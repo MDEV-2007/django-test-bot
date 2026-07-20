@@ -313,7 +313,7 @@ def seed_questions_and_tests(topics):
         made_questions = []
         for text, difficulty, choices in questions:
             question, q_created = Question.objects.get_or_create(
-                text=text,
+                body=text,
                 defaults=dict(topic=topic, difficulty=difficulty, category="history"),
             )
             total_q_created += int(q_created)

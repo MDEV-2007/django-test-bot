@@ -86,7 +86,7 @@ def import_from_source(source_conn: sqlite3.Connection) -> int:
             continue
 
         question, created = Question.objects.get_or_create(
-            text=question_text,
+            body=question_text,
             defaults={
                 "topic": topic,
                 "difficulty": "medium",

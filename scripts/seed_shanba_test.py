@@ -325,7 +325,10 @@ QUESTIONS = [
 
 
 def main():
-    topic = Topic.objects.get(slug=TOPIC_SLUG)
+    topic, _ = Topic.objects.get_or_create(
+        slug=TOPIC_SLUG,
+        defaults={"title": "Milliy Sertifikat", "category": "certificate"},
+    )
 
     created_questions = []
     low_confidence = []
@@ -334,25 +337,25 @@ def main():
         if q["type"] == "mcq":
             question = Question.objects.create(
                 topic=topic,
-                text=q["text"],
+                body=q["text"],
                 difficulty=q["difficulty"],
                 category="certificate",
-                question_type="mcq",
+                question_type="single_choice",
             )
             for idx, opt_text in enumerate(q["options"]):
                 AnswerOption.objects.create(question=question, text=opt_text, is_correct=(idx == q["correct_index"]))
         else:
             question = Question.objects.create(
                 topic=topic,
-                text=q["text"],
+                body=q["text"],
                 difficulty=q["difficulty"],
                 category="certificate",
-                question_type="open",
+                question_type="open_written",
                 reference_answer=q["reference_answer"],
             )
         created_questions.append(question)
         if q.get("confidence") not in (None, "OK"):
-            low_confidence.append((i, q["confidence"], question.text[:60]))
+            low_confidence.append((i, q["confidence"], question.body[:60]))
 
     test = TestSet.objects.create(
         title="Milliy Sertifikat namunaviy testi — Tarix (45 savol)",

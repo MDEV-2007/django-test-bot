@@ -25,7 +25,10 @@ TOPIC_SLUG = "milliy-sertifikat"
 
 
 def main():
-    topic = Topic.objects.get(slug=TOPIC_SLUG)
+    topic, _ = Topic.objects.get_or_create(
+        slug=TOPIC_SLUG,
+        defaults={"title": "Milliy Sertifikat", "category": "certificate"},
+    )
     test = TestSet.objects.create(
         title="Milliy Sertifikat testi — 25 savol",
         description="Milliy sertifikatga tayyorgarlik uchun aralash turdagi (variantli, "
@@ -57,7 +60,7 @@ def main():
         ("Mustaqil O'zbekiston Respublikasining birinchi Prezidenti kim bo'lgan?", ["Shavkat Mirziyoyev", "Islom Karimov", "Shukrullo Mirsaidov", "O'tkir Sultonov"], 1),
     ]
     for text, options, correct_idx in mcq_data:
-        q = Question.objects.create(topic=topic, text=text, category="certificate", question_type="mcq", difficulty="medium")
+        q = Question.objects.create(topic=topic, body=text, category="certificate", question_type="single_choice", difficulty="medium")
         for idx, opt in enumerate(options):
             AnswerOption.objects.create(question=q, text=opt, is_correct=(idx == correct_idx))
         created_questions.append(q)
@@ -103,7 +106,7 @@ def main():
         ),
     ]
     for text, pairs, distractors in matching_data:
-        q = Question.objects.create(topic=topic, text=text, category="certificate", question_type="matching", difficulty="medium")
+        q = Question.objects.create(topic=topic, body=text, category="certificate", question_type="matching", difficulty="medium")
         order = 1
         for left_key, left_text, right_key, right_text in pairs:
             MatchingPair.objects.create(question=q, left_key=left_key, left_text=left_text,
@@ -119,7 +122,7 @@ def main():
     # 3) Grouped — 1 umumiy bank (A-D), 3 savol shu bankdan javob tanlaydi
     # ------------------------------------------------------------------
     group = QuestionGroup.objects.create(
-        test=test,
+        test_set=test,
         instruction="Quyidagi 3 ta savolga mos javobni bir xil A-D variantlaridan tanlang.",
         order=1,
     )
@@ -140,7 +143,7 @@ def main():
     ]
     for text, correct_label in grouped_data:
         q = Question.objects.create(
-            topic=topic, text=text, category="certificate", question_type="grouped",
+            topic=topic, body=text, category="certificate", question_type="grouped_item",
             difficulty="medium", group=group, correct_group_option=options_by_label[correct_label],
         )
         created_questions.append(q)
@@ -154,7 +157,7 @@ def main():
     ]
     for text, reference_answer in open_data:
         q = Question.objects.create(
-            topic=topic, text=text, category="certificate", question_type="open",
+            topic=topic, body=text, category="certificate", question_type="open_written",
             difficulty="medium", reference_answer=reference_answer,
         )
         created_questions.append(q)
