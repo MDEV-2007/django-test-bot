@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — To'lovlar tarixi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6 animate-fadeIn">
+    <header class="flex items-center gap-3 border-b border-[var(--border-card)] pb-6">
+        <a href="{% url 'premium:plans' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </a>
+        <h1 class="text-xl font-extrabold text-[var(--text-primary)]">To'lovlar tarixi</h1>
+    </header>
+
+    <div class="space-y-3">
+        {% for p in payments %}
+        <a href="{% url 'premium:payment_status' p.id %}" class="glass-card rounded-2xl border border-[var(--border-card)] p-5 flex items-center justify-between gap-4 hover:bg-[var(--surface-hover)] transition block">
+            <div>
+                <h4 class="font-bold text-[var(--text-primary)] text-sm">{{ p.plan.name }}</h4>
+                <p class="text-xs text-[var(--text-muted)] mt-0.5">{{ p.created_at|date:"d.m.Y H:i" }} — {{ p.amount|floatformat:0 }} so'm</p>
+            </div>
+            <span class="text-[10px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-full border flex-shrink-0
+                {% if p.status == 'approved' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                {% elif p.status == 'rejected' %}bg-rose-500/10 text-rose-400 border-rose-500/20
+                {% else %}bg-amber-500/10 text-amber-400 border-amber-500/20{% endif %}">
+                {{ p.get_status_display }}
+            </span>
+        </a>
+        {% empty %}
+        <div class="text-center py-12 text-[var(--text-faint)]">
+            <i data-lucide="receipt" class="w-12 h-12 mx-auto mb-2 text-[var(--text-icon-faint)]"></i>
+            <p class="text-xs">Hozircha to'lovlar mavjud emas.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

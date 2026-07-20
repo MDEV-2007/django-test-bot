@@ -1,0 +1,106 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block page_title %}{{ test.title }} — savollar{% endblock %}
+{% block breadcrumb %}<a href="{% url 'teacher:tests' %}" class="hover:text-ink-700">Testlarim</a><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i><span class="font-medium text-ink-700 truncate">{{ test.title }}</span>{% endblock %}
+
+{% block head_extra %}<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl">
+  <!-- Header + step + actions -->
+  <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-extrabold">{{ test.title }}</h1>
+      <p class="text-sm text-ink-500 mt-1">
+        {{ test.subject.name|default:"Fan yo'q" }} · {{ questions|length }} savol · {{ test.duration_minutes }} daqiqa
+        · <span class="font-semibold {% if test.is_published %}text-emerald-600{% else %}text-amber-600{% endif %}">{{ test.status_label }}</span>
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="{% url 'teacher:test_edit_info' test.pk %}" class="px-3.5 py-2 rounded-xl bg-white border border-ink-100 text-ink-700 font-semibold text-xs flex items-center gap-1.5"><i data-lucide="settings-2" class="w-4 h-4"></i> Ma'lumot</a>
+      <a href="{% url 'teacher:test_preview' test.pk %}" class="px-3.5 py-2 rounded-xl bg-white border border-ink-100 text-ink-700 font-semibold text-xs flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4"></i> Ko'rib chiqish</a>
+      <a href="{% url 'teacher:test_results' test.pk %}" class="px-3.5 py-2 rounded-xl bg-white border border-ink-100 text-ink-700 font-semibold text-xs flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Natijalar</a>
+      <form method="post" action="{% url 'teacher:test_publish' test.pk %}">{% csrf_token %}
+        <button class="px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center gap-1.5 {% if test.is_published %}bg-amber-50 text-amber-600{% else %}bg-emerald-500 text-white{% endif %}">
+          <i data-lucide="{% if test.is_published %}eye-off{% else %}send{% endif %}" class="w-4 h-4"></i>{% if test.is_published %}Qoralamaga{% else %}Nashr etish{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="flex items-center gap-2 mb-6 text-xs">
+    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold"><i data-lucide="check" class="w-3.5 h-3.5"></i> 1. Ma'lumot</span>
+    <span class="w-6 h-px bg-ink-200"></span>
+    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full accent-bg text-white font-semibold">2. Savollar</span>
+    <span class="w-6 h-px bg-ink-200"></span>
+    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ink-100 text-ink-500 font-semibold">3. Nashr</span>
+  </div>
+
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="font-bold">Savollar</h2>
+    <div class="flex items-center gap-2">
+      <form method="post" action="{% url 'teacher:game_from_test' test.pk %}">{% csrf_token %}
+        <button class="px-3.5 py-2 rounded-xl bg-white border border-ink-100 text-ink-600 font-semibold text-xs flex items-center gap-1.5" title="Testdan flesh-kartalar o'yini yasash"><i data-lucide="sparkles" class="w-4 h-4"></i> O'yin yasash</button>
+      </form>
+      <a href="{% url 'teacher:question_add' test.pk %}" class="px-4 py-2 rounded-xl accent-bg text-white font-semibold text-xs flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i> Savol qo'shish</a>
+    </div>
+  </div>
+
+  {% if questions %}
+  <p class="text-xs text-ink-400 mb-2 flex items-center gap-1.5"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i> Tartibni o'zgartirish uchun savollarni sudrab suring.</p>
+  <ul id="question-list" class="space-y-2">
+    {% for q in questions %}
+    <li data-id="{{ q.id }}" class="bg-white rounded-xl border border-ink-100 p-4 flex items-start gap-3">
+      <span class="drag-handle cursor-grab text-ink-300 mt-0.5"><i data-lucide="grip-vertical" class="w-4 h-4"></i></span>
+      <span class="w-6 h-6 rounded-lg bg-ink-100 text-ink-500 text-xs font-bold flex items-center justify-center flex-shrink-0">{{ forloop.counter }}</span>
+      <div class="min-w-0 flex-1">
+        <div class="rich-content text-sm text-ink-800">{{ q.body|safe|truncatewords_html:30 }}</div>
+        <span class="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] bg-emerald-50 text-emerald-600 font-semibold">{{ q.get_question_type_display }}</span>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <a href="{% url 'teacher:question_edit' test.pk q.id %}" class="p-1.5 rounded-lg text-ink-400 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="edit-3" class="w-4 h-4"></i></a>
+        <form method="post" action="{% url 'teacher:question_delete' test.pk q.id %}" onsubmit="return confirm('Savolni o‘chirasizmi?')">{% csrf_token %}
+          <button class="p-1.5 rounded-lg text-ink-400 hover:bg-rose-50 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </form>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="bg-white rounded-2xl border border-dashed border-ink-200 p-10 text-center">
+    <div class="w-14 h-14 rounded-2xl bg-ink-100 flex items-center justify-center mx-auto mb-3 text-ink-300"><i data-lucide="list-plus" class="w-7 h-7"></i></div>
+    <p class="text-ink-600 font-semibold">Hali savollar yo'q</p>
+    <p class="text-ink-400 text-sm mt-1">6 xil savol turidan tanlab, birinchi savolni qo'shing.</p>
+    <a href="{% url 'teacher:question_add' test.pk %}" class="inline-flex items-center gap-2 accent-bg text-white font-semibold px-5 py-2.5 rounded-xl text-sm mt-4"><i data-lucide="plus" class="w-4 h-4"></i> Savol qo'shish</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const list = document.getElementById('question-list');
+    if (!list || !window.Sortable) return;
+    const csrftoken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1];
+    Sortable.create(list, {
+      handle: '.drag-handle', animation: 150,
+      onEnd: function () {
+        const order = Array.from(list.children).map(li => li.dataset.id);
+        fetch("{% url 'teacher:question_reorder' test.pk %}", {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order: order })
+        }).then(() => {
+          // Renumber the visible badges.
+          list.querySelectorAll('li').forEach((li, i) => {
+            const badge = li.querySelector('span.rounded-lg');
+            if (badge) badge.textContent = i + 1;
+          });
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

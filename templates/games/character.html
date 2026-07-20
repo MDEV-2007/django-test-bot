@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Shaxsni top{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-xl mx-auto animate-fadeIn">
+    <!-- Header -->
+    <header class="border-b border-[var(--border-card)] pb-6 space-y-4">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'dashboard:home' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">Shaxsni top</h1>
+                <p class="text-xs text-[var(--text-muted)]">{% if selected_subject %}{{ selected_subject.name }} fanidan{% endif %} kalit so'zlarga qarab shaxs nomini aniqlang.</p>
+            </div>
+        </div>
+        {% if subjects %}
+        <div class="flex flex-wrap gap-2">
+            {% for s in subjects %}
+            <a href="?subject={{ s.slug }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition
+                {% if selected_subject.id == s.id %}text-white border-transparent{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-card)] hover:text-[var(--text-primary)]{% endif %}"
+                {% if selected_subject.id == s.id %}style="background-color: {{ s.color }};"{% endif %}>
+                <i data-lucide="{{ s.icon_name }}" class="w-3.5 h-3.5"></i> {{ s.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+
+    {% if not character %}
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-10 text-center bg-[var(--surface-card-soft)]">
+        <i data-lucide="user-search" class="w-12 h-12 mx-auto mb-3 text-[var(--text-icon-faint)]"></i>
+        <h3 class="font-bold text-[var(--text-primary)]">Bu fanda hali "Shaxsni top" o'yini yo'q</h3>
+        <p class="text-xs text-[var(--text-muted)] mt-1">Boshqa fanni tanlang yoki keyinroq urinib ko'ring.</p>
+    </div>
+    {% else %}
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 space-y-6 bg-[var(--surface-card-soft)]" x-data="{ clueIndex: 1 }">
+        <div class="text-center py-4 border-b border-[var(--border-soft)]">
+            <div class="w-16 h-16 rounded-full bg-[var(--surface-card-solid)] border border-[var(--border-card)] flex items-center justify-center text-indigo-400 mx-auto mb-3">
+                <i data-lucide="help-circle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="font-extrabold text-[var(--text-primary)] text-lg">Bu shaxs kim?</h3>
+            <p class="text-[11px] text-[var(--text-faint)] mt-0.5">Qancha kam kalitdan foydalansangiz, shuncha ko'p ball olasiz!</p>
+        </div>
+
+        <!-- Clues List -->
+        <div class="space-y-3.5">
+            <!-- Clue 1 -->
+            <div class="rounded-2xl border border-[var(--border-soft)] p-4 bg-[var(--surface-card-medium)]">
+                <p class="text-[10px] text-blue-400 uppercase font-bold tracking-wider mb-1">Kalit #1</p>
+                <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ character.clue_1 }}</p>
+            </div>
+            
+            <!-- Clue 2 -->
+            <div class="rounded-2xl border border-[var(--border-soft)] p-4 bg-[var(--surface-card-medium)]" x-show="clueIndex >= 2" x-collapse>
+                <p class="text-[10px] text-blue-400 uppercase font-bold tracking-wider mb-1">Kalit #2</p>
+                <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ character.clue_2 }}</p>
+            </div>
+
+            <!-- Clue 3 -->
+            <div class="rounded-2xl border border-[var(--border-soft)] p-4 bg-[var(--surface-card-medium)]" x-show="clueIndex >= 3" x-collapse>
+                <p class="text-[10px] text-blue-400 uppercase font-bold tracking-wider mb-1">Kalit #3</p>
+                <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ character.clue_3 }}</p>
+            </div>
+        </div>
+
+        <!-- Reveal triggers -->
+        <div class="flex gap-3 justify-center text-xs" x-show="clueIndex < 3">
+            <button type="button" @click="clueIndex++" class="flex items-center gap-1 bg-[var(--surface-hover)] border border-[var(--border-card)] hover:bg-[var(--surface-hover-strong)] text-[var(--text-primary)] font-bold py-2.5 px-4 rounded-xl transition">
+                <span>Keyingi kalitni ko'rish</span>
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+            </button>
+        </div>
+
+        <!-- Input Guess Form -->
+        <form hx-post="{% url 'games:character' %}" hx-target="#result-container" class="space-y-4 pt-4 border-t border-[var(--border-soft)]">
+            {% csrf_token %}
+            <div class="space-y-1.5">
+                <label class="text-xs text-[var(--text-muted)] font-semibold block">Shaxs ism-sharifini yozing</label>
+                <input type="text" name="guess" required placeholder="Masalan: Amir Temur..." class="w-full bg-[var(--surface-input)] border border-[var(--border-card)] rounded-2xl py-3 px-4 text-[var(--text-primary)] text-sm placeholder-[var(--text-faint)] focus:outline-none focus:border-[#2d6cff] transition">
+            </div>
+            
+            <button type="submit" class="w-full bg-gradient-to-r from-[#2d6cff] to-[#37b7ff] text-[var(--text-primary)] font-extrabold py-3.5 rounded-2xl hover:shadow-[0_0_15px_rgba(45,108,255,0.3)] transition text-sm">
+                Javobni yuborish
+            </button>
+        </form>
+
+        <!-- Result -->
+        <div id="result-container"></div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

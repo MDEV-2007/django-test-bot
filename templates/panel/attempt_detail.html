@@ -1,0 +1,36 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_title %}Natija #{{ a.id }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'panel:attempts' %}" class="hover:text-ink-700">Natijalar</a><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i><span class="font-medium text-ink-700">#{{ a.id }}</span>{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl">
+  <div class="bg-white rounded-2xl border border-ink-100 p-6 mb-6">
+    <h1 class="text-xl font-extrabold">{{ a.test.title|default:"Tasodifiy test" }}</h1>
+    <p class="text-ink-500 text-sm mt-1">{{ a.profile.user.get_full_name|default:a.profile.user.username }} · {{ a.started_at|date:"d.m.Y H:i" }}</p>
+    <div class="grid grid-cols-4 gap-3 mt-4">
+      <div class="text-center"><p class="text-2xl font-extrabold accent-text">{{ a.score|default:0|floatformat:0 }}%</p><p class="text-[11px] text-ink-500">Ball</p></div>
+      <div class="text-center"><p class="text-2xl font-extrabold text-emerald-600">{{ a.correct_answers }}</p><p class="text-[11px] text-ink-500">To'g'ri</p></div>
+      <div class="text-center"><p class="text-2xl font-extrabold text-rose-600">{{ a.wrong_answers }}</p><p class="text-[11px] text-ink-500">Xato</p></div>
+      <div class="text-center"><p class="text-2xl font-extrabold text-ink-400">{{ a.skipped_answers }}</p><p class="text-[11px] text-ink-500">Tashlab ketilgan</p></div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-ink-100 p-5">
+    <h2 class="font-bold mb-3">Javoblar</h2>
+    <div class="space-y-3">
+      {% for ans in answers %}
+      <div class="flex items-start gap-3 p-3 rounded-xl {% if ans.is_correct %}bg-emerald-50/50{% elif ans.is_skipped %}bg-ink-100/50{% else %}bg-rose-50/50{% endif %}">
+        <i data-lucide="{% if ans.is_correct %}check-circle{% elif ans.is_skipped %}minus-circle{% else %}x-circle{% endif %}"
+           class="w-5 h-5 flex-shrink-0 {% if ans.is_correct %}text-emerald-500{% elif ans.is_skipped %}text-ink-400{% else %}text-rose-500{% endif %}"></i>
+        <div class="min-w-0 text-sm">
+          <p class="text-ink-700 rich-content">{{ ans.question.body|safe|truncatewords_html:25 }}</p>
+          {% if ans.selected_choice %}<p class="text-ink-500 text-xs mt-1">Javob: {{ ans.selected_choice.text }}</p>{% endif %}
+          {% if ans.text_answer %}<p class="text-ink-500 text-xs mt-1">Yozma javob: {{ ans.text_answer|truncatechars:120 }}</p>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

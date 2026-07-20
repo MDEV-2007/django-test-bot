@@ -1,0 +1,28 @@
+{% extends 'panel/base_admin.html' %}
+
+{% block accent %}#10b981{% endblock %}
+{% block panel_label %}O'qituvchi paneli{% endblock %}
+
+{% block nav %}
+  {% with a=active_nav %}
+  <a href="{% url 'teacher:dashboard' %}" class="nav-link {% if a == 'dashboard' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="layout-dashboard" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Bosh sahifa
+  </a>
+
+  <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-ink-300">Kontentim</p>
+  <a href="{% url 'teacher:tests' %}" class="nav-link {% if a == 'tests' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="file-check-2" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Testlarim
+  </a>
+  <a href="{% url 'teacher:lessons' %}" class="nav-link {% if a == 'lessons' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="book-open" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Darslarim
+  </a>
+  <a href="{% url 'teacher:games' %}" class="nav-link {% if a == 'games' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="gamepad-2" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> O'yinlarim
+  </a>
+
+  <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-ink-300">Tezkor</p>
+  <a href="{% url 'teacher:test_create' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-emerald-600 bg-emerald-50 font-semibold hover:bg-emerald-100 transition">
+    <i data-lucide="plus-circle" class="w-4.5 h-4.5"></i> Yangi test
+  </a>
+  {% endwith %}
+{% endblock %}

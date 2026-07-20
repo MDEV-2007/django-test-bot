@@ -1,0 +1,54 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block page_title %}Natijalar{% endblock %}
+{% block breadcrumb %}<a href="{% url 'teacher:tests' %}" class="hover:text-ink-700">Testlarim</a><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i><span class="font-medium text-ink-700">{{ test.title }} — natijalar</span>{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl">
+  <h1 class="text-2xl font-extrabold mb-1">{{ test.title }} — natijalar</h1>
+  <p class="text-sm text-ink-500 mb-6">{{ attempts|length }} ta o'quvchi topshirgan.</p>
+
+  <!-- Per-question stats -->
+  <div class="bg-white rounded-2xl border border-ink-100 p-5 mb-6">
+    <h2 class="font-bold mb-3">Savollar bo'yicha to'g'ri javob foizi</h2>
+    <div class="space-y-2.5">
+      {% for s in stats %}
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-ink-400 w-6">{{ forloop.counter }}.</span>
+        <div class="flex-1 min-w-0">
+          <div class="rich-content text-xs text-ink-600 truncate">{{ s.question.body|safe|truncatewords_html:12 }}</div>
+          <div class="h-1.5 bg-ink-100 rounded-full mt-1 overflow-hidden"><div class="h-full {% if s.pct >= 60 %}bg-emerald-500{% elif s.pct >= 30 %}bg-amber-500{% else %}bg-rose-500{% endif %}" style="width: {{ s.pct }}%"></div></div>
+        </div>
+        <span class="text-xs font-semibold w-14 text-right">{{ s.pct }}% ({{ s.correct }}/{{ s.total }})</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Attempts table -->
+  <div class="bg-white rounded-2xl border border-ink-100 overflow-hidden">
+    <div class="p-4 border-b border-ink-100"><h2 class="font-bold">Topshirganlar</h2></div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-ink-100/60 text-ink-500 text-xs uppercase"><tr>
+          <th class="text-left px-4 py-3">O'quvchi</th><th class="text-left px-4 py-3">Ball</th>
+          <th class="text-left px-4 py-3">To'g'ri</th><th class="text-left px-4 py-3">Sana</th><th class="px-4 py-3"></th>
+        </tr></thead>
+        <tbody class="divide-y divide-ink-100">
+          {% for a in attempts %}
+          <tr class="hover:bg-ink-100/40">
+            <td class="px-4 py-3 font-medium">{{ a.profile.user.get_full_name|default:a.profile.user.username }}</td>
+            <td class="px-4 py-3 font-semibold">{{ a.score|default:0|floatformat:0 }}%</td>
+            <td class="px-4 py-3">{{ a.correct_answers }}/{{ a.answers.count }}</td>
+            <td class="px-4 py-3 text-ink-500">{{ a.started_at|date:"d.m.Y H:i" }}</td>
+            <td class="px-4 py-3 text-right"><a href="{% url 'teacher:attempt_grade' test.pk a.id %}" class="accent-text font-semibold text-xs">Baholash →</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="px-4 py-10 text-center text-ink-400">Hali hech kim topshirmagan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

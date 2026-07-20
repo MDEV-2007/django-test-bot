@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — To'lov{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto space-y-6 animate-fadeIn">
+    <header class="flex items-center gap-3 border-b border-[var(--border-card)] pb-6">
+        <a href="{% url 'premium:plans' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+            <h1 class="text-xl font-extrabold text-[var(--text-primary)]">To'lovni amalga oshirish</h1>
+            <p class="text-xs text-[var(--text-muted)] mt-0.5">{{ plan.name }}</p>
+        </div>
+    </header>
+
+    <!-- Amount -->
+    <div class="glass-card rounded-[24px] border border-[var(--border-card)] p-6 text-center bg-[var(--surface-card-soft)]">
+        <p class="text-xs text-[var(--text-muted)] uppercase tracking-widest">To'lov summasi</p>
+        <p class="text-4xl font-extrabold text-[var(--text-primary)] font-mono mt-2">{{ plan.price|floatformat:0 }} <span class="text-lg text-[var(--text-muted)]">so'm</span></p>
+    </div>
+
+    <!-- Card details -->
+    <div class="glass-card rounded-[24px] border border-amber-500/20 bg-amber-500/5 p-6 space-y-4">
+        <h3 class="font-bold text-[var(--text-primary)] text-sm flex items-center gap-2">
+            <i data-lucide="credit-card" class="w-4 h-4 text-amber-400"></i> To'lov uchun karta
+        </h3>
+        <div class="bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-5 space-y-3">
+            <div>
+                <p class="text-[10px] text-[var(--text-faint)] uppercase tracking-widest">Karta raqami</p>
+                <p class="text-xl font-mono font-bold text-[var(--text-primary)] tracking-wider mt-1">{{ card_number }}</p>
+            </div>
+            <div>
+                <p class="text-[10px] text-[var(--text-faint)] uppercase tracking-widest">Karta egasi</p>
+                <p class="text-sm font-semibold text-[var(--text-secondary)] mt-1">{{ card_holder }}</p>
+            </div>
+        </div>
+        <p class="text-xs text-[var(--text-muted)] leading-relaxed">
+            Yuqoridagi kartaga <strong class="text-[var(--text-primary)]">{{ plan.price|floatformat:0 }} so'm</strong> o'tkazing, so'ng to'lov skrinshotini pastdagi shakl orqali yuklang.
+            Admin tekshirib chiqqach, premium avtomatik ravishda faollashadi.
+        </p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="bg-rose-500/10 border border-rose-500/25 rounded-2xl p-4 text-sm text-rose-300">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Screenshot upload -->
+    <form method="POST" enctype="multipart/form-data" class="glass-card rounded-[24px] border border-[var(--border-card)] p-6 space-y-4 bg-[var(--surface-card-soft)]">
+        {% csrf_token %}
+        <h3 class="font-bold text-[var(--text-primary)] text-sm flex items-center gap-2">
+            <i data-lucide="image-up" class="w-4 h-4 text-[#37b7ff]"></i> To'lov skrinshotini yuklash
+        </h3>
+        <label class="block border-2 border-dashed border-[var(--border-card)] rounded-2xl p-8 text-center cursor-pointer hover:border-[#2d6cff]/40 transition"
+               x-data="{ fileName: '' }">
+            <input type="file" name="screenshot" accept="image/*" required class="hidden"
+                   @change="fileName = $event.target.files[0]?.name || ''">
+            <i data-lucide="upload-cloud" class="w-8 h-8 text-[var(--text-faint)] mx-auto mb-2"></i>
+            <p class="text-xs text-[var(--text-muted)]" x-text="fileName || 'Skrinshot faylini tanlash uchun bosing'"></p>
+        </label>
+        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-extrabold py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2">
+            <i data-lucide="send" class="w-4 h-4"></i> Skrinshotni yuborish
+        </button>
+    </form>
+</div>
+{% endblock %}

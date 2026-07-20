@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Xarita Challenge{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-xl mx-auto animate-fadeIn">
+    <!-- Header -->
+    <header class="border-b border-[var(--border-card)] pb-6 space-y-4">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'dashboard:home' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">Xarita Challenge</h1>
+                <p class="text-xs text-[var(--text-muted)]">{% if selected_subject %}{{ selected_subject.name }} fanidan{% endif %} xarita va joylashuvlarni aniqlash.</p>
+            </div>
+        </div>
+        {% if subjects %}
+        <div class="flex flex-wrap gap-2">
+            {% for s in subjects %}
+            <a href="?subject={{ s.slug }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition
+                {% if selected_subject.id == s.id %}text-white border-transparent{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-card)] hover:text-[var(--text-primary)]{% endif %}"
+                {% if selected_subject.id == s.id %}style="background-color: {{ s.color }};"{% endif %}>
+                <i data-lucide="{{ s.icon_name }}" class="w-3.5 h-3.5"></i> {{ s.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+
+    {% if not challenge %}
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-10 text-center bg-[var(--surface-card-soft)]">
+        <i data-lucide="map" class="w-12 h-12 mx-auto mb-3 text-[var(--text-icon-faint)]"></i>
+        <h3 class="font-bold text-[var(--text-primary)]">Bu fanda hali xarita o'yini yo'q</h3>
+        <p class="text-xs text-[var(--text-muted)] mt-1">Boshqa fanni tanlang yoki keyinroq urinib ko'ring.</p>
+    </div>
+    {% else %}
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 space-y-6 bg-[var(--surface-card-soft)]" x-data="{ selectedRegion: '' }">
+        <div class="space-y-3">
+            <h3 class="font-bold text-[var(--text-primary)] text-base leading-snug">{{ challenge.title }}</h3>
+            <p class="text-xs text-[var(--text-muted)] leading-relaxed">{{ challenge.description }}</p>
+        </div>
+
+        <!-- Historical map of the region this challenge is about (see attribution below) -->
+        <div class="rounded-2xl border border-[var(--border-card)] overflow-hidden h-52 bg-white relative flex items-center justify-center">
+            {% if challenge.map_image_url %}
+                <img src="{{ challenge.map_image_url }}" alt="Xarita" class="w-full h-full object-contain p-2">
+            {% endif %}
+        </div>
+        <p class="text-[10px] text-[var(--text-faint)] text-right -mt-3">Xarita manbasi: Wikimedia Commons (CC BY-SA 4.0)</p>
+
+        <!-- Options selection -->
+        <form hx-post="{% url 'games:map' %}" hx-target="#result-container" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="region" :value="selectedRegion">
+
+            <div class="grid grid-cols-2 gap-3">
+                {% for option in options %}
+                <button type="button" @click="selectedRegion = '{{ option|escapejs }}'" class="p-4 rounded-xl border font-semibold text-xs transition text-center"
+                        :class="selectedRegion === '{{ option|escapejs }}' ? 'border-blue-500 bg-blue-500/10 text-[var(--text-primary)]' : 'border-[var(--border-card)] bg-[var(--surface-card-medium)] text-[var(--text-muted)] hover:bg-[var(--surface-hover)]'">
+                    {{ option }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <button type="submit" :disabled="!selectedRegion" class="w-full bg-gradient-to-r from-[#2d6cff] to-[#37b7ff] text-[var(--text-primary)] font-extrabold py-3.5 rounded-2xl hover:shadow-[0_0_15px_rgba(45,108,255,0.3)] transition text-sm disabled:opacity-40">
+                Javobni tekshirish
+            </button>
+        </form>
+
+        <!-- Result -->
+        <div id="result-container"></div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

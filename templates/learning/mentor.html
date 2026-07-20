@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — AI Mentor{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-3xl mx-auto animate-fadeIn">
+    <!-- Header -->
+    <header class="border-b border-[var(--border-card)] pb-6 space-y-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">AI Mentor</h1>
+                <p class="text-xs text-[var(--text-muted)]">{% if selected_subject %}{{ selected_subject.name }} fani{% else %}Tanlangan fan{% endif %} bo'yicha savollaringizga tezkor javoblar.</p>
+            </div>
+        </div>
+        {% if subjects %}
+        <div class="flex flex-wrap gap-2">
+            {% for s in subjects %}
+            <a href="?subject={{ s.slug }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition
+                {% if selected_subject.id == s.id %}text-white border-transparent{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-card)] hover:text-[var(--text-primary)]{% endif %}"
+                {% if selected_subject.id == s.id %}style="background-color: {{ s.color }};"{% endif %}>
+                <i data-lucide="{{ s.icon_name }}" class="w-3.5 h-3.5"></i> {{ s.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+
+    <!-- Chat container block -->
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] flex flex-col h-[65vh] bg-[var(--surface-card-soft)] overflow-hidden relative">
+        <div class="absolute inset-0 bg-radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 40%) pointer-events-none"></div>
+        
+        <!-- Chat bubbles thread -->
+        <div id="chat-bubble-container" class="flex-1 p-6 overflow-y-auto space-y-4 scroll-smooth">
+            {% for chat in chat_history %}
+                {% if chat.sender == 'ai' %}
+                <!-- Bot Bubble -->
+                <div class="flex gap-3 items-start animate-slideIn">
+                    <div class="w-10 h-10 rounded-full bg-[var(--surface-card-solid)] border border-[var(--border-card)] flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="bot" class="w-5 h-5 text-indigo-400"></i>
+                    </div>
+                    <div class="glass-card text-[var(--text-secondary)] rounded-2xl rounded-tl-none px-4 py-3.5 max-w-xs sm:max-w-md shadow-md text-sm leading-relaxed border border-[var(--border-soft)] bg-[var(--surface-card-soft)]">
+                        {{ chat.message|linebreaksbr }}
+                    </div>
+                </div>
+                {% else %}
+                <!-- User Bubble -->
+                <div class="flex justify-end animate-slideIn">
+                    <div class="bg-[#2d6cff]/20 border border-[#2d6cff]/30 text-[var(--text-primary)] rounded-2xl rounded-tr-none px-4 py-3.5 max-w-xs sm:max-w-md shadow-md text-sm">
+                        {{ chat.message|linebreaksbr }}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Chat Input send bar -->
+        <form hx-post="{% url 'learning:mentor' %}" 
+              hx-target="#chat-bubble-container" 
+              hx-swap="beforeend" 
+              hx-on::after-request="this.reset(); scrollChat();"
+              class="border-t border-[var(--border-card)] p-4 bg-[var(--surface-card-strong)] backdrop-blur flex gap-3 items-center">
+            
+            <input type="text" name="message" required placeholder="Savolingizni yozing..."
+                   class="flex-1 bg-[var(--surface-input)] border border-[var(--border-card)] rounded-2xl py-3 px-4 text-[var(--text-primary)] text-sm placeholder-[var(--text-faint)] focus:outline-none focus:border-[#2d6cff] transition">
+            
+            <button type="submit" class="w-12 h-12 rounded-2xl bg-[#2d6cff] hover:bg-[#1a57e3] text-[var(--text-primary)] flex items-center justify-center shadow-lg shadow-blue-500/25 transition flex-shrink-0">
+                <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function scrollChat() {
+        const container = document.getElementById('chat-bubble-container');
+        if (container) {
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+    }
+    // Auto-scroll on page load
+    document.addEventListener('DOMContentLoaded', scrollChat);
+</script>
+
+<style>
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slideIn {
+        animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

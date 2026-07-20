@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Timeline O'yini{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-xl mx-auto animate-fadeIn" 
+     x-data="{ 
+         items: [
+             {% for e in events %}
+             { id: {{ e.id }}, title: '{{ e.title|escapejs }}' },
+             {% endfor %}
+         ],
+         moveUp(index) {
+             if (index > 0) {
+                 const arr = [...this.items];
+                 const temp = arr[index];
+                 arr[index] = arr[index - 1];
+                 arr[index - 1] = temp;
+                 this.items = arr;
+             }
+         },
+         moveDown(index) {
+             if (index < this.items.length - 1) {
+                 const arr = [...this.items];
+                 const temp = arr[index];
+                 arr[index] = arr[index + 1];
+                 arr[index + 1] = temp;
+                 this.items = arr;
+             }
+         },
+         getIds() {
+             return this.items.map(i => i.id).join(',');
+         }
+     }">
+     
+    <!-- Header -->
+    <header class="border-b border-[var(--border-card)] pb-6 space-y-4">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'dashboard:home' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">Timeline O'yini</h1>
+                <p class="text-xs text-[var(--text-muted)]">{% if selected_subject %}{{ selected_subject.name }} fanidan{% endif %} voqealarni to'g'ri ketma-ketlikda tartiblang.</p>
+            </div>
+        </div>
+        {% if subjects %}
+        <div class="flex flex-wrap gap-2">
+            {% for s in subjects %}
+            <a href="?subject={{ s.slug }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition
+                {% if selected_subject.id == s.id %}text-white border-transparent{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-card)] hover:text-[var(--text-primary)]{% endif %}"
+                {% if selected_subject.id == s.id %}style="background-color: {{ s.color }};"{% endif %}>
+                <i data-lucide="{{ s.icon_name }}" class="w-3.5 h-3.5"></i> {{ s.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+
+    {% if not events %}
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-10 text-center bg-[var(--surface-card-soft)]">
+        <i data-lucide="calendar-clock" class="w-12 h-12 mx-auto mb-3 text-[var(--text-icon-faint)]"></i>
+        <h3 class="font-bold text-[var(--text-primary)]">Bu fanda hali Timeline o'yini yo'q</h3>
+        <p class="text-xs text-[var(--text-muted)] mt-1">Bu o'yin uchun kamida 4 ta voqea kerak. Boshqa fanni tanlang yoki keyinroq urinib ko'ring.</p>
+    </div>
+    {% else %}
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 space-y-6 bg-[var(--surface-card-soft)]">
+        <!-- Interactive List -->
+        <div class="space-y-3">
+            <template x-for="(item, index) in items" :key="item.id">
+                <div class="flex items-center justify-between p-4 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card-medium)] hover:bg-[var(--surface-input)] transition duration-150 gap-4">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[#37b7ff] flex items-center justify-center text-xs font-bold font-mono" x-text="index + 1"></span>
+                        <p class="text-sm font-semibold text-[var(--text-primary)] truncate" x-text="item.title"></p>
+                    </div>
+                    
+                    <!-- Up/Down Swappers -->
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        <button @click="moveUp(index)" :disabled="index === 0" class="w-8 h-8 rounded-lg bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition disabled:opacity-30">
+                            <i data-lucide="arrow-up" class="w-4 h-4"></i>
+                        </button>
+                        <button @click="moveDown(index)" :disabled="index === items.length - 1" class="w-8 h-8 rounded-lg bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition disabled:opacity-30">
+                            <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Submit form -->
+        <form hx-post="{% url 'games:timeline' %}" hx-target="#result-container" hx-swap="innerHTML" class="space-y-4">
+            {% csrf_token %}
+            <!-- Calculate comma-separated ordered ids dynamically -->
+            <input type="hidden" name="ordered_ids" :value="getIds()">
+            
+            <button type="submit" class="w-full bg-gradient-to-r from-[#2d6cff] to-[#37b7ff] text-[var(--text-primary)] font-extrabold py-3.5 rounded-2xl hover:shadow-[0_0_15px_rgba(45,108,255,0.3)] transition text-sm">
+                Tartibni tekshirish
+            </button>
+        </form>
+
+        <!-- Result target block -->
+        <div id="result-container"></div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.body.addEventListener('htmx:afterSwap', () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

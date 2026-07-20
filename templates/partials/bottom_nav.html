@@ -1,0 +1,62 @@
+{% load static %}
+{# bottom offset respects the phone's home-indicator / gesture bar (Telegram Web App on notched devices) via env(safe-area-inset-bottom); falls back to 1.5rem elsewhere. #}
+<div class="fixed left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-md xl:hidden"
+     style="bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);">
+    <div class="glass-card flex items-center justify-around py-3 px-1 rounded-[28px] border border-[var(--border-card)] shadow-2xl backdrop-blur-xl bg-[var(--surface-card-medium)]">
+
+        <!-- Dashboard -->
+        <a href="{% url 'dashboard:home' %}" class="flex flex-col items-center gap-1 transition relative px-2 py-1 text-[var(--text-muted)] {% if request.resolver_match.app_name == 'dashboard' %}text-[#37b7ff]{% endif %}">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[9px] font-medium tracking-wide">Asosiy</span>
+            {% if request.resolver_match.app_name == 'dashboard' %}
+                <div class="absolute -bottom-1 w-5 h-[2px] bg-[#37b7ff] rounded-full"></div>
+            {% endif %}
+        </a>
+
+        <!-- Test Center -->
+        <a href="{% url 'tests:center' %}" class="flex flex-col items-center gap-1 transition relative px-2 py-1 text-[var(--text-muted)] {% if request.resolver_match.app_name == 'tests' %}text-[#37b7ff]{% endif %}">
+            <i data-lucide="award" class="w-5 h-5"></i>
+            <span class="text-[9px] font-medium tracking-wide">Testlar</span>
+            {% if request.resolver_match.app_name == 'tests' %}
+                <div class="absolute -bottom-1 w-5 h-[2px] bg-[#37b7ff] rounded-full"></div>
+            {% endif %}
+        </a>
+
+        <!-- Battle Arena -->
+        <a href="{% url 'battles:arena' %}" class="flex flex-col items-center gap-1 transition relative px-2 py-1 text-[var(--text-muted)] {% if request.resolver_match.app_name == 'battles' %}text-[#37b7ff]{% endif %}">
+            <i data-lucide="zap" class="w-5 h-5 text-amber-400 {% if request.resolver_match.app_name == 'battles' %}drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]{% endif %}"></i>
+            <span class="text-[9px] font-medium tracking-wide">Jang</span>
+            {% if request.resolver_match.app_name == 'battles' %}
+                <div class="absolute -bottom-1 w-5 h-[2px] bg-[#37b7ff] rounded-full"></div>
+            {% endif %}
+        </a>
+
+        <!-- Learning Center -->
+        <a href="{% url 'learning:center' %}" class="flex flex-col items-center gap-1 transition relative px-2 py-1 text-[var(--text-muted)] {% if request.resolver_match.app_name == 'learning' and request.resolver_match.url_name == 'center' %}text-[#37b7ff]{% endif %}">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+            <span class="text-[9px] font-medium tracking-wide">O'qish</span>
+            {% if request.resolver_match.app_name == 'learning' and request.resolver_match.url_name == 'center' %}
+                <div class="absolute -bottom-1 w-5 h-[2px] bg-[#37b7ff] rounded-full"></div>
+            {% endif %}
+        </a>
+
+        <!-- Reyting (leaderboard) -->
+        <a href="{% url 'leaderboard:rankings' %}" class="flex flex-col items-center gap-1 transition relative px-2 py-1 text-[var(--text-muted)] {% if request.resolver_match.app_name == 'leaderboard' %}text-[#37b7ff]{% endif %}">
+            <i data-lucide="trophy" class="w-5 h-5 text-yellow-400"></i>
+            <span class="text-[9px] font-medium tracking-wide">Reyting</span>
+            {% if request.resolver_match.app_name == 'leaderboard' %}
+                <div class="absolute -bottom-1 w-5 h-[2px] bg-[#37b7ff] rounded-full"></div>
+            {% endif %}
+        </a>
+
+        <!-- Profile (hub for Tahlil / Xatolar / Do'kon / Premium) -->
+        <a href="{% url 'accounts:profile' %}" class="flex flex-col items-center gap-1 transition relative px-2 py-1 text-[var(--text-muted)] {% if request.resolver_match.app_name == 'accounts' and request.resolver_match.url_name == 'profile' %}text-[#37b7ff]{% endif %}">
+            <i data-lucide="user" class="w-5 h-5"></i>
+            <span class="text-[9px] font-medium tracking-wide">Profil</span>
+            {% if request.resolver_match.app_name == 'accounts' and request.resolver_match.url_name == 'profile' %}
+                <div class="absolute -bottom-1 w-5 h-[2px] bg-[#37b7ff] rounded-full"></div>
+            {% endif %}
+        </a>
+
+    </div>
+</div>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#050811" />
+    <!-- Resolves and applies the saved theme (light/dark/system) before anything paints,
+         so the page never flashes the wrong theme on load. Must run synchronously, this
+         early in <head> (after the theme-color meta tag above so it can update it), and
+         before the <style> block below that reads these attributes. -->
+    <script>
+      (function () {
+        var KEY = 'ilmmevasi_theme';
+        var pref = localStorage.getItem(KEY) || 'system';
+        var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var resolved = pref === 'system' ? (systemDark ? 'dark' : 'light') : pref;
+        var root = document.documentElement;
+        root.setAttribute('data-theme', resolved);
+        root.setAttribute('data-theme-pref', pref);
+        root.classList.toggle('dark', resolved === 'dark');
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', resolved === 'light' ? '#e1e4ea' : '#050811');
+      })();
+    </script>
+    <title>{% block title %}IlmMevasi — Premium History Education{% endblock %}</title>
+
+    <!-- Favicons / App icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}" />
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}" />
+    <link rel="shortcut icon" href="{% static 'img/favicon-32.png' %}" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Telegram Web App SDK (safe outside Telegram too) -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                navy: '#050811',
+                blue: '#2d6cff',
+                royal: '#37b7ff',
+                gold: '#f7c948',
+                emerald: '#10b981',
+                rose: '#ef4444'
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/htmx.org@1.9.5" defer></script>
+    <!-- Lucide icons: UMD build exposes window.lucide.createIcons() -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- Alpine Collapse plugin (dropdown animations) -->
+    <script src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+
+    <style>
+      /* Theme tokens. Dark values reproduce the site's original (and only, until now)
+         look exactly; light is a new counterpart designed to match the same visual
+         language (frosted glass cards floating on a tinted page background). Every
+         page's Tailwind classes reference these via arbitrary-value utilities like
+         bg-[var(--surface-card-soft)] instead of literal slate/white shades, so a
+         single edit here re-themes the whole site. */
+      :root, :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg-page: #050811;
+        --bg-page-glow: rgba(45, 108, 255, 0.12);
+        --bg-page-glow-splash: rgba(45, 108, 255, 0.18);
+
+        --text-primary: #f8fbff;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        --text-faint: #64748b;
+        --text-icon-faint: #475569;
+        --text-nav: #b9c7e8;
+        --text-nav-secondary: #9db4da;
+        --text-subtitle: #8ca1d1;
+        --text-splash-tagline: #8ea3c4;
+
+        --border-soft: rgba(255, 255, 255, 0.05);
+        --border-card: rgba(255, 255, 255, 0.10);
+        --border-strong: rgba(255, 255, 255, 0.20);
+
+        --surface-hover: rgba(255, 255, 255, 0.05);
+        --surface-hover-strong: rgba(255, 255, 255, 0.10);
+
+        --surface-card-soft: rgba(2, 6, 23, 0.20);
+        --surface-card-medium: rgba(2, 6, 23, 0.40);
+        --surface-card-strong: rgba(2, 6, 23, 0.80);
+        --surface-card-solid: #020617;
+        --surface-input: rgba(15, 23, 42, 0.60);
+
+        --surface-invert: #ffffff;
+        --text-on-invert: #020617;
+
+        --glass-bg: rgba(15, 23, 42, 0.65);
+        --glass-border: rgba(255, 255, 255, 0.08);
+      }
+      :root[data-theme="light"] {
+        /* A muted, low-brightness gray palette on purpose — nothing here approaches
+           pure white. Bright white UIs are the exact thing that tires the eyes; keeping
+           the whole surface in a soft gray range (page ~89%, cards ~93-95% luminance)
+           gives the same card/page depth as the dark theme without the glare. */
+        color-scheme: light;
+        --bg-page: #e1e4ea;
+        --bg-page-glow: rgba(45, 108, 255, 0.05);
+        --bg-page-glow-splash: rgba(45, 108, 255, 0.07);
+
+        --text-primary: #1e293b;
+        --text-secondary: #334155;
+        --text-muted: #64748b;
+        --text-faint: #94a3b8;
+        --text-icon-faint: #cbd5e1;
+        --text-nav: #475569;
+        --text-nav-secondary: #64748b;
+        --text-subtitle: #64748b;
+        --text-splash-tagline: #64748b;
+
+        --border-soft: rgba(15, 23, 42, 0.08);
+        --border-card: rgba(15, 23, 42, 0.14);
+        --border-strong: rgba(15, 23, 42, 0.22);
+
+        --surface-hover: rgba(15, 23, 42, 0.06);
+        --surface-hover-strong: rgba(15, 23, 42, 0.10);
+
+        --surface-card-soft: rgba(255, 255, 255, 0.45);
+        --surface-card-medium: rgba(255, 255, 255, 0.65);
+        --surface-card-strong: rgba(255, 255, 255, 0.82);
+        --surface-card-solid: #edf0f4;
+        --surface-input: #edf0f4;
+
+        --surface-invert: #1e293b;
+        --text-on-invert: #ffffff;
+
+        --glass-bg: rgba(255, 255, 255, 0.45);
+        --glass-border: rgba(15, 23, 42, 0.12);
+      }
+      html, body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text-primary);
+        background: radial-gradient(circle at top, var(--bg-page-glow), transparent 45%), var(--bg-page);
+        font-family: 'Inter', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+      .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+      }
+      .shadow-soft {
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      }
+      /* Horizontal scroll containers (tab rows, chip rows) without a visible scrollbar. */
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      /* Subtle tactile press feedback on buttons (transform only — never shifts layout). */
+      button { transition: transform 0.08s ease; }
+      button:active { transform: scale(0.97); }
+      /* Splash screen — decorative only, must never block clicks on the real page
+         underneath it (this is a classic multi-page Django app: every internal link
+         is a full page reload, so this markup re-appears in the DOM on every single
+         navigation, not just the very first cold load). */
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        background: radial-gradient(circle at top, var(--bg-page-glow-splash), transparent 55%), var(--bg-page);
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+        pointer-events: none;
+      }
+      #app-splash.hidden-splash {
+        opacity: 0;
+        visibility: hidden;
+      }
+      /* Logo sits inside two faint concentric rings for depth (matches the
+         static splash-screen.svg brand asset). */
+      #app-splash .splash-logo-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #app-splash .splash-ring {
+        position: absolute;
+        border-radius: 9999px;
+        border: 1px solid var(--border-soft);
+        animation: splashPop 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      #app-splash .splash-ring-1 { width: 190px; height: 190px; }
+      #app-splash .splash-ring-2 { width: 270px; height: 270px; border-color: var(--border-soft); }
+      #app-splash .splash-logo {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(45, 108, 255, 0.35);
+        animation: splashPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      #app-splash .splash-heading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.45rem;
+      }
+      #app-splash .splash-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+      }
+      #app-splash .splash-title span { color: #37b7ff; }
+      #app-splash .splash-tagline {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-splash-tagline);
+      }
+      #app-splash .splash-bar {
+        width: 140px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--border-card);
+        overflow: hidden;
+      }
+      #app-splash .splash-bar::after {
+        content: '';
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #2d6cff, #37b7ff);
+        animation: splashLoad 1s ease-in-out infinite;
+      }
+      @keyframes splashPop {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      @keyframes splashLoad {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(350%); }
+      }
+
+      /* --- Sahifa o'tish progress-bari (yuqoridagi ingichka chiziq) --- */
+      #page-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 0;
+        z-index: 9999;
+        background: linear-gradient(90deg, #2d6cff, #37b7ff);
+        border-radius: 0 999px 999px 0;
+        box-shadow: 0 0 8px rgba(55, 183, 255, 0.6);
+        opacity: 0;
+        pointer-events: none;
+      }
+      #page-progress.active {
+        opacity: 1;
+        /* 90% gacha tez, keyin sekinlashib "kutadi" — yangi sahifa kelishi bilan yo'qoladi */
+        animation: pageProgress 4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+      }
+      @keyframes pageProgress {
+        0% { width: 0; }
+        60% { width: 70%; }
+        100% { width: 92%; }
+      }
+
+      /* --- HTMX yuklanish holati: almashayotgan blok xiralashadi + shimmer --- */
+      .is-loading {
+        position: relative;
+        opacity: 0.5;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+      }
+      .is-loading::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+        background-size: 200% 100%;
+        animation: shimmer 1.1s linear infinite;
+      }
+      @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="bg-[var(--bg-page)] text-[var(--text-primary)] min-h-screen"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <script>window.csrftoken = "{{ csrf_token }}";</script>
+
+    <!-- Splash / loading screen: only plays its full animation once per browser
+         session — every other internal navigation (this is a multi-page app, so
+         every link is a full reload) skips straight to hidden. -->
+    <div id="app-splash">
+      <div class="splash-logo-wrap">
+        <span class="splash-ring splash-ring-2"></span>
+        <span class="splash-ring splash-ring-1"></span>
+        <img src="{% static 'img/icon.png' %}" alt="IlmMevasi" class="splash-logo" />
+      </div>
+      <div class="splash-heading">
+        <div class="splash-title">Ilm<span>Mevasi</span></div>
+        <div class="splash-tagline">Bilim sari har kuni bir qadam</div>
+      </div>
+      <div class="splash-bar"></div>
+    </div>
+    <script>
+      if (sessionStorage.getItem('ilmmevasi_splash_shown')) {
+        document.getElementById('app-splash').classList.add('hidden-splash');
+      } else {
+        sessionStorage.setItem('ilmmevasi_splash_shown', '1');
+      }
+    </script>
+
+    {% include 'partials/notifications.html' %}
+
+    {% if request.session.impersonator_id %}
+    <div class="sticky top-0 z-[60] bg-amber-500 text-slate-950 text-xs sm:text-sm font-semibold px-4 py-2 flex items-center justify-center gap-3">
+      <span>Siz <b>{{ request.user.username }}</b> sifatida ko'ryapsiz (impersonatsiya).</span>
+      <form method="post" action="{% url 'panel:stop_impersonation' %}" class="inline">{% csrf_token %}
+        <button class="underline font-bold">Admin hisobiga qaytish</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <div class="p-4 md:p-6 xl:p-8 min-h-screen">
+      <div class="max-w-[1600px] mx-auto xl:grid xl:grid-cols-[300px_1fr] gap-8">
+
+        <!-- Desktop Sidebar -->
+        {% if request.user.is_authenticated and not '/login/' in request.path and not '/register/' in request.path and not '/onboarding/' in request.path %}
+          {% include 'partials/navbar.html' %}
+        {% endif %}
+
+        <!-- Main Panel: when the sidebar above isn't rendered (login/register/onboarding,
+             or logged out), the grid still reserves its 300px track — without col-span-2
+             here, this lone child gets auto-placed into that track and gets squeezed into
+             it instead of using the full width. -->
+        <main class="w-full pb-28 xl:pb-0 {% if not request.user.is_authenticated or '/login/' in request.path or '/register/' in request.path or '/onboarding/' in request.path %}xl:col-span-2{% endif %}">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Floating Navigation -->
+    {% if request.user.is_authenticated and not '/login/' in request.path and not '/register/' in request.path and not '/onboarding/' in request.path %}
+      {% include 'partials/bottom_nav.html' %}
+    {% endif %}
+
+    <script>
+      // Resolved-theme -> chrome color, shared by the Telegram integration below and
+      // by the theme store's apply() so both always agree on the current color.
+      function themeColorFor(resolved) {
+        return resolved === 'light' ? '#e1e4ea' : '#050811';
+      }
+
+      // Telegram Web App integration (no-op outside Telegram)
+      (function () {
+        try {
+          var tg = window.Telegram && window.Telegram.WebApp;
+          if (tg && tg.initData !== undefined) {
+            tg.ready();
+            tg.expand();
+            var color = themeColorFor(document.documentElement.getAttribute('data-theme'));
+            if (tg.setHeaderColor) { try { tg.setHeaderColor(color); } catch (e) {} }
+            if (tg.setBackgroundColor) { try { tg.setBackgroundColor(color); } catch (e) {} }
+            document.documentElement.classList.add('in-telegram');
+
+            // Light haptic tap on every button/link — the native, tactile feel Duolingo
+            // and iOS apps use. Telegram-only, so it never affects the desktop website.
+            document.addEventListener('click', function (e) {
+              if (e.target.closest('button, a, [role="button"], label[for]')) {
+                try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch (_) {}
+              }
+            }, true);
+
+            // MainButton har sahifa yuklanishida default yashirin — faqat test
+            // ekrani (screen.html) o'zi kerak bo'lganda ko'rsatadi. Busiz tugma
+            // Telegram klientida sahifalar orasida "yopishib" qolib ketadi.
+            try { tg.MainButton && tg.MainButton.hide(); } catch (_) {}
+
+            // CloudStorage: tanlangan fan Telegram bulutida saqlanadi — telefon va
+            // kompyuterdagi Telegram orasida sinxron bo'ladi. Ishlash printsipi:
+            //  - sahifa ?subject=slug bilan ochilsa (foydalanuvchi fan tanladi) —
+            //    slug bulutga yoziladi;
+            //  - yangi sessiyaning birinchi sahifasida esa bulutdagi qiymat bilan
+            //    bir marta qayta yo'naltiramiz (server buni sessiyaga oladi).
+            //    sessionStorage bayrog'i takroriy redirect/looplarning oldini oladi.
+            try {
+              if (tg.CloudStorage) {
+                var sp = new URLSearchParams(location.search);
+                var subj = sp.get('subject');
+                if (subj) {
+                  sessionStorage.setItem('ilm_subj_synced', '1');
+                  tg.CloudStorage.setItem('selected_subject', subj, function () {});
+                } else if (!sessionStorage.getItem('ilm_subj_synced')) {
+                  sessionStorage.setItem('ilm_subj_synced', '1');
+                  tg.CloudStorage.getItem('selected_subject', function (err, value) {
+                    if (!err && value && /^[a-z0-9-]+$/.test(value)) {
+                      var url = new URL(location.href);
+                      url.searchParams.set('subject', value);
+                      location.replace(url.toString());
+                    }
+                  });
+                }
+              }
+            } catch (_) {}
+
+            // Native Telegram BackButton: bosh sahifadan boshqa hamma sahifada
+            // ko'rsatiladi va brauzer tarixida orqaga qaytaradi. Tarix bo'sh bo'lsa
+            // (sahifa to'g'ridan-to'g'ri ochilgan) bosh sahifaga olib boradi.
+            try {
+              var isHome = location.pathname === '/' || location.pathname === '';
+              if (tg.BackButton && !isHome) {
+                tg.BackButton.show();
+                tg.BackButton.onClick(function () {
+                  if (history.length > 1) { history.back(); }
+                  else { location.href = '/'; }
+                });
+              } else if (tg.BackButton) {
+                tg.BackButton.hide();
+              }
+            } catch (_) {}
+          }
+        } catch (e) {}
+      })();
+
+      // Global theme store (Light / Dark / System) — both the desktop sidebar and the
+      // mobile bottom-nav toggles read/write this same store, so switching in one place
+      // is instantly reflected in the other without a page reload.
+      document.addEventListener('alpine:init', () => {
+        Alpine.store('theme', {
+          pref: document.documentElement.getAttribute('data-theme-pref') || 'system',
+          resolved: document.documentElement.getAttribute('data-theme') || 'dark',
+          set(pref) {
+            this.pref = pref;
+            localStorage.setItem('ilmmevasi_theme', pref);
+            this.apply();
+          },
+          apply() {
+            var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.resolved = this.pref === 'system' ? (systemDark ? 'dark' : 'light') : this.pref;
+            var root = document.documentElement;
+            root.setAttribute('data-theme', this.resolved);
+            root.setAttribute('data-theme-pref', this.pref);
+            root.classList.toggle('dark', this.resolved === 'dark');
+
+            var color = themeColorFor(this.resolved);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', color);
+
+            var tg = window.Telegram && window.Telegram.WebApp;
+            if (tg && tg.initData !== undefined) {
+              if (tg.setHeaderColor) { try { tg.setHeaderColor(color); } catch (e) {} }
+              if (tg.setBackgroundColor) { try { tg.setBackgroundColor(color); } catch (e) {} }
+            }
+          },
+        });
+        // Live-follow the OS theme while the user's preference is "system".
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          if (Alpine.store('theme').pref === 'system') Alpine.store('theme').apply();
+        });
+      });
+
+      // Render Lucide icons (with a helper we can call after HTMX/Alpine swaps)
+      function renderIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      }
+      document.addEventListener('DOMContentLoaded', renderIcons);
+      document.body.addEventListener('htmx:afterSwap', renderIcons);
+      document.body.addEventListener('htmx:afterSettle', renderIcons);
+
+      // ---------------------------------------------------------------------
+      // Yuklanish holatlari (skeleton/progress) — butun sayt uchun bitta joyda.
+      //
+      // 1) Yuqori progress-bar: ichki havolaga bosilganda darhol paydo bo'ladi,
+      //    yangi sahifa kelguncha "oqadi". Foydalanuvchi bosishi zoye ketmaganini
+      //    shu zahoti ko'radi (ayniqsa sekin internetda / Telegram ichida).
+      // 2) HTMX shimmer: har qanday hx so'rov paytida almashinadigan blok
+      //    xiralashib, ustida shimmer chizig'i yuradi — alohida sahifalarga
+      //    hech narsa yozish shart emas, hammasiga avtomatik qo'llanadi.
+      // ---------------------------------------------------------------------
+      (function () {
+        // 1) Yuqori progress-bar
+        var bar = document.createElement('div');
+        bar.id = 'page-progress';
+        document.body.appendChild(bar);
+
+        function startProgress() {
+          bar.classList.remove('done');
+          // reflow — animatsiyani boshidan boshlash uchun
+          void bar.offsetWidth;
+          bar.classList.add('active');
+        }
+
+        document.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[href]');
+          if (!a) return;
+          var href = a.getAttribute('href') || '';
+          // Faqat ichki, oddiy navigatsiya: yangi oyna/hash/js havolalarini o'tkazib yuboramiz
+          if (a.target === '_blank' || e.ctrlKey || e.metaKey) return;
+          if (href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:')) return;
+          if (a.hasAttribute('hx-get') || a.hasAttribute('hx-post')) return; // HTMX o'zi ko'rsatadi
+          if (href.startsWith('http') && !href.startsWith(location.origin)) return;
+          startProgress();
+        }, true);
+
+        // Oddiy (HTMX bo'lmagan) forma yuborilganda ham
+        document.addEventListener('submit', function (e) {
+          if (!e.target.hasAttribute('hx-post') && !e.target.hasAttribute('hx-get')) startProgress();
+        }, true);
+
+        // bfcache'dan qaytganda (orqaga tugmasi) barni tozalaymiz
+        window.addEventListener('pageshow', function () {
+          bar.classList.remove('active');
+        });
+
+        // 2) HTMX: so'rov ketayotgan target'ga .is-loading beramiz
+        document.body.addEventListener('htmx:beforeRequest', function (e) {
+          var t = e.detail && e.detail.target;
+          if (t && t.classList) t.classList.add('is-loading');
+        });
+        ['htmx:afterSwap', 'htmx:responseError', 'htmx:sendError', 'htmx:timeout'].forEach(function (ev) {
+          document.body.addEventListener(ev, function (e) {
+            var t = e.detail && e.detail.target;
+            if (t && t.classList) t.classList.remove('is-loading');
+            document.querySelectorAll('.is-loading').forEach(function (el) { el.classList.remove('is-loading'); });
+          });
+        });
+      })();
+
+      // Hide splash once everything is ready
+      function hideSplash() {
+        var s = document.getElementById('app-splash');
+        if (s) s.classList.add('hidden-splash');
+      }
+      window.addEventListener('load', function () {
+        renderIcons();
+        setTimeout(hideSplash, 350);
+      });
+      // Fallback: never let the splash get stuck
+      setTimeout(function () { renderIcons(); hideSplash(); }, 2500);
+    </script>
+  </body>
+</html>

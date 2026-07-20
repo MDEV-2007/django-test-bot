@@ -1,0 +1,25 @@
+{% load static %}
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Texnik ishlar — IlmMevasi</title>
+  <style>
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+           font-family: system-ui, -apple-system, sans-serif;
+           background: radial-gradient(circle at top, rgba(45,108,255,0.12), transparent 45%), #050811; color:#e6ecff; }
+    .card { text-align:center; padding:2.5rem; max-width:420px; }
+    .logo { width:88px; height:88px; border-radius:22px; box-shadow:0 20px 60px rgba(45,108,255,.35); margin-bottom:1.25rem; }
+    h1 { font-size:1.5rem; margin:.25rem 0; }
+    p { color:#8ca1d1; line-height:1.6; font-size:.95rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="{% static 'img/icon.png' %}" alt="IlmMevasi" class="logo">
+    <h1>Texnik ishlar olib borilmoqda</h1>
+    <p>Ilova vaqtincha yangilanmoqda. Iltimos, biroz vaqtdan so'ng qayta urinib ko'ring. Noqulaylik uchun uzr so'raymiz.</p>
+  </div>
+</body>
+</html>

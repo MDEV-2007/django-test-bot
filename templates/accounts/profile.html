@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — {{ profile.user.first_name }} Profili{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-fadeIn">
+    <!-- Profile Header Card -->
+    <section class="glass-card rounded-[32px] border border-[var(--border-card)] p-6 xl:p-8 relative overflow-hidden bg-[var(--surface-card-medium)]">
+        <div class="absolute -top-16 -right-16 w-48 h-48 bg-[#2d6cff]/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-amber-500/8 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative">
+            <!-- Avatar -->
+            <div class="relative flex-shrink-0">
+                <img src="{{ profile.avatar_url|default:'https://api.dicebear.com/7.x/adventurer/svg?seed=Azizbek' }}" alt="Avatar"
+                     class="w-24 h-24 rounded-full border-2 border-[var(--border-card)] shadow-xl">
+                {% if profile.is_premium %}
+                <div class="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center border-2 border-[var(--surface-card-medium)] shadow-lg">
+                    <i data-lucide="crown" class="w-4 h-4 text-slate-950 fill-current"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 text-center sm:text-left space-y-3">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">{{ profile.user.first_name }} {{ profile.user.last_name }}</h1>
+                    {% if profile.telegram_username %}
+                        <p class="text-xs text-[#37b7ff] font-mono mt-0.5">@{{ profile.telegram_username }}</p>
+                    {% endif %}
+                    {% if profile.biography %}
+                        <p class="text-sm text-[var(--text-muted)] mt-2 max-w-md leading-relaxed">{{ profile.biography }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Stat chips -->
+                <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+                    <span class="bg-amber-500/10 border border-amber-500/20 text-[#f7c948] text-xs font-extrabold px-3 py-1.5 rounded-full flex items-center gap-1">
+                        <i data-lucide="award" class="w-3.5 h-3.5"></i> Level {{ profile.level }}
+                    </span>
+                    <span class="bg-blue-500/10 border border-blue-500/20 text-[#37b7ff] text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+                        <i data-lucide="zap" class="w-3.5 h-3.5"></i> {{ profile.xp }} XP
+                    </span>
+                    <span class="bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+                        <i data-lucide="coins" class="w-3.5 h-3.5"></i> {{ profile.coins }} Tanga
+                    </span>
+                    <span class="bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+                        <i data-lucide="flame" class="w-3.5 h-3.5"></i> {{ profile.streak }} kunlik streak
+                    </span>
+                    <span class="bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+                        <i data-lucide="swords" class="w-3.5 h-3.5"></i> ELO {{ profile.elo_rating }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Settings link -->
+            <a href="{% url 'accounts:logout' %}" class="flex items-center gap-2 bg-[var(--surface-hover)] border border-[var(--border-card)] hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-400 text-[var(--text-muted)] font-semibold py-2.5 px-4 rounded-xl transition text-xs flex-shrink-0">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                <span>Chiqish</span>
+            </a>
+        </div>
+
+        <!-- XP progress -->
+        <div class="mt-6 space-y-2">
+            <div class="flex justify-between text-xs font-semibold text-[var(--text-subtitle)]">
+                <span>Keyingi Level uchun</span>
+                <span>{{ profile.xp }} / {{ profile.next_level_xp }} XP ({{ profile.xp_progress }}%)</span>
+            </div>
+            <div class="h-2.5 w-full bg-[var(--surface-hover)] rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#2d6cff] to-[#37b7ff] rounded-full transition-all duration-500" style="width: {{ profile.xp_progress }}%"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tezkor kirish (hub) — shaxsiy bo'limlar bu yerga ko'chirilgan, pastki panel toza qoladi -->
+    <section>
+        <h2 class="text-sm font-bold text-[var(--text-subtitle)] uppercase tracking-wider mb-3 px-1">Tezkor kirish</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <a href="{% url 'analytics:dashboard' %}" class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4 flex flex-col items-center gap-2 hover:border-[#37b7ff]/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[#37b7ff]"><i data-lucide="bar-chart-3" class="w-5 h-5"></i></div>
+                <span class="text-xs font-semibold text-[var(--text-primary)] text-center">Tahlil</span>
+            </a>
+            <a href="{% url 'tests:revision' %}" class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4 flex flex-col items-center gap-2 hover:border-rose-500/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400"><i data-lucide="repeat" class="w-5 h-5"></i></div>
+                <span class="text-xs font-semibold text-[var(--text-primary)] text-center">Xatolar</span>
+            </a>
+            <a href="{% url 'shop:home' %}" class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4 flex flex-col items-center gap-2 hover:border-[#37b7ff]/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[#37b7ff]"><i data-lucide="shopping-bag" class="w-5 h-5"></i></div>
+                <span class="text-xs font-semibold text-[var(--text-primary)] text-center">Do'kon</span>
+            </a>
+            <a href="{% url 'premium:plans' %}" class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4 flex flex-col items-center gap-2 hover:border-amber-500/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400"><i data-lucide="crown" class="w-5 h-5"></i></div>
+                <span class="text-xs font-semibold text-[var(--text-primary)] text-center">Premium</span>
+            </a>
+        </div>
+    </section>
+
+    {% include 'partials/theme_toggle.html' %}
+
+    <div class="grid gap-8 lg:grid-cols-2">
+        <!-- Badges / Achievements -->
+        <section class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 space-y-5 bg-[var(--surface-card-soft)]">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="trophy" class="w-5 h-5 text-yellow-500"></i> Yutuqlar & Nishonlar
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {% for pb in badges %}
+                <div class="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card-medium)] p-4 text-center space-y-2 hover:bg-[var(--surface-input)] transition">
+                    <div class="w-10 h-10 mx-auto rounded-xl flex items-center justify-center
+                        {% if pb.badge.rarity == 'legendary' %}bg-amber-500/15 text-amber-400 border border-amber-500/25
+                        {% elif pb.badge.rarity == 'epic' %}bg-purple-500/15 text-purple-400 border border-purple-500/25
+                        {% elif pb.badge.rarity == 'rare' %}bg-blue-500/15 text-[#37b7ff] border border-blue-500/25
+                        {% else %}bg-[var(--surface-hover)] text-[var(--text-muted)] border border-[var(--border-card)]{% endif %}">
+                        <i data-lucide="{{ pb.badge.icon_name }}" class="w-5 h-5"></i>
+                    </div>
+                    <p class="text-xs font-bold text-[var(--text-primary)] truncate">{{ pb.badge.name }}</p>
+                    <span class="text-[10px] uppercase tracking-wider font-extrabold
+                        {% if pb.badge.rarity == 'legendary' %}text-amber-400
+                        {% elif pb.badge.rarity == 'epic' %}text-purple-400
+                        {% elif pb.badge.rarity == 'rare' %}text-blue-400
+                        {% else %}text-[var(--text-faint)]{% endif %}">
+                        {{ pb.badge.get_rarity_display }}
+                    </span>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-8">
+                    <i data-lucide="award" class="w-10 h-10 text-[var(--text-icon-faint)] mx-auto mb-2"></i>
+                    <p class="text-xs text-[var(--text-faint)]">Hali yutuqlar yo'q. Test topshiring va jang olib boring!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Recent Battle History -->
+        <section class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 space-y-5 bg-[var(--surface-card-soft)]">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="swords" class="w-5 h-5 text-amber-400"></i> Janglar Tarixi
+            </h3>
+            <div class="space-y-3">
+                {% for battle in recent_battles %}
+                <div class="flex items-center justify-between border-b border-[var(--border-soft)] pb-3 last:border-0 last:pb-0">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                            {% if battle.winner == profile %}bg-emerald-500/10 text-emerald-400{% else %}bg-rose-500/10 text-rose-400{% endif %}">
+                            {% if battle.winner == profile %}
+                                <i data-lucide="trophy" class="w-4 h-4"></i>
+                            {% else %}
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold text-[var(--text-primary)] truncate">
+                                {% if battle.player1 == profile %}vs {{ battle.player2.user.first_name|default:"Noma'lum" }}{% else %}vs {{ battle.player1.user.first_name }}{% endif %}
+                            </p>
+                            <p class="text-[10px] text-[var(--text-faint)] font-mono">{{ battle.created_at|date:"d M, H:i" }}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-extrabold {% if battle.winner == profile %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                        {% if battle.winner == profile %}G'alaba{% else %}Mag'lubiyat{% endif %}
+                    </span>
+                </div>
+                {% empty %}
+                <div class="text-center py-8">
+                    <i data-lucide="swords" class="w-10 h-10 text-[var(--text-icon-faint)] mx-auto mb-2"></i>
+                    <p class="text-xs text-[var(--text-faint)]">Hali jang o'tkazmadingiz.</p>
+                    <a href="{% url 'battles:arena' %}" class="text-xs font-bold text-[#37b7ff] hover:underline mt-2 inline-block">Arena'ga o'tish</a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Recent Test Attempts -->
+    <section class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 space-y-5 bg-[var(--surface-card-soft)]">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="history" class="w-5 h-5 text-[#37b7ff]"></i> Oxirgi Imtihonlar
+            </h3>
+            <a href="{% url 'tests:history' %}" class="text-xs font-bold text-[#37b7ff] hover:underline flex items-center gap-1">
+                Barcha tarixi <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+        <div class="space-y-3">
+            {% for attempt in recent_attempts %}
+            <div class="flex items-center justify-between border-b border-[var(--border-soft)] pb-3 last:border-0 last:pb-0">
+                <div class="min-w-0 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                        {% if attempt.score >= 80 %}bg-emerald-500/10 text-emerald-400
+                        {% elif attempt.score >= 50 %}bg-amber-500/10 text-amber-400
+                        {% else %}bg-rose-500/10 text-rose-400{% endif %}">
+                        <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-[var(--text-primary)] truncate">{{ attempt.test.title|default:"Tasodifiy Test" }}</p>
+                        <p class="text-[10px] text-[var(--text-faint)] font-mono mt-0.5 flex items-center gap-2">
+                            <span>{{ attempt.completed_at|date:"d M, H:i" }}</span>
+                            <span>{{ attempt.time_spent_display }}</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <span class="text-sm font-extrabold font-mono
+                        {% if attempt.score >= 80 %}text-emerald-400{% elif attempt.score >= 50 %}text-amber-400{% else %}text-rose-400{% endif %}">
+                        {{ attempt.score|floatformat:0 }}%
+                    </span>
+                    <a href="{% url 'tests:feedback' attempt.id %}" class="w-8 h-8 rounded-lg bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8">
+                <i data-lucide="file-text" class="w-10 h-10 text-[var(--text-icon-faint)] mx-auto mb-2"></i>
+                <p class="text-xs text-[var(--text-faint)]">Hali imtihon topshirmagansiz.</p>
+                <a href="{% url 'tests:center' %}" class="text-xs font-bold text-[#37b7ff] hover:underline mt-2 inline-block">Test boshlash</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

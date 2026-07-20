@@ -1,0 +1,61 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block page_title %}Bosh sahifa{% endblock %}
+{% block breadcrumb %}<i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="font-medium text-ink-700">Bosh sahifa</span>{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+  <div>
+    <h1 class="text-2xl font-extrabold">Salom, {{ request.user.get_full_name|default:request.user.username }}! 👋</h1>
+    <p class="text-sm text-ink-500 mt-1">O'quv kontentingiz va o'quvchilar natijalari.</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'teacher:test_create' %}" class="inline-flex items-center gap-2 accent-bg text-white font-semibold px-4 py-2.5 rounded-xl text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Yangi test</a>
+    <a href="{% url 'teacher:lesson_create' %}" class="inline-flex items-center gap-2 bg-white border border-ink-100 text-ink-700 font-semibold px-4 py-2.5 rounded-xl text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Yangi dars</a>
+    <a href="{% url 'teacher:game_create' %}" class="inline-flex items-center gap-2 bg-white border border-ink-100 text-ink-700 font-semibold px-4 py-2.5 rounded-xl text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Yangi o'yin</a>
+  </div>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-2xl border border-ink-100 p-5">
+    <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="file-check-2" class="w-5 h-5"></i></span>
+    <p class="text-3xl font-extrabold mt-3">{{ stats.tests }}</p>
+    <p class="text-sm text-ink-500">Testlar <span class="text-emerald-600">({{ stats.published_tests }} nashr)</span></p>
+  </div>
+  <div class="bg-white rounded-2xl border border-ink-100 p-5">
+    <span class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+    <p class="text-3xl font-extrabold mt-3">{{ stats.lessons }}</p><p class="text-sm text-ink-500">Darslar</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-ink-100 p-5">
+    <span class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="gamepad-2" class="w-5 h-5"></i></span>
+    <p class="text-3xl font-extrabold mt-3">{{ stats.games }}</p><p class="text-sm text-ink-500">O'yinlar</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-ink-100 p-5">
+    <span class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="clipboard-list" class="w-5 h-5"></i></span>
+    <p class="text-3xl font-extrabold mt-3">{{ stats.attempts }}</p><p class="text-sm text-ink-500">Topshirilgan urinishlar</p>
+  </div>
+</div>
+
+<div class="bg-white rounded-2xl border border-ink-100 p-5">
+  <h2 class="font-bold mb-3">So'nggi urinishlar (mening testlarim)</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="text-ink-500 text-xs uppercase"><tr>
+        <th class="text-left py-2">O'quvchi</th><th class="text-left py-2">Test</th><th class="text-left py-2">Ball</th><th class="text-left py-2">Sana</th>
+      </tr></thead>
+      <tbody class="divide-y divide-ink-100">
+        {% for a in recent_attempts %}
+        <tr>
+          <td class="py-2.5">{{ a.profile.user.get_full_name|default:a.profile.user.username }}</td>
+          <td class="py-2.5">{{ a.test.title }}</td>
+          <td class="py-2.5 font-semibold">{{ a.score|default:0|floatformat:0 }}%</td>
+          <td class="py-2.5 text-ink-500">{{ a.started_at|date:"d.m.Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="py-8 text-center text-ink-400">Hali urinishlar yo'q. Test yaratib, nashr eting.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

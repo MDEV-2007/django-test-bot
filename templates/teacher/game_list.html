@@ -1,0 +1,36 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block page_title %}O'yinlarim{% endblock %}
+{% block breadcrumb %}<i data-lucide="gamepad-2" class="w-4 h-4"></i><span class="font-medium text-ink-700">O'yinlarim</span>{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-extrabold">O'yinlarim</h1>
+  <a href="{% url 'teacher:game_create' %}" class="inline-flex items-center gap-2 accent-bg text-white font-semibold px-4 py-2.5 rounded-xl text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Yangi o'yin</a>
+</div>
+
+{% if games %}
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for g in games %}
+  <div class="bg-white rounded-2xl border border-ink-100 p-5">
+    <div class="flex items-start justify-between">
+      <span class="w-10 h-10 rounded-xl accent-soft flex items-center justify-center"><i data-lucide="{% if g.game_type == 'flashcards' %}layers{% elif g.game_type == 'match_pairs' %}shuffle{% else %}timer{% endif %}" class="w-5 h-5"></i></span>
+      <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {% if g.is_published %}bg-emerald-50 text-emerald-600{% else %}bg-amber-50 text-amber-600{% endif %}">{% if g.is_published %}Nashr{% else %}Qoralama{% endif %}</span>
+    </div>
+    <h3 class="font-bold mt-3">{{ g.title }}</h3>
+    <p class="text-sm text-ink-500">{{ g.get_game_type_display }} · {{ g.items.count }} element</p>
+    <div class="flex items-center gap-2 mt-4 pt-4 border-t border-ink-100">
+      <a href="{% url 'teacher:game_edit' g.pk %}" class="flex-1 text-center py-2 rounded-lg bg-emerald-50 text-emerald-600 font-semibold text-xs">Tahrirlash</a>
+      <form method="post" action="{% url 'teacher:game_delete' g.pk %}" onsubmit="return confirm('O‘yinni o‘chirasizmi?')">{% csrf_token %}<button class="p-2 rounded-lg text-ink-400 hover:bg-rose-50 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-2xl border border-ink-100 p-12 text-center">
+  <div class="w-16 h-16 rounded-2xl bg-ink-100 flex items-center justify-center mx-auto mb-4 text-ink-300"><i data-lucide="gamepad-2" class="w-8 h-8"></i></div>
+  <p class="text-ink-700 font-semibold">Hali o'yinlaringiz yo'q</p>
+  <a href="{% url 'teacher:game_create' %}" class="inline-flex items-center gap-2 accent-bg text-white font-semibold px-5 py-2.5 rounded-xl text-sm mt-4"><i data-lucide="plus" class="w-4 h-4"></i> Birinchi o'yinni yaratish</a>
+</div>
+{% endif %}
+{% endblock %}

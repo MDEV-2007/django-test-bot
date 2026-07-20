@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Battle Arena{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-xl mx-auto animate-fadeIn" 
+     x-data="{
+         state: 'lobby', // lobby, searching, battle, finished
+         battleId: null,
+         opponent: null,
+         questions: [],
+         currentQIdx: 0,
+         playerScore: 0,
+         opponentScore: 0,
+         timeLeft: 15,
+         timerInterval: null,
+         selectedChoiceId: null,
+         opponentSelectedId: null,
+         correctChoiceId: null,
+         canAnswer: true,
+         roundResolved: false,
+         battleResult: '', // win, loss, draw
+         resultMessage: '',
+         xpReward: 0,
+         coinsReward: 0,
+         eloChange: 0,
+
+         startSearch() {
+             this.state = 'searching';
+             setTimeout(() => {
+                 this.loadBattleData();
+             }, 2000);
+         },
+         async loadBattleData() {
+             try {
+                 const res = await fetch('{% url 'battles:start_battle_quiz' %}');
+                 const data = await res.json();
+                 if (!data.success) throw new Error(data.error);
+                 this.battleId = data.battle_id;
+                 this.questions = data.questions;
+                 this.opponent = data.opponent;
+                 this.state = 'battle';
+                 this.currentQIdx = 0;
+                 this.playerScore = 0;
+                 this.opponentScore = 0;
+                 this.startQuestionRound();
+             } catch(e) {
+                 this.state = 'lobby';
+                 alert('Xatolik: Jangni boshlab bo\'lmadi.');
+             }
+         },
+         startQuestionRound() {
+             this.timeLeft = 15;
+             this.selectedChoiceId = null;
+             this.opponentSelectedId = null;
+             this.correctChoiceId = null;
+             this.canAnswer = true;
+             this.roundResolved = false;
+
+             if (this.timerInterval) clearInterval(this.timerInterval);
+             this.timerInterval = setInterval(() => {
+                 if (this.timeLeft > 0) {
+                     this.timeLeft--;
+                 } else {
+                     clearInterval(this.timerInterval);
+                     this.handleTimeOut();
+                 }
+             }, 1000);
+         },
+         async submitRound(choiceId) {
+             if (this.roundResolved) return;
+             this.roundResolved = true;
+             this.canAnswer = false;
+             clearInterval(this.timerInterval);
+
+             const currentQ = this.questions[this.currentQIdx];
+             const formData = new FormData();
+             formData.append('battle_id', this.battleId);
+             formData.append('round_number', currentQ.round_number);
+             if (choiceId) formData.append('choice_id', choiceId);
+
+             try {
+                 const res = await fetch('{% url 'battles:submit_round' %}', { method: 'POST', body: formData, headers: { 'X-CSRFToken': window.csrftoken } });
+                 const data = await res.json();
+                 if (!data.success) throw new Error(data.error);
+                 this.correctChoiceId = data.correct_choice_id;
+                 this.opponentSelectedId = data.opponent_choice_id;
+                 this.playerScore = data.player_score;
+                 this.opponentScore = data.opponent_score;
+             } catch(e) {
+                 console.log(e);
+             }
+
+             setTimeout(() => this.nextRound(), 2000);
+         },
+         handleChoiceSelection(choice) {
+             if (!this.canAnswer) return;
+             this.selectedChoiceId = choice.id;
+             this.submitRound(choice.id);
+         },
+         handleTimeOut() {
+             if (this.roundResolved) return;
+             this.submitRound(null);
+         },
+         nextRound() {
+             if (this.currentQIdx < this.questions.length - 1) {
+                 this.currentQIdx++;
+                 this.startQuestionRound();
+             } else {
+                 this.finishBattle();
+             }
+         },
+         async finishBattle() {
+             this.state = 'finished';
+             if (this.timerInterval) clearInterval(this.timerInterval);
+
+             try {
+                 const formData = new FormData();
+                 formData.append('battle_id', this.battleId);
+                 const res = await fetch('{% url 'battles:finish_battle' %}', { method: 'POST', body: formData, headers: { 'X-CSRFToken': window.csrftoken } });
+                 const data = await res.json();
+                 if (!data.success) throw new Error(data.error);
+
+                 this.battleResult = data.result;
+                 this.resultMessage = { win: 'G\'alaba!', loss: 'Mag\'lubiyat...', draw: 'Durang!' }[data.result];
+                 this.xpReward = data.xp_gained;
+                 this.coinsReward = data.coins_gained;
+                 this.eloChange = data.elo_change;
+                 this.playerScore = data.player_score;
+                 this.opponentScore = data.opponent_score;
+             } catch(e) {
+                 console.log(e);
+             }
+         }
+     }">
+
+    <!-- STATE 1: Matchmaking Lobby -->
+    <div x-show="state === 'lobby'" class="space-y-6">
+        <!-- Header -->
+        <header class="border-b border-[var(--border-card)] pb-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                    <i data-lucide="swords" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">Battle Arena</h1>
+                    <p class="text-xs text-[var(--text-muted)]">{% if selected_subject %}{{ selected_subject.name }} fanidan{% endif %} AI raqibga qarshi tezkor janglar. G'alaba qozonib ELO ratingingizni oshiring.</p>
+                </div>
+            </div>
+            {% if subjects %}
+            <div class="flex flex-wrap gap-2">
+                {% for s in subjects %}
+                <a href="?subject={{ s.slug }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition
+                    {% if selected_subject.id == s.id %}text-white border-transparent{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-card)] hover:text-[var(--text-primary)]{% endif %}"
+                    {% if selected_subject.id == s.id %}style="background-color: {{ s.color }};"{% endif %}>
+                    <i data-lucide="{{ s.icon_name }}" class="w-3.5 h-3.5"></i> {{ s.name }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </header>
+
+        <!-- ELO rating dashboard -->
+        <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 flex flex-col md:flex-row items-center justify-between gap-6 bg-[var(--surface-card-soft)]">
+            <div class="space-y-2">
+                <p class="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">Mening ELO reytingim</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-extrabold text-[var(--text-primary)] font-mono">{{ profile.elo_rating }}</span>
+                    <span class="text-xs text-amber-400 font-bold flex items-center gap-0.5"><i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i> Active</span>
+                </div>
+            </div>
+            <div class="flex gap-4 text-xs font-semibold text-center text-[var(--text-muted)]">
+                <div class="bg-[var(--surface-card-solid)] border border-[var(--border-soft)] p-3 rounded-2xl">
+                    <p class="text-[var(--text-faint)]">Janglar</p>
+                    <p class="text-[var(--text-primary)] font-bold mt-1 text-sm">{{ total_battles }}</p>
+                </div>
+                <div class="bg-emerald-500/10 border border-emerald-500/10 p-3 rounded-2xl text-emerald-400">
+                    <p class="text-emerald-500/80">G'alabalar</p>
+                    <p class="font-bold mt-1 text-sm">{{ wins }}</p>
+                </div>
+                <div class="bg-rose-500/10 border border-rose-500/10 p-3 rounded-2xl text-rose-400">
+                    <p class="text-rose-500/80">Mag'lubiyatlar</p>
+                    <p class="font-bold mt-1 text-sm">{{ losses }}</p>
+                </div>
+            </div>
+        </div>
+
+        <button @click="startSearch()" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-extrabold py-4 rounded-2xl hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition text-sm flex items-center justify-center gap-2">
+            <i data-lucide="swords" class="w-5 h-5 fill-current"></i>
+            <span>Raqib qidirishni boshlash</span>
+        </button>
+    </div>
+
+    <!-- STATE 2: Searching Screen -->
+    <div x-show="state === 'searching'" class="glass-card rounded-[32px] border border-[var(--border-card)] p-8 text-center bg-[var(--surface-card-medium)] py-16 space-y-6">
+        <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+            <!-- Spinner -->
+            <div class="absolute inset-0 rounded-full border-4 border-[var(--border-soft)] border-t-[#37b7ff] animate-spin"></div>
+            <i data-lucide="radar" class="w-10 h-10 text-[#37b7ff] animate-pulse"></i>
+        </div>
+        <div class="space-y-2">
+            <h3 class="text-xl font-bold text-[var(--text-primary)]">Mos raqib tayyorlanmoqda...</h3>
+            <p class="text-xs text-[var(--text-faint)]">Sizning darajangizga mos AI raqib: ELO [{{ profile.elo_rating|add:-100 }} - {{ profile.elo_rating|add:100 }}]</p>
+        </div>
+    </div>
+
+    <!-- STATE 3: Battle Screen -->
+    <div x-show="state === 'battle'" class="space-y-6">
+        <!-- Competitor details banner -->
+        <div class="flex items-center justify-between glass-card p-4 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-32 h-full bg-blue-500/5 blur-xl pointer-events-none"></div>
+            <div class="absolute top-0 right-0 w-32 h-full bg-purple-500/5 blur-xl pointer-events-none"></div>
+            
+            <!-- Player -->
+            <div class="flex items-center gap-3">
+                <img src="{{ profile.avatar_url|default:'https://api.dicebear.com/7.x/adventurer/svg?seed=Azizbek' }}" class="w-10 h-10 rounded-full border border-[var(--border-card)]">
+                <div>
+                    <h4 class="font-bold text-xs text-[var(--text-primary)] truncate max-w-[80px]">{{ request.user.first_name }}</h4>
+                    <span class="text-[10px] text-blue-400 font-mono mt-0.5" x-text="`Score: ${playerScore}`"></span>
+                </div>
+            </div>
+            
+            <!-- Lightning VS symbol -->
+            <div class="w-10 h-10 rounded-full bg-[var(--surface-card-solid)] border border-[var(--border-card)] flex items-center justify-center text-amber-500 font-black text-xs shadow-lg shadow-amber-500/10">
+                VS
+            </div>
+
+            <!-- Opponent -->
+            <div class="flex items-center gap-3 text-right flex-row-reverse">
+                <img :src="opponent?.avatar" class="w-10 h-10 rounded-full border border-[var(--border-card)]">
+                <div>
+                    <h4 class="font-bold text-xs text-[var(--text-primary)] truncate max-w-[80px]" x-text="opponent?.name"></h4>
+                    <span class="text-[10px] text-purple-400 font-mono mt-0.5" x-text="`Score: ${opponentScore}`"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question display card -->
+        <template x-if="questions.length > 0">
+            <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 space-y-6 bg-[var(--surface-card-soft)] relative">
+                <!-- Round Header -->
+                <div class="flex justify-between items-center text-xs text-[var(--text-muted)]">
+                    <span class="font-bold text-[#37b7ff]" x-text="`Raund ${currentQIdx + 1} / ${questions.length}`"></span>
+                    <span class="font-mono bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold" x-text="`Vaqt: ${timeLeft}s`"></span>
+                </div>
+                
+                <h3 class="text-lg font-bold text-[var(--text-primary)] leading-relaxed" x-text="questions[currentQIdx].text"></h3>
+
+                <!-- Choices -->
+                <div class="grid gap-3">
+                    <template x-for="choice in questions[currentQIdx].choices" :key="choice.id">
+                        <button type="button" @click="handleChoiceSelection(choice)" :disabled="!canAnswer"
+                                class="w-full flex items-center justify-between p-4 rounded-xl border transition duration-150 text-left font-sans"
+                                :class="{
+                                    'border-[#2d6cff] bg-[#2d6cff]/10 text-[#37b7ff]': selectedChoiceId === choice.id && correctChoiceId !== choice.id,
+                                    'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-semibold': correctChoiceId === choice.id,
+                                    'border-rose-500 bg-rose-500/10 text-rose-400': selectedChoiceId === choice.id && correctChoiceId !== null && correctChoiceId !== choice.id,
+                                    'border-[var(--border-card)] bg-[var(--surface-card-medium)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]': selectedChoiceId !== choice.id && correctChoiceId !== choice.id
+                                }">
+                            <span class="text-sm font-semibold" x-text="choice.text"></span>
+                            
+                            <!-- Badges -->
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                <span x-show="selectedChoiceId === choice.id" class="text-[9px] uppercase font-black bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">Siz</span>
+                                <span x-show="opponentSelectedId === choice.id" class="text-[9px] uppercase font-black bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20">Raqib</span>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- STATE 4: Finished view -->
+    <div x-show="state === 'finished'" class="glass-card rounded-[32px] border border-[var(--border-card)] p-8 text-center bg-[var(--surface-card-medium)] py-12 space-y-6">
+        <div class="mx-auto w-16 h-16 rounded-full flex items-center justify-center border mb-4 animate-scaleUp"
+             :class="{
+                 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': battleResult === 'win',
+                 'bg-rose-500/10 text-rose-400 border-rose-500/30': battleResult === 'loss',
+                 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border-card)]': battleResult === 'draw'
+             }">
+            <template x-if="battleResult === 'win'">
+                <i data-lucide="trophy" class="w-8 h-8"></i>
+            </template>
+            <template x-if="battleResult === 'loss'">
+                <i data-lucide="frown" class="w-8 h-8"></i>
+            </template>
+            <template x-if="battleResult === 'draw'">
+                <i data-lucide="minus" class="w-8 h-8"></i>
+            </template>
+        </div>
+        
+        <div class="space-y-2">
+            <h2 class="text-3xl font-extrabold text-[var(--text-primary)]" x-text="resultMessage"></h2>
+            <div class="flex justify-center items-center gap-6 mt-1 text-[var(--text-muted)] font-mono text-sm">
+                <span x-text="`Siz: ${playerScore} ball`"></span>
+                <span>-</span>
+                <span x-text="`Raqib: ${opponentScore} ball`"></span>
+            </div>
+        </div>
+
+        <div class="bg-[var(--surface-hover)] rounded-2xl p-4 max-w-sm mx-auto grid grid-cols-3 gap-3 text-xs font-semibold text-[var(--text-secondary)]">
+            <div>
+                <p class="text-[var(--text-faint)] text-[10px] uppercase">Tajriba (XP)</p>
+                <p class="text-blue-400 font-bold mt-1 text-sm" x-text="`+${xpReward} XP`"></p>
+            </div>
+            <div>
+                <p class="text-[var(--text-faint)] text-[10px] uppercase">Tangalar</p>
+                <p class="text-yellow-500 font-bold mt-1 text-sm" x-text="`+${coinsReward}`"></p>
+            </div>
+            <div>
+                <p class="text-[var(--text-faint)] text-[10px] uppercase">ELO Rating</p>
+                <p class="font-extrabold mt-1 text-sm" :class="eloChange >= 0 ? 'text-emerald-400' : 'text-rose-400'" x-text="eloChange >= 0 ? `+${eloChange}` : eloChange"></p>
+            </div>
+        </div>
+
+        <button @click="state = 'lobby';" class="inline-block bg-[var(--surface-invert)] text-[var(--text-on-invert)] font-bold py-3.5 px-6 rounded-2xl text-xs transition">
+            Lobbyga qaytish
+        </button>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes scaleUp {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-scaleUp {
+        animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

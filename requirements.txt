@@ -1,0 +1,6 @@
+# Kept for tooling that expects a root requirements.txt (and `pip install -r requirements.txt`).
+# The real, environment-split lists live in requirements/:
+#     requirements/base.txt  — shared runtime deps
+#     requirements/dev.txt   — local development
+#     requirements/prod.txt  — production (gunicorn, psycopg, redis)
+-r requirements/prod.txt

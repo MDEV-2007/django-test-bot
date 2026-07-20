@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Coin do'kon{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-fadeIn">
+    <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-card)] pb-6">
+        <div class="flex items-start gap-4">
+            <a href="{% url 'accounts:profile' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0 mt-1">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
+                    <i data-lucide="shopping-bag" class="w-8 h-8 text-[#37b7ff]"></i> Coin do'kon
+                </h1>
+                <p class="text-[var(--text-muted)] text-sm mt-1">Tangalaringizni avatar, ramka, unvon va imtiyozlarga ayirboshlang.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 glass-card rounded-2xl px-4 py-2.5 border border-[var(--border-card)]">
+                <i data-lucide="coins" class="w-5 h-5 text-yellow-500"></i>
+                <span class="font-extrabold text-lg text-[var(--text-primary)]" id="coin-balance">{{ profile.coins }}</span>
+                <span class="text-xs text-[var(--text-muted)]">tanga</span>
+            </div>
+            <a href="{% url 'shop:inventory' %}" class="flex items-center gap-2 rounded-2xl px-4 py-2.5 bg-[var(--surface-hover)] text-[var(--text-primary)] text-sm font-semibold hover:bg-[var(--surface-input)] transition">
+                <i data-lucide="backpack" class="w-4 h-4"></i> Inventar
+            </a>
+        </div>
+    </header>
+
+    {% for category_name, items in categories.items %}
+    <section class="space-y-4">
+        <h2 class="text-lg font-bold text-[var(--text-primary)]">{{ category_name }}</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            {% for item in items %}
+            <div class="shop-card glass-card rounded-3xl p-5 border flex flex-col
+                        {% if item.rarity == 'legendary' %}border-[#f7c948]/50{% elif item.rarity == 'epic' %}border-purple-500/40{% elif item.rarity == 'rare' %}border-[#37b7ff]/40{% else %}border-[var(--border-card)]{% endif %}"
+                 data-slug="{{ item.slug }}" data-category="{{ item.category }}"
+                 data-equippable="{% if item.is_equippable %}1{% else %}0{% endif %}"
+                 data-equip-url="{% url 'shop:equip' item.slug %}">
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--surface-hover)] flex items-center justify-center
+                                {% if item.rarity == 'legendary' %}text-[#f7c948]{% elif item.rarity == 'epic' %}text-purple-400{% elif item.rarity == 'rare' %}text-[#37b7ff]{% else %}text-[var(--text-muted)]{% endif %}">
+                        <i data-lucide="{{ item.icon_name }}" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded-full
+                                {% if item.rarity == 'legendary' %}bg-[#f7c948]/10 text-[#f7c948]{% elif item.rarity == 'epic' %}bg-purple-500/10 text-purple-400{% elif item.rarity == 'rare' %}bg-[#37b7ff]/10 text-[#37b7ff]{% else %}bg-[var(--surface-hover)] text-[var(--text-muted)]{% endif %}">
+                        {{ item.get_rarity_display }}
+                    </span>
+                </div>
+
+                <h3 class="font-bold text-[var(--text-primary)] mt-3">{{ item.name }}</h3>
+                <p class="text-xs text-[var(--text-muted)] mt-1 leading-relaxed flex-1">{{ item.description }}</p>
+
+                <div class="flex items-center justify-between mt-4 pt-3 border-t border-[var(--border-soft)]">
+                    <span class="flex items-center gap-1.5 font-extrabold text-[var(--text-primary)]">
+                        <i data-lucide="coins" class="w-4 h-4 text-yellow-500"></i> {{ item.price_coins }}
+                    </span>
+                    <div class="shop-action">
+                        {% if item.owned and not item.is_consumable %}
+                            {% if item.is_equippable %}
+                                {% if item.equipped %}
+                                    <span class="flex items-center gap-1 text-xs font-bold text-emerald-400"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Faol</span>
+                                {% else %}
+                                    <form method="post" action="{% url 'shop:equip' item.slug %}" class="shop-form" data-action="equip">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-[#37b7ff]/15 text-[#37b7ff] hover:bg-[#37b7ff]/25 transition">Faollashtirish</button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-xs font-bold text-emerald-400">Sizda bor</span>
+                            {% endif %}
+                        {% else %}
+                            <form method="post" action="{% url 'shop:purchase' item.slug %}" class="shop-form" data-action="purchase">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="text-xs font-bold px-3 py-1.5 rounded-xl transition
+                                    {% if item.affordable %}bg-[#2d6cff] text-white hover:bg-[#2d6cff]/85{% else %}bg-[var(--surface-hover)] text-[var(--text-muted)] cursor-not-allowed{% endif %}"
+                                    {% if not item.affordable %}disabled title="Tanga yetarli emas"{% endif %}>
+                                    {% if item.is_consumable and item.owned %}Yana olish{% else %}Sotib olish{% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% empty %}
+    <div class="glass-card rounded-3xl p-10 text-center text-[var(--text-muted)]">
+        <i data-lucide="package-open" class="w-10 h-10 mx-auto mb-3 opacity-60"></i>
+        <p>Do'kon hozircha bo'sh. Admin <code>python manage.py seed_shop</code> buyrug'i bilan mahsulot qo'shishi mumkin.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="{% static 'js/shop.js' %}" defer></script>
+{% endblock %}

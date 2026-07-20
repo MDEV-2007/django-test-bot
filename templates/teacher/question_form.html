@@ -1,0 +1,187 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block page_title %}{% if is_create %}Savol qo'shish{% else %}Savolni tahrirlash{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'teacher:test_build' test.pk %}" class="hover:text-ink-700">{{ test.title }}</a><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i><span class="font-medium text-ink-700">{% if is_create %}Yangi savol{% else %}Tahrirlash{% endif %}</span>{% endblock %}
+
+{% block content %}
+{{ options_data|json_script:"options-data" }}
+{{ pairs_data|json_script:"pairs-data" }}
+{{ subs_data|json_script:"subs-data" }}
+{{ group_data|json_script:"group-data" }}
+
+<div class="max-w-2xl" x-data="questionForm()">
+  <h1 class="text-2xl font-extrabold mb-6">{% if is_create %}Yangi savol{% else %}Savolni tahrirlash{% endif %}</h1>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-5">
+    {% csrf_token %}
+
+    <div class="bg-white rounded-2xl border border-ink-100 p-5">
+      <label class="block text-sm font-semibold text-ink-700 mb-1.5">Savol turi</label>
+      <select name="question_type" x-model="qtype" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+        {% for val, label in type_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+      </select>
+      <p class="text-xs text-ink-400 mt-1.5" x-text="hint()"></p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-ink-100 p-5 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-ink-700 mb-1.5">Savol matni <span class="text-rose-500">*</span></label>
+        <textarea name="body" rows="3" required class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">{% if question %}{{ question.body }}{% endif %}</textarea>
+        <p class="text-xs text-ink-400 mt-1">Jadval yoki boyitilgan matn uchun HTML ishlatishingiz mumkin.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-ink-700 mb-1.5">Qiyinlik</label>
+          <select name="difficulty" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
+            {% for val, label in difficulty_choices %}<option value="{{ val }}" {% if question.difficulty == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-ink-700 mb-1.5">Ball</label>
+          <input type="number" name="points" min="1" value="{{ question.points|default:1 }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
+        </div>
+      </div>
+      <div x-show="qtype === 'image_based' || qtype === 'table_based'" x-cloak>
+        <label class="block text-sm font-semibold text-ink-700 mb-1.5">Rasm (xarita/diagramma)</label>
+        {% if question.image %}<img src="{{ question.image.url }}" class="h-24 rounded-lg mb-2 object-contain border border-ink-100">{% endif %}
+        <input type="file" name="image" accept="image/*" class="w-full text-sm text-ink-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-ink-100 file:text-ink-700 file:font-semibold">
+      </div>
+      <input type="hidden" name="image_position" value="{% if question %}{{ question.image_position }}{% else %}after_body{% endif %}">
+      <div>
+        <label class="block text-sm font-semibold text-ink-700 mb-1.5">Izoh (ixtiyoriy)</label>
+        <textarea name="explanation" rows="2" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">{% if question %}{{ question.explanation }}{% endif %}</textarea>
+      </div>
+    </div>
+
+    <!-- OPTIONS (single_choice / image_based / table_based) -->
+    <div x-show="isSingle()" x-cloak class="bg-white rounded-2xl border border-ink-100 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-sm">Variantlar</h3>
+        <button type="button" @click="options.push({text:'', is_correct:false})" class="text-emerald-600 text-xs font-semibold flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Variant</button>
+      </div>
+      <p class="text-xs text-ink-400 mb-3">To'g'ri javobni radio tugma bilan belgilang.</p>
+      <div class="space-y-2">
+        <template x-for="(opt, i) in options" :key="i">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correct_option" :value="i" :checked="opt.is_correct" class="w-4 h-4 text-emerald-600">
+            <input type="text" name="option_text" x-model="opt.text" placeholder="Variant matni" class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <button type="button" @click="options.splice(i,1)" class="p-1.5 text-ink-300 hover:text-rose-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- MATCHING -->
+    <div x-show="qtype === 'matching'" x-cloak class="bg-white rounded-2xl border border-ink-100 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-sm">Moslashtirish qatorlari</h3>
+        <button type="button" @click="pairs.push({left_key:'',left_text:'',right_key:'',right_text:''})" class="text-emerald-600 text-xs font-semibold flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Qator</button>
+      </div>
+      <p class="text-xs text-ink-400 mb-3">Chap ustunni bo'sh qoldirsangiz — o'ng ustun uchun chalg'ituvchi variant bo'ladi.</p>
+      <div class="space-y-2">
+        <template x-for="(p, i) in pairs" :key="i">
+          <div class="grid grid-cols-[3rem_1fr_3rem_1fr_auto] gap-2 items-center">
+            <input type="text" name="pair_left_key" x-model="p.left_key" placeholder="I" class="rounded-lg border border-slate-200 px-2 py-2 text-sm text-center">
+            <input type="text" name="pair_left_text" x-model="p.left_text" placeholder="Chap ustun" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <input type="text" name="pair_right_key" x-model="p.right_key" placeholder="a" class="rounded-lg border border-slate-200 px-2 py-2 text-sm text-center">
+            <input type="text" name="pair_right_text" x-model="p.right_text" placeholder="O'ng ustun" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <button type="button" @click="pairs.splice(i,1)" class="p-1.5 text-ink-300 hover:text-rose-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- OPEN WRITTEN -->
+    <div x-show="qtype === 'open_written'" x-cloak class="bg-white rounded-2xl border border-ink-100 p-5 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-ink-700 mb-1.5">Namunaviy javob (bo'linmagan savol uchun)</label>
+        <textarea name="reference_answer" rows="2" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm" placeholder="AI shu javob bilan solishtiradi">{{ reference_answer }}</textarea>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-bold text-sm">Qism-savollar (a, b...) — ixtiyoriy</h3>
+          <button type="button" @click="subs.push({label:'',text:'',reference_answer:''})" class="text-emerald-600 text-xs font-semibold flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Qism</button>
+        </div>
+        <div class="space-y-2">
+          <template x-for="(s, i) in subs" :key="i">
+            <div class="grid grid-cols-[3rem_1fr_1fr_auto] gap-2 items-center">
+              <input type="text" name="sub_label" x-model="s.label" placeholder="a" class="rounded-lg border border-slate-200 px-2 py-2 text-sm text-center">
+              <input type="text" name="sub_text" x-model="s.text" placeholder="Qism-savol matni" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+              <input type="text" name="sub_ref" x-model="s.reference_answer" placeholder="Namunaviy javob" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+              <button type="button" @click="subs.splice(i,1)" class="p-1.5 text-ink-300 hover:text-rose-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUPED ITEM -->
+    <div x-show="qtype === 'grouped_item'" x-cloak class="bg-white rounded-2xl border border-ink-100 p-5 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-ink-700 mb-1.5">Ko'rsatma</label>
+        <input type="text" name="group_instruction" x-model="group.instruction" placeholder="Mos javobni A-F variantlaridan tanlang" class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-bold text-sm">Javob banki</h3>
+          <button type="button" @click="group.options.push({label:'',text:''})" class="text-emerald-600 text-xs font-semibold flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Variant</button>
+        </div>
+        <p class="text-xs text-ink-400 mb-2">To'g'ri javobni radio bilan belgilang.</p>
+        <div class="space-y-2">
+          <template x-for="(o, i) in group.options" :key="i">
+            <div class="flex items-center gap-2">
+              <input type="radio" name="group_correct" :value="i" :checked="group.correct === i" class="w-4 h-4 text-emerald-600">
+              <input type="text" name="group_option_label" x-model="o.label" placeholder="A" class="w-12 rounded-lg border border-slate-200 px-2 py-2 text-sm text-center">
+              <input type="text" name="group_option_text" x-model="o.text" placeholder="Variant matni" class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+              <button type="button" @click="group.options.splice(i,1)" class="p-1.5 text-ink-300 hover:text-rose-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="accent-bg text-white font-semibold px-6 py-2.5 rounded-xl text-sm">Saqlash</button>
+      <a href="{% url 'teacher:test_build' test.pk %}" class="px-5 py-2.5 rounded-xl text-ink-500 font-semibold text-sm hover:bg-ink-100">Bekor qilish</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function readJSON(id, fallback) {
+    try { const el = document.getElementById(id); const v = el ? JSON.parse(el.textContent) : fallback; return v == null ? fallback : v; }
+    catch (e) { return fallback; }
+  }
+  function questionForm() {
+    const groupData = readJSON('group-data', null);
+    return {
+      qtype: '{% if question %}{{ question.question_type }}{% else %}single_choice{% endif %}',
+      singleTypes: {{ single_types|safe }},
+      options: readJSON('options-data', []),
+      pairs: readJSON('pairs-data', []),
+      subs: readJSON('subs-data', []),
+      group: groupData || { instruction: '', options: [{label:'A',text:''},{label:'B',text:''},{label:'C',text:''}], correct: 0 },
+      isSingle() { return this.singleTypes.includes(this.qtype); },
+      hint() {
+        const h = {
+          single_choice: "Bitta to'g'ri javobli oddiy test.",
+          image_based: "Rasm (xarita/diagramma) + variantlar.",
+          table_based: "Jadval savol matnida (HTML) + variantlar.",
+          matching: "I/II/III... ni a/b/c... bilan bog'lash.",
+          grouped_item: "Umumiy javob bankidan (A-F) tanlash.",
+          open_written: "Yozma javob — Groq AI baholaydi.",
+        };
+        return h[this.qtype] || '';
+      },
+      init() {
+        if (this.options.length === 0) this.options = [{text:'',is_correct:true},{text:'',is_correct:false},{text:'',is_correct:false},{text:'',is_correct:false}];
+        if (this.pairs.length === 0) this.pairs = [{left_key:'I',left_text:'',right_key:'a',right_text:''},{left_key:'II',left_text:'',right_key:'b',right_text:''}];
+        if (this.subs.length === 0) this.subs = [];
+        this.$watch('qtype', () => this.$nextTick(() => window.lucide && lucide.createIcons()));
+      }
+    };
+  }
+</script>
+{% endblock %}

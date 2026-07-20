@@ -1,0 +1,154 @@
+{% extends 'panel/base_panel.html' %}
+{% load panel_extras %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block breadcrumb %}<i data-lucide="{{ icon }}" class="w-4 h-4"></i><span class="font-medium text-ink-700 truncate">{{ title }}</span>{% endblock %}
+
+{% block content %}
+<div x-data="{ selected: [], allChecked: false,
+     toggleAll(e) { this.allChecked = e.target.checked;
+        document.querySelectorAll('.row-check').forEach(c => { c.checked = this.allChecked; });
+        this.selected = this.allChecked ? Array.from(document.querySelectorAll('.row-check')).map(c => c.value) : []; },
+     rowToggle(val, e) { if (e.target.checked) { this.selected.push(val); } else { this.selected = this.selected.filter(v => v !== val); } } }">
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-extrabold flex items-center gap-2.5">
+        <span class="w-9 h-9 rounded-xl accent-soft flex items-center justify-center"><i data-lucide="{{ icon }}" class="w-5 h-5"></i></span>
+        {{ title }}
+      </h1>
+      <p class="text-sm text-ink-500 mt-1">{{ page_obj.paginator.count }} ta yozuv</p>
+    </div>
+    <div class="flex items-center gap-2">
+      {% block header_actions %}{% endblock %}
+      {% if create_url %}
+      <a href="{{ create_url }}" class="inline-flex items-center gap-2 accent-bg text-white font-semibold px-4 py-2.5 rounded-xl text-sm hover:opacity-90 transition">
+        <i data-lucide="plus" class="w-4 h-4"></i> Yangi
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search + filters -->
+  {% if search_fields or filters_conf %}
+  <form method="get" class="bg-white rounded-2xl border border-ink-100 p-3 mb-4 flex flex-wrap items-center gap-2">
+    {% if search_fields %}
+    <div class="relative flex-1 min-w-[200px]">
+      <i data-lucide="search" class="w-4 h-4 text-ink-300 absolute left-3 top-1/2 -translate-y-1/2"></i>
+      <input type="text" name="q" value="{{ current_q }}" placeholder="{{ search_placeholder }}"
+             class="w-full pl-9 pr-3 py-2 rounded-xl border border-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+    </div>
+    {% endif %}
+    {% for f in filters_conf %}
+    <select name="{{ f.param }}" onchange="this.form.submit()"
+            class="py-2 px-3 rounded-xl border border-ink-100 text-sm text-ink-700 focus:outline-none focus:ring-2 focus:ring-blue-100">
+      <option value="">{{ f.label }}: barchasi</option>
+      {% for val, lab in f.options %}
+      <option value="{{ val }}" {% if current_filters|get:f.param == val %}selected{% endif %}>{{ lab }}</option>
+      {% endfor %}
+    </select>
+    {% endfor %}
+    {% if current_order %}<input type="hidden" name="order" value="{{ current_order }}">{% endif %}
+    <button type="submit" class="px-4 py-2 rounded-xl bg-ink-900 text-white text-sm font-semibold">Qidirish</button>
+    {% if current_q or current_filters %}
+    <a href="{{ request.path }}" class="px-3 py-2 rounded-xl text-ink-500 text-sm hover:bg-ink-100">Tozalash</a>
+    {% endif %}
+  </form>
+  {% endif %}
+
+  <!-- Bulk action bar -->
+  {% if bulk_actions %}
+  <form method="post" x-show="selected.length > 0" x-cloak
+        class="bg-blue-50 border border-blue-100 rounded-2xl p-3 mb-4 flex flex-wrap items-center gap-2">
+    {% csrf_token %}
+    <input type="hidden" name="order" value="{{ current_order }}">
+    <span class="text-sm text-ink-700 font-medium px-2" x-text="selected.length + ' ta tanlandi'"></span>
+    <template x-for="v in selected"><input type="hidden" name="selected" :value="v"></template>
+    {% for act in bulk_actions %}
+    <button type="submit" name="action" value="{{ act.value }}"
+            onclick="return confirm('Tanlangan qatorlarga amalni qo‘llaysizmi?')"
+            class="px-3.5 py-2 rounded-lg text-xs font-semibold
+            {% if act.tone == 'rose' %}bg-rose-500 text-white{% elif act.tone == 'green' %}bg-emerald-500 text-white{% elif act.tone == 'amber' %}bg-amber-500 text-white{% else %}bg-ink-700 text-white{% endif %}">
+      {{ act.label }}
+    </button>
+    {% endfor %}
+  </form>
+  {% endif %}
+
+  <!-- Table -->
+  <div class="bg-white rounded-2xl border border-ink-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-ink-100/60 text-ink-500 text-xs uppercase tracking-wide">
+          <tr>
+            {% if bulk_actions %}
+            <th class="w-10 px-4 py-3"><input type="checkbox" @change="toggleAll($event)" class="rounded border-ink-300"></th>
+            {% endif %}
+            {% for col in columns %}
+            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">
+              {% if col.sortable %}
+                {% if current_order == col.sortable %}
+                  <a href="?{{ qs_sort_base }}&order=-{{ col.sortable }}" class="inline-flex items-center gap-1 hover:text-ink-900">{{ col.label }} <i data-lucide="arrow-up" class="w-3 h-3"></i></a>
+                {% elif current_order == '-'|add:col.sortable %}
+                  <a href="?{{ qs_sort_base }}&order={{ col.sortable }}" class="inline-flex items-center gap-1 hover:text-ink-900">{{ col.label }} <i data-lucide="arrow-down" class="w-3 h-3"></i></a>
+                {% else %}
+                  <a href="?{{ qs_sort_base }}&order={{ col.sortable }}" class="inline-flex items-center gap-1 hover:text-ink-900">{{ col.label }} <i data-lucide="chevrons-up-down" class="w-3 h-3 opacity-40"></i></a>
+                {% endif %}
+              {% else %}{{ col.label }}{% endif %}
+            </th>
+            {% endfor %}
+            {% if row_actions %}<th class="px-4 py-3 text-right font-semibold">Amallar</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-ink-100">
+          {% for row in rows %}
+          <tr class="hover:bg-ink-100/40 transition">
+            {% if bulk_actions %}
+            <td class="px-4 py-3"><input type="checkbox" class="row-check rounded border-ink-300" value="{{ row.pk }}" @change="rowToggle('{{ row.pk }}', $event)"></td>
+            {% endif %}
+            {% for cell in row.cells %}
+            <td class="px-4 py-3 text-ink-700 {% if forloop.first %}font-medium text-ink-900{% endif %}">
+              {% if forloop.first and row.detail_url %}<a href="{{ row.detail_url }}" class="hover:accent-text">{{ cell }}</a>{% else %}{{ cell }}{% endif %}
+            </td>
+            {% endfor %}
+            {% if row_actions %}
+            <td class="px-4 py-3">
+              <div class="flex items-center justify-end gap-1">
+                {% if row.detail_url %}<a href="{{ row.detail_url }}" title="Ko'rish" class="p-1.5 rounded-lg text-ink-400 hover:bg-ink-100 hover:text-ink-700"><i data-lucide="eye" class="w-4 h-4"></i></a>{% endif %}
+                {% if row.edit_url %}<a href="{{ row.edit_url }}" title="Tahrirlash" class="p-1.5 rounded-lg text-ink-400 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="edit-3" class="w-4 h-4"></i></a>{% endif %}
+                {% if row.delete_url %}<a href="{{ row.delete_url }}" title="O'chirish" class="p-1.5 rounded-lg text-ink-400 hover:bg-rose-50 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></a>{% endif %}
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="99" class="px-4 py-16 text-center">
+              <div class="w-14 h-14 rounded-2xl bg-ink-100 flex items-center justify-center mx-auto mb-3 text-ink-300"><i data-lucide="inbox" class="w-7 h-7"></i></div>
+              <p class="text-ink-500 text-sm">{{ empty_text }}</p>
+              {% if create_url %}<a href="{{ create_url }}" class="inline-block mt-3 accent-text font-semibold text-sm">+ Birinchisini yarating</a>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if is_paginated %}
+  <div class="flex items-center justify-between mt-4 text-sm">
+    <p class="text-ink-500">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}-sahifa</p>
+    <div class="flex items-center gap-1">
+      {% if page_obj.has_previous %}
+      <a href="?{{ querystring }}&page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 rounded-lg border border-ink-100 hover:bg-ink-100">Oldingi</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+      <a href="?{{ querystring }}&page={{ page_obj.next_page_number }}" class="px-3 py-1.5 rounded-lg border border-ink-100 hover:bg-ink-100">Keyingi</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

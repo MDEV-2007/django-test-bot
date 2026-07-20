@@ -1,0 +1,44 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block page_title %}Darslarim{% endblock %}
+{% block breadcrumb %}<i data-lucide="book-open" class="w-4 h-4"></i><span class="font-medium text-ink-700">Darslarim</span>{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-extrabold">Darslarim</h1>
+  <a href="{% url 'teacher:lesson_create' %}" class="inline-flex items-center gap-2 accent-bg text-white font-semibold px-4 py-2.5 rounded-xl text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Yangi dars</a>
+</div>
+
+{% if lessons %}
+<div class="bg-white rounded-2xl border border-ink-100 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-ink-100/60 text-ink-500 text-xs uppercase"><tr>
+      <th class="text-left px-4 py-3">Sarlavha</th><th class="text-left px-4 py-3">Mavzu</th><th class="text-left px-4 py-3">Holat</th><th class="px-4 py-3"></th>
+    </tr></thead>
+    <tbody class="divide-y divide-ink-100">
+      {% for l in lessons %}
+      <tr class="hover:bg-ink-100/40">
+        <td class="px-4 py-3 font-medium">{{ l.title }}</td>
+        <td class="px-4 py-3 text-ink-600">{{ l.topic.title|default:"—" }}</td>
+        <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {% if l.is_published %}bg-emerald-50 text-emerald-600{% else %}bg-amber-50 text-amber-600{% endif %}">{{ l.status_label }}</span></td>
+        <td class="px-4 py-3">
+          <div class="flex items-center justify-end gap-1">
+            <a href="{% url 'teacher:lesson_edit' l.pk %}" class="p-1.5 rounded-lg text-ink-400 hover:bg-blue-50 hover:text-blue-600"><i data-lucide="edit-3" class="w-4 h-4"></i></a>
+            <form method="post" action="{% url 'teacher:lesson_delete' l.pk %}" onsubmit="return confirm('Darsni o‘chirasizmi?')">{% csrf_token %}
+              <button class="p-1.5 rounded-lg text-ink-400 hover:bg-rose-50 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="bg-white rounded-2xl border border-ink-100 p-12 text-center">
+  <div class="w-16 h-16 rounded-2xl bg-ink-100 flex items-center justify-center mx-auto mb-4 text-ink-300"><i data-lucide="book-plus" class="w-8 h-8"></i></div>
+  <p class="text-ink-700 font-semibold">Hali darslaringiz yo'q</p>
+  <a href="{% url 'teacher:lesson_create' %}" class="inline-flex items-center gap-2 accent-bg text-white font-semibold px-5 py-2.5 rounded-xl text-sm mt-4"><i data-lucide="plus" class="w-4 h-4"></i> Birinchi darsni yaratish</a>
+</div>
+{% endif %}
+{% endblock %}

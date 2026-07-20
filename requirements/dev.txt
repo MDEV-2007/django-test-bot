@@ -1,0 +1,6 @@
+# Local development. Install with:  pip install -r requirements/dev.txt
+-r base.txt
+
+# Installed locally too so `DATABASE_URL`/`REDIS_URL` can be tested before deploying.
+psycopg[binary]==3.2.3
+redis==5.2.1

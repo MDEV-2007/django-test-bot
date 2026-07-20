@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Test: {{ attempt.test.title|default:"Tarix" }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto animate-fadeIn" 
+     x-data="{
+         secondsLeft: {{ seconds_left }},
+         flaggedQuestions: new Set(),
+         finishing: false,
+         currentQIdx: {{ q_idx }},
+         formatTime() {
+             const m = Math.floor(this.secondsLeft / 60);
+             const s = this.secondsLeft % 60;
+             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+         },
+         toggleFlag(idx) {
+             if (this.flaggedQuestions.has(idx)) {
+                 this.flaggedQuestions.delete(idx);
+             } else {
+                 this.flaggedQuestions.add(idx);
+             }
+         },
+         isFlagged(idx) {
+             return this.flaggedQuestions.has(idx);
+         },
+         async finishAttempt() {
+             // Guards against firing twice (the countdown timer hitting zero at the same
+             // moment the user clicks 'Tugatish', or a double-click) — without this, a
+             // second request can see is_completed already True (set early in finish())
+             // and redirect to the feedback page before the first request's slower
+             // Groq-based AI feedback generation has actually created it, causing a 404.
+             if (this.finishing) return;
+             this.finishing = true;
+             const csrftoken = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+             const resp = await fetch('{% url 'tests:finish' attempt.id %}', {
+                 method: 'POST',
+                 headers: { 'X-CSRFToken': csrftoken }
+             });
+             window.location.href = resp.url;
+         },
+         init() {
+             const timer = setInterval(() => {
+                 if (this.secondsLeft > 0) {
+                     this.secondsLeft--;
+                 } else {
+                     clearInterval(timer);
+                     this.finishAttempt();
+                 }
+             }, 1000);
+         }
+     }">
+     
+    <!-- Top Action Info Bar -->
+    <div class="flex items-center justify-between glass-card p-4 rounded-2xl border border-[var(--border-card)]">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'tests:center' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h3 class="font-bold text-[var(--text-primary)] text-sm truncate max-w-xs md:max-w-md">{{ attempt.test.title }}</h3>
+                <p class="text-xs text-[var(--text-muted)] mt-0.5">Vaqtingiz tugagach imtihon avtomatik yakunlanadi.</p>
+            </div>
+        </div>
+        
+        <!-- Timer -->
+        <div class="flex items-center gap-2 bg-[var(--surface-card-solid)] border border-[var(--border-card)] px-4 py-2 rounded-xl text-yellow-500 font-bold font-mono text-sm shadow-md">
+            <i data-lucide="clock" class="w-4 h-4 text-yellow-500 animate-pulse"></i>
+            <span x-text="formatTime()"></span>
+        </div>
+    </div>
+
+    <!-- Main Question layout grid -->
+    <div class="grid gap-6 md:grid-cols-[1fr_260px]">
+        <!-- Dynamic Question Card loaded via HTMX -->
+        <div id="question-container" class="w-full">
+            {% include 'tests_app/partials/question_card.html' %}
+        </div>
+
+        <!-- Question Navigator Sidebar -->
+        <div class="glass-card rounded-[28px] p-6 space-y-6 border border-[var(--border-card)] h-fit">
+            <div class="flex justify-between items-center border-b border-[var(--border-soft)] pb-3">
+                <h4 class="font-bold text-[var(--text-primary)] text-sm">Savol Navigatori</h4>
+                <span class="text-xs text-[var(--text-subtitle)] font-semibold">{{ total_questions }} ta savol</span>
+            </div>
+            
+            <div class="grid grid-cols-5 gap-2.5">
+                {% for idx in "x"|rjust:total_questions %}
+                    <button 
+                        hx-get="{% url 'tests:screen' attempt.id %}?q_idx={{ forloop.counter }}"
+                        hx-target="#question-container"
+                        hx-push-url="false"
+                        class="w-10 h-10 rounded-xl text-xs font-bold border transition flex items-center justify-center"
+                        :class="{
+                            'border-yellow-500 bg-yellow-500/10 text-yellow-400': isFlagged({{ forloop.counter }}),
+                            'border-[var(--border-card)] bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[var(--surface-hover-strong)] hover:text-[var(--text-primary)]': !isFlagged({{ forloop.counter }}) && currentQIdx !== {{ forloop.counter }},
+                            'border-[#2d6cff] bg-[#2d6cff]/20 text-[#37b7ff]': currentQIdx == {{ forloop.counter }} && !isFlagged({{ forloop.counter }})
+                        }"
+                        hx-trigger="click">
+                        {{ forloop.counter }}
+                    </button>
+                {% endfor %}
+            </div>
+
+            <div class="pt-4 border-t border-[var(--border-soft)] space-y-2 text-xs text-[var(--text-muted)]">
+                <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-[#2d6cff]/20 border border-[#2d6cff]/40"></span>
+                    <span>Hozirgi savol</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-yellow-500/10 border border-yellow-500/40"></span>
+                    <span>Belgilangan (Flagged)</span>
+                </div>
+            </div>
+
+            <button type="button" :disabled="finishing"
+                    @click="if (confirm('Imtihonni hozir yakunlaysizmi? Javob berilmagan savollar noto\'g\'ri hisoblanadi.')) finishAttempt()"
+                    class="w-full flex items-center justify-center gap-2 bg-rose-500/10 border border-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-[var(--text-primary)] font-bold py-3.5 px-4 rounded-xl transition text-xs disabled:opacity-50 disabled:cursor-not-allowed">
+                <i data-lucide="loader-2" class="w-4 h-4 animate-spin" x-show="finishing" x-cloak></i>
+                <span x-text="finishing ? 'AI tahlil tayyorlanmoqda...' : 'Imtihonni yakunlash'"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    [x-cloak] { display: none !important; }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    /* Question body is CKEditor-authored HTML (bold, lists, and — for table_based
+       questions — real <table> markup). Rendered with |safe, so it needs its own rules;
+       the table gets its own horizontal-scroll wrapper so wide grids never overflow the
+       page on mobile/Telegram. */
+    .rich-text table {
+        border-collapse: collapse;
+        width: 100%;
+        display: block;
+        overflow-x: auto;
+        font-size: 0.875rem;
+    }
+    .rich-text table td, .rich-text table th {
+        border: 1px solid var(--border-card);
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+    }
+    .rich-text ul, .rich-text ol {
+        margin: 0.5rem 0 0.5rem 1.25rem;
+    }
+</style>
+<script src="{% static 'js/autosave.js' %}" defer></script>
+
+<script>
+    // Telegram MainButton integratsiyasi: "Keyingi savol" / "Imtihonni tugatish"
+    // harakati Telegramning pastki native tugmasida turadi. Savol HTMX bilan
+    // almashganda tugma matni ham avtomatik yangilanadi. Telegram tashqarisida
+    // umuman ishlamaydi (no-op) — oddiy brauzerga ta'sir qilmaydi.
+    (function () {
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg || tg.initData === undefined || !tg.MainButton) return;
+
+        function syncMainButton() {
+            var next = document.getElementById('btn-next');
+            var finish = document.getElementById('btn-finish');
+            try {
+                if (next) {
+                    tg.MainButton.setParams({ text: 'Keyingi savol', color: '#2d6cff', text_color: '#ffffff' });
+                    tg.MainButton.show();
+                } else if (finish) {
+                    tg.MainButton.setParams({ text: '✅ Imtihonni tugatish', color: '#10b981', text_color: '#ffffff' });
+                    tg.MainButton.show();
+                } else {
+                    tg.MainButton.hide();
+                }
+            } catch (_) {}
+        }
+
+        tg.MainButton.onClick(function () {
+            var next = document.getElementById('btn-next');
+            var finish = document.getElementById('btn-finish');
+            try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('medium'); } catch (_) {}
+            if (next) next.click();
+            else if (finish) finish.click();
+        });
+
+        // Savol kartasi HTMX bilan almashganda tugmani qayta sinxronlaymiz
+        document.body.addEventListener('htmx:afterSwap', function (e) {
+            if (e.target && e.target.id === 'question-container') syncMainButton();
+        });
+
+        // Sahifadan chiqishda tugmani yashiramiz (boshqa sahifalarda qolib ketmasin)
+        window.addEventListener('pagehide', function () {
+            try { tg.MainButton.hide(); } catch (_) {}
+        });
+
+        syncMainButton();
+    })();
+</script>
+{% endblock %}

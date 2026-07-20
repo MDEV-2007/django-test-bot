@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Test Markazi{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-fadeIn">
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-card)] pb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">Test Markazi</h1>
+            <p class="text-[var(--text-muted)] text-sm mt-1">{% if selected_subject %}{{ selected_subject.name }} fanidan{% endif %} Milliy sertifikat va imtihonlarga tayyorgarlik testlari.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{% url 'tests:start_mistakes_test' %}" class="flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500 hover:text-white border border-rose-500/25 text-rose-400 font-bold py-3.5 px-5 rounded-2xl transition text-sm">
+                <i data-lucide="target" class="w-4 h-4"></i>
+                <span>Xatolar ustida ishlash</span>
+            </a>
+            <a href="{% url 'tests:start_random_test' %}" class="flex items-center justify-center gap-2 bg-[#2d6cff] hover:bg-[#1a57e3] text-white font-bold py-3.5 px-5 rounded-2xl transition shadow-lg shadow-blue-500/25 text-sm">
+                <i data-lucide="shuffle" class="w-4 h-4"></i>
+                <span>Tasodifiy test</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Subject selector -->
+    {% if subjects %}
+    <section class="flex flex-wrap gap-2">
+        {% for s in subjects %}
+        <a href="?subject={{ s.slug }}" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold border transition
+            {% if selected_subject.id == s.id %}text-white border-transparent shadow-lg{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-card)] hover:text-[var(--text-primary)]{% endif %}"
+            {% if selected_subject.id == s.id %}style="background-color: {{ s.color }}; box-shadow: 0 8px 20px {{ s.color }}40;"{% endif %}>
+            <i data-lucide="{{ s.icon_name }}" class="w-4 h-4"></i>
+            <span>{{ s.name }}</span>
+        </a>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- Stats Cards Grid -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#37b7ff]">
+                <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-xs text-[var(--text-muted)]">Jami urinishlar</p>
+                <h3 class="text-lg font-bold text-[var(--text-primary)]">{{ total_attempts }} ta</h3>
+            </div>
+        </div>
+        <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-xs text-[var(--text-muted)]">O'rtacha ko'rsatkich</p>
+                <h3 class="text-lg font-bold text-[var(--text-primary)]">{{ avg_score|floatformat:0 }}%</h3>
+            </div>
+        </div>
+        <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-yellow-500">
+                <i data-lucide="zap" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-xs text-[var(--text-muted)]">Jang reytingi (ELO)</p>
+                <h3 class="text-lg font-bold text-[var(--text-primary)]">{{ profile.elo_rating }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Pills & Search -->
+    <section class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-wrap gap-2">
+            <a href="?category=all&search={{ search_query }}" class="px-4 py-2 rounded-xl text-xs font-semibold border {% if selected_category == 'all' %}bg-[var(--surface-hover-strong)] text-[var(--text-primary)] border-[var(--border-strong)]{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-soft)] hover:text-[var(--text-primary)]{% endif %} transition">
+                Barchasi
+            </a>
+            <a href="?category=certificate&search={{ search_query }}" class="px-4 py-2 rounded-xl text-xs font-semibold border {% if selected_category == 'certificate' %}bg-[#2d6cff]/20 text-[#37b7ff] border-[#2d6cff]/40{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-soft)] hover:text-[var(--text-primary)]{% endif %} transition">
+                Milliy Sertifikat
+            </a>
+            <a href="?category=history&search={{ search_query }}" class="px-4 py-2 rounded-xl text-xs font-semibold border {% if selected_category == 'history' %}bg-emerald-500/20 text-emerald-400 border-emerald-500/30{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-soft)] hover:text-[var(--text-primary)]{% endif %} transition">
+                Tarix
+            </a>
+            <a href="?category=bba&search={{ search_query }}" class="px-4 py-2 rounded-xl text-xs font-semibold border {% if selected_category == 'bba' %}bg-purple-500/20 text-purple-400 border-purple-500/30{% else %}bg-transparent text-[var(--text-muted)] border-[var(--border-soft)] hover:text-[var(--text-primary)]{% endif %} transition">
+                BBA Imtihoni
+            </a>
+        </div>
+        <form method="GET" class="relative max-w-xs w-full">
+            <input type="hidden" name="category" value="{{ selected_category }}">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[var(--text-faint)]">
+                <i data-lucide="search" class="w-4 h-4"></i>
+            </span>
+            <input type="text" name="search" value="{{ search_query }}" placeholder="Qidirish..." class="w-full bg-[var(--surface-input)] border border-[var(--border-card)] rounded-xl py-2.5 pl-10 pr-4 text-[var(--text-primary)] text-xs placeholder-[var(--text-faint)] focus:outline-none focus:border-[#2d6cff] transition">
+        </form>
+    </section>
+
+    {% if not has_mock_test_access %}
+    <section class="glass-card rounded-[24px] border border-amber-500/20 bg-amber-500/5 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 flex-shrink-0">
+                <i data-lucide="lock" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-[var(--text-primary)] text-sm">Mock test tizimi — Premium</h3>
+                <p class="text-xs text-[var(--text-muted)] mt-0.5">To'liq mock testlarga kirish uchun bir martalik xarid qiling. Tasodifiy test har doim bepul.</p>
+            </div>
+        </div>
+        <a href="{% url 'premium:plans' %}" class="flex-shrink-0 bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-extrabold py-2.5 px-5 rounded-xl text-xs whitespace-nowrap">Premium sotib olish</a>
+    </section>
+    {% endif %}
+
+    <!-- Test List Grid -->
+    <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {% for test in tests %}
+        <div class="glass-card rounded-[24px] border border-[var(--border-card)] p-6 flex flex-col bg-[var(--surface-card-soft)] hover:bg-[var(--surface-card-soft)] transition relative overflow-hidden">
+            <!-- Glow Accent -->
+            <div class="absolute -top-12 -right-12 w-24 h-24 bg-[var(--surface-hover)] rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-full border 
+                    {% if test.category == 'certificate' %}bg-[#2d6cff]/10 text-[#37b7ff] border-[#2d6cff]/20
+                    {% elif test.category == 'history' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                    {% else %}bg-purple-500/10 text-purple-400 border-purple-500/20{% endif %}">
+                    {{ test.get_category_display }}
+                </span>
+                <span class="text-xs text-[var(--text-faint)] flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> {{ test.duration_minutes }} min</span>
+            </div>
+
+            <h3 class="text-lg font-bold text-[var(--text-primary)] leading-tight line-clamp-1 mb-2 flex items-center gap-2">
+                {% if test.title|slice:':13' == 'Imported Test' %}{{ test.title|truncatechars:28 }}{% else %}{{ test.title }}{% endif %}
+                {% if test.is_premium and not has_mock_test_access %}<i data-lucide="lock" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>{% endif %}
+            </h3>
+            <p class="text-xs text-[var(--text-muted)] line-clamp-2 flex-grow leading-relaxed">{{ test.description }}</p>
+
+            <div class="mt-6 pt-4 border-t border-[var(--border-soft)] flex items-center justify-between">
+                <span class="text-xs text-[var(--text-subtitle)] font-mono">{{ test.questions.count }} ta savol</span>
+                {% if test.is_premium and not has_mock_test_access %}
+                <a href="{% url 'premium:plans' %}" class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/25 text-amber-400 hover:bg-amber-500 hover:text-slate-950 font-bold py-2.5 px-4 rounded-xl transition text-xs">
+                    <span>Premium kerak</span>
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'tests:start_test' test.id %}" class="flex items-center gap-1.5 bg-[var(--surface-hover)] border border-[var(--border-card)] hover:bg-[#2d6cff] hover:text-[var(--text-primary)] hover:border-[#2d6cff] text-[var(--text-primary)] font-bold py-2.5 px-4 rounded-xl transition text-xs">
+                    <span>Boshlash</span>
+                    <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <i data-lucide="folder-open" class="w-12 h-12 text-[var(--text-icon-faint)] mx-auto mb-3"></i>
+            <h3 class="font-bold text-[var(--text-primary)] text-lg">Testlar topilmadi</h3>
+            <p class="text-xs text-[var(--text-faint)] mt-1">Ushbu katsgoriya ostida testlar mavjud emas.</p>
+        </div>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %}

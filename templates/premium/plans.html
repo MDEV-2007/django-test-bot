@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Premium{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-fadeIn max-w-4xl mx-auto">
+    <header class="border-b border-[var(--border-card)] pb-6 relative">
+        <div class="flex items-center justify-between mb-4">
+            <a href="{% url 'accounts:profile' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </a>
+            <div class="w-10 h-10 sm:block hidden"></div>
+        </div>
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 mx-auto shadow-lg shadow-amber-500/20">
+                <i data-lucide="crown" class="w-7 h-7"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">Premium imkoniyatlar</h1>
+            <p class="text-[var(--text-muted)] text-sm max-w-lg mx-auto">To'liq video/audio darslar va rasmiy mock testlarga kirish uchun quyidagi rejalardan birini tanlang.</p>
+        </div>
+    </header>
+
+    <!-- Current status -->
+    <div class="grid gap-4 sm:grid-cols-2">
+        <div class="glass-card rounded-2xl border border-[var(--border-card)] p-5 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 {% if profile.has_active_premium_lessons %}bg-emerald-500/10 text-emerald-400{% else %}bg-[var(--surface-hover)] text-[var(--text-faint)]{% endif %}">
+                <i data-lucide="{% if profile.has_active_premium_lessons %}check-circle{% else %}lock{% endif %}" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-[var(--text-primary)] text-sm">Video/Audio darslar</h4>
+                {% if profile.has_active_premium_lessons %}
+                    <p class="text-xs text-emerald-400 mt-0.5">Faol{% if profile.premium_expires_at %} — {{ profile.premium_expires_at|date:"d.m.Y" }} gacha{% endif %}</p>
+                {% else %}
+                    <p class="text-xs text-[var(--text-faint)] mt-0.5">Qulflangan</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="glass-card rounded-2xl border border-[var(--border-card)] p-5 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 {% if profile.premium_mock_test_unlocked %}bg-emerald-500/10 text-emerald-400{% else %}bg-[var(--surface-hover)] text-[var(--text-faint)]{% endif %}">
+                <i data-lucide="{% if profile.premium_mock_test_unlocked %}check-circle{% else %}lock{% endif %}" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-[var(--text-primary)] text-sm">Mock test tizimi</h4>
+                {% if profile.premium_mock_test_unlocked %}
+                    <p class="text-xs text-emerald-400 mt-0.5">Ochilgan (muddatsiz)</p>
+                {% else %}
+                    <p class="text-xs text-[var(--text-faint)] mt-0.5">Qulflangan</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Plans -->
+    <div class="grid gap-6 sm:grid-cols-2">
+        {% for plan in plans %}
+        <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 flex flex-col bg-[var(--surface-card-soft)] relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+            <span class="text-[10px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-full border w-fit
+                {% if plan.plan_type == 'lessons' %}bg-[#2d6cff]/10 text-[#37b7ff] border-[#2d6cff]/20{% else %}bg-purple-500/10 text-purple-400 border-purple-500/20{% endif %}">
+                {{ plan.get_plan_type_display }}
+            </span>
+            <h3 class="text-xl font-bold text-[var(--text-primary)] mt-4">{{ plan.name }}</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">{{ plan.description }}</p>
+
+            <div class="mt-4 flex items-baseline gap-1">
+                <span class="text-3xl font-extrabold text-[var(--text-primary)] font-mono">{{ plan.price|floatformat:0 }}</span>
+                <span class="text-sm text-[var(--text-muted)]">so'm{% if plan.duration_days > 0 %} / {{ plan.duration_days }} kun{% else %} (bir martalik){% endif %}</span>
+            </div>
+
+            <ul class="mt-5 space-y-2 flex-grow">
+                {% for feature in plan.features %}
+                <li class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                    <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+                    <span>{{ feature }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% if plan.plan_type == 'lessons' and profile.has_active_premium_lessons or plan.plan_type == 'mock_test' and profile.premium_mock_test_unlocked %}
+                <button disabled class="mt-6 w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Faol
+                </button>
+            {% else %}
+                <a href="{% url 'premium:checkout' plan.id %}" class="mt-6 w-full bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-extrabold py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] transition">
+                    <i data-lucide="credit-card" class="w-4 h-4"></i> Sotib olish
+                </a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12 text-[var(--text-faint)]">
+            <i data-lucide="package-open" class="w-12 h-12 mx-auto mb-2 text-[var(--text-icon-faint)]"></i>
+            <p class="text-xs">Hozircha rejalar mavjud emas.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center">
+        <a href="{% url 'premium:my_payments' %}" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition inline-flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5"></i> To'lovlar tarixim
+        </a>
+    </div>
+</div>
+{% endblock %}

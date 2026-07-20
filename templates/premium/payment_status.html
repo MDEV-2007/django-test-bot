@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — To'lov holati{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto space-y-6 animate-fadeIn">
+    <header class="flex items-center gap-3 border-b border-[var(--border-card)] pb-6">
+        <a href="{% url 'premium:plans' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </a>
+        <h1 class="text-xl font-extrabold text-[var(--text-primary)]">To'lov holati</h1>
+    </header>
+
+    <div class="glass-card rounded-[28px] border border-[var(--border-card)] p-8 text-center space-y-4 bg-[var(--surface-card-soft)]">
+        {% if payment.status == 'approved' %}
+            <div class="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto">
+                <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-xl font-bold text-[var(--text-primary)]">Tasdiqlandi!</h2>
+            <p class="text-sm text-[var(--text-muted)]">To'lovingiz tasdiqlandi va premium kirish avtomatik ochildi.</p>
+        {% elif payment.status == 'rejected' %}
+            <div class="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto">
+                <i data-lucide="x-circle" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-xl font-bold text-[var(--text-primary)]">Rad etildi</h2>
+            <p class="text-sm text-[var(--text-muted)]">{{ payment.admin_note|default:"To'lov tasdiqlanmadi. Qo'llab-quvvatlash bilan bog'laning yoki qayta urinib ko'ring." }}</p>
+            <a href="{% url 'premium:checkout' payment.plan.id %}" class="inline-block mt-2 bg-[var(--surface-hover-strong)] hover:bg-[var(--surface-hover-strong)] text-[var(--text-primary)] font-bold py-2.5 px-5 rounded-xl text-xs transition">Qayta urinish</a>
+        {% else %}
+            <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto animate-pulse">
+                <i data-lucide="clock" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-xl font-bold text-[var(--text-primary)]">Ko'rib chiqilmoqda</h2>
+            <p class="text-sm text-[var(--text-muted)]">To'lovingiz admin tomonidan tekshirilmoqda. Tasdiqlangach premium avtomatik ochiladi va sizga bildirishnoma keladi.</p>
+        {% endif %}
+
+        <div class="border-t border-[var(--border-soft)] pt-4 mt-2 text-left space-y-2 text-xs">
+            <div class="flex justify-between"><span class="text-[var(--text-faint)]">Reja</span><span class="text-[var(--text-secondary)] font-semibold">{{ payment.plan.name }}</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-faint)]">Summa</span><span class="text-[var(--text-secondary)] font-semibold font-mono">{{ payment.amount|floatformat:0 }} so'm</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-faint)]">Sana</span><span class="text-[var(--text-secondary)] font-semibold">{{ payment.created_at|date:"d.m.Y H:i" }}</span></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'panel/base_admin.html' %}
+
+{% block accent %}#2d6cff{% endblock %}
+{% block panel_label %}Super Admin{% endblock %}
+
+{% block nav %}
+  {% with a=active_nav %}
+  <a href="{% url 'panel:dashboard' %}" class="nav-link {% if a == 'dashboard' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="layout-dashboard" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Boshqaruv paneli
+  </a>
+
+  <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-ink-300">Foydalanuvchilar</p>
+  <a href="{% url 'panel:users' %}" class="nav-link {% if a == 'users' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="users" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Foydalanuvchilar
+  </a>
+  <a href="{% url 'panel:teachers' %}" class="nav-link {% if a == 'teachers' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="graduation-cap" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> O'qituvchilar
+  </a>
+
+  <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-ink-300">Kontent</p>
+  <a href="{% url 'panel:subjects' %}" class="nav-link {% if a == 'subjects' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="library" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Fanlar
+  </a>
+  <a href="{% url 'panel:testsets' %}" class="nav-link {% if a == 'testsets' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="file-check-2" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Testlar
+  </a>
+  <a href="{% url 'panel:lessons' %}" class="nav-link {% if a == 'lessons' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="book-open" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Darslar
+  </a>
+  <a href="{% url 'panel:games' %}" class="nav-link {% if a == 'games' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="gamepad-2" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> O'yinlar
+  </a>
+  <a href="{% url 'panel:shop' %}" class="nav-link {% if a == 'shop' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="shopping-bag" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Coin do'kon
+  </a>
+
+  <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-ink-300">Boshqaruv</p>
+  <a href="{% url 'panel:attempts' %}" class="nav-link {% if a == 'attempts' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="clipboard-list" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Natijalar
+  </a>
+  <a href="{% url 'panel:payments' %}" class="nav-link {% if a == 'payments' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="credit-card" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> To'lovlar
+  </a>
+  <a href="{% url 'panel:broadcast' %}" class="nav-link {% if a == 'broadcast' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="megaphone" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Xabar yuborish
+  </a>
+  <a href="{% url 'panel:audit' %}" class="nav-link {% if a == 'audit' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="history" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Audit jurnali
+  </a>
+  <a href="{% url 'panel:settings' %}" class="nav-link {% if a == 'settings' %}active{% endif %} flex items-center gap-3 px-3 py-2.5 rounded-xl text-ink-700 hover:bg-ink-100 transition">
+    <i data-lucide="settings" class="nav-ico w-4.5 h-4.5 text-ink-500"></i> Sozlamalar
+  </a>
+  {% endwith %}
+{% endblock %}

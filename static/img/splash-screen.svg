@@ -1,0 +1,78 @@
+<svg width="1080" height="1920" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>IlmMevasi splash screen</title>
+  <desc>IlmMevasi ta'lim ilovasi uchun mobil splash ekrani</desc>
+  <defs>
+    <radialGradient id="glowTop" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2d6cff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#2d6cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="iconGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2d6cff" stop-opacity="0.5"/>
+      <stop offset="0.6" stop-color="#2d6cff" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#2d6cff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="iconGrad" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#4ea9ff"/>
+      <stop offset="0.55" stop-color="#2f74f2"/>
+      <stop offset="1" stop-color="#1c50cf"/>
+    </linearGradient>
+    <radialGradient id="appleGrad" cx="0.35" cy="0.3" r="0.75">
+      <stop offset="0" stop-color="#6fe098"/>
+      <stop offset="0.6" stop-color="#39be6a"/>
+      <stop offset="1" stop-color="#279a52"/>
+    </radialGradient>
+    <linearGradient id="barGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2d6cff"/>
+      <stop offset="1" stop-color="#37b7ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1080" height="1920" fill="#050811"/>
+  <ellipse cx="540" cy="200" rx="720" ry="540" fill="url(#glowTop)"/>
+
+  <g fill="#ffffff">
+    <circle cx="180" cy="260" r="3" opacity="0.18"/>
+    <circle cx="880" cy="180" r="4" opacity="0.14"/>
+    <circle cx="920" cy="420" r="2.5" opacity="0.2"/>
+    <circle cx="140" cy="520" r="2.5" opacity="0.16"/>
+    <circle cx="260" cy="1120" r="3" opacity="0.12"/>
+    <circle cx="840" cy="1180" r="3.5" opacity="0.13"/>
+    <circle cx="960" cy="980" r="2.5" opacity="0.15"/>
+    <circle cx="120" cy="980" r="3" opacity="0.12"/>
+    <circle cx="700" cy="1500" r="2.5" opacity="0.12"/>
+    <circle cx="380" cy="1560" r="3" opacity="0.1"/>
+  </g>
+
+  <circle cx="540" cy="610" r="320" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1.5"/>
+  <circle cx="540" cy="610" r="255" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1.5"/>
+  <ellipse cx="540" cy="620" rx="360" ry="360" fill="url(#iconGlow)"/>
+
+  <g>
+    <rect x="350" y="420" width="380" height="380" rx="94" fill="url(#iconGrad)"/>
+    <rect x="350" y="420" width="380" height="380" rx="94" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="2"/>
+
+    <path d="M545,540 C548,524 555,514 566,508" fill="none" stroke="#2f8a4d" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="574" cy="516" rx="24" ry="12" fill="#2aa85a" transform="rotate(-32 574 516)"/>
+    <circle cx="540" cy="588" r="55" fill="url(#appleGrad)"/>
+    <ellipse cx="519" cy="568" rx="15" ry="9" fill="#ffffff" opacity="0.28"/>
+
+    <path d="M393,690 C455,671 505,667 540,682 L540,744 C505,729 455,733 393,753 Z" fill="#f4f9ff"/>
+    <path d="M547,682 C582,667 632,671 694,690 L694,753 C632,733 582,729 547,744 Z" fill="#cfe2ff"/>
+    <path d="M420,703 C470,691 505,689 528,699" fill="none" stroke="#b9cdec" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M420,721 C470,711 505,709 528,717" fill="none" stroke="#b9cdec" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M559,699 C585,689 625,691 665,703" fill="none" stroke="#9fbbe4" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M559,717 C585,709 625,711 665,721" fill="none" stroke="#9fbbe4" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="543.5" y1="681" x2="543.5" y2="745" stroke="#1f55d6" stroke-opacity="0.35" stroke-width="3"/>
+  </g>
+
+  <text x="540" y="1000" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="112" letter-spacing="-3">
+    <tspan fill="#ffffff">Ilm</tspan><tspan fill="#37b7ff">Mevasi</tspan>
+  </text>
+  <text x="540" y="1068" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-weight="500" font-size="38" fill="#8ea3c4">Bilim sari har kuni bir qadam</text>
+
+  <rect x="390" y="1662" width="300" height="10" rx="5" fill="#ffffff" fill-opacity="0.08"/>
+  <rect x="390" y="1662" width="132" height="10" rx="5" fill="url(#barGrad)"/>
+  <text x="540" y="1724" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-weight="400" font-size="30" fill="#5b6b86">yuklanmoqda...</text>
+
+  <text x="540" y="1858" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-weight="500" font-size="28" fill="#3f4b63" letter-spacing="1">IlmMevasi © 2026</text>
+</svg>

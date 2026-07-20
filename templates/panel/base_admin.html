@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>{% block page_title %}Boshqaruv paneli{% endblock %} — {{ site_name|default:"Ilm Mevasi" }}</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { blue: '#2d6cff', royal: '#37b7ff', emerald: '#10b981', gold: '#f7c948', rose: '#ef4444' },
+            ink: { 900: '#0f1729', 700: '#334155', 500: '#64748b', 300: '#cbd5e1', 100: '#f1f5f9' },
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://unpkg.com/htmx.org@1.9.5" defer></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    body { font-family: 'Inter', sans-serif; }
+    /* Accent driven by each panel (blue for super admin, emerald for teacher). */
+    :root { --accent: {% block accent %}#2d6cff{% endblock %}; }
+    .accent-bg { background-color: var(--accent); }
+    .accent-text { color: var(--accent); }
+    .accent-soft { background-color: color-mix(in srgb, var(--accent) 12%, white); color: var(--accent); }
+    .nav-link.active { background-color: color-mix(in srgb, var(--accent) 12%, white); color: var(--accent); font-weight: 600; }
+    .nav-link.active .nav-ico { color: var(--accent); }
+    .rich-content table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+    .rich-content td, .rich-content th { border: 1px solid #e2e8f0; padding: 0.4rem 0.6rem; }
+    .rich-content ul { list-style: disc; margin-left: 1.25rem; }
+    .rich-content ol { list-style: decimal; margin-left: 1.25rem; }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="bg-ink-100 text-ink-900 antialiased min-h-screen"
+      x-data="{ sidebarOpen: false }">
+
+  <!-- Mobile overlay -->
+  <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+       class="fixed inset-0 bg-black/40 z-30 lg:hidden"></div>
+
+  <!-- Sidebar -->
+  <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+         class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-ink-100 flex flex-col transition-transform duration-200 lg:translate-x-0">
+    <div class="h-16 flex items-center gap-3 px-5 border-b border-ink-100">
+      <div class="w-9 h-9 rounded-xl accent-bg flex items-center justify-center text-white font-extrabold">IM</div>
+      <div class="leading-tight">
+        <p class="font-extrabold text-sm">{{ site_name|default:"Ilm Mevasi" }}</p>
+        <p class="text-[11px] text-ink-500">{% block panel_label %}Boshqaruv paneli{% endblock %}</p>
+      </div>
+      <button @click="sidebarOpen = false" class="ml-auto lg:hidden text-ink-500">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1 text-sm">
+      {% block nav %}{% endblock %}
+    </nav>
+
+    <div class="p-3 border-t border-ink-100">
+      <div class="flex items-center gap-3 px-2 py-2">
+        <div class="w-9 h-9 rounded-full bg-ink-100 flex items-center justify-center text-ink-700 font-bold uppercase">
+          {{ request.user.username|first }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
+          <p class="text-[11px] text-ink-500">{{ request.user.profile.get_role_display }}</p>
+        </div>
+      </div>
+      <a href="{% url 'accounts:logout' %}" class="mt-1 flex items-center gap-2 px-3 py-2 rounded-lg text-ink-500 hover:bg-ink-100 hover:text-rose-500 transition text-sm">
+        <i data-lucide="log-out" class="w-4 h-4"></i> Chiqish
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="lg:pl-72 min-h-screen flex flex-col">
+    <!-- Topbar -->
+    <header class="h-16 bg-white/80 backdrop-blur border-b border-ink-100 flex items-center gap-3 px-4 sticky top-0 z-20">
+      <button @click="sidebarOpen = true" class="lg:hidden text-ink-700">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+      <nav class="text-sm text-ink-500 flex items-center gap-1.5 min-w-0">
+        {% block breadcrumb %}<span class="truncate">Bosh sahifa</span>{% endblock %}
+      </nav>
+      <div class="ml-auto flex items-center gap-2">
+        {% block topbar_actions %}{% endblock %}
+        <a href="{% url 'dashboard:home' %}" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-ink-500 hover:bg-ink-100 text-xs">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Saytga o'tish
+        </a>
+      </div>
+    </header>
+
+    <!-- Toast messages -->
+    {% if messages %}
+    <div class="fixed top-20 right-4 z-50 space-y-2 w-80 max-w-[90vw]">
+      {% for message in messages %}
+      <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4500)" x-cloak
+           class="flex items-start gap-3 p-3.5 rounded-xl shadow-lg border text-sm bg-white
+           {% if message.tags == 'success' %}border-emerald-200{% elif message.tags == 'error' %}border-rose-200{% elif message.tags == 'warning' %}border-amber-200{% else %}border-ink-100{% endif %}">
+        <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}"
+           class="w-5 h-5 flex-shrink-0 {% if message.tags == 'success' %}text-emerald-500{% elif message.tags == 'error' %}text-rose-500{% elif message.tags == 'warning' %}text-amber-500{% else %}text-brand-blue{% endif %}"></i>
+        <p class="flex-1 text-ink-700">{{ message }}</p>
+        <button @click="show = false" class="text-ink-300 hover:text-ink-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script>
+    function refreshIcons() { if (window.lucide) lucide.createIcons(); }
+    document.addEventListener('DOMContentLoaded', refreshIcons);
+    document.body.addEventListener('htmx:afterSwap', refreshIcons);
+    document.body.addEventListener('htmx:afterSettle', refreshIcons);
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

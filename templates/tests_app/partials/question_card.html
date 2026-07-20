@@ -1,0 +1,203 @@
+<div class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 xl:p-8 space-y-6 relative bg-[var(--surface-card-soft)]"
+     x-init="currentQIdx = {{ q_idx }}">
+    <!-- Progress Indicator inside the card -->
+    <div class="space-y-2">
+        <div class="flex justify-between text-xs text-[var(--text-subtitle)] font-semibold">
+            <span>Savol {{ q_idx }} / {{ total_questions }}</span>
+            <span class="text-xs uppercase bg-[var(--surface-hover)] border border-[var(--border-card)] px-2 py-0.5 rounded font-bold font-sans">
+                {{ question.get_difficulty_display }}
+            </span>
+        </div>
+        <div class="h-2 w-full bg-[var(--surface-hover)] rounded-full overflow-hidden">
+            <!-- Calculates exact progress percentage -->
+            <div class="h-full bg-gradient-to-r from-[#2d6cff] to-[#37b7ff] rounded-full transition-all duration-300" style="width: {% widthratio q_idx total_questions 100 %}%"></div>
+        </div>
+    </div>
+
+    <!-- Question Text -->
+    <div class="space-y-4">
+        {% if question.image_position == 'before_body' %}{% include 'tests_app/partials/_question_media.html' %}{% endif %}
+
+        <h2 class="text-xl md:text-2xl font-bold text-[var(--text-primary)] leading-relaxed rich-text">{{ q_idx }}. {{ question.body|safe }}</h2>
+
+        {% if question.image_position != 'before_body' %}{% include 'tests_app/partials/_question_media.html' %}{% endif %}
+
+        {% if question.audio_url %}
+            <div class="bg-[var(--surface-card-solid)] border border-[var(--border-soft)] rounded-2xl p-3 flex items-center gap-3">
+                <i data-lucide="volume-2" class="w-5 h-5 text-blue-400"></i>
+                <audio src="{{ question.audio_url }}" controls class="w-full h-8 text-xs"></audio>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Answer Form -->
+    {% if question.question_type == 'open_written' %}
+    <form class="space-y-3" hx-post="{% url 'tests:submit_answer' attempt.id %}" hx-target="#question-container"
+          data-autosave data-attempt="{{ attempt.id }}" data-question="{{ question.id }}">
+        {% csrf_token %}
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        <input type="hidden" name="q_idx" value="{{ q_idx }}">
+
+        {% if sub_question_rows %}
+            <!-- Multi-part open question: a shared context (question.body above) plus
+                 a), b)... sub-parts, each answered and AI-graded independently. -->
+            <div class="space-y-4">
+                {% for row in sub_question_rows %}
+                <div class="space-y-2">
+                    <p class="text-sm text-[var(--text-secondary)]"><span class="font-bold text-[var(--text-primary)]">{{ row.label }})</span> {{ row.text }}</p>
+                    <textarea name="subanswer_{{ row.label }}" rows="2" placeholder="Javob: {{ row.label }}) ..."
+                              class="w-full bg-[var(--surface-input)] border border-[var(--border-card)] rounded-2xl py-3 px-4 text-[var(--text-primary)] text-sm placeholder-[var(--text-faint)] focus:outline-none focus:border-[#2d6cff] transition resize-none">{{ row.answer }}</textarea>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <textarea name="text_answer" rows="3" placeholder="Javobingizni shu yerga yozing..."
+                      class="w-full bg-[var(--surface-input)] border border-[var(--border-card)] rounded-2xl py-3 px-4 text-[var(--text-primary)] text-sm placeholder-[var(--text-faint)] focus:outline-none focus:border-[#2d6cff] transition resize-none">{{ current_answer.text_answer }}</textarea>
+        {% endif %}
+
+        <button type="submit" class="w-full bg-[var(--surface-hover-strong)] hover:opacity-80 text-[var(--text-primary)] font-semibold py-3 rounded-2xl transition text-sm flex items-center justify-center gap-2">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Javobni saqlash</span>
+        </button>
+    </form>
+
+    {% elif question.question_type == 'matching' %}
+    <form class="space-y-3" hx-post="{% url 'tests:submit_answer' attempt.id %}" hx-target="#question-container" hx-trigger="change">
+        {% csrf_token %}
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        <input type="hidden" name="q_idx" value="{{ q_idx }}">
+
+        <div class="space-y-3">
+            {% for row in matching_rows %}
+            <div class="flex items-center gap-3 p-3 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)]">
+                <span class="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold font-mono bg-[var(--surface-hover)] border border-[var(--border-card)] text-[var(--text-primary)] flex-shrink-0">
+                    {{ row.left_key }}
+                </span>
+                <span class="flex-1 text-sm text-[var(--text-secondary)]">{{ row.left_text }}</span>
+                <select name="match_{{ row.left_key }}" class="bg-[var(--surface-input)] border border-[var(--border-card)] rounded-xl py-2.5 px-3 text-xs md:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] transition max-w-[55%]">
+                    <option value="">— tanlang —</option>
+                    {% for opt in matching_pairs %}
+                    <option value="{{ opt.right_key }}" {% if row.selected_right_key == opt.right_key %}selected{% endif %}>
+                        {{ opt.right_key }}) {{ opt.right_text|truncatechars:70 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+        </div>
+    </form>
+
+    {% elif question.question_type == 'grouped_item' %}
+    <form class="space-y-3" hx-post="{% url 'tests:submit_answer' attempt.id %}" hx-target="#question-container" hx-trigger="change">
+        {% csrf_token %}
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        <input type="hidden" name="q_idx" value="{{ q_idx }}">
+
+        {% if question.group.instruction %}
+        <p class="text-xs text-[var(--text-muted)] italic">{{ question.group.instruction }}</p>
+        {% endif %}
+
+        <div class="grid gap-3">
+            {% for option in group_options %}
+            <label class="w-full flex items-center justify-between p-4 rounded-2xl border transition duration-150 cursor-pointer group
+                {% if current_answer.grouped_option == option %}
+                    border-[#2d6cff] bg-[#2d6cff]/10 text-[#37b7ff] font-semibold
+                {% else %}
+                    border-[var(--border-card)] bg-[var(--surface-card-soft)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-strong)]
+                {% endif %}">
+                <div class="flex items-center gap-4">
+                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono transition-all
+                        {% if current_answer.grouped_option == option %}
+                            bg-[#2d6cff] text-[var(--text-primary)]
+                        {% else %}
+                            bg-[var(--surface-hover)] border border-[var(--border-card)] text-[var(--text-muted)] group-hover:bg-[var(--surface-hover-strong)] group-hover:text-[var(--text-primary)]
+                        {% endif %}">
+                        {{ option.label }}
+                    </span>
+                    <span class="text-sm md:text-base">{{ option.text }}</span>
+                </div>
+                <input type="radio" name="group_option_id" value="{{ option.id }}" class="hidden" {% if current_answer.grouped_option == option %}checked{% endif %}>
+
+                {% if current_answer.grouped_option == option %}
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-[#37b7ff]"></i>
+                {% endif %}
+            </label>
+            {% endfor %}
+        </div>
+    </form>
+
+    {% else %}
+    <form class="space-y-3" hx-post="{% url 'tests:submit_answer' attempt.id %}" hx-target="#question-container" hx-trigger="change">
+        {% csrf_token %}
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        <input type="hidden" name="q_idx" value="{{ q_idx }}">
+
+        <div class="grid gap-3">
+            {% for choice in choices %}
+            <label class="w-full flex items-center justify-between p-4 rounded-2xl border transition duration-150 cursor-pointer group
+                {% if current_answer.selected_choice == choice %}
+                    border-[#2d6cff] bg-[#2d6cff]/10 text-[#37b7ff] font-semibold
+                {% else %}
+                    border-[var(--border-card)] bg-[var(--surface-card-soft)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-strong)]
+                {% endif %}">
+                <div class="flex items-center gap-4">
+                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono transition-all
+                        {% if current_answer.selected_choice == choice %}
+                            bg-[#2d6cff] text-[var(--text-primary)]
+                        {% else %}
+                            bg-[var(--surface-hover)] border border-[var(--border-card)] text-[var(--text-muted)] group-hover:bg-[var(--surface-hover-strong)] group-hover:text-[var(--text-primary)]
+                        {% endif %}">
+                        {{ forloop.counter|add:64|stringformat:"c" }}
+                    </span>
+                    <span class="text-sm md:text-base">{{ choice.text }}</span>
+                </div>
+                <input type="radio" name="choice_id" value="{{ choice.id }}" class="hidden" {% if current_answer.selected_choice == choice %}checked{% endif %}>
+
+                {% if current_answer.selected_choice == choice %}
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-[#37b7ff]"></i>
+                {% endif %}
+            </label>
+            {% endfor %}
+        </div>
+    </form>
+    {% endif %}
+
+    <!-- Navigation Controls -->
+    <div class="pt-6 border-t border-[var(--border-soft)] flex items-center justify-between gap-4">
+        <!-- Previous Question -->
+        {% if has_prev %}
+            <button hx-get="{% url 'tests:screen' attempt.id %}?q_idx={{ prev_idx }}" hx-target="#question-container" class="flex items-center gap-2 bg-[var(--surface-hover)] border border-[var(--border-card)] hover:bg-[var(--surface-hover-strong)] text-[var(--text-primary)] font-semibold py-3 px-5 rounded-2xl transition text-xs">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Oldingi</span>
+            </button>
+        {% else %}
+            <div></div>
+        {% endif %}
+
+        <!-- Flag Button -->
+        <button @click="toggleFlag({{ q_idx }})" class="flex items-center justify-center w-12 h-12 rounded-2xl border transition"
+                :class="isFlagged({{ q_idx }}) ? 'border-yellow-500 bg-yellow-500/10 text-yellow-400' : 'border-[var(--border-card)] bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'">
+            <i data-lucide="flag" class="w-5 h-5" :class="isFlagged({{ q_idx }}) ? 'fill-current' : ''"></i>
+        </button>
+
+        <!-- Next Question or Finish -->
+        {% if has_next %}
+            <!-- id="btn-next" — Telegram MainButton shu tugmani "bosadi" (screen.html dagi sinxron skript) -->
+            <button id="btn-next" hx-get="{% url 'tests:screen' attempt.id %}?q_idx={{ next_idx }}" hx-target="#question-container" class="flex items-center gap-2 bg-gradient-to-r from-[#2d6cff] to-[#37b7ff] text-[var(--text-primary)] font-bold py-3 px-5 rounded-2xl transition text-xs shadow-md shadow-blue-500/10">
+                <span>Keyingi</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+        {% else %}
+            <button id="btn-finish" type="button" @click="finishAttempt()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-400 text-[var(--text-primary)] font-extrabold py-3 px-5 rounded-2xl transition text-xs shadow-md shadow-emerald-500/10">
+                <span>Tugatish</span>
+                <i data-lucide="check" class="w-4 h-4"></i>
+            </button>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>

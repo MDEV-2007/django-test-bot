@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Tahlil tayyorlanmoqda{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center animate-fadeIn">
+    <div class="glass-card rounded-[32px] border border-[var(--border-card)] p-10 text-center max-w-sm bg-[var(--surface-card-soft)]"
+         x-data x-init="setTimeout(() => window.location.reload(), 2000)">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-[#2d6cff]/10 border border-[#2d6cff]/20 flex items-center justify-center text-[#37b7ff] mb-4">
+            <i data-lucide="loader-2" class="w-7 h-7 animate-spin"></i>
+        </div>
+        <h2 class="text-lg font-bold text-[var(--text-primary)]">AI tahlil tayyorlanmoqda...</h2>
+        <p class="text-sm text-[var(--text-muted)] mt-2">Natijangiz asosida sun'iy intellekt tahlili yaratilmoqda, bir necha soniya kuting — sahifa avtomatik yangilanadi.</p>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

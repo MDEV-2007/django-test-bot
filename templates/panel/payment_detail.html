@@ -1,0 +1,44 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_title %}To'lov #{{ p.id }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'panel:payments' %}" class="hover:text-ink-700">To'lovlar</a><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i><span class="font-medium text-ink-700">#{{ p.id }}</span>{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="bg-white rounded-2xl border border-ink-100 p-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-xl font-extrabold">{{ p.plan.name }}</h1>
+      <span class="px-2.5 py-1 rounded-full text-xs font-semibold
+        {% if p.status == 'pending' %}bg-amber-50 text-amber-600{% elif p.status == 'approved' %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %}">{{ p.get_status_display }}</span>
+    </div>
+    <dl class="mt-4 space-y-2 text-sm">
+      <div class="flex justify-between"><dt class="text-ink-500">Foydalanuvchi</dt><dd class="font-medium">{{ p.profile.user.username }}</dd></div>
+      <div class="flex justify-between"><dt class="text-ink-500">Summa</dt><dd class="font-medium">{{ p.amount|floatformat:0 }}</dd></div>
+      <div class="flex justify-between"><dt class="text-ink-500">Sana</dt><dd class="font-medium">{{ p.created_at|date:"d.m.Y H:i" }}</dd></div>
+      {% if p.reviewed_by %}<div class="flex justify-between"><dt class="text-ink-500">Ko'rib chiqdi</dt><dd class="font-medium">{{ p.reviewed_by.username }}</dd></div>{% endif %}
+    </dl>
+
+    <div class="mt-5">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-2">To'lov skrinshoti</p>
+      {% if p.screenshot %}
+      <a href="{% url 'premium:payment_screenshot' p.id %}" target="_blank" rel="noopener" class="block">
+        <img src="{% url 'premium:payment_screenshot' p.id %}" alt="Skrinshot" class="w-full max-w-xs rounded-xl border border-ink-100 hover:opacity-80 transition" />
+      </a>
+      {% else %}
+      <div class="w-full max-w-xs h-40 rounded-xl border border-ink-100 bg-ink-50 flex items-center justify-center text-ink-300">
+        <i data-lucide="image-off" class="w-8 h-8"></i>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if p.status == 'pending' %}
+    <div class="flex gap-3 mt-6">
+      <form method="post" action="{% url 'panel:payment_approve' p.pk %}" class="flex-1">{% csrf_token %}
+        <button class="w-full py-2.5 rounded-xl bg-emerald-500 text-white font-semibold text-sm">Tasdiqlash</button></form>
+      <form method="post" action="{% url 'panel:payment_reject' p.pk %}" class="flex-1">{% csrf_token %}
+        <button class="w-full py-2.5 rounded-xl bg-rose-500 text-white font-semibold text-sm">Rad etish</button></form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

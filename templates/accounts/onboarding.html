@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Xush kelibsiz{% endblock %}
+
+{% block content %}
+<div class="min-h-[85vh] flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8" x-data="{ step: 1 }">
+    <form method="POST" action="{% url 'accounts:onboarding' %}" class="max-w-md w-full">
+        {% csrf_token %}
+        <div class="glass-card rounded-[32px] border border-[var(--border-card)] p-8 shadow-2xl backdrop-blur-xl bg-[var(--surface-card-strong)] relative overflow-hidden">
+            <div class="absolute -top-12 -left-12 w-32 h-32 bg-[#2d6cff]/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex justify-end relative mb-2">
+                <button type="submit" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition font-semibold">O'tkazib yuborish</button>
+            </div>
+
+            <!-- Slide 1: Welcome -->
+            <div x-show="step === 1" x-cloak class="text-center relative space-y-4">
+                <img src="{% static 'img/icon.png' %}" alt="IlmMevasi" class="mx-auto w-16 h-16 rounded-2xl shadow-xl" />
+                <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">IlmMevasi'ga xush kelibsiz, {{ profile.user.first_name|default:profile.user.username }}!</h2>
+                <p class="text-sm text-[var(--text-muted)] leading-relaxed">Turli fanlardan bilimingizni sinab ko'ring, milliy sertifikat va imtihonlarga tayyorlaning — barchasi bitta ilovada.</p>
+            </div>
+
+            <!-- Slide 2: What's inside -->
+            <div x-show="step === 2" x-cloak class="relative space-y-4">
+                <h2 class="text-xl font-extrabold text-[var(--text-primary)] text-center">Ilovada nima bor?</h2>
+                <ul class="space-y-3 text-sm text-[var(--text-secondary)]">
+                    <li class="flex items-center gap-3"><i data-lucide="award" class="w-5 h-5 text-[#37b7ff] flex-shrink-0"></i> Test Markazi — mavzuli testlar va AI tahlil</li>
+                    <li class="flex items-center gap-3"><i data-lucide="message-square" class="w-5 h-5 text-indigo-400 flex-shrink-0"></i> AI Mentor — savollaringizga tezkor javob</li>
+                    <li class="flex items-center gap-3"><i data-lucide="zap" class="w-5 h-5 text-amber-400 flex-shrink-0"></i> Battle Arena — boshqalar bilan 1v1 bellashuv</li>
+                    <li class="flex items-center gap-3"><i data-lucide="trophy" class="w-5 h-5 text-yellow-400 flex-shrink-0"></i> Reyting — eng kuchli bilimdonlar orasida o'rningizni ko'ring</li>
+                    <li class="flex items-center gap-3"><i data-lucide="users" class="w-5 h-5 text-emerald-400 flex-shrink-0"></i> Jamiyat — savol bering, boshqalarga javob yozing</li>
+                </ul>
+            </div>
+
+            <!-- Progress dots -->
+            <div class="flex items-center justify-center gap-2 mt-8 relative">
+                <div class="h-1.5 rounded-full transition-all" :class="step === 1 ? 'w-6 bg-[#2d6cff]' : 'w-1.5 bg-[var(--surface-hover-strong)]'"></div>
+                <div class="h-1.5 rounded-full transition-all" :class="step === 2 ? 'w-6 bg-[#2d6cff]' : 'w-1.5 bg-[var(--surface-hover-strong)]'"></div>
+            </div>
+
+            <!-- Nav buttons -->
+            <div class="flex items-center gap-3 mt-6 relative">
+                <button type="button" x-show="step === 2" x-cloak @click="step = 1" class="flex-1 bg-[var(--surface-hover)] border border-[var(--border-card)] hover:bg-[var(--surface-hover-strong)] text-[var(--text-primary)] font-semibold py-3 px-4 rounded-2xl transition text-sm">Orqaga</button>
+                <button type="button" x-show="step === 1" @click="step = 2" class="flex-1 bg-[#2d6cff] hover:bg-[#1a57e3] text-[var(--text-primary)] font-bold py-3 px-4 rounded-2xl transition shadow-lg shadow-blue-500/25 text-sm">Keyingisi</button>
+                <button type="submit" x-show="step === 2" x-cloak class="flex-1 bg-[#2d6cff] hover:bg-[#1a57e3] text-[var(--text-primary)] font-bold py-3 px-4 rounded-2xl transition shadow-lg shadow-blue-500/25 text-sm">Boshlash</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+{% endblock %}

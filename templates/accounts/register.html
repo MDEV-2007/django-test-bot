@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Ro'yxatdan O'tish{% endblock %}
+
+{% block content %}
+<div class="min-h-[85vh] flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 glass-card rounded-[32px] border border-[var(--border-card)] p-8 shadow-2xl backdrop-blur-xl bg-[var(--surface-card-strong)] relative overflow-hidden">
+        <!-- Visual Glow Effect -->
+        <div class="absolute -top-12 -left-12 w-32 h-32 bg-[#2d6cff]/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="text-center relative">
+            <img src="{% static 'img/icon.png' %}" alt="IlmMevasi" class="mx-auto w-16 h-16 rounded-2xl shadow-xl mb-4" />
+            <h2 class="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">Ro'yxatdan o'tish</h2>
+            <p class="mt-2 text-sm text-[var(--text-subtitle)]">Platformaning barcha imkoniyatlaridan foydalanish uchun ro'yxatdan o'ting.</p>
+        </div>
+
+        {% if error %}
+            <div class="bg-rose-500/10 border border-rose-500/25 rounded-2xl p-4 flex gap-3 text-sm text-rose-300">
+                <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
+
+        <!-- Registration Form -->
+        <form class="space-y-4" method="POST" action="{% url 'accounts:register' %}">
+            {% csrf_token %}
+            <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="first_name" class="sr-only">Ism</label>
+                        <input id="first_name" name="first_name" type="text" required class="appearance-none rounded-2xl relative block w-full px-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Ism">
+                    </div>
+                    <div>
+                        <label for="last_name" class="sr-only">Familiya</label>
+                        <input id="last_name" name="last_name" type="text" required class="appearance-none rounded-2xl relative block w-full px-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Familiya">
+                    </div>
+                </div>
+                <div>
+                    <label for="username" class="sr-only">Foydalanuvchi nomi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[var(--text-muted)]">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </span>
+                        <input id="username" name="username" type="text" required class="appearance-none rounded-2xl relative block w-full pl-11 pr-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Foydalanuvchi nomi">
+                    </div>
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Parol</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[var(--text-muted)]">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </span>
+                        <input id="password" name="password" type="password" required class="appearance-none rounded-2xl relative block w-full pl-11 pr-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Parol">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-[var(--border-card)] text-sm font-semibold rounded-2xl text-[var(--text-primary)] bg-[#2d6cff] hover:bg-[#1a57e3] focus:outline-none transition duration-200 shadow-lg shadow-blue-500/25">
+                    Ro'yxatdan o'tish
+                </button>
+            </div>
+        </form>
+        
+        <div class="text-center text-sm">
+            <span class="text-[var(--text-muted)]">Hisobingiz bormi?</span>
+            <a href="{% url 'accounts:login' %}" class="font-bold text-[#37b7ff] hover:underline ml-1">Kirish</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

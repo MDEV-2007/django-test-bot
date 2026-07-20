@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block title %}IlmMevasi — Natija & AI Tahlil{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-4xl mx-auto animate-fadeIn" x-data="{ activeTab: 'analysis' }">
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-[var(--border-card)] pb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">Natija & AI Tahlili</h1>
+            <p class="text-[var(--text-muted)] text-sm mt-1">AI yordamida imtihon ko'rsatkichlari chuqur tahlil qilindi.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+            {% if attempt.score < 100 %}
+            <a href="{% url 'tests:start_mistakes_test' %}" class="flex items-center gap-2 bg-rose-500/10 border border-rose-500/25 hover:bg-rose-500 hover:text-white text-rose-400 font-semibold py-3 px-5 rounded-2xl transition text-xs">
+                <i data-lucide="target" class="w-4 h-4"></i>
+                <span>Xatolar ustida ishlash</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'tests:center' %}" class="flex items-center gap-2 bg-[var(--surface-hover)] border border-[var(--border-card)] hover:bg-[var(--surface-hover-strong)] text-[var(--text-primary)] font-semibold py-3 px-5 rounded-2xl transition text-xs">
+                <i data-lucide="award" class="w-4 h-4"></i>
+                <span>Testlar ro'yxati</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Score Overview Banner -->
+    <section class="glass-card rounded-[32px] border border-[var(--border-card)] p-6 xl:p-8 flex flex-col md:flex-row items-center justify-around gap-8 bg-[var(--surface-card-medium)] relative overflow-hidden">
+        <div class="absolute -top-12 -left-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        
+        <!-- Score Circular Chart -->
+        <div class="relative flex items-center justify-center w-36 h-36">
+            <svg class="w-full h-full transform -rotate-90">
+                <circle cx="72" cy="72" r="64" class="stroke-white/5 fill-none" stroke-width="10"></circle>
+                <circle cx="72" cy="72" r="64" class="stroke-[#2d6cff] fill-none" stroke-width="10" 
+                        stroke-dasharray="402" stroke-dashoffset="{{ 402|add:0|slugify }}"></circle>
+            </svg>
+            <div class="absolute text-center">
+                <span class="text-4xl font-extrabold text-[var(--text-primary)] font-mono">{{ attempt.score|floatformat:0 }}%</span>
+                <p class="text-[10px] text-[var(--text-muted)] uppercase tracking-widest mt-1">Umumiy ball</p>
+            </div>
+        </div>
+        
+        <!-- Performance Metrics -->
+        <div class="space-y-4 text-center md:text-left">
+            <div class="flex items-center justify-center md:justify-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                    <i data-lucide="crown" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-[var(--text-muted)]">Prognoz sertifikat darajasi</p>
+                    <h3 class="text-xl font-extrabold text-[var(--text-primary)]">{{ ai.predicted_score }} Daraja</h3>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-4 justify-center md:justify-start text-sm">
+                <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold px-4 py-2 rounded-2xl flex items-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>{{ attempt.correct_answers }} To'g'ri</span>
+                </div>
+                <div class="bg-rose-500/10 border border-rose-500/20 text-rose-400 font-semibold px-4 py-2 rounded-2xl flex items-center gap-2">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                    <span>{{ attempt.wrong_answers }} Xato</span>
+                </div>
+                <div class="bg-[var(--surface-card-medium)] border border-[var(--border-soft)] text-[var(--text-muted)] font-semibold px-4 py-2 rounded-2xl flex items-center gap-2">
+                    <i data-lucide="minus" class="w-4 h-4"></i>
+                    <span>{{ attempt.skipped_answers }} Tashlab ketilgan</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab navigation -->
+    <div class="flex border-b border-[var(--border-soft)]">
+        <button @click="activeTab = 'analysis'" class="px-6 py-3.5 border-b-2 font-semibold text-sm transition"
+                :class="activeTab === 'analysis' ? 'border-[#2d6cff] text-[var(--text-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'">
+            AI Tahlili
+        </button>
+        <button @click="activeTab = 'review'" class="px-6 py-3.5 border-b-2 font-semibold text-sm transition"
+                :class="activeTab === 'review' ? 'border-[#2d6cff] text-[var(--text-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'">
+            Savollar tahlili
+        </button>
+        <button @click="activeTab = 'roadmap'" class="px-6 py-3.5 border-b-2 font-semibold text-sm transition"
+                :class="activeTab === 'roadmap' ? 'border-[#2d6cff] text-[var(--text-primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'">
+            Shaxsiy Yo'l Xaritasi (Roadmap)
+        </button>
+    </div>
+
+    <!-- Question Review Tab -->
+    <div x-show="activeTab === 'review'" class="space-y-4 animate-fadeIn">
+        {% for item in review_items %}
+        <div class="glass-card rounded-[24px] p-5 border {% if item.is_correct %}border-emerald-500/20{% elif item.is_skipped %}border-[var(--border-card)]{% else %}border-rose-500/20{% endif %} bg-[var(--surface-card-soft)]">
+            <div class="flex items-start justify-between gap-3">
+                <span class="text-xs font-bold text-[var(--text-muted)] mt-1">{{ forloop.counter }}-savol</span>
+                {% if item.is_correct %}
+                    <span class="flex items-center gap-1 text-[10px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i data-lucide="check" class="w-3 h-3"></i> To'g'ri</span>
+                {% elif item.is_skipped %}
+                    <span class="flex items-center gap-1 text-[10px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-full bg-[var(--surface-hover)] text-[var(--text-muted)] border border-[var(--border-card)]"><i data-lucide="minus" class="w-3 h-3"></i> Tashlab ketilgan</span>
+                {% else %}
+                    <span class="flex items-center gap-1 text-[10px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20"><i data-lucide="x" class="w-3 h-3"></i> Xato</span>
+                {% endif %}
+            </div>
+            <div class="mt-2 text-[var(--text-primary)] text-sm leading-relaxed prose-review">{{ item.question.body|safe }}</div>
+
+            {% if item.your_answer %}
+            <p class="mt-3 text-xs {% if item.is_correct %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                <span class="text-[var(--text-muted)]">Sizning javobingiz:</span> {{ item.your_answer }}
+            </p>
+            {% endif %}
+            {% if item.correct_answer and not item.is_correct %}
+            <p class="mt-1 text-xs text-emerald-400"><span class="text-[var(--text-muted)]">To'g'ri javob:</span> {{ item.correct_answer }}</p>
+            {% endif %}
+            {% if item.grading_note %}
+            <p class="mt-2 text-xs text-[var(--text-secondary)] italic">{{ item.grading_note }}</p>
+            {% endif %}
+
+            {% if item.explanation %}
+            <div class="mt-3 pt-3 border-t border-[var(--border-soft)] flex gap-2 text-xs text-[var(--text-secondary)] leading-relaxed">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
+                <span>{{ item.explanation }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="text-center py-12 text-[var(--text-muted)]">
+            <i data-lucide="file-question" class="w-12 h-12 mx-auto mb-2 text-[var(--text-icon-faint)]"></i>
+            <p class="text-xs">Savollar tahlili mavjud emas.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- AI Analysis Tab -->
+    <div x-show="activeTab === 'analysis'" class="space-y-6 animate-fadeIn">
+        <div class="glass-card rounded-[28px] p-6 space-y-6 border border-[var(--border-card)] bg-[var(--surface-card-soft)]">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5 text-indigo-400"></i> AI Mentor Xulosasi
+            </h3>
+            <p class="text-[var(--text-secondary)] text-sm leading-relaxed">{{ ai.overall_analysis }}</p>
+            <div class="bg-[var(--surface-card-medium)] border border-[var(--border-soft)] rounded-2xl p-4 text-xs italic text-[var(--text-muted)] flex items-start gap-3">
+                <i data-lucide="quote" class="w-5 h-5 text-[#37b7ff] flex-shrink-0"></i>
+                <p>{{ ai.ai_motivation }}</p>
+            </div>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2">
+            <!-- Strong topics -->
+            <div class="glass-card rounded-[24px] p-6 border border-[var(--border-card)] space-y-4">
+                <h4 class="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <i data-lucide="thumbs-up" class="w-5 h-5 text-emerald-400"></i> Kuchli o'zlashtirilgan mavzular
+                </h4>
+                <div class="flex flex-wrap gap-2">
+                    {% for topic in strong_topics|slice:":5" %}
+                        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-3 py-1.5 rounded-xl font-medium">{{ topic }}</span>
+                    {% empty %}
+                        <span class="text-xs text-[var(--text-faint)]">Kiritilmagan</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Weak topics -->
+            <div class="glass-card rounded-[24px] p-6 border border-[var(--border-card)] space-y-4">
+                <h4 class="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400"></i> Ko'proq ishlash kerak bo'lgan mavzular
+                </h4>
+                <div class="flex flex-wrap gap-2">
+                    {% for topic in weak_topics|slice:":5" %}
+                        <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs px-3 py-1.5 rounded-xl font-medium">{{ topic }}</span>
+                    {% empty %}
+                        <span class="text-xs text-[var(--text-faint)]">Yo'q</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% if ai.detailed_mistakes %}
+        <div class="glass-card rounded-[28px] p-6 border border-[var(--border-card)] space-y-5">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="search-x" class="w-5 h-5 text-rose-400"></i> Aynan qayerda xato qildingiz
+            </h3>
+            <div class="space-y-4">
+                {% for m in ai.detailed_mistakes %}
+                <div class="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card-soft)] p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                        <span class="text-[10px] uppercase tracking-widest font-extrabold text-[#37b7ff] bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">{{ m.mavzu }}</span>
+                    </div>
+                    <p class="text-sm font-semibold text-[var(--text-primary)]">{{ m.savol_mazmuni }}</p>
+                    <div class="grid sm:grid-cols-2 gap-2 text-xs">
+                        <div class="bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl px-3 py-2 flex items-start gap-2">
+                            <i data-lucide="x" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0"></i>
+                            <span><span class="font-semibold">Sizning javobingiz:</span> {{ m.bola_javobi }}</span>
+                        </div>
+                        <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl px-3 py-2 flex items-start gap-2">
+                            <i data-lucide="check" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0"></i>
+                            <span><span class="font-semibold">To'g'ri javob:</span> {{ m.togri_javob }}</span>
+                        </div>
+                    </div>
+                    {% if m.nega_muhim %}
+                    <p class="text-xs text-[var(--text-muted)]">{{ m.nega_muhim }}</p>
+                    {% endif %}
+                    {% if m.eslab_qolish %}
+                    <div class="bg-[var(--surface-card-medium)] border border-[var(--border-soft)] rounded-xl p-3 text-xs italic text-[var(--text-secondary)] flex items-start gap-2">
+                        <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
+                        <span>{{ m.eslab_qolish }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="glass-card rounded-[28px] p-6 border border-[var(--border-card)] space-y-4">
+            <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="check-square" class="w-5 h-5 text-blue-400"></i> Tavsiya etilgan amallar
+            </h3>
+            <ul class="space-y-3 text-sm text-[var(--text-secondary)] leading-relaxed">
+                {% for line in ai.recommendations.splitlines %}
+                    <li class="flex items-start gap-3">
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-blue-400 mt-1 flex-shrink-0"></i>
+                        <span>{{ line }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Study Roadmap Tab -->
+    <div x-show="activeTab === 'roadmap'" class="space-y-6 animate-fadeIn" x-data="{ itemsDone: [] }">
+        <div class="glass-card rounded-[28px] p-6 border border-[var(--border-card)] bg-[var(--surface-card-soft)] space-y-6">
+            <div>
+                <h3 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <i data-lucide="map" class="w-5 h-5 text-indigo-400"></i> Bosqichma-bosqich yo'riqnoma
+                </h3>
+                <p class="text-xs text-[var(--text-muted)] mt-1">Kuchsiz tomonlaringizni bartaraf qilish uchun AI tomonidan tuzilgan individual reja.</p>
+            </div>
+            
+            <div class="relative pl-8 space-y-8 before:absolute before:inset-y-0 before:left-3.5 before:w-0.5 before:bg-[var(--surface-hover-strong)]">
+                {% for step in roadmap %}
+                <div class="relative flex gap-4 items-start group" x-data="{ done: false }">
+                    <!-- Step Indicator Circle -->
+                    <button @click="done = !done" class="absolute -left-8 w-7.5 h-7.5 rounded-full flex items-center justify-center text-xs font-extrabold border transition-all z-10"
+                            :class="done ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'bg-[var(--surface-card-solid)] border-[var(--border-strong)] text-[var(--text-muted)] group-hover:border-[var(--border-strong)]'">
+                        <span x-show="!done">{{ step.step }}</span>
+                        <i x-show="done" data-lucide="check" class="w-4 h-4"></i>
+                    </button>
+                    
+                    <div class="flex-1 rounded-2xl border border-[var(--border-soft)] p-4 bg-[var(--surface-card-soft)] group-hover:bg-[var(--surface-card-medium)] transition duration-150"
+                         :class="done ? 'border-emerald-500/20 bg-emerald-500/5' : ''">
+                        <div class="flex justify-between items-start gap-3">
+                            <h4 class="font-bold text-sm text-[var(--text-primary)]" :class="done ? 'line-through text-[var(--text-faint)]' : ''">{{ step.title }}</h4>
+                            <span class="text-[10px] text-[var(--text-faint)] font-mono flex-shrink-0 bg-[var(--surface-hover)] px-2 py-0.5 rounded-full">{{ step.duration }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Simple inline CSS hack to apply stroke percentage directly -->
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+<script>
+    // Adjust stroke dashboard offset based on score
+    document.addEventListener('DOMContentLoaded', () => {
+        const score = {{ attempt.score }};
+        const maxDash = 402;
+        const offset = maxDash - (maxDash * score / 100);
+        const circles = document.querySelectorAll('circle.stroke-\\[\\#2d6cff\\]');
+        if(circles.length > 0) {
+            circles[0].setAttribute('stroke-dashoffset', offset);
+        }
+    });
+</script>
+{% endblock %}

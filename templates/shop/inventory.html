@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Inventar{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-fadeIn">
+    <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-card)] pb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="backpack" class="w-8 h-8 text-[#37b7ff]"></i> Inventar
+            </h1>
+            <p class="text-[var(--text-muted)] text-sm mt-1">Sotib olgan narsalaringiz va xaridlar tarixi.</p>
+        </div>
+        <a href="{% url 'shop:home' %}" class="flex items-center gap-2 rounded-2xl px-4 py-2.5 bg-[var(--surface-hover)] text-[var(--text-primary)] text-sm font-semibold hover:bg-[var(--surface-input)] transition">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Do'konga qaytish
+        </a>
+    </header>
+
+    <!-- Owned items -->
+    <section class="space-y-4">
+        <h2 class="text-lg font-bold text-[var(--text-primary)]">Mening narsalarim</h2>
+        {% if items %}
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            {% for inv in items %}
+            <div class="shop-card glass-card rounded-3xl p-5 border flex flex-col
+                        {% if inv.is_equipped %}border-emerald-400/50{% else %}border-[var(--border-card)]{% endif %}"
+                 data-slug="{{ inv.item.slug }}" data-category="{{ inv.item.category }}">
+                <div class="flex items-start justify-between">
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--surface-hover)] flex items-center justify-center text-[#37b7ff]">
+                        <i data-lucide="{{ inv.item.icon_name }}" class="w-6 h-6"></i>
+                    </div>
+                    {% if inv.item.is_consumable %}
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--surface-hover)] text-[var(--text-primary)]">x{{ inv.quantity }}</span>
+                    {% elif inv.is_equipped %}
+                    <span class="flex items-center gap-1 text-[10px] uppercase font-bold text-emerald-400"><i data-lucide="check" class="w-3.5 h-3.5"></i> Faol</span>
+                    {% endif %}
+                </div>
+                <h3 class="font-bold text-[var(--text-primary)] mt-3">{{ inv.item.name }}</h3>
+                <p class="text-xs text-[var(--text-muted)] mt-1 flex-1">{{ inv.item.get_category_display }}</p>
+
+                {% if inv.item.is_equippable %}
+                <div class="shop-action mt-4 pt-3 border-t border-[var(--border-soft)]">
+                    {% if inv.is_equipped %}
+                    <form method="post" action="{% url 'shop:unequip' inv.item.slug %}" class="shop-form" data-action="unequip">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-xs font-bold px-3 py-2 rounded-xl bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">Yechish</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{% url 'shop:equip' inv.item.slug %}" class="shop-form" data-action="equip">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-xs font-bold px-3 py-2 rounded-xl bg-[#37b7ff]/15 text-[#37b7ff] hover:bg-[#37b7ff]/25 transition">Faollashtirish</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="glass-card rounded-3xl p-10 text-center text-[var(--text-muted)]">
+            <i data-lucide="package-open" class="w-10 h-10 mx-auto mb-3 opacity-60"></i>
+            <p>Hozircha narsangiz yo'q. <a href="{% url 'shop:home' %}" class="text-[#37b7ff] font-semibold">Do'kondan</a> birini oling.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Streak freeze status + usage history -->
+    <section class="space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="snowflake" class="w-5 h-5 text-[#37b7ff]"></i> Streak muzlatish
+            </h2>
+            <span class="text-sm font-bold text-[var(--text-primary)]">{{ freeze_count }} ta mavjud</span>
+        </div>
+        <p class="text-xs text-[var(--text-muted)]">Har bir muzlatish bitta o'tkazib yuborilgan kunni qoplaydi va seriyangizni saqlaydi. Yetarlicha bo'lsa, avtomatik ishlaydi.</p>
+        {% if freeze_logs %}
+        <div class="glass-card rounded-3xl border border-[var(--border-card)] divide-y divide-[var(--border-soft)] overflow-hidden">
+            {% for log in freeze_logs %}
+            <div class="flex items-center justify-between px-5 py-3">
+                <span class="flex items-center gap-2 text-sm text-[var(--text-primary)]"><i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> {{ log.days_covered }} kun qoplandi</span>
+                <span class="text-xs text-[var(--text-muted)]">{{ log.created_at|date:"d M, H:i" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Purchase history -->
+    {% if history %}
+    <section class="space-y-4">
+        <h2 class="text-lg font-bold text-[var(--text-primary)]">Xaridlar tarixi</h2>
+        <div class="glass-card rounded-3xl border border-[var(--border-card)] divide-y divide-[var(--border-soft)] overflow-hidden">
+            {% for p in history %}
+            <div class="flex items-center justify-between px-5 py-3">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="receipt" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                    <span class="text-sm text-[var(--text-primary)]">{{ p.item_name }}</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="flex items-center gap-1 text-sm font-bold text-rose-400">-{{ p.coins_spent }} <i data-lucide="coins" class="w-3.5 h-3.5"></i></span>
+                    <span class="text-xs text-[var(--text-muted)] hidden sm:block">{{ p.created_at|date:"d M, H:i" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<script src="{% static 'js/shop.js' %}" defer></script>
+{% endblock %}

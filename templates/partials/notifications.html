@@ -1,0 +1,87 @@
+<div x-data="{ 
+    notifications: [],
+    add(message, type = 'info') {
+        const id = Date.now();
+        this.notifications.push({ id, message, type });
+        setTimeout(() => this.remove(id), 5000);
+    },
+    remove(id) {
+        this.notifications = this.notifications.filter(n => n.id !== id);
+    }
+}"
+@notify.window="add($event.detail.message, $event.detail.type)"
+class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+    
+    <!-- Django Messages Integration -->
+    {% if messages %}
+        {% for message in messages %}
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                 x-transition:enter="transition ease-out duration-300 transform"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-[20px] bg-[var(--surface-card-strong)] border border-[var(--border-card)] backdrop-blur-md p-4 shadow-lg flex items-start gap-3">
+                
+                <div class="flex-shrink-0">
+                    {% if message.tags == 'success' %}
+                        <i data-lucide="check-circle" class="w-6 h-6 text-emerald-400"></i>
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i data-lucide="alert-circle" class="w-6 h-6 text-rose-500"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-400"></i>
+                    {% else %}
+                        <i data-lucide="info" class="w-6 h-6 text-sky-400"></i>
+                    {% endif %}
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-[var(--text-primary)]">{{ message }}</p>
+                </div>
+                <button @click="show = false" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Dynamic Alpine.js Toasts -->
+    <template x-for="n in notifications" :key="n.id">
+        <div x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-[20px] bg-[var(--surface-card-strong)] border border-[var(--border-card)] backdrop-blur-md p-4 shadow-lg flex items-start gap-3">
+            
+            <div class="flex-shrink-0">
+                <template x-if="n.type === 'success'">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-emerald-400"></i>
+                </template>
+                <template x-if="n.type === 'error' || n.type === 'danger'">
+                    <i data-lucide="alert-circle" class="w-6 h-6 text-rose-500"></i>
+                </template>
+                <template x-if="n.type === 'warning'">
+                    <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-400"></i>
+                </template>
+                <template x-if="n.type === 'info'">
+                    <i data-lucide="info" class="w-6 h-6 text-sky-400"></i>
+                </template>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-medium text-[var(--text-primary)]" x-text="n.message"></p>
+            </div>
+            <button @click="remove(n.id)" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </template>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        // Automatically run Lucide icons after rendering inside Alpine templates
+        setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 100);
+    });
+</script>

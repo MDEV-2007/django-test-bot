@@ -1,0 +1,11 @@
+{% load static %}
+{# Uploaded image (question.image, e.g. an image_based map/diagram) takes priority over the older image_url field, which stays around for questions seeded from external URLs. #}
+{% if question.image %}
+    <div class="rounded-2xl overflow-hidden border border-[var(--border-card)] max-h-80 w-full flex items-center justify-center bg-black/20">
+        <img src="{{ question.image.url }}" alt="Savol rasmi" class="object-contain max-h-80 w-full">
+    </div>
+{% elif question.image_url %}
+    <div class="rounded-2xl overflow-hidden border border-[var(--border-card)] max-h-80 w-full flex items-center justify-center bg-black/20">
+        <img src="{{ question.image_url }}" alt="Savol rasmi" class="object-contain max-h-80">
+    </div>
+{% endif %}

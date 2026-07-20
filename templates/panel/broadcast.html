@@ -1,0 +1,100 @@
+{% extends 'panel/base_panel.html' %}
+
+{% block page_title %}Xabar yuborish{% endblock %}
+{% block breadcrumb %}<i data-lucide="megaphone" class="w-4 h-4"></i><span class="font-medium text-ink-700">Xabar yuborish</span>{% endblock %}
+
+{% block content %}
+<div class="grid gap-6 lg:grid-cols-[1fr_360px] max-w-5xl">
+  <div>
+    <h1 class="text-2xl font-extrabold mb-1">Ommaviy xabar</h1>
+    <p class="text-sm text-ink-500 mb-6">Foydalanuvchilarga ilova ichida bildirishnoma (va ixtiyoriy Telegram xabari) yuboring.</p>
+
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-2xl border border-ink-100 p-6 space-y-5">
+      {% csrf_token %}
+      {% for field in form %}
+      <div>
+        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-ink-700 mb-1.5">
+          {% if field.name == 'via_telegram' %}{% else %}{{ field.label }}{% endif %}
+        </label>
+        {% if field.name == 'via_telegram' %}
+          <label class="flex items-center gap-2 text-sm text-ink-700">{{ field }} Telegram orqali ham yuborish (ulangan foydalanuvchilarga)</label>
+        {% elif field.name == 'image' %}
+          <div class="space-y-2">
+            <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept="image/*"
+                   class="block w-full text-sm text-ink-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                   onchange="previewBroadcastImg(this)">
+            <p class="text-xs text-ink-400">Ixtiyoriy — rasm yuklash shart emas</p>
+            <img id="broadcast-img-preview" src="" alt="Preview" class="hidden mt-2 rounded-xl max-h-48 border border-ink-100 object-contain">
+          </div>
+        {% else %}
+          {{ field }}
+        {% endif %}
+        {% if field.help_text and field.name != 'image' %}<p class="text-xs text-ink-400 mt-1">{{ field.help_text }}</p>{% endif %}
+        {% if field.errors %}<p class="text-xs text-rose-500 mt-1">{{ field.errors|striptags }}</p>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="accent-bg text-white font-semibold px-5 py-2.5 rounded-xl text-sm inline-flex items-center gap-2">
+        <i data-lucide="send" class="w-4 h-4"></i> Yuborish
+      </button>
+    </form>
+    <script>
+    function previewBroadcastImg(input) {
+      const preview = document.getElementById('broadcast-img-preview');
+      if (input.files && input.files[0]) {
+        preview.src = URL.createObjectURL(input.files[0]);
+        preview.classList.remove('hidden');
+      } else {
+        preview.src = '';
+        preview.classList.add('hidden');
+      }
+    }
+    </script>
+
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+      <div class="bg-white rounded-xl border border-ink-100 p-3"><p class="text-xs text-ink-400">Barcha</p><p class="font-bold">{{ audience_counts.all }}</p></div>
+      <div class="bg-white rounded-xl border border-ink-100 p-3"><p class="text-xs text-ink-400">O'quvchilar</p><p class="font-bold">{{ audience_counts.students }}</p></div>
+      <div class="bg-white rounded-xl border border-ink-100 p-3"><p class="text-xs text-ink-400">O'qituvchilar</p><p class="font-bold">{{ audience_counts.teachers }}</p></div>
+      <div class="bg-white rounded-xl border border-ink-100 p-3"><p class="text-xs text-ink-400">Premium</p><p class="font-bold">{{ audience_counts.premium }}</p></div>
+    </div>
+  </div>
+
+  <div>
+    <h2 class="text-sm font-bold text-ink-500 uppercase tracking-wide mb-3">So'nggi yuborilganlar</h2>
+    <div class="space-y-2">
+      {% for b in history %}
+      <div class="bg-white rounded-xl border border-ink-100 p-4">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-bold text-sm text-ink-800 truncate">{{ b.title }}</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold flex-shrink-0">{{ b.get_audience_display }}</span>
+            </div>
+            <p class="text-xs text-ink-500 mt-1 line-clamp-2">{{ b.message }}</p>
+            {% if b.image %}
+            <img src="{{ b.image.url }}" alt="rasm" class="mt-2 rounded-lg max-h-20 border border-ink-100 object-cover">
+            {% endif %}
+            <div class="flex items-center gap-3 mt-2 text-[11px] text-ink-400">
+              <span class="inline-flex items-center gap-1"><i data-lucide="users" class="w-3 h-3"></i> {{ b.recipients_count }}</span>
+              {% if b.via_telegram %}<span class="inline-flex items-center gap-1"><i data-lucide="send" class="w-3 h-3"></i> {{ b.telegram_sent_count }}</span>{% endif %}
+              <span>{{ b.sent_at|date:"d.m.Y H:i" }}</span>
+            </div>
+          </div>
+          <!-- Delete button -->
+          <form method="post" action="{% url 'panel:broadcast_delete' b.pk %}"
+                onsubmit="return confirm('\"{{ b.title }}\" ni o\'chirasizmi?')"
+                class="flex-shrink-0">
+            {% csrf_token %}
+            <button type="submit" title="O'chirish"
+                    class="p-1.5 rounded-lg text-ink-300 hover:bg-rose-50 hover:text-rose-500 transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-sm text-ink-400">Hali xabar yuborilmagan.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

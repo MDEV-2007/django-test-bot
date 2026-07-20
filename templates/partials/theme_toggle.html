@@ -1,0 +1,25 @@
+<!-- Light/Dark/System theme switcher. Reads/writes the global Alpine.store('theme')
+     defined in base.html. -->
+<section class="glass-card rounded-[28px] border border-[var(--border-card)] p-6 bg-[var(--surface-card-soft)] flex items-center justify-between gap-4 flex-wrap" x-data>
+    <div>
+        <h3 class="text-sm font-bold text-[var(--text-primary)]">Ko'rinish</h3>
+        <p class="text-xs text-[var(--text-faint)] mt-0.5">Ilova rangini tanlang: yorug', tungi yoki qurilma sozlamasiga mos.</p>
+    </div>
+    <div class="flex items-center gap-1 bg-[var(--surface-hover)] rounded-full p-1">
+        <button type="button" @click="$store.theme.set('light')" title="Yorug'"
+                :class="$store.theme.pref === 'light' ? 'bg-[var(--surface-card-solid)] text-[var(--text-primary)] shadow-soft' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'"
+                class="w-9 h-9 rounded-full flex items-center justify-center transition">
+            <i data-lucide="sun" class="w-4 h-4"></i>
+        </button>
+        <button type="button" @click="$store.theme.set('dark')" title="Tungi"
+                :class="$store.theme.pref === 'dark' ? 'bg-[var(--surface-card-solid)] text-[var(--text-primary)] shadow-soft' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'"
+                class="w-9 h-9 rounded-full flex items-center justify-center transition">
+            <i data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+        <button type="button" @click="$store.theme.set('system')" title="Tizim"
+                :class="$store.theme.pref === 'system' ? 'bg-[var(--surface-card-solid)] text-[var(--text-primary)] shadow-soft' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'"
+                class="w-9 h-9 rounded-full flex items-center justify-center transition">
+            <i data-lucide="monitor" class="w-4 h-4"></i>
+        </button>
+    </div>
+</section>

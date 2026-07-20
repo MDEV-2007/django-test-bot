@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Xatolar ustida ishlash{% endblock %}
+
+{% block content %}
+<div class="space-y-6 animate-fadeIn max-w-3xl mx-auto">
+    <header class="flex items-start gap-4 border-b border-[var(--border-card)] pb-6">
+        <a href="{% url 'accounts:profile' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0 mt-1">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="repeat" class="w-8 h-8 text-[#37b7ff]"></i> Xatolar ustida ishlash
+            </h1>
+            <p class="text-[var(--text-muted)] text-sm mt-1">Noto'g'ri javob bergan savollaringizni to'g'ri javob bermaguningizcha takrorlang.</p>
+        </div>
+    </header>
+
+    <!-- Subject filter -->
+    <div class="flex flex-wrap gap-2">
+        <a href="{% url 'tests:revision' %}" class="px-4 py-2 rounded-xl font-semibold text-xs transition border {% if not selected_subject %}bg-[#2d6cff] text-white border-transparent{% else %}text-[var(--text-muted)] border-[var(--border-card)]{% endif %}">Barchasi</a>
+        {% for s in subjects %}
+        <a href="?subject={{ s.slug }}" class="flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-xs transition border {% if selected_subject == s.slug %}text-white border-transparent{% else %}text-[var(--text-muted)] border-[var(--border-card)]{% endif %}" {% if selected_subject == s.slug %}style="background-color: {{ s.color }};"{% endif %}>
+            <i data-lucide="{{ s.icon_name }}" class="w-3.5 h-3.5"></i> {{ s.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if deck %}
+    <div x-data="revisionDeck()" x-init="init()">
+        <!-- Progress -->
+        <div class="glass-card rounded-2xl p-4 border border-[var(--border-card)]">
+            <div class="flex items-center justify-between text-sm mb-2">
+                <span class="font-semibold text-[var(--text-primary)]">Jarayon</span>
+                <span class="text-[var(--text-muted)]"><span x-text="doneCount"></span> / <span x-text="total"></span></span>
+            </div>
+            <div class="h-2.5 rounded-full bg-[var(--surface-hover)] overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#2d6cff] to-[#37b7ff] transition-all duration-500" :style="`width: ${progress}%`"></div>
+            </div>
+        </div>
+
+        <!-- Deck finished -->
+        <div x-show="index >= deck.length" x-cloak class="glass-card rounded-3xl p-10 text-center mt-6">
+            <i data-lucide="party-popper" class="w-12 h-12 mx-auto mb-3 text-emerald-400"></i>
+            <h3 class="text-xl font-bold text-[var(--text-primary)]">Ajoyib! Ushbu to'plamни yakunladingiz.</h3>
+            <p class="text-[var(--text-muted)] text-sm mt-2">To'g'ri javob berilgan savollar ro'yxatдан olib tashlandi.</p>
+            <a href="{% url 'tests:center' %}" class="inline-block mt-5 px-5 py-2.5 rounded-2xl bg-[#2d6cff] text-white text-sm font-semibold">Test markaziga</a>
+        </div>
+
+        <!-- Current card -->
+        <template x-if="index < deck.length">
+            <div class="glass-card rounded-3xl p-6 md:p-8 border border-[var(--border-card)] mt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold text-[var(--text-muted)]" x-text="current.topic || 'Umumiy'"></span>
+                    <span class="text-xs font-bold text-rose-400 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> <span x-text="current.times_wrong"></span> marta xato</span>
+                </div>
+
+                <div class="prose-invert text-[var(--text-primary)] font-medium leading-relaxed" x-html="current.body"></div>
+                <template x-if="current.image">
+                    <img :src="current.image" class="rounded-2xl mt-4 max-h-64 mx-auto" alt="">
+                </template>
+
+                <!-- Inline (choice-based) retry -->
+                <template x-if="current.inline">
+                    <div class="space-y-2.5 mt-5">
+                        <template x-for="c in current.choices" :key="c.id">
+                            <button type="button" @click="answer(c.id)" :disabled="answered"
+                                class="w-full text-left px-4 py-3 rounded-2xl border transition text-sm font-medium"
+                                :class="choiceClass(c.id)">
+                                <span x-text="c.text"></span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Non-choice types: reveal + self-mark -->
+                <template x-if="!current.inline">
+                    <div class="mt-5">
+                        <div x-show="revealed" x-cloak class="rounded-2xl bg-[var(--surface-hover)] p-4 text-sm text-[var(--text-secondary)]" x-html="current.explanation || 'Izoh yo‘q.'"></div>
+                        <button x-show="!revealed" @click="revealed = true" type="button" class="w-full px-4 py-3 rounded-2xl bg-[var(--surface-hover)] text-[var(--text-primary)] text-sm font-semibold">Javobни ko'rsatish</button>
+                        <button x-show="revealed" @click="master()" type="button" class="w-full mt-3 px-4 py-3 rounded-2xl bg-emerald-500/15 text-emerald-400 text-sm font-bold">Tushundim, keyingisi</button>
+                    </div>
+                </template>
+
+                <!-- Feedback + next -->
+                <div x-show="answered" x-cloak class="mt-5">
+                    <div class="rounded-2xl p-4 text-sm" :class="lastCorrect ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'">
+                        <p class="font-bold flex items-center gap-2">
+                            <i :data-lucide="lastCorrect ? 'check-circle-2' : 'x-circle'" class="w-4 h-4"></i>
+                            <span x-text="lastCorrect ? 'To‘g‘ri! Ro‘yxatдан olib tashlandi.' : 'Xato. To‘g‘ri javob belgilandi.'"></span>
+                        </p>
+                        <p x-show="lastExplanation" class="mt-2 text-[var(--text-secondary)]" x-html="lastExplanation"></p>
+                    </div>
+                    <button @click="next()" type="button" class="w-full mt-3 px-4 py-3 rounded-2xl bg-[#2d6cff] text-white text-sm font-bold flex items-center justify-center gap-2">
+                        Keyingisi <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+    {% else %}
+    <div class="glass-card rounded-3xl p-10 text-center text-[var(--text-muted)]">
+        <i data-lucide="check-circle-2" class="w-12 h-12 mx-auto mb-3 text-emerald-400 opacity-80"></i>
+        <p class="text-[var(--text-primary)] font-semibold">Takrorlanadigan xato yo'q!</p>
+        <p class="text-sm mt-1">Bu fanда barcha xatolaringiz ustида ishlab bo'ldingiz yoki hali test yechmagansiz.</p>
+        <a href="{% url 'tests:center' %}" class="inline-block mt-4 px-5 py-2.5 rounded-2xl bg-[#2d6cff] text-white text-sm font-semibold">Test yechish</a>
+    </div>
+    {% endif %}
+</div>
+
+{{ deck|json_script:"revision-deck" }}
+<script>
+function revisionDeck() {
+    return {
+        deck: JSON.parse(document.getElementById('revision-deck').textContent),
+        index: 0,
+        answered: false,
+        revealed: false,
+        lastCorrect: false,
+        lastExplanation: '',
+        correctChoiceId: null,
+        pickedId: null,
+        doneCount: {{ mastered_count }},
+        total: {{ total }},
+        get current() { return this.deck[this.index] || {}; },
+        get progress() { return this.total ? Math.round((this.doneCount / this.total) * 100) : 100; },
+        init() { this.$nextTick(() => window.lucide && lucide.createIcons()); },
+        _post(itemId, body) {
+            return fetch("{% url 'tests:revision_check' 0 %}".replace('/0/', '/' + itemId + '/'), {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest' },
+                body: body,
+            }).then(r => r.json());
+        },
+        answer(choiceId) {
+            if (this.answered) return;
+            this.answered = true; this.pickedId = choiceId;
+            const fd = new FormData(); fd.append('choice_id', choiceId);
+            this._post(this.current.item_id, fd).then(d => {
+                this.lastCorrect = d.correct;
+                this.correctChoiceId = d.correct_choice_id;
+                this.lastExplanation = d.explanation || '';
+                if (d.correct) this.doneCount++;
+                this.$nextTick(() => window.lucide && lucide.createIcons());
+            });
+        },
+        master() {
+            const fd = new FormData(); fd.append('action', 'master');
+            this._post(this.current.item_id, fd).then(d => {
+                this.answered = true; this.lastCorrect = true; this.doneCount++;
+                this.$nextTick(() => window.lucide && lucide.createIcons());
+            });
+        },
+        choiceClass(id) {
+            if (!this.answered) return 'border-[var(--border-card)] hover:border-[#37b7ff] text-[var(--text-primary)] bg-[var(--surface-card-soft)]';
+            if (id === this.correctChoiceId) return 'border-emerald-400 bg-emerald-500/10 text-emerald-400';
+            if (id === this.pickedId) return 'border-rose-400 bg-rose-500/10 text-rose-400';
+            return 'border-[var(--border-card)] text-[var(--text-muted)] opacity-60';
+        },
+        next() {
+            this.index++; this.answered = false; this.revealed = false;
+            this.lastExplanation = ''; this.correctChoiceId = null; this.pickedId = null;
+            this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+    };
+}
+</script>
+{% endblock %}

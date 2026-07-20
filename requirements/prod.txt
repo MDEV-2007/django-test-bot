@@ -1,0 +1,6 @@
+# Production-only. Install with:  pip install -r requirements/prod.txt
+-r base.txt
+
+gunicorn==23.0.0         # WSGI server — never run `manage.py runserver` in production
+psycopg[binary]==3.2.3   # PostgreSQL driver (set DATABASE_URL)
+redis==5.2.1             # cache + sessions (set REDIS_URL)

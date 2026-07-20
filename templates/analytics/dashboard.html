@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Analitika{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-fadeIn">
+    <header class="flex items-start gap-4 border-b border-[var(--border-card)] pb-6">
+        <a href="{% url 'accounts:profile' %}" class="w-10 h-10 rounded-xl bg-[var(--surface-hover)] border border-[var(--border-card)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition flex-shrink-0 mt-1">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-8 h-8 text-[#37b7ff]"></i> Tahlil paneli
+            </h1>
+            <p class="text-[var(--text-muted)] text-sm mt-1">Har bir testдan keyin yangilanadigan bilim ko'rsatkichlaringiz.</p>
+        </div>
+    </header>
+
+    {% if data.total_tests == 0 %}
+    <div class="glass-card rounded-3xl p-10 text-center text-[var(--text-muted)]">
+        <i data-lucide="line-chart" class="w-10 h-10 mx-auto mb-3 opacity-60"></i>
+        <p>Hali tahlil uchun ma'lumot yo'q. Birinchi testни yeching — natijalaringiz shu yerда jamlanadi.</p>
+        <a href="{% url 'tests:center' %}" class="inline-block mt-4 px-5 py-2.5 rounded-2xl bg-[#2d6cff] text-white text-sm font-semibold">Test yechish</a>
+    </div>
+    {% else %}
+
+    <!-- Stat tiles -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {% include 'analytics/_tile.html' with icon='target' tone='emerald' label='Aniqlik' value=data.accuracy suffix='%' %}
+        {% include 'analytics/_tile.html' with icon='file-check-2' tone='blue' label='Testlar' value=data.total_tests %}
+        {% include 'analytics/_tile.html' with icon='gauge' tone='violet' label="O'rtacha ball" value=data.avg_score suffix='%' %}
+        {% include 'analytics/_tile.html' with icon='clock' tone='amber' label='Vaqt (daq)' value=data.time_minutes %}
+    </section>
+
+    <!-- Radar + Accuracy doughnut -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="glass-card rounded-3xl p-6 border border-[var(--border-card)] lg:col-span-2">
+            <h2 class="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"><i data-lucide="radar" class="w-5 h-5 text-[#37b7ff]"></i> Mavzular bo'yicha o'zlashtirish</h2>
+            <div class="relative h-[320px]"><canvas id="radarChart"></canvas></div>
+        </div>
+        <div class="glass-card rounded-3xl p-6 border border-[var(--border-card)]">
+            <h2 class="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-emerald-400"></i> Javoblar aniqligi</h2>
+            <div class="relative h-[260px]"><canvas id="accuracyChart"></canvas></div>
+        </div>
+    </section>
+
+    <!-- Weak / strong -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="glass-card rounded-3xl p-6 border border-rose-500/20">
+            <h3 class="font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i> Zaif mavzular</h3>
+            {% if data.mastery.weak %}
+            <div class="flex flex-wrap gap-2">{% for t in data.mastery.weak %}<span class="text-xs font-semibold px-3 py-1 rounded-full bg-rose-500/10 text-rose-400">{{ t }}</span>{% endfor %}</div>
+            {% else %}<p class="text-sm text-[var(--text-muted)]">Zaif mavzu topilmadi — zo'r!</p>{% endif %}
+        </div>
+        <div class="glass-card rounded-3xl p-6 border border-emerald-500/20">
+            <h3 class="font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2"><i data-lucide="award" class="w-4 h-4 text-emerald-400"></i> Kuchli mavzular</h3>
+            {% if data.mastery.strong %}
+            <div class="flex flex-wrap gap-2">{% for t in data.mastery.strong %}<span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400">{{ t }}</span>{% endfor %}</div>
+            {% else %}<p class="text-sm text-[var(--text-muted)]">Ko'proq test yeching — kuchli tomonlaringiz shu yerда chiqadi.</p>{% endif %}
+        </div>
+    </section>
+
+    <!-- Weekly progress (line) + daily activity (bar) -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="glass-card rounded-3xl p-6 border border-[var(--border-card)]">
+            <h2 class="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"><i data-lucide="trending-up" class="w-5 h-5 text-[#37b7ff]"></i> Haftalik jarayon</h2>
+            <div class="relative h-[280px]"><canvas id="weeklyChart"></canvas></div>
+        </div>
+        <div class="glass-card rounded-3xl p-6 border border-[var(--border-card)]">
+            <h2 class="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"><i data-lucide="activity" class="w-5 h-5 text-amber-400"></i> Kunlik faollik (14 kun)</h2>
+            <div class="relative h-[280px]"><canvas id="dailyChart"></canvas></div>
+        </div>
+    </section>
+
+    <!-- Subject distribution + history -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="glass-card rounded-3xl p-6 border border-[var(--border-card)]">
+            <h2 class="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"><i data-lucide="layers" class="w-5 h-5 text-violet-400"></i> Fanlar taqsimoti</h2>
+            <div class="relative h-[260px]"><canvas id="subjectChart"></canvas></div>
+        </div>
+        <div class="glass-card rounded-3xl p-6 border border-[var(--border-card)] lg:col-span-2">
+            <h2 class="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 text-[#37b7ff]"></i> Oxirgi testlar</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="text-left text-[var(--text-muted)] text-xs uppercase">
+                        <th class="py-2 pr-4">Test</th><th class="py-2 px-2">Ball</th><th class="py-2 px-2 text-emerald-400">To'g'ri</th><th class="py-2 px-2 text-rose-400">Xato</th><th class="py-2 pl-2 text-right">Sana</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for a in data.recent %}
+                        <tr class="border-t border-[var(--border-soft)]">
+                            <td class="py-2.5 pr-4 text-[var(--text-primary)] font-medium">{{ a.test__title|default:"Tasodifiy test"|truncatechars:28 }}</td>
+                            <td class="py-2.5 px-2 font-bold {% if a.score >= 80 %}text-emerald-400{% elif a.score >= 50 %}text-amber-400{% else %}text-rose-400{% endif %}">{{ a.score|floatformat:0 }}%</td>
+                            <td class="py-2.5 px-2">{{ a.correct_answers }}</td>
+                            <td class="py-2.5 px-2">{{ a.wrong_answers }}</td>
+                            <td class="py-2.5 pl-2 text-right text-[var(--text-muted)] text-xs">{{ a.completed_at|date:"d M, H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+{{ charts|json_script:"analytics-data" }}
+<script src="{% static 'js/analytics.js' %}" defer></script>
+{% endblock %}

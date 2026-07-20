@@ -1,0 +1,240 @@
+:root {
+  color-scheme: dark;
+  color: #e6edf8;
+  background: #0b1120;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, rgba(56, 149, 255, 0.15), transparent 28%),
+    linear-gradient(180deg, #07101e 0%, #050811 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+  gap: 24px;
+  padding: 28px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 30px;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #37b7ff 0%, #3e54ff 100%);
+  font-size: 24px;
+}
+
+.brand-name {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  margin: 0;
+  color: #9fb4d7;
+  font-size: 0.92rem;
+}
+
+.nav-list {
+  display: grid;
+  gap: 12px;
+}
+
+.nav-item {
+  display: block;
+  padding: 14px 18px;
+  border-radius: 16px;
+  color: #b9c7e8;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.nav-item.active {
+  color: #f8fbff;
+  background: linear-gradient(135deg, rgba(56, 149, 255, 0.18), rgba(97, 147, 255, 0.02));
+  border: 1px solid rgba(56, 149, 255, 0.35);
+}
+
+.sidebar-card {
+  margin-top: auto;
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(52, 71, 102, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.card-title {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.card-text,
+.stat-label,
+.eyebrow {
+  margin: 0;
+  color: #a0b0d3;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 26px;
+  border-radius: 30px;
+  background: rgba(10, 16, 29, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.eyebrow {
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.76rem;
+  color: #6c87b6;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1.05;
+}
+
+.button {
+  border: none;
+  border-radius: 16px;
+  padding: 14px 22px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.button-primary {
+  color: #fff;
+  background: linear-gradient(135deg, #4f9dff 0%, #4360ff 100%);
+  box-shadow: 0 24px 40px rgba(67, 96, 255, 0.24);
+}
+
+.button-secondary {
+  color: #dbe5ff;
+  background: rgba(34, 53, 94, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.stat-card {
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(17, 26, 45, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stat-card h2 {
+  margin: 8px 0 0;
+  font-size: 2rem;
+}
+
+.grid-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+}
+
+.card {
+  padding: 24px;
+  border-radius: 28px;
+  background: rgba(14, 23, 38, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-large {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(56, 149, 255, 0.15);
+  color: #b8d2ff;
+  font-size: 0.85rem;
+}
+
+.card-text {
+  margin-top: 18px;
+  line-height: 1.75;
+}
+
+@media (max-width: 1100px) {
+  .page-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar,
+  .sidebar,
+  .stats-grid,
+  .grid-grid {
+    padding: 18px;
+  }
+
+  .stats-grid,
+  .grid-grid {
+    grid-template-columns: 1fr;
+  }
+}
