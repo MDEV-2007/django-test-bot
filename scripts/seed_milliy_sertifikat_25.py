@@ -7,19 +7,26 @@ savollardan qochildi (avvalgi PDF-transkripsiyadagi kabi noaniqlik yo'q).
 """
 import os
 
+# Running this file directly puts scripts/ on sys.path, not the project root, so
+# `config.settings` (and every app) would be unimportable. Add the root explicitly
+# so the script works from any working directory.
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django
 django.setup()
 
 from learning.models import Topic
-from tests_app.models import Question, Choice, MatchingPair, QuestionGroup, GroupOption, Test
+from tests_app.models import Question, AnswerOption, MatchingPair, QuestionGroup, GroupOption, TestSet
 
 TOPIC_SLUG = "milliy-sertifikat"
 
 
 def main():
     topic = Topic.objects.get(slug=TOPIC_SLUG)
-    test = Test.objects.create(
+    test = TestSet.objects.create(
         title="Milliy Sertifikat testi — 25 savol",
         description="Milliy sertifikatga tayyorgarlik uchun aralash turdagi (variantli, "
                      "juftlashtirish, umumiy javob banki, ochiq javobli) 25 savollik test.",
@@ -52,7 +59,7 @@ def main():
     for text, options, correct_idx in mcq_data:
         q = Question.objects.create(topic=topic, text=text, category="certificate", question_type="mcq", difficulty="medium")
         for idx, opt in enumerate(options):
-            Choice.objects.create(question=q, text=opt, is_correct=(idx == correct_idx))
+            AnswerOption.objects.create(question=q, text=opt, is_correct=(idx == correct_idx))
         created_questions.append(q)
 
     # ------------------------------------------------------------------

@@ -1,5 +1,12 @@
 import os
 
+# Running this file directly puts scripts/ on sys.path, not the project root, so
+# `config.settings` (and every app) would be unimportable. Add the root explicitly
+# so the script works from any working directory.
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 import django
@@ -7,7 +14,7 @@ import django
 django.setup()
 
 from learning.models import Topic
-from tests_app.models import Question, Choice, Test
+from tests_app.models import Question, AnswerOption, TestSet
 from games.models import HistoricalCharacter, MapChallenge
 
 # Real historical map of Central Asia (Khorasan / Transoxiana-Movarounnahr / Khwarazm-Xorazm) —
@@ -312,11 +319,11 @@ def seed_questions_and_tests(topics):
             total_q_created += int(q_created)
             if not question.choices.exists():
                 for choice_text, is_correct in choices:
-                    Choice.objects.create(question=question, text=choice_text, is_correct=is_correct)
+                    AnswerOption.objects.create(question=question, text=choice_text, is_correct=is_correct)
                     total_c_created += 1
             made_questions.append(question)
 
-        test, test_created = Test.objects.get_or_create(
+        test, test_created = TestSet.objects.get_or_create(
             title=TEST_TITLES_BY_TOPIC[slug],
             defaults=dict(
                 description=f"{topic.title} bo'yicha bilimlaringizni sinab ko'ring.",

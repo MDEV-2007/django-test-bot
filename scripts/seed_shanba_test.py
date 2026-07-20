@@ -17,12 +17,19 @@ Groq shu bilan solishtirib baholaydi.
 """
 import os
 
+# Running this file directly puts scripts/ on sys.path, not the project root, so
+# `config.settings` (and every app) would be unimportable. Add the root explicitly
+# so the script works from any working directory.
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django
 django.setup()
 
 from learning.models import Topic
-from tests_app.models import Question, Choice, Test
+from tests_app.models import Question, AnswerOption, TestSet
 
 TOPIC_SLUG = "milliy-sertifikat"
 
@@ -333,7 +340,7 @@ def main():
                 question_type="mcq",
             )
             for idx, opt_text in enumerate(q["options"]):
-                Choice.objects.create(question=question, text=opt_text, is_correct=(idx == q["correct_index"]))
+                AnswerOption.objects.create(question=question, text=opt_text, is_correct=(idx == q["correct_index"]))
         else:
             question = Question.objects.create(
                 topic=topic,
@@ -347,7 +354,7 @@ def main():
         if q.get("confidence") not in (None, "OK"):
             low_confidence.append((i, q["confidence"], question.text[:60]))
 
-    test = Test.objects.create(
+    test = TestSet.objects.create(
         title="Milliy Sertifikat namunaviy testi — Tarix (45 savol)",
         description="Haftalik namunaviy Milliy Sertifikat tarix testi: variantli va ochiq javobli "
                      "(AI baholaydigan) savollar aralash.",

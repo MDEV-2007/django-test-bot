@@ -3,6 +3,13 @@ import shutil
 import sqlite3
 from pathlib import Path
 
+# Running this file directly puts scripts/ on sys.path, not the project root, so
+# `config.settings` (and every app) would be unimportable. Add the root explicitly
+# so the script works from any working directory.
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 import django
@@ -37,7 +44,7 @@ def get_table_names(conn: sqlite3.Connection):
 
 
 def import_from_source(source_conn: sqlite3.Connection) -> int:
-    from tests_app.models import Question, Choice, Test
+    from tests_app.models import Question, AnswerOption, TestSet
     from learning.models import Topic
 
     table_info = source_conn.execute("PRAGMA table_info(questions)").fetchall()
@@ -55,7 +62,7 @@ def import_from_source(source_conn: sqlite3.Connection) -> int:
         return 0
 
     topic, _ = Topic.objects.get_or_create(title="Import test", slug="import-test", category="history", order=99)
-    created_test, _ = Test.objects.get_or_create(
+    created_test, _ = TestSet.objects.get_or_create(
         title="Imported Test",
         defaults={
             "description": "Imported from uploaded SQLite file",
@@ -110,11 +117,11 @@ def import_from_source(source_conn: sqlite3.Connection) -> int:
                     elif correct_letter == "D" and idx == 4:
                         is_correct = True
 
-                    Choice.objects.get_or_create(question=question, text=option_text, defaults={"is_correct": is_correct})
+                    AnswerOption.objects.get_or_create(question=question, text=option_text, defaults={"is_correct": is_correct})
 
         question_title = f"Imported Test #{question.id}"
         chapter_name = values.get("chapter") or "General"
-        test, test_created = Test.objects.get_or_create(
+        test, test_created = TestSet.objects.get_or_create(
             title=question_title,
             defaults={
                 "description": f"Imported from source DB — {chapter_name}",
