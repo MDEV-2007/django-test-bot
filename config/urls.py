@@ -18,9 +18,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Offline support. sw.js MUST be served from the site root: a service worker can only
+    # control pages at or below its own path, so serving it from /static/js/ would scope
+    # it to /static/js/ and it would never see a single page navigation.
+    path('sw.js', TemplateView.as_view(
+        template_name='sw.js', content_type='application/javascript'), name='service_worker'),
+    path('offline/', TemplateView.as_view(
+        template_name='offline.html'), name='offline'),
     path('', include('dashboard.urls')),
     path('accounts/', include('accounts.urls')),
     path('analytics/', include('analytics.urls')),

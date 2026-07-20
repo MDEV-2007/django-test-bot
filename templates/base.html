@@ -703,6 +703,19 @@
             });
           };
         }
+
+        /* The overlay above can only react once a page is already open. If the connection
+           is gone *before* the user taps a link, the browser never reaches us and shows
+           its own error page. The service worker answers that failed navigation with our
+           own offline page. It only handles navigations and caches no real pages, so it
+           cannot serve stale content after a deploy. */
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function (e) {
+              console.warn('Service worker registration failed:', e);
+            });
+          });
+        }
       })();
     </script>
   </body>

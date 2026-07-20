@@ -1,0 +1,109 @@
+{% load static %}<!doctype html>
+{% comment %}
+Served by the service worker when a navigation fails because the device is offline.
+
+Everything is inlined on purpose: with no network the Tailwind CDN, Google Fonts and
+lucide would all fail to load, so this page must not depend on a single external file.
+{% endcomment %}
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>IlmMevasi — Internet aloqasi yo'q</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem 1.25rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #f8fbff; text-align: center;
+      background: radial-gradient(circle at top, rgba(45,108,255,0.16), transparent 45%), #050811;
+    }
+    .wrap { width: 100%; max-width: 26rem; }
+    .icon {
+      width: 96px; height: 96px; margin: 0 auto 1.5rem;
+      border-radius: 30px; display: flex; align-items: center; justify-content: center;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1);    opacity: 1; }
+      50%     { transform: scale(0.94); opacity: 0.75; }
+    }
+    svg { width: 44px; height: 44px; stroke: #ef4444; fill: none;
+          stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    h1 { font-size: 1.5rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+    p  { color: #8ea3c4; font-size: 0.9rem; line-height: 1.7; margin: 0.75rem 0 0; }
+    .tips {
+      margin-top: 1.75rem; padding: 1rem 1.25rem; text-align: left;
+      background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+    }
+    .tips b { font-size: 0.78rem; color: #f8fbff; display: block; margin-bottom: 0.5rem; }
+    .tips ul { margin: 0; padding-left: 1.1rem; color: #8ea3c4; font-size: 0.8rem; line-height: 1.9; }
+    button {
+      margin-top: 1.5rem; width: 100%; padding: 0.9rem 1.5rem;
+      border: none; border-radius: 1rem; cursor: pointer; font-family: inherit;
+      background: linear-gradient(90deg, #2d6cff, #37b7ff); color: #fff;
+      font-weight: 700; font-size: 0.9rem;
+    }
+    button:disabled { opacity: 0.6; cursor: default; }
+    .status { margin-top: 0.9rem; font-size: 0.75rem; color: #5b6b86; }
+    .online { color: #10b981; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="icon">
+      <!-- wifi-off, inlined: an icon font would not load offline -->
+      <svg viewBox="0 0 24 24" role="img" aria-label="Aloqa yo'q">
+        <path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+    </div>
+
+    <h1>Internet aloqasi yo'q</h1>
+    <p>Sizda internet aloqasi mavjud emas. Aloqani tiklab, qayta urinib ko'ring.</p>
+
+    <div class="tips">
+      <b>Tekshiring:</b>
+      <ul>
+        <li>Wi-Fi yoki mobil internet yoqilganmi</li>
+        <li>Aviarejim o'chirilganmi</li>
+        <li>Signal kuchi yetarlimi</li>
+      </ul>
+    </div>
+
+    <button id="retry" type="button">Qayta urinish</button>
+    <p class="status" id="status">Aloqa kutilmoqda...</p>
+  </div>
+
+  <script>
+    var btn = document.getElementById('retry');
+    var status = document.getElementById('status');
+
+    function refresh() {
+      if (navigator.onLine) {
+        status.innerHTML = '<span class="online">Aloqa tiklandi — yuklanmoqda...</span>';
+        location.reload();
+      } else {
+        status.textContent = 'Hali ham aloqa yo’q. Internetni yoqing.';
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      btn.disabled = true;
+      status.textContent = 'Tekshirilmoqda...';
+      setTimeout(function () { btn.disabled = false; refresh(); }, 800);
+    });
+
+    // Reload by itself the moment the connection comes back.
+    window.addEventListener('online', refresh);
+    if (navigator.onLine) status.textContent = 'Aloqa bor — sahifani yangilang.';
+  </script>
+</body>
+</html>

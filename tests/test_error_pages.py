@@ -89,6 +89,46 @@ class OfflineStateTests(TestCase):
             self.assertIn(hook, html)
 
 
+class ServiceWorkerOfflineTests(TestCase):
+    """The in-page overlay only helps once a page is open. When the connection is already
+    gone the browser never reaches us at all, so a service worker has to answer the failed
+    navigation with our own offline page."""
+
+    def test_service_worker_is_served_from_the_site_root(self):
+        """Scope is the whole point: a worker served from /static/js/ could only control
+        /static/js/ and would never see a page navigation."""
+        response = self.client.get('/sw.js')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/javascript')
+
+    def test_service_worker_only_intercepts_navigations(self):
+        """Caching assets or API responses is how a service worker starts serving stale
+        content after a deploy — a worse bug than the one it fixes."""
+        js = self.client.get('/sw.js').content.decode()
+        self.assertIn("request.mode !== 'navigate'", js)
+        self.assertIn('/offline/', js)
+
+    def test_offline_page_renders(self):
+        response = self.client.get('/offline/')
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn("Internet aloqasi yo'q", html)
+        self.assertIn('Qayta urinish', html)
+
+    def test_offline_page_has_no_external_dependencies(self):
+        """With no network the Tailwind CDN, fonts and icons would all fail to load, so
+        the offline page must be entirely self-contained."""
+        html = self.client.get('/offline/').content.decode()
+        for pattern in ('src="http', 'href="http', 'cdn.'):
+            self.assertNotIn(pattern, html,
+                             'the offline page must not depend on anything it cannot load offline')
+
+    def test_offline_page_is_reachable_without_logging_in(self):
+        """A login redirect would defeat the point — there is no network to log in over."""
+        response = self.client.get('/offline/')
+        self.assertEqual(response.status_code, 200)
+
+
 class ForbiddenPageTests(TestCase):
     def test_403_renders(self):
         user, _ = make_user(username='no_access')
