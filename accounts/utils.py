@@ -69,7 +69,7 @@ def send_telegram_message(chat_id: str, text: str) -> bool:
 
 def send_telegram_photo(chat_id: str, image_path: str, caption: str) -> bool:
     """Send a photo with caption to a Telegram user via sendPhoto (multipart upload).
-    Falls back to a plain sendMessage if the file cannot be read.
+    Falls back to a plain sendMessage if the photo cannot be sent.
     Never raises.
     """
     if not chat_id:
@@ -89,13 +89,16 @@ def send_telegram_photo(chat_id: str, image_path: str, caption: str) -> bool:
                 files={"photo": f},
                 timeout=15,
             )
-        return resp.ok
+        if resp.ok:
+            return True
+        else:
+            logger.warning("Telegram sendPhoto returned not ok: %s %s. Falling back to text.", resp.status_code, resp.text)
     except FileNotFoundError:
         logger.warning("Broadcast image not found at %s — falling back to text", image_path)
-        return send_telegram_message(chat_id, caption)
-    except Exception:
-        logger.warning("Failed to send Telegram photo to %s", chat_id, exc_info=True)
-        return False
+    except Exception as e:
+        logger.warning("Failed to send Telegram photo to %s due to exception: %s. Falling back to text.", chat_id, str(e), exc_info=True)
+
+    return send_telegram_message(chat_id, caption)
 
 
 def get_telegram_photo_url(tg_id: str) -> str | None:

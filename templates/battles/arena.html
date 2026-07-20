@@ -35,7 +35,7 @@
              try {
                  const res = await fetch('{% url 'battles:start_battle_quiz' %}');
                  const data = await res.json();
-                 if (!data.success) throw new Error(data.error);
+                 if (!data.success) throw new Error(data.error || 'Jangni boshlab bo\'lmadi.');
                  this.battleId = data.battle_id;
                  this.questions = data.questions;
                  this.opponent = data.opponent;
@@ -46,7 +46,7 @@
                  this.startQuestionRound();
              } catch(e) {
                  this.state = 'lobby';
-                 alert('Xatolik: Jangni boshlab bo\'lmadi.');
+                 alert('Xatolik: ' + (e.message || 'Jangni boshlab bo\'lmadi.'));
              }
          },
          startQuestionRound() {
