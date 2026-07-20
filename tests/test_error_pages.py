@@ -56,6 +56,39 @@ class ServerErrorPageTests(TestCase):
         self.assertNotIn("{% extends", source)
 
 
+class OfflineStateTests(TestCase):
+    """A lost connection must read as a clear message, not as buttons that silently do
+    nothing. The overlay ships in base.html, so every page inherits it."""
+
+    def setUp(self):
+        self.user, _ = make_user(username='offline_student')
+        self.client.force_login(self.user)
+
+    def test_offline_overlay_is_present_on_every_page(self):
+        for url in ('/', '/tests/', '/shop/', '/accounts/profile/'):
+            with self.subTest(url=url):
+                html = self.client.get(url).content.decode()
+                self.assertIn('id="offline-overlay"', html)
+                self.assertIn("Internet aloqasi yo'q", html)
+
+    def test_offline_overlay_offers_a_retry(self):
+        html = self.client.get('/').content.decode()
+        self.assertIn('id="offline-retry"', html)
+        self.assertIn('Qayta urinish', html)
+
+    def test_weak_connection_toast_is_present(self):
+        html = self.client.get('/').content.decode()
+        self.assertIn('id="net-toast"', html)
+        self.assertIn('Aloqa yaxshi emas', html)
+
+    def test_offline_state_is_wired_to_browser_events(self):
+        """Without these listeners the markup would never be shown."""
+        html = self.client.get('/').content.decode()
+        for hook in ("addEventListener('offline'", "addEventListener('online'",
+                     'htmx:sendError', 'navigator.onLine'):
+            self.assertIn(hook, html)
+
+
 class ForbiddenPageTests(TestCase):
     def test_403_renders(self):
         user, _ = make_user(username='no_access')

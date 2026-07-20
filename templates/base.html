@@ -172,6 +172,57 @@
       /* Horizontal scroll containers (tab rows, chip rows) without a visible scrollbar. */
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
+
+      /* Offline overlay — shown when the device loses its connection, so a dead network
+         reads as a clear message instead of buttons that silently do nothing. */
+      #offline-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        background: radial-gradient(circle at top, var(--bg-page-glow-splash), transparent 55%), var(--bg-page);
+      }
+      #offline-overlay.is-visible { display: flex; }
+      #offline-overlay .off-icon {
+        width: 88px; height: 88px; border-radius: 28px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        color: #ef4444;
+        animation: offlinePulse 2s ease-in-out infinite;
+      }
+      @keyframes offlinePulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50%      { transform: scale(0.94); opacity: 0.75; }
+      }
+      #offline-overlay h2 { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 0.5rem 0 0; }
+      #offline-overlay p  { font-size: 0.9rem; color: var(--text-muted); max-width: 22rem; line-height: 1.65; margin: 0; }
+      #offline-retry {
+        margin-top: 0.5rem; padding: 0.85rem 1.6rem; border-radius: 1rem; border: none;
+        background: linear-gradient(90deg, #2d6cff, #37b7ff); color: #fff;
+        font-weight: 700; font-size: 0.875rem; cursor: pointer; font-family: inherit;
+        display: inline-flex; align-items: center; gap: 0.45rem;
+      }
+      #offline-retry:disabled { opacity: 0.6; cursor: default; }
+
+      /* Lighter, non-blocking toast for a single request that failed while the browser
+         still believes it is online (flaky signal, server unreachable). */
+      #net-toast {
+        position: fixed; left: 50%; transform: translateX(-50%);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 6.5rem);
+        z-index: 9998; display: none; align-items: center; gap: 0.5rem;
+        padding: 0.7rem 1.1rem; border-radius: 1rem;
+        background: rgba(239, 68, 68, 0.95); color: #fff;
+        font-size: 0.8rem; font-weight: 600;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+      }
+      #net-toast.is-visible { display: inline-flex; }
       /* Subtle tactile press feedback on buttons (transform only — never shifts layout). */
       button { transition: transform 0.08s ease; }
       button:active { transform: scale(0.97); }
@@ -329,6 +380,23 @@
       </div>
       <div class="splash-bar"></div>
     </div>
+
+    <!-- Offline state: full-screen while the device has no connection at all -->
+    <div id="offline-overlay" role="alertdialog" aria-live="assertive" aria-label="Internet aloqasi yo'q">
+      <div class="off-icon"><i data-lucide="wifi-off" style="width:40px;height:40px"></i></div>
+      <h2>Internet aloqasi yo'q</h2>
+      <p>Aloqangizni tekshiring — Wi-Fi yoki mobil internetni yoqing, so'ng qayta urinib ko'ring.</p>
+      <button id="offline-retry" type="button">
+        <i data-lucide="refresh-cw" style="width:16px;height:16px"></i> Qayta urinish
+      </button>
+    </div>
+
+    <!-- Weak/flaky connection: a single request failed while still nominally online -->
+    <div id="net-toast" role="status" aria-live="polite">
+      <i data-lucide="wifi-off" style="width:15px;height:15px"></i>
+      Aloqa yaxshi emas — qayta urinib ko'ring
+    </div>
+
     <script>
       if (sessionStorage.getItem('ilmmevasi_splash_shown')) {
         document.getElementById('app-splash').classList.add('hidden-splash');
@@ -566,6 +634,76 @@
       });
       // Fallback: never let the splash get stuck
       setTimeout(function () { renderIcons(); hideSplash(); }, 2500);
+
+      /* --- Connection state ------------------------------------------------
+         Two levels, because they need different treatment:
+           * offline  -> the browser reports no connection: block the UI, since every
+                         action would silently fail anyway.
+           * failed request -> still "online" but a call did not get through (weak
+                         signal, server unreachable): a dismissible toast only, so the
+                         page stays usable. */
+      (function () {
+        var overlay = document.getElementById('offline-overlay');
+        var toast = document.getElementById('net-toast');
+        var retry = document.getElementById('offline-retry');
+        var toastTimer = null;
+
+        function showOverlay() {
+          if (!overlay) return;
+          overlay.classList.add('is-visible');
+          renderIcons();
+        }
+        function hideOverlay() {
+          if (overlay) overlay.classList.remove('is-visible');
+        }
+        function flashToast() {
+          // Never show the toast on top of the full-screen overlay.
+          if (!toast || (overlay && overlay.classList.contains('is-visible'))) return;
+          toast.classList.add('is-visible');
+          renderIcons();
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { toast.classList.remove('is-visible'); }, 3500);
+        }
+
+        if (!navigator.onLine) showOverlay();
+        window.addEventListener('offline', showOverlay);
+        window.addEventListener('online', function () {
+          hideOverlay();
+          if (toast) toast.classList.remove('is-visible');
+        });
+
+        if (retry) {
+          retry.addEventListener('click', function () {
+            if (navigator.onLine) { location.reload(); return; }
+            // Still offline: acknowledge the tap instead of doing nothing.
+            retry.disabled = true;
+            var original = retry.innerHTML;
+            retry.textContent = 'Tekshirilmoqda...';
+            setTimeout(function () {
+              retry.disabled = false;
+              retry.innerHTML = original;
+              renderIcons();
+              if (navigator.onLine) location.reload();
+            }, 1200);
+          });
+        }
+
+        // HTMX drives the test screen; a dropped request there is exactly when the
+        // student needs to be told rather than left staring at an unchanged page.
+        document.body.addEventListener('htmx:sendError', flashToast);
+        document.body.addEventListener('htmx:timeout', flashToast);
+
+        // Same for the plain fetch() calls (shop purchase, revision grading).
+        var nativeFetch = window.fetch;
+        if (nativeFetch) {
+          window.fetch = function () {
+            return nativeFetch.apply(this, arguments).catch(function (err) {
+              flashToast();
+              throw err;
+            });
+          };
+        }
+      })();
     </script>
   </body>
 </html>
