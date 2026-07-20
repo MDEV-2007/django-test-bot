@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-fallback-key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', 'ilmmevasi.pythonanywhere.com', '.pythonanywhere.com']
 
 # Needed because these tunnels serve over HTTPS while proxying to plain HTTP locally —
 # Django's CSRF middleware checks the browser's Origin header against this list for
@@ -42,6 +42,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.dev',
     'https://*.ngrok-free.app',
     'https://*.ngrok.io',
+    'https://ilmmevasi.pythonanywhere.com',
+    'https://*.pythonanywhere.com',
 ]
 
 # Telegram bot token used to validate Telegram WebApp login data. Set in .env.
