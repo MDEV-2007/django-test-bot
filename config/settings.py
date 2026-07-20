@@ -32,19 +32,29 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-fallback-key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', 'ilmmevasi.pythonanywhere.com', '.pythonanywhere.com']
+ALLOWED_HOSTS = [
+    '127.0.0.1', 'localhost',
+    '.pythonanywhere.com',                                  # production host
+    '.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io',  # dev tunnels
+]
 
-# Needed because these tunnels serve over HTTPS while proxying to plain HTTP locally —
-# Django's CSRF middleware checks the browser's Origin header against this list for
-# any secure (HTTPS) request, and rejects it (403) if the tunnel domain isn't trusted.
+# Needed because tunnels and PythonAnywhere serve over HTTPS while proxying to plain HTTP —
+# Django's CSRF middleware checks the browser's Origin header against this list for any
+# secure (HTTPS) request, and rejects it (403) if the domain isn't trusted.
 CSRF_TRUSTED_ORIGINS = [
+    'https://*.pythonanywhere.com',
     'https://*.loca.lt',
     'https://*.ngrok-free.dev',
     'https://*.ngrok-free.app',
     'https://*.ngrok.io',
-    'https://ilmmevasi.pythonanywhere.com',
-    'https://*.pythonanywhere.com',
 ]
+
+# Moving to a custom domain later needs no code change — set EXTRA_ALLOWED_HOSTS in the
+# environment (comma-separated, e.g. "ilmmevasi.uz,www.ilmmevasi.uz") and both lists pick
+# it up. Bare hosts are also trusted as HTTPS origins for CSRF.
+_extra_hosts = [h.strip() for h in os.environ.get('EXTRA_ALLOWED_HOSTS', '').split(',') if h.strip()]
+ALLOWED_HOSTS += _extra_hosts
+CSRF_TRUSTED_ORIGINS += [h if h.startswith('http') else f'https://{h.lstrip(".")}' for h in _extra_hosts]
 
 # Telegram bot token used to validate Telegram WebApp login data. Set in .env.
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
