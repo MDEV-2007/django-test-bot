@@ -1,7 +1,10 @@
 {% load static %}<!doctype html>
-{# Deliberately standalone: Django renders 500.html with an EMPTY context — no context
-   processors, no `request`. Extending base.html would depend on the very machinery that
-   may have just failed, so this page inlines everything it needs and cannot cascade. #}
+{% comment %}
+Deliberately standalone: Django renders 500.html with an EMPTY context — no context
+processors, no `request`. Extending base.html would depend on the very machinery that
+may have just failed, so this page inlines everything it needs and cannot cascade.
+(Multi-line notes must use {% comment %}, not {# #}, which is single-line only.)
+{% endcomment %}
 <html lang="uz">
 <head>
   <meta charset="utf-8">
