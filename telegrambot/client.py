@@ -24,20 +24,44 @@ def api_url(method):
     return f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/{method}"
 
 
+_DOWN_KEY = 'telegram:api_down'
+DOWN_COOLDOWN = 300  # 5 minutes
+
+# Network-level failures mean Telegram could not be reached at all (blocked proxy,
+# firewall, DNS). Retrying those on every request just burns the timeout budget.
+_UNREACHABLE = (requests.exceptions.ConnectionError, requests.exceptions.Timeout)
+
+
 def api_call(method, **params):
     """Call a Bot API method. Never raises — a failed Telegram call must not take down
-    the caller (a webhook request or an admin action)."""
+    the caller (a webhook request or an admin action).
+
+    If the API is unreachable at the network level, a circuit breaker skips further
+    calls for DOWN_COOLDOWN seconds. Without it, a blocked outbound route (e.g. a host
+    that only allows whitelisted domains) makes every request that notifies a user hang
+    for the full connect timeout plus retries.
+    """
     if not settings.TELEGRAM_BOT_TOKEN:
         logger.warning("TELEGRAM_BOT_TOKEN is not set; skipping %s", method)
         return {'ok': False}
+
+    from django.core.cache import cache
+    if cache.get(_DOWN_KEY):
+        return {'ok': False, 'description': 'telegram api unreachable (circuit open)'}
+
     try:
         # (connect, read): fail fast on a dead connection instead of burning the
         # read-timeout window meant for slow responses.
-        resp = SESSION.post(api_url(method), data=params, timeout=(10, 15))
+        resp = SESSION.post(api_url(method), data=params, timeout=(5, 15))
         data = resp.json()
         if not data.get('ok'):
             logger.warning("Telegram API %s failed: %s", method, data)
         return data
+    except _UNREACHABLE as exc:
+        cache.set(_DOWN_KEY, '1', DOWN_COOLDOWN)
+        logger.warning("Telegram API unreachable (%s) — skipping calls for %ss",
+                       type(exc).__name__, DOWN_COOLDOWN)
+        return {'ok': False}
     except Exception:
         logger.exception("Telegram API call %s raised", method)
         return {'ok': False}

@@ -22,10 +22,46 @@ logger = logging.getLogger(__name__)
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
+# --- Circuit breaker -----------------------------------------------------------
+# When the provider is unreachable at the network level (DNS, proxy, firewall) every
+# call pays the full timeout before failing. That turned a blocked host into
+# ~20s of dead wait per request — and with the Ollama fallback behind it, up to 80s —
+# on pages that grade answers or run the mentor chat.
+#
+# So the first connection-level failure "opens the circuit": for the next
+# BREAKER_COOLDOWN seconds we skip the call entirely and return None immediately, which
+# drops callers straight onto their rule-based fallback. HTTP errors (401, 429, 500) do
+# NOT open it — those mean the host is reachable and the request itself was the problem.
+BREAKER_COOLDOWN = 300  # 5 minutes
+_BREAKER_KEY = 'ai_client:down:{provider}'
+
+
+def _is_down(provider):
+    from django.core.cache import cache
+    return cache.get(_BREAKER_KEY.format(provider=provider)) is not None
+
+
+def _mark_down(provider, exc):
+    from django.core.cache import cache
+    cache.set(_BREAKER_KEY.format(provider=provider), '1', BREAKER_COOLDOWN)
+    logger.warning("%s unreachable (%s) — skipping it for %ss",
+                   provider, type(exc).__name__, BREAKER_COOLDOWN)
+
+
+# Network-level failures: the host could not be reached at all.
+_UNREACHABLE = (
+    requests.exceptions.ConnectionError,   # covers ProxyError and DNS failures
+    requests.exceptions.Timeout,
+)
+
+# (connect, read): a blocked proxy or dead host is rejected in seconds instead of
+# burning the whole read-timeout window meant for slow-but-working responses.
+CONNECT_TIMEOUT = 5
+
 
 def _ask_groq(messages, temperature, response_format, timeout):
     api_key = settings.GROQ_API_KEY
-    if not api_key:
+    if not api_key or _is_down('groq'):
         return None
 
     payload = {
@@ -41,10 +77,13 @@ def _ask_groq(messages, temperature, response_format, timeout):
             GROQ_API_URL,
             headers={"Authorization": f"Bearer {api_key}"},
             json=payload,
-            timeout=timeout,
+            timeout=(CONNECT_TIMEOUT, timeout),
         )
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]
+    except _UNREACHABLE as exc:
+        _mark_down('groq', exc)
+        return None
     except Exception:
         logger.exception("Groq API call failed")
         return None
@@ -52,7 +91,7 @@ def _ask_groq(messages, temperature, response_format, timeout):
 
 def _ask_ollama(messages, temperature, response_format, timeout):
     base_url = (settings.OLLAMA_API_URL or "").rstrip("/")
-    if not base_url:
+    if not base_url or _is_down('ollama'):
         return None
 
     payload = {
@@ -67,11 +106,15 @@ def _ask_ollama(messages, temperature, response_format, timeout):
         payload["format"] = "json"
 
     try:
-        resp = requests.post(f"{base_url}/api/chat", json=payload, timeout=max(timeout, 60))
+        resp = requests.post(f"{base_url}/api/chat", json=payload,
+                             timeout=(CONNECT_TIMEOUT, max(timeout, 60)))
         resp.raise_for_status()
         content = resp.json()["message"]["content"]
         # Ba'zi modellar think=False'ni bilmaydi — <think> bloklarini tozalaymiz
         return re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+    except _UNREACHABLE as exc:
+        _mark_down('ollama', exc)
+        return None
     except Exception:
         logger.exception("Ollama API call failed")
         return None
