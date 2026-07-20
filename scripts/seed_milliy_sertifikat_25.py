@@ -19,16 +19,22 @@ import django
 django.setup()
 
 from learning.models import Topic
-from tests_app.models import Question, AnswerOption, MatchingPair, QuestionGroup, GroupOption, TestSet
+from tests_app.models import Subject, Question, AnswerOption, MatchingPair, QuestionGroup, GroupOption, TestSet
 
 TOPIC_SLUG = "milliy-sertifikat"
 
 
 def main():
+    # The catalogue filters by subject, so seeded content must belong to one or it stays
+    # invisible to students even though it exists.
+    subject, _ = Subject.objects.get_or_create(slug="tarix", defaults={"name": "Tarix"})
     topic, _ = Topic.objects.get_or_create(
         slug=TOPIC_SLUG,
-        defaults={"title": "Milliy Sertifikat", "category": "certificate"},
+        defaults={"title": "Milliy Sertifikat", "category": "certificate", "subject": subject},
     )
+    if topic.subject_id is None:
+        topic.subject = subject
+        topic.save(update_fields=["subject"])
     test = TestSet.objects.create(
         title="Milliy Sertifikat testi — 25 savol",
         description="Milliy sertifikatga tayyorgarlik uchun aralash turdagi (variantli, "
@@ -36,6 +42,8 @@ def main():
         category="certificate",
         duration_minutes=40,
         is_premium=False,
+        subject=subject,
+        is_published=True,   # otherwise it stays a draft and never reaches the catalogue
     )
     created_questions = []
 

@@ -29,7 +29,7 @@ import django
 django.setup()
 
 from learning.models import Topic
-from tests_app.models import Question, AnswerOption, TestSet
+from tests_app.models import Subject, Question, AnswerOption, TestSet
 
 TOPIC_SLUG = "milliy-sertifikat"
 
@@ -325,10 +325,16 @@ QUESTIONS = [
 
 
 def main():
+    # The catalogue filters by subject, so seeded content must belong to one or it stays
+    # invisible to students even though it exists.
+    subject, _ = Subject.objects.get_or_create(slug="tarix", defaults={"name": "Tarix"})
     topic, _ = Topic.objects.get_or_create(
         slug=TOPIC_SLUG,
-        defaults={"title": "Milliy Sertifikat", "category": "certificate"},
+        defaults={"title": "Milliy Sertifikat", "category": "certificate", "subject": subject},
     )
+    if topic.subject_id is None:
+        topic.subject = subject
+        topic.save(update_fields=["subject"])
 
     created_questions = []
     low_confidence = []
@@ -364,6 +370,8 @@ def main():
         category="certificate",
         duration_minutes=90,
         is_premium=False,
+        subject=subject,
+        is_published=True,   # otherwise it stays a draft and never reaches the catalogue
     )
     test.questions.set(created_questions)
 

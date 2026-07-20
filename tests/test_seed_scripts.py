@@ -18,6 +18,8 @@ from django.test import TestCase
 
 from tests_app.models import AnswerOption, Question, TestSet
 
+from .factories import make_user
+
 SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent.parent / 'scripts'
 
 # seed.py is excluded on purpose: it is a one-off importer that copies rows out of an
@@ -84,3 +86,33 @@ class SeedScriptTests(TestCase):
         with redirect_stdout(io.StringIO()):
             module.main()
         self.assertTrue(TestSet.objects.exists(), "no TestSet was created")
+
+    def test_seeded_tests_are_publishable_and_have_a_subject(self):
+        """The catalogue filters on is_published=True and (when one is selected) subject.
+        A seeded test that misses either exists in the admin but is invisible to students —
+        exactly the symptom that showed up in production."""
+        for name in ('seed_milliy_sertifikat_25.py', 'seed_shanba_test.py'):
+            with self.subTest(script=name):
+                module = load(name)
+                with redirect_stdout(io.StringIO()):
+                    module.main()
+
+        for test_set in TestSet.objects.filter(is_random=False):
+            self.assertTrue(test_set.is_published,
+                            f"'{test_set.title}' is a draft — students will never see it")
+            self.assertIsNotNone(test_set.subject,
+                                 f"'{test_set.title}' has no subject — the subject filter hides it")
+
+    def test_seeded_test_actually_appears_in_the_catalogue(self):
+        """End-to-end: seed, then load the student test centre and assert it is listed."""
+        module = load('seed_milliy_sertifikat_25.py')
+        with redirect_stdout(io.StringIO()):
+            module.main()
+
+        user, _ = make_user(username='catalogue_viewer')
+        self.client.force_login(user)
+        listed = self.client.get('/tests/').context['tests']
+
+        self.assertTrue(listed, "the test centre is empty after seeding")
+        seeded = TestSet.objects.filter(is_random=False).first()
+        self.assertIn(seeded, listed, f"'{seeded.title}' was seeded but is not in the catalogue")
