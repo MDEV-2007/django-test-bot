@@ -55,7 +55,7 @@ CSRF_TRUSTED_ORIGINS = [
 _extra_hosts = [h.strip() for h in os.environ.get('EXTRA_ALLOWED_HOSTS', '').split(',') if h.strip()]
 ALLOWED_HOSTS += _extra_hosts
 CSRF_TRUSTED_ORIGINS += [h if h.startswith('http') else f'https://{h.lstrip(".")}' for h in _extra_hosts]
-
+    
 # Telegram bot token used to validate Telegram WebApp login data. Set in .env.
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
