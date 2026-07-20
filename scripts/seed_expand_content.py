@@ -13,6 +13,8 @@ import django
 
 django.setup()
 
+
+from django.db import transaction
 from learning.models import Topic
 from tests_app.models import Question, AnswerOption, TestSet
 from games.models import HistoricalCharacter, MapChallenge
@@ -377,6 +379,10 @@ def seed_map_challenges():
     print(f"Map challenges: {created} created, {len(NEW_MAP_CHALLENGES) - created} already existed.")
 
 
+# All-or-nothing: the TestSet is created before its questions, so a failure part
+# way through used to leave an orphan test with 0 questions behind — visible in the
+# catalogue but impossible to start. Re-running then piled up more orphans.
+@transaction.atomic
 def main():
     topics = seed_topics()
     seed_questions_and_tests(topics)

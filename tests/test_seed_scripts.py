@@ -13,6 +13,7 @@ import io
 import pathlib
 import sys
 from contextlib import redirect_stdout
+from unittest.mock import patch
 
 from django.test import TestCase
 
@@ -102,6 +103,34 @@ class SeedScriptTests(TestCase):
                             f"'{test_set.title}' is a draft — students will never see it")
             self.assertIsNotNone(test_set.subject,
                                  f"'{test_set.title}' has no subject — the subject filter hides it")
+
+    def test_seeded_test_has_its_questions_attached(self):
+        """The TestSet is created before its questions and only linked at the very end.
+        A crash in between left an orphan test showing '0 ta savol' — listed in the
+        catalogue but impossible to start. main() is atomic now; this proves the link."""
+        for name in ('seed_milliy_sertifikat_25.py', 'seed_shanba_test.py'):
+            with self.subTest(script=name):
+                module = load(name)
+                with redirect_stdout(io.StringIO()):
+                    module.main()
+
+        for test_set in TestSet.objects.filter(is_random=False):
+            self.assertGreater(test_set.questions.count(), 0,
+                               f"'{test_set.title}' has no questions — it cannot be started")
+
+    def test_a_failing_seeder_leaves_no_orphan_test(self):
+        """Atomicity: if question creation blows up, the TestSet must roll back too."""
+        module = load('seed_milliy_sertifikat_25.py')
+        before = TestSet.objects.count()
+
+        with patch.object(module.Question.objects, 'create',
+                          side_effect=RuntimeError('simulated failure')):
+            with self.assertRaises(RuntimeError):
+                with redirect_stdout(io.StringIO()):
+                    module.main()
+
+        self.assertEqual(TestSet.objects.count(), before,
+                         "a half-finished seeder must not leave a TestSet behind")
 
     def test_seeded_test_actually_appears_in_the_catalogue(self):
         """End-to-end: seed, then load the student test centre and assert it is listed."""

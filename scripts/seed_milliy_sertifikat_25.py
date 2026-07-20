@@ -18,12 +18,18 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 import django
 django.setup()
 
+from django.db import transaction
+
 from learning.models import Topic
 from tests_app.models import Subject, Question, AnswerOption, MatchingPair, QuestionGroup, GroupOption, TestSet
 
 TOPIC_SLUG = "milliy-sertifikat"
 
 
+# All-or-nothing: the TestSet is created before its questions, so a failure part
+# way through used to leave an orphan test with 0 questions behind — visible in the
+# catalogue but impossible to start. Re-running then piled up more orphans.
+@transaction.atomic
 def main():
     # The catalogue filters by subject, so seeded content must belong to one or it stays
     # invisible to students even though it exists.
