@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Sahifa topilmadi{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center animate-fadeIn px-2">
+    <div class="w-full max-w-2xl text-center">
+
+        <!-- 404 + tushib ketgan meva -->
+        <div class="relative mb-8">
+            <h1 class="text-[110px] md:text-[150px] leading-none font-extrabold tracking-tighter
+                       bg-gradient-to-br from-[#2d6cff] via-[#37b7ff] to-[#2d6cff] bg-clip-text text-transparent
+                       select-none">404</h1>
+
+            <!-- Uzilib tushgan olma — "ilm mevasi" motivi -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#6fe098] to-[#279a52]
+                            shadow-2xl shadow-emerald-500/25 flex items-center justify-center
+                            translate-y-6 md:translate-y-8 rotate-12">
+                    <i data-lucide="apple" class="w-8 h-8 md:w-10 md:h-10 text-white/90"></i>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            Bu meva shoxda yo'q ekan
+        </h2>
+        <p class="text-[var(--text-muted)] text-sm md:text-base mt-3 max-w-md mx-auto leading-relaxed">
+            Siz izlagan sahifa mavjud emas, ko'chirilgan yoki havola noto'g'ri yozilgan.
+            Quyidagilardan birini tanlang — bilim daraxti shu yerda.
+        </p>
+
+        <!-- Tezkor havolalar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-9">
+            <a href="{% url 'dashboard:home' %}"
+               class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4
+                      flex flex-col items-center gap-2 hover:border-[#37b7ff]/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[#37b7ff]">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-semibold text-[var(--text-primary)]">Asosiy</span>
+            </a>
+
+            <a href="{% url 'tests:center' %}"
+               class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4
+                      flex flex-col items-center gap-2 hover:border-[#37b7ff]/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                    <i data-lucide="award" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-semibold text-[var(--text-primary)]">Testlar</span>
+            </a>
+
+            <a href="{% url 'learning:center' %}"
+               class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4
+                      flex flex-col items-center gap-2 hover:border-emerald-500/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-semibold text-[var(--text-primary)]">Darslar</span>
+            </a>
+
+            <a href="{% url 'leaderboard:rankings' %}"
+               class="glass-card rounded-[22px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4
+                      flex flex-col items-center gap-2 hover:border-yellow-500/40 hover:-translate-y-0.5 transition">
+                <div class="w-11 h-11 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500">
+                    <i data-lucide="trophy" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-semibold text-[var(--text-primary)]">Reyting</span>
+            </a>
+        </div>
+
+        <!-- Asosiy amallar -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+            <a href="{% url 'dashboard:home' %}"
+               class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#2d6cff] to-[#37b7ff]
+                      text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:opacity-90 transition">
+                <i data-lucide="home" class="w-4 h-4"></i> Bosh sahifaga
+            </a>
+            <button type="button" onclick="history.back()"
+                    class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[var(--surface-hover)]
+                           border border-[var(--border-card)] text-[var(--text-primary)] text-sm font-semibold
+                           hover:bg-[var(--surface-hover-strong)] transition">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Ortga qaytish
+            </button>
+        </div>
+
+        <p class="text-[11px] text-[var(--text-muted)] mt-8">
+            Havola bizning xatoyimiz deb o'ylaysizmi? Telegram orqali xabar bering.
+        </p>
+    </div>
+</div>
+{% endblock %}

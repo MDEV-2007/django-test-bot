@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IlmMevasi — Ruxsat yo'q{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center animate-fadeIn px-2">
+    <div class="w-full max-w-lg text-center">
+
+        <div class="w-20 h-20 mx-auto rounded-[26px] bg-amber-500/10 border border-amber-500/25
+                    flex items-center justify-center text-amber-400 mb-6">
+            <i data-lucide="lock" class="w-9 h-9"></i>
+        </div>
+
+        <h1 class="text-[76px] md:text-[96px] leading-none font-extrabold tracking-tighter
+                   bg-gradient-to-br from-amber-400 to-orange-500 bg-clip-text text-transparent select-none">403</h1>
+
+        <h2 class="text-xl md:text-2xl font-extrabold text-[var(--text-primary)] tracking-tight mt-2">
+            Bu sahifaga ruxsatingiz yo'q
+        </h2>
+        <p class="text-[var(--text-muted)] text-sm mt-3 max-w-sm mx-auto leading-relaxed">
+            Ushbu bo'lim boshqa rol uchun mo'ljallangan. Agar bu xato deb hisoblasangiz,
+            administrator bilan bog'laning.
+        </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+            <a href="{% url 'dashboard:home' %}"
+               class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#2d6cff] to-[#37b7ff]
+                      text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:opacity-90 transition">
+                <i data-lucide="home" class="w-4 h-4"></i> Bosh sahifaga
+            </a>
+            <button type="button" onclick="history.back()"
+                    class="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[var(--surface-hover)]
+                           border border-[var(--border-card)] text-[var(--text-primary)] text-sm font-semibold
+                           hover:bg-[var(--surface-hover-strong)] transition">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Ortga
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
