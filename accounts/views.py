@@ -1,6 +1,9 @@
 import json
+import re
 import urllib.parse
 from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import login, logout, authenticate
@@ -67,24 +70,51 @@ def register_view(request):
         return redirect('dashboard:home')
         
     error_msg = None
+    form_values = {}
     if request.method == 'POST':
-        username = request.POST.get('username')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        password = request.POST.get('password')
-        
-        if User.objects.filter(username=username).exists():
+        # Strip every field: without this a value of only spaces passed straight through,
+        # so accounts were created with a whitespace username AND a whitespace password —
+        # which nobody could ever type to log back in.
+        username = (request.POST.get('username') or '').strip()
+        first_name = (request.POST.get('first_name') or '').strip()
+        last_name = (request.POST.get('last_name') or '').strip()
+        # The password is NOT stripped (leading/trailing spaces can be intentional), but it
+        # must contain more than whitespace.
+        password = request.POST.get('password') or ''
+
+        # Repopulate the form on error so the user doesn't retype everything.
+        form_values = {'username': username, 'first_name': first_name, 'last_name': last_name}
+
+        if not username or not first_name or not password.strip():
+            error_msg = "Iltimos, barcha majburiy maydonlarni to'ldiring (bo'sh joy hisobga olinmaydi)."
+        elif ' ' in username:
+            error_msg = "Foydalanuvchi nomida bo'sh joy bo'lishi mumkin emas."
+        elif len(username) < 3:
+            error_msg = "Foydalanuvchi nomi kamida 3 ta belgidan iborat bo'lsin."
+        elif not re.match(r'^[A-Za-z0-9_.]+$', username):
+            error_msg = "Foydalanuvchi nomida faqat harflar, raqamlar, _ va . ishlatiladi."
+        elif User.objects.filter(username__iexact=username).exists():
             error_msg = "Bu foydalanuvchi nomi band!"
         else:
-            # Create user
-            user = User.objects.create_user(username=username, password=password, first_name=first_name, last_name=last_name)
+            # Hold passwords to the project's configured validators (length, common
+            # passwords, all-numeric, similarity to the username).
+            try:
+                validate_password(password, user=User(username=username, first_name=first_name))
+            except ValidationError as e:
+                error_msg = ' '.join(e.messages)
+
+        if not error_msg:
+            user = User.objects.create_user(
+                username=username, password=password,
+                first_name=first_name, last_name=last_name,
+            )
             profile = ensure_profile_for_user(user)
             profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
             profile.save()
             login(request, user)
             return _post_login_redirect(profile)
-            
-    return render(request, 'accounts/register.html', {'error': error_msg})
+
+    return render(request, 'accounts/register.html', {'error': error_msg, 'values': form_values})
 
 def logout_view(request):
     logout(request)

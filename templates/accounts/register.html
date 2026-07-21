@@ -30,11 +30,11 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label for="first_name" class="sr-only">Ism</label>
-                        <input id="first_name" name="first_name" type="text" required class="appearance-none rounded-2xl relative block w-full px-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Ism">
+                        <input id="first_name" name="first_name" type="text" value="{{ values.first_name }}" required class="appearance-none rounded-2xl relative block w-full px-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Ism">
                     </div>
                     <div>
                         <label for="last_name" class="sr-only">Familiya</label>
-                        <input id="last_name" name="last_name" type="text" required class="appearance-none rounded-2xl relative block w-full px-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Familiya">
+                        <input id="last_name" name="last_name" type="text" value="{{ values.last_name }}" required class="appearance-none rounded-2xl relative block w-full px-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Familiya">
                     </div>
                 </div>
                 <div>
@@ -43,7 +43,7 @@
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-[var(--text-muted)]">
                             <i data-lucide="user" class="w-5 h-5"></i>
                         </span>
-                        <input id="username" name="username" type="text" required class="appearance-none rounded-2xl relative block w-full pl-11 pr-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Foydalanuvchi nomi">
+                        <input id="username" name="username" type="text" value="{{ values.username }}" required class="appearance-none rounded-2xl relative block w-full pl-11 pr-4 py-3.5 bg-[var(--surface-input)] border border-[var(--border-card)] placeholder-[var(--text-faint)] text-[var(--text-primary)] focus:outline-none focus:border-[#2d6cff] text-sm transition" placeholder="Foydalanuvchi nomi">
                     </div>
                 </div>
                 <div>
