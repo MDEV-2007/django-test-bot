@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /$
+Allow: /accounts/login/
+Allow: /accounts/register/
+Allow: /static/
+
+# The app itself lives behind login — nothing useful for crawlers, and we don't want
+# private/app URLs in search results.
+Disallow: /panel/
+Disallow: /teacher/
+Disallow: /admin/
+Disallow: /tests/
+Disallow: /learning/
+Disallow: /battles/
+Disallow: /games/
+Disallow: /leaderboard/
+Disallow: /premium/
+Disallow: /shop/
+Disallow: /analytics/
+Disallow: /telegram/
+Disallow: /media/
+
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml

@@ -23,7 +23,38 @@
         if (meta) meta.setAttribute('content', resolved === 'light' ? '#e1e4ea' : '#050811');
       })();
     </script>
-    <title>{% block title %}IlmMevasi — Premium History Education{% endblock %}</title>
+    <title>{% block title %}IlmMevasi — Milliy sertifikat va imtihonlarga tayyorgarlik{% endblock %}</title>
+
+    <!-- SEO + social share preview. Pages can override the description via the meta_description
+         block; the Open Graph / Twitter tags drive the rich preview card shown when a link is
+         shared in Telegram, Facebook, etc. -->
+    <meta name="description" content="{% block meta_description %}IlmMevasi — o'quvchilar uchun gamifikatsiyalangan ta'lim platformasi. Tarix, ona tili, matematika va biologiyadan milliy sertifikat va imtihonlarga tayyorlaning: testlar, darslar, AI mentor va reyting.{% endblock %}" />
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="IlmMevasi" />
+    <meta property="og:title" content="{% block og_title %}IlmMevasi{% endblock %}" />
+    <meta property="og:description" content="Milliy sertifikat va imtihonlarga tayyorgarlik: testlar, darslar, AI mentor va reyting." />
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}" />
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image.png' %}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="uz_UZ" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="IlmMevasi" />
+    <meta name="twitter:description" content="Milliy sertifikat va imtihonlarga tayyorgarlik: testlar, darslar, AI mentor va reyting." />
+    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image.png' %}" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "IlmMevasi",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/",
+      "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/icon.png' %}",
+      "description": "Gamifikatsiyalangan ta'lim platformasi — milliy sertifikat va imtihonlarga tayyorgarlik."
+    }
+    </script>
 
     <!-- Favicons / App icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}" />

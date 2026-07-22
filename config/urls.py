@@ -30,6 +30,13 @@ urlpatterns = [
         template_name='sw.js', content_type='application/javascript'), name='service_worker'),
     path('offline/', TemplateView.as_view(
         template_name='offline.html'), name='offline'),
+
+    # SEO: robots + sitemap. Rendered as templates so the absolute URLs pick up the real
+    # request host (works behind the tunnel and on the deployed domain alike).
+    path('robots.txt', TemplateView.as_view(
+        template_name='robots.txt', content_type='text/plain'), name='robots_txt'),
+    path('sitemap.xml', TemplateView.as_view(
+        template_name='sitemap.xml', content_type='application/xml'), name='sitemap_xml'),
     path('', include('dashboard.urls')),
     path('accounts/', include('accounts.urls')),
     path('analytics/', include('analytics.urls')),
