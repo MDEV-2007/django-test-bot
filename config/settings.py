@@ -76,7 +76,15 @@ ADMIN_TELEGRAM_CHAT_ID = os.environ.get('ADMIN_TELEGRAM_CHAT_ID', '')
 # App). Create an OAuth 2.0 Web client at https://console.cloud.google.com/apis/credentials
 # and add your site origin(s) to "Authorized JavaScript origins". When empty, the Google
 # button simply isn't rendered, so the site keeps working with classic + Telegram login.
-GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', '')
+#
+# The fallback below is the project's real client id. A Google OAuth *client id* is public
+# by design (it ships in the page's HTML for the browser to use), so committing it is safe
+# and means `git pull` alone enables the button on any server — no .env edit needed. Set
+# GOOGLE_OAUTH_CLIENT_ID in the environment to override it (e.g. a separate staging client).
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get(
+    'GOOGLE_OAUTH_CLIENT_ID',
+    '534089827568-olhigpeig64rioppsgttm1u1sltuln4i.apps.googleusercontent.com',
+)
 
 # Card shown to students for premium payments. Set in .env.
 PREMIUM_CARD_NUMBER = os.environ.get('PREMIUM_CARD_NUMBER', '0000 0000 0000 0000')
