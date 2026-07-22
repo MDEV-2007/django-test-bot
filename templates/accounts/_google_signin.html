@@ -1,7 +1,9 @@
 {% if google_client_id %}
-{# Google Sign-In for WEBSITE visitors only. Hidden inside the Telegram Mini App
-   (Telegram users authenticate with the Telegram button instead). Shared by the
-   login and register pages; pass `button_text` to switch the label. #}
+{% comment %}
+Google Sign-In for WEBSITE visitors only. Hidden inside the Telegram Mini App
+(Telegram users authenticate with the Telegram button instead). Shared by the
+login and register pages; pass `button_text` to switch the label.
+{% endcomment %}
 <div id="google-login-section" class="space-y-4">
     <div id="g-signin-btn" class="flex justify-center"></div>
     <p id="google-login-error" class="text-[11px] text-center text-rose-400 hidden"></p>
