@@ -276,7 +276,9 @@ STORAGES = {
     'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
     'staticfiles': {
         'BACKEND': (
-            'whitenoise.storage.CompressedManifestStaticFilesStorage'
+            # Non-strict manifest storage: a missing entry (image committed but
+            # collectstatic not yet run) degrades to a broken asset, never a site-wide 500.
+            'config.storage.ResilientManifestStaticFilesStorage'
             if not DEBUG else
             'django.contrib.staticfiles.storage.StaticFilesStorage'
         ),
