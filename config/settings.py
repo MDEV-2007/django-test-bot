@@ -72,6 +72,12 @@ TELEGRAM_WEBHOOK_MAX_CONNECTIONS = int(os.environ.get('TELEGRAM_WEBHOOK_MAX_CONN
 # Chat that receives new-payment notifications (optional; must be a numeric chat id).
 ADMIN_TELEGRAM_CHAT_ID = os.environ.get('ADMIN_TELEGRAM_CHAT_ID', '')
 
+# Google OAuth client id for "Sign in with Google" on the website (NOT the Telegram Mini
+# App). Create an OAuth 2.0 Web client at https://console.cloud.google.com/apis/credentials
+# and add your site origin(s) to "Authorized JavaScript origins". When empty, the Google
+# button simply isn't rendered, so the site keeps working with classic + Telegram login.
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID', '')
+
 # Card shown to students for premium payments. Set in .env.
 PREMIUM_CARD_NUMBER = os.environ.get('PREMIUM_CARD_NUMBER', '0000 0000 0000 0000')
 PREMIUM_CARD_HOLDER = os.environ.get('PREMIUM_CARD_HOLDER', "Ism Familiya (kartani .env faylida kiriting)")

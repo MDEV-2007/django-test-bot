@@ -23,6 +23,8 @@
             </div>
         {% endif %}
 
+        {% include 'accounts/_google_signin.html' with button_text='continue_with' %}
+
         <!-- Telegram WebApp Login Section: only rendered when actually opened inside Telegram -->
         <div id="tg-login-section" class="space-y-4 hidden">
             <button id="tg-login-btn" type="button" class="w-full flex items-center justify-center gap-3 bg-[#2d6cff] hover:bg-[#1a57e3] text-[var(--text-primary)] font-bold py-3.5 px-6 rounded-2xl transition duration-200 shadow-lg shadow-blue-500/25">

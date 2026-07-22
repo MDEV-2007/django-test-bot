@@ -17,6 +17,7 @@ from .utils import (
     verify_telegram_webapp_data,
     login_is_locked, login_record_failure, login_clear_failures,
     get_telegram_photo_url,
+    verify_google_id_token, generate_unique_username,
 )
 
 def _post_login_redirect(profile):
@@ -42,7 +43,10 @@ def login_view(request):
 
         if login_is_locked(request, username):
             error_msg = "Juda ko'p urinish. Iltimos, 15 daqiqadan so'ng qayta urinib ko'ring."
-            return render(request, 'accounts/login.html', {'error': error_msg})
+            return render(request, 'accounts/login.html', {
+                'error': error_msg,
+                'google_client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+            })
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -63,7 +67,10 @@ def login_view(request):
                 login_record_failure(request, username)
                 error_msg = "Foydalanuvchi nomi yoki parol xato!"
 
-    return render(request, 'accounts/login.html', {'error': error_msg})
+    return render(request, 'accounts/login.html', {
+        'error': error_msg,
+        'google_client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+    })
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -114,7 +121,11 @@ def register_view(request):
             login(request, user)
             return _post_login_redirect(profile)
 
-    return render(request, 'accounts/register.html', {'error': error_msg, 'values': form_values})
+    return render(request, 'accounts/register.html', {
+        'error': error_msg,
+        'values': form_values,
+        'google_client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+    })
 
 def logout_view(request):
     logout(request)
@@ -192,6 +203,88 @@ def tg_login(request):
         return JsonResponse({'success': True, 'redirect': redirect_url})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+def google_login(request):
+    """Website "Sign in with Google" endpoint (NOT the Telegram Mini App).
+
+    The browser's Google Identity Services widget hands us a signed ID token (JWT) which
+    we verify server-side, then find-or-create the matching account and log in. CSRF stays
+    ON: the fetch() on the login page sends the X-CSRFToken header, so this is a normal
+    protected POST (unlike tg_login, which is signed by Telegram instead)."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+    if not settings.GOOGLE_OAUTH_CLIENT_ID:
+        return JsonResponse({'success': False, 'error': 'Google kirish sozlanmagan.'}, status=503)
+
+    try:
+        data = json.loads(request.body or '{}')
+    except (ValueError, TypeError):
+        data = {}
+    credential = data.get('credential')
+
+    claims = verify_google_id_token(credential)
+    if not claims:
+        return JsonResponse({'success': False, 'error': "Google orqali kirishni tasdiqlab bo'lmadi."}, status=401)
+
+    google_sub = str(claims.get('sub'))
+    email = (claims.get('email') or '').strip().lower()
+    first_name = claims.get('given_name', '') or ''
+    last_name = claims.get('family_name', '') or ''
+    picture = claims.get('picture', '') or ''
+
+    # Match order: existing Google link -> existing account with the same verified email
+    # (so a user who first registered classically can later just click Google) -> brand new.
+    profile = Profile.objects.filter(google_id=google_sub).select_related('user').first()
+    if profile is None and email:
+        existing = User.objects.filter(email__iexact=email).order_by('id').first()
+        if existing is not None:
+            # Classic/Telegram account with this verified email — link it below (the
+            # google_id is persisted by the shared save block, not here, so the guard
+            # there still fires).
+            profile = ensure_profile_for_user(existing)
+
+    if profile is None:
+        username = generate_unique_username(email.split('@')[0] if email else 'user')
+        user = User.objects.create_user(username=username, email=email)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+        profile = ensure_profile_for_user(user)
+        profile.google_id = google_sub
+        if picture:
+            profile.avatar_url = picture
+        elif not profile.avatar_url:
+            profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
+        profile.save()
+
+    user = profile.user
+    if not user.is_active:
+        return JsonResponse({
+            'success': False,
+            'error': "Hisobingiz vaqtincha chetlashtirilgan. Iltimos, administrator bilan bog'laning."
+        }, status=403)
+
+    # Persist any first-time link / email backfill, and refresh the avatar to Google's.
+    update_fields = []
+    if profile.google_id != google_sub:
+        profile.google_id = google_sub
+        update_fields.append('google_id')
+    if picture and profile.avatar_url != picture:
+        profile.avatar_url = picture
+        update_fields.append('avatar_url')
+    if update_fields:
+        profile.save(update_fields=update_fields)
+    if email and not user.email:
+        user.email = email
+        user.save(update_fields=['email'])
+
+    login(request, user)
+    profile.update_streak()
+
+    redirect_url = _post_login_redirect(profile).url
+    return JsonResponse({'success': True, 'redirect': redirect_url})
+
 
 @login_required
 def profile_view(request):

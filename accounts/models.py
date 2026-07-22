@@ -18,6 +18,10 @@ class Profile(models.Model):
     )
     telegram_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     telegram_username = models.CharField(max_length=150, null=True, blank=True)
+    # Google account subject id (the stable "sub" claim from the verified ID token) — used
+    # to link a "Sign in with Google" login to this profile even if the user later changes
+    # their Google display name or email. Unique but nullable: Telegram/classic accounts leave it blank.
+    google_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     avatar_url = models.URLField(max_length=500, null=True, blank=True)
     
     # Gamification

@@ -1,0 +1,64 @@
+{% if google_client_id %}
+{# Google Sign-In for WEBSITE visitors only. Hidden inside the Telegram Mini App
+   (Telegram users authenticate with the Telegram button instead). Shared by the
+   login and register pages; pass `button_text` to switch the label. #}
+<div id="google-login-section" class="space-y-4">
+    <div id="g-signin-btn" class="flex justify-center"></div>
+    <p id="google-login-error" class="text-[11px] text-center text-rose-400 hidden"></p>
+    <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-[var(--border-soft)]"></div>
+        <span class="flex-shrink mx-4 text-xs text-[var(--text-faint)] uppercase tracking-widest">Yoki</span>
+        <div class="flex-grow border-t border-[var(--border-soft)]"></div>
+    </div>
+</div>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+    (function () {
+        const CLIENT_ID = "{{ google_client_id }}";
+        const BUTTON_TEXT = "{{ button_text|default:'continue_with' }}";
+        const section = document.getElementById('google-login-section');
+        const errorEl = document.getElementById('google-login-error');
+
+        // Website-only: if we're inside the Telegram Mini App, hide Google entirely.
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (tg && tg.initData) { section.style.display = 'none'; return; }
+
+        function getCookie(name) {
+            return document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1];
+        }
+
+        window.handleGoogleCredential = async function (response) {
+            errorEl.classList.add('hidden');
+            try {
+                const res = await fetch("{% url 'accounts:google_login' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = data.redirect || '/';
+                } else {
+                    errorEl.textContent = data.error || 'Google orqali kirishda xatolik.';
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (e) {
+                errorEl.textContent = 'Tarmoq xatoligi. Qaytadan urinib ko\'ring.';
+                errorEl.classList.remove('hidden');
+            }
+        };
+
+        function initGoogle() {
+            if (!(window.google && google.accounts && google.accounts.id)) {
+                return setTimeout(initGoogle, 200); // gsi/client still loading
+            }
+            google.accounts.id.initialize({ client_id: CLIENT_ID, callback: window.handleGoogleCredential });
+            google.accounts.id.renderButton(document.getElementById('g-signin-btn'), {
+                theme: 'filled_blue', size: 'large', shape: 'pill', text: BUTTON_TEXT, logo_alignment: 'center'
+            });
+        }
+        if (document.readyState !== 'loading') initGoogle();
+        else document.addEventListener('DOMContentLoaded', initGoogle);
+    })();
+</script>
+{% endif %}

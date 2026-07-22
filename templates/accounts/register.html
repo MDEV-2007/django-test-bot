@@ -23,6 +23,8 @@
             </div>
         {% endif %}
 
+        {% include 'accounts/_google_signin.html' with button_text='signup_with' %}
+
         <!-- Registration Form -->
         <form class="space-y-4" method="POST" action="{% url 'accounts:register' %}">
             {% csrf_token %}

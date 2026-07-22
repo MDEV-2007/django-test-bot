@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import logging
+import re
 import urllib.parse
 
 import requests
@@ -8,6 +9,50 @@ from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
+
+
+# --- Google Sign-In (website only) ------------------------------------------
+
+def verify_google_id_token(credential: str) -> dict | None:
+    """Verify a Google Identity Services ID token (a signed JWT) server-side and
+    return its claims, or None if it is missing/invalid.
+
+    google-auth checks the JWT signature against Google's rotating public keys, the
+    issuer, the expiry, AND that the audience equals our own OAuth client id — so a
+    token minted for a different site is rejected. Never raises."""
+    client_id = settings.GOOGLE_OAUTH_CLIENT_ID
+    if not credential or not client_id:
+        return None
+    try:
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests as google_requests
+
+        claims = google_id_token.verify_oauth2_token(
+            credential, google_requests.Request(), client_id
+        )
+        # Only trust logins where Google has actually verified ownership of the email.
+        if not claims.get('email') or not claims.get('email_verified'):
+            return None
+        return claims
+    except Exception:
+        logger.warning("Google ID token verification failed", exc_info=True)
+        return None
+
+
+def generate_unique_username(base: str) -> str:
+    """Turn an arbitrary string (usually a Google email local-part) into a username that
+    passes the project's rules — only [A-Za-z0-9_.], at least 3 chars — and is unique."""
+    from django.contrib.auth.models import User
+
+    cleaned = re.sub(r'[^A-Za-z0-9_.]', '', (base or '')).strip('.')
+    if len(cleaned) < 3:
+        cleaned = f"user{cleaned}" if cleaned else "user"
+    candidate = cleaned[:140]
+    suffix = 1
+    while User.objects.filter(username__iexact=candidate).exists():
+        suffix += 1
+        candidate = f"{cleaned[:140]}{suffix}"
+    return candidate
 
 
 # --- Login brute-force throttle ---------------------------------------------
