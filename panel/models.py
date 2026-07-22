@@ -64,13 +64,26 @@ class SiteSettings(models.Model):
     def __str__(self):
         return self.site_name
 
+    CACHE_KEY = 'site_settings:singleton'
+
     def save(self, *args, **kwargs):
         self.pk = 1
         super().save(*args, **kwargs)
+        # Refresh the cache immediately so an admin edit is visible on the next request.
+        from django.core.cache import cache
+        cache.set(self.CACHE_KEY, self, 3600)
 
     @classmethod
     def load(cls):
-        obj, _ = cls.objects.get_or_create(pk=1)
+        """Cached singleton. This is read on EVERY request (context processor + the
+        maintenance-mode middleware), so hitting the DB each time was two queries on every
+        single page for data that almost never changes. Cached for an hour and refreshed
+        on save."""
+        from django.core.cache import cache
+        obj = cache.get(cls.CACHE_KEY)
+        if obj is None:
+            obj, _ = cls.objects.get_or_create(pk=1)
+            cache.set(cls.CACHE_KEY, obj, 3600)
         return obj
 
 
