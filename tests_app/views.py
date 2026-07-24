@@ -941,7 +941,7 @@ def feedback(request, attempt_id):
             'grading_note': ans.ai_grading_note,
         })
 
-    from accounts.referrals import get_referral_link, referral_stats
+    from accounts.referrals import get_referral_link, get_telegram_deep_link, referral_stats
 
     return render(request, 'tests_app/feedback.html', {
         'attempt': attempt,
@@ -953,6 +953,7 @@ def feedback(request, attempt_id):
         'profile': attempt.profile,
         'show_referral_prompt': attempt.score >= 70,
         'referral_link': get_referral_link(attempt.profile, request),
+        'telegram_deep_link': get_telegram_deep_link(attempt.profile),
         'referral_stats': referral_stats(attempt.profile),
         'referral_share_text': (
             f"IlmMevasi'da testdan {attempt.score:.0f}% natija oldim! "

@@ -59,6 +59,13 @@ CSRF_TRUSTED_ORIGINS += [h if h.startswith('http') else f'https://{h.lstrip(".")
 # Telegram bot token used to validate Telegram WebApp login data. Set in .env.
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
+# Bot's @username (no leading @), e.g. "ilmmevasi_bot" — used to build a t.me/<bot>?start=
+# deep link for referral sharing. When a user shares from INSIDE the Telegram Mini App, the
+# recipient should land back in Telegram (bot -> "Open app" -> login), not on the plain
+# website — a bare website link opened from Telegram's share sheet just opens a browser
+# instead. Leave empty to fall back to the website registration link everywhere.
+TELEGRAM_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME', '')
+
 # Public HTTPS base URL of this site — used for the Mini App button and to build the
 # webhook URL. Telegram rejects non-HTTPS for both.
 WEBAPP_URL = os.environ.get('WEBAPP_URL', 'http://127.0.0.1:8000/')

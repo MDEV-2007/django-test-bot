@@ -19,7 +19,7 @@ from .utils import (
     get_telegram_photo_url,
     verify_google_id_token, generate_unique_username,
 )
-from .referrals import apply_referral, ensure_referral_code, get_referral_link, referral_stats
+from .referrals import apply_referral, ensure_referral_code, get_referral_link, get_telegram_deep_link, referral_stats
 
 def _post_login_redirect(profile):
     """Staff roles land in their panel; students (who haven't seen the onboarding splash
@@ -324,7 +324,9 @@ def profile_view(request):
         'recent_battles': recent_battles,
         'badges': badges,
         'referral_link': get_referral_link(profile, request),
+        'telegram_deep_link': get_telegram_deep_link(profile),
         'referral_stats': referral_stats(profile),
+        'referral_share_text': "IlmMevasi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!",
     })
 
 @login_required

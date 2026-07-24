@@ -70,7 +70,7 @@
     </section>
 
     {% if show_referral_prompt %}
-        {% include 'partials/referral_card.html' with referral_link=referral_link referral_stats=referral_stats compact=True referral_share_text=referral_share_text %}
+        {% include 'partials/referral_card.html' with referral_link=referral_link telegram_deep_link=telegram_deep_link referral_stats=referral_stats compact=True referral_share_text=referral_share_text %}
     {% endif %}
 
     <!-- Tab navigation -->

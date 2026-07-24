@@ -1,14 +1,33 @@
 {% comment %}
-Referral (viral loop) card. Context: `referral_link` (str), `referral_stats`
-({referral_count, coins_earned}). Pass `compact=True` for a smaller variant
-(used on the test-result page); omit/False for the full profile-page version.
+Referral (viral loop) card. Context: `referral_link` (website URL, always usable),
+`telegram_deep_link` (t.me/<bot>?start=CODE, '' if TELEGRAM_BOT_USERNAME unset),
+`referral_stats` ({referral_count, coins_earned}). Pass `compact=True` for the
+smaller variant used on the test-result page.
 {% endcomment %}
 <section class="glass-card rounded-[28px] border border-emerald-500/20 {% if compact %}p-5{% else %}p-6{% endif %} space-y-4 bg-[var(--surface-card-soft)] relative overflow-hidden"
-          x-data="{ copied: false, copyLink() {
-              navigator.clipboard.writeText('{{ referral_link|escapejs }}');
-              this.copied = true;
-              setTimeout(() => this.copied = false, 2000);
-          } }">
+          x-data="{
+              copied: false,
+              insideTelegram: false,
+              websiteLink: '{{ referral_link|escapejs }}',
+              telegramLink: '{{ telegram_deep_link|escapejs }}',
+              shareText: '{{ referral_share_text|escapejs }}',
+              init() {
+                  // Sharing FROM inside the Telegram Mini App should send friends BACK into
+                  // Telegram (bot -> Open app -> login), not to a plain website link that
+                  // would just pop a browser and drop them out of Telegram entirely.
+                  const tg = window.Telegram && window.Telegram.WebApp;
+                  this.insideTelegram = !!(tg && tg.initData && this.telegramLink);
+              },
+              link() { return this.insideTelegram ? this.telegramLink : this.websiteLink; },
+              shareHref() {
+                  return 'https://t.me/share/url?url=' + encodeURIComponent(this.link()) + '&text=' + encodeURIComponent(this.shareText);
+              },
+              copyLink() {
+                  navigator.clipboard.writeText(this.link());
+                  this.copied = true;
+                  setTimeout(() => this.copied = false, 2000);
+              }
+          }">
     <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="flex items-center gap-3 relative">
@@ -24,7 +43,7 @@ Referral (viral loop) card. Context: `referral_link` (str), `referral_stats`
     </div>
 
     <div class="flex items-center gap-2 relative">
-        <input type="text" readonly value="{{ referral_link }}"
+        <input type="text" readonly :value="link()"
                onclick="this.select()"
                class="flex-1 min-w-0 bg-[var(--surface-input)] border border-[var(--border-card)] rounded-xl px-3 py-2.5 text-xs text-[var(--text-secondary)] font-mono truncate focus:outline-none">
         <button type="button" @click="copyLink()"
@@ -36,8 +55,7 @@ Referral (viral loop) card. Context: `referral_link` (str), `referral_stats`
     </div>
 
     <div class="flex flex-wrap items-center gap-3 relative">
-        <a href="https://t.me/share/url?url={{ referral_link|urlencode }}&text={{ referral_share_text|default:"IlmMevasi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!"|urlencode }}"
-           target="_blank" rel="noopener"
+        <a :href="shareHref()" target="_blank" rel="noopener"
            class="flex items-center gap-2 bg-[#2d6cff] hover:bg-[#1a57e3] text-white font-bold py-2.5 px-4 rounded-xl transition text-xs">
             <i data-lucide="send" class="w-4 h-4"></i>
             <span>Telegram'da ulash</span>

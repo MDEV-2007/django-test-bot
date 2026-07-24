@@ -54,6 +54,22 @@ def get_referral_link(profile: Profile, request=None) -> str:
     return f'{base}{path}'
 
 
+def get_telegram_deep_link(profile: Profile) -> str:
+    """t.me/<bot>?start=CODE deep link, or '' if TELEGRAM_BOT_USERNAME isn't configured.
+
+    Used instead of the website link when sharing from INSIDE the Telegram Mini App: a
+    plain website URL opened from Telegram's share sheet just opens a browser, dropping the
+    recipient out of Telegram entirely, whereas this deep link reopens Telegram itself and
+    triggers the bot's /start handler (which applies the referral and offers the Mini App)."""
+    from django.conf import settings
+
+    username = (getattr(settings, 'TELEGRAM_BOT_USERNAME', '') or '').lstrip('@')
+    if not username:
+        return ''
+    code = ensure_referral_code(profile)
+    return f'https://t.me/{username}?start={code}'
+
+
 @transaction.atomic
 def apply_referral(new_profile: Profile, code: str) -> Profile | None:
     """Link `new_profile` to the referrer identified by `code` and award coins to both
