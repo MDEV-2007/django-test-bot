@@ -69,6 +69,10 @@
         </div>
     </section>
 
+    {% if show_referral_prompt %}
+        {% include 'partials/referral_card.html' with referral_link=referral_link referral_stats=referral_stats compact=True referral_share_text=referral_share_text %}
+    {% endif %}
+
     <!-- Tab navigation -->
     <div class="flex border-b border-[var(--border-soft)]">
         <button @click="activeTab = 'analysis'" class="px-6 py-3.5 border-b-2 font-semibold text-sm transition"

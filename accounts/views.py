@@ -19,6 +19,7 @@ from .utils import (
     get_telegram_photo_url,
     verify_google_id_token, generate_unique_username,
 )
+from .referrals import apply_referral, ensure_referral_code, get_referral_link, referral_stats
 
 def _post_login_redirect(profile):
     """Staff roles land in their panel; students (who haven't seen the onboarding splash
@@ -78,6 +79,9 @@ def register_view(request):
         
     error_msg = None
     form_values = {}
+    # Carried through from ?ref=CODE on the initial GET (register.html stashes it into a
+    # hidden field via JS) so it survives the POST regardless of which field it arrived in.
+    ref_code = (request.POST.get('ref') or request.GET.get('ref') or '').strip()
     if request.method == 'POST':
         # Strip every field: without this a value of only spaces passed straight through,
         # so accounts were created with a whitespace username AND a whitespace password —
@@ -118,6 +122,8 @@ def register_view(request):
             profile = ensure_profile_for_user(user)
             profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
             profile.save()
+            if ref_code:
+                apply_referral(profile, ref_code)
             login(request, user)
             return _post_login_redirect(profile)
 
@@ -125,6 +131,7 @@ def register_view(request):
         'error': error_msg,
         'values': form_values,
         'google_client_id': settings.GOOGLE_OAUTH_CLIENT_ID,
+        'ref_code': ref_code,
     })
 
 def logout_view(request):
@@ -188,6 +195,13 @@ def tg_login(request):
             profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
             profile.last_active_date = timezone.localdate()
             profile.save()
+
+            # start_param carries a referral code when the user opened the Mini App via a
+            # t.me/bot?start=CODE deep link (login.html forwards Telegram's
+            # initDataUnsafe.start_param here). Only meaningful for a just-created profile.
+            start_param = (data.get('start_param') or '').strip()
+            if start_param:
+                apply_referral(profile, start_param)
 
         # --- Sync Telegram profile photo on every login ---
         tg_photo = get_telegram_photo_url(tg_id)
@@ -257,6 +271,9 @@ def google_login(request):
         elif not profile.avatar_url:
             profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
         profile.save()
+        ref_code = (data.get('ref') or '').strip()
+        if ref_code:
+            apply_referral(profile, ref_code)
 
     user = profile.user
     if not user.is_active:
@@ -300,12 +317,14 @@ def profile_view(request):
                       .select_related('player1', 'player2', 'winner')
                       .order_by('-created_at')[:5])
     badges = profile.badges.all()
-    
+
     return render(request, 'accounts/profile.html', {
         'profile': profile,
         'recent_attempts': recent_attempts,
         'recent_battles': recent_battles,
-        'badges': badges
+        'badges': badges,
+        'referral_link': get_referral_link(profile, request),
+        'referral_stats': referral_stats(profile),
     })
 
 @login_required

@@ -95,6 +95,8 @@
         </div>
     </section>
 
+    {% include 'partials/referral_card.html' with referral_link=referral_link referral_stats=referral_stats %}
+
     {% include 'partials/theme_toggle.html' %}
 
     <div class="grid gap-8 lg:grid-cols-2">

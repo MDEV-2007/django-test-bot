@@ -23,6 +23,15 @@ class Profile(models.Model):
     # their Google display name or email. Unique but nullable: Telegram/classic accounts leave it blank.
     google_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     avatar_url = models.URLField(max_length=500, null=True, blank=True)
+
+    # --- Referral (viral loop) ---------------------------------------------------------
+    # Short shareable code (see accounts.referrals). Generated lazily on first use rather
+    # than at signup, so backfilling every existing profile is a non-event, not a migration.
+    referral_code = models.CharField(max_length=12, unique=True, null=True, blank=True, db_index=True)
+    referred_by = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals',
+        help_text="Kim taklif qilgan (birinchi ro'yxatdan o'tishdagina o'rnatiladi).",
+    )
     
     # Gamification
     xp = models.IntegerField(default=0)
@@ -162,6 +171,28 @@ def ensure_profile_for_user(user):
         }
     )
     return profile
+
+
+class ReferralBonus(models.Model):
+    """Permanent audit ledger of one successful referral (mirrors shop.Purchase's pattern:
+    InventoryItem/Profile hold current state, this table is the immutable history).
+
+    `referred` is a OneToOneField — not just a FK — so the database itself guarantees a
+    referred profile can be rewarded at most once, independent of any check in application
+    code (the app-level guard in accounts.referrals is belt-and-suspenders, not the only line
+    of defense against a bug or race double-crediting the same signup)."""
+
+    referrer = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='referral_bonuses_given')
+    referred = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='referral_bonus_received')
+    coins_awarded = models.PositiveIntegerField(default=10, help_text="Coins the REFERRER received (the new user gets the same amount).")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['referrer', '-created_at'])]
+
+    def __str__(self):
+        return f"{self.referrer.user.username} <- {self.referred.user.username} (+{self.coins_awarded})"
 
 
 @receiver(post_save, sender=User)

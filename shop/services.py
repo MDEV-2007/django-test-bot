@@ -14,6 +14,7 @@ from accounts.models import Profile
 from .models import InventoryItem, Purchase, ShopItem, StreakFreezeLog
 
 STREAK_FREEZE_SLUG = 'streak_freeze'
+PREMIUM_TEST_UNLOCK_SLUG = 'premium_test_unlock'
 
 EQUIPPED_CACHE_KEY = 'shop:equipped:{pid}'
 EQUIPPED_CACHE_TTL = 60 * 30  # 30 min; also busted explicitly on equip/unequip.
@@ -37,12 +38,22 @@ def purchase_item(profile, item):
     inv = InventoryItem.objects.select_for_update().filter(profile=locked, item=item).first()
     if inv and not item.is_consumable:
         raise ShopError("Bu mahsulot sizda allaqachon bor.")
+    if item.slug == PREMIUM_TEST_UNLOCK_SLUG and locked.premium_mock_test_unlocked:
+        # Already unlocked some other way (a real-money Payment) — don't let coins go to
+        # waste on a purchase that would have no effect.
+        raise ShopError("Premium testlar sizda allaqachon ochiq.")
     if locked.coins < item.price_coins:
         raise ShopError("Tangangiz yetarli emas.")
 
     # Row is locked, so a plain decrement is race-safe.
     locked.coins -= item.price_coins
-    locked.save(update_fields=['coins'])
+    update_fields = ['coins']
+    if item.slug == PREMIUM_TEST_UNLOCK_SLUG:
+        # Reuses the same flag real-money Payment.apply_to_profile() sets — one unlock,
+        # regardless of whether it was bought with coins or a card payment.
+        locked.premium_mock_test_unlocked = True
+        update_fields.append('premium_mock_test_unlocked')
+    locked.save(update_fields=update_fields)
 
     if inv:  # consumable restock
         inv.quantity += 1

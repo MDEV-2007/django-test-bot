@@ -23,11 +23,19 @@
             </div>
         {% endif %}
 
+        {% if ref_code %}
+            <div class="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-4 flex gap-3 text-sm text-emerald-300">
+                <i data-lucide="gift" class="w-5 h-5 flex-shrink-0"></i>
+                <p>Do'stingiz sizni taklif qildi — ro'yxatdan o'tsangiz ikkalangiz ham bonus tanga olasiz! 🎁</p>
+            </div>
+        {% endif %}
+
         {% include 'accounts/_google_signin.html' with button_text='signup_with' %}
 
         <!-- Registration Form -->
         <form class="space-y-4" method="POST" action="{% url 'accounts:register' %}">
             {% csrf_token %}
+            {% if ref_code %}<input type="hidden" name="ref" value="{{ ref_code }}">{% endif %}
             <div class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
                     <div>

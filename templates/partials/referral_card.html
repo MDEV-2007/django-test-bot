@@ -1,0 +1,50 @@
+{% comment %}
+Referral (viral loop) card. Context: `referral_link` (str), `referral_stats`
+({referral_count, coins_earned}). Pass `compact=True` for a smaller variant
+(used on the test-result page); omit/False for the full profile-page version.
+{% endcomment %}
+<section class="glass-card rounded-[28px] border border-emerald-500/20 {% if compact %}p-5{% else %}p-6{% endif %} space-y-4 bg-[var(--surface-card-soft)] relative overflow-hidden"
+          x-data="{ copied: false, copyLink() {
+              navigator.clipboard.writeText('{{ referral_link|escapejs }}');
+              this.copied = true;
+              setTimeout(() => this.copied = false, 2000);
+          } }">
+    <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="flex items-center gap-3 relative">
+        <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+            <i data-lucide="gift" class="w-5 h-5"></i>
+        </div>
+        <div class="min-w-0">
+            <h3 class="text-base font-bold text-[var(--text-primary)]">
+                {% if compact %}🎉 Do'stlarni taklif qil, tanga yig'!{% else %}Do'stlaringizni taklif qiling{% endif %}
+            </h3>
+            <p class="text-xs text-[var(--text-muted)]">Har bir do'st ro'yxatdan o'tsa — ikkalangiz ham +10 tanga olasiz. 100 tanga = Premium Test unlock!</p>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2 relative">
+        <input type="text" readonly value="{{ referral_link }}"
+               onclick="this.select()"
+               class="flex-1 min-w-0 bg-[var(--surface-input)] border border-[var(--border-card)] rounded-xl px-3 py-2.5 text-xs text-[var(--text-secondary)] font-mono truncate focus:outline-none">
+        <button type="button" @click="copyLink()"
+                class="flex-shrink-0 flex items-center gap-1.5 bg-[var(--surface-hover)] border border-[var(--border-card)] hover:bg-[var(--surface-hover-strong)] text-[var(--text-primary)] font-semibold py-2.5 px-3.5 rounded-xl transition text-xs">
+            <i data-lucide="copy" class="w-3.5 h-3.5" x-show="!copied"></i>
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400" x-show="copied" x-cloak></i>
+            <span x-text="copied ? 'Nusxalandi!' : 'Nusxa'"></span>
+        </button>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3 relative">
+        <a href="https://t.me/share/url?url={{ referral_link|urlencode }}&text={{ referral_share_text|default:"IlmMevasi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!"|urlencode }}"
+           target="_blank" rel="noopener"
+           class="flex items-center gap-2 bg-[#2d6cff] hover:bg-[#1a57e3] text-white font-bold py-2.5 px-4 rounded-xl transition text-xs">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Telegram'da ulash</span>
+        </a>
+        <div class="flex items-center gap-3 text-xs text-[var(--text-muted)] ml-auto">
+            <span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> {{ referral_stats.referral_count }} taklif</span>
+            <span class="flex items-center gap-1 text-yellow-500"><i data-lucide="coins" class="w-3.5 h-3.5"></i> +{{ referral_stats.coins_earned }}</span>
+        </div>
+    </div>
+</section>

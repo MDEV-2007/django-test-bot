@@ -15,6 +15,13 @@ ITEMS = [
     dict(slug='streak_freeze', category=ShopItem.CATEGORY_CONSUMABLE, name='Streak Muzlatish',
          description="Bir kun dars qilmasangiz, seriyangizni avtomatik saqlab qoladi.",
          icon_name='snowflake', price_coins=150, rarity='rare', is_consumable=True, order=1),
+    # Referral viral loop payoff (accounts.referrals): ~10 successful referrals earns the
+    # 100 coins this costs. is_consumable=False since it's a one-time permanent unlock —
+    # shop.services.purchase_item special-cases this exact slug to flip the profile's
+    # existing premium_mock_test_unlocked flag (the same one real-money payments set).
+    dict(slug='premium_test_unlock', category=ShopItem.CATEGORY_CONSUMABLE, name='Premium Test Unlock',
+         description="Tangalar bilan barcha premium mock testlarga kirishni oching — do'stlaringizni taklif qilib toping!",
+         icon_name='unlock', price_coins=100, rarity='epic', is_consumable=False, order=2),
 
     # --- Titles ---
     dict(slug='title_bilimdon', category=ShopItem.CATEGORY_TITLE, name='Bilimdon',

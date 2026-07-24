@@ -941,6 +941,8 @@ def feedback(request, attempt_id):
             'grading_note': ans.ai_grading_note,
         })
 
+    from accounts.referrals import get_referral_link, referral_stats
+
     return render(request, 'tests_app/feedback.html', {
         'attempt': attempt,
         'ai': ai_feedback,
@@ -948,7 +950,14 @@ def feedback(request, attempt_id):
         'strong_topics': strong_topics,
         'weak_topics': weak_topics,
         'review_items': review_items,
-        'profile': attempt.profile
+        'profile': attempt.profile,
+        'show_referral_prompt': attempt.score >= 70,
+        'referral_link': get_referral_link(attempt.profile, request),
+        'referral_stats': referral_stats(attempt.profile),
+        'referral_share_text': (
+            f"IlmMevasi'da testdan {attempt.score:.0f}% natija oldim! "
+            "Sen ham sinab ko'r va bonus tanga yutib ol:"
+        ),
     })
 
 @login_required

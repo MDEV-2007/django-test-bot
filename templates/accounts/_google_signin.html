@@ -31,11 +31,14 @@ login and register pages; pass `button_text` to switch the label.
 
         window.handleGoogleCredential = async function (response) {
             errorEl.classList.add('hidden');
+            // Referral code, if this page was opened via a friend's share link (?ref=CODE) —
+            // only matters for a brand-new account; google_login ignores it otherwise.
+            const refCode = new URLSearchParams(window.location.search).get('ref') || '';
             try {
                 const res = await fetch("{% url 'accounts:google_login' %}", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                    body: JSON.stringify({ credential: response.credential })
+                    body: JSON.stringify({ credential: response.credential, ref: refCode })
                 });
                 const data = await res.json();
                 if (data.success) {

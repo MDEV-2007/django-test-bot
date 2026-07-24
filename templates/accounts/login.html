@@ -56,7 +56,9 @@
                         const res = await fetch('{% url "accounts:tg_login" %}', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ initData: tg.initData })
+                            // start_param carries a referral code when this Mini App was opened
+                            // via a friend's t.me/bot?start=CODE deep link.
+                            body: JSON.stringify({ initData: tg.initData, start_param: tg.initDataUnsafe?.start_param || '' })
                         });
                         const data = await res.json();
                         if (data.success) {

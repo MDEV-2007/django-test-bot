@@ -26,9 +26,14 @@ def _webapp_url():
     return getattr(settings, 'WEBAPP_URL', '') or 'http://127.0.0.1:8000/'
 
 
-def get_or_create_profile(tg_user):
-    """Mirrors accounts.views.tg_login's user-creation logic for bot-initiated users."""
+def get_or_create_profile(tg_user, referral_code=None):
+    """Mirrors accounts.views.tg_login's user-creation logic for bot-initiated users.
+
+    `referral_code` is only ever applied on the branch that creates a brand-new profile —
+    an existing user re-sending /start (even with a stray ?start=CODE) can't retroactively
+    farm a referral bonus."""
     from accounts.models import Profile, ensure_profile_for_user
+    from accounts.referrals import apply_referral
 
     tg_id = str(tg_user['id'])
     profile = Profile.objects.select_related('user').filter(telegram_id=tg_id).first()
@@ -49,11 +54,13 @@ def get_or_create_profile(tg_user):
         profile.avatar_url = f"https://api.dicebear.com/7.x/adventurer/svg?seed={seed}"
     profile.last_active_date = timezone.localdate()
     profile.save()
+    if referral_code:
+        apply_referral(profile, referral_code)
     return profile
 
 
-def handle_start(chat_id, tg_user):
-    get_or_create_profile(tg_user)
+def handle_start(chat_id, tg_user, referral_code=None):
+    get_or_create_profile(tg_user, referral_code=referral_code)
 
     # Telegram silently rejects "web_app" buttons whose URL isn't HTTPS — the whole
     # sendMessage call fails and nothing reaches the user. Fall back to a plain "url"
@@ -66,6 +73,7 @@ def handle_start(chat_id, tg_user):
 
     keyboard = {'inline_keyboard': [
         [open_app_button],
+        [{'text': "\U0001F381 Do'stlarni taklif qil", 'callback_data': 'referral_info'}],
         [{'text': "\U0001F48E Premium sotib olish", 'callback_data': 'premium_menu'}],
     ]}
     result = send_message(
@@ -77,6 +85,24 @@ def handle_start(chat_id, tg_user):
     if not result.get('ok'):
         send_message(chat_id, "Assalomu alaykum! Botda vaqtincha texnik nosozlik bor, "
                               "birozdan so'ng qayta urinib ko'ring.")
+
+
+def handle_referral_info(chat_id, tg_user):
+    from accounts.referrals import get_referral_link, referral_stats
+
+    profile = get_or_create_profile(tg_user)
+    link = get_referral_link(profile)
+    stats = referral_stats(profile)
+    send_message(
+        chat_id,
+        "🎁 Do'stlaringizni taklif qiling!\n\n"
+        "Havolangiz orqali ro'yxatdan o'tgan har bir do'st uchun — ikkalangiz ham "
+        "+10 tanga olasiz.\n\n"
+        f"🔗 Sizning havolangiz:\n{link}\n\n"
+        f"👥 Taklif qilganlaringiz: {stats['referral_count']}\n"
+        f"🪙 Ulardan olingan tanga: {stats['coins_earned']}\n\n"
+        "100 tanga to'plasangiz, Do'kondan Premium Test unlockni tekinga olishingiz mumkin!",
+    )
 
 
 def handle_premium_menu(chat_id):
@@ -172,6 +198,8 @@ def process_update(update):
         answer_callback(cq['id'])
         if data == 'premium_menu':
             handle_premium_menu(chat_id)
+        elif data == 'referral_info':
+            handle_referral_info(chat_id, cq['from'])
         elif data.startswith('buy_plan_'):
             handle_buy_plan(chat_id, cq['from'], int(data.replace('buy_plan_', '')))
         return
@@ -188,11 +216,16 @@ def process_update(update):
 
     text = msg.get('text', '')
     if text.startswith('/start'):
-        handle_start(chat_id, tg_user)
+        # Deep link: t.me/<bot>?start=CODE arrives as the literal text "/start CODE".
+        parts = text.split(maxsplit=1)
+        referral_code = parts[1].strip() if len(parts) > 1 else None
+        handle_start(chat_id, tg_user, referral_code=referral_code)
     elif text.startswith('/myid'):
         send_message(chat_id,
                      f"Sizning Telegram chat ID raqamingiz: {chat_id}\n\n"
                      f"Admin bildirishnomalarini olish uchun .env faylida "
                      f"ADMIN_TELEGRAM_CHAT_ID={chat_id} deb yozing.")
+    elif text.startswith('/referral') or text.startswith('/invite'):
+        handle_referral_info(chat_id, tg_user)
     elif text:
         send_message(chat_id, "Buyruqlar uchun /start ni bosing.")
