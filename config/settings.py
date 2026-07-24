@@ -298,6 +298,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Django 4+ sets Cross-Origin-Opener-Policy: same-origin by default (in every environment,
+# not just when DEBUG is off). That isolates the browsing-context group, which severs
+# window.opener in Google's Sign-In popup — the popup's own script then throws "Cannot read
+# properties of null (reading 'postMessage')" trying to relay the credential back, and the
+# button silently fails. same-origin-allow-popups keeps the same protection for regular
+# navigation while letting popups we open (or that open us, like this one) keep talking back.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+
 # Production hardening. These only switch on when DEBUG is off, so local development
 # over plain HTTP is unaffected, but a real deployment gets secure cookies, HTTPS
 # redirects, and clickjacking/content-type protections without any extra config.
