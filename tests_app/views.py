@@ -639,15 +639,13 @@ def submit_answer(request, attempt_id):
         if total_questions == 0:
             return redirect('tests:center')
 
-        if q_idx >= total_questions:
-            current_answer = answers[q_idx - 1]
-            context = _question_screen_context(attempt, q_idx, current_answer, total_questions)
-            return render(request, 'tests_app/partials/question_card.html', context)
-
-        next_idx = q_idx + 1
-        current_answer = answers[next_idx - 1]
-        context = _question_screen_context(attempt, next_idx, current_answer, total_questions)
-
+        # Stay on the SAME question after saving — choice/matching/grouped answers save via
+        # hx-trigger="change" the instant the student picks an option, so auto-advancing here
+        # used to jump to the next question the moment they clicked, before they could even
+        # see their own selection highlighted. Navigation is the student's call, via the
+        # existing Oldingi/Keyingi buttons.
+        current_answer = answers[q_idx - 1]
+        context = _question_screen_context(attempt, q_idx, current_answer, total_questions)
         return render(request, 'tests_app/partials/question_card.html', context)
         
     return HttpResponse(status=400)
