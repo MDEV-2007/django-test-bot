@@ -30,7 +30,11 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-fallback-key-do-not-use-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# Defaults to False (fail-safe): if .env is ever missing or DEBUG is unset for any reason
+# in production, the app should come up locked down rather than silently leaking stack
+# traces, settings, and installed-app info to every visitor via Django's debug error page.
+# Local development explicitly sets DEBUG=True in .env (see .env.example).
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     '127.0.0.1', 'localhost',

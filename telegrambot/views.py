@@ -12,6 +12,7 @@ Two rules make this safe and fast:
      and handling an update can involve several outbound API calls plus a file download.
      We hand the work to the background pool and return 200 straight away.
 """
+import hmac
 import json
 import logging
 
@@ -33,7 +34,13 @@ def _secret_ok(request):
         # No secret configured — refuse rather than run an unauthenticated endpoint.
         logger.error("TELEGRAM_WEBHOOK_SECRET is not set; rejecting webhook call")
         return False
-    return request.headers.get('X-Telegram-Bot-Api-Secret-Token') == expected
+    # compare_digest instead of == — a plain string compare returns as soon as the first
+    # differing character is found, so response time leaks how many leading characters of
+    # a guess were correct. Low practical risk here (this runs over HTTPS, and the attacker
+    # would need very precise timing measurements), but a constant-time compare costs
+    # nothing and is the standard way to compare secrets, so there's no reason not to.
+    received = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
+    return hmac.compare_digest(received, expected)
 
 
 @csrf_exempt
