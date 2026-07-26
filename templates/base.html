@@ -278,34 +278,42 @@
         opacity: 0;
         visibility: hidden;
       }
-      /* Logo sits inside two faint concentric rings for depth (matches the
-         static splash-screen.svg brand asset). */
+      /* Logo "draws itself in": stem grows down first, then the two main roots
+         splay out, then the two finer roots — same sequence and geometry as the
+         brand-kit mockup, just played ONCE (fill-mode: forwards) and settling in
+         its final state instead of looping/fading back out, since the real splash
+         is dismissed by JS (hideSplash()) rather than by the animation itself. */
       #app-splash .splash-logo-wrap {
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      #app-splash .splash-ring {
-        position: absolute;
-        border-radius: 9999px;
-        border: 1px solid var(--border-soft);
-        animation: splashPop 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      #app-splash .splash-ring-1 { width: 190px; height: 190px; }
-      #app-splash .splash-ring-2 { width: 270px; height: 270px; border-color: var(--border-soft); }
-      #app-splash .splash-logo {
         width: 96px;
         height: 96px;
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(45, 108, 255, 0.35);
-        animation: splashPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       }
+      #app-splash .splash-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: 26px;
+        background: radial-gradient(circle, rgba(45, 108, 255, 0.5), transparent 70%);
+        filter: blur(14px);
+        animation: splashGlowPulse 2s ease-in-out infinite;
+      }
+      #app-splash .splash-branch {
+        position: absolute;
+        left: 50%;
+        background: linear-gradient(180deg, #ffffff, #d6e6fb);
+        border-radius: 999px;
+        transform-origin: top center;
+      }
+      #app-splash .splash-stem   { top: 22%; width: 13px; height: 44%; animation: splashStemIn   0.9s ease forwards; }
+      #app-splash .splash-root-l { top: 50%; width: 11px; height: 34%; animation: splashRootLIn  0.9s ease forwards; }
+      #app-splash .splash-root-r { top: 50%; width: 11px; height: 34%; animation: splashRootRIn  0.9s ease forwards; }
+      #app-splash .splash-root-l2 { top: 54%; width: 8px; height: 24%; background: #ffffff; animation: splashRootL2In 0.9s ease forwards; }
+      #app-splash .splash-root-r2 { top: 54%; width: 8px; height: 24%; background: #ffffff; animation: splashRootR2In 0.9s ease forwards; }
       #app-splash .splash-heading {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 0.45rem;
+        animation: splashWordIn 0.9s ease forwards;
       }
       #app-splash .splash-title {
         font-size: 1.5rem;
@@ -329,19 +337,47 @@
       #app-splash .splash-bar::after {
         content: '';
         display: block;
-        width: 40%;
         height: 100%;
         border-radius: 999px;
         background: linear-gradient(90deg, #2d6cff, #37b7ff);
-        animation: splashLoad 1s ease-in-out infinite;
+        animation: splashBarLoad 1.1s ease forwards;
       }
-      @keyframes splashPop {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+      @keyframes splashGlowPulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
       }
-      @keyframes splashLoad {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(350%); }
+      @keyframes splashStemIn {
+        0% { opacity: 0; transform: translateX(-50%) scaleY(0); }
+        30% { opacity: 1; transform: translateX(-50%) scaleY(1); }
+        100% { opacity: 1; transform: translateX(-50%) scaleY(1); }
+      }
+      @keyframes splashRootLIn {
+        0%, 18% { opacity: 0; transform: translateX(-50%) rotate(-34deg) scaleY(0); }
+        58% { opacity: 1; transform: translateX(-50%) rotate(-34deg) scaleY(1); }
+        100% { opacity: 1; transform: translateX(-50%) rotate(-34deg) scaleY(1); }
+      }
+      @keyframes splashRootRIn {
+        0%, 18% { opacity: 0; transform: translateX(-50%) rotate(34deg) scaleY(0); }
+        58% { opacity: 1; transform: translateX(-50%) rotate(34deg) scaleY(1); }
+        100% { opacity: 1; transform: translateX(-50%) rotate(34deg) scaleY(1); }
+      }
+      @keyframes splashRootL2In {
+        0%, 36% { opacity: 0; transform: translateX(-50%) rotate(-58deg) scaleY(0); }
+        80% { opacity: 0.7; transform: translateX(-50%) rotate(-58deg) scaleY(1); }
+        100% { opacity: 0.7; transform: translateX(-50%) rotate(-58deg) scaleY(1); }
+      }
+      @keyframes splashRootR2In {
+        0%, 36% { opacity: 0; transform: translateX(-50%) rotate(58deg) scaleY(0); }
+        80% { opacity: 0.7; transform: translateX(-50%) rotate(58deg) scaleY(1); }
+        100% { opacity: 0.7; transform: translateX(-50%) rotate(58deg) scaleY(1); }
+      }
+      @keyframes splashWordIn {
+        0%, 72% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes splashBarLoad {
+        0% { width: 0%; }
+        100% { width: 100%; }
       }
 
       /* --- Sahifa o'tish progress-bari (yuqoridagi ingichka chiziq) --- */
@@ -401,9 +437,12 @@
          every link is a full reload) skips straight to hidden. -->
     <div id="app-splash">
       <div class="splash-logo-wrap">
-        <span class="splash-ring splash-ring-2"></span>
-        <span class="splash-ring splash-ring-1"></span>
-        <img src="{% static 'img/icon.png' %}" alt="IlmIldizi" class="splash-logo" />
+        <span class="splash-glow"></span>
+        <span class="splash-branch splash-stem"></span>
+        <span class="splash-branch splash-root-l"></span>
+        <span class="splash-branch splash-root-r"></span>
+        <span class="splash-branch splash-root-l2"></span>
+        <span class="splash-branch splash-root-r2"></span>
       </div>
       <div class="splash-heading">
         <div class="splash-title">Ilm<span>Ildizi</span></div>
@@ -661,7 +700,9 @@
       }
       window.addEventListener('load', function () {
         renderIcons();
-        setTimeout(hideSplash, 350);
+        // Long enough for the stem-in -> roots-out -> wordmark -> bar sequence
+        // (~1.1s total) to finish playing before the overlay starts fading.
+        setTimeout(hideSplash, 1300);
       });
       // Fallback: never let the splash get stuck
       setTimeout(function () { renderIcons(); hideSplash(); }, 2500);
