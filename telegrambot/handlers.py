@@ -88,10 +88,13 @@ def handle_start(chat_id, tg_user, referral_code=None):
 
 
 def handle_referral_info(chat_id, tg_user):
-    from accounts.referrals import get_referral_link, referral_stats
+    from accounts.referrals import get_referral_link, get_telegram_deep_link, referral_stats
 
     profile = get_or_create_profile(tg_user)
-    link = get_referral_link(profile)
+    # Sharing FROM the bot itself should hand friends a t.me deep link — clicking a website
+    # link from a Telegram chat just opens a browser instead of continuing inside Telegram.
+    # Falls back to the website link only if TELEGRAM_BOT_USERNAME isn't configured.
+    link = get_telegram_deep_link(profile) or get_referral_link(profile)
     stats = referral_stats(profile)
     send_message(
         chat_id,
