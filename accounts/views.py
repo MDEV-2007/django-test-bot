@@ -16,7 +16,7 @@ from .models import Profile, ensure_profile_for_user
 from .utils import (
     verify_telegram_webapp_data,
     login_is_locked, login_record_failure, login_clear_failures,
-    get_telegram_photo_url,
+    sync_telegram_avatar,
     verify_google_id_token, generate_unique_username,
 )
 from .referrals import apply_referral, ensure_referral_code, get_referral_link, get_telegram_deep_link, referral_stats
@@ -204,7 +204,7 @@ def tg_login(request):
                 apply_referral(profile, start_param)
 
         # --- Sync Telegram profile photo on every login ---
-        tg_photo = get_telegram_photo_url(tg_id)
+        tg_photo = sync_telegram_avatar(tg_id)
         if tg_photo:
             profile.avatar_url = tg_photo
             profile.save(update_fields=['avatar_url'])

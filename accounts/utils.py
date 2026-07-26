@@ -146,15 +146,19 @@ def send_telegram_photo(chat_id: str, image_path: str, caption: str) -> bool:
     return send_telegram_message(chat_id, caption)
 
 
-def get_telegram_photo_url(tg_id: str) -> str | None:
-    """Fetch the largest available Telegram profile photo URL for *tg_id*.
+def sync_telegram_avatar(tg_id: str) -> str | None:
+    """Download this Telegram user's current profile photo and re-host it under our own
+    MEDIA storage, returning a local URL (e.g. /media/avatars/tg_123.jpg) — or None if the
+    user has no photo, the token is missing, or any network/API error occurs. Never raises.
 
-    Uses two Bot API calls:
-      1. getUserProfilePhotos  — returns file_ids for the user's photos
-      2. getFile               — resolves a file_id to a downloadable path
-
-    Returns the full URL on success, or None if the user has no photo,
-    the token is missing, or any network/API error occurs.  Never raises.
+    Earlier this returned the raw https://api.telegram.org/file/bot<TOKEN>/<path> URL
+    directly as avatar_url. That was wrong two ways: (1) it embeds the bot TOKEN in plain
+    sight in the profile page's HTML source; (2) the file_path Telegram hands back is
+    short-lived — once it expires the hotlinked <img> just breaks (this is exactly the
+    "avatar tashiydi" bug reported: it works right after login, then quietly rots). Storing
+    our own copy fixes both: the token never reaches the client, and the local copy never
+    expires. Uses two Bot API calls (getUserProfilePhotos, getFile), same as before, but
+    then actually downloads the bytes instead of just building a URL from them.
     """
     token = settings.TELEGRAM_BOT_TOKEN
     if not token or not tg_id:
@@ -188,9 +192,25 @@ def get_telegram_photo_url(tg_id: str) -> str | None:
         if not file_path:
             return None
 
-        return f"https://api.telegram.org/file/bot{token}/{file_path}"
+        # Step 3: download the actual image bytes (server-side — the token never leaves here).
+        photo_resp = requests.get(f"https://api.telegram.org/file/bot{token}/{file_path}", timeout=10)
+        if not photo_resp.ok:
+            return None
+
+        from django.core.files.base import ContentFile
+        from django.core.files.storage import default_storage
+
+        ext = file_path.rsplit('.', 1)[-1] if '.' in file_path else 'jpg'
+        name = f"avatars/tg_{tg_id}.{ext}"
+        # Delete any existing copy first: FileSystemStorage.save() never overwrites — it
+        # picks a new randomized name instead — so without this every re-sync would pile up
+        # a fresh file and leave the old, stale-cached one still referenced elsewhere.
+        if default_storage.exists(name):
+            default_storage.delete(name)
+        saved_name = default_storage.save(name, ContentFile(photo_resp.content))
+        return default_storage.url(saved_name)
     except Exception:
-        logger.warning("Failed to fetch Telegram photo for user %s", tg_id, exc_info=True)
+        logger.warning("Failed to sync Telegram avatar for user %s", tg_id, exc_info=True)
         return None
 
 
