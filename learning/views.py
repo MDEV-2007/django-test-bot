@@ -37,7 +37,7 @@ STOPWORDS = {
 
 def _mentor_system_prompt(subject_name):
     return (
-        f"Sen IlmMevasi ta'lim ilovasidagi AI Mentorsan. Foydalanuvchi hozir '{subject_name}' "
+        f"Sen IlmIldizi ta'lim ilovasidagi AI Mentorsan. Foydalanuvchi hozir '{subject_name}' "
         f"fanini o'rganyapti — asosan shu fan bo'yicha, Milliy sertifikat va imtihonlarga "
         f"tayyorgarlik yuzasidan yordam berasan. Faqat o'zbek tilida, aniq va qisqa (3-6 gap) "
         f"javob ber. Agar foydalanuvchi xabarida 'Kontekst:' bilan boshlangan qism berilgan "

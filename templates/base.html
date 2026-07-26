@@ -11,7 +11,7 @@
          before the <style> block below that reads these attributes. -->
     <script>
       (function () {
-        var KEY = 'ilmmevasi_theme';
+        var KEY = 'ilmildizi_theme';
         var pref = localStorage.getItem(KEY) || 'system';
         var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         var resolved = pref === 'system' ? (systemDark ? 'dark' : 'light') : pref;
@@ -23,17 +23,17 @@
         if (meta) meta.setAttribute('content', resolved === 'light' ? '#e1e4ea' : '#050811');
       })();
     </script>
-    <title>{% block title %}IlmMevasi — Milliy sertifikat va imtihonlarga tayyorgarlik{% endblock %}</title>
+    <title>{% block title %}IlmIldizi — Milliy sertifikat va imtihonlarga tayyorgarlik{% endblock %}</title>
 
     <!-- SEO + social share preview. Pages can override the description via the meta_description
          block; the Open Graph / Twitter tags drive the rich preview card shown when a link is
          shared in Telegram, Facebook, etc. -->
-    <meta name="description" content="{% block meta_description %}IlmMevasi — o'quvchilar uchun gamifikatsiyalangan ta'lim platformasi. Tarix, ona tili, matematika va biologiyadan milliy sertifikat va imtihonlarga tayyorlaning: testlar, darslar, AI mentor va reyting.{% endblock %}" />
+    <meta name="description" content="{% block meta_description %}IlmIldizi — o'quvchilar uchun gamifikatsiyalangan ta'lim platformasi. Tarix, ona tili, matematika va biologiyadan milliy sertifikat va imtihonlarga tayyorlaning: testlar, darslar, AI mentor va reyting.{% endblock %}" />
     <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="IlmMevasi" />
-    <meta property="og:title" content="{% block og_title %}IlmMevasi{% endblock %}" />
+    <meta property="og:site_name" content="IlmIldizi" />
+    <meta property="og:title" content="{% block og_title %}IlmIldizi{% endblock %}" />
     <meta property="og:description" content="Milliy sertifikat va imtihonlarga tayyorgarlik: testlar, darslar, AI mentor va reyting." />
     <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}" />
     <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image.png' %}" />
@@ -41,7 +41,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="uz_UZ" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="IlmMevasi" />
+    <meta name="twitter:title" content="IlmIldizi" />
     <meta name="twitter:description" content="Milliy sertifikat va imtihonlarga tayyorgarlik: testlar, darslar, AI mentor va reyting." />
     <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image.png' %}" />
 
@@ -49,7 +49,7 @@
     {
       "@context": "https://schema.org",
       "@type": "EducationalOrganization",
-      "name": "IlmMevasi",
+      "name": "IlmIldizi",
       "url": "{{ request.scheme }}://{{ request.get_host }}/",
       "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/icon.png' %}",
       "description": "Gamifikatsiyalangan ta'lim platformasi — milliy sertifikat va imtihonlarga tayyorgarlik."
@@ -403,11 +403,11 @@
       <div class="splash-logo-wrap">
         <span class="splash-ring splash-ring-2"></span>
         <span class="splash-ring splash-ring-1"></span>
-        <img src="{% static 'img/icon.png' %}" alt="IlmMevasi" class="splash-logo" />
+        <img src="{% static 'img/icon.png' %}" alt="IlmIldizi" class="splash-logo" />
       </div>
       <div class="splash-heading">
-        <div class="splash-title">Ilm<span>Mevasi</span></div>
-        <div class="splash-tagline">Bilim sari har kuni bir qadam</div>
+        <div class="splash-title">Ilm<span>Ildizi</span></div>
+        <div class="splash-tagline">Bilim sayohati</div>
       </div>
       <div class="splash-bar"></div>
     </div>
@@ -429,10 +429,10 @@
     </div>
 
     <script>
-      if (sessionStorage.getItem('ilmmevasi_splash_shown')) {
+      if (sessionStorage.getItem('ilmildizi_splash_shown')) {
         document.getElementById('app-splash').classList.add('hidden-splash');
       } else {
-        sessionStorage.setItem('ilmmevasi_splash_shown', '1');
+        sessionStorage.setItem('ilmildizi_splash_shown', '1');
       }
     </script>
 
@@ -557,7 +557,7 @@
           resolved: document.documentElement.getAttribute('data-theme') || 'dark',
           set(pref) {
             this.pref = pref;
-            localStorage.setItem('ilmmevasi_theme', pref);
+            localStorage.setItem('ilmildizi_theme', pref);
             this.apply();
           },
           apply() {

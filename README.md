@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="static/img/icon.png" width="96" height="96" alt="IlmMevasi" />
+<img src="static/img/icon.png" width="96" height="96" alt="IlmIldizi" />
 
-# IlmMevasi
+# IlmIldizi
 
 **Gamified education platform for Uzbek students — as a website *and* a Telegram Mini App.**
 

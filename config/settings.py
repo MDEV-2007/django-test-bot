@@ -54,7 +54,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Moving to a custom domain later needs no code change — set EXTRA_ALLOWED_HOSTS in the
-# environment (comma-separated, e.g. "ilmmevasi.uz,www.ilmmevasi.uz") and both lists pick
+# environment (comma-separated, e.g. "ilmildizi.uz,www.ilmildizi.uz") and both lists pick
 # it up. Bare hosts are also trusted as HTTPS origins for CSRF.
 _extra_hosts = [h.strip() for h in os.environ.get('EXTRA_ALLOWED_HOSTS', '').split(',') if h.strip()]
 ALLOWED_HOSTS += _extra_hosts
@@ -63,7 +63,7 @@ CSRF_TRUSTED_ORIGINS += [h if h.startswith('http') else f'https://{h.lstrip(".")
 # Telegram bot token used to validate Telegram WebApp login data. Set in .env.
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
-# Bot's @username (no leading @), e.g. "ilmmevasi_bot" — used to build a t.me/<bot>?start=
+# Bot's @username (no leading @), e.g. "ilmildizi_bot" — used to build a t.me/<bot>?start=
 # deep link for referral sharing. When a user shares from INSIDE the Telegram Mini App, the
 # recipient should land back in Telegram (bot -> "Open app" -> login), not on the plain
 # website — a bare website link opened from Telegram's share sheet just opens a browser
@@ -231,7 +231,7 @@ else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'ilmmevasi-local',
+            'LOCATION': 'ilmildizi-local',
         }
     }
 

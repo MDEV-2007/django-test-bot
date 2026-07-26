@@ -19,7 +19,7 @@ class Command(BaseCommand):
     help = "Telegram webhook'ni o'rnatadi, ko'rsatadi yoki o'chiradi."
 
     def add_arguments(self, parser):
-        parser.add_argument('--url', help="Public base URL, e.g. https://ilmmevasi.uz")
+        parser.add_argument('--url', help="Public base URL, e.g. https://ilmildizi.uz")
         parser.add_argument('--info', action='store_true', help="Show current webhook status.")
         parser.add_argument('--delete', action='store_true', help="Remove the webhook (use polling).")
 

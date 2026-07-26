@@ -326,13 +326,13 @@ def profile_view(request):
         'referral_link': get_referral_link(profile, request),
         'telegram_deep_link': get_telegram_deep_link(profile),
         'referral_stats': referral_stats(profile),
-        'referral_share_text': "IlmMevasi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!",
+        'referral_share_text': "IlmIldizi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!",
     })
 
 @login_required
 def onboarding_view(request):
     """Two-slide splash intro shown once to a user right after their first
-    login/registration, explaining what IlmMevasi is and what it offers."""
+    login/registration, explaining what IlmIldizi is and what it offers."""
     profile = ensure_profile_for_user(request.user)
 
     if request.method == 'POST':

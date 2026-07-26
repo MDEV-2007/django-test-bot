@@ -20,7 +20,7 @@ class NotFoundPageTests(TestCase):
     def test_404_page_is_branded_and_offers_a_way_out(self):
         html = self.client.get('/yoq/').content.decode()
         self.assertIn('404', html)
-        self.assertIn("Bu meva shoxda yo'q ekan", html)
+        self.assertIn("Bu yo'l hali ildiz otmagan", html)
         # Must give the visitor somewhere to go, not just a dead end.
         for link in ('/tests/', '/learning/', '/leaderboard/'):
             self.assertIn(link, html)

@@ -1,7 +1,7 @@
 def site_settings(request):
     """Exposes the singleton site name/logo to every template (panels use it in the
     sidebar/title). Guarded so a missing table during early migrations can't 500 the site."""
-    name, logo = "Ilm Mevasi", ""
+    name, logo = "Ilm Ildizi", ""
     try:
         from .models import SiteSettings
         s = SiteSettings.load()

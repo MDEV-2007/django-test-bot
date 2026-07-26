@@ -25,7 +25,7 @@ from core.models import StreakReminderLog
 DEFAULT_MESSAGE = (
     "🔥 Seriyangiz uzilish arafasida!\n\n"
     "Bugungi mashqni bajaring va {streak} kunlik faollik seriyangizni saqlab qoling. "
-    "Ilm Mevasi sizni kutmoqda 🌱"
+    "Ilm Ildizi sizni kutmoqda 🌱"
 )
 
 

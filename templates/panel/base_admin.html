@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#ffffff" />
-  <title>{% block page_title %}Boshqaruv paneli{% endblock %} — {{ site_name|default:"Ilm Mevasi" }}</title>
+  <title>{% block page_title %}Boshqaruv paneli{% endblock %} — {{ site_name|default:"Ilm Ildizi" }}</title>
 
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -59,7 +59,7 @@
     <div class="h-16 flex items-center gap-3 px-5 border-b border-ink-100">
       <div class="w-9 h-9 rounded-xl accent-bg flex items-center justify-center text-white font-extrabold">IM</div>
       <div class="leading-tight">
-        <p class="font-extrabold text-sm">{{ site_name|default:"Ilm Mevasi" }}</p>
+        <p class="font-extrabold text-sm">{{ site_name|default:"Ilm Ildizi" }}</p>
         <p class="text-[11px] text-ink-500">{% block panel_label %}Boshqaruv paneli{% endblock %}</p>
       </div>
       <button @click="sidebarOpen = false" class="ml-auto lg:hidden text-ink-500">

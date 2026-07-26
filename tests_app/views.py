@@ -954,7 +954,7 @@ def feedback(request, attempt_id):
         'telegram_deep_link': get_telegram_deep_link(attempt.profile),
         'referral_stats': referral_stats(attempt.profile),
         'referral_share_text': (
-            f"IlmMevasi'da testdan {attempt.score:.0f}% natija oldim! "
+            f"IlmIldizi'da testdan {attempt.score:.0f}% natija oldim! "
             "Sen ham sinab ko'r va bonus tanga yutib ol:"
         ),
     })

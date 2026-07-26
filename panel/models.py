@@ -45,11 +45,11 @@ class AuditLog(models.Model):
 class SiteSettings(models.Model):
     """Singleton site-wide settings, editable from the Super Admin panel. Always use
     SiteSettings.load() rather than creating rows directly — only pk=1 is ever used."""
-    site_name = models.CharField(max_length=100, default="Ilm Mevasi")
+    site_name = models.CharField(max_length=100, default="Ilm Ildizi")
     logo_url = models.URLField(max_length=500, blank=True)
     contact_email = models.EmailField(blank=True)
     contact_phone = models.CharField(max_length=50, blank=True)
-    telegram_channel = models.CharField(max_length=150, blank=True, help_text="masalan: @ilmmevasi")
+    telegram_channel = models.CharField(max_length=150, blank=True, help_text="masalan: @ilmildizi")
     announcement = models.TextField(blank=True, help_text="Saytdagi barcha foydalanuvchilarga ko'rsatiladigan e'lon (ixtiyoriy).")
     maintenance_mode = models.BooleanField(
         default=False,

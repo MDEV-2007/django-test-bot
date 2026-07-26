@@ -67,9 +67,9 @@ def handle_start(chat_id, tg_user, referral_code=None):
     # button so /start always works, even before a real HTTPS domain is configured.
     url = _webapp_url()
     if url.startswith('https://'):
-        open_app_button = {'text': "\U0001F393 Ilm Mevasi'ni ochish", 'web_app': {'url': url}}
+        open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'web_app': {'url': url}}
     else:
-        open_app_button = {'text': "\U0001F393 Ilm Mevasi'ni ochish", 'url': url}
+        open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'url': url}
 
     keyboard = {'inline_keyboard': [
         [open_app_button],
@@ -78,7 +78,7 @@ def handle_start(chat_id, tg_user, referral_code=None):
     ]}
     result = send_message(
         chat_id,
-        "Assalomu alaykum! IlmMevasi botiga xush kelibsiz.\n\n"
+        "Assalomu alaykum! IlmIldizi botiga xush kelibsiz.\n\n"
         "Pastdagi tugma orqali ilovani oching yoki premium imkoniyatlarni ko'ring.",
         reply_markup=keyboard,
     )

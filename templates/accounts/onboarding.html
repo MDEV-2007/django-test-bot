@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}IlmMevasi — Xush kelibsiz{% endblock %}
+{% block title %}IlmIldizi — Xush kelibsiz{% endblock %}
 
 {% block content %}
 <div class="min-h-[85vh] flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8" x-data="{ step: 1 }">
@@ -17,8 +17,8 @@
 
             <!-- Slide 1: Welcome -->
             <div x-show="step === 1" x-cloak class="text-center relative space-y-4">
-                <img src="{% static 'img/icon.png' %}" alt="IlmMevasi" class="mx-auto w-16 h-16 rounded-2xl shadow-xl" />
-                <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">IlmMevasi'ga xush kelibsiz, {{ profile.user.first_name|default:profile.user.username }}!</h2>
+                <img src="{% static 'img/icon.png' %}" alt="IlmIldizi" class="mx-auto w-16 h-16 rounded-2xl shadow-xl" />
+                <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">IlmIldizi'ga xush kelibsiz, {{ profile.user.first_name|default:profile.user.username }}!</h2>
                 <p class="text-sm text-[var(--text-muted)] leading-relaxed">Turli fanlardan bilimingizni sinab ko'ring, milliy sertifikat va imtihonlarga tayyorlaning — barchasi bitta ilovada.</p>
             </div>
 
