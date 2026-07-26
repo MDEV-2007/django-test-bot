@@ -1,0 +1,22 @@
+{
+  "name": "ilmildizi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend build tooling for IlmIldizi (Tailwind CSS compiled ahead of time, replacing the Play CDN script).",
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/src/tailwind.css -o ./static/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./static/src/tailwind.css -o ./static/css/tailwind.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MDEV-2007/django-test-bot.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MDEV-2007/django-test-bot/issues"
+  },
+  "homepage": "https://github.com/MDEV-2007/django-test-bot#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}

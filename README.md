@@ -119,6 +119,27 @@ deck, webhook authentication and role-based access.
 
 ---
 
+## Frontend build (Tailwind CSS)
+
+Tailwind is compiled ahead of time with the Tailwind CLI — **not** the `cdn.tailwindcss.com`
+Play script (Tailwind's own docs say not to use that in production: it ships the whole
+engine and re-compiles in the browser on every page load). `tailwind.config.js` holds the
+shared theme (used by both the main site and the Super Admin/Teacher panels); the compiled
+output, `static/css/tailwind.css`, **is committed to git** — so a normal deploy needs no
+Node.js on the server at all, only `collectstatic` to pick it up like any other static file.
+
+```bash
+npm install            # once, wherever you edit templates
+npm run watch:css      # while developing — recompiles on every template save
+npm run build:css      # one-shot minified rebuild before committing
+```
+
+**Rebuild and commit `static/css/tailwind.css` whenever you add a class that wasn't used
+anywhere before** — Tailwind only generates CSS for classes it finds literally written in
+`templates/**/*.html` or `static/js/**/*.js` (see `content` in `tailwind.config.js`); a class
+that exists only in the compiled file from an old build won't retroactively appear for new
+markup, and a class used in a template but never rebuilt just silently has no styles.
+
 ## Deployment
 
 Everything scale-related is an **environment variable** — no code changes.

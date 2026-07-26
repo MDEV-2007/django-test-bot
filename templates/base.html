@@ -68,30 +68,12 @@
     <!-- Telegram Web App SDK (safe outside Telegram too) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Tailwind Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                navy: '#050811',
-                blue: '#2d6cff',
-                royal: '#37b7ff',
-                gold: '#f7c948',
-                emerald: '#10b981',
-                rose: '#ef4444'
-              }
-            },
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            }
-          }
-        }
-      }
-    </script>
+    <!-- Tailwind CSS, precompiled by the Tailwind CLI (see package.json build:css /
+         tailwind.config.js) — replaces the Play CDN script, which Tailwind itself warns
+         "should not be used in production" (it ships the whole engine + does JIT
+         compilation in the browser on every page load). Rebuild after editing any
+         template's classes: npm run build:css (or watch:css while developing). -->
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}" />
 
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/htmx.org@1.9.5" defer></script>

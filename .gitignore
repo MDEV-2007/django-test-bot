@@ -28,6 +28,11 @@ staticfiles/
 # Logs
 *.log
 
+# Node (Tailwind CLI build tooling — see package.json). The compiled
+# static/css/tailwind.css IS committed; only the toolchain itself is ignored.
+node_modules/
+npm-debug.log*
+
 # IDE / OS
 .vscode/
 .idea/
