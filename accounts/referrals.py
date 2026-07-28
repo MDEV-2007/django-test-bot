@@ -30,7 +30,7 @@ def ensure_referral_code(profile: Profile) -> str:
     use instead of needing a data migration."""
     if profile.referral_code:
         return profile.referral_code
-    # Collision odds are astronomically low (32^8 codes), but loop anyway rather than trust it.
+    # Collision odds are astronomically low (32^8 codes), but loop anyway rather than trust it.     
     for _ in range(10):
         code = generate_referral_code()
         if not Profile.objects.filter(referral_code=code).exists():
