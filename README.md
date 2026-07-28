@@ -169,6 +169,17 @@ Daily streak reminder (cron / Task Scheduler):
 python manage.py send_streak_reminders        # --dry-run to preview
 ```
 
+Daily backup of the database + media (see `core/management/commands/backup_data.py`):
+
+```bash
+python manage.py backup_data                  # writes to BACKUP_DIR (default: ./backups)
+```
+
+**Deploying to a bare VPS** (Nginx, systemd, SSL, firewall, and the two daily jobs above
+wired up as timers instead of manual cron): see `deploy/DEPLOY_VPS.md` for the full,
+copy-pasteable walkthrough, and `deploy/nginx/` + `deploy/systemd/` for the config files
+it installs.
+
 ### Scale notes
 
 - **Never** run `manage.py runserver` in production.
@@ -189,6 +200,7 @@ python manage.py send_streak_reminders        # --dry-run to preview
 | `python manage.py set_webhook --delete` | Switch back to polling |
 | `python manage.py run_bot_polling` | Local bot without a public URL |
 | `python manage.py send_streak_reminders` | Daily Telegram streak nudge |
+| `python manage.py backup_data` | Back up the database + media to `BACKUP_DIR` |
 | `python manage.py test tests` | Run the test suite |
 
 ---

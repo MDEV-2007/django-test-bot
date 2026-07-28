@@ -1,0 +1,26 @@
+# One-shot unit that runs `manage.py backup_data`. Triggered daily by the paired
+# ilmildizi-backup.timer — don't `systemctl enable` this .service directly, enable the
+# .timer instead.
+#
+# Install:
+#   cp deploy/systemd/ilmildizi-backup.* /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now ilmildizi-backup.timer
+#
+# Check it's scheduled / see last run:
+#   systemctl list-timers ilmildizi-backup.timer
+#   journalctl -u ilmildizi-backup -n 50
+#
+# Run one backup right now without waiting for the schedule:
+#   systemctl start ilmildizi-backup.service
+
+[Unit]
+Description=IlmIldizi daily backup (database + media)
+
+[Service]
+Type=oneshot
+User=ilmildizi
+Group=ilmildizi
+WorkingDirectory=/srv/ilmildizi
+EnvironmentFile=/srv/ilmildizi/.env
+ExecStart=/srv/ilmildizi/venv/bin/python manage.py backup_data --keep-days 14

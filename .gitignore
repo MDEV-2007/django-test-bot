@@ -24,6 +24,7 @@ test.sqlite3
 data.sqlite3
 media/
 staticfiles/
+backups/
 
 # Logs
 *.log

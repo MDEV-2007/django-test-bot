@@ -1,0 +1,18 @@
+# Runs `manage.py send_streak_reminders` once a day. Paired with
+# ilmildizi-streak-reminder.timer — enable the .timer, not this .service.
+#
+# Install:
+#   cp deploy/systemd/ilmildizi-streak-reminder.* /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now ilmildizi-streak-reminder.timer
+
+[Unit]
+Description=IlmIldizi daily streak reminder (Telegram)
+
+[Service]
+Type=oneshot
+User=ilmildizi
+Group=ilmildizi
+WorkingDirectory=/srv/ilmildizi
+EnvironmentFile=/srv/ilmildizi/.env
+ExecStart=/srv/ilmildizi/venv/bin/python manage.py send_streak_reminders

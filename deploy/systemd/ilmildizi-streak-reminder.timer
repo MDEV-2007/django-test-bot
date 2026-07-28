@@ -1,0 +1,13 @@
+# Fires at 20:00 server time daily — matches the "kechqurun eslatma" design intent
+# (send_streak_reminders.py). Set the VPS's timezone first so 20:00 means local evening
+# for your actual students, not UTC: `timedatectl set-timezone Asia/Tashkent`.
+
+[Unit]
+Description=Daily timer for IlmIldizi streak reminders
+
+[Timer]
+OnCalendar=*-*-* 20:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
