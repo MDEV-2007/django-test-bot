@@ -1,0 +1,12 @@
+# Obraz ichiga tushmasligi kerak bo'lgan narsalar. `node_modules` alohida bosqichda
+# `npm ci` bilan o'rnatiladi (mezbondagi nusxa boshqa OS uchun qurilgan bo'lishi mumkin),
+# `.next` esa konteyner ichida qayta yig'iladi.
+node_modules
+.next
+out
+.env*
+.git
+.gitignore
+Dockerfile
+.dockerignore
+npm-debug.log*

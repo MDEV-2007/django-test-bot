@@ -1,28 +1,79 @@
+# IlmIldizi — to'liq ishlab chiqarish tizimi (VPS uchun).
+#
+#   nginx     80/443  — yagona kirish nuqtasi, TLS, marshrutlash
+#   frontend  3000    — Next.js (standalone build)
+#   web       8000    — Django + Channels (daphne, ASGI)
+#   db        5432    — PostgreSQL
+#   redis     6379    — kesh, sessiya va Channels layer
+#
+# Faqat nginx tashqariga port ochadi; qolganlari ichki tarmoqda qoladi.
+#
+# Ishga tushirish:  docker compose up -d --build
+# Loglar:           docker compose logs -f web
 services:
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    environment:
+      # nginx:1.27 obrazi /etc/nginx/templates/*.template fayllarini envsubst bilan
+      # /etc/nginx/conf.d/ ga ko'chiradi — domenni shu yerda bir marta beramiz.
+      SERVER_NAME: ${SERVER_NAME:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/docker/nginx.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./deploy/docker/app_routes.inc:/etc/nginx/conf.d/app_routes.inc:ro
+      - media:/srv/media:ro
+      - static:/srv/static:ro
+      - certbot-www:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt:ro
+    depends_on:
+      - web
+      - frontend
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    environment:
+      # Next'ning `rewrites` qoidalari uchun (nginx allaqachon /api ni backendga
+      # yuboradi, bu esa zaxira yo'l: to'g'ridan-to'g'ri frontendga kelgan so'rov ham
+      # to'g'ri manzilga tushadi).
+      BACKEND_ORIGIN: http://web:8000
+    expose:
+      - "3000"
+    depends_on:
+      - web
+
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file: backend/.env
     environment:
       DEBUG: "False"
       DATABASE_URL: postgres://${POSTGRES_USER:-ilmildizi}:${POSTGRES_PASSWORD:-ilmildizi}@db:5432/${POSTGRES_DB:-ilmildizi}
-      # Also the Channels layer backend now (see CHANNEL_LAYERS in config/settings.py) —
-      # required with more than one ASGI worker so Battle Arena matchmaking/battle groups
-      # are visible across all of them, not just whichever worker a player happened to hit.
+      # Channels layer ham shu Redis — bir nechta ASGI ishchisi bo'lganda Arena
+      # jangidagi guruhlar barcha ishchilarga ko'rinishi uchun (settings.CHANNEL_LAYERS).
       REDIS_URL: redis://redis:6379/1
     volumes:
       - media:/app/media
-    ports:
-      - "8000:8000"
+      - static:/app/staticfiles
+    expose:
+      - "8000"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # Daphne (ASGI), not gunicorn (WSGI) — Battle Arena's live PvP is served over
-    # WebSockets, which a WSGI server has no way to handle.
+    # `collectstatic` konteyner ishga tushganda bajariladi (obraz qurilishida emas):
+    # statik fayllar nginx bilan bo'lishiladigan volume'ga tushishi kerak, obrazdagi
+    # nusxa esa volume ustiga chiqmaydi.
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
              daphne -b 0.0.0.0 -p 8000 config.asgi:application"
 
   db:
@@ -51,7 +102,21 @@ services:
       timeout: 5s
       retries: 10
 
+  # Sertifikat olish va yangilash. Doimiy ishlamaydi — kerak bo'lganda chaqiriladi:
+  #   docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d DOMEN
+  # Yangilash uchun (cron/systemd timer bilan oyiga bir marta yetarli):
+  #   docker compose run --rm certbot renew && docker compose exec nginx nginx -s reload
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["tools"]
+    volumes:
+      - certbot-www:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+
 volumes:
   pgdata:
   redisdata:
   media:
+  static:
+  certbot-www:
+  certbot-conf:

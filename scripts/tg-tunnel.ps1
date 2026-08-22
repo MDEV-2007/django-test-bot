@@ -63,13 +63,17 @@ if (-not $cloudflared) {
 }
 
 function Get-EnvValue([string]$path, [string]$key) {
-  $line = Select-String -Path $path -Pattern "^$key=" | Select-Object -First 1
+  $line = Select-String -Path $path -Pattern "^$key=" -Encoding utf8 | Select-Object -First 1
   if ($null -eq $line) { return '' }
   return $line.Line.Substring($key.Length + 1).Trim()
 }
 
 function Set-EnvValue([string]$path, [string]$key, [string]$value) {
-  $lines = Get-Content $path
+  # `-Encoding utf8` MAJBURIY: usiz Windows PowerShell 5.1 faylni ANSI deb o'qiydi va
+  # UTF-8 belgilar (tire, apostrof) har yozuvda uzunroq ketma-ketlikka aylanadi. Bu
+  # o'sish geometrik: backend/.env shu sabab 6.5 GB gacha shishib, Django uni umuman
+  # o'qiy olmay qolgan edi.
+  $lines = Get-Content $path -Encoding utf8
   if ($lines -match "^$key=") {
     $lines = $lines | ForEach-Object {
       if ($_ -match "^$key=") { "$key=$value" } else { $_ }

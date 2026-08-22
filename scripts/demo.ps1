@@ -39,7 +39,7 @@ $python = 'C:\Users\Murodulla\AppData\Local\Programs\Python\Python314\python.exe
 if (-not (Test-Path $python)) { $python = (Get-Command python).Source }
 
 function Get-EnvValueFromFile([string]$path, [string]$key) {
-  $line = Select-String -Path $path -Pattern "^$key=" | Select-Object -First 1
+  $line = Select-String -Path $path -Pattern "^$key=" -Encoding utf8 | Select-Object -First 1
   if ($null -eq $line) { return '' }
   return $line.Line.Substring($key.Length + 1).Trim()
 }

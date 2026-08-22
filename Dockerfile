@@ -20,9 +20,11 @@ RUN pip install -r requirements.txt
 COPY backend/ .
 
 # Hash + compress static assets into STATIC_ROOT so WhiteNoise can serve them.
-# DEBUG is forced off here so ManifestStaticFilesStorage runs; SECRET_KEY is a throwaway
-# used only for this build-time management command.
-RUN DEBUG=False SECRET_KEY=build-only python manage.py collectstatic --noinput
+# DEBUG is forced off here so ManifestStaticFilesStorage runs. Every value on this line
+# is a throwaway used only by this one command: settings.py refuses to start with
+# DEBUG=False and no DATABASE_URL/REDIS_URL (a deliberate production guard), and
+# collectstatic touches neither the database nor Redis.
+RUN DEBUG=False     SECRET_KEY=build-only     DATABASE_URL=sqlite:///build-only.db     REDIS_URL=redis://127.0.0.1:6379/0     python manage.py collectstatic --noinput
 
 
 # docker-compose.yml overrides this with its own `command:` (runs migrate first), but a

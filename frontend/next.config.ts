@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /* Docker uchun: `standalone` rejimi barcha kerakli node_modules'ni bitta papkaga
+     yig'adi, natijada runtime obrazga `npm install` ham, butun node_modules ham kerak
+     emas (obraz ~1 GB o'rniga ~200 MB). */
+  output: 'standalone',
+
   // The repo root also has its own package-lock.json (Tailwind build for the Django
   // templates) — pin Turbopack's root to this app so it doesn't guess wrong.
   turbopack: {
