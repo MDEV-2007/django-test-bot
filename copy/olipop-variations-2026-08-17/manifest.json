@@ -1,0 +1,162 @@
+{
+  "project": "olipop-variations",
+  "output_dir": "copy/olipop-variations-2026-08-17",
+  "jobs": [
+    {
+      "id": "var-1-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-1.png",
+      "arguments": {
+        "prompt": "Product hero ad. Keep the reference can (OLIPOP Strawberry Vanilla, blush-pink can, orange wordmark, dark green type) exactly as shown, centered. Overlay the headline text \"9g Fiber. 5g Sugar. All Flavor.\" across the top in the can's own dark green type. Add an orange \"Shop Now\" button at the bottom center. Soft blush-pink radial glow behind the can. Clean, no other clutter.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-2-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-2.png",
+      "arguments": {
+        "prompt": "Review/testimonial card ad. Large quotation marks framing the text: \"It's gently sweet and creamy, and almost drinks like a dessert.\" in conversational serif type. 5 gold stars above the quote. Credit line beneath: \"Jenna — verified buyer.\" Place the reference can (OLIPOP Strawberry Vanilla) small in the bottom corner, unaltered. Blush-pink card background.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-3-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-3.png",
+      "arguments": {
+        "prompt": "Comparison chart ad. Two-column table as the dominant element. Left column header \"OLIPOP\" highlighted in the can's orange, checkmarks for: Prebiotic Fiber, Low Sugar (5g), Real Ingredients, Non-GMO/Vegan/Gluten-Free, Classic Soda Taste. Right column header \"Traditional Soda\" in neutral gray, X marks for all five rows — generic category label only, no brand name or logo. Place the reference can (OLIPOP Strawberry Vanilla) beside the table, unaltered.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-4-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-4.png",
+      "arguments": {
+        "prompt": "Benefit stack ad. Reference can (OLIPOP Strawberry Vanilla) centered, unaltered. Four callouts evenly spaced around it, each connected to the can with a thin pointer line and a small consistent leaf/root icon: \"9g Prebiotic Fiber,\" \"5g Sugar,\" \"Real Botanicals,\" \"Supports Digestive Health.\" Blush-pink background, dark green callout type matching the can's own type.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-5-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-5.png",
+      "arguments": {
+        "prompt": "Problem-solution split-frame ad. Top half desaturated gray with plain type line: \"Regular soda: sugar, guilt, no gut benefit.\" Bottom half full color with the reference can (OLIPOP Strawberry Vanilla, unaltered) and brand-type line: \"OLIPOP: real ingredients, real fiber, real taste.\" Clear visual break between the two halves.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-6-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-6.png",
+      "arguments": {
+        "prompt": "Stat callout ad. The number \"9g\" at maximum size in the can's orange, filling roughly half the canvas. Beneath it in smaller dark green type: \"Prebiotic Fiber — An Excellent Source of Fiber (FDA labeling standard).\" Reference can (OLIPOP Strawberry Vanilla) small in the bottom corner, unaltered.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-7-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-7.png",
+      "arguments": {
+        "prompt": "Billboard ad. Headline \"The Feel Good Soda\" as the dominant, thumb-scale-legible element in the can's dark green type. Reference can (OLIPOP Strawberry Vanilla, unaltered) as the only image element. Flat blush-pink gradient background. No badges, no clutter, no other copy.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-8-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-8.png",
+      "arguments": {
+        "prompt": "Lifestyle scene ad. Reference can (OLIPOP Strawberry Vanilla, packaging exactly as shown) on a kitchen table at golden-hour evening light, glasses of ice nearby, a casual family dinner softly out of focus in the background. Headline text small or absent from the image itself; let the scene carry the mood.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-9-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-9.png",
+      "arguments": {
+        "prompt": "Product hero ad with an ingredient-transparency angle. Reference can (OLIPOP Strawberry Vanilla) centered, unaltered. Small labeled ingredient tags floating around it: \"cassava root,\" \"chicory root,\" \"real strawberries,\" \"stevia.\" Clean blush-pink background. Headline \"What's Really In Your Soda?\" across the top in the can's dark green type.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-10-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-10.png",
+      "arguments": {
+        "prompt": "Problem-solution split-frame ad. Top half plain type line: \"The soda aisle negotiation,\" generic grayscale soda-can silhouettes (no brand names). Bottom half full color with the reference can (OLIPOP Strawberry Vanilla, unaltered) and brand-type line: \"5g sugar. Caffeine-free. Still fizzy.\"",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-11-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-11.png",
+      "arguments": {
+        "prompt": "Stat callout ad. The number \"5g\" large and centered in the can's orange, qualifier beneath it in dark green type: \"of sugar per can.\" A small subscription-discount badge in one corner. Reference can (OLIPOP Strawberry Vanilla, unaltered) beside the stat.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    },
+    {
+      "id": "var-12-img",
+      "endpoint": "fal-ai/gpt-image-2/edit",
+      "kind": "image",
+      "estimated_cost": 0.061,
+      "filename": "variation-12.png",
+      "arguments": {
+        "prompt": "Review/testimonial card ad. Contrarian banner headline across the top: \"Soda isn't supposed to do this.\" Below it, the quote in conversational type: \"All the flavors are wonderful and sweet, despite only sporting 35–45 calories per can.\" 5 gold stars, credit line \"Marcus — verified buyer.\" Reference can (OLIPOP Strawberry Vanilla) small in the bottom corner, unaltered.",
+        "image_urls": ["copy/olipop-variations-2026-08-17/reference.webp"],
+        "quality": "medium",
+        "image_size": "square_hd"
+      }
+    }
+  ]
+}

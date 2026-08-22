@@ -1,0 +1,24 @@
+# Runtime dependencies needed everywhere (dev and production).
+# djangorestframework requires Django>=5.2 — this also aligns the pin with the Django 6
+# docs/URLs already referenced throughout config/settings.py's comments.
+Django==6.1
+Pillow==12.2.0
+requests==2.34.2
+python-dotenv==1.2.2
+django-ckeditor-5==0.2.20
+django-admin-sortable2==2.3.1
+whitenoise==6.12.0
+dj-database-url==3.1.2
+# Verifies "Sign in with Google" ID tokens server-side (website login).
+google-auth==2.55.1
+# Realtime: Battle Arena PvP matchmaking (WebSockets) needs an ASGI stack everywhere,
+# not just in production, so `manage.py runserver` also serves WebSockets locally —
+# daphne in INSTALLED_APPS makes runserver ASGI-capable automatically.
+daphne==4.1.2
+channels==4.1.0
+
+# DRF API for the Next.js frontend (see frontend/), JWT-based so cross-origin requests
+# don't depend on the session cookie's SameSite policy.
+djangorestframework==3.18.0
+django-cors-headers==4.9.0
+djangorestframework-simplejwt==5.5.1

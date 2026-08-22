@@ -1,0 +1,737 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Loyihada tema `[data-theme]` atributi orqali almashadi (.dark klassi emas) —
+   shadcn'ning `dark:` variantini ham shunga moslaymiz. */
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+/* Same "Grafit neytral" design tokens as the Django templates (templates/base.html) —
+   copied verbatim so pages built here match the existing app instead of drifting into a
+   second visual language. Edit templates/base.html's :root block first if the palette
+   changes, then mirror it here. */
+:root, :root[data-theme="dark"] {
+  color-scheme: dark;
+  /* Obsidian Slate & Emerald Luxury palette — see figma_ui_prompt.md master brief.
+     Mirrored from templates/base.html's :root block. */
+  /* v2 chuqurlik: sahifa foni qoraytirildi, sirtlar esa yoritildi. Ilgari fon #0c0e12,
+     karta #14171d edi — atigi ~2.5% yorug'lik farqi, shuning uchun kartaning chekkasi
+     ko'rinmay, butun ekran bir tekis qora dog'ga aylanardi. */
+  --bg-page: #08090c;
+  --accent: #2fb3a3;
+  --accent-hover: #269488;
+  --accent-soft: rgba(47, 179, 163, 0.16);
+  --accent-border: rgba(47, 179, 163, 0.35);
+  --accent-text: #5cc4b6;
+  --on-accent: #0d1416;
+
+  --success: #52a86b;
+  --success-soft: rgba(82, 168, 107, 0.16);
+  --success-text: #7ad192;
+  --danger: #f43f5e;
+  --danger-soft: rgba(244, 63, 94, 0.14);
+  --danger-text: #fb7185;
+  --warning: #d99a38;
+  --warning-soft: rgba(217, 154, 56, 0.15);
+  --warning-text: #f59e0b;
+
+  --text-primary: #f0f1f3;
+  --text-secondary: #a3a7ae;
+  --text-muted: #8d9094;
+  --text-faint: #5a5d63;
+
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --border-card: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  /* Karta ustidagi 1px ichki yorug'lik — "shisha" hissini beruvchi asosiy detal. */
+  --border-highlight: rgba(255, 255, 255, 0.06);
+
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  --surface-card-soft: #101319;
+  --surface-card-medium: #161a22;
+  --surface-card-strong: #161a22;
+  --surface-input: #1d222c;
+
+  /* ── Semantik "tone" oilasi ──────────────────────────────────────────────────
+     Ilgari ikonka ranglari to'g'ridan-to'g'ri Tailwind palitrasidan olinardi
+     (bg-amber-500/12, text-sky-400 ...) va ular brend tizimiga bog'lanmagan edi —
+     natijada "rangli o'yinchoq" hissi. Endi har bir rang MA'NOGA biriktirilgan:
+
+       growth  — o'sish, asosiy harakat (brend zumradi)
+       streak  — uzluksizlik, premium, mukofot
+       danger  — xato, yo'qotish
+       lesson  — o'quv kontenti (dars, video, audio)
+       ai      — sun'iy intellekt (mentor, tahlil)
+
+     Yangi kod shu o'zgaruvchilarni ishlatadi; rang o'zgarsa — bitta joyda o'zgaradi. */
+  --tone-growth: var(--accent);
+  --tone-growth-text: var(--accent-text);
+  --tone-growth-soft: var(--accent-soft);
+
+  --tone-streak: #d99a38;
+  --tone-streak-text: #f0b45c;
+  --tone-streak-soft: rgba(217, 154, 56, 0.14);
+
+  --tone-danger: var(--danger);
+  --tone-danger-text: var(--danger-text);
+  --tone-danger-soft: var(--danger-soft);
+
+  --tone-lesson: #4a90c2;
+  --tone-lesson-text: #79b8e0;
+  --tone-lesson-soft: rgba(74, 144, 194, 0.14);
+
+  --tone-ai: #7d7ad1;
+  --tone-ai-text: #a7a4ec;
+  --tone-ai-soft: rgba(125, 122, 209, 0.14);
+
+  /* Balandlik (elevation) shkalasi — soyasiz dark UI har doim yassi ko'rinadi. */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-float: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 32px -8px rgba(47, 179, 163, 0.35);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  /* ── Yorug' tema v2 ────────────────────────────────────────────────────────
+     Muammolar (o'lchangan kontrast nisbatlari):
+       --text-faint  2.72:1  → matn "hira" ko'rinardi (AA uchun 4.5 kerak)
+       --on-accent   4.21:1  → asosiy tugma yozuvi ham chegaradan past edi
+       karta/fon     1.14:1  → oq karta oq-kulrang fondan ajralmasdi
+       input/karta   1.11:1  → maydonlar deyarli ko'rinmasdi
+     Quyidagi qiymatlar shu to'rt muammoni to'g'irlaydi. */
+  --bg-page: #e8ebee;
+  --accent: #16776a;
+  --accent-hover: #115f55;
+  --accent-soft: #d6efea;
+  --accent-border: rgba(22, 119, 106, 0.32);
+  --accent-text: #0f5c52;
+  --on-accent: #ffffff;
+
+  --success: #35704a;
+  --success-soft: #dcecdf;
+  --success-text: #245538;
+  --danger: #a3392c;
+  --danger-soft: #f7dcd7;
+  --danger-text: #7f2d20;
+  --warning: #9a5f0f;
+  --warning-soft: #fbecd4;
+  --warning-text: #6b3f04;
+
+  --text-primary: #16181a;
+  --text-secondary: #43474c;
+  --text-muted: #5c6067;
+  --text-faint: #6f747b;
+
+  --border-soft: rgba(18, 20, 24, 0.09);
+  --border-card: rgba(18, 20, 24, 0.14);
+  --border-strong: rgba(18, 20, 24, 0.26);
+
+  --surface-hover: rgba(18, 20, 24, 0.055);
+  --surface-card-soft: #ffffff;
+  --surface-card-medium: #ffffff;
+  --surface-card-strong: #ffffff;
+  --surface-input: #e9edf2;
+
+  --tone-growth: var(--accent);
+  --tone-growth-text: var(--accent-text);
+  --tone-growth-soft: var(--accent-soft);
+
+  --tone-streak: #b57a1e;
+  --tone-streak-text: #8a5c12;
+  --tone-streak-soft: rgba(181, 122, 30, 0.12);
+
+  --tone-danger: var(--danger);
+  --tone-danger-text: var(--danger-text);
+  --tone-danger-soft: var(--danger-soft);
+
+  --tone-lesson: #2f6f9c;
+  --tone-lesson-text: #245a80;
+  --tone-lesson-soft: rgba(47, 111, 156, 0.12);
+
+  --tone-ai: #5b57a8;
+  --tone-ai-text: #494590;
+  --tone-ai-soft: rgba(91, 87, 168, 0.12);
+
+  --border-highlight: rgba(255, 255, 255, 0.9);
+  --shadow-card: 0 1px 2px rgba(16, 20, 26, 0.06), 0 8px 24px -12px rgba(16, 20, 26, 0.12);
+  --shadow-float: 0 2px 6px rgba(16, 20, 26, 0.08), 0 18px 44px -16px rgba(16, 20, 26, 0.18);
+  --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 28px -10px rgba(31, 138, 124, 0.35);
+}
+
+@theme inline {
+  --color-background: var(--bg-page);
+  --color-foreground: var(--text-primary);
+  --font-heading: var(--font-voice);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* ── Tipografik shkala v2 ──────────────────────────────────────────────────
+     Ilgari butun interfeys Tailwind default'larida edi va asosiy matn `text-xs`
+     (12px) ga tushib qolgandi — 300+ joyda. Bu yerda Tailwind'ning o'z pog'onalari
+     qayta ta'riflanadi, shuning uchun har bir faylni tahrirlamasdan butun sayt
+     o'qish uchun qulay o'lchamga ko'tariladi.
+       xs 12→13, sm 14→15, base 16, lg 18, xl 22, 2xl 28, 3xl 36
+     Sarlavhalarda `letter-spacing` manfiy — katta o'lchamda harflar yoyilib
+     ketmasligi uchun. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.45;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.4;
+  --text-lg--letter-spacing: -0.01em;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.3;
+  --text-xl--letter-spacing: -0.015em;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.2;
+  --text-2xl--letter-spacing: -0.02em;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.12;
+  --text-3xl--letter-spacing: -0.025em;
+  --text-4xl: 2.75rem;
+  --text-4xl--line-height: 1.08;
+  --text-4xl--letter-spacing: -0.03em;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  /* shadcn'ning `bg-accent` (hover sirti) — brend `--accent` zumradiga EMAS,
+     yumshoq sirt rangiga bog'lanadi, aks holda har bir hover yorqin yashil bo'lardi. */
+  --color-accent: var(--surface-hover);
+  --color-brand: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans), 'Segoe UI', Arial, sans-serif;
+  font-feature-settings: 'ss01', 'cv01';
+}
+
+/* Sarlavha ovozi — Bricolage Grotesque. Sinf nomi tarixiy sabab bilan `font-voice`
+   bo'lib qoldi (ilgari serif edi), butun saytda ishlatilgani uchun saqlanmoqda. */
+.font-voice {
+  font-family: var(--font-voice), var(--font-sans), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Nozik shovqin qatlami — dark UI ni "arzon tekis rang" dan qutqaradigan detal.
+   Faqat 2.5% shaffoflik, bosishlarni to'smaydi. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme='light'] body::before { opacity: 0.02; }
+
+/* Yagona sahifa konteyneri. Har bir sahifa o'z max-w-* ini tanlagani uchun kengliklar
+   2xl dan 6xl gacha tarqalib ketgan edi — natijada sidebar yonida katta bo'sh maydon
+   qolardi. Endi barcha o'quvchi sahifalari shu ikki sinfdan birini ishlatadi. */
+.page-shell {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+/* Bitta vazifaga qaratilgan, o'qish uchun mo'ljallangan ekranlar (test yechish, mini-o'yin) —
+   satr uzunligi qulay qolishi uchun to'liq kenglikdan torroq. */
+.page-shell-focus {
+  width: 100%;
+  max-width: 900px;
+  margin-inline: auto;
+}
+/* Faqat bitta ishga qaratilgan oqimlar uchun (to'lov, chek yuborish, holat sahifasi). */
+.page-shell-narrow {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+/* Gorizontal scroll qatorlarida (chip/tab) kesilgan kontent borligini bildiruvchi o'ng
+   chekka fade — foydalanuvchi scroll borligini sezmay qolmasligi uchun. Mask orqali
+   qilinadi: qo'shimcha o'rovchi element kerak emas, qatorning o'ziga qo'shiladi. */
+.scroll-fade {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
+}
+.scroll-row {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-row::-webkit-scrollbar { display: none; }
+
+/* Bo'lim sarlavhalari — butun saytda bitta uslub (ALL CAPS + tracking). */
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* "Shisha karta" — asosiy konteyner birligi butun saytda */
+.glass-card,
+.bento-card {
+  background-color: var(--surface-card-soft);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.022) 0%, rgba(255, 255, 255, 0) 55%);
+  border: 1px solid var(--border-card);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--border-highlight);
+}
+
+.bento-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.bento-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-float), inset 0 1px 0 var(--border-highlight);
+}
+
+.icon-tile {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background-color: var(--accent-soft);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.tactile-btn {
+  transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease, border-color 0.15s ease;
+}
+.tactile-btn:active {
+  transform: scale(0.975);
+}
+
+@keyframes flame-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.5)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.85)); }
+}
+.animate-flame-pulse { animation: flame-pulse 2.2s infinite ease-in-out; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.animate-fadeIn { animation: fadeIn 0.25s ease-out forwards; }
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-scaleIn { animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* App shell offset — Sidebar/MobileTabBar are `position:fixed` siblings rendered by
+   AppShell before <main> in every authenticated page. Sibling selectors let every page's
+   <main> get the correct offset without editing each page file individually. */
+@media (min-width: 1024px) {
+  aside.ilm-sidebar ~ main { padding-left: 16rem; }
+
+  /* Sidebar offseti `main` ning padding-i bo'lgani uchun u max-width ICHIDAN joy oladi:
+     max-width:1180px + padding-left:256px = kontentga atigi ~900px qolardi (kartalar
+     siqilib ketardi). Sidebar bor sahifalarda max-width shu offsetga kengaytiriladi —
+     natijada kontent to'liq belgilangan enini oladi va bo'sh maydonda markazda turadi. */
+  aside.ilm-sidebar ~ main.page-shell { max-width: calc(1180px + 16rem); }
+  aside.ilm-sidebar ~ main.page-shell-focus { max-width: calc(900px + 16rem); }
+  aside.ilm-sidebar ~ main.page-shell-narrow { max-width: calc(640px + 16rem); }
+}
+@media (max-width: 1023px) {
+  /* Pastki tab-bar balandligi + telefon "home indicator" zonasi (Telegram Mini App
+     to'liq ekranda ochilganda pastda tizim chizig'i bor). */
+  nav.ilm-mobile-tabbar ~ main {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* --- Zen Mode ---------------------------------------------------------------------
+   Imtihon boshlanganda <html data-zen="on"> qo'yiladi: sidebar, yuqori panel va mobil
+   tab-bar yig'iladi, <main> ning ular uchun ajratilgan bo'shlig'i ham olib tashlanadi.
+   Shu tariqa butun ekran faqat savolga qaratiladi va tasodifiy chiqib ketish yo'llari
+   (menyu havolalari) ko'rinmaydi — chiqish faqat tasdiqlash modali orqali. */
+html[data-zen='on'] aside.ilm-sidebar,
+html[data-zen='on'] header.ilm-topbar,
+html[data-zen='on'] nav.ilm-mobile-tabbar {
+  display: none;
+}
+@media (min-width: 1024px) {
+  /* Zen rejimida sidebar yo'q — offset ham, uni qoplagan max-width qo'shimchasi ham
+     bekor qilinadi, aks holda kontent sidebar kengligicha kengayib ketardi. */
+  html[data-zen='on'] aside.ilm-sidebar ~ main { padding-left: 0; }
+  html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell { max-width: 1180px; }
+  html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell-focus { max-width: 900px; }
+  html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell-narrow { max-width: 640px; }
+}
+@media (max-width: 1023px) {
+  html[data-zen='on'] nav.ilm-mobile-tabbar ~ main {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* O'qish qulayligi: savol/matn kengligi 65–75 belgi (optimal "measure") va nafas oladigan
+   qator oralig'i. Shrift o'lchamini o'quvchi A- / A / A+ orqali o'zgartiradi. */
+.reading-block {
+  max-width: 70ch;
+  font-size: var(--reading-size, 1rem);
+  line-height: 1.65;
+}
+.reading-scale { font-size: var(--reading-size, 1rem); }
+
+/* ── shadcn/ui semantik tokenlari ───────────────────────────────────────────────
+   shadcn init o'zining oklch palitrasini (och tema) qo'shgan edi — u bizning obsidian
+   temamizdan KEYIN turgani uchun fonni oqartirib yuborardi, ustiga `.dark` klassini
+   kutardi, biz esa `[data-theme]` atributidan foydalanamiz.
+   Shuning uchun shadcn tokenlari mavjud palitradan HOSILA qilib qayta yozildi: bitta
+   manba (yuqoridagi :root) — ikkala tizim ham o'shani o'qiydi, drift bo'lmaydi.
+
+   Diqqat: shadcn'da `--primary` = asosiy brend rangi, `--accent` esa yumshoq hover foni.
+   Bizda `--accent` brend zumradi. Shuning uchun brend rangi `--primary` ga bog'lanadi,
+   shadcn'ning `--accent` i esa hover sirtiga — semantikasi to'g'ri qolishi uchun. */
+:root {
+  --radius: 0.75rem;
+
+  --background: var(--bg-page);
+  --foreground: var(--text-primary);
+  --card: var(--surface-card-soft);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-card-strong);
+  --popover-foreground: var(--text-primary);
+
+  --primary: var(--accent);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--surface-input);
+  --secondary-foreground: var(--text-primary);
+
+  --muted: var(--surface-input);
+  --muted-foreground: var(--text-muted);
+
+  /* shadcn'ning `accent` i (yumshoq hover foni) bu yerda ATAYLAB aniqlanmagan:
+     `--accent` bizda brend zumradi va uni qayta yozish butun saytni buzardi.
+     O'rniga quyidagi @theme inline blokida `--color-accent` sirt rangiga bog'langan. */
+  --accent-foreground: var(--text-primary);
+
+  --destructive: var(--danger);
+  --destructive-foreground: #ffffff;
+
+  --border: var(--border-card);
+  --input: var(--border-card);
+  --ring: var(--accent-border);
+
+  --chart-1: #2fb3a3;
+  --chart-2: #d99a38;
+  --chart-3: #52a86b;
+  --chart-4: #6a8cff;
+  --chart-5: #b06ad9;
+
+  --sidebar: var(--surface-card-strong);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--on-accent);
+  --sidebar-accent: var(--surface-hover);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-card);
+  --sidebar-ring: var(--accent-border);
+}
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+
+  /* ── Karta sirti v2 ───────────────────────────────────────────────────────
+     Uch qatlam: (1) yuqoridan pastga nozik yorug'lik gradienti, (2) tashqi soya,
+     (3) yuqori chetdagi 1px ichki yorug'lik. Uchalasi birgalikda kartani fondan
+     ajratadi — ilgari karta bilan fon orasida ko'z ilg'aydigan farq yo'q edi.
+
+     Qoida `@layer base` ichida: shu tufayli `bg-amber-500/10` kabi utility'lar
+     (ular `@layer utilities` da, ya'ni keyinroq) o'z rangini saqlaydi va faqat
+     gradient + soya qo'shiladi. */
+  [data-slot='card'] {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.022) 0%, rgba(255, 255, 255, 0) 55%);
+    box-shadow: var(--shadow-card), inset 0 1px 0 var(--border-highlight);
+    /* Radius tili: karta 20px, boshqaruv elementlari 12px. Ilgari rounded-xl/2xl/3xl
+       (16/24/28px) aralash ishlatilar edi. */
+    border-radius: 20px;
+    /* Ichki bo'shliq ritmi: 20px (kartaning o'z --card-spacing o'zgaruvchisi). */
+    --card-spacing: 1.25rem;
+  }
+  [data-slot='card'] [data-slot='card'] {
+    /* Ichma-ich karta — optik ichma-ichlik qoidasi bo'yicha radiusi kichikroq. */
+    border-radius: 14px;
+  }
+  /* Bosiladigan kartalar (havola yoki tugma ichidagi) hover'da 2px ko'tariladi va
+     soyasi kuchayadi — "bu element bosiladi" degan jismoniy signal. */
+  [data-slot='card'] {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  a:hover > [data-slot='card'],
+  button:hover > [data-slot='card'],
+  a:hover [data-slot='card'].tactile-btn {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-float), inset 0 1px 0 var(--border-highlight);
+  }
+  a:active > [data-slot='card'],
+  button:active > [data-slot='card'] {
+    transform: translateY(0) scale(0.995);
+  }
+
+  /* Progress chizig'i qiymat o'zgarganda "to'ladi" (sakramaydi). */
+  [data-slot='progress-indicator'] {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Reduced motion — tizim sozlamasi hurmat qilinadi. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  [data-slot='popover-content'],
+  [data-slot='dialog-content'],
+  [data-slot='dropdown-menu-content'] {
+    box-shadow: var(--shadow-float), inset 0 1px 0 var(--border-highlight);
+  }
+
+  /* Raqamlar doim mono + tabular — ustunlarda "sakramaydi". */
+  .font-mono, code, kbd, samp {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+/* Tanlov "chip"lari (fan/mavzu filtrlari). Ilgari faol chip to'liq zumrad fon bilan
+   chizilardi va sahifadagi HAQIQIY asosiy harakat (masalan "Testni boshlash") bilan
+   vizual jihatdan raqobatlashardi. Qoida: bir ekranda bitta to'q zumrad tugma bo'ladi;
+   tanlov holati esa yumshoq fon + zumrad chegara va matn bilan ko'rsatiladi. */
+.chip-active {
+  background-color: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--accent-text);
+}
+.chip-active:hover {
+  background-color: color-mix(in oklab, var(--accent-soft), var(--accent) 12%);
+  color: var(--accent-text);
+}
+
+/* Skeleton shimmer — yuklanish holatining "tirik" ko'rinishi. Yorug'lik to'lqini
+   1.6s da chapdan o'ngga yuguradi; `background-size` 200% bo'lgani uchun faqat
+   `background-position` animatsiya qilinadi (layout qayta hisoblanmaydi). */
+@keyframes skeleton-shimmer {
+  0% { background-position: -150% 0; }
+  100% { background-position: 250% 0; }
+}
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--surface-hover), #fff 8%) 45%,
+    color-mix(in oklab, var(--surface-hover), #fff 14%) 50%,
+    color-mix(in oklab, var(--surface-hover), #fff 8%) 55%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Yorug' temadagi tugmalar ──────────────────────────────────────────────────
+   Muammo: `outline` tugma foni `--background` (sahifa foni #e8ebee) edi — oq karta
+   ustida u "iflos kulrang" bo'lib ko'rinardi. Yorug' temada u OQ bo'ladi va faqat
+   chegara bilan ajraladi; hover'da yumshoq kulrangga o'tadi.
+   Asosiy (zumrad) tugmaga esa yengil soya beriladi — yorug' fonda "yassi rangli
+   to'rtburchak" emas, ko'tarilgan element bo'lib ko'rinsin. */
+:root[data-theme='light'] [data-slot='button'][data-variant='outline'] {
+  background-color: #ffffff;
+}
+:root[data-theme='light'] [data-slot='button'][data-variant='outline']:hover {
+  background-color: #f2f5f7;
+}
+:root[data-theme='light'] [data-slot='button'][data-variant='default'] {
+  box-shadow: 0 1px 2px rgba(16, 20, 26, 0.12), 0 6px 16px -8px rgba(22, 119, 106, 0.55);
+}
+:root[data-theme='light'] [data-slot='button'][data-variant='default']:hover {
+  box-shadow: 0 2px 4px rgba(16, 20, 26, 0.14), 0 10px 22px -10px rgba(22, 119, 106, 0.6);
+}
+
+/* Yorug' temada input/select ham oq karta ustida ko'rinishi uchun chegarasi kuchliroq. */
+:root[data-theme='light'] [data-slot='input'],
+:root[data-theme='light'] [data-slot='select-trigger'],
+:root[data-theme='light'] [data-slot='textarea'] {
+  background-color: #ffffff;
+  border-color: rgba(18, 20, 24, 0.18);
+}
+
+/* Yorug' temada kartaning ichki "shisha" yorug'ligi kerak emas — o'rniga aniq chegara
+   va yumshoq soya ishlaydi (aks holda oq ustiga oq chiziq ko'rinmaydi). */
+:root[data-theme='light'] [data-slot='card'] {
+  background-image: none;
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Yorug' temada "och" Tailwind matn ranglari ────────────────────────────────
+   Interfeysda ~120 joyda `text-amber-300`, `text-rose-300`, `text-sky-300` kabi
+   sinflar bor — ular QORONG'I fon uchun tanlangan va oq karta ustida deyarli
+   o'qilmaydi. Har bir faylni tahrirlash o'rniga yorug' temada shu sinflar semantik
+   `--*-text` tokenlariga qayta bog'lanadi (ranglar ma'nosi saqlanadi, kontrast esa
+   AA darajasiga chiqadi). */
+:root[data-theme='light'] .text-rose-200,
+:root[data-theme='light'] .text-rose-300,
+:root[data-theme='light'] .text-rose-400 { color: var(--danger-text); }
+
+:root[data-theme='light'] .text-amber-200,
+:root[data-theme='light'] .text-amber-300,
+:root[data-theme='light'] .text-amber-400,
+:root[data-theme='light'] .text-yellow-400 { color: var(--warning-text); }
+
+:root[data-theme='light'] .text-sky-300,
+:root[data-theme='light'] .text-sky-400,
+:root[data-theme='light'] .text-blue-300 { color: var(--tone-lesson-text); }
+
+:root[data-theme='light'] .text-indigo-300,
+:root[data-theme='light'] .text-indigo-400,
+:root[data-theme='light'] .text-purple-300 { color: var(--tone-ai-text); }
+
+:root[data-theme='light'] .text-emerald-400 { color: var(--success-text); }
+
+/* Podium lentalari va shunga o'xshash "to'q fon + oq yozuv" elementlari yorug'
+   temada ham o'z kontrastini saqlaydi — ularning rangi utility emas, gradient. */
+
+/* Yuqori paneldagi "streak" va "tanga" chiplari `text-orange-400` / `text-amber-400`
+   ishlatadi — yorug' temada ular oq fon ustida deyarli ko'rinmasdi (1.7:1). */
+:root[data-theme='light'] .text-orange-300,
+:root[data-theme='light'] .text-orange-400 { color: var(--warning-text); }
+
+/* ── Mobil / Telegram Mini App uchun xavfsiz zonalar ──────────────────────────
+   Telegram WebApp to'liq ekranda ochilganda pastda "home indicator", ba'zi
+   qurilmalarda esa yuqorida "notch" bo'ladi. Sobit (fixed) elementlar shu
+   zonalarni hisobga olmasa, tugmalar barmoq yetmaydigan joyda qolib ketadi. */
+nav.ilm-mobile-tabbar {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Test ekranidagi pastki navigatsiya paneli ham xuddi shunday. */
+@media (max-width: 639px) {
+  .exam-bottom-bar {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Mobil brauzerlarda 100vh manzil qatori ostiga kirib ketadi — svh ishonchli. */
+.min-h-screen-safe {
+  min-height: 100svh;
+}
+
+/* Mobil (sensorli) ekranlarda kichik tugmalar barmoq uchun juda past bo'lib qoladi:
+   `sm` (32px) va `xs` (28px) sichqoncha uchun mos, barmoq uchun emas. Faqat kichik
+   ekranda minimal balandlik ko'tariladi — desktopda o'lchamlar o'zgarmaydi. */
+@media (max-width: 1023px) {
+  [data-slot='button'][data-size='sm'],
+  [data-slot='button'][data-size='icon-sm'] { min-height: 2.5rem; }
+  [data-slot='button'][data-size='icon-sm'] { min-width: 2.5rem; }
+  [data-slot='button'][data-size='xs'] { min-height: 2.25rem; }
+  [data-slot='button'][data-size='icon-xs'] { min-height: 2.25rem; min-width: 2.25rem; }
+}
+
+/* Tab tugmalari ham sensorli ekranda balandroq bo'lsin. */
+@media (max-width: 1023px) {
+  [data-slot='tabs-list'] { height: auto; }
+  [data-slot='tabs-trigger'] { min-height: 2.25rem; }
+}
+
+/* Panel jadvallaridagi belgilash katakchalari mobil ekranda 16px — barmoq uchun kichik. */
+@media (max-width: 1023px) {
+  [data-slot='checkbox'] { width: 1.25rem; height: 1.25rem; }
+}
+
+/* ── Mobil tipografika va zichlik ─────────────────────────────────────────────
+   Tipografik shkala desktop uchun kalibrlangan (asosiy matn 15px, sarlavha 36px).
+   375px ekranda o'sha o'lchamlar "kattalashib" ketadi: sarlavha ikki-uch qatorga
+   bo'linadi, karta ichidagi 20px bo'shliq bilan birga ekranga juda kam ma'lumot
+   sig'adi.
+
+   Yechim: ildiz shrift o'lchami 16px → 15px (barcha `rem` o'lchamlari — matn,
+   padding, gap, radius — bir tekis ~6% kichrayadi), ustiga eng katta sarlavhalar
+   alohida qisqartiriladi. Barmoq nishonlari 44px dan pastga tushmaydi:
+   `min-h-12` = 3rem = 45px. */
+@media (max-width: 640px) {
+  html { font-size: 93.75%; }
+
+  /* Sarlavhalar mobil ekranda nomutanosib katta edi — alohida pasaytiriladi. */
+  .text-4xl { font-size: 2rem; line-height: 1.1; }
+  .text-3xl { font-size: 1.75rem; line-height: 1.15; }
+  .text-2xl { font-size: 1.5rem; line-height: 1.2; }
+  .text-xl { font-size: 1.25rem; line-height: 1.3; }
+
+  /* Kartalar ham zichroq: 20px ichki bo'shliq telefonda ko'p joy yeydi. */
+  [data-slot='card'] { --card-spacing: 1rem; border-radius: 16px; }
+}
+
+/* ── Telegram Mini App ────────────────────────────────────────────────────────
+   Bu qoidalar FAQAT <html data-tg="on"> bo'lganda, ya'ni sahifa Telegram ichida
+   ochilganda kuchga kiradi (atributni `TelegramProvider` qo'yadi) — oddiy
+   brauzerdagi ko'rinishga hech qanday ta'siri yo'q.
+
+   Telegram webview'da `100svh` ishonchsiz: panel yuqoridan joy oladi va oyna
+   balandligi tortish paytida o'zgaradi. SDK bergan `viewportStableHeight`
+   (--tg-viewport) aniqroq. */
+html[data-tg='on'] .min-h-screen-safe {
+  min-height: var(--tg-viewport, 100svh);
+}
+
+/* Telegram o'zining "orqaga" tugmasini yuqorida ko'rsatadi, pastda esa tizim
+   chizig'i yo'q — shuning uchun tab-bar uchun qo'shimcha bo'shliq kerak emas. */
+html[data-tg='on'] nav.ilm-mobile-tabbar {
+  padding-bottom: 0.5rem;
+}

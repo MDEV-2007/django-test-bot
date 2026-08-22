@@ -42,7 +42,7 @@ ufw enable   # "y" deb tasdiqlang
 ufw status
 ```
 Shu bilan faqat SSH (22), HTTP (80) va HTTPS (443) portlari ochiq qoladi — boshqa
-hamma narsa (jumladan gunicorn'ning 8000-porti) tashqaridan yopiq.
+hamma narsa (jumladan daphne'ning 8000-porti) tashqaridan yopiq.
 
 ## 3. PostgreSQL (1-band)
 
@@ -59,7 +59,14 @@ Keyinroq `.env`da ishlatiladigan `DATABASE_URL`:
 postgres://ilmildizi_db:MUSTAHKAM_PAROL_BUNI_ALISHTIRING@localhost:5432/ilmildizi
 ```
 
-## 4. Redis (tavsiya etiladi, majburiy emas)
+## 4. Redis (majburiy)
+
+Redis endi ixtiyoriy emas: `DEBUG=False` bo'lganda `REDIS_URL` o'rnatilmasa, ilova
+ishga tushmaydi (`config/settings.py` shuni tekshiradi). Sabab — Redis'siz har bir daphne
+process o'zining alohida xotira-ichi cache va channel layer'iga ega bo'ladi: bir nechta
+process ishga tushirilganda (6-bandga qarang) cache'lar process'lar orasida mos kelmay
+qoladi, va Battle Arena raqib qidiruvi process'lar orasida ishlamay qoladi (ikkita
+o'yinchi turli process'ga tushib qolsa, bir-birini topa olmaydi).
 
 ```bash
 apt install -y redis-server
@@ -105,7 +112,12 @@ python manage.py seed_shop
 deactivate
 ```
 
-## 6. systemd — gunicorn, backup, streak reminder (5-band)
+## 6. systemd — daphne (ko'p process), backup, streak reminder (5-band)
+
+`ilmildizi@.service` — **template unit**: bitta daphne process bitta CPU yadrosinigina
+band qiladi (u ichida worker pool yo'q), shuning uchun CPU yadrolar soniga qarab bir
+nechta process ishga tushiramiz, Nginx ular orasida load-balance qiladi (7-bandga
+qarang). Yadrolar sonini bilish uchun: `nproc`.
 
 ```bash
 exit   # ilmildizi foydalanuvchisidan chiqib, sudo huquqli foydalanuvchiga qaytish
@@ -113,12 +125,14 @@ exit   # ilmildizi foydalanuvchisidan chiqib, sudo huquqli foydalanuvchiga qayti
 sudo cp /srv/ilmildizi/deploy/systemd/*.service /srv/ilmildizi/deploy/systemd/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 
-sudo systemctl enable --now ilmildizi
+# 3ta process (8001-8003) — deploy/nginx/ilmildizi.conf'dagi upstream porlariga mos
+# bo'lishi kerak; ko'proq/kamroq CPU yadrosi bo'lsa, ikkalasini ham moslang.
+sudo systemctl enable --now ilmildizi@8001 ilmildizi@8002 ilmildizi@8003
 sudo systemctl enable --now ilmildizi-backup.timer
 sudo systemctl enable --now ilmildizi-streak-reminder.timer
 
 # Barchasi ishga tushganini tekshirish:
-systemctl status ilmildizi
+systemctl status ilmildizi@8001 ilmildizi@8002 ilmildizi@8003
 systemctl list-timers ilmildizi-backup.timer ilmildizi-streak-reminder.timer
 ```
 
@@ -165,7 +179,7 @@ ham bo'ladi, ikkalasi ham ishlaydi).
 
 - [ ] `https://YOUR_DOMAIN/accounts/login/` ochiladi, qulf belgisi (SSL) bor
 - [ ] Botga Telegram'da `/start` — javob keladi
-- [ ] `systemctl status ilmildizi` — active (running)
+- [ ] `systemctl status ilmildizi@8001` (va 8002, 8003) — active (running)
 - [ ] `systemctl start ilmildizi-backup.service` — qo'lda ishga tushirib, `/srv/ilmildizi/backups/`da fayl paydo bo'lishini tekshiring
 - [ ] `ufw status` — faqat 22/80/443 ochiq
 
@@ -182,5 +196,5 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 deactivate
 exit
-sudo systemctl restart ilmildizi
+sudo systemctl restart ilmildizi@8001 ilmildizi@8002 ilmildizi@8003
 ```

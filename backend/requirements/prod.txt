@@ -1,0 +1,8 @@
+# Production-only. Install with:  pip install -r requirements/prod.txt
+-r base.txt
+
+psycopg[binary]==3.2.3   # PostgreSQL driver (set DATABASE_URL)
+redis==5.2.1             # cache + sessions (set REDIS_URL)
+channels-redis==4.2.1    # Channels layer backend — shares the same REDIS_URL, lets
+                         # WebSocket groups (battle matchmaking) work across multiple
+                         # ASGI worker processes, not just within one.

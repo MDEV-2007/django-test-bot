@@ -1,0 +1,59 @@
+# Keeps Daphne running: starts on boot, restarts automatically if it ever crashes.
+#
+# Daphne (ASGI), not gunicorn (WSGI) — Battle Arena's live PvP needs WebSockets, which a
+# WSGI server can't serve. One process handles both plain HTTP and WebSocket connections;
+# there's no separate "websocket server" to run alongside it.
+#
+# This is a systemd TEMPLATE unit (note the @ in the filename) — the part after @ when you
+# enable it becomes the port daphne binds to, so you run one instance per CPU core instead
+# of a single process handling all traffic. Daphne itself has no worker/thread-pool concept
+# (it's one asyncio event loop), so a single instance is also a single point of contention
+# for every concurrent request — running several behind Nginx (see the `upstream` block in
+# deploy/nginx/ilmildizi.conf) is what actually lets the app use more than one CPU core and
+# keeps one slow request (e.g. an AI Mentor call) from queuing up everyone else's.
+#
+# Install (as root / with sudo) — start one instance per port you listed in the nginx
+# upstream block (3 shown here; match your CPU core count):
+#   cp deploy/systemd/ilmildizi@.service /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now ilmildizi@8001 ilmildizi@8002 ilmildizi@8003
+#
+# Check status / logs (per instance):
+#   systemctl status ilmildizi@8001
+#   journalctl -u ilmildizi@8001 -f
+#
+# Adjust the three paths below (User, WorkingDirectory, ExecStart) to match your server —
+# they assume the project lives at /srv/ilmildizi and the venv at /srv/ilmildizi/venv,
+# owned by a dedicated non-root user (also called ilmildizi here; create with
+# `adduser --system --group ilmildizi` if it doesn't exist yet).
+#
+# REDIS_URL must be set in /srv/ilmildizi/.env once you run more than one instance —
+# without it, each daphne process gets its own private in-memory cache and channel layer,
+# so Battle Arena matchmaking silently breaks (two players can land on different instances
+# and never find each other) and cached data (leaderboard, admin dashboard) goes stale
+# per-process instead of being shared. See config/settings.py CACHES/CHANNEL_LAYERS.
+
+[Unit]
+Description=IlmIldizi (daphne, instance on port %i)
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=ilmildizi
+Group=ilmildizi
+WorkingDirectory=/srv/ilmildizi/backend
+EnvironmentFile=/srv/ilmildizi/backend/.env
+# Bind to localhost only — Nginx (deploy/nginx/ilmildizi.conf) is the only thing that
+# should be reachable from the internet; daphne itself never is.
+ExecStart=/srv/ilmildizi/venv/bin/daphne -b 127.0.0.1 -p %i config.asgi:application
+Restart=on-failure
+RestartSec=3
+
+# Hardening: the service can't write anywhere except what it actually needs to.
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/srv/ilmildizi/media /srv/ilmildizi/staticfiles /srv/ilmildizi/backups
+
+[Install]
+WantedBy=multi-user.target

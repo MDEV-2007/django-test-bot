@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>IlmIldizi — Internet aloqasi yo'q</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem 1.25rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #e9eaeb; text-align: center;
+      background: radial-gradient(circle at top, rgba(47,179,163,0.08), transparent 45%), #17181a;
+    }
+    .wrap { width: 100%; max-width: 26rem; }
+    .icon {
+      width: 96px; height: 96px; margin: 0 auto 1.5rem;
+      border-radius: 30px; display: flex; align-items: center; justify-content: center;
+      background: rgba(201,100,92,0.14); border: 1px solid rgba(201,100,92,0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1);    opacity: 1; }
+      50%     { transform: scale(0.94); opacity: 0.75; }
+    }
+    svg { width: 44px; height: 44px; stroke: #c9645c; fill: none;
+          stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    h1 { font-size: 1.5rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+    p  { color: #b7b9bc; font-size: 0.9rem; line-height: 1.7; margin: 0.75rem 0 0; }
+    .tips {
+      margin-top: 1.75rem; padding: 1rem 1.25rem; text-align: left;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+    }
+    .tips b { font-size: 0.78rem; color: #e9eaeb; display: block; margin-bottom: 0.5rem; }
+    .tips ul { margin: 0; padding-left: 1.1rem; color: #b7b9bc; font-size: 0.8rem; line-height: 1.9; }
+    button {
+      margin-top: 1.5rem; width: 100%; padding: 0.9rem 1.5rem;
+      border: none; border-radius: 1rem; cursor: pointer; font-family: inherit;
+      background: linear-gradient(90deg, #2fb3a3, #5cc4b6); color: #0d1416;
+      font-weight: 700; font-size: 0.9rem;
+    }
+    button:disabled { opacity: 0.6; cursor: default; }
+    .status { margin-top: 0.9rem; font-size: 0.75rem; color: #8d9094; }
+    .online { color: #6b9b6f; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" role="img" aria-label="Aloqa yo'q">
+        <path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+    </div>
+
+    <h1>Internet aloqasi yo'q</h1>
+    <p>IlmIldizi bilan bog'lanish uchun internet aloqasini tekshiring.</p>
+
+    <div class="tips">
+      <b>Tekshiring:</b>
+      <ul>
+        <li>Wi-Fi yoki mobil internet yoqilganligini</li>
+        <li>Aviarejim (Airplane mode) o'chirilganligini</li>
+        <li>Tarmoq signali yetarli ekanligini</li>
+      </ul>
+    </div>
+
+    <button id="retry" type="button">Qayta urinish</button>
+    <p class="status" id="status">Aloqa kutilmoqda...</p>
+  </div>
+
+  <script>
+    var btn = document.getElementById('retry');
+    var status = document.getElementById('status');
+
+    function refresh() {
+      if (navigator.onLine) {
+        status.innerHTML = '<span class="online">Aloqa tiklandi — yuklanmoqda...</span>';
+        location.reload();
+      } else {
+        status.textContent = 'Hali ham aloqa yo’q. Internetni yoqing.';
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      btn.disabled = true;
+      status.textContent = 'Tekshirilmoqda...';
+      setTimeout(function () { btn.disabled = false; refresh(); }, 800);
+    });
+
+    window.addEventListener('online', refresh);
+    if (navigator.onLine) status.textContent = 'Aloqa bor — sahifani yangilang.';
+  </script>
+</body>
+</html>

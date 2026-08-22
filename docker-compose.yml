@@ -1,0 +1,57 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: backend/.env
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgres://${POSTGRES_USER:-ilmildizi}:${POSTGRES_PASSWORD:-ilmildizi}@db:5432/${POSTGRES_DB:-ilmildizi}
+      # Also the Channels layer backend now (see CHANNEL_LAYERS in config/settings.py) —
+      # required with more than one ASGI worker so Battle Arena matchmaking/battle groups
+      # are visible across all of them, not just whichever worker a player happened to hit.
+      REDIS_URL: redis://redis:6379/1
+    volumes:
+      - media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Daphne (ASGI), not gunicorn (WSGI) — Battle Arena's live PvP is served over
+    # WebSockets, which a WSGI server has no way to handle.
+    command: >
+      sh -c "python manage.py migrate &&
+             daphne -b 0.0.0.0 -p 8000 config.asgi:application"
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ilmildizi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ilmildizi}
+      POSTGRES_DB: ${POSTGRES_DB:-ilmildizi}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ilmildizi} -d ${POSTGRES_DB:-ilmildizi}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+  redisdata:
+  media:

@@ -1,0 +1,32 @@
+# Version control / IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Node (only used at build time on the host to compile Tailwind; not needed in the image)
+node_modules/
+
+# Local dev artifacts that must never leak into the image
+.env
+db.sqlite3
+media/
+backups/
+staticfiles/
+
+# Docker / CI meta
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Misc
+*.log
+.DS_Store

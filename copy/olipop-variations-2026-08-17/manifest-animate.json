@@ -1,0 +1,18 @@
+{
+  "project": "olipop-animate",
+  "output_dir": "copy/olipop-variations-2026-08-17",
+  "jobs": [
+    {
+      "id": "hero-video",
+      "endpoint": "fal-ai/kling-video/v2.5-turbo/pro/image-to-video",
+      "kind": "video",
+      "estimated_cost": 0.50,
+      "filename": "hero-video.mp4",
+      "arguments": {
+        "prompt": "Camera locked with just a very slow, subtle push-in — all the text and callouts must stay pin-sharp and fixed in place. The motion lives in the can: condensation droplets slowly beading and rolling down the pink aluminum, a soft cool light sweep moving across the can's face, faint carbonation sparkle rising behind it, and the leaf and droplet icons giving an almost imperceptible float. Calm, fresh, premium — no zoom past the callouts, no warping text.",
+        "image_url": "copy/olipop-variations-2026-08-17/reference.webp",
+        "duration": 5
+      }
+    }
+  ]
+}

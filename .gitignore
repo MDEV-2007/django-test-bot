@@ -34,6 +34,10 @@ backups/
 node_modules/
 npm-debug.log*
 
+# Next.js build output (frontend/ has its own ignore; this catches a stray root build)
+.next/
+out/
+
 # IDE / OS
 .vscode/
 .idea/

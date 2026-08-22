@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="static/img/icon.png" width="96" height="96" alt="IlmIldizi" />
+<img src="frontend/public/icon.png" width="96" height="96" alt="IlmIldizi" />
 
 # IlmIldizi
 
@@ -35,8 +35,10 @@ Built with **Django 6 · Tailwind · Alpine · HTMX · Chart.js**.
 
 ## Quick start
 
+**Backend (Django — faqat JSON API):**
+
 ```bash
-git clone <repo-url> && cd django-test-bot
+git clone <repo-url> && cd django-test-bot/backend
 
 python -m venv .venv
 .venv\Scripts\activate                 # Windows
@@ -48,10 +50,18 @@ cp .env.example .env                    # then set SECRET_KEY
 python manage.py migrate
 python manage.py seed_shop              # shop catalogue
 python manage.py createsuperuser
-python manage.py runserver
+python manage.py runserver 8001
 ```
 
-Open <http://127.0.0.1:8000>.
+**Frontend (Next.js — butun interfeys):**
+
+```bash
+cd frontend
+npm install
+npm run dev                             # http://localhost:3000
+```
+
+Django sahifalari yo'q: `/api/...` (JSON) va `/admin/` dan boshqa marshrut qolmagan.
 
 <details>
 <summary><b>Running the Telegram bot locally</b></summary>
@@ -83,23 +93,24 @@ switching back to polling, or Telegram will keep delivering to the webhook inste
 ## Project layout
 
 ```
-config/          settings, root urls, wsgi/asgi
-accounts/        users, profiles, roles, auth
-tests_app/       questions, test sets, attempts, revision deck
-learning/        topics, lessons, video/audio, flashcards
-analytics/       mastery + dashboard aggregation (service-only, no models)
-shop/            coin shop, inventory, purchases, streak freeze
-leaderboard/     cached rankings
-telegrambot/     bot handlers, webhook, management commands
-panel/           super-admin panel (config-driven CRUD engine)
-teacher/         teacher panel (scoped to own content)
-core/            missions, badges, notifications, background executor, AI client
-scripts/         one-off seed scripts
-tests/           automated test suite  →  see tests/RESULTS.md
-requirements/    base / dev / prod dependency split
+backend/         Django — JSON API, modellar, biznes mantiq
+  config/        settings, root urls, wsgi/asgi
+  accounts/      users, profiles, roles, auth
+  tests_app/     questions, test sets, attempts, revision deck
+  learning/      topics, lessons, video/audio, flashcards
+  analytics/     mastery, dashboard aggregation, DTM ball bashorati
+  shop/          coin shop, inventory, purchases, streak freeze
+  leaderboard/   cached rankings
+  telegrambot/   bot handlers, webhook, management commands
+  panel/         super-admin API
+  teacher/       teacher API + o'qituvchi-orqali-sinf (referral, sinf dashboardi)
+  core/          missions, badges, notifications, background executor, AI client
+  scripts/       one-off seed scripts
+  tests/         automated test suite  →  see backend/tests/RESULTS.md
+  requirements/  base / dev / prod dependency split
+frontend/        Next.js 16 + shadcn/ui — butun foydalanuvchi interfeysi
+deploy/          nginx, systemd, VPS qo'llanma
 ```
-
-Apps live at the repository root — the conventional Django layout.
 
 ---
 
@@ -119,26 +130,17 @@ deck, webhook authentication and role-based access.
 
 ---
 
-## Frontend build (Tailwind CSS)
+## Frontend
 
-Tailwind is compiled ahead of time with the Tailwind CLI — **not** the `cdn.tailwindcss.com`
-Play script (Tailwind's own docs say not to use that in production: it ships the whole
-engine and re-compiles in the browser on every page load). `tailwind.config.js` holds the
-shared theme (used by both the main site and the Super Admin/Teacher panels); the compiled
-output, `static/css/tailwind.css`, **is committed to git** — so a normal deploy needs no
-Node.js on the server at all, only `collectstatic` to pick it up like any other static file.
+Interfeys `frontend/` da: Next.js 16, Tailwind v4, shadcn/ui, `motion`.
+Django shablonlari (`templates/`, `static/`) **butunlay olib tashlandi** — eski
+Tailwind CLI qurilishi ham kerak emas.
 
 ```bash
-npm install            # once, wherever you edit templates
-npm run watch:css      # while developing — recompiles on every template save
-npm run build:css      # one-shot minified rebuild before committing
+cd frontend
+npm run dev            # ishlab chiqish serveri
+npm run build          # produksiya qurilishi
 ```
-
-**Rebuild and commit `static/css/tailwind.css` whenever you add a class that wasn't used
-anywhere before** — Tailwind only generates CSS for classes it finds literally written in
-`templates/**/*.html` or `static/js/**/*.js` (see `content` in `tailwind.config.js`); a class
-that exists only in the compiled file from an old build won't retroactively appear for new
-markup, and a class used in a template but never rebuilt just silently has no styles.
 
 ## Deployment
 
@@ -151,15 +153,16 @@ Everything scale-related is an **environment variable** — no code changes.
 | `DEBUG=False` | HTTPS redirect, HSTS, secure cookies, hashed + compressed static |
 | `TELEGRAM_WEBHOOK_SECRET` | Required — the webhook refuses to run without it |
 
-> **Linux/macOS only.** `gunicorn` depends on `fork()` and does **not** run on Windows —
-> there it fails with *"'gunicorn' is not recognized"*. Develop on Windows with
-> `runserver` (+ a tunnel for the bot webhook); deploy on a Linux server.
+> Served by **Daphne** (ASGI) rather than gunicorn — needed for Battle Arena's live PvP
+> WebSockets. Unlike gunicorn, Daphne isn't `fork()`-only, so `manage.py runserver` (which
+> Channels makes ASGI-capable the moment `daphne` is in `INSTALLED_APPS`) also serves
+> WebSockets locally on Windows — no tunnel-only workaround needed for that part.
 
 ```bash
 pip install -r requirements/prod.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
-gunicorn -c gunicorn.conf.py config.wsgi:application
+daphne -b 0.0.0.0 -p 8000 config.asgi:application
 python manage.py set_webhook --url https://your-domain.com
 ```
 
@@ -184,7 +187,7 @@ it installs.
 
 - **Never** run `manage.py runserver` in production.
 - The bot uses a **webhook** in production. Polling is a single process — it can't be
-  scaled or made redundant; the webhook is served by every gunicorn worker.
+  scaled or made redundant; the webhook is served by every ASGI worker process.
 - Post-test AI feedback runs **off the request path** (`core/background.py`). The Groq
   call can take 20s+, which would otherwise block one worker per submission.
 - SQLite serialises every write behind one lock — set `DATABASE_URL` before real traffic.

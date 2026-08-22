@@ -3,9 +3,129 @@
   "configurations": [
     {
       "name": "django-dev-server",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["manage.py", "runserver", "8001"],
+      "runtimeExecutable": "C:\\Users\\Murodulla\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+      "runtimeArgs": [
+        "backend/manage.py",
+        "runserver",
+        "8001"
+      ],
       "port": 8001
+    },
+    {
+      "name": "ilmildizi-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\django-test-bot\\frontend",
+        "--",
+        "--port",
+        "3500"
+      ],
+      "port": 3500
+    },
+    {
+      "name": "ilmildizi-frontend-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\django-test-bot\\frontend",
+        "--",
+        "--port",
+        "3500"
+      ],
+      "port": 3500
+    },
+    {
+      "name": "rxtez-mobile-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "web",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\RetseptApp\\apps\\mobile"
+      ],
+      "port": 8081
+    },
+    {
+      "name": "maydon-mobile-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "web",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\Maydon\\mobile",
+        "--",
+        "--port",
+        "8092"
+      ],
+      "port": 8092
+    },
+    {
+      "name": "maydon-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start:dev",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\Maydon\\backend"
+      ],
+      "port": 3010
+    },
+    {
+      "name": "defendra",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\qalqon"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "defendra-api",
+      "runtimeExecutable": "C:\\Users\\Murodulla\\Desktop\\qalqon\\backend\\venv\\Scripts\\python.exe",
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--app-dir",
+        "C:\\Users\\Murodulla\\Desktop\\qalqon\\backend"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "mywebsite-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\mywebsite\\apps\\web",
+        "--",
+        "--port",
+        "3300"
+      ],
+      "port": 3300
+    },
+    {
+      "name": "mywebsite-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start:dev",
+        "--prefix",
+        "C:\\Users\\Murodulla\\Desktop\\mywebsite\\apps\\api"
+      ],
+      "port": 4000
     }
   ]
 }
