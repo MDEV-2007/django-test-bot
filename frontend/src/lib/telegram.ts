@@ -58,6 +58,10 @@ export type TelegramWebApp = {
   setBackgroundColor?(color: string): void;
   onEvent(event: string, cb: () => void): void;
   offEvent(event: string, cb: () => void): void;
+  shareToStory?(mediaUrl: string, params?: {
+    text?: string;
+    widget_link?: { url: string; name?: string };
+  }): void;
   BackButton: BackButton;
   MainButton: MainButton;
   HapticFeedback?: HapticFeedback;
@@ -227,6 +231,35 @@ export function useTelegramClosingConfirmation(enabled: boolean) {
     wa.enableClosingConfirmation();
     return () => wa.disableClosingConfirmation();
   }, [enabled]);
+}
+
+/* ── Story ulashish ─────────────────────────────────────────────────────────── */
+
+/** Telegram Story'ga rasm qo'yish (Bot API 7.8+).
+ *
+ *  Diqqat: `mediaUrl` OCHIQ manzil bo'lishi shart — rasmni foydalanuvchining telefoni
+ *  emas, Telegram serverlari yuklab oladi va ular hech qanday token yubormaydi.
+ *
+ *  Qaytadi: `false` — muhit yoki mijoz versiyasi qo'llab-quvvatlamaydi (chaqiruvchi
+ *  o'shanda tugmani ko'rsatmasligi yoki boshqa ulashish usulini taklif qilishi mumkin). */
+export function shareToStory(
+  mediaUrl: string,
+  params?: { text?: string; widget_link?: { url: string; name?: string } },
+): boolean {
+  const wa = getWebApp();
+  if (!wa?.shareToStory) return false;
+  try {
+    wa.shareToStory(mediaUrl, params);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Mijoz Story ulashishni qo'llab-quvvatlaydimi (tugmani ko'rsatish uchun). */
+export function canShareToStory(): boolean {
+  const wa = getWebApp();
+  return !!wa?.shareToStory && wa.isVersionAtLeast('7.8');
 }
 
 /* ── Tayyorlik holati ───────────────────────────────────────────────────────── */

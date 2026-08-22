@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
-  AlertTriangle, ChevronLeft, ChevronRight,
+  AlertTriangle, ChevronLeft, ChevronRight, Share2,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
+import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +42,45 @@ type FeedbackData = {
     your_answer: string; correct_answer: string; explanation: string; grading_note: string;
   }[];
 };
+
+/* Natijani Telegram Story'ga qo'yish.
+
+   Nega alohida rasm: Story faqat RASM yoki videoni qabul qiladi, sahifa skrinshotini
+   emas. Server 1080x1920 karta chizib beradi va uni imzolangan ochiq manzilda ochadi —
+   rasmni foydalanuvchining telefoni emas, Telegram serverlari yuklab oladi. */
+function StoryShareButton({ attemptId }: { attemptId: string }) {
+  const inTelegram = useIsTelegram();
+  const [busy, setBusy] = useState(false);
+
+  // Tugma faqat Story'ni qo'llab-quvvatlaydigan Telegram mijozida ko'rinadi
+  // (Bot API 7.8+); saytda yoki eski ilovada umuman chizilmaydi.
+  if (!inTelegram || !canShareToStory()) return null;
+
+  async function share() {
+    setBusy(true);
+    try {
+      const res = await apiFetch<{ media_url: string; text: string }>(
+        `/api/tests/attempts/${attemptId}/story-link/`,
+      );
+      const ok = shareToStory(res.media_url, {
+        text: res.text,
+        widget_link: { url: 'https://t.me/ilmildiziuz_bot', name: 'IlmIldizi' },
+      });
+      if (ok) tgHaptic('success');
+      else toast.error('Telegramning bu versiyasi Story ulashishni qo`llamaydi.');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Xatolik');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Button size="sm" onClick={share} disabled={busy}>
+      <Share2 className="size-4" /> {busy ? 'Tayyorlanmoqda...' : 'Storyga qo`yish'}
+    </Button>
+  );
+}
 
 export default function FeedbackPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
@@ -129,7 +170,9 @@ export default function FeedbackPage() {
           <Button asChild variant="outline" size="sm">
             <Link href="/tests"><ChevronLeft className="size-4" /> Testlar ro&apos;yxati</Link>
           </Button>
-          {a.score < 100 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <StoryShareButton attemptId={attemptId} />
+            {a.score < 100 && (
             <Button
               size="sm"
               variant="outline"
@@ -138,7 +181,8 @@ export default function FeedbackPage() {
             >
               <RotateCcw className="size-4" /> Xatolar ustida ishlash
             </Button>
-          )}
+            )}
+          </div>
         </div>
 
         {mistakesError && (

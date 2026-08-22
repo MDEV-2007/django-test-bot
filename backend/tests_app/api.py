@@ -2,11 +2,16 @@
 for the overall JWT-API pattern. Each endpoint here reuses the exact same helpers/queries
 as its template-based counterpart; only the response shape (JSON vs render()) differs.
 Grading stays server-only: is_correct is never sent back until finish()/feedback()."""
+from django.conf import settings
 from django.core.paginator import Paginator
+from django.http import Http404, HttpResponse
 from django.db.models import Avg, Count, F, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework.decorators import api_view
+from rest_framework.decorators import (
+    api_view, authentication_classes, permission_classes,
+)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import ensure_profile_for_user
@@ -563,3 +568,55 @@ def revision_check_api(request, item_id):
         'ok': True, 'correct': is_correct, 'mastered': is_correct,
         'correct_choice_id': correct_choice.id if correct_choice else None, 'explanation': explanation,
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def story_link_api(request, attempt_id):
+    """Telegram Story uchun imzolangan rasm manzili.
+
+    Manzil OCHIQ (imzo bilan himoyalangan), chunki rasmni Telegram serverlari yuklab
+    oladi — ular JWT sarlavhasini yubormaydi. Shu sababli havolani faqat urinish egasi
+    oladi, lekin havolaning o'zi autentifikatsiyasiz ochiladi.
+    """
+    from .story import sign_attempt
+
+    attempt = get_object_or_404(Attempt, id=attempt_id, profile=request.user.profile)
+    if not attempt.is_completed:
+        return Response({'error': 'attempt not finished'}, status=409)
+
+    base = (getattr(settings, 'FRONTEND_URL', '') or getattr(settings, 'WEBAPP_URL', '') or '').rstrip('/')
+    path = f'/api/tests/attempts/{attempt.id}/story/?sig={sign_attempt(attempt.id)}'
+    return Response({
+        'media_url': f'{base}{path}' if base else path,
+        'text': f"IlmIldizi'da {round(attempt.score or 0)}% natija oldim!",
+    })
+
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def story_image_api(request, attempt_id):
+    """Natija kartasi (PNG). Imzo to'g'ri bo'lmasa — 404."""
+    from .story import render_story_png, signature_ok
+
+    if not signature_ok(attempt_id, request.GET.get('sig')):
+        raise Http404
+
+    attempt = get_object_or_404(
+        Attempt.objects.select_related('test', 'profile__user'),
+        id=attempt_id, is_completed=True,
+    )
+    total = attempt.correct_answers + attempt.wrong_answers + attempt.skipped_answers
+    user = attempt.profile.user
+    png = render_story_png(
+        score=attempt.score,
+        correct=attempt.correct_answers,
+        total=total or 1,
+        test_title=attempt.test.title if attempt.test else 'Tasodifiy test',
+        display_name=(user.first_name or user.username),
+    )
+    response = HttpResponse(png, content_type='image/png')
+    # Telegram rasmni bir necha marta so'rashi mumkin; natija o'zgarmaydi.
+    response['Cache-Control'] = 'public, max-age=86400'
+    return response
