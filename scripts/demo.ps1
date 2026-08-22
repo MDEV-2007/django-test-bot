@@ -38,6 +38,12 @@ $frontend = Join-Path $root 'frontend'
 $python = 'C:\Users\Murodulla\AppData\Local\Programs\Python\Python314\python.exe'
 if (-not (Test-Path $python)) { $python = (Get-Command python).Source }
 
+function Get-EnvValueFromFile([string]$path, [string]$key) {
+  $line = Select-String -Path $path -Pattern "^$key=" | Select-Object -First 1
+  if ($null -eq $line) { return '' }
+  return $line.Line.Substring($key.Length + 1).Trim()
+}
+
 function Stop-Port([int]$port) {
   # Eski jarayon portni band qilib turgan bo'lsa demo jim turib ishlamaydi —
   # shuning uchun avval tozalanadi.
@@ -78,6 +84,15 @@ if ($Build -or -not $hasBuild) {
   Write-Host ' tayyor'
 }
 
+# --- Tunnel (agar so'ralgan bo'lsa) --------------------------------------------
+# Tunnel serverlardan OLDIN ko'tariladi: u backend/.env ni yangilaydi (WEBAPP_URL,
+# FRONTEND_URL, ruxsat etilgan hostlar), Django esa muhitni faqat ishga tushganda
+# o'qiydi. Aks holda bot eski manzilni ishlatib qolardi.
+if ($Tunnel) {
+  & (Join-Path $PSScriptRoot 'tg-tunnel.ps1') -FrontendPort $FrontendPort -BackendPort $BackendPort
+  Write-Host ''
+}
+
 # --- Backend -------------------------------------------------------------------
 Stop-Port $BackendPort
 Push-Location $backend
@@ -105,14 +120,15 @@ if (-not (Wait-Url "http://127.0.0.1:$FrontendPort/" 90)) {
 }
 Write-Host "  frontend : http://localhost:$FrontendPort" -ForegroundColor Green
 
-# --- Tunnel (ixtiyoriy) --------------------------------------------------------
+Write-Host ''
+Write-Host 'Demo tayyor.' -ForegroundColor Yellow
+Write-Host "  Brauzer  : http://localhost:$FrontendPort"
+
 if ($Tunnel) {
-  Write-Host ''
-  & (Join-Path $PSScriptRoot 'tg-tunnel.ps1') -FrontendPort $FrontendPort -BackendPort $BackendPort
+  $public = Get-EnvValueFromFile (Join-Path $backend '.env') 'WEBAPP_URL'
+  Write-Host "  Ochiq    : $public"
+  Write-Host "  Telegram : botni oching va /start bosing"
 } else {
   Write-Host ''
-  Write-Host 'Demo tayyor. Brauzerda oching:' -ForegroundColor Yellow
-  Write-Host "  http://localhost:$FrontendPort"
-  Write-Host ''
-  Write-Host 'Telefonda / Telegram Mini App`da ko`rsatish uchun: -Tunnel bayrog`i bilan qayta ishga tushiring.'
+  Write-Host 'Telefonda / Telegram Mini App`da ko`rsatish uchun: -Tunnel bayrog`i bilan ishga tushiring.'
 }

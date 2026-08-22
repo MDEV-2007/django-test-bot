@@ -165,25 +165,29 @@ function Set-TelegramWebhook([string]$url) {
 }
 
 $webhookSet = $false
-foreach ($attempt in 1..3) {
+foreach ($attempt in 1..4) {
   if (Set-TelegramWebhook $beUrl) { $webhookSet = $true; break }
   Write-Host "  setWebhook urinish $attempt muvaffaqiyatsiz, qayta urinilmoqda..."
-  Start-Sleep -Seconds 8
+  Start-Sleep -Seconds 10
 }
 
 if ($webhookSet) {
   Write-Host "  setWebhook: $beUrl"
 } else {
   $ngrok = (Get-Command ngrok -ErrorAction SilentlyContinue).Source
-  if (-not $ngrok) { throw "setWebhook ishlamadi va ngrok ham topilmadi." }
+  if (-not $ngrok) {
+    Write-Warning "setWebhook ishlamadi (Telegram hostni yecha olmadi) va ngrok topilmadi."
+    Write-Warning "Mini App (menyu tugmasi) ISHLAYDI; faqat botga yozilgan /start javobsiz qoladi."
+    $ngrok = $null
+  }
 
   Write-Host '  Telegram cloudflared hostini yecha olmadi -> webhook uchun ngrok ishlatilmoqda'
   Get-Process ngrok -ErrorAction SilentlyContinue | Stop-Process -Force
   Start-Sleep -Seconds 1
-  Start-Process -FilePath $ngrok -ArgumentList 'http', "$BackendPort", '--log=stdout' `
+  if ($ngrok) { Start-Process -FilePath $ngrok -ArgumentList 'http', "$BackendPort", '--log=stdout' `
     -RedirectStandardOutput (Join-Path $env:TEMP 'ngrok-webhook.log') `
     -RedirectStandardError (Join-Path $env:TEMP 'ngrok-webhook.err.log') `
-    -WindowStyle Hidden | Out-Null
+    -WindowStyle Hidden | Out-Null }
 
   $ngrokUrl = $null
   foreach ($i in 1..20) {
@@ -194,10 +198,22 @@ if ($webhookSet) {
     } catch { }
     if ($ngrokUrl) { break }
   }
-  if (-not $ngrokUrl) { throw 'ngrok tunnel manzilini bermadi.' }
+  <# Bu yerda "throw" YO'Q: webhook — demo uchun ikkinchi darajali. Mini App menyu
+     tugmasi orqali baribir ochiladi, shuning uchun butun ishga tushirishni to'xtatish
+     noto'g'ri bo'lardi. Xabar beramiz va davom etamiz. #>
+  if (-not $ngrokUrl) {
+    Write-Warning 'ngrok tunnel manzilini bermadi (autentifikatsiya yoki tarmoq muammosi).'
+  } elseif (Set-TelegramWebhook $ngrokUrl) {
+    Write-Host "  setWebhook: $ngrokUrl (ngrok)"
+    $webhookSet = $true
+  } else {
+    Write-Warning "setWebhook ngrok bilan ham ishlamadi: $ngrokUrl"
+  }
+}
 
-  if (-not (Set-TelegramWebhook $ngrokUrl)) { throw "setWebhook ngrok bilan ham ishlamadi: $ngrokUrl" }
-  Write-Host "  setWebhook: $ngrokUrl (ngrok)"
+if (-not $webhookSet) {
+  Write-Warning 'Webhook qo`yilmadi: botga /start yozilsa javob bermaydi.'
+  Write-Warning 'Mini App esa menyu tugmasi orqali ochilaveradi.'
 }
 
 $menu = @{

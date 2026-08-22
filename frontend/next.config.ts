@@ -2,27 +2,27 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // The repo root also has its own package-lock.json (Tailwind build for the Django
-  // templates) â€” pin Turbopack's root to this app so it doesn't guess wrong.
+  // templates) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â pin Turbopack's root to this app so it doesn't guess wrong.
   turbopack: {
     root: __dirname,
   },
 
   /* Telegram Mini App'ni lokal serverda sinash uchun sahifa cloudflared tunnel
      domeni orqali ochiladi. Next dev rejimi begona (cross-origin) domendan
-     kelgan ichki so'rovlarni (HMR, _next/*) sukut bo'yicha bloklaydi â€”
+     kelgan ichki so'rovlarni (HMR, _next/*) sukut bo'yicha bloklaydi ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â
      tunnel manzili shu ro'yxatga qo'shilishi kerak. Tunnel manzili
      o'zgarganda bu qatorni ham yangilang. */
-  allowedDevOrigins: ['ferrari-nvidia-pocket-status.trycloudflare.com'],
+  allowedDevOrigins: ['purse-manchester-publishers-wet.trycloudflare.com'],
 
   /* Django API va media SHU origin ostidan uzatiladi.
-     Nega: Telegram Mini App telefonda ochiladi — u yerdan `localhost:8001` ga chiqib
+     Nega: Telegram Mini App telefonda ochiladi Ã¢â‚¬â€ u yerdan `localhost:8001` ga chiqib
      bo'lmaydi. Ikkita alohida tunnel ham ishlaydi, lekin har safar manzil o'zgarganda
      frontendni qayta yig'ish kerak bo'lardi (`NEXT_PUBLIC_API_URL` build vaqtida
-     kodga yoziladi). Bitta origin bo'lsa — qayta yig'ish ham, CORS ham kerak emas.
+     kodga yoziladi). Bitta origin bo'lsa Ã¢â‚¬â€ qayta yig'ish ham, CORS ham kerak emas.
 
      `skipTrailingSlashRedirect` MAJBURIY: Django yo'llari oxirida slash bilan
      (`/api/auth/config/`), Next esa sukut bo'yicha uni slashsiz variantiga 308 bilan
-     yo'naltiradi. Destination'da slash ochiq yozilgan — aks holda Next slashni olib
+     yo'naltiradi. Destination'da slash ochiq yozilgan Ã¢â‚¬â€ aks holda Next slashni olib
      tashlab uzatadi va Django APPEND_SLASH bilan 301 qaytarib, aylanma hosil bo'ladi
      (o'lchangan: `Location: /api/auth/config/`). */
   skipTrailingSlashRedirect: true,
