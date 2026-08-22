@@ -113,24 +113,25 @@ if (-not $KeepExistingTunnels) {
   Start-Sleep -Seconds 1
 }
 
-Write-Host 'Tunnellar:' -ForegroundColor Cyan
+<# BITTA tunnel yetarli: API, media va Telegram webhook'i frontendning O'Z origin'i
+   ostidan Django'ga uzatiladi (next.config.ts, rewrites). Shu sababli tunnel manzili
+   o'zgarganda frontendni QAYTA YIG'ISH kerak emas — ilgari `NEXT_PUBLIC_API_URL`
+   build vaqtida kodga yozilgani uchun har safar qayta yig'ish talab qilinardi. #>
+Write-Host 'Tunnel:' -ForegroundColor Cyan
 $feUrl = Start-QuickTunnel -port $FrontendPort -label 'frontend'
-$beUrl = Start-QuickTunnel -port $BackendPort -label 'backend'
 $feHost = ([uri]$feUrl).Host
-$beHost = ([uri]$beUrl).Host
+# Webhook ham shu tunnel orqali (/telegram/webhook/ Django'ga proksi qilinadi).
+$beUrl = $feUrl
 
 Write-Host 'Konfiguratsiya yangilanmoqda:' -ForegroundColor Cyan
 
 Set-EnvValue $backendEnv 'WEBAPP_URL' $feUrl
 Set-EnvValue $backendEnv 'FRONTEND_URL' $feUrl
-Set-EnvValue $backendEnv 'EXTRA_ALLOWED_HOSTS' "$feHost,$beHost"
+Set-EnvValue $backendEnv 'EXTRA_ALLOWED_HOSTS' $feHost
 Set-EnvValue $backendEnv 'FRONTEND_ORIGINS' "http://localhost:$FrontendPort,$feUrl"
 Write-Host "  backend/.env"
 
-Set-EnvValue $frontendEnv 'NEXT_PUBLIC_API_URL' $beUrl
-Write-Host "  frontend/.env.local"
-
-# Next dev rejimi begona domendan kelgan _next/* so'rovlarini bloklaydi.
+# `next dev` begona domendan kelgan _next/* so'rovlarini bloklaydi (prod'da ahamiyatsiz).
 $cfg = Get-Content $nextConfig -Raw
 $cfg = [regex]::Replace($cfg, "allowedDevOrigins: \[[^\]]*\]", "allowedDevOrigins: ['$feHost']")
 [System.IO.File]::WriteAllText($nextConfig, $cfg, $utf8NoBom)
@@ -217,6 +218,6 @@ Write-Host "Tayyor. Bot: @$($me.result.username)" -ForegroundColor Green
 Write-Host "  Mini App : $feUrl"
 Write-Host "  API      : $beUrl"
 Write-Host ''
-Write-Host 'Endi dev serverlarni QAYTA ishga tushiring (ikkalasi ham muhitni faqat startda o''qiydi):' -ForegroundColor Yellow
+Write-Host 'Django muhitni faqat startda o''qiydi — uni QAYTA ishga tushiring:' -ForegroundColor Yellow
 Write-Host "  python backend\manage.py runserver $BackendPort"
-Write-Host "  npm run dev --prefix frontend -- --port $FrontendPort"
+Write-Host 'Frontendga tegish shart emas: API va webhook uning o''z origin''i orqali ketadi.'

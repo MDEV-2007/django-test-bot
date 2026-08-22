@@ -1,6 +1,16 @@
 import { useAuthStore, type Profile } from './auth-store';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
+/* API manzili.
+ *
+ * Sukut bo'yicha BO'SH satr — ya'ni so'rovlar sahifaning o'z origin'iga ketadi
+ * (`/api/...`) va Next ularni `next.config.ts` dagi rewrite orqali Django'ga uzatadi.
+ * Bu eng ishonchli holat: tunnel manzili o'zgarsa ham hech narsani qayta yig'ish
+ * (build) shart emas, CORS muammosi umuman yo'q va telefon `localhost` ga urinmaydi.
+ *
+ * Alohida domen kerak bo'lsa (masalan backend boshqa serverda) — `NEXT_PUBLIC_API_URL`
+ * ni to'liq manzil bilan to'ldiring. `??` emas `||` ishlatilmaydi: bo'sh satr ATAYLAB
+ * "shu origin" degani. */
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 export class ApiError extends Error {
   status: number;
