@@ -46,3 +46,6 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Local server logs written by scripts/demo.ps1
+logs/

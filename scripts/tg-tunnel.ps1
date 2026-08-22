@@ -42,9 +42,8 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $root = Split-Path -Parent $PSScriptRoot
 $backendEnv = Join-Path $root 'backend\.env'
 $frontendEnv = Join-Path $root 'frontend\.env.local'
-$nextConfig = Join-Path $root 'frontend\next.config.ts'
 
-foreach ($f in @($backendEnv, $frontendEnv, $nextConfig)) {
+foreach ($f in @($backendEnv, $frontendEnv)) {
   if (-not (Test-Path $f)) { throw "Topilmadi: $f" }
 }
 # cloudflared is often a loose .exe dropped in a personal bin folder rather than an
@@ -131,11 +130,12 @@ Set-EnvValue $backendEnv 'EXTRA_ALLOWED_HOSTS' $feHost
 Set-EnvValue $backendEnv 'FRONTEND_ORIGINS' "http://localhost:$FrontendPort,$feUrl"
 Write-Host "  backend/.env"
 
-# `next dev` begona domendan kelgan _next/* so'rovlarini bloklaydi (prod'da ahamiyatsiz).
-$cfg = Get-Content $nextConfig -Raw
-$cfg = [regex]::Replace($cfg, "allowedDevOrigins: \[[^\]]*\]", "allowedDevOrigins: ['$feHost']")
-[System.IO.File]::WriteAllText($nextConfig, $cfg, $utf8NoBom)
-Write-Host "  frontend/next.config.ts"
+<# `next dev` begona domendan kelgan _next/* so'rovlarini bloklaydi (prod'da ahamiyatsiz).
+   Manzil next.config.ts ga YOZILMAYDI: `Get-Content` faylni ANSI sifatida o'qib,
+   UTF-8 bo'lib qayta yozardi va har ishga tushirishda izohlardagi tire/apostroflar
+   buzilib borardi. Endi u oddiy muhit o'zgaruvchisi orqali uzatiladi. #>
+Set-EnvValue $frontendEnv 'DEV_TUNNEL_HOST' $feHost
+Write-Host "  frontend/.env.local"
 
 $token = Get-EnvValue $backendEnv 'TELEGRAM_BOT_TOKEN'
 $secret = Get-EnvValue $backendEnv 'TELEGRAM_WEBHOOK_SECRET'

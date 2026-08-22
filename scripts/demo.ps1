@@ -100,9 +100,16 @@ try {
   & $python manage.py migrate --noinput 2>&1 | Out-Null
 } finally { Pop-Location }
 
+# Serverlar yashirin oynada ishlaydi — chiqishi yozilmasa, xatolik yuz berganda
+# hech qanday iz qolmaydi (bot javob bermaganda aynan shu muammo bo'lgan).
+$logDir = Join-Path $root 'logs'
+if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
+
 Start-Process -FilePath $python `
   -ArgumentList 'manage.py', 'runserver', "127.0.0.1:$BackendPort", '--noreload' `
-  -WorkingDirectory $backend -WindowStyle Hidden | Out-Null
+  -WorkingDirectory $backend -WindowStyle Hidden `
+  -RedirectStandardOutput (Join-Path $logDir 'backend.out.log') `
+  -RedirectStandardError (Join-Path $logDir 'backend.err.log') | Out-Null
 
 if (-not (Wait-Url "http://127.0.0.1:$BackendPort/api/auth/config/" 60)) {
   throw "Backend $BackendPort portida ko`tarilmadi."
@@ -113,7 +120,9 @@ Write-Host "  backend  : http://127.0.0.1:$BackendPort" -ForegroundColor Green
 Stop-Port $FrontendPort
 Start-Process -FilePath 'npm.cmd' `
   -ArgumentList 'run', 'start', '--', '--port', "$FrontendPort" `
-  -WorkingDirectory $frontend -WindowStyle Hidden | Out-Null
+  -WorkingDirectory $frontend -WindowStyle Hidden `
+  -RedirectStandardOutput (Join-Path $logDir 'frontend.out.log') `
+  -RedirectStandardError (Join-Path $logDir 'frontend.err.log') | Out-Null
 
 if (-not (Wait-Url "http://127.0.0.1:$FrontendPort/" 90)) {
   throw "Frontend $FrontendPort portida ko`tarilmadi."
@@ -123,6 +132,7 @@ Write-Host "  frontend : http://localhost:$FrontendPort" -ForegroundColor Green
 Write-Host ''
 Write-Host 'Demo tayyor.' -ForegroundColor Yellow
 Write-Host "  Brauzer  : http://localhost:$FrontendPort"
+Write-Host "  Loglar   : logsackend.err.log, logsrontend.err.log"
 
 if ($Tunnel) {
   $public = Get-EnvValueFromFile (Join-Path $backend '.env') 'WEBAPP_URL'
