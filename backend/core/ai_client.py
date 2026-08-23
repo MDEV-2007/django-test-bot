@@ -170,6 +170,11 @@ def ask_groq_stream(messages, temperature=0.6, timeout=20):
             stream=True,
         ) as resp:
             resp.raise_for_status()
+            # Groq oqimni `text/event-stream` deb yuboradi va sarlavhada charset
+            # ko'rsatmaydi. Bunday holda `requests` RFC 2616 bo'yicha latin-1 ga tushadi,
+            # shuning uchun `decode_unicode=True` o'zbekcha `oʻ`, `gʻ` va tirelarni
+            # `OÊ»`, `â€"` kabi axlatga aylantiradi. Kodlashni aniq belgilaymiz.
+            resp.encoding = 'utf-8'
             for line in resp.iter_lines(decode_unicode=True):
                 if not line or not line.startswith("data: "):
                     continue
