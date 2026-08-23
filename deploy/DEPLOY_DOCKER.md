@@ -156,8 +156,13 @@ nano deploy/docker/nginx.conf
 Keyin:
 
 ```bash
-docker compose restart nginx && curl -I https://ilmildizi.uz
+docker compose up -d --force-recreate nginx && curl -I https://ilmildizi.uz
 ```
+
+> `restart` emas, aynan `--force-recreate`: nginx obrazi `${SERVER_NAME}` ni konteyner
+> yaratilgan paytdagi muhit bilan almashtiradi. `.env` dagi domenni o'zgartirib `restart`
+> qilsangiz, eski domen qoladi va nginx yo'q sertifikatni qidirib ishga tushmaydi
+> (`cannot load certificate ... No such file`).
 
 Tekshirish ro'yxati (hammasi 200 bo'lishi kerak):
 
@@ -240,6 +245,22 @@ gunzip -c /root/ilmildizi-2026-08-23.sql.gz | docker compose exec -T db psql -U 
 
 ## 12. Ishlamasa — nimadan boshlash
 
+**nginx `Restarting` holatida, sayt umuman ochilmaydi**
+
+Logga qarang:
+
+```bash
+docker compose logs --tail=20 nginx | grep emerg
+```
+
+`cannot load certificate ".../live/<boshqa-domen>/fullchain.pem"` chiqsa — nginx eski
+domenni ko'ryapti. `.env` dagi `SERVER_NAME` konteynerga faqat u yaratilganda beriladi:
+
+```bash
+docker compose exec nginx printenv SERVER_NAME   # haqiqatda nimani ko'ryapti
+docker compose up -d --force-recreate nginx      # yangi qiymat bilan qayta yaratish
+```
+
 **Sayt ochilmayapti (`curl` javob bermaydi)**
 
 ```bash
@@ -263,8 +284,10 @@ to'ldirilmagan, yoki `EXTRA_ALLOWED_HOSTS` da domen yo'q (`DisallowedHost` xatos
 yo'q. Qo'shing va qayta ishga tushiring:
 
 ```bash
-nano backend/.env && docker compose restart web
+nano backend/.env && docker compose up -d --force-recreate web
 ```
+
+> Bu yerda ham `restart` yaramaydi: `env_file` faqat konteyner yaratilganda o'qiladi.
 
 **Bot javob bermayapti**
 
