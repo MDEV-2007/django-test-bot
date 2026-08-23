@@ -103,6 +103,11 @@ docker run --rm python:3.12-slim python -c "import secrets;print('SECRET_KEY=' +
 
 > **Bu faylga izoh yozmang.** Unda faqat `KALIT=qiymat` qatorlari bo'lsin.
 
+> `TELEGRAM_WEBHOOK_SECRET` ni o'zingiz o'ylab topmang va `openssl rand -base64` bilan
+> ham yaratmang: Telegram sirda faqat `A-Z a-z 0-9 _ -` ni qabul qiladi, base64 esa
+> `+ / =` chiqaradi va `setWebhook` "secret token contains unallowed characters"
+> deb rad etadi. Xavfsiz yo'l: `openssl rand -hex 32`.
+
 Baza paroli uchun alohida fayl (compose o'qiydi):
 
 ```bash

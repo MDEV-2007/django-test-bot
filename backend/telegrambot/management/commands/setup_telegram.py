@@ -59,6 +59,17 @@ class Command(BaseCommand):
         secret = getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '')
         if not secret:
             raise CommandError("TELEGRAM_WEBHOOK_SECRET sozlanmagan (backend/.env).")
+        # Telegram sirda faqat A-Z a-z 0-9 _ - ni qabul qiladi (1..256 belgi). Buni shu
+        # yerda tekshiramiz, chunki serverning javobi ("secret token contains unallowed
+        # characters") qaysi belgi aybdorligini ham, uni qayerdan tuzatishni ham aytmaydi.
+        # `openssl rand -base64` chiqaradigan + / = belgilari aynan shu xatoga olib keladi.
+        bad = sorted(set(ch for ch in secret if not (ch.isascii() and (ch.isalnum() or ch in '_-'))))
+        if bad or len(secret) > 256:
+            raise CommandError(
+                "TELEGRAM_WEBHOOK_SECRET Telegram qoidasiga mos emas "
+                f"(ruxsat: A-Z a-z 0-9 _ - , 1..256 belgi; muammo: {'uzunligi' if not bad else ' '.join(bad)}). "
+                "Yangisini shunday yarating: openssl rand -hex 32"
+            )
 
         res = api_call(
             'setWebhook',
