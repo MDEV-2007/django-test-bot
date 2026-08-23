@@ -615,6 +615,9 @@ def story_image_api(request, attempt_id):
         total=total or 1,
         test_title=attempt.test.title if attempt.test else 'Tasodifiy test',
         display_name=(user.first_name or user.username),
+        # Fon ildizi urinish id'sidan chiziladi: har bir natijaning o'z shakli bo'ladi,
+        # lekin bitta natija qayta so'ralganda aynan o'sha rasm qaytadi (rasm keshlanadi).
+        seed=attempt.id,
     )
     response = HttpResponse(png, content_type='image/png')
     # Telegram rasmni bir necha marta so'rashi mumkin; natija o'zgarmaydi.
