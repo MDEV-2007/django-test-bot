@@ -821,21 +821,41 @@ def broadcast_api(request):
     bc.recipients_count = len(profiles)
     bc.save()
 
+    photo_failed = 0
     if bc.via_telegram:
         sent = 0
         caption = f"{bc.title}\n\n{bc.message}"
         has_image = bool(bc.image)
         image_path = bc.image.path if has_image else None
+        # Birinchi yuborish rasmni Telegram'ga yuklaydi va uning file_id'sini qaytaradi;
+        # qolganlariga o'sha nusxaga havola ketadi — yuzta qayta yuklash o'rniga bitta.
+        file_id = ''
         for p in profiles:
             if not p.telegram_id:
                 continue
-            ok = send_telegram_photo(p.telegram_id, image_path, caption) if has_image else send_telegram_message(p.telegram_id, caption)
+            if has_image:
+                result = send_telegram_photo(p.telegram_id, image_path, caption, file_id=file_id)
+                if isinstance(result, str):
+                    file_id = result
+                else:
+                    # Rasm o'tmadi — xabar matn holida ketgan bo'lishi mumkin.
+                    photo_failed += 1
+                ok = bool(result)
+            else:
+                ok = send_telegram_message(p.telegram_id, caption)
             if ok:
                 sent += 1
         bc.telegram_sent_count = sent
         bc.save(update_fields=['telegram_sent_count'])
 
-    return Response({'id': bc.id, 'recipients_count': bc.recipients_count, 'telegram_sent_count': bc.telegram_sent_count})
+    return Response({
+        'id': bc.id,
+        'recipients_count': bc.recipients_count,
+        'telegram_sent_count': bc.telegram_sent_count,
+        # Panelda ko'rsatiladi: ilgari rasm jimgina tushib qolar, admin esa xabar rasm
+        # bilan ketdi deb o'ylardi.
+        'photo_failed_count': photo_failed,
+    })
 
 
 @api_view(['DELETE'])

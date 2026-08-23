@@ -112,9 +112,18 @@ def send_telegram_message(chat_id: str, text: str) -> bool:
         return False
 
 
-def send_telegram_photo(chat_id: str, image_path: str, caption: str) -> bool:
-    """Send a photo with caption to a Telegram user via sendPhoto (multipart upload).
-    Falls back to a plain sendMessage if the photo cannot be sent.
+def send_telegram_photo(chat_id: str, image_path: str, caption: str, file_id: str = '') -> str | bool:
+    """Send a photo with caption to a Telegram user via sendPhoto.
+
+    Returns Telegram's `file_id` for the uploaded photo on success (a non-empty string,
+    so the result stays truthy for callers that only check success), or False if even the
+    text fallback failed.
+
+    `file_id` lets a broadcast upload the image ONCE and then reference Telegram's own
+    copy for everyone else. Re-uploading the same file per recipient made a broadcast to
+    a few hundred students hundreds of multipart uploads — slow, and every one of them a
+    fresh chance to hit a timeout and silently degrade to a text-only message.
+
     Never raises.
     """
     if not chat_id:
@@ -122,22 +131,31 @@ def send_telegram_photo(chat_id: str, image_path: str, caption: str) -> bool:
     token = settings.TELEGRAM_BOT_TOKEN
     if not token:
         return False
+    data = {
+        "chat_id": chat_id,
+        # Telegram caption limit is 1024 characters
+        "caption": caption[:1024],
+    }
     try:
-        with open(image_path, 'rb') as f:
-            resp = requests.post(
-                f"https://api.telegram.org/bot{token}/sendPhoto",
-                data={
-                    "chat_id": chat_id,
-                    # Telegram caption limit is 1024 characters
-                    "caption": caption[:1024],
-                },
-                files={"photo": f},
-                timeout=15,
-            )
-        if resp.ok:
-            return True
+        if file_id:
+            resp = requests.post(f"https://api.telegram.org/bot{token}/sendPhoto",
+                                 data={**data, "photo": file_id}, timeout=15)
         else:
-            logger.warning("Telegram sendPhoto returned not ok: %s %s. Falling back to text.", resp.status_code, resp.text)
+            with open(image_path, 'rb') as f:
+                resp = requests.post(f"https://api.telegram.org/bot{token}/sendPhoto",
+                                     data=data, files={"photo": f}, timeout=15)
+        if resp.ok:
+            # Eng yirik o'lchamdagi nusxaning file_id'si — keyingi qabul qiluvchilar uchun.
+            try:
+                sizes = resp.json()['result']['photo']
+                return max(sizes, key=lambda ph: ph.get('file_size', 0))['file_id']
+            except (ValueError, KeyError, IndexError):
+                return True
+        else:
+            # Telegram sababni javob tanasida yozadi ("PHOTO_INVALID_DIMENSIONS",
+            # "file must be non-empty" va h.k.); status kodning o'zi buni aytmaydi.
+            logger.warning("Telegram sendPhoto returned not ok: %s %s. Falling back to text.",
+                           resp.status_code, resp.text)
     except FileNotFoundError:
         logger.warning("Broadcast image not found at %s — falling back to text", image_path)
     except Exception as e:

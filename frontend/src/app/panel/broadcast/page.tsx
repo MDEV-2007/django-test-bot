@@ -66,11 +66,18 @@ export default function PanelBroadcastPage() {
       form.append('audience', audience);
       form.append('via_telegram', viaTelegram ? 'true' : '');
       if (image) form.append('image', image);
-      const res = await apiUpload<{ recipients_count: number; telegram_sent_count: number }>('/api/panel/broadcast/', form);
+      const res = await apiUpload<{ recipients_count: number; telegram_sent_count: number; photo_failed_count: number }>('/api/panel/broadcast/', form);
       toast.success(
         `${res.recipients_count} foydalanuvchiga yuborildi`,
         viaTelegram ? { description: `${res.telegram_sent_count} tasiga Telegram orqali yetkazildi.` } : undefined,
       );
+      // Rasm Telegram'da tushib qolsa, xabar matn holida yetib boradi. Buni ochiq aytamiz —
+      // aks holda admin rasm ketdi deb o'ylab qolaveradi.
+      if (res.photo_failed_count > 0) {
+        toast.warning(`${res.photo_failed_count} ta yuborishda rasm o'tmadi — xabar matn holida ketdi.`, {
+          description: 'Sabab server logida: docker compose logs web | grep sendPhoto',
+        });
+      }
       setTitle(''); setMessage(''); setImage(null);
       load();
     } catch (e) {
