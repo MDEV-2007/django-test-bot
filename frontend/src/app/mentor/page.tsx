@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { MentorMessage } from '@/components/MentorMessage';
 import { cn } from '@/lib/utils';
 
 type ChatMessage = { sender: 'user' | 'ai'; text: string; time: string };
@@ -188,15 +189,17 @@ export default function MentorPage() {
                   'max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-[70%]',
                   m.sender === 'user'
                     ? 'rounded-tr-sm bg-primary font-medium text-[var(--on-accent)]'
-                    : 'whitespace-pre-line rounded-tl-sm border bg-[var(--surface-input)]',
+                    : 'rounded-tl-sm border bg-[var(--surface-input)]',
                 )}>
-                  <p>
-                    {m.text || (
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="size-3.5 animate-spin" /> Tarixiy manbalar tahlil qilinmoqda...
-                      </span>
-                    )}
-                  </p>
+                  {m.sender === 'user' ? (
+                    <p className="whitespace-pre-line">{m.text}</p>
+                  ) : m.text ? (
+                    <MentorMessage text={m.text} />
+                  ) : (
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="size-3.5 animate-spin" /> Tarixiy manbalar tahlil qilinmoqda...
+                    </span>
+                  )}
                   <span className={cn(
                     'mt-1.5 block text-right font-mono text-xs',
                     m.sender === 'user' ? 'text-[var(--on-accent)]/70' : 'text-muted-foreground',

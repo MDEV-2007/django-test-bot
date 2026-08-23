@@ -23,6 +23,52 @@ logger = logging.getLogger(__name__)
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
+# Mulohaza modellari (qwen3 va shu kabilar) javobni <think>...</think> bloki bilan
+# boshlaydi. Bu blok foydalanuvchiga ko'rsatilmasligi kerak: u ichki qoralama, ko'pincha
+# javobning o'zidan uzunroq va boshqa tilda.
+_THINK_OPEN, _THINK_CLOSE = '<think>', '</think>'
+
+
+def _strip_think(text):
+    return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+
+
+def _strip_think_stream(chunks):
+    """Oqim uchun: teglar bo'laklarga bo'linib kelishi mumkin, shuning uchun holatni
+    saqlaymiz va yopilmagan teg ehtimoli bo'lgan dumni bufer'da ushlab turamiz."""
+    buf, inside, first = '', False, True
+    tail = max(len(_THINK_OPEN), len(_THINK_CLOSE)) - 1
+    for chunk in chunks:
+        buf += chunk
+        while True:
+            if inside:
+                end = buf.find(_THINK_CLOSE)
+                if end == -1:
+                    buf = buf[-tail:] if len(buf) > tail else buf
+                    break
+                buf = buf[end + len(_THINK_CLOSE):]
+                inside = False
+                continue
+            start = buf.find(_THINK_OPEN)
+            if start != -1:
+                out, buf, inside = buf[:start], buf[start + len(_THINK_OPEN):], True
+                if out.strip():
+                    yield out.lstrip() if first else out
+                    first = False
+                continue
+            safe = len(buf) - tail
+            if safe > 0:
+                out, buf = buf[:safe], buf[safe:]
+                if first:
+                    out = out.lstrip()
+                    if not out:
+                        break
+                    first = False
+                yield out
+            break
+    if not inside and buf.strip():
+        yield buf.lstrip() if first else buf
+
 # --- Circuit breaker -----------------------------------------------------------
 # When the provider is unreachable at the network level (DNS, proxy, firewall) every
 # call pays the full timeout before failing. That turned a blocked host into
@@ -81,7 +127,7 @@ def _ask_groq(messages, temperature, response_format, timeout):
             timeout=(CONNECT_TIMEOUT, timeout),
         )
         resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+        return _strip_think(resp.json()["choices"][0]["message"]["content"])
     except _UNREACHABLE as exc:
         _mark_down('groq', exc)
         return None
@@ -120,7 +166,7 @@ def _ask_ollama(messages, temperature, response_format, timeout):
         resp.raise_for_status()
         content = resp.json()["message"]["content"]
         # Ba'zi modellar think=False'ni bilmaydi — <think> bloklarini tozalaymiz
-        return re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+        return _strip_think(content)
     except _UNREACHABLE as exc:
         _mark_down('ollama', exc)
         return None
@@ -151,45 +197,53 @@ def ask_groq_stream(messages, temperature=0.6, timeout=20):
     rule-based chain (build_mentor_reply) as one complete chunk when this yields nothing —
     same reliability as before, streaming is purely an enhancement on the happy path.
     """
-    api_key = settings.GROQ_API_KEY
-    if not api_key or _is_down('groq'):
-        return
+    def _deltas():
+        api_key = settings.GROQ_API_KEY
+        if not api_key or _is_down('groq'):
+            return
 
-    payload = {
-        "model": settings.GROQ_MODEL,
-        "messages": messages,
-        "temperature": temperature,
-        "stream": True,
-    }
-    try:
-        with requests.post(
-            GROQ_API_URL,
-            headers={"Authorization": f"Bearer {api_key}"},
-            json=payload,
-            timeout=(CONNECT_TIMEOUT, timeout),
-            stream=True,
-        ) as resp:
-            resp.raise_for_status()
-            # Groq oqimni `text/event-stream` deb yuboradi va sarlavhada charset
-            # ko'rsatmaydi. Bunday holda `requests` RFC 2616 bo'yicha latin-1 ga tushadi,
-            # shuning uchun `decode_unicode=True` o'zbekcha `oʻ`, `gʻ` va tirelarni
-            # `OÊ»`, `â€"` kabi axlatga aylantiradi. Kodlashni aniq belgilaymiz.
-            resp.encoding = 'utf-8'
-            for line in resp.iter_lines(decode_unicode=True):
-                if not line or not line.startswith("data: "):
-                    continue
-                data = line[len("data: "):]
-                if data.strip() == "[DONE]":
-                    break
-                try:
-                    delta = json.loads(data)["choices"][0]["delta"].get("content")
-                except (ValueError, KeyError, IndexError):
-                    continue
-                if delta:
-                    yield delta
-    except _UNREACHABLE as exc:
-        _mark_down('groq', exc)
-        return
-    except Exception:
-        logger.exception("Groq streaming call failed")
-        return
+        payload = {
+            "model": settings.GROQ_MODEL,
+            "messages": messages,
+            "temperature": temperature,
+            "stream": True,
+        }
+        try:
+            with requests.post(
+                GROQ_API_URL,
+                headers={"Authorization": f"Bearer {api_key}"},
+                json=payload,
+                timeout=(CONNECT_TIMEOUT, timeout),
+                stream=True,
+            ) as resp:
+                resp.raise_for_status()
+                # Groq oqimni `text/event-stream` deb yuboradi va sarlavhada charset
+                # ko'rsatmaydi. Bunday holda `requests` RFC 2616 bo'yicha latin-1 ga
+                # tushadi, shuning uchun `decode_unicode=True` o'zbekcha `oʻ`, `gʻ` va
+                # tirelarni `OÊ»`, `â€"` kabi axlatga aylantiradi.
+                resp.encoding = 'utf-8'
+                for line in resp.iter_lines(decode_unicode=True):
+                    if not line or not line.startswith("data: "):
+                        continue
+                    data = line[len("data: "):]
+                    if data.strip() == "[DONE]":
+                        break
+                    try:
+                        delta = json.loads(data)["choices"][0]["delta"].get("content")
+                    except (ValueError, KeyError, IndexError):
+                        continue
+                    if delta:
+                        yield delta
+        except _UNREACHABLE as exc:
+            _mark_down('groq', exc)
+            return
+        except requests.exceptions.HTTPError as exc:
+            body = (exc.response.text or '')[:300] if exc.response is not None else ''
+            logger.error("Groq streaming API %s: %s",
+                         exc.response.status_code if exc.response is not None else '?', body)
+            return
+        except Exception:
+            logger.exception("Groq streaming call failed")
+            return
+
+    yield from _strip_think_stream(_deltas())
