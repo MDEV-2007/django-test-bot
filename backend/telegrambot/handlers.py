@@ -36,8 +36,14 @@ def get_or_create_profile(tg_user, referral_code=None):
     from accounts.referrals import apply_referral
 
     tg_id = str(tg_user['id'])
+    tg_username = (tg_user.get('username') or '').lstrip('@')
     profile = Profile.objects.select_related('user').filter(telegram_id=tg_id).first()
     if profile:
+        # @nom Telegram tomonida o'zgaradi (yoki keyinchalik qo'yiladi), shuning uchun
+        # uni faqat yaratilishda emas, har murojaatda tekshiramiz.
+        if tg_username != (profile.telegram_username or ''):
+            profile.telegram_username = tg_username
+            profile.save(update_fields=['telegram_username'])
         return profile
 
     user, created = User.objects.get_or_create(username=f"tg_{tg_id}")
@@ -48,7 +54,7 @@ def get_or_create_profile(tg_user, referral_code=None):
 
     profile = ensure_profile_for_user(user)
     profile.telegram_id = tg_id
-    profile.telegram_username = tg_user.get('username', '')
+    profile.telegram_username = tg_username
     if not profile.avatar_url:
         seed = tg_user.get('username') or tg_user.get('first_name') or tg_id
         profile.avatar_url = f"https://api.dicebear.com/7.x/adventurer/svg?seed={seed}"

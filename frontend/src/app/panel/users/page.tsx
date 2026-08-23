@@ -23,7 +23,18 @@ export default function PanelUsersPage() {
 
   const columns: Column<UserRow>[] = [
     { key: 'name', label: 'Foydalanuvchi', render: (u) => u.full_name },
-    { key: 'username', label: 'Username', render: (u) => u.username },
+    {
+      key: 'username',
+      label: 'Username',
+      // Telegram orqali kelgan hisobning Django ichki nomi `tg_<raqam>` bo'ladi — bu
+      // ustunda uni ko'rsatishdan foyda yo'q. @nom bo'lsa shuni, bo'lmasa (Telegram'da
+      // @nom qo'ymagan foydalanuvchilar) buni ochiq aytamiz.
+      render: (u) => (u.telegram_username
+        ? <span>@{u.telegram_username}</span>
+        : u.username.startsWith('tg_')
+          ? <span className="text-[var(--text-secondary)]">Telegram @nomi yo&apos;q</span>
+          : <span>{u.username}</span>),
+    },
     { key: 'role', label: 'Rol', render: (u) => <Badge text={u.role_display} tone={u.role_tone} /> },
     { key: 'status', label: 'Holat', render: (u) => <Badge text={u.is_active ? 'Faol' : 'Bloklangan'} tone={u.is_active ? 'green' : 'rose'} /> },
     { key: 'date', label: "Ro'yxatdan o'tgan", render: (u) => new Date(u.date_joined).toLocaleDateString('uz-UZ') },

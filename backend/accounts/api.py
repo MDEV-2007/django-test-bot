@@ -184,13 +184,22 @@ def telegram_login_api(request):
     tg_id = str(user_data.get('id'))
     first_name = user_data.get('first_name', '')
     last_name = user_data.get('last_name', '')
-    username = user_data.get('username', f'tg_{tg_id}')
+    # Telegram username ixtiyoriy: hisobda @nom bo'lmasa, kalit umuman kelmaydi.
+    # Uni `tg_<id>` bilan to'ldirmaymiz — u Django ichki nomi, foydalanuvchining
+    # Telegram nomi emas; bo'sh maydonni interfeys o'zi to'g'ri ko'rsatadi.
+    tg_username = (user_data.get('username') or '').lstrip('@')
 
     try:
         profile = Profile.objects.get(telegram_id=tg_id)
         user = profile.user
         if not user.is_active:
             return Response({'error': 'Hisobingiz chetlashtirilgan.'}, status=403)
+        # @nomni har kirishda yangilaymiz: u Telegram tomonida istalgan payt o'zgaradi
+        # va ilgari faqat hisob birinchi marta yaratilganda yozilar edi, ya'ni eski
+        # foydalanuvchilarda bu maydon abadiy bo'sh qolardi.
+        if tg_username != (profile.telegram_username or ''):
+            profile.telegram_username = tg_username
+            profile.save(update_fields=['telegram_username'])
     except Profile.DoesNotExist:
         django_username = f'tg_{tg_id}'
         user, created = User.objects.get_or_create(username=django_username)
@@ -201,8 +210,8 @@ def telegram_login_api(request):
 
         profile = ensure_profile_for_user(user)
         profile.telegram_id = tg_id
-        profile.telegram_username = username
-        profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
+        profile.telegram_username = tg_username
+        profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={tg_username or tg_id}'
         profile.last_active_date = timezone.localdate()
         profile.save()
 
