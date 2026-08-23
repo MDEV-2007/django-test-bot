@@ -85,6 +85,14 @@ def _ask_groq(messages, temperature, response_format, timeout):
     except _UNREACHABLE as exc:
         _mark_down('groq', exc)
         return None
+    except requests.exceptions.HTTPError as exc:
+        # Groq javob tanasida sababni aniq yozadi ("model ... has been decommissioned",
+        # "rate limit reached", "invalid api key"), status kodning o'zi esa aytmaydi:
+        # to'xtatilgan model ham, noto'g'ri manzil ham bir xil 404 beradi. Sababsiz
+        # kodni ko'rib, kalit aybdor deb o'ylash oson — shuning uchun tanani ham yozamiz.
+        body = (exc.response.text or '')[:300] if exc.response is not None else ''
+        logger.error("Groq API %s: %s", exc.response.status_code if exc.response is not None else '?', body)
+        return None
     except Exception:
         logger.exception("Groq API call failed")
         return None
