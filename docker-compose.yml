@@ -18,6 +18,9 @@ services:
       # nginx:1.27 obrazi /etc/nginx/templates/*.template fayllarini envsubst bilan
       # /etc/nginx/conf.d/ ga ko'chiradi — domenni shu yerda bir marta beramiz.
       SERVER_NAME: ${SERVER_NAME:-localhost}
+      # Sertifikat papkasining nomi. Odatda SERVER_NAME bilan bir xil; SERVER_NAME'da
+      # bir nechta domen bo'lsa (apex + www), bu yerga faqat birinchisi yoziladi.
+      CERT_NAME: ${CERT_NAME:-${SERVER_NAME:-localhost}}
     ports:
       - "80:80"
       - "443:443"

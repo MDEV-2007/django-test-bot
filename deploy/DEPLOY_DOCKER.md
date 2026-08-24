@@ -111,8 +111,13 @@ docker run --rm python:3.12-slim python -c "import secrets;print('SECRET_KEY=' +
 Baza paroli uchun alohida fayl (compose o'qiydi):
 
 ```bash
-printf 'POSTGRES_USER=ilmildizi\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=ilmildizi\nSERVER_NAME=ilmildizi.uz\n' "$(openssl rand -hex 24)" > .env
+printf 'POSTGRES_USER=ilmildizi\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=ilmildizi\nSERVER_NAME=ilmildizi.uz www.ilmildizi.uz\nCERT_NAME=ilmildizi.uz\n' "$(openssl rand -hex 24)" > .env
 ```
+
+> `SERVER_NAME` — nginx javob beradigan domenlar (bir nechta bo'lsa, bo'sh joy bilan).
+> `CERT_NAME` — sertifikat papkasi nomi, ya'ni certbot'ga bergan **birinchi** `-d`
+> qiymati. Ular bir xil emas: www qo'shilganda bitta o'zgaruvchi bilan nginx
+> "live/ilmildizi.uz www.ilmildizi.uz/fullchain.pem" ni qidirib, ishga tushmay qoladi.
 
 ## 6. Birinchi ishga tushirish (HTTP)
 
@@ -212,6 +217,44 @@ Oxiriga qo'shing:
 ```cron
 0 3 1 * * cd /opt/ilmildizi && docker compose run --rm certbot renew --quiet && docker compose exec -T nginx nginx -s reload
 ```
+
+## 10.5. Domenni almashtirish (duckdns'dan o'z domeningizga)
+
+Tartib muhim: DNS -> sertifikat -> sozlamalar -> bot.
+
+**1)** Registratorda (ahost va h.k.) ikkita A-yozuv yarating — `@` va `www`, ikkalasi ham
+VPS IP'ingizga. Tarqalishini kuting:
+
+```bash
+dig +short ilmildizi.uz www.ilmildizi.uz
+```
+
+Ikkala qatorda VPS IP chiqmaguncha davom etmang.
+
+**2)** Yangi domenga sertifikat oling. Eski domen ishlab tursa ham bo'ladi — certbot
+faqat 80-portdagi `/.well-known/acme-challenge/` yo'lini talab qiladi:
+
+```bash
+docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d ilmildizi.uz -d www.ilmildizi.uz --agree-tos -m siz@pochta.uz --no-eff-email
+```
+
+**3)** `.env` (`SERVER_NAME`, `CERT_NAME`) va `backend/.env` (`FRONTEND_URL`,
+`WEBAPP_URL`, `EXTRA_ALLOWED_HOSTS`, `FRONTEND_ORIGINS`) dagi domenni yangilang, so'ng:
+
+```bash
+docker compose up -d --force-recreate nginx web
+```
+
+**4)** Botni yangi manzilga qayting — webhook ham, Mini App tugmasi ham shu buyruqda
+yangilanadi:
+
+```bash
+docker compose exec web python manage.py setup_telegram
+```
+
+Eski domen bir muddat ishlab tursin desangiz, uni `SERVER_NAME` ro'yxatida va
+`EXTRA_ALLOWED_HOSTS` da qoldiring.
+
 
 ## 11. Kundalik ishlar
 
