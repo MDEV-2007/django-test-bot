@@ -45,6 +45,16 @@ export const metadata: Metadata = {
   description: "Rasmiy formatdagi mock testlar, AI mentor va zaif mavzular tahlili.",
   applicationName: 'IlmIldizi',
   robots: { index: false, follow: false },
+  // Havola ulashilganda (Telegram, ijtimoiy tarmoq) ko'rinadigan oldi rasm. `icon.png`
+  // va `apple-icon.png` ni Next.js app/ ichidan o'zi topadi, og:image esa aniq
+  // ko'rsatilishi kerak.
+  openGraph: {
+    type: 'website',
+    siteName: 'IlmIldizi',
+    locale: 'uz_UZ',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'IlmIldizi' }],
+  },
+  twitter: { card: 'summary_large_image', images: ['/og-image.png'] },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

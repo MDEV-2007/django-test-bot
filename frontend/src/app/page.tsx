@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     siteName: 'IlmIldizi',
     title: "IlmIldizi — Milliy sertifikat va BBA'ga onlayn tayyorgarlik",
     description:
-      'Mock testlar, AI mentor va real vaqtdagi tahlil. Bilim ildizdan boshlanadi.',
+      'Mock testlar, AI mentor va real vaqtdagi tahlil. Kuchsiz mavzuni ildizidan yo\'q qiling.',
   },
   twitter: {
     card: 'summary_large_image',
@@ -208,7 +208,7 @@ export default function LandingPage() {
             </span>
 
             <h1 className="font-voice mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
-              Bilim <span className="text-[var(--accent-text)]">ildizdan</span> boshlanadi
+              Kuchsiz mavzuni top, <span className="text-[var(--accent-text)]">ildizidan</span> yo&apos;q qil
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
