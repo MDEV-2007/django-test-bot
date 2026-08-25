@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sprout, Menu, X } from 'lucide-react';
+import { BrandMark } from '@/components/BrandMark';
+import { Menu, X } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { isTelegramEnv } from '@/lib/telegram';
 import { Button } from '@/components/ui/button';
@@ -61,9 +62,7 @@ export default function LandingNav() {
     >
       <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/20">
-            <Sprout className="size-4.5 text-[var(--on-accent)]" />
-          </span>
+          <BrandMark size={36} />
           <span className="font-voice text-lg font-bold">IlmIldizi</span>
         </Link>
 

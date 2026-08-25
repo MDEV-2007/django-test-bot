@@ -1,7 +1,8 @@
 'use client';
 
 import { motion, useReducedMotion } from 'motion/react';
-import { Sprout, type LucideIcon } from 'lucide-react';
+import { BrandMark } from '@/components/BrandMark';
+import { type LucideIcon } from 'lucide-react';
 import AuthBackground from './AuthBackground';
 import { Card, CardContent } from '@/components/ui/card';
 import { dur, easeOut } from '@/lib/motion';
@@ -36,9 +37,7 @@ export default function AuthShell({
           transition={{ duration: dur.slow, ease: easeOut }}
         >
           <div className="mb-6 flex items-center gap-3">
-            <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/25">
-              <Sprout className="size-6 text-[var(--on-accent)]" />
-            </span>
+            <BrandMark size={48} />
             <div>
               <p className="font-voice text-xl font-bold leading-none">IlmIldizi</p>
               <p className="mt-1 text-xs text-muted-foreground">Milliy Sertifikat &amp; BBA tayyorgarlik</p>
@@ -86,8 +85,8 @@ export default function AuthShell({
             <CardContent className="p-6 sm:p-8">
               {/* Mobil uchun kichik brend belgisi — desktopda chap ustun bor. */}
               <div className="mb-6 text-center lg:text-left">
-                <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-[var(--accent)] to-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/25 lg:hidden">
-                  <Sprout className="size-6 text-[var(--on-accent)]" />
+                <span className="mx-auto mb-4 flex justify-center lg:hidden">
+                  <BrandMark size={48} />
                 </span>
                 <h1 className="font-voice text-2xl font-bold">{title}</h1>
                 <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{description}</p>

@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { BrandMark } from '@/components/BrandMark';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Swords, Bot, ShoppingBag, Crown,
-  BarChart3, Trophy, User, LogOut, Sprout, GraduationCap, ShieldCheck,
+  BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
@@ -74,8 +75,8 @@ export default function Sidebar() {
     <aside className="ilm-sidebar fixed left-0 top-0 z-30 hidden h-screen w-64 shrink-0 select-none flex-col border-r border-[var(--border-card)] bg-[var(--surface-card-strong)] lg:flex">
       <div className="px-5 py-5">
         <Link href="/dashboard" className="group flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] shadow-lg shadow-[var(--accent)]/20 transition-transform group-hover:scale-105">
-            <Sprout className="size-5 text-[var(--on-accent)]" />
+          <div className="transition-transform group-hover:scale-105">
+            <BrandMark size={40} />
           </div>
           <div className="min-w-0">
             <span className="font-voice block truncate text-lg font-bold leading-none transition-colors group-hover:text-[var(--accent-text)]">
