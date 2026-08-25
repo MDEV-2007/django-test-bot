@@ -4,6 +4,7 @@ import {
   FileCheck2, Bot, Swords, BarChart3, Target, GraduationCap, ArrowRight,
   Check, Sprout, Send, Sparkles, Clock, BrainCircuit,
 } from 'lucide-react';
+import { AuthRedirect } from '@/components/landing/AuthRedirect';
 import LandingNav from '@/components/landing/LandingNav';
 import RootsBackground from '@/components/landing/RootsBackground';
 import RevealOnScroll from '@/components/landing/RevealOnScroll';
@@ -195,6 +196,7 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <AuthRedirect />
       <RootsBackground />
       <LandingNav />
 
