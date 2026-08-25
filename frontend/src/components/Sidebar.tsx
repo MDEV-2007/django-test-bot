@@ -79,8 +79,8 @@ export default function Sidebar() {
             <BrandMark size={40} />
           </div>
           <div className="min-w-0">
-            <span className="font-voice block truncate text-lg font-bold leading-none transition-colors group-hover:text-[var(--accent-text)]">
-              IlmIldizi
+            <span className="font-voice block truncate text-lg font-bold leading-none">
+              Ilm<span className="text-[var(--accent-text)]">Ildizi</span>
             </span>
             <p className="mt-1 truncate text-xs text-muted-foreground">Milliy Sertifikat &amp; BBA</p>
           </div>

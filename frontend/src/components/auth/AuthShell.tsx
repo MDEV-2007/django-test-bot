@@ -39,7 +39,7 @@ export default function AuthShell({
           <div className="mb-6 flex items-center gap-3">
             <BrandMark size={48} />
             <div>
-              <p className="font-voice text-xl font-bold leading-none">IlmIldizi</p>
+              <p className="font-voice text-xl font-bold leading-none">Ilm<span className="text-[var(--accent-text)]">Ildizi</span></p>
               <p className="mt-1 text-xs text-muted-foreground">Milliy Sertifikat &amp; BBA tayyorgarlik</p>
             </div>
           </div>

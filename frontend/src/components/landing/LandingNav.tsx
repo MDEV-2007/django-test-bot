@@ -63,7 +63,7 @@ export default function LandingNav() {
       <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5">
           <BrandMark size={36} />
-          <span className="font-voice text-lg font-bold">IlmIldizi</span>
+          <span className="font-voice text-lg font-bold">Ilm<span className="text-[var(--accent-text)]">Ildizi</span></span>
         </Link>
 
         <div className="ml-auto hidden items-center gap-1 md:flex">
