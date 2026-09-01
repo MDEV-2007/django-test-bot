@@ -23,9 +23,13 @@ Ishlatish:
 
     --dry-run bilan hech narsa saqlanmaydi, faqat nima yaratilishi ko'rsatiladi.
 
-Qayta ishga tushirish xavfsiz: xuddi shu --title bilan test allaqachon bo'lsa, u savollari
+    --chunk-size bilan bo'lib yuklash — masalan 61 ta ochiq savol bitta o'tirish uchun ko'p,
+    --chunk-size 30 bersangiz ikkita TestSet yaratiladi: "... — 1-qism" (1-30) va
+    "... — 2-qism (davomi)" (31-61), har biriga savol soniga mos qisqartirilgan vaqt bilan.
+
+Qayta ishga tushirish xavfsiz: xuddi shu nom(lar) bilan test allaqachon bo'lsa, u savollari
 bilan birga o'chirilib qayta yaratiladi (seed_demo_test bilan bir xil naqsh) — ya'ni faylni
-tuzatib qayta import qilish eskisini ikkilantirmaydi.
+tuzatib yoki --chunk-size'ni o'zgartirib qayta import qilish eskisini ikkilantirmaydi.
 """
 import json
 from pathlib import Path
@@ -38,7 +42,7 @@ from tests_app.models import Question, Subject, TestSet
 
 
 class Command(BaseCommand):
-    help = "JSON fayldagi savol-javoblardan bitta yozma (open_written) TestSet yaratadi."
+    help = "JSON fayldagi savol-javoblardan bitta yoki bir nechta yozma (open_written) TestSet yaratadi."
 
     def add_arguments(self, parser):
         parser.add_argument('json_path', help="Savol-javoblar fayli (masalan: tests_app/fixtures/qa_imports/...json)")
@@ -46,8 +50,9 @@ class Command(BaseCommand):
         parser.add_argument('--topic', default='', help="Mavzu nomi (ixtiyoriy). Berilsa, shu Subject ostida topiladi yoki yaratiladi.")
         parser.add_argument('--subject', default='', help="Fan nomi. Berilmasa JSON'dagi test.fan ishlatiladi.")
         parser.add_argument('--category', default='history', choices=[c[0] for c in Question.CATEGORY_CHOICES])
-        parser.add_argument('--duration', type=int, default=30, help="Test uchun daqiqa (standart: 30).")
+        parser.add_argument('--duration', type=int, default=30, help="Butun test uchun daqiqa (standart: 30). Bo'lib yuklashda savol soniga mutanosib taqsimlanadi.")
         parser.add_argument('--premium', action='store_true', help="Berilsa, test faqat xarid qilganlarga ochiq bo'ladi (standart: bepul).")
+        parser.add_argument('--chunk-size', type=int, default=0, help="Har shuncha savoldan bitta TestSet (masalan 30). Berilmasa — bitta test.")
         parser.add_argument('--dry-run', action='store_true', help="Hech narsa saqlamaydi, faqat nima yaratilishini ko'rsatadi.")
 
     def handle(self, *args, **options):
@@ -62,18 +67,19 @@ class Command(BaseCommand):
             raise CommandError("JSON'da 'savollar' ro'yxati bo'sh yoki yo'q.")
 
         subject_name = options['subject'] or meta.get('fan') or 'Tarix'
-        title = options['title']
-        dry = options['dry_run']
+        base_title = options['title']
+        chunk_size = options['chunk_size']
+        chunks = [items[i:i + chunk_size] for i in range(0, len(items), chunk_size)] if chunk_size > 0 else [items]
 
         self.stdout.write(f"Fan: {subject_name} | Sinf: {meta.get('sinf', '?')} | Savollar: {len(items)}")
-        self.stdout.write(f"Test nomi: {title}")
-        if options['topic']:
-            self.stdout.write(f"Mavzu: {options['topic']}")
+        if len(chunks) > 1:
+            self.stdout.write(f"Bo'lib yuklanadi: {len(chunks)} ta test, har birida ~{chunk_size} savol")
 
-        if dry:
-            for item in items[:3]:
-                self.stdout.write(f"  #{item['id']}: {item['savol'][:70]}")
-            self.stdout.write(f"  ... jami {len(items)} ta savol")
+        if options['dry_run']:
+            for idx, chunk in enumerate(chunks, start=1):
+                self.stdout.write(f"  {self._chunk_title(base_title, idx, len(chunks))} — {len(chunk)} ta savol")
+                for item in chunk[:2]:
+                    self.stdout.write(f"    #{item['id']}: {item['savol'][:65]}")
             self.stdout.write(self.style.WARNING("(sinov rejimi — hech narsa saqlanmadi)"))
             return
 
@@ -93,50 +99,57 @@ class Command(BaseCommand):
                     },
                 )
 
-            # Xuddi shu nomdagi eski test bo'lsa — savollari bilan birga almashtiriladi
-            # (Question.test_sets M2M orqali bog'langan, boshqa testda ishlatilmayotgan
-            # savol shu bilan birga tozalanadi). Faylni tuzatib qayta ishga tushirish
-            # xavfsiz bo'lishi uchun.
-            old = TestSet.objects.filter(title=title).prefetch_related('questions__test_sets').first()
-            if old:
-                # Faqat aynan shu testgagina tegishli savollarni o'chiramiz — boshqa
-                # test bilan baham ko'rilgan savol (masalan qo'lda qo'shilgan) qolaveradi.
-                orphan_ids = [q.id for q in old.questions.all() if q.test_sets.count() == 1]
-                Question.objects.filter(id__in=orphan_ids).delete()
-                old.delete()
+            # Bo'lib yuklashga o'tilganda, avvalgi bir butun (bo'linmagan) TestSet bo'lsa,
+            # u alohida nom ostida qolib ketmasligi uchun tozalanadi.
+            if len(chunks) > 1:
+                self._replace_testset(base_title)
 
-            test_set = TestSet.objects.create(
-                subject=subject,
-                title=title,
-                # Manba kanali faqat izoh sifatida — o'quvchiga ko'rinadigan tavsifga
-                # chiqmaydi, u xolis matn bo'lib qolishi kerak.
-                description='',
-                category=options['category'],
-                duration_minutes=options['duration'],
-                is_premium=options['premium'],
-                is_published=True,
-            )
+            created = []
+            for idx, chunk in enumerate(chunks, start=1):
+                chunk_title = self._chunk_title(base_title, idx, len(chunks))
+                self._replace_testset(chunk_title)
 
-            questions = []
-            for item in items:
-                explanation = item.get('izoh', '')
-                q = Question.objects.create(
-                    topic=topic,
-                    subject=subject,
-                    body=f"<p>{_escape(item['savol'])}</p>",
-                    question_type='open_written',
-                    difficulty='medium',
-                    category=options['category'],
-                    reference_answer=item['javob'],
-                    explanation=explanation,
+                duration = max(5, round(options['duration'] * len(chunk) / len(items)))
+                test_set = TestSet.objects.create(
+                    subject=subject, title=chunk_title, description='',
+                    category=options['category'], duration_minutes=duration,
+                    is_premium=options['premium'], is_published=True,
                 )
-                questions.append(q)
+                questions = [
+                    Question.objects.create(
+                        topic=topic, subject=subject,
+                        body=f"<p>{_escape(item['savol'])}</p>",
+                        question_type='open_written', difficulty='medium',
+                        category=options['category'],
+                        reference_answer=item['javob'],
+                        explanation=item.get('izoh', ''),
+                    )
+                    for item in chunk
+                ]
+                test_set.questions.add(*questions)
+                created.append((chunk_title, len(questions)))
 
-            test_set.questions.add(*questions)
+        for chunk_title, count in created:
+            self.stdout.write(self.style.SUCCESS(f"Tayyor: '{chunk_title}' — {count} ta savol, katalogda ko'rinadi."))
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Tayyor: '{title}' (id={test_set.id}), {len(questions)} ta savol, katalogda ko'rinadi."
-        ))
+    @staticmethod
+    def _chunk_title(base_title, idx, total):
+        if total == 1:
+            return base_title
+        suffix = f"{idx}-qism" + (" (davomi)" if idx > 1 else "")
+        return f"{base_title} — {suffix}"
+
+    @staticmethod
+    def _replace_testset(title):
+        """Xuddi shu nomdagi eski test bo'lsa, faqat aynan shu testgagina tegishli
+        savollari bilan birga o'chiradi — boshqa test bilan baham ko'rilgan savol
+        (masalan qo'lda qo'shilgan) qolaveradi."""
+        old = TestSet.objects.filter(title=title).prefetch_related('questions__test_sets').first()
+        if not old:
+            return
+        orphan_ids = [q.id for q in old.questions.all() if q.test_sets.count() == 1]
+        Question.objects.filter(id__in=orphan_ids).delete()
+        old.delete()
 
 
 def _escape(text):
