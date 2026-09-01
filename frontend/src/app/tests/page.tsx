@@ -19,11 +19,14 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+type AnswerMode = 'open' | 'closed' | 'mixed' | null;
+
 type TestItem = {
   id: number; title: string; description: string; category: string;
   subject: string | null; duration_minutes: number; questions_count: number; is_premium: boolean;
   is_unlocked: boolean;
   recent_solvers: number; recent_avg_score: number | null;
+  answer_mode: AnswerMode;
 };
 
 type CenterData = {
@@ -31,6 +34,7 @@ type CenterData = {
   subjects: { id: number; name: string; slug: string }[];
   selected_subject: string | null;
   selected_category: string;
+  selected_answer_mode: string;
   search_query: string;
   total_attempts: number;
   avg_score: number;
@@ -50,6 +54,21 @@ const CATEGORY_BADGE: Record<string, string> = {
   certificate: 'Rasmiy Format', history: 'Mavzulashtirilgan', bba: 'DTB Formati', all: 'Test',
 };
 
+const ANSWER_MODES = [
+  { value: 'all', label: 'Barchasi' },
+  { value: 'closed', label: 'Yopiq' },
+  { value: 'open', label: 'Ochiq' },
+  { value: 'mixed', label: 'Aralash' },
+];
+
+// Karta ustidagi kichik yorliq: variantli/yozma javob turi. `null` — savol yo'q (bo'sh
+// test), yorliq ko'rsatilmaydi.
+const ANSWER_MODE_BADGE: Record<string, { label: string; className: string }> = {
+  closed: { label: 'Yopiq test', className: 'border-sky-500/30 bg-sky-500/10 text-sky-300' },
+  open: { label: 'Ochiq test', className: 'border-violet-500/30 bg-violet-500/10 text-violet-300' },
+  mixed: { label: 'Aralash test', className: 'border-amber-500/30 bg-amber-500/10 text-amber-300' },
+};
+
 export default function TestsPage() {
   const router = useRouter();
   const { access } = useAuthStore();
@@ -58,6 +77,7 @@ export default function TestsPage() {
   const [starting, setStarting] = useState<number | null>(null);
   const [subject, setSubject] = useState<string | null>(null);
   const [category, setCategory] = useState('all');
+  const [answerMode, setAnswerMode] = useState('all');
   const [search, setSearch] = useState('');
 
   /* Qidiruv har harfda so'rov yubormasligi uchun 300 ms kutiladi; so'rov yo'li shu
@@ -71,6 +91,7 @@ export default function TestsPage() {
   const params = new URLSearchParams();
   if (subject) params.set('subject', subject);
   if (category !== 'all') params.set('category', category);
+  if (answerMode !== 'all') params.set('answer_mode', answerMode);
   if (debouncedSearch) params.set('search', debouncedSearch);
   const query = params.toString() ? `?${params.toString()}` : '';
 
@@ -163,21 +184,29 @@ export default function TestsPage() {
           </div>
         )}
 
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3">
           <Tabs value={category} onValueChange={setCategory}>
             <TabsList>
               {CATEGORIES.map((c) => <TabsTrigger key={c.value} value={c.value}>{c.label}</TabsTrigger>)}
             </TabsList>
           </Tabs>
 
-          <div className="relative w-full sm:w-72">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <Tabs value={answerMode} onValueChange={setAnswerMode}>
+              <TabsList>
+                {ANSWER_MODES.map((m) => <TabsTrigger key={m.value} value={m.value}>{m.label}</TabsTrigger>)}
+              </TabsList>
+            </Tabs>
+
+            <div className="relative w-full sm:w-72">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Test nomi bo'yicha qidirish..."
-              className="pl-9"
-            />
+                className="pl-9"
+              />
+            </div>
           </div>
         </div>
 
@@ -209,10 +238,17 @@ export default function TestsPage() {
               <Reveal key={t.id} index={tIdx} className="h-full">
               <Card className="group flex h-full flex-col justify-between transition-colors hover:border-[var(--accent-border)]">
                 <CardContent className="flex flex-1 flex-col pt-6">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]">
-                      {CATEGORY_BADGE[t.category] || t.category}
-                    </Badge>
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]">
+                        {CATEGORY_BADGE[t.category] || t.category}
+                      </Badge>
+                      {t.answer_mode && ANSWER_MODE_BADGE[t.answer_mode] && (
+                        <Badge variant="outline" className={ANSWER_MODE_BADGE[t.answer_mode].className}>
+                          {ANSWER_MODE_BADGE[t.answer_mode].label}
+                        </Badge>
+                      )}
+                    </div>
                     <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
                       <Clock className="size-3.5" /> {t.duration_minutes} daq
                     </span>

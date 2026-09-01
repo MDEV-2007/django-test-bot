@@ -5,7 +5,7 @@ Grading stays server-only: is_correct is never sent back until finish()/feedback
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse
-from django.db.models import Avg, Count, F, Q
+from django.db.models import Avg, Count, F, Q, Case, When, IntegerField
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.decorators import (
@@ -25,6 +25,21 @@ from .services.grading import grade_open_answers
 from core.ai_client import ask_groq
 
 
+def _answer_mode(t):
+    total = getattr(t, 'q_count', None)
+    open_count = getattr(t, 'open_count', None)
+    if total is None or open_count is None:
+        total = t.questions.count()
+        open_count = t.questions.filter(question_type='open_written').count()
+    if total == 0:
+        return None
+    if open_count == 0:
+        return 'closed'
+    if open_count == total:
+        return 'open'
+    return 'mixed'
+
+
 def _test_payload(t, social=None, unlocked=False):
     """`social` — shu testning so'nggi 7 kunlik ijtimoiy dalili
     ({'solvers': N, 'avg': X}); ma'lumot bo'lmasa None qaytadi."""
@@ -34,6 +49,11 @@ def _test_payload(t, social=None, unlocked=False):
         'duration_minutes': t.duration_minutes,
         # `q_count` — ro'yxat so'rovida annotate qilingan (N+1 ni yo'q qilish uchun).
         'questions_count': getattr(t, 'q_count', None) if getattr(t, 'q_count', None) is not None else t.questions.count(),
+        # 'closed' — hammasi variantli (single_choice/matching/grouped_item/...), 'open' —
+        # hammasi yozma javob (open_written, Groq baholaydi), 'mixed' — ikkalasi ham bor.
+        # Faqat shu ikki toifa mavjud: open_written'dan boshqa 5 tur ham "variantli" deb
+        # hisoblanadi, chunki o'quvchi baribir tayyor javoblardan tanlaydi.
+        'answer_mode': _answer_mode(t),
         'is_premium': t.is_premium,
         # `is_unlocked` — shu O'QUVCHI uchun: global mock-test kirishi yoki aynan shu
         # test uchun tasdiqlangan to'lov bo'lsa True.
@@ -50,16 +70,30 @@ def center_api(request):
     subject, subjects = _resolve_subject(request)
 
     category = request.GET.get('category', 'all')
+    answer_mode = request.GET.get('answer_mode', 'all')
     search_query = request.GET.get('search', '')
 
     tests = TestSet.objects.filter(is_random=False, is_archived=False, is_published=True)
     if subject:
         tests = tests.filter(subject=subject)
-    tests = tests.select_related('subject').annotate(q_count=Count('questions')).order_by('-created_at')
+    tests = tests.select_related('subject').annotate(
+        q_count=Count('questions', distinct=True),
+        open_count=Count(
+            Case(When(questions__question_type='open_written', then=F('questions__id')),
+                 output_field=IntegerField()),
+            distinct=True,
+        ),
+    ).order_by('-created_at')
     if category != 'all':
         tests = tests.filter(category=category)
     if search_query:
         tests = tests.filter(title__icontains=search_query)
+    if answer_mode == 'closed':
+        tests = tests.filter(open_count=0, q_count__gt=0)
+    elif answer_mode == 'open':
+        tests = tests.filter(open_count=F('q_count'), q_count__gt=0)
+    elif answer_mode == 'mixed':
+        tests = tests.filter(open_count__gt=0, q_count__gt=0).exclude(open_count=F('q_count'))
 
     stats = profile.attempts.aggregate(total=Count('id'), avg=Avg('score', filter=Q(is_completed=True)))
 
@@ -88,6 +122,7 @@ def center_api(request):
         'subjects': [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in subjects],
         'selected_subject': subject.slug if subject else None,
         'selected_category': category,
+        'selected_answer_mode': answer_mode,
         'search_query': search_query,
         'total_attempts': stats['total'] or 0,
         'avg_score': stats['avg'] or 0,
