@@ -108,7 +108,9 @@ class Command(BaseCommand):
             test_set = TestSet.objects.create(
                 subject=subject,
                 title=title,
-                description=f"{meta.get('manba', '')} manbasidan olingan savollar.".strip(),
+                # Manba kanali faqat izoh sifatida — o'quvchiga ko'rinadigan tavsifga
+                # chiqmaydi, u xolis matn bo'lib qolishi kerak.
+                description='',
                 category=options['category'],
                 duration_minutes=options['duration'],
                 is_premium=options['premium'],
