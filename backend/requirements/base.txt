@@ -17,6 +17,10 @@ google-auth==2.55.1
 daphne==4.1.2
 channels==4.1.0
 
+# Reads exam PDFs for the tests_app PDF importer: text with coordinates, table
+# detection, and rendering a map/diagram region to PNG.
+pymupdf==1.28.2
+
 # DRF API for the Next.js frontend (see frontend/), JWT-based so cross-origin requests
 # don't depend on the session cookie's SameSite policy.
 djangorestframework==3.18.0
