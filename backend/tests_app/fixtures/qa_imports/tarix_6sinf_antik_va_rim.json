@@ -1,0 +1,215 @@
+{
+  "test": {
+    "sinf": 6,
+    "fan": "Tarix",
+    "mavzular": "33-38-mavzular",
+    "turi": "yopiq test (qisqa javobli)",
+    "savollar_soni": 40,
+    "manba": "@Tarix_quiz_testlar"
+  },
+  "savollar": [
+    {
+      "id": 1,
+      "savol": "Makedoniyalik Aleksandr qachon vafot etdi?",
+      "javob": "Miloddan avvalgi 323-yilda, Bobil shahrida"
+    },
+    {
+      "id": 2,
+      "savol": "Makedoniyalik Aleksandrning lashkarboshilaridan biri kim Bobil hukmdori bo'ldi?",
+      "javob": "Salavk (Salavk I Nikator)"
+    },
+    {
+      "id": 3,
+      "savol": "Salavkiylar davlatida davlat mudofaasi va qo'shinlarni tashkil etish bilan sobiq lashkarboshilardan tayinlangan kimlar shug'ullangan?",
+      "javob": "Strateglar"
+    },
+    {
+      "id": 4,
+      "savol": "Marg'iyona antioxiysi hozirgi qaysi shahar?",
+      "javob": "Marv (hozirgi Turkmanistondagi Mari shahri yaqinida)"
+    },
+    {
+      "id": 5,
+      "savol": "Qadimgi antik davlatlarni yozing?",
+      "javob": "Yunon-Baqtriya podsholigi, Qadimgi Xorazm, Qang', Davan va Kushon podsholigi"
+    },
+    {
+      "id": 6,
+      "savol": "\"Ming shaharli\" Baqtriya podshosi kim?",
+      "javob": "Yevtidem"
+    },
+    {
+      "id": 7,
+      "savol": "Yevtidemning o'g'li kimning hukmronligi davrida Yunon-Baqtriya podsholigi eng katta sarhadlarga ega bo'ldi?",
+      "javob": "Demetriy (Yevtidemning o'g'li) davrida"
+    },
+    {
+      "id": 8,
+      "savol": "Parfiyada hokimiyat kimning qo'liga o'tishi bilan Baqtriyaga harbiy tazyiq kuchaydi?",
+      "javob": "Mitridat I"
+    },
+    {
+      "id": 9,
+      "savol": "Yunon-Baqtriya davlatini yuechji qabilalari qachon bosib oladi?",
+      "javob": "Miloddan avvalgi II asrning ikkinchi yarmida (taxminan mil. avv. 140-130-yillar)"
+    },
+    {
+      "id": 10,
+      "savol": "Nechanchi asrda Xorazmda qadimgi shaharsozlik boshlanadi?",
+      "javob": "Miloddan avvalgi VI asrda",
+      "izoh": "Ba'zi darsliklarda \"mil. avv. VII-VI asrlar\" deb beriladi — darslik matnini tekshiring."
+    },
+    {
+      "id": 11,
+      "savol": "Qayerdan aylana shaklidagi mustahkam ibodatxona qoldiqlari topiladi?",
+      "javob": "Xorazmdagi Qo'yqirilganqal'adan"
+    },
+    {
+      "id": 12,
+      "savol": "O'rta Osiyodagi eng qadimgi yozuv qayerdan topilgan?",
+      "javob": "Xorazmdan (Qo'yqirilganqal'a yodgorligidan topilgan yozuv namunalari)",
+      "izoh": "Ayrim darsliklarda Xumbuztepa sopol buyumlaridagi belgilar keltiriladi — darslikdagi variantni tekshiring."
+    },
+    {
+      "id": 13,
+      "savol": "Milodiy I asrda Xorazmda ishlab chiqilgan mahalliy taqvimdan xorazmliklar nechanchi asrga qadar foydalanishgan?",
+      "javob": "Milodiy X asrga qadar (Beruniy ma'lumotiga ko'ra)"
+    },
+    {
+      "id": 14,
+      "savol": "Qang' davlatining poytaxti Xitoy manbalarida nima deb atalgan?",
+      "javob": "Bityan"
+    },
+    {
+      "id": 15,
+      "savol": "Nechanchi asrda Qang' qudratli davlat birlashmasiga aylanadi?",
+      "javob": "Miloddan avvalgi I asrda"
+    },
+    {
+      "id": 16,
+      "savol": "Qachon Qang' davlati parchalanib ketadi?",
+      "javob": "Milodiy IV asrda"
+    },
+    {
+      "id": 17,
+      "savol": "Davan davlati qachon yuksak taraqqiy etgan davlatga aylanadi?",
+      "javob": "Miloddan avvalgi II asrda"
+    },
+    {
+      "id": 18,
+      "savol": "Qachon Kushon xonadonining boshlig'i barcha yuechji qabilalarini o'z hokimiyati ostida birlashtirib Kushon davlatiga asos soladi?",
+      "javob": "Milodiy I asr boshlarida — Kudzula Kadfiz (Kadfiz I) tomonidan"
+    },
+    {
+      "id": 19,
+      "savol": "Kimning davrida poytaxt Baqtriyadan Peshovarga ko'chiriladi?",
+      "javob": "Kanishka davrida"
+    },
+    {
+      "id": 20,
+      "savol": "Kimning hukmronligi davrida Kushon podsholigi o'zi taraqqiyotining cho'qqisiga erishadi?",
+      "javob": "Kanishka hukmronligi davrida (milodiy II asr)"
+    },
+    {
+      "id": 21,
+      "savol": "Kushon podsholigiga oid yozuv qayerdan topilgan bo'lib, yunon alifbosidagi Kushon bitiklari hisoblanadi?",
+      "javob": "Surxondaryodagi Ayritom yodgorligidan",
+      "izoh": "Ayrim darsliklarda Dalvarzintepa yoki Qoratepa ko'rsatiladi — darslik matnini tekshiring."
+    },
+    {
+      "id": 22,
+      "savol": "Buddaviylik dini O'rta Osiyoda qachongacha saqlanib qoladi?",
+      "javob": "Milodiy VII-VIII asrlargacha (arablar istilosigacha)"
+    },
+    {
+      "id": 23,
+      "savol": "Qayerdan Kushon hukmdorlari saroyi topilgan?",
+      "javob": "Surxondaryodagi Xolchayon yodgorligidan"
+    },
+    {
+      "id": 24,
+      "savol": "Do'mbirachi tasviri qayerdan topilgan?",
+      "javob": "Surxondaryodagi Ayritom yodgorligidan (Ayritom frizidagi sozandalar tasviri)"
+    },
+    {
+      "id": 25,
+      "savol": "\"Buyuk ipak yo'li\" degan nom unga kim tomonidan berilgan?",
+      "javob": "Nemis olimi Ferdinand Rixtgofen tomonidan (1877-yilda)"
+    },
+    {
+      "id": 26,
+      "savol": "Buyuk ipak yo'li qachon vujudga kelgan?",
+      "javob": "Miloddan avvalgi II asrda (mil. avv. 138-yilda Chjan Tsyan safaridan keyin)"
+    },
+    {
+      "id": 27,
+      "savol": "Baqtriyadan nimalar olib kelingan?",
+      "javob": "Zotdor otlar, uzum novdalari, beda (yem-xashak) urug'i, anor va boshqa ekin turlari, shuningdek hunarmandchilik buyumlari"
+    },
+    {
+      "id": 28,
+      "savol": "Kim xunnlar qo'liga asir tushadi va 10 yilcha hibsda yotadi, asirlikdan qochib Farg'ona vodiysiga keladi?",
+      "javob": "Xitoy elchisi Chjan Tsyan"
+    },
+    {
+      "id": 29,
+      "savol": "Apennin yarim orolidagi eng katta daryo qaysi?",
+      "javob": "Po daryosi"
+    },
+    {
+      "id": 30,
+      "savol": "Qachon etrusklar Italiyada 12 ta shahar-davlat ittifoqini tuzishdi?",
+      "javob": "Miloddan avvalgi VII asrda"
+    },
+    {
+      "id": 31,
+      "savol": "Rim shahri qaysi daryo bo'yida vujudga kelgan?",
+      "javob": "Tibr daryosi bo'yida"
+    },
+    {
+      "id": 32,
+      "savol": "Aka-uka Romul va Rem nechanchi yilda Rim shahriga asos soladi?",
+      "javob": "Miloddan avvalgi 753-yilda"
+    },
+    {
+      "id": 33,
+      "savol": "Qaysi davlatda hukmdorlar ham harbiy boshliq, ham sudya, ham kohin bo'lgan?",
+      "javob": "Qadimgi Rimda (podsholik davrida — reks deb atalgan hukmdorlar)"
+    },
+    {
+      "id": 34,
+      "savol": "Qachon Rim respublika deb e'lon qilinadi?",
+      "javob": "Miloddan avvalgi 509-yilda"
+    },
+    {
+      "id": 35,
+      "savol": "Rimga ko'chib kelgan aholi va uning avlodlari",
+      "javob": "Plebeylar"
+    },
+    {
+      "id": 36,
+      "savol": "Rimda oq xarir libos bu —",
+      "javob": "Toga"
+    },
+    {
+      "id": 37,
+      "savol": "Urush boshlangan taqdirda yoki xalq qo'zg'oloni ro'y berganda kim qo'shinlar boshlig'i etib tayinlanardi?",
+      "javob": "Diktator"
+    },
+    {
+      "id": 38,
+      "savol": "Kim cheklanmagan hokimiyatga ega bo'lgan va hokimiyatda olti oydan ko'p tura olmagan?",
+      "javob": "Diktator"
+    },
+    {
+      "id": 39,
+      "savol": "Qaysi kengash qashshoq rimliklar manfaatini ifoda etgan?",
+      "javob": "Plebeylar kengashi (xalq tribunlari boshchiligidagi)"
+    },
+    {
+      "id": 40,
+      "savol": "Qachon Rimning barcha fuqarolari mavqeidan qat'iy nazar qonun oldida teng hisoblanadigan qonunlar qabul qilina boshlandi?",
+      "javob": "Miloddan avvalgi 449-yilda — XII jadval qonunlari qabul qilinganidan boshlab"
+    }
+  ]
+}
