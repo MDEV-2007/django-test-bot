@@ -339,7 +339,10 @@ export default function BattlesPage() {
                 <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]">
                   Tezkor duel savoli
                 </Badge>
-                <h2 className="font-voice text-lg font-bold leading-snug">{currentQ.text}</h2>
+                <h2
+                  className="font-voice text-lg font-bold leading-snug"
+                  dangerouslySetInnerHTML={{ __html: currentQ.text }}
+                />
 
                 {waitingOpponent ? (
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">
