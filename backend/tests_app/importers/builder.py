@@ -38,8 +38,12 @@ def build(questions, banks, *, title, subject_name, category, duration_minutes,
     test_set = TestSet.objects.create(
         subject=subject,
         title=title,
-        description="PDF dan avtomatik import qilindi. To'g'ri javoblar AI tomonidan "
-                    "taxmin qilingan - nashr etishdan oldin tekshiring.",
+        # Bo'sh: bu maydon o'quvchiga ko'rinadigan test tavsifi, admin uchun eslatma emas.
+        # "AI taxmin qilgan, tekshiring" degan ogohlantirish avvalgi versiyada shu yerga
+        # yozilib, is_published=False bo'lishiga qaramay tavsif sifatida chiqib qolgan
+        # edi. Qoralama ekanligi is_published va panel review oqimi orqali allaqachon
+        # ma'lum — buni takrorlashning hojati yo'q.
+        description='',
         category=category,
         duration_minutes=duration_minutes,
         created_by=created_by,
