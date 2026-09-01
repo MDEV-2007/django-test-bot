@@ -1,0 +1,321 @@
+{
+  "test": {
+    "sinf": 6,
+    "fan": "Tarix",
+    "mavzular": "1-5-mavzular",
+    "turi": "yopiq test (qisqa javobli)",
+    "savollar_soni": 61,
+    "manba": "@Tarix_quiz_testlar"
+  },
+  "savollar": [
+    {
+      "id": 1,
+      "savol": "Eng qadimgi shaharlar, yozuv, davlatlar tashkil topishi va rivojlanishi davrini olimlar nima deb ataydilar?",
+      "javob": "Sivilizatsiya (tamaddun) davri"
+    },
+    {
+      "id": 2,
+      "savol": "Qadimgi dunyo tarixida dastlabki sivilizatsiyalar tarixi dastlab qayerda, so'ngra qayerda boshlangan?",
+      "javob": "Dastlab Qadimgi Sharqda (Misr va Mesopotamiya), so'ngra Qadimgi G'arbda (Yunoniston va Rim)"
+    },
+    {
+      "id": 3,
+      "savol": "Qadimgi dunyo tarixi deganda qachondan qachongacha bo'lgan voqealar tushuniladi?",
+      "javob": "Yer yuzida odam paydo bo'lganidan (taxminan 3 million yil muqaddam) to milodiy V asrgacha (476-yil — G'arbiy Rim imperiyasining qulashi)"
+    },
+    {
+      "id": 4,
+      "savol": "Misrliklar tarixi haqida ma'lumot beruvchi yozuvlar qaysilar?",
+      "javob": "Iyerogliflar — papirus va tosh bitiklarga bitilgan Misr yozuvlari"
+    },
+    {
+      "id": 5,
+      "savol": "Qadim zamonlarda odamlar yashagan manzilgohlarda qazishma ishlarini amalga oshiruvchilar kimlar?",
+      "javob": "Arxeologlar"
+    },
+    {
+      "id": 6,
+      "savol": "Qadimgi odamlarning suyak qoldiqlarini tekshirib, ularning tashqi qiyofasini tiklaydilar va rivojlanishni o'rganadilar — bular kimlar?",
+      "javob": "Antropologlar"
+    },
+    {
+      "id": 7,
+      "savol": "Qadimgi odamlarning ko'pgina udumlari, hozirda mavjud qabila va elatlarning qadimdan saqlab qolgan xo'jalik va madaniy an'analarini o'rganadilar. Bular kimlar?",
+      "javob": "Etnograflar"
+    },
+    {
+      "id": 8,
+      "savol": "Mehnat qurollari, sopol idishlar, qurol-aslahalar, zeb-ziynat buyumlari — inson qo'li bilan yaratilgan narsalar qanday manbalar?",
+      "javob": "Moddiy (ashyoviy) manbalar"
+    },
+    {
+      "id": 9,
+      "savol": "Qaysi voqeadan keyin olimlarga qadimgi ming yilliklar tarixini tiklash osonlashdi?",
+      "javob": "Yozuv paydo bo'lgach va qadimgi yozuvlarning siri ochilib, ular o'qib chiqilgandan keyin"
+    },
+    {
+      "id": 10,
+      "savol": "O'rta Osiyo tarixi bo'yicha eng qadimgi yozma manba — bu kimlarning muqaddas kitobi va qaysi kitob?",
+      "javob": "Zardushtiylarning muqaddas kitobi — \"Avesto\""
+    },
+    {
+      "id": 11,
+      "savol": "Behistun qoyasi yozuvlari qaysi shahar yaqinida joylashgan va kimning buyrug'iga ko'ra o'yib yozdirilgan?",
+      "javob": "Eronning Hamadon shahri yaqinida; ahamoniy podshosi Doro I (Dorius I) buyrug'iga ko'ra"
+    },
+    {
+      "id": 12,
+      "savol": "Gerodot qaysi asrda yashagan va uning asari qaysi?",
+      "javob": "Miloddan avvalgi V asrda yashagan; asari — \"Tarix\""
+    },
+    {
+      "id": 13,
+      "savol": "Miloddan avvalgi I asr oxirida yashagan qadimgi yunon tarixchisi va geografi bo'lgan shaxsning asarida O'rta Osiyo xalqlari madaniyati haqida ma'lumotlar keltiriladi?",
+      "javob": "Strabon — \"Geografiya\" asari"
+    },
+    {
+      "id": 14,
+      "savol": "Kim \"Makedoniyalik Aleksandr tarixi\" nomli asarini yozib, Makedoniyalik Aleksandrning O'rta Osiyoga harbiy yurishlari haqidagi ma'lumotlarni keltirgan?",
+      "javob": "Rim tarixchisi Kvint Kursiy Ruf"
+    },
+    {
+      "id": 15,
+      "savol": "Qadimgi yunon tarixchisi Arrianning asari qaysi?",
+      "javob": "\"Aleksandrning yurishlari\" (\"Anabasis\")"
+    },
+    {
+      "id": 16,
+      "savol": "Ko'hna qadamjolarni qazish chog'ida arxeologlar qayer hunarmandlari tomonidan tayyorlangan sopol va metall idishlar, zargarlik buyumlarini topishgan?",
+      "javob": "O'rta Osiyo, Eron, Hindiston va Xitoy hunarmandlari tayyorlagan buyumlarni",
+      "izoh": "Darslikda aniq mamlakatlar ro'yxati boshqacha berilgan bo'lishi mumkin — matnni tekshiring."
+    },
+    {
+      "id": 17,
+      "savol": "Insoniyat rivojidagi birinchi bosqich nima deb ataladi?",
+      "javob": "Ibtidoiy jamoa tuzumi (tosh davri)"
+    },
+    {
+      "id": 18,
+      "savol": "Turmush va mehnat umumiyligi negizida birlashgan eng qadimgi odamlar jamoasi nima deb ataladi?",
+      "javob": "Ibtidoiy to'da (poda)"
+    },
+    {
+      "id": 19,
+      "savol": "Dastlabki urug' jamoalari ayol kishi, ya'ni ona atrofida jipslasha boshlagan — bu qaysi davrda ro'y bergan?",
+      "javob": "So'nggi paleolit davrida — matriarxat (ona urug'i) davri"
+    },
+    {
+      "id": 20,
+      "savol": "Nima uchun jamoadagi yetakchilik mavqei asta-sekin erkak kishiga o'ta boshladi?",
+      "javob": "Chorvachilik, dehqonchilik va metallga ishlov berish kabi og'ir mehnat turlari erkaklar zimmasiga tushib, ular xo'jalikda asosiy kuchga aylangani uchun — shu bilan patriarxat (ota urug'i) qaror topdi"
+    },
+    {
+      "id": 21,
+      "savol": "Qaysi voqea ro'y berishi bilan eng qadimgi urug'chilik tuzumi ham yakunlandi?",
+      "javob": "Ona urug'i (matriarxat) o'rnini ota urug'i (patriarxat) egallashi bilan"
+    },
+    {
+      "id": 22,
+      "savol": "Yer yuzida odam qanday paydo bo'lganligi haqida ilmiy, diniy, afsonaviy va dunyoviy naqllar mavjud bo'lib, biz bu masalani qaysi naql asosida va kimlarning ma'lumotlariga tayangan holda o'rganamiz?",
+      "javob": "Ilmiy naql asosida — arxeologlar va antropologlarning ma'lumotlariga tayanib"
+    },
+    {
+      "id": 23,
+      "savol": "Yer yuzidagi dastlabki odamlar nima uchun hayvonot dunyosidan farqlanib turgan?",
+      "javob": "Ular mehnat qurollari yasay olgan, tik yurgan, mehnat qilgan va ongli fikrlash qobiliyatiga ega bo'lgani uchun"
+    },
+    {
+      "id": 24,
+      "savol": "Germaniya hududidan qanday turdagi odam suyaklari topilgan?",
+      "javob": "Neandertal odam suyaklari (Neandertal vodiysidan topilgani uchun shunday nomlangan)"
+    },
+    {
+      "id": 25,
+      "savol": "Buyuk muzlik davri qachon boshlandi?",
+      "javob": "Bundan taxminan 100 ming yil muqaddam"
+    },
+    {
+      "id": 26,
+      "savol": "Tarix fanida eng qadimgi odamlar nima deb ataladi?",
+      "javob": "Arxantroplar"
+    },
+    {
+      "id": 27,
+      "savol": "O'rta Osiyoda toshdan yasalgan qadimiy mehnat qurollari qaysi manzilgohlardan topib o'rganilib, qaysi davrga tegishli ekanligini yozing?",
+      "javob": "Selung'ur g'ori (Farg'ona vodiysi, So'x), Ko'lbuloq (Toshkent viloyati), Onarcha va Yangaja manzilgohlaridan; ilk paleolit davriga tegishli"
+    },
+    {
+      "id": 28,
+      "savol": "Toshdan yasalgan qadimiy mehnat qurollari — bular qo'pol tosh qurollar bo'lib, ularning bir tomoni urib o'tkirlangan. Arxeologiya fanida bu tosh qurollar nima deb atalgan?",
+      "javob": "Chopperlar"
+    },
+    {
+      "id": 29,
+      "savol": "O'zlashtiruvchi xo'jalik bu?",
+      "javob": "Tabiatda tayyor holda mavjud bo'lgan mahsulotlarni o'zlashtirishga — termachilik va ovchilikka asoslangan xo'jalik turi"
+    },
+    {
+      "id": 30,
+      "savol": "Tosh asriga mansub 8-9 yashar neandertal bolaning suyak qoldiqlari topib o'rganilgan manzilgoh qaysi davrga tegishli?",
+      "javob": "Teshiktosh g'ori — o'rta paleolit (mustye) davriga tegishli"
+    },
+    {
+      "id": 31,
+      "savol": "Dastlabki diniy e'tiqodlar qaysi davrga oid?",
+      "javob": "O'rta paleolit (mustye) davriga"
+    },
+    {
+      "id": 32,
+      "savol": "Odamlar guruhi jamoasining biror hayvon yoki o'simlik turi bilan qarindoshlik aloqasiga ishonishi nima deb ataladi?",
+      "javob": "Totemizm"
+    },
+    {
+      "id": 33,
+      "savol": "Odamni o'rab turgan muhitda jonlar va ruhlarning mavjudligiga e'tiqod qilishi fanda nima deb ataladi?",
+      "javob": "Animizm"
+    },
+    {
+      "id": 34,
+      "savol": "Qadimgi odamlar u yoki bu buyumlar omad keltirishiga yoxud balo-qazoni bartaraf etishiga e'tiqod qilishgan — bu nima deb ataladi?",
+      "javob": "Fetishizm"
+    },
+    {
+      "id": 35,
+      "savol": "So'nggi paleolit davriga oid g'orlar qayerlardan topilgan?",
+      "javob": "Ispaniyadagi Altamira va Fransiyadagi Lasko g'orlaridan",
+      "izoh": "Agar savol O'rta Osiyo doirasida so'ralayotgan bo'lsa, javob Samarqand makoni va Ko'lbuloq bo'lishi mumkin — darslik matnini tekshiring."
+    },
+    {
+      "id": 36,
+      "savol": "Odamning o'zini qo'shib, turgan tevarak olamni tushunishga intilishi nimaga asos bo'lib xizmat qildi?",
+      "javob": "Dastlabki diniy e'tiqodlar va ibtidoiy san'atning paydo bo'lishiga"
+    },
+    {
+      "id": 37,
+      "savol": "Turar joylar qurilishi qaysi davrning muhim ixtirosi hisoblanib, u davrda qaysi turdagi odam yashagan?",
+      "javob": "So'nggi paleolit davrining ixtirosi; bu davrda hozirgi qiyofadagi aql-idrokli odam (Homo sapiens — kromanyon) yashagan"
+    },
+    {
+      "id": 38,
+      "savol": "Insoniyat qaysi davrda olov hosil qilishni o'rganib oldi?",
+      "javob": "O'rta paleolit (mustye) davrida"
+    },
+    {
+      "id": 39,
+      "savol": "O'rta tosh davri hamda o'rta paleolitning yillarini yozing?",
+      "javob": "O'rta tosh davri (mezolit) — miloddan avvalgi 12-7-ming yilliklar; o'rta paleolit (mustye) — bundan 100-40 ming yil muqaddam"
+    },
+    {
+      "id": 40,
+      "savol": "Qachonga kelib buyuk muzlik davri poyoniga yetdi?",
+      "javob": "Bundan taxminan 12-10 ming yil muqaddam (miloddan avvalgi X-mingyillikda)"
+    },
+    {
+      "id": 41,
+      "savol": "Inson o'q-yoy yasashni o'rganib olgan davrda qayerda xo'jalikning yangi tarmoqlari — ibtidoiy ziroatchilik va chorvachilik vujudga keldi?",
+      "javob": "Old Osiyo (Yaqin Sharq) hududida"
+    },
+    {
+      "id": 42,
+      "savol": "Mezolit davrining qaysi manzilgohlaridan qoyatosh rasmlari topilib, ancha mufassal o'rganilgan?",
+      "javob": "Surxondaryodagi Zarautsoy kamaridan (shuningdek Navoiy viloyatidagi Sarmishsoydan)"
+    },
+    {
+      "id": 43,
+      "savol": "Bu davr boshlanishi sopol idishlar yasashning kashf etilishi bilan belgilanib, bu davrning katta ixtirosi nima?",
+      "javob": "Neolit (yangi tosh) davri; uning katta ixtirosi — to'qimachilikning kashf etilishi"
+    },
+    {
+      "id": 44,
+      "savol": "Mikrolitlar qaysi davrga tegishli?",
+      "javob": "Mezolit (o'rta tosh) davriga"
+    },
+    {
+      "id": 45,
+      "savol": "Insonlar o'troq turmush tarziga o'tgan davrning muhim kashfiyotlari qaysi?",
+      "javob": "Neolit davri kashfiyotlari — dehqonchilik va chorvachilikning paydo bo'lishi (ishlab chiqaruvchi xo'jalikka o'tish), kulolchilik va to'qimachilik"
+    },
+    {
+      "id": 46,
+      "savol": "Qachondan boshlab misdan foydalanishga, undan mehnat qurollari yasashga o'tildi?",
+      "javob": "Miloddan avvalgi IV-mingyillikdan boshlab"
+    },
+    {
+      "id": 47,
+      "savol": "Eneolit davri nechanchi ming yilliklarga to'g'ri keladi?",
+      "javob": "Miloddan avvalgi IV-III ming yilliklarga"
+    },
+    {
+      "id": 48,
+      "savol": "O'rta Osiyo janubida sun'iy sug'orishga asoslangan dehqonchilik vujudga kelgan davrda kulolchilikda nimalar yuz berdi?",
+      "javob": "Kulolchilik charxi kashf etilib, sopol idishlar maxsus xumdonlarda pishirila boshlandi va rang-barang naqshlar bilan bezatildi"
+    },
+    {
+      "id": 49,
+      "savol": "Zarafshon daryo havzasidagi hozirgi Buxoro viloyati Qorako'l tumanida joylashgan manzilgoh qaysi davrga tegishli?",
+      "javob": "Zamonbobo manzilgohi — bronza (jez) davriga, miloddan avvalgi II ming yillikka tegishli"
+    },
+    {
+      "id": 50,
+      "savol": "Surxondaryo vohasidagi qadimgi ziroatchilar manzilgohi — xom g'ishtdan qurilgan uy-joylar, sopol buyumlar, bronza mehnat qurollari, ustaxona qoldiqlari va xumdagi bug'doy topilgan joy qaysi manzilgoh?",
+      "javob": "Sopollitepa"
+    },
+    {
+      "id": 51,
+      "savol": "Bu shahar qurilishi tarixida ilk shahar alomatlari ko'zga tashlanib, u 2 qismdan — qal'a va uning atrofidagi hunarmand va dehqonlar uylaridan iborat bo'lgan, ibodatxona qoldiqlari topilgan. Bu qaysi manzilgoh?",
+      "javob": "Jarqo'ton"
+    },
+    {
+      "id": 52,
+      "savol": "Qaysi davr odamlari kulolchilik charxi va g'ildirakni kashf etdilar?",
+      "javob": "Bronza (jez) davri odamlari"
+    },
+    {
+      "id": 53,
+      "savol": "Temirdan birinchi bo'lib qaysi xalqlar foydalana boshlaganlar?",
+      "javob": "Kichik Osiyoda yashagan xettlar"
+    },
+    {
+      "id": 54,
+      "savol": "Sof temir tabiatda kamyob metall bo'lganligi uchun undan zeb-ziynat buyumlari yasashda foydalanilgan. Shunday buyumlar kimning maqbarasidan topilgan?",
+      "javob": "Misr fir'avni Tutanxamon maqbarasidan"
+    },
+    {
+      "id": 55,
+      "savol": "Maykop qo'rg'oni qayerda joylashgan?",
+      "javob": "Shimoliy Kavkazda — Maykop shahri yaqinida (hozirgi Rossiya, Adigeya)"
+    },
+    {
+      "id": 56,
+      "savol": "Miloddan avvalgi nechanchi asrlarda temirdan yasalgan ilk mehnat qurollari O'rta Osiyodan ham topilgan?",
+      "javob": "Miloddan avvalgi IX-VIII asrlarda",
+      "izoh": "Ba'zi darsliklarda \"mil. avv. X-IX asrlar\" deb beriladi — darslikni tekshiring."
+    },
+    {
+      "id": 57,
+      "savol": "Avestoga ko'ra — qabilalar ittifoqi bu",
+      "javob": "Dahyu"
+    },
+    {
+      "id": 58,
+      "savol": "Avestoga ko'ra — qabila bu",
+      "javob": "Zantu"
+    },
+    {
+      "id": 59,
+      "savol": "Avestoga ko'ra — hududiy qo'shnichilik jamoasi bu",
+      "javob": "Vis"
+    },
+    {
+      "id": 60,
+      "savol": "Avestoga ko'ra — urug' jamoasi bu",
+      "javob": "Varzana (verezena)",
+      "izoh": "Ayrim darsliklarda \"vis\" urug' jamoasi sifatida beriladi — u holda 59 va 60-javoblar o'rin almashadi."
+    },
+    {
+      "id": 61,
+      "savol": "Avestoga ko'ra — katta patriarxal oila bu",
+      "javob": "Nmana"
+    }
+  ]
+}
