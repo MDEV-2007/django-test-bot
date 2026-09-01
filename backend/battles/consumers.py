@@ -23,8 +23,10 @@ from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils import timezone
 
+from accounts.models import Profile
 from core.missions import advance_missions
 from core.models import Notification
 from tests_app.models import AnswerOption, Question, Subject
@@ -64,6 +66,49 @@ def _player_info(profile):
     }
 
 
+def _create_rounds(battle, subject):
+    """Bir jang uchun savol to'plami. Ham navbat (matchmaking), ham to'g'ridan-to'g'ri
+    chaqiruv (LobbyConsumer) shu bir xil funksiyadan foydalanadi — ikkalasida ham jang
+    faollashgach xuddi shu qoida bilan savol tanlanishi kerak."""
+    q_filter = Question.objects.filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
+    if subject:
+        q_filter = q_filter.filter(subject=subject)
+    questions = list(q_filter.prefetch_related('choices').order_by('?')[:ROUNDS_PER_BATTLE])
+    BattleRound.objects.bulk_create([
+        BattleRound(battle=battle, question=q, round_number=idx)
+        for idx, q in enumerate(questions, start=1)
+    ])
+
+
+def _battle_payload(battle):
+    battle.refresh_from_db()
+    rounds = list(
+        battle.rounds.select_related('question')
+        .prefetch_related('question__choices')
+        .order_by('round_number')
+    )
+    questions = []
+    for r in rounds:
+        choices = list(r.question.choices.all())
+        random.shuffle(choices)
+        questions.append({
+            'round_number': r.round_number,
+            'question_id': r.question_id,
+            'text': r.question.body,
+            'choices': [{'id': c.id, 'text': c.text} for c in choices],
+        })
+    return {
+        'battle_id': battle.id,
+        'questions': questions,
+        'player1': _player_info(battle.player1),
+        'player2': _player_info(battle.player2),
+    }
+
+
+def lobby_group(profile_id):
+    return f'lobby_{profile_id}'
+
+
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         user = self.scope['user']
@@ -86,7 +131,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.battle_group, self.channel_name)
 
         if just_matched:
-            payload = await database_sync_to_async(self._battle_payload)(battle)
+            payload = await database_sync_to_async(_battle_payload)(battle)
             await self.channel_layer.group_send(self.battle_group, {'type': 'match.found', 'battle': payload})
 
     def _match_or_create(self, subject):
@@ -102,47 +147,132 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                 waiting.player2 = self.profile
                 waiting.status = 'active'
                 waiting.save(update_fields=['player2', 'status'])
-                self._create_rounds(waiting, subject)
+                _create_rounds(waiting, subject)
                 return waiting, True
             return Battle.objects.create(player1=self.profile, status='searching', subject=subject), False
-
-    def _create_rounds(self, battle, subject):
-        q_filter = Question.objects.filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
-        if subject:
-            q_filter = q_filter.filter(subject=subject)
-        questions = list(q_filter.prefetch_related('choices').order_by('?')[:ROUNDS_PER_BATTLE])
-        BattleRound.objects.bulk_create([
-            BattleRound(battle=battle, question=q, round_number=idx)
-            for idx, q in enumerate(questions, start=1)
-        ])
-
-    def _battle_payload(self, battle):
-        battle.refresh_from_db()
-        rounds = list(
-            battle.rounds.select_related('question')
-            .prefetch_related('question__choices')
-            .order_by('round_number')
-        )
-        questions = []
-        for r in rounds:
-            choices = list(r.question.choices.all())
-            random.shuffle(choices)
-            questions.append({
-                'round_number': r.round_number,
-                'question_id': r.question_id,
-                'text': r.question.body,
-                'choices': [{'id': c.id, 'text': c.text} for c in choices],
-            })
-        return {
-            'battle_id': battle.id,
-            'questions': questions,
-            'player1': _player_info(battle.player1),
-            'player2': _player_info(battle.player2),
-        }
 
     # Group event handler (channels maps 'match.found' -> match_found)
     async def match_found(self, event):
         await self.send(text_data=json.dumps({'event': 'matched', **event['battle']}))
+
+
+class LobbyConsumer(AsyncWebsocketConsumer):
+    """Onlayn ro'yxatdan to'g'ridan-to'g'ri chaqiruv: A ro'yxatda B'ni ko'radi, "Jangga
+    chaqirish" bosadi — B, agar shu socket ochiq bo'lsa, real vaqtda taklif oladi.
+
+    MatchmakingConsumer'dan farqi: u ikki NOMA'LUM o'yinchini navbatda birlashtiradi, bu
+    esa ikkita ANIQ, oldindan tanlangan profilni bog'laydi. Ikkalasi ham bir xil Battle
+    modelidan foydalanadi — shu sababli qabul qilingandan keyin mijoz xuddi shu
+    `openLiveBattle(battle_id)` yo'lini ishlatadi, BattleConsumer'ning o'zi qaysi yo'l
+    bilan 'active' bo'lganini bilishga ehtiyoj sezmaydi.
+
+    Bitta cheklov (v1): B shu ekranni ochib turmasa (socket ulanmagan), taklif real
+    vaqtda yetib bormaydi — Battle 'pending' holida osilib qoladi. Xotira band qilmasin
+    deb pending qatorlar https://... kabi muddatli tozalash hozircha yo'q, kelajakda
+    kerak bo'lsa qo'shiladi.
+    """
+
+    async def connect(self):
+        user = self.scope['user']
+        if not user or not user.is_authenticated:
+            await self.close()
+            return
+        self.profile = await database_sync_to_async(lambda: user.profile)()
+        self.group = lobby_group(self.profile.id)
+        await self.channel_layer.group_add(self.group, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, code):
+        if hasattr(self, 'group'):
+            await self.channel_layer.group_discard(self.group, self.channel_name)
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+        except ValueError:
+            return
+        action = data.get('action')
+        if action == 'challenge':
+            await self._send_challenge(data.get('target_id'))
+        elif action == 'respond':
+            await self._respond(data.get('battle_id'), bool(data.get('accept')))
+
+    async def _send_challenge(self, target_id):
+        if not target_id or int(target_id) == self.profile.id:
+            return
+        subject = await database_sync_to_async(_resolve_ws_subject)(self.scope)
+        battle = await database_sync_to_async(self._create_pending)(int(target_id), subject)
+        if battle is None:
+            await self.send(text_data=json.dumps({
+                'event': 'challenge_failed',
+                'reason': "Bu foydalanuvchi hozir onlayn emas yoki band.",
+            }))
+            return
+        challenger = await database_sync_to_async(_player_info)(self.profile)
+        await self.channel_layer.group_send(lobby_group(target_id), {
+            'type': 'challenge.received',
+            'battle_id': battle.id,
+            'from': challenger,
+        })
+        await self.send(text_data=json.dumps({'event': 'challenge_sent', 'battle_id': battle.id}))
+
+    def _create_pending(self, target_id, subject):
+        # `last_seen_at` orqali "onlayn"ligini serverning o'zi ham tekshiradi — mijoz
+        # yuborgan ro'yxatga ishonib qolmaymiz, chaqiruv paytida ham hali onlaynligini
+        # tasdiqlaymiz.
+        cutoff = timezone.now() - timezone.timedelta(minutes=2)
+        target = Profile.objects.filter(id=target_id, last_seen_at__gte=cutoff).first()
+        if not target:
+            return None
+        # Ikkala tomon uchun ham osilib qolgan (hech kim javob bermagan) eski
+        # chaqiruvlarni almashtiramiz — aks holda foydalanuvchi bir necha marta
+        # chaqirilsa, eskisi hech qachon tozalanmay qolaveradi.
+        Battle.objects.filter(
+            Q(player1=self.profile, player2_id=target_id) | Q(player1_id=target_id, player2=self.profile),
+            status='pending',
+        ).delete()
+        return Battle.objects.create(player1=self.profile, player2_id=target_id, status='pending', subject=subject)
+
+    async def _respond(self, battle_id, accept):
+        if not battle_id:
+            return
+        result = await database_sync_to_async(self._resolve_response)(int(battle_id), accept)
+        if result is None:
+            return
+        if accept:
+            payload = await database_sync_to_async(_battle_payload)(result)
+            for pid in (result.player1_id, result.player2_id):
+                await self.channel_layer.group_send(lobby_group(pid), {'type': 'challenge.accepted', 'battle': payload})
+        else:
+            # `result.id` emas — `Battle.delete()` chaqirilgach Django `pk`/`id`ni None
+            # qilib qo'yadi. Chaqiruvchidan kelgan `battle_id`ning o'zi bu yerda hali bor.
+            await self.channel_layer.group_send(lobby_group(result.player1_id), {
+                'type': 'challenge.declined', 'battle_id': int(battle_id),
+            })
+
+    def _resolve_response(self, battle_id, accept):
+        battle = Battle.objects.filter(id=battle_id, player2=self.profile, status='pending').first()
+        if not battle:
+            return None
+        if not accept:
+            battle.delete()
+            return battle
+        battle.status = 'active'
+        battle.save(update_fields=['status'])
+        _create_rounds(battle, battle.subject)
+        return battle
+
+    # Group event handlers (channels maps 'challenge.received' -> challenge_received, ...)
+    async def challenge_received(self, event):
+        await self.send(text_data=json.dumps({
+            'event': 'challenge_received', 'battle_id': event['battle_id'], 'from': event['from'],
+        }))
+
+    async def challenge_accepted(self, event):
+        await self.send(text_data=json.dumps({'event': 'challenge_accepted', **event['battle']}))
+
+    async def challenge_declined(self, event):
+        await self.send(text_data=json.dumps({'event': 'challenge_declined', 'battle_id': event['battle_id']}))
 
 
 class BattleConsumer(AsyncWebsocketConsumer):

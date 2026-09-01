@@ -19,6 +19,31 @@ BOT_NAMES = ["Sardor", "Aziza", "Jahongir", "Malika", "Bekzod", "Nodira", "Farru
 ROUNDS_PER_BATTLE = 5
 POINTS_PER_CORRECT = 10
 
+# "Onlayn" — shu vaqt oralig'ida faol bo'lgan foydalanuvchi. accounts.models'dagi
+# ensure_profile_for_user last_seen_at'ni har so'rovda (60s tezlikda) yangilaydi, ya'ni
+# saytda ochiq turgan har bir foydalanuvchi shu oyna ichida qoladi.
+ONLINE_WINDOW_MINUTES = 2
+
+
+@api_view(['GET'])
+def online_users_api(request):
+    from accounts.models import Profile
+
+    cutoff = timezone.now() - timezone.timedelta(minutes=ONLINE_WINDOW_MINUTES)
+    profiles = (Profile.objects
+                .filter(last_seen_at__gte=cutoff)
+                .exclude(id=request.user.profile.id)
+                .select_related('user')
+                .order_by('-elo_rating')[:30])
+    return Response({
+        'users': [{
+            'id': p.id,
+            'name': p.user.first_name or p.user.username,
+            'avatar': p.avatar_url or f'https://api.dicebear.com/7.x/adventurer/svg?seed={p.user.username}',
+            'elo': p.elo_rating,
+        } for p in profiles],
+    })
+
 
 @api_view(['GET'])
 def arena_api(request):

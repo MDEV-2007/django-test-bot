@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
         { source: '/api/:path*', destination: `${backend}/api/:path*/` },
         { source: '/media/:path*', destination: `${backend}/media/:path*` },
         { source: '/telegram/:path*', destination: `${backend}/telegram/:path*/` },
-        { source: '/ws/:path*', destination: `${backend}/ws/:path*` },
+        { source: '/ws/:path*', destination: `${backend}/ws/:path*/` },
       ],
       afterFiles: [],
       fallback: [],

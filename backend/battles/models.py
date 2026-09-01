@@ -4,6 +4,7 @@ from tests_app.models import Question, AnswerOption
 
 class Battle(models.Model):
     STATUS_CHOICES = [
+        ('pending', "Chaqiruvga javob kutilmoqda"),
         ('searching', 'Mos raqib qidirilmoqda'),
         ('active', 'Jang davom etmoqda'),
         ('finished', 'Tugallangan'),

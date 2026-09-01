@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Swords, Bot, Trophy, Shield, Loader2, RotateCcw } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Swords, Bot, Trophy, Shield, Loader2, RotateCcw, Radio } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { openSocket } from '@/lib/ws-client';
@@ -16,6 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 type ArenaData = {
@@ -26,6 +30,9 @@ type ArenaData = {
 type Question = { round_number: number; question_id: number; text: string; choices: { id: number; text: string }[] };
 
 type Mode = 'idle' | 'ai' | 'live-searching' | 'live' | 'result';
+
+type OnlineUser = { id: number; name: string; avatar: string; elo: number };
+type IncomingChallenge = { battle_id: number; from: { name: string; id?: number } };
 
 export default function BattlesPage() {
   const { user, access } = useAuthStore();
@@ -45,24 +52,89 @@ export default function BattlesPage() {
   /* Jangdan OLDINGI ELO — natija ekranida o'zgarishni ko'rsatish uchun. Server yangi
      qiymatni qaytargach, raqam eskidan yangisiga "aylanib" o'tadi. */
   const [prevElo, setPrevElo] = useState<number | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [incomingChallenge, setIncomingChallenge] = useState<IncomingChallenge | null>(null);
+  const [sentChallengeTo, setSentChallengeTo] = useState<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const mmRef = useRef<WebSocket | null>(null);
+  const lobbyRef = useRef<WebSocket | null>(null);
 
   const loadArena = () => apiFetch<ArenaData>('/api/battles/').then((d) => {
     setArena(d);
     setSelectedSubject((prev) => prev ?? d.selected_subject);
-  });
+  }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
 
   useEffect(() => {
     if (!access) return;
     loadArena();
   }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => () => { wsRef.current?.close(); mmRef.current?.close(); }, []);
+  useEffect(() => () => { wsRef.current?.close(); mmRef.current?.close(); lobbyRef.current?.close(); }, []);
+
+  const loadOnlineUsers = useCallback(() => {
+    apiFetch<{ users: OnlineUser[] }>('/api/battles/online/').then((d) => setOnlineUsers(d.users)).catch(() => {});
+  }, []);
+
+  /* Lobby socket — butun sahifa hayoti davomida ulanib turadi, chunki qarshi tomon
+     har qanday holatda (idle, jang o'rtasida) chaqiruv yuborishi mumkin. */
+  useEffect(() => {
+    if (!access) return;
+    const ws = openSocket('/ws/battles/lobby/');
+    lobbyRef.current = ws;
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.event === 'challenge_received') {
+        setIncomingChallenge({ battle_id: data.battle_id, from: data.from });
+        soundFX.correct?.();
+      } else if (data.event === 'challenge_sent') {
+        toast.success("Chaqiruv yuborildi, javob kutilmoqda...");
+      } else if (data.event === 'challenge_failed') {
+        setSentChallengeTo(null);
+        toast.error(data.reason || "Chaqiruvni yuborib bo'lmadi");
+      } else if (data.event === 'challenge_declined') {
+        setSentChallengeTo(null);
+        toast.info("Raqib chaqiruvni rad etdi");
+      } else if (data.event === 'challenge_accepted') {
+        setSentChallengeTo(null);
+        setIncomingChallenge(null);
+        setBattleId(data.battle_id);
+        setQuestions(data.questions);
+        setRoundIdx(0); setMyScore(0); setOppScore(0); setSelectedChoice(null); setCorrectChoiceId(null);
+        const opponent = data.player1.id === useAuthStore.getState().user?.id ? data.player2 : data.player1;
+        setOpponentName(opponent?.name || 'Raqib');
+        openLiveBattle(data.battle_id);
+      }
+    };
+    return () => ws.close();
+  }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* Faqat "idle" holatda ro'yxatni yangilab turamiz — jang jarayonida keraksiz. */
+  useEffect(() => {
+    if (!access || mode !== 'idle') return;
+    loadOnlineUsers();
+    const t = setInterval(loadOnlineUsers, 15000);
+    return () => clearInterval(t);
+  }, [access, mode, loadOnlineUsers]);
+
+  function sendChallenge(targetId: number) {
+    if (!lobbyRef.current || lobbyRef.current.readyState !== WebSocket.OPEN) {
+      toast.error("Ulanish yo'q, sahifani yangilang");
+      return;
+    }
+    setSentChallengeTo(targetId);
+    lobbyRef.current.send(JSON.stringify({ action: 'challenge', target_id: targetId }));
+  }
+
+  function respondChallenge(accept: boolean) {
+    if (!incomingChallenge || !lobbyRef.current) return;
+    lobbyRef.current.send(JSON.stringify({ action: 'respond', battle_id: incomingChallenge.battle_id, accept }));
+    setIncomingChallenge(null);
+  }
 
   function selectSubject(slug: string) {
     setSelectedSubject(slug);
-    apiFetch<ArenaData>(`/api/battles/?subject=${slug}`).then(setArena);
+    apiFetch<ArenaData>(`/api/battles/?subject=${slug}`).then(setArena)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }
 
   async function startAiBattle() {
@@ -279,6 +351,47 @@ export default function BattlesPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {onlineUsers.length > 0 && (
+              <div className="space-y-2.5 pt-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-muted-foreground">
+                  <Radio className="size-3.5 text-[var(--success-text)]" />
+                  Onlayn ({onlineUsers.length})
+                </div>
+                <div className="space-y-2">
+                  {onlineUsers.map((u) => (
+                    <Card key={u.id}>
+                      <CardContent className="flex items-center justify-between gap-3 py-3">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <div className="relative shrink-0">
+                            <Avatar className="size-9">
+                              <AvatarImage src={u.avatar} alt="" />
+                              <AvatarFallback className="text-xs">{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[var(--bg-page)] bg-[var(--success)]" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold">{u.name}</p>
+                            <p className="font-mono text-xs text-muted-foreground">{u.elo} ELO</p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={sentChallengeTo === u.id}
+                          onClick={() => sendChallenge(u.id)}
+                          className="shrink-0"
+                        >
+                          {sentChallengeTo === u.id
+                            ? <><Loader2 className="size-3.5 animate-spin" /> Kutilmoqda</>
+                            : <><Swords className="size-3.5" /> Chaqirish</>}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -415,6 +528,25 @@ export default function BattlesPage() {
             </CardContent>
           </Card>
         )}
+
+        <Dialog open={!!incomingChallenge} onOpenChange={(open) => { if (!open) respondChallenge(false); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Swords className="size-5 text-amber-400" /> Jang chaqiruvi
+              </DialogTitle>
+              <DialogDescription>
+                <strong className="text-foreground">{incomingChallenge?.from.name}</strong> sizni tezkor duelga chaqirmoqda. Jang qilasizmi?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => respondChallenge(false)}>Rad etish</Button>
+              <Button onClick={() => respondChallenge(true)}>
+                <Swords className="size-4" /> Qabul qilish
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </>
   );
