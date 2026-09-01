@@ -64,6 +64,12 @@ ITEMS = [
          payload={'avatar_url': 'https://api.dicebear.com/7.x/adventurer/svg?seed=Explorer'}, order=41),
 
     # --- Badges (cosmetic, shop-bought; distinct from earned core.Badge) ---
+    # Eng arzon mahsulot: yangi foydalanuvchi bitta-ikkita test yechgandan keyin ham
+    # do'konda sotib oladigan narsasi bo'lsin — aks holda hamma narx 100+ tanga bo'lib,
+    # ilk tashrifda do'kon "sen kambag'alsan" degan bo'sh ekrandek ko'rinadi.
+    dict(slug='badge_newcomer', category=ShopItem.CATEGORY_BADGE, name='Yangi boshlovchi nishoni',
+         description="Profilingizga birinchi nishoningiz.", icon_name='sparkle',
+         price_coins=25, rarity='common', payload={'color': '#94a3b8'}, order=49),
     dict(slug='badge_star', category=ShopItem.CATEGORY_BADGE, name='Yulduz nishoni',
          description="Profilingizga yulduz nishoni.", icon_name='star',
          price_coins=350, rarity='rare', payload={'color': '#f7c948'}, order=50),

@@ -21,32 +21,46 @@ import { cn } from '@/lib/utils';
    Ilgari bu yerda 5 ta havola bor edi va qolgan bo'limlar (Do'kon, Premium, Analitika,
    Liderlar ligasi, AI Mentor) MOBILDA umuman ochilmasdi — sidebar esa faqat kattaroq
    ekranda ko'rinadi. Endi 5-slot avatar bo'lib, pastdan chiqadigan varaqda profil va
-   qolgan barcha bo'limlar bir joyda. */
+   qolgan barcha bo'limlar bir joyda.
+
+   AI Mentor — kunlik qaytishni ta'minlaydigan asosiy funksiya — shu tab-bar'da,
+   Darslar esa (hozircha ko'p mavzuda bo'sh, "tayyorlanmoqda" holatida) varaqqa
+   ko'chirilgan: eng qimmat 5 ta piksel joyi kontenti tayyor bo'lmagan bo'limga
+   berilmasligi kerak. */
 const TABS = [
   // `api` — barmoq tugmaga tekkan zahoti fonda olinadigan ma'lumot: bosish va sahifa
   // ochilishi orasidagi ~100 ms shu bilan behuda ketmaydi.
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, api: '/api/dashboard/home/' },
   { href: '/tests', label: 'Testlar', icon: FileCheck2, matchPrefixes: ['/tests'], api: '/api/tests/' },
-  { href: '/learning', label: 'Darslar', icon: BookOpen, api: '/api/learning/' },
   { href: '/battles', label: 'Arena', icon: Swords, matchPrefixes: ['/games'] },
+  { href: '/mentor', label: 'AI Mentor', icon: Bot },
 ];
 
+/* Guruh nomlari MA'NOGA qarab, joylashuvga qarab emas: "Hisobim" — o'z profiling
+   haqidagi narsalar, "Do'kon" — tanga sarflaydigan HAMMA narsa bir joyda (ilgari
+   Do'kon va Inventar ikkita alohida guruhda, foydalanuvchi qaysi biriga borishini
+   bilmasdi), "Ko'proq" — hali tab-bar'ga sig'maganlar. */
 const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: typeof Bot }[] }[] = [
   {
     label: 'Hisobim',
     items: [
       { href: '/profile', label: 'Profilim', icon: User },
       { href: '/analytics', label: 'Analitika', icon: BarChart3 },
-      { href: '/shop', label: "Do'kon", icon: ShoppingBag },
       { href: '/premium', label: 'Premium', icon: Crown },
     ],
   },
   {
-    label: 'Yordam va bellashuv',
+    label: "Do'kon",
     items: [
-      { href: '/mentor', label: 'AI Mentor', icon: Bot },
-      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy },
+      { href: '/shop', label: "Do'kon", icon: ShoppingBag },
       { href: '/shop/inventory', label: 'Inventar', icon: Snowflake },
+    ],
+  },
+  {
+    label: "Ko'proq",
+    items: [
+      { href: '/learning', label: 'Darslar', icon: BookOpen },
+      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy },
     ],
   },
 ];

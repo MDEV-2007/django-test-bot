@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Crown, CheckCircle2, ArrowRight, Lock, Receipt } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
@@ -19,6 +20,10 @@ type PlansData = {
   has_active_premium_lessons: boolean; premium_mock_test_unlocked: boolean; premium_expires_at: string | null;
 };
 
+// "ENG OMMABOP" lentasi shu muddatga tegishli — sariq CTA ham aynan shu tarifda
+// turishi kerak, aks holda ikkita karta ikki xil urg'u berib bir-birini yeydi.
+const RECOMMENDED_DURATION = 180;
+
 export default function PremiumPage() {
   const { access } = useAuthStore();
   const [data, setData] = useState<PlansData | null>(null);
@@ -28,8 +33,9 @@ export default function PremiumPage() {
     if (!access) return;
     apiFetch<PlansData>('/api/premium/plans/').then((d) => {
       setData(d);
-      setSelectedPlanId((prev) => prev ?? d.plans[0]?.id ?? null);
-    });
+      const recommended = d.plans.find((p) => p.duration_days === RECOMMENDED_DURATION);
+      setSelectedPlanId((prev) => prev ?? recommended?.id ?? d.plans[0]?.id ?? null);
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   /* Ustunlar soni tariflar soniga moslashadi. Ilgari qattiq `xl:grid-cols-4` yozilgan edi —
@@ -114,7 +120,7 @@ export default function PremiumPage() {
             const isSelected = selectedPlanId === p.id;
             const active = isPlanActive(p);
             const perDay = p.duration_days > 0 ? Number(p.price) / p.duration_days : null;
-            const ribbon = p.duration_days === 180 ? 'ENG OMMABOP' : p.duration_days === 365 ? 'ENG FOYDALI' : null;
+            const ribbon = p.duration_days === RECOMMENDED_DURATION ? 'ENG OMMABOP' : p.duration_days === 365 ? 'ENG FOYDALI' : null;
             return (
               <Card
                 key={p.id}

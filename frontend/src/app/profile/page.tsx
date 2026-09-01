@@ -11,6 +11,8 @@ import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import KnowledgeTree from '@/components/student/KnowledgeTree';
+import PredictedScore from '@/components/student/PredictedScore';
+import { AudioToggle, ThemeToggle } from '@/components/SettingsToggles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -158,6 +160,10 @@ export default function ProfilePage() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* DTM ball bashorati — ilovaning farqlovchi xususiyati, shuning uchun
+            Hisobim ekranining eng tepasida, ro'yxat ichiga yashiringan emas. */}
+        <PredictedScore />
 
         {/* Referral */}
         <Card className="border-[var(--accent-border)]">
@@ -329,6 +335,18 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Sozlamalar — kunlik ishlatilmaydigan narsalar (ovoz, tema) shu yerda,
+            har sahifaning tepa panelida emas. */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Sozlamalar</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            <AudioToggle />
+            <ThemeToggle />
+          </CardContent>
+        </Card>
       </main>
     </>
   );

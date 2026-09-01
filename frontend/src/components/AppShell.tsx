@@ -1,69 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Flame, Coins, Sun, Moon, Volume2, VolumeX, Search, Snowflake } from 'lucide-react';
+import { Flame, Coins, Search, Snowflake } from 'lucide-react';
 import StatNumber from '@/components/motion/StatNumber';
 import { useAuthStore } from '@/lib/auth-store';
 import { apiFetch, fetchMe } from '@/lib/api-client';
 import { decodeJwtPayload } from '@/lib/jwt';
-import { isAudioEnabled, setAudioEnabled, soundFX } from '@/lib/soundFX';
+import { soundFX } from '@/lib/soundFX';
 import CosmeticTheme from '@/components/student/CosmeticTheme';
 import Sidebar from './Sidebar';
 import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
-
-function ThemeToggle() {
-  const [dark, setDark] = useState(true);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('ilm_theme');
-    const isDark = saved !== 'light';
-    setDark(isDark);
-    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-  }, []);
-
-  function toggle() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.dataset.theme = next ? 'dark' : 'light';
-    localStorage.setItem('ilm_theme', next ? 'dark' : 'light');
-  }
-
-  return (
-    <button
-      onClick={toggle}
-      title="Mavzuni almashtirish"
-      className="rounded-xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-1.5 text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-    >
-      {dark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-[var(--accent-text)]" />}
-    </button>
-  );
-}
-
-function AudioToggle() {
-  const [enabled, setEnabled] = useState(true);
-
-  useEffect(() => { setEnabled(isAudioEnabled()); }, []);
-
-  function toggle() {
-    const next = !enabled;
-    setEnabled(next);
-    setAudioEnabled(next);
-    if (next) soundFX.click();
-  }
-
-  return (
-    <button
-      onClick={toggle}
-      title="Ovozli effektlar"
-      className="rounded-xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-1.5 text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-    >
-      {enabled ? <Volume2 className="h-4 w-4 text-[var(--accent-text)]" /> : <VolumeX className="h-4 w-4" />}
-    </button>
-  );
-}
 
 export default function AppShell() {
   const router = useRouter();
@@ -125,8 +74,6 @@ export default function AppShell() {
               <Search className="h-3.5 w-3.5" />
               <kbd className="font-mono text-xs">Ctrl K</kbd>
             </button>
-            <AudioToggle />
-            <ThemeToggle />
           </div>
         )}
       </header>

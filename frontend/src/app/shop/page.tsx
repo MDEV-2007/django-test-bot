@@ -53,8 +53,20 @@ export default function ShopPage() {
 
   const load = () => apiFetch<ShopData>('/api/shop/').then((d) => {
     setData(d);
-    setActiveTab((prev) => prev ?? Object.keys(d.categories)[0] ?? null);
-  });
+    /* Birinchi ko'rinadigan bo'lim — foydalanuvchi HALI SOTIB OLA OLADIGAN yoki
+       allaqachon egasi bo'lgan narsa bor kategoriya. Aks holda eng arzon kategoriya
+       birinchi ko'rsatiladi (odatda katalog tartibidagi eng qimmat "consumable" emas) —
+       aks holda yangi foydalanuvchi ikkita "Tanga yetarli emas" tugmasidan boshqa
+       hech narsa ko'rmaydi. */
+    const cats = Object.keys(d.categories);
+    const affordableCat = cats.find((cat) => d.categories[cat].some((i) => i.affordable || i.owned));
+    const cheapestCat = [...cats].sort((a, b) => {
+      const minA = Math.min(...d.categories[a].map((i) => i.price_coins));
+      const minB = Math.min(...d.categories[b].map((i) => i.price_coins));
+      return minA - minB;
+    })[0];
+    setActiveTab((prev) => prev ?? affordableCat ?? cheapestCat ?? cats[0] ?? null);
+  }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   useEffect(() => { if (access) load(); }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function act(slug: string, action: 'buy' | 'equip' | 'unequip', name: string) {

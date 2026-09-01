@@ -730,8 +730,11 @@ html[data-tg='on'] .min-h-screen-safe {
   min-height: var(--tg-viewport, 100svh);
 }
 
-/* Telegram o'zining "orqaga" tugmasini yuqorida ko'rsatadi, pastda esa tizim
-   chizig'i yo'q — shuning uchun tab-bar uchun qo'shimcha bo'shliq kerak emas. */
-html[data-tg='on'] nav.ilm-mobile-tabbar {
-  padding-bottom: 0.5rem;
-}
+/* MUHIM: bu yerda avvalgi qoida `env(safe-area-inset-bottom)`ni Telegram uchun
+   qattiq 0.5rem bilan almashtirar edi, "Telegram'da tizim chizig'i yo'q" degan
+   tekshirilmagan taxmin asosida. iOS'da Telegram Mini App to'liq ekranda ochilganda
+   ham iPhone'ning home indicator zonasi odatda hali ham bor — shu taxmin noto'g'ri
+   chiqsa, pastki tab-bar aynan shu chiziq bilan ustma-ust tushib qolardi. Endi
+   `nav.ilm-mobile-tabbar`ning umumiy qoidasi (yuqorida, `env(safe-area-inset-bottom)`
+   bilan) Telegram'da ham ishlaydi — notch yo'q qurilmada `env()` baribir 0ga teng
+   bo'ladi, shuning uchun bu hech qanday amaliy holatni yomonlashtirmaydi. */

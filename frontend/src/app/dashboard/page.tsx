@@ -171,7 +171,7 @@ export default function DashboardPage() {
      matnli unvon esa oddiy matn bo'lib qoladi. */
   const stats: {
     label: string; value: React.ReactNode; icon: typeof Flame;
-    tone: string; bg: string; href?: string; hint: string;
+    tone: string; bg: string; href?: string; hint: string; mono?: boolean;
   }[] = [
     {
       label: 'Uzluksizlik', value: <><StatNumber value={p.streak} /> kun</>, icon: Flame,
@@ -191,7 +191,10 @@ export default function DashboardPage() {
       hint: `Keyingi darajagacha ${xpLeft.toLocaleString('uz-UZ')} XP qoldi.`,
     },
     {
-      label: 'Arena unvoni', value: arenaRankTitle(p.elo_rating), icon: Swords,
+      /* Bu qiymat RAQAM emas, matnli unvon — Geist Mono'ning stilize harflari
+         (masalan "Navkar"dagi 'r') kichik o'lchamda boshqa harfga o'xshab ko'rinadi.
+         Mono shrift faqat raqamlar uchun mo'ljallangan (layout.tsx). */
+      label: 'Arena unvoni', value: arenaRankTitle(p.elo_rating), icon: Swords, mono: false,
       tone: 'text-[var(--tone-danger-text)]', bg: 'bg-[var(--tone-danger-soft)]', href: '/battles',
       hint: `Joriy ELO reytingi: ${p.elo_rating}.`,
     },
@@ -367,7 +370,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-xs text-muted-foreground">{s.label}</p>
-                    <p className="truncate font-mono text-base font-bold tabular-nums sm:text-lg">{s.value}</p>
+                    <p className={cn('truncate text-base font-bold sm:text-lg', s.mono !== false && 'font-mono tabular-nums')}>{s.value}</p>
                   </div>
                 </CardContent>
               </Card>
