@@ -1,0 +1,40 @@
+{
+  "boilerplate": "Tarix fanidan milliy sertifikat namunasidagi test topshiriqlari Davlatmirzo Tilavaddinov",
+  "yopiq": {
+    "1": "B", "2": "C", "3": "D", "4": "A", "5": "C", "6": "A", "7": "C", "8": "C", "9": "D", "10": "D",
+    "11": "A", "12": "C", "13": "D", "14": "B", "15": "A", "16": "B", "17": "C", "18": "A", "19": "B", "20": "A",
+    "21": "D", "22": "C", "23": "A", "24": "A", "25": "C", "26": "C", "27": "C", "28": "D", "29": "D", "30": "C",
+    "31": "A", "32": "C", "33": "D", "34": "C", "35": "A"
+  },
+  "yopiq_izoh": {
+    "1": "Izoh: U-Di (Xan sulolasi hukmdori), Sin emas.",
+    "4": "Izoh: Xronologiya — 1865 -> 1867 (Shim. Germaniya ittifoqi) -> 1867 (Tokugava) -> 1889 -> 1905 -> 1912.",
+    "11": "Izoh: Bekovich-Cherkasskiy (5) aslida Pyotr I davri, lekin variantlar ichida faqat A mantiqan to'g'ri chiqadi.",
+    "17": "Izoh: Minsk-2 — Rossiya (4), Ukraina (2), Germaniya (7), Fransiya (6).",
+    "18": "Izoh: 3 va 5 noto'g'ri — Bolgariyada germanparast hukumat keldi; 1914-yilgi konstitutsiyada cheklanmagan hokimiyatni Yuan Shikay oldi.",
+    "22": "Diqqat: C va D orasida farq faqat V. Ivanov (8) yoki M. Saidjonov (9) orasida. Vladimir Ivanov shu davrda O'zbekiston KP(b) MK birinchi kotibi bo'lgani uchun C tanlandi, lekin bu 100% aniq emas.",
+    "30": "Diqqat: Boysun madaniy muhiti 2001-yilda \"durdona\" deb e'tirof etilgan, 2008-yilda esa Reprezentativ ro'yxatga kiritilgan. Darslik varianti C."
+  },
+  "yozma": {
+    "36": ["Konrad III", "Gogenshtaufenlar sulolasi"],
+    "37": ["Norvegiya (Oslo muzokaralari)", "Bill Klinton"],
+    "38": ["Avstriya-Vengriya", "Viktor Emmanuil III"],
+    "39": ["Hazorasp yaqinida", "Oltintosh (Oltuntosh)"],
+    "40": ["Lal Bahodur Shastri", "Rahmonqul Qurbonov"],
+    "41": ["Yassi (Turkiston), O'tror va Shohruxiya", "Abulqosim Bobur Mirzo"],
+    "42": ["Xurosonning shimoli — Durun, Nisa, Obivard, Mashhadgacha", "Din Muhammad Sulton"],
+    "43": ["Jerald Ford", "Vyetnam Sotsialistik Respublikasi"],
+    "44": ["Zakaspiy viloyati", "Sirdaryo viloyati"],
+    "45": ["Vladimir Ivanov", "Fayzulla Xo'jayev"]
+  },
+  "yozma_izoh": {
+    "41": "Bu uchlik darsliklarda turlicha berilgan — o'z manbangizdan tekshiring.",
+    "42": "\"Din Muhammad Sulton\" javobi manbada belgi bilan qayd etilgan — tasdiqlashdan oldin tekshiring."
+  },
+  "yozma_bandlar": {
+    "45": [
+      "O'zbekiston SSR MKning birinchi kotibi",
+      "O'zbekiston SSR Xalq Komissarlari Sovetining raisi"
+    ]
+  }
+}
