@@ -248,6 +248,30 @@ def me_api(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def subscription_api(request):
+    """Majburiy kanal obunasi holati (telegrambot/subscription.py).
+
+    Alohida endpoint, `me_api` ichida emas: javob Telegramga tarmoq so'rovi bo'lishi mumkin,
+    va u ilovaning eng issiq yo'lini (har ochilishdagi /me/) sekinlashtirmasligi kerak."""
+    from telegrambot.subscription import state_for
+
+    profile = ensure_profile_for_user(request.user)
+    return Response(state_for(profile))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def subscription_check_api(request):
+    """"Tekshirdim" tugmasi: keshni chetlab o'tib, Telegramdan yangi javob oladi."""
+    from telegrambot.subscription import invalidate, state_for
+
+    profile = ensure_profile_for_user(request.user)
+    invalidate(profile.telegram_id)
+    return Response(state_for(profile, use_cache=False))
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def profile_api(request):
     from battles.models import Battle
     from django.db.models import Q as _Q

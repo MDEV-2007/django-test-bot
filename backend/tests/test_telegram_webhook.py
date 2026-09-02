@@ -7,8 +7,13 @@ from django.test import TestCase, override_settings
 
 SECRET = 'test-webhook-secret'
 
+# Majburiy kanal obunasi bu yerda o'chiriladi: yoqilgan bo'lsa /start har bir testda
+# Telegramga haqiqiy getChatMember so'rovini yuborardi (ishlab chiquvchining .env dagi
+# haqiqiy tokeni bilan). Gate'ning o'zi tests/test_channel_subscription.py da sinaladi.
+NO_GATE = dict(REQUIRE_CHANNEL_SUBSCRIPTION=False)
 
-@override_settings(TELEGRAM_WEBHOOK_SECRET=SECRET)
+
+@override_settings(TELEGRAM_WEBHOOK_SECRET=SECRET, **NO_GATE)
 class WebhookAuthTests(TestCase):
     url = '/telegram/webhook/'
     payload = json.dumps({
@@ -45,7 +50,7 @@ class WebhookAuthTests(TestCase):
         submit.assert_not_called()
 
 
-@override_settings(TELEGRAM_WEBHOOK_SECRET='')
+@override_settings(TELEGRAM_WEBHOOK_SECRET='', **NO_GATE)
 class WebhookUnconfiguredTests(TestCase):
     def test_refuses_to_run_without_a_configured_secret(self):
         response = self.client.post('/telegram/webhook/', '{}',
@@ -54,7 +59,7 @@ class WebhookUnconfiguredTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
-@override_settings(TELEGRAM_WEBHOOK_SECRET=SECRET)
+@override_settings(TELEGRAM_WEBHOOK_SECRET=SECRET, **NO_GATE)
 class WebhookHandlerTests(TestCase):
     @patch('telegrambot.handlers.send_message')
     def test_start_creates_a_profile_for_a_new_telegram_user(self, send_message):

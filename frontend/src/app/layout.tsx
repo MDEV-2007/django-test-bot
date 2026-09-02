@@ -8,6 +8,7 @@ import MotionProvider from "@/components/motion/MotionProvider";
 import Script from "next/script";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TelegramProvider from "@/components/TelegramProvider";
+import SubscriptionGate from "@/components/SubscriptionGate";
 
 /* Uch shriftli tizim (UI_UX_ANALIZ_VA_REJA.md, 2.1-bo'lim):
    - Plus Jakarta Sans — butun interfeys matni. Inter'ga nisbatan x-height'i baland,
@@ -76,7 +77,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             qiladi, shuning uchun bir marta shu yerda o'rnatiladi. */}
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              {children}
+              {/* Majburiy kanal obunasi — kirgan foydalanuvchi obuna bo'lmagan
+                  bo'lsagina butun ekranni yopadi (qarang: SubscriptionGate). */}
+              <SubscriptionGate />
+            </AuthProvider>
           </TooltipProvider>
         </MotionProvider>
         <Toaster position="top-right" />

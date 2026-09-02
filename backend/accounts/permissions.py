@@ -122,3 +122,23 @@ class IsSuperAdmin(BasePermission):
     def has_permission(self, request, view):
         profile = _profile(request.user)
         return bool(profile and profile.is_superadmin)
+
+
+class IsChannelSubscribed(BasePermission):
+    """Majburiy Telegram kanal obunasi (telegrambot/subscription.py).
+
+    Ikkinchi qatlam: bot /start da obunani so'raydi, lekin Mini App'ni to'g'ridan-to'g'ri
+    havola bilan ochish yoki obunadan keyin kanalni tark etish mumkin. Shuning uchun eng
+    qimmatli amallar (test boshlash, AI mentor) serverda ham tekshiriladi.
+
+    Telegram hisobi ulanmagan foydalanuvchi (faqat sayt orqali kirgan) tekshirib bo'lmaydi
+    — `is_subscribed` unga True qaytaradi, ya'ni sayt foydalanuvchisi bloklanmaydi."""
+    message = "Davom etish uchun rasmiy Telegram kanalimizga obuna bo'ling."
+
+    def has_permission(self, request, view):
+        from telegrambot.subscription import is_subscribed
+
+        profile = _profile(request.user)
+        if profile is None:
+            return True
+        return is_subscribed(profile.telegram_id)

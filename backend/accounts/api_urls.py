@@ -13,5 +13,7 @@ urlpatterns = [
     path('refresh/', api.SafeTokenRefreshView.as_view(), name='refresh'),
     path('me/', api.me_api, name='me'),
     path('profile/', api.profile_api, name='profile'),
+    path('subscription/', api.subscription_api, name='subscription'),
+    path('subscription/check/', api.subscription_check_api, name='subscription_check'),
     path('onboarding-complete/', api.onboarding_complete_api, name='onboarding_complete'),
 ]

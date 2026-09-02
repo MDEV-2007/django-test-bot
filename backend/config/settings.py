@@ -97,6 +97,13 @@ ADMIN_TELEGRAM_CHAT_ID = os.environ.get('ADMIN_TELEGRAM_CHAT_ID', '')
 # @channelusername for a public channel). The bot must be an admin of this channel.
 TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID', '')
 
+# Majburiy obuna: foydalanuvchi shu kanalga a'zo bo'lmaguncha bot menyusi ham, Mini App
+# ham ochilmaydi (qarang: telegrambot/subscription.py). `@username` yoki raqamli `-100...`
+# id. Botning O'ZI shu kanalda ADMIN bo'lishi shart — aks holda getChatMember ishlamaydi
+# va gate ataylab "ochiq" holatga tushadi (hech kim bloklanmaydi).
+TELEGRAM_REQUIRED_CHANNEL = os.environ.get('TELEGRAM_REQUIRED_CHANNEL', '@ilmildizi')
+REQUIRE_CHANNEL_SUBSCRIPTION = os.environ.get('REQUIRE_CHANNEL_SUBSCRIPTION', '1') == '1'
+
 # Google OAuth client id for "Sign in with Google" on the website (NOT the Telegram Mini
 # App). Create an OAuth 2.0 Web client at https://console.cloud.google.com/apis/credentials
 # and add your site origin(s) to "Authorized JavaScript origins". When empty, the Google

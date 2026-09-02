@@ -152,6 +152,7 @@ Everything scale-related is an **environment variable** — no code changes.
 | `REDIS_URL` | Moves **cache and sessions** to Redis (shared across workers) |
 | `DEBUG=False` | HTTPS redirect, HSTS, secure cookies, hashed + compressed static |
 | `TELEGRAM_WEBHOOK_SECRET` | Required — the webhook refuses to run without it |
+| `TELEGRAM_REQUIRED_CHANNEL` | Channel users must join before the bot or Mini App opens (`@ilmildizi`). **The bot must be an admin of it**, otherwise the check cannot run and the gate deliberately falls open. Set `REQUIRE_CHANNEL_SUBSCRIPTION=0` to turn it off |
 
 > Served by **Daphne** (ASGI) rather than gunicorn — needed for Battle Arena's live PvP
 > WebSockets. Unlike gunicorn, Daphne isn't `fork()`-only, so `manage.py runserver` (which
@@ -194,6 +195,52 @@ it installs.
 
 ---
 
+## PDF test import
+
+`import_pdf_tests` reads a digitally generated exam paper and creates one **unpublished**
+TestSet from it, so a 45-question paper does not have to be typed in by hand.
+
+```bash
+python manage.py import_pdf_tests tests.pdf --title "Tarix — 1-variant" --dry-run
+python manage.py import_pdf_tests tests.pdf --title "Tarix — 1-variant" --duration 90
+```
+
+What it recovers, all of it straight from the PDF's text layer rather than from a model
+reading a picture of the page:
+
+- question numbers, bodies and `A) B) C) D)` options, including options printed several
+  to a line and questions that continue across a page break;
+- tables, re-rendered as HTML into the question body (`table_based`) - including the
+  matching questions whose "table" is drawn with no ruling lines at all, as two columns
+  of aligned markers (I, II, III... and a, b, c...) that are rebuilt from their positions;
+- sub-items, one per line: a paper prints "1) ...; 2) ...; 3) ...;" packed onto one line,
+  and run together they are unreadable;
+- maps and Euler-Venn diagrams, cropped out of the page and attached as the question's
+  image (`image_based`) — the picture is kept as a picture, not described in words;
+- shared A–F answer banks and the items that use them (`grouped_item`);
+- written questions with their lettered sub-parts (`open_written` + `SubQuestion`).
+
+Correct answers are the one thing an exam paper does not print. They are guessed through
+the usual `core.ai_client` chain (Groq, then local Ollama) and carry a confidence; a guess
+below the threshold is left unmarked and listed in the report instead of pre-selected.
+Image-based questions are refused outright, since the answer is in a picture the text
+model cannot see. **The imported set is always a draft — check the answers before
+publishing.** `--no-ai` skips the guessing entirely and imports every question unanswered.
+
+Scanned (image-only) PDFs are rejected with a clear error rather than silently importing
+nothing; they would need an OCR step this command does not do.
+
+### Reviewing the answers
+
+Super Admin panel: **Testlar → (test) → Javoblarni tekshirish** (`/panel/tests/<id>/review`).
+Questions come one at a time with their image and table rendered as the student will see
+them; `A`–`F` or `1`–`6` picks an option and moves on, `←`/`→` walks the list, and a filter
+narrows it to the questions still missing an answer. Written questions get a reference
+answer per sub-part instead — that is what the AI grader compares a student's text against.
+The publish button only appears once nothing is left to review.
+
+---
+
 ## Useful commands
 
 | Command | Purpose |
@@ -204,6 +251,7 @@ it installs.
 | `python manage.py run_bot_polling` | Local bot without a public URL |
 | `python manage.py send_streak_reminders` | Daily Telegram streak nudge |
 | `python manage.py backup_data` | Back up the database + media to `BACKUP_DIR` |
+| `python manage.py import_pdf_tests <file.pdf>` | Import a whole exam PDF as one draft test |
 | `python manage.py test tests` | Run the test suite |
 
 ---

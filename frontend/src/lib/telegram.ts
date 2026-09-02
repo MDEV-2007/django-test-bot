@@ -54,6 +54,7 @@ export type TelegramWebApp = {
   enableClosingConfirmation(): void;
   disableClosingConfirmation(): void;
   disableVerticalSwipes?(): void;
+  openTelegramLink?(url: string): void;
   setHeaderColor?(color: string): void;
   setBackgroundColor?(color: string): void;
   onEvent(event: string, cb: () => void): void;
@@ -288,4 +289,18 @@ export function useIsTelegram(): boolean {
   }, []);
 
   return inTelegram;
+}
+
+/* ── Telegram havolasini ochish ────────────────────────────────── */
+
+/** t.me havolasini Telegram ILOVASI ichida ochadi. Mini App ichidan oddiy `window.open`
+ *  brauzerni ochadi — foydalanuvchi kanalga obuna bo'lish uchun ilovani tark etadi va
+ *  ko'pincha qaytmaydi. `openTelegramLink` esa ilova ichida kanal sahifasiga o'tkazadi.
+ *  Telegramdan tashqarida yangi tabda ochiladi. */
+export function openTelegramLink(url: string) {
+  const wa = getWebApp();
+  if (wa?.openTelegramLink) {
+    try { wa.openTelegramLink(url); return; } catch { /* eski versiya */ }
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
 }

@@ -17,6 +17,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.utils import timezone
 
+from . import subscription
 from .client import answer_callback, download_file, send_message
 
 logger = logging.getLogger(__name__)
@@ -65,8 +66,50 @@ def get_or_create_profile(tg_user, referral_code=None):
     return profile
 
 
+
+def send_subscribe_prompt(chat_id):
+    """Kanalga obuna so'raladigan yagona ekran. Bu yerda "keyinroq" tugmasi ATAYLAB yo'q:
+    yumshoq gate'ni deyarli hech kim bosmaydi, natijada kanal ham o'smaydi, foydalanuvchi
+    ham ikki marta bezovta qilinadi."""
+    url = subscription.channel_url()
+    rows = []
+    if url:
+        rows.append([{'text': "📢 Kanalga obuna bo'lish", 'url': url}])
+    rows.append([{'text': "✅ Tekshirish", 'callback_data': 'check_subscription'}])
+    send_message(
+        chat_id,
+        "Assalomu alaykum!\n\n"
+        "IlmIldizi'dan foydalanish uchun avval rasmiy kanalimizga obuna bo'ling. "
+        "Kanalda kunlik testlar, yangi funksiyalar va loyiha yangiliklari e'lon qilinadi.\n\n"
+        "Obuna bo'lgach, ✅ Tekshirish tugmasini bosing.",
+        reply_markup={'inline_keyboard': rows},
+    )
+
+
+def gate_blocks(chat_id, tg_user):
+    """True bo'lsa — foydalanuvchi obuna emas va unga obuna ekrani yuborildi."""
+    if subscription.is_subscribed(tg_user.get('id')):
+        return False
+    send_subscribe_prompt(chat_id)
+    return True
+
+
+def handle_check_subscription(chat_id, tg_user, callback_query_id):
+    """"Tekshirish" tugmasi: keshni tashlab, Telegramdan yangi javob olamiz."""
+    subscription.invalidate(tg_user.get('id'))
+    if subscription.is_subscribed(tg_user.get('id'), use_cache=False):
+        answer_callback(callback_query_id, "Rahmat! Obuna tasdiqlandi.")
+        handle_start(chat_id, tg_user)
+    else:
+        answer_callback(callback_query_id, "Hali obuna ko'rinmadi. Obuna bo'lib, qayta bosing.")
+
+
 def handle_start(chat_id, tg_user, referral_code=None):
+    # Profil gate'dan OLDIN yaratiladi: referal havolasi bilan kelgan foydalanuvchi obuna
+    # bo'lish uchun chatdan chiqib ketsa ham, taklif qilgan do'sti bonusini yo'qotmaydi.
     get_or_create_profile(tg_user, referral_code=referral_code)
+    if gate_blocks(chat_id, tg_user):
+        return
 
     # Telegram silently rejects "web_app" buttons whose URL isn't HTTPS — the whole
     # sendMessage call fails and nothing reaches the user. Fall back to a plain "url"
@@ -204,7 +247,12 @@ def process_update(update):
         cq = update['callback_query']
         chat_id = cq['message']['chat']['id']
         data = cq.get('data', '')
+        if data == 'check_subscription':
+            handle_check_subscription(chat_id, cq['from'], cq['id'])
+            return
         answer_callback(cq['id'])
+        if gate_blocks(chat_id, cq['from']):
+            return
         if data == 'premium_menu':
             handle_premium_menu(chat_id)
         elif data == 'referral_info':
@@ -219,11 +267,16 @@ def process_update(update):
     chat_id = msg['chat']['id']
     tg_user = msg['from']
 
+    text = msg.get('text', '')
+    # /start ning o'zi gate'ni ichida bajaradi (profil + referal avval yaratilishi kerak);
+    # qolgan hamma narsa shu yerda to'xtatiladi.
+    if not text.startswith('/start') and gate_blocks(chat_id, tg_user):
+        return
+
     if 'photo' in msg:
         handle_photo(chat_id, tg_user, msg['photo'])
         return
 
-    text = msg.get('text', '')
     if text.startswith('/start'):
         # Deep link: t.me/<bot>?start=CODE arrives as the literal text "/start CODE".
         parts = text.split(maxsplit=1)

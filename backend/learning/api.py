@@ -10,9 +10,11 @@ from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.permissions import IsChannelSubscribed
 from core.ai_client import ask_groq_stream
 from tests_app.models import Subject
 from tests_app.subject_utils import resolve_subject
@@ -25,6 +27,8 @@ from .services import (
 
 
 class MentorStreamAPI(APIView):
+    permission_classes = [IsAuthenticated, IsChannelSubscribed]
+
     def post(self, request):
         if _mentor_rate_limited(request.user.id):
             return HttpResponse('Juda ko\'p so\'rov yubordingiz, biroz kuting.', status=429, content_type='text/plain')

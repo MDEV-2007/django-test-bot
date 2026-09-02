@@ -15,6 +15,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import ensure_profile_for_user
+from accounts.permissions import IsChannelSubscribed
 from .models import (
     AIFeedback, AnswerOption, Attempt, AttemptAnswer, GroupOption, Question,
     RevisionItem, Subject, TestSet,
@@ -147,6 +148,7 @@ def _new_attempt(profile, test):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
 def start_test_api(request, test_id):
     test = get_object_or_404(TestSet, id=test_id)
     profile = ensure_profile_for_user(request.user)
@@ -164,6 +166,7 @@ def start_test_api(request, test_id):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
 def start_random_test_api(request):
     seed_questions_if_needed()
     profile = ensure_profile_for_user(request.user)
@@ -190,6 +193,7 @@ def start_random_test_api(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
 def start_mistakes_test_api(request):
     profile = ensure_profile_for_user(request.user)
     subject, _ = _resolve_subject(request)
