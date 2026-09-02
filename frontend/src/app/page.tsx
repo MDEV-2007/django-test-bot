@@ -103,6 +103,19 @@ const STEPS = [
 type PlanCard = {
   name: string; price: string; unit: string; text: string;
   features: string[]; cta: string; href: string; highlight: boolean;
+  /** "≈ 500 so'm/kun" — faqat muddatli tariflarda. */
+  perDay?: string;
+  /** Kartaning tepasidagi lenta ("TAVSIYA ETAMIZ"). */
+  ribbon?: string;
+};
+
+/* Lentalar Premium sahifasi bilan AYNAN bir xil bo'lishi shart — o'quvchi landingda
+   bir narsani, ichkarida boshqasini ko'rmasligi kerak. Matnlar ataylab tekshirib
+   bo'ladigan gaplar: "eng ommabop" kabi (bir necha foydalanuvchi bo'lgan paytda
+   yolg'on) ijtimoiy dalil emas. */
+const RIBBONS: Record<number, string> = {
+  180: 'TAVSIYA ETAMIZ',
+  365: 'ENG PAST OYLIK NARX',
 };
 
 /* Bepul tarif — bazada yo'q (u "to'lov qilmaslik" degani), shuning uchun bu yerda
@@ -124,24 +137,36 @@ const FREE_PLAN: PlanCard = {
 const FALLBACK_PLANS: PlanCard[] = [
   FREE_PLAN,
   {
-    name: 'Mock test',
-    price: '15 000',
-    unit: "so'm / bir martalik",
-    text: "Rasmiy formatdagi mock testlar — imtihon sharoitida, batafsil tahlil bilan.",
-    features: ['Rasmiy imtihon formati', 'Taymer va ball hisobi', "Xatolar bo'yicha tahlil", 'Muddatsiz kirish'],
-    cta: 'Mock testni ochish',
-    href: '/premium',
-    highlight: false,
+    name: 'PRO — Oylik',
+    price: '25 000', unit: "so'm / 30 kun", perDay: "≈ 833 so'm/kun",
+    text: "Barcha mock testlar va kengaytirilgan AI Mentor. Istalgan vaqtda to'xtatasiz.",
+    features: ['Barcha mock testlar — cheklovsiz kirish', 'AI Mentor: kuniga 50 savol', '30 kun amal qiladi'],
+    cta: 'Obunani boshlash', href: '/premium', highlight: false,
   },
   {
-    name: 'PRO obuna',
-    price: '25 000',
-    unit: "so'm / oy",
-    text: "Barcha mock testlar va kengaytirilgan AI Mentor. 6 va 12 oylik variantlari arzonroq.",
-    features: ['Barcha mock testlar', 'AI Mentor: kuniga 50 savol', 'Batafsil tahlil', '6/12 oylik chegirma'],
-    cta: "Tariflarni ko'rish",
-    href: '/premium',
-    highlight: true,
+    name: 'PRO — 6 oylik',
+    price: '90 000', unit: "so'm / 180 kun", perDay: "≈ 500 so'm/kun",
+    ribbon: RIBBONS[180],
+    text: "Milliy sertifikat imtihoniga to'liq tayyorgarlik davri uchun.",
+    features: ['Barcha mock testlar — cheklovsiz kirish', 'AI Mentor: kuniga 50 savol',
+               "15 000 so'm/oy — oylikka nisbatan 40% arzon"],
+    cta: 'Obunani boshlash', href: '/premium', highlight: true,
+  },
+  {
+    name: 'PRO — 12 oylik',
+    price: '150 000', unit: "so'm / 365 kun", perDay: "≈ 411 so'm/kun",
+    ribbon: RIBBONS[365],
+    text: "Eng past oylik narx. Butun o'quv yili davomida amal qiladi.",
+    features: ['Barcha mock testlar — cheklovsiz kirish', 'AI Mentor: kuniga 50 savol',
+               "12 500 so'm/oy — eng past oylik narx"],
+    cta: 'Obunani boshlash', href: '/premium', highlight: false,
+  },
+  {
+    name: 'Mock test — bir martalik',
+    price: '15 000', unit: "so'm (bir martalik)",
+    text: "Bitta to'lov, muddatsiz kirish. AI Mentor chegarasi obunasiz darajada qoladi.",
+    features: ['Barcha rasmiy mock testlar', 'Muddatsiz kirish', 'AI natija tahlili'],
+    cta: 'Mock testni ochish', href: '/premium', highlight: false,
   },
 ];
 
@@ -161,39 +186,36 @@ type ApiPlan = {
 async function loadPlans(): Promise<PlanCard[]> {
   try {
     const base = process.env.BACKEND_ORIGIN || 'http://127.0.0.1:8001';
-    const res = await fetch(`${base}/api/premium/public-plans/`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${base}/api/premium/public-plans/`, { next: { revalidate: 300 } });
     if (!res.ok) return FALLBACK_PLANS;
 
     const data: { plans: ApiPlan[] } = await res.json();
-    const mock = data.plans.find((p) => p.plan_type === 'mock_test');
-    // Oylik tarif — obuna narxining "boshlanish nuqtasi" sifatida ko'rsatiladi.
-    const monthly = data.plans.find((p) => p.plan_type !== 'mock_test' && p.duration_days === 30);
-    if (!mock || !monthly) return FALLBACK_PLANS;
+    if (!data.plans?.length) return FALLBACK_PLANS;
 
     const sum = (value: string) => Math.round(Number(value)).toLocaleString('uz-UZ');
-    return [
-      FREE_PLAN,
-      {
-        name: 'Mock test',
-        price: sum(mock.price),
-        unit: "so'm / bir martalik",
-        text: mock.description,
-        features: mock.features,
-        cta: 'Mock testni ochish',
+    // Barcha tariflar ko'rsatiladi — Premium sahifasi bilan bir xil ro'yxat. Ilgari
+    // landingda faqat ikkitasi (oylik + mock) chiqardi va 6/12 oylik chegirmalar
+    // ko'rinmasdi: eng foydali variantlar aynan o'shalar bo'lsa ham.
+    const cards: PlanCard[] = data.plans.map((plan) => {
+      const oneOff = plan.duration_days === 0;
+      return {
+        name: plan.name,
+        price: sum(plan.price),
+        unit: oneOff ? "so'm (bir martalik)" : `so'm / ${plan.duration_days} kun`,
+        perDay: oneOff
+          ? undefined
+          : `≈ ${sum(String(Number(plan.price) / plan.duration_days))} so'm/kun`,
+        ribbon: RIBBONS[plan.duration_days],
+        text: plan.description,
+        features: plan.features,
+        cta: oneOff ? 'Mock testni ochish' : 'Obunani boshlash',
         href: '/premium',
-        highlight: false,
-      },
-      {
-        name: 'PRO obuna',
-        price: sum(monthly.price),
-        unit: "so'm / oy",
-        text: monthly.description,
-        features: monthly.features,
-        cta: "Tariflarni ko'rish",
-        href: '/premium',
-        highlight: true,
-      },
-    ];
+        // Tavsiya etilgan tarif ajratib ko'rsatiladi — Premium sahifasidagi kabi.
+        highlight: plan.duration_days === 180,
+      };
+    });
+
+    return [FREE_PLAN, ...cards];
   } catch {
     return FALLBACK_PLANS;
   }
@@ -380,24 +402,34 @@ export default async function LandingPage() {
             </p>
           </RevealOnScroll>
 
-          <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {/* Beshta karta: bepul + uchta obuna muddati + bir martalik mock test.
+              Premium sahifasidagi ro'yxat bilan bir xil — landingda bir narsani,
+              ichkarida boshqasini ko'rsatish mumkin emas. */}
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {plans.map((p, i) => (
               <RevealOnScroll key={p.name} index={i}>
-                <Card className={`h-full ${p.highlight ? 'border-[var(--accent-border)] ring-1 ring-[var(--accent)]/25' : ''}`}>
+                <Card className={`relative h-full ${p.highlight ? 'border-[var(--accent-border)] ring-1 ring-[var(--accent)]/25' : ''}`}>
+                  {p.ribbon && (
+                    /* `top-0` — karta ICHIDA. `Card` komponentida `overflow-hidden`
+                       bor, shuning uchun kartadan tashqariga chiqarilgan lenta
+                       (`-top-2.5`) kesilib qolardi. Premium sahifasida ham xuddi
+                       shu usul: lenta yuqori chetdan osilib turadi. */
+                    <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-b-lg bg-[var(--accent)] px-3 py-1 font-mono text-[11px] font-bold text-[var(--on-accent)] shadow-md">
+                      {p.ribbon}
+                    </span>
+                  )}
                   <CardContent className="flex h-full flex-col gap-4 pt-6">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold">{p.name}</h3>
-                        {p.highlight && (
-                          <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-semibold text-[var(--accent-text)]">
-                            Ommabop
-                          </span>
-                        )}
-                      </div>
+                      <h3 className="text-lg font-semibold">{p.name}</h3>
                       <p className="mt-3 flex items-baseline gap-1.5">
                         <span className="font-mono text-3xl font-bold">{p.price}</span>
                         <span className="text-xs text-muted-foreground">{p.unit}</span>
                       </p>
+                      {/* Kunlik narx — uzoq muddatli tarifni taqqoslashning eng oson
+                          yo'li (Premium sahifasida ham shunday ko'rsatiladi). */}
+                      {p.perDay && (
+                        <p className="mt-0.5 font-mono text-xs text-[var(--text-faint)]">{p.perDay}</p>
+                      )}
                     </div>
 
                     <p className="text-sm leading-relaxed text-muted-foreground">{p.text}</p>
