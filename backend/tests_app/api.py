@@ -77,6 +77,22 @@ def center_api(request):
     tests = TestSet.objects.filter(is_random=False, is_archived=False, is_published=True)
     if subject:
         tests = tests.filter(subject=subject)
+
+    # Imtihon turlari ro'yxati TANLANGAN FANDAN kelib chiqadi: CEFR faqat ingliz
+    # tilida, "Tarix" faqat tarixda ko'rinishi kerak — ilgari frontendda qattiq
+    # yozilgan umumiy ro'yxat ishlatilgani uchun Tarix ostida ham CEFR chiqib turardi.
+    #
+    # Ro'yxat qattiq yozilmaydi, MAVJUD testlardan hisoblanadi: yangi fan yoki
+    # kategoriya qo'shilganda hech narsa tahrirlanmaydi, o'zi to'g'ri qoladi.
+    #
+    # MUHIM: kategoriya filtri qo'llanishidan OLDIN hisoblanadi — aks holda bitta
+    # kategoriya tanlangach ro'yxat o'sha bittaga qisqarib, boshqasiga o'tib bo'lmay
+    # qolardi. `order_by()` — DISTINCT bilan tartiblash maydoni SELECT'ga tushib
+    # ketmasligi uchun (Postgres bunga xato beradi).
+    available_categories = sorted(
+        tests.order_by().exclude(category='').values_list('category', flat=True).distinct()
+    )
+
     tests = tests.select_related('subject').annotate(
         q_count=Count('questions', distinct=True),
         open_count=Count(
@@ -85,6 +101,7 @@ def center_api(request):
             distinct=True,
         ),
     ).order_by('-created_at')
+
     if category != 'all':
         tests = tests.filter(category=category)
     if search_query:
@@ -132,6 +149,8 @@ def center_api(request):
         ],
         'selected_subject': subject.slug if subject else None,
         'selected_category': category,
+        # Shu fanda haqiqatan mavjud imtihon turlari — filtr shundan quriladi.
+        'available_categories': available_categories,
         'selected_answer_mode': answer_mode,
         'search_query': search_query,
         'total_attempts': stats['total'] or 0,

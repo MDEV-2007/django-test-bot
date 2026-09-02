@@ -35,6 +35,8 @@ type CenterData = {
   subjects: { id: number; name: string; slug: string; color?: string; icon_name?: string }[];
   selected_subject: string | null;
   selected_category: string;
+  /* Shu fanda mavjud imtihon turlari — filtr shundan quriladi (tests_app/api.py). */
+  available_categories: string[];
   selected_answer_mode: string;
   search_query: string;
   total_attempts: number;
@@ -135,6 +137,23 @@ export default function TestsPage() {
   // ikkalasini bog'laydi.
   const subjects = subjectIndex(data?.subjects);
 
+  /* Shu fanda haqiqatan mavjud imtihon turlari. Server `available_categories`ni
+     tanlangan fan bo'yicha hisoblaydi, ya'ni CEFR faqat ingliz tilida, "Tarix" faqat
+     tarixda chiqadi. Ma'lumot hali kelmagan bo'lsa — hech narsa ko'rsatmaymiz. */
+  const availableCategories = data?.available_categories;
+  const visibleCategories = availableCategories
+    ? CATEGORIES.filter((c) => c.value === 'all' || availableCategories.includes(c.value))
+    : [];
+
+  /* Fan almashtirilganda eski kategoriya filtri qolib ketardi: masalan Tarixda
+     "Tarix"ni tanlab, Ona tiliga o'tsangiz filtr o'sha holicha qolib, ro'yxat doim
+     bo'sh chiqardi ("0 ta test topildi"). Tanlangan tur yangi fanda bo'lmasa —
+     "Barchasi"ga qaytariladi. */
+  useEffect(() => {
+    if (!availableCategories) return;
+    if (category !== 'all' && !availableCategories.includes(category)) setCategory('all');
+  }, [availableCategories, category]);
+
   return (
     <>
       <AppShell />
@@ -207,11 +226,19 @@ export default function TestsPage() {
         )}
 
         <div className="flex flex-col gap-3">
-          <Tabs value={category} onValueChange={setCategory}>
-            <TabsList>
-              {CATEGORIES.map((c) => <TabsTrigger key={c.value} value={c.value}>{c.label}</TabsTrigger>)}
-            </TabsList>
-          </Tabs>
+          {/* Faqat SHU FANDA mavjud imtihon turlari ko'rsatiladi (ro'yxat serverdan
+              keladi). Ilgari bu yerda umumiy ro'yxat turardi va natijada Ona tili yoki
+              Biologiya ostida ham "Tarix", "CEFR" kabi mos kelmaydigan turlar chiqib
+              turardi. Bitta tur qolsa filtrning ma'nosi yo'q — umuman ko'rsatilmaydi. */}
+          {visibleCategories.length > 1 && (
+            <Tabs value={category} onValueChange={setCategory}>
+              <TabsList>
+                {visibleCategories.map((c) => (
+                  <TabsTrigger key={c.value} value={c.value}>{c.label}</TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          )}
 
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <Tabs value={answerMode} onValueChange={setAnswerMode}>
