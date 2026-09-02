@@ -7,7 +7,7 @@ import time
 from django.conf import settings
 from django.http import FileResponse, Http404
 from PIL import Image, UnidentifiedImageError
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -18,6 +18,28 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from accounts.models import ensure_profile_for_user
 from .models import Payment, SubscriptionPlan
 from .services import ALLOWED_IMAGE_FORMATS, seed_plans_if_needed, validate_screenshot
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def public_plans_api(request):
+    """Tariflar ro'yxati — KIRMAGAN foydalanuvchi uchun (landing sahifasi).
+
+    Nega alohida endpoint: `plans_api` foydalanuvchining o'z holatini ham qaytaradi
+    (`is_premium`, obuna muddati) va shuning uchun autentifikatsiya talab qiladi.
+    Landing sahifasi esa ochiq — u yerda faqat narxlar kerak.
+
+    Nega umuman API orqali: narxlar ilgari landing sahifasida QO'LDA yozilgan edi va
+    tariflar o'zgargach eskirib qoldi — sayt 25 000 so'mga "barcha video va audio
+    darslar"ni va'da qilib turaverdi. Endi manba bitta: premium/plan_catalog.py."""
+    seed_plans_if_needed()
+    plans = SubscriptionPlan.objects.filter(is_active=True)
+    return Response({
+        'plans': [{
+            'id': p.id, 'plan_type': p.plan_type, 'name': p.name, 'description': p.description,
+            'price': str(p.price), 'duration_days': p.duration_days, 'features': p.features,
+        } for p in plans],
+    })
 
 
 @api_view(['GET'])

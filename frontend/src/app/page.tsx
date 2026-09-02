@@ -100,38 +100,104 @@ const STEPS = [
   },
 ];
 
-const PLANS = [
-  {
-    name: 'Bepul',
-    price: '0',
-    unit: "so'm",
-    text: "Kundalik mashq testlari, arena, mini o'yinlar, reyting va asosiy tahlil.",
-    features: ['Mashq testlari', '1v1 Arena', 'Kunlik missiyalar', 'Reyting va yutuqlar'],
-    cta: 'Bepul boshlash',
-    href: '/register',
-    highlight: false,
-  },
+type PlanCard = {
+  name: string; price: string; unit: string; text: string;
+  features: string[]; cta: string; href: string; highlight: boolean;
+};
+
+/* Bepul tarif — bazada yo'q (u "to'lov qilmaslik" degani), shuning uchun bu yerda
+   qo'lda turadi. Qolgan ikkitasi serverdan olinadi. */
+const FREE_PLAN: PlanCard = {
+  name: 'Bepul',
+  price: '0',
+  unit: "so'm",
+  text: "Kundalik mashq testlari, arena, mini o'yinlar, reyting va asosiy tahlil.",
+  features: ['Mashq testlari', '1v1 Arena', 'Kunlik missiyalar', 'Reyting va yutuqlar'],
+  cta: 'Bepul boshlash',
+  href: '/register',
+  highlight: false,
+};
+
+/* Server javob bermasa ishlatiladigan zaxira. Landing — saytning eng ko'p ochiladigan
+   sahifasi, u API ishlamay qolgani uchun buzilmasligi kerak. Qiymatlar
+   premium/plan_catalog.py bilan mos yozilgan. */
+const FALLBACK_PLANS: PlanCard[] = [
+  FREE_PLAN,
   {
     name: 'Mock test',
     price: '15 000',
-    unit: "so'm / test",
-    text: "Rasmiy formatdagi bitta to'liq mock test — imtihon sharoitida, batafsil tahlil bilan.",
-    features: ['Rasmiy imtihon formati', 'Taymer va ball hisobi', "Xatolar bo'yicha tahlil", 'Bir marta to‘lov'],
+    unit: "so'm / bir martalik",
+    text: "Rasmiy formatdagi mock testlar — imtihon sharoitida, batafsil tahlil bilan.",
+    features: ['Rasmiy imtihon formati', 'Taymer va ball hisobi', "Xatolar bo'yicha tahlil", 'Muddatsiz kirish'],
     cta: 'Mock testni ochish',
-    href: '/premium',
-    highlight: true,
-  },
-  {
-    name: 'Darslar obunasi',
-    price: '25 000',
-    unit: "so'm / oy",
-    text: "Barcha video va audio darslarga to'liq kirish. 6 va 12 oylik variantlari arzonroq.",
-    features: ['Video darslar', 'Audio konspektlar', 'Barcha fanlar', '6/12 oylik chegirma'],
-    cta: "Tariflarni ko'rish",
     href: '/premium',
     highlight: false,
   },
+  {
+    name: 'PRO obuna',
+    price: '25 000',
+    unit: "so'm / oy",
+    text: "Barcha mock testlar va kengaytirilgan AI Mentor. 6 va 12 oylik variantlari arzonroq.",
+    features: ['Barcha mock testlar', 'AI Mentor: kuniga 50 savol', 'Batafsil tahlil', '6/12 oylik chegirma'],
+    cta: "Tariflarni ko'rish",
+    href: '/premium',
+    highlight: true,
+  },
 ];
+
+type ApiPlan = {
+  plan_type: string; name: string; description: string;
+  price: string; duration_days: number; features: string[];
+};
+
+/* Narxlar SERVERDAN olinadi (premium/plan_catalog.py — yagona manba).
+ *
+ * Nega: ilgari ular shu faylda qo'lda yozilgan edi va tariflar o'zgargach eskirib
+ * qoldi — sayt 25 000 so'mga "barcha video va audio darslar"ni va'da qilib turaverdi,
+ * holbuki darslar bazasi bo'sh edi. Bunday nomuvofiqlik ishonchni yo'qotadi.
+ *
+ * `revalidate` — sahifa statik qoladi va soatiga bir marta yangilanadi, ya'ni har
+ * tashrifda backendga so'rov ketmaydi. Xatolik bo'lsa zaxira ro'yxat ishlatiladi. */
+async function loadPlans(): Promise<PlanCard[]> {
+  try {
+    const base = process.env.BACKEND_ORIGIN || 'http://127.0.0.1:8001';
+    const res = await fetch(`${base}/api/premium/public-plans/`, { next: { revalidate: 3600 } });
+    if (!res.ok) return FALLBACK_PLANS;
+
+    const data: { plans: ApiPlan[] } = await res.json();
+    const mock = data.plans.find((p) => p.plan_type === 'mock_test');
+    // Oylik tarif — obuna narxining "boshlanish nuqtasi" sifatida ko'rsatiladi.
+    const monthly = data.plans.find((p) => p.plan_type !== 'mock_test' && p.duration_days === 30);
+    if (!mock || !monthly) return FALLBACK_PLANS;
+
+    const sum = (value: string) => Math.round(Number(value)).toLocaleString('uz-UZ');
+    return [
+      FREE_PLAN,
+      {
+        name: 'Mock test',
+        price: sum(mock.price),
+        unit: "so'm / bir martalik",
+        text: mock.description,
+        features: mock.features,
+        cta: 'Mock testni ochish',
+        href: '/premium',
+        highlight: false,
+      },
+      {
+        name: 'PRO obuna',
+        price: sum(monthly.price),
+        unit: "so'm / oy",
+        text: monthly.description,
+        features: monthly.features,
+        cta: "Tariflarni ko'rish",
+        href: '/premium',
+        highlight: true,
+      },
+    ];
+  } catch {
+    return FALLBACK_PLANS;
+  }
+}
 
 const FAQ = [
   {
@@ -140,7 +206,7 @@ const FAQ = [
   },
   {
     q: "Platformadan bepul foydalansa bo'ladimi?",
-    a: "Ha. Mashq testlari, 1v1 arena, mini o'yinlar, kunlik missiyalar va asosiy tahlil bepul. To'lov faqat rasmiy mock testlar va video/audio darslar uchun.",
+    a: "Ha. Mashq testlari, 1v1 arena, mini o'yinlar, kunlik missiyalar, asosiy tahlil va AI Mentor (kuniga 5 savol) bepul. To'lov faqat rasmiy mock testlar va kengaytirilgan AI Mentor uchun.",
   },
   {
     q: "Telegram orqali kirish xavfsizmi?",
@@ -187,7 +253,9 @@ const jsonLd = {
   ],
 };
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const plans = await loadPlans();
+
   return (
     <>
       <script
@@ -308,12 +376,12 @@ export default function LandingPage() {
           <RevealOnScroll className="mx-auto max-w-2xl text-center">
             <h2 className="font-voice text-3xl font-bold sm:text-4xl">Ochiq narxlar</h2>
             <p className="mt-3 text-muted-foreground">
-              Asosiy mashq bepul. To&apos;lov faqat rasmiy mock testlar va darslar uchun — obuna majburiy emas.
+              Asosiy mashq bepul. To&apos;lov faqat rasmiy mock testlar va kengaytirilgan AI Mentor uchun — obuna majburiy emas.
             </p>
           </RevealOnScroll>
 
           <div className="mt-12 grid gap-4 md:grid-cols-3">
-            {PLANS.map((p, i) => (
+            {plans.map((p, i) => (
               <RevealOnScroll key={p.name} index={i}>
                 <Card className={`h-full ${p.highlight ? 'border-[var(--accent-border)] ring-1 ring-[var(--accent)]/25' : ''}`}>
                   <CardContent className="flex h-full flex-col gap-4 pt-6">

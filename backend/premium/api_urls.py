@@ -5,6 +5,8 @@ from . import api
 app_name = 'premium_api'
 
 urlpatterns = [
+    # Ochiq (kirmasdan): landing sahifasidagi narxlar shu yerdan olinadi.
+    path('public-plans/', api.public_plans_api, name='public_plans'),
     path('plans/', api.plans_api, name='plans'),
     path('checkout/<int:plan_id>/', api.CheckoutAPI.as_view(), name='checkout'),
     path('payments/<int:payment_id>/', api.payment_status_api, name='payment_status'),
