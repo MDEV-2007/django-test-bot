@@ -9,6 +9,7 @@ import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import { cn } from '@/lib/utils';
+import { cardArtwork, subjectIndex } from '@/lib/subjectTheme';
 import Reveal from '@/components/motion/Reveal';
 import PageHero from '@/components/student/PageHero';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,7 +32,7 @@ type TestItem = {
 
 type CenterData = {
   tests: TestItem[];
-  subjects: { id: number; name: string; slug: string }[];
+  subjects: { id: number; name: string; slug: string; color?: string; icon_name?: string }[];
   selected_subject: string | null;
   selected_category: string;
   selected_answer_mode: string;
@@ -43,15 +44,20 @@ type CenterData = {
   mock_plan: { id: number; price: string } | null;
 };
 
+/* Imtihon turlari — backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
+   U yerga yangi tur qo'shsangiz, bu yerga ham qo'shing (aks holda test katalogda
+   filtrlanmaydi va nishonsiz qoladi). */
 const CATEGORIES = [
   { value: 'all', label: 'Barchasi' },
   { value: 'certificate', label: 'Milliy Sertifikat' },
   { value: 'history', label: 'Tarix' },
   { value: 'bba', label: 'BBA' },
+  { value: 'cefr', label: 'CEFR' },
 ];
 
 const CATEGORY_BADGE: Record<string, string> = {
-  certificate: 'Rasmiy Format', history: 'Mavzulashtirilgan', bba: 'DTB Formati', all: 'Test',
+  certificate: 'Rasmiy Format', history: 'Mavzulashtirilgan', bba: 'DTB Formati',
+  cefr: 'Ingliz tili', all: 'Test',
 };
 
 const ANSWER_MODES = [
@@ -124,6 +130,10 @@ export default function TestsPage() {
       setStarting(null);
     }
   }
+
+  // Karta rangini fan belgilaydi, test esa faqat fanning `slug`ini biladi — shu jadval
+  // ikkalasini bog'laydi.
+  const subjects = subjectIndex(data?.subjects);
 
   return (
     <>
@@ -246,9 +256,16 @@ export default function TestsPage() {
             const buyHref = data.mock_plan
               ? `/premium/checkout/${data.mock_plan.id}?test=${t.id}`
               : '/premium';
+            /* Kartaning fonini fan belgilaydi (rang bazadan, motiv `subjectTheme.ts`
+               dan), aniq ko'rinishini esa test `id` si — shu tufayli bitta fandagi
+               o'nlab test bir-biriga o'xshab ketmaydi. */
+            const art = cardArtwork(t.subject ? subjects[t.subject] : null, t.id);
             return (
               <Reveal key={t.id} index={tIdx} className="h-full">
-              <Card className="group flex h-full flex-col justify-between transition-colors hover:border-[var(--accent-border)]">
+              <Card
+                style={art.style}
+                className="group flex h-full flex-col justify-between transition-colors hover:border-[var(--accent-border)]"
+              >
                 <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">

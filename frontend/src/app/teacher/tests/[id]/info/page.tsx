@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -20,10 +21,12 @@ type TestInfo = {
   duration_minutes: number; description: string;
 };
 
+// Backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
 const CATEGORIES = [
   { value: 'history', label: 'Tarix' },
   { value: 'certificate', label: 'Milliy Sertifikat' },
   { value: 'bba', label: 'BBA Imtihoni' },
+  { value: 'cefr', label: 'CEFR (Ingliz tili)' },
 ];
 
 export default function TeacherTestInfoPage() {
@@ -37,8 +40,10 @@ export default function TeacherTestInfoPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<TestInfo>(`/api/teacher/tests/${id}/info/`).then(setInfo);
-    apiFetch<{ subjects: Subject[] }>('/api/tests/').then((d) => setSubjects(d.subjects));
+    apiFetch<TestInfo>(`/api/teacher/tests/${id}/info/`).then(setInfo)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
+    apiFetch<{ subjects: Subject[] }>('/api/tests/').then((d) => setSubjects(d.subjects))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   async function submit() {

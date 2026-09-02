@@ -2,10 +2,13 @@ from django.db import models
 from accounts.models import Profile
 
 class Topic(models.Model):
+    # `tests_app.Question.CATEGORY_CHOICES` bilan bir xil ro'yxat (ikkalasi ham imtihon
+    # turini bildiradi). Bittasiga qo'shsangiz — ikkinchisiga ham qo'shing.
     CATEGORY_CHOICES = [
         ('history', 'Tarix'),
         ('certificate', 'Milliy Sertifikat'),
         ('bba', 'BBA Imtihoni'),
+        ('cefr', 'CEFR'),
     ]
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)

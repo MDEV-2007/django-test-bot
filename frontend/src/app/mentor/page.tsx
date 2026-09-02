@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Bot, Send, Sparkles, RefreshCw, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import { API_URL, apiFetch, refreshAccessToken } from '@/lib/api-client';
 import AppShell from '@/components/AppShell';
@@ -44,7 +45,7 @@ export default function MentorPage() {
     apiFetch<{ subjects: Subject[]; selected_subject: string | null }>('/api/tests/').then((d) => {
       setSubjects(d.subjects);
       setSubject(d.selected_subject);
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, sending]);
@@ -120,7 +121,11 @@ export default function MentorPage() {
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-voice text-xl font-bold">Tarixchi AI Mentor 24/7</h1>
+                  {/* Fan nomi sarlavhada QOTIB QOLMASIN: mentor tanlangan fan bo'yicha
+                      javob beradi (backend system prompt'ga fan nomini uzatadi), ya'ni
+                      ingliz tilini o'rganayotgan o'quvchiga "Tarixchi AI" deb ko'rinishi
+                      xato edi. */}
+                  <h1 className="font-voice text-xl font-bold">AI Mentor 24/7</h1>
                   <Badge variant="outline" className="border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success-text)]">
                     <span className="mr-1 size-1.5 animate-ping rounded-full bg-[var(--success)]" /> Online
                   </Badge>

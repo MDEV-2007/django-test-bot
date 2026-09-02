@@ -329,7 +329,7 @@ export default function BattlesPage() {
                   </div>
                   <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">AI bilan mashg&apos;ulot jangi</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    Tarixchi AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, yangi bilimlarni mustahkamlang.
+                    AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, yangi bilimlarni mustahkamlang.
                   </p>
                   <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) →</span>
                 </CardContent>

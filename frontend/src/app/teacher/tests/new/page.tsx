@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -16,10 +17,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 type Subject = { id: number; name: string; slug: string };
 
+// Backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
 const CATEGORIES = [
   { value: 'history', label: 'Tarix' },
   { value: 'certificate', label: 'Milliy Sertifikat' },
   { value: 'bba', label: 'BBA Imtihoni' },
+  { value: 'cefr', label: 'CEFR (Ingliz tili)' },
 ];
 
 export default function NewTestPage() {
@@ -39,7 +42,7 @@ export default function NewTestPage() {
     apiFetch<{ subjects: Subject[] }>('/api/tests/').then((d) => {
       setSubjects(d.subjects);
       if (d.subjects[0]) setSubjectId(String(d.subjects[0].id));
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   async function submit() {

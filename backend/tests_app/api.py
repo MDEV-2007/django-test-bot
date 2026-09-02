@@ -123,7 +123,13 @@ def center_api(request):
                 unlocked=(has_sub or profile.premium_mock_test_unlocked or t.id in unlocked_ids),
             ) for t in tests
         ],
-        'subjects': [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in subjects],
+        # `color` va `icon_name` — test kartasining ko'rinishi shu yerdan boshqariladi:
+        # har bir fan o'z rangida ko'rinadi va admin panelda rangni o'zgartirsa,
+        # katalogdagi kartalar ham darhol o'zgaradi (frontendda qotib qolmagan).
+        'subjects': [
+            {'id': s.id, 'name': s.name, 'slug': s.slug, 'color': s.color, 'icon_name': s.icon_name}
+            for s in subjects
+        ],
         'selected_subject': subject.slug if subject else None,
         'selected_category': category,
         'selected_answer_mode': answer_mode,

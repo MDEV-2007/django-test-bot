@@ -53,7 +53,8 @@ const QUICK_ACCESS = [
   { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
   { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]' },
   { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
-  { href: '/mentor', title: 'Tarixchi AI Mentor', desc: 'Savollarga 24/7 tahliliy javob', icon: Bot, badge: 'AI', tone: 'text-[var(--tone-ai-text)]', bg: 'bg-[var(--tone-ai-soft)]' },
+  // Fan nomi yozilmaydi — mentor tanlangan fan bo'yicha javob beradi (tarix, ingliz tili...).
+  { href: '/mentor', title: 'AI Mentor', desc: 'Savollarga 24/7 tahliliy javob', icon: Bot, badge: 'AI', tone: 'text-[var(--tone-ai-text)]', bg: 'bg-[var(--tone-ai-soft)]' },
 ];
 
 const MINI_GAMES = [

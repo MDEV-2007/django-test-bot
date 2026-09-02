@@ -47,10 +47,15 @@ class Question(models.Model):
         ('medium', 'O\'rta'),
         ('hard', 'Qiyin'),
     ]
+    # Imtihon turi (fandan alohida: fan `subject` FK'da turadi). CEFR — ingliz tili
+    # darajalari tizimi; darajalarning o'zi (A1...C2) `learning.Topic` sifatida
+    # saqlanadi, shuning uchun yangi maydon kerak emas va analitikadagi mavzular
+    # kesimi avtomatik ravishda "daraja bo'yicha o'zlashtirish"ga aylanadi.
     CATEGORY_CHOICES = [
         ('history', 'Tarix'),
         ('certificate', 'Milliy Sertifikat'),
         ('bba', 'BBA Imtihoni'),
+        ('cefr', 'CEFR'),
     ]
     QUESTION_TYPE_CHOICES = [
         ('single_choice', 'Oddiy test (bitta to\'g\'ri javob)'),
@@ -258,7 +263,7 @@ class TestSet(models.Model):
         """Questions in the teacher-defined drag-drop order (question_order), with any
         questions not yet in that list appended by id. Falls back to plain id order when
         no custom order is stored — so existing tests behave exactly as before."""
-        qs = list(self.questions.all())
+        qs = list(self.questions.all().prefetch_related('choices', 'sub_questions', 'group__options'))
         order = self.question_order or []
         if not order:
             return qs

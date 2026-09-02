@@ -1,0 +1,45 @@
+{
+  "test": {
+    "fan": "Ingliz tili",
+    "izoh": "CEFR B1 darajasi uchun grammatika va lug'at bo'yicha namunaviy test."
+  },
+  "savollar": [
+    {
+      "savol": "She ___ to school every day.",
+      "variantlar": ["go", "goes", "going", "gone"],
+      "javob": "goes",
+      "izoh": "Present Simple, 3-shaxs birlikda fe'lga -s qo'shiladi.",
+      "daraja": "B1",
+      "qiyinlik": "easy"
+    },
+    {
+      "savol": "If I ___ more time, I would learn another language.",
+      "variantlar": ["have", "had", "will have", "having"],
+      "javob": "B",
+      "izoh": "Second Conditional: if + past simple, would + infinitive.",
+      "daraja": "B1"
+    },
+    {
+      "savol": "The film was so boring that I ___ asleep.",
+      "variantlar": ["fell", "felt", "fallen", "falling"],
+      "javob": 1,
+      "izoh": "'fall asleep' — uxlab qolmoq. O'tgan zamon shakli: fell.",
+      "daraja": "B1"
+    },
+    {
+      "savol": "I'm looking forward ___ you next week.",
+      "variantlar": ["to see", "seeing", "to seeing", "see"],
+      "javob": "to seeing",
+      "izoh": "'look forward to' dan keyin gerund (-ing) keladi.",
+      "daraja": "B1",
+      "qiyinlik": "hard"
+    },
+    {
+      "savol": "He has lived here ___ 2015.",
+      "variantlar": ["for", "since", "from", "during"],
+      "javob": "since",
+      "izoh": "Aniq boshlanish nuqtasi bilan Present Perfect: since 2015.",
+      "daraja": "B1"
+    }
+  ]
+}
