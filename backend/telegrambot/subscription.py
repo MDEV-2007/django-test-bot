@@ -107,10 +107,15 @@ def is_subscribed(telegram_id, use_cache=True):
     return subscribed
 
 
-def state_for(profile, use_cache=True):
-    """Frontend uchun holat: gate kerakmi, obunami, qaysi kanalga."""
+def state_for(profile, use_cache=True, in_miniapp=True):
+    """Frontend uchun holat: gate kerakmi, obunami, qaysi kanalga.
+
+    `in_miniapp=False` — so'rov oddiy brauzerdan keldi. Bunday holda talab UMUMAN
+    qo'yilmaydi: obuna sharti bot orqali kirgan foydalanuvchiga tegishli, saytga
+    kirgan odamga emas (hatto hisobiga Telegram ulangan bo'lsa ham). Shu tufayli
+    bloklovchi ekran brauzerda hech qachon chiqmaydi."""
     telegram_id = getattr(profile, 'telegram_id', '') if profile else ''
-    required = is_required() and bool(telegram_id)
+    required = in_miniapp and is_required() and bool(telegram_id)
     return {
         'required': required,
         'subscribed': True if not required else is_subscribed(telegram_id, use_cache=use_cache),

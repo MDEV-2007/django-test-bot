@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Megaphone, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
-import { openTelegramLink, tgHaptic } from '@/lib/telegram';
+import { openTelegramLink, tgHaptic, useIsTelegram } from '@/lib/telegram';
 
 /* Majburiy kanal obunasi — ikkinchi qatlam.
  *
@@ -35,7 +35,13 @@ export default function SubscriptionGate() {
   const [missed, setMissed] = useState(false);
 
   const staffExempt = !!user && (user.is_superadmin || user.is_teacher);
-  const enabled = authReady && !!access && !!user && !staffExempt;
+  /* Gate FAQAT Telegram ichida (bot orqali kirganda) ishlaydi. Oddiy brauzerdan
+     saytga kirgan foydalanuvchi hech qachon bloklanmaydi — hisobiga Telegram
+     ulangan bo'lsa ham: obuna sharti bot foydalanuvchisiga tegishli, sayt esa
+     mustaqil mahsulot. Server ham xuddi shu qoidaga amal qiladi
+     (accounts/permissions.py `IsChannelSubscribed`). */
+  const inTelegram = useIsTelegram();
+  const enabled = inTelegram && authReady && !!access && !!user && !staffExempt;
 
   useEffect(() => {
     if (!enabled) { setState(null); return; }

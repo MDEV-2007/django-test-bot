@@ -125,19 +125,29 @@ class IsSuperAdmin(BasePermission):
 
 
 class IsChannelSubscribed(BasePermission):
-    """Majburiy Telegram kanal obunasi (telegrambot/subscription.py).
+    """Majburiy Telegram kanal obunasi — FAQAT Telegram ichidan kelgan so'rovlar uchun.
 
-    Ikkinchi qatlam: bot /start da obunani so'raydi, lekin Mini App'ni to'g'ridan-to'g'ri
-    havola bilan ochish yoki obunadan keyin kanalni tark etish mumkin. Shuning uchun eng
-    qimmatli amallar (test boshlash, AI mentor) serverda ham tekshiriladi.
+    Qoida: obuna talabi bot orqali kirgan foydalanuvchiga tegishli. Oddiy brauzerdan
+    saytga kirgan odam hech qachon bloklanmaydi — hatto uning hisobiga Telegram
+    ulangan bo'lsa ham. Sabab: sayt mustaqil mahsulot, unga kirish uchun Telegram
+    kanaliga a'zo bo'lishni talab qilish o'rinsiz.
 
-    Telegram hisobi ulanmagan foydalanuvchi (faqat sayt orqali kirgan) tekshirib bo'lmaydi
-    — `is_subscribed` unga True qaytaradi, ya'ni sayt foydalanuvchisi bloklanmaydi."""
+    Mini App esa Telegramning o'zida ochiladi, ya'ni u yerdagi foydalanuvchi — bot
+    foydalanuvchisi, shuning uchun u yerda talab kuchda qoladi.
+
+    So'rov Mini App'dan kelganini frontend `X-Telegram-Miniapp` sarlavhasi bilan
+    aytadi (frontend/src/lib/api-client.ts). Bu sarlavhani qo'lda o'chirib yuborish
+    mumkin — lekin uni o'chirgan odam aynan "brauzerdan kirgan foydalanuvchi"ga
+    aylanadi, unga esa talab baribir qo'llanmaydi. Ya'ni bu yerda yashiringan
+    imkoniyat yo'q: haqiqiy, chetlab o'tib bo'lmaydigan qatlam — botning o'zi
+    (telegrambot/handlers.py), u Telegram tomonda ishlaydi."""
     message = "Davom etish uchun rasmiy Telegram kanalimizga obuna bo'ling."
 
     def has_permission(self, request, view):
         from telegrambot.subscription import is_subscribed
 
+        if not request.META.get('HTTP_X_TELEGRAM_MINIAPP'):
+            return True
         profile = _profile(request.user)
         if profile is None:
             return True

@@ -246,6 +246,15 @@ def me_api(request):
     return Response(ProfileSerializer(profile).data)
 
 
+def _from_miniapp(request):
+    """So'rov Telegram Mini App ichidan keldimi.
+
+    Frontend Telegram muhitini aniqlagach shu sarlavhani qo'shadi
+    (frontend/src/lib/api-client.ts). Kanal obunasi talabi faqat shu holatda
+    qo'llanadi — brauzerdan kirgan foydalanuvchi hech qachon bloklanmaydi."""
+    return bool(request.META.get('HTTP_X_TELEGRAM_MINIAPP'))
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def subscription_api(request):
@@ -256,7 +265,7 @@ def subscription_api(request):
     from telegrambot.subscription import state_for
 
     profile = ensure_profile_for_user(request.user)
-    return Response(state_for(profile))
+    return Response(state_for(profile, in_miniapp=_from_miniapp(request)))
 
 
 @api_view(['POST'])
@@ -267,7 +276,7 @@ def subscription_check_api(request):
 
     profile = ensure_profile_for_user(request.user)
     invalidate(profile.telegram_id)
-    return Response(state_for(profile, use_cache=False))
+    return Response(state_for(profile, use_cache=False, in_miniapp=_from_miniapp(request)))
 
 
 @api_view(['GET'])

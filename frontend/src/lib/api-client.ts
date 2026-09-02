@@ -1,4 +1,5 @@
 import { useAuthStore, type Profile } from './auth-store';
+import { isTelegramEnv } from './telegram';
 
 /* API manzili.
  *
@@ -18,6 +19,17 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
   }
+}
+
+/* Majburiy kanal obunasi FAQAT Telegram ichida qo'llanadi: bot orqali kirgan
+   foydalanuvchidan kanalga a'zo bo'lish so'raladi, oddiy brauzerdan saytga kirgan
+   odamdan — yo'q (hisobiga Telegram ulangan bo'lsa ham). Server buni shu sarlavha
+   orqali biladi (accounts/permissions.py, accounts/api.py `_from_miniapp`).
+
+   `isTelegramEnv` sessiyaga yozib qo'yadi, ya'ni ichki navigatsiyada `#tgWebApp...`
+   fragmenti yo'qolsa ham javob o'zgarmaydi. */
+function miniAppHeader(): Record<string, string> {
+  return isTelegramEnv() ? { 'X-Telegram-Miniapp': '1' } : {};
 }
 
 async function refreshAccessToken(): Promise<string | null> {
@@ -49,6 +61,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...miniAppHeader(),
         ...init.headers,
       },
     });
@@ -61,7 +74,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body.error || res.statusText);
+    throw new ApiError(res.status, body.error || body.detail || res.statusText);
   }
   return res.json() as Promise<T>;
 }
@@ -85,7 +98,7 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body.error || res.statusText);
+    throw new ApiError(res.status, body.error || body.detail || res.statusText);
   }
   return res.json() as Promise<T>;
 }
