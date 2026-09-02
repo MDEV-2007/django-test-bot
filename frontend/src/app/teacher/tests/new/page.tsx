@@ -19,7 +19,7 @@ type Subject = { id: number; name: string; slug: string };
 
 // Backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
 const CATEGORIES = [
-  { value: 'history', label: 'Tarix' },
+  { value: 'history', label: 'Mavzulashtirilgan' },
   { value: 'certificate', label: 'Milliy Sertifikat' },
   { value: 'bba', label: 'BBA Imtihoni' },
   { value: 'cefr', label: 'CEFR (Ingliz tili)' },

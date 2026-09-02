@@ -98,7 +98,30 @@ export default function SocialLogin({ refCode, onSuccess }: { refCode?: string; 
           }
         },
       });
-      window.google.accounts.id.renderButton(googleBtnRef.current, { theme: 'outline', size: 'large', width: 320 });
+      /* Tugma ko'rinishi qo'lda sozlanadi — Google faqat shu bir nechta parametrni
+         beradi, qolgani iframe ichida va CSS bilan o'zgartirib bo'lmaydi.
+
+         `filled_black` — qorong'i mavzuga mos (ilgari `outline` edi: qop-qora
+         kartada oppoq tugma bo'lib ajralib turardi).
+         Eni konteynerdan o'lchanadi, 400px — Google qo'yган yuqori chegara. Ilgari
+         qattiq 320px yozilgan edi va tugma matn maydonlaridan tor bo'lib, qatorlar
+         tekislanmay turardi.
+         Burchaklar o'ramning `rounded-xl` + `overflow-hidden` klasslari bilan
+         kesiladi (pastdagi JSX), shunda u forma tugmalari bilan bir xil bo'ladi. */
+      const width = Math.min(400, Math.round(googleBtnRef.current.offsetWidth) || 400);
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        theme: 'filled_black',
+        size: 'large',
+        shape: 'rectangular',
+        text: 'continue_with',
+        /* Logotip chap chetda. Google uni har doim OQ kvadrat ustida chizadi (brend
+           talabi) va buni tashqaridan o'zgartirib bo'lmaydi — tugma iframe ichida.
+           `center` bilan sinab ko'rildi: u holda oq kvadrat tugma O'RTASIDA qolib,
+           yanada g'alati ko'rinadi. Chap chetda esa u standart Google tugmasidek
+           o'qiladi. */
+        logo_alignment: 'left',
+        width,
+      });
     })();
 
     return () => { cancelled = true; };
@@ -127,7 +150,10 @@ export default function SocialLogin({ refCode, onSuccess }: { refCode?: string; 
           <span>{error}</span>
         </div>
       )}
-      <div ref={googleBtnRef} className="flex justify-center [&>div]:!w-full" />
+      {/* Google tugmasi iframe ichida chiziladi — uning burchagini o'zgartirib
+          bo'lmaydi, shuning uchun o'ram `rounded-xl` bilan kesib qo'yadi. Shu tariqa
+          u formadagi boshqa tugmalar bilan bir xil ko'rinadi. */}
+      <div ref={googleBtnRef} className="flex justify-center overflow-hidden rounded-xl" />
       {showTelegram && (
         <button
           type="button"

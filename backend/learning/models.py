@@ -5,7 +5,7 @@ class Topic(models.Model):
     # `tests_app.Question.CATEGORY_CHOICES` bilan bir xil ro'yxat (ikkalasi ham imtihon
     # turini bildiradi). Bittasiga qo'shsangiz — ikkinchisiga ham qo'shing.
     CATEGORY_CHOICES = [
-        ('history', 'Tarix'),
+        ('history', 'Mavzulashtirilgan'),
         ('certificate', 'Milliy Sertifikat'),
         ('bba', 'BBA Imtihoni'),
         ('cefr', 'CEFR'),

@@ -51,8 +51,14 @@ class Question(models.Model):
     # darajalari tizimi; darajalarning o'zi (A1...C2) `learning.Topic` sifatida
     # saqlanadi, shuning uchun yangi maydon kerak emas va analitikadagi mavzular
     # kesimi avtomatik ravishda "daraja bo'yicha o'zlashtirish"ga aylanadi.
+    # `history` qiymati tarixiy sabab bilan shunday nomlangan (platforma faqat tarixdan
+    # boshlangan), lekin u ASLIDA fan emas — "mavzulashtirilgan mashq testi" degani,
+    # rasmiy imtihon formatidan farqli. Qiymatning o'zi o'zgartirilmaydi (bazadagi
+    # yuzlab qator unga bog'langan), faqat KO'RINADIGAN nomi to'g'rilandi: ilgari u
+    # "Tarix" deb chiqar edi va bu standart qiymat bo'lgani uchun biologiya yoki ona
+    # tili testi ham katalogda "Tarix" kategoriyasida ko'rinardi.
     CATEGORY_CHOICES = [
-        ('history', 'Tarix'),
+        ('history', 'Mavzulashtirilgan'),
         ('certificate', 'Milliy Sertifikat'),
         ('bba', 'BBA Imtihoni'),
         ('cefr', 'CEFR'),

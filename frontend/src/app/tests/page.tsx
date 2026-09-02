@@ -52,7 +52,7 @@ type CenterData = {
 const CATEGORIES = [
   { value: 'all', label: 'Barchasi' },
   { value: 'certificate', label: 'Milliy Sertifikat' },
-  { value: 'history', label: 'Tarix' },
+  { value: 'history', label: 'Mavzulashtirilgan' },
   { value: 'bba', label: 'BBA' },
   { value: 'cefr', label: 'CEFR' },
 ];
