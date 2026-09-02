@@ -91,3 +91,45 @@ class PerTestUnlockTests(TestCase):
 
         self.assertEqual(info['test']['id'], self.paid_test.id)
         self.assertEqual(info['test']['title'], 'Sotib olingan test')
+
+    def test_active_pro_subscription_unlocks_every_mock_test(self):
+        """PRO obuna BARCHA mock testlarni ochadi.
+
+        Ilgari obuna faqat video/audio darslarni ochardi — darslar esa hali
+        deyarli yo'q edi, ya'ni obunachi to'lab hech narsa olmasdi. Endi obuna
+        ochadigan asosiy narsa aynan mock testlar."""
+        sub_plan = SubscriptionPlan.objects.create(
+            name='PRO — Oylik', plan_type='lessons', price=Decimal('25000'), duration_days=30,
+        )
+        payment = Payment.objects.create(
+            profile=self.profile, plan=sub_plan, amount=sub_plan.price, status='approved',
+        )
+        payment.apply_to_profile()
+        self.profile.refresh_from_db()
+
+        data = self.client.get('/api/tests/').json()
+
+        self.assertTrue(data['has_mock_test_access'])
+        self.assertTrue(all(t['is_unlocked'] for t in data['tests'] if t['is_premium']))
+        # Katalog "ochiq" desa, start ham ruxsat berishi shart — ikkalasi bir qoidaga
+        # tayanmasa, o'quvchi ochiq ko'ringan testni bosib 403 olardi.
+        self.assertEqual(self.client.post(f'/api/tests/{self.other_test.id}/start/').status_code, 200)
+
+    def test_expired_subscription_does_not_unlock_mock_tests(self):
+        """Muddati tugagan obuna kirish bermaydi (aks holda bir marta to'lagan
+        o'quvchi abadiy ochiq qolardi)."""
+        from django.utils import timezone
+
+        sub_plan = SubscriptionPlan.objects.create(
+            name='PRO — Oylik', plan_type='lessons', price=Decimal('25000'), duration_days=30,
+        )
+        Payment.objects.create(
+            profile=self.profile, plan=sub_plan, amount=sub_plan.price, status='approved',
+        ).apply_to_profile()
+        self.profile.premium_expires_at = timezone.now() - timezone.timedelta(days=1)
+        self.profile.save(update_fields=['premium_expires_at'])
+
+        data = self.client.get('/api/tests/').json()
+
+        self.assertFalse(data['has_mock_test_access'])
+        self.assertEqual(self.client.post(f'/api/tests/{self.other_test.id}/start/').status_code, 403)

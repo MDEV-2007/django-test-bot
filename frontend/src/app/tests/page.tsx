@@ -134,13 +134,40 @@ export default function TestsPage() {
           eyebrowIcon={GraduationCap}
           title="Test va Imtihonlar Markazi"
           description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
-          actions={
-            <Button onClick={startRandom} disabled={starting !== null}>
-              {starting === -1 ? <Loader2 className="size-4 animate-spin" /> : <Shuffle className="size-4" />}
-              Tasodifiy test
-            </Button>
-          }
         />
+
+        {/* Tezkor test — sahifaning ASOSIY harakati.
+            Nega: katalogdagi testlar 30-45 savoldan iborat va telefonda ularni
+            oxirigacha yechish kam uchraydi (javoblarning katta qismi "o'tkazib
+            yuborilgan" bo'lib qolyapti). 10 savollik format bir o'tirishda
+            tugatiladi — ya'ni o'quvchi natija KO'RADI, natija esa qaytib kelish
+            sababi. Ilgari bu tugma sarlavha yonida kichik "Tasodifiy test" bo'lib
+            turardi va nima taklif qilinayotgani (necha savol, qancha vaqt)
+            umuman ko'rinmasdi. */}
+        <Card
+          onClick={() => starting === null && startRandom()}
+          className="tactile-btn group cursor-pointer border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
+        >
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+            <div className="flex min-w-0 items-center gap-3.5">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-[var(--accent)] transition-transform group-hover:scale-110">
+                <Shuffle className="size-6" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">
+                  Tezkor test
+                </h3>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  10 savol · 10 daqiqa · bepul — bir o&apos;tirishda tugatasiz
+                </p>
+              </div>
+            </div>
+            <Button disabled={starting !== null} onClick={(e) => { e.stopPropagation(); startRandom(); }}>
+              {starting === -1 ? <Loader2 className="size-4 animate-spin" /> : null}
+              Boshlash
+            </Button>
+          </CardContent>
+        </Card>
 
         {error && (
           <Card className="border-[var(--danger)]/30">
@@ -148,25 +175,10 @@ export default function TestsPage() {
           </Card>
         )}
 
-        {/* "PRO" belgisi bor, lekin mock testlar yopiq bo'lgan holat: o'quvchi nima
-            uchun qulf turganini va nimani sotib olish kerakligini bilishi shart. */}
-        {data && data.has_lessons_access && !data.has_mock_test_access && (
-          <Card className="border-amber-500/25 bg-amber-500/[0.06]">
-            <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">
-              <div className="flex min-w-0 items-start gap-2.5">
-                <Lock className="mt-0.5 size-4 shrink-0 text-[var(--warning-text)]" />
-                <p className="min-w-0 text-sm text-[var(--text-secondary)]">
-                  Sizda <strong className="text-foreground">darslar obunasi</strong> faol — video va
-                  audio darslar ochiq. Rasmiy <strong className="text-foreground">mock testlar</strong> esa
-                  har biri alohida sotib olinadi: kartadagi tugma o&apos;sha testni ochadi.
-                </p>
-              </div>
-              <Button asChild size="sm" variant="outline" className="shrink-0 border-amber-500/30 text-[var(--warning-text)]">
-                <Link href="/premium">Mock test tarifini ko&apos;rish <ArrowRight className="size-4" /></Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        {/* Ilgari bu yerda "sizda darslar obunasi bor, lekin mock testlar alohida
+            sotib olinadi" ogohlantirishi turardi. Endi PRO obuna barcha mock
+            testlarni ochadi (tests_app/api.py), ya'ni o'sha holat ham, o'sha matn
+            ham mavjud emas. */}
 
         {data && data.subjects.length > 0 && (
           <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">

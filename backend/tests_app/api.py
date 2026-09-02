@@ -111,12 +111,15 @@ def center_api(request):
     from premium.models import SubscriptionPlan, unlocked_test_ids
     unlocked_ids = unlocked_test_ids(profile)
     mock_plan = SubscriptionPlan.objects.filter(plan_type='mock_test', is_active=True).order_by('order').first()
+    # Faol PRO obuna barcha mock testlarni ochadi. Ilgari obuna FAQAT darslarni ochardi
+    # (ular esa hali yo'q edi) — ya'ni o'quvchi obuna sotib olib ham hech narsa olmasdi.
+    has_sub = profile.has_active_premium_lessons
 
     return Response({
         'tests': [
             _test_payload(
                 t, social_by_test.get(t.id),
-                unlocked=(profile.premium_mock_test_unlocked or t.id in unlocked_ids),
+                unlocked=(has_sub or profile.premium_mock_test_unlocked or t.id in unlocked_ids),
             ) for t in tests
         ],
         'subjects': [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in subjects],
@@ -126,7 +129,7 @@ def center_api(request):
         'search_query': search_query,
         'total_attempts': stats['total'] or 0,
         'avg_score': stats['avg'] or 0,
-        'has_mock_test_access': profile.premium_mock_test_unlocked,
+        'has_mock_test_access': has_sub or profile.premium_mock_test_unlocked,
         # Darslar obunasi va mock test kirishi — IKKI XIL tarif. Frontend shu ikkalasini
         # ajratib ko'rsatishi uchun ikkalasi ham qaytariladi: "PRO" bo'lgan, lekin mock
         # testga kirolmayotgan o'quvchi nima uchun qulf turganini bilishi kerak.
@@ -148,8 +151,14 @@ def start_test_api(request, test_id):
     test = get_object_or_404(TestSet, id=test_id)
     profile = ensure_profile_for_user(request.user)
     from premium.models import unlocked_test_ids as _unlocked_ids
-    if test.is_premium and not profile.premium_mock_test_unlocked and test.id not in _unlocked_ids(profile):
-        return Response({'error': 'Bu test faqat premium (mock test tizimi) xaridorlariga ochiq.'}, status=403)
+    # PRO obuna ham, bir martalik mock-test xaridi ham ochadi (yuqoridagi center_api bilan
+    # bir xil qoida — ikkalasi ajralib qolsa, katalogda "ochiq" ko'ringan test start'da
+    # 403 berardi).
+    if (test.is_premium
+            and not profile.has_active_premium_lessons
+            and not profile.premium_mock_test_unlocked
+            and test.id not in _unlocked_ids(profile)):
+        return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
     attempt = _new_attempt(profile, test)
     return Response({'attempt_id': attempt.id})
 

@@ -8,12 +8,26 @@ from .models import Topic, Lesson, VideoLesson, AudioLesson, Flashcard
 
 # Daily per-user cap on AI-backed mentor answers, to bound Groq API cost. Beyond this the
 # mentor still replies, but from the rule-based fallback instead of calling the LLM.
-MENTOR_AI_DAILY_LIMIT = 30
+#
+# Ilgari bu bitta raqam (30) edi — bepul va PRO uchun bir xil. Ya'ni AI Mentor obunaning
+# qiymati emas, hammaga bir xil bepul xizmat edi: xarajat obunachi bo'lmaganlarga ham
+# ketardi, PRO esa buning uchun hech nima bermasdi. Endi limit tarif farqi:
+# obuna bo'lmagan o'quvchi kuniga 5 ta AI javob oladi, PRO — 50 ta.
+MENTOR_AI_DAILY_LIMIT_FREE = 5
+MENTOR_AI_DAILY_LIMIT_PRO = 50
 
 
-def _mentor_ai_allowed(user_id):
+def mentor_daily_limit(is_pro):
+    return MENTOR_AI_DAILY_LIMIT_PRO if is_pro else MENTOR_AI_DAILY_LIMIT_FREE
+
+
+def _mentor_ai_allowed(user_id, is_pro=False):
     """Increments today's mentor-AI counter for a user and returns whether they are
-    still under the daily limit. Uses the cache (resets naturally at end of day)."""
+    still under the daily limit. Uses the cache (resets naturally at end of day).
+
+    Hisoblagich tarifdan QAT'I NAZAR bitta kalitda yuritiladi — obuna kun o'rtasida
+    yoqilsa, o'quvchi shu kuni allaqachon ishlatgan javoblarini qaytadan olmaydi, lekin
+    yuqoriroq chegaraga o'tadi."""
     key = f"mentor_ai:{user_id}:{date.today().isoformat()}"
     try:
         count = cache.get_or_set(key, 0, 60 * 60 * 26)
@@ -22,7 +36,7 @@ def _mentor_ai_allowed(user_id):
         # Key expired between get_or_set and incr — treat as first use of the day.
         cache.set(key, 1, 60 * 60 * 26)
         count = 0
-    return count < MENTOR_AI_DAILY_LIMIT
+    return count < mentor_daily_limit(is_pro)
 
 
 # Separate from the daily cost cap above: bounds how many mentor requests one user can fire

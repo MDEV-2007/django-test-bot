@@ -20,9 +20,18 @@ type PlansData = {
   has_active_premium_lessons: boolean; premium_mock_test_unlocked: boolean; premium_expires_at: string | null;
 };
 
-// "ENG OMMABOP" lentasi shu muddatga tegishli — sariq CTA ham aynan shu tarifda
-// turishi kerak, aks holda ikkita karta ikki xil urg'u berib bir-birini yeydi.
+/* Tavsiya etilgan tarif: lenta ham, sariq CTA ham AYNAN shu kartada turishi kerak —
+   aks holda ikkita karta ikki xil urg'u berib bir-birini yeydi.
+
+   Lenta matni ataylab "ENG OMMABOP" emas: ilovada hali bir nechta foydalanuvchi
+   bo'lgan paytda "eng ommabop" — tekshirib bo'lmaydigan, ya'ni yolg'on ijtimoiy
+   dalil. Uning o'rnida tekshirib bo'ladigan gaplar turadi: bu bizning tavsiyamiz,
+   va 12 oylikning oylik narxi haqiqatan eng past. */
 const RECOMMENDED_DURATION = 180;
+const RIBBONS: Record<number, string> = {
+  180: 'TAVSIYA ETAMIZ',
+  365: 'ENG PAST OYLIK NARX',
+};
 
 export default function PremiumPage() {
   const { access } = useAuthStore();
@@ -64,7 +73,12 @@ export default function PremiumPage() {
           eyebrow="ILMILDIZI PRO"
           eyebrowIcon={Crown}
           title="Tarixdan 100% Natija va Milliy Sertifikatni Kafolatlang"
-          description="Cheksiz mock testlar, barcha audio/video darslar, AI Mentorning 24/7 yordami va shaxsiy xatolar ustida ishlash xaritasi."
+          /* Matn ataylab faqat HOZIR mavjud narsalarni sanaydi. Ilgari bu yerda
+             "barcha audio/video darslar" yozilgan edi — darslar bazasi esa deyarli
+             bo'sh: bu bitta "aldadi" da'vosi bilan ishonchni yo'qotadigan turdagi
+             va'da. Darslar tayyor bo'lgach, ular obunaga qo'shiladi (tarif
+             xususiyatlarida shunday deyilgan ham). */
+          description="Barcha rasmiy mock testlar, kengaytirilgan AI Mentor va xatolaringiz ustida ishlash xaritasi."
           actions={
             <Button asChild variant="outline" size="sm">
               <Link href="/premium/payments"><Receipt className="size-4" /> To&apos;lovlarim</Link>
@@ -120,7 +134,7 @@ export default function PremiumPage() {
             const isSelected = selectedPlanId === p.id;
             const active = isPlanActive(p);
             const perDay = p.duration_days > 0 ? Number(p.price) / p.duration_days : null;
-            const ribbon = p.duration_days === RECOMMENDED_DURATION ? 'ENG OMMABOP' : p.duration_days === 365 ? 'ENG FOYDALI' : null;
+            const ribbon = RIBBONS[p.duration_days] ?? null;
             return (
               <Card
                 key={p.id}
@@ -142,7 +156,11 @@ export default function PremiumPage() {
                 )}
                 <CardContent className={cn('space-y-3 pt-6', ribbon && 'pt-9')}>
                   <p className="text-xs font-bold uppercase text-[var(--text-faint)]">
-                    {p.plan_type === 'lessons' ? 'Darslar' : 'Mock test'}
+                    {/* `plan_type` qiymati bazada hamon 'lessons' — uni o'zgartirish
+                        mavjud to'lovlar va `Payment.apply_to_profile()` mantig'ini
+                        buzardi. Lekin KO'RSATILADIGAN yorliq "Darslar" bo'lolmaydi:
+                        bu tarif endi mock testlar va AI Mentorni ochadi. */}
+                    {p.plan_type === 'lessons' ? 'Obuna' : 'Bir martalik'}
                   </p>
                   <h3 className="text-base font-bold">{p.name}</h3>
                   <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{p.description}</p>
