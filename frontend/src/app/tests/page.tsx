@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
+import CardMotif from '@/components/student/CardMotif';
 import { cn } from '@/lib/utils';
 import { cardArtwork, subjectIndex } from '@/lib/subjectTheme';
 import Reveal from '@/components/motion/Reveal';
@@ -175,9 +176,10 @@ export default function TestsPage() {
             umuman ko'rinmasdi. */}
         <Card
           onClick={() => starting === null && startRandom()}
-          className="tactile-btn group cursor-pointer border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
+          className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
         >
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+          <CardMotif shape="quick" className="text-[var(--accent)]" />
+          <CardContent className="relative flex flex-wrap items-center justify-between gap-4 pt-6">
             <div className="flex min-w-0 items-center gap-3.5">
               <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-[var(--accent)] transition-transform group-hover:scale-110">
                 <Shuffle className="size-6" />

@@ -11,6 +11,7 @@ import { soundFX } from '@/lib/soundFX';
 import StatNumber from '@/components/motion/StatNumber';
 import { arenaRankTitle } from '@/lib/rank';
 import AppShell from '@/components/AppShell';
+import CardMotif from '@/components/student/CardMotif';
 import PageHero from '@/components/student/PageHero';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -321,9 +322,10 @@ export default function BattlesPage() {
             <div className="grid gap-4 pt-2 sm:grid-cols-2">
               <Card
                 onClick={startAiBattle}
-                className="tactile-btn group cursor-pointer border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
+                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
               >
-                <CardContent className="pt-6">
+                <CardMotif shape="bot" className="text-[var(--accent)]" />
+                <CardContent className="relative pt-6">
                   <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/20 text-[var(--accent)] transition-transform group-hover:scale-110">
                     <Bot className="size-6" />
                   </div>
@@ -337,9 +339,10 @@ export default function BattlesPage() {
 
               <Card
                 onClick={startLiveMatch}
-                className="tactile-btn group cursor-pointer border-2 border-amber-500/30 transition-colors hover:border-amber-500"
+                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/30 transition-colors hover:border-amber-500"
               >
-                <CardContent className="pt-6">
+                <CardMotif shape="arena" className="text-amber-400" />
+                <CardContent className="relative pt-6">
                   <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 transition-transform group-hover:scale-110">
                     <Swords className="size-6" />
                   </div>

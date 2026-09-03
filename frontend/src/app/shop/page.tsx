@@ -11,6 +11,7 @@ import { apiFetch, fetchMe } from '@/lib/api-client';
 import { invalidateApi } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
+import CardMotif, { type MotifKey } from '@/components/student/CardMotif';
 import Reveal from '@/components/motion/Reveal';
 import StatNumber from '@/components/motion/StatNumber';
 import PageHero from '@/components/student/PageHero';
@@ -27,6 +28,15 @@ type Item = {
 };
 
 type ShopData = { coins: number; categories: Record<string, Item[]> };
+
+/* Fon naqshining rangi — noyoblik darajasi bo'yicha. Yorliqdagi ranglar bilan bir
+   xil oila, shunda karta bir butun bo'lib ko'rinadi. */
+const RARITY_MOTIF: Record<string, string> = {
+  common: 'text-[var(--text-muted)]',
+  rare: 'text-sky-300',
+  epic: 'text-purple-300',
+  legendary: 'text-amber-300',
+};
 
 const RARITY_STYLE: Record<string, string> = {
   common: 'border-transparent bg-[var(--surface-hover)] text-[var(--text-muted)]',
@@ -177,8 +187,17 @@ export default function ShopPage() {
             const loading = busy === item.slug;
             return (
               <Reveal key={item.id} index={itemIdx} className="h-full">
-              <Card className="flex h-full flex-col justify-between text-center transition-colors hover:border-[var(--border-strong)]">
-                <CardContent className="flex flex-1 flex-col items-center gap-2 pt-6">
+              {/* Naqsh mahsulot TURINI bildiradi (avatar, ramka, mavzu...). Kartalar
+                  bir xil o'lchamdagi to'rtburchaklar bo'lgani uchun ro'yxatda nima
+                  nima ekanini faqat matndan ajratishga to'g'ri kelardi. Rang —
+                  noyoblik darajasidan (`RARITY_MOTIF`), ya'ni afsonaviy narsa ko'zga
+                  darhol tashlanadi. */}
+              <Card className="group relative flex h-full flex-col justify-between overflow-hidden text-center transition-colors hover:border-[var(--border-strong)]">
+                <CardMotif
+                  shape={(item.category as MotifKey) ?? 'shop'}
+                  className={RARITY_MOTIF[item.rarity] || RARITY_MOTIF.common}
+                />
+                <CardContent className="relative flex flex-1 flex-col items-center gap-2 pt-6">
                   <Badge variant="outline" className={RARITY_STYLE[item.rarity] || RARITY_STYLE.common}>
                     {item.rarity}
                   </Badge>
