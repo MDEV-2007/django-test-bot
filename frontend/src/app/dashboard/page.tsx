@@ -18,6 +18,7 @@ import Celebration from '@/components/student/Celebration';
 import { mentorNudge } from '@/lib/mentorVoice';
 import StatNumber from '@/components/motion/StatNumber';
 import AppShell from '@/components/AppShell';
+import CardMotif from '@/components/student/CardMotif';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -49,18 +50,21 @@ type DashboardData = {
 /* Ranglar semantik "tone" tokenlaridan olinadi (globals.css): har bir rang ma'noni
    bildiradi — o'sish, uzluksizlik/mukofot, o'quv kontenti, AI. Ilgari bular
    to'g'ridan-to'g'ri Tailwind palitrasidan olingan va tizimga bog'lanmagan edi. */
+/* `motif` — kartaning fonidagi naqsh (components/student/CardMotif.tsx). Har bo'lim
+   o'z mazmunini aks ettiradi: testda hujjat, arenada qilichlar, darsda kitob va
+   tovush to'lqinlari, mentorda suhbat pufagi. */
 const QUICK_ACCESS = [
-  { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
-  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]' },
-  { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
+  { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
+  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]' },
+  { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
   // Fan nomi yozilmaydi — mentor tanlangan fan bo'yicha javob beradi (tarix, ingliz tili...).
-  { href: '/mentor', title: 'AI Mentor', desc: 'Savollarga 24/7 tahliliy javob', icon: Bot, badge: 'AI', tone: 'text-[var(--tone-ai-text)]', bg: 'bg-[var(--tone-ai-soft)]' },
+  { href: '/mentor', title: 'AI Mentor', desc: 'Savollarga 24/7 tahliliy javob', icon: Bot, badge: 'AI', motif: 'mentor' as const, tone: 'text-[var(--tone-ai-text)]', bg: 'bg-[var(--tone-ai-soft)]' },
 ];
 
 const MINI_GAMES = [
-  { href: '/games/timeline', title: 'Xronologik Ketma-ketlik', desc: "Voqealarni to'g'ri tartibda joylashtiring", icon: History, tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
-  { href: '/games/map', title: "Xarita & Qal'alar Tahlili", desc: 'Qadimgi davlatlar va joylashuvlarni toping', icon: MapPin, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
-  { href: '/games/character', title: 'Tarixiy Shaxsni Toping', desc: 'Maslahatlar orqali sarkarda yoki allomani toping', icon: HelpCircle, tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]' },
+  { href: '/games/timeline', title: 'Xronologik Ketma-ketlik', desc: "Voqealarni to'g'ri tartibda joylashtiring", icon: History, motif: 'timeline' as const, tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
+  { href: '/games/map', title: "Xarita & Qal'alar Tahlili", desc: 'Qadimgi davlatlar va joylashuvlarni toping', icon: MapPin, motif: 'map' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
+  { href: '/games/character', title: 'Tarixiy Shaxsni Toping', desc: 'Maslahatlar orqali sarkarda yoki allomani toping', icon: HelpCircle, motif: 'character' as const, tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]' },
 ];
 
 function scoreTone(score: number | null) {
@@ -406,8 +410,12 @@ export default function DashboardPage() {
               return (
                 <Reveal key={item.href} index={qIdx}>
                 <Link href={item.href} className="group block">
-                  <Card className="h-full gap-0 py-4 transition-all hover:border-[var(--accent-border)]">
-                    <CardContent className="px-4">
+                  {/* `relative` + `overflow-hidden` — fon naqshi karta chetidan
+                      chiqib ketmasligi uchun. Naqsh rangi `item.tone` dan
+                      (currentColor) olinadi, shuning uchun har karta o'z rangida. */}
+                  <Card className="relative h-full gap-0 overflow-hidden py-4 transition-all hover:border-[var(--accent-border)]">
+                    <CardMotif shape={item.motif} className={item.tone} />
+                    <CardContent className="relative px-4">
                       <div className="mb-3 flex items-center justify-between">
                         <div className={`flex size-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-105 ${item.bg} ${item.tone}`}>
                           <Icon className="size-5" />
@@ -436,9 +444,10 @@ export default function DashboardPage() {
               {MINI_GAMES.map((game) => {
                 const Icon = game.icon;
                 return (
-                  <Link key={game.href} href={game.href} className="block">
-                    <Card className="tactile-btn gap-0 py-4 transition-colors hover:border-[var(--accent-border)]">
-                      <CardContent className="flex items-center gap-3.5 px-4">
+                  <Link key={game.href} href={game.href} className="group block">
+                    <Card className="tactile-btn relative gap-0 overflow-hidden py-4 transition-colors hover:border-[var(--accent-border)]">
+                      <CardMotif shape={game.motif} className={game.tone} />
+                      <CardContent className="relative flex items-center gap-3.5 px-4">
                         <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${game.bg} ${game.tone}`}>
                           <Icon className="size-5" />
                         </div>
