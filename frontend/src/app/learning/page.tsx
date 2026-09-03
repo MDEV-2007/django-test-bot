@@ -90,11 +90,11 @@ function LearningPageInner() {
         )}
 
         {data && !data.has_lessons_access && (
-          <Card className="border-amber-500/25 bg-amber-500/[0.06] transition-colors hover:border-amber-500/45">
+          <Card className="border-[var(--tone-premium)]/25 bg-[var(--tone-premium-soft)] transition-colors hover:border-[var(--tone-premium)]/45">
             <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">
               <div className="flex items-start gap-2.5">
-                <Lock className="mt-0.5 size-4 shrink-0 text-amber-400" />
-                <p className="text-sm text-amber-200">
+                <Lock className="mt-0.5 size-4 shrink-0 text-[var(--tone-premium-text)]" />
+                <p className="text-sm text-[var(--text-secondary)]">
                   <strong>Premium imtiyozi:</strong> barcha audio konspektlar va video darslarga to&apos;liq kirish.
                 </p>
               </div>
@@ -174,9 +174,9 @@ function LearningPageInner() {
                           size="icon"
                           onClick={toggleBookmark}
                           title="Saqlab qo'yish"
-                          className={lesson.is_bookmarked ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30' : ''}
+                          className={lesson.is_bookmarked ? 'bg-primary/20 text-[var(--accent-text)] hover:bg-primary/30' : ''}
                         >
-                          <Star className={cn('size-4', lesson.is_bookmarked && 'fill-amber-400')} />
+                          <Star className={cn('size-4', lesson.is_bookmarked && 'fill-[var(--accent)]')} />
                         </Button>
                       </div>
                       <CardTitle className="font-voice text-xl leading-snug sm:text-2xl">{lesson.title}</CardTitle>

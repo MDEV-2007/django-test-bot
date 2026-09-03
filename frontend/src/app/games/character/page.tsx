@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { celebrate } from '@/lib/confetti';
 import { HelpCircle, Coins, CheckCircle2, XCircle, Zap, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import AppShell from '@/components/AppShell';
+import CharacterCard from '@/components/student/CharacterCard';
 import PageHero from '@/components/student/PageHero';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +19,7 @@ import { cn } from '@/lib/utils';
 
 type Character = { id: number; clue_1: string; clue_2: string; clue_3: string };
 type Subject = { id: number; name: string; slug: string };
-type Result = { correct: boolean; xp?: number; coins?: number; name: string };
+type Result = { correct: boolean; xp?: number; coins?: number; name: string; avatar_url?: string | null };
 
 export default function CharacterGamePage() {
   const { access } = useAuthStore();
@@ -37,7 +39,7 @@ export default function CharacterGamePage() {
       setSubjects(d.subjects);
       setSubject((prev) => prev ?? d.selected_subject);
       setLoaded(true);
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   };
   useEffect(() => { if (access) load(); }, [access, subject]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -129,6 +131,14 @@ export default function CharacterGamePage() {
                 </form>
               ) : (
                 <div className="space-y-3 pt-2">
+                  {/* Javob ochilgan lahza — sahifadagi YAGONA "jasur" joy: personaj
+                      kartasi (rasm hukmron, matn scrim ustida). Qolgan hamma karta
+                      jim turadi. */}
+                  <CharacterCard
+                    name={result.name}
+                    imageUrl={result.avatar_url}
+                    caption={result.correct ? "To'g'ri topdingiz" : "To'g'ri javob"}
+                  />
                   <Card className={cn(result.correct ? 'border-[var(--success)]/30 bg-[var(--success)]/[0.06]' : 'border-rose-500/30 bg-rose-500/[0.06]')}>
                     <CardContent className="space-y-1 pt-6">
                       <p className="flex items-center gap-1.5 text-sm font-bold">
@@ -136,7 +146,6 @@ export default function CharacterGamePage() {
                           ? <><CheckCircle2 className="size-4 text-[var(--success-text)]" /> Barakalla, to&apos;g&apos;ri topdingiz!</>
                           : <><XCircle className="size-4 text-rose-400" /> Afsus, noto&apos;g&apos;ri.</>}
                       </p>
-                      <p className="text-sm">To&apos;g&apos;ri javob: <strong>{result.name}</strong></p>
                       {result.correct && (
                         <p className="text-xs text-muted-foreground">+{result.xp} XP, +{result.coins} tanga</p>
                       )}

@@ -103,8 +103,11 @@ def character_api(request):
             xp, coins = 120, 12
             profile.add_xp(xp)
             profile.add_coins(coins)
-            return Response({'correct': True, 'xp': xp, 'coins': coins, 'name': char.name})
-        return Response({'correct': False, 'name': char.name})
+            return Response({'correct': True, 'xp': xp, 'coins': coins,
+                             'name': char.name, 'avatar_url': char.avatar_url})
+        # `avatar_url` javob ekranidagi personaj kartasi uchun. Bo'sh bo'lsa frontend
+        # rasmsiz, tinch ko'rinishga tushadi — karta baribir chiziladi.
+        return Response({'correct': False, 'name': char.name, 'avatar_url': char.avatar_url})
 
     subject, subjects = resolve_subject(request)
     characters = list(HistoricalCharacter.objects.filter(subject=subject) if subject else HistoricalCharacter.objects.all())

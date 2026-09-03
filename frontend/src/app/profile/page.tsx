@@ -97,8 +97,8 @@ export default function ProfilePage() {
   }
 
   const chips = [
-    { icon: Flame, tone: 'text-amber-400', label: `${p.streak} kunlik streak` },
-    { icon: Coins, tone: 'text-yellow-400', label: `${p.coins.toLocaleString('uz-UZ')} tanga` },
+    { icon: Flame, tone: 'text-[var(--tone-streak-text)]', label: `${p.streak} kunlik streak` },
+    { icon: Coins, tone: 'text-[var(--tone-premium-text)]', label: `${p.coins.toLocaleString('uz-UZ')} tanga` },
     { icon: Zap, tone: 'text-[var(--accent-text)]', label: `${p.xp.toLocaleString('uz-UZ')} XP` },
   ];
 

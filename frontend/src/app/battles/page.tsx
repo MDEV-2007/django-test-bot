@@ -317,7 +317,7 @@ export default function BattlesPage() {
                   { label: 'ELO', value: arena.elo_rating, sub: arenaRankTitle(arena.elo_rating), cls: 'border-blue-500/25 bg-blue-500/[0.05]', text: 'text-foreground' },
                   { label: 'Janglar', value: arena.total_battles, sub: null, cls: '', text: 'text-foreground' },
                   { label: "G'alaba", value: arena.wins, sub: null, cls: 'border-[var(--success)]/25 bg-[var(--success)]/[0.05]', text: 'text-[var(--success-text)]' },
-                  { label: 'Durang', value: arena.draws, sub: null, cls: '', text: 'text-amber-300' },
+                  { label: 'Durang', value: arena.draws, sub: null, cls: '', text: 'text-[var(--text-secondary)]' },
                   { label: "Mag'lub", value: arena.losses, sub: null, cls: 'border-rose-500/25 bg-rose-500/[0.05]', text: 'text-rose-300' },
                 ].map((s) => (
                   <Card key={s.label} className={cn('gap-0 py-3', s.cls)}>
@@ -367,18 +367,18 @@ export default function BattlesPage() {
 
               <Card
                 onClick={startLiveMatch}
-                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/30 transition-colors hover:border-amber-500"
+                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-rose-500/30 transition-colors hover:border-rose-500"
               >
-                <CardMotif shape="arena" className="text-amber-400" />
+                <CardMotif shape="arena" className="text-rose-400" />
                 <CardContent className="relative pt-6">
-                  <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 transition-transform group-hover:scale-110">
+                  <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-rose-500/20 text-rose-400 transition-transform group-hover:scale-110">
                     <Swords className="size-6" />
                   </div>
-                  <h3 className="text-base font-bold transition-colors group-hover:text-amber-400">Jonli abituriyent bilan duel</h3>
+                  <h3 className="text-base font-bold transition-colors group-hover:text-rose-400">Jonli abituriyent bilan duel</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
                   </p>
-                  <span className="mt-4 inline-block text-xs font-bold text-amber-400">Raqib topish →</span>
+                  <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish →</span>
                 </CardContent>
               </Card>
             </div>
@@ -432,7 +432,7 @@ export default function BattlesPage() {
               <CardContent className="flex flex-col items-center py-10 text-center">
                 <div className="relative mb-6">
                   <div className="size-20 animate-spin rounded-full border-4 border-[var(--accent)]/20 border-t-[var(--accent)]" />
-                  <Swords className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 text-amber-400" />
+                  <Swords className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 text-rose-400" />
                 </div>
                 <h3 className="mb-1 text-lg font-bold">Raqib qidirilmoqda...</h3>
                 <p className="text-sm text-muted-foreground">Sizning darajangizga mos bilimdon ulanmoqda</p>
@@ -460,16 +460,16 @@ export default function BattlesPage() {
                   <span className="block font-mono text-xs font-bold uppercase text-muted-foreground">
                     Raund {roundIdx + 1} / {questions.length}
                   </span>
-                  <span className="text-xs font-black text-amber-400">VS</span>
+                  <span className="text-xs font-black text-rose-400">VS</span>
                 </div>
 
                 <div className="flex min-w-0 items-center gap-2.5 text-right">
                   <div className="min-w-0">
                     <p className="truncate text-xs font-bold">{opponentName}</p>
-                    <p className="font-mono text-sm font-black text-amber-400">{oppScore} ball</p>
+                    <p className="font-mono text-sm font-black text-rose-400">{oppScore} ball</p>
                   </div>
-                  <Avatar className="size-10 border border-amber-400">
-                    <AvatarFallback className="bg-[var(--surface-input)] text-amber-300"><Bot className="size-5" /></AvatarFallback>
+                  <Avatar className="size-10 border border-rose-400">
+                    <AvatarFallback className="bg-[var(--surface-input)] text-rose-300"><Bot className="size-5" /></AvatarFallback>
                   </Avatar>
                 </div>
               </CardContent>
@@ -541,7 +541,7 @@ export default function BattlesPage() {
             <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
               <div className={cn(
                 'flex size-16 items-center justify-center rounded-3xl',
-                isWin ? 'bg-amber-500/15 text-amber-400' : 'bg-[var(--surface-input)] text-muted-foreground',
+                isWin ? 'bg-[var(--tone-premium-soft)] text-[var(--tone-premium-text)]' : 'bg-[var(--surface-input)] text-muted-foreground',
               )}>
                 {isWin ? <Trophy className="size-8" /> : <Shield className="size-8" />}
               </div>
@@ -579,7 +579,7 @@ export default function BattlesPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Swords className="size-5 text-amber-400" /> Jang chaqiruvi
+                <Swords className="size-5 text-rose-400" /> Jang chaqiruvi
               </DialogTitle>
               <DialogDescription>
                 <strong className="text-foreground">{incomingChallenge?.from.name}</strong> sizni tezkor duelga chaqirmoqda. Jang qilasizmi?

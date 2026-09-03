@@ -72,7 +72,7 @@ const MINI_GAMES = [
 function scoreTone(score: number | null) {
   if (score === null) return 'border-[var(--border-card)] bg-[var(--surface-hover)] text-[var(--text-secondary)]';
   if (score >= 80) return 'border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success-text)]';
-  if (score >= 50) return 'border-amber-500/30 bg-amber-500/15 text-amber-300';
+  if (score >= 50) return 'border-[var(--tone-streak)]/30 bg-[var(--tone-streak-soft)] text-[var(--tone-streak-text)]';
   return 'border-[var(--danger)]/30 bg-[var(--danger-soft)] text-[var(--danger-text)]';
 }
 
@@ -265,7 +265,7 @@ export default function DashboardPage() {
                   <Sparkles className="size-3" /> Bugungi tavsiya
                 </Badge>
                 {p.is_premium && (
-                  <Badge variant="outline" className="border-amber-500/30 bg-amber-500/12 text-amber-300">
+                  <Badge variant="outline" className="border-[var(--tone-premium)]/30 bg-[var(--tone-premium-soft)] text-[var(--tone-premium-text)]">
                     <Crown className="size-3" /> Premium
                   </Badge>
                 )}
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                 <div className="space-y-1.5">
                   <p className="text-xs text-muted-foreground">Uzluksizlik</p>
                   <p className="flex items-center gap-1.5 font-mono text-sm font-bold tabular-nums">
-                    <Flame className="size-3.5 text-amber-400" /> {p.streak} kun
+                    <Flame className="size-3.5 text-[var(--tone-streak-text)]" /> {p.streak} kun
                   </p>
                   <p className="truncate text-xs text-[var(--text-secondary)]">
                     {data.freeze_count > 0 ? `${data.freeze_count} ta muzlatish zaxirada` : 'Bugun ham davom ettiring'}
@@ -441,7 +441,7 @@ export default function DashboardPage() {
           <section className="min-w-0 space-y-3 md:col-span-7">
             <div className="flex items-center justify-between">
               <h2 className="section-title">Interaktiv mini o&apos;yinlar</h2>
-              <Badge variant="outline" className="border-amber-500/25 bg-amber-500/10 text-amber-300">Bonus XP</Badge>
+              <Badge variant="outline" className="border-[var(--tone-premium)]/25 bg-[var(--tone-premium-soft)] text-[var(--tone-premium-text)]">Bonus XP</Badge>
             </div>
             <div className="space-y-3">
               {MINI_GAMES.map((game) => {
