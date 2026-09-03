@@ -98,6 +98,7 @@ export default function BattlesPage() {
       } else if (data.event === 'challenge_accepted') {
         setSentChallengeTo(null);
         setIncomingChallenge(null);
+        if (!ensurePlayable(data.questions)) return;
         setBattleId(data.battle_id);
         setQuestions(data.questions);
         setRoundIdx(0); setMyScore(0); setOppScore(0); setSelectedChoice(null); setCorrectChoiceId(null);
@@ -123,7 +124,9 @@ export default function BattlesPage() {
       return;
     }
     setSentChallengeTo(targetId);
-    lobbyRef.current.send(JSON.stringify({ action: 'challenge', target_id: targetId }));
+    lobbyRef.current.send(JSON.stringify({
+      action: 'challenge', target_id: targetId, subject: selectedSubject || undefined,
+    }));
   }
 
   function respondChallenge(accept: boolean) {
@@ -140,9 +143,16 @@ export default function BattlesPage() {
 
   async function startAiBattle() {
     const qs = selectedSubject ? `?subject=${selectedSubject}` : '';
-    const data = await apiFetch<{ battle_id: number; questions: Question[]; opponent: { name: string } }>(
-      `/api/battles/start-quiz/${qs}`, { method: 'POST' },
-    );
+    let data;
+    try {
+      data = await apiFetch<{ battle_id: number; questions: Question[]; opponent: { name: string } }>(
+        `/api/battles/start-quiz/${qs}`, { method: 'POST' },
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Jangni boshlab bo'lmadi");
+      return;
+    }
+    if (!ensurePlayable(data.questions)) return;
     setBattleId(data.battle_id);
     setQuestions(data.questions);
     setOpponentName(data.opponent.name);
@@ -189,8 +199,15 @@ export default function BattlesPage() {
     mmRef.current = mm;
     mm.onmessage = (e) => {
       const data = JSON.parse(e.data);
+      if (data.event === 'search_failed') {
+        mm.close();
+        setMode('idle');
+        toast.error(data.reason || "Bu fanda jang boshlab bo'lmadi");
+        return;
+      }
       if (data.event === 'matched') {
         mm.close();
+        if (!ensurePlayable(data.questions)) return;
         setBattleId(data.battle_id);
         setQuestions(data.questions);
         setRoundIdx(0); setMyScore(0); setOppScore(0); setSelectedChoice(null); setCorrectChoiceId(null);
@@ -199,6 +216,17 @@ export default function BattlesPage() {
         openLiveBattle(data.battle_id);
       }
     };
+  }
+
+  /* Savolsiz jangga KIRMAYMIZ. Ilgari bo'sh ro'yxat kelsa ham rejim 'live'ga o'tar,
+     lekin ko'rsatadigan savol bo'lmagani uchun ekran butunlay bo'sh (qora) qolardi —
+     ikkala o'yinchida ham. Server endi bunday jangni yaratmaydi; bu esa eski
+     serverga qarshi ham himoya. */
+  function ensurePlayable(qs: Question[] | undefined): qs is Question[] {
+    if (qs && qs.length > 0) return true;
+    setMode('idle');
+    toast.error("Bu fanda jang uchun savollar yetarli emas. Boshqa fanni tanlang.");
+    return false;
   }
 
   function openLiveBattle(id: number) {
@@ -491,6 +519,21 @@ export default function BattlesPage() {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {(mode === 'ai' || mode === 'live') && !currentQ && (
+          <Card className="mx-auto max-w-md">
+            <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
+              <Shield className="size-10 text-muted-foreground" />
+              <h2 className="font-voice text-lg font-bold">Jangni ko&apos;rsatib bo&apos;lmadi</h2>
+              <p className="text-sm text-muted-foreground">
+                Savollar yuklanmadi. Boshqa fanni tanlab qayta urinib ko&apos;ring.
+              </p>
+              <Button onClick={reset} className="w-full">
+                <RotateCcw className="size-4" /> Arenaga qaytish
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {mode === 'result' && (

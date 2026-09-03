@@ -34,21 +34,41 @@ from .models import Battle, BattlePlayerAnswer, BattleRound
 
 ROUNDS_PER_BATTLE = 5
 POINTS_PER_CORRECT = 10
+# A battle needs at least two questions to be playable at all — the same floor
+# battles/api.py enforces for AI battles. Below it the arena used to still create the
+# Battle row, hand both clients an empty question list, and leave them on a blank
+# screen with no way out.
+MIN_QUESTIONS = 2
+NOT_ENOUGH_QUESTIONS = "Bu fanda jang uchun savollar yetarli emas. Boshqa fanni tanlang."
 
 
-def _resolve_ws_subject(scope):
+def _resolve_ws_subject(scope, slug=None):
     """Same-origin Django template clients carry a session (selected_subject key, set by
     tests_app.subject_utils.resolve_subject on the HTTP side). The Next.js frontend has no
     Django session at all — it connects with `?subject=<slug>` in the WS URL instead (see
-    config/ws_auth.py for the matching `?token=` JWT pattern). Session wins when present,
-    since it reflects the subject the same browser most recently browsed on the site."""
-    session = scope.get('session')
-    slug = session.get('selected_subject') if session else None
+    config/ws_auth.py for the matching `?token=` JWT pattern), or passes the slug straight
+    in the message (`slug` here) for a socket that was opened before the user picked a
+    subject. An explicit slug always wins; session comes next, since it reflects the
+    subject the same browser most recently browsed on the site."""
+    if not slug:
+        session = scope.get('session')
+        slug = session.get('selected_subject') if session else None
     if not slug:
         query = parse_qs((scope.get('query_string') or b'').decode())
         slug = query.get('subject', [None])[0]
     subject = Subject.objects.filter(slug=slug).first() if slug else None
     return subject or Subject.objects.first()
+
+
+def _question_pool(subject):
+    q_filter = Question.objects.filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
+    if subject:
+        q_filter = q_filter.filter(subject=subject)
+    return q_filter
+
+
+def _has_enough_questions(subject):
+    return _question_pool(subject).count() >= MIN_QUESTIONS
 
 
 def _avatar_for(profile):
@@ -70,14 +90,12 @@ def _create_rounds(battle, subject):
     """Bir jang uchun savol to'plami. Ham navbat (matchmaking), ham to'g'ridan-to'g'ri
     chaqiruv (LobbyConsumer) shu bir xil funksiyadan foydalanadi — ikkalasida ham jang
     faollashgach xuddi shu qoida bilan savol tanlanishi kerak."""
-    q_filter = Question.objects.filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
-    if subject:
-        q_filter = q_filter.filter(subject=subject)
-    questions = list(q_filter.prefetch_related('choices').order_by('?')[:ROUNDS_PER_BATTLE])
+    questions = list(_question_pool(subject).prefetch_related('choices').order_by('?')[:ROUNDS_PER_BATTLE])
     BattleRound.objects.bulk_create([
         BattleRound(battle=battle, question=q, round_number=idx)
         for idx, q in enumerate(questions, start=1)
     ])
+    return len(questions)
 
 
 def _battle_payload(battle):
@@ -126,6 +144,10 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
     async def _find_or_wait(self):
         subject = await database_sync_to_async(_resolve_ws_subject)(self.scope)
+        if not await database_sync_to_async(_has_enough_questions)(subject):
+            await self.send(text_data=json.dumps({'event': 'search_failed', 'reason': NOT_ENOUGH_QUESTIONS}))
+            await self.close()
+            return
         battle, just_matched = await database_sync_to_async(self._match_or_create)(subject)
         self.battle_group = f'battle_{battle.id}'
         await self.channel_layer.group_add(self.battle_group, self.channel_name)
@@ -179,6 +201,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             return
         self.profile = await database_sync_to_async(lambda: user.profile)()
         self.group = lobby_group(self.profile.id)
+        self._pending_challenger_id = None
         await self.channel_layer.group_add(self.group, self.channel_name)
         await self.accept()
 
@@ -193,14 +216,20 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             return
         action = data.get('action')
         if action == 'challenge':
-            await self._send_challenge(data.get('target_id'))
+            await self._send_challenge(data.get('target_id'), data.get('subject'))
         elif action == 'respond':
             await self._respond(data.get('battle_id'), bool(data.get('accept')))
 
-    async def _send_challenge(self, target_id):
+    async def _send_challenge(self, target_id, subject_slug=None):
         if not target_id or int(target_id) == self.profile.id:
             return
-        subject = await database_sync_to_async(_resolve_ws_subject)(self.scope)
+        # The lobby socket is opened on page load, before the user has picked a subject,
+        # so the slug rides along with the challenge itself. Without it every challenge
+        # silently fell back to `Subject.objects.first()`.
+        subject = await database_sync_to_async(_resolve_ws_subject)(self.scope, subject_slug)
+        if not await database_sync_to_async(_has_enough_questions)(subject):
+            await self.send(text_data=json.dumps({'event': 'challenge_failed', 'reason': NOT_ENOUGH_QUESTIONS}))
+            return
         battle = await database_sync_to_async(self._create_pending)(int(target_id), subject)
         if battle is None:
             await self.send(text_data=json.dumps({
@@ -239,6 +268,15 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         result = await database_sync_to_async(self._resolve_response)(int(battle_id), accept)
         if result is None:
             return
+        if result == 'no_questions':
+            # The subject lost its questions between challenge and accept. Tell both
+            # sides rather than dropping them into a battle with nothing to answer.
+            for pid in (self.profile.id, self._pending_challenger_id):
+                if pid:
+                    await self.channel_layer.group_send(lobby_group(pid), {
+                        'type': 'challenge.failed', 'reason': NOT_ENOUGH_QUESTIONS,
+                    })
+            return
         if accept:
             payload = await database_sync_to_async(_battle_payload)(result)
             for pid in (result.player1_id, result.player2_id):
@@ -257,9 +295,12 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         if not accept:
             battle.delete()
             return battle
+        self._pending_challenger_id = battle.player1_id
+        if _create_rounds(battle, battle.subject) < MIN_QUESTIONS:
+            battle.delete()
+            return 'no_questions'
         battle.status = 'active'
         battle.save(update_fields=['status'])
-        _create_rounds(battle, battle.subject)
         return battle
 
     # Group event handlers (channels maps 'challenge.received' -> challenge_received, ...)
@@ -273,6 +314,9 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
     async def challenge_declined(self, event):
         await self.send(text_data=json.dumps({'event': 'challenge_declined', 'battle_id': event['battle_id']}))
+
+    async def challenge_failed(self, event):
+        await self.send(text_data=json.dumps({'event': 'challenge_failed', 'reason': event['reason']}))
 
 
 class BattleConsumer(AsyncWebsocketConsumer):

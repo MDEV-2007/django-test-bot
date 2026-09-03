@@ -14,7 +14,9 @@ from django.test import TransactionTestCase
 
 from tests.factories import make_question, make_subject, make_user
 
-from .consumers import BattleConsumer, MatchmakingConsumer
+from .consumers import BattleConsumer, LobbyConsumer, MatchmakingConsumer
+from tests_app.models import Subject
+
 from .models import Battle
 
 
@@ -131,3 +133,101 @@ class LivePvpBattleTests(TransactionTestCase):
         correct_id = correct_ids[0]
         wrong_id = next(i for i in ids if i != correct_id)
         return correct_id, wrong_id
+
+
+class ChallengeSubjectTests(TransactionTestCase):
+    """Direct challenges (LobbyConsumer) used to ignore the subject the challenger had
+    picked and fall back to `Subject.objects.first()`. When that subject had no
+    single-answer questions the battle was still created, both clients got an empty
+    question list, and both were left staring at a blank screen with no way out.
+    """
+
+    def setUp(self):
+        self.empty = make_subject(name='Ona tili', slug='ona-tili')
+        Subject.objects.filter(pk=self.empty.pk).update(order=0)
+        self.full = make_subject(name='Tarix', slug='tarix')
+        Subject.objects.filter(pk=self.full.pk).update(order=5)
+        for i in range(6):
+            make_question(subject=self.full, body=f'Savol {i}')
+        self.user1, self.profile1 = make_user('lobby_challenger')
+        self.user2, self.profile2 = make_user('lobby_target')
+
+    def _lobby(self, user):
+        communicator = WebsocketCommunicator(LobbyConsumer.as_asgi(), '/ws/battles/lobby/')
+        communicator.scope['user'] = user
+        communicator.scope['query_string'] = b''
+        return communicator
+
+    async def _mark_both_online(self):
+        from channels.db import database_sync_to_async
+        from django.utils import timezone
+
+        from accounts.models import Profile
+        await database_sync_to_async(
+            lambda: Profile.objects.filter(id__in=[self.profile1.id, self.profile2.id])
+            .update(last_seen_at=timezone.now())
+        )()
+
+    def test_challenge_uses_the_subject_the_challenger_picked(self):
+        async def run():
+            await self._mark_both_online()
+            a, b = self._lobby(self.user1), self._lobby(self.user2)
+            self.assertTrue((await a.connect())[0])
+            self.assertTrue((await b.connect())[0])
+
+            await a.send_to(text_data=json.dumps({
+                'action': 'challenge', 'target_id': self.profile2.id, 'subject': self.full.slug,
+            }))
+            self.assertEqual((await a.receive_json_from(timeout=5))['event'], 'challenge_sent')
+            invite = await b.receive_json_from(timeout=5)
+            self.assertEqual(invite['event'], 'challenge_received')
+
+            await b.send_to(text_data=json.dumps({
+                'action': 'respond', 'battle_id': invite['battle_id'], 'accept': True,
+            }))
+            accepted_b = await b.receive_json_from(timeout=5)
+            accepted_a = await a.receive_json_from(timeout=5)
+            # Both sides get a playable battle — this is what used to come back empty.
+            self.assertEqual(len(accepted_a['questions']), len(accepted_b['questions']))
+            self.assertGreaterEqual(len(accepted_a['questions']), 2)
+
+            await a.disconnect()
+            await b.disconnect()
+
+        asyncio.run(run())
+
+    def test_challenge_on_a_question_less_subject_is_refused(self):
+        async def run():
+            await self._mark_both_online()
+            a, b = self._lobby(self.user1), self._lobby(self.user2)
+            self.assertTrue((await a.connect())[0])
+            self.assertTrue((await b.connect())[0])
+
+            await a.send_to(text_data=json.dumps({
+                'action': 'challenge', 'target_id': self.profile2.id, 'subject': self.empty.slug,
+            }))
+            failed = await a.receive_json_from(timeout=5)
+            self.assertEqual(failed['event'], 'challenge_failed')
+            # The target is never bothered, and no half-built battle is left behind.
+            self.assertTrue(await b.receive_nothing(timeout=1))
+            from channels.db import database_sync_to_async
+            self.assertEqual(await database_sync_to_async(Battle.objects.count)(), 0)
+
+            await a.disconnect()
+            await b.disconnect()
+
+        asyncio.run(run())
+
+    def test_matchmaking_on_a_question_less_subject_is_refused(self):
+        async def run():
+            communicator = WebsocketCommunicator(MatchmakingConsumer.as_asgi(), '/ws/battles/matchmaking/')
+            communicator.scope['user'] = self.user1
+            communicator.scope['session'] = {'selected_subject': self.empty.slug}
+            self.assertTrue((await communicator.connect())[0])
+            failed = await communicator.receive_json_from(timeout=5)
+            self.assertEqual(failed['event'], 'search_failed')
+            from channels.db import database_sync_to_async
+            self.assertEqual(await database_sync_to_async(Battle.objects.count)(), 0)
+            await communicator.disconnect()
+
+        asyncio.run(run())
