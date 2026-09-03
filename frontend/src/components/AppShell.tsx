@@ -56,7 +56,9 @@ export default function AppShell() {
               <Flame className="h-3.5 w-3.5" />
               <span><StatNumber value={user.streak} /> kun</span>
             </div>
-            <Link href="/shop" title="Tanga balansi" className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 font-semibold text-amber-400">
+            {/* Tanga — oltin (`premium` ohangi). Streak esa yonida to'q sariq: ilgari
+                ikkalasi ham bir xil sariq edi va bir-biridan ajralmasdi. */}
+            <Link href="/shop" title="Tanga balansi" className="flex items-center gap-1.5 rounded-lg border border-[var(--tone-premium)]/25 bg-[var(--tone-premium-soft)] px-2.5 py-1 font-semibold text-[var(--tone-premium-text)]">
               <Coins className="h-3.5 w-3.5" />
               <span><StatNumber value={user.coins} /></span>
             </Link>

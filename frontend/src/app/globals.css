@@ -58,7 +58,8 @@
      natijada "rangli o'yinchoq" hissi. Endi har bir rang MA'NOGA biriktirilgan:
 
        growth  — o'sish, asosiy harakat (brend zumradi)
-       streak  — uzluksizlik, premium, mukofot
+       streak  — uzluksizlik (olov, to'q sariq)
+       premium — qiymat: premium obuna, tanga, mukofot (OLTIN, boshqa hech qayerda)
        danger  — xato, yo'qotish
        lesson  — o'quv kontenti (dars, video, audio)
        ai      — sun'iy intellekt (mentor, tahlil)
@@ -68,9 +69,19 @@
   --tone-growth-text: var(--accent-text);
   --tone-growth-soft: var(--accent-soft);
 
-  --tone-streak: #d99a38;
-  --tone-streak-text: #f0b45c;
-  --tone-streak-soft: rgba(217, 154, 56, 0.14);
+  /* Streak — OLOV, ya'ni to'q sariq. Ilgari bu token oltin edi va bir vaqtda
+     "uzluksizlik + premium + mukofot" degan uch ma'noni bildirardi. Bir rang uch
+     narsani bildirsa, u aksent bo'lishdan to'xtaydi: foydalanuvchi sariqni ko'rib
+     "bu pulmi, yutuqmi yoki shunchaki bezakmi?" deb o'ylab qoladi. Endi oltin
+     alohida tokenda (`--tone-premium`) va faqat qiymat/mukofot uchun ishlatiladi. */
+  --tone-streak: #d97538;
+  --tone-streak-text: #f09a5c;
+  --tone-streak-soft: rgba(217, 117, 56, 0.14);
+
+  /* Oltin — YAGONA rol: premium, tanga, mukofot. Boshqa hech qayerda ishlatilmaydi. */
+  --tone-premium: #d99a38;
+  --tone-premium-text: #f0b45c;
+  --tone-premium-soft: rgba(217, 154, 56, 0.14);
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
@@ -136,9 +147,13 @@
   --tone-growth-text: var(--accent-text);
   --tone-growth-soft: var(--accent-soft);
 
-  --tone-streak: #b57a1e;
-  --tone-streak-text: #8a5c12;
-  --tone-streak-soft: rgba(181, 122, 30, 0.12);
+  --tone-streak: #b55a1e;
+  --tone-streak-text: #8a3f12;
+  --tone-streak-soft: rgba(181, 90, 30, 0.12);
+
+  --tone-premium: #b57a1e;
+  --tone-premium-text: #8a5c12;
+  --tone-premium-soft: rgba(181, 122, 30, 0.12);
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
@@ -416,6 +431,30 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   line-height: 1.65;
 }
 .reading-scale { font-size: var(--reading-size, 1rem); }
+
+/* PDF dan import qilingan savollar bir nechta blokdan iborat: savol matni, keyin har
+   bandi alohida qatorda ("1) ...", "a) ..."), moslashtirish va jadvalli savollarda esa
+   jadval. Bitta xatboshidan iborat eski savollarga bu qoidalar umuman tegmaydi. */
+.reading-block > p { margin: 0; }
+.reading-block > p + p { margin-top: 0.35em; font-weight: 400; }
+.reading-block table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0.75em 0;
+  border-collapse: collapse;
+  font-weight: 400;
+  font-size: 0.9em;
+}
+.reading-block th,
+.reading-block td {
+  border: 1px solid var(--border);
+  padding: 0.45em 0.6em;
+  text-align: left;
+  vertical-align: top;
+}
+.reading-block th { background: var(--surface-hover); font-weight: 600; }
 
 /* ── shadcn/ui semantik tokenlari ───────────────────────────────────────────────
    shadcn init o'zining oklch palitrasini (och tema) qo'shgan edi — u bizning obsidian

@@ -55,7 +55,9 @@ type DashboardData = {
    tovush to'lqinlari, mentorda suhbat pufagi. */
 const QUICK_ACCESS = [
   { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
-  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]' },
+  // Arena — jang, ya'ni `danger` ohangi. Ilgari u oltin edi va bosh sahifadagi
+  // "Arena unvoni" ko'rsatkichi bilan ziddiyatda turardi (u allaqachon qizil).
+  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, tone: 'text-[var(--tone-danger-text)]', bg: 'bg-[var(--tone-danger-soft)]' },
   { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
   // Fan nomi yozilmaydi — mentor tanlangan fan bo'yicha javob beradi (tarix, ingliz tili...).
   { href: '/mentor', title: 'AI Mentor', desc: 'Savollarga 24/7 tahliliy javob', icon: Bot, badge: 'AI', motif: 'mentor' as const, tone: 'text-[var(--tone-ai-text)]', bg: 'bg-[var(--tone-ai-soft)]' },
@@ -186,8 +188,9 @@ export default function DashboardPage() {
         : 'Har kuni kamida bitta faoliyat bajarsangiz uzluksizlik o\'sadi.',
     },
     {
+      // Tanga — qiymat, ya'ni oltin (premium bilan bir oila).
       label: 'Tangalar', value: <StatNumber value={p.coins} />, icon: Coins,
-      tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]', href: '/shop',
+      tone: 'text-[var(--tone-premium-text)]', bg: 'bg-[var(--tone-premium-soft)]', href: '/shop',
       hint: "Testlar, arena va mini-o'yinlarda topiladi. Do'konda sarflanadi.",
     },
     {

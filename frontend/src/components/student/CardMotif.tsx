@@ -153,7 +153,10 @@ export default function CardMotif({ shape, className = '' }: { shape: MotifKey; 
       aria-hidden
       /* Rang klassi AYNAN shu elementga beriladi, kartaga emas: kartaga berilsa
          sarlavha va tavsif matni ham o'sha rangni meros qilib olardi. */
-      className={`pointer-events-none absolute -right-3 -top-4 size-32 opacity-[0.09] transition-opacity duration-300 group-hover:opacity-[0.16] ${className}`}
+      /* 6% — ataylab past. Naqsh KONTENT emas, tekstura: u karta nima haqda ekanini
+         chetdan sezdiradi, lekin sarlavha bilan diqqat uchun kurashmaydi. Sichqoncha
+         olib borilganda biroz kuchayadi — bu "bu karta bosiladi" degan ishora. */
+      className={`pointer-events-none absolute -right-3 -top-4 size-32 opacity-[0.06] transition-opacity duration-300 group-hover:opacity-[0.12] ${className}`}
       style={{
         backgroundColor: 'currentColor',
         WebkitMaskImage: mask,

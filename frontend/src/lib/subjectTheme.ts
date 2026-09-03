@@ -125,9 +125,13 @@ export function cardArtwork(subject: SubjectMeta | null | undefined, seed: numbe
      o'lchamda edi — telefonda karta eni ~340px bo'lgani uchun naqsh sarlavha va
      tavsif ustidan o'tib, matnni o'qishni qiyinlashtirardi. Naqsh — bezak emas,
      fon teksturasi: sezilishi kerak, lekin matn bilan raqobatlashmasligi shart. */
-  const glow = rgba(color, 0.14 * variant.tint);
-  const glowSoft = rgba(color, 0.04 * variant.tint);
-  const motif = motifDataUri(slug, color, 0.075 * variant.tint, variant.rotate);
+  /* Naqsh 6% — `CardMotif.tsx` bilan bir xil daraja, shunda ikkala tizim bitta
+     "ovoz balandligida" gapiradi. Gradient ham pasaytirildi: fan ranglari endi past
+     to'yingan (qarang: `set_subject_palette` komandasi) va oldingi 14% ular bilan
+     birga kartani haddan tashqari bo'yab yuborardi. */
+  const glow = rgba(color, 0.10 * variant.tint);
+  const glowSoft = rgba(color, 0.03 * variant.tint);
+  const motif = motifDataUri(slug, color, 0.06 * variant.tint, variant.rotate);
   const size = Math.round(112 * variant.scale);
 
   return {
