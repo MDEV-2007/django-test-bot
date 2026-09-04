@@ -29,6 +29,9 @@ type TestSetEdit = {
   id: number; title: string; subject_id: number | null; description: string; category: string;
   duration_minutes: number; created_by_id: number | null;
   is_premium: boolean; is_published: boolean; is_archived: boolean;
+  /* Urinishlar soni — o'chirish mumkinmi yoki yo'qligini shu belgilaydi (server
+     urinishlari bor testni o'chirmaydi, o'quvchilar natijasi yo'qolmasligi uchun). */
+  attempt_count: number;
   category_options: Option[]; subject_options: Option[];
 };
 
@@ -50,7 +53,8 @@ export default function PanelTestSetEditPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<TestSetEdit>(`/api/panel/testsets/${id}/edit/`).then(setTs);
+    apiFetch<TestSetEdit>(`/api/panel/testsets/${id}/edit/`).then(setTs)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   async function submit() {
@@ -80,6 +84,30 @@ export default function PanelTestSetEditPage() {
       router.push('/panel/tests');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "O'chirishda xatolik");
+      setShowDelete(false);
+    }
+  }
+
+  /* Urinishlari bor testni o'chirib bo'lmaydi — o'rniga arxivlanadi: test katalogdan
+     yo'qoladi va yangi urinishlar uchun yopiladi, lekin o'quvchilarning natijalari
+     joyida qoladi. Ilgari bu yo'l interfeysda umuman ko'rsatilmasdi: foydalanuvchi
+     faqat "o'chirib bo'lmaydi" degan xatoni ko'rar va nima qilishni bilmasdi. */
+  async function archive() {
+    if (!ts) return;
+    try {
+      await apiFetch(`/api/panel/testsets/${id}/edit/`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          title: ts.title, subject: ts.subject_id ?? '', description: ts.description,
+          category: ts.category, duration_minutes: ts.duration_minutes,
+          created_by: ts.created_by_id ?? '',
+          is_premium: ts.is_premium, is_published: false, is_archived: true,
+        }),
+      });
+      toast.success('Test arxivlandi');
+      router.push('/panel/tests');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Arxivlashda xatolik');
       setShowDelete(false);
     }
   }
@@ -179,15 +207,31 @@ export default function PanelTestSetEditPage() {
       <Dialog open={showDelete} onOpenChange={setShowDelete}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Testni o&apos;chirish</DialogTitle>
+            <DialogTitle>
+              {ts.attempt_count > 0 ? "Testni o'chirib bo'lmaydi" : "Testni o'chirish"}
+            </DialogTitle>
             <DialogDescription>
-              &laquo;{ts.title}&raquo; va uning savollari o&apos;chiriladi. O&apos;quvchilarning
-              shu testdagi urinishlari ham yo&apos;qoladi.
+              {ts.attempt_count > 0 ? (
+                <>
+                  &laquo;{ts.title}&raquo; testini <strong>{ts.attempt_count} ta</strong> o&apos;quvchi
+                  yechgan. Uni o&apos;chirish o&apos;sha natijalarni ham yo&apos;q qilardi, shuning
+                  uchun bunga ruxsat berilmaydi. Buning o&apos;rniga <strong>arxivlang</strong> —
+                  test katalogdan yo&apos;qoladi va yangi urinishlar uchun yopiladi, natijalar esa
+                  saqlanib qoladi.
+                </>
+              ) : (
+                <>&laquo;{ts.title}&raquo; va uning savollari butunlay o&apos;chiriladi. Bu testni
+                  hali hech kim yechmagan, shuning uchun hech qanday natija yo&apos;qolmaydi.</>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDelete(false)}>Bekor qilish</Button>
-            <Button variant="destructive" onClick={remove}>O&apos;chirish</Button>
+            {ts.attempt_count > 0 ? (
+              <Button onClick={archive}>Arxivlash</Button>
+            ) : (
+              <Button variant="destructive" onClick={remove}>O&apos;chirish</Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

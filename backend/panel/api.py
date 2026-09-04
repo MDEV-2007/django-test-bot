@@ -12,6 +12,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -290,9 +291,14 @@ def stop_impersonation_api(request):
     original_id = getattr(request, 'auth', None) and request.auth.get('impersonator_id')
     if not original_id:
         return Response({'error': 'Impersonatsiya holati topilmadi.'}, status=400)
-    admin_user = User.objects.filter(pk=original_id).first()
-    if not admin_user:
+    admin_user = User.objects.select_related('profile').filter(pk=original_id).first()
+    if not admin_user or not admin_user.is_active:
         return Response({'error': 'Asl admin topilmadi.'}, status=404)
+    is_superadmin = admin_user.is_superuser or (
+        hasattr(admin_user, 'profile') and admin_user.profile.is_superadmin
+    )
+    if not is_superadmin:
+        return Response({'error': 'Asl admin huquqi bekor qilingan.'}, status=403)
     refresh = RefreshToken.for_user(admin_user)
     return Response({'access': str(refresh.access_token), 'refresh': str(refresh), 'username': admin_user.username})
 
@@ -482,6 +488,11 @@ def testset_edit_api(request, pk):
             'description': ts.description, 'category': ts.category,
             'duration_minutes': ts.duration_minutes, 'created_by_id': ts.created_by_id,
             'is_premium': ts.is_premium, 'is_published': ts.is_published, 'is_archived': ts.is_archived,
+            # Urinishlari bor testni o'chirib bo'lmaydi (pastdagi DELETE shartiga
+            # qarang). Interfeys buni OLDINDAN bilishi kerak: aks holda u
+            # "urinishlar ham o'chadi" deb va'da beradi, so'ng server rad etadi va
+            # foydalanuvchiga tugma buzuqdek tuyuladi.
+            'attempt_count': ts.attempts.count(),
             'category_options': [{'value': v, 'label': l} for v, l in Question.CATEGORY_CHOICES],
             'subject_options': [{'value': s.id, 'label': s.name} for s in Subject.objects.all()],
         })
@@ -520,6 +531,147 @@ def testset_toggle_publish_api(request, pk):
         ts.is_archived = False
     ts.save()
     return Response({'is_published': ts.is_published})
+
+
+# ============================================================ ANSWER REVIEW
+# A test imported from a PDF (tests_app.importers) arrives with its correct answers
+# guessed by a model, so every one of them has to be confirmed by a person before the set
+# is published. These two endpoints are that review pass: one read that returns each
+# question with everything needed to judge it (image, table markup, options, the AI's
+# pick), and one write that sets a single question's answer.
+
+
+def _review_question(question):
+    """One question as the review screen needs it, including whether it still needs a
+    decision - which is what the reviewer filters on."""
+    data = {
+        'id': question.id,
+        'question_type': question.question_type,
+        'body': question.body,
+        'image_url': question.image.url if question.image else question.image_url,
+        'choices': [], 'group': None, 'sub_questions': [], 'reference_answer': '',
+    }
+
+    if question.question_type == 'grouped_item':
+        group = question.group
+        data['group'] = {
+            'instruction': group.instruction if group else '',
+            'options': [
+                {'id': o.id, 'label': o.label, 'text': o.text}
+                for o in (group.options.all() if group else [])
+            ],
+            'correct_option_id': question.correct_group_option_id,
+        }
+        data['needs_review'] = question.correct_group_option_id is None
+        return data
+
+    if question.question_type == 'open_written':
+        subs = list(question.sub_questions.all())
+        data['sub_questions'] = [
+            {'id': s.id, 'label': s.label, 'text': s.text,
+             'reference_answer': s.reference_answer}
+            for s in subs
+        ]
+        data['reference_answer'] = question.reference_answer
+        if subs:
+            data['needs_review'] = any(not s.reference_answer.strip() for s in subs)
+        else:
+            data['needs_review'] = not question.reference_answer.strip()
+        return data
+
+    choices = list(question.choices.all())
+    data['choices'] = [
+        {'id': c.id, 'text': c.text, 'is_correct': c.is_correct} for c in choices
+    ]
+    data['needs_review'] = not any(c.is_correct for c in choices)
+    return data
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def testset_review_api(request, pk):
+    ts = get_object_or_404(TestSet, pk=pk)
+    questions = [_review_question(q) for q in ts.ordered_questions()]
+    return Response({
+        'id': ts.id,
+        'title': ts.title,
+        'is_published': ts.is_published,
+        'questions': questions,
+        'needs_review_count': sum(1 for q in questions if q['needs_review']),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def testset_review_answer_api(request, pk, question_pk):
+    """Set one question's correct answer. Scoped through the test set so a question can
+    only be edited from a review of a set it actually belongs to."""
+    ts = get_object_or_404(TestSet, pk=pk)
+    question = get_object_or_404(ts.questions, pk=question_pk)
+
+    if question.question_type == 'grouped_item':
+        return _review_save_grouped(request, question)
+    if question.question_type == 'open_written':
+        return _review_save_written(request, question)
+    return _review_save_choice(request, question)
+
+
+def _review_save_choice(request, question):
+    try:
+        choice_id = int(request.data.get('choice_id'))
+    except (TypeError, ValueError):
+        return Response({'error': 'Variant topilmadi.'}, status=400)
+
+    choices = list(question.choices.all())
+    if not any(c.id == choice_id for c in choices):
+        return Response({'error': 'Variant topilmadi.'}, status=400)
+
+    for choice in choices:
+        should_be = (choice.id == choice_id)
+        if choice.is_correct != should_be:
+            choice.is_correct = should_be
+            choice.save(update_fields=['is_correct'])
+    return Response({'ok': True, 'question': _review_question(question)})
+
+
+def _review_save_grouped(request, question):
+    try:
+        option_id = int(request.data.get('group_option_id'))
+    except (TypeError, ValueError):
+        return Response({'error': 'Variant topilmadi.'}, status=400)
+
+    group = question.group
+    if group is None or not group.options.filter(pk=option_id).exists():
+        return Response({'error': 'Variant topilmadi.'}, status=400)
+
+    question.correct_group_option_id = option_id
+    question.save(update_fields=['correct_group_option'])
+    return Response({'ok': True, 'question': _review_question(question)})
+
+
+@transaction.atomic
+def _review_save_written(request, question):
+    """Reference answers, either per sub-question or - for a question with no lettered
+    parts - the single one on the question itself. Validated fully before any save so a
+    bad id in the middle of the payload can't leave earlier sub-questions half-written."""
+    answers = request.data.get('reference_answers')
+    if isinstance(answers, dict) and answers:
+        subs = {s.id: s for s in question.sub_questions.all()}
+        try:
+            resolved = [(subs[int(raw_id)], str(text).strip()) for raw_id, text in answers.items()]
+        except (KeyError, TypeError, ValueError):
+            return Response({'error': 'Band topilmadi.'}, status=400)
+        for sub, text in resolved:
+            sub.reference_answer = text
+            sub.save(update_fields=['reference_answer'])
+        return Response({'ok': True, 'question': _review_question(question)})
+
+    if question.sub_questions.exists():
+        return Response({'error': "Bandlar uchun javob yuborilmadi."}, status=400)
+
+    question.reference_answer = str(request.data.get('reference_answer', '')).strip()
+    question.save(update_fields=['reference_answer'])
+    return Response({'ok': True, 'question': _review_question(question)})
 
 
 # ============================================================ LESSONS
