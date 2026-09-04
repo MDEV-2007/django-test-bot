@@ -86,8 +86,10 @@ class Command(BaseCommand):
     help = "Javoblari ✓ bilan belgilangan Milliy Sertifikat PDF'ini import qiladi."
 
     def add_arguments(self, parser):
-        parser.add_argument('pdf', help="PDF fayl yo'li.")
-        parser.add_argument('--title', required=True, help="Yaratiladigan test nomi.")
+        parser.add_argument('pdf', help="PDF fayl YOKI PDF'lar turgan papka yo'li.")
+        parser.add_argument('--title', default=None,
+                            help="Test nomi. Berilmasa fayl nomidan olinadi — bu papka "
+                                 "rejimida majburiy, chunki har faylga alohida nom kerak.")
         parser.add_argument('--subject', default='Tarix')
         parser.add_argument('--category', default='certificate',
                             choices=[c[0] for c in Question.CATEGORY_CHOICES])
@@ -315,15 +317,72 @@ class Command(BaseCommand):
         dest.parent.mkdir(parents=True, exist_ok=True)
         pix.save(dest)
 
+    @staticmethod
+    def _title_from_filename(path):
+        """Fayl nomidan o'qiladigan test nomi yasaydi.
+
+        13 ta PDF'ni qo'lda nomlash — 13 marta xato qilish imkoniyati, shuning uchun
+        nom fayl nomidan olinadi:
+
+            Milliy_Sertifikat_1-2-mavzu_TAHLIL_JAVOBLAR.pdf
+            -> "Milliy Sertifikat 1-2-mavzu"
+
+        Xizmatchi so'zlar ("TAHLIL", "JAVOBLAR") tashlanadi: ular faylning
+        o'qituvchi uchun ekanini bildiradi, test nomiga aloqasi yo'q."""
+        name = re.sub(r'[_\s]+', ' ', path.stem).strip()
+        name = re.sub(r'\b(TAHLIL|JAVOBLAR|VA)\b', ' ', name, flags=re.IGNORECASE)
+        return re.sub(r'\s+', ' ', name).strip(' -')
+
     def handle(self, *args, **options):
         try:
-            import pymupdf
+            import pymupdf  # noqa: F401
         except ImportError:
             raise CommandError("pymupdf o'rnatilmagan.")
 
         path = Path(options['pdf'])
         if not path.exists():
             raise CommandError(f"Fayl topilmadi: {path}")
+
+        if path.is_dir():
+            pdfs = sorted(p for p in path.iterdir() if p.suffix.lower() == '.pdf')
+            if not pdfs:
+                raise CommandError(f"Papkada PDF topilmadi: {path}")
+            if options['title']:
+                raise CommandError(
+                    "--title papka rejimida ishlatilmaydi: har bir faylga alohida nom "
+                    "kerak, u fayl nomidan olinadi."
+                )
+            return self._handle_folder(pdfs, options)
+
+        title = options['title'] or self._title_from_filename(path)
+        self._import_one(path, title, options)
+
+    def _handle_folder(self, pdfs, options):
+        """Papkadagi hamma PDF'ni ketma-ket import qiladi.
+
+        Har fayl ALOHIDA tranzaksiyada: bittasi xato bersa qolgan 12 tasi baribir
+        yuklanadi. Aks holda 13-fayldagi bitta nuqson butun ishni bekor qilardi."""
+        self.stdout.write(f"{len(pdfs)} ta PDF topildi.\n")
+        ok, failed = [], []
+
+        for index, pdf in enumerate(pdfs, start=1):
+            title = self._title_from_filename(pdf)
+            self.stdout.write(self.style.HTTP_INFO(f"\n[{index}/{len(pdfs)}] {pdf.name}"))
+            try:
+                self._import_one(pdf, title, options)
+                ok.append(title)
+            except Exception as exc:  # noqa: BLE001 — bitta fayl butun partiyani to'xtatmasin
+                failed.append((pdf.name, str(exc)))
+                self.stdout.write(self.style.ERROR(f"  XATO: {exc}"))
+
+        self.stdout.write(self.style.SUCCESS(f"\n\nTayyor: {len(ok)} ta import qilindi."))
+        if failed:
+            self.stdout.write(self.style.ERROR(f"{len(failed)} ta fayl o'tmadi:"))
+            for name, err in failed:
+                self.stdout.write(self.style.ERROR(f"  - {name}: {err}"))
+
+    def _import_one(self, path, title, options):
+        import pymupdf
 
         doc = pymupdf.open(path)
         questions, bank = self._parse(doc)
@@ -360,16 +419,16 @@ class Command(BaseCommand):
             return
 
         media_dir = Path(settings.MEDIA_ROOT) / 'questions'
-        slug = re.sub(r'[^a-z0-9]+', '-', options['title'].lower()).strip('-')[:40]
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')[:40]
 
         with transaction.atomic():
             subject, _ = Subject.objects.get_or_create(
                 name=options['subject'],
                 defaults={'slug': options['subject'].lower().replace(' ', '-')},
             )
-            TestSet.objects.filter(title=options['title']).delete()
+            TestSet.objects.filter(title=title).delete()
             test = TestSet.objects.create(
-                subject=subject, title=options['title'], description='',
+                subject=subject, title=title, description='',
                 category=options['category'], duration_minutes=options['duration'],
                 is_premium=options['premium'], is_published=options['publish'],
             )
@@ -432,6 +491,6 @@ class Command(BaseCommand):
 
         state = 'nashr etildi' if options['publish'] else "QORALAMA (panelda ko'rib chiqing)"
         self.stdout.write(self.style.SUCCESS(
-            f"\n'{options['title']}' — {len(created)} ta savol, {state}."))
+            f"\n'{title}' — {len(created)} ta savol, {state}."))
         if figs:
             self.stdout.write(f"Rasmlar saqlandi: {media_dir}")
