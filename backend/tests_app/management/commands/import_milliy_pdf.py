@@ -44,7 +44,20 @@ from django.utils.html import escape
 from tests_app.models import AnswerOption, Question, SubQuestion, Subject, TestSet
 
 # Sahifa kolontitullari — savol matniga tushmasligi kerak.
-NOISE = ('Sodiqov Shohjahon', 'Telegram: @', "Ko’proq testlar uchun", 'MILLIY SERTIFIKAT SHABLONIDAGI')
+#
+# Bu ro'yxat MATN BO'YICHA emas, BELGI bo'yicha tuzilgan. Sabab: birinchi urinishda
+# bu yerda "Ko’proq testlar uchun" degan aniq ibora turgan edi, oxirgi sahifadagi
+# kolontitul esa "Ko’proq MILLIY SERTIFIKAT testlari uchun..." deb yozilgan — bir
+# so'z farq qilgani uchun filtr uni o'tkazib yuborgan va reklama matni 12 ta
+# savolning ichiga yopishib qolgan edi. Endi kanal nomi va sahifa raqami bo'yicha
+# tekshiriladi: kolontitul matni qanday o'zgarsa ham, ular o'zgarmaydi.
+NOISE_MARKERS = ('Sodiqov Shohjahon', 'TarixMilliyCertificate', 'MILLIY SERTIFIKAT SHABLONIDAGI')
+# "7 / 13" ko'rinishidagi sahifa raqami.
+PAGE_NO_RE = re.compile(r'^\d{1,2}\s*/\s*\d{1,2}$')
+
+
+def _is_noise(text):
+    return any(m in text for m in NOISE_MARKERS) or bool(PAGE_NO_RE.match(text))
 OPTION_RE = re.compile(r'^([A-D])\)\s*(.+)$', re.DOTALL)
 SUB_RE = re.compile(r'^([a-z])\)\s*(.+)$')
 ANSWER_RE = re.compile(r'^Javob:\s*(.+)$')
@@ -104,7 +117,7 @@ class Command(BaseCommand):
                     continue
                 for line in block['lines']:
                     text = ''.join(s['text'] for s in line['spans']).strip()
-                    if not text or any(n in text for n in NOISE):
+                    if not text or _is_noise(text):
                         continue
                     x0, y0, _x1, y1 = line['bbox']
                     size = line['spans'][0]['size'] if line['spans'] else 10.0
