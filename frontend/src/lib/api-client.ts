@@ -15,9 +15,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  /* Serverning to'liq javob tanasi. `message` faqat qisqa kod bo'lishi mumkin
+     ("premium_required"), foydalanuvchiga ko'rsatiladigan matn esa shu yerda
+     `message` maydonida keladi — chaqiruvchi kerak bo'lsa o'shani oladi. */
+  payload: Record<string, unknown>;
+  constructor(status: number, message: string, payload: Record<string, unknown> = {}) {
     super(message);
     this.status = status;
+    this.payload = payload;
   }
 }
 
@@ -74,7 +79,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body.error || body.detail || res.statusText);
+    throw new ApiError(res.status, body.error || body.detail || res.statusText, body);
   }
   return res.json() as Promise<T>;
 }
@@ -98,7 +103,7 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body.error || body.detail || res.statusText);
+    throw new ApiError(res.status, body.error || body.detail || res.statusText, body);
   }
   return res.json() as Promise<T>;
 }

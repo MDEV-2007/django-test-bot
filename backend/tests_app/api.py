@@ -22,7 +22,9 @@ from .models import (
 )
 from .subject_utils import resolve_subject as _resolve_subject
 from .feedback import _dispatch_ai_feedback, seed_questions_if_needed
+from .services.answering import apply_answer
 from .services.grading import grade_open_answers
+from .services.review import describe_answer, section_label, writing_payload
 from core.ai_client import ask_groq
 
 
@@ -187,7 +189,11 @@ def start_test_api(request, test_id):
             and test.id not in _unlocked_ids(profile)):
         return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
     attempt = _new_attempt(profile, test)
-    return Response({'attempt_id': attempt.id})
+    # `mode` — klient qaysi ekranni ochishini aytadi. Partlarga (ExamSection) bo'lingan
+    # test CEFR imtihon ekranida ochiladi: matn/audio va butun part bir varaqda. Qolgan
+    # hamma test eski "bitta savol — bitta ekran" oqimida qoladi.
+    mode = 'cefr' if test.sections.exists() else 'classic'
+    return Response({'attempt_id': attempt.id, 'mode': mode})
 
 
 @api_view(['POST'])
@@ -302,6 +308,15 @@ def _question_screen_data(attempt, q_idx, current_answer, total_questions, secon
             {'label': sq.label, 'text': sq.text, 'answer': submitted_open.get(sq.label, '')} for sq in sub_qs
         ]
         data['text_answer'] = current_answer.text_answer
+    elif qtype in Question.TEXT_INPUT_TYPES:
+        data['text_answer'] = current_answer.text_answer
+        data['max_words'] = question.max_words
+        if qtype == 'tfng':
+            data['tfng_options'] = question.tfng_options
+    elif qtype == 'writing_task':
+        data['text_answer'] = current_answer.text_answer
+        data['min_words'] = question.min_words
+        data['max_words'] = question.max_words
 
     return data
 
@@ -327,11 +342,7 @@ def question_api(request, attempt_id):
         return Response({'error': 'no questions'}, status=404)
     q_idx = max(1, min(q_idx, total))
 
-    elapsed = timezone.now() - attempt.started_at
-    duration = attempt.test.duration_minutes if attempt.test else 10
-    seconds_left = max(0, duration * 60 - int(elapsed.total_seconds()))
-
-    return Response(_question_screen_data(attempt, q_idx, current_answer, total, seconds_left))
+    return Response(_question_screen_data(attempt, q_idx, current_answer, total, attempt.seconds_left()))
 
 
 @api_view(['POST'])
@@ -340,42 +351,17 @@ def answer_api(request, attempt_id):
     if attempt.is_completed:
         return Response({'error': 'attempt already finished', 'completed': True}, status=409)
 
+    # Vaqt serverda tugagan bo'lsa, javob qabul qilinmaydi: aks holda taymer nolga
+    # tushgach ham (masalan brauzer yopilib qayta ochilsa) javob yozish mumkin bo'lardi.
+    if attempt.is_time_up:
+        return Response({'error': 'time_up', 'time_up': True,
+                          'message': "Test vaqti tugadi."}, status=409)
+
     question_id = request.data.get('question_id')
     q_idx = int(request.data.get('q_idx', 1))
     answer = get_object_or_404(AttemptAnswer, attempt=attempt, question_id=question_id)
-    question = answer.question
 
-    if question.question_type == 'open_written':
-        sub_qs = question.sub_questions.all()
-        if sub_qs:
-            subanswers = request.data.get('subanswers') or {}
-            answer.open_answers = {sq.label: (subanswers.get(sq.label) or '').strip()
-                                    for sq in sub_qs if (subanswers.get(sq.label) or '').strip()}
-        else:
-            answer.text_answer = (request.data.get('text_answer') or '').strip()
-    elif question.question_type == 'matching':
-        left_keys = [p.left_key for p in question.matching_pairs.all() if p.left_key]
-        matches = request.data.get('matches') or {}
-        answer.matching_data = {k: matches[k] for k in left_keys if matches.get(k)}
-        answer.grade()
-    elif question.question_type == 'grouped_item':
-        option_id = request.data.get('group_option_id')
-        answer.grouped_option = get_object_or_404(GroupOption, id=option_id, group=question.group) if option_id else None
-        answer.grade()
-    else:
-        choice_id = request.data.get('choice_id')
-        answer.selected_choice = get_object_or_404(AnswerOption, id=choice_id, question_id=question_id) if choice_id else None
-        answer.grade()
-
-    # Javob vaqti: klient shu savolda qancha turganini yuboradi (`time_spent_sec`).
-    # Ishonchsiz manba bo'lgani uchun oqilona chegara qo'yiladi (0–1 soat).
-    now = timezone.now()
-    try:
-        spent = int(request.data.get('time_spent_sec') or 0)
-    except (TypeError, ValueError):
-        spent = 0
-    answer.time_spent_sec = max(0, min(spent, 3600)) or None
-    answer.answered_at = now
+    apply_answer(answer, request.data)
     answer.save()
 
     answers, current_answer, total = _get_answers_and_current(attempt, q_idx)
@@ -439,10 +425,16 @@ def finish_api(request, attempt_id):
                     a.open_grading = {sq.label: {'is_correct': r['is_correct'], 'note': r['note'][:300]} for sq, r in entries}
                     a.save(update_fields=['is_correct', 'open_grading'])
 
-    correct = sum(1 for a in answers if a.is_correct)
-    skipped = sum(1 for a in answers if a.is_skipped)
-    wrong = total - correct - skipped
-    score = (correct / total) * 100
+    # Writing topshirig'i to'g'ri/xato deb sanalmaydi — u alohida, mezonlar bo'yicha
+    # (0-5 ball va CEFR darajasi) baholanadi va tekshiruvi premium. Shuning uchun u
+    # foizli natijaning maxrajiga kirmaydi: aks holda esse yozgan o'quvchi shu savol
+    # hisobiga avtomatik "xato" olardi.
+    scored = [a for a in answers if a.question.question_type != 'writing_task']
+    scored_total = len(scored)
+    correct = sum(1 for a in scored if a.is_correct)
+    skipped = sum(1 for a in scored if a.is_skipped)
+    wrong = scored_total - correct - skipped
+    score = (correct / scored_total) * 100 if scored_total else 0.0
 
     attempt.correct_answers = correct
     attempt.wrong_answers = wrong
@@ -466,7 +458,7 @@ def finish_api(request, attempt_id):
         score_row.xp = F('xp') + xp_awarded
         score_row.save(update_fields=['xp'])
 
-    for ans in answers:
+    for ans in scored:
         if ans.is_skipped:
             continue
         if not ans.is_correct:
@@ -502,19 +494,27 @@ def feedback_api(request, attempt_id):
         _dispatch_ai_feedback(attempt.id)
         return Response({'status': 'pending'})
 
-    answers = (attempt.answers.select_related('question', 'selected_choice')
-               .prefetch_related('question__choices').order_by('question_id'))
+    # Savollar imtihon raqami bo'yicha tartiblanadi (CEFR uchun 1-35), raqami yo'q
+    # savollar esa eski tartibda — id bo'yicha.
+    answers = (attempt.answers
+               .select_related('question', 'question__section', 'selected_choice',
+                                'grouped_option', 'question__correct_group_option')
+               .prefetch_related('question__choices', 'question__accepted_answers',
+                                  'question__matching_pairs', 'question__sub_questions')
+               .order_by('question__exam_number', 'question_id'))
     review_items = []
     for ans in answers:
         q = ans.question
-        correct_answer, your_answer = '', ''
-        if q.question_type in Question.SINGLE_ANSWER_TYPES:
-            correct_answer = ', '.join(c.text for c in q.choices.all() if c.is_correct)
-            your_answer = ans.selected_choice.text if ans.selected_choice else ''
         review_items.append({
             'question_id': q.id, 'body': q.body, 'is_correct': ans.is_correct, 'is_skipped': ans.is_skipped,
-            'your_answer': your_answer, 'correct_answer': correct_answer,
             'explanation': q.explanation, 'grading_note': ans.ai_grading_note,
+            # Har bir savol turi uchun javob matni — bo'shliqli, TRUE/FALSE, moslashtirish
+            # va guruhlangan savollar ham ko'rinadi (tests_app/services/review.py).
+            **describe_answer(ans),
+            'exam_number': q.exam_number,
+            'type': q.question_type,
+            'section': section_label(q),
+            'writing': writing_payload(ans),
         })
 
     return Response({
@@ -554,7 +554,7 @@ def revision_api(request):
     profile = ensure_profile_for_user(request.user)
     base = RevisionItem.objects.filter(profile=profile)
     active = (base.filter(mastered=False).select_related('question', 'question__topic', 'subject')
-              .prefetch_related('question__choices'))
+              .prefetch_related('question__choices', 'question__accepted_answers'))
 
     subject_slug = request.GET.get('subject', '')
     topic_id = request.GET.get('topic', '')
@@ -575,12 +575,21 @@ def revision_api(request):
     deck = []
     for item in active[:50]:
         q = item.question
+        is_choice = q.question_type in Question.SINGLE_ANSWER_TYPES
+        # Bo'shliqli va TRUE/FALSE savollar ham dastada joyida yechiladi: ular AI'siz,
+        # aniq solishtirish bilan baholanadi, ya'ni javobni shu yerda tekshirsa bo'ladi.
+        is_text = q.question_type in Question.TEXT_INPUT_TYPES
         deck.append({
             'item_id': item.id, 'question_id': q.id, 'body': q.body, 'type': q.question_type,
             'image': q.image.url if q.image else (q.image_url or ''), 'explanation': q.explanation or '',
             'topic': q.topic.title if q.topic else '', 'times_wrong': item.times_wrong,
-            'inline': q.question_type in Question.SINGLE_ANSWER_TYPES,
-            'choices': [{'id': c.id, 'text': c.text} for c in q.choices.all()] if q.question_type in Question.SINGLE_ANSWER_TYPES else [],
+            'inline': is_choice or is_text,
+            # 'choice' — variantlardan tanlanadi, 'text' — javob yoziladi (yoki
+            # TRUE/FALSE/NOT GIVEN tugmalaridan tanlanadi).
+            'answer_mode': 'text' if is_text else 'choice',
+            'choices': [{'id': c.id, 'text': c.text} for c in q.choices.all()] if is_choice else [],
+            'tfng_options': q.tfng_options if q.question_type == 'tfng' else [],
+            'max_words': q.max_words,
         })
 
     return Response({
@@ -611,7 +620,14 @@ def revision_check_api(request, item_id):
 
     choice_id = request.data.get('choice_id')
     correct_choice = q.choices.filter(is_correct=True).first()
-    is_correct = bool(choice_id and correct_choice and str(correct_choice.id) == str(choice_id))
+
+    if q.question_type in Question.TEXT_INPUT_TYPES:
+        from .models import normalize_gap_answer
+        given = normalize_gap_answer(request.data.get('text_answer'))
+        accepted = {a.normalized for a in q.accepted_answers.all()}
+        is_correct = bool(given) and given in accepted
+    else:
+        is_correct = bool(choice_id and correct_choice and str(correct_choice.id) == str(choice_id))
 
     item.times_reviewed = F('times_reviewed') + 1
     item.last_reviewed_at = timezone.now()
@@ -620,7 +636,7 @@ def revision_check_api(request, item_id):
     item.save(update_fields=['times_reviewed', 'last_reviewed_at', 'mastered', 'updated_at'])
 
     explanation = q.explanation or ''
-    if not is_correct and not explanation and correct_choice:
+    if not is_correct and not explanation and correct_choice and q.question_type not in Question.TEXT_INPUT_TYPES:
         cache_key = f'ai_expl:{q.id}'
         explanation = cache.get(cache_key) or ''
         if not explanation:
@@ -640,6 +656,10 @@ def revision_check_api(request, item_id):
     return Response({
         'ok': True, 'correct': is_correct, 'mastered': is_correct,
         'correct_choice_id': correct_choice.id if correct_choice else None, 'explanation': explanation,
+        # Bo'shliqli/TRUE-FALSE savol uchun to'g'ri javob matni — o'quvchi xato qilsa
+        # darhol ko'radi (variantli savolda buni `correct_choice_id` bajaradi).
+        'correct_answer': (' / '.join(a.text for a in q.accepted_answers.all())
+                            if q.question_type in Question.TEXT_INPUT_TYPES else ''),
     })
 
 

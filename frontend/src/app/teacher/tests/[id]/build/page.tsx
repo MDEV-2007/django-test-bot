@@ -6,11 +6,13 @@ import Link from 'next/link';
 import {
   Settings2, Eye, BarChart3, Send, Gamepad2, Plus, Pencil, Trash2, HelpCircle,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
 import PageHeader from '@/components/panel/PageHeader';
-import QuestionForm, { type QuestionData } from '@/components/teacher/QuestionForm';
+import QuestionForm, { type BankOption, type QuestionData, type SectionOption } from '@/components/teacher/QuestionForm';
+import SectionManager, { type TeacherSection } from '@/components/teacher/SectionManager';
 import BrandLoader from '@/components/BrandLoader';
 import Reveal from '@/components/motion/Reveal';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +21,11 @@ import { Button } from '@/components/ui/button';
 
 type QuestionRow = { id: number; question_type: string; body: string };
 type BuildData = { test: { id: number; title: string }; questions: QuestionRow[] };
+type SectionData = {
+  sections: TeacherSection[];
+  skill_options: { value: string; label: string }[];
+  banks: BankOption[];
+};
 
 export default function TestBuildPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,9 +36,15 @@ export default function TestBuildPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingFull, setEditingFull] = useState<QuestionData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sectionData, setSectionData] = useState<SectionData | null>(null);
 
   const load = useCallback(() => {
-    apiFetch<BuildData>(`/api/teacher/tests/${id}/build/`).then(setData);
+    apiFetch<BuildData>(`/api/teacher/tests/${id}/build/`).then(setData)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
+    // Partlar alohida so'rovda: ular faqat CEFR testida ishlatiladi, shuning uchun
+    // mavjud `build` javobining shakli o'zgarmaydi.
+    apiFetch<SectionData>(`/api/teacher/tests/${id}/sections/`).then(setSectionData)
+      .catch(() => { /* partlar ixtiyoriy — xatolik butun sahifani buzmasin */ });
   }, [id]);
 
   useEffect(() => { if (access) load(); }, [access, load]);
@@ -100,6 +113,15 @@ export default function TestBuildPage() {
           </Card>
         )}
 
+        {sectionData && (
+          <SectionManager
+            testId={Number(id)}
+            sections={sectionData.sections}
+            skillOptions={sectionData.skill_options}
+            onChanged={load}
+          />
+        )}
+
         <div className="space-y-2.5">
           {data.questions.map((q, i) => (
             <Reveal key={q.id} index={i} y={6}>
@@ -156,6 +178,8 @@ export default function TestBuildPage() {
             key={editingId ?? 'new'}
             testId={Number(id)}
             initial={editingFull ?? undefined}
+            sections={(sectionData?.sections ?? []) as SectionOption[]}
+            banks={sectionData?.banks ?? []}
             onSaved={() => { setShowForm(false); setEditingFull(null); setEditingId(null); load(); }}
           />
         )}

@@ -15,7 +15,7 @@ from django.db.models import Avg, Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
-from tests_app.models import Attempt, AttemptAnswer
+from tests_app.models import Attempt, AttemptAnswer, ExamSection
 
 DASHBOARD_CACHE_KEY = 'analytics:dash:{pid}'
 DASHBOARD_CACHE_TTL = 60 * 15  # 15 min; explicitly busted on test completion.
@@ -81,6 +81,54 @@ def compute_mastery(profile):
         },
         'weak': weak,
         'strong': strong,
+    }
+
+
+def compute_cefr_skills(profile):
+    """CEFR ko'nikmalari kesimi: Listening / Reading / Writing bo'yicha o'zlashtirish.
+
+    Nega alohida: mavjud "mavzular kesimi" savolni Topic bo'yicha guruhlaydi (CEFR'da bu
+    A1...C2 darajalari), lekin o'quvchi uchun eng muhim savol boshqa — "qaysi ko'nikmam
+    oqsayapti?". Ko'nikma savolning partida (ExamSection.skill) turadi.
+
+    Writing to'g'ri/xato deb baholanmaydi, shuning uchun u foiz bilan emas, AI qo'ygan
+    o'rtacha ball (0-5) va oxirgi daraja bilan qaytadi. CEFR testi yechmagan o'quvchida
+    natija bo'sh bo'ladi va dashboard bu blokni umuman ko'rsatmaydi."""
+    answers = _answer_qs(profile).filter(question__section__isnull=False)
+
+    rows = list(
+        answers.exclude(question__question_type='writing_task')
+        .values('question__section__skill')
+        .annotate(total=Count('id'), correct=Count('id', filter=Q(is_correct=True)))
+    )
+
+    skills = []
+    labels = dict(ExamSection.SKILL_CHOICES)
+    for row in rows:
+        skill = row['question__section__skill']
+        total = row['total']
+        skills.append({
+            'skill': skill,
+            'label': labels.get(skill, skill),
+            'mastery': round((row['correct'] / total) * 100) if total else 0,
+            'answered': total,
+        })
+    skills.sort(key=lambda s: s['skill'])
+
+    # Writing — baholangan javoblarning o'rtacha bali va eng oxirgi darajasi.
+    writing = answers.filter(question__question_type='writing_task', ai_score__isnull=False)
+    writing_stats = writing.aggregate(avg=Avg('ai_score'), count=Count('id'))
+    latest_level = (writing.order_by('-attempt__completed_at')
+                    .values_list('ai_level', flat=True).first() or '')
+
+    return {
+        'skills': skills,
+        'writing': {
+            'reviewed_count': writing_stats['count'] or 0,
+            'avg_score': round(writing_stats['avg'], 1) if writing_stats['avg'] else None,
+            'level': latest_level,
+        },
+        'has_data': bool(skills) or bool(writing_stats['count']),
     }
 
 
@@ -208,6 +256,8 @@ def dashboard_data(profile, use_cache=True):
         'monthly': monthly,
         'subject_dist': subject_dist,
         'mastery': mastery,
+        # CEFR ko'nikmalari — faqat CEFR imtihonini yechganlarda to'ladi.
+        'cefr': compute_cefr_skills(profile),
         'recent': recent,
     }
     cache.set(key, data, DASHBOARD_CACHE_TTL)

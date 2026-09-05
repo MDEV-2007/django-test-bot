@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { notFound } from 'next/navigation';
 
 export default function DesignSystemPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 

@@ -3,6 +3,7 @@ from adminsortable2.admin import SortableTabularInline, SortableAdminBase
 from .models import (
     Subject, Question, AnswerOption, MatchingPair, SubQuestion,
     QuestionGroup, GroupOption, TestSet, Attempt, AttemptAnswer, AIFeedback,
+    ExamSection, AcceptedAnswer,
 )
 
 
@@ -36,6 +37,15 @@ class SubQuestionInline(SortableTabularInline):
     verbose_name_plural = "Ochiq savol qism-savollari (a, b... — bo'sh qoldirsangiz, savol bo'linmagan hisoblanadi)"
 
 
+class AcceptedAnswerInline(SortableTabularInline):
+    """Bo'shliqli (gap_fill) va TRUE/FALSE/NOT GIVEN savollarning to'g'ri javoblari.
+    Bir nechta qator = bir nechta maqbul variant (masalan "forest" va "the forest")."""
+    model = AcceptedAnswer
+    extra = 2
+    verbose_name = "Qabul qilinadigan javob"
+    verbose_name_plural = "Qabul qilinadigan javoblar"
+
+
 @admin.register(Question)
 class QuestionAdmin(SortableAdminBase, admin.ModelAdmin):
     list_display = ('short_body', 'question_type', 'topic', 'difficulty', 'category', 'points')
@@ -59,6 +69,13 @@ class QuestionAdmin(SortableAdminBase, admin.ModelAdmin):
             'fields': ('group', 'correct_group_option'),
             'classes': ('collapse',),
         }),
+        ("CEFR imtihoni", {
+            'fields': ('section', 'exam_number', 'max_words', 'tfng_style', 'min_words'),
+            'classes': ('collapse',),
+            'description': "Savol qaysi partga tegishli va varaqadagi rasmiy raqami. "
+                            "Bo'shliqli savol uchun to'g'ri javoblar pastdagi "
+                            "'Qabul qilinadigan javob' bo'limida yoziladi.",
+        }),
     )
 
     def short_body(self, obj):
@@ -72,12 +89,17 @@ class QuestionAdmin(SortableAdminBase, admin.ModelAdmin):
         matching pairs, etc. For a brand-new (unsaved) question, show every inline since
         the type may still change before the first save."""
         if obj is None:
-            inline_classes = [AnswerOptionInline, MatchingPairInline, SubQuestionInline]
+            inline_classes = [AnswerOptionInline, MatchingPairInline, SubQuestionInline,
+                              AcceptedAnswerInline]
         elif obj.question_type == 'matching':
             inline_classes = [MatchingPairInline]
         elif obj.question_type == 'open_written':
             inline_classes = [SubQuestionInline]
         elif obj.question_type == 'grouped_item':
+            inline_classes = []
+        elif obj.question_type in ('gap_fill', 'tfng'):
+            inline_classes = [AcceptedAnswerInline]
+        elif obj.question_type == 'writing_task':
             inline_classes = []
         else:  # single_choice / image_based / table_based
             inline_classes = [AnswerOptionInline]
@@ -126,3 +148,38 @@ class AttemptAnswerAdmin(admin.ModelAdmin):
 @admin.register(AIFeedback)
 class AIFeedbackAdmin(admin.ModelAdmin):
     list_display = ('attempt', 'predicted_score', 'created_at')
+
+
+class ExamSectionQuestionInline(admin.TabularInline):
+    """Partga tegishli savollar — faqat ko'rish uchun ro'yxat; savolning o'zi
+    Question sahifasida tahrirlanadi."""
+    model = Question
+    fk_name = 'section'
+    extra = 0
+    fields = ('exam_number', 'question_type', 'body')
+    readonly_fields = ('body',)
+    ordering = ('exam_number',)
+    show_change_link = True
+
+
+@admin.register(ExamSection)
+class ExamSectionAdmin(admin.ModelAdmin):
+    list_display = ('test_set', 'skill', 'part_number', 'title', 'question_count')
+    list_filter = ('skill', 'test_set')
+    search_fields = ('title', 'instruction', 'test_set__title')
+    inlines = [ExamSectionQuestionInline]
+    fieldsets = (
+        (None, {'fields': ('test_set', 'skill', 'part_number', 'order', 'title', 'instruction',
+                            'duration_minutes')}),
+        ("O'qish matni", {
+            'fields': ('passage',),
+            'description': "Matn ichidagi bo'shliqni {{9}} ko'rinishida yozing — 9 savolning "
+                            "imtihon raqami. O'quvchi shu joyda kichik kiritish maydonini ko'radi.",
+        }),
+        ("Audio (Listening)", {'fields': ('audio', 'audio_url', 'audio_play_limit')}),
+        ("Rasm (xarita — Listening Part 4)", {'fields': ('image',)}),
+    )
+
+    def question_count(self, obj):
+        return obj.questions.count()
+    question_count.short_description = "Savollar"

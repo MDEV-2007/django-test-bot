@@ -1,0 +1,41 @@
+{
+  "title": "CEFR Writing Mock 1",
+  "description": "Ikki qismli Writing mock: rasmiy xat va esse. Yozish bepul, AI tekshiruvi premium.",
+  "subject": "Ingliz tili",
+  "duration_minutes": 60,
+  "is_premium": false,
+  "sections": [
+    {
+      "skill": "writing",
+      "part": 1,
+      "title": "Part 1 — An email",
+      "instruction": "Write an email. Write 60-80 words. You have about 20 minutes for this part.",
+      "duration_minutes": 20,
+      "questions": [
+        {
+          "number": 1,
+          "type": "writing_task",
+          "min_words": 60,
+          "max_words": 80,
+          "body": "<p>You recently attended a language course at a study centre in your city. The centre has asked you for feedback.</p><p>Write an email to the course manager. In your email you should:</p><ul><li>say which course you took and when;</li><li>explain what you liked most about it;</li><li>suggest one thing the centre could improve.</li></ul>"
+        }
+      ]
+    },
+    {
+      "skill": "writing",
+      "part": 2,
+      "title": "Part 2 — An essay",
+      "instruction": "Write an essay. Write 180-200 words. You have about 40 minutes for this part.",
+      "duration_minutes": 40,
+      "questions": [
+        {
+          "number": 2,
+          "type": "writing_task",
+          "min_words": 180,
+          "max_words": 200,
+          "body": "<p>Some people believe that students learn better when they study online from home. Others think that classroom lessons with a teacher are more effective.</p><p>Discuss both views and give your own opinion. Support your answer with reasons and examples from your own experience.</p>"
+        }
+      ]
+    }
+  ]
+}

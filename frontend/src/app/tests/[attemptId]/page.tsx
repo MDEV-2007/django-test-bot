@@ -304,8 +304,16 @@ export default function TestScreenPage() {
             <Separator />
 
             {/* reading-block: 70ch measure + 1.65 line-height + A-/A/A+ boshqaradigan
-                --reading-size. Ilgari o'lcham qattiq yozilgan (text-base/sm:text-lg) edi. */}
-            <h2 className="reading-block font-bold" dangerouslySetInnerHTML={{ __html: q.body }} />
+                --reading-size. Ilgari o'lcham qattiq yozilgan (text-base/sm:text-lg) edi.
+                Teg <h2> emas, <div>: PDF dan import qilingan savol matni bir nechta <p>
+                dan va jadvaldan iborat bo'lishi mumkin, brauzer esa <table> ni ko'rgan
+                zahoti <h2> ni yopib yuboradi va jadval savoldan tashqarida qolib ketardi. */}
+            <div
+              role="heading"
+              aria-level={2}
+              className="reading-block font-bold"
+              dangerouslySetInnerHTML={{ __html: q.body }}
+            />
 
             {q.image && (
               <div className="overflow-hidden rounded-2xl border bg-black/20">

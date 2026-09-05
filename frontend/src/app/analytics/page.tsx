@@ -34,6 +34,11 @@ type Dashboard = {
   daily: { date: string; count: number; avg: number }[];
   monthly: { label: string; tests: number; avg: number; cum_xp: number }[];
   subject_dist: { name: string; value: number; color: string }[];
+  cefr: {
+    skills: { skill: string; label: string; mastery: number; answered: number }[];
+    writing: { reviewed_count: number; avg_score: number | null; level: string };
+    has_data: boolean;
+  };
   mastery: {
     subjects: { name: string; mastery: number; color: string }[];
     topics: { id: number; title: string; mastery: number; answered: number }[];
@@ -255,6 +260,50 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* CEFR ko'nikmalari — faqat CEFR imtihonini yechgan o'quvchida chiziladi.
+                O'quvchi uchun eng foydali kesim: qaysi ko'nikma oqsayotgani. */}
+            {data.cefr?.has_data && (
+              <Card>
+                <CardHeader className="flex-row items-start justify-between space-y-0">
+                  <CardTitle className="text-base">CEFR ko&apos;nikmalari</CardTitle>
+                  {data.cefr.writing.level && (
+                    <span className="font-mono text-xs text-[var(--accent-text)]">
+                      Writing: {data.cefr.writing.level}
+                    </span>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {data.cefr.skills.map((s) => (
+                    <div key={s.skill} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="truncate pr-2 font-semibold">{s.label}</span>
+                        <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
+                          {s.mastery}% · {s.answered} savol
+                        </span>
+                      </div>
+                      <Progress value={s.mastery} className="h-2" />
+                    </div>
+                  ))}
+
+                  {data.cefr.writing.reviewed_count > 0 ? (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="truncate pr-2 font-semibold">Yozma ish (AI bahosi)</span>
+                        <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
+                          {data.cefr.writing.avg_score} / 5 · {data.cefr.writing.reviewed_count} ta
+                        </span>
+                      </div>
+                      <Progress value={((data.cefr.writing.avg_score ?? 0) / 5) * 100} className="h-2" />
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Yozma ishingiz hali AI tomonidan tekshirilmagan.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Mavzular radar — backend `mastery.radar` ni yuborardi, ilgari ishlatilmasdi. */}
             {radarData.length >= 3 && (

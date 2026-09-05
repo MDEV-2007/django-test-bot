@@ -12,6 +12,8 @@ import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/te
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
+import { WritingReviewCard } from '@/components/cefr/WritingTask';
+import type { WritingReview } from '@/lib/cefr-types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,10 +39,7 @@ type FeedbackData = {
   predicted_score?: string;
   roadmap?: RoadmapStep[];
   detailed_mistakes?: Mistake[];
-  review_items?: {
-    question_id: number; body: string; is_correct: boolean; is_skipped: boolean;
-    your_answer: string; correct_answer: string; explanation: string; grading_note: string;
-  }[];
+  review_items?: ReviewItem[];
 };
 
 /* Natijani Telegram Story'ga qo'yish.
@@ -81,6 +80,15 @@ function StoryShareButton({ attemptId }: { attemptId: string }) {
     </Button>
   );
 }
+
+type ReviewItem = {
+  question_id: number; body: string; is_correct: boolean; is_skipped: boolean;
+  your_answer: string; correct_answer: string; explanation: string; grading_note: string;
+  exam_number: number | null;
+  type: string;
+  section: { skill: string; skill_label: string; part_number: number; title: string } | null;
+  writing: ({ reviewed: false } | ({ reviewed: true } & WritingReview)) | null;
+};
 
 export default function FeedbackPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
@@ -333,9 +341,22 @@ export default function FeedbackPage() {
         {!!data.review_items?.length && (
           <section className="space-y-2">
             <h2 className="section-title">Savollar tahlili</h2>
-            {data.review_items.map((r) => (
+            {data.review_items.map((r, index) => {
+              // Part sarlavhasi faqat yangi partga o'tilganda chiziladi — CEFR natijasi
+              // "Part 1 / Part 2 ..." bo'lib ajralib turadi, aralash ro'yxat bo'lmaydi.
+              const previous = data.review_items?.[index - 1]?.section ?? null;
+              const startsPart = Boolean(r.section) && (
+                previous?.skill !== r.section?.skill || previous?.part_number !== r.section?.part_number
+              );
+              return (
+              <div key={r.question_id}>
+                {startsPart && r.section && (
+                  <h3 className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                    {r.section.skill_label} — Part {r.section.part_number}
+                    {r.section.title ? ` · ${r.section.title}` : ''}
+                  </h3>
+                )}
               <Card
-                key={r.question_id}
                 className={cn(
                   'gap-0 py-0',
                   r.is_correct ? 'border-[var(--success)]/25 bg-[var(--success)]/10'
@@ -343,8 +364,19 @@ export default function FeedbackPage() {
                 )}
               >
                 <CardContent className="p-3 text-sm">
-                  <p dangerouslySetInnerHTML={{ __html: r.body }} />
-                  {r.your_answer && <p className="mt-1 text-xs text-muted-foreground">Sizning javobingiz: {r.your_answer}</p>}
+                  <div className="flex items-start gap-2">
+                    {r.exam_number !== null && (
+                      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-black/20 text-[11px] font-bold tabular-nums">
+                        {r.exam_number}
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1" dangerouslySetInnerHTML={{ __html: r.body }} />
+                  </div>
+                  {r.your_answer && (
+                    <p className="mt-1 line-clamp-4 text-xs text-muted-foreground">
+                      Sizning javobingiz: {r.your_answer}
+                    </p>
+                  )}
                   {!r.is_correct && r.correct_answer && (
                     <p className="mt-1 text-xs text-muted-foreground">To&apos;g&apos;ri javob: {r.correct_answer}</p>
                   )}
@@ -357,9 +389,24 @@ export default function FeedbackPage() {
                       </p>
                     </>
                   )}
+
+                  {/* Writing topshirig'i to'g'ri/xato emas — mezonlar bo'yicha baholanadi.
+                      Baholatilmagan bo'lsa, premium tekshiruv taklif qilinadi. */}
+                  {r.writing?.reviewed && (
+                    <div className="mt-3">
+                      <WritingReviewCard review={r.writing} />
+                    </div>
+                  )}
+                  {r.writing && !r.writing.reviewed && r.your_answer && (
+                    <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                      Bu matn hali baholanmagan — AI tekshiruvi (ball va CEFR darajasi) premium orqali ochiladi.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
-            ))}
+              </div>
+              );
+            })}
           </section>
         )}
       </main>

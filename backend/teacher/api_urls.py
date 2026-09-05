@@ -19,6 +19,9 @@ urlpatterns = [
     path('tests/<int:pk>/results/', api.test_results_api, name='test_results'),
     path('tests/<int:pk>/reorder/', api.question_reorder_api, name='question_reorder'),
     path('tests/<int:pk>/make-game/', api.game_from_test_api, name='game_from_test'),
+    # CEFR partlari (matn/audio bloklari) — o'qituvchi panelidan boshqariladi.
+    path('tests/<int:pk>/sections/', api.sections_api, name='sections'),
+    path('tests/<int:pk>/sections/<int:sid>/', api.section_detail_api, name='section_detail'),
     path('tests/<int:pk>/questions/add/', api.question_add_api, name='question_add'),
     path('tests/<int:pk>/questions/<int:qid>/', api.question_detail_api, name='question_detail'),
     path('tests/<int:pk>/questions/<int:qid>/delete/', api.question_delete_api, name='question_delete'),

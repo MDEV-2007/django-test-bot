@@ -10,6 +10,7 @@ Bu faylda Feature 1 (o'qituvchi-orqali-sinf) endpointlari ham bor — pastdagi
 import json
 
 from django.db.models import Avg, Count, Max, Q
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -24,8 +25,8 @@ from accounts.referrals import ensure_referral_code, get_referral_link, get_tele
 from games.models import Game, GameItem
 from learning.models import Lesson, Topic
 from tests_app.models import (
-    AnswerOption, Attempt, AttemptAnswer, GroupOption, MatchingPair, Question,
-    QuestionGroup, SubQuestion, TestSet,
+    AcceptedAnswer, AnswerOption, Attempt, AttemptAnswer, ExamSection, GroupOption,
+    MatchingPair, Question, QuestionGroup, SubQuestion, TestSet,
 )
 
 from .forms import GameForm, LessonForm, QuestionBaseForm, TestInfoForm
@@ -158,6 +159,16 @@ def _question_payload(q):
                           for s in q.sub_questions.all()],
         'reference_answer': q.reference_answer,
         'group': group,
+        # --- CEFR maydonlari (oddiy savolda bo'sh) ---
+        'section': q.section_id,
+        'exam_number': q.exam_number,
+        'max_words': q.max_words,
+        'min_words': q.min_words,
+        'tfng_style': q.tfng_style,
+        'accepted_answers': [a.text for a in q.accepted_answers.all()],
+        # Savol mavjud bankka ulangan bo'lsa, tahrirlashda o'sha bank tanlab turadi.
+        'reuse_group_id': q.group_id if (q.group_id and q.group.questions.count() > 1) else None,
+        'reuse_correct_label': q.correct_group_option.label if q.correct_group_option else '',
     }
 
 
@@ -183,6 +194,7 @@ def _apply_type_data_json(question, test, data):
     question.choices.all().delete()
     question.matching_pairs.all().delete()
     question.sub_questions.all().delete()
+    question.accepted_answers.all().delete()
 
     old_group = question.group
     if qtype != 'grouped_item' and question.group_id:
@@ -232,9 +244,34 @@ def _apply_type_data_json(question, test, data):
                 order=i,
             )
 
+    elif qtype in Question.TEXT_INPUT_TYPES:
+        # Bo'shliqli savol uchun bir nechta maqbul javob bo'lishi mumkin
+        # ("forest" va "the forest"); TRUE/FALSE/NOT GIVEN uchun esa bittasi.
+        for i, row in enumerate(data.get('accepted_answers') or []):
+            text = (row.get('text') if isinstance(row, dict) else row) or ''
+            text = text.strip()
+            if not text:
+                continue
+            AcceptedAnswer.objects.create(question=question, text=text, order=i)
+
     elif qtype == 'grouped_item':
         # Guruhlangan savolning javob banki `type_data.group` ichida keladi.
         group_data = data.get('group') or data
+
+        # CEFR'da bitta bank (A-F) bir nechta savolga xizmat qiladi — masalan 15-20
+        # abzatslar bitta sarlavhalar ro'yxatidan tanlanadi. Shuning uchun mavjud bankni
+        # qayta ishlatish mumkin: `group_id` berilsa, yangisi yaratilmaydi.
+        existing_id = group_data.get('group_id')
+        if existing_id:
+            group = get_object_or_404(QuestionGroup, pk=existing_id, test_set=test)
+            correct_label = str(group_data.get('correct_label') or '').strip().upper()
+            question.group = group
+            question.correct_group_option = group.options.filter(label__iexact=correct_label).first()
+            question.save(update_fields=['group', 'correct_group_option'])
+            if old_group and old_group.pk != group.pk and old_group.questions.count() == 0:
+                old_group.delete()
+            return
+
         group = QuestionGroup.objects.create(
             test_set=test,
             instruction=(group_data.get('instruction') or '').strip() or 'Mos javobni tanlang',
@@ -258,6 +295,17 @@ def _apply_type_data_json(question, test, data):
         question.save(update_fields=['group', 'correct_group_option'])
         if old_group and old_group.pk != group.pk and old_group.questions.count() == 0:
             old_group.delete()
+
+
+def _reject_foreign_section(question, test):
+    """Savol faqat O'Z testining partiga ulanishi mumkin.
+
+    `QuestionBaseForm` ModelForm bo'lgani uchun `section` maydonining standart tanlovi —
+    bazadagi HAMMA part. Tekshiruvsiz o'qituvchi so'rovni qo'lda o'zgartirib, savolini
+    boshqa birovning testidagi partga bog'lab qo'yishi mumkin edi."""
+    if question.section_id and question.section.test_set_id != test.id:
+        return Response({'errors': {'section': ["Bu part boshqa testga tegishli."]}}, status=400)
+    return None
 
 
 def _type_data(request):
@@ -284,6 +332,9 @@ def question_add_api(request, pk):
     # A question inherits its subject from the test it's created in, so per-subject
     # filtering and the subject leaderboard work without asking the teacher again.
     question.subject = test.subject
+    rejected = _reject_foreign_section(question, test)
+    if rejected:
+        return rejected
     question.save()
     _apply_type_data_json(question, test, _type_data(request))
 
@@ -307,7 +358,11 @@ def question_detail_api(request, pk, qid):
     form = QuestionBaseForm(request.data, request.FILES, instance=question)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
-    question = form.save()
+    question = form.save(commit=False)
+    rejected = _reject_foreign_section(question, test)
+    if rejected:
+        return rejected
+    question.save()
     _apply_type_data_json(question, test, _type_data(request))
     return Response({'ok': True})
 
@@ -817,3 +872,109 @@ def _teacher_payload(profile: Profile):
         'referral_code': ensure_referral_code(profile),
         'telegram_link': get_telegram_deep_link(profile),
     }
+
+
+# ============================================================ CEFR PARTLARI
+def _section_payload(section):
+    return {
+        'id': section.id,
+        'skill': section.skill,
+        'skill_label': section.get_skill_display(),
+        'part_number': section.part_number,
+        'title': section.title,
+        'instruction': section.instruction,
+        'passage': section.passage,
+        'audio': section.audio_src,
+        'audio_play_limit': section.audio_play_limit,
+        'image': section.image.url if section.image else '',
+        'duration_minutes': section.duration_minutes,
+        'order': section.order,
+        'question_count': section.questions.count(),
+    }
+
+
+def _save_section(section, data, files):
+    """Formadan kelgan qiymatlarni partga yozadi. Fayl maydoni faqat yangi fayl kelganda
+    almashtiriladi — aks holda matnni tahrirlash audioni o'chirib yuborardi."""
+    def _int(name, default=None):
+        raw = data.get(name)
+        if raw in (None, '', 'null'):
+            return default
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            return default
+
+    section.skill = data.get('skill') or section.skill or 'reading'
+    section.part_number = _int('part_number', section.part_number or 1)
+    section.title = (data.get('title') or '').strip()
+    section.instruction = (data.get('instruction') or '').strip()
+    section.passage = data.get('passage') or ''
+    section.audio_url = (data.get('audio_url') or '').strip()
+    section.audio_play_limit = _int('audio_play_limit', 2)
+    section.duration_minutes = _int('duration_minutes')
+    section.order = _int('order', section.order or 0)
+
+    if files.get('audio'):
+        section.audio = files['audio']
+    if files.get('image'):
+        section.image = files['image']
+    if data.get('clear_audio') in ('1', 'true', True):
+        section.audio = None
+    if data.get('clear_image') in ('1', 'true', True):
+        section.image = None
+    return section
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsTeacher])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def sections_api(request, pk):
+    """Testning CEFR partlari: ro'yxat va yangisini yaratish.
+
+    Part — imtihonning bitta bloki: umumiy ko'rsatma, o'qish matni yoki audio va o'sha
+    blokka tegishli savollar. Ilgari buni faqat Django admin orqali yaratish mumkin edi."""
+    test = _own_test(request, pk)
+
+    if request.method == 'GET':
+        return Response({
+            'sections': [_section_payload(s) for s in test.sections.all()],
+            'skill_options': [{'value': v, 'label': l} for v, l in ExamSection.SKILL_CHOICES],
+            'banks': [{
+                'id': g.id, 'instruction': g.instruction,
+                'options': [{'label': o.label, 'text': o.text} for o in g.options.all()],
+            } for g in test.question_groups.all()],
+        })
+
+    section = _save_section(ExamSection(test_set=test), request.data, request.FILES)
+    try:
+        section.validate_unique()
+    except ValidationError:
+        return Response({'error': "Bu ko'nikmada shu raqamli part allaqachon bor."}, status=400)
+    section.save()
+    return Response(_section_payload(section), status=201)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsTeacher])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def section_detail_api(request, pk, sid):
+    test = _own_test(request, pk)
+    section = get_object_or_404(ExamSection, pk=sid, test_set=test)
+
+    if request.method == 'GET':
+        return Response(_section_payload(section))
+
+    if request.method == 'DELETE':
+        # Partni o'chirish uning savollarini o'chirmaydi (Question.section — SET_NULL):
+        # ular testda "part'siz" savol bo'lib qoladi va yo'qolmaydi.
+        section.delete()
+        return Response({'deleted': True})
+
+    _save_section(section, request.data, request.FILES)
+    try:
+        section.validate_unique()
+    except ValidationError:
+        return Response({'error': "Bu ko'nikmada shu raqamli part allaqachon bor."}, status=400)
+    section.save()
+    return Response(_section_payload(section))

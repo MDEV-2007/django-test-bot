@@ -1,0 +1,143 @@
+{
+  "title": "CEFR Reading Mock 19",
+  "description": "Rasmiy formatdagi CEFR Reading mock testi — 5 part, 35 savol.",
+  "subject": "Ingliz tili",
+  "duration_minutes": 60,
+  "is_premium": true,
+  "sections": [
+    {
+      "skill": "reading",
+      "part": 1,
+      "title": "INJURED BIRD",
+      "instruction": "Read the text. Fill in each gap with ONE word. You must use a word which is somewhere in the rest of the text.",
+      "passage": "<p>A boy named Tom went for his usual walk in the forest near his house. He enjoyed spending time in nature because it helped him relax and forget about school stress. There was a narrow path in the {{1}} that he often followed. The path was quiet and peaceful, and Tom liked listening to the sounds of birds and the wind in the trees.</p><p>One afternoon, while he was walking along the {{2}}, he suddenly heard a strange noise coming from the bushes. At first, he felt a little nervous, but he was also curious. He walked towards the direction of the {{3}}. As he got closer, he noticed something moving under the leaves.</p><p>When he looked more carefully, he saw a small bird on the ground. The {{4}} seemed weak, and the bird's wing was injured. It could not fly away. Tom felt sorry for the poor animal and decided to help it. He gently picked up the bird and carried it home to heal its {{5}}.</p><p>At home, Tom did not know what to do. He did not want to make the situation worse. Therefore, he decided to ask his biology teacher for advice. He called his {{6}} and explained what had happened in the forest. The teacher told him how to take care of the bird and suggested taking it to a local animal clinic if the wing did not improve.</p><p>Tom was proud of himself for helping the injured bird. It was a simple walk in the forest, but it became a meaningful experience for him.</p>",
+      "questions": [
+        {"number": 1, "type": "gap_fill", "max_words": 1, "answers": ["forest"]},
+        {"number": 2, "type": "gap_fill", "max_words": 1, "answers": ["path"]},
+        {"number": 3, "type": "gap_fill", "max_words": 1, "answers": ["noise", "sound"]},
+        {"number": 4, "type": "gap_fill", "max_words": 1, "answers": ["bird", "animal"]},
+        {"number": 5, "type": "gap_fill", "max_words": 1, "answers": ["wing"]},
+        {"number": 6, "type": "gap_fill", "max_words": 1, "answers": ["teacher"]}
+      ]
+    },
+    {
+      "skill": "reading",
+      "part": 2,
+      "instruction": "Read the texts 7-14 and the statements A-J. Decide which statement matches the situation described in each text. Each statement can be used ONLY ONCE. There are TWO extra statements you do not need to use.",
+      "bank": {
+        "instruction": "7-14 savollar uchun A-J tasdiqlaridan mos kelganini tanlang. Har bir tasdiq FAQAT BIR MARTA ishlatiladi; ikkitasi ortiqcha.",
+        "options": {
+          "A": "You want to know about events happening recently at a global scale.",
+          "B": "You want to gain experience and build a successful career.",
+          "C": "You like wildlife and want to protect the environment.",
+          "D": "You are fond of cooking and learning other countries' cuisines.",
+          "E": "You want to play computer games and chat with friends.",
+          "F": "You want to go out to eat and meet new friends.",
+          "G": "You have a creative mind and want to learn new skills and make new friends.",
+          "H": "You want your city to become a touristic place for visitors.",
+          "I": "You want to relax and enjoy music and social events.",
+          "J": "You want to meet people and have fun at parties."
+        }
+      },
+      "questions": [
+        {"number": 7, "type": "grouped_item", "answer": "A",
+         "body": "<p><strong>Think</strong><br>Think is a website where you can read short articles about world news. It covers important global events and explains them in simple language. You can learn what is happening in different countries and understand modern problems easily. It is updated every day.</p>"},
+        {"number": 8, "type": "grouped_item", "answer": "I",
+         "body": "<p><strong>Plus Party</strong><br>Plus Party is a fun social club for young people. Members meet at different places to enjoy music, dance, and games. It is a great way to relax after work or study and meet new people in a friendly environment.</p>"},
+        {"number": 9, "type": "grouped_item", "answer": "C",
+         "body": "<p><strong>A Nature Lover</strong><br>A Nature Lover is a group for people who enjoy wildlife and nature. Members take part in activities like cleaning parks, planting trees, and protecting animals. It is perfect for people who care about the environment.</p>"},
+        {"number": 10, "type": "grouped_item", "answer": "D",
+         "body": "<p><strong>A Food of World</strong><br>A Food of World is a cooking club where you can learn recipes from different countries. Members share ideas, cook together, and discover new tastes. It is great for anyone who loves food and wants to try international dishes.</p>"},
+        {"number": 11, "type": "grouped_item", "answer": "E",
+         "body": "<p><strong>Chat and Game</strong><br>Chat and Game is an online platform where users can play computer games and talk with friends. You can join different game rooms, compete with others, and chat at the same time. It is fun and easy to use.</p>"},
+        {"number": 12, "type": "grouped_item", "answer": "F",
+         "body": "<p><strong>Come and Dine with We</strong><br>Come and Dine with We is a social dining group. People meet in restaurants to enjoy meals and have conversations. It is a great chance to try new food and make new friends in a relaxed setting.</p>"},
+        {"number": 13, "type": "grouped_item", "answer": "G",
+         "body": "<p><strong>Action</strong><br>Action is a creative club where young people learn new skills like art, music, and design. Members work on projects together and share ideas. It is perfect for creative minds who want to grow and meet others.</p>"},
+        {"number": 14, "type": "grouped_item", "answer": "H",
+         "body": "<p><strong>City Explorers</strong><br>City Explorers is a group that helps improve cities and make them more attractive for tourists. Members organize tours, create guides, and promote local culture. It is ideal for people who love their city.</p>"}
+      ]
+    },
+    {
+      "skill": "reading",
+      "part": 3,
+      "instruction": "Read the text and choose the correct heading (K-R) for each paragraph (15-20). There are more headings than paragraphs, so you will not use all of them. You cannot use any heading more than once.",
+      "bank": {
+        "instruction": "15-20 abzatslar uchun K-R sarlavhalaridan mos kelganini tanlang. Har bir sarlavha faqat bir marta ishlatiladi.",
+        "options": {
+          "K": "Weekends as time to recharge",
+          "L": "Getting ready for the first day",
+          "M": "Using a journey to school efficiently",
+          "N": "Preparing homework the night before",
+          "O": "Building a relationship through a shared activity",
+          "P": "Sports as the best way to make friends",
+          "Q": "Staying calm in unexpected situations",
+          "R": "Short breaks are essential in learning"
+        }
+      },
+      "questions": [
+        {"number": 15, "type": "grouped_item", "answer": "L",
+         "body": "<p>The night before something new, like a job or school, many people feel nervous. They often check their bag several times and lay out clothes for the morning. This helps them feel more in control. Being organised in advance reduces morning stress. It also gives them time to think about what they need. As a result, they start the day feeling prepared and confident.</p>"},
+        {"number": 16, "type": "grouped_item", "answer": "Q",
+         "body": "<p>When you are stuck in traffic or waiting for a delayed train, it is easy to get angry. However, losing your temper does not solve anything. Taking deep breaths and accepting the delay can help you stay relaxed. Listening to music or a podcast also keeps your mind busy. This way, you arrive at your destination without feeling exhausted or upset.</p>"},
+        {"number": 17, "type": "grouped_item", "answer": "O",
+         "body": "<p>Cooking dinner together or cleaning the house might seem boring. But these ordinary moments can bring people closer. When two people wash dishes or prepare a meal side by side, they talk and laugh naturally. This shared effort creates a feeling of teamwork. Over time, these small activities build trust and understanding between them.</p>"},
+        {"number": 18, "type": "grouped_item", "answer": "R",
+         "body": "<p>Studying for hours without stopping often leads to tiredness and poor concentration. The brain needs time to process information. Taking just five minutes to stand up, stretch, or drink water can make a big difference. After a short rest, you return to your work feeling refreshed. Many successful students use this technique to stay focused for longer periods.</p>"},
+        {"number": 19, "type": "grouped_item", "answer": "M",
+         "body": "<p>The daily trip to school or work is often seen as wasted time. But it does not have to be. You can listen to educational podcasts, review notes, or plan your day in your head. Some people use this time to read or learn new words in a foreign language. Turning travel time into learning time makes the journey productive and enjoyable.</p>"},
+        {"number": 20, "type": "grouped_item", "answer": "K",
+         "body": "<p>After a busy week of studying or working, the body and mind need rest. Sleeping late, meeting friends, or simply doing nothing can help you recover. Without proper rest, you will feel tired when the new week begins. Weekends give you a chance to relax and prepare for the challenges ahead. People who use weekends wisely are usually happier and more energetic.</p>"}
+      ]
+    },
+    {
+      "skill": "reading",
+      "part": 4,
+      "title": "ALEXANDER VON HUMBOLDT",
+      "instruction": "Read the text and answer questions 21-29.",
+      "passage": "<p>Alexander von Humboldt, born in 1769, began his professional career as a mining inspector in Prussia. Although the position offered prestige and security, he found the work monotonous and limiting. Humboldt was far more captivated by the prospect of observing nature directly in unfamiliar and uncharted territories. The turning point came with the death of his mother, whose inheritance provided him with sufficient means to abandon his official duties and embark upon extensive scientific travels.</p><p>In 1799, he departed for South America, a continent that promised both intellectual discovery and physical challenge. His ascent of Mount Chimborazo in present-day Ecuador became legendary. Although he did not reach the summit, Humboldt climbed higher than any European had previously attempted, establishing a new altitude record and demonstrating extraordinary endurance in an era when high-altitude physiology was scarcely understood.</p><p>Humboldt's reputation was further secured through his prolific writings. Works such as Views of Nature and his monumental Cosmos combined meticulous scientific data with a narrative style that was accessible and inspiring to a broad readership. Unlike many of his contemporaries, who presented facts in dry catalogues, Humboldt wove empirical evidence into prose that conveyed both accuracy and aesthetic wonder.</p><p>Perhaps the most distinctive element of his scientific vision was his insistence on the interconnectedness of nature. Where others dissected nature into isolated parts, Humboldt described it as an integrated whole in which climate, vegetation, geography, and human activity were deeply entwined. This interdisciplinary outlook enabled him to cross the boundaries of geography, biology, and philosophy, creating a holistic framework that anticipated later ecological thinking.</p><p>His ideas resonated far beyond his homeland. Humboldt exchanged letters with leading figures in Europe and America, including President Thomas Jefferson. Among those deeply influenced by his writings was Charles Darwin, who openly acknowledged that Humboldt's works inspired his own voyage on the Beagle. Rather than rejecting Humboldt's views, Darwin praised him as a model of scientific exploration and intellectual ambition.</p><p>Despite his fame, financial security eluded Humboldt. The fortune he inherited funded his early travels, but the enormous cost of expeditions and lavish publications gradually exhausted his wealth. In later years, Humboldt depended heavily on financial assistance from the Prussian monarchy in order to continue his scientific work. Nevertheless, his influence extended far beyond Europe, reaching intellectuals and researchers across North and South America.</p><p>Today, many historians and scientists regard Humboldt as one of the founders of modern environmental thinking because of his emphasis on the interconnectedness of nature.</p>",
+      "questions": [
+        {"number": 21, "type": "single_choice", "answer": "C",
+         "body": "Why did Humboldt decide to leave his job as a mining inspector?",
+         "choices": {"A": "He wanted to earn more money.", "B": "He hoped to travel with Charles Darwin.", "C": "He was eager to study nature in unexplored areas.", "D": "He was forced to resign by the government."}},
+        {"number": 22, "type": "single_choice", "answer": "B",
+         "body": "What was notable about his climb on Mount Chimborazo?",
+         "choices": {"A": "He was the first person to reach the summit.", "B": "He achieved the highest altitude recorded at that time.", "C": "He discovered new plants on the mountain.", "D": "He climbed it without any local guides."}},
+        {"number": 23, "type": "single_choice", "answer": "B",
+         "body": "What made his books distinctive?",
+         "choices": {"A": "They were the longest scientific works of the century.", "B": "They combined accurate science with engaging language.", "C": "They only discussed plants and animals.", "D": "They were written in both English and German."}},
+        {"number": 24, "type": "single_choice", "answer": "B",
+         "body": "What was unusual about Humboldt's scientific approach?",
+         "choices": {"A": "He avoided philosophy and focused only on data.", "B": "He emphasized the interconnection of natural systems.", "C": "He believed humans were separate from nature.", "D": "He studied only geography and ignored biology."}},
+        {"number": 25, "type": "tfng", "answer": "NOT GIVEN", "body": "Humboldt believed forests influence climate."},
+        {"number": 26, "type": "tfng", "answer": "FALSE", "body": "Charles Darwin criticized Humboldt's scientific views."},
+        {"number": 27, "type": "tfng", "answer": "FALSE", "body": "Humboldt always had enough money to support his studies."},
+        {"number": 28, "type": "tfng", "answer": "FALSE", "body": "Humboldt's scientific influence was limited only to Europe."},
+        {"number": 29, "type": "tfng", "answer": "TRUE", "body": "Humboldt's approach is still valuable in modern science."}
+      ]
+    },
+    {
+      "skill": "reading",
+      "part": 5,
+      "title": "URBAN TRANSPORT AND SUSTAINABLE SOLUTIONS",
+      "instruction": "Read the text and answer questions 30-35. For questions 30-33 complete the sentences using ONE WORD ONLY from the text.",
+      "passage": "<p>In many large cities around the world, traffic has become a serious issue affecting both daily life and the environment. One of the most common problems is traffic congestion, which leads to longer travel times, increased stress, and higher levels of air pollution. As populations grow and more people rely on private vehicles, roads become overcrowded, especially during peak hours. Governments and city planners are therefore under pressure to find effective ways to reduce these problems while still supporting economic activity.</p><p>A key factor in addressing traffic issues is improving the flow of vehicles. Efficient traffic systems can reduce delays and make transportation more reliable. This can be achieved through better road design, smart traffic lights, and the promotion of alternative forms of transport such as cycling or public transit. In some cities, authorities have introduced dedicated bus lanes or restricted certain areas to pedestrians only. These strategies not only help to manage traffic more effectively but also encourage people to choose more sustainable travel options.</p><p>In recent years, there has also been a growing focus on ecologically friendly solutions. For example, electric vehicles are becoming more popular as they produce fewer emissions compared to traditional cars. Cities are also investing in green infrastructure, such as bike-sharing systems and improved public transport networks. Some governments have even launched pilot programs to test innovative ideas. One notable experiment involved limiting the number of cars allowed in the city center on certain days, which resulted in a noticeable decrease in pollution levels and traffic volume.</p><p>Despite these efforts, challenges remain. Not all solutions are equally effective in every city, as local conditions vary greatly. Factors such as population density, economic resources, and public attitudes play a significant role in determining the success of transport policies. However, it is clear that a combination of strategies, including technological innovation and behavioral change, is necessary to create more sustainable urban environments.</p>",
+      "questions": [
+        {"number": 30, "type": "gap_fill", "max_words": 1, "answers": ["congestion"],
+         "body": "One of the most serious problems in modern cities is traffic {{30}}."},
+        {"number": 31, "type": "gap_fill", "max_words": 1, "answers": ["flow"],
+         "body": "Improving the {{31}} of vehicles can help reduce delays."},
+        {"number": 32, "type": "gap_fill", "max_words": 1, "answers": ["ecologically"],
+         "body": "Many cities are now focusing on more {{32}} friendly transport solutions."},
+        {"number": 33, "type": "gap_fill", "max_words": 1, "answers": ["experiment", "program"],
+         "body": "A government {{33}} tested limiting cars in the city center."},
+        {"number": 34, "type": "single_choice", "answer": "B",
+         "body": "What is one way that cities can improve traffic systems?",
+         "choices": {"A": "Building more private roads", "B": "Introducing dedicated lanes", "C": "Increasing fuel prices", "D": "Reducing public transport"}},
+        {"number": 35, "type": "single_choice", "answer": "C",
+         "body": "Why do some solutions not work equally well in all cities?",
+         "choices": {"A": "People prefer walking.", "B": "Weather conditions differ.", "C": "Local factors vary.", "D": "Technology is expensive."}}
+      ]
+    }
+  ]
+}

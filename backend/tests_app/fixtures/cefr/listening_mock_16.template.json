@@ -1,0 +1,152 @@
+{
+  "_readme": [
+    "CEFR Listening Mock 16 — TUZILMA TAYYOR, IKKI NARSA YETISHMAYDI:",
+    "1) audio fayllar: har bir partga bittadan mp3 (part1.mp3 ... part6.mp3) va Part 4 uchun map.png;",
+    "2) javob kaliti: quyida 'TODO' deb turgan har bir joyga to'g'ri javobni yozing.",
+    "Tayyor bo'lgach tekshiring va yuklang:",
+    "  python manage.py import_cefr_json listening_mock_16.json --audio-dir ./audio/ --dry-run",
+    "  python manage.py import_cefr_json listening_mock_16.json --audio-dir ./audio/ --publish",
+    "Fayl nomidan '.template' ni olib tashlang — u shablon ekanini bildiradi.",
+    "Bu kalit ('_' bilan boshlanadigan boshqa kalitlar ham) importer tomonidan e'tiborsiz qoldiriladi."
+  ],
+  "title": "CEFR Listening Mock 16",
+  "description": "Rasmiy formatdagi CEFR Listening mock testi — 6 part, 35 savol.",
+  "subject": "Ingliz tili",
+  "duration_minutes": 40,
+  "is_premium": true,
+  "sections": [
+    {
+      "skill": "listening",
+      "part": 1,
+      "instruction": "You will hear some sentences. You will hear each sentence twice. Choose the best reply to each sentence.",
+      "audio": "part1.mp3",
+      "audio_play_limit": 1,
+      "_note": "Audio har bir gapni ikki marta o'qiydi, shuning uchun play_limit = 1.",
+      "questions": [
+        {"number": 1, "type": "single_choice", "answer": "TODO", "body": "1.",
+         "choices": {"A": "I'm waiting for the menu", "B": "I went to school yesterday.", "C": "My favorite sport is tennis."}},
+        {"number": 2, "type": "single_choice", "answer": "TODO", "body": "2.",
+         "choices": {"A": "Football", "B": "Yes, I'm ready to order.", "C": "It was on the table."}},
+        {"number": 3, "type": "single_choice", "answer": "TODO", "body": "3.",
+         "choices": {"A": "Let's meet at 8 o'clock.", "B": "I played football yesterday.", "C": "It is nice"}},
+        {"number": 4, "type": "single_choice", "answer": "TODO", "body": "4.",
+         "choices": {"A": "Take a little rest", "B": "Yes, I love cooking.", "C": "It starts at 9 a.m."}},
+        {"number": 5, "type": "single_choice", "answer": "TODO", "body": "5.",
+         "choices": {"A": "It's next to your phone.", "B": "I only make pasta", "C": "I'm not ready to order."}},
+        {"number": 6, "type": "single_choice", "answer": "TODO", "body": "6.",
+         "choices": {"A": "I need some bread.", "B": "Yes, we can meet tonight.", "C": "I watched a video"}},
+        {"number": 7, "type": "single_choice", "answer": "TODO", "body": "7.",
+         "choices": {"A": "Ok, see you there", "B": "I went to the supermarket.", "C": "I think it's too expensive."}},
+        {"number": 8, "type": "single_choice", "answer": "TODO", "body": "8.",
+         "choices": {"A": "I'm very tired today.", "B": "Some milk please", "C": "Tennis is my favorite sport."}}
+      ]
+    },
+    {
+      "skill": "listening",
+      "part": 2,
+      "title": "Reading Competition",
+      "instruction": "You will hear someone giving a talk. For each question, fill in the missing information in the numbered space. Write ONE WORD and / or A NUMBER for each answer.",
+      "audio": "part2.mp3",
+      "audio_play_limit": 2,
+      "passage": "<p><strong>Reading Competition</strong></p><ul><li>The reading competition lasts from June to {{9}}</li><li>The participants must read at least {{10}} books.</li><li>The competition finishes at {{11}}</li><li>To take part in the competition, you must register by {{12}}</li><li>Top prize for the winner is {{13}} pounds.</li><li>For further information, our email address is {{14}}</li></ul>",
+      "questions": [
+        {"number": 9, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 10, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 11, "type": "gap_fill", "max_words": 2, "answers": ["TODO"]},
+        {"number": 12, "type": "gap_fill", "max_words": 2, "answers": ["TODO"]},
+        {"number": 13, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 14, "type": "gap_fill", "max_words": 2, "answers": ["TODO"]}
+      ]
+    },
+    {
+      "skill": "listening",
+      "part": 3,
+      "instruction": "You will hear people speaking in different situations. Match each speaker (15-18) to the statement (A-F). There are TWO extra statements you do not need to use.",
+      "audio": "part3.mp3",
+      "audio_play_limit": 2,
+      "bank": {
+        "instruction": "15-18 spikerlarni A-F fikrlaridan mos kelganiga ulang. Ikkitasi ortiqcha.",
+        "options": {
+          "A": "Taking natural trips to recover stress",
+          "B": "Traveling is my hobby",
+          "C": "Learns from observing animals and their behavior",
+          "D": "Nature photography to share online moments",
+          "E": "I want to take pictures of animals at the zoo",
+          "F": "Became interested in nature after a special outdoor activity"
+        }
+      },
+      "questions": [
+        {"number": 15, "type": "grouped_item", "body": "Speaker 1", "answer": "TODO"},
+        {"number": 16, "type": "grouped_item", "body": "Speaker 2", "answer": "TODO"},
+        {"number": 17, "type": "grouped_item", "body": "Speaker 3", "answer": "TODO"},
+        {"number": 18, "type": "grouped_item", "body": "Speaker 4", "answer": "TODO"}
+      ]
+    },
+    {
+      "skill": "listening",
+      "part": 4,
+      "instruction": "You will hear someone giving a talk. Label the places (19-23) on the map (A-H). There are TWO extra options which you do not need to use.",
+      "audio": "part4.mp3",
+      "audio_play_limit": 2,
+      "image": "map.png",
+      "_note": "Xarita rasmi shart: A-H nuqtalari o'sha rasmda ko'rsatilgan bo'ladi.",
+      "bank": {
+        "instruction": "19-23 joylarni xaritadagi A-H harflari bilan belgilang. Ikkitasi ortiqcha.",
+        "options": {
+          "A": "A", "B": "B", "C": "C", "D": "D", "E": "E", "F": "F", "G": "G", "H": "H"
+        }
+      },
+      "questions": [
+        {"number": 19, "type": "grouped_item", "body": "TODO — joy nomi", "answer": "TODO"},
+        {"number": 20, "type": "grouped_item", "body": "TODO — joy nomi", "answer": "TODO"},
+        {"number": 21, "type": "grouped_item", "body": "TODO — joy nomi", "answer": "TODO"},
+        {"number": 22, "type": "grouped_item", "body": "TODO — joy nomi", "answer": "TODO"},
+        {"number": 23, "type": "grouped_item", "body": "TODO — joy nomi", "answer": "TODO"}
+      ]
+    },
+    {
+      "skill": "listening",
+      "part": 5,
+      "instruction": "You will hear three extracts. Choose the correct answer (A, B or C) for each question (24-29). There are TWO questions for each extract.",
+      "audio": "part5.mp3",
+      "audio_play_limit": 2,
+      "questions": [
+        {"number": 24, "type": "single_choice", "answer": "TODO",
+         "body": "<em>Extract one.</em> Where are the speakers?",
+         "choices": {"A": "In a television studio.", "B": "In a live festival audience.", "C": "On stage at a book festival."}},
+        {"number": 25, "type": "single_choice", "answer": "TODO",
+         "body": "What do the speakers agree about, regarding Ali Ball's book Cold Spies?",
+         "choices": {"A": "It would not make a good film.", "B": "The characterization is poor.", "C": "It is better than his previous one."}},
+        {"number": 26, "type": "single_choice", "answer": "TODO",
+         "body": "<em>Extract two.</em> What does the lawyer think?",
+         "choices": {"A": "Magistrates' decisions are unpredictable.", "B": "The prosecution won't have any evidence.", "C": "Technicalities will assist her case."}},
+        {"number": 27, "type": "single_choice", "answer": "TODO",
+         "body": "Sam is most concerned that",
+         "choices": {"A": "Ann will lose her driving licence.", "B": "imprisonment is unlikely.", "C": "Ann may receive two penalties."}},
+        {"number": 28, "type": "single_choice", "answer": "TODO",
+         "body": "<em>Extract three.</em> What's the purpose of the conversation?",
+         "choices": {"A": "To understand a process.", "B": "To resolve a problem.", "C": "To decide who is right."}},
+        {"number": 29, "type": "single_choice", "answer": "TODO",
+         "body": "What is the manager's attitude?",
+         "choices": {"A": "Embarrassed.", "B": "Businesslike.", "C": "Indifferent."}}
+      ]
+    },
+    {
+      "skill": "listening",
+      "part": 6,
+      "title": "DOMESTICATION OF WILD LIONS",
+      "instruction": "You will hear someone giving a talk. For questions 30-35 complete the sentences with a word.",
+      "audio": "part6.mp3",
+      "audio_play_limit": 2,
+      "passage": "<p><strong>DOMESTICATION OF WILD LIONS</strong></p><ul><li>Domestication takes long years and happens over many {{30}}</li><li>Taming is a process to make animals less stressful and aggressive towards humans, but their natural {{31}} stay the same.</li><li>Unlike wolves, that live in packs and work together, lions live in groups called {{32}}</li><li>Domesticating lions is difficult, they need to have a lot of food and {{33}}</li><li>Domesticating animals, no matter what we do, seems {{34}}</li><li>Instead of taming or domesticating animals, we should focus on protecting their {{35}} habitat.</li></ul>",
+      "questions": [
+        {"number": 30, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 31, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 32, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 33, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 34, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]},
+        {"number": 35, "type": "gap_fill", "max_words": 1, "answers": ["TODO"]}
+      ]
+    }
+  ]
+}

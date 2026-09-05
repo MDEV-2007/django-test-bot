@@ -115,8 +115,10 @@ export default function TestsPage() {
   async function start(testId: number) {
     setStarting(testId);
     try {
-      const res = await apiFetch<{ attempt_id: number }>(`/api/tests/${testId}/start/`, { method: 'POST' });
-      router.push(`/tests/${res.attempt_id}`);
+      const res = await apiFetch<{ attempt_id: number; mode?: string }>(`/api/tests/${testId}/start/`, { method: 'POST' });
+      // Partlarga bo'lingan CEFR testi o'z ekranida ochiladi: matn/audio va butun part
+      // bir varaqda. Qolgan testlar eski "bitta savol — bitta ekran" oqimida qoladi.
+      router.push(res.mode === 'cefr' ? `/tests/${res.attempt_id}/exam` : `/tests/${res.attempt_id}`);
     } catch (e) {
       setStartError(e instanceof Error ? e.message : 'Xatolik yuz berdi');
       setStarting(null);

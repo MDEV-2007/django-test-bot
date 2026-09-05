@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { celebrate } from '@/lib/confetti';
 import { RotateCcw, CheckCircle2, XCircle, ArrowRight, Flame, PartyPopper, AlertTriangle } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
@@ -14,12 +15,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { dur, easeOut, shake, springBouncy } from '@/lib/motion';
 
 type DeckItem = {
   item_id: number; question_id: number; body: string; type: string; explanation: string; image: string;
   topic: string; times_wrong: number; inline: boolean; choices: { id: number; text: string }[];
+  /* 'choice' — variantlardan tanlanadi; 'text' — bo'shliqqa javob yoziladi yoki
+     TRUE/FALSE/NOT GIVEN tugmalaridan tanlanadi. */
+  answer_mode: 'choice' | 'text';
+  tfng_options: string[];
+  max_words: number | null;
 };
 type Subject = { id: number; name: string; slug: string };
 type TopicRow = { id: number; title: string; count: number };
@@ -28,7 +35,10 @@ type RevisionData = {
   subjects: Subject[]; selected_subject: string;
   topics: TopicRow[]; selected_topic: string;
 };
-type CheckResult = { ok: boolean; correct: boolean; mastered: boolean; correct_choice_id: number | null; explanation: string };
+type CheckResult = {
+  ok: boolean; correct: boolean; mastered: boolean;
+  correct_choice_id: number | null; explanation: string; correct_answer: string;
+};
 
 export default function RevisionPage() {
   const { access } = useAuthStore();
@@ -36,6 +46,7 @@ export default function RevisionPage() {
   const [idx, setIdx] = useState(0);
   const [result, setResult] = useState<CheckResult | null>(null);
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [textAnswer, setTextAnswer] = useState('');
   const [subject, setSubject] = useState<string | null>(null);
   const [topic, setTopic] = useState('');
   const [combo, setCombo] = useState(0);
@@ -52,15 +63,28 @@ export default function RevisionPage() {
       setIdx(0);
       setResult(null);
       setSelectedChoice(null);
+      setTextAnswer('');
       setSubject((prev) => prev ?? (d.selected_subject || null));
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, subject, topic]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function check(choiceId: number) {
-    const item = data!.deck[idx];
     setSelectedChoice(choiceId);
+    await submit({ choice_id: choiceId });
+  }
+
+  /* Bo'shliqli va TRUE/FALSE savollar: javob matn sifatida yuboriladi va serverda
+     aniq solishtiriladi (AI ishtirokisiz). */
+  async function checkText(value: string) {
+    if (!value.trim()) return;
+    setTextAnswer(value);
+    await submit({ text_answer: value });
+  }
+
+  async function submit(payload: Record<string, unknown>) {
+    const item = data!.deck[idx];
     const res = await apiFetch<CheckResult>(`/api/tests/revision/${item.item_id}/check/`, {
-      method: 'POST', body: JSON.stringify({ choice_id: choiceId }),
+      method: 'POST', body: JSON.stringify(payload),
     });
     setResult(res);
     if (res.correct) {
@@ -82,6 +106,7 @@ export default function RevisionPage() {
   function next() {
     setResult(null);
     setSelectedChoice(null);
+    setTextAnswer('');
     setIdx((i) => i + 1);
   }
 
@@ -236,7 +261,16 @@ export default function RevisionPage() {
               <h2 className="font-voice text-base font-bold leading-relaxed sm:text-lg" dangerouslySetInnerHTML={{ __html: item.body }} />
               {item.image && <img src={item.image} alt="" className="max-h-56 rounded-2xl border object-contain" />}
 
-              {item.inline && (
+              {item.inline && item.answer_mode === 'text' && (
+                <TextAnswerBlock
+                  item={item}
+                  result={result}
+                  value={textAnswer}
+                  onSubmit={checkText}
+                />
+              )}
+
+              {item.inline && item.answer_mode === 'choice' && (
                 <div className="space-y-3">
                   {item.choices.map((c, i) => {
                     const isCorrect = result && c.id === result.correct_choice_id;
@@ -272,6 +306,11 @@ export default function RevisionPage() {
                         {result.correct ? <CheckCircle2 className="size-4" /> : <XCircle className="size-4" />}
                         <span>{result.correct ? "To'g'ri!" : "Noto'g'ri."} Tushuntirish:</span>
                       </p>
+                      {!result.correct && result.correct_answer && (
+                        <p className="text-xs font-semibold text-[var(--success-text)]">
+                          To&apos;g&apos;ri javob: {result.correct_answer}
+                        </p>
+                      )}
                       <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{result.explanation || item.explanation}</p>
                     </CardContent>
                   </Card>
@@ -294,5 +333,63 @@ export default function RevisionPage() {
         )}
       </main>
     </>
+  );
+}
+
+
+/* Bo'shliqli (gap_fill) va TRUE/FALSE/NOT GIVEN savollarining dastadagi ko'rinishi.
+   TRUE/FALSE uchun tayyor tugmalar, bo'shliq uchun bitta kiritish maydoni — ikkalasi ham
+   bitta harakatda javob yuboradi, chunki dastaning maqsadi tez takrorlash. */
+function TextAnswerBlock({
+  item, result, value, onSubmit,
+}: {
+  item: DeckItem;
+  result: CheckResult | null;
+  value: string;
+  onSubmit: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState(value);
+
+  if (item.tfng_options.length > 0) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {item.tfng_options.map((option) => {
+          const chosen = value.toUpperCase() === option;
+          return (
+            <button
+              key={option}
+              type="button"
+              disabled={!!result}
+              onClick={() => onSubmit(option)}
+              className={cn(
+                'tactile-btn rounded-2xl border px-4 py-3 text-sm font-semibold transition-all',
+                chosen && result?.correct && 'border-2 border-[var(--success)] bg-[var(--success)]/20 text-[var(--success-text)]',
+                chosen && result && !result.correct && 'border-2 border-rose-500 bg-rose-500/20 text-rose-300',
+                !chosen && 'border bg-[var(--surface-input)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]',
+              )}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={(event) => { event.preventDefault(); onSubmit(draft); }}
+      className="flex flex-wrap items-center gap-2"
+    >
+      <Input
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        disabled={!!result}
+        autoComplete="off"
+        placeholder={item.max_words && item.max_words > 1 ? `Javob (${item.max_words} so'zgacha)` : 'Javob'}
+        className="max-w-xs"
+      />
+      <Button type="submit" disabled={!!result || !draft.trim()}>Tekshirish</Button>
+    </form>
   );
 }

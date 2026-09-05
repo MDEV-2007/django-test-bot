@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import api
+from . import api, cefr_api
 
 app_name = 'tests_api'
 
@@ -12,6 +12,12 @@ urlpatterns = [
     path('attempts/<int:attempt_id>/question/', api.question_api, name='question'),
     path('attempts/<int:attempt_id>/answer/', api.answer_api, name='answer'),
     path('attempts/<int:attempt_id>/finish/', api.finish_api, name='finish'),
+    # CEFR imtihon ekrani: butun urinish bitta so'rovda (partlar + matn/audio + savollar).
+    path('attempts/<int:attempt_id>/exam/', cefr_api.exam_api, name='exam'),
+    path('attempts/<int:attempt_id>/exam/answer/', cefr_api.exam_answer_api, name='exam_answer'),
+    path('attempts/<int:attempt_id>/annotations/', cefr_api.annotations_api, name='annotations'),
+    path('attempts/<int:attempt_id>/exam/audio-play/', cefr_api.audio_play_api, name='exam_audio_play'),
+    path('attempts/<int:attempt_id>/writing-review/', cefr_api.writing_review_api, name='writing_review'),
     path('attempts/<int:attempt_id>/feedback/', api.feedback_api, name='feedback'),
     # Telegram Story: havolani egasi oladi, rasmni esa Telegram serverlari imzo bilan
     # (autentifikatsiyasiz) yuklab oladi.

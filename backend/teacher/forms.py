@@ -41,8 +41,11 @@ class QuestionBaseForm(StyledMixin, forms.ModelForm):
     sub-questions, group) is parsed from POST by the view, since row counts are dynamic."""
     class Meta:
         model = Question
+        # CEFR maydonlari (`section`...`min_words`) boshqa toifadagi testlarda bo'sh
+        # qoladi — ular ixtiyoriy, shuning uchun eski savol formasi o'zgarishsiz ishlaydi.
         fields = ['question_type', 'body', 'difficulty', 'points', 'explanation',
-                  'image', 'image_position']
+                  'image', 'image_position',
+                  'section', 'exam_number', 'max_words', 'tfng_style', 'min_words']
         widgets = {
             'body': forms.Textarea(attrs={'rows': 3}),
             'explanation': forms.Textarea(attrs={'rows': 2}),
@@ -53,6 +56,13 @@ class QuestionBaseForm(StyledMixin, forms.ModelForm):
         # The wizard attaches a grouped question's QuestionGroup after this form saves, so
         # defer the model's "grouped_item needs a group" validation (see Question.clean).
         self.instance._skip_group_validation = True
+        # CEFR maydonlari ixtiyoriy: oddiy savol formasi ularsiz ham yuboriladi.
+        for name in ('section', 'exam_number', 'max_words', 'tfng_style', 'min_words'):
+            self.fields[name].required = False
+
+    def clean_tfng_style(self):
+        # Bo'sh kelsa — standart uslub (TRUE/FALSE/NOT GIVEN).
+        return self.cleaned_data.get('tfng_style') or 'tf'
 
 
 class LessonForm(StyledMixin, forms.ModelForm):
