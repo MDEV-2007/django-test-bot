@@ -35,7 +35,8 @@ export default function PanelSettingsPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<Settings>('/api/panel/settings/').then(setSettings);
+    apiFetch<Settings>('/api/panel/settings/').then(setSettings)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   async function save() {

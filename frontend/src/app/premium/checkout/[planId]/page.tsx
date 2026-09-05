@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Crown, ChevronLeft, Upload, CreditCard } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch, apiUpload } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
@@ -43,7 +44,8 @@ function CheckoutPageInner() {
   useEffect(() => {
     if (!access) return;
     const q = testId ? `?test=${testId}` : '';
-    apiFetch<CheckoutInfo>(`/api/premium/checkout/${planId}/${q}`).then(setInfo);
+    apiFetch<CheckoutInfo>(`/api/premium/checkout/${planId}/${q}`).then(setInfo)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, planId, testId]);
 
   async function submit() {

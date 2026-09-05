@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -37,8 +38,10 @@ export default function EditLessonPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<{ results: Topic[] }>('/api/teacher/topics/').then((d) => setTopics(d.results));
-    apiFetch<LessonDetail>(`/api/teacher/lessons/${id}/`).then(setLesson);
+    apiFetch<{ results: Topic[] }>('/api/teacher/topics/').then((d) => setTopics(d.results))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
+    apiFetch<LessonDetail>(`/api/teacher/lessons/${id}/`).then(setLesson)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   async function submit() {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
@@ -23,7 +24,8 @@ export default function PanelTestsPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<{ results: { id: number; name: string }[] }>('/api/panel/subjects/?page=1').then((d) => setSubjects(d.results));
+    apiFetch<{ results: { id: number; name: string }[] }>('/api/panel/subjects/?page=1').then((d) => setSubjects(d.results))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   const filters: FilterConfig[] = [

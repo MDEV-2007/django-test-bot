@@ -8,6 +8,7 @@ import {
   Calendar, PartyPopper, XCircle, Zap,
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
@@ -39,7 +40,7 @@ export default function TimelineGamePage() {
       setEvents(d.events);
       setSubjects(d.subjects);
       setSubject((prev) => prev ?? d.selected_subject);
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   };
   useEffect(() => { if (access) load(); }, [access, subject]); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ClipboardList, PenLine } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -34,7 +35,8 @@ export default function TestResultsPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<ResultsData>(`/api/teacher/tests/${id}/results/`).then(setData);
+    apiFetch<ResultsData>(`/api/teacher/tests/${id}/results/`).then(setData)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   if (!data) return <TeacherShell><div className="py-10"><BrandLoader /></div></TeacherShell>;

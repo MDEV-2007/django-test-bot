@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
@@ -19,7 +20,8 @@ export default function PanelAttemptDetailPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<AttemptDetail>(`/api/panel/attempts/${id}/`).then(setData);
+    apiFetch<AttemptDetail>(`/api/panel/attempts/${id}/`).then(setData)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   if (!data) return <PanelShell><div className="p-10"><BrandLoader /></div></PanelShell>;

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Copy, Pencil, Eye, EyeOff, Loader2, ListChecks } from 'lucide-react';
+import { Copy, Pencil, Eye, EyeOff, Loader2, ListChecks, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -38,7 +38,8 @@ export default function PanelTestDetailPage() {
   const [data, setData] = useState<TestSetDetail | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const load = () => apiFetch<TestSetDetail>(`/api/panel/testsets/${id}/`).then(setData);
+  const load = () => apiFetch<TestSetDetail>(`/api/panel/testsets/${id}/`).then(setData)
+    .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   useEffect(() => { if (access) load(); }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function duplicate() {
@@ -99,6 +100,9 @@ export default function PanelTestDetailPage() {
           </Button>
           <Button asChild variant="outline">
             <Link href={`/panel/tests/${id}/edit`}><Pencil className="size-4" /> Tahrirlash</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/panel/tests/${id}/review`}><ClipboardCheck className="size-4" /> Javoblarni tekshirish</Link>
           </Button>
         </div>
 

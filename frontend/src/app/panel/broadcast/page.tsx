@@ -48,7 +48,8 @@ export default function PanelBroadcastPage() {
   const [sending, setSending] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<HistoryRow | null>(null);
 
-  const load = () => apiFetch<BroadcastData>('/api/panel/broadcast/').then(setData);
+  const load = () => apiFetch<BroadcastData>('/api/panel/broadcast/').then(setData)
+    .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   useEffect(() => { if (access) load(); }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const recipients = data?.audience_counts[audience];

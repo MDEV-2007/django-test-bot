@@ -34,7 +34,8 @@ export default function PanelLessonEditPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<LessonDetail>(`/api/panel/lessons/${id}/`).then(setLesson);
+    apiFetch<LessonDetail>(`/api/panel/lessons/${id}/`).then(setLesson)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   async function submit() {

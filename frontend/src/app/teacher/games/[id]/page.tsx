@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Plus, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -33,7 +34,8 @@ export default function EditGamePage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<GameDetail>(`/api/teacher/games/${id}/`).then(setGame);
+    apiFetch<GameDetail>(`/api/teacher/games/${id}/`).then(setGame)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   async function submit() {

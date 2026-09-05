@@ -36,7 +36,7 @@ export default function PanelNewLessonPage() {
     apiFetch<{ results: Topic[] }>('/api/teacher/topics/').then((d) => {
       setTopics(d.results);
       setForm((f) => (f.topic ? f : { ...f, topic: String(d.results[0]?.id ?? '') }));
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   async function submit() {

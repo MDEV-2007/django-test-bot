@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FileCheck2, Plus, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -31,7 +32,8 @@ export default function TeacherTestsPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<{ results: TestRow[] }>('/api/teacher/tests/').then((d) => setTests(d.results));
+    apiFetch<{ results: TestRow[] }>('/api/teacher/tests/').then((d) => setTests(d.results))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   return (

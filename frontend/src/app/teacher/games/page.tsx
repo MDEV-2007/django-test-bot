@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Gamepad2, Plus, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -21,7 +22,8 @@ export default function TeacherGamesPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<{ results: GameRow[] }>('/api/teacher/games/').then((d) => setGames(d.results));
+    apiFetch<{ results: GameRow[] }>('/api/teacher/games/').then((d) => setGames(d.results))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   return (

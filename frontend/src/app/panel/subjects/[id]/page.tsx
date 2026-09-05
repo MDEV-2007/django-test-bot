@@ -29,7 +29,8 @@ export default function PanelSubjectEditPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<SubjectDetail>(`/api/panel/subjects/${id}/`).then(setSubject);
+    apiFetch<SubjectDetail>(`/api/panel/subjects/${id}/`).then(setSubject)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   async function submit() {

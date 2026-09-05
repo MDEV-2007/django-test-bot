@@ -32,7 +32,8 @@ export default function PanelPaymentDetailPage() {
   const [data, setData] = useState<PaymentDetail | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const load = () => apiFetch<PaymentDetail>(`/api/panel/payments/${id}/`).then(setData);
+  const load = () => apiFetch<PaymentDetail>(`/api/panel/payments/${id}/`).then(setData)
+    .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   useEffect(() => { if (access) load(); }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function act(action: 'approve' | 'reject') {

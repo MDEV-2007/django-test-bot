@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Check, HelpCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -28,7 +29,8 @@ export default function TestPreviewPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<{ questions: Question[] }>(`/api/teacher/tests/${id}/preview/`).then((d) => setQuestions(d.questions));
+    apiFetch<{ questions: Question[] }>(`/api/teacher/tests/${id}/preview/`).then((d) => setQuestions(d.questions))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   if (!questions) return <TeacherShell><div className="py-10"><BrandLoader /></div></TeacherShell>;

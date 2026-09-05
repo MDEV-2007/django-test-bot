@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Receipt } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch, API_URL } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
@@ -38,7 +39,8 @@ export default function MyPaymentsPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<{ results: Payment[] }>('/api/premium/my-payments/').then((d) => setPayments(d.results));
+    apiFetch<{ results: Payment[] }>('/api/premium/my-payments/').then((d) => setPayments(d.results))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   return (

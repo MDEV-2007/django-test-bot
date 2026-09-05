@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { History, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
@@ -35,7 +36,8 @@ export default function HistoryPage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<HistoryResponse>(`/api/tests/history/?page=${page}`).then(setData);
+    apiFetch<HistoryResponse>(`/api/tests/history/?page=${page}`).then(setData)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, page]);
 
   return (

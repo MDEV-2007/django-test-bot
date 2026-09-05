@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { CheckCircle2, XCircle, PenLine } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -30,7 +31,7 @@ export default function AttemptGradePage() {
     apiFetch<{ answers: Answer[] }>(`/api/teacher/tests/${id}/attempts/${attemptId}/grade/`).then((d) => {
       setAnswers(d.answers);
       setGrades(Object.fromEntries(d.answers.map((a) => [a.id, a.is_correct])));
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id, attemptId]);
 
   async function submit() {

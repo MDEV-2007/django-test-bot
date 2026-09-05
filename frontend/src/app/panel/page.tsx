@@ -7,6 +7,7 @@ import {
   Activity, TrendingUp, CreditCard, Wallet, Radio, Crown, AlertTriangle, ArrowRight,
 } from 'lucide-react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
@@ -68,7 +69,8 @@ export default function PanelDashboard() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<Dashboard>('/api/panel/').then(setData);
+    apiFetch<Dashboard>('/api/panel/').then(setData)
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   // API kunlik ikkita qatorni alohida massiv qilib yuboradi — recharts uchun birlashtiramiz.

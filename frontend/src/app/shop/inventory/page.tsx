@@ -27,7 +27,8 @@ export default function InventoryPage() {
   const [data, setData] = useState<InventoryData | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const load = () => apiFetch<InventoryData>('/api/shop/inventory/').then(setData);
+  const load = () => apiFetch<InventoryData>('/api/shop/inventory/').then(setData)
+    .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   useEffect(() => { if (access) load(); }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function toggleEquip(slug: string, equipped: boolean, name: string) {

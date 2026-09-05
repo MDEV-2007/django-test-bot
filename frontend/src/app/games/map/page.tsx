@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { celebrate } from '@/lib/confetti';
 import { MapPin, RotateCcw, Coins, CheckCircle2, XCircle, Zap } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
@@ -36,7 +37,7 @@ export default function MapGamePage() {
       setSubjects(d.subjects);
       setSubject((prev) => prev ?? d.selected_subject);
       setLoaded(true);
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   };
   useEffect(() => { if (access) load(); }, [access, subject]); // eslint-disable-line react-hooks/exhaustive-deps
 

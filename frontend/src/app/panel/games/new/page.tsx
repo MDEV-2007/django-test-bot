@@ -38,7 +38,8 @@ export default function PanelNewGamePage() {
 
   useEffect(() => {
     if (!access) return;
-    apiFetch<{ results: Subject[] }>('/api/panel/subjects/').then((d) => setSubjects(d.results));
+    apiFetch<{ results: Subject[] }>('/api/panel/subjects/').then((d) => setSubjects(d.results))
+      .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   async function submit() {

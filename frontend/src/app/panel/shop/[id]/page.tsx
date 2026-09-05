@@ -54,7 +54,7 @@ export default function EditShopItemPage() {
       setItem(d);
       // Bo'shliqli formatlash — JSON qo'lda tahrirlanadigan bo'lgani uchun o'qishga qulayroq.
       setPayloadText(JSON.stringify(d.payload, null, 2));
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
   async function submit() {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -33,7 +34,7 @@ export default function NewLessonPage() {
     apiFetch<{ results: Topic[] }>('/api/teacher/topics/').then((d) => {
       setTopics(d.results);
       if (d.results[0]) setTopicId(String(d.results[0].id));
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   async function submit() {

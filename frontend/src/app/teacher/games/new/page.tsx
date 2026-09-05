@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import TeacherShell from '@/components/teacher/TeacherShell';
@@ -31,7 +32,7 @@ export default function NewGamePage() {
     apiFetch<{ subjects: Subject[] }>('/api/tests/').then((d) => {
       setSubjects(d.subjects);
       if (d.subjects[0]) setSubjectId(String(d.subjects[0].id));
-    });
+    }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access]);
 
   async function submit() {
