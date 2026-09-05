@@ -106,7 +106,7 @@ _UNREACHABLE = (
 CONNECT_TIMEOUT = 5
 
 
-def _ask_groq(messages, temperature, response_format, timeout):
+def _ask_groq(messages, temperature, response_format, timeout, on_error=None):
     api_key = settings.GROQ_API_KEY
     if not api_key or _is_down('groq'):
         return None
@@ -136,15 +136,18 @@ def _ask_groq(messages, temperature, response_format, timeout):
         # "rate limit reached", "invalid api key"), status kodning o'zi esa aytmaydi:
         # to'xtatilgan model ham, noto'g'ri manzil ham bir xil 404 beradi. Sababsiz
         # kodni ko'rib, kalit aybdor deb o'ylash oson — shuning uchun tanani ham yozamiz.
+        status = exc.response.status_code if exc.response is not None else None
         body = (exc.response.text or '')[:300] if exc.response is not None else ''
-        logger.error("Groq API %s: %s", exc.response.status_code if exc.response is not None else '?', body)
+        logger.error("Groq API %s: %s", status, body)
+        if on_error:
+            on_error('groq', status, body)
         return None
     except Exception:
         logger.exception("Groq API call failed")
         return None
 
 
-def _ask_ollama(messages, temperature, response_format, timeout):
+def _ask_ollama(messages, temperature, response_format, timeout, on_error=None):
     base_url = (settings.OLLAMA_API_URL or "").rstrip("/")
     if not base_url or _is_down('ollama'):
         return None
@@ -170,20 +173,32 @@ def _ask_ollama(messages, temperature, response_format, timeout):
     except _UNREACHABLE as exc:
         _mark_down('ollama', exc)
         return None
+    except requests.exceptions.HTTPError as exc:
+        status = exc.response.status_code if exc.response is not None else None
+        body = (exc.response.text or '')[:300] if exc.response is not None else ''
+        logger.error("Ollama API %s: %s", status, body)
+        if on_error:
+            on_error('ollama', status, body)
+        return None
     except Exception:
         logger.exception("Ollama API call failed")
         return None
 
 
-def ask_groq(messages, temperature=0.6, response_format=None, timeout=20):
+def ask_groq(messages, temperature=0.6, response_format=None, timeout=20, on_error=None):
     """Public entry point (nomi tarixiy — endi provider zanjiri).
 
     Avval Groq, u ishlamasa lokal Ollama. Ikkalasi ham bo'lmasa None —
     chaqiruvchi o'zining qoida-asosli fallback'iga o'tadi.
+
+    `on_error(provider, status_code, body)` — optional — is called for every HTTP-level
+    failure (both providers), so a caller that needs to tell "rate limited" apart from
+    "misconfigured/unreachable" can, without changing the None-on-failure contract every
+    existing caller already relies on.
     """
-    content = _ask_groq(messages, temperature, response_format, timeout)
+    content = _ask_groq(messages, temperature, response_format, timeout, on_error=on_error)
     if content is None:
-        content = _ask_ollama(messages, temperature, response_format, timeout)
+        content = _ask_ollama(messages, temperature, response_format, timeout, on_error=on_error)
     return content
 
 

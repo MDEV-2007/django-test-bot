@@ -32,6 +32,9 @@ urlpatterns = [
     path('testsets/<int:pk>/edit/', api.testset_edit_api, name='testset_edit'),
     path('testsets/<int:pk>/duplicate/', api.testset_duplicate_api, name='testset_duplicate'),
     path('testsets/<int:pk>/toggle-publish/', api.testset_toggle_publish_api, name='testset_toggle_publish'),
+    path('testsets/<int:pk>/review/', api.testset_review_api, name='testset_review'),
+    path('testsets/<int:pk>/review/<int:question_pk>/', api.testset_review_answer_api,
+         name='testset_review_answer'),
 
     path('lessons/', api.lessons_api, name='lessons'),
     path('lessons/<int:pk>/', api.lesson_detail_api, name='lesson_detail'),
