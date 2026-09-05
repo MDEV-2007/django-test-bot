@@ -281,6 +281,37 @@ docker compose exec web python manage.py import_cefr_json tests_app/fixtures/cef
 ```
 
 
+## 10.2. Pullik sinf (classroom) — cron SHART
+
+Mock sikli uchta buyruqqa tayanadi. **Ularsiz mock tugagach reyting hisoblanmaydi va
+o'quvchiga natija bormaydi** — ya'ni bu ixtiyoriy bezak emas, modulning ishlashi shartidir.
+
+Uchalasi ham idempotent: takror ishga tushishi xavfsiz, xabar ikki marta ketmaydi.
+
+`crontab -e` ga bitta qator:
+
+```
+*/5 * * * * cd /opt/ilmildizi && docker compose exec -T web sh -c "python manage.py sync_mock_statuses && python manage.py close_expired_mock_attempts && python manage.py publish_mock_results" >> /var/log/ilmildizi-classroom.log 2>&1
+```
+
+`exec -T` shart: cron'da terminal yo'q, `-T` siz buyruq "the input device is not a TTY"
+deb yiqiladi.
+
+Kirish qarori bu buyruqlarga bog'liq EMAS — u har so'rovda server soatidan qayta
+hisoblanadi. Ya'ni cron bir muddat ishlamasa, mock oynasi baribir o'z vaqtida yopiladi;
+faqat natija e'loni kechikadi.
+
+O'qituvchiga admin panelidan foydalanish huquqini berish (avtomatik berilmaydi, chunki
+o'qituvchi bo'lib ro'yxatdan o'tish moderatsiyasiz):
+
+```bash
+docker compose exec web python manage.py teacher_admin_access --grant <username>
+```
+
+Keyin o'qituvchi `https://<domen>/admin/` ga kiradi va faqat O'Z sinfini ko'radi:
+to'lovlarni tasdiqlaydi, mock yaratadi, daromadini kuzatadi.
+
+
 ## 11. Kundalik ishlar
 
 Yangi versiyani chiqarish:
