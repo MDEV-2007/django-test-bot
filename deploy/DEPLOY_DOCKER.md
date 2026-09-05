@@ -256,12 +256,55 @@ Eski domen bir muddat ishlab tursin desangiz, uni `SERVER_NAME` ro'yxatida va
 `EXTRA_ALLOWED_HOSTS` da qoldiring.
 
 
+## 10.1. CEFR testlarini yuklash
+
+Ingliz tili fani va A1-C2 darajalari bir marta yaratiladi:
+
+```bash
+docker compose exec web python manage.py seed_english_cefr
+```
+
+Mock testlar JSON'dan yuklanadi (idempotent — bir xil sarlavha qayta yuklansa,
+eski partlar almashtiriladi):
+
+```bash
+docker compose exec web python manage.py import_cefr_json tests_app/fixtures/cefr/reading_mock_19.json --publish
+docker compose exec web python manage.py import_cefr_json tests_app/fixtures/cefr/writing_mock_1.json --publish
+```
+
+Listening uchun audio kerak. Fayllarni konteynerga nusxalang va `--audio-dir` bilan
+ko'rsating; `--dry-run` esa bazaga tegmasdan faqat tekshiradi:
+
+```bash
+docker compose cp ./audio web:/tmp/audio
+docker compose exec web python manage.py import_cefr_json tests_app/fixtures/cefr/listening_mock_16.json --audio-dir /tmp/audio --dry-run
+```
+
+
 ## 11. Kundalik ishlar
 
 Yangi versiyani chiqarish:
 
 ```bash
-cd /opt/ilmildizi && git pull && docker compose up -d --build
+cd /opt/ilmildizi && git stash && git pull && git stash pop && docker compose up -d --build
+```
+
+`git stash` shart: `deploy/docker/nginx.conf` serverda joyida tahrirlangan (443 bloki
+shu yerda ochilgan, repozitoriyada esa izohda turadi), shuning uchun oddiy `git pull`
+"local changes would be overwritten" deb to'xtaydi. Agar `stash pop` to'qnashuv bersa,
+faylni qo'lda birlashtiring va `git stash drop` bilan yakunlang.
+
+Konteynerlar sog'ligini tekshirish (`healthy` bo'lishi kerak):
+
+```bash
+docker compose ps
+```
+
+`backend/.env` yoki root `.env` tahrirlangan bo'lsa, `restart` yetmaydi — konteyner
+yaratilgandagi muhitni saqlab qoladi:
+
+```bash
+docker compose up -d --force-recreate web
 ```
 
 Loglar:
