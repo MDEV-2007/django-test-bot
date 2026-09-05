@@ -380,6 +380,12 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
+    # Konteyner sog'lig'ini tekshiruvchi zond `http://127.0.0.1:8000/healthz` ga uradi —
+    # o'z ichidan, TLS'siz. HTTPS'ga yo'naltirish bu manzilga ham tegsa, zond 301 oladi va
+    # tekshiruv HECH QACHON o'tmaydi: konteyner ishlab tursa ham "unhealthy" bo'lib qoladi.
+    # Bu manzil tashqariga ochiq emas (nginx uni proksilamaydi), shuning uchun uni
+    # yo'naltirishdan chiqarish xavfsizlikka ta'sir qilmaydi.
+    SECURE_REDIRECT_EXEMPT = [r'^healthz$']
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
