@@ -37,6 +37,7 @@ urlpatterns = [
     path('api/battles/', include('battles.api_urls')),
     path('api/shop/', include('shop.api_urls')),
     path('api/premium/', include('premium.api_urls')),
+    path('api/classroom/', include('classroom.api_urls')),
     path('api/learning/', include('learning.api_urls')),
     path('api/teacher/', include('teacher.api_urls')),
     path('api/panel/', include('panel.api_urls')),

@@ -159,6 +159,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'analytics.apps.AnalyticsConfig',
     'battles.apps.BattlesConfig',
+    'classroom.apps.ClassroomConfig',
     'games.apps.GamesConfig',
     'leaderboard.apps.LeaderboardConfig',
     'learning.apps.LearningConfig',

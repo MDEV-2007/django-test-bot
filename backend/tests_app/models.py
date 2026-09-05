@@ -375,20 +375,37 @@ class Attempt(models.Model):
     def duration_minutes(self):
         return self.test.duration_minutes if self.test else 10
 
+    @property
+    def deadline(self):
+        """Urinish tugaydigan aniq payt.
+
+        Odatda bu shunchaki `started_at + test davomiyligi`. Lekin urinish jadvalga
+        qo'yilgan mock'ka tegishli bo'lsa, mock'ning kirish oynasi ham chegara qo'yadi:
+        oynaning oxirgi 10 daqiqasida kirgan o'quvchi 60 daqiqa emas, 10 daqiqa oladi.
+        Bu chegara `classroom.MockAttempt.deadline` da hisoblanadi va shu yerda tan
+        olinadi — shunda MAVJUD javob endpointlari (klassik ham, CEFR ham) hech qanday
+        o'zgarishsiz mock uchun ham to'g'ri ishlaydi.
+        """
+        from datetime import timedelta
+
+        mock_attempt = getattr(self, 'mock_attempt', None)
+        if mock_attempt is not None:
+            return mock_attempt.deadline
+        return self.started_at + timedelta(minutes=self.duration_minutes)
+
     def seconds_left(self, now=None):
         """Urinishda qolgan vaqt. Manba — server soati: klient nima ko'rsatishidan
         qat'i nazar, imtihon shu yerda tugaydi."""
         from django.utils import timezone as _tz
         now = now or _tz.now()
-        elapsed = (now - self.started_at).total_seconds()
-        return max(0, int(self.duration_minutes * 60 - elapsed))
+        return max(0, int((self.deadline - now).total_seconds()))
 
     @property
     def is_time_up(self):
         """Vaqt tugadimi (kechikkan javoblar uchun qisqa muhlat bilan)."""
+        from datetime import timedelta
         from django.utils import timezone as _tz
-        elapsed = (_tz.now() - self.started_at).total_seconds()
-        return elapsed > self.duration_minutes * 60 + self.SUBMIT_GRACE_SECONDS
+        return _tz.now() > self.deadline + timedelta(seconds=self.SUBMIT_GRACE_SECONDS)
 
     @property
     def time_spent_display(self):

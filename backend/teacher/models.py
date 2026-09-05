@@ -21,6 +21,22 @@ class TeacherProfile(models.Model):
     full_name = models.CharField(max_length=120)
     subject = models.CharField(max_length=80, blank=True, help_text="Masalan: Tarix, Ona tili")
     institution = models.CharField(max_length=160, blank=True, help_text="Maktab / o'quv markazi nomi")
+
+    # --- Pullik sinf (classroom ilovasi) ---
+    # Yangi `Teacher` modeli yaratilmadi: o'qituvchi allaqachon shu yerda, ikkinchi
+    # jadval ikkita haqiqat manbai degani bo'lardi.
+    revenue_share_percent = models.PositiveSmallIntegerField(
+        default=75,
+        help_text="O'qituvchiga tegadigan ulush, foizda. Qolgani platformada qoladi.",
+    )
+    telegram_channel_url = models.URLField(
+        max_length=300, blank=True, help_text="O'qituvchining Telegram kanali (o'quvchilarga ko'rsatiladi).")
+    payout_card_last4 = models.CharField(
+        max_length=4, blank=True,
+        help_text="Karta raqamining FAQAT oxirgi 4 raqami — to'lovni kim olganini tekshirish uchun. "
+                   "To'liq raqam saqlanmaydi.",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
