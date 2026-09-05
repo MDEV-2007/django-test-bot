@@ -34,6 +34,14 @@ services:
     depends_on:
       - web
       - frontend
+    # 127.0.0.1 — konteynerning o'zi. Bu manzil HTTPS'ga yo'naltirishdan oldin turadi
+    # (nginx.conf dagi `location = /nginx-health`), shuning uchun sertifikat kerak emas.
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1/nginx-health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   frontend:
     build:
@@ -48,6 +56,13 @@ services:
       - "3000"
     depends_on:
       - web
+    # node:22-alpine da curl yo'q, busybox wget bor.
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
   web:
     build:
@@ -66,6 +81,18 @@ services:
       - static:/app/staticfiles
     expose:
       - "8000"
+    # /healthz PostgreSQL va Redis'ga ham tegib ko'radi (config/health.py): soket ochiq
+    # turgani bilan daphne backing service'siz faqat 500 qaytaradi. python:3.12-slim da
+    # curl ham, wget ham yo'q — urllib har doim bor.
+    #
+    # start_period 90s: konteyner avval `migrate` va `collectstatic` ni bajaradi, shu
+    # vaqt ichida muvaffaqiyatsiz probe'lar retries hisobiga kirmaydi.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
     depends_on:
       db:
         condition: service_healthy

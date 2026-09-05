@@ -19,7 +19,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from config.health import healthz
+
 urlpatterns = [
+    # Docker healthcheck (konteyner ichidan chaqiriladi; nginx bu manzilni tashqariga
+    # ochmaydi — u /api, /telegram, /admin dan tashqari hammasini frontendga yuboradi).
+    path('healthz', healthz),
+
     path('admin/', admin.site.urls),
 
     # JSON API for the Next.js frontend (frontend/). Django endi FAQAT backend:

@@ -2,7 +2,10 @@
 # (nginx.conf ikkala joyda `include` qiladi; nusxa ko'chirilgan qoidalar vaqt o'tib
 # bir-biridan farq qila boshlaydi).
 
-client_max_body_size 12M;   # to'lov cheki skrinshotlari uchun yetarli
+# 12M to'lov cheki skrinshoti uchun yetarli edi, lekin CEFR Listening parti audiosi
+# (o'qituvchi panelidan yuklanadi) undan kattaroq bo'ladi — bir part odatda 3-10 MB,
+# uzunrog'i esa bundan ham oshadi.
+client_max_body_size 64M;
 
 # Yuklangan fayllar — Django emas, nginx beradi (tezroq va ASGI ishchisini band qilmaydi).
 location /media/ {
