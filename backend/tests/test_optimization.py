@@ -4,7 +4,6 @@ These lock in the caching/select_related work: a future change that reintroduces
 an uncached per-request DB read will trip the assertion instead of silently slowing the
 site down.
 """
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext

@@ -188,7 +188,7 @@ class NonTeacherStaffTests(TestCase):
         ensure_profile_for_user(user)
         grant_admin_access(user)
 
-        subject = make_subject()
+        make_subject()
         teacher_user, teacher = make_teacher_with_admin('ustoz_c')
         student = ensure_profile_for_user(
             User.objects.create_user(username='oquvchi_c', password='pw-1234-student'))

@@ -33,7 +33,6 @@ tashlanadi — aks holda xarita yozuvlari ("1", "Burgundiya gersogligi") bir mar
 rasmda, ikkinchi marta matnda ko'rinardi.
 """
 import re
-import shutil
 from pathlib import Path
 
 from django.conf import settings

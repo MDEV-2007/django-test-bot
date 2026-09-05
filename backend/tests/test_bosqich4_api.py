@@ -1,7 +1,6 @@
 """JSON API for Bosqich 4: Learning center, mini-games (session-free redesign), Analytics,
 Profile/Onboarding — see accounts/api.py for the JWT-API pattern.
 """
-from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 

@@ -47,7 +47,6 @@ JSON SHAKLI
 }
 """
 import json
-import re
 from pathlib import Path
 
 from django.core.files import File

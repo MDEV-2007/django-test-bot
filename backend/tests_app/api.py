@@ -1,7 +1,8 @@
-"""JSON API mirroring tests_app/views.py for the Next.js frontend — see accounts/api.py
-for the overall JWT-API pattern. Each endpoint here reuses the exact same helpers/queries
-as its template-based counterpart; only the response shape (JSON vs render()) differs.
-Grading stays server-only: is_correct is never sent back until finish()/feedback()."""
+"""Test yechish oqimining JSON API'si — umumiy JWT naqshi uchun accounts/api.py ga qarang.
+
+Baholash SERVER TOMONDA qoladi: `is_correct` finish()/feedback() dan oldin hech qachon
+javobga qo'shilmaydi, aks holda to'g'ri javobni tarmoq so'rovidan o'qib olish mumkin
+bo'lardi."""
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse
@@ -17,8 +18,7 @@ from rest_framework.response import Response
 from accounts.models import ensure_profile_for_user
 from accounts.permissions import IsChannelSubscribed
 from .models import (
-    AIFeedback, AnswerOption, Attempt, AttemptAnswer, GroupOption, Question,
-    RevisionItem, Subject, TestSet,
+    AIFeedback, Attempt, AttemptAnswer, Question, RevisionItem, Subject, TestSet,
 )
 from .subject_utils import resolve_subject as _resolve_subject
 from .feedback import _dispatch_ai_feedback, seed_questions_if_needed

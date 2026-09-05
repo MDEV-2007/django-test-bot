@@ -1,11 +1,11 @@
-"""JSON API mirroring teacher/views.py for the Next.js frontend — see accounts/api.py for
-the overall JWT-API pattern. The question wizard (question_add/question_detail) is the one
-place that departs from the flat-POST-array convention the Django form used: the frontend
-sends type-specific rows as nested JSON in `type_data`, which `_apply_type_data_json`
-applies with exactly the same rules as the template version.
+"""O'qituvchi panelining JSON API'si (Next.js frontend uchun).
 
-Bu faylda Feature 1 (o'qituvchi-orqali-sinf) endpointlari ham bor — pastdagi
-"SINF" bo'limi.
+Umumiy JWT naqshi — accounts/api.py. Savol ustasi (question_add/question_detail) bitta
+narsasi bilan ajralib turadi: savol turiga xos qatorlar (variantlar, juftliklar,
+qism-savollar, javob banki) alohida maydonlar emas, `type_data` ichidagi ichma-ich JSON
+sifatida keladi — ularning soni oldindan noma'lum. Ularni `_apply_type_data_json` yozadi.
+
+Bu faylda o'qituvchi-orqali-sinf endpointlari ham bor — pastdagi "SINF" bo'limi.
 """
 import json
 
@@ -186,8 +186,8 @@ def test_build_api(request, pk):
 
 
 def _apply_type_data_json(question, test, data):
-    """Same rules as teacher/views.py's _apply_type_data, reading nested JSON instead of
-    flat POST arrays: skip a row with a blank primary text field, auto-letter missing
+    """Savol turiga xos bolalarni (variant, juftlik, qism-savol, bank) qayta quradi:
+    skip a row with a blank primary text field, auto-letter missing
     keys/labels, wipe-and-rebuild children, and for grouped_item create-then-repoint-then-
     delete-old-group (Question.group is on_delete=CASCADE, so order matters)."""
     qtype = question.question_type

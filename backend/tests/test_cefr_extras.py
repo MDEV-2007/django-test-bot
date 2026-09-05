@@ -4,7 +4,6 @@ Bu yerdagi testlar `test_cefr_exam.py` qamramaydigan qismlarni tekshiradi — im
 tugagandan KEYINGI oqim va uni tuzadigan panel.
 """
 from datetime import timedelta
-from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -14,8 +13,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from analytics.services import compute_cefr_skills
 from tests_app.models import (
-    AcceptedAnswer, AIFeedback, AnswerOption, AttemptAnswer, ExamSection, GroupOption,
-    Question, QuestionGroup,
+    AcceptedAnswer, AIFeedback, AttemptAnswer, ExamSection, GroupOption, Question,
+    QuestionGroup,
 )
 
 from .factories import make_attempt, make_subject, make_test_set, make_user

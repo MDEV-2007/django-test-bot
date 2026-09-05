@@ -20,8 +20,8 @@ class Command(BaseCommand):
             topic = Topic.objects.create(title="Umumiy tarix", slug="umumiy-tarix", category='history')
 
         # --- Super admin ---
-        admin = self._user('demo_admin', 'Demo', 'Admin', 'superadmin')
-        self.stdout.write(self.style.SUCCESS(f"Super Admin: demo_admin / parol: demo12345"))
+        self._user('demo_admin', 'Demo', 'Admin', 'superadmin')
+        self.stdout.write(self.style.SUCCESS("Super Admin: demo_admin / parol: demo12345"))
 
         # --- Teachers ---
         for n in (1, 2):

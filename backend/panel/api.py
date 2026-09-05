@@ -1,10 +1,11 @@
-"""JSON API mirroring panel/views.py (Super Admin panel) for the Next.js frontend — see
-accounts/api.py for the overall JWT-API pattern and panel/api_utils.py for the generic
-list/search/filter/sort/paginate helper that replaces panel/generic.py's PanelListView.
+"""Super Admin panelining JSON API'si (Next.js frontend uchun).
 
-Audit-log attribution (panel/signals.py) is handled globally by
-accounts.jwt_auth.AuditAwareJWTAuthentication — see its docstring — so no per-view call is
-needed here.
+Umumiy JWT naqshi — accounts/api.py; ro'yxat/qidiruv/filtr/tartib/sahifalash uchun umumiy
+yordamchi — panel/api_utils.py.
+
+Audit jurnalida amalni kim bajargani (panel/signals.py)
+accounts.jwt_auth.AuditAwareJWTAuthentication orqali global tarzda aniqlanadi, shuning
+uchun bu yerdagi hech bir endpoint uni alohida chaqirmaydi.
 """
 import csv
 import secrets

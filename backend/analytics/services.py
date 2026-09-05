@@ -140,7 +140,6 @@ def dashboard_data(profile, use_cache=True):
         if cached is not None:
             return cached
 
-    answers = _answer_qs(profile)
     attempts = Attempt.objects.filter(profile=profile, is_completed=True)
     today = timezone.localdate()
 

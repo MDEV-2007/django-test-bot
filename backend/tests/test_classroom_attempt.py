@@ -214,7 +214,6 @@ class AttemptFlowTests(TestCase):
         data = self._start()
         self._answer(data['attempt_id'], self.questions[0], '4')
 
-        deadline = MockAttempt.objects.get(pk=data['mock_attempt_id']).deadline
         MockAttempt.objects.filter(pk=data['mock_attempt_id']).update(
             started_at=timezone.now() - timedelta(hours=2))
 

@@ -8,7 +8,6 @@ reset-password, testset duplicate/publish, payment approve/reject).
 import io
 from decimal import Decimal
 
-from django.contrib.auth.models import User
 from django.test import TestCase
 from PIL import Image
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
