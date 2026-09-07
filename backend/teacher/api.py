@@ -177,7 +177,14 @@ def _question_payload(q):
 def test_build_api(request, pk):
     test = _own_test(request, pk)
     return Response({
-        'test': {'id': test.id, 'title': test.title},
+        'test': {
+            'id': test.id,
+            'title': test.title,
+            'category': test.category,
+            'subject': test.subject.name if test.subject else None,
+            'is_cefr': test.category == 'cefr',
+            'duration_minutes': test.duration_minutes,
+        },
         'questions': [_question_payload(q) for q in test.ordered_questions()],
         'type_choices': Question.QUESTION_TYPE_CHOICES,
         'difficulty_choices': Question.DIFFICULTY_CHOICES,

@@ -33,9 +33,17 @@ export type QuestionData = {
 export type SectionOption = { id: number; skill_label: string; part_number: number; title: string };
 export type BankOption = { id: number; instruction: string; options: { label: string; text: string }[] };
 
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
 const EMPTY: QuestionData = {
   question_type: 'single_choice', body: '', difficulty: 'medium', points: 1, explanation: '',
-  image_position: 'after_body', options: [{ text: '', is_correct: true }, { text: '', is_correct: false }],
+  image_position: 'after_body',
+  options: [
+    { text: '', is_correct: true },
+    { text: '', is_correct: false },
+    { text: '', is_correct: false },
+    { text: '', is_correct: false },
+  ],
   pairs: [{ left_key: 'I', left_text: '', right_key: 'a', right_text: '' }],
   sub_questions: [], reference_answer: '',
   group: { instruction: '', options: [{ label: 'A', text: '' }, { label: 'B', text: '' }], correct_index: 0 },
@@ -48,7 +56,7 @@ const TEXT_TYPES = ['gap_fill', 'tfng'];
 const SINGLE_TYPES = ['single_choice', 'image_based', 'table_based'];
 
 export default function QuestionForm({
-  testId, initial, onSaved, sections = [], banks = [],
+  testId, initial, onSaved, sections = [], banks = [], isCefr = false,
 }: {
   testId: number;
   initial?: QuestionData;
@@ -57,6 +65,7 @@ export default function QuestionForm({
      tegishli maydonlar umuman ko'rinmaydi. */
   sections?: SectionOption[];
   banks?: BankOption[];
+  isCefr?: boolean;
 }) {
   const [q, setQ] = useState<QuestionData>(initial || EMPTY);
   const [correctIndex, setCorrectIndex] = useState(
@@ -134,22 +143,28 @@ export default function QuestionForm({
     <div className="space-y-4 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-5">
       {error && <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-xs text-[var(--danger-text)] whitespace-pre-wrap">{error}</p>}
 
-      <select value={q.question_type} onChange={(e) => setQ({ ...q, question_type: e.target.value })}
-        className="w-full rounded-lg border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-sm text-[var(--text-primary)]">
-        <option value="single_choice">Oddiy test</option>
-        <option value="image_based">Rasmli savol</option>
-        <option value="table_based">Jadvalli savol</option>
-        <option value="matching">Moslashtirish</option>
-        <option value="grouped_item">Guruhlangan savol</option>
-        <option value="open_written">Yozma savol</option>
-        <option value="gap_fill">Bo&apos;shliqni to&apos;ldirish (CEFR)</option>
-        <option value="tfng">TRUE / FALSE / NOT GIVEN (CEFR)</option>
-        <option value="writing_task">Writing topshirig&apos;i (CEFR)</option>
-      </select>
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-[var(--text-secondary)]">Savol turi</label>
+        <select value={q.question_type} onChange={(e) => setQ({ ...q, question_type: e.target.value })}
+          className="w-full rounded-lg border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-sm text-[var(--text-primary)]">
+          <option value="single_choice">Oddiy test (A, B, C, D variantli)</option>
+          <option value="image_based">Rasmli savol (Xarita, rasm + variantlar)</option>
+          <option value="table_based">Jadvalli savol (Xronologiya / ma&apos;lumot)</option>
+          <option value="matching">Moslashtirish (I, II, III va a, b, c)</option>
+          <option value="grouped_item">Guruhlangan savol (Umumiy javoblar banki)</option>
+          <option value="open_written">Yozma ochiq savol</option>
+          {isCefr && (
+            <>
+              <option value="gap_fill">Bo&apos;shliqni to&apos;ldirish (CEFR)</option>
+              <option value="tfng">TRUE / FALSE / NOT GIVEN (CEFR)</option>
+              <option value="writing_task">Writing topshirig&apos;i (CEFR)</option>
+            </>
+          )}
+        </select>
+      </div>
 
-      {/* CEFR: savolni partga bog'lash va varaqadagi raqamini berish. Matn ichidagi
-          {{N}} bo'shlig'i aynan shu raqam orqali savolga ulanadi. */}
-      {sections.length > 0 && (
+      {/* CEFR: savolni partga bog'lash — faqat CEFR testida va partlar mavjud bo'lganda */}
+      {isCefr && sections.length > 0 && (
         <div className="flex flex-wrap gap-3">
           <select
             value={q.section ?? ''}
@@ -316,17 +331,58 @@ export default function QuestionForm({
 
       {SINGLE_TYPES.includes(q.question_type) && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[var(--text-secondary)]">Variantlar</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[var(--text-secondary)]">
+              Variantlar (A, B, C, D) — to&apos;g&apos;ri javobni radio bilan belgilang:
+            </p>
+            <button
+              type="button"
+              onClick={() => setQ({ ...q, options: [...q.options, { text: '', is_correct: false }] })}
+              className="text-xs font-medium text-[var(--accent-text)] hover:underline"
+            >
+              + Variant qo&apos;shish
+            </button>
+          </div>
           {q.options.map((o, i) => (
             <div key={i} className="flex items-center gap-2">
-              <input type="radio" name="correct" checked={correctIndex === i} onChange={() => setCorrectIndex(i)} />
-              <input value={o.text} onChange={(e) => {
-                const opts = [...q.options]; opts[i] = { ...opts[i], text: e.target.value }; setQ({ ...q, options: opts });
-              }} className="flex-1 rounded-lg border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-sm text-[var(--text-primary)]" />
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-input)] font-bold text-xs">
+                {OPTION_LETTERS[i] || String(i + 1)}
+              </span>
+              <input
+                type="radio"
+                name="correct"
+                checked={correctIndex === i}
+                onChange={() => setCorrectIndex(i)}
+                title="To'g'ri javob"
+                className="size-4 shrink-0 accent-emerald-500 cursor-pointer"
+              />
+              <input
+                value={o.text}
+                onChange={(e) => {
+                  const opts = [...q.options];
+                  opts[i] = { ...opts[i], text: e.target.value };
+                  setQ({ ...q, options: opts });
+                }}
+                placeholder={`${OPTION_LETTERS[i] || i + 1} varianti matni`}
+                className="flex-1 rounded-lg border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-sm text-[var(--text-primary)]"
+              />
+              {q.options.length > 2 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const opts = q.options.filter((_, idx) => idx !== i);
+                    setQ({ ...q, options: opts });
+                    if (correctIndex === i) setCorrectIndex(0);
+                    else if (correctIndex > i) setCorrectIndex(correctIndex - 1);
+                  }}
+                  className="px-1.5 py-1 text-xs text-muted-foreground hover:text-[var(--danger-text)]"
+                  title="Variantni o'chirish"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           ))}
-          <button onClick={() => setQ({ ...q, options: [...q.options, { text: '', is_correct: false }] })}
-            className="text-xs text-[var(--accent-text)]">+ Variant qo&apos;shish</button>
         </div>
       )}
 

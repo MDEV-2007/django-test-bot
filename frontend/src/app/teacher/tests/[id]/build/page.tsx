@@ -20,7 +20,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 type QuestionRow = { id: number; question_type: string; body: string };
-type BuildData = { test: { id: number; title: string }; questions: QuestionRow[] };
+type BuildData = {
+  test: {
+    id: number;
+    title: string;
+    category?: string;
+    subject?: string | null;
+    is_cefr?: boolean;
+    duration_minutes?: number;
+  };
+  questions: QuestionRow[];
+};
 type SectionData = {
   sections: TeacherSection[];
   skill_options: { value: string; label: string }[];
@@ -81,12 +91,29 @@ export default function TestBuildPage() {
 
   if (!data) return <TeacherShell><div className="py-10"><BrandLoader /></div></TeacherShell>;
 
+  const isCefr = Boolean(data.test.is_cefr || data.test.category === 'cefr');
+  const hasSections = Boolean(sectionData && sectionData.sections.length > 0);
+
   return (
     <TeacherShell>
       <div className="mx-auto max-w-3xl space-y-6">
         <PageHeader
           title={data.test.title}
-          description={`${data.questions.length} ta savol`}
+          description={
+            <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              {data.test.subject && (
+                <Badge variant="outline" className="border-[var(--accent-border)] font-semibold text-[var(--accent-text)]">
+                  {data.test.subject}
+                </Badge>
+              )}
+              <Badge variant="secondary" className="font-normal">
+                {isCefr ? 'CEFR (Til formati)' : data.test.category === 'certificate' ? 'Milliy Sertifikat' : data.test.category === 'bba' ? 'BBA formati' : 'Standart fan testi'}
+              </Badge>
+              <span>·</span>
+              <span>{data.questions.length} ta savol</span>
+              {data.test.duration_minutes ? <span>· {data.test.duration_minutes} daqiqa</span> : null}
+            </span>
+          }
           backHref="/teacher/tests"
           actions={
             <>
@@ -113,7 +140,8 @@ export default function TestBuildPage() {
           </Card>
         )}
 
-        {sectionData && (
+        {/* Faqat CEFR testlarida yoki partlari mavjud testlarda ko'rsatiladi */}
+        {sectionData && (isCefr || hasSections) && (
           <SectionManager
             testId={Number(id)}
             sections={sectionData.sections}
@@ -178,6 +206,7 @@ export default function TestBuildPage() {
             key={editingId ?? 'new'}
             testId={Number(id)}
             initial={editingFull ?? undefined}
+            isCefr={isCefr}
             sections={(sectionData?.sections ?? []) as SectionOption[]}
             banks={sectionData?.banks ?? []}
             onSaved={() => { setShowForm(false); setEditingFull(null); setEditingId(null); load(); }}

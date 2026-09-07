@@ -19,10 +19,10 @@ type Subject = { id: number; name: string; slug: string };
 
 // Backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
 const CATEGORIES = [
-  { value: 'history', label: 'Mavzulashtirilgan' },
-  { value: 'certificate', label: 'Milliy Sertifikat' },
-  { value: 'bba', label: 'BBA Imtihoni' },
-  { value: 'cefr', label: 'CEFR (Ingliz tili)' },
+  { value: 'history', label: 'Mavzulashtirilgan (Standart fan testi)' },
+  { value: 'certificate', label: 'Milliy Sertifikat formati' },
+  { value: 'bba', label: 'BBA (DTM) imtihon formati' },
+  { value: 'cefr', label: 'CEFR (Ingliz tili / Til partlari)' },
 ];
 
 export default function NewTestPage() {
@@ -101,6 +101,11 @@ export default function NewTestPage() {
                     {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  {category === 'cefr'
+                    ? "Chet tili uchun maxsus partlar (Listening audio, Reading matnlari)."
+                    : "Standart fan testi: 4 variantli (A, B, C, D) testlar, xarita/rasm va moslashtirish."}
+                </p>
               </div>
             </div>
 
