@@ -20,7 +20,7 @@ ITEMS = [
     # shop.services.purchase_item special-cases this exact slug to flip the profile's
     # existing premium_mock_test_unlocked flag (the same one real-money payments set).
     dict(slug='premium_test_unlock', category=ShopItem.CATEGORY_CONSUMABLE, name='Premium Test Unlock',
-         description="Tangalar bilan barcha premium mock testlarga kirishni oching — do'stlaringizni taklif qilib toping!",
+         description="Tangalar bilan barcha premium mock testlarga kirishni oching (bir martalik xarid)!",
          icon_name='unlock', price_coins=100, rarity='epic', is_consumable=False, order=2),
 
     # --- Titles ---

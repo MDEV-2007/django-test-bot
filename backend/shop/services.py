@@ -43,10 +43,10 @@ def purchase_item(profile, item):
     inv = InventoryItem.objects.select_for_update().filter(profile=locked, item=item).first()
     if inv and not item.is_consumable:
         raise ShopError("Bu mahsulot sizda allaqachon bor.")
-    if item.slug == PREMIUM_TEST_UNLOCK_SLUG and locked.premium_mock_test_unlocked:
-        # Already unlocked some other way (a real-money Payment) — don't let coins go to
-        # waste on a purchase that would have no effect.
-        raise ShopError("Premium testlar sizda allaqachon ochiq.")
+    if item.slug == PREMIUM_TEST_UNLOCK_SLUG and (locked.premium_mock_test_unlocked or inv is not None):
+        # Already unlocked some other way (a real-money Payment or prior shop buy) —
+        # strictly one-time purchase.
+        raise ShopError("Premium testlar sizda allaqachon ochiq (bir martalik xarid).")
     if locked.coins < item.price_coins:
         raise ShopError("Tangangiz yetarli emas.")
 

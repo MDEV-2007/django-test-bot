@@ -11,11 +11,15 @@ from .models import InventoryItem, Purchase, ShopItem, StreakFreezeLog
 
 def _item_payload(item, profile):
     inv = getattr(item, '_inv', None)
+    is_premium_unlock = item.slug == 'premium_test_unlock'
+    is_owned = inv is not None or (is_premium_unlock and profile.premium_mock_test_unlocked)
+    is_consumable = False if is_premium_unlock else item.is_consumable
     return {
         'id': item.id, 'slug': item.slug, 'name': item.name, 'category': item.category,
         'category_display': item.get_category_display(), 'price_coins': item.price_coins,
-        'rarity': item.rarity, 'is_consumable': item.is_consumable, 'is_equippable': item.is_equippable,
-        'owned': inv is not None, 'owned_qty': inv.quantity if inv else 0,
+        'description': item.description,
+        'rarity': item.rarity, 'is_consumable': is_consumable, 'is_equippable': item.is_equippable,
+        'owned': is_owned, 'owned_qty': inv.quantity if inv else (1 if is_owned else 0),
         'equipped': bool(inv and inv.is_equipped),
         'affordable': profile.coins >= item.price_coins,
     }

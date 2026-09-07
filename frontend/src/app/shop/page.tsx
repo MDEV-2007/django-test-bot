@@ -25,6 +25,7 @@ type Item = {
   id: number; slug: string; name: string; category: string; category_display: string;
   price_coins: number; rarity: string; is_consumable: boolean; is_equippable: boolean;
   owned: boolean; owned_qty: number; equipped: boolean; affordable: boolean;
+  description?: string;
 };
 
 type ShopData = { coins: number; categories: Record<string, Item[]> };
@@ -185,6 +186,7 @@ export default function ShopPage() {
         <div className={cn('grid gap-4', itemGridCols)}>
           {items.map((item, itemIdx) => {
             const loading = busy === item.slug;
+            const isPremiumUnlock = item.slug === 'premium_test_unlock';
             return (
               <Reveal key={item.id} index={itemIdx} className="h-full">
               {/* Naqsh mahsulot TURINI bildiradi (avatar, ramka, mavzu...). Kartalar
@@ -194,14 +196,24 @@ export default function ShopPage() {
                   darhol tashlanadi. */}
               <Card className="group relative flex h-full flex-col justify-between overflow-hidden text-center transition-colors hover:border-[var(--border-strong)]">
                 <CardMotif
-                  shape={(item.category as MotifKey) ?? 'shop'}
+                  shape={isPremiumUnlock ? 'trophy' : ((item.category as MotifKey) ?? 'shop')}
                   className={RARITY_MOTIF[item.rarity] || RARITY_MOTIF.common}
                 />
                 <CardContent className="relative flex flex-1 flex-col items-center gap-2 pt-6">
-                  <Badge variant="outline" className={RARITY_STYLE[item.rarity] || RARITY_STYLE.common}>
-                    {item.rarity}
-                  </Badge>
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    <Badge variant="outline" className={RARITY_STYLE[item.rarity] || RARITY_STYLE.common}>
+                      {item.rarity}
+                    </Badge>
+                    {isPremiumUnlock && (
+                      <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-semibold">
+                        Bir martalik
+                      </Badge>
+                    )}
+                  </div>
                   <h3 className="text-sm font-semibold leading-snug">{item.name}</h3>
+                  {item.description && (
+                    <p className="line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
+                  )}
                   <span className="flex items-center gap-1 font-mono text-xs font-semibold text-yellow-400">
                     <Coins className="size-3" /> {item.price_coins.toLocaleString('uz-UZ')}
                   </span>
@@ -223,6 +235,13 @@ export default function ShopPage() {
                             {loading && <Loader2 className="size-3.5 animate-spin" />} Taqish
                           </Button>
                         )
+                      ) : isPremiumUnlock ? (
+                        <div className="space-y-1">
+                          <Badge variant="outline" className="w-full justify-center border-[var(--success)]/30 bg-[var(--success-soft)] py-2 text-[var(--success-text)] font-medium">
+                            <CheckCircle2 className="mr-1.5 size-3.5" /> Ochilgan (Sizda bor)
+                          </Badge>
+                          <p className="text-[11px] text-muted-foreground">Bir martalik xarid faol</p>
+                        </div>
                       ) : (
                         <Badge variant="outline" className="w-full justify-center border-[var(--success)]/30 bg-[var(--success-soft)] py-2 text-[var(--success-text)]">
                           Sizda bor
@@ -235,7 +254,7 @@ export default function ShopPage() {
                         onClick={() => act(item.slug, 'buy', item.name)}
                       >
                         {loading && <Loader2 className="size-3.5 animate-spin" />}
-                        {loading ? 'Sotib olinmoqda' : !item.affordable ? 'Tanga yetarli emas' : item.is_consumable && item.owned ? 'Yana olish' : 'Sotib olish'}
+                        {loading ? 'Sotib olinmoqda' : !item.affordable ? 'Tanga yetarli emas' : isPremiumUnlock ? '100 tangaga ochish' : item.is_consumable && item.owned ? 'Yana olish' : 'Sotib olish'}
                       </Button>
                     )}
                     {item.owned && item.is_consumable && (
