@@ -31,7 +31,15 @@ type RoadmapStep = { step: number; title: string; duration: string };
 
 type FeedbackData = {
   status: 'pending' | 'ready';
-  attempt?: { id: number; score: number; correct_answers: number; wrong_answers: number; skipped_answers: number };
+  attempt?: {
+    id: number;
+    score: number;
+    correct_answers: number;
+    wrong_answers: number;
+    skipped_answers: number;
+    test_title?: string;
+    completed_at?: string;
+  };
   overall_analysis?: string;
   weak_topics?: string[];
   strong_topics?: string[];
@@ -424,10 +432,11 @@ export default function FeedbackPage() {
             open={certOpen}
             onOpenChange={setCertOpen}
             studentName={`${user?.first_name || user?.username || ''} ${user?.last_name || ''}`.trim()}
-            testTitle="Rasmiy Formatdagi Sinov Testi"
+            testTitle={data?.attempt?.test_title || "Rasmiy Formatdagi Sinov Testi"}
             score={a.score || 0}
             correctCount={a.correct_answers || 0}
             totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
+            date={data?.attempt?.completed_at}
             attemptId={attemptId}
           />
         )}

@@ -485,7 +485,7 @@ def finish_api(request, attempt_id):
 
 @api_view(['GET'])
 def feedback_api(request, attempt_id):
-    attempt = get_object_or_404(Attempt, id=attempt_id, profile=request.user.profile)
+    attempt = get_object_or_404(Attempt.objects.select_related('test'), id=attempt_id, profile=request.user.profile)
     if not attempt.is_completed:
         return Response({'error': 'attempt not finished'}, status=409)
 
@@ -519,8 +519,15 @@ def feedback_api(request, attempt_id):
 
     return Response({
         'status': 'ready',
-        'attempt': {'id': attempt.id, 'score': attempt.score, 'correct_answers': attempt.correct_answers,
-                    'wrong_answers': attempt.wrong_answers, 'skipped_answers': attempt.skipped_answers},
+        'attempt': {
+            'id': attempt.id,
+            'score': attempt.score,
+            'correct_answers': attempt.correct_answers,
+            'wrong_answers': attempt.wrong_answers,
+            'skipped_answers': attempt.skipped_answers,
+            'test_title': attempt.test.title if attempt.test else 'Rasmiy Formatdagi Sinov Testi',
+            'completed_at': attempt.completed_at.isoformat() if attempt.completed_at else None,
+        },
         'overall_analysis': ai_feedback.overall_analysis,
         'weak_topics': [t.strip() for t in ai_feedback.weak_topics.split(',') if t.strip()],
         'strong_topics': [t.strip() for t in ai_feedback.strong_topics.split(',') if t.strip()],
