@@ -35,6 +35,8 @@ A) Boburnoma
 B) Xamsa
 C) Zafarnoma
 D) Shajarayi turk
+Javob: B`;
+
 interface BulkImportModalProps {
   testId: number;
   isOpen?: boolean;
