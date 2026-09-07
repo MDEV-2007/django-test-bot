@@ -52,7 +52,7 @@ export default function AppShell() {
 
         {user && (
           <div className="ml-auto flex items-center gap-2">
-            <div title="Ketma-ketlik (Streak)" className="flex items-center gap-1.5 rounded-lg border border-orange-500/20 bg-orange-500/10 px-2.5 py-1 font-semibold text-orange-400">
+            <div title="Ketma-ketlik (Streak)" className="flex items-center gap-1.5 rounded-lg border border-[var(--tone-streak)]/25 bg-[var(--tone-streak-soft)] px-2.5 py-1 font-semibold text-[var(--tone-streak-text)]">
               <Flame className="h-3.5 w-3.5" />
               <span><StatNumber value={user.streak} /> kun</span>
             </div>
@@ -63,7 +63,7 @@ export default function AppShell() {
               <span><StatNumber value={user.coins} /></span>
             </Link>
             {user.freeze_count > 0 && (
-              <Link href="/shop/inventory" title="Streak muzlatish" className="hidden items-center gap-1.5 rounded-lg border border-sky-500/20 bg-sky-500/10 px-2.5 py-1 font-semibold text-sky-300 sm:flex">
+              <Link href="/shop/inventory" title="Streak muzlatish" className="hidden items-center gap-1.5 rounded-lg border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 font-semibold text-sky-600 dark:text-sky-300 sm:flex">
                 <Snowflake className="h-3.5 w-3.5" />
                 <span>{user.freeze_count} muzlatish</span>
               </Link>

@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
-  AlertTriangle, ChevronLeft, ChevronRight, Share2,
+  AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
+import CertificateModal from '@/components/student/CertificateModal';
 import { WritingReviewCard } from '@/components/cefr/WritingTask';
 import type { WritingReview } from '@/lib/cefr-types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,10 +94,11 @@ type ReviewItem = {
 export default function FeedbackPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
   const router = useRouter();
-  const { access } = useAuthStore();
+  const { access, user } = useAuthStore();
   const [data, setData] = useState<FeedbackData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mistakesError, setMistakesError] = useState<string | null>(null);
+  const [certOpen, setCertOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -179,6 +181,14 @@ export default function FeedbackPage() {
             <Link href="/tests"><ChevronLeft className="size-4" /> Testlar ro&apos;yxati</Link>
           </Button>
           <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setCertOpen(true)}
+              className="border-[var(--tone-premium)]/40 bg-[var(--tone-premium-soft)] font-semibold text-[var(--tone-premium-text)] hover:bg-[var(--tone-premium)]/20"
+            >
+              <Award className="size-4" /> Sertifikat
+            </Button>
             <StoryShareButton attemptId={attemptId} />
             {a.score < 100 && (
             <Button
@@ -408,6 +418,18 @@ export default function FeedbackPage() {
               );
             })}
           </section>
+        )}
+        {a && (
+          <CertificateModal
+            open={certOpen}
+            onOpenChange={setCertOpen}
+            studentName={`${user?.first_name || user?.username || ''} ${user?.last_name || ''}`.trim()}
+            testTitle="Rasmiy Formatdagi Sinov Testi"
+            score={a.score || 0}
+            correctCount={a.correct_answers || 0}
+            totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
+            attemptId={attemptId}
+          />
         )}
       </main>
     </>

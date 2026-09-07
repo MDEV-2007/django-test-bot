@@ -43,9 +43,9 @@ type ProfileData = {
 
 const RARITY_ICON: Record<string, LucideIcon> = { legendary: Crown, epic: Medal, rare: Flame, common: ScrollText };
 const RARITY_TONE: Record<string, string> = {
-  legendary: 'border-amber-500/30 bg-amber-500/12 text-amber-300',
-  epic: 'border-purple-500/30 bg-purple-500/12 text-purple-300',
-  rare: 'border-sky-500/30 bg-sky-500/12 text-sky-300',
+  legendary: 'border-amber-500/30 bg-amber-500/12 text-amber-600 dark:text-amber-300',
+  epic: 'border-purple-500/30 bg-purple-500/12 text-purple-600 dark:text-purple-300',
+  rare: 'border-sky-500/30 bg-sky-500/12 text-sky-600 dark:text-sky-300',
   common: 'border-[var(--border-card)] bg-[var(--surface-hover)] text-[var(--text-secondary)]',
 };
 

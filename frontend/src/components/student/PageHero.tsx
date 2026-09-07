@@ -20,10 +20,10 @@ export default function PageHero({
 }) {
   const TONE: Record<string, { border: string; badge: string; glow: string }> = {
     accent: { border: 'border-[var(--accent-border)]', badge: 'border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]', glow: 'bg-primary/10' },
-    amber: { border: 'border-amber-500/25', badge: 'border-amber-500/30 bg-amber-500/12 text-amber-300', glow: 'bg-amber-500/10' },
-    rose: { border: 'border-rose-500/25', badge: 'border-rose-500/30 bg-rose-500/12 text-rose-300', glow: 'bg-rose-500/10' },
-    indigo: { border: 'border-indigo-500/25', badge: 'border-indigo-500/30 bg-indigo-500/12 text-indigo-300', glow: 'bg-indigo-500/10' },
-    sky: { border: 'border-sky-500/25', badge: 'border-sky-500/30 bg-sky-500/12 text-sky-300', glow: 'bg-sky-500/10' },
+    amber: { border: 'border-amber-500/25', badge: 'border-amber-500/30 bg-amber-500/12 text-amber-600 dark:text-amber-300', glow: 'bg-amber-500/10' },
+    rose: { border: 'border-rose-500/25', badge: 'border-rose-500/30 bg-rose-500/12 text-rose-600 dark:text-rose-300', glow: 'bg-rose-500/10' },
+    indigo: { border: 'border-indigo-500/25', badge: 'border-indigo-500/30 bg-indigo-500/12 text-indigo-600 dark:text-indigo-300', glow: 'bg-indigo-500/10' },
+    sky: { border: 'border-sky-500/25', badge: 'border-sky-500/30 bg-sky-500/12 text-sky-600 dark:text-sky-300', glow: 'bg-sky-500/10' },
   };
   const t = TONE[tone] ?? TONE.accent;
 

@@ -38,6 +38,7 @@
   --text-primary: #f0f1f3;
   --text-secondary: #a3a7ae;
   --text-muted: #8d9094;
+  --text-subtitle: #8d9094;
   --text-faint: #5a5d63;
 
   --border-soft: rgba(255, 255, 255, 0.06);
@@ -47,6 +48,7 @@
   --border-highlight: rgba(255, 255, 255, 0.06);
 
   --surface-hover: rgba(255, 255, 255, 0.05);
+  --surface-hover-strong: rgba(255, 255, 255, 0.09);
   --surface-card-soft: #101319;
   --surface-card-medium: #161a22;
   --surface-card-strong: #161a22;
@@ -131,6 +133,7 @@
   --text-primary: #16181a;
   --text-secondary: #43474c;
   --text-muted: #5c6067;
+  --text-subtitle: #5c6067;
   --text-faint: #6f747b;
 
   --border-soft: rgba(18, 20, 24, 0.09);
@@ -138,6 +141,7 @@
   --border-strong: rgba(18, 20, 24, 0.26);
 
   --surface-hover: rgba(18, 20, 24, 0.055);
+  --surface-hover-strong: rgba(18, 20, 24, 0.09);
   --surface-card-soft: #ffffff;
   --surface-card-medium: #ffffff;
   --surface-card-strong: #ffffff;

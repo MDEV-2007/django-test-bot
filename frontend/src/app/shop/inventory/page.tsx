@@ -82,18 +82,18 @@ export default function InventoryPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Tangalar</p>
-                    <p className="font-mono text-lg font-bold tabular-nums text-yellow-400">{data.coins.toLocaleString('uz-UZ')}</p>
+                    <p className="font-mono text-lg font-bold tabular-nums text-[var(--tone-premium-text)]">{data.coins.toLocaleString('uz-UZ')}</p>
                   </div>
                 </CardContent>
               </Card>
               <Card className="gap-0 py-4">
                 <CardContent className="flex items-center gap-3 px-4">
-                  <div className="flex size-12 items-center justify-center rounded-2xl bg-sky-500/12 text-sky-300">
+                  <div className="flex size-12 items-center justify-center rounded-2xl bg-sky-500/12 text-sky-600 dark:text-sky-300">
                     <Snowflake className="size-5" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Streak muzlatish</p>
-                    <p className="font-mono text-lg font-bold tabular-nums text-sky-300">{data.freeze_count} ta</p>
+                    <p className="font-mono text-lg font-bold tabular-nums text-sky-600 dark:text-sky-300">{data.freeze_count} ta</p>
                   </div>
                 </CardContent>
               </Card>
@@ -173,7 +173,7 @@ export default function InventoryPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Snowflake className="size-4 text-sky-300" /> Streak muzlatish tarixi
+                    <Snowflake className="size-4 text-sky-600 dark:text-sky-300" /> Streak muzlatish tarixi
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

@@ -49,3 +49,9 @@ Thumbs.db
 
 # Local server logs written by scripts/demo.ps1
 logs/
+
+# Agent skills
+.agents/
+.claude/skills/
+skills-lock.json
+

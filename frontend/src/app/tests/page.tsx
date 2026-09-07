@@ -73,8 +73,8 @@ const ANSWER_MODES = [
 // Karta ustidagi kichik yorliq: variantli/yozma javob turi. `null` — savol yo'q (bo'sh
 // test), yorliq ko'rsatilmaydi.
 const ANSWER_MODE_BADGE: Record<string, { label: string; className: string }> = {
-  closed: { label: 'Yopiq test', className: 'border-sky-500/30 bg-sky-500/10 text-sky-300' },
-  open: { label: 'Ochiq test', className: 'border-violet-500/30 bg-violet-500/10 text-violet-300' },
+  closed: { label: 'Yopiq test', className: 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300' },
+  open: { label: 'Ochiq test', className: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300' },
   mixed: { label: 'Aralash test', className: 'border-[var(--border-strong)] bg-[var(--surface-hover)] text-[var(--text-secondary)]' },
 };
 

@@ -86,9 +86,9 @@ export default function DesignSystemPage() {
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-text)]">Yangi</span>
-              <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs font-semibold text-[var(--accent-text)]">Top 3</span>
-              <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-300">Premium</span>
-              <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1.5 text-xs font-semibold text-orange-400">Streak 🔥</span>
+              <span className="rounded-full border border-[var(--tone-premium)]/30 bg-[var(--tone-premium-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-premium-text)]">Top 3</span>
+              <span className="rounded-full border border-[var(--tone-ai)]/30 bg-[var(--tone-ai-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-ai-text)]">Premium</span>
+              <span className="rounded-full border border-[var(--tone-streak)]/30 bg-[var(--tone-streak-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--tone-streak-text)]">Streak 🔥</span>
             </div>
             <div className="space-y-4">
               <div className="space-y-2">

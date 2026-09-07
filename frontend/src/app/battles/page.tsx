@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Swords, Bot, Trophy, Shield, Loader2, RotateCcw, Radio } from 'lucide-react';
+import { Swords, Bot, Trophy, Shield, Loader2, RotateCcw, Radio, Share2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -273,6 +273,30 @@ export default function BattlesPage() {
     setMode('idle');
   }
 
+  function inviteFriend() {
+    soundFX.click();
+    const shareText = "Men bilan IlmIldizi 1v1 Battle Arenasida bilimingizni sinab ko'ring! Qani, kim ko'proq savolga to'g'ri javob topadi? ⚔️🔥";
+    const shareUrl = `https://t.me/ilmildiziuz_bot?start=arena_${user?.id || 'duel'}`;
+    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+
+    if (typeof window !== 'undefined' && (window as unknown as { Telegram?: { WebApp?: { openTelegramLink: (url: string) => void } } })?.Telegram?.WebApp?.openTelegramLink) {
+      (window as unknown as { Telegram: { WebApp: { openTelegramLink: (url: string) => void } } }).Telegram.WebApp.openTelegramLink(tgShareUrl);
+    } else {
+      window.open(tgShareUrl, '_blank');
+    }
+  }
+
+  function copyInviteLink(e: React.MouseEvent) {
+    e.stopPropagation();
+    soundFX.click();
+    const shareUrl = `https://t.me/ilmildiziuz_bot?start=arena_${user?.id || 'duel'}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast.success("Do'stni jangga chaqirish havolasi nusxalandi!");
+    }).catch(() => {
+      toast.info(`Havola: ${shareUrl}`);
+    });
+  }
+
   const currentQ = questions[roundIdx];
   const isWin = resultMsg.toLowerCase().includes('win') || resultMsg.toLowerCase().includes("g'alaba") || myScore > oppScore;
 
@@ -347,7 +371,7 @@ export default function BattlesPage() {
               </div>
             )}
 
-            <div className="grid gap-4 pt-2 sm:grid-cols-2">
+            <div className="grid gap-4 pt-2 md:grid-cols-3">
               <Card
                 onClick={startAiBattle}
                 className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
@@ -359,7 +383,7 @@ export default function BattlesPage() {
                   </div>
                   <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">AI bilan mashg&apos;ulot jangi</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, yangi bilimlarni mustahkamlang.
+                    AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, bilimlarni mustahkamlang.
                   </p>
                   <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) →</span>
                 </CardContent>
@@ -379,6 +403,32 @@ export default function BattlesPage() {
                     Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
                   </p>
                   <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish →</span>
+                </CardContent>
+              </Card>
+
+              <Card
+                onClick={inviteFriend}
+                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/30 transition-colors hover:border-amber-500"
+              >
+                <CardMotif shape="arena" className="text-amber-400" />
+                <CardContent className="relative pt-6">
+                  <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 transition-transform group-hover:scale-110">
+                    <Share2 className="size-6" />
+                  </div>
+                  <h3 className="text-base font-bold transition-colors group-hover:text-amber-400">Do&apos;stni jangga chorlash</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.
+                  </p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-400">Telegramda ulashish →</span>
+                    <button
+                      onClick={copyInviteLink}
+                      title="Nusxa olish"
+                      className="rounded-lg p-1 text-muted-foreground transition hover:bg-amber-500/10 hover:text-amber-400"
+                    >
+                      <Copy className="size-4" />
+                    </button>
+                  </div>
                 </CardContent>
               </Card>
             </div>

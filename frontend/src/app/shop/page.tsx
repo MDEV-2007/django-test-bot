@@ -40,9 +40,9 @@ const RARITY_MOTIF: Record<string, string> = {
 
 const RARITY_STYLE: Record<string, string> = {
   common: 'border-transparent bg-[var(--surface-hover)] text-[var(--text-muted)]',
-  rare: 'border-sky-500/30 bg-sky-500/12 text-sky-300',
-  epic: 'border-purple-500/30 bg-purple-500/12 text-purple-300',
-  legendary: 'border-amber-500/30 bg-amber-500/12 text-amber-300',
+  rare: 'border-sky-500/30 bg-sky-500/12 text-sky-600 dark:text-sky-300',
+  epic: 'border-purple-500/30 bg-purple-500/12 text-purple-600 dark:text-purple-300',
+  legendary: 'border-amber-500/30 bg-amber-500/12 text-amber-600 dark:text-amber-300',
 };
 
 function categoryIcon(cat: string): LucideIcon {

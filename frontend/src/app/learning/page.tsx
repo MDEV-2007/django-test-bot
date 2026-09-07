@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import LessonAudioPlayer from '@/components/learning/LessonAudioPlayer';
 import { cn } from '@/lib/utils';
 
 type TopicRef = { id: number; title: string; lessons: { id: number; title: string }[] };
@@ -211,18 +212,12 @@ function LearningPageInner() {
                       )}
 
                       {lesson.audios.map((a) => (
-                        <div key={a.id} className="space-y-2 rounded-xl border bg-[var(--surface-input)] p-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-[var(--accent-text)]">
-                              <Volume2 className="size-5" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold">{a.title}</p>
-                              <p className="text-xs text-muted-foreground">{a.duration_display}</p>
-                            </div>
-                          </div>
-                          <audio src={a.audio_url} controls className="h-8 w-full" />
-                        </div>
+                        <LessonAudioPlayer
+                          key={a.id}
+                          audioUrl={a.audio_url}
+                          title={a.title}
+                          durationDisplay={a.duration_display}
+                        />
                       ))}
                       {lesson.locked_audios_count > 0 && (
                         <p className="flex items-center gap-1.5 text-xs text-rose-400">

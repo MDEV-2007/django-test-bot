@@ -399,7 +399,7 @@ export default function DashboardPage() {
         {/* Muzlatish eslatmasi */}
         {data.freeze_count > 0 && (
           <div className="flex items-center gap-2 rounded-xl border border-sky-500/20 bg-sky-500/[0.06] px-4 py-2.5 text-xs text-[var(--text-secondary)]">
-            <Snowflake className="size-4 shrink-0 text-sky-300" />
+            <Snowflake className="size-4 shrink-0 text-sky-600 dark:text-sky-300" />
             <span><strong className="text-foreground">{data.freeze_count} ta</strong> streak muzlatish saqlanmoqda — bir kun o&apos;tkazib yuborsangiz avtomatik ishlatiladi.</span>
           </div>
         )}

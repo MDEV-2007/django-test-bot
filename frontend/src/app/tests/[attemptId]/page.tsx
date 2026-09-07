@@ -347,6 +347,16 @@ export default function TestScreenPage() {
             {q.type === 'open_written' && (
               <OpenWrittenQuestion data={data} onSave={(payload) => submit(payload)} />
             )}
+
+            {/* Desktop klaviatura eslatmasi */}
+            <div className="hidden sm:flex items-center justify-between border-t border-[var(--border-card)] pt-3 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">A-D</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">1-4</kbd> — variantni tanlash
+              </span>
+              <span className="flex items-center gap-1.5">
+                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">→</kbd> — keyingi savol
+              </span>
+            </div>
           </CardContent>
         </Card>
 
