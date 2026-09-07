@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Users, Copy, Check, Send, TrendingDown, ChevronRight, UserPlus } from 'lucide-react';
+import { Users, Copy, Check, Send, TrendingDown, ChevronRight, UserPlus, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -67,6 +67,36 @@ export default function TeacherClassPage() {
     setTimeout(() => setCopied(false), 1800);
   }
 
+  function exportStudents() {
+    if (!data || data.students.length === 0) {
+      toast.error("Eksport qilish uchun o'quvchilar mavjud emas");
+      return;
+    }
+    const headers = ["#", "F.I.SH", "Username", "Daraja", "XP", "Testlar soni", "O'rtacha ball (%)", "Oxirgi faollik", "Qo'shilgan sana"];
+    const rows = data.students.map((st, idx) => [
+      idx + 1,
+      `"${(st.name || '').replace(/"/g, '""')}"`,
+      `"${(st.username || '').replace(/"/g, '""')}"`,
+      st.level,
+      st.xp,
+      st.tests,
+      st.avg_score !== null ? `${st.avg_score.toFixed(0)}%` : '—',
+      st.last_active ? `"${new Date(st.last_active).toLocaleString('uz-UZ')}"` : '—',
+      `"${new Date(st.joined_at).toLocaleDateString('uz-UZ')}"`,
+    ]);
+    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `sinf_oquvchilar_royxati.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("O'quvchilar ro'yxati (.csv) yuklab olindi");
+  }
+
   if (error) {
     return (
       <TeacherShell>
@@ -85,7 +115,17 @@ export default function TeacherClassPage() {
   return (
     <TeacherShell>
       <div className="space-y-6">
-        <PageHeader title="Mening sinfim" description={subtitle} />
+        <PageHeader
+          title="Mening sinfim"
+          description={subtitle}
+          actions={
+            data.students.length > 0 ? (
+              <Button variant="outline" size="sm" onClick={exportStudents}>
+                <Download className="size-4" /> Excel (.csv) yuklab olish
+              </Button>
+            ) : undefined
+          }
+        />
 
         {/* Taklif havolasi — sinfni yig'ishning yagona yo'li, shuning uchun eng tepada. */}
         <Card className="border-[var(--accent-border)] bg-primary/[0.05]">

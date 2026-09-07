@@ -9,6 +9,7 @@ Bu faylda o'qituvchi-orqali-sinf endpointlari ham bor — pastdagi "SINF" bo'lim
 """
 import json
 
+from django.db import transaction
 from django.db.models import Avg, Count, Max, Q
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -351,6 +352,55 @@ def question_add_api(request, pk):
     test.question_order = order
     test.save(update_fields=['question_order'])
     return Response({'id': question.id})
+
+
+@api_view(['POST'])
+@permission_classes([IsTeacher])
+def question_bulk_api(request, pk):
+    """Matndan yoki tashqi manbadan bir nechta savollarni birdaniga testga qo'shish."""
+    test = _own_test(request, pk)
+    questions_data = request.data.get('questions') or []
+    if not isinstance(questions_data, list) or not questions_data:
+        return Response({'error': "Kamida bitta savol ma'lumoti kiritilishi kerak."}, status=400)
+
+    created_questions = []
+    order = list(test.question_order or [])
+
+    with transaction.atomic():
+        for q_item in questions_data:
+            body = (q_item.get('body') or '').strip()
+            if not body:
+                continue
+
+            q = Question.objects.create(
+                body=body,
+                subject=test.subject,
+                category=test.category,
+                question_type=q_item.get('question_type') or 'single_choice',
+                difficulty=q_item.get('difficulty') or 'medium',
+                points=int(q_item.get('points') or 1),
+                explanation=(q_item.get('explanation') or '').strip(),
+            )
+
+            options = q_item.get('options') or []
+            for idx, opt in enumerate(options):
+                opt_text = (opt.get('text') or '').strip()
+                if not opt_text:
+                    continue
+                AnswerOption.objects.create(
+                    question=q,
+                    text=opt_text,
+                    is_correct=bool(opt.get('is_correct', False)),
+                )
+
+            test.questions.add(q)
+            order.append(q.id)
+            created_questions.append(q.id)
+
+        test.question_order = order
+        test.save(update_fields=['question_order'])
+
+    return Response({'ok': True, 'count': len(created_questions), 'ids': created_questions})
 
 
 @api_view(['GET', 'POST', 'PUT'])

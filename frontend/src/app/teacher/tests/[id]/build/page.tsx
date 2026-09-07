@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Settings2, Eye, BarChart3, Send, Gamepad2, Plus, Pencil, Trash2, HelpCircle,
+  Share2, Printer, Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -13,6 +14,8 @@ import TeacherShell from '@/components/teacher/TeacherShell';
 import PageHeader from '@/components/panel/PageHeader';
 import QuestionForm, { type BankOption, type QuestionData, type SectionOption } from '@/components/teacher/QuestionForm';
 import SectionManager, { type TeacherSection } from '@/components/teacher/SectionManager';
+import BulkImportModal from '@/components/teacher/BulkImportModal';
+import ShareTestModal from '@/components/teacher/ShareTestModal';
 import BrandLoader from '@/components/BrandLoader';
 import Reveal from '@/components/motion/Reveal';
 import { Card, CardContent } from '@/components/ui/card';
@@ -47,6 +50,8 @@ export default function TestBuildPage() {
   const [editingFull, setEditingFull] = useState<QuestionData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sectionData, setSectionData] = useState<SectionData | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   const load = useCallback(() => {
     apiFetch<BuildData>(`/api/teacher/tests/${id}/build/`).then(setData)
@@ -126,6 +131,12 @@ export default function TestBuildPage() {
               <Button asChild variant="outline" size="sm">
                 <Link href={`/teacher/tests/${id}/results`}><BarChart3 className="size-4" /> Natijalar</Link>
               </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)}>
+                <Share2 className="size-4" /> Ulashish
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/teacher/tests/${id}/print`}><Printer className="size-4" /> Chop etish (PDF)</Link>
+              </Button>
               <Button variant="outline" size="sm" onClick={makeGame}>
                 <Gamepad2 className="size-4" /> O&apos;yin yasash
               </Button>
@@ -192,13 +203,22 @@ export default function TestBuildPage() {
         </div>
 
         {!showForm && (
-          <Button
-            variant="outline"
-            className="h-14 w-full border-dashed"
-            onClick={() => { setShowForm(true); setEditingId(null); setEditingFull(null); }}
-          >
-            <Plus className="size-4" /> Savol qo&apos;shish
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              variant="outline"
+              className="h-14 flex-1 border-dashed"
+              onClick={() => { setShowForm(true); setEditingId(null); setEditingFull(null); }}
+            >
+              <Plus className="size-4" /> Savol qo&apos;shish
+            </Button>
+            <Button
+              variant="outline"
+              className="h-14 flex-1 border-dashed border-[var(--accent-border)] bg-[var(--accent)]/5 hover:bg-[var(--accent)]/10 text-[var(--accent-text)]"
+              onClick={() => setShowBulkModal(true)}
+            >
+              <Sparkles className="size-4" /> Matndan tezkor import
+            </Button>
+          </div>
         )}
 
         {showForm && (
@@ -212,6 +232,23 @@ export default function TestBuildPage() {
             onSaved={() => { setShowForm(false); setEditingFull(null); setEditingId(null); load(); }}
           />
         )}
+
+        <ShareTestModal
+          open={showShareModal}
+          onOpenChange={setShowShareModal}
+          testId={Number(id)}
+          testTitle={data.test.title}
+          subject={data.test.subject}
+          durationMinutes={data.test.duration_minutes}
+          questionCount={data.questions.length}
+        />
+
+        <BulkImportModal
+          open={showBulkModal}
+          onOpenChange={setShowBulkModal}
+          testId={Number(id)}
+          onImportSuccess={load}
+        />
       </div>
     </TeacherShell>
   );

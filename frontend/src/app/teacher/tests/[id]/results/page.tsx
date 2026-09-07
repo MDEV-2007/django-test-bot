@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ClipboardList, PenLine } from 'lucide-react';
+import { ClipboardList, PenLine, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -39,6 +39,31 @@ export default function TestResultsPage() {
       .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }, [access, id]);
 
+  function exportResults() {
+    if (!data || data.attempts.length === 0) {
+      toast.error("Eksport qilish uchun urinishlar mavjud emas");
+      return;
+    }
+    const headers = ["#", "O'quvchi", "Ball (%)", "Topshirilgan vaqt"];
+    const rows = data.attempts.map((a, idx) => [
+      idx + 1,
+      `"${(a.student || '').replace(/"/g, '""')}"`,
+      a.score !== null ? `${a.score.toFixed(0)}%` : '—',
+      `"${new Date(a.started_at).toLocaleString('uz-UZ')}"`,
+    ]);
+    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `test_${id}_natijalar.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Excel (.csv) fayli yuklab olindi");
+  }
+
   if (!data) return <TeacherShell><div className="py-10"><BrandLoader /></div></TeacherShell>;
 
   return (
@@ -48,6 +73,13 @@ export default function TestResultsPage() {
           title="Natijalar"
           description={`${data.attempts.length} ta urinish · ${data.stats.length} ta savol`}
           backHref={`/teacher/tests/${id}/build`}
+          actions={
+            data.attempts.length > 0 ? (
+              <Button variant="outline" size="sm" onClick={exportResults}>
+                <Download className="size-4" /> Excel (.csv) yuklab olish
+              </Button>
+            ) : undefined
+          }
         />
 
         <Card>
