@@ -35,23 +35,39 @@ A) Boburnoma
 B) Xamsa
 C) Zafarnoma
 D) Shajarayi turk
-Javob: B`;
+interface BulkImportModalProps {
+  testId: number;
+  isOpen?: boolean;
+  open?: boolean;
+  onClose?: () => void;
+  onOpenChange?: (open: boolean) => void;
+  onSuccess?: () => void;
+  onImportSuccess?: () => void;
+}
 
 export default function BulkImportModal({
   testId,
   isOpen,
+  open,
   onClose,
+  onOpenChange,
   onSuccess,
-}: {
-  testId: number;
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
+  onImportSuccess,
+}: BulkImportModalProps) {
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
 
-  if (!isOpen) return null;
+  const isVisible = Boolean(open ?? isOpen);
+  const handleClose = () => {
+    if (onOpenChange) onOpenChange(false);
+    if (onClose) onClose();
+  };
+  const handleSuccess = () => {
+    if (onImportSuccess) onImportSuccess();
+    if (onSuccess) onSuccess();
+  };
+
+  if (!isVisible) return null;
 
   function parseQuestions(raw: string): ParsedQuestion[] {
     if (!raw.trim()) return [];
@@ -148,8 +164,8 @@ export default function BulkImportModal({
       if (res.ok) {
         toast.success(`${res.count} ta savol muvaffaqiyatli import qilindi!`);
         setText('');
-        onSuccess();
-        onClose();
+        handleSuccess();
+        handleClose();
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Importda xatolik yuz berdi.");
@@ -172,7 +188,7 @@ export default function BulkImportModal({
               <p className="text-xs text-muted-foreground">Word yoki Telegramdagi tayyor testlarni bir zumda bazaga qo&apos;shing</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
+          <Button variant="ghost" size="icon" onClick={handleClose} className="rounded-full">
             <X className="size-5" />
           </Button>
         </div>
@@ -263,7 +279,7 @@ export default function BulkImportModal({
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 border-t border-[var(--border-card)] bg-[var(--surface-input)] px-6 py-3.5">
-          <Button variant="outline" onClick={onClose} disabled={saving}>
+          <Button variant="outline" onClick={handleClose} disabled={saving}>
             Bekor qilish
           </Button>
           <Button onClick={handleImport} disabled={parsed.length === 0 || saving} className="gap-2">

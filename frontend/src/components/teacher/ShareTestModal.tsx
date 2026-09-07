@@ -7,18 +7,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
+interface ShareTestModalProps {
+  test?: { id: number; title: string; subject?: string | null; duration_minutes?: number };
+  testId?: number;
+  testTitle?: string;
+  subject?: string | null;
+  durationMinutes?: number;
+  questionCount?: number;
+  isOpen?: boolean;
+  open?: boolean;
+  onClose?: () => void;
+  onOpenChange?: (open: boolean) => void;
+}
+
 export default function ShareTestModal({
   test,
+  testId,
+  testTitle,
+  subject,
+  durationMinutes,
   isOpen,
+  open,
   onClose,
-}: {
-  test: { id: number; title: string; subject?: string | null; duration_minutes?: number };
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+  onOpenChange,
+}: ShareTestModalProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedPost, setCopiedPost] = useState(false);
   const [origin, setOrigin] = useState('');
+
+  const isVisible = Boolean(open ?? isOpen);
+  const handleClose = () => {
+    if (onOpenChange) onOpenChange(false);
+    if (onClose) onClose();
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -26,12 +47,17 @@ export default function ShareTestModal({
     }
   }, []);
 
-  if (!isOpen) return null;
+  if (!isVisible) return null;
 
-  const testUrl = `${origin}/tests/${test.id}`;
-  const shareText = `📚 Test: ${test.title}\n` +
-    (test.subject ? `📌 Fan: ${test.subject}\n` : '') +
-    (test.duration_minutes ? `⏳ Davomiyligi: ${test.duration_minutes} daqiqa\n` : '') +
+  const actualId = test?.id ?? testId ?? 0;
+  const actualTitle = test?.title ?? testTitle ?? 'Sinov Testi';
+  const actualSubject = test?.subject ?? subject;
+  const actualDuration = test?.duration_minutes ?? durationMinutes;
+
+  const testUrl = `${origin}/tests/${actualId}`;
+  const shareText = `📚 Test: ${actualTitle}\n` +
+    (actualSubject ? `📌 Fan: ${actualSubject}\n` : '') +
+    (actualDuration ? `⏳ Davomiyligi: ${actualDuration} daqiqa\n` : '') +
     `\n👇 Testni yechish uchun bosing:\n${testUrl}`;
 
   async function copyLink() {
@@ -49,7 +75,7 @@ export default function ShareTestModal({
   }
 
   function shareToTelegram() {
-    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(testUrl)}&text=${encodeURIComponent(`📚 Test: ${test.title}\nO'z bilimingizni sinab ko'ring!`)}`;
+    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(testUrl)}&text=${encodeURIComponent(`📚 Test: ${actualTitle}\nO'z bilimingizni sinab ko'ring!`)}`;
     window.open(tgUrl, '_blank');
   }
 
@@ -67,7 +93,7 @@ export default function ShareTestModal({
               <p className="text-xs text-muted-foreground">O&apos;quvchilaringiz yoki Telegram guruhga yuboring</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
+          <Button variant="ghost" size="icon" onClick={handleClose} className="rounded-full">
             <X className="size-5" />
           </Button>
         </div>
@@ -105,7 +131,7 @@ export default function ShareTestModal({
 
         {/* Footer */}
         <div className="flex justify-end border-t border-[var(--border-card)] bg-[var(--surface-input)] px-6 py-3">
-          <Button variant="outline" size="sm" onClick={onClose}>
+          <Button variant="outline" size="sm" onClick={handleClose}>
             Yopish
           </Button>
         </div>
