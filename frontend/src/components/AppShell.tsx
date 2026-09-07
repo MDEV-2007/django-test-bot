@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Flame, Coins, Search, Snowflake } from 'lucide-react';
@@ -10,6 +10,7 @@ import { apiFetch, fetchMe } from '@/lib/api-client';
 import { decodeJwtPayload } from '@/lib/jwt';
 import { soundFX } from '@/lib/soundFX';
 import CosmeticTheme from '@/components/student/CosmeticTheme';
+import StreakModal from '@/components/student/StreakModal';
 import Sidebar from './Sidebar';
 import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
@@ -17,6 +18,7 @@ import CommandPalette from './CommandPalette';
 export default function AppShell() {
   const router = useRouter();
   const { user, access } = useAuthStore();
+  const [streakModalOpen, setStreakModalOpen] = useState(false);
   const impersonating = access ? decodeJwtPayload(access)?.impersonator_id : null;
 
   useEffect(() => {
@@ -52,10 +54,15 @@ export default function AppShell() {
 
         {user && (
           <div className="ml-auto flex items-center gap-2">
-            <div title="Ketma-ketlik (Streak)" className="flex items-center gap-1.5 rounded-lg border border-[var(--tone-streak)]/25 bg-[var(--tone-streak-soft)] px-2.5 py-1 font-semibold text-[var(--tone-streak-text)]">
-              <Flame className="h-3.5 w-3.5" />
+            <button
+              type="button"
+              onClick={() => { soundFX.click(); setStreakModalOpen(true); }}
+              title="Ketma-ketlik (Streak) tafsilotlari"
+              className="tactile-btn flex items-center gap-1.5 rounded-lg border border-[var(--tone-streak)]/25 bg-[var(--tone-streak-soft)] px-2.5 py-1 font-semibold text-[var(--tone-streak-text)] transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <Flame className="h-3.5 w-3.5 animate-flame-pulse" />
               <span><StatNumber value={user.streak} /> kun</span>
-            </div>
+            </button>
             {/* Tanga — oltin (`premium` ohangi). Streak esa yonida to'q sariq: ilgari
                 ikkalasi ham bir xil sariq edi va bir-biridan ajralmasdi. */}
             <Link href="/shop" title="Tanga balansi" className="flex items-center gap-1.5 rounded-lg border border-[var(--tone-premium)]/25 bg-[var(--tone-premium-soft)] px-2.5 py-1 font-semibold text-[var(--tone-premium-text)]">
@@ -81,6 +88,7 @@ export default function AppShell() {
       </header>
       <MobileTabBar />
       {user && <CommandPalette />}
+      {user && <StreakModal open={streakModalOpen} onOpenChange={setStreakModalOpen} user={user} />}
     </>
   );
 }
