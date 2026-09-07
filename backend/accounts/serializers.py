@@ -24,7 +24,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email', 'role',
             'is_superadmin', 'is_teacher', 'avatar_url', 'xp', 'level', 'coins',
-            'streak', 'is_premium', 'has_seen_onboarding', 'elo_rating', 'next_level_xp',
+            'streak', 'last_active_date', 'is_premium', 'has_seen_onboarding', 'elo_rating', 'next_level_xp',
             'freeze_count', 'cosmetics', 'base_avatar_url',
         ]
 

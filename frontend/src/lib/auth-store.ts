@@ -14,6 +14,7 @@ export type Profile = {
   level: number;
   coins: number;
   streak: number;
+  last_active_date?: string | null;
   is_premium: boolean;
   has_seen_onboarding: boolean;
   elo_rating: number;
