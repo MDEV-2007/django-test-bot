@@ -83,11 +83,11 @@ class Command(BaseCommand):
 
         import json
         menu = api_call('setChatMenuButton', menu_button=json.dumps({
-            'type': 'web_app', 'text': 'Ilm Ildizi', 'web_app': {'url': base},
+            'type': 'commands',
         }))
         if not menu.get('ok'):
             raise CommandError(f"setChatMenuButton muvaffaqiyatsiz: {menu.get('description')}")
-        self.stdout.write(self.style.SUCCESS(f"Menyu tugmasi: {base}"))
+        self.stdout.write(self.style.SUCCESS("Umumiy menyu tugmasi: buyruqlar ro'yxati o'rnatildi"))
 
         api_call('setMyCommands', commands=json.dumps([
             {'command': 'start', 'description': 'Ilovani ochish'},

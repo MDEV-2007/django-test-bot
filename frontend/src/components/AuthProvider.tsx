@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuthStore } from '@/lib/auth-store';
-import { fetchMe, refreshAccessToken } from '@/lib/api-client';
+import { useAuthStore, TG_MANUAL_LOGOUT_KEY } from '@/lib/auth-store';
+import { fetchMe, loginWithTelegram, refreshAccessToken } from '@/lib/api-client';
+import { isTelegramEnv, loadTelegramSdk } from '@/lib/telegram';
 
 /** Runs once on app load: pulls the refresh token back out of localStorage, exchanges it
  * for a fresh access token, then fetches /api/auth/me/ to repopulate the user in the store.
  * Nothing is persisted except the refresh token — see auth-store.ts for why.
  *
- * Bu jarayon sahifani BLOKLAMAYDI. Ilgari u tugaguncha butun ilova o'rniga to'liq ekranli
- * yuklovchi chizilardi — ya'ni har bir "sovuq" ochilishda (Telegram Mini App'da har safar)
- * foydalanuvchi ikkita tarmoq so'rovi tugashini bo'sh ekranga qarab kutardi. Endi qobiq va
- * skeletonlar darhol chiziladi, seans esa fonda tiklanadi; sahifalar `authReady` orqali
- * "hali aniqlanmoqda" va "kirilmagan" holatlarini ajratadi. */
+ * Telegram Mini App ichida ochilganda: agar sessiya hali bo'lmasa, initData orqali
+ * darhol avtomatik kiriladi va kanal obunasi holati tekshirilib, obuna bo'lmagan
+ * o'quvchi darhol bloklanadi.
+ */
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const { hydrate, setAccess, logout, setAuthReady } = useAuthStore();
 
@@ -21,6 +21,19 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     (async () => {
       const refresh = useAuthStore.getState().refresh;
       if (!refresh) {
+        if (isTelegramEnv()) {
+          try {
+            const wa = await loadTelegramSdk();
+            const manualOut = typeof window !== 'undefined' && sessionStorage.getItem(TG_MANUAL_LOGOUT_KEY) === '1';
+            if (wa?.initData && !manualOut) {
+              await loginWithTelegram(wa.initData, wa.initDataUnsafe?.start_param);
+              setAuthReady();
+              return;
+            }
+          } catch {
+            // avtomatik kirishda tarmoq xatosi bo'lsa mehmon sifatida davom etadi
+          }
+        }
         setAuthReady();
         return;
       }

@@ -9,6 +9,7 @@ created and the card details are sent -> the user replies with a screenshot, whi
 attached to that Payment. Approval happens only in the web admin panel, so there is one
 consistent review path.
 """
+import json
 import logging
 
 from django.conf import settings
@@ -18,7 +19,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from . import subscription
-from .client import answer_callback, download_file, send_message
+from .client import answer_callback, api_call, download_file, send_message
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,13 @@ def send_subscribe_prompt(chat_id):
     """Kanalga obuna so'raladigan yagona ekran. Bu yerda "keyinroq" tugmasi ATAYLAB yo'q:
     yumshoq gate'ni deyarli hech kim bosmaydi, natijada kanal ham o'smaydi, foydalanuvchi
     ham ikki marta bezovta qilinadi."""
+    # Obuna bo'lmagan foydalanuvchi uchun pastdagi menyu tugmasi (web_app) yopiladi,
+    # aks holda o'quvchi kanalga kirmasdan pastdagi tugmani bosib ilovaga o'tib ketaveradi.
+    try:
+        api_call('setChatMenuButton', chat_id=chat_id, menu_button=json.dumps({'type': 'commands'}))
+    except Exception:
+        pass
+
     url = subscription.channel_url()
     rows = []
     if url:
@@ -111,11 +119,15 @@ def handle_start(chat_id, tg_user, referral_code=None):
     if gate_blocks(chat_id, tg_user):
         return
 
-    # Telegram silently rejects "web_app" buttons whose URL isn't HTTPS — the whole
-    # sendMessage call fails and nothing reaches the user. Fall back to a plain "url"
-    # button so /start always works, even before a real HTTPS domain is configured.
+    # Faqat kanalga obuna bo'lgan foydalanuvchiga pastdagi WebApp menyu tugmasi ko'rsatiladi
     url = _webapp_url()
     if url.startswith('https://'):
+        try:
+            api_call('setChatMenuButton', chat_id=chat_id, menu_button=json.dumps({
+                'type': 'web_app', 'text': 'Ilm Ildizi', 'web_app': {'url': url}
+            }))
+        except Exception:
+            pass
         open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'web_app': {'url': url}}
     else:
         open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'url': url}
