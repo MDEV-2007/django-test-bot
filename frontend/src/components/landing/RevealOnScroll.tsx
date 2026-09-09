@@ -25,7 +25,7 @@ export default function RevealOnScroll({
       className={className}
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
+      viewport={{ once: true, amount: 'some', margin: '0px 0px -40px 0px' }}
       transition={{ duration: dur.slow, ease: easeOut, delay: index * 0.06 }}
     >
       {children}

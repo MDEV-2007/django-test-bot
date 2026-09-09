@@ -14,7 +14,7 @@ import SubjectsShowcase from '@/components/landing/SubjectsShowcase';
 import BentoGrid from '@/components/landing/BentoGrid';
 import SocialProofAndStats from '@/components/landing/SocialProofAndStats';
 import LeadMagnetBanner from '@/components/landing/LeadMagnetBanner';
-import PricingSection, { PlanCard } from '@/components/landing/PricingSection';
+import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LiveActivityToast from '@/components/landing/LiveActivityToast';
@@ -76,52 +76,7 @@ const RIBBONS: Record<number, string> = {
   365: 'ENG PAST OYLIK NARX',
 };
 
-const FREE_PLAN: PlanCard = {
-  name: 'Bepul',
-  price: '0',
-  unit: "so'm",
-  text: "Kundalik mashq testlari, arena, mini o'yinlar, reyting va asosiy tahlil.",
-  features: ['Mashq testlari', '1v1 Arena', 'Kunlik missiyalar', 'Reyting va yutuqlar', 'AI Mentor (kuniga 5 ta savol)'],
-  cta: 'Bepul boshlash',
-  href: '/register',
-  highlight: false,
-};
 
-const FALLBACK_PLANS: PlanCard[] = [
-  FREE_PLAN,
-  {
-    name: 'PRO — Oylik',
-    price: '25 000', unit: "so'm / 30 kun", perDay: "≈ 833 so'm/kun",
-    text: "Barcha mock testlar va kengaytirilgan AI Mentor. Istalgan vaqtda to'xtatasiz.",
-    features: ['Barcha mock testlar — cheklovsiz kirish', 'AI Mentor: kuniga 50 savol', '30 kun amal qiladi'],
-    cta: 'Obunani boshlash', href: '/premium', highlight: false,
-  },
-  {
-    name: 'PRO — 6 oylik',
-    price: '90 000', unit: "so'm / 180 kun", perDay: "≈ 500 so'm/kun",
-    ribbon: RIBBONS[180],
-    text: "Milliy sertifikat imtihoniga to'liq tayyorgarlik davri uchun.",
-    features: ['Barcha mock testlar — cheklovsiz kirish', 'AI Mentor: kuniga 50 savol',
-               "15 000 so'm/oy — oylikka nisbatan 40% arzon"],
-    cta: 'Obunani boshlash', href: '/premium', highlight: true,
-  },
-  {
-    name: 'PRO — 12 oylik',
-    price: '150 000', unit: "so'm / 365 kun", perDay: "≈ 411 so'm/kun",
-    ribbon: RIBBONS[365],
-    text: "Eng past oylik narx. Butun o'quv yili davomida amal qiladi.",
-    features: ['Barcha mock testlar — cheklovsiz kirish', 'AI Mentor: kuniga 50 savol',
-               "12 500 so'm/oy — eng past oylik narx"],
-    cta: 'Obunani boshlash', href: '/premium', highlight: false,
-  },
-  {
-    name: 'Mock test — bir martalik',
-    price: '15 000', unit: "so'm (bir martalik)",
-    text: "Bitta to'lov, muddatsiz kirish. AI Mentor chegarasi obunasiz darajada qoladi.",
-    features: ['Barcha rasmiy mock testlar', 'Muddatsiz kirish', 'AI natija tahlili'],
-    cta: 'Mock testni ochish', href: '/premium', highlight: false,
-  },
-];
 
 type ApiPlan = {
   plan_type: string; name: string; description: string;
@@ -373,9 +328,7 @@ export default async function LandingPage() {
         </section>
 
         {/* ── NARXLAR BO'LIMI ──────────────────────────────────────────────── */}
-        <RevealOnScroll>
-          <PricingSection plans={plans} />
-        </RevealOnScroll>
+        <PricingSection plans={plans} />
 
         {/* ── SAVOLLAR (FAQ) ───────────────────────────────────────────────── */}
         <RevealOnScroll>
