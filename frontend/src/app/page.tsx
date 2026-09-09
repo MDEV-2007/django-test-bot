@@ -18,6 +18,7 @@ import PricingSection, { PlanCard } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LiveActivityToast from '@/components/landing/LiveActivityToast';
+import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
@@ -228,6 +229,7 @@ export default async function LandingPage() {
       <LandingNav />
       <LiveActivityToast />
       <MobileStickyCta />
+      <LandingAiChatWidget />
 
       <main className="flex-1">
         {/* ── HERO SECTION ─────────────────────────────────────────────────── */}
