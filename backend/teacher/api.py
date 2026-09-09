@@ -123,6 +123,8 @@ def test_info_api(request, pk):
             'description': test.description,
             'is_live_mock': test.is_live_mock,
             'scheduled_at': test.scheduled_at.strftime('%Y-%m-%dT%H:%M') if test.scheduled_at else '',
+            'notify_all': test.notify_all,
+            'notified_at': test.notified_at.isoformat() if test.notified_at else None,
         })
     data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
     if 'scheduled_at' in data and not data['scheduled_at']:

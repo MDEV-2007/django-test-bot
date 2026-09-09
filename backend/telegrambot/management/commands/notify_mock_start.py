@@ -5,17 +5,11 @@ Foydalanish:
     python manage.py notify_mock_start <test_id> --all
     python manage.py notify_mock_start <test_id> --dry-run
 """
-import json
-import logging
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.conf import settings
 
-from accounts.models import Profile
 from tests_app.models import TestSet
-from telegrambot.client import api_call
-
-logger = logging.getLogger(__name__)
+from telegrambot.mock_notifier import send_mock_announcement
 
 
 class Command(BaseCommand):
@@ -34,6 +28,11 @@ class Command(BaseCommand):
             help="Faqat eslatish so'raganlarga emas, platformadagi barcha Telegram foydalanuvchilariga ommaviy yuborish.",
         )
         parser.add_argument(
+            '--remind-only',
+            action='store_true',
+            help="Faqat eslatma so'ragan (ro'yxatdan o'tgan) foydalanuvchilarga yuborish.",
+        )
+        parser.add_argument(
             '--dry-run',
             action='store_true',
             help="Xabarlarni yubormasdan faqat qabul qiluvchilar soni va matnini tekshiradi.",
@@ -41,7 +40,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         test_id = options.get('test_id')
-        send_all = options.get('all', False)
+        send_all_opt = options.get('all', False)
+        remind_only_opt = options.get('remind_only', False)
         dry_run = options.get('dry_run', False)
 
         if test_id:
@@ -62,84 +62,25 @@ class Command(BaseCommand):
                 self.stderr.write(self.style.ERROR("Jonli mock test topilmadi."))
                 return
 
-        subject_name = test.subject.name if test.subject else "Tarix"
-        q_count = test.questions.count() or 45
-        duration = test.duration_minutes or 90
-
-        site_url = getattr(settings, 'NEXT_PUBLIC_SITE_URL', 'https://ilmildizi.uz')
-        test_link = f"{site_url}/tests/mock/{test.id}"
-
-        # Qabul qiluvchilarni aniqlash
-        if send_all:
-            recipients = list(
-                Profile.objects.filter(telegram_id__isnull=False)
-                .select_related('user')
-            )
-            mode_desc = "BARCHA o'quvchilarga"
-        else:
-            remind_user_ids = test.remind_users.values_list('id', flat=True)
-            recipients = list(
-                Profile.objects.filter(user_id__in=remind_user_ids, telegram_id__isnull=False)
-                .select_related('user')
-            )
-            mode_desc = "Eslatma so'ragan o'quvchilarga"
+        send_all = None
+        if send_all_opt:
+            send_all = True
+        elif remind_only_opt:
+            send_all = False
 
         self.stdout.write(f"Mock imtihon: '{test.title}' (#{test.id})")
-        self.stdout.write(f"Auditoriya: {mode_desc} (Jami: {len(recipients)} ta foydalanuvchi)")
 
-        message_text = (
-            f"🔔 <b>DIQQAT! {subject_name} fanidan Katta Mock Imtihon boshlandi!</b>\n\n"
-            f"📝 <b>Savollar soni:</b> {q_count} ta\n"
-            f"⏳ <b>Ajratilgan vaqt:</b> {duration} daqiqa\n"
-            f"🎯 <b>Format:</b> Milliy Sertifikat (A+, A, B+, B, C+)\n\n"
-            f"⚡️ Imtihon hozirgina boshlandi! Barcha ishtirokchilar bir vaqtda topshirmoqda. O'z bilimingizni sinab ko'ring va rasmiy darajangizni oling!\n\n"
-            f"👇 <b>Imtihonga kirish uchun quyidagi tugmani bosing:</b>"
-        )
-
-        reply_markup = {
-            'inline_keyboard': [
-                [
-                    {
-                        'text': "🚀 Imtihonni boshlash",
-                        'web_app': {'url': test_link},
-                    }
-                ],
-                [
-                    {
-                        'text': "🌐 Brauzerda ochish",
-                        'url': test_link,
-                    }
-                ]
-            ]
-        }
+        res = send_mock_announcement(test, send_all=send_all, dry_run=dry_run)
 
         if dry_run:
-            self.stdout.write(self.style.WARNING("DRY RUN: Xabarlar yuborilmadi. Xabar matni:"))
-            self.stdout.write(message_text)
+            self.stdout.write(self.style.WARNING("DRY RUN (Xabarlar yuborilmadi):"))
+            self.stdout.write(f"Auditoriya: {res.get('audience')} (Jami: {res.get('total')} ta foydalanuvchi)")
+            self.stdout.write("--- Xabar matni ---")
+            self.stdout.write(res.get('message_preview', ''))
             return
-
-        sent_count = 0
-        fail_count = 0
-
-        for profile in recipients:
-            try:
-                res = api_call(
-                    'sendMessage',
-                    chat_id=profile.telegram_id,
-                    text=message_text,
-                    parse_mode='HTML',
-                    reply_markup=json.dumps(reply_markup),
-                )
-                if res.get('ok'):
-                    sent_count += 1
-                else:
-                    fail_count += 1
-            except Exception as e:
-                logger.error(f"Telegram yuborishda xatolik ({profile.telegram_id}): {e}")
-                fail_count += 1
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Tugallandi: {sent_count} ta muvaffaqiyatli jo'natildi, {fail_count} ta yetib bormadi."
+                f"Tugallandi ({res.get('audience')}): {res.get('sent_count')} ta muvaffaqiyatli jo'natildi, {res.get('fail_count')} ta yetib bormadi."
             )
         )

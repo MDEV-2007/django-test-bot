@@ -317,6 +317,14 @@ class TestSet(models.Model):
         'auth.User', blank=True, related_name='mock_reminders',
         help_text="Imtihon boshlanganda Telegram orqali eslatish so'ragan foydalanuvchilar.",
     )
+    notify_all = models.BooleanField(
+        default=True,
+        help_text="Mock boshlanganda barcha bot foydalanuvchilariga yuborish (aks holda faqat eslatma so'raganlarga).",
+    )
+    notified_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Jonli mock boshlanish xabari jo'natilgan vaqt (bir marta yuboriladi).",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

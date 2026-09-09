@@ -38,7 +38,7 @@ class TestSetForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = TestSet
         fields = ['title', 'subject', 'description', 'category', 'duration_minutes',
-                  'created_by', 'is_premium', 'is_published', 'is_archived', 'is_live_mock', 'scheduled_at']
+                  'created_by', 'is_premium', 'is_published', 'is_archived', 'is_live_mock', 'scheduled_at', 'notify_all']
 
 
 class LessonForm(StyledFormMixin, forms.ModelForm):

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, Save, Trash2, Flame } from 'lucide-react';
+import { Loader2, Save, Trash2, Flame, Send, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -30,6 +30,7 @@ type TestSetEdit = {
   duration_minutes: number; created_by_id: number | null;
   is_premium: boolean; is_published: boolean; is_archived: boolean;
   is_live_mock?: boolean; scheduled_at?: string;
+  notify_all?: boolean; notified_at?: string | null;
   /* Urinishlar soni — o'chirish mumkinmi yoki yo'qligini shu belgilaydi (server
      urinishlari bor testni o'chirmaydi, o'quvchilar natijasi yo'qolmasligi uchun). */
   attempt_count: number;
@@ -51,6 +52,7 @@ export default function PanelTestSetEditPage() {
   const [ts, setTs] = useState<TestSetEdit | null>(null);
   const [saving, setSaving] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [broadcasting, setBroadcasting] = useState(false);
 
   useEffect(() => {
     if (!access) return;
@@ -70,6 +72,7 @@ export default function PanelTestSetEditPage() {
           is_premium: ts.is_premium, is_published: ts.is_published, is_archived: ts.is_archived,
           is_live_mock: Boolean(ts.is_live_mock),
           scheduled_at: ts.scheduled_at || null,
+          notify_all: ts.notify_all !== false,
         }),
       });
       toast.success('Test saqlandi');
@@ -77,6 +80,37 @@ export default function PanelTestSetEditPage() {
     } catch {
       toast.error('Saqlashda xatolik', { description: 'Maydonlarni tekshirib ko‘ring.' });
       setSaving(false);
+    }
+  }
+
+  async function broadcastNow() {
+    if (!ts) return;
+    const sendAll = ts.notify_all !== false;
+    const msg = sendAll
+      ? "Diqqat! Telegram xabarnomasi botdagi BARCHA o'quvchilarga yuboriladi. Hozir yuborasizmi?"
+      : "Telegram xabarnomasi faqat eslatma so'ragan (ro'yxatdan o'tgan) o'quvchilarga yuboriladi. Hozir yuborasizmi?";
+
+    if (!confirm(msg)) return;
+
+    setBroadcasting(true);
+    try {
+      const res = await apiFetch<{ ok: boolean; sent_count: number; fail_count: number; total: number; notified_at: string }>(
+        `/api/tests/${id}/broadcast/`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ send_all: sendAll }),
+        }
+      );
+      if (res.ok) {
+        toast.success(`Telegram xabarnomasi yuborildi! (${res.sent_count} ta o'quvchiga yetdi)`);
+        setTs({ ...ts, notified_at: res.notified_at });
+      } else {
+        toast.error("Xabar yuborishda xatolik yuz berdi");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Xabarnoma yuborishda xatolik");
+    } finally {
+      setBroadcasting(false);
     }
   }
 
@@ -91,10 +125,6 @@ export default function PanelTestSetEditPage() {
     }
   }
 
-  /* Urinishlari bor testni o'chirib bo'lmaydi — o'rniga arxivlanadi: test katalogdan
-     yo'qoladi va yangi urinishlar uchun yopiladi, lekin o'quvchilarning natijalari
-     joyida qoladi. Ilgari bu yo'l interfeysda umuman ko'rsatilmasdi: foydalanuvchi
-     faqat "o'chirib bo'lmaydi" degan xatoni ko'rar va nima qilishni bilmasdi. */
   async function archive() {
     if (!ts) return;
     try {
@@ -159,8 +189,10 @@ export default function PanelTestSetEditPage() {
                 >
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={NO_SUBJECT}>—</SelectItem>
-                    {ts.subject_options.map((o) => <SelectItem key={o.value} value={String(o.value)}>{o.label}</SelectItem>)}
+                    <SelectItem value={NO_SUBJECT}>Biriktirilmagan</SelectItem>
+                    {ts.subject_options.map((s) => (
+                      <SelectItem key={s.value} value={String(s.value)}>{s.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -169,41 +201,45 @@ export default function PanelTestSetEditPage() {
                 <Select value={ts.category} onValueChange={(v) => setTs({ ...ts, category: v })}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {ts.category_options.map((o) => <SelectItem key={o.value} value={String(o.value)}>{o.label}</SelectItem>)}
+                    {ts.category_options.map((c) => (
+                      <SelectItem key={c.value} value={String(c.value)}>{c.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="ts-dur">Davomiyligi (daq)</Label>
-                <Input id="ts-dur" type="number" value={ts.duration_minutes} onChange={(e) => setTs({ ...ts, duration_minutes: Number(e.target.value) })} />
+                <Label htmlFor="ts-dur">Davomiyligi (daq.)</Label>
+                <Input
+                  id="ts-dur" type="number" min={1} value={ts.duration_minutes}
+                  onChange={(e) => setTs({ ...ts, duration_minutes: Number(e.target.value) })}
+                />
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Katta Jonli Mock Imtihon */}
         <Card className="border-amber-500/30 bg-amber-500/[0.04]">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Flame className="size-4 text-amber-500" /> Katta Jonli Mock Imtihon
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardHeader>
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-0.5">
-                <Label htmlFor="is_live_mock" className="text-sm font-medium">Jonli Mock Imtihon holati</Label>
+                <CardTitle className="text-base flex items-center gap-1.5">
+                  <Flame className="size-4 text-amber-500" /> Katta Jonli Mock Imtihon
+                </CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Yoqilsa, belgilangan vaqtgacha o&apos;quvchilarga teskari sanoq taymeri ko&apos;rsatiladi.
+                  Belgilangan aniq vaqtda o&apos;tkaziladi, unga qadar sahifada taymer (Countdown) yuradi.
                 </p>
               </div>
               <Switch
-                id="is_live_mock"
                 checked={Boolean(ts.is_live_mock)}
                 onCheckedChange={(v) => setTs({ ...ts, is_live_mock: v })}
               />
             </div>
+          </CardHeader>
 
-            {ts.is_live_mock && (
-              <div className="space-y-2 pt-2 border-t border-amber-500/20">
+          {ts.is_live_mock && (
+            <CardContent className="space-y-4 pt-0 border-t border-amber-500/20">
+              <div className="space-y-1.5 pt-4">
                 <Label htmlFor="scheduled_at" className="text-xs font-semibold">
                   Boshlanish vaqti (Toshkent vaqti)
                 </Label>
@@ -217,8 +253,58 @@ export default function PanelTestSetEditPage() {
                   Masalan: <b>2026-09-10T21:30</b> (Ertaga soat 21:30)
                 </p>
               </div>
-            )}
-          </CardContent>
+
+              <div className="flex items-center justify-between gap-4 pt-2 border-t border-amber-500/20">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-semibold text-foreground">Barcha bot foydalanuvchilariga e&apos;lon qilish</div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {ts.notify_all !== false
+                      ? "Imtihon boshlanganda Telegramdagi barcha o'quvchilarga yuboriladi."
+                      : "Faqat sahifada eslatma so'ragan o'quvchilarga yuboriladi."}
+                  </p>
+                </div>
+                <Switch
+                  checked={ts.notify_all !== false}
+                  onCheckedChange={(v) => setTs({ ...ts, notify_all: v })}
+                />
+              </div>
+
+              {ts.notified_at ? (
+                <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-2.5 text-xs text-emerald-600 dark:text-emerald-400 flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <CheckCircle2 className="size-4" /> Telegram xabarnomasi yuborilgan
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={broadcasting}
+                    onClick={broadcastNow}
+                    className="h-7 text-xs"
+                  >
+                    {broadcasting ? 'Yuborilmoqda...' : 'Qayta yuborish'}
+                  </Button>
+                </div>
+              ) : (
+                <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="text-[11px] text-muted-foreground">
+                    ⏳ 21:30 da cron orqali avtomatik jo&apos;natiladi
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={broadcasting}
+                    onClick={broadcastNow}
+                    className="border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 h-8 text-xs font-semibold"
+                  >
+                    <Send className="size-3 mr-1.5" />
+                    {broadcasting ? 'Yuborilmoqda...' : "Hozir Telegramga yuborish"}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
 
         <Card>
@@ -239,10 +325,10 @@ export default function PanelTestSetEditPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" onClick={() => router.push(`/panel/tests/${id}`)}>Bekor qilish</Button>
           <Button onClick={submit} disabled={saving}>
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-            Saqlash
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Saqlash
           </Button>
         </div>
       </div>
@@ -250,30 +336,26 @@ export default function PanelTestSetEditPage() {
       <Dialog open={showDelete} onOpenChange={setShowDelete}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {ts.attempt_count > 0 ? "Testni o'chirib bo'lmaydi" : "Testni o'chirish"}
-            </DialogTitle>
+            <DialogTitle>Testni o&apos;chirish</DialogTitle>
             <DialogDescription>
               {ts.attempt_count > 0 ? (
                 <>
-                  &laquo;{ts.title}&raquo; testini <strong>{ts.attempt_count} ta</strong> o&apos;quvchi
-                  yechgan. Uni o&apos;chirish o&apos;sha natijalarni ham yo&apos;q qilardi, shuning
-                  uchun bunga ruxsat berilmaydi. Buning o&apos;rniga <strong>arxivlang</strong> —
-                  test katalogdan yo&apos;qoladi va yangi urinishlar uchun yopiladi, natijalar esa
-                  saqlanib qoladi.
+                  Bu testda <b>{ts.attempt_count} ta urinish</b> bor. O&apos;quvchilar
+                  natijasi yo&apos;qolmasligi uchun uni o&apos;chirish mumkin emas.
+                  O&apos;rniga <b>arxivlash</b> tavsiya etiladi: test katalogdan
+                  yo&apos;qoladi, yangi urinishlar yopiladi, ammo eski natijalar saqlanadi.
                 </>
               ) : (
-                <>&laquo;{ts.title}&raquo; va uning savollari butunlay o&apos;chiriladi. Bu testni
-                  hali hech kim yechmagan, shuning uchun hech qanday natija yo&apos;qolmaydi.</>
+                "Haqiqatan ham ushbu testni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi."
               )}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setShowDelete(false)}>Bekor qilish</Button>
             {ts.attempt_count > 0 ? (
               <Button onClick={archive}>Arxivlash</Button>
             ) : (
-              <Button variant="destructive" onClick={remove}>O&apos;chirish</Button>
+              <Button variant="destructive" onClick={remove}>Ha, o&apos;chirish</Button>
             )}
           </DialogFooter>
         </DialogContent>

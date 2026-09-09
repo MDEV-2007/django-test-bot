@@ -491,6 +491,8 @@ def testset_edit_api(request, pk):
             'is_premium': ts.is_premium, 'is_published': ts.is_published, 'is_archived': ts.is_archived,
             'is_live_mock': ts.is_live_mock,
             'scheduled_at': ts.scheduled_at.strftime('%Y-%m-%dT%H:%M') if ts.scheduled_at else '',
+            'notify_all': ts.notify_all,
+            'notified_at': ts.notified_at.isoformat() if ts.notified_at else None,
             # Urinishlari bor testni o'chirib bo'lmaydi (pastdagi DELETE shartiga
             # qarang). Interfeys buni OLDINDAN bilishi kerak: aks holda u
             # "urinishlar ham o'chadi" deb va'da beradi, so'ng server rad etadi va

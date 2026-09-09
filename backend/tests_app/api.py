@@ -292,6 +292,26 @@ def toggle_mock_reminder_api(request, test_id):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mock_broadcast_api(request, test_id):
+    """O'qituvchi yoki admin tomonidan jonli mock xabarini Telegramga darhol chiqarish."""
+    test = get_object_or_404(TestSet, id=test_id)
+    user = request.user
+    if not (user.is_superuser or user.is_staff or test.created_by == user):
+        return Response({'detail': "Faqat test muallifi yoki admin xabar yuborishi mumkin."}, status=403)
+
+    send_all = request.data.get('send_all')
+    if send_all is None:
+        send_all = getattr(test, 'notify_all', True)
+    else:
+        send_all = bool(send_all)
+
+    from telegrambot.mock_notifier import send_mock_announcement
+    res = send_mock_announcement(test, send_all=send_all)
+    return Response(res)
+
+
+@api_view(['POST'])
 @permission_classes([IsAuthenticated, IsChannelSubscribed])
 def start_random_test_api(request):
     seed_questions_if_needed()
