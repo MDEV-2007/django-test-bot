@@ -218,7 +218,7 @@ export default async function LandingPage() {
   const plans = await loadPlans();
 
   return (
-    <>
+    <div className="relative min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-emerald-100 selection:text-emerald-900">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -461,6 +461,6 @@ export default async function LandingPage() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
