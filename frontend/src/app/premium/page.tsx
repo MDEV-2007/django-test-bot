@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Crown, CheckCircle2, ArrowRight, Lock, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -34,18 +35,23 @@ const RIBBONS: Record<number, string> = {
 };
 
 export default function PremiumPage() {
-  const { access } = useAuthStore();
+  const router = useRouter();
+  const { access, authReady } = useAuthStore();
   const [data, setData] = useState<PlansData | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
 
   useEffect(() => {
+    if (authReady && !access) {
+      router.replace('/register?next=%2Fpremium');
+      return;
+    }
     if (!access) return;
     apiFetch<PlansData>('/api/premium/plans/').then((d) => {
       setData(d);
       const recommended = d.plans.find((p) => p.duration_days === RECOMMENDED_DURATION);
       setSelectedPlanId((prev) => prev ?? recommended?.id ?? d.plans[0]?.id ?? null);
     }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
-  }, [access]);
+  }, [authReady, access, router]);
 
   /* Ustunlar soni tariflar soniga moslashadi. Ilgari qattiq `xl:grid-cols-4` yozilgan edi —
      tariflar soni 4 dan 3 ga tushgach, kartalar ekranning 1/4 qismiga siqilib, bitta

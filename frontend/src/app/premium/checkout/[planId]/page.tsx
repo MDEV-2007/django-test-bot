@@ -35,18 +35,23 @@ function CheckoutPageInner() {
   // Qaysi testni ochish uchun to'lov qilinayotgani (?test=ID) — mock test tarifi uchun.
   const testId = useSearchParams().get('test') || '';
   const router = useRouter();
-  const { access } = useAuthStore();
+  const { access, authReady } = useAuthStore();
   const [info, setInfo] = useState<CheckoutInfo | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (authReady && !access) {
+      const currentUrl = `/premium/checkout/${planId}${testId ? `?test=${testId}` : ''}`;
+      router.replace(`/register?next=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
     if (!access) return;
     const q = testId ? `?test=${testId}` : '';
     apiFetch<CheckoutInfo>(`/api/premium/checkout/${planId}/${q}`).then(setInfo)
       .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
-  }, [access, planId, testId]);
+  }, [authReady, access, planId, testId, router]);
 
   async function submit() {
     if (!file) { setError('Skrinshot tanlang.'); return; }

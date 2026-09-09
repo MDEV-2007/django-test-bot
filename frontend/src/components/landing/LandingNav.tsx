@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { BrandMark } from '@/components/BrandMark';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
-import { isTelegramEnv } from '@/lib/telegram';
 
 const LINKS = [
   { href: '#imkoniyatlar', label: 'Imkoniyatlar' },
@@ -16,16 +14,9 @@ const LINKS = [
 ];
 
 export default function LandingNav() {
-  const router = useRouter();
-  const { access, authReady, hydrated } = useAuthStore();
+  const { access, authReady } = useAuthStore();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    if (!isTelegramEnv() || !hydrated) return;
-    if (!useAuthStore.getState().refresh) return;
-    router.replace('/dashboard');
-  }, [hydrated, router]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);

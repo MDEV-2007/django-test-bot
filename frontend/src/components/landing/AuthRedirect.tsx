@@ -16,13 +16,5 @@ import { useRouter } from 'next/navigation';
 const REFRESH_KEY = 'ilmildizi_refresh';
 
 export function AuthRedirect() {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (localStorage.getItem(REFRESH_KEY)) {
-      router.replace('/dashboard');
-    }
-  }, [router]);
-
   return null;
 }

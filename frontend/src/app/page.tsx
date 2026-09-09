@@ -5,7 +5,6 @@ import {
   Sprout, Send, Sparkles, Clock, CheckCircle2,
   Compass, Award
 } from 'lucide-react';
-import { AuthRedirect } from '@/components/landing/AuthRedirect';
 import LandingNav from '@/components/landing/LandingNav';
 import RootsBackground from '@/components/landing/RootsBackground';
 import RevealOnScroll from '@/components/landing/RevealOnScroll';
@@ -179,7 +178,6 @@ export default async function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <AuthRedirect />
       <RootsBackground />
       <LandingNav />
       <LiveActivityToast />

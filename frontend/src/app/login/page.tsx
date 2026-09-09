@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, Lock, User, Target, Swords, Bot, ArrowRight, Loader2 } from 'lucide-react';
 import { login, ApiError } from '@/lib/api-client';
 import SocialLogin from '@/components/SocialLogin';
@@ -20,7 +20,19 @@ const POINTS = [
 ];
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
+  );
+}
+
+function LoginPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get('next');
+  const targetNext = nextParam && nextParam.startsWith('/') ? nextParam : null;
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +48,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const user = await login(username, password);
-      router.push(user.has_seen_onboarding ? '/dashboard' : '/onboarding');
+      router.push(targetNext || (user.has_seen_onboarding ? '/dashboard' : '/onboarding'));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Kirishda xatolik yuz berdi.');
     } finally {
@@ -45,7 +57,7 @@ export default function LoginPage() {
   }
 
   function handleSocialSuccess(user: Profile) {
-    router.push(user.has_seen_onboarding ? '/dashboard' : '/onboarding');
+    router.push(targetNext || (user.has_seen_onboarding ? '/dashboard' : '/onboarding'));
   }
 
   return (
@@ -56,7 +68,10 @@ export default function LoginPage() {
       footer={
         <>
           Hisobingiz yo&apos;qmi?{' '}
-          <Link href="/register" className="font-semibold text-[var(--accent-text)] hover:underline">
+          <Link
+            href={targetNext ? `/register?next=${encodeURIComponent(targetNext)}` : '/register'}
+            className="font-semibold text-[var(--accent-text)] hover:underline"
+          >
             Ro&apos;yxatdan o&apos;tish
           </Link>
         </>

@@ -29,7 +29,11 @@ export default function RegisterPage() {
 
 function RegisterPageInner() {
   const router = useRouter();
-  const refCode = useSearchParams().get('ref') || '';
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref') || '';
+  const nextParam = searchParams.get('next');
+  const targetNext = nextParam && nextParam.startsWith('/') ? nextParam : null;
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
@@ -43,7 +47,7 @@ function RegisterPageInner() {
     setLoading(true);
     try {
       const user = await register({ username, first_name: firstName, last_name: lastName, password, ref: refCode });
-      router.push(user.has_seen_onboarding ? '/dashboard' : '/onboarding');
+      router.push(targetNext || (user.has_seen_onboarding ? '/dashboard' : '/onboarding'));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Ro'yxatdan o'tishda xatolik.");
     } finally {
@@ -52,7 +56,7 @@ function RegisterPageInner() {
   }
 
   function handleSocialSuccess(user: Profile) {
-    router.push(user.has_seen_onboarding ? '/dashboard' : '/onboarding');
+    router.push(targetNext || (user.has_seen_onboarding ? '/dashboard' : '/onboarding'));
   }
 
   return (
@@ -63,7 +67,10 @@ function RegisterPageInner() {
       footer={
         <>
           Hisobingiz bormi?{' '}
-          <Link href="/login" className="font-semibold text-[var(--accent-text)] hover:underline">
+          <Link
+            href={targetNext ? `/login?next=${encodeURIComponent(targetNext)}` : '/login'}
+            className="font-semibold text-[var(--accent-text)] hover:underline"
+          >
             Hisobim bor
           </Link>
         </>

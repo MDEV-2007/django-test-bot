@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Check, Sparkles, Zap, ArrowRight, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/lib/auth-store';
 
 export type PlanCard = {
   name: string;
@@ -91,6 +92,8 @@ interface PricingSectionProps {
 }
 
 export default function PricingSection({ plans }: PricingSectionProps) {
+  const { access, authReady } = useAuthStore();
+  const loggedIn = authReady && !!access;
   const [filter, setFilter] = useState<'all' | 'subscription' | 'one_time'>('all');
 
   const safePlans = plans && plans.length > 0 ? plans : FALLBACK_PLANS;
@@ -214,20 +217,29 @@ export default function PricingSection({ plans }: PricingSectionProps) {
               </div>
 
               <div className="mt-8 pt-4">
-                <Button
-                  asChild
-                  variant={isHighlight ? 'default' : 'outline'}
-                  size="lg"
-                  className={`w-full rounded-full ${
-                    isHighlight
-                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md'
-                      : 'border-slate-300 hover:bg-slate-50 text-slate-800'
-                  }`}
-                >
-                  <Link href={p.href}>
-                    {p.cta} <ArrowRight className="size-4 ml-1.5" />
-                  </Link>
-                </Button>
+                {(() => {
+                  const targetHref = loggedIn
+                    ? p.href
+                    : p.href.startsWith('/premium')
+                      ? `/register?next=${encodeURIComponent(p.href)}`
+                      : p.href;
+                  return (
+                    <Button
+                      asChild
+                      variant={isHighlight ? 'default' : 'outline'}
+                      size="lg"
+                      className={`w-full rounded-full ${
+                        isHighlight
+                          ? 'bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md'
+                          : 'border-slate-300 hover:bg-slate-50 text-slate-800'
+                      }`}
+                    >
+                      <Link href={targetHref}>
+                        {p.cta} <ArrowRight className="size-4 ml-1.5" />
+                      </Link>
+                    </Button>
+                  );
+                })()}
               </div>
             </div>
           );
