@@ -58,6 +58,8 @@ def _test_payload(t, social=None, unlocked=False):
         # hisoblanadi, chunki o'quvchi baribir tayyor javoblardan tanlaydi.
         'answer_mode': _answer_mode(t),
         'is_premium': t.is_premium,
+        'is_live_mock': getattr(t, 'is_live_mock', False),
+        'scheduled_at': t.scheduled_at.isoformat() if getattr(t, 'scheduled_at', None) else None,
         # `is_unlocked` — shu O'QUVCHI uchun: global mock-test kirishi yoki aynan shu
         # test uchun tasdiqlangan to'lov bo'lsa True.
         'is_unlocked': unlocked,
@@ -135,7 +137,32 @@ def center_api(request):
     # (ular esa hali yo'q edi) — ya'ni o'quvchi obuna sotib olib ham hech narsa olmasdi.
     has_sub = profile.has_active_premium_lessons
 
+    # Pinned Katta Mock Imtihon: eng yaqin yoki hozir ketayotgan jonli imtihon
+    now = timezone.now()
+    pinned_mock = (
+        TestSet.objects.filter(is_published=True, is_archived=False, is_live_mock=True, scheduled_at__gte=now - timezone.timedelta(hours=3))
+        .select_related('subject')
+        .order_by('scheduled_at')
+        .first()
+    )
+    pinned_payload = None
+    if pinned_mock:
+        pinned_payload = {
+            'id': pinned_mock.id,
+            'title': pinned_mock.title,
+            'description': pinned_mock.description,
+            'subject': pinned_mock.subject.name if pinned_mock.subject else 'Tarix',
+            'subject_slug': pinned_mock.subject.slug if pinned_mock.subject else 'tarix',
+            'category': pinned_mock.category,
+            'duration_minutes': pinned_mock.duration_minutes,
+            'questions_count': pinned_mock.questions.count(),
+            'scheduled_at': pinned_mock.scheduled_at.isoformat() if pinned_mock.scheduled_at else None,
+            'is_live_mock': pinned_mock.is_live_mock,
+            'is_reminded': pinned_mock.remind_users.filter(id=request.user.id).exists() if request.user.is_authenticated else False,
+        }
+
     return Response({
+        'pinned_mock': pinned_payload,
         'tests': [
             _test_payload(
                 t, social_by_test.get(t.id),
@@ -179,6 +206,27 @@ def _new_attempt(profile, test):
 def start_test_api(request, test_id):
     test = get_object_or_404(TestSet, id=test_id)
     profile = ensure_profile_for_user(request.user)
+    now = timezone.now()
+
+    # Jonli Mock Imtihon vaqti tekshiruvi
+    if test.is_live_mock and test.scheduled_at and now < test.scheduled_at:
+        # Toshkent vaqtida ko'rsatish
+        return Response({
+            'error': f"Imtihon hali boshlanmadi. Boshlanish vaqti: {test.scheduled_at.strftime('%H:%M')}.",
+            'scheduled_at': test.scheduled_at.isoformat(),
+        }, status=400)
+
+    # Agar test bo'yicha davom etayotgan urinish bo'lsa, o'shani qaytaramiz
+    active_attempt = Attempt.objects.filter(profile=profile, test=test, is_completed=False).order_by('-started_at').first()
+    if active_attempt:
+        mode = 'cefr' if test.sections.exists() else 'classic'
+        return Response({'attempt_id': active_attempt.id, 'mode': mode})
+
+    # Agar mock imtihon bo'lsa va allaqachon topshirilgan bo'lsa
+    completed_attempt = Attempt.objects.filter(profile=profile, test=test, is_completed=True).order_by('-completed_at').first()
+    if completed_attempt and test.is_live_mock:
+        return Response({'attempt_id': completed_attempt.id, 'completed': True, 'mode': 'feedback'})
+
     from premium.models import unlocked_test_ids as _unlocked_ids
     # PRO obuna ham, bir martalik mock-test xaridi ham ochadi (yuqoridagi center_api bilan
     # bir xil qoida — ikkalasi ajralib qolsa, katalogda "ochiq" ko'ringan test start'da
@@ -194,6 +242,53 @@ def start_test_api(request, test_id):
     # hamma test eski "bitta savol — bitta ekran" oqimida qoladi.
     mode = 'cefr' if test.sections.exists() else 'classic'
     return Response({'attempt_id': attempt.id, 'mode': mode})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
+def mock_lobby_api(request, test_id):
+    test = get_object_or_404(TestSet, id=test_id, is_published=True, is_archived=False)
+    profile = ensure_profile_for_user(request.user)
+    is_reminded = test.remind_users.filter(id=request.user.id).exists()
+    now = timezone.now()
+
+    # Foydalanuvchining ushbu test bo'yicha urinishlari
+    active_attempt = Attempt.objects.filter(test=test, profile=profile, is_completed=False).order_by('-started_at').first()
+    completed_attempt = Attempt.objects.filter(test=test, profile=profile, is_completed=True).order_by('-completed_at').first()
+
+    return Response({
+        'id': test.id,
+        'title': test.title,
+        'description': test.description,
+        'subject': test.subject.name if test.subject else 'Tarix',
+        'subject_slug': test.subject.slug if test.subject else 'tarix',
+        'category': test.category,
+        'duration_minutes': test.duration_minutes,
+        'questions_count': test.questions.count(),
+        'is_live_mock': test.is_live_mock,
+        'scheduled_at': test.scheduled_at.isoformat() if test.scheduled_at else None,
+        'server_now': now.isoformat(),
+        'is_reminded': is_reminded,
+        'has_active_attempt': active_attempt is not None,
+        'active_attempt_id': active_attempt.id if active_attempt else None,
+        'has_completed': completed_attempt is not None,
+        'completed_attempt_id': completed_attempt.id if completed_attempt else None,
+        'completed_score': completed_attempt.score if completed_attempt else None,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
+def toggle_mock_reminder_api(request, test_id):
+    test = get_object_or_404(TestSet, id=test_id)
+    user = request.user
+    if test.remind_users.filter(id=user.id).exists():
+        test.remind_users.remove(user)
+        reminded = False
+    else:
+        test.remind_users.add(user)
+        reminded = True
+    return Response({'reminded': reminded, 'message': "Eslatma yoqildi" if reminded else "Eslatma o'chirildi"})
 
 
 @api_view(['POST'])

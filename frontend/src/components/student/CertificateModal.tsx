@@ -38,12 +38,24 @@ function formatUzDate(dateInput?: string | Date | null): string {
   return `${d.getDate()}-${MONTHS_UZ[d.getMonth()]}, ${d.getFullYear()}-yil`;
 }
 
-function getGrade(score: number): { grade: string; label: string; tone: string; printTone: string } {
-  if (score >= 86) return { grade: "A (A'lo)", label: 'Eng yuqori natija', tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50' };
-  if (score >= 71) return { grade: 'B+ (Juda yaxshi)', label: 'Yuqori natija', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50' };
-  if (score >= 56) return { grade: 'B (Yaxshi)', label: 'Muvaffaqiyatli', tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50' };
-  if (score >= 46) return { grade: 'C+ (Qoniqarli)', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50' };
-  return { grade: 'Ishtirokchi', label: "Sinovdan o'tildi", tone: 'text-muted-foreground border-muted bg-muted/10', printTone: 'text-slate-700 border-slate-400 bg-slate-100' };
+function getGrade(score: number, correctCount?: number, totalQuestions?: number): { grade: string; label: string; tone: string; printTone: string; isPassed: boolean } {
+  // 45 talik Milliy Sertifikat imtihoni uchun rasmiy mezon
+  if (totalQuestions === 45 && typeof correctCount === 'number') {
+    if (correctCount >= 34) return { grade: "A+ (A'lo)", label: "Eng yuqori natija — Oltin Sertifikat", tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
+    if (correctCount >= 28) return { grade: "A (A'lo)", label: 'Yuqori a\'lo natija', tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
+    if (correctCount >= 24) return { grade: 'B+ (Juda yaxshi)', label: 'Muvaffaqiyatli natija', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
+    if (correctCount >= 21) return { grade: 'B (Yaxshi)', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
+    if (correctCount >= 18) return { grade: 'C+ (Qoniqarli)', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
+    return { grade: "Sinovdan o'tmadi", label: "Sertifikat berilmaydi (yetarli emas)", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
+  }
+
+  // Umumiy testlar uchun foiz bo'yicha
+  if (score >= 75.5) return { grade: "A+ (A'lo)", label: 'Eng yuqori natija', tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
+  if (score >= 62.0) return { grade: "A (A'lo)", label: 'Yuqori natija', tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
+  if (score >= 53.0) return { grade: 'B+ (Juda yaxshi)', label: 'Muvaffaqiyatli', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
+  if (score >= 46.5) return { grade: 'B (Yaxshi)', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
+  if (score >= 40.0) return { grade: 'C+ (Qoniqarli)', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
+  return { grade: "Sinovdan o'tmadi", label: "Sertifikat berilmaydi", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
 }
 
 export default function CertificateModal({
@@ -58,7 +70,7 @@ export default function CertificateModal({
   attemptId,
 }: CertificateModalProps) {
   const [downloading, setDownloading] = useState(false);
-  const gradeInfo = getGrade(score);
+  const gradeInfo = getGrade(score, correctCount, totalQuestions);
   const certDate = formatUzDate(date);
   const serialNo = `ILM-${new Date().getFullYear()}-${String(attemptId).padStart(6, '0')}`;
   const displayName = studentName.trim() || "Platforma O'quvchisi";

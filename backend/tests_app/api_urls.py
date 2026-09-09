@@ -6,6 +6,8 @@ app_name = 'tests_api'
 
 urlpatterns = [
     path('', api.center_api, name='center'),
+    path('<int:test_id>/lobby/', api.mock_lobby_api, name='mock_lobby'),
+    path('<int:test_id>/remind/', api.toggle_mock_reminder_api, name='mock_remind'),
     path('<int:test_id>/start/', api.start_test_api, name='start'),
     path('start-random/', api.start_random_test_api, name='start_random'),
     path('start-mistakes/', api.start_mistakes_test_api, name='start_mistakes'),

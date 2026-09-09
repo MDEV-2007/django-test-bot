@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2, FileCheck2, GraduationCap, Users } from 'lucide-react';
+import { Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2, FileCheck2, GraduationCap, Users, Flame } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
@@ -45,6 +45,19 @@ type CenterData = {
   has_mock_test_access: boolean;
   has_lessons_access: boolean;
   mock_plan: { id: number; price: string } | null;
+  pinned_mock?: {
+    id: number;
+    title: string;
+    description: string;
+    subject: string;
+    subject_slug: string;
+    category: string;
+    duration_minutes: number;
+    questions_count: number;
+    scheduled_at: string | null;
+    is_live_mock: boolean;
+    is_reminded: boolean;
+  } | null;
 };
 
 /* Imtihon turlari — backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
@@ -167,6 +180,43 @@ export default function TestsPage() {
           title="Test va Imtihonlar Markazi"
           description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
         />
+
+        {/* Pinned Katta Mock Imtihon Banner */}
+        {data?.pinned_mock && (
+          <Reveal>
+            <Card className="relative overflow-hidden border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/[0.08] via-[var(--surface-card)] to-emerald-500/[0.08] shadow-lg">
+              <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-500 ring-4 ring-amber-500/10">
+                    <Flame className="size-6 animate-pulse" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge className="bg-amber-500 text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5">
+                        Katta Mock Imtihon
+                      </Badge>
+                      <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold">
+                        {data.pinned_mock.subject}
+                      </Badge>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-foreground truncate">
+                      {data.pinned_mock.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                      {data.pinned_mock.questions_count || 45} ta savol · {data.pinned_mock.duration_minutes || 90} daqiqa · Milliy Sertifikat Formati
+                    </p>
+                  </div>
+                </div>
+
+                <Button asChild size="lg" className="rounded-xl font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md">
+                  <Link href={`/tests/mock/${data.pinned_mock.id}`}>
+                    Kutish zaliga kirish <ArrowRight className="ml-1.5 size-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </Reveal>
+        )}
 
         {/* Tezkor test — sahifaning ASOSIY harakati.
             Nega: katalogdagi testlar 30-45 savoldan iborat va telefonda ularni

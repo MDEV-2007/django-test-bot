@@ -305,6 +305,18 @@ class TestSet(models.Model):
         help_text="Test katalogida ko'rinmaydi, lekin o'chirilmaydi — foydalanuvchilarning bu "
                    "testga oid eski urinishlari (Attempt) va ballari to'liq saqlanib qoladi.",
     )
+    is_live_mock = models.BooleanField(
+        default=False,
+        help_text="Belgilangan vaqtda o'tkaziladigan katta jonli mock imtihon.",
+    )
+    scheduled_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Mock imtihonning aniq boshlanish vaqti (masalan, ertaga 21:30).",
+    )
+    remind_users = models.ManyToManyField(
+        'auth.User', blank=True, related_name='mock_reminders',
+        help_text="Imtihon boshlanganda Telegram orqali eslatish so'ragan foydalanuvchilar.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

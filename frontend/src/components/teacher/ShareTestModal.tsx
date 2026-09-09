@@ -54,11 +54,12 @@ export default function ShareTestModal({
   const actualSubject = test?.subject ?? subject;
   const actualDuration = test?.duration_minutes ?? durationMinutes;
 
-  const testUrl = `${origin}/tests/${actualId}`;
-  const shareText = `📚 Test: ${actualTitle}\n` +
+  const testUrl = `${origin}/tests/mock/${actualId}`;
+  const shareText = `📚 Katta Mock Imtihon: ${actualTitle}\n` +
     (actualSubject ? `📌 Fan: ${actualSubject}\n` : '') +
     (actualDuration ? `⏳ Davomiyligi: ${actualDuration} daqiqa\n` : '') +
-    `\n👇 Testni yechish uchun bosing:\n${testUrl}`;
+    `🎯 Format: Milliy Sertifikat (A+, A, B+, B, C+)\n` +
+    `\n👇 Imtihon vaqtini ko'rish va topshirish uchun bosing:\n${testUrl}`;
 
   async function copyLink() {
     await navigator.clipboard.writeText(testUrl);

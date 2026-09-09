@@ -227,6 +227,28 @@ export default function FeedbackPage() {
             <p className="text-xs text-muted-foreground">
               {a.correct_answers} to&apos;g&apos;ri · {a.wrong_answers} xato · {a.skipped_answers} javobsiz
             </p>
+            {/* Milliy Sertifikat Darajasi (45 talik test uchun) */}
+            {(() => {
+              const totalQ = (a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0);
+              if (totalQ === 45) {
+                const c = a.correct_answers;
+                let badgeText = '';
+                let badgeClass = '';
+                if (c >= 34) { badgeText = '🏆 A+ Daraja (Oltin Sertifikat)'; badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-500 dark:text-amber-400'; }
+                else if (c >= 28) { badgeText = '🥇 A Daraja (A\'lo Sertifikat)'; badgeClass = 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'; }
+                else if (c >= 24) { badgeText = '🥈 B+ Daraja (Juda yaxshi)'; badgeClass = 'border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400'; }
+                else if (c >= 21) { badgeText = '🥉 B Daraja (Yaxshi)'; badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400'; }
+                else if (c >= 18) { badgeText = '📜 C+ Daraja (Qoniqarli)'; badgeClass = 'border-orange-500/40 bg-orange-500/15 text-orange-600 dark:text-orange-400'; }
+                else { badgeText = '❌ Sinovdan o\'tmadi (Sertifikat berilmaydi)'; badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400'; }
+
+                return (
+                  <Badge variant="outline" className={`py-1.5 px-3 text-xs sm:text-sm font-bold ${badgeClass}`}>
+                    {badgeText}
+                  </Badge>
+                );
+              }
+              return null;
+            })()}
             {data.predicted_score && (
               <Badge variant="outline" className="border-amber-500/25 bg-amber-500/10 py-1.5 text-amber-300">
                 <Crown className="size-4" /> Prognoz Sertifikat: {data.predicted_score} Daraja
