@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Clock, Award, Bell, BellOff, ArrowRight, ShieldCheck, CheckCircle2,
-  AlertCircle, Share2, Sparkles, HelpCircle, FileText, ChevronLeft,
-  Flame, Lock
+  Clock, Award, Bell, ArrowRight, ShieldCheck, CheckCircle2,
+  AlertCircle, Share2, HelpCircle, FileText, ChevronLeft,
+  Flame
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -17,7 +17,6 @@ import Reveal from '@/components/motion/Reveal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 
 type MockLobbyData = {
   id: number;
@@ -51,7 +50,7 @@ const GRADING_SCALE = [
 export default function MockLobbyPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { access, user } = useAuthStore();
+  const { access } = useAuthStore();
 
   const [data, setData] = useState<MockLobbyData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -182,223 +181,289 @@ export default function MockLobbyPage() {
   return (
     <>
       <AppShell />
-      <main className="mx-auto max-w-3xl space-y-8 px-4 pb-20 pt-4">
-        {/* Navigation */}
-        <div>
-          <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-24 pt-6">
+        {/* Navigation Breadcrumbs */}
+        <div className="mb-6 flex items-center justify-between">
+          <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground hover:text-foreground">
             <Link href="/tests">
               <ChevronLeft className="size-4" /> Barcha testlar
             </Link>
           </Button>
+
+          <Button variant="outline" size="sm" onClick={copyShareLink} className="gap-1.5 text-xs">
+            <Share2 className="size-3.5" /> Ulashish
+          </Button>
         </div>
 
-        {/* Hero Section */}
-        <Reveal>
-          <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-gradient-to-br from-[var(--surface-card)] via-[var(--surface-hover)] to-[var(--tone-growth-soft)]/20 p-6 shadow-xl sm:p-10">
-            <div className="relative z-10 space-y-6 text-center">
-              {/* Badges */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 gap-1.5 px-3 py-1 font-semibold">
-                  <Flame className="size-4 text-amber-500 animate-pulse" /> Katta Mock Imtihon
-                </Badge>
-                <Badge variant="outline" className="gap-1 border-[var(--border-strong)] font-medium">
-                  {data.subject}
-                </Badge>
-                <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300">
-                  Milliy Sertifikat Formati
-                </Badge>
-              </div>
+        {/* 2-Column Responsive Layout for Desktop / Single Column for Mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Main Column: Hero + Countdown + Rules (Left 7 cols on Desktop) */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+            <Reveal>
+              <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-gradient-to-br from-[var(--surface-card-medium)] via-[var(--surface-card-soft)] to-amber-500/5 p-6 sm:p-10 shadow-2xl">
+                {/* Decorative background glow */}
+                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-amber-500/10 blur-3xl" />
+                <div className="pointer-events-none absolute -left-16 -bottom-16 size-64 rounded-full bg-sky-500/10 blur-3xl" />
 
-              {/* Title & Description */}
-              <div className="space-y-2">
-                <h1 className="text-2xl font-extrabold tracking-tight sm:text-4xl text-foreground">
-                  {data.title}
-                </h1>
-                <p className="mx-auto max-w-xl text-sm sm:text-base text-muted-foreground">
-                  {data.description || "Rasmiy Milliy Sertifikat formati bo'yicha katta sinov imtihoni. Barcha o'quvchilar bir vaqtda topshiradi."}
-                </p>
-              </div>
-
-              {/* Live or Countdown Block */}
-              {isLiveNow ? (
-                <div className="space-y-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-6 text-center shadow-lg">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-300 animate-pulse">
-                    <span className="size-2 rounded-full bg-emerald-500" /> Imtihon boshlandi!
+                <div className="relative z-10 space-y-6">
+                  {/* Badges */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 gap-1.5 px-3 py-1 font-semibold text-xs">
+                      <Flame className="size-4 text-amber-500 animate-pulse" /> Katta Jonli Mock Imtihon
+                    </Badge>
+                    <Badge variant="outline" className="border-[var(--border-strong)] font-medium text-xs">
+                      {data.subject}
+                    </Badge>
+                    <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300 text-xs">
+                      Milliy Sertifikat Formati
+                    </Badge>
                   </div>
-                  <h3 className="text-xl font-black text-foreground sm:text-2xl">
-                    Hozir topshirish oynasi ochiq!
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Sizda to&apos;liq {data.duration_minutes} daqiqa vaqt bo&apos;ladi. O&apos;z bilimingizni sinab, rasmiy sertifikat oling.
-                  </p>
 
-                  <div className="pt-2">
-                    {data.has_completed ? (
-                      <div className="space-y-3">
-                        <Badge className="bg-emerald-500 text-white px-3 py-1 text-sm font-semibold">
-                          Siz imtihonni topshirdingiz ({data.completed_score?.toFixed(0)}%)
-                        </Badge>
-                        <div>
-                          <Button size="lg" asChild className="rounded-xl font-bold shadow-lg">
-                            <Link href={`/tests/${data.completed_attempt_id}/feedback`}>
-                              Natijalarni ko&apos;rish <ArrowRight className="ml-2 size-5" />
-                            </Link>
-                          </Button>
-                        </div>
+                  {/* Title & Description */}
+                  <div className="space-y-3">
+                    <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black tracking-tight text-foreground leading-tight">
+                      {data.title}
+                    </h1>
+                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                      {data.description || "Rasmiy Milliy Sertifikat formati bo'yicha katta sinov imtihoni. Barcha o'quvchilar bir vaqtda topshiradi."}
+                    </p>
+                  </div>
+
+                  {/* Live or Countdown Block */}
+                  {isLiveNow ? (
+                    <div className="space-y-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-6 sm:p-8 text-center shadow-lg">
+                      <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-300 animate-pulse">
+                        <span className="size-2 rounded-full bg-emerald-500" /> Imtihon boshlandi!
                       </div>
-                    ) : data.has_active_attempt ? (
-                      <Button size="lg" onClick={startTest} disabled={starting} className="rounded-xl px-8 font-black text-base shadow-xl bg-amber-500 hover:bg-amber-600 text-white">
-                        {starting ? 'Kirilmoqda...' : 'Imtihonni davom ettirish'} <ArrowRight className="ml-2 size-5" />
-                      </Button>
-                    ) : (
-                      <Button size="lg" onClick={startTest} disabled={starting} className="rounded-xl px-10 font-black text-base shadow-xl bg-emerald-600 hover:bg-emerald-700 text-white animate-bounce">
-                        {starting ? 'Kirilmoqda...' : '🚀 Imtihonni boshlash'} <ArrowRight className="ml-2 size-5" />
-                      </Button>
-                    )}
+                      <h3 className="text-xl font-black text-foreground sm:text-2xl">
+                        Hozir topshirish oynasi ochiq!
+                      </h3>
+                      <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+                        Sizda to&apos;liq {data.duration_minutes} daqiqa vaqt bo&apos;ladi. O&apos;z bilimingizni sinab, rasmiy sertifikat darajangizni oling.
+                      </p>
+
+                      <div className="pt-2">
+                        {data.has_completed ? (
+                          <div className="space-y-3">
+                            <Badge className="bg-emerald-500 text-white px-3 py-1 text-sm font-semibold">
+                              Siz imtihonni topshirdingiz ({data.completed_score?.toFixed(0)}%)
+                            </Badge>
+                            <div>
+                              <Button size="lg" asChild className="rounded-xl font-bold shadow-lg">
+                                <Link href={`/tests/${data.completed_attempt_id}/feedback`}>
+                                  Natijalarni ko&apos;rish <ArrowRight className="ml-2 size-5" />
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+                        ) : data.has_active_attempt ? (
+                          <Button size="lg" onClick={startTest} disabled={starting} className="rounded-xl px-8 font-black text-base shadow-xl bg-amber-500 hover:bg-amber-600 text-white">
+                            {starting ? 'Kirilmoqda...' : 'Imtihonni davom ettirish'} <ArrowRight className="ml-2 size-5" />
+                          </Button>
+                        ) : (
+                          <Button size="lg" onClick={startTest} disabled={starting} className="rounded-xl px-10 font-black text-base shadow-xl bg-emerald-600 hover:bg-emerald-700 text-white animate-bounce">
+                            {starting ? 'Kirilmoqda...' : '🚀 Imtihonni boshlash'} <ArrowRight className="ml-2 size-5" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-6 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface-card)]/80 p-6 sm:p-8 backdrop-blur-md shadow-inner">
+                      <div className="text-center sm:text-left">
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                          Imtihon boshlanishiga qoldi:
+                        </span>
+                      </div>
+
+                      {/* Countdown Cards */}
+                      <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-xl mx-auto">
+                        {[
+                          { label: 'Kun', val: days },
+                          { label: 'Soat', val: hours },
+                          { label: 'Daqiqa', val: minutes },
+                          { label: 'Soniya', val: seconds },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex flex-col items-center justify-center rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/70 p-3 sm:p-5 shadow-sm">
+                            <span className="text-2xl sm:text-4xl xl:text-5xl font-black tabular-nums text-foreground tracking-tight">
+                              {String(item.val).padStart(2, '0')}
+                            </span>
+                            <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase mt-1">
+                              {item.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Action: Telegram Reminder & Share */}
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
+                        <Button
+                          variant={reminded ? 'secondary' : 'default'}
+                          size="lg"
+                          onClick={toggleReminder}
+                          disabled={togglingReminder}
+                          className="rounded-xl font-bold gap-2 shadow-md px-6"
+                        >
+                          {reminded ? (
+                            <>
+                              <CheckCircle2 className="size-5 text-emerald-500" />
+                              Telegram eslatma yoqilgan
+                            </>
+                          ) : (
+                            <>
+                              <Bell className="size-5 animate-wiggle" />
+                              Menga Telegramdan eslatish
+                            </>
+                          )}
+                        </Button>
+
+                        <Button variant="outline" size="lg" onClick={copyShareLink} className="rounded-xl gap-2">
+                          <Share2 className="size-4" /> Havolani ulashish
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Spec Pills (3 Columns) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                    <div className="flex items-center gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)]/60 p-3.5 shadow-sm">
+                      <div className="flex size-10 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500 shrink-0">
+                        <HelpCircle className="size-5" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground font-medium">Savollar soni</div>
+                        <div className="text-sm font-bold text-foreground">{data.questions_count || 45} ta savol</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)]/60 p-3.5 shadow-sm">
+                      <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
+                        <Clock className="size-5" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground font-medium">Ajratilgan vaqt</div>
+                        <div className="text-sm font-bold text-foreground">{data.duration_minutes || 90} daqiqa</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)]/60 p-3.5 shadow-sm">
+                      <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
+                        <Award className="size-5" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground font-medium">Sertifikat</div>
+                        <div className="text-sm font-bold text-foreground">Rasmiy Darajalar</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-6 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface-card)]/80 p-6 backdrop-blur-md">
-                  <div className="space-y-1">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Boshlanishiga qoldi:
-                    </span>
+              </div>
+            </Reveal>
+
+            {/* Imtihon Qoidalari va Muhim Yo'riqnoma */}
+            <Reveal delay={0.1}>
+              <Card className="border-[var(--border-card)] bg-[var(--surface-card-soft)]/90 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-bold flex items-center gap-2 text-foreground">
+                    <FileText className="size-4 text-sky-500" /> Imtihon Qoidalari va Muhim Yo&apos;riqnoma
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  <div className="flex items-start gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/30 p-3.5">
+                    <Clock className="size-4 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <b className="text-foreground font-semibold">Bir martalik topshirish:</b> Imtihon boshlangandan keyin umumiy {data.duration_minutes} daqiqa vaqt beriladi. Sahifani yangilasangiz yoki brauzerdan vaqtincha chiqib ketsangiz ham taymer to&apos;xtamaydi.
+                    </div>
                   </div>
 
-                  {/* Countdown Cards */}
-                  <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-md mx-auto">
-                    {[
-                      { label: 'Kun', val: days },
-                      { label: 'Soat', val: hours },
-                      { label: 'Daqiqa', val: minutes },
-                      { label: 'Soniya', val: seconds },
-                    ].map((item, idx) => (
-                      <div key={idx} className="flex flex-col items-center justify-center rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)] p-3 sm:p-4 shadow-sm">
-                        <span className="text-2xl sm:text-4xl font-black tabular-nums text-foreground tracking-tight">
-                          {String(item.val).padStart(2, '0')}
-                        </span>
-                        <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase mt-1">
-                          {item.label}
-                        </span>
+                  <div className="flex items-start gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/30 p-3.5">
+                    <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <b className="text-foreground font-semibold">Avtomatik saqlash:</b> Har bir belgilagan javobingiz darhol tizimga saqlanadi. Internet aloqasi vaqtincha sekinlashsa ham javoblaringiz yo&apos;qolmaydi.
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/30 p-3.5">
+                    <Award className="size-4 text-purple-500 shrink-0 mt-0.5" />
+                    <div>
+                      <b className="text-foreground font-semibold">Tezkor Natija va Sertifikat:</b> Testni yakunlashingiz bilan avtomatik baholanadi, to&apos;plangan ballaringiz, xatolar tahlili va rasmiy Milliy sertifikat taqdim etiladi.
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Reveal>
+          </div>
+
+          {/* Right Column: Baholash Mezonlari (Sidebar on Desktop - Sticky) */}
+          <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-20">
+            {/* Baholash Mezonlari Card */}
+            <Reveal delay={0.15}>
+              <Card className="border-[var(--border-card)] bg-[var(--surface-card-medium)] shadow-xl overflow-hidden">
+                <CardHeader className="border-b border-[var(--border-card)] bg-[var(--surface-hover)]/60 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500">
+                      <ShieldCheck className="size-5" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-bold text-foreground">Baholash Mezonlari</CardTitle>
+                      <p className="text-xs text-muted-foreground">45 talik Milliy Sertifikat darajalari</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-[var(--border-card)]">
+                    {GRADING_SCALE.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-[var(--surface-hover)]/40">
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono text-sm font-bold text-foreground">{item.range}</span>
+                          <span className="text-xs text-muted-foreground hidden sm:inline">to&apos;g&apos;ri</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xs text-muted-foreground font-medium">{item.label}</span>
+                          <span className={`inline-flex items-center justify-center min-w-[50px] px-2.5 py-1 rounded-lg text-xs font-black border ${item.tone}`}>
+                            {item.grade}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+            </Reveal>
 
-                  {/* Action: Telegram Reminder & Share */}
-                  <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                    <Button
-                      variant={reminded ? 'secondary' : 'default'}
-                      size="lg"
-                      onClick={toggleReminder}
-                      disabled={togglingReminder}
-                      className="rounded-xl font-bold gap-2 shadow-md"
-                    >
-                      {reminded ? (
-                        <>
-                          <CheckCircle2 className="size-5 text-emerald-500" />
-                          Telegram eslatma yoqilgan
-                        </>
-                      ) : (
-                        <>
-                          <Bell className="size-5 animate-wiggle" />
-                          Menga Telegramdan eslatish
-                        </>
-                      )}
-                    </Button>
-
-                    <Button variant="outline" size="lg" onClick={copyShareLink} className="rounded-xl gap-2">
-                      <Share2 className="size-4" /> Havolani ulashish
-                    </Button>
-                  </div>
+            {/* Telegram Bot Notification Info Card */}
+            <Reveal delay={0.2}>
+              <div className="rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-500/10 via-[var(--surface-card-soft)] to-transparent p-5 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2.5 text-sky-500 font-bold text-sm">
+                  <Bell className="size-4" /> Telegram Bot Eslatmasi
                 </div>
-              )}
-
-              {/* Quick Spec Pills */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 text-left">
-                <div className="flex items-center gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)] p-3.5 shadow-sm">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500">
-                    <HelpCircle className="size-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground font-medium">Savollar soni</div>
-                    <div className="text-sm font-bold text-foreground">{data.questions_count || 45} ta savol</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)] p-3.5 shadow-sm">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
-                    <Clock className="size-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground font-medium">Ajratilgan vaqt</div>
-                    <div className="text-sm font-bold text-foreground">{data.duration_minutes || 90} daqiqa</div>
-                  </div>
-                </div>
-
-                <div className="col-span-2 sm:col-span-1 flex items-center gap-3 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card)] p-3.5 shadow-sm">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
-                    <Award className="size-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground font-medium">Sertifikat</div>
-                    <div className="text-sm font-bold text-foreground">Rasmiy Darajalar</div>
-                  </div>
-                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Imtihon boshlangan vaqtda (soat 21:30 da) Telegram botimiz sizga to&apos;g&apos;ridan-to&apos;g&apos;ri xabar va kirish tugmasini yuboradi.
+                </p>
+                <Button
+                  variant={reminded ? 'secondary' : 'default'}
+                  size="sm"
+                  onClick={toggleReminder}
+                  disabled={togglingReminder}
+                  className="w-full rounded-xl font-bold text-xs gap-2"
+                >
+                  {reminded ? (
+                    <>
+                      <CheckCircle2 className="size-4 text-emerald-500" />
+                      Eslatma yoqilgan
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="size-4 animate-wiggle" />
+                      Menga eslatishni yoqish
+                    </>
+                  )}
+                </Button>
               </div>
-            </div>
+            </Reveal>
           </div>
-        </Reveal>
 
-        {/* Official Grading Scale Section */}
-        <Reveal delay={0.1}>
-          <Card className="border-[var(--border-card)] shadow-lg overflow-hidden">
-            <CardHeader className="border-b border-[var(--border-card)] bg-[var(--surface-hover)]/50 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
-                  <ShieldCheck className="size-4" />
-                </div>
-                <div>
-                  <CardTitle className="text-base font-bold">Milliy Sertifikat Baholash Mezonlari</CardTitle>
-                  <p className="text-xs text-muted-foreground">To&apos;plangan to&apos;g&apos;ri javoblar soni bo&apos;yicha darajalar taqsimoti</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y divide-[var(--border-card)]">
-                {GRADING_SCALE.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 transition-colors hover:bg-[var(--surface-hover)]/30">
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-sm font-bold text-foreground">{item.range}</span>
-                      <span className="text-xs text-muted-foreground hidden sm:inline-block">to&apos;g&apos;ri javob</span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xs text-muted-foreground font-medium">{item.label}</span>
-                      <span className={`inline-flex items-center justify-center min-w-[48px] px-2.5 py-1 rounded-md text-xs font-black border ${item.tone}`}>
-                        {item.grade}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </Reveal>
-
-        {/* Rules & Guidelines */}
-        <Reveal delay={0.2}>
-          <Card className="border-[var(--border-card)] shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <FileText className="size-4 text-sky-500" /> Imtihon Qoidalari va Muhim Eslatmalar
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              <p>• <b>Bir martalik kirish:</b> Imtihon boshlangandan keyin taymer orqaga sanaydi. Sahifani yangilasangiz yoki chiqib ketsangiz ham, berilgan {data.duration_minutes} daqiqalik vaqt to&apos;xtamaydi.</p>
-              <p>• <b>Javoblarni tasdiqlash:</b> Har bir savolga belgilangan javob avtomatik tarzda tizimga saqlanib boradi.</p>
-              <p>• <b>Natijalar va Sertifikat:</b> Imtihonni topshirganingizdan so&apos;ng darhol natijangiz, to&apos;plagan ballingiz, xatolar tahlili va sertifikat taqdim etiladi.</p>
-            </CardContent>
-          </Card>
-        </Reveal>
+        </div>
       </main>
     </>
   );
