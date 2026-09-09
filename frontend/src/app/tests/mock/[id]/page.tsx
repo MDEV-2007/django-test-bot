@@ -146,17 +146,19 @@ export default function MockLobbyPage() {
 
   if (loading) {
     return (
-      <AppShell>
+      <>
+        <AppShell />
         <div className="flex min-h-[60vh] items-center justify-center">
           <BrandLoader />
         </div>
-      </AppShell>
+      </>
     );
   }
 
   if (!data) {
     return (
-      <AppShell>
+      <>
+        <AppShell />
         <div className="mx-auto max-w-xl py-20 text-center">
           <AlertCircle className="mx-auto size-12 text-rose-500" />
           <h2 className="mt-4 text-xl font-bold">Mock imtihon topilmadi</h2>
@@ -165,7 +167,7 @@ export default function MockLobbyPage() {
             <Link href="/tests">Testlar ro&apos;yxatiga qaytish</Link>
           </Button>
         </div>
-      </AppShell>
+      </>
     );
   }
 
@@ -178,8 +180,9 @@ export default function MockLobbyPage() {
   const isLiveNow = secondsLeft === 0;
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-3xl space-y-8 pb-20 pt-4">
+    <>
+      <AppShell />
+      <main className="mx-auto max-w-3xl space-y-8 px-4 pb-20 pt-4">
         {/* Navigation */}
         <div>
           <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground">
@@ -347,7 +350,7 @@ export default function MockLobbyPage() {
         </Reveal>
 
         {/* Official Grading Scale Section */}
-        <Reveal delayMs={100}>
+        <Reveal delay={0.1}>
           <Card className="border-[var(--border-card)] shadow-lg overflow-hidden">
             <CardHeader className="border-b border-[var(--border-card)] bg-[var(--surface-hover)]/50 pb-4">
               <div className="flex items-center gap-2.5">
@@ -382,7 +385,7 @@ export default function MockLobbyPage() {
         </Reveal>
 
         {/* Rules & Guidelines */}
-        <Reveal delayMs={200}>
+        <Reveal delay={0.2}>
           <Card className="border-[var(--border-card)] shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
@@ -396,7 +399,7 @@ export default function MockLobbyPage() {
             </CardContent>
           </Card>
         </Reveal>
-      </div>
-    </AppShell>
+      </main>
+    </>
   );
 }
