@@ -1,5 +1,7 @@
 """Django management command: 6-sinf Tarix Milliy Sertifikat 45 talik mock testini yaratish.
 
+Barcha to'g'ri javoblar, tahlillar va namunaviy yozma javoblar rasmiy kalit bo'yicha to'liq kiritilgan.
+
 Foydalanish:
     python manage.py seed_tarix_mock
     python manage.py seed_tarix_mock --force
@@ -51,7 +53,6 @@ class Command(BaseCommand):
 
         # Ertaga soat 21:30 (Toshkent vaqti)
         toshkent_tz = timezone.get_current_timezone()
-        # Masalan ertangi kun soat 21:30
         now = timezone.now().astimezone(toshkent_tz)
         tomorrow = now + timezone.timedelta(days=1)
         scheduled_at = datetime(
@@ -68,6 +69,7 @@ class Command(BaseCommand):
             scheduled_at=scheduled_at,
             is_published=True,
             is_premium=False,
+            notify_all=True,
         )
 
         questions = []
@@ -78,6 +80,7 @@ class Command(BaseCommand):
         mcq_data = [
             {
                 "body": "Quyidagilardan nomuvofiqlik saqlangan javobni aniqlang.",
+                "explanation": "Gilgamish Uruk shahri podshosi va Mesopotamiya rivoyatlari qahramoni bo'lgan, Fors davlatiga aloqasi yo'q.",
                 "options": [
                     ("A", "Xammurapi — Bobil podshosi, qonunlar tuzgan birinchi hukmdor", False),
                     ("B", "Oshshurbanapal — Ossuriya hukmdori, Nineviyada kutubxona to'plagan", False),
@@ -103,6 +106,7 @@ class Command(BaseCommand):
                     "</div>"
                     "</div>"
                 ),
+                "explanation": "1-b (Sargon I Akkad va Shumerni birlashtirdi); 2-d (Xammurapi qonunlar tuzgan); 3-a (Kir II Fors davlatiga asos solgan); 4-c (Doro I satrapliklar va 'darik' tangasi).",
                 "options": [
                     ("A", "1-b; 2-d; 3-a; 4-c", True),
                     ("B", "1-a; 2-b; 3-c; 4-d", False),
@@ -112,6 +116,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "Yunonlar Dajla va Frot daryolari oralig'idagi vodiyni qanday atashgan?",
+                "explanation": "Yunonlar Dajla va Frot oralig'idagi hududni Mesopotamiya (Ikki daryo oralig'i) deb atashgan.",
                 "options": [
                     ("A", "Mesopotamiya", True),
                     ("B", "Baqtriana", False),
@@ -129,6 +134,7 @@ class Command(BaseCommand):
                     "5) Kir II Fors davlatiga asos soldi (mil.avv. 558)\n"
                     "6) Doro I taxtga chiqdi (mil.avv. 522)"
                 ),
+                "explanation": "3000-yillik ikkinchi yarmi -> 1792 (XVIII asr) -> 605 -> 558 -> 539 -> 522.",
                 "options": [
                     ("A", "1, 2, 3, 5, 4, 6", True),
                     ("B", "1, 2, 3, 4, 5, 6", False),
@@ -155,6 +161,7 @@ class Command(BaseCommand):
                     "</div>"
                     "</div>"
                 ),
+                "explanation": "Shamash — quyosh; Sin — oy; Ea — suv; Ishtar — hosildorlik-sevgi-urush ilohasi.",
                 "options": [
                     ("A", "I-a, II-b, III-c, IV-d", True),
                     ("B", "I-b, II-a, III-c, IV-d", False),
@@ -181,6 +188,7 @@ class Command(BaseCommand):
                     "</div>"
                     "</div>"
                 ),
+                "explanation": "Braxmanlar — kohinlar; Kshatriylar — jangchilar; Vayshiylar — dehqon-hunarmand-savdogar; Shudralar — xizmatkor-qul.",
                 "options": [
                     ("A", "I-a, II-b, III-c, IV-d", True),
                     ("B", "I-b, II-a, III-c, IV-d", False),
@@ -193,6 +201,7 @@ class Command(BaseCommand):
                     "Tarixiy shaxsni aniqlang. Uruk shahri podshosi bo'lgan, Mesopotamiya rivoyatlarining eng sevimli qahramoni. "
                     "U boqiy hayotga erishish uchun sehrli giyoh izlagan, ammo ilon uni o'g'irlab ketgan."
                 ),
+                "explanation": "Gilgamish — Uruk shahri podshosi bo'lgan, Mesopotamiya dostonining bosh qahramoni.",
                 "options": [
                     ("A", "Gilgamish", True),
                     ("B", "Sargon I", False),
@@ -205,6 +214,7 @@ class Command(BaseCommand):
                     "Tarixiy shaxsni aniqlang. U mil.avv. 522-yilda Fors taxtiga chiqdi, saltanatni satrapliklarga bo'ldi, "
                     "\"darik\" oltin tangasini joriy etdi va Persepoldan boshlangan \"shoh yo'li\"ni qurdirdi."
                 ),
+                "explanation": "Doro I mil.avv. 522-yilda taxtga chiqib, satrapliklar va 'darik' oltin tangasini joriy etgan, 'shoh yo'li'ni qurdorgan.",
                 "options": [
                     ("A", "Doro I", True),
                     ("B", "Kir II", False),
@@ -217,6 +227,7 @@ class Command(BaseCommand):
                     "Tarixiy davlatni aniqlang. Chandragupta tomonidan asos solingan, poytaxti Pataliputra bo'lgan, "
                     "Ashoka davrida yuksak taraqqiyotga erishgan Shimoliy Hindiston davlati."
                 ),
+                "explanation": "Chandragupta Maurya davlatiga asos solgan, poytaxti Pataliputra, Ashoka davrida eng yuksak taraqqiyotga erishgan.",
                 "options": [
                     ("A", "Maurya davlati", True),
                     ("B", "Magadha davlati", False),
@@ -229,6 +240,7 @@ class Command(BaseCommand):
                     "Tarixiy shaxsni aniqlang. Mil.avv. 246-yilda Xitoyni birlashtirgan, o'ziga tirikligidayoq maqbara qurdirgan, "
                     "Buyuk Xitoy devorini mustahkamlashni buyurgan hukmdor."
                 ),
+                "explanation": "Sin Shixuandi mil.avv. 246-yilda Xitoyni birlashtirgan, Buyuk Xitoy devorini mustahkamlagan va tirikligidayoq ulkan maqbara qurdirgan.",
                 "options": [
                     ("A", "Sin Shixuandi", True),
                     ("B", "U-Di", False),
@@ -241,6 +253,7 @@ class Command(BaseCommand):
                     "Quyidagi shaharlardan qaysilari qadimgi shumer shahar-davlatlariga tegishli?\n"
                     "1) Uruk, 2) Umma, 3) Nineviya, 4) Lagash, 5) Xattusa, 6) Ur"
                 ),
+                "explanation": "Nineviya — Ossuriya poytaxti, Xattusa — Xett poytaxti, shumer shaharlari emas. Uruk, Umma, Lagash, Ur esa Shumerga tegishli.",
                 "options": [
                     ("A", "1, 2, 4, 6", True),
                     ("B", "1, 3, 5, 6", False),
@@ -250,6 +263,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "Ossuriya davlati qaysi ikki davlat tomonidan mil.avv. 605-yilda bosib olindi?",
+                "explanation": "Ossuriya davlati mil.avv. 605-yilda Bobil va Midiya davlatlari ittifoqi tomonidan butunlay tugatilgan.",
                 "options": [
                     ("A", "Bobil va Midiya", True),
                     ("B", "Fors va Misr", False),
@@ -259,6 +273,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "Mil.avv. VII-VI asrlarda O'zbekiston hududi uchun xos bo'lgan holatni aniqlang.",
+                "explanation": "Mil.avv. VII-VI asrlarda O'zbekiston hududida ilk davlatchilik kurtaklari: So'g'd, Baqtriya, Xorazm va sak qabilalari mavjud bo'lgan.",
                 "options": [
                     ("A", "Hududda so'g'dlar, xorazmiylar, baqtriyaliklar va saklar yashagan", True),
                     ("B", "Hudud yagona markazlashgan davlatga birlashgan edi", False),
@@ -271,6 +286,7 @@ class Command(BaseCommand):
                     "Quyidagi xudolardan qaysilari zardushtiylikka tegishli?\n"
                     "1) Ahuramazda, 2) Zevs, 3) Mitra, 4) Amon-Ra, 5) Anaxita, 6) Ahriman"
                 ),
+                "explanation": "Ahuramazda (oliy xudo), Mitra (quyosh/yorug'lik), Anaxita (hosildorlik/suv), Ahriman (yovuzlik). Zevs — yunon, Amon-Ra — misr xudosi.",
                 "options": [
                     ("A", "1, 3, 5, 6", True),
                     ("B", "1, 2, 4, 5", False),
@@ -280,6 +296,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "Buyuk Xitoy devorining uzunligi qariyb qancha bo'lgan?",
+                "explanation": "Buyuk Xitoy devorining uzunligi qariyb 4000 kilometr bo'lgan.",
                 "options": [
                     ("A", "4000 kilometr", True),
                     ("B", "1000 kilometr", False),
@@ -296,6 +313,7 @@ class Command(BaseCommand):
                     "4) Ashoka hukmronligi (mil.avv. III asr)\n"
                     "5) Makedoniyalik Aleksandr Ahamoniylarni bosib oldi (mil.avv. 330)"
                 ),
+                "explanation": "330 (Aleksandr) -> mil.avv. III asr (Ashoka) -> 246 (Sin Shixuandi) -> 206 (Lyu Ban) -> milodiy II asr (Sariq ro'mollilar).",
                 "options": [
                     ("A", "5, 4, 1, 2, 3", True),
                     ("B", "1, 5, 4, 2, 3", False),
@@ -325,6 +343,7 @@ class Command(BaseCommand):
                     "</div>"
                     "</div>"
                 ),
+                "explanation": "Qadimgi Xitoy sivilizatsiyasi Xuanxe va Yantszi daryolari vodiysida vujudga kelgan (3-hudud). 1-hudud — Mesopotamiya, 2-hudud — Hindiston.",
                 "options": [
                     ("A", "3", True),
                     ("B", "1", False),
@@ -351,6 +370,7 @@ class Command(BaseCommand):
                     "<tr><td style='padding:8px 10px;border-right:1px solid #cbd5e1;text-align:center;font-weight:bold;'>6</td><td style='padding:8px 12px;border-right:1px solid #cbd5e1;'>Chandragupta kurashi</td><td style='padding:8px 12px;'>Yunon-makedon qo'shinlari Hindistonni butunlay egalladi</td></tr>"
                     "</tbody></table></div>"
                 ),
+                "explanation": "2 xato: aksincha, Kir II davrida Fors kuchaydi. 4 xato: Sin Shixuandi Xitoyni birlashtirdi. 6 xato: Chandragupta yunon-makedon qo'shinlariga qarshi kurashib g'alaba qozondi.",
                 "options": [
                     ("A", "1, 3, 5", True),
                     ("B", "2, 4, 6", False),
@@ -380,6 +400,7 @@ class Command(BaseCommand):
                     "4) Sin Shixuandi Xitoyni birlashtirdi (mil.avv. 246)."
                     "</div>"
                 ),
+                "explanation": "a=1: O'rta Osiyoda so'g'd-xorazm-baqtriya davlatlari VI asrda mavjud edi. b=2: Ashoka hukmronligi mil.avv. III asrga to'g'ri keladi.",
                 "options": [
                     ("A", "a-1, b-2", True),
                     ("B", "a-3, b-4", False),
@@ -410,11 +431,12 @@ class Command(BaseCommand):
                     "<b>f)</b> Mil.avv. 605-yilda tarix sahnasidan ketdi."
                     "</div>"
                 ),
+                "explanation": "I (faqat Bobil): Bobil poytaxti (a), Xammurapi qonunlari (d). II (umumiy kesishma): Mesopotamiya hududi (c), mil.avv. 605-yilda tarix sahnasidan ketishi (f). III (faqat Ossuriya): Nineviya poytaxti (b), Oshshurbanapal kutubxonasi (e).",
                 "options": [
                     ("A", "I-a,d; II-c,e; III-b,f", False),
                     ("B", "I-b,f; II-c,e; III-a,d", False),
-                    ("C", "I-a,d; II-c,f; III-b,e", False),
-                    ("D", "I-a,d; II-b,e; III-c,f", True),
+                    ("C", "I-a,d; II-c,f; III-b,e", True),
+                    ("D", "I-a,e; II-c,d; III-b,f", False),
                 ],
             },
             {
@@ -435,6 +457,7 @@ class Command(BaseCommand):
                     "</div>"
                     "</div>"
                 ),
+                "explanation": "Elam — Suza; Ossuriya — Nineviya; Xett — Xattusa; Urartu — Tushpa.",
                 "options": [
                     ("A", "1-c; 2-a; 3-d; 4-b", True),
                     ("B", "1-a; 2-c; 3-b; 4-d", False),
@@ -444,6 +467,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "Zardushtiylarning muqaddas kitobi qanday nomlangan?",
+                "explanation": "Zardushtiylarning muqaddas kitobi 'Avesto' deb ataladi.",
                 "options": [
                     ("A", "\"Avesto\"", True),
                     ("B", "\"Bibliya\"", False),
@@ -453,6 +477,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "\"Avesto\" matnlariga yozilgan sharh qanday nomlangan?",
+                "explanation": "'Avesto' matnlariga keyinchalik yozilgan sharh 'Zand' deb ataladi.",
                 "options": [
                     ("A", "\"Zand\"", True),
                     ("B", "\"Rigveda\"", False),
@@ -465,6 +490,7 @@ class Command(BaseCommand):
                     "Quyidagi ixtirolardan qaysilari Qadimgi Xitoyga tegishli?\n"
                     "1) Qog'oz, 2) Kompas, 3) Alifbo (22 harf), 4) Seysmograf, 5) Shaxmat, 6) Nol raqami"
                 ),
+                "explanation": "Qog'oz, kompas, seysmograf — Qadimgi Xitoy ixtirolari. Alifbo (22 harf) — Finikiya, shaxmat va nol raqami — Hindiston.",
                 "options": [
                     ("A", "1, 2, 4", True),
                     ("B", "3, 5, 6", False),
@@ -477,6 +503,7 @@ class Command(BaseCommand):
                     "Quyidagi xalqlardan qaysilari mil.avv. VII-VI asrlarda O'zbekiston hududida yashagan?\n"
                     "1) So'g'diylar, 2) Xorazmliklar, 3) Finikiyaliklar, 4) Baqtriyaliklar, 5) Ossuriyaliklar, 6) Saklar"
                 ),
+                "explanation": "So'g'diylar, xorazmliklar, baqtriyaliklar va saklar mil.avv. VII-VI asrlarda O'zbekiston hududida yashagan.",
                 "options": [
                     ("A", "1, 2, 4, 6", True),
                     ("B", "1, 3, 5, 6", False),
@@ -486,6 +513,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "Saklarning \"o'tkir uchli kigiz qalpoq kiyib yuruvchi\" guruhi qanday atalgan?",
+                "explanation": "Saka-tigraxauda — o'tkir uchli kigiz qalpoq kiyib yuruvchi saklar guruhi.",
                 "options": [
                     ("A", "Saka-tigraxauda", True),
                     ("B", "Saka-tiay-taradarayya", False),
@@ -495,6 +523,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "O'zaro muvofiqlik SAQLANMAGAN javobni toping.",
+                "explanation": "Anaxita hosildorlik va suv ilohasi hisoblanadi, yovuzlik va o'lim xudosi esa Ahrimandir.",
                 "options": [
                     ("A", "Ahuramazda — zardushtiylarning oliy xudosi", False),
                     ("B", "Mitra — quyosh va yorug'lik xudosi", False),
@@ -504,6 +533,7 @@ class Command(BaseCommand):
             },
             {
                 "body": "Doro I zabt etgan mamlakatlar qaysi alohida harbiy-ma'muriy o'lkalarga bo'lingan?",
+                "explanation": "Doro I davlatni satraplik deb atalgan harbiy-ma'muriy o'lkalarga bo'lgan.",
                 "options": [
                     ("A", "Satrapliklar", True),
                     ("B", "Nomlar", False),
@@ -518,6 +548,7 @@ class Command(BaseCommand):
                     "II. Buddaviylik dinida avvaliga xudo tushunchasi bo'lmagan.\n"
                     "III. Sin Shixuandi maqbarasi atigi bir necha oy ichida qurib bitkazilgan."
                 ),
+                "explanation": "I to'g'ri. II to'g'ri. III noto'g'ri — Sin Shixuandi maqbarasi bir necha oyda emas, 720 ming odam tomonidan 37 yil davomida qurilgan.",
                 "options": [
                     ("A", "I-to'g'ri; II-to'g'ri; III-noto'g'ri", True),
                     ("B", "I-noto'g'ri; II-to'g'ri; III-noto'g'ri", False),
@@ -541,6 +572,7 @@ class Command(BaseCommand):
                     "</div>"
                     "</div>"
                 ),
+                "explanation": "Chandragupta — Maurya davlatiga asos solgan; Ashoka — Maurya davlatini yuksaltirgan; Siddhartha Gautama — Buddaviylik diniga asos solgan.",
                 "options": [
                     ("A", "1-a; 2-b; 3-c", True),
                     ("B", "1-b; 2-a; 3-c", False),
@@ -564,6 +596,7 @@ class Command(BaseCommand):
                     "</div>"
                     "</div>"
                 ),
+                "explanation": "Maurya davlati — Pataliputra; Ahamoniylar davlati — Persepol; Xett podsholigi — Xattusa.",
                 "options": [
                     ("A", "1-b; 2-a; 3-c", True),
                     ("B", "1-a; 2-b; 3-c", False),
@@ -581,6 +614,7 @@ class Command(BaseCommand):
                     "5) Muqanna qo'zg'oloni\n"
                     "6) Jakeriya qo'zg'oloni"
                 ),
+                "explanation": "Lyu Ban qo'zg'oloni, 'Qizil qoshlilar', 'Sariq ro'mollilar' — Qadimgi Xitoydagi qo'zg'olonlar.",
                 "options": [
                     ("A", "1, 2, 3", True),
                     ("B", "4, 5, 6", False),
@@ -590,15 +624,16 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyidagi bankdan foydalanib javob bering:\n"
+                    "33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:\n"
                     "A) Xammurapi qonunlarining qabul qilinishi (mil.avv. XVIII asr)\n"
                     "B) Doro I ning satraplik islohoti (mil.avv. 522)\n"
                     "C) Sin Shixuandi Xitoyni birlashtirishi (mil.avv. 246)\n"
                     "D) Kir II Fors davlatiga asos solishi (mil.avv. 558)\n"
                     "E) Makedoniyalik Aleksandrning Ahamoniylarni bosib olishi (mil.avv. 330)\n"
                     "F) Ashoka hukmronligi davri (mil.avv. III asr)\n\n"
-                    "Berilgan voqealardan qaysi biri eng avval sodir bo'lgan?"
+                    "<b>33-topshiriq:</b> Berilgan voqealardan qaysi biri eng avval sodir bo'lgan?"
                 ),
+                "explanation": "Mil.avv. XVIII asr — ro'yxatdagi eng qadimgi sana. To'g'ri javob: A (Xammurapi qonunlarining qabul qilinishi).",
                 "options": [
                     ("A", "Xammurapi qonunlarining qabul qilinishi (mil.avv. XVIII asr)", True),
                     ("B", "Kir II Fors davlatiga asos solishi (mil.avv. 558)", False),
@@ -608,15 +643,16 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyidagi bankdan foydalanib javob bering:\n"
+                    "33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:\n"
                     "A) Xammurapi qonunlarining qabul qilinishi (mil.avv. XVIII asr)\n"
                     "B) Doro I ning satraplik islohoti (mil.avv. 522)\n"
                     "C) Sin Shixuandi Xitoyni birlashtirishi (mil.avv. 246)\n"
                     "D) Kir II Fors davlatiga asos solishi (mil.avv. 558)\n"
                     "E) Makedoniyalik Aleksandrning Ahamoniylarni bosib olishi (mil.avv. 330)\n"
                     "F) Ashoka hukmronligi davri (mil.avv. III asr)\n\n"
-                    "Ahamoniylar davlatining tugatilishiga sabab bo'lgan voqeani aniqlang."
+                    "<b>34-topshiriq:</b> Ahamoniylar davlatining tugatilishiga sabab bo'lgan voqeani aniqlang."
                 ),
+                "explanation": "Makedoniyalik Aleksandr mil.avv. 330-yilda Ahamoniylar davlatini bosib oldi. To'g'ri javob: E.",
                 "options": [
                     ("A", "Makedoniyalik Aleksandrning Ahamoniylarni bosib olishi (mil.avv. 330)", True),
                     ("B", "Doro I ning satraplik islohoti (mil.avv. 522)", False),
@@ -626,15 +662,16 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyidagi bankdan foydalanib javob bering:\n"
+                    "33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:\n"
                     "A) Xammurapi qonunlarining qabul qilinishi (mil.avv. XVIII asr)\n"
                     "B) Doro I ning satraplik islohoti (mil.avv. 522)\n"
                     "C) Sin Shixuandi Xitoyni birlashtirishi (mil.avv. 246)\n"
                     "D) Kir II Fors davlatiga asos solishi (mil.avv. 558)\n"
                     "E) Makedoniyalik Aleksandrning Ahamoniylarni bosib olishi (mil.avv. 330)\n"
                     "F) Ashoka hukmronligi davri (mil.avv. III asr)\n\n"
-                    "Berilgan voqealardan qaysi biri eng keyin sodir bo'lgan?"
+                    "<b>35-topshiriq:</b> Berilgan voqealardan qaysi biri eng keyin sodir bo'lgan?"
                 ),
+                "explanation": "Mil.avv. 246-yil — ro'yxatdagi eng so'nggi sana. To'g'ri javob: C (Sin Shixuandi Xitoyni birlashtirishi).",
                 "options": [
                     ("A", "Sin Shixuandi Xitoyni birlashtirishi (mil.avv. 246)", True),
                     ("B", "Ashoka hukmronligi davri (mil.avv. III asr)", False),
@@ -652,6 +689,7 @@ class Command(BaseCommand):
                 difficulty="medium",
                 subject=subject,
                 points=1,
+                explanation=item.get("explanation", ""),
             )
             for opt_label, opt_text, is_corr in item["options"]:
                 AnswerOption.objects.create(
@@ -668,16 +706,18 @@ class Command(BaseCommand):
             {
                 "title": "Mesopotamiya.",
                 "parts": [
-                    ("a", "Shumerlar ixtiro qilgan, jahondagi eng qadimgi yozuvlardan birini yozing.", "Mixxat"),
-                    ("b", "Mesopotamiya ibodatxonalari qanday nomlanganini yozing.", "Zikkurat"),
+                    ("a", "Shumerlar ixtiro qilgan, jahondagi eng qadimgi yozuvlardan birini yozing.", "Mixxat yozuvi"),
+                    ("b", "Mesopotamiya ibodatxonalari qanday nomlanganini yozing.", "Zikkuratlar"),
                 ],
+                "explanation": "a) Mixxat yozuvi; b) Zikkuratlar.",
             },
             {
                 "title": "Bobil podsholigi.",
                 "parts": [
-                    ("a", "\"Bobil\" so'zining ma'nosini yozing.", "Xudolar darvozasi"),
+                    ("a", "\"Bobil\" so'zining ma'nosini yozing.", "\"Xudolar darvozasi\""),
                     ("b", "Tarixda qonunlar tuzgan birinchi hukmdorni yozing.", "Xammurapi"),
                 ],
+                "explanation": "a) \"Xudolar darvozasi\"; b) Xammurapi.",
             },
             {
                 "title": "Old Osiyo davlatlari.",
@@ -685,6 +725,7 @@ class Command(BaseCommand):
                     ("a", "Ossuriya davlatining dastlabki poytaxtini yozing.", "Oshshur"),
                     ("b", "Ossuriyaning ikkinchi (keyingi) poytaxtini yozing.", "Nineviya"),
                 ],
+                "explanation": "a) Oshshur; b) Nineviya.",
             },
             {
                 "title": "Ahamoniylar davlati.",
@@ -692,48 +733,55 @@ class Command(BaseCommand):
                     ("a", "Fors davlatiga asos solgan hukmdorni yozing.", "Kir II"),
                     ("b", "Saltanatni satrapliklarga bo'lgan, \"darik\" tangasini joriy etgan hukmdorni yozing.", "Doro I"),
                 ],
+                "explanation": "a) Kir II; b) Doro I.",
             },
             {
                 "title": "Qadimgi Hindiston.",
                 "parts": [
-                    ("a", "Hind daryosi havzasidagi eng yirik ikki shaharni yozing.", "Xarappa va Moxenjodaro"),
+                    ("a", "Hind daryosi havzasidagi eng yirik ikki shaharni yozing.", "Moxenjodaro va Xarappa"),
                     ("b", "Hind jamiyati bo'lingan to'rt tabaqadan (kastadan) birinchisini — kohinlar tabaqasini yozing.", "Braxmanlar"),
                 ],
+                "explanation": "a) Moxenjodaro va Xarappa; b) Braxmanlar.",
             },
             {
                 "title": "Buddaviylik.",
                 "parts": [
                     ("a", "Buddaviylik diniga asos solgan shahzodani yozing.", "Siddhartha Gautama"),
-                    ("b", "Bu din nima uchun \"xudolarsiz din\" deb atalganini qisqacha yozing.", "Chunki unda olamni yaratgan oliy xudo tushunchasi yo'q edi"),
+                    ("b", "Bu din nima uchun \"xudolarsiz din\" deb atalganini qisqacha yozing.", "Avvaliga xudo tushunchasi bo'lmagan, xudolar inson azobini yengillashtira olmaydi deb hisoblangan"),
                 ],
+                "explanation": "a) Siddhartha Gautama; b) Avvaliga xudo tushunchasi bo'lmagan, xudolar inson azobini yengillashtira olmaydi deb hisoblangan.",
             },
             {
                 "title": "Qadimgi Xitoy.",
                 "parts": [
                     ("a", "Xitoyni mil.avv. 246-yilda birlashtirgan hukmdorni yozing.", "Sin Shixuandi"),
-                    ("b", "Uning maqbarasini qurgan odamlar sonini yozing.", "700 ming kishi"),
+                    ("b", "Uning maqbarasini qurgan odamlar sonini yozing.", "720 ming odam"),
                 ],
+                "explanation": "a) Sin Shixuandi; b) 720 ming odam.",
             },
             {
                 "title": "Xitoy qo'zg'olonlari.",
                 "parts": [
                     ("a", "Mil.avv. 206-yilda Sin sulolasiga qarshi qo'zg'olon ko'targan shaxsni yozing.", "Lyu Ban"),
-                    ("b", "Milodiy II asrdagi eng yirik qo'zg'olon nomini yozing.", "Sariq ro'mollilar qo'zg'oloni"),
+                    ("b", "Milodiy II asrdagi eng yirik qo'zg'olon nomini yozing.", "\"Sariq ro'mollilar\" qo'zg'oloni"),
                 ],
+                "explanation": "a) Lyu Ban; b) \"Sariq ro'mollilar\" qo'zg'oloni.",
             },
             {
                 "title": "O'zbekiston hududidagi ilk davlatlar.",
                 "parts": [
-                    ("a", "Sug'diylar yashagan hududning yunon manbalaridagi nomini yozing.", "Sug'diyona"),
-                    ("b", "Amudaryoning quyi oqimida yashagan xalqni yozing.", "Xorazmiylar"),
+                    ("a", "Sug'diylar yashagan hududning yunon manbalaridagi nomini yozing.", "So'g'diyona"),
+                    ("b", "Amudaryoning quyi oqimida yashagan xalqni yozing.", "Xorazmliklar"),
                 ],
+                "explanation": "a) So'g'diyona; b) Xorazmliklar.",
             },
             {
                 "title": "Zardushtiylik.",
                 "parts": [
-                    ("a", "Zardushtiylik diniga asos solgan shaxsni yozing.", "Zardusht"),
-                    ("b", "Zardushtiylarning muqaddas kitobini yozing.", "Avesto"),
+                    ("a", "Zardushtiylik diniga asos solgan shaxsni yozing.", "Zardusht (Zoroastr)"),
+                    ("b", "Zardushtiylarning muqaddas kitobini yozing.", "\"Avesto\""),
                 ],
+                "explanation": "a) Zardusht (Zoroastr); b) \"Avesto\".",
             },
         ]
 
@@ -745,6 +793,7 @@ class Command(BaseCommand):
                 difficulty="hard",
                 subject=subject,
                 points=2,
+                explanation=item.get("explanation", ""),
             )
             for order, (lbl, text, ref_ans) in enumerate(item["parts"], start=1):
                 SubQuestion.objects.create(
@@ -763,12 +812,12 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"\n🎉 45 talik Milliy Sertifikat Mock Imtihoni bazaga muvaffaqiyatli yuklandi!\n"
+                f"\n🎉 45 talik Milliy Sertifikat Mock Imtihoni barcha to'g'ri javoblar va tahlillar bilan bazaga muvaffaqiyatli yuklandi!\n"
                 f"Sarlavha: '{test_set.title}' (ID: {test_set.id})\n"
                 f"Boshlanish vaqti: {test_set.scheduled_at.strftime('%Y-%m-%d %H:%M')} (Toshkent vaqti)\n"
                 f"Davomiyligi: {test_set.duration_minutes} daqiqa\n"
                 f"Savollar soni: {test_set.questions.count()} ta (35 ta test + 10 ta yozma ochiq savol)\n"
                 f"Kutish zali havolasi: /tests/mock/{test_set.id}\n"
-                f"Ustaxonada tahrirlash: /teacher/tests/{test_set.id}/build\n"
+                f"Ustaxonada ko'rish: /teacher/tests/{test_set.id}/build\n"
             )
         )
