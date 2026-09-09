@@ -95,10 +95,13 @@ export default function RootsBackground() {
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      {/* Zamonaviy nozik nuqtali grid to'ri */}
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_20%,#000_60%,transparent_100%)] opacity-80" />
+
       {/* Yumshoq yorug'lik dog'lari — tekis fonga chuqurlik beradi */}
-      <div className="absolute -left-40 top-[-15%] size-[42rem] rounded-full bg-primary/[0.10] blur-3xl" />
-      <div className="absolute -right-40 top-[20%] size-[38rem] rounded-full bg-primary/[0.07] blur-3xl" />
-      <div className="absolute bottom-[-20%] left-1/3 size-[40rem] rounded-full bg-primary/[0.06] blur-3xl" />
+      <div className="absolute -left-40 top-[-10%] size-[48rem] rounded-full bg-emerald-500/[0.12] blur-[120px]" />
+      <div className="absolute -right-40 top-[15%] size-[44rem] rounded-full bg-teal-500/[0.08] blur-[120px]" />
+      <div className="absolute bottom-[-10%] left-1/3 size-[44rem] rounded-full bg-emerald-600/[0.07] blur-[140px]" />
 
       <motion.svg
         viewBox={narrow ? MOBILE.viewBox : '0 0 1440 900'}

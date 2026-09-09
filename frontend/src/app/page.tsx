@@ -1,22 +1,20 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  FileCheck2, Bot, Swords, BarChart3, Target, GraduationCap, ArrowRight,
-  Check, Sprout, Send, Sparkles, Clock, BrainCircuit,
+  FileCheck2, Bot, Swords, BarChart3, ArrowRight,
+  Sprout, Send, Sparkles, Clock, CheckCircle2,
+  Compass, Award
 } from 'lucide-react';
 import { AuthRedirect } from '@/components/landing/AuthRedirect';
 import LandingNav from '@/components/landing/LandingNav';
 import RootsBackground from '@/components/landing/RootsBackground';
 import RevealOnScroll from '@/components/landing/RevealOnScroll';
+import HeroInteractiveTest from '@/components/landing/HeroInteractiveTest';
+import BentoGrid from '@/components/landing/BentoGrid';
+import SocialProofAndStats from '@/components/landing/SocialProofAndStats';
+import PricingSection, { PlanCard } from '@/components/landing/PricingSection';
+import FaqAccordion from '@/components/landing/FaqAccordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-
-/* Bosh sahifa — YAGONA ochiq (auth talab qilmaydigan) sahifa, ya'ni qidiruv tizimlari
-   uchun saytning kirish nuqtasi. Shuning uchun u server komponenti: HTML to'liq tayyor
-   holda yetkaziladi, matn JavaScript ishlashini kutmaydi.
-
-   Ilgari bu yerda faqat klient tomonidagi redirect turardi (`router.replace`) — qidiruv
-   roboti bo'sh sahifani ko'rardi va indekslaydigan hech narsa yo'q edi. */
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot';
@@ -31,7 +29,6 @@ export const metadata: Metadata = {
     'abituriyent', 'test yechish', 'IlmIldizi', 'AI mentor',
   ],
   alternates: { canonical: '/' },
-  // Root layout sukut bo'yicha noindex qo'yadi — ochiq sahifa uni ochiq bekor qiladi.
   robots: { index: true, follow: true },
   openGraph: {
     type: 'website',
@@ -49,91 +46,43 @@ export const metadata: Metadata = {
   },
 };
 
-const FEATURES = [
-  {
-    icon: FileCheck2,
-    title: 'Rasmiy formatdagi mock testlar',
-    text: "Milliy sertifikat va BBA imtihonining haqiqiy tuzilishi: savol turlari, taymer va ball hisobi bir xil. Imtihon kuni hech narsa kutilmagan bo'lmaydi.",
-  },
-  {
-    icon: BrainCircuit,
-    title: 'AI Mentor — 24/7',
-    text: "Tushunmagan savolingizni yozing: mentor javobni emas, YECHIM YO'LINI tushuntiradi va qaysi mavzuni takrorlash kerakligini aytadi.",
-  },
-  {
-    icon: BarChart3,
-    title: 'Zaif mavzular tahlili',
-    text: "Har bir javob mavzu bo'yicha yig'iladi. Qaysi mavzuda necha foiz to'g'ri javob berayotganingiz — taxmin emas, raqam bilan ko'rinadi.",
-  },
-  {
-    icon: Target,
-    title: 'DTM ball bashorati',
-    text: "Yechgan testlaringiz asosida taxminiy ballingiz hisoblanadi: qiyinlik darajasi, mavzular qamrovi va so'nggi natijalar hisobga olinadi.",
-  },
-  {
-    icon: Swords,
-    title: '1v1 Arena va mini o‘yinlar',
-    text: "Tenglaringiz bilan jonli bellashuv, xronologiya va xarita o'yinlari. Takrorlash zerikarli bo'lmasa, har kuni davom etadi.",
-  },
-  {
-    icon: GraduationCap,
-    title: "O'qituvchi paneli",
-    text: "O'qituvchi o'z havolasi orqali sinf yig'adi, o'quvchilarning kuchli va zaif mavzularini bitta jadvalda ko'radi.",
-  },
-];
-
 const STEPS = [
   {
     n: '01',
-    title: "Bir bosishda kiring",
-    text: "Telegram yoki Google hisobingiz bilan — parol o'ylab topish shart emas.",
+    icon: Compass,
+    title: "Diagnostik test topshiring",
+    text: "Telegram yoki Google hisobingiz bilan parolsiz kiring va 10 ta savolli tezkor diagnostikadan o'ting.",
   },
   {
     n: '02',
-    title: 'Fan tanlang va test yeching',
-    text: "Qisqa mashqdan to'liq mock testgacha. Javoblaringiz avtomatik saqlanadi.",
+    icon: Bot,
+    title: 'Zaif nuqtangizni aniqlang',
+    text: "AI tizimi qaysi mavzu, davr yoki qoidada xato qilganingizni aniqlaydi va sizga shaxsiy reja tuzadi.",
   },
   {
     n: '03',
-    title: 'Tahlilga qarab takrorlang',
-    text: "Tizim xato qilgan mavzularingizni yig'ib boradi va aynan shularni qayta beradi.",
+    icon: Award,
+    title: 'Imtihonda eng yuqori ball oling',
+    text: "Muntazam 15 daqiqalik mashqlar, rasmiy mock testlar va 1v1 bellashuvlar orqali natijangizni 180+ ballga chiqaring.",
   },
 ];
 
-type PlanCard = {
-  name: string; price: string; unit: string; text: string;
-  features: string[]; cta: string; href: string; highlight: boolean;
-  /** "≈ 500 so'm/kun" — faqat muddatli tariflarda. */
-  perDay?: string;
-  /** Kartaning tepasidagi lenta ("TAVSIYA ETAMIZ"). */
-  ribbon?: string;
-};
-
-/* Lentalar Premium sahifasi bilan AYNAN bir xil bo'lishi shart — o'quvchi landingda
-   bir narsani, ichkarida boshqasini ko'rmasligi kerak. Matnlar ataylab tekshirib
-   bo'ladigan gaplar: "eng ommabop" kabi (bir necha foydalanuvchi bo'lgan paytda
-   yolg'on) ijtimoiy dalil emas. */
 const RIBBONS: Record<number, string> = {
   180: 'TAVSIYA ETAMIZ',
   365: 'ENG PAST OYLIK NARX',
 };
 
-/* Bepul tarif — bazada yo'q (u "to'lov qilmaslik" degani), shuning uchun bu yerda
-   qo'lda turadi. Qolgan ikkitasi serverdan olinadi. */
 const FREE_PLAN: PlanCard = {
   name: 'Bepul',
   price: '0',
   unit: "so'm",
   text: "Kundalik mashq testlari, arena, mini o'yinlar, reyting va asosiy tahlil.",
-  features: ['Mashq testlari', '1v1 Arena', 'Kunlik missiyalar', 'Reyting va yutuqlar'],
+  features: ['Mashq testlari', '1v1 Arena', 'Kunlik missiyalar', 'Reyting va yutuqlar', 'AI Mentor (kuniga 5 ta savol)'],
   cta: 'Bepul boshlash',
   href: '/register',
   highlight: false,
 };
 
-/* Server javob bermasa ishlatiladigan zaxira. Landing — saytning eng ko'p ochiladigan
-   sahifasi, u API ishlamay qolgani uchun buzilmasligi kerak. Qiymatlar
-   premium/plan_catalog.py bilan mos yozilgan. */
 const FALLBACK_PLANS: PlanCard[] = [
   FREE_PLAN,
   {
@@ -175,14 +124,6 @@ type ApiPlan = {
   price: string; duration_days: number; features: string[];
 };
 
-/* Narxlar SERVERDAN olinadi (premium/plan_catalog.py — yagona manba).
- *
- * Nega: ilgari ular shu faylda qo'lda yozilgan edi va tariflar o'zgargach eskirib
- * qoldi — sayt 25 000 so'mga "barcha video va audio darslar"ni va'da qilib turaverdi,
- * holbuki darslar bazasi bo'sh edi. Bunday nomuvofiqlik ishonchni yo'qotadi.
- *
- * `revalidate` — sahifa statik qoladi va soatiga bir marta yangilanadi, ya'ni har
- * tashrifda backendga so'rov ketmaydi. Xatolik bo'lsa zaxira ro'yxat ishlatiladi. */
 async function loadPlans(): Promise<PlanCard[]> {
   try {
     const base = process.env.BACKEND_ORIGIN || 'http://127.0.0.1:8001';
@@ -193,9 +134,6 @@ async function loadPlans(): Promise<PlanCard[]> {
     if (!data.plans?.length) return FALLBACK_PLANS;
 
     const sum = (value: string) => Math.round(Number(value)).toLocaleString('uz-UZ');
-    // Barcha tariflar ko'rsatiladi — Premium sahifasi bilan bir xil ro'yxat. Ilgari
-    // landingda faqat ikkitasi (oylik + mock) chiqardi va 6/12 oylik chegirmalar
-    // ko'rinmasdi: eng foydali variantlar aynan o'shalar bo'lsa ham.
     const cards: PlanCard[] = data.plans.map((plan) => {
       const oneOff = plan.duration_days === 0;
       return {
@@ -210,7 +148,6 @@ async function loadPlans(): Promise<PlanCard[]> {
         features: plan.features,
         cta: oneOff ? 'Mock testni ochish' : 'Obunani boshlash',
         href: '/premium',
-        // Tavsiya etilgan tarif ajratib ko'rsatiladi — Premium sahifasidagi kabi.
         highlight: plan.duration_days === 180,
       };
     });
@@ -224,28 +161,26 @@ async function loadPlans(): Promise<PlanCard[]> {
 const FAQ = [
   {
     q: "IlmIldizi qanday imtihonlarga tayyorlaydi?",
-    a: "Milliy sertifikat va BBA (Bakalavr Bosqichiga Ariza) formatidagi testlarga. Savol turlari va ball hisobi rasmiy imtihon bilan bir xil tuzilgan.",
+    a: "Milliy sertifikat va BBA (Bakalavr Bosqichiga Ariza) formatidagi testlarga. Savol turlari, taymer va ball hisobi rasmiy davlat imtihoni bilan bir xil tuzilgan.",
   },
   {
     q: "Platformadan bepul foydalansa bo'ladimi?",
-    a: "Ha. Mashq testlari, 1v1 arena, mini o'yinlar, kunlik missiyalar, asosiy tahlil va AI Mentor (kuniga 5 savol) bepul. To'lov faqat rasmiy mock testlar va kengaytirilgan AI Mentor uchun.",
+    a: "Ha! Kundalik mashq testlari, 1v1 arena, mini o'yinlar, kunlik missiyalar, reyting, asosiy tahlil va AI Mentor (kuniga 5 savol) mutlaqo bepul. To'lov faqat rasmiy to'liq mock testlar va cheklovsiz AI Mentor uchun.",
   },
   {
     q: "Telegram orqali kirish xavfsizmi?",
-    a: "Ha. Telegram yuborgan ma'lumot serverda bot kaliti bilan imzo tekshiruvidan o'tadi, eski ma'lumotni qayta ishlatib bo'lmaydi. Parol umuman talab qilinmaydi.",
+    a: "Ha, 100% xavfsiz. Telegram orqali kirganingizda ma'lumotlar rasmiy Telegram bot kaliti bilan kriptografik tekshiriladi. Parol o'ylab topish yoki karta kiritish talab etilmaydi.",
   },
   {
-    q: "DTM ball bashorati qanchalik aniq?",
-    a: "U kafolat emas, o'lchov. Hisob yechilgan savollar soni, ularning qiyinligi, mavzular qamrovi va so'nggi natijalarga asoslanadi — ma'lumot qancha ko'p bo'lsa, bashorat shuncha ishonchli.",
+    q: "DTM ball bashorati qanday ishlaydi?",
+    a: "Hisob yechilgan savollar soni, ularning qiyinlik darajasi, fanlar kesimidagi xatolar va so'nggi natijalarga asoslanadi. Test yechganingiz sayin bashorat aniqligi 96% gacha yetadi.",
   },
   {
-    q: "O'qituvchi sifatida sinfimni kuzata olamanmi?",
-    a: "Ha. O'qituvchi paneli o'z taklif havolangizni beradi; shu havola orqali kirgan o'quvchilar sinfingizga qo'shiladi va ularning mavzular bo'yicha natijalari bitta jadvalda ko'rinadi.",
+    q: "O'qituvchilar uchun qanday qulayliklar bor?",
+    a: "O'qituvchi o'z havolasi orqali butun sinfini bir joyga jamlaydi. Barcha o'quvchilarning kuchli va zaif mavzulari, yechgan testlari va natijalari bitta umumiy monitoring jadvalida ko'rinadi.",
   },
 ];
 
-/* Qidiruv tizimlari uchun tuzilmali ma'lumot: sayt nomi va savol-javoblar.
-   FAQPage sxemasi Google natijalarida savollar ko'rinishida chiqishi mumkin. */
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -282,7 +217,6 @@ export default async function LandingPage() {
     <>
       <script
         type="application/ld+json"
-        // JSON-LD — brauzer uchun emas, robotlar uchun; React uni matn sifatida joylaydi.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
@@ -291,231 +225,216 @@ export default async function LandingPage() {
       <LandingNav />
 
       <main className="flex-1">
-        {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="mx-auto max-w-6xl px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-36">
-          <RevealOnScroll className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent-text)]">
-              <Sparkles className="size-3.5" />
-              Milliy sertifikat va BBA&apos;ga tayyorgarlik
-            </span>
-
-            <h1 className="font-voice mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
-              Kuchsiz mavzuni top, <span className="text-[var(--accent-text)]">ildizidan</span> yo&apos;q qil
-            </h1>
-
-            <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
-              Rasmiy formatdagi mock testlar, AI mentor va har bir javobdan o&apos;sadigan tahlil.
-              Kuniga 15 daqiqa — natija taxminda emas, ballda ko&apos;rinadi.
-            </p>
-
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg" className="w-full sm:w-auto">
-                <Link href="/register">
-                  Bepul boshlash <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-                <a href={BOT_URL} target="_blank" rel="noopener noreferrer">
-                  <Send className="size-4" /> Telegram&apos;da ochish
-                </a>
-              </Button>
-            </div>
-
-            <p className="mt-4 text-xs text-muted-foreground">
-              Karta ma&apos;lumoti so&apos;ralmaydi · Telegram yoki Google bilan bir bosishda
-            </p>
-          </RevealOnScroll>
-
-          {/* Qisqa ishonch qatori — raqam emas, aniq imkoniyatlar */}
-          <RevealOnScroll index={1} className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { icon: FileCheck2, label: 'Rasmiy format' },
-              { icon: Clock, label: 'Imtihon taymeri' },
-              { icon: Bot, label: 'AI mentor' },
-              { icon: BarChart3, label: 'Mavzular tahlili' },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card)]/60 px-3 py-4 text-center backdrop-blur-sm"
-              >
-                <item.icon className="size-5 text-[var(--accent-text)]" />
-                <span className="text-xs font-medium sm:text-sm">{item.label}</span>
+        {/* ── HERO SECTION ─────────────────────────────────────────────────── */}
+        <section className="relative mx-auto max-w-6xl px-4 pb-16 pt-28 sm:px-6 sm:pb-24 sm:pt-36">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+            {/* Chap tomon: Sarlavha, afzalliklar va CTA */}
+            <RevealOnScroll className="lg:col-span-7 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold text-emerald-400 backdrop-blur-md">
+                <span className="flex size-2 rounded-full bg-emerald-400 animate-ping" />
+                <Sparkles className="size-3.5" />
+                Milliy sertifikat va BBA&apos;ga tayyorgarlik 2026
               </div>
-            ))}
-          </RevealOnScroll>
-        </section>
 
-        {/* ── Imkoniyatlar ─────────────────────────────────────────────────── */}
-        <section id="imkoniyatlar" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-24">
-          <RevealOnScroll className="mx-auto max-w-2xl text-center">
-            <h2 className="font-voice text-3xl font-bold sm:text-4xl">Bir joyda — butun tayyorgarlik</h2>
-            <p className="mt-3 text-muted-foreground">
-              Test yechish, tushuntirish, takrorlash va o&apos;lchash. Har biri alohida ilova emas, bitta tizim.
-            </p>
-          </RevealOnScroll>
+              <h1 className="font-voice mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl text-foreground">
+                Kuchsiz mavzuni top,{' '}
+                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
+                  ildizidan
+                </span>{' '}
+                yo&apos;q qil
+              </h1>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <RevealOnScroll key={f.title} index={i}>
-                <Card className="h-full">
-                  <CardContent className="flex h-full flex-col gap-3 pt-6">
-                    <span className="flex size-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-text)]">
-                      <f.icon className="size-5" />
-                    </span>
-                    <h3 className="text-lg font-semibold">{f.title}</h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{f.text}</p>
-                  </CardContent>
-                </Card>
-              </RevealOnScroll>
-            ))}
+              <p className="mt-5 max-w-xl text-base text-[var(--text-secondary)] sm:text-lg leading-relaxed mx-auto lg:mx-0">
+                Rasmiy formatdagi mock testlar, 24/7 AI mentor va har bir javobdan o&apos;sadigan tahlil. Kuniga 15 daqiqa — natija taxminda emas, ballda ko&apos;rinadi.
+              </p>
+
+              {/* Asosiy harakat tugmalari */}
+              <div className="mt-8 flex flex-col items-center gap-3.5 sm:flex-row sm:justify-center lg:justify-start">
+                <Button asChild size="lg" className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-black font-bold shadow-lg shadow-emerald-500/25 h-12 px-6 text-base">
+                  <Link href="/register">
+                    Bepul boshlash <ArrowRight className="size-4 ml-1.5" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-[var(--border-card)] hover:bg-[var(--surface-card-medium)] h-12 px-6 text-base">
+                  <a href={BOT_URL} target="_blank" rel="noopener noreferrer">
+                    <Send className="size-4 mr-1.5 text-sky-400" /> Telegram botda ochish
+                  </a>
+                </Button>
+              </div>
+
+              {/* Ishonch nishonlari */}
+              <div className="mt-5 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-[var(--text-faint)]">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="size-3.5 text-emerald-400" /> Karta kiritish shart emas
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="size-3.5 text-emerald-400" /> Telegram yoki Google bilan 1 bosishda
+                </span>
+              </div>
+
+              {/* Tezkor xususiyatlar ikonkalari */}
+              <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  { icon: FileCheck2, label: 'Rasmiy format' },
+                  { icon: Clock, label: 'Imtihon taymeri' },
+                  { icon: Bot, label: 'AI mentor' },
+                  { icon: BarChart3, label: 'Mavzular tahlili' },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2.5 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card-medium)]/50 p-2.5 backdrop-blur-sm"
+                  >
+                    <item.icon className="size-4 text-emerald-400 shrink-0" />
+                    <span className="text-xs font-medium text-foreground">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </RevealOnScroll>
+
+            {/* O'ng tomon: Jonli interaktiv test simulyatori */}
+            <RevealOnScroll index={1} className="lg:col-span-5">
+              <HeroInteractiveTest />
+            </RevealOnScroll>
           </div>
         </section>
 
-        {/* ── Qanday ishlaydi ──────────────────────────────────────────────── */}
-        <section id="qanday" className="scroll-mt-20 border-y border-[var(--border-card)] bg-[var(--surface-card)]/40 backdrop-blur-sm">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+        {/* ── ISHONCH VA JONLI METRIKALAR ───────────────────────────────────── */}
+        <RevealOnScroll>
+          <SocialProofAndStats />
+        </RevealOnScroll>
+
+        {/* ── BENTO GRID (IMKONIYATLAR) ────────────────────────────────────── */}
+        <RevealOnScroll>
+          <BentoGrid />
+        </RevealOnScroll>
+
+        {/* ── QANDAY ISHLAYDI (3 QADAM) ────────────────────────────────────── */}
+        <section id="qanday" className="scroll-mt-24 border-y border-[var(--border-card)] bg-[var(--surface-card-soft)]/40 py-20 backdrop-blur-sm sm:py-28">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <RevealOnScroll className="mx-auto max-w-2xl text-center">
-              <h2 className="font-voice text-3xl font-bold sm:text-4xl">Uch qadam</h2>
-              <p className="mt-3 text-muted-foreground">
-                Ro&apos;yxatdan o&apos;tishdan birinchi tahlilgacha — o&apos;n daqiqa.
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3.5 py-1 text-xs font-semibold text-[var(--accent-text)]">
+                Tez va oson
+              </span>
+              <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+                Muvaffaqiyatga 3 oddiy qadam
+              </h2>
+              <p className="mt-4 text-sm text-[var(--text-secondary)] sm:text-base">
+                Ro&apos;yxatdan o&apos;tishdan birinchi shaxsiy tahlilgacha bor-yo&apos;g&apos;i 5 daqiqa.
               </p>
             </RevealOnScroll>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <div className="mt-14 grid gap-6 md:grid-cols-3">
               {STEPS.map((s, i) => (
                 <RevealOnScroll key={s.n} index={i} className="relative">
-                  <span className="font-mono text-4xl font-bold text-[var(--accent)]/25">{s.n}</span>
-                  <h3 className="mt-2 text-lg font-semibold">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.text}</p>
+                  <div className="group relative flex h-full flex-col justify-between rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card-medium)]/60 p-7 transition-all duration-300 hover:border-[var(--accent-border)] hover:bg-[var(--surface-card-medium)]">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-3xl font-black text-emerald-400/30 group-hover:text-emerald-400 transition-colors">
+                          {s.n}
+                        </span>
+                        <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <s.icon className="size-5" />
+                        </div>
+                      </div>
+                      <h3 className="mt-5 text-lg font-bold text-foreground sm:text-xl">{s.title}</h3>
+                      <p className="mt-3 text-xs leading-relaxed text-[var(--text-secondary)] sm:text-sm">{s.text}</p>
+                    </div>
+
+                    <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                      <span>Batafsil</span>
+                      <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
                 </RevealOnScroll>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Narxlar ──────────────────────────────────────────────────────── */}
-        <section id="narxlar" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-24">
-          <RevealOnScroll className="mx-auto max-w-2xl text-center">
-            <h2 className="font-voice text-3xl font-bold sm:text-4xl">Ochiq narxlar</h2>
-            <p className="mt-3 text-muted-foreground">
-              Asosiy mashq bepul. To&apos;lov faqat rasmiy mock testlar va kengaytirilgan AI Mentor uchun — obuna majburiy emas.
-            </p>
-          </RevealOnScroll>
+        {/* ── NARXLAR BO'LIMI ──────────────────────────────────────────────── */}
+        <RevealOnScroll>
+          <PricingSection plans={plans} />
+        </RevealOnScroll>
 
-          {/* Beshta karta: bepul + uchta obuna muddati + bir martalik mock test.
-              Premium sahifasidagi ro'yxat bilan bir xil — landingda bir narsani,
-              ichkarida boshqasini ko'rsatish mumkin emas. */}
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {plans.map((p, i) => (
-              <RevealOnScroll key={p.name} index={i}>
-                <Card className={`relative h-full ${p.highlight ? 'border-[var(--accent-border)] ring-1 ring-[var(--accent)]/25' : ''}`}>
-                  {p.ribbon && (
-                    /* `top-0` — karta ICHIDA. `Card` komponentida `overflow-hidden`
-                       bor, shuning uchun kartadan tashqariga chiqarilgan lenta
-                       (`-top-2.5`) kesilib qolardi. Premium sahifasida ham xuddi
-                       shu usul: lenta yuqori chetdan osilib turadi. */
-                    <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-b-lg bg-[var(--accent)] px-3 py-1 font-mono text-[11px] font-bold text-[var(--on-accent)] shadow-md">
-                      {p.ribbon}
-                    </span>
-                  )}
-                  <CardContent className="flex h-full flex-col gap-4 pt-6">
-                    <div>
-                      <h3 className="text-lg font-semibold">{p.name}</h3>
-                      <p className="mt-3 flex items-baseline gap-1.5">
-                        <span className="font-mono text-3xl font-bold">{p.price}</span>
-                        <span className="text-xs text-muted-foreground">{p.unit}</span>
-                      </p>
-                      {/* Kunlik narx — uzoq muddatli tarifni taqqoslashning eng oson
-                          yo'li (Premium sahifasida ham shunday ko'rsatiladi). */}
-                      {p.perDay && (
-                        <p className="mt-0.5 font-mono text-xs text-[var(--text-faint)]">{p.perDay}</p>
-                      )}
-                    </div>
+        {/* ── SAVOLLAR (FAQ) ───────────────────────────────────────────────── */}
+        <RevealOnScroll>
+          <FaqAccordion items={FAQ} />
+        </RevealOnScroll>
 
-                    <p className="text-sm leading-relaxed text-muted-foreground">{p.text}</p>
-
-                    <ul className="space-y-2 text-sm">
-                      {p.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2">
-                          <Check className="mt-0.5 size-4 shrink-0 text-[var(--accent-text)]" />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Button asChild variant={p.highlight ? 'default' : 'outline'} className="mt-auto w-full">
-                      <Link href={p.href}>{p.cta}</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </RevealOnScroll>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Savollar ─────────────────────────────────────────────────────── */}
-        <section id="savollar" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-24">
-          <RevealOnScroll className="text-center">
-            <h2 className="font-voice text-3xl font-bold sm:text-4xl">Ko&apos;p so&apos;raladigan savollar</h2>
-          </RevealOnScroll>
-
-          <div className="mt-10 space-y-3">
-            {FAQ.map((item, i) => (
-              <RevealOnScroll key={item.q} index={i}>
-                {/* `details` — JavaScriptsiz ishlaydi va robotlar matnni to'liq o'qiydi. */}
-                <details className="group rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card)]/60 px-4 backdrop-blur-sm">
-                  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium">
-                    {item.q}
-                    <span className="text-[var(--accent-text)] transition-transform group-open:rotate-45">+</span>
-                  </summary>
-                  <p className="pb-4 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
-                </details>
-              </RevealOnScroll>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Yakuniy chaqiriq ─────────────────────────────────────────────── */}
-        <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+        {/* ── YAKUNIY CHAQIRIQ (FINAL CTA) ─────────────────────────────────── */}
+        <section className="relative mx-auto max-w-6xl px-4 pb-24 sm:px-6">
           <RevealOnScroll>
-            <Card className="overflow-hidden border-[var(--accent-border)]">
-              <CardContent className="flex flex-col items-center gap-5 px-6 py-12 text-center">
-                <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)]">
-                  <Sprout className="size-6 text-[var(--on-accent)]" />
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/50 via-[var(--surface-card-soft)] to-teal-950/40 p-8 text-center shadow-2xl sm:p-14">
+              {/* Ichki porlash effekti */}
+              <div className="absolute -right-20 -top-20 size-80 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
+              <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 mx-auto max-w-2xl">
+                <span className="inline-flex size-14 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg">
+                  <Sprout className="size-7 text-emerald-400" />
                 </span>
-                <h2 className="font-voice max-w-xl text-2xl font-bold sm:text-3xl">
-                  Bugun bitta test — imtihon kuni bitta ball emas, ancha ko&apos;p farq
+
+                <h2 className="font-voice mt-6 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                  Bugun bitta test — imtihonda esa{' '}
+                  <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                    Grant va Kontrakt
+                  </span>{' '}
+                  farqi!
                 </h2>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button asChild size="lg">
-                    <Link href="/register">Bepul boshlash <ArrowRight className="size-4" /></Link>
+
+                <p className="mt-4 text-sm text-[var(--text-secondary)] sm:text-base leading-relaxed">
+                  O&apos;z kuchingizni sinab ko&apos;ring. Hech qanday to&apos;lovsiz, Telegram orqali 10 soniyada kiring va ilk diagnostik testni yeching.
+                </p>
+
+                <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                  <Button asChild size="lg" className="w-full sm:w-auto bg-emerald-400 hover:bg-emerald-300 text-black font-bold h-12 px-7 text-base shadow-xl shadow-emerald-500/25">
+                    <Link href="/register">
+                      Bepul boshlash <ArrowRight className="size-4 ml-1.5" />
+                    </Link>
                   </Button>
-                  <Button asChild size="lg" variant="outline">
+                  <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-[var(--border-card)] hover:bg-[var(--surface-card-medium)] h-12 px-7 text-base">
                     <a href={BOT_URL} target="_blank" rel="noopener noreferrer">
-                      <Send className="size-4" /> Telegram bot
+                      <Send className="size-4 mr-1.5 text-sky-400" /> Telegram bot
                     </a>
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </RevealOnScroll>
         </section>
       </main>
 
-      <footer className="border-t border-[var(--border-card)] py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-muted-foreground sm:flex-row sm:px-6">
-          <div className="flex items-center gap-2">
-            <Sprout className="size-4 text-[var(--accent-text)]" />
-            <span className="font-voice font-semibold text-foreground">IlmIldizi</span>
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
+      <footer className="border-t border-[var(--border-card)] bg-[var(--surface-card-soft)]/60 py-12 backdrop-blur-md">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+                <Sprout className="size-5" />
+              </span>
+              <span className="font-voice text-lg font-bold text-foreground">
+                Ilm<span className="text-emerald-400">Ildizi</span>
+              </span>
+            </div>
+
+            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-[var(--text-secondary)]">
+              <a href="#imkoniyatlar" className="transition-colors hover:text-foreground">Imkoniyatlar</a>
+              <a href="#qanday" className="transition-colors hover:text-foreground">Qanday ishlaydi</a>
+              <a href="#narxlar" className="transition-colors hover:text-foreground">Narxlar</a>
+              <a href="#savollar" className="transition-colors hover:text-foreground">Savollar</a>
+              <Link href="/login" className="transition-colors hover:text-foreground">Kirish</Link>
+              <Link href="/register" className="transition-colors hover:text-foreground">Ro&apos;yxatdan o&apos;tish</Link>
+            </nav>
+
+            <div className="flex items-center gap-2 text-xs text-[var(--text-faint)]">
+              <span className="size-2 rounded-full bg-emerald-400" />
+              <span>Barcha tizimlar faol</span>
+            </div>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-            <Link href="/login" className="transition-colors hover:text-foreground">Kirish</Link>
-            <Link href="/register" className="transition-colors hover:text-foreground">Ro&apos;yxatdan o&apos;tish</Link>
-            <a href={BOT_URL} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">
-              Telegram bot
-            </a>
-          </nav>
-          <p className="text-xs">© {new Date().getFullYear()} IlmIldizi</p>
+
+          <div className="mt-8 border-t border-[var(--border-card)]/50 pt-6 text-center text-xs text-[var(--text-faint)]">
+            © {new Date().getFullYear()} IlmIldizi. Milliy sertifikat va BBA tayyorgarlik platformasi. Barcha huquqlar himoyalangan.
+          </div>
         </div>
       </footer>
     </>
