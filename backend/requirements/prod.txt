@@ -6,3 +6,5 @@ redis==5.2.1             # cache + sessions (set REDIS_URL)
 channels-redis==4.2.1    # Channels layer backend — shares the same REDIS_URL, lets
                          # WebSocket groups (battle matchmaking) work across multiple
                          # ASGI worker processes, not just within one.
+gunicorn==23.0.0         # Multi-worker process manager for production
+uvicorn[standard]==0.34.0 # High-performance ASGI worker with uvloop

@@ -34,4 +34,4 @@ RUN DEBUG=False     SECRET_KEY=build-only     DATABASE_URL=sqlite:///build-only.
 
 # docker-compose.yml overrides this with its own `command:` (runs migrate first), but a
 # default CMD means the image still does something sane under a plain `docker run` too.
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "config.asgi:application"]

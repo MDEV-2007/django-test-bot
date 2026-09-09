@@ -76,6 +76,8 @@ services:
       # Channels layer ham shu Redis — bir nechta ASGI ishchisi bo'lganda Arena
       # jangidagi guruhlar barcha ishchilarga ko'rinishi uchun (settings.CHANNEL_LAYERS).
       REDIS_URL: redis://redis:6379/1
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-4}
+      ASGI_THREADS: ${ASGI_THREADS:-16}
     volumes:
       - media:/app/media
       - static:/app/staticfiles
@@ -98,17 +100,19 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # `collectstatic` konteyner ishga tushganda bajariladi (obraz qurilishida emas):
-    # statik fayllar nginx bilan bo'lishiladigan volume'ga tushishi kerak, obrazdagi
-    # nusxa esa volume ustiga chiqmaydi.
+    # Multi-worker Gunicorn + Uvicorn: barcha CPU yadrolarini to'liq ishlatadi.
+    # Bitta worker band bo'lsa ham qolganlari boshqa o'quvchilarga xizmat ko'rsatadi.
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
-             daphne -b 0.0.0.0 -p 8000 config.asgi:application"
+             gunicorn -w $${WEB_CONCURRENCY:-4} -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --timeout 120 --access-logfile - config.asgi:application"
 
   db:
     image: postgres:16-alpine
     restart: unless-stopped
+    # 200 ta ulanishgacha ruxsat va 256MB RAM kesh — mock imtihon paytidagi ko'p sonli
+    # so'rovlarda ulanish yetmay qolishining oldini oladi.
+    command: postgres -c max_connections=200 -c shared_buffers=256MB -c work_mem=16MB
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-ilmildizi}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ilmildizi}

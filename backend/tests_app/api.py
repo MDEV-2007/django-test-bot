@@ -6,9 +6,11 @@ bo'lardi."""
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse
+from django.db import transaction
 from django.db.models import Avg, Count, F, Q, Case, When, IntegerField
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from core import background
 from rest_framework.decorators import (
     api_view, authentication_classes, permission_classes,
 )
@@ -194,10 +196,18 @@ def center_api(request):
     })
 
 
+@transaction.atomic
 def _new_attempt(profile, test):
     attempt = Attempt.objects.create(profile=profile, test=test)
-    for q in test.ordered_questions():
-        AttemptAnswer.objects.create(attempt=attempt, question=q)
+    q_ids = list(test.questions.values_list('id', flat=True))
+    order = test.question_order or []
+    if order:
+        rank = {qid: i for i, qid in enumerate(order)}
+        q_ids = sorted(q_ids, key=lambda qid: rank.get(qid, len(order) + qid))
+    AttemptAnswer.objects.bulk_create([
+        AttemptAnswer(attempt=attempt, question_id=qid)
+        for qid in q_ids
+    ])
     return attempt
 
 
@@ -307,8 +317,8 @@ def mock_broadcast_api(request, test_id):
         send_all = bool(send_all)
 
     from telegrambot.mock_notifier import send_mock_announcement
-    res = send_mock_announcement(test, send_all=send_all)
-    return Response(res)
+    background.submit(send_mock_announcement, test.id, send_all=send_all)
+    return Response({'ok': True, 'queued': True, 'message': "Xabarnoma yuborish fon rejimida boshlandi."})
 
 
 @api_view(['POST'])
@@ -437,7 +447,7 @@ def _question_screen_data(attempt, q_idx, current_answer, total_questions, secon
 
 
 def _get_answers_and_current(attempt, q_idx):
-    answers = list(attempt.answers.all().order_by('id'))
+    answers = list(attempt.answers.select_related('question').all().order_by('id'))
     total = len(answers)
     if total == 0:
         return None, None, 0
@@ -486,6 +496,7 @@ def answer_api(request, attempt_id):
 
 
 @api_view(['POST'])
+@transaction.atomic
 def finish_api(request, attempt_id):
     attempt = get_object_or_404(Attempt, id=attempt_id, profile=request.user.profile)
     if attempt.is_completed:
