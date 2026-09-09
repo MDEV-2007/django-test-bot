@@ -113,9 +113,13 @@ def handle_check_subscription(chat_id, tg_user, callback_query_id):
 
 
 def handle_start(chat_id, tg_user, referral_code=None):
-    # Profil gate'dan OLDIN yaratiladi: referal havolasi bilan kelgan foydalanuvchi obuna
-    # bo'lish uchun chatdan chiqib ketsa ham, taklif qilgan do'sti bonusini yo'qotmaydi.
-    get_or_create_profile(tg_user, referral_code=referral_code)
+    # Deep link: 'landing' yoki 'pdf_gift' referal kodi emas, maxsus kirish belgisi
+    is_landing = (referral_code == 'landing')
+    is_pdf_gift = (referral_code == 'pdf_gift')
+    actual_ref = None if (is_landing or is_pdf_gift) else referral_code
+
+    # Profil gate'dan OLDIN yaratiladi
+    get_or_create_profile(tg_user, referral_code=actual_ref)
     if gate_blocks(chat_id, tg_user):
         return
 
@@ -137,10 +141,28 @@ def handle_start(chat_id, tg_user, referral_code=None):
         [{'text': "\U0001F381 Do'stlarni taklif qil", 'callback_data': 'referral_info'}],
         [{'text': "\U0001F48E Premium sotib olish", 'callback_data': 'premium_menu'}],
     ]}
+
+    if is_pdf_gift:
+        welcome_text = (
+            "Assalomu alaykum! 🎁 2026-yilgi Milliy sertifikat namunaviy savollar to'plamiga xush kelibsiz.\n\n"
+            "Quyidagi tugma orqali ilovaga kiring va bepul diagnostik test topshirib, "
+            "zaif mavzularingizni AI Mentor orqali tahlil qilib oling!"
+        )
+    elif is_landing:
+        welcome_text = (
+            "Assalomu alaykum! IlmIldizi saytidan kelganingizdan xursandmiz.\n\n"
+            "Platforma siz uchun to'liq tayyor. Pastdagi tugma orqali ilovani oching va "
+            "10 ta savolli dastlabki diagnostik testni parolsiz, bepul yechib ko'ring!"
+        )
+    else:
+        welcome_text = (
+            "Assalomu alaykum! IlmIldizi botiga xush kelibsiz.\n\n"
+            "Pastdagi tugma orqali ilovani oching yoki premium imkoniyatlarni ko'ring."
+        )
+
     result = send_message(
         chat_id,
-        "Assalomu alaykum! IlmIldizi botiga xush kelibsiz.\n\n"
-        "Pastdagi tugma orqali ilovani oching yoki premium imkoniyatlarni ko'ring.",
+        welcome_text,
         reply_markup=keyboard,
     )
     if not result.get('ok'):

@@ -10,13 +10,17 @@ import LandingNav from '@/components/landing/LandingNav';
 import RootsBackground from '@/components/landing/RootsBackground';
 import RevealOnScroll from '@/components/landing/RevealOnScroll';
 import HeroInteractiveTest from '@/components/landing/HeroInteractiveTest';
+import SubjectsShowcase from '@/components/landing/SubjectsShowcase';
 import BentoGrid from '@/components/landing/BentoGrid';
 import SocialProofAndStats from '@/components/landing/SocialProofAndStats';
+import LeadMagnetBanner from '@/components/landing/LeadMagnetBanner';
 import PricingSection, { PlanCard } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
+import MobileStickyCta from '@/components/landing/MobileStickyCta';
+import LiveActivityToast from '@/components/landing/LiveActivityToast';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
-const BOT_URL = 'https://t.me/ilmildiziuz_bot';
+const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
 
 export const metadata: Metadata = {
   title: "IlmIldizi — Milliy sertifikat va BBA'ga onlayn tayyorgarlik",
@@ -222,10 +226,12 @@ export default async function LandingPage() {
       <AuthRedirect />
       <RootsBackground />
       <LandingNav />
+      <LiveActivityToast />
+      <MobileStickyCta />
 
       <main className="flex-1">
         {/* ── HERO SECTION ─────────────────────────────────────────────────── */}
-        <section className="relative mx-auto max-w-6xl px-4 pb-16 pt-32 sm:px-6 sm:pb-24 sm:pt-40">
+        <section className="relative mx-auto max-w-6xl px-4 pb-12 pt-32 sm:px-6 sm:pb-16 sm:pt-40">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
             {/* Chap tomon: Sarlavha va CTA */}
             <RevealOnScroll className="lg:col-span-7 text-center lg:text-left">
@@ -301,6 +307,11 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* ── FANLAR VITRINASI ──────────────────────────────────────────────── */}
+        <RevealOnScroll>
+          <SubjectsShowcase />
+        </RevealOnScroll>
+
         {/* ── ISHONCH VA JONLI METRIKALAR ───────────────────────────────────── */}
         <RevealOnScroll>
           <SocialProofAndStats />
@@ -309,6 +320,11 @@ export default async function LandingPage() {
         {/* ── BENTO GRID (IMKONIYATLAR) ────────────────────────────────────── */}
         <RevealOnScroll>
           <BentoGrid />
+        </RevealOnScroll>
+
+        {/* ── LEAD MAGNET (BEPUL PDF SOVG'A) ─────────────────────────────────── */}
+        <RevealOnScroll>
+          <LeadMagnetBanner />
         </RevealOnScroll>
 
         {/* ── QANDAY ISHLAYDI (3 QADAM) ────────────────────────────────────── */}
