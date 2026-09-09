@@ -48,7 +48,7 @@ export default function HeroInteractiveTest() {
           particleCount: 40,
           spread: 65,
           origin: { y: 0.7 },
-          colors: ['#10b981', '#14b8a6', '#f59e0b', '#ffffff'],
+          colors: ['#059669', '#10b981', '#f59e0b', '#3b82f6'],
         });
       } catch {
         // no-op
@@ -64,36 +64,36 @@ export default function HeroInteractiveTest() {
   return (
     <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
       {/* Yumshoq tashqi nur */}
-      <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-indigo-500/15 opacity-60 blur-xl pointer-events-none" />
+      <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-emerald-200/40 via-teal-100/30 to-sky-100/40 opacity-70 blur-2xl pointer-events-none" />
 
-      {/* Asosiy simulyator oynasi */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/[0.12] bg-[#0c0e14]/90 p-5 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-        {/* Darcha boshqaruvi (macOS uslubidagi nuqtalar + Fan yorlig'i) */}
-        <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 text-xs">
+      {/* Asosiy simulyator oynasi (Oq qog'ozli test varaqasi kabi toza) */}
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
+        {/* Darcha boshqaruvi */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4 text-xs">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 mr-2">
-              <span className="size-2.5 rounded-full bg-rose-500/70" />
-              <span className="size-2.5 rounded-full bg-amber-500/70" />
-              <span className="size-2.5 rounded-full bg-emerald-500/70" />
+              <span className="size-2.5 rounded-full bg-rose-400" />
+              <span className="size-2.5 rounded-full bg-amber-400" />
+              <span className="size-2.5 rounded-full bg-emerald-400" />
             </div>
-            <span className="rounded-full bg-white/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-emerald-300 border border-emerald-500/20">
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200">
               {QUESTION.subject}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 font-mono text-zinc-400 text-xs">
-            <Clock className="size-3.5 text-emerald-400" />
+          <div className="flex items-center gap-1.5 font-mono text-slate-500 text-xs">
+            <Clock className="size-3.5 text-emerald-600" />
             <span>{QUESTION.time}</span>
           </div>
         </div>
 
         {/* Savol matni */}
         <div className="mt-4">
-          <div className="flex items-center justify-between text-[11px] text-zinc-400">
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
             <span>Savol #1 (Mock Test)</span>
-            <span className="font-mono text-emerald-400 font-semibold">+1.5 ball</span>
+            <span className="font-mono text-emerald-600 font-semibold">+1.5 ball</span>
           </div>
-          <p className="mt-2 text-sm sm:text-base font-semibold leading-relaxed text-white">
+          <p className="mt-2 text-sm sm:text-base font-semibold leading-relaxed text-slate-900">
             {QUESTION.text}
           </p>
         </div>
@@ -102,15 +102,15 @@ export default function HeroInteractiveTest() {
         <div className="mt-5 space-y-2.5">
           {QUESTION.options.map((option) => {
             const isSelected = selectedId === option.id;
-            let btnStyle = 'border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.16] text-zinc-200';
+            let btnStyle = 'border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 text-slate-800';
 
             if (hasAnswered) {
               if (option.isCorrect) {
-                btnStyle = 'border-emerald-500/70 bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30';
+                btnStyle = 'border-emerald-500 bg-emerald-50/90 text-emerald-900 ring-1 ring-emerald-500/40';
               } else if (isSelected && !option.isCorrect) {
-                btnStyle = 'border-rose-500/70 bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/30';
+                btnStyle = 'border-rose-500 bg-rose-50/90 text-rose-900 ring-1 ring-rose-500/40';
               } else {
-                btnStyle = 'opacity-40 border-white/[0.04] bg-white/[0.01] text-zinc-400';
+                btnStyle = 'opacity-40 border-slate-100 bg-slate-50/30 text-slate-400';
               }
             }
 
@@ -125,10 +125,10 @@ export default function HeroInteractiveTest() {
                   <span
                     className={`flex size-6 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold transition-colors ${
                       isSelected && option.isCorrect
-                        ? 'bg-emerald-500 text-black'
+                        ? 'bg-emerald-600 text-white'
                         : isSelected && !option.isCorrect
-                        ? 'bg-rose-500 text-white'
-                        : 'bg-white/[0.08] text-zinc-400 group-hover:text-white'
+                        ? 'bg-rose-600 text-white'
+                        : 'bg-white border border-slate-200 text-slate-700 shadow-xs group-hover:border-slate-300'
                     }`}
                   >
                     {option.label}
@@ -139,10 +139,10 @@ export default function HeroInteractiveTest() {
                 {hasAnswered && (
                   <div>
                     {option.isCorrect && (
-                      <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
+                      <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
                     )}
                     {isSelected && !option.isCorrect && (
-                      <XCircle className="size-4 shrink-0 text-rose-400" />
+                      <XCircle className="size-4 shrink-0 text-rose-500" />
                     )}
                   </div>
                 )}
@@ -151,48 +151,48 @@ export default function HeroInteractiveTest() {
           })}
         </div>
 
-        {/* AI Mentor izohi va harakat */}
+        {/* AI Mentor izohi */}
         <AnimatePresence>
           {hasAnswered && (
             <motion.div
               initial={{ opacity: 0, y: 8, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: 4, height: 0 }}
-              className="mt-4 overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-500/[0.08] p-3.5 backdrop-blur-xl"
+              className="mt-4 overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50/80 p-3.5"
             >
               <div className="flex items-start gap-3">
-                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-black shadow-md">
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
                   <BrainCircuit className="size-4" />
                 </div>
                 <div className="flex-1 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-emerald-300">
+                    <span className="font-semibold text-emerald-800">
                       AI Mentor tushuntirishi
                     </span>
                     {isCorrect ? (
-                      <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-300">
+                      <span className="flex items-center gap-1 rounded-full bg-emerald-200/60 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-800">
                         <Award className="size-3" /> +15 XP
                       </span>
                     ) : (
-                      <span className="rounded-full bg-rose-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-rose-300">
+                      <span className="rounded-full bg-rose-200/60 px-2 py-0.5 font-mono text-[10px] font-bold text-rose-800">
                         Zaif nuqta qayd etildi
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 leading-relaxed text-zinc-300">
+                  <p className="mt-1.5 leading-relaxed text-slate-700">
                     {isCorrect ? QUESTION.explanation.correct : QUESTION.explanation.incorrect}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/[0.08] pt-2.5">
+              <div className="mt-3 flex items-center justify-between gap-2 border-t border-emerald-200/60 pt-2.5">
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors"
+                  className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-800 transition-colors"
                 >
                   <RotateCcw className="size-3" /> Qayta yechish
                 </button>
-                <Button asChild size="sm" className="h-7 text-xs px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-full shadow">
+                <Button asChild size="sm" className="h-7 text-xs px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-full shadow-xs">
                   <Link href="/register">
                     To&apos;liq testga o&apos;tish <ArrowRight className="size-3 ml-1" />
                   </Link>
@@ -203,11 +203,11 @@ export default function HeroInteractiveTest() {
         </AnimatePresence>
 
         {!hasAnswered && (
-          <div className="mt-3 flex items-center justify-between text-[11px] text-zinc-400">
+          <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
             <span className="flex items-center gap-1">
-              <Sparkles className="size-3 text-emerald-400" /> Javobni tanlang va tekshirib ko&apos;ring
+              <Sparkles className="size-3 text-emerald-600" /> Variantni tanlang va tekshiring
             </span>
-            <span className="font-mono text-zinc-400">Interaktiv namuna</span>
+            <span className="font-mono text-slate-400">Interaktiv namuna</span>
           </div>
         )}
       </div>

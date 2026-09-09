@@ -21,16 +21,16 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
   };
 
   return (
-    <section id="savollar" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28">
+    <section id="savollar" className="mx-auto max-w-3xl scroll-mt-28 px-4 py-20 sm:px-6 sm:py-28">
       <div className="text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3.5 py-1 text-xs font-semibold text-[var(--accent-text)]">
+        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
           <HelpCircle className="size-3.5" />
           Savollarga javoblar
         </span>
-        <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+        <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           Ko&apos;p so&apos;raladigan savollar
         </h2>
-        <p className="mt-3 text-sm text-[var(--text-secondary)]">
+        <p className="mt-3 text-sm text-slate-600">
           Platforma, imtihonlar va to&apos;lovlar haqida eng muhim ma&apos;lumotlar.
         </p>
       </div>
@@ -44,19 +44,19 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
               key={item.q}
               className={`overflow-hidden rounded-2xl border transition-all duration-200 ${
                 isOpen
-                  ? 'border-[var(--accent-border)] bg-[var(--surface-card-medium)] shadow-lg'
-                  : 'border-[var(--border-card)] bg-[var(--surface-card-soft)] hover:border-[var(--border-card)]/80 hover:bg-[var(--surface-card-soft)]/90'
+                  ? 'border-emerald-300 bg-white shadow-md ring-1 ring-emerald-100'
+                  : 'border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-xs'
               }`}
             >
               <button
                 onClick={() => toggle(index)}
                 aria-expanded={isOpen}
-                className="flex w-full items-center justify-between gap-4 p-5 text-left text-sm font-semibold text-foreground sm:text-base"
+                className="flex w-full items-center justify-between gap-4 p-5 text-left text-sm font-semibold text-slate-900 sm:text-base"
               >
                 <span>{item.q}</span>
                 <span
-                  className={`flex size-7 shrink-0 items-center justify-center rounded-full border border-[var(--border-card)] bg-[var(--surface-input)] text-[var(--accent-text)] transition-transform duration-200 ${
-                    isOpen ? 'rotate-180 bg-[var(--accent-soft)]' : ''
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 transition-transform duration-200 ${
+                    isOpen ? 'rotate-180 bg-emerald-50 text-emerald-700 border-emerald-200' : ''
                   }`}
                 >
                   <ChevronDown className="size-4" />
@@ -71,7 +71,7 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.25, ease: 'easeInOut' }}
                   >
-                    <div className="border-t border-[var(--border-card)]/60 px-5 pb-5 pt-3 text-xs leading-relaxed text-[var(--text-secondary)] sm:text-sm">
+                    <div className="border-t border-slate-100 px-5 pb-5 pt-3 text-xs leading-relaxed text-slate-600 sm:text-sm">
                       {item.a}
                     </div>
                   </motion.div>

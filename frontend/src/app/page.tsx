@@ -14,7 +14,6 @@ import BentoGrid from '@/components/landing/BentoGrid';
 import SocialProofAndStats from '@/components/landing/SocialProofAndStats';
 import PricingSection, { PlanCard } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
-import { Button } from '@/components/ui/button';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot';
@@ -230,21 +229,21 @@ export default async function LandingPage() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
             {/* Chap tomon: Sarlavha va CTA */}
             <RevealOnScroll className="lg:col-span-7 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold text-emerald-400 backdrop-blur-md">
-                <span className="flex size-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
+                <span className="flex size-2 rounded-full bg-emerald-600 animate-pulse" />
                 <Sparkles className="size-3.5" />
                 Milliy sertifikat va BBA&apos;ga onlayn tayyorgarlik
               </div>
 
-              <h1 className="font-voice mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl text-white">
+              <h1 className="font-voice mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl text-slate-900">
                 Kuchsiz mavzuni top,{' '}
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
+                <span className="text-emerald-600">
                   ildizidan
                 </span>{' '}
                 yo&apos;q qil
               </h1>
 
-              <p className="mt-5 max-w-xl text-base text-zinc-300 sm:text-lg leading-relaxed mx-auto lg:mx-0">
+              <p className="mt-5 max-w-xl text-base text-slate-600 sm:text-lg leading-relaxed mx-auto lg:mx-0">
                 Rasmiy formatdagi mock testlar, 24/7 AI mentor va har bir javobdan o&apos;sadigan tahlil. Kuniga 15 daqiqa — natija taxminda emas, imtihondagi ballda ko&apos;rinadi.
               </p>
 
@@ -252,7 +251,7 @@ export default async function LandingPage() {
               <div className="mt-8 flex flex-col items-center gap-3.5 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
                   href="/register"
-                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 hover:brightness-110 text-black font-bold h-12 px-7 text-sm sm:text-base shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-300/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-12 px-7 text-sm sm:text-base shadow-[0_4px_16px_rgba(5,150,105,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Bepul boshlash <ArrowRight className="size-4" />
                 </Link>
@@ -260,19 +259,19 @@ export default async function LandingPage() {
                   href={BOT_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white font-medium h-12 px-6 text-sm sm:text-base backdrop-blur-md transition-all"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-medium h-12 px-6 text-sm sm:text-base shadow-xs transition-all"
                 >
-                  <Send className="size-4 text-sky-400" /> Telegram bot
+                  <Send className="size-4 text-sky-600" /> Telegram bot
                 </a>
               </div>
 
               {/* Ishonch nishonlari */}
-              <div className="mt-5 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-zinc-400">
+              <div className="mt-5 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-500">
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="size-3.5 text-emerald-400" /> Karta kiritish shart emas
+                  <CheckCircle2 className="size-3.5 text-emerald-600" /> Karta kiritish shart emas
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="size-3.5 text-emerald-400" /> Telegram yoki Google bilan 1 bosishda
+                  <CheckCircle2 className="size-3.5 text-emerald-600" /> Telegram yoki Google bilan 1 bosishda
                 </span>
               </div>
 
@@ -286,10 +285,10 @@ export default async function LandingPage() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-[#0c0e14]/60 px-3.5 py-2 backdrop-blur-md"
+                    className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 shadow-xs"
                   >
-                    <item.icon className="size-3.5 text-emerald-400 shrink-0" />
-                    <span className="text-xs font-medium text-zinc-300">{item.label}</span>
+                    <item.icon className="size-3.5 text-emerald-600 shrink-0" />
+                    <span className="text-xs font-medium text-slate-700">{item.label}</span>
                   </div>
                 ))}
               </div>
@@ -313,16 +312,16 @@ export default async function LandingPage() {
         </RevealOnScroll>
 
         {/* ── QANDAY ISHLAYDI (3 QADAM) ────────────────────────────────────── */}
-        <section id="qanday" className="scroll-mt-28 border-y border-white/[0.06] bg-[#0c0e14]/40 py-20 backdrop-blur-md sm:py-28">
+        <section id="qanday" className="scroll-mt-28 border-y border-slate-200 bg-slate-50/60 py-20 sm:py-28">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <RevealOnScroll className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold text-emerald-400">
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
                 Oddiy va samarali
               </span>
-              <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
+              <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
                 Muvaffaqiyatga 3 oddiy qadam
               </h2>
-              <p className="mt-4 text-sm text-zinc-400 sm:text-base">
+              <p className="mt-4 text-sm text-slate-600 sm:text-base">
                 Ro&apos;yxatdan o&apos;tishdan birinchi shaxsiy tahlilgacha bor-yo&apos;g&apos;i 5 daqiqa.
               </p>
             </RevealOnScroll>
@@ -330,21 +329,21 @@ export default async function LandingPage() {
             <div className="mt-14 grid gap-5 md:grid-cols-3">
               {STEPS.map((s, i) => (
                 <RevealOnScroll key={s.n} index={i} className="relative">
-                  <div className="group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-white/[0.08] bg-[#0c0e14]/75 p-7 backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/30 hover:bg-[#0f121a]">
+                  <div className="group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-300 hover:border-emerald-300 hover:shadow-xl">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-3xl font-black text-white/20 group-hover:text-emerald-400 transition-colors">
+                        <span className="font-mono text-3xl font-black text-slate-200 group-hover:text-emerald-600 transition-colors">
                           {s.n}
                         </span>
-                        <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
                           <s.icon className="size-5" />
                         </div>
                       </div>
-                      <h3 className="mt-5 text-lg font-bold text-white sm:text-xl">{s.title}</h3>
-                      <p className="mt-3 text-xs leading-relaxed text-zinc-400 sm:text-sm">{s.text}</p>
+                      <h3 className="mt-5 text-lg font-bold text-slate-900 sm:text-xl">{s.title}</h3>
+                      <p className="mt-3 text-xs leading-relaxed text-slate-600 sm:text-sm">{s.text}</p>
                     </div>
 
-                    <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                    <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-emerald-700">
                       <span>Batafsil</span>
                       <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
                     </div>
@@ -368,31 +367,31 @@ export default async function LandingPage() {
         {/* ── YAKUNIY CHAQIRIQ (FINAL CTA) ─────────────────────────────────── */}
         <section className="relative mx-auto max-w-6xl px-4 pb-24 sm:px-6">
           <RevealOnScroll>
-            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/25 via-[#0c0e14]/90 to-[#0c0e14]/90 p-8 text-center shadow-2xl sm:p-14 backdrop-blur-2xl">
-              <div className="absolute -right-20 -top-20 size-80 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
-              <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-500/15 blur-3xl pointer-events-none" />
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/50 p-8 text-center shadow-lg sm:p-14">
+              <div className="absolute -right-20 -top-20 size-80 rounded-full bg-emerald-100/40 blur-3xl pointer-events-none" />
+              <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-100/40 blur-3xl pointer-events-none" />
 
               <div className="relative z-10 mx-auto max-w-2xl">
-                <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-lg">
-                  <Sprout className="size-6 text-emerald-400" />
+                <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-xs">
+                  <Sprout className="size-6 text-emerald-600" />
                 </span>
 
-                <h2 className="font-voice mt-6 text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
+                <h2 className="font-voice mt-6 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
                   Bugun bitta test — imtihonda esa{' '}
-                  <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                  <span className="text-emerald-600">
                     Grant va Kontrakt
                   </span>{' '}
                   farqi!
                 </h2>
 
-                <p className="mt-4 text-sm text-zinc-300 sm:text-base leading-relaxed">
+                <p className="mt-4 text-sm text-slate-600 sm:text-base leading-relaxed">
                   O&apos;z bilimingizni hoziroq sinab ko&apos;ring. Hech qanday to&apos;lovsiz, Telegram orqali 10 soniyada kiring va diagnostik testni yeching.
                 </p>
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
                   <Link
                     href="/register"
-                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 hover:brightness-110 text-black font-bold h-12 px-7 text-sm sm:text-base shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-300/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-12 px-7 text-sm sm:text-base shadow-[0_4px_16px_rgba(5,150,105,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
                     Bepul boshlash <ArrowRight className="size-4" />
                   </Link>
@@ -400,9 +399,9 @@ export default async function LandingPage() {
                     href={BOT_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white font-medium h-12 px-6 text-sm sm:text-base backdrop-blur-md transition-all"
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-medium h-12 px-6 text-sm sm:text-base shadow-xs transition-all"
                   >
-                    <Send className="size-4 text-sky-400" /> Telegram bot
+                    <Send className="size-4 text-sky-600" /> Telegram bot
                   </a>
                 </div>
               </div>
@@ -412,34 +411,34 @@ export default async function LandingPage() {
       </main>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/[0.06] bg-[#07080b] py-12">
+      <footer className="border-t border-slate-200 bg-white py-12">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2.5">
-              <span className="flex size-7 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+              <span className="flex size-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
                 <Sprout className="size-4" />
               </span>
-              <span className="font-voice text-base font-bold text-white">
-                Ilm<span className="text-emerald-400">Ildizi</span>
+              <span className="font-voice text-base font-bold text-slate-900">
+                Ilm<span className="text-emerald-600">Ildizi</span>
               </span>
             </div>
 
-            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-zinc-400">
-              <a href="#imkoniyatlar" className="transition-colors hover:text-white">Imkoniyatlar</a>
-              <a href="#qanday" className="transition-colors hover:text-white">Qanday ishlaydi</a>
-              <a href="#narxlar" className="transition-colors hover:text-white">Narxlar</a>
-              <a href="#savollar" className="transition-colors hover:text-white">Savollar</a>
-              <Link href="/login" className="transition-colors hover:text-white">Kirish</Link>
-              <Link href="/register" className="transition-colors hover:text-white">Ro&apos;yxatdan o&apos;tish</Link>
+            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-600">
+              <a href="#imkoniyatlar" className="transition-colors hover:text-slate-900">Imkoniyatlar</a>
+              <a href="#qanday" className="transition-colors hover:text-slate-900">Qanday ishlaydi</a>
+              <a href="#narxlar" className="transition-colors hover:text-slate-900">Narxlar</a>
+              <a href="#savollar" className="transition-colors hover:text-slate-900">Savollar</a>
+              <Link href="/login" className="transition-colors hover:text-slate-900">Kirish</Link>
+              <Link href="/register" className="transition-colors hover:text-slate-900">Ro&apos;yxatdan o&apos;tish</Link>
             </nav>
 
-            <div className="flex items-center gap-2 text-xs text-zinc-400">
-              <span className="size-1.5 rounded-full bg-emerald-400" />
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span className="size-1.5 rounded-full bg-emerald-500" />
               <span>Barcha tizimlar barqaror</span>
             </div>
           </div>
 
-          <div className="mt-8 border-t border-white/[0.04] pt-6 text-center text-xs text-zinc-400">
+          <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
             © {new Date().getFullYear()} IlmIldizi. Barcha huquqlar himoyalangan.
           </div>
         </div>

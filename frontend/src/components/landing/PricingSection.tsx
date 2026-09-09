@@ -36,25 +36,25 @@ export default function PricingSection({ plans }: PricingSectionProps) {
     <section id="narxlar" className="mx-auto max-w-6xl scroll-mt-28 px-4 py-20 sm:px-6 sm:py-28">
       {/* Sarlavha */}
       <div className="mx-auto max-w-3xl text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold text-emerald-400">
+        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
           <Zap className="size-3.5" />
           Shaffof va hamyonbop
         </span>
-        <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-          Natijaga mos <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">ochiq narxlar</span>
+        <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+          Natijaga mos <span className="text-emerald-600">ochiq narxlar</span>
         </h2>
-        <p className="mt-4 text-sm text-zinc-400 sm:text-base">
+        <p className="mt-4 text-sm text-slate-600 sm:text-base">
           Mashq testlari, arena va mini o&apos;yinlar bepul. To&apos;liq mock testlar va AI Mentor uchun arzon tarifni tanlang.
         </p>
 
         {/* Filtr tugmalari */}
-        <div className="mt-8 inline-flex items-center rounded-full border border-white/[0.08] bg-[#0c0e14]/80 p-1 backdrop-blur-xl">
+        <div className="mt-8 inline-flex items-center rounded-full border border-slate-200 bg-slate-100 p-1">
           <button
             onClick={() => setFilter('all')}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
               filter === 'all'
-                ? 'bg-emerald-500 text-black shadow-md'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Barcha rejalar
@@ -63,8 +63,8 @@ export default function PricingSection({ plans }: PricingSectionProps) {
             onClick={() => setFilter('subscription')}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
               filter === 'subscription'
-                ? 'bg-emerald-500 text-black shadow-md'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Muddatli obuna (Tejamkor)
@@ -73,8 +73,8 @@ export default function PricingSection({ plans }: PricingSectionProps) {
             onClick={() => setFilter('one_time')}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
               filter === 'one_time'
-                ? 'bg-emerald-500 text-black shadow-md'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Bir martalik
@@ -92,50 +92,50 @@ export default function PricingSection({ plans }: PricingSectionProps) {
               key={p.name}
               className={`relative flex flex-col justify-between rounded-2xl sm:rounded-3xl border transition-all duration-300 ${
                 isHighlight
-                  ? 'border-emerald-500/50 bg-gradient-to-b from-emerald-950/25 via-[#0c0e14]/90 to-[#0c0e14]/90 shadow-[0_12px_40px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30'
-                  : 'border-white/[0.08] bg-[#0c0e14]/75 hover:border-white/[0.16] hover:bg-[#0f121a]'
-              } p-6 sm:p-8 backdrop-blur-xl`}
+                  ? 'border-2 border-emerald-500 bg-gradient-to-b from-emerald-50/40 via-white to-white shadow-xl shadow-emerald-500/10 ring-1 ring-emerald-500/30'
+                  : 'border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-lg'
+              } p-6 sm:p-8`}
             >
               {p.ribbon && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-black shadow-lg">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-600 px-3.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
                   {p.ribbon}
                 </span>
               )}
 
               <div>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-white sm:text-xl">{p.name}</h3>
+                  <h3 className="text-lg font-bold text-slate-900 sm:text-xl">{p.name}</h3>
                   {isHighlight && (
-                    <span className="flex size-6 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-300">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
                       <Sparkles className="size-3.5" />
                     </span>
                   )}
                 </div>
 
                 <div className="mt-4 flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl font-extrabold text-white sm:text-4xl">
+                  <span className="font-mono text-3xl font-extrabold text-slate-900 sm:text-4xl">
                     {p.price}
                   </span>
-                  <span className="text-xs text-zinc-400">{p.unit}</span>
+                  <span className="text-xs text-slate-500">{p.unit}</span>
                 </div>
 
                 {p.perDay && (
-                  <p className="mt-1 font-mono text-xs font-medium text-emerald-400">
+                  <p className="mt-1 font-mono text-xs font-medium text-emerald-700">
                     {p.perDay}
                   </p>
                 )}
 
-                <p className="mt-4 text-xs sm:text-sm leading-relaxed text-zinc-300">
+                <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-600">
                   {p.text}
                 </p>
 
                 {/* Imkoniyatlar ro'yxati */}
-                <div className="mt-6 border-t border-white/[0.06] pt-5">
-                  <span className="text-xs font-semibold text-white">Tarif imkoniyatlari:</span>
-                  <ul className="mt-3 space-y-2.5 text-xs sm:text-sm text-zinc-300">
+                <div className="mt-6 border-t border-slate-100 pt-5">
+                  <span className="text-xs font-semibold text-slate-900">Tarif imkoniyatlari:</span>
+                  <ul className="mt-3 space-y-2.5 text-xs sm:text-sm text-slate-600">
                     {p.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5">
-                        <Check className="mt-0.5 size-4 shrink-0 text-emerald-400" />
+                        <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -150,8 +150,8 @@ export default function PricingSection({ plans }: PricingSectionProps) {
                   size="lg"
                   className={`w-full rounded-full ${
                     isHighlight
-                      ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 text-black hover:brightness-110 font-bold shadow-lg shadow-emerald-500/25 border border-emerald-300/40'
-                      : 'border-white/10 hover:bg-white/[0.06] text-white'
+                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-md'
+                      : 'border-slate-300 hover:bg-slate-50 text-slate-800'
                   }`}
                 >
                   <Link href={p.href}>
@@ -165,13 +165,13 @@ export default function PricingSection({ plans }: PricingSectionProps) {
       </div>
 
       {/* Xavfsizlik kafolati */}
-      <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-zinc-400">
+      <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500">
         <div className="flex items-center gap-2">
-          <Shield className="size-4 text-emerald-400" />
+          <Shield className="size-4 text-emerald-600" />
           <span>Payme va Click orqali 100% xavfsiz to&apos;lov</span>
         </div>
         <div className="flex items-center gap-2">
-          <Check className="size-4 text-emerald-400" />
+          <Check className="size-4 text-emerald-600" />
           <span>Yashirin to&apos;lovlar yo&apos;q, istalgan vaqtda to&apos;xtatish mumkin</span>
         </div>
       </div>
