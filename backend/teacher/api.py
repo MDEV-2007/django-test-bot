@@ -121,8 +121,13 @@ def test_info_api(request, pk):
             'id': test.id, 'title': test.title, 'subject_id': test.subject_id,
             'category': test.category, 'duration_minutes': test.duration_minutes,
             'description': test.description,
+            'is_live_mock': test.is_live_mock,
+            'scheduled_at': test.scheduled_at.strftime('%Y-%m-%dT%H:%M') if test.scheduled_at else '',
         })
-    form = TestInfoForm(request.data, instance=test)
+    data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+    if 'scheduled_at' in data and not data['scheduled_at']:
+        data['scheduled_at'] = None
+    form = TestInfoForm(data, instance=test)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     form.save()

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, Save, Trash2 } from 'lucide-react';
+import { Loader2, Save, Trash2, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -29,6 +29,7 @@ type TestSetEdit = {
   id: number; title: string; subject_id: number | null; description: string; category: string;
   duration_minutes: number; created_by_id: number | null;
   is_premium: boolean; is_published: boolean; is_archived: boolean;
+  is_live_mock?: boolean; scheduled_at?: string;
   /* Urinishlar soni — o'chirish mumkinmi yoki yo'qligini shu belgilaydi (server
      urinishlari bor testni o'chirmaydi, o'quvchilar natijasi yo'qolmasligi uchun). */
   attempt_count: number;
@@ -67,6 +68,8 @@ export default function PanelTestSetEditPage() {
           title: ts.title, subject: ts.subject_id, description: ts.description, category: ts.category,
           duration_minutes: ts.duration_minutes, created_by: ts.created_by_id,
           is_premium: ts.is_premium, is_published: ts.is_published, is_archived: ts.is_archived,
+          is_live_mock: Boolean(ts.is_live_mock),
+          scheduled_at: ts.scheduled_at || null,
         }),
       });
       toast.success('Test saqlandi');
@@ -175,6 +178,46 @@ export default function PanelTestSetEditPage() {
                 <Input id="ts-dur" type="number" value={ts.duration_minutes} onChange={(e) => setTs({ ...ts, duration_minutes: Number(e.target.value) })} />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-amber-500/30 bg-amber-500/[0.04]">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Flame className="size-4 text-amber-500" /> Katta Jonli Mock Imtihon
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <Label htmlFor="is_live_mock" className="text-sm font-medium">Jonli Mock Imtihon holati</Label>
+                <p className="text-xs text-muted-foreground">
+                  Yoqilsa, belgilangan vaqtgacha o&apos;quvchilarga teskari sanoq taymeri ko&apos;rsatiladi.
+                </p>
+              </div>
+              <Switch
+                id="is_live_mock"
+                checked={Boolean(ts.is_live_mock)}
+                onCheckedChange={(v) => setTs({ ...ts, is_live_mock: v })}
+              />
+            </div>
+
+            {ts.is_live_mock && (
+              <div className="space-y-2 pt-2 border-t border-amber-500/20">
+                <Label htmlFor="scheduled_at" className="text-xs font-semibold">
+                  Boshlanish vaqti (Toshkent vaqti)
+                </Label>
+                <Input
+                  id="scheduled_at"
+                  type="datetime-local"
+                  value={ts.scheduled_at || ''}
+                  onChange={(e) => setTs({ ...ts, scheduled_at: e.target.value })}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Masalan: <b>2026-09-10T21:30</b> (Ertaga soat 21:30)
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

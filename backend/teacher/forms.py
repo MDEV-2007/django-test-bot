@@ -25,7 +25,7 @@ class TestInfoForm(StyledMixin, forms.ModelForm):
     by the view, not exposed here."""
     class Meta:
         model = TestSet
-        fields = ['title', 'subject', 'category', 'duration_minutes', 'description']
+        fields = ['title', 'subject', 'category', 'duration_minutes', 'description', 'is_live_mock', 'scheduled_at']
         widgets = {'description': forms.Textarea(attrs={'rows': 3})}
 
     def __init__(self, *args, **kwargs):

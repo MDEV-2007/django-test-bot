@@ -489,6 +489,8 @@ def testset_edit_api(request, pk):
             'description': ts.description, 'category': ts.category,
             'duration_minutes': ts.duration_minutes, 'created_by_id': ts.created_by_id,
             'is_premium': ts.is_premium, 'is_published': ts.is_published, 'is_archived': ts.is_archived,
+            'is_live_mock': ts.is_live_mock,
+            'scheduled_at': ts.scheduled_at.strftime('%Y-%m-%dT%H:%M') if ts.scheduled_at else '',
             # Urinishlari bor testni o'chirib bo'lmaydi (pastdagi DELETE shartiga
             # qarang). Interfeys buni OLDINDAN bilishi kerak: aks holda u
             # "urinishlar ham o'chadi" deb va'da beradi, so'ng server rad etadi va
@@ -502,7 +504,10 @@ def testset_edit_api(request, pk):
             return Response({'error': "Bu testda o'quvchilar urinishlari bor — o'chirish o'rniga arxivlang."}, status=400)
         ts.delete()
         return Response({'deleted': True})
-    form = TestSetForm(request.data, instance=ts)
+    data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+    if 'scheduled_at' in data and not data['scheduled_at']:
+        data['scheduled_at'] = None
+    form = TestSetForm(data, instance=ts)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     form.save()

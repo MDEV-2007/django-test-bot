@@ -14,11 +14,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Flame } from 'lucide-react';
 
 type Subject = { id: number; name: string; slug: string };
 type TestInfo = {
   id: number; title: string; subject_id: number | null; category: string;
   duration_minutes: number; description: string;
+  is_live_mock?: boolean;
+  scheduled_at?: string;
 };
 
 // Backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
@@ -56,6 +60,8 @@ export default function TeacherTestInfoPage() {
         body: JSON.stringify({
           title: info.title, subject: info.subject_id, category: info.category,
           duration_minutes: info.duration_minutes, description: info.description,
+          is_live_mock: Boolean(info.is_live_mock),
+          scheduled_at: info.scheduled_at || null,
         }),
       });
       router.push(`/teacher/tests/${id}/build`);
@@ -128,6 +134,41 @@ export default function TeacherTestInfoPage() {
                 id="description" rows={3} value={info.description}
                 onChange={(e) => setInfo({ ...info, description: e.target.value })}
               />
+            </div>
+
+            {/* Katta Jonli Mock Imtihon Sozlamasi */}
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5 font-bold text-sm text-foreground">
+                    <Flame className="size-4 text-amber-500" /> Katta Jonli Mock Imtihon
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Belgilangan vaqtda boshlanadi, unga qadar sahifada taymer (Countdown) ko&apos;rinadi.
+                  </p>
+                </div>
+                <Switch
+                  checked={Boolean(info.is_live_mock)}
+                  onCheckedChange={(checked) => setInfo({ ...info, is_live_mock: checked })}
+                />
+              </div>
+
+              {info.is_live_mock && (
+                <div className="space-y-2 pt-2 border-t border-amber-500/20">
+                  <Label htmlFor="scheduled_at" className="text-xs font-semibold">
+                    Boshlanish vaqti (Toshkent vaqti)
+                  </Label>
+                  <Input
+                    id="scheduled_at"
+                    type="datetime-local"
+                    value={info.scheduled_at || ''}
+                    onChange={(e) => setInfo({ ...info, scheduled_at: e.target.value })}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Masalan: ertaga soat 21:30 uchun <b>2026-09-10T21:30</b> qilib belgilang.
+                  </p>
+                </div>
+              )}
             </div>
 
             <Button onClick={submit} disabled={saving} size="lg" className="w-full">
