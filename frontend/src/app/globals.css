@@ -781,3 +781,25 @@ html[data-tg='on'] .min-h-screen-safe {
    `nav.ilm-mobile-tabbar`ning umumiy qoidasi (yuqorida, `env(safe-area-inset-bottom)`
    bilan) Telegram'da ham ishlaydi — notch yo'q qurilmada `env()` baribir 0ga teng
    bo'ladi, shuning uchun bu hech qanday amaliy holatni yomonlashtirmaydi. */
+
+/* ── Toast (Sonner) Premium Design ─────────────────────────────────────────── */
+.cn-toast {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px !important;
+  font-family: inherit;
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme='dark'] .cn-toast {
+  background-color: rgba(22, 27, 34, 0.94) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f0f6fc !important;
+}
+
+[data-theme='light'] .cn-toast {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #1a202c !important;
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12) !important;
+}
