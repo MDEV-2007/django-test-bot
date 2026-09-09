@@ -87,15 +87,21 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyidagi hukmdorlar va ular bilan bog'liq ma'lumotlar mos ravishda berilgan javobni aniqlang.\n"
-                    "1) Sargon I\n"
-                    "2) Xammurapi\n"
-                    "3) Kir II\n"
-                    "4) Doro I\n"
-                    "a) Fors davlatiga asos solgan, Midiya va Bobilni zabt etgan\n"
-                    "b) Akkad va Shumerni birlashtirib, muntazam qo'shin tuzgan\n"
-                    "c) Saltanatni satrapliklarga bo'lgan, \"darik\" tangasini joriy etgan\n"
-                    "d) Mesopotamiyani birlashtirib, qonunlar tuzgan"
+                    "<p>Quyidagi hukmdorlar va ular bilan bog'liq ma'lumotlar mos ravishda berilgan javobni aniqlang.</p>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>1)</b> Sargon I<br/>"
+                    "<b>2)</b> Xammurapi<br/>"
+                    "<b>3)</b> Kir II<br/>"
+                    "<b>4)</b> Doro I"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>a)</b> Fors davlatiga asos solgan, Midiya va Bobilni zabt etgan<br/>"
+                    "<b>b)</b> Akkad va Shumerni birlashtirib, muntazam qo'shin tuzgan<br/>"
+                    "<b>c)</b> Saltanatni satrapliklarga bo'lgan, \"darik\" tangasini joriy etgan<br/>"
+                    "<b>d)</b> Mesopotamiyani birlashtirib, qonunlar tuzgan"
+                    "</div>"
+                    "</div>"
                 ),
                 "options": [
                     ("A", "1-b; 2-d; 3-a; 4-c", True),
@@ -132,16 +138,22 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyida berilgan Mesopotamiya xudolari va ularning izohi to'g'ri moslashtirilgan javobni toping.\n"
-                    "I Shamash\n"
-                    "II Sin\n"
-                    "III Ea\n"
-                    "IV Ishtar\n"
-                    "a Quyosh xudosi, oliy hakam\n"
-                    "b Oy xudosi\n"
-                    "c Suv xudosi\n"
-                    "d Hosildorlik, sevgi, urush va g'alaba ilohasi\n"
-                    "e Yerosti saltanati xudosi"
+                    "<p>Quyida berilgan Mesopotamiya xudolari va ularning izohi to'g'ri moslashtirilgan javobni toping.</p>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>I</b> Shamash<br/>"
+                    "<b>II</b> Sin<br/>"
+                    "<b>III</b> Ea<br/>"
+                    "<b>IV</b> Ishtar"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>a</b> Quyosh xudosi, oliy hakam<br/>"
+                    "<b>b</b> Oy xudosi<br/>"
+                    "<b>c</b> Suv xudosi<br/>"
+                    "<b>d</b> Hosildorlik, sevgi, urush va g'alaba ilohasi<br/>"
+                    "<b>e</b> Yerosti saltanati xudosi"
+                    "</div>"
+                    "</div>"
                 ),
                 "options": [
                     ("A", "I-a, II-b, III-c, IV-d", True),
@@ -152,16 +164,22 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyida berilgan Hindiston tabaqalari (varnalar) va ularning izohi to'g'ri moslashtirilgan javobni toping.\n"
-                    "I Braxmanlar\n"
-                    "II Kshatriylar\n"
-                    "III Vayshiylar\n"
-                    "IV Shudralar\n"
-                    "a Kohinlar, hind ruhoniylari\n"
-                    "b Jangchilar\n"
-                    "c Dehqon, hunarmand va savdogarlar\n"
-                    "d Xizmatkorlar va qullar\n"
-                    "e Hech qaysi tabaqaga mansub bo'lmaganlar"
+                    "<p>Quyida berilgan Hindiston tabaqalari (varnalar) va ularning izohi to'g'ri moslashtirilgan javobni toping.</p>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>I</b> Braxmanlar<br/>"
+                    "<b>II</b> Kshatriylar<br/>"
+                    "<b>III</b> Vayshiylar<br/>"
+                    "<b>IV</b> Shudralar"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>a</b> Kohinlar, hind ruhoniylari<br/>"
+                    "<b>b</b> Jangchilar<br/>"
+                    "<b>c</b> Dehqon, hunarmand va savdogarlar<br/>"
+                    "<b>d</b> Xizmatkorlar va qullar<br/>"
+                    "<b>e</b> Hech qaysi tabaqaga mansub bo'lmaganlar"
+                    "</div>"
+                    "</div>"
                 ),
                 "options": [
                     ("A", "I-a, II-b, III-c, IV-d", True),
@@ -287,11 +305,25 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Sxematik diagrammada uch qadimgi sivilizatsiya daryo vodiysi ko'rsatilgan:\n"
-                    "1: Dajla-Frot oralig'i\n"
-                    "2: Hind-Gang vodiysi\n"
-                    "3: Xuanxe-Yantszi vodiysi\n"
-                    "1–3 raqamlaridan qaysi biri Qadimgi Xitoy sivilizatsiyasi vujudga kelgan hududni bildiradi?"
+                    "<p>Sxematik diagrammada uch qadimgi sivilizatsiya daryo vodiysi ko'rsatilgan. "
+                    "1–3 raqamlaridan qaysi biri <b>Qadimgi Xitoy sivilizatsiyasi</b> vujudga kelgan hududni bildiradi?</p>"
+                    "<div style='display:flex;gap:12px;justify-content:center;margin:18px 0;flex-wrap:wrap;'>"
+                    "<div style='border:2px solid #94a3b8;border-radius:10px;width:140px;overflow:hidden;background:rgba(148,163,184,0.08);text-align:center;'>"
+                    "<div style='background:rgba(148,163,184,0.2);padding:6px;font-weight:bold;font-size:16px;border-bottom:1px solid #94a3b8;'>1</div>"
+                    "<div style='padding:12px 8px;font-size:13px;font-weight:500;min-height:54px;display:flex;align-items:center;justify-content:center;'>Dajla-Frot oralig'i</div>"
+                    "<div style='padding:6px;font-weight:bold;font-size:18px;color:#f59e0b;border-top:1px dashed #94a3b8;'>?</div>"
+                    "</div>"
+                    "<div style='border:2px solid #94a3b8;border-radius:10px;width:140px;overflow:hidden;background:rgba(148,163,184,0.08);text-align:center;'>"
+                    "<div style='background:rgba(148,163,184,0.2);padding:6px;font-weight:bold;font-size:16px;border-bottom:1px solid #94a3b8;'>2</div>"
+                    "<div style='padding:12px 8px;font-size:13px;font-weight:500;min-height:54px;display:flex;align-items:center;justify-content:center;'>Hind-Gang vodiysi</div>"
+                    "<div style='padding:6px;font-weight:bold;font-size:18px;color:#f59e0b;border-top:1px dashed #94a3b8;'>?</div>"
+                    "</div>"
+                    "<div style='border:2px solid #94a3b8;border-radius:10px;width:140px;overflow:hidden;background:rgba(148,163,184,0.08);text-align:center;'>"
+                    "<div style='background:rgba(148,163,184,0.2);padding:6px;font-weight:bold;font-size:16px;border-bottom:1px solid #94a3b8;'>3</div>"
+                    "<div style='padding:12px 8px;font-size:13px;font-weight:500;min-height:54px;display:flex;align-items:center;justify-content:center;'>Xuanxe-Yantszi vodiysi</div>"
+                    "<div style='padding:6px;font-weight:bold;font-size:18px;color:#f59e0b;border-top:1px dashed #94a3b8;'>?</div>"
+                    "</div>"
+                    "</div>"
                 ),
                 "options": [
                     ("A", "3", True),
@@ -302,13 +334,22 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Tarixiy voqea va uning natijasi o'zaro to'g'ri mos berilgan qatorlarni aniqlang.\n"
-                    "1 Xammurapi Mesopotamiyani birlashtirishi — Bobil eng qudratli davlatga aylandi\n"
-                    "2 Kir II ning Midiyani bo'ysundirishi — Fors davlati zaiflashib qoldi\n"
-                    "3 Doro I ning satraplik islohoti — Saltanat boshqaruvi mustahkamlandi\n"
-                    "4 Sin Shixuandi hukmronligi — Xitoy mayda davlatlarga bo'linib ketdi\n"
-                    "5 Zardushtning va'zlari — \"Avesto\" kitobi vujudga keldi\n"
-                    "6 Chandragupta kurashi — Yunon-makedon qo'shinlari Hindistonni butunlay egalladi"
+                    "<p>Tarixiy voqea va uning natijasi o'zaro to'g'ri mos berilgan qatorlarni aniqlang.</p>"
+                    "<div style='overflow-x:auto;margin:16px 0;border-radius:8px;border:1px solid #cbd5e1;'>"
+                    "<table style='width:100%;border-collapse:collapse;font-size:14px;'>"
+                    "<thead><tr style='background:rgba(100,116,139,0.12);border-bottom:2px solid #94a3b8;'>"
+                    "<th style='padding:8px 10px;border-right:1px solid #cbd5e1;width:44px;text-align:center;'>№</th>"
+                    "<th style='padding:8px 12px;border-right:1px solid #cbd5e1;text-align:left;'>Voqea</th>"
+                    "<th style='padding:8px 12px;text-align:left;'>Natija</th>"
+                    "</tr></thead>"
+                    "<tbody>"
+                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 10px;border-right:1px solid #cbd5e1;text-align:center;font-weight:bold;'>1</td><td style='padding:8px 12px;border-right:1px solid #cbd5e1;'>Xammurapi Mesopotamiyani birlashtirishi</td><td style='padding:8px 12px;'>Bobil eng qudratli davlatga aylandi</td></tr>"
+                    "<tr style='border-bottom:1px solid #e2e8f0;background:rgba(100,116,139,0.04);'><td style='padding:8px 10px;border-right:1px solid #cbd5e1;text-align:center;font-weight:bold;'>2</td><td style='padding:8px 12px;border-right:1px solid #cbd5e1;'>Kir II ning Midiyani bo'ysundirishi</td><td style='padding:8px 12px;'>Fors davlati zaiflashib qoldi</td></tr>"
+                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 10px;border-right:1px solid #cbd5e1;text-align:center;font-weight:bold;'>3</td><td style='padding:8px 12px;border-right:1px solid #cbd5e1;'>Doro I ning satraplik islohoti</td><td style='padding:8px 12px;'>Saltanat boshqaruvi mustahkamlandi</td></tr>"
+                    "<tr style='border-bottom:1px solid #e2e8f0;background:rgba(100,116,139,0.04);'><td style='padding:8px 10px;border-right:1px solid #cbd5e1;text-align:center;font-weight:bold;'>4</td><td style='padding:8px 12px;border-right:1px solid #cbd5e1;'>Sin Shixuandi hukmronligi</td><td style='padding:8px 12px;'>Xitoy mayda davlatlarga bo'linib ketdi</td></tr>"
+                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 10px;border-right:1px solid #cbd5e1;text-align:center;font-weight:bold;'>5</td><td style='padding:8px 12px;border-right:1px solid #cbd5e1;'>Zardushtning va'zlari</td><td style='padding:8px 12px;'>\"Avesto\" kitobi vujudga keldi</td></tr>"
+                    "<tr><td style='padding:8px 10px;border-right:1px solid #cbd5e1;text-align:center;font-weight:bold;'>6</td><td style='padding:8px 12px;border-right:1px solid #cbd5e1;'>Chandragupta kurashi</td><td style='padding:8px 12px;'>Yunon-makedon qo'shinlari Hindistonni butunlay egalladi</td></tr>"
+                    "</tbody></table></div>"
                 ),
                 "options": [
                     ("A", "1, 3, 5", True),
@@ -319,12 +360,25 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Jadvalda harflar bilan belgilangan o'rinlarga mos keluvchi ma'lumotni toping.\n"
-                    "Davr: Mil.avv. VI asr -> O'rta Osiyo: a | Jahon: Doro I Fors taxtiga chiqdi (mil.avv. 522)\n"
-                    "Davr: Mil.avv. III asr -> O'rta Osiyo: Zardusht va'zlari 21 ta kitobga jamlandi | Jahon: b\n\n"
-                    "Ma'lumotlar: 1) O'rta Osiyoda so'g'd, xorazm, baqtriya davlatlari mavjud edi; "
-                    "2) Ashoka hukmronligi (mil.avv. III asr); 3) Kir II Fors davlatiga asos soldi (mil.avv. 558); "
+                    "<p>Jadvalda harflar bilan belgilangan o'rinlarga mos keluvchi ma'lumotni toping.</p>"
+                    "<div style='overflow-x:auto;margin:16px 0;border-radius:8px;border:1px solid #cbd5e1;'>"
+                    "<table style='width:100%;border-collapse:collapse;font-size:14px;'>"
+                    "<thead><tr style='background:rgba(100,116,139,0.12);border-bottom:2px solid #94a3b8;'>"
+                    "<th style='padding:8px 12px;border-right:1px solid #cbd5e1;text-align:left;width:130px;'>Davr</th>"
+                    "<th style='padding:8px 12px;border-right:1px solid #cbd5e1;text-align:left;'>O'rta Osiyo voqeasi</th>"
+                    "<th style='padding:8px 12px;text-align:left;'>Jahon voqeasi</th>"
+                    "</tr></thead>"
+                    "<tbody>"
+                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:10px 12px;border-right:1px solid #cbd5e1;font-weight:bold;'>Mil.avv. VI asr</td><td style='padding:10px 12px;border-right:1px solid #cbd5e1;font-weight:bold;color:#f59e0b;font-size:16px;'>a</td><td style='padding:10px 12px;'>Doro I Fors taxtiga chiqdi (mil.avv. 522)</td></tr>"
+                    "<tr style='background:rgba(100,116,139,0.04);'><td style='padding:10px 12px;border-right:1px solid #cbd5e1;font-weight:bold;'>Mil.avv. III asr</td><td style='padding:10px 12px;border-right:1px solid #cbd5e1;'>Zardusht va'zlari 21 ta kitobga jamlandi</td><td style='padding:10px 12px;font-weight:bold;color:#f59e0b;font-size:16px;'>b</td></tr>"
+                    "</tbody></table></div>"
+                    "<div style='padding:10px 14px;background:rgba(100,116,139,0.08);border-radius:8px;font-size:13px;line-height:1.6;'>"
+                    "<b>Ma'lumotlar:</b><br/>"
+                    "1) O'rta Osiyoda so'g'd, xorazm, baqtriya davlatlari mavjud edi;<br/>"
+                    "2) Ashoka hukmronligi (mil.avv. III asr);<br/>"
+                    "3) Kir II Fors davlatiga asos soldi (mil.avv. 558);<br/>"
                     "4) Sin Shixuandi Xitoyni birlashtirdi (mil.avv. 246)."
+                    "</div>"
                 ),
                 "options": [
                     ("A", "a-1, b-2", True),
@@ -335,13 +389,26 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyida berilgan ma'lumotlarni tahlil qilib Eyler-Venn diagrammasiga mos keladigan javoblarni aniqlang (Bobil va Ossuriya davlatlari):\n"
-                    "a) Poytaxti Bobil shahri bo'lgan\n"
-                    "b) Poytaxti Nineviya (avval Oshshur) bo'lgan\n"
-                    "c) Mesopotamiya hududida joylashgan\n"
-                    "d) Xammurapi qonunlari bilan mashhur\n"
-                    "e) Oshshurbanapal kutubxonasi bilan mashhur\n"
-                    "f) Mil.avv. 605-yilda tarix sahnasidan ketdi"
+                    "<p>Quyida berilgan ma'lumotlarni tahlil qilib <b>Eyler-Venn diagrammasiga</b> mos keladigan javoblarni aniqlang (Bobil va Ossuriya davlatlari):</p>"
+                    "<div style='display:flex;justify-content:center;margin:18px 0;'>"
+                    "<svg width='360' height='190' viewBox='0 0 360 190' style='max-width:100%;height:auto;'>"
+                    "<circle cx='130' cy='95' r='80' fill='rgba(59, 130, 246, 0.12)' stroke='#3b82f6' stroke-width='2.5' />"
+                    "<circle cx='230' cy='95' r='80' fill='rgba(245, 158, 11, 0.12)' stroke='#f59e0b' stroke-width='2.5' />"
+                    "<text x='85' y='85' font-size='18' font-weight='bold' fill='currentColor' text-anchor='middle'>I</text>"
+                    "<text x='85' y='108' font-size='14' font-weight='600' fill='currentColor' text-anchor='middle'>Bobil</text>"
+                    "<text x='180' y='100' font-size='18' font-weight='bold' fill='currentColor' text-anchor='middle'>III</text>"
+                    "<text x='275' y='85' font-size='18' font-weight='bold' fill='currentColor' text-anchor='middle'>II</text>"
+                    "<text x='275' y='108' font-size='14' font-weight='600' fill='currentColor' text-anchor='middle'>Ossuriya</text>"
+                    "</svg>"
+                    "</div>"
+                    "<div style='font-size:13.5px;line-height:1.8;padding:12px;background:rgba(100,116,139,0.06);border-radius:8px;'>"
+                    "<b>a)</b> Poytaxti Bobil shahri bo'lgan;<br/>"
+                    "<b>b)</b> Poytaxti Nineviya (avval Oshshur) bo'lgan;<br/>"
+                    "<b>c)</b> Mesopotamiya hududida joylashgan;<br/>"
+                    "<b>d)</b> Xammurapi qonunlari bilan mashhur;<br/>"
+                    "<b>e)</b> Oshshurbanapal kutubxonasi bilan mashhur;<br/>"
+                    "<b>f)</b> Mil.avv. 605-yilda tarix sahnasidan ketdi."
+                    "</div>"
                 ),
                 "options": [
                     ("A", "I-a,d; II-c,e; III-b,f", False),
@@ -352,12 +419,21 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Quyidagi davlatlar va ularning poytaxtlarini to'g'ri moslashtiring.\n"
-                    "1) Elam\n"
-                    "2) Ossuriya (keyingi)\n"
-                    "3) Xett\n"
-                    "4) Urartu\n"
-                    "a) Nineviya, b) Tushpa, c) Suza, d) Xattusa"
+                    "<p>Quyidagi davlatlar va ularning poytaxtlarini to'g'ri moslashtiring.</p>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>1)</b> Elam<br/>"
+                    "<b>2)</b> Ossuriya (keyingi)<br/>"
+                    "<b>3)</b> Xett<br/>"
+                    "<b>4)</b> Urartu"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>a)</b> Nineviya<br/>"
+                    "<b>b)</b> Tushpa<br/>"
+                    "<b>c)</b> Suza<br/>"
+                    "<b>d)</b> Xattusa"
+                    "</div>"
+                    "</div>"
                 ),
                 "options": [
                     ("A", "1-c; 2-a; 3-d; 4-b", True),
@@ -451,13 +527,19 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Shaxslar va ularning ishlari to'g'ri moslashtirilgan javobni toping.\n"
-                    "1) Chandragupta\n"
-                    "2) Ashoka\n"
-                    "3) Siddhartha Gautama\n"
-                    "a) Maurya davlatiga asos solgan sarkarda\n"
-                    "b) Maurya davlatini yuksaltirgan hukmdor\n"
-                    "c) Buddaviylik diniga asos solgan shahzoda"
+                    "<p>Shaxslar va ularning ishlari to'g'ri moslashtirilgan javobni toping.</p>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>1)</b> Chandragupta<br/>"
+                    "<b>2)</b> Ashoka<br/>"
+                    "<b>3)</b> Siddhartha Gautama"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>a)</b> Maurya davlatiga asos solgan sarkarda<br/>"
+                    "<b>b)</b> Maurya davlatini yuksaltirgan hukmdor<br/>"
+                    "<b>c)</b> Buddaviylik diniga asos solgan shahzoda"
+                    "</div>"
+                    "</div>"
                 ),
                 "options": [
                     ("A", "1-a; 2-b; 3-c", True),
@@ -468,11 +550,19 @@ class Command(BaseCommand):
             },
             {
                 "body": (
-                    "Davlatlar va ularning poytaxtlarini to'g'ri moslashtiring.\n"
-                    "1) Maurya davlati\n"
-                    "2) Ahamoniylar davlati\n"
-                    "3) Xett podsholigi\n"
-                    "a) Persepol, b) Pataliputra, c) Xattusa"
+                    "<p>Davlatlar va ularning poytaxtlarini to'g'ri moslashtiring.</p>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>1)</b> Maurya davlati<br/>"
+                    "<b>2)</b> Ahamoniylar davlati<br/>"
+                    "<b>3)</b> Xett podsholigi"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;font-size:13.5px;line-height:1.8;background:rgba(100,116,139,0.05);'>"
+                    "<b>a)</b> Persepol<br/>"
+                    "<b>b)</b> Pataliputra<br/>"
+                    "<b>c)</b> Xattusa"
+                    "</div>"
+                    "</div>"
                 ),
                 "options": [
                     ("A", "1-b; 2-a; 3-c", True),
