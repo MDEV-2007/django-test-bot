@@ -60,7 +60,7 @@ function formatTime(seconds: number) {
 export default function CefrExamPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
   const router = useRouter();
-  const { access } = useAuthStore();
+  const { access, authReady } = useAuthStore();
 
   const [exam, setExam] = useState<CefrExam | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +111,10 @@ export default function CefrExamPage() {
   }, [attemptId, flagged]);
 
   useEffect(() => {
+    if (authReady && !access) {
+      router.replace(`/login?next=${encodeURIComponent(`/tests/${attemptId}/exam`)}`);
+      return;
+    }
     if (!access) return;
     apiFetch<CefrExam>(`/api/tests/attempts/${attemptId}/exam/`)
       .then((data) => {
@@ -122,7 +126,7 @@ export default function CefrExamPage() {
         if (e instanceof ApiError && e.status === 409) { router.push(`/tests/${attemptId}/feedback`); return; }
         setError(e instanceof Error ? e.message : 'Xatolik');
       });
-  }, [access, attemptId, router]);
+  }, [authReady, access, attemptId, router]);
 
   // Mahalliy sanoq — server bilan har safar bog'lanmasdan vaqt tik-tiklab tursin.
   // Haqiqiy chegara baribir serverda: u vaqt tugagach javob qabul qilmaydi.

@@ -50,7 +50,7 @@ const GRADING_SCALE = [
 export default function MockLobbyPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { access } = useAuthStore();
+  const { access, authReady } = useAuthStore();
 
   const [data, setData] = useState<MockLobbyData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +62,10 @@ export default function MockLobbyPage() {
 
   // Load Lobby Data
   useEffect(() => {
+    if (authReady && !access) {
+      router.replace(`/register?next=${encodeURIComponent(`/tests/mock/${id}`)}`);
+      return;
+    }
     if (!access) return;
     apiFetch<MockLobbyData>(`/api/tests/${id}/lobby/`)
       .then((res) => {

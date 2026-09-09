@@ -102,7 +102,7 @@ type ReviewItem = {
 export default function FeedbackPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
   const router = useRouter();
-  const { access, user } = useAuthStore();
+  const { access, authReady, user } = useAuthStore();
   const [data, setData] = useState<FeedbackData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mistakesError, setMistakesError] = useState<string | null>(null);
@@ -110,6 +110,10 @@ export default function FeedbackPage() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    if (authReady && !access) {
+      router.replace(`/login?next=${encodeURIComponent(`/tests/${attemptId}/feedback`)}`);
+      return;
+    }
     if (!access) return;
     const load = () => {
       apiFetch<FeedbackData>(`/api/tests/attempts/${attemptId}/feedback/`)
@@ -125,7 +129,7 @@ export default function FeedbackPage() {
     load();
     pollRef.current = setInterval(load, 3000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [access, attemptId]);
+  }, [authReady, access, attemptId, router]);
 
   async function startMistakesTest() {
     setMistakesError(null);

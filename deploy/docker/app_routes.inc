@@ -7,6 +7,17 @@
 # uzunrog'i esa bundan ham oshadi.
 client_max_body_size 64M;
 
+# Xavfsizlik sarlavhalari (Security Headers)
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+# To'lov skrinshotlari (shaxsiy cheklar) ommaviy media ichidan to'siladi — ularni faqat
+# /api/premium/payments/<id>/screenshot/?token=... orqali autentifikatsiyadan o'tgan holda ko'rish mumkin.
+location ^~ /media/payment_screenshots/ {
+    return 404;
+}
+
 # Yuklangan fayllar — Django emas, nginx beradi (tezroq va ASGI ishchisini band qilmaydi).
 location /media/ {
     alias /srv/media/;

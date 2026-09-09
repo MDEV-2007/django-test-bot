@@ -48,9 +48,9 @@ function formatTime(sec: number) {
 }
 
 export default function TestScreenPage() {
-  const { attemptId } = useParams<{ attemptId: string }>();
+  const { id: _unused, attemptId } = useParams<{ id?: string; attemptId: string }>();
   const router = useRouter();
-  const { access } = useAuthStore();
+  const { access, authReady } = useAuthStore();
   const [data, setData] = useState<QuestionData | null>(null);
   const [qIdx, setQIdx] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +99,13 @@ export default function TestScreenPage() {
       });
   }, [attemptId, router]);
 
-  useEffect(() => { if (access) load(qIdx); }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (authReady && !access) {
+      router.replace(`/login?next=${encodeURIComponent(`/tests/${attemptId}`)}`);
+      return;
+    }
+    if (access) load(qIdx);
+  }, [authReady, access, attemptId, load, qIdx, router]);
 
   // Local countdown between server syncs so the timer doesn't visibly stall.
   useEffect(() => {
