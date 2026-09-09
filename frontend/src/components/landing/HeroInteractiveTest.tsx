@@ -26,7 +26,7 @@ const QUESTION = {
   ] as Option[],
   explanation: {
     correct: "Barakalla! 1370-yilda Balxdagi qurultoyda Amir Temur Movarounnahrning yagona hukmdori deb e'lon qilindi va Samarqandni poytaxt etib tanladi.",
-    incorrect: "E'tibor bering: To'g'ri javob — Samarqand (1370-yil). Buxoro esa keyinchalik Shayboniylar davrida poytaxt bo'lgan. Zaif nuqta belgilandi!",
+    incorrect: "E'tibor bering: To'g'ri javob — Samarqand (1370-yil). Buxoro esa keyinchalik Shayboniylar davrida poytaxt bo'lgan. Zaif nuqta aniqlandi!",
   },
 };
 
@@ -45,13 +45,13 @@ export default function HeroInteractiveTest() {
     if (option.isCorrect) {
       try {
         confetti({
-          particleCount: 45,
-          spread: 60,
+          particleCount: 40,
+          spread: 65,
           origin: { y: 0.7 },
-          colors: ['#2fb3a3', '#5cc4b6', '#f0b45c', '#ffffff'],
+          colors: ['#10b981', '#14b8a6', '#f59e0b', '#ffffff'],
         });
       } catch {
-        // no-op if canvas is not supported
+        // no-op
       }
     }
   };
@@ -63,49 +63,54 @@ export default function HeroInteractiveTest() {
 
   return (
     <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
-      {/* Tashqi porlash (ambient glow) */}
-      <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[var(--accent)]/30 via-emerald-500/15 to-[var(--tone-premium)]/20 opacity-70 blur-xl transition-all duration-500" />
+      {/* Yumshoq tashqi nur */}
+      <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-indigo-500/15 opacity-60 blur-xl pointer-events-none" />
 
       {/* Asosiy simulyator oynasi */}
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)]/90 p-5 shadow-2xl backdrop-blur-xl sm:p-6">
-        {/* Yuqori panel: Fan, taymer va jonli indikator */}
-        <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4 text-xs">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/[0.12] bg-[#0c0e14]/90 p-5 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        {/* Darcha boshqaruvi (macOS uslubidagi nuqtalar + Fan yorlig'i) */}
+        <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 text-xs">
           <div className="flex items-center gap-2">
-            <span className="flex size-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="rounded-md bg-[var(--surface-card-medium)] px-2.5 py-1 font-medium text-[var(--accent-text)] border border-[var(--accent-border)]/40">
+            <div className="flex items-center gap-1.5 mr-2">
+              <span className="size-2.5 rounded-full bg-rose-500/70" />
+              <span className="size-2.5 rounded-full bg-amber-500/70" />
+              <span className="size-2.5 rounded-full bg-emerald-500/70" />
+            </div>
+            <span className="rounded-full bg-white/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-emerald-300 border border-emerald-500/20">
               {QUESTION.subject}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 font-mono text-[var(--text-secondary)]">
-            <Clock className="size-3.5 text-[var(--accent-text)]" />
+
+          <div className="flex items-center gap-1.5 font-mono text-zinc-400 text-xs">
+            <Clock className="size-3.5 text-emerald-400" />
             <span>{QUESTION.time}</span>
           </div>
         </div>
 
         {/* Savol matni */}
         <div className="mt-4">
-          <div className="flex items-center justify-between text-xs text-[var(--text-faint)]">
+          <div className="flex items-center justify-between text-[11px] text-zinc-400">
             <span>Savol #1 (Mock Test)</span>
             <span className="font-mono text-emerald-400 font-semibold">+1.5 ball</span>
           </div>
-          <p className="mt-2 text-sm font-semibold leading-relaxed text-foreground sm:text-base">
+          <p className="mt-2 text-sm sm:text-base font-semibold leading-relaxed text-white">
             {QUESTION.text}
           </p>
         </div>
 
-        {/* Variantlar */}
+        {/* Variantlar ro'yxati */}
         <div className="mt-5 space-y-2.5">
           {QUESTION.options.map((option) => {
             const isSelected = selectedId === option.id;
-            let btnStyle = 'border-[var(--border-card)] bg-[var(--surface-card-medium)]/60 hover:bg-[var(--surface-card-medium)] text-foreground';
+            let btnStyle = 'border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/[0.16] text-zinc-200';
 
             if (hasAnswered) {
               if (option.isCorrect) {
-                btnStyle = 'border-emerald-500/80 bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40';
+                btnStyle = 'border-emerald-500/70 bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30';
               } else if (isSelected && !option.isCorrect) {
-                btnStyle = 'border-rose-500/80 bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/40';
+                btnStyle = 'border-rose-500/70 bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/30';
               } else {
-                btnStyle = 'opacity-45 border-[var(--border-card)] bg-[var(--surface-card-medium)]/30 text-[var(--text-muted)]';
+                btnStyle = 'opacity-40 border-white/[0.04] bg-white/[0.01] text-zinc-400';
               }
             }
 
@@ -123,7 +128,7 @@ export default function HeroInteractiveTest() {
                         ? 'bg-emerald-500 text-black'
                         : isSelected && !option.isCorrect
                         ? 'bg-rose-500 text-white'
-                        : 'bg-[var(--surface-input)] text-[var(--text-secondary)] group-hover:text-foreground'
+                        : 'bg-white/[0.08] text-zinc-400 group-hover:text-white'
                     }`}
                   >
                     {option.label}
@@ -146,49 +151,48 @@ export default function HeroInteractiveTest() {
           })}
         </div>
 
-        {/* AI Mentor Izohi va natija paneli */}
+        {/* AI Mentor izohi va harakat */}
         <AnimatePresence>
           {hasAnswered && (
             <motion.div
-              initial={{ opacity: 0, y: 10, height: 0 }}
+              initial={{ opacity: 0, y: 8, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: 5, height: 0 }}
-              className="mt-4 overflow-hidden rounded-xl border border-[var(--accent-border)]/50 bg-[var(--accent-soft)]/20 p-3.5 backdrop-blur-md"
+              exit={{ opacity: 0, y: 4, height: 0 }}
+              className="mt-4 overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-500/[0.08] p-3.5 backdrop-blur-xl"
             >
               <div className="flex items-start gap-3">
-                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)] text-black">
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-black shadow-md">
                   <BrainCircuit className="size-4" />
                 </div>
                 <div className="flex-1 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-[var(--accent-text)]">
+                    <span className="font-semibold text-emerald-300">
                       AI Mentor tushuntirishi
                     </span>
                     {isCorrect ? (
-                      <span className="flex items-center gap-1 rounded bg-emerald-500/20 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-400">
+                      <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-300">
                         <Award className="size-3" /> +15 XP
                       </span>
                     ) : (
-                      <span className="rounded bg-rose-500/20 px-1.5 py-0.5 font-mono text-[10px] font-bold text-rose-300">
-                        Zaif mavzu qayd etildi
+                      <span className="rounded-full bg-rose-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-rose-300">
+                        Zaif nuqta qayd etildi
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 leading-relaxed text-[var(--text-secondary)]">
+                  <p className="mt-1.5 leading-relaxed text-zinc-300">
                     {isCorrect ? QUESTION.explanation.correct : QUESTION.explanation.incorrect}
                   </p>
                 </div>
               </div>
 
-              {/* Boshqaruv tugmalari */}
-              <div className="mt-3 flex items-center justify-between gap-2 border-t border-[var(--border-card)]/50 pt-2.5">
+              <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/[0.08] pt-2.5">
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] hover:text-foreground transition-colors"
+                  className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors"
                 >
                   <RotateCcw className="size-3" /> Qayta yechish
                 </button>
-                <Button asChild size="sm" className="h-7 text-xs px-3">
+                <Button asChild size="sm" className="h-7 text-xs px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-full shadow">
                   <Link href="/register">
                     To&apos;liq testga o&apos;tish <ArrowRight className="size-3 ml-1" />
                   </Link>
@@ -198,13 +202,12 @@ export default function HeroInteractiveTest() {
           )}
         </AnimatePresence>
 
-        {/* Pastki yordamchi izoh */}
         {!hasAnswered && (
-          <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+          <div className="mt-3 flex items-center justify-between text-[11px] text-zinc-400">
             <span className="flex items-center gap-1">
-              <Sparkles className="size-3 text-[var(--accent-text)]" /> Javobni belgilang va AI Mentor tekshirsin
+              <Sparkles className="size-3 text-emerald-400" /> Javobni tanlang va tekshirib ko&apos;ring
             </span>
-            <span className="font-mono text-[var(--text-faint)]">Interaktiv demo</span>
+            <span className="font-mono text-zinc-400">Interaktiv namuna</span>
           </div>
         )}
       </div>
