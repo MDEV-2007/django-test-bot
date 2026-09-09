@@ -37,24 +37,64 @@ type TestItem = {
 function formatScheduledTime(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '';
+    // Devor soati (Toshkent vaqti) satrda yozilgan (masalan 2026-09-10T21:30).
+    // Brauzer timezone offsetlari sababli 5 soat qo'shib (02:30) yubormasligi uchun to'g'ridan-to'g'ri ajratamiz:
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    let year: number, month: number, day: number, hour: number, minute: number;
+
+    if (match) {
+      year = parseInt(match[1], 10);
+      month = parseInt(match[2], 10) - 1;
+      day = parseInt(match[3], 10);
+      hour = parseInt(match[4], 10);
+      minute = parseInt(match[5], 10);
+    } else {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      year = d.getFullYear();
+      month = d.getMonth();
+      day = d.getDate();
+      hour = d.getHours();
+      minute = d.getMinutes();
+    }
+
     const now = new Date();
-    const isToday = d.toDateString() === now.toDateString();
-    const timeStr = d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const isToday = now.getFullYear() === year && now.getMonth() === month && now.getDate() === day;
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const isTomorrow = tomorrow.getFullYear() === year && tomorrow.getMonth() === month && tomorrow.getDate() === day;
+
+    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
     if (isToday) {
       return `Bugun, ${timeStr}`;
     }
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    if (d.toDateString() === tomorrow.toDateString()) {
+    if (isTomorrow) {
       return `Ertaga, ${timeStr}`;
     }
+    const d = new Date(year, month, day, hour, minute);
     const dateFormatted = d.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
     return `${dateFormatted}, ${timeStr}`;
   } catch {
     return '';
   }
+}
+
+function parseExamDate(dateStr: string | null | undefined): Date | null {
+  if (!dateStr) return null;
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (match) {
+    return new Date(
+      parseInt(match[1], 10),
+      parseInt(match[2], 10) - 1,
+      parseInt(match[3], 10),
+      parseInt(match[4], 10),
+      parseInt(match[5], 10)
+    );
+  }
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 type CenterData = {
@@ -224,13 +264,18 @@ export default function TestsPage() {
                     <Flame className="size-6 animate-pulse" />
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <Badge className="bg-amber-500 text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5">
                         Katta Mock Imtihon
                       </Badge>
                       <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold">
                         {data.pinned_mock.subject}
                       </Badge>
+                      {data.pinned_mock.scheduled_at && (
+                        <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 font-mono text-xs gap-1 font-semibold">
+                          <Clock className="size-3" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
+                        </Badge>
+                      )}
                     </div>
                     <h3 className="text-base sm:text-lg font-extrabold text-foreground truncate">
                       {data.pinned_mock.title}
@@ -425,7 +470,8 @@ export default function TestsPage() {
             // uchun alohida: `is_unlocked` serverdan shu o'quvchi bo'yicha keladi.
             const locked = t.is_premium && !t.is_unlocked;
             const isLiveMock = Boolean(t.is_live_mock);
-            const isScheduledFuture = Boolean(isLiveMock && t.scheduled_at && new Date(t.scheduled_at).getTime() > Date.now());
+            const examDate = parseExamDate(t.scheduled_at);
+            const isScheduledFuture = Boolean(isLiveMock && examDate && examDate.getTime() > Date.now());
             const buyHref = data.mock_plan
               ? `/premium/checkout/${data.mock_plan.id}?test=${t.id}`
               : '/premium';

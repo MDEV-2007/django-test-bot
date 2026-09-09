@@ -45,6 +45,13 @@ def _answer_mode(t):
     return 'mixed'
 
 
+def _iso_scheduled_at(dt):
+    if not dt:
+        return None
+    # Boshlanish vaqti Toshkent vaqti (+05:00) bilan yuboriladi
+    return dt.strftime('%Y-%m-%dT%H:%M:%S+05:00')
+
+
 def _test_payload(t, social=None, unlocked=False):
     """`social` — shu testning so'nggi 7 kunlik ijtimoiy dalili
     ({'solvers': N, 'avg': X}); ma'lumot bo'lmasa None qaytadi."""
@@ -61,7 +68,7 @@ def _test_payload(t, social=None, unlocked=False):
         'answer_mode': _answer_mode(t),
         'is_premium': t.is_premium,
         'is_live_mock': getattr(t, 'is_live_mock', False),
-        'scheduled_at': t.scheduled_at.isoformat() if getattr(t, 'scheduled_at', None) else None,
+        'scheduled_at': _iso_scheduled_at(getattr(t, 'scheduled_at', None)),
         # `is_unlocked` — shu O'QUVCHI uchun: global mock-test kirishi yoki aynan shu
         # test uchun tasdiqlangan to'lov bo'lsa True.
         'is_unlocked': unlocked,
@@ -158,7 +165,7 @@ def center_api(request):
             'category': pinned_mock.category,
             'duration_minutes': pinned_mock.duration_minutes,
             'questions_count': pinned_mock.questions.count(),
-            'scheduled_at': pinned_mock.scheduled_at.isoformat() if pinned_mock.scheduled_at else None,
+            'scheduled_at': _iso_scheduled_at(pinned_mock.scheduled_at),
             'is_live_mock': pinned_mock.is_live_mock,
             'is_reminded': pinned_mock.remind_users.filter(id=request.user.id).exists() if request.user.is_authenticated else False,
         }
@@ -223,7 +230,7 @@ def start_test_api(request, test_id):
         # Toshkent vaqtida ko'rsatish
         return Response({
             'error': f"Imtihon hali boshlanmadi. Boshlanish vaqti: {test.scheduled_at.strftime('%H:%M')}.",
-            'scheduled_at': test.scheduled_at.isoformat(),
+            'scheduled_at': _iso_scheduled_at(test.scheduled_at),
         }, status=400)
 
     # Agar test bo'yicha davom etayotgan urinish bo'lsa, o'shani qaytaramiz
@@ -276,8 +283,8 @@ def mock_lobby_api(request, test_id):
         'duration_minutes': test.duration_minutes,
         'questions_count': test.questions.count(),
         'is_live_mock': test.is_live_mock,
-        'scheduled_at': test.scheduled_at.isoformat() if test.scheduled_at else None,
-        'server_now': now.isoformat(),
+        'scheduled_at': _iso_scheduled_at(test.scheduled_at),
+        'server_now': now.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%dT%H:%M:%S+05:00'),
         'is_reminded': is_reminded,
         'has_active_attempt': active_attempt is not None,
         'active_attempt_id': active_attempt.id if active_attempt else None,

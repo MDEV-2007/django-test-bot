@@ -47,6 +47,51 @@ const GRADING_SCALE = [
   { range: '0 – 17', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
 ];
 
+function formatScheduledTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  try {
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    let year: number, month: number, day: number, hour: number, minute: number;
+
+    if (match) {
+      year = parseInt(match[1], 10);
+      month = parseInt(match[2], 10) - 1;
+      day = parseInt(match[3], 10);
+      hour = parseInt(match[4], 10);
+      minute = parseInt(match[5], 10);
+    } else {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      year = d.getFullYear();
+      month = d.getMonth();
+      day = d.getDate();
+      hour = d.getHours();
+      minute = d.getMinutes();
+    }
+
+    const now = new Date();
+    const isToday = now.getFullYear() === year && now.getMonth() === month && now.getDate() === day;
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const isTomorrow = tomorrow.getFullYear() === year && tomorrow.getMonth() === month && tomorrow.getDate() === day;
+
+    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+    if (isToday) {
+      return `Bugun soat ${timeStr}`;
+    }
+    if (isTomorrow) {
+      return `Ertaga soat ${timeStr}`;
+    }
+    const d = new Date(year, month, day, hour, minute);
+    const dateFormatted = d.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
+    return `${dateFormatted}, soat ${timeStr}`;
+  } catch {
+    return '';
+  }
+}
+
 export default function MockLobbyPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -306,7 +351,7 @@ export default function MockLobbyPage() {
                           <Clock className="size-3.5 text-amber-500" /> Boshlanishiga qoldi:
                         </span>
                         <span className="text-[11px] text-muted-foreground font-medium">
-                          Ertaga soat 21:30
+                          {data.scheduled_at ? formatScheduledTime(data.scheduled_at) : 'Tez kunda'}
                         </span>
                       </div>
 
