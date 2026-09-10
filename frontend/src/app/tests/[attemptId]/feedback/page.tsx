@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import CertificateModal from '@/components/student/CertificateModal';
+import ExamSurveyCard from '@/components/student/ExamSurveyCard';
 import { WritingReviewCard } from '@/components/cefr/WritingTask';
 import type { WritingReview } from '@/lib/cefr-types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -260,6 +261,9 @@ export default function FeedbackPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Imtihon taassuroti / Tezkor so'rovnoma */}
+        <ExamSurveyCard attemptId={attemptId} testTitle={data?.attempt?.test_title} />
 
         {data.overall_analysis && (
           <Card>

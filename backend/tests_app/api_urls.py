@@ -22,6 +22,7 @@ urlpatterns = [
     path('attempts/<int:attempt_id>/exam/audio-play/', cefr_api.audio_play_api, name='exam_audio_play'),
     path('attempts/<int:attempt_id>/writing-review/', cefr_api.writing_review_api, name='writing_review'),
     path('attempts/<int:attempt_id>/feedback/', api.feedback_api, name='feedback'),
+    path('attempts/<int:attempt_id>/survey/', api.exam_survey_api, name='exam_survey'),
     # Telegram Story: havolani egasi oladi, rasmni esa Telegram serverlari imzo bilan
     # (autentifikatsiyasiz) yuklab oladi.
     path('attempts/<int:attempt_id>/story-link/', api.story_link_api, name='story_link'),

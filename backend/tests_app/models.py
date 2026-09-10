@@ -1,5 +1,6 @@
 import re
 
+from django.conf import settings
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 from accounts.models import Profile
@@ -667,3 +668,28 @@ class AcceptedAnswer(models.Model):
     @property
     def normalized(self):
         return normalize_gap_answer(self.text)
+
+
+class ExamSurvey(models.Model):
+    """O'quvchining imtihon tugagandan keyingi fikr-mulohazasi (qiyinligi, platforma bahosi va takliflar)."""
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Oson'),
+        ('medium', "O'rtacha"),
+        ('hard', 'Qiyin'),
+        ('very_hard', 'Juda murakkab'),
+    ]
+
+    attempt = models.ForeignKey(Attempt, on_delete=models.CASCADE, related_name='surveys', null=True, blank=True)
+    test = models.ForeignKey(TestSet, on_delete=models.CASCADE, related_name='surveys')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='exam_surveys')
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='medium')
+    platform_rating = models.PositiveSmallIntegerField(default=5)  # 1-5
+    comment = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} — {self.test.title} ({self.get_difficulty_display()}, {self.platform_rating}★)"
+

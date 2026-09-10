@@ -3,6 +3,7 @@
 Baholash SERVER TOMONDA qoladi: `is_correct` finish()/feedback() dan oldin hech qachon
 javobga qo'shilmaydi, aks holda to'g'ri javobni tarmoq so'rovidan o'qib olish mumkin
 bo'lardi."""
+import logging
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse
@@ -21,6 +22,7 @@ from accounts.models import ensure_profile_for_user
 from accounts.permissions import IsChannelSubscribed
 from .models import (
     AIFeedback, Attempt, AttemptAnswer, Question, RevisionItem, Subject, TestSet,
+    ExamSurvey,
 )
 from .subject_utils import resolve_subject as _resolve_subject
 from .feedback import _dispatch_ai_feedback, seed_questions_if_needed
@@ -28,6 +30,8 @@ from .services.answering import apply_answer
 from .services.grading import grade_open_answers
 from .services.review import describe_answer, section_label, writing_payload
 from core.ai_client import ask_groq
+
+logger = logging.getLogger(__name__)
 
 
 def _answer_mode(t):
@@ -676,6 +680,70 @@ def feedback_api(request, attempt_id):
         'detailed_mistakes': ai_feedback.detailed_mistakes,
         'review_items': review_items,
     })
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def exam_survey_api(request, attempt_id):
+    attempt = get_object_or_404(Attempt.objects.select_related('test'), id=attempt_id, profile=request.user.profile)
+
+    if request.method == 'GET':
+        existing = ExamSurvey.objects.filter(attempt=attempt, user=request.user).first()
+        if existing:
+            return Response({
+                'submitted': True,
+                'difficulty': existing.difficulty,
+                'platform_rating': existing.platform_rating,
+                'comment': existing.comment,
+            })
+        return Response({'submitted': False})
+
+    data = request.data
+    difficulty = data.get('difficulty', 'medium')
+    if difficulty not in ('easy', 'medium', 'hard', 'very_hard'):
+        difficulty = 'medium'
+    try:
+        platform_rating = max(1, min(5, int(data.get('platform_rating', 5))))
+    except (TypeError, ValueError):
+        platform_rating = 5
+    comment = (data.get('comment') or '').strip()[:1000]
+
+    survey, created = ExamSurvey.objects.update_or_create(
+        attempt=attempt,
+        user=request.user,
+        defaults={
+            'test': attempt.test,
+            'difficulty': difficulty,
+            'platform_rating': platform_rating,
+            'comment': comment,
+        }
+    )
+
+    admin_id = (getattr(settings, 'ADMIN_TELEGRAM_CHAT_ID', '') or '').strip()
+    if admin_id and admin_id.isdigit():
+        try:
+            from telegrambot.client import send_message
+            diff_labels = {'easy': "🟢 Oson", 'medium': "🟡 O'rtacha", 'hard': "🔴 Qiyin", 'very_hard': "🔥 Juda murakkab"}
+            stars = "⭐" * platform_rating
+            user_display = request.user.get_full_name() or request.user.username
+            tg_user = f"@{request.user.username}" if request.user.username else user_display
+            score_text = f"{attempt.score:.0f}%" if attempt.score is not None else "Noma'lum"
+
+            msg = (
+                f"📝 <b>Yangi Imtihon Fikr-Mulohazasi!</b>\n\n"
+                f"👤 <b>O'quvchi:</b> {user_display} ({tg_user})\n"
+                f"🎯 <b>Test:</b> {attempt.test.title}\n"
+                f"📊 <b>Natija:</b> {score_text} ({attempt.correct_answers} to'g'ri)\n"
+                f"⚖️ <b>Qiyinlik:</b> {diff_labels.get(difficulty, difficulty)}\n"
+                f"✨ <b>Platforma bahosi:</b> {stars} ({platform_rating}/5)\n"
+            )
+            if comment:
+                msg += f"💬 <b>Fikr/Taklif:</b> <i>{comment}</i>\n"
+            send_message(int(admin_id), msg)
+        except Exception as e:
+            logger.warning("Admin telegram xabarnomasini yuborishda xatolik: %s", e)
+
+    return Response({'ok': True, 'message': "Fikringiz uchun tashakkur!"})
 
 
 @api_view(['GET'])

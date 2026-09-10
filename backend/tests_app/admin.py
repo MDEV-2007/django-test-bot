@@ -3,7 +3,7 @@ from adminsortable2.admin import SortableTabularInline, SortableAdminBase
 from .models import (
     Subject, Question, AnswerOption, MatchingPair, SubQuestion,
     QuestionGroup, GroupOption, TestSet, Attempt, AttemptAnswer, AIFeedback,
-    ExamSection, AcceptedAnswer,
+    ExamSection, AcceptedAnswer, ExamSurvey,
 )
 
 
@@ -183,3 +183,12 @@ class ExamSectionAdmin(admin.ModelAdmin):
     def question_count(self, obj):
         return obj.questions.count()
     question_count.short_description = "Savollar"
+
+
+@admin.register(ExamSurvey)
+class ExamSurveyAdmin(admin.ModelAdmin):
+    list_display = ('user', 'test', 'difficulty', 'platform_rating', 'created_at')
+    list_filter = ('difficulty', 'platform_rating', 'test', 'created_at')
+    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'comment', 'test__title')
+    readonly_fields = ('created_at',)
+
