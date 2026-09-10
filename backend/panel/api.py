@@ -31,7 +31,7 @@ from games.models import Game
 from learning.models import Lesson
 from premium.models import Payment
 from shop.models import ShopItem
-from tests_app.models import Attempt, Question, Subject, TestSet
+from tests_app.models import Attempt, Question, Subject, TestSet, ExamSurvey
 
 from .api_utils import bulk_action, list_response
 from .forms import (
@@ -1029,3 +1029,50 @@ def broadcast_delete_api(request, pk):
             pass
     bc.delete()
     return Response({'deleted': True})
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def surveys_api(request):
+    """Admin uchun o'quvchilar qoldirgan barcha fikr-mulohazalar va sharhlar ro'yxati."""
+    surveys = ExamSurvey.objects.select_related('user', 'test', 'attempt').order_by('-created_at')
+
+    q = request.GET.get('q', '').strip()
+    if q:
+        surveys = surveys.filter(
+            Q(user__username__icontains=q) |
+            Q(user__first_name__icontains=q) |
+            Q(user__last_name__icontains=q) |
+            Q(comment__icontains=q) |
+            Q(test__title__icontains=q)
+        )
+
+    difficulty = request.GET.get('difficulty')
+    if difficulty:
+        surveys = surveys.filter(difficulty=difficulty)
+
+    rating = request.GET.get('rating')
+    if rating and rating.isdigit():
+        surveys = surveys.filter(platform_rating=int(rating))
+
+    items = []
+    for s in surveys[:150]:
+        user_full = f"{s.user.first_name} {s.user.last_name}".strip() or s.user.username
+        items.append({
+            'id': s.id,
+            'user_name': user_full,
+            'username': s.user.username,
+            'test_title': s.test.title,
+            'score': s.attempt.score if s.attempt else None,
+            'correct_answers': s.attempt.correct_answers if s.attempt else None,
+            'difficulty': s.difficulty,
+            'platform_rating': s.platform_rating,
+            'comment': s.comment,
+            'created_at': s.created_at.strftime('%Y-%m-%d %H:%M'),
+        })
+
+    return Response({
+        'count': surveys.count(),
+        'items': items,
+    })
+

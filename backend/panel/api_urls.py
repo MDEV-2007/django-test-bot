@@ -57,4 +57,6 @@ urlpatterns = [
 
     path('broadcast/', api.broadcast_api, name='broadcast'),
     path('broadcast/<int:pk>/delete/', api.broadcast_delete_api, name='broadcast_delete'),
+
+    path('surveys/', api.surveys_api, name='surveys'),
 ]

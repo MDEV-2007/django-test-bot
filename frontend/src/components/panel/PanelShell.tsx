@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Users, GraduationCap, BookMarked, ShoppingBag, FileCheck2,
   BookOpen, Gamepad2, ClipboardList, CreditCard, Megaphone, ScrollText, Settings,
-  LogOut, ArrowLeft, ShieldCheck, Menu, X, ChevronRight,
+  LogOut, ArrowLeft, ShieldCheck, Menu, X, ChevronRight, MessageSquareHeart,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: 'Operatsiyalar',
     items: [
       { href: '/panel/attempts', label: 'Natijalar', icon: ClipboardList },
+      { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart },
       { href: '/panel/payments', label: "To'lovlar", icon: CreditCard },
       { href: '/panel/broadcast', label: 'Xabar yuborish', icon: Megaphone },
     ],
