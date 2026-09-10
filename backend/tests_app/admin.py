@@ -1,10 +1,15 @@
+import csv
+
 from django.contrib import admin
+from django.db import models
+from django.http import HttpResponse
 from adminsortable2.admin import SortableTabularInline, SortableAdminBase
 from .models import (
     Subject, Question, AnswerOption, MatchingPair, SubQuestion,
     QuestionGroup, GroupOption, TestSet, Attempt, AttemptAnswer, AIFeedback,
     ExamSection, AcceptedAnswer, ExamSurvey,
 )
+
 
 
 @admin.register(Subject)
@@ -137,6 +142,84 @@ class AttemptAdmin(admin.ModelAdmin):
     list_display = ('profile', 'test', 'score', 'correct_answers', 'wrong_answers', 'skipped_answers', 'is_completed')
     list_filter = ('is_completed', 'test')
     search_fields = ('profile__user__username', 'test__title')
+
+
+class MockAttemptResult(Attempt):
+    class Meta:
+        proxy = True
+        app_label = 'tests_app'
+        verbose_name = "Mock natijasi"
+        verbose_name_plural = "Mock natijalari (Jonli Mock)"
+
+
+@admin.register(MockAttemptResult)
+class MockAttemptResultAdmin(admin.ModelAdmin):
+    list_display = (
+        'profile', 'test', 'score_display', 'grade_display',
+        'correct_answers', 'wrong_answers', 'time_spent_display',
+        'completed_at', 'is_completed'
+    )
+    list_filter = ('test', 'is_completed', 'completed_at')
+    search_fields = (
+        'profile__user__username', 'profile__user__first_name',
+        'profile__user__last_name', 'test__title'
+    )
+    ordering = ('-score', '-completed_at')
+    readonly_fields = (
+        'profile', 'test', 'score', 'correct_answers',
+        'wrong_answers', 'skipped_answers', 'started_at',
+        'completed_at', 'is_completed'
+    )
+    actions = ['export_csv']
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(
+            models.Q(test__is_live_mock=True) |
+            models.Q(mock_attempt__isnull=False) |
+            models.Q(test__title__icontains='mock')
+        ).distinct()
+
+    @admin.display(description='Ball', ordering='score')
+    def score_display(self, obj):
+        if obj.score is None:
+            return "—"
+        return f"{obj.score:.1f}%"
+
+    @admin.display(description='Daraja')
+    def grade_display(self, obj):
+        s = obj.score or 0
+        c = obj.correct_answers or 0
+        if s >= 80 or c >= 34:
+            return "A+ (Oltin)"
+        if s >= 65 or c >= 28:
+            return "A (A'lo)"
+        if s >= 55 or c >= 24:
+            return "B+ (Yaxshi)"
+        if s >= 48 or c >= 21:
+            return "B (Qoniqarli)"
+        if s >= 40 or c >= 18:
+            return "C+ (O'tish)"
+        return "— (Sertifikatsiz)"
+
+    @admin.action(description="Belgilangan natijalarni CSV qilib yuklash")
+    def export_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="mock_natijalari_admin.csv"'
+        response.write('\ufeff')
+        writer = csv.writer(response)
+        writer.writerow(["F.I.SH", "Username", "Test", "Ball", "To'g'ri", "Xato", "Topshirilgan sana"])
+        for obj in queryset.order_by('-score'):
+            u = obj.profile.user
+            name = f"{u.first_name} {u.last_name}".strip() or u.username
+            writer.writerow([
+                name, u.username, obj.test.title if obj.test else "Mock",
+                f"{obj.score:.1f}" if obj.score is not None else '',
+                obj.correct_answers, obj.wrong_answers,
+                obj.completed_at.strftime('%Y-%m-%d %H:%M') if obj.completed_at else 'Davom etmoqda'
+            ])
+        return response
+
 
 
 @admin.register(AttemptAnswer)

@@ -38,24 +38,34 @@ function formatUzDate(dateInput?: string | Date | null): string {
   return `${d.getDate()}-${MONTHS_UZ[d.getMonth()]}, ${d.getFullYear()}-yil`;
 }
 
-function getGrade(score: number, correctCount?: number, totalQuestions?: number): { grade: string; label: string; tone: string; printTone: string; isPassed: boolean } {
+interface GradeResult {
+  grade: string;
+  shortGrade: string;
+  subLabel: string;
+  label: string;
+  tone: string;
+  printTone: string;
+  isPassed: boolean;
+}
+
+function getGrade(score: number, correctCount?: number, totalQuestions?: number): GradeResult {
   // 45 talik Milliy Sertifikat imtihoni uchun rasmiy mezon
   if (totalQuestions === 45 && typeof correctCount === 'number') {
-    if (correctCount >= 34) return { grade: "A+ (A'lo)", label: "Eng yuqori natija — Oltin Sertifikat", tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
-    if (correctCount >= 28) return { grade: "A (A'lo)", label: 'Yuqori a\'lo natija', tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
-    if (correctCount >= 24) return { grade: 'B+ (Juda yaxshi)', label: 'Muvaffaqiyatli natija', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
-    if (correctCount >= 21) return { grade: 'B (Yaxshi)', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
-    if (correctCount >= 18) return { grade: 'C+ (Qoniqarli)', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
-    return { grade: "Sinovdan o'tmadi", label: "Sertifikat berilmaydi (yetarli emas)", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
+    if (correctCount >= 34) return { grade: "A+ (A'lo)", shortGrade: 'A+', subLabel: "A'lo", label: "Eng yuqori natija — Oltin Sertifikat", tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
+    if (correctCount >= 28) return { grade: "A (A'lo)", shortGrade: 'A', subLabel: "A'lo", label: "Yuqori a'lo natija", tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
+    if (correctCount >= 24) return { grade: 'B+ (Juda yaxshi)', shortGrade: 'B+', subLabel: 'Juda yaxshi', label: 'Muvaffaqiyatli natija', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
+    if (correctCount >= 21) return { grade: 'B (Yaxshi)', shortGrade: 'B', subLabel: 'Yaxshi', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
+    if (correctCount >= 18) return { grade: 'C+ (Qoniqarli)', shortGrade: 'C+', subLabel: 'Qoniqarli', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
+    return { grade: "Sinovdan o'tmadi", shortGrade: '—', subLabel: "O'tmadi", label: "Sertifikat berilmaydi (yetarli emas)", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
   }
 
   // Umumiy testlar uchun foiz bo'yicha
-  if (score >= 75.5) return { grade: "A+ (A'lo)", label: 'Eng yuqori natija', tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
-  if (score >= 62.0) return { grade: "A (A'lo)", label: 'Yuqori natija', tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
-  if (score >= 53.0) return { grade: 'B+ (Juda yaxshi)', label: 'Muvaffaqiyatli', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
-  if (score >= 46.5) return { grade: 'B (Yaxshi)', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
-  if (score >= 40.0) return { grade: 'C+ (Qoniqarli)', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
-  return { grade: "Sinovdan o'tmadi", label: "Sertifikat berilmaydi", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
+  if (score >= 75.5) return { grade: "A+ (A'lo)", shortGrade: 'A+', subLabel: "A'lo", label: 'Eng yuqori natija', tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
+  if (score >= 62.0) return { grade: "A (A'lo)", shortGrade: 'A', subLabel: "A'lo", label: 'Yuqori natija', tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
+  if (score >= 53.0) return { grade: 'B+ (Juda yaxshi)', shortGrade: 'B+', subLabel: 'Juda yaxshi', label: 'Muvaffaqiyatli', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
+  if (score >= 46.5) return { grade: 'B (Yaxshi)', shortGrade: 'B', subLabel: 'Yaxshi', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
+  if (score >= 40.0) return { grade: 'C+ (Qoniqarli)', shortGrade: 'C+', subLabel: 'Qoniqarli', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
+  return { grade: "Sinovdan o'tmadi", shortGrade: '—', subLabel: "O'tmadi", label: "Sertifikat berilmaydi", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
 }
 
 export default function CertificateModal({
@@ -74,6 +84,11 @@ export default function CertificateModal({
   const certDate = formatUzDate(date);
   const serialNo = `ILM-${new Date().getFullYear()}-${String(attemptId).padStart(6, '0')}`;
   const displayName = studentName.trim() || "Platforma O'quvchisi";
+
+  // Ballni to'g'ri yaxlitlash (57.77777777777777% muammosini hal qilish)
+  const formattedScore = typeof score === 'number'
+    ? (Number.isInteger(score) ? score.toString() : (Math.round(score * 10) / 10).toFixed(1))
+    : '0';
 
   const handlePrint = () => {
     window.print();
@@ -133,11 +148,11 @@ export default function CertificateModal({
       // 3. Respublika va Platforma sarlavhasi
       ctx.textAlign = 'center';
       ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 18px "Inter", sans-serif';
+      ctx.font = 'bold 18px "Inter", -apple-system, sans-serif';
       ctx.fillText("O'ZBEKISTON RESPUBLIKASI TA'LIM VA TEST PLATFORMASI", width / 2, 115);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '900 44px "Inter", sans-serif';
+      ctx.font = '900 44px "Inter", -apple-system, sans-serif';
       ctx.fillText('Ilm', width / 2 - 40, 175);
       ctx.fillStyle = '#2fb3a3';
       ctx.fillText('Ildizi', width / 2 + 45, 175);
@@ -156,16 +171,16 @@ export default function CertificateModal({
 
       // Muvaffaqiyat Sertifikati
       ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 22px "Inter", sans-serif';
+      ctx.font = 'bold 22px "Inter", -apple-system, sans-serif';
       ctx.fillText('MUVAFFAQIYAT SERTIFIKATI', width / 2, 245);
 
       ctx.fillStyle = '#64748b';
-      ctx.font = '16px "Inter", sans-serif';
+      ctx.font = '16px "Inter", -apple-system, sans-serif';
       ctx.fillText('Ushbu sertifikat tasdiqlaydi:', width / 2, 275);
 
       // O'quvchi ismi
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 46px "Georgia", serif';
+      ctx.font = displayName.length > 25 ? 'bold 38px "Georgia", serif' : 'bold 46px "Georgia", serif';
       ctx.fillText(displayName, width / 2, 350);
 
       // Ajratuvchi chiziqlar
@@ -178,11 +193,11 @@ export default function CertificateModal({
 
       // Test nomi va matn
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '18px "Inter", sans-serif';
+      ctx.font = '18px "Inter", -apple-system, sans-serif';
       ctx.fillText("quyidagi fan va format bo'yicha sinov testini muvaffaqiyatli yakunladi:", width / 2, 420);
 
       ctx.fillStyle = '#38bdf8';
-      ctx.font = 'bold 26px "Inter", sans-serif';
+      ctx.font = 'bold 26px "Inter", -apple-system, sans-serif';
       ctx.fillText(`“${testTitle}”`, width / 2, 465);
 
       // 4. Natijalar bloki (3 ta karta)
@@ -203,21 +218,43 @@ export default function CertificateModal({
         ctx.stroke();
 
         ctx.fillStyle = '#94a3b8';
-        ctx.font = 'bold 15px "Inter", sans-serif';
+        ctx.font = 'bold 15px "Inter", -apple-system, sans-serif';
         ctx.fillText(label, x + boxWidth / 2, boxY + 45);
 
         ctx.fillStyle = valColor;
-        ctx.font = '900 42px "Courier New", monospace';
-        ctx.fillText(val, x + boxWidth / 2, boxY + 105);
+        ctx.font = 'bold 40px "Inter", -apple-system, sans-serif';
+        ctx.fillText(val, x + boxWidth / 2, boxY + 104);
 
-        ctx.fillStyle = '#64748b';
-        ctx.font = '13px "Inter", sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 14px "Inter", -apple-system, sans-serif';
         ctx.fillText(sub, x + boxWidth / 2, boxY + 138);
       };
 
-      drawStatCard(startX, "TO'PLANGAN BALL", `${score}%`, 'Umumiy natija', '#34d399');
+      drawStatCard(startX, "TO'PLANGAN BALL", `${formattedScore}%`, 'Umumiy natija', '#34d399');
       drawStatCard(startX + boxWidth + gap, "TO'G'RI JAVOBLAR", `${correctCount} / ${totalQuestions}`, 'Jami savollardan', '#ffffff');
-      drawStatCard(startX + (boxWidth + gap) * 2, 'BAHOLASH DARAJASI', gradeInfo.grade, gradeInfo.label, '#fbbf24');
+
+      // Karta 3: Baholash Darajasi (Chiroyli va professional ko'rinishda)
+      const xGrade = startX + (boxWidth + gap) * 2;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.beginPath();
+      ctx.roundRect(xGrade, boxY, boxWidth, boxHeight, 16);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.3)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 15px "Inter", -apple-system, sans-serif';
+      ctx.fillText('BAHOLASH DARAJASI', xGrade + boxWidth / 2, boxY + 45);
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '900 40px "Inter", -apple-system, sans-serif';
+      ctx.fillText(gradeInfo.shortGrade, xGrade + boxWidth / 2, boxY + 102);
+
+      ctx.fillStyle = '#fef3c7';
+      ctx.font = 'bold 14px "Inter", -apple-system, sans-serif';
+      const gradeSubText = gradeInfo.subLabel ? `${gradeInfo.subLabel}` : gradeInfo.label;
+      ctx.fillText(gradeSubText, xGrade + boxWidth / 2, boxY + 138);
 
       // 5. Pastki qism: Serial ID, Sana, Muhr va Tasdiq
       const footerY = 820;
@@ -225,15 +262,15 @@ export default function CertificateModal({
       // Chap tomon: ID va sana
       ctx.textAlign = 'left';
       ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 16px "Courier New", monospace';
+      ctx.font = 'bold 16px "Inter", monospace';
       ctx.fillText(`ID: ${serialNo}`, 120, footerY);
 
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '16px "Inter", sans-serif';
+      ctx.font = '16px "Inter", -apple-system, sans-serif';
       ctx.fillText(`Berilgan sana: ${certDate}`, 120, footerY + 30);
 
       ctx.fillStyle = '#64748b';
-      ctx.font = '13px "Inter", sans-serif';
+      ctx.font = '13px "Inter", -apple-system, sans-serif';
       ctx.fillText("Ushbu hujjat elektron shaklda IlmIldizi tizimi orqali tasdiqlangan.", 120, footerY + 58);
 
       // O'ng tomon: Digital Verified muhri
@@ -368,7 +405,10 @@ export default function CertificateModal({
                   To&apos;plangan Ball
                 </span>
                 <span className="font-mono text-3xl sm:text-4xl font-black text-emerald-400 print:text-emerald-700 mt-1.5">
-                  {score}%
+                  {formattedScore}%
+                </span>
+                <span className="text-[11px] text-muted-foreground print:text-slate-500 mt-0.5">
+                  Umumiy natija
                 </span>
               </div>
 
@@ -380,6 +420,9 @@ export default function CertificateModal({
                 <span className="font-mono text-2xl sm:text-3xl font-extrabold text-white print:text-slate-900 mt-1.5">
                   {correctCount} / {totalQuestions}
                 </span>
+                <span className="text-[11px] text-muted-foreground print:text-slate-500 mt-0.5">
+                  Jami savollardan
+                </span>
               </div>
 
               {/* Baholash Darajasi */}
@@ -387,12 +430,19 @@ export default function CertificateModal({
                 <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground print:text-slate-500">
                   Baholash Darajasi
                 </span>
-                <Badge
-                  variant="outline"
-                  className={`mt-2 font-extrabold text-xs sm:text-sm px-3 py-1 ${gradeInfo.tone} print:${gradeInfo.printTone}`}
-                >
-                  {gradeInfo.grade}
-                </Badge>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <Badge
+                    variant="outline"
+                    className={`font-black text-sm sm:text-base px-3 py-0.5 ${gradeInfo.tone} print:${gradeInfo.printTone}`}
+                  >
+                    {gradeInfo.shortGrade}
+                  </Badge>
+                  {gradeInfo.subLabel && (
+                    <span className="text-xs font-semibold text-amber-300 print:text-amber-800">
+                      ({gradeInfo.subLabel})
+                    </span>
+                  )}
+                </div>
                 <span className="text-[11px] text-muted-foreground print:text-slate-500 mt-1">
                   {gradeInfo.label}
                 </span>

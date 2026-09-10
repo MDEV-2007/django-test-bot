@@ -59,4 +59,7 @@ urlpatterns = [
     path('broadcast/<int:pk>/delete/', api.broadcast_delete_api, name='broadcast_delete'),
 
     path('surveys/', api.surveys_api, name='surveys'),
+    path('mocks/', api.mock_attempts_api, name='mock_attempts'),
+    path('mocks/export/', api.mock_attempts_export_api, name='mock_attempts_export'),
 ]
+

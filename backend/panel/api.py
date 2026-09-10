@@ -803,9 +803,18 @@ def attempts_api(request):
 def attempt_detail_api(request, pk):
     a = get_object_or_404(Attempt.objects.select_related('profile__user', 'test'), pk=pk)
     answers = a.answers.select_related('question', 'selected_choice').all()
+    total_q = (a.correct_answers + a.wrong_answers + a.skipped_answers)
+    if not total_q and a.test:
+        total_q = a.test.questions.count()
+
     return Response({
-        'id': a.id, 'student': a.profile.user.get_full_name() or a.profile.user.username,
-        'test_title': a.test.title if a.test else 'Tasodifiy', 'score': a.score,
+        'id': a.id,
+        'student': a.profile.user.get_full_name() or a.profile.user.username,
+        'test_title': a.test.title if a.test else 'Tasodifiy',
+        'score': a.score,
+        'correct_answers': a.correct_answers,
+        'total_questions': total_q or 45,
+        'completed_at': a.completed_at.isoformat() if a.completed_at else None,
         'answers': [{
             'question_body': ans.question.body, 'is_correct': ans.is_correct,
             'selected_choice': ans.selected_choice.text if ans.selected_choice else None,
@@ -1075,4 +1084,192 @@ def surveys_api(request):
         'count': surveys.count(),
         'items': items,
     })
+
+
+# ============================================================ MOCK RESULTS
+def _calculate_grade(score, correct):
+    if score is None:
+        return '—', 'slate'
+    if score >= 80 or (correct and correct >= 34):
+        return 'A+', 'emerald'
+    if score >= 65 or (correct and correct >= 28):
+        return 'A', 'teal'
+    if score >= 55 or (correct and correct >= 24):
+        return 'B+', 'sky'
+    if score >= 48 or (correct and correct >= 21):
+        return 'B', 'amber'
+    if score >= 40 or (correct and correct >= 18):
+        return 'C+', 'orange'
+    return '—', 'rose'
+
+
+def _format_duration(started_at, completed_at):
+    if not completed_at or not started_at:
+        return "Davom etmoqda"
+    total_sec = max(0, int((completed_at - started_at).total_seconds()))
+    mins = total_sec // 60
+    secs = total_sec % 60
+    if mins > 0:
+        return f"{mins} daq {secs} son"
+    return f"{secs} son"
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def mock_attempts_api(request):
+    """Admin uchun barcha Mock test topshirgan o'quvchilar natijalari va reytingi."""
+    base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
+    qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
+
+    test_id = request.GET.get('test_id')
+    if test_id and test_id.isdigit():
+        qs = qs.filter(test_id=int(test_id))
+
+    completed = request.GET.get('completed')
+    if completed == 'True':
+        qs = qs.filter(is_completed=True)
+    elif completed == 'False':
+        qs = qs.filter(is_completed=False)
+
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(
+            Q(profile__user__username__icontains=q) |
+            Q(profile__user__first_name__icontains=q) |
+            Q(profile__user__last_name__icontains=q) |
+            Q(test__title__icontains=q) |
+            Q(profile__phone__icontains=q)
+        )
+
+    sort = request.GET.get('sort', 'score')
+    if sort == 'date':
+        qs = qs.order_by('-completed_at', '-started_at')
+    else:  # score / rating
+        qs = qs.order_by('-score', 'started_at')
+
+    # Hisob-kitoblar
+    total_participants = qs.count()
+    completed_qs = qs.filter(is_completed=True)
+    completed_count = completed_qs.count()
+
+    from django.db.models import Avg, Max
+    agg = completed_qs.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+    avg_score = round(agg['avg_score'], 1) if agg['avg_score'] is not None else 0.0
+    max_score = round(agg['max_score'], 1) if agg['max_score'] is not None else 0.0
+    gold_count = completed_qs.filter(score__gte=80).count()
+
+    # Mavjud mock testlar ro'yxati (filtr filtrlash menyusi uchun)
+    available_mocks = list(
+        TestSet.objects.filter(
+            Q(is_live_mock=True) | Q(title__icontains='mock')
+        ).values('id', 'title').distinct()[:50]
+    )
+
+    items = []
+    tz = timezone.get_current_timezone()
+    for idx, a in enumerate(qs[:250], start=1):
+        u = a.profile.user
+        user_full = f"{u.first_name} {u.last_name}".strip() or u.username
+        grade, grade_tone = _calculate_grade(a.score, a.correct_answers)
+
+        completed_local = None
+        if a.completed_at:
+            dt = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+            completed_local = dt.strftime('%d.%m.%Y %H:%M')
+
+        started_local = None
+        if a.started_at:
+            dt = a.started_at.astimezone(tz) if timezone.is_aware(a.started_at) else a.started_at
+            started_local = dt.strftime('%d.%m.%Y %H:%M')
+
+        total_q = (a.correct_answers + a.wrong_answers + a.skipped_answers)
+        if not total_q and a.test:
+            total_q = a.test.questions.count()
+
+        items.append({
+            'id': a.id,
+            'rank': idx,
+            'student_name': user_full,
+            'username': u.username,
+            'telegram_id': getattr(a.profile, 'telegram_id', None),
+            'phone': getattr(a.profile, 'phone', ''),
+            'test_id': a.test_id,
+            'test_title': a.test.title if a.test else "Noma'lum test",
+            'subject_name': a.test.subject.name if (a.test and a.test.subject) else "Asosiy",
+            'score': round(a.score, 1) if a.score is not None else None,
+            'grade': grade,
+            'grade_tone': grade_tone,
+            'correct_answers': a.correct_answers,
+            'wrong_answers': a.wrong_answers,
+            'skipped_answers': a.skipped_answers,
+            'total_questions': total_q or 45,
+            'duration_str': _format_duration(a.started_at, a.completed_at),
+            'is_completed': a.is_completed,
+            'completed_at': completed_local,
+            'raw_completed_at': a.completed_at.isoformat() if a.completed_at else None,
+            'started_at': started_local,
+        })
+
+    return Response({
+        'total_count': total_participants,
+        'completed_count': completed_count,
+        'avg_score': avg_score,
+        'max_score': max_score,
+        'gold_count': gold_count,
+        'available_mocks': available_mocks,
+        'items': items,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def mock_attempts_export_api(request):
+    """Barcha mock topshirgan o'quvchilar natijalarini CSV (Excel) formatida yuklab olish."""
+    base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
+    qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
+
+    test_id = request.GET.get('test_id')
+    if test_id and test_id.isdigit():
+        qs = qs.filter(test_id=int(test_id))
+
+    qs = qs.order_by('-score', 'started_at')
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="mock_natijalari.csv"'
+    response.write('\ufeff')  # UTF-8 BOM for Excel
+    writer = csv.writer(response)
+    writer.writerow([
+        "O'rin", "O'quvchi (F.I.SH)", "Username", "Telegram ID", "Telefon",
+        "Test", "Fan", "Ball (%)", "Daraja", "To'g'ri", "Xato", "Ketgan vaqt", "Topshirilgan sana"
+    ])
+
+    tz = timezone.get_current_timezone()
+    for idx, a in enumerate(qs, start=1):
+        u = a.profile.user
+        user_full = f"{u.first_name} {u.last_name}".strip() or u.username
+        grade, _ = _calculate_grade(a.score, a.correct_answers)
+
+        completed_str = "—"
+        if a.completed_at:
+            dt = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+            completed_str = dt.strftime('%Y-%m-%d %H:%M')
+
+        writer.writerow([
+            idx,
+            user_full,
+            u.username,
+            getattr(a.profile, 'telegram_id', '') or '',
+            getattr(a.profile, 'phone', '') or '',
+            a.test.title if a.test else "Mock",
+            a.test.subject.name if (a.test and a.test.subject) else "",
+            f"{a.score:.1f}" if a.score is not None else '0',
+            grade,
+            a.correct_answers,
+            a.wrong_answers,
+            _format_duration(a.started_at, a.completed_at),
+            completed_str,
+        ])
+
+    return response
+
 
