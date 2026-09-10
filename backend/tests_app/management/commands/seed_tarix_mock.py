@@ -31,10 +31,16 @@ class Command(BaseCommand):
             action='store_true',
             help="Agar mavjud bo'lsa, eski testni o'chirib qayta yaratadi.",
         )
+        parser.add_argument(
+            '--today',
+            action='store_true',
+            help="Ertaga emas, aynan BUGUN soat 21:30 ga rejalashtirish.",
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
         force = options.get('force', False)
+        for_today = options.get('today', False)
         subject, _ = Subject.objects.get_or_create(slug="tarix", defaults={"name": "Tarix"})
 
         existing = TestSet.objects.filter(title=MOCK_TITLE).first()
@@ -51,12 +57,13 @@ class Command(BaseCommand):
                 )
                 return
 
-        # Ertaga soat 21:30 (Toshkent vaqti)
-        toshkent_tz = timezone.get_current_timezone()
+        # Toshkent vaqti bilan 21:30
+        from zoneinfo import ZoneInfo
+        toshkent_tz = ZoneInfo("Asia/Tashkent")
         now = timezone.now().astimezone(toshkent_tz)
-        tomorrow = now + timezone.timedelta(days=1)
+        target_day = now if for_today else (now + timezone.timedelta(days=1))
         scheduled_at = datetime(
-            tomorrow.year, tomorrow.month, tomorrow.day, 21, 30, 0, tzinfo=toshkent_tz
+            target_day.year, target_day.month, target_day.day, 21, 30, 0, tzinfo=toshkent_tz
         )
 
         test_set = TestSet.objects.create(

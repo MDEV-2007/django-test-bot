@@ -48,8 +48,12 @@ def _answer_mode(t):
 def _iso_scheduled_at(dt):
     if not dt:
         return None
-    # Boshlanish vaqti Toshkent vaqti (+05:00) bilan yuboriladi
-    return dt.strftime('%Y-%m-%dT%H:%M:%S+05:00')
+    tz = timezone.get_current_timezone()
+    if timezone.is_aware(dt):
+        dt = dt.astimezone(tz)
+    else:
+        dt = timezone.make_aware(dt, tz)
+    return dt.isoformat()
 
 
 def _test_payload(t, social=None, unlocked=False):
@@ -227,9 +231,10 @@ def start_test_api(request, test_id):
 
     # Jonli Mock Imtihon vaqti tekshiruvi
     if test.is_live_mock and test.scheduled_at and now < test.scheduled_at:
-        # Toshkent vaqtida ko'rsatish
+        tz = timezone.get_current_timezone()
+        local_sched = test.scheduled_at.astimezone(tz) if timezone.is_aware(test.scheduled_at) else test.scheduled_at
         return Response({
-            'error': f"Imtihon hali boshlanmadi. Boshlanish vaqti: {test.scheduled_at.strftime('%H:%M')}.",
+            'error': f"Imtihon hali boshlanmadi. Boshlanish vaqti: {local_sched.strftime('%H:%M')}.",
             'scheduled_at': _iso_scheduled_at(test.scheduled_at),
         }, status=400)
 
