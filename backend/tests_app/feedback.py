@@ -106,7 +106,13 @@ def _answer_display_texts(ans):
     field layouts."""
     question = ans.question
     if question.question_type == 'open_written':
-        return ans.text_answer, (question.reference_answer or "Noma'lum")
+        sub_qs = list(question.sub_questions.all())
+        if sub_qs:
+            submitted = ans.open_answers or {}
+            student_text = "; ".join(f"{sq.label}) {submitted.get(sq.label, '')}" for sq in sub_qs if submitted.get(sq.label))
+            correct_text = "; ".join(f"{sq.label}) {sq.reference_answer}" for sq in sub_qs)
+            return student_text or "(bo'sh)", correct_text or "Noma'lum"
+        return ans.text_answer or "(bo'sh)", (question.reference_answer or "Noma'lum")
 
     if question.question_type == 'matching':
         pairs = list(question.matching_pairs.all())

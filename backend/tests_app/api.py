@@ -562,10 +562,16 @@ def finish_api(request, attempt_id):
                     a.save(update_fields=['is_correct', 'ai_grading_note'])
                 else:
                     total_parts = a.question.sub_questions.count()
-                    all_correct = len(entries) == total_parts and all(r['is_correct'] for _, r in entries)
-                    a.is_correct = all_correct
+                    correct_parts = sum(1 for _, r in entries if r.get('is_correct'))
+                    a.is_correct = (correct_parts == total_parts)
                     a.open_grading = {sq.label: {'is_correct': r['is_correct'], 'note': r['note'][:300]} for sq, r in entries}
-                    a.save(update_fields=['is_correct', 'open_grading'])
+                    if correct_parts > 0 and correct_parts < total_parts:
+                        a.ai_grading_note = f"{total_parts} ta qismdan {correct_parts} tasi to'g'ri topildi."
+                    elif a.is_correct:
+                        a.ai_grading_note = "Barcha qismlar to'g'ri topildi."
+                    else:
+                        a.ai_grading_note = "Javoblar to'g'ri kelmadi."
+                    a.save(update_fields=['is_correct', 'open_grading', 'ai_grading_note'])
 
     # Writing topshirig'i to'g'ri/xato deb sanalmaydi — u alohida, mezonlar bo'yicha
     # (0-5 ball va CEFR darajasi) baholanadi va tekshiruvi premium. Shuning uchun u
@@ -573,10 +579,30 @@ def finish_api(request, attempt_id):
     # hisobiga avtomatik "xato" olardi.
     scored = [a for a in answers if a.question.question_type != 'writing_task']
     scored_total = len(scored)
-    correct = sum(1 for a in scored if a.is_correct)
+
+    # SubQuestion qismlarini proporsional hisoblash: masalan 2 ta qismdan 1 tasi to'g'ri bo'lsa,
+    # 0.5 ball qo'shiladi — o'quvchining to'g'ri topgan qismi bekor ketmaydi.
+    correct_points = 0.0
+    fully_or_partially_correct = 0
+    for a in scored:
+        if a.question.question_type == 'open_written' and a.question.sub_questions.exists():
+            total_parts = a.question.sub_questions.count()
+            if a.open_grading and total_parts > 0:
+                parts_correct = sum(1 for v in a.open_grading.values() if v.get('is_correct'))
+                correct_points += (parts_correct / total_parts)
+                if parts_correct > 0:
+                    fully_or_partially_correct += 1
+            elif a.is_correct:
+                correct_points += 1.0
+                fully_or_partially_correct += 1
+        elif a.is_correct:
+            correct_points += 1.0
+            fully_or_partially_correct += 1
+
+    score = round((correct_points / scored_total) * 100, 1) if scored_total else 0.0
+    correct = fully_or_partially_correct
     skipped = sum(1 for a in scored if a.is_skipped)
-    wrong = scored_total - correct - skipped
-    score = (correct / scored_total) * 100 if scored_total else 0.0
+    wrong = max(0, scored_total - correct - skipped)
 
     attempt.correct_answers = correct
     attempt.wrong_answers = wrong

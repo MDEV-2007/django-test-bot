@@ -713,23 +713,23 @@ class Command(BaseCommand):
             {
                 "title": "Mesopotamiya.",
                 "parts": [
-                    ("a", "Shumerlar ixtiro qilgan, jahondagi eng qadimgi yozuvlardan birini yozing.", "Mixxat yozuvi"),
-                    ("b", "Mesopotamiya ibodatxonalari qanday nomlanganini yozing.", "Zikkuratlar"),
+                    ("a", "Shumerlar ixtiro qilgan, jahondagi eng qadimgi yozuvlardan birini yozing.", "Mixxat yozuvi (Mixxat)"),
+                    ("b", "Mesopotamiya ibodatxonalari qanday nomlanganini yozing.", "Zikkuratlar (Zikkurat)"),
                 ],
                 "explanation": "a) Mixxat yozuvi; b) Zikkuratlar.",
             },
             {
                 "title": "Bobil podsholigi.",
                 "parts": [
-                    ("a", "\"Bobil\" so'zining ma'nosini yozing.", "\"Xudolar darvozasi\""),
-                    ("b", "Tarixda qonunlar tuzgan birinchi hukmdorni yozing.", "Xammurapi"),
+                    ("a", "\"Bobil\" so'zining ma'nosini yozing.", "\"Xudolar darvozasi\" (Xudo darvozasi / Tangrilar darvozasi)"),
+                    ("b", "Tarixda qonunlar tuzgan birinchi hukmdorni yozing.", "Xammurapi (Hammurapi)"),
                 ],
                 "explanation": "a) \"Xudolar darvozasi\"; b) Xammurapi.",
             },
             {
                 "title": "Old Osiyo davlatlari.",
                 "parts": [
-                    ("a", "Ossuriya davlatining dastlabki poytaxtini yozing.", "Oshshur"),
+                    ("a", "Ossuriya davlatining dastlabki poytaxtini yozing.", "Oshshur (Ashshur / Assur)"),
                     ("b", "Ossuriyaning ikkinchi (keyingi) poytaxtini yozing.", "Nineviya"),
                 ],
                 "explanation": "a) Oshshur; b) Nineviya.",
@@ -737,23 +737,23 @@ class Command(BaseCommand):
             {
                 "title": "Ahamoniylar davlati.",
                 "parts": [
-                    ("a", "Fors davlatiga asos solgan hukmdorni yozing.", "Kir II"),
-                    ("b", "Saltanatni satrapliklarga bo'lgan, \"darik\" tangasini joriy etgan hukmdorni yozing.", "Doro I"),
+                    ("a", "Fors davlatiga asos solgan hukmdorni yozing.", "Kir II (Kir 2 / Buyuk Kir)"),
+                    ("b", "Saltanatni satrapliklarga bo'lgan, \"darik\" tangasini joriy etgan hukmdorni yozing.", "Doro I (Doro 1)"),
                 ],
                 "explanation": "a) Kir II; b) Doro I.",
             },
             {
                 "title": "Qadimgi Hindiston.",
                 "parts": [
-                    ("a", "Hind daryosi havzasidagi eng yirik ikki shaharni yozing.", "Moxenjodaro va Xarappa"),
-                    ("b", "Hind jamiyati bo'lingan to'rt tabaqadan (kastadan) birinchisini — kohinlar tabaqasini yozing.", "Braxmanlar"),
+                    ("a", "Hind daryosi havzasidagi eng yirik ikki shaharni yozing.", "Moxenjodaro va Xarappa (Moxenjo-daro / Harappa)"),
+                    ("b", "Hind jamiyati bo'lingan to'rt tabaqadan (kastadan) birinchisini — kohinlar tabaqasini yozing.", "Braxmanlar (Brahmanlar / Braxman)"),
                 ],
                 "explanation": "a) Moxenjodaro va Xarappa; b) Braxmanlar.",
             },
             {
                 "title": "Buddaviylik.",
                 "parts": [
-                    ("a", "Buddaviylik diniga asos solgan shahzodani yozing.", "Siddhartha Gautama"),
+                    ("a", "Buddaviylik diniga asos solgan shahzodani yozing.", "Siddhartha Gautama (Gautama / Budda / Siddharta)"),
                     ("b", "Bu din nima uchun \"xudolarsiz din\" deb atalganini qisqacha yozing.", "Avvaliga xudo tushunchasi bo'lmagan, xudolar inson azobini yengillashtira olmaydi deb hisoblangan"),
                 ],
                 "explanation": "a) Siddhartha Gautama; b) Avvaliga xudo tushunchasi bo'lmagan, xudolar inson azobini yengillashtira olmaydi deb hisoblangan.",
@@ -761,32 +761,32 @@ class Command(BaseCommand):
             {
                 "title": "Qadimgi Xitoy.",
                 "parts": [
-                    ("a", "Xitoyni mil.avv. 246-yilda birlashtirgan hukmdorni yozing.", "Sin Shixuandi"),
-                    ("b", "Uning maqbarasini qurgan odamlar sonini yozing.", "720 ming odam"),
+                    ("a", "Xitoyni mil.avv. 246-yilda birlashtirgan hukmdorni yozing.", "Sin Shixuandi (Shi Xuandi / Qin Shi Huang)"),
+                    ("b", "Uning maqbarasini qurgan odamlar sonini yozing.", "720 ming odam (720 ming / 720000 / 720 000)"),
                 ],
                 "explanation": "a) Sin Shixuandi; b) 720 ming odam.",
             },
             {
                 "title": "Xitoy qo'zg'olonlari.",
                 "parts": [
-                    ("a", "Mil.avv. 206-yilda Sin sulolasiga qarshi qo'zg'olon ko'targan shaxsni yozing.", "Lyu Ban"),
-                    ("b", "Milodiy II asrdagi eng yirik qo'zg'olon nomini yozing.", "\"Sariq ro'mollilar\" qo'zg'oloni"),
+                    ("a", "Mil.avv. 206-yilda Sin sulolasiga qarshi qo'zg'olon ko'targan shaxsni yozing.", "Lyu Ban (Lyuban)"),
+                    ("b", "Milodiy II asrdagi eng yirik qo'zg'olon nomini yozing.", "\"Sariq ro'mollilar\" qo'zg'oloni (Sariq ro'mollilar)"),
                 ],
                 "explanation": "a) Lyu Ban; b) \"Sariq ro'mollilar\" qo'zg'oloni.",
             },
             {
                 "title": "O'zbekiston hududidagi ilk davlatlar.",
                 "parts": [
-                    ("a", "Sug'diylar yashagan hududning yunon manbalaridagi nomini yozing.", "So'g'diyona"),
-                    ("b", "Amudaryoning quyi oqimida yashagan xalqni yozing.", "Xorazmliklar"),
+                    ("a", "Sug'diylar yashagan hududning yunon manbalaridagi nomini yozing.", "So'g'diyona (Sogdiana / Sug'diyona)"),
+                    ("b", "Amudaryoning quyi oqimida yashagan xalqni yozing.", "Xorazmliklar (Xorazmiylar)"),
                 ],
                 "explanation": "a) So'g'diyona; b) Xorazmliklar.",
             },
             {
                 "title": "Zardushtiylik.",
                 "parts": [
-                    ("a", "Zardushtiylik diniga asos solgan shaxsni yozing.", "Zardusht (Zoroastr)"),
-                    ("b", "Zardushtiylarning muqaddas kitobini yozing.", "\"Avesto\""),
+                    ("a", "Zardushtiylik diniga asos solgan shaxsni yozing.", "Zardusht (Zoroastr / Zaratustra)"),
+                    ("b", "Zardushtiylarning muqaddas kitobini yozing.", "\"Avesto\" (Avesta)"),
                 ],
                 "explanation": "a) Zardusht (Zoroastr); b) \"Avesto\".",
             },

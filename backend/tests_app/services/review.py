@@ -56,9 +56,17 @@ def describe_answer(answer):
         sub_qs = list(question.sub_questions.all())
         if sub_qs:
             submitted = answer.open_answers or {}
+            grading = answer.open_grading or {}
+            items = []
+            for sq in sub_qs:
+                ans_text = submitted.get(sq.label, '')
+                g = grading.get(sq.label)
+                status = ""
+                if g:
+                    status = " ✓" if g.get('is_correct') else " ✗"
+                items.append(f"{sq.label}) {ans_text or '(javob yo`q)'}{status}")
             return {
-                'your_answer': _joined(f"{sq.label}) {submitted.get(sq.label, '')}"
-                                       for sq in sub_qs if submitted.get(sq.label)),
+                'your_answer': _joined(items),
                 'correct_answer': _joined(f"{sq.label}) {sq.reference_answer}" for sq in sub_qs),
             }
         return {'your_answer': answer.text_answer, 'correct_answer': question.reference_answer}
