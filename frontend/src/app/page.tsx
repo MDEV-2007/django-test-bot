@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { Sprout } from 'lucide-react';
 import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
-import SubjectsTicker from '@/components/landing/SubjectsTicker';
-import ExamCategories from '@/components/landing/ExamCategories';
-import TestmakonBentoGrid from '@/components/landing/TestmakonBentoGrid';
+import ExamTracksSection from '@/components/landing/ExamTracksSection';
+import DiagnosisMethodSection from '@/components/landing/DiagnosisMethodSection';
+import SubjectsGrid from '@/components/landing/SubjectsGrid';
 import ScoreCalculator from '@/components/landing/ScoreCalculator';
-import ThreeStepsSection from '@/components/landing/ThreeStepsSection';
+import TeacherAndCommunity from '@/components/landing/TeacherAndCommunity';
 import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
-import FinalCtaSection from '@/components/landing/FinalCtaSection';
+import FinalEditorialCta from '@/components/landing/FinalEditorialCta';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LiveActivityToast from '@/components/landing/LiveActivityToast';
 import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
@@ -19,13 +19,13 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
 
 export const metadata: Metadata = {
-  title: "IlmIldizi — Milliy sertifikat va DTM'ga onlayn tayyorgarlik",
+  title: "IlmIldizi — Milliy sertifikat va DTM'ga tizimli onlayn tayyorgarlik",
   description:
-    "O'zbekiston abituriyentlari uchun AI quvvatli zamonaviy ta'lim platformasi. "
-    + "Rasmiy formatdagi mock testlar, AI mentor, zaif mavzular tahlili va DTM ball bashorati.",
+    "O'zbekiston abituriyentlari uchun rasmiy UzBMB formatidagi mock imtihonlar, "
+    + "zaif mavzular tahlili va DTM ball bashorati. Bilimni yodlama, ildizidan tushun.",
   keywords: [
     'milliy sertifikat', 'DTM', 'BBA', 'mock test', 'onlayn test', 'tarix testlari',
-    'ona tili test', 'abituriyent', 'test yechish', 'IlmIldizi', 'AI mentor', 'Rasch modeli',
+    'ona tili test', 'abituriyent', 'test yechish', 'IlmIldizi', 'Rasch modeli',
   ],
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
@@ -34,14 +34,14 @@ export const metadata: Metadata = {
     locale: 'uz_UZ',
     url: SITE_URL,
     siteName: 'IlmIldizi',
-    title: "IlmIldizi — Milliy sertifikat va DTM'ga onlayn tayyorgarlik",
+    title: "IlmIldizi — Milliy sertifikat va DTM'ga tizimli onlayn tayyorgarlik",
     description:
-      "15 000+ savol, AI mentor va real vaqtdagi tahlil. Kuchsiz mavzuni ildizidan yo'q qiling.",
+      "15 000+ saralangan testlar, zaif mavzular tahlili va rasmiy 100 ballik UzBMB baholash shkalasi.",
   },
   twitter: {
     card: 'summary_large_image',
     title: 'IlmIldizi',
-    description: "Milliy sertifikat va DTM'ga onlayn tayyorgarlik platformasi.",
+    description: "Milliy sertifikat va DTM'ga tizimli onlayn tayyorgarlik platformasi.",
   },
 };
 
@@ -92,15 +92,15 @@ async function loadPlans(): Promise<PlanCard[]> {
 const FAQ = [
   {
     q: "IlmIldizi qanday imtihonlarga tayyorlaydi?",
-    a: "Milliy sertifikat (A+ dan C gacha) va DTM (Bakalavr bosqichiga ariza) formatidagi testlarga. Savol turlari, vaqt taymeri va UzBMB Rasch modeli bo'yicha ball hisobi rasmiy davlat imtihonlari bilan 100% bir xil.",
+    a: "Milliy sertifikat (A+ dan C gacha) va DTM (Bakalavr bosqichiga ariza) formatidagi testlarga. Savol turlari, vaqt taymeri va UzBMB Rasch modeli bo'yicha ball hisobi rasmiy davlat imtihonlari mezonlari bilan 100% mos.",
   },
   {
     q: "Platformadan bepul foydalansa bo'ladimi?",
-    a: "Ha! Kundalik mashq testlari, 1v1 arena bellashuvlari, mini o'yinlar, kunlik missiyalar, reyting, asosiy tahlil va AI Mentor (kuniga 5 savol) mutlaqo bepul. To'lov faqat rasmiy to'liq mock imtihonlar va cheklovsiz AI repetitor uchun.",
+    a: "Ha! Kundalik mashq testlari, 1v1 arena bellashuvlari, mini o'yinlar, kunlik missiyalar, umumiy reyting va asosiy diagnostika mutlaqo bepul. To'lov faqat rasmiy to'liq mock imtihonlar va cheklovsiz chuqur tahlil uchun.",
   },
   {
-    q: "Telegram orqali kirish qanday ishlaydi?",
-    a: "Telegram orqali kirganingizda rasmiy Telegram bot kaliti bilan bir zumda tizimga ulanasiz. Parol o'ylab topish, kod kutish yoki bank kartasi kiritish talab etilmaydi.",
+    q: "Telegram orqali kirish xavfsizmi?",
+    a: "Ha, 100% xavfsiz. Telegram orqali kirganingizda rasmiy Telegram bot kaliti bilan bir zumda tizimga ulanasiz. Parol o'ylab topish, kod kutish yoki bank kartasi kiritish shart emas.",
   },
   {
     q: "DTM va Sertifikat ball bashorati qanday hisoblanadi?",
@@ -121,7 +121,7 @@ const jsonLd = {
       url: SITE_URL,
       name: 'IlmIldizi',
       inLanguage: 'uz-UZ',
-      description: "O'zbekiston abituriyentlari uchun AI quvvatli onlayn test platformasi. Milliy sertifikat va DTM tayyorgarligi.",
+      description: "O'zbekiston abituriyentlari uchun tizimli onlayn test platformasi. Milliy sertifikat va DTM tayyorgarligi.",
     },
     {
       '@type': 'EducationalOrganization',
@@ -158,32 +158,32 @@ export default async function LandingPage() {
       <LandingAiChatWidget />
 
       <main className="flex-1">
-        {/* 1. HERO SECTION (Aurora, Lit Grid, Rotating Headline, Interactive 3D Mock Preview) */}
+        {/* 1. HERO SECTION (Editorial, Authentic, Live Diagnostic Certificate & Sample Question) */}
         <HeroSection />
 
-        {/* 2. FANLAR LENTASI (Infinite Marquee Ticker) */}
-        <SubjectsTicker />
+        {/* 2. IMTIHON YO'NALISHLARI (Milliy Sertifikat, DTM 90 talik, Fan mashqlari, 1v1 Bellashuv) */}
+        <ExamTracksSection />
 
-        {/* 3. IMTIHONLAR: "Chipta" kartalari */}
-        <ExamCategories />
+        {/* 3. ILDIZ TAMOYILI (Qanday ishlaydi: Zaiflikni topish -> Maqsadli mashq -> O'sish) */}
+        <DiagnosisMethodSection />
 
-        {/* 4. ASIMMETRIK BENTO GRID (Har bir xatoyingiz keyingi mashqqa aylanadi) */}
-        <TestmakonBentoGrid />
+        {/* 4. FANLAR KATALOGI */}
+        <SubjectsGrid />
 
-        {/* 5. BALL KALKULYATORI & OTM BASHORATI */}
+        {/* 5. OTM BALL KALKULYATORI & BASHORATI */}
         <ScoreCalculator />
 
-        {/* 6. UCH QADAMDA BOSHLAYSIZ */}
-        <ThreeStepsSection />
+        {/* 6. O'QITUVCHILAR VA SINFLAR MONITORINGI */}
+        <TeacherAndCommunity />
 
-        {/* 7. TARIFLAR (NARXLAR) */}
+        {/* 7. TARIFLAR VA NARXLAR */}
         <PricingSection plans={plans} />
 
         {/* 8. KO'P SO'RALADIGAN SAVOLLAR (FAQ) */}
         <FaqAccordion items={FAQ} />
 
-        {/* 9. YAKUNIY CHAQIRIQ (High-contrast dark card) */}
-        <FinalCtaSection />
+        {/* 9. SAMIMIY YAKUNIY CHAQIRIQ (Final CTA) */}
+        <FinalEditorialCta />
       </main>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
@@ -202,7 +202,7 @@ export default async function LandingPage() {
               </Link>
 
               <p className="mt-4 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm">
-                O&apos;zbekiston abituriyentlari uchun AI quvvatli zamonaviy ta&apos;lim platformasi. Rasmiy formatdagi mock testlar va individual zaiflik tahlili.
+                O&apos;zbekiston abituriyentlari uchun rasmiy mezonlar asosidagi ta&apos;lim platformasi. Xatolarni yodlash emas, sababini ildizidan tushunish.
               </p>
 
               <div className="mt-5 flex items-center gap-2 text-xs text-emerald-700 font-semibold">
@@ -218,9 +218,9 @@ export default async function LandingPage() {
               </h4>
               <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
                 <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Mock Testlar</Link></li>
-                <li><Link href="/battles" className="hover:text-emerald-700 transition-colors">1v1 Arena</Link></li>
+                <li><Link href="/battles" className="hover:text-emerald-700 transition-colors">1v1 Bellashuv</Link></li>
                 <li><Link href="/leaderboard" className="hover:text-emerald-700 transition-colors">Respublika Reytingi</Link></li>
-                <li><Link href="/premium" className="hover:text-emerald-700 transition-colors">Tariflar & Obuna</Link></li>
+                <li><Link href="/premium" className="hover:text-emerald-700 transition-colors">Tariflar va Obuna</Link></li>
               </ul>
             </div>
 
@@ -230,9 +230,9 @@ export default async function LandingPage() {
                 Imtihonlar
               </h4>
               <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">DTM Simulyatsiya</Link></li>
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Milliy Sertifikat</Link></li>
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Tarix Fani Testlari</Link></li>
+                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Milliy Sertifikat (UzBMB)</Link></li>
+                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">DTM Katta Simulyatsiya</Link></li>
+                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Tarix Testlari</Link></li>
                 <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Ona Tili va Adabiyot</Link></li>
               </ul>
             </div>
