@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   FileCheck2, Swords, BookOpen, Bot, ArrowRight, History, MapPin, HelpCircle,
   Crown, Sparkles, Flame, Coins, Trophy, Snowflake, CheckCircle2,
-  ChevronRight, Zap,
+  ChevronRight, Zap, GraduationCap,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { apiFetch } from '@/lib/api-client';
@@ -28,7 +28,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import StudentAdmissionMatcher from '@/components/student/StudentAdmissionMatcher';
 
 type DashboardData = {
   profile: {
@@ -437,9 +436,38 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* OTM Ball Bashorati va Universitetlar Matcheri */}
-        <section className="space-y-3">
-          <StudentAdmissionMatcher />
+        {/* OTM Ball Bashorati Tezkor Banneri */}
+        <section>
+          <Link href="/analytics" className="group block">
+            <Card className="tactile-btn relative overflow-hidden border-[var(--accent-border)] bg-gradient-to-r from-emerald-950/30 via-[var(--surface-card-medium)] to-[var(--surface-card-medium)] py-4 transition-all hover:border-[var(--accent)]">
+              <div className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-[var(--accent)]/10 blur-2xl" />
+              <CardContent className="relative flex flex-wrap items-center justify-between gap-4 px-5">
+                <div className="flex items-center gap-3.5">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-text)] transition-transform group-hover:scale-105">
+                    <GraduationCap className="size-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-text)]">
+                        OTM Qabul Bashorati & Universitetlar Matcheri
+                      </p>
+                      <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-300">
+                        2025/2026
+                      </Badge>
+                    </div>
+                    <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                      Ballingiz qaysi OTMga Grant yoki Kontraktga yetishini Analitika sahifasida real vaqtda hisoblang.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 text-xs font-bold text-[var(--accent-text)]">
+                  <span>Hisoblash</span>
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </section>
 
         <div className="grid gap-5 md:grid-cols-12">

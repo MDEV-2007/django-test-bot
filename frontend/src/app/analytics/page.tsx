@@ -16,6 +16,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
 import PredictedScore from '@/components/student/PredictedScore';
+import StudentAdmissionMatcher from '@/components/student/StudentAdmissionMatcher';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -135,6 +136,9 @@ export default function AnalyticsPage() {
 
         {/* DTM ball bashorati — sahifaning eng qimmatli javobi, shuning uchun eng tepada. */}
         <PredictedScore />
+
+        {/* OTM Ball Bashorati va Universitetlar Matcheri */}
+        <StudentAdmissionMatcher />
 
         {!data && (
           <div className="space-y-4">
