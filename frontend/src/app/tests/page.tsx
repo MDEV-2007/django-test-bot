@@ -164,6 +164,17 @@ const MOCK_THEMES: Record<string, {
   subjectBadge: string;
   timeBadge: string;
   button: string;
+  liveCardBorder: string;
+  liveCardBg: string;
+  liveCardGlow: string;
+  liveTopLine: string;
+  liveBadge: string;
+  liveTimeBadge: string;
+  liveHoverText: string;
+  liveIconColor: string;
+  liveSubjectBadge: string;
+  liveButton: string;
+  primaryButton: string;
 }> = {
   'ona-tili': {
     card: 'border-emerald-500/40 bg-gradient-to-r from-emerald-500/[0.12] via-[var(--surface-card)] to-teal-500/[0.08]',
@@ -172,6 +183,17 @@ const MOCK_THEMES: Record<string, {
     subjectBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
     timeBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
     button: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700',
+    liveCardBorder: 'border-2 border-emerald-500/50 hover:border-emerald-400',
+    liveCardBg: 'bg-gradient-to-br from-emerald-500/[0.08] via-[var(--surface-card)] to-teal-500/[0.04]',
+    liveCardGlow: 'shadow-lg shadow-emerald-500/5 hover:shadow-xl hover:shadow-emerald-500/10',
+    liveTopLine: 'from-transparent via-emerald-500 to-transparent',
+    liveBadge: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white',
+    liveTimeBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
+    liveHoverText: 'group-hover:text-emerald-500',
+    liveIconColor: 'text-emerald-500',
+    liveSubjectBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium',
+    liveButton: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20',
+    primaryButton: 'bg-emerald-600 hover:bg-emerald-700 text-white',
   },
   'matematika': {
     card: 'border-blue-500/40 bg-gradient-to-r from-blue-500/[0.14] via-[var(--surface-card)] to-indigo-500/[0.08]',
@@ -180,6 +202,17 @@ const MOCK_THEMES: Record<string, {
     subjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
     timeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
     button: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700',
+    liveCardBorder: 'border-2 border-blue-500/50 hover:border-blue-400',
+    liveCardBg: 'bg-gradient-to-br from-blue-500/[0.08] via-[var(--surface-card)] to-indigo-500/[0.04]',
+    liveCardGlow: 'shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10',
+    liveTopLine: 'from-transparent via-blue-500 to-transparent',
+    liveBadge: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
+    liveTimeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
+    liveHoverText: 'group-hover:text-blue-500',
+    liveIconColor: 'text-blue-500',
+    liveSubjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium',
+    liveButton: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20',
+    primaryButton: 'bg-blue-600 hover:bg-blue-700 text-white',
   },
   'math': {
     card: 'border-blue-500/40 bg-gradient-to-r from-blue-500/[0.14] via-[var(--surface-card)] to-indigo-500/[0.08]',
@@ -188,6 +221,17 @@ const MOCK_THEMES: Record<string, {
     subjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
     timeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
     button: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700',
+    liveCardBorder: 'border-2 border-blue-500/50 hover:border-blue-400',
+    liveCardBg: 'bg-gradient-to-br from-blue-500/[0.08] via-[var(--surface-card)] to-indigo-500/[0.04]',
+    liveCardGlow: 'shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10',
+    liveTopLine: 'from-transparent via-blue-500 to-transparent',
+    liveBadge: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
+    liveTimeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
+    liveHoverText: 'group-hover:text-blue-500',
+    liveIconColor: 'text-blue-500',
+    liveSubjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium',
+    liveButton: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20',
+    primaryButton: 'bg-blue-600 hover:bg-blue-700 text-white',
   },
   'tarix': {
     card: 'border-amber-500/40 bg-gradient-to-r from-amber-500/[0.12] via-[var(--surface-card)] to-orange-500/[0.08]',
@@ -196,6 +240,17 @@ const MOCK_THEMES: Record<string, {
     subjectBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400',
     timeBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-500',
     button: 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700',
+    liveCardBorder: 'border-2 border-amber-500/50 hover:border-amber-400',
+    liveCardBg: 'bg-gradient-to-br from-amber-500/[0.08] via-[var(--surface-card)] to-orange-500/[0.04]',
+    liveCardGlow: 'shadow-lg shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10',
+    liveTopLine: 'from-transparent via-amber-500 to-transparent',
+    liveBadge: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white',
+    liveTimeBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-500',
+    liveHoverText: 'group-hover:text-amber-500',
+    liveIconColor: 'text-amber-500',
+    liveSubjectBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium',
+    liveButton: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md shadow-amber-500/20',
+    primaryButton: 'bg-amber-600 hover:bg-amber-700 text-white',
   },
   'biologiya': {
     card: 'border-green-500/40 bg-gradient-to-r from-green-500/[0.12] via-[var(--surface-card)] to-emerald-500/[0.08]',
@@ -204,6 +259,17 @@ const MOCK_THEMES: Record<string, {
     subjectBadge: 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400',
     timeBadge: 'border-green-500/30 bg-green-500/10 text-green-500',
     button: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700',
+    liveCardBorder: 'border-2 border-green-500/50 hover:border-green-400',
+    liveCardBg: 'bg-gradient-to-br from-green-500/[0.08] via-[var(--surface-card)] to-emerald-500/[0.04]',
+    liveCardGlow: 'shadow-lg shadow-green-500/5 hover:shadow-xl hover:shadow-green-500/10',
+    liveTopLine: 'from-transparent via-green-500 to-transparent',
+    liveBadge: 'bg-gradient-to-r from-green-600 to-emerald-600 text-white',
+    liveTimeBadge: 'border-green-500/30 bg-green-500/10 text-green-500',
+    liveHoverText: 'group-hover:text-green-500',
+    liveIconColor: 'text-green-500',
+    liveSubjectBadge: 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400 font-medium',
+    liveButton: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-md shadow-green-500/20',
+    primaryButton: 'bg-green-600 hover:bg-green-700 text-white',
   },
   'cefr': {
     card: 'border-violet-500/40 bg-gradient-to-r from-violet-500/[0.12] via-[var(--surface-card)] to-purple-500/[0.08]',
@@ -212,6 +278,17 @@ const MOCK_THEMES: Record<string, {
     subjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400',
     timeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
     button: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700',
+    liveCardBorder: 'border-2 border-violet-500/50 hover:border-violet-400',
+    liveCardBg: 'bg-gradient-to-br from-violet-500/[0.08] via-[var(--surface-card)] to-purple-500/[0.04]',
+    liveCardGlow: 'shadow-lg shadow-violet-500/5 hover:shadow-xl hover:shadow-violet-500/10',
+    liveTopLine: 'from-transparent via-violet-500 to-transparent',
+    liveBadge: 'bg-gradient-to-r from-violet-600 to-purple-600 text-white',
+    liveTimeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
+    liveHoverText: 'group-hover:text-violet-500',
+    liveIconColor: 'text-violet-500',
+    liveSubjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-medium',
+    liveButton: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20',
+    primaryButton: 'bg-violet-600 hover:bg-violet-700 text-white',
   },
   'ingliz-tili': {
     card: 'border-violet-500/40 bg-gradient-to-r from-violet-500/[0.12] via-[var(--surface-card)] to-purple-500/[0.08]',
@@ -220,6 +297,17 @@ const MOCK_THEMES: Record<string, {
     subjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400',
     timeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
     button: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700',
+    liveCardBorder: 'border-2 border-violet-500/50 hover:border-violet-400',
+    liveCardBg: 'bg-gradient-to-br from-violet-500/[0.08] via-[var(--surface-card)] to-purple-500/[0.04]',
+    liveCardGlow: 'shadow-lg shadow-violet-500/5 hover:shadow-xl hover:shadow-violet-500/10',
+    liveTopLine: 'from-transparent via-violet-500 to-transparent',
+    liveBadge: 'bg-gradient-to-r from-violet-600 to-purple-600 text-white',
+    liveTimeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
+    liveHoverText: 'group-hover:text-violet-500',
+    liveIconColor: 'text-violet-500',
+    liveSubjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-medium',
+    liveButton: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20',
+    primaryButton: 'bg-violet-600 hover:bg-violet-700 text-white',
   },
 };
 
@@ -548,6 +636,8 @@ export default function TestsPage() {
                dan), aniq ko'rinishini esa test `id` si — shu tufayli bitta fandagi
                o'nlab test bir-biriga o'xshab ketmaydi. */
             const art = cardArtwork(t.subject ? subjects[t.subject] : null, t.id);
+            const cardSubjectSlug = t.subject || data.pinned_mock?.subject_slug || subject || 'tarix';
+            const cTheme = MOCK_THEMES[cardSubjectSlug] || MOCK_THEMES['tarix'];
             return (
               <Reveal key={t.id} index={tIdx} className="h-full">
               <Card
@@ -555,26 +645,26 @@ export default function TestsPage() {
                 className={cn(
                   "group relative flex h-full flex-col justify-between transition-all duration-300",
                   isLiveMock
-                    ? "border-2 border-amber-500/50 bg-gradient-to-br from-amber-500/[0.08] via-[var(--surface-card)] to-emerald-500/[0.04] shadow-lg shadow-amber-500/5 hover:border-amber-400 hover:shadow-xl hover:shadow-amber-500/10"
+                    ? cn("border-2", cTheme.liveCardBorder, cTheme.liveCardBg, cTheme.liveCardGlow)
                     : "transition-colors hover:border-[var(--accent-border)]"
                 )}
               >
                 {isLiveMock && (
-                  <div className="absolute -top-px left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-80" />
+                  <div className={cn("absolute -top-px left-8 right-8 h-[2px] opacity-80 bg-gradient-to-r", cTheme.liveTopLine)} />
                 )}
                 <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">
                       {isLiveMock ? (
                         <>
-                          <Badge className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 gap-1.5 shadow-sm border-0">
+                          <Badge className={cn("text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 gap-1.5 shadow-sm border-0", cTheme.liveBadge)}>
                             <span className="relative flex size-1.5">
                               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-80" />
                               <span className="relative inline-flex size-1.5 rounded-full bg-white" />
                             </span>
                             Jonli Mock
                           </Badge>
-                          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+                          <Badge variant="outline" className={cn("text-xs font-semibold", cTheme.subjectBadge)}>
                             {CATEGORY_BADGE[t.category] || 'Rasmiy Format'}
                           </Badge>
                         </>
@@ -590,7 +680,7 @@ export default function TestsPage() {
                       )}
                     </div>
                     {isLiveMock && t.scheduled_at ? (
-                      <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 font-mono text-xs gap-1 font-semibold">
+                      <Badge variant="outline" className={cn("font-mono text-xs gap-1 font-semibold", cTheme.liveTimeBadge)}>
                         <Clock className="size-3" /> {formatScheduledTime(t.scheduled_at)}
                       </Badge>
                     ) : (
@@ -602,7 +692,7 @@ export default function TestsPage() {
 
                   <h3 className={cn(
                     "font-voice text-base font-bold leading-snug transition-colors",
-                    isLiveMock ? "text-foreground group-hover:text-amber-500" : "group-hover:text-[var(--accent-text)]"
+                    isLiveMock ? cn("text-foreground", cTheme.liveHoverText) : "group-hover:text-[var(--accent-text)]"
                   )}>
                     {t.title}
                   </h3>
@@ -612,10 +702,10 @@ export default function TestsPage() {
 
                   <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1 font-mono">
-                      <HelpCircle className={cn("size-3.5", isLiveMock ? "text-amber-500" : "text-[var(--accent-text)]")} /> {t.questions_count} ta savol
+                      <HelpCircle className={cn("size-3.5", isLiveMock ? cTheme.liveIconColor : "text-[var(--accent-text)]")} /> {t.questions_count} ta savol
                     </span>
                     {t.subject && (
-                      <Badge variant={isLiveMock ? "outline" : "secondary"} className={isLiveMock ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium" : ""}>
+                      <Badge variant={isLiveMock ? "outline" : "secondary"} className={isLiveMock ? cTheme.liveSubjectBadge : ""}>
                         {t.subject}
                       </Badge>
                     )}
@@ -633,7 +723,7 @@ export default function TestsPage() {
 
                   {locked ? (
                     /* Bitta aniq signal: qulflangan kartada yagona harakat — tariflar sahifasi. */
-                    <Button asChild variant="outline" className="w-full border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:text-amber-200">
+                    <Button asChild variant="outline" className={cn("w-full", isLiveMock ? cTheme.liveTimeBadge : "border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:text-amber-200")}>
                       <Link href={buyHref}>
                         <Lock className="size-3.5" />
                         {data.mock_plan
@@ -643,14 +733,14 @@ export default function TestsPage() {
                       </Link>
                     </Button>
                   ) : isLiveMock && isScheduledFuture ? (
-                    <Button asChild className="w-full font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md shadow-amber-500/20 transition-all hover:scale-[1.01]">
+                    <Button asChild className={cn("w-full font-bold text-white shadow-md transition-all hover:scale-[1.01]", cTheme.liveButton)}>
                       <Link href={`/tests/mock/${t.id}`}>
                         Kutish zaliga kirish (Lobby) <ArrowRight className="ml-1.5 size-4" />
                       </Link>
                     </Button>
                   ) : isLiveMock ? (
                     <Button
-                      className="w-full font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/25 animate-pulse"
+                      className={cn("w-full font-bold text-white shadow-md animate-pulse", cTheme.liveButton)}
                       onClick={() => start(t.id)}
                       disabled={starting !== null}
                     >
