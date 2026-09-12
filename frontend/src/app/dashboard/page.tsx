@@ -28,6 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import StudentAdmissionMatcher from '@/components/student/StudentAdmissionMatcher';
 
 type DashboardData = {
   profile: {
@@ -434,6 +435,11 @@ export default function DashboardPage() {
               );
             })}
           </div>
+        </section>
+
+        {/* OTM Ball Bashorati va Universitetlar Matcheri */}
+        <section className="space-y-3">
+          <StudentAdmissionMatcher />
         </section>
 
         <div className="grid gap-5 md:grid-cols-12">
