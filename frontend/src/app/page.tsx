@@ -1,16 +1,20 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Sprout } from 'lucide-react';
+import {
+  FileCheck2, Bot, Swords, BarChart3, ArrowRight,
+  Sprout, Send, Sparkles, Clock, CheckCircle2,
+  Compass, Award
+} from 'lucide-react';
 import LandingNav from '@/components/landing/LandingNav';
-import HeroSection from '@/components/landing/HeroSection';
-import SubjectsTicker from '@/components/landing/SubjectsTicker';
-import ExamCategories from '@/components/landing/ExamCategories';
-import TestmakonBentoGrid from '@/components/landing/TestmakonBentoGrid';
-import ScoreCalculator from '@/components/landing/ScoreCalculator';
-import ThreeStepsSection from '@/components/landing/ThreeStepsSection';
+import RootsBackground from '@/components/landing/RootsBackground';
+import RevealOnScroll from '@/components/landing/RevealOnScroll';
+import HeroInteractiveTest from '@/components/landing/HeroInteractiveTest';
+import SubjectsShowcase from '@/components/landing/SubjectsShowcase';
+import BentoGrid from '@/components/landing/BentoGrid';
+import SocialProofAndStats from '@/components/landing/SocialProofAndStats';
+import LeadMagnetBanner from '@/components/landing/LeadMagnetBanner';
 import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
-import FinalCtaSection from '@/components/landing/FinalCtaSection';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LiveActivityToast from '@/components/landing/LiveActivityToast';
 import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
@@ -19,13 +23,13 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
 
 export const metadata: Metadata = {
-  title: "IlmIldizi — Milliy sertifikat va DTM'ga tizimli onlayn tayyorgarlik",
+  title: "IlmIldizi — Milliy sertifikat va BBA'ga onlayn tayyorgarlik",
   description:
-    "O'zbekiston abituriyentlari uchun rasmiy UzBMB formatidagi mock imtihonlar, "
-    + "zaif mavzular tahlili va DTM ball bashorati. Bilimni yodlama, ildizidan tushun.",
+    "Rasmiy formatdagi mock testlar, AI mentor, zaif mavzular tahlili va DTM ball bashorati. "
+    + "Telegram orqali bir bosishda kiring va bugundanoq tayyorlanishni boshlang.",
   keywords: [
-    'milliy sertifikat', 'DTM', 'BBA', 'mock test', 'onlayn test', 'tarix testlari',
-    'ona tili test', 'abituriyent', 'test yechish', 'IlmIldizi', 'Rasch modeli',
+    'milliy sertifikat', 'BBA', 'DTM', 'mock test', 'onlayn test', 'tarix testlari',
+    'abituriyent', 'test yechish', 'IlmIldizi', 'AI mentor',
   ],
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
@@ -34,21 +38,44 @@ export const metadata: Metadata = {
     locale: 'uz_UZ',
     url: SITE_URL,
     siteName: 'IlmIldizi',
-    title: "IlmIldizi — Milliy sertifikat va DTM'ga tizimli onlayn tayyorgarlik",
+    title: "IlmIldizi — Milliy sertifikat va BBA'ga onlayn tayyorgarlik",
     description:
-      "15 000+ saralangan testlar, zaif mavzular tahlili va rasmiy 100 ballik UzBMB baholash shkalasi.",
+      'Mock testlar, AI mentor va real vaqtdagi tahlil. Kuchsiz mavzuni ildizidan yo\'q qiling.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'IlmIldizi',
-    description: "Milliy sertifikat va DTM'ga tizimli onlayn tayyorgarlik platformasi.",
+    description: "Milliy sertifikat va BBA'ga onlayn tayyorgarlik platformasi.",
   },
 };
+
+const STEPS = [
+  {
+    n: '01',
+    icon: Compass,
+    title: "Diagnostik test topshiring",
+    text: "Telegram yoki Google hisobingiz bilan bir bosishda kiring va 10 ta savolli tezkor diagnostikadan o'ting.",
+  },
+  {
+    n: '02',
+    icon: Bot,
+    title: 'Zaif nuqtangizni aniqlang',
+    text: "AI tizimi qaysi mavzu, davr yoki qoidada xato qilganingizni aniqlaydi va shaxsiy reja tuzadi.",
+  },
+  {
+    n: '03',
+    icon: Award,
+    title: 'Imtihonda eng yuqori ball oling',
+    text: "Kunlik 15 daqiqalik mashqlar va 1v1 bellashuvlar orqali natijangizni A+ darajaga chiqaring.",
+  },
+];
 
 const RIBBONS: Record<number, string> = {
   180: 'TAVSIYA ETAMIZ',
   365: 'ENG PAST OYLIK NARX',
 };
+
+
 
 type ApiPlan = {
   plan_type: string; name: string; description: string;
@@ -92,23 +119,23 @@ async function loadPlans(): Promise<PlanCard[]> {
 const FAQ = [
   {
     q: "IlmIldizi qanday imtihonlarga tayyorlaydi?",
-    a: "Milliy sertifikat (A+ dan C gacha) va DTM (Bakalavr bosqichiga ariza) formatidagi testlarga. Savol turlari, vaqt taymeri va UzBMB Rasch modeli bo'yicha ball hisobi rasmiy davlat imtihonlari mezonlari bilan 100% mos.",
+    a: "Milliy sertifikat va BBA (Bakalavr Bosqichiga Ariza) formatidagi testlarga. Savol turlari, taymer va ball hisobi rasmiy davlat imtihoni bilan bir xil tuzilgan.",
   },
   {
     q: "Platformadan bepul foydalansa bo'ladimi?",
-    a: "Ha! Kundalik mashq testlari, 1v1 arena bellashuvlari, mini o'yinlar, kunlik missiyalar, umumiy reyting va asosiy diagnostika mutlaqo bepul. To'lov faqat rasmiy to'liq mock imtihonlar va cheklovsiz chuqur tahlil uchun.",
+    a: "Ha! Kundalik mashq testlari, 1v1 arena, mini o'yinlar, kunlik missiyalar, reyting, asosiy tahlil va AI Mentor (kuniga 5 savol) mutlaqo bepul. To'lov faqat rasmiy to'liq mock testlar va cheklovsiz AI Mentor uchun.",
   },
   {
     q: "Telegram orqali kirish xavfsizmi?",
-    a: "Ha, 100% xavfsiz. Telegram orqali kirganingizda rasmiy Telegram bot kaliti bilan bir zumda tizimga ulanasiz. Parol o'ylab topish, kod kutish yoki bank kartasi kiritish shart emas.",
+    a: "Ha, 100% xavfsiz. Telegram orqali kirganingizda ma'lumotlar rasmiy Telegram bot kaliti bilan kriptografik tekshiriladi. Parol o'ylab topish yoki karta kiritish talab etilmaydi.",
   },
   {
-    q: "DTM va Sertifikat ball bashorati qanday hisoblanadi?",
-    a: "Hisob yechilgan savollar soni, ularning Rasch modeli bo'yicha qiyinlik darajasi, fanlar kesimidagi xatolar va so'nggi natijalarga asoslanadi. Test yechganingiz sayin bashorat aniqligi 96% gacha oshadi.",
+    q: "DTM ball bashorati qanday ishlaydi?",
+    a: "Hisob yechilgan savollar soni, ularning qiyinlik darajasi, fanlar kesimidagi xatolar va so'nggi natijalarga asoslanadi. Test yechganingiz sayin bashorat aniqligi 96% gacha yetadi.",
   },
   {
-    q: "O'qituvchilar va repetitorlar uchun qanday imkoniyatlar bor?",
-    a: "O'qituvchi o'z taklif havolasi orqali butun sinfini bitta umumiy monitoring paneliga jamlay oladi. Barcha o'quvchilarning zaif mavzulari, yechgan testlari va ko'rsatkichlari bitta ekranda tahlil qilinadi.",
+    q: "O'qituvchilar uchun qanday qulayliklar bor?",
+    a: "O'qituvchi o'z havolasi orqali butun sinfini bir joyga jamlaydi. Barcha o'quvchilarning kuchli va zaif mavzulari, yechgan testlari va natijalari bitta umumiy monitoring jadvalida ko'rinadi.",
   },
 ];
 
@@ -121,7 +148,7 @@ const jsonLd = {
       url: SITE_URL,
       name: 'IlmIldizi',
       inLanguage: 'uz-UZ',
-      description: "O'zbekiston abituriyentlari uchun tizimli onlayn test platformasi. Milliy sertifikat va DTM tayyorgarligi.",
+      description: "Milliy sertifikat va BBA'ga onlayn tayyorgarlik platformasi.",
     },
     {
       '@type': 'EducationalOrganization',
@@ -151,111 +178,237 @@ export default async function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Floating Pill Navbar */}
+      <RootsBackground />
       <LandingNav />
       <LiveActivityToast />
       <MobileStickyCta />
       <LandingAiChatWidget />
 
       <main className="flex-1">
-        {/* 1. HERO SECTION (Aurora, Lit Grid, Rotating Headline, Interactive 3D Mock Preview) */}
-        <HeroSection />
+        {/* ── HERO SECTION ─────────────────────────────────────────────────── */}
+        <section className="relative mx-auto max-w-6xl px-4 pb-12 pt-32 sm:px-6 sm:pb-16 sm:pt-40">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+            {/* Chap tomon: Sarlavha va CTA */}
+            <RevealOnScroll className="lg:col-span-7 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
+                <span className="flex size-2 rounded-full bg-emerald-600 animate-pulse" />
+                <Sparkles className="size-3.5" />
+                Milliy sertifikat va BBA&apos;ga onlayn tayyorgarlik
+              </div>
 
-        {/* 2. FANLAR LENTASI (Infinite Marquee Ticker) */}
-        <SubjectsTicker />
+              <h1 className="font-voice mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl text-slate-900">
+                Kuchsiz mavzuni top,{' '}
+                <span className="text-emerald-600">
+                  ildizidan
+                </span>{' '}
+                yo&apos;q qil
+              </h1>
 
-        {/* 3. IMTIHONLAR: "Chipta" kartalari */}
-        <ExamCategories />
+              <p className="mt-5 max-w-xl text-base text-slate-600 sm:text-lg leading-relaxed mx-auto lg:mx-0">
+                Rasmiy formatdagi mock testlar, 24/7 AI mentor va har bir javobdan o&apos;sadigan tahlil. Kuniga 15 daqiqa — natija taxminda emas, imtihondagi ballda ko&apos;rinadi.
+              </p>
 
-        {/* 4. ASIMMETRIK BENTO GRID (Har bir xatoyingiz keyingi mashqqa aylanadi) */}
-        <TestmakonBentoGrid />
+              {/* Asosiy tugmalar */}
+              <div className="mt-8 flex flex-col items-center gap-3.5 sm:flex-row sm:justify-center lg:justify-start">
+                <Link
+                  href="/register"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-12 px-7 text-sm sm:text-base shadow-[0_4px_16px_rgba(5,150,105,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Bepul boshlash <ArrowRight className="size-4" />
+                </Link>
+                <a
+                  href={BOT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-medium h-12 px-6 text-sm sm:text-base shadow-xs transition-all"
+                >
+                  <Send className="size-4 text-sky-600" /> Telegram bot
+                </a>
+              </div>
 
-        {/* 5. BALL KALKULYATORI & OTM BASHORATI */}
-        <ScoreCalculator />
+              {/* Ishonch nishonlari */}
+              <div className="mt-5 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="size-3.5 text-emerald-600" /> Karta kiritish shart emas
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="size-3.5 text-emerald-600" /> Telegram yoki Google bilan 1 bosishda
+                </span>
+              </div>
 
-        {/* 6. UCH QADAMDA BOSHLAYSIZ */}
-        <ThreeStepsSection />
+              {/* Tezkor xususiyatlar ikonkalari */}
+              <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  { icon: FileCheck2, label: 'Rasmiy format' },
+                  { icon: Clock, label: 'Imtihon taymeri' },
+                  { icon: Bot, label: 'AI mentor' },
+                  { icon: BarChart3, label: 'Mavzular tahlili' },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 shadow-xs"
+                  >
+                    <item.icon className="size-3.5 text-emerald-600 shrink-0" />
+                    <span className="text-xs font-medium text-slate-700">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </RevealOnScroll>
 
-        {/* 7. TARIFLAR (NARXLAR) */}
+            {/* O'ng tomon: Jonli interaktiv test simulyatori */}
+            <RevealOnScroll index={1} className="lg:col-span-5">
+              <HeroInteractiveTest />
+            </RevealOnScroll>
+          </div>
+        </section>
+
+        {/* ── FANLAR VITRINASI ──────────────────────────────────────────────── */}
+        <RevealOnScroll>
+          <SubjectsShowcase />
+        </RevealOnScroll>
+
+        {/* ── ISHONCH VA JONLI METRIKALAR ───────────────────────────────────── */}
+        <RevealOnScroll>
+          <SocialProofAndStats />
+        </RevealOnScroll>
+
+        {/* ── BENTO GRID (IMKONIYATLAR) ────────────────────────────────────── */}
+        <RevealOnScroll>
+          <BentoGrid />
+        </RevealOnScroll>
+
+        {/* ── LEAD MAGNET (BEPUL PDF SOVG'A) ─────────────────────────────────── */}
+        <RevealOnScroll>
+          <LeadMagnetBanner />
+        </RevealOnScroll>
+
+        {/* ── QANDAY ISHLAYDI (3 QADAM) ────────────────────────────────────── */}
+        <section id="qanday" className="scroll-mt-28 border-y border-slate-200 bg-slate-50/60 py-20 sm:py-28">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <RevealOnScroll className="mx-auto max-w-2xl text-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
+                Oddiy va samarali
+              </span>
+              <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+                Muvaffaqiyatga 3 oddiy qadam
+              </h2>
+              <p className="mt-4 text-sm text-slate-600 sm:text-base">
+                Ro&apos;yxatdan o&apos;tishdan birinchi shaxsiy tahlilgacha bor-yo&apos;g&apos;i 5 daqiqa.
+              </p>
+            </RevealOnScroll>
+
+            <div className="mt-14 grid gap-5 md:grid-cols-3">
+              {STEPS.map((s, i) => (
+                <RevealOnScroll key={s.n} index={i} className="relative">
+                  <div className="group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-300 hover:border-emerald-300 hover:shadow-xl">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-3xl font-black text-slate-200 group-hover:text-emerald-600 transition-colors">
+                          {s.n}
+                        </span>
+                        <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          <s.icon className="size-5" />
+                        </div>
+                      </div>
+                      <h3 className="mt-5 text-lg font-bold text-slate-900 sm:text-xl">{s.title}</h3>
+                      <p className="mt-3 text-xs leading-relaxed text-slate-600 sm:text-sm">{s.text}</p>
+                    </div>
+
+                    <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-emerald-700">
+                      <span>Batafsil</span>
+                      <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── NARXLAR BO'LIMI ──────────────────────────────────────────────── */}
         <PricingSection plans={plans} />
 
-        {/* 8. KO'P SO'RALADIGAN SAVOLLAR (FAQ) */}
-        <FaqAccordion items={FAQ} />
+        {/* ── SAVOLLAR (FAQ) ───────────────────────────────────────────────── */}
+        <RevealOnScroll>
+          <FaqAccordion items={FAQ} />
+        </RevealOnScroll>
 
-        {/* 9. YAKUNIY CHAQIRIQ (High-contrast dark card) */}
-        <FinalCtaSection />
+        {/* ── YAKUNIY CHAQIRIQ (FINAL CTA) ─────────────────────────────────── */}
+        <section className="relative mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+          <RevealOnScroll>
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/50 p-8 text-center shadow-lg sm:p-14">
+              <div className="absolute -right-20 -top-20 size-80 rounded-full bg-emerald-100/40 blur-3xl pointer-events-none" />
+              <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-100/40 blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 mx-auto max-w-2xl">
+                <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-xs">
+                  <Sprout className="size-6 text-emerald-600" />
+                </span>
+
+                <h2 className="font-voice mt-6 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+                  Bugun bitta test — imtihonda esa{' '}
+                  <span className="text-emerald-600">
+                    Grant va Kontrakt
+                  </span>{' '}
+                  farqi!
+                </h2>
+
+                <p className="mt-4 text-sm text-slate-600 sm:text-base leading-relaxed">
+                  O&apos;z bilimingizni hoziroq sinab ko&apos;ring. Hech qanday to&apos;lovsiz, Telegram orqali 10 soniyada kiring va diagnostik testni yeching.
+                </p>
+
+                <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
+                  <Link
+                    href="/register"
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-12 px-7 text-sm sm:text-base shadow-[0_4px_16px_rgba(5,150,105,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Bepul boshlash <ArrowRight className="size-4" />
+                  </Link>
+                  <a
+                    href={BOT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-medium h-12 px-6 text-sm sm:text-base shadow-xs transition-all"
+                  >
+                    <Send className="size-4 text-sky-600" /> Telegram bot
+                  </a>
+                </div>
+              </div>
+            </div>
+          </RevealOnScroll>
+        </section>
       </main>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-200 bg-white py-14">
+      <footer className="border-t border-slate-200 bg-white py-12">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
-            {/* Brand column */}
-            <div className="lg:col-span-2">
-              <Link href="/" className="flex items-center gap-2.5">
-                <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                  <Sprout className="size-5 text-emerald-600" />
-                </span>
-                <span className="font-voice text-lg font-black tracking-tight text-slate-900">
-                  Ilm<span className="text-emerald-600">Ildizi</span>
-                </span>
-              </Link>
-
-              <p className="mt-4 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm">
-                O&apos;zbekiston abituriyentlari uchun rasmiy mezonlar asosidagi ta&apos;lim platformasi. Xatolarni yodlash emas, sababini ildizidan tushunish.
-              </p>
-
-              <div className="mt-5 flex items-center gap-2 text-xs text-emerald-700 font-semibold">
-                <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
-                <span>Barcha tizimlar barqaror ishlamoqda</span>
-              </div>
+          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <Sprout className="size-4" />
+              </span>
+              <span className="font-voice text-base font-bold text-slate-900">
+                Ilm<span className="text-emerald-600">Ildizi</span>
+              </span>
             </div>
 
-            {/* Links 1 */}
-            <div>
-              <h4 className="font-voice text-xs font-black uppercase tracking-wider text-slate-900 mb-3.5">
-                Platforma
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Mock Testlar</Link></li>
-                <li><Link href="/battles" className="hover:text-emerald-700 transition-colors">1v1 Bellashuv</Link></li>
-                <li><Link href="/leaderboard" className="hover:text-emerald-700 transition-colors">Respublika Reytingi</Link></li>
-                <li><Link href="/premium" className="hover:text-emerald-700 transition-colors">Tariflar va Obuna</Link></li>
-              </ul>
-            </div>
+            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-600">
+              <a href="#imkoniyatlar" className="transition-colors hover:text-slate-900">Imkoniyatlar</a>
+              <a href="#qanday" className="transition-colors hover:text-slate-900">Qanday ishlaydi</a>
+              <a href="#narxlar" className="transition-colors hover:text-slate-900">Narxlar</a>
+              <a href="#savollar" className="transition-colors hover:text-slate-900">Savollar</a>
+              <Link href="/login" className="transition-colors hover:text-slate-900">Kirish</Link>
+              <Link href="/register" className="transition-colors hover:text-slate-900">Ro&apos;yxatdan o&apos;tish</Link>
+            </nav>
 
-            {/* Links 2 */}
-            <div>
-              <h4 className="font-voice text-xs font-black uppercase tracking-wider text-slate-900 mb-3.5">
-                Imtihonlar
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Milliy Sertifikat (UzBMB)</Link></li>
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">DTM Katta Simulyatsiya</Link></li>
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Tarix Testlari</Link></li>
-                <li><Link href="/mock" className="hover:text-emerald-700 transition-colors">Ona Tili va Adabiyot</Link></li>
-              </ul>
-            </div>
-
-            {/* Links 3 */}
-            <div>
-              <h4 className="font-voice text-xs font-black uppercase tracking-wider text-slate-900 mb-3.5">
-                Yordam & Aloqa
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
-                <li><a href="#savollar" className="hover:text-emerald-700 transition-colors">Ko&apos;p so&apos;raladigan savollar</a></li>
-                <li><a href={BOT_URL} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-700 transition-colors">Telegram Bot</a></li>
-                <li><Link href="/login" className="hover:text-emerald-700 transition-colors">Tizimga kirish</Link></li>
-                <li><Link href="/register" className="hover:text-emerald-700 transition-colors">Ro&apos;yxatdan o&apos;tish</Link></li>
-              </ul>
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span className="size-1.5 rounded-full bg-emerald-500" />
+              <span>Barcha tizimlar barqaror</span>
             </div>
           </div>
 
-          <div className="mt-12 border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-            <p>© {new Date().getFullYear()} IlmIldizi. Barcha huquqlar himoyalangan.</p>
-            <p className="flex items-center gap-1">
-              O&apos;zbekistonda mehr bilan yaratilgan 🇺🇿
-            </p>
+          <div className="mt-8 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+            © {new Date().getFullYear()} IlmIldizi. Barcha huquqlar himoyalangan.
           </div>
         </div>
       </footer>
