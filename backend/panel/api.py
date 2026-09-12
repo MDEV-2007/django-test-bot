@@ -1091,19 +1091,22 @@ def surveys_api(request):
 
 
 # ============================================================ MOCK RESULTS
-def _calculate_grade(score, correct):
+def _calculate_grade(score, correct=None):
+    """UzBMB (DTM) rasmiy Milliy Sertifikat 100 ballik baholash shkalasi."""
     if score is None:
         return '—', 'slate'
-    if score >= 80 or (correct and correct >= 34):
+    if score >= 86.0:
         return 'A+', 'emerald'
-    if score >= 65 or (correct and correct >= 28):
+    if score >= 70.0:
         return 'A', 'teal'
-    if score >= 55 or (correct and correct >= 24):
+    if score >= 60.0:
         return 'B+', 'sky'
-    if score >= 48 or (correct and correct >= 21):
+    if score >= 50.0:
         return 'B', 'amber'
-    if score >= 40 or (correct and correct >= 18):
+    if score >= 46.0:
         return 'C+', 'orange'
+    if score >= 40.0:
+        return 'C', 'yellow'
     return '—', 'rose'
 
 

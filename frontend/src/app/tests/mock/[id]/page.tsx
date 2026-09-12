@@ -39,12 +39,13 @@ type MockLobbyData = {
 };
 
 const GRADING_SCALE = [
-  { range: '34 – 45', grade: 'A+', label: "Oltin (A'lo)", tone: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
-  { range: '28 – 33', grade: 'A', label: "A'lo natija", tone: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400' },
-  { range: '24 – 27', grade: 'B+', label: 'Juda yaxshi', tone: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400' },
-  { range: '21 – 23', grade: 'B', label: 'Yaxshi natija', tone: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-  { range: '18 – 20', grade: 'C+', label: "Qoniqarli (O'tish)", tone: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400' },
-  { range: '0 – 17', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
+  { range: '86 – 100 ball', grade: 'A+', label: "Oltin (Maksimal)", tone: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  { range: '70 – 85.9 ball', grade: 'A', label: "A'lo natija", tone: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400' },
+  { range: '60 – 69.9 ball', grade: 'B+', label: 'Juda yaxshi', tone: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400' },
+  { range: '50 – 59.9 ball', grade: 'B', label: 'Yaxshi natija', tone: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+  { range: '46 – 49.9 ball', grade: 'C+', label: "Qoniqarli", tone: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400' },
+  { range: '40 – 45.9 ball', grade: 'C', label: "O'tish darajasi", tone: 'border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
+  { range: '0 – 39.9 ball', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
 ];
 
 function formatScheduledTime(dateStr: string | null | undefined): string {

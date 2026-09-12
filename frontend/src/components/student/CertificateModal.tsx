@@ -49,23 +49,14 @@ interface GradeResult {
 }
 
 function getGrade(score: number, correctCount?: number, totalQuestions?: number): GradeResult {
-  // 45 talik Milliy Sertifikat imtihoni uchun rasmiy mezon
-  if (totalQuestions === 45 && typeof correctCount === 'number') {
-    if (correctCount >= 34) return { grade: "A+ (A'lo)", shortGrade: 'A+', subLabel: "A'lo", label: "Eng yuqori natija — Oltin Sertifikat", tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
-    if (correctCount >= 28) return { grade: "A (A'lo)", shortGrade: 'A', subLabel: "A'lo", label: "Yuqori a'lo natija", tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
-    if (correctCount >= 24) return { grade: 'B+ (Juda yaxshi)', shortGrade: 'B+', subLabel: 'Juda yaxshi', label: 'Muvaffaqiyatli natija', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
-    if (correctCount >= 21) return { grade: 'B (Yaxshi)', shortGrade: 'B', subLabel: 'Yaxshi', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
-    if (correctCount >= 18) return { grade: 'C+ (Qoniqarli)', shortGrade: 'C+', subLabel: 'Qoniqarli', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
-    return { grade: "Sinovdan o'tmadi", shortGrade: '—', subLabel: "O'tmadi", label: "Sertifikat berilmaydi (yetarli emas)", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
-  }
-
-  // Umumiy testlar uchun foiz bo'yicha
-  if (score >= 75.5) return { grade: "A+ (A'lo)", shortGrade: 'A+', subLabel: "A'lo", label: 'Eng yuqori natija', tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
-  if (score >= 62.0) return { grade: "A (A'lo)", shortGrade: 'A', subLabel: "A'lo", label: 'Yuqori natija', tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
-  if (score >= 53.0) return { grade: 'B+ (Juda yaxshi)', shortGrade: 'B+', subLabel: 'Juda yaxshi', label: 'Muvaffaqiyatli', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
-  if (score >= 46.5) return { grade: 'B (Yaxshi)', shortGrade: 'B', subLabel: 'Yaxshi', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
-  if (score >= 40.0) return { grade: 'C+ (Qoniqarli)', shortGrade: 'C+', subLabel: 'Qoniqarli', label: "O'tish bali", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
-  return { grade: "Sinovdan o'tmadi", shortGrade: '—', subLabel: "O'tmadi", label: "Sertifikat berilmaydi", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
+  // Rasmiy UzBMB Milliy Sertifikat 100 ballik shkalasi
+  if (score >= 86.0) return { grade: "A+ (A'lo)", shortGrade: 'A+', subLabel: "A'lo", label: "Eng yuqori natija — Oltin Sertifikat (OTMga 100% ball)", tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
+  if (score >= 70.0) return { grade: "A (A'lo)", shortGrade: 'A', subLabel: "A'lo", label: "Yuqori a'lo natija", tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
+  if (score >= 60.0) return { grade: 'B+ (Juda yaxshi)', shortGrade: 'B+', subLabel: 'Juda yaxshi', label: 'Muvaffaqiyatli natija', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
+  if (score >= 50.0) return { grade: 'B (Yaxshi)', shortGrade: 'B', subLabel: 'Yaxshi', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
+  if (score >= 46.0) return { grade: 'C+ (Qoniqarli)', shortGrade: 'C+', subLabel: 'Qoniqarli', label: "Qoniqarli natija", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
+  if (score >= 40.0) return { grade: 'C (O\'tish)', shortGrade: 'C', subLabel: "O'tish", label: "Quyi o'tish bali", tone: 'text-yellow-400 border-yellow-500/40 bg-yellow-500/10', printTone: 'text-yellow-700 border-yellow-700 bg-yellow-50', isPassed: true };
+  return { grade: "Sinovdan o'tmadi", shortGrade: '—', subLabel: "O'tmadi", label: "Sertifikat berilmaydi (40 balldan past)", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
 }
 
 export default function CertificateModal({
