@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   TrendingUp, ChevronRight, Flame, ThumbsUp, AlertTriangle,
   Radar as RadarIcon, FileCheck2, Target, Clock, Percent,
+  GraduationCap, BarChart2,
 } from 'lucide-react';
 import {
   Area, Bar, BarChart, CartesianGrid, ComposedChart, Line, PolarAngleAxis, PolarGrid,
@@ -24,6 +25,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
 } from '@/components/ui/chart';
@@ -134,323 +136,355 @@ export default function AnalyticsPage() {
           )}
         />
 
-        {/* DTM ball bashorati — sahifaning eng qimmatli javobi, shuning uchun eng tepada. */}
-        <PredictedScore />
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 max-w-xl bg-[var(--surface-input)] p-1 border border-[var(--border-card)]">
+            <TabsTrigger value="overview" className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
+              <TrendingUp className="size-4" />
+              <span>Umumiy Tahlil</span>
+            </TabsTrigger>
+            <TabsTrigger value="admission" className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[var(--accent-text)]">
+              <GraduationCap className="size-4" />
+              <span>OTM Bashorati</span>
+            </TabsTrigger>
+            <TabsTrigger value="topics" className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
+              <BarChart2 className="size-4" />
+              <span>Fanlar & Mavzular</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* OTM Ball Bashorati va Universitetlar Matcheri */}
-        <StudentAdmissionMatcher />
+          {/* ── TAB 1: UMUMIY TAHLIL ── */}
+          <TabsContent value="overview" className="space-y-6 mt-0">
+            {/* DTM ball bashorati qisqacha kartasi */}
+            <PredictedScore />
 
-        {!data && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20" />)}
-            </div>
-            <Skeleton className="h-72 w-full" />
-          </div>
-        )}
-
-        {/* Hali test yechmagan foydalanuvchi uchun nol-nol jadval o'rniga aniq yo'l. */}
-        {data && data.total_tests === 0 && (
-          <Card>
-            <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-              <div className="flex size-14 items-center justify-center rounded-2xl border border-[var(--accent-border)] bg-primary/10 text-[var(--accent-text)]">
-                <TrendingUp className="size-7" />
-              </div>
-              <div className="space-y-1.5">
-                <h2 className="font-voice text-lg font-bold">Tahlil hali bo&apos;sh</h2>
-                <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
-                  Birinchi testingizni yeching — shundan so&apos;ng bu yerda kunlik faolligingiz, fanlar
-                  bo&apos;yicha o&apos;zlashtirish darajangiz va zaif mavzularingiz ko&apos;rina boshlaydi.
-                </p>
-              </div>
-              <Button asChild>
-                <Link href="/tests">Birinchi testni boshlash <ChevronRight className="size-4" /></Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {data && data.total_tests > 0 && (
-          <>
-            <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-              {stats.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <Card key={s.label} className="gap-0 py-4">
-                    <CardContent className="px-4">
-                      <div className="flex items-center gap-1.5">
-                        <Icon className="size-3.5 text-muted-foreground" />
-                        <p className="truncate text-xs text-muted-foreground">{s.label}</p>
-                      </div>
-                      <p className={`mt-1 font-mono text-xl font-bold tabular-nums ${s.tone}`}>{s.value}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
-            {/* Javoblar taqsimoti */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Javoblar taqsimoti</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex h-3 w-full overflow-hidden rounded-full bg-[var(--surface-hover)]">
-                  <div className="h-full bg-[var(--success)]" style={{ width: `${(data.accuracy_breakdown.correct / breakdownTotal) * 100}%` }} />
-                  <div className="h-full bg-rose-500" style={{ width: `${(data.accuracy_breakdown.wrong / breakdownTotal) * 100}%` }} />
-                  <div className="h-full bg-[var(--text-faint)]" style={{ width: `${(data.accuracy_breakdown.skipped / breakdownTotal) * 100}%` }} />
+            {!data && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20" />)}
                 </div>
-                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--success)]" /> {data.accuracy_breakdown.correct} to&apos;g&apos;ri</span>
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-rose-500" /> {data.accuracy_breakdown.wrong} xato</span>
-                  <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--text-faint)]" /> {data.accuracy_breakdown.skipped} o&apos;tkazib yuborilgan</span>
-                </div>
-              </CardContent>
-            </Card>
+                <Skeleton className="h-72 w-full" />
+              </div>
+            )}
 
-            <div className="grid gap-5 lg:grid-cols-12">
-              {/* 14 kunlik faollik */}
-              <Card className="lg:col-span-7">
-                <CardHeader className="flex-row items-start justify-between space-y-0">
-                  <div>
-                    <CardTitle className="text-base">14 kunlik faollik</CardTitle>
-                    <CardDescription>Kunlik yechilgan testlar soni</CardDescription>
+            {data && data.total_tests === 0 && (
+              <Card>
+                <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+                  <div className="flex size-14 items-center justify-center rounded-2xl border border-[var(--accent-border)] bg-primary/10 text-[var(--accent-text)]">
+                    <TrendingUp className="size-7" />
                   </div>
-                  <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 font-mono text-[var(--accent-text)]">
-                    Jami: {totalDaily}
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={dailyConfig} className="h-48 w-full">
-                    <BarChart data={data.daily} margin={{ left: -24, right: 4, top: 8 }}>
-                      <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={10} tickMargin={6} />
-                      <YAxis tickLine={false} axisLine={false} fontSize={10} allowDecimals={false} width={40} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 0, 0]} maxBarSize={28} />
-                    </BarChart>
-                  </ChartContainer>
-                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[var(--chart-1)]" /> Kunlik faollik</span>
-                    <span className="flex items-center gap-1">Uzluksizlik: <Flame className="size-3.5 text-amber-400" /> {data.streak} kun</span>
+                  <div className="space-y-1.5">
+                    <h2 className="font-voice text-lg font-bold">Tahlil hali bo&apos;sh</h2>
+                    <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
+                      Birinchi testingizni yeching — shundan so&apos;ng bu yerda kunlik faolligingiz, fanlar
+                      bo&apos;yicha o&apos;zlashtirish darajangiz va zaif mavzularingiz ko&apos;rina boshlaydi.
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Fanlar o'zlashtirilishi */}
-              <Card className="lg:col-span-5">
-                <CardHeader className="flex-row items-start justify-between space-y-0">
-                  <CardTitle className="text-base">Fanlar o&apos;zlashtirilishi</CardTitle>
-                  <span className="font-mono text-xs text-[var(--accent-text)]">{data.mastery.subjects.length} ta modul</span>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {data.mastery.subjects.length === 0 && (
-                    <p className="text-sm text-muted-foreground">Hali ma&apos;lumot yo&apos;q.</p>
-                  )}
-                  {data.mastery.subjects.map((s) => (
-                    <div key={s.name} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="truncate pr-2 font-semibold">{s.name}</span>
-                        <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
-                          {s.mastery}% ({grade(s.mastery)})
-                        </span>
-                      </div>
-                      <Progress value={s.mastery} className="h-2" />
-                    </div>
-                  ))}
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/tests/revision">Zaif mavzular ustida ishlash <ChevronRight className="size-4" /></Link>
+                  <Button asChild>
+                    <Link href="/tests">Birinchi testni boshlash <ChevronRight className="size-4" /></Link>
                   </Button>
                 </CardContent>
               </Card>
-            </div>
-
-            {/* CEFR ko'nikmalari — faqat CEFR imtihonini yechgan o'quvchida chiziladi.
-                O'quvchi uchun eng foydali kesim: qaysi ko'nikma oqsayotgani. */}
-            {data.cefr?.has_data && (
-              <Card>
-                <CardHeader className="flex-row items-start justify-between space-y-0">
-                  <CardTitle className="text-base">CEFR ko&apos;nikmalari</CardTitle>
-                  {data.cefr.writing.level && (
-                    <span className="font-mono text-xs text-[var(--accent-text)]">
-                      Writing: {data.cefr.writing.level}
-                    </span>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {data.cefr.skills.map((s) => (
-                    <div key={s.skill} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="truncate pr-2 font-semibold">{s.label}</span>
-                        <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
-                          {s.mastery}% · {s.answered} savol
-                        </span>
-                      </div>
-                      <Progress value={s.mastery} className="h-2" />
-                    </div>
-                  ))}
-
-                  {data.cefr.writing.reviewed_count > 0 ? (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="truncate pr-2 font-semibold">Yozma ish (AI bahosi)</span>
-                        <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
-                          {data.cefr.writing.avg_score} / 5 · {data.cefr.writing.reviewed_count} ta
-                        </span>
-                      </div>
-                      <Progress value={((data.cefr.writing.avg_score ?? 0) / 5) * 100} className="h-2" />
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      Yozma ishingiz hali AI tomonidan tekshirilmagan.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
             )}
 
-            {/* Mavzular radar — backend `mastery.radar` ni yuborardi, ilgari ishlatilmasdi. */}
-            {radarData.length >= 3 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <RadarIcon className="size-4 text-[var(--accent-text)]" /> Mavzular bo&apos;yicha o&apos;zlashtirish
-                  </CardTitle>
-                  <CardDescription>
-                    Eng ko&apos;p javob bergan {radarData.length} ta mavzu bo&apos;yicha aniqlik
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={radarConfig} className="mx-auto h-72 w-full max-w-xl">
-                    <RadarChart data={radarData} outerRadius="72%">
-                      <PolarGrid stroke="var(--border)" />
-                      <PolarAngleAxis dataKey="topic" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
-                      <PolarRadiusAxis domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--text-faint)' }} angle={90} />
-                      <ChartTooltip
-                        content={<ChartTooltipContent labelKey="fullTopic" formatter={(v) => [`${v}% o'zlashtirilgan`, '']} />}
-                      />
-                      <Radar dataKey="mastery" stroke="var(--color-mastery)" fill="var(--color-mastery)" fillOpacity={0.25} strokeWidth={2} />
-                    </RadarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {data.monthly.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Oylik jarayon</CardTitle>
-                  <CardDescription>So&apos;nggi 6 oy: yechilgan testlar va o&apos;rtacha ball</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={monthlyConfig} className="h-52 w-full">
-                    <ComposedChart data={data.monthly} margin={{ left: -20, right: 8, top: 10 }}>
-                      <defs>
-                        <linearGradient id="monthly-tests" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="var(--color-tests)" stopOpacity={0.35} />
-                          <stop offset="100%" stopColor="var(--color-tests)" stopOpacity={0.02} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} tickMargin={8} />
-                      <YAxis yAxisId="left" tickLine={false} axisLine={false} fontSize={10} allowDecimals={false} width={36} />
-                      <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tickLine={false} axisLine={false} fontSize={10} width={32} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Area
-                        yAxisId="left" type="monotone" dataKey="tests"
-                        stroke="var(--color-tests)" strokeWidth={2}
-                        fill="url(#monthly-tests)"
-                        dot={{ r: 3, strokeWidth: 0, fill: 'var(--color-tests)' }}
-                        activeDot={{ r: 5 }}
-                      />
-                      <Line
-                        yAxisId="right" type="monotone" dataKey="avg"
-                        stroke="var(--color-avg)" strokeWidth={2} strokeDasharray="4 4"
-                        dot={false}
-                      />
-                    </ComposedChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {data.subject_dist.length > 0 && (
-              <Card>
-                <CardHeader><CardTitle className="text-base">Fanlar bo&apos;yicha javoblar</CardTitle></CardHeader>
-                <CardContent className="space-y-2">
-                  {data.subject_dist.map((s) => {
-                    const total = data.subject_dist.reduce((acc, d) => acc + d.value, 0) || 1;
+            {data && data.total_tests > 0 && (
+              <>
+                <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+                  {stats.map((s) => {
+                    const Icon = s.icon;
                     return (
-                      <div key={s.name} className="flex items-center gap-2 text-sm">
-                        <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
-                        <span className="flex-1 truncate text-[var(--text-secondary)]">{s.name}</span>
-                        <span className="shrink-0 font-mono text-xs text-muted-foreground">
-                          {Math.round((s.value / total) * 100)}%
-                        </span>
-                      </div>
+                      <Card key={s.label} className="gap-0 py-4">
+                        <CardContent className="px-4">
+                          <div className="flex items-center gap-1.5">
+                            <Icon className="size-3.5 text-muted-foreground" />
+                            <p className="truncate text-xs text-muted-foreground">{s.label}</p>
+                          </div>
+                          <p className={`mt-1 font-mono text-xl font-bold tabular-nums ${s.tone}`}>{s.value}</p>
+                        </CardContent>
+                      </Card>
                     );
                   })}
-                </CardContent>
-              </Card>
-            )}
+                </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Card className="border-[var(--success)]/25 bg-[var(--success)]/[0.05]">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm text-[var(--success-text)]">
-                    <ThumbsUp className="size-4" /> Kuchli mavzular
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-wrap gap-2">
-                  {data.mastery.strong.length
-                    ? data.mastery.strong.map((w) => (
-                        <Badge key={w} variant="outline" className="border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success-text)]">{w}</Badge>
-                      ))
-                    : <span className="text-sm text-muted-foreground">Yo&apos;q</span>}
-                </CardContent>
-              </Card>
-
-              <Card className="border-rose-500/25 bg-rose-500/[0.05]">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm text-rose-300">
-                    <AlertTriangle className="size-4" /> Kuchsiz mavzular
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-wrap gap-2">
-                  {data.mastery.weak.length
-                    ? data.mastery.weak.map((w) => (
-                        <Badge key={w} variant="outline" className="border-rose-500/30 bg-rose-500/12 text-rose-300">{w}</Badge>
-                      ))
-                    : <span className="text-sm text-muted-foreground">Yo&apos;q</span>}
-                </CardContent>
-              </Card>
-            </div>
-
-            {data.recent.length > 0 && (
-              <Card>
-                <CardHeader><CardTitle className="text-base">Oxirgi testlar</CardTitle></CardHeader>
-                <CardContent>
-                  {data.recent.map((r, i) => (
-                    <div key={r.id}>
-                      {i > 0 && <Separator />}
-                      <Link href={`/tests/${r.id}/feedback`} className="flex items-center justify-between gap-3 py-2.5 transition-colors hover:text-[var(--accent-text)]">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm">{r.test__title || 'Tasodifiy test'}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(r.completed_at).toLocaleDateString('uz-UZ')} · {r.correct_answers} to&apos;g&apos;ri, {r.wrong_answers} xato
-                          </p>
-                        </div>
-                        <span className="shrink-0 font-mono text-sm font-semibold">
-                          {r.score !== null ? `${r.score.toFixed(0)}%` : '—'}
-                        </span>
-                      </Link>
+                {/* Javoblar taqsimoti */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Javoblar taqsimoti</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex h-3 w-full overflow-hidden rounded-full bg-[var(--surface-hover)]">
+                      <div className="h-full bg-[var(--success)]" style={{ width: `${(data.accuracy_breakdown.correct / breakdownTotal) * 100}%` }} />
+                      <div className="h-full bg-rose-500" style={{ width: `${(data.accuracy_breakdown.wrong / breakdownTotal) * 100}%` }} />
+                      <div className="h-full bg-[var(--text-faint)]" style={{ width: `${(data.accuracy_breakdown.skipped / breakdownTotal) * 100}%` }} />
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
+                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--success)]" /> {data.accuracy_breakdown.correct} to&apos;g&apos;ri</span>
+                      <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-rose-500" /> {data.accuracy_breakdown.wrong} xato</span>
+                      <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--text-faint)]" /> {data.accuracy_breakdown.skipped} o&apos;tkazib yuborilgan</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 14 kunlik faollik */}
+                <Card>
+                  <CardHeader className="flex-row items-start justify-between space-y-0">
+                    <div>
+                      <CardTitle className="text-base">14 kunlik faollik</CardTitle>
+                      <CardDescription>Kunlik yechilgan testlar soni</CardDescription>
+                    </div>
+                    <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 font-mono text-[var(--accent-text)]">
+                      Jami: {totalDaily}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={dailyConfig} className="h-48 w-full">
+                      <BarChart data={data.daily} margin={{ left: -24, right: 4, top: 8 }}>
+                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border)" />
+                        <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={10} tickMargin={6} />
+                        <YAxis tickLine={false} axisLine={false} fontSize={10} allowDecimals={false} width={40} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                      </BarChart>
+                    </ChartContainer>
+                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[var(--chart-1)]" /> Kunlik faollik</span>
+                      <span className="flex items-center gap-1">Uzluksizlik: <Flame className="size-3.5 text-amber-400" /> {data.streak} kun</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Kuchli va Zaif mavzular */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Card className="border-[var(--success)]/25 bg-[var(--success)]/[0.05]">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-sm text-[var(--success-text)]">
+                        <ThumbsUp className="size-4" /> Kuchli mavzular
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-2">
+                      {data.mastery.strong.length
+                        ? data.mastery.strong.map((w) => (
+                            <Badge key={w} variant="outline" className="border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success-text)]">{w}</Badge>
+                          ))
+                        : <span className="text-sm text-muted-foreground">Yo&apos;q</span>}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-rose-500/25 bg-rose-500/[0.05]">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-sm text-rose-300">
+                        <AlertTriangle className="size-4" /> Kuchsiz mavzular
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-2">
+                      {data.mastery.weak.length
+                        ? data.mastery.weak.map((w) => (
+                            <Badge key={w} variant="outline" className="border-rose-500/30 bg-rose-500/12 text-rose-300">{w}</Badge>
+                          ))
+                        : <span className="text-sm text-muted-foreground">Yo&apos;q</span>}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Oxirgi testlar */}
+                {data.recent.length > 0 && (
+                  <Card>
+                    <CardHeader><CardTitle className="text-base">Oxirgi testlar</CardTitle></CardHeader>
+                    <CardContent>
+                      {data.recent.map((r, i) => (
+                        <div key={r.id}>
+                          {i > 0 && <Separator />}
+                          <Link href={`/tests/${r.id}/feedback`} className="flex items-center justify-between gap-3 py-2.5 transition-colors hover:text-[var(--accent-text)]">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm">{r.test__title || 'Tasodifiy test'}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(r.completed_at).toLocaleDateString('uz-UZ')} · {r.correct_answers} to&apos;g&apos;ri, {r.wrong_answers} xato
+                              </p>
+                            </div>
+                            <span className="shrink-0 font-mono text-sm font-semibold">
+                              {r.score !== null ? `${r.score.toFixed(0)}%` : '—'}
+                            </span>
+                          </Link>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+              </>
             )}
-          </>
-        )}
+          </TabsContent>
+
+          {/* ── TAB 2: OTM QABUL & BASHORAT ── */}
+          <TabsContent value="admission" className="space-y-6 mt-0">
+            <PredictedScore />
+            <StudentAdmissionMatcher />
+          </TabsContent>
+
+          {/* ── TAB 3: FANLAR & MAVZULAR ── */}
+          <TabsContent value="topics" className="space-y-6 mt-0">
+            {data && (
+              <>
+                <div className="grid gap-5 lg:grid-cols-12">
+                  {/* Fanlar o'zlashtirilishi */}
+                  <Card className="lg:col-span-6">
+                    <CardHeader className="flex-row items-start justify-between space-y-0">
+                      <CardTitle className="text-base">Fanlar o&apos;zlashtirilishi</CardTitle>
+                      <span className="font-mono text-xs text-[var(--accent-text)]">{data.mastery.subjects.length} ta modul</span>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {data.mastery.subjects.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Hali ma&apos;lumot yo&apos;q.</p>
+                      )}
+                      {data.mastery.subjects.map((s) => (
+                        <div key={s.name} className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="truncate pr-2 font-semibold">{s.name}</span>
+                            <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
+                              {s.mastery}% ({grade(s.mastery)})
+                            </span>
+                          </div>
+                          <Progress value={s.mastery} className="h-2" />
+                        </div>
+                      ))}
+                      <Button asChild variant="outline" className="w-full">
+                        <Link href="/tests/revision">Zaif mavzular ustida ishlash <ChevronRight className="size-4" /></Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Fanlar bo'yicha javoblar taqsimoti */}
+                  {data.subject_dist.length > 0 && (
+                    <Card className="lg:col-span-6">
+                      <CardHeader><CardTitle className="text-base">Fanlar bo&apos;yicha test hajmi</CardTitle></CardHeader>
+                      <CardContent className="space-y-2">
+                        {data.subject_dist.map((s) => {
+                          const total = data.subject_dist.reduce((acc, d) => acc + d.value, 0) || 1;
+                          return (
+                            <div key={s.name} className="flex items-center gap-2 text-sm">
+                              <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
+                              <span className="flex-1 truncate text-[var(--text-secondary)]">{s.name}</span>
+                              <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                                {Math.round((s.value / total) * 100)}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Radar diagrammasi */}
+                {radarData.length >= 3 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <RadarIcon className="size-4 text-[var(--accent-text)]" /> Mavzular bo&apos;yicha o&apos;zlashtirish
+                      </CardTitle>
+                      <CardDescription>
+                        Eng ko&apos;p javob bergan {radarData.length} ta mavzu bo&apos;yicha aniqlik
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ChartContainer config={radarConfig} className="mx-auto h-72 w-full max-w-xl">
+                        <RadarChart data={radarData} outerRadius="72%">
+                          <PolarGrid stroke="var(--border)" />
+                          <PolarAngleAxis dataKey="topic" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
+                          <PolarRadiusAxis domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--text-faint)' }} angle={90} />
+                          <ChartTooltip
+                            content={<ChartTooltipContent labelKey="fullTopic" formatter={(v) => [`${v}% o'zlashtirilgan`, '']} />}
+                          />
+                          <Radar dataKey="mastery" stroke="var(--color-mastery)" fill="var(--color-mastery)" fillOpacity={0.25} strokeWidth={2} />
+                        </RadarChart>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Oylik jarayon dinamikasi */}
+                {data.monthly.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Oylik jarayon</CardTitle>
+                      <CardDescription>So&apos;nggi 6 oy: yechilgan testlar va o&apos;rtacha ball</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ChartContainer config={monthlyConfig} className="h-52 w-full">
+                        <ComposedChart data={data.monthly} margin={{ left: -20, right: 8, top: 10 }}>
+                          <defs>
+                            <linearGradient id="monthly-tests" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="var(--color-tests)" stopOpacity={0.35} />
+                              <stop offset="100%" stopColor="var(--color-tests)" stopOpacity={0.02} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border)" />
+                          <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} tickMargin={8} />
+                          <YAxis yAxisId="left" tickLine={false} axisLine={false} fontSize={10} allowDecimals={false} width={36} />
+                          <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tickLine={false} axisLine={false} fontSize={10} width={32} />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Area
+                            yAxisId="left" type="monotone" dataKey="tests"
+                            stroke="var(--color-tests)" strokeWidth={2}
+                            fill="url(#monthly-tests)"
+                            dot={{ r: 3, strokeWidth: 0, fill: 'var(--color-tests)' }}
+                            activeDot={{ r: 5 }}
+                          />
+                          <Line
+                            yAxisId="right" type="monotone" dataKey="avg"
+                            stroke="var(--color-avg)" strokeWidth={2} strokeDasharray="4 4"
+                            dot={false}
+                          />
+                        </ComposedChart>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* CEFR ko'nikmalari */}
+                {data.cefr?.has_data && (
+                  <Card>
+                    <CardHeader className="flex-row items-start justify-between space-y-0">
+                      <CardTitle className="text-base">CEFR ko&apos;nikmalari</CardTitle>
+                      {data.cefr.writing.level && (
+                        <span className="font-mono text-xs text-[var(--accent-text)]">
+                          Writing: {data.cefr.writing.level}
+                        </span>
+                      )}
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {data.cefr.skills.map((s) => (
+                        <div key={s.skill} className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="truncate pr-2 font-semibold">{s.label}</span>
+                            <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
+                              {s.mastery}% · {s.answered} savol
+                            </span>
+                          </div>
+                          <Progress value={s.mastery} className="h-2" />
+                        </div>
+                      ))}
+
+                      {data.cefr.writing.reviewed_count > 0 ? (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="truncate pr-2 font-semibold">Yozma ish (AI bahosi)</span>
+                            <span className="shrink-0 font-mono font-bold text-[var(--accent-text)]">
+                              {data.cefr.writing.avg_score} / 5 · {data.cefr.writing.reviewed_count} ta
+                            </span>
+                          </div>
+                          <Progress value={((data.cefr.writing.avg_score ?? 0) / 5) * 100} className="h-2" />
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          Yozma ishingiz hali AI tomonidan tekshirilmagan.
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </>
   );
