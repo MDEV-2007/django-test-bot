@@ -241,10 +241,14 @@ def user_adjust_api(request, pk):
         except (TypeError, ValueError):
             return current
 
-    profile.xp = _clean_int('xp', profile.xp)
+    if profile.is_privileged:
+        profile.xp = 0
+        profile.level = 1
+    else:
+        profile.xp = _clean_int('xp', profile.xp)
+        profile.level = max(1, profile.xp // 1000 + 1)
     profile.coins = _clean_int('coins', profile.coins)
     profile.elo_rating = _clean_int('elo_rating', profile.elo_rating, lo=100, hi=5000)
-    profile.level = max(1, profile.xp // 1000 + 1)
     profile.save()
     return Response({'xp': profile.xp, 'coins': profile.coins, 'elo_rating': profile.elo_rating, 'level': profile.level})
 

@@ -31,18 +31,29 @@ def _key(view):
 
 def get_top_ranking(view):
     """Cached ordered list of {'profile_id', 'xp'} for a leaderboard view
-    ('all' = overall Profile.xp, otherwise a subject slug = that subject's SubjectScore)."""
+    ('all' = overall Profile.xp, otherwise a subject slug = that subject's SubjectScore).
+    Privileged users (superadmin, teacher, staff) are strictly excluded.
+    """
     key = _key(view)
     data = cache.get(key)
     if data is not None:
         return data
 
     if view == 'all':
-        rows = Profile.objects.order_by('-xp').values_list('id', 'xp')[:TOP_N]
+        rows = (Profile.objects
+                .filter(role='student', user__is_superuser=False, user__is_staff=False)
+                .order_by('-xp', 'id')
+                .values_list('id', 'xp')[:TOP_N])
     else:
         rows = (SubjectScore.objects
-                .filter(subject__slug=view, xp__gt=0)
-                .order_by('-xp')
+                .filter(
+                    subject__slug=view,
+                    xp__gt=0,
+                    profile__role='student',
+                    profile__user__is_superuser=False,
+                    profile__user__is_staff=False,
+                )
+                .order_by('-xp', 'profile_id')
                 .values_list('profile_id', 'xp')[:TOP_N])
     data = [{'profile_id': pid, 'xp': xp} for pid, xp in rows]
     cache.set(key, data, RANKING_TTL)
@@ -50,8 +61,17 @@ def get_top_ranking(view):
 
 
 def invalidate(view=None):
-    """Explicitly drop cached rankings (e.g. after an admin XP reset). No arg = overall."""
-    cache.delete(_key(view or 'all'))
+    """Explicitly drop cached rankings (e.g. after an admin XP reset). No arg = overall & all subjects."""
+    if view:
+        cache.delete(_key(view))
+    else:
+        cache.delete(_key('all'))
+        try:
+            from tests_app.models import Subject
+            for slug in Subject.objects.values_list('slug', flat=True):
+                cache.delete(_key(slug))
+        except Exception:
+            pass
 
 
 def get_rank_and_neighbors(profile, view, window=5):
@@ -61,25 +81,42 @@ def get_rank_and_neighbors(profile, view, window=5):
     ro'yxatda umuman ko'rmaydi — bu ruhlantirmaydi, aksincha uzoqlashtiradi. Yaqin
     atrofdagi 10 kishi esa erishsa bo'ladigan maqsad beradi.
 
-    Bu ma'lumot har bir foydalanuvchi uchun har xil, shuning uchun keshlanmaydi; o'rniga
-    ikkita arzon so'rov ishlatiladi: (1) o'zidan yuqoridagilar SONI, (2) shu oynadagi qator.
+    Superadminlar va o'qituvchilar reytingda qatnashmaydi (0, [] qaytariladi).
     """
+    if profile.is_privileged or profile.role != 'student':
+        return 0, []
+
     # DIQQAT: "oldinda nechta kishi bor" hisobi ro'yxat TARTIBI bilan aynan bir xil
     # bo'lishi shart (teng XP larda ham). Aks holda o'quvchining o'z qatori oynadan
     # tashqarida qolib ketadi — teng ballilar ko'p bo'lganda bu doim sodir bo'ladi.
     if view == 'all':
         my_xp = profile.xp
-        base = Profile.objects.order_by('-xp', 'id')
+        base = (Profile.objects
+                .filter(role='student', user__is_superuser=False, user__is_staff=False)
+                .order_by('-xp', 'id'))
         ahead = Profile.objects.filter(
+            role='student', user__is_superuser=False, user__is_staff=False
+        ).filter(
             Q(xp__gt=my_xp) | Q(xp=my_xp, id__lt=profile.id)
         ).count()
     else:
         score = SubjectScore.objects.filter(profile=profile, subject__slug=view).first()
         my_xp = score.xp if score else 0
         base = (SubjectScore.objects
-                .filter(subject__slug=view, xp__gt=0)
+                .filter(
+                    subject__slug=view,
+                    xp__gt=0,
+                    profile__role='student',
+                    profile__user__is_superuser=False,
+                    profile__user__is_staff=False,
+                )
                 .order_by('-xp', 'profile_id'))
-        ahead = SubjectScore.objects.filter(subject__slug=view).filter(
+        ahead = SubjectScore.objects.filter(
+            subject__slug=view,
+            profile__role='student',
+            profile__user__is_superuser=False,
+            profile__user__is_staff=False,
+        ).filter(
             Q(xp__gt=my_xp) | Q(xp=my_xp, profile_id__lt=profile.id)
         ).exclude(xp__lte=0).count()
 

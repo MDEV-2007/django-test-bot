@@ -613,7 +613,7 @@ def finish_api(request, attempt_id):
     attempt.save()
 
     profile = request.user.profile
-    xp_awarded = correct * 50
+    xp_awarded = 0 if profile.is_privileged else correct * 50
     coins_awarded = correct * 5
     profile.add_xp(xp_awarded)
     profile.add_coins(coins_awarded)

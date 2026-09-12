@@ -67,8 +67,36 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
         
+    @property
+    def is_privileged(self):
+        """Super adminlar va o'qituvchilar reyting va XP hisob-kitoblaridan mustasno."""
+        if self.role in ('superadmin', 'teacher'):
+            return True
+        try:
+            user = self.user
+            if user and (user.is_superuser or user.is_staff):
+                return True
+        except Exception:
+            pass
+        return False
+
+    def save(self, *args, **kwargs):
+        if self.is_privileged:
+            self.xp = 0
+            self.level = 1
+            update_fields = kwargs.get('update_fields')
+            if update_fields is not None:
+                kwargs['update_fields'] = list(set(update_fields) | {'xp', 'level'})
+        super().save(*args, **kwargs)
+
     def add_xp(self, amount):
-        """Adds XP and handles leveling up."""
+        """Adds XP and handles leveling up. Privileged users (superadmin, teacher) never gain XP."""
+        if self.is_privileged:
+            if self.xp != 0 or self.level != 1:
+                self.xp = 0
+                self.level = 1
+                self.save(update_fields=['xp', 'level'])
+            return False
         self.xp += amount
         leveled_up = False
         # Simple levelling threshold: 1000 XP per level
@@ -208,6 +236,13 @@ class ReferralBonus(models.Model):
 def create_profile_for_user(sender, instance, created, **kwargs):
     if created:
         ensure_profile_for_user(instance)
+    elif hasattr(instance, 'profile'):
+        if instance.is_superuser or instance.is_staff:
+            p = instance.profile
+            if p.xp != 0 or p.level != 1:
+                p.xp = 0
+                p.level = 1
+                p.save(update_fields=['xp', 'level'])
 
 
 @receiver(post_save, sender=Profile)

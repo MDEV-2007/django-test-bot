@@ -76,7 +76,7 @@ export default function LeaderboardPage() {
           eyebrowIcon={Trophy}
           title="Respublika Reyting Jadvali"
           description="Eng ko'p XP to'plagan o'quvchilar shu yerda ko'rinadi — har bir to'g'ri javob sizni yuqoriga olib chiqadi."
-          actions={data && (
+          actions={data && data.my_rank > 0 && (
             <div className="rounded-2xl border bg-card px-4 py-3 text-center">
               <p className="font-mono text-xs uppercase text-muted-foreground">Sizning o&apos;rningiz</p>
               <p className="font-mono text-xl font-black text-[var(--accent-text)]">#{data.my_rank}</p>
