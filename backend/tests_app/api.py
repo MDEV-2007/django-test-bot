@@ -154,14 +154,27 @@ def center_api(request):
     # (ular esa hali yo'q edi) — ya'ni o'quvchi obuna sotib olib ham hech narsa olmasdi.
     has_sub = profile.has_active_premium_lessons
 
-    # Pinned Katta Mock Imtihon: eng yaqin yoki hozir ketayotgan jonli imtihon
+    # Pinned Katta Mock Imtihon: tanlangan fan va kategoriya bo'yicha eng yaqin yoki hozir ketayotgan jonli imtihon
     now = timezone.now()
-    pinned_mock = (
-        TestSet.objects.filter(is_published=True, is_archived=False, is_live_mock=True, scheduled_at__gte=now - timezone.timedelta(hours=3))
-        .select_related('subject')
-        .order_by('scheduled_at')
-        .first()
-    )
+    mock_qs = TestSet.objects.filter(
+        is_published=True,
+        is_archived=False,
+        is_live_mock=True,
+        scheduled_at__gte=now - timezone.timedelta(hours=3),
+    ).select_related('subject').order_by('scheduled_at')
+
+    pinned_mock = None
+    if subject:
+        subj_mock_qs = mock_qs.filter(subject=subject)
+        if category != 'all':
+            pinned_mock = subj_mock_qs.filter(category=category).first()
+        else:
+            pinned_mock = subj_mock_qs.first()
+    else:
+        if category != 'all':
+            pinned_mock = mock_qs.filter(category=category).first()
+        else:
+            pinned_mock = mock_qs.first()
     pinned_payload = None
     if pinned_mock:
         pinned_payload = {

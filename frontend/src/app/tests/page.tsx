@@ -255,46 +255,71 @@ export default function TestsPage() {
         />
 
         {/* Pinned Katta Mock Imtihon Banner */}
-        {data?.pinned_mock && (
-          <Reveal>
-            <Card className="relative overflow-hidden border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/[0.08] via-[var(--surface-card)] to-emerald-500/[0.08] shadow-lg">
-              <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-500 ring-4 ring-amber-500/10">
-                    <Flame className="size-6 animate-pulse" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <Badge className="bg-amber-500 text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5">
-                        Katta Mock Imtihon
-                      </Badge>
-                      <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold">
-                        {data.pinned_mock.subject}
-                      </Badge>
-                      {data.pinned_mock.scheduled_at && (
-                        <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 font-mono text-xs gap-1 font-semibold">
-                          <Clock className="size-3" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
-                        </Badge>
-                      )}
+        {data?.pinned_mock && (() => {
+          const isOnaTili = data.pinned_mock.subject_slug === 'ona-tili';
+          return (
+            <Reveal>
+              <Card className={`relative overflow-hidden border-2 shadow-lg ${
+                isOnaTili
+                  ? 'border-emerald-500/40 bg-gradient-to-r from-emerald-500/[0.1] via-[var(--surface-card)] to-teal-500/[0.08]'
+                  : 'border-amber-500/40 bg-gradient-to-r from-amber-500/[0.08] via-[var(--surface-card)] to-emerald-500/[0.08]'
+              }`}>
+                <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ring-4 ${
+                      isOnaTili
+                        ? 'bg-emerald-500/20 text-emerald-500 ring-emerald-500/10'
+                        : 'bg-amber-500/20 text-amber-500 ring-amber-500/10'
+                    }`}>
+                      <Flame className="size-6 animate-pulse" />
                     </div>
-                    <h3 className="text-base sm:text-lg font-extrabold text-foreground truncate">
-                      {data.pinned_mock.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                      {data.pinned_mock.questions_count || 45} ta savol · {data.pinned_mock.duration_minutes || 90} daqiqa · Milliy Sertifikat Formati
-                    </p>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <Badge className={`text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 ${
+                          isOnaTili ? 'bg-emerald-600' : 'bg-amber-500'
+                        }`}>
+                          Katta Mock Imtihon
+                        </Badge>
+                        <Badge variant="outline" className={
+                          isOnaTili
+                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold'
+                            : 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold'
+                        }>
+                          {data.pinned_mock.subject}
+                        </Badge>
+                        {data.pinned_mock.scheduled_at && (
+                          <Badge variant="outline" className={`font-mono text-xs gap-1 font-semibold ${
+                            isOnaTili
+                              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
+                              : 'border-amber-500/30 bg-amber-500/10 text-amber-500'
+                          }`}>
+                            <Clock className="size-3" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className="text-base sm:text-lg font-extrabold text-foreground truncate">
+                        {data.pinned_mock.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                        {data.pinned_mock.questions_count || 45} ta savol · {data.pinned_mock.duration_minutes || 90} daqiqa · Milliy Sertifikat Formati
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <Button asChild size="lg" className="rounded-xl font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md">
-                  <Link href={`/tests/mock/${data.pinned_mock.id}`}>
-                    Kutish zaliga kirish <ArrowRight className="ml-1.5 size-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </Reveal>
-        )}
+                  <Button asChild size="lg" className={`rounded-xl font-bold text-white shadow-md ${
+                    isOnaTili
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
+                  }`}>
+                    <Link href={`/tests/mock/${data.pinned_mock.id}`}>
+                      Kutish zaliga kirish <ArrowRight className="ml-1.5 size-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </Reveal>
+          );
+        })()}
 
         {/* Tezkor test — sahifaning ASOSIY harakati.
             Nega: katalogdagi testlar 30-45 savoldan iborat va telefonda ularni
