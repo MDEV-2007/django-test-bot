@@ -157,6 +157,72 @@ const ANSWER_MODE_BADGE: Record<string, { label: string; className: string }> = 
   mixed: { label: 'Aralash test', className: 'border-[var(--border-strong)] bg-[var(--surface-hover)] text-[var(--text-secondary)]' },
 };
 
+const MOCK_THEMES: Record<string, {
+  card: string;
+  iconBox: string;
+  badge: string;
+  subjectBadge: string;
+  timeBadge: string;
+  button: string;
+}> = {
+  'ona-tili': {
+    card: 'border-emerald-500/40 bg-gradient-to-r from-emerald-500/[0.12] via-[var(--surface-card)] to-teal-500/[0.08]',
+    iconBox: 'bg-emerald-500/20 text-emerald-500 ring-emerald-500/10',
+    badge: 'bg-emerald-600 text-white',
+    subjectBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    timeBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
+    button: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700',
+  },
+  'matematika': {
+    card: 'border-blue-500/40 bg-gradient-to-r from-blue-500/[0.14] via-[var(--surface-card)] to-indigo-500/[0.08]',
+    iconBox: 'bg-blue-500/20 text-blue-500 ring-blue-500/10',
+    badge: 'bg-blue-600 text-white',
+    subjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    timeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
+    button: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700',
+  },
+  'math': {
+    card: 'border-blue-500/40 bg-gradient-to-r from-blue-500/[0.14] via-[var(--surface-card)] to-indigo-500/[0.08]',
+    iconBox: 'bg-blue-500/20 text-blue-500 ring-blue-500/10',
+    badge: 'bg-blue-600 text-white',
+    subjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    timeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
+    button: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700',
+  },
+  'tarix': {
+    card: 'border-amber-500/40 bg-gradient-to-r from-amber-500/[0.12] via-[var(--surface-card)] to-orange-500/[0.08]',
+    iconBox: 'bg-amber-500/20 text-amber-500 ring-amber-500/10',
+    badge: 'bg-amber-500 text-white',
+    subjectBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    timeBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-500',
+    button: 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700',
+  },
+  'biologiya': {
+    card: 'border-green-500/40 bg-gradient-to-r from-green-500/[0.12] via-[var(--surface-card)] to-emerald-500/[0.08]',
+    iconBox: 'bg-green-500/20 text-green-500 ring-green-500/10',
+    badge: 'bg-green-600 text-white',
+    subjectBadge: 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400',
+    timeBadge: 'border-green-500/30 bg-green-500/10 text-green-500',
+    button: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700',
+  },
+  'cefr': {
+    card: 'border-violet-500/40 bg-gradient-to-r from-violet-500/[0.12] via-[var(--surface-card)] to-purple-500/[0.08]',
+    iconBox: 'bg-violet-500/20 text-violet-500 ring-violet-500/10',
+    badge: 'bg-violet-600 text-white',
+    subjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400',
+    timeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
+    button: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700',
+  },
+  'ingliz-tili': {
+    card: 'border-violet-500/40 bg-gradient-to-r from-violet-500/[0.12] via-[var(--surface-card)] to-purple-500/[0.08]',
+    iconBox: 'bg-violet-500/20 text-violet-500 ring-violet-500/10',
+    badge: 'bg-violet-600 text-white',
+    subjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400',
+    timeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
+    button: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700',
+  },
+};
+
 export default function TestsPage() {
   const router = useRouter();
   const { access } = useAuthStore();
@@ -256,43 +322,25 @@ export default function TestsPage() {
 
         {/* Pinned Katta Mock Imtihon Banner */}
         {data?.pinned_mock && (() => {
-          const isOnaTili = data.pinned_mock.subject_slug === 'ona-tili';
+          const theme = MOCK_THEMES[data.pinned_mock.subject_slug] || MOCK_THEMES['tarix'];
           return (
             <Reveal>
-              <Card className={`relative overflow-hidden border-2 shadow-lg ${
-                isOnaTili
-                  ? 'border-emerald-500/40 bg-gradient-to-r from-emerald-500/[0.1] via-[var(--surface-card)] to-teal-500/[0.08]'
-                  : 'border-amber-500/40 bg-gradient-to-r from-amber-500/[0.08] via-[var(--surface-card)] to-emerald-500/[0.08]'
-              }`}>
+              <Card className={`relative overflow-hidden border-2 shadow-lg ${theme.card}`}>
                 <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ring-4 ${
-                      isOnaTili
-                        ? 'bg-emerald-500/20 text-emerald-500 ring-emerald-500/10'
-                        : 'bg-amber-500/20 text-amber-500 ring-amber-500/10'
-                    }`}>
+                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ring-4 ${theme.iconBox}`}>
                       <Flame className="size-6 animate-pulse" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <Badge className={`text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 ${
-                          isOnaTili ? 'bg-emerald-600' : 'bg-amber-500'
-                        }`}>
+                        <Badge className={`text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 ${theme.badge}`}>
                           Katta Mock Imtihon
                         </Badge>
-                        <Badge variant="outline" className={
-                          isOnaTili
-                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold'
-                            : 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold'
-                        }>
+                        <Badge variant="outline" className={`text-xs font-semibold ${theme.subjectBadge}`}>
                           {data.pinned_mock.subject}
                         </Badge>
                         {data.pinned_mock.scheduled_at && (
-                          <Badge variant="outline" className={`font-mono text-xs gap-1 font-semibold ${
-                            isOnaTili
-                              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
-                              : 'border-amber-500/30 bg-amber-500/10 text-amber-500'
-                          }`}>
+                          <Badge variant="outline" className={`font-mono text-xs gap-1 font-semibold ${theme.timeBadge}`}>
                             <Clock className="size-3" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
                           </Badge>
                         )}
@@ -306,11 +354,7 @@ export default function TestsPage() {
                     </div>
                   </div>
 
-                  <Button asChild size="lg" className={`rounded-xl font-bold text-white shadow-md ${
-                    isOnaTili
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'
-                      : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
-                  }`}>
+                  <Button asChild size="lg" className={`rounded-xl font-bold text-white shadow-md ${theme.button}`}>
                     <Link href={`/tests/mock/${data.pinned_mock.id}`}>
                       Kutish zaliga kirish <ArrowRight className="ml-1.5 size-4" />
                     </Link>
