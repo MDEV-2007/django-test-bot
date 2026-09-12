@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { Sprout } from 'lucide-react';
 import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
-import ExamTracksSection from '@/components/landing/ExamTracksSection';
-import DiagnosisMethodSection from '@/components/landing/DiagnosisMethodSection';
-import SubjectsGrid from '@/components/landing/SubjectsGrid';
+import SubjectsTicker from '@/components/landing/SubjectsTicker';
+import ExamCategories from '@/components/landing/ExamCategories';
+import TestmakonBentoGrid from '@/components/landing/TestmakonBentoGrid';
 import ScoreCalculator from '@/components/landing/ScoreCalculator';
-import TeacherAndCommunity from '@/components/landing/TeacherAndCommunity';
+import ThreeStepsSection from '@/components/landing/ThreeStepsSection';
 import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
-import FinalEditorialCta from '@/components/landing/FinalEditorialCta';
+import FinalCtaSection from '@/components/landing/FinalCtaSection';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LiveActivityToast from '@/components/landing/LiveActivityToast';
 import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
@@ -158,32 +158,32 @@ export default async function LandingPage() {
       <LandingAiChatWidget />
 
       <main className="flex-1">
-        {/* 1. HERO SECTION (Editorial, Authentic, Live Diagnostic Certificate & Sample Question) */}
+        {/* 1. HERO SECTION (Aurora, Lit Grid, Rotating Headline, Interactive 3D Mock Preview) */}
         <HeroSection />
 
-        {/* 2. IMTIHON YO'NALISHLARI (Milliy Sertifikat, DTM 90 talik, Fan mashqlari, 1v1 Bellashuv) */}
-        <ExamTracksSection />
+        {/* 2. FANLAR LENTASI (Infinite Marquee Ticker) */}
+        <SubjectsTicker />
 
-        {/* 3. ILDIZ TAMOYILI (Qanday ishlaydi: Zaiflikni topish -> Maqsadli mashq -> O'sish) */}
-        <DiagnosisMethodSection />
+        {/* 3. IMTIHONLAR: "Chipta" kartalari */}
+        <ExamCategories />
 
-        {/* 4. FANLAR KATALOGI */}
-        <SubjectsGrid />
+        {/* 4. ASIMMETRIK BENTO GRID (Har bir xatoyingiz keyingi mashqqa aylanadi) */}
+        <TestmakonBentoGrid />
 
-        {/* 5. OTM BALL KALKULYATORI & BASHORATI */}
+        {/* 5. BALL KALKULYATORI & OTM BASHORATI */}
         <ScoreCalculator />
 
-        {/* 6. O'QITUVCHILAR VA SINFLAR MONITORINGI */}
-        <TeacherAndCommunity />
+        {/* 6. UCH QADAMDA BOSHLAYSIZ */}
+        <ThreeStepsSection />
 
-        {/* 7. TARIFLAR VA NARXLAR */}
+        {/* 7. TARIFLAR (NARXLAR) */}
         <PricingSection plans={plans} />
 
         {/* 8. KO'P SO'RALADIGAN SAVOLLAR (FAQ) */}
         <FaqAccordion items={FAQ} />
 
-        {/* 9. SAMIMIY YAKUNIY CHAQIRIQ (Final CTA) */}
-        <FinalEditorialCta />
+        {/* 9. YAKUNIY CHAQIRIQ (High-contrast dark card) */}
+        <FinalCtaSection />
       </main>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
