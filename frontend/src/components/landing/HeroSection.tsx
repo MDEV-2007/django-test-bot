@@ -6,7 +6,6 @@ import {
   ArrowRight, Send, CheckCircle2, Clock, 
   Sparkles, Layers, Award, Bot, RotateCcw
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 const ROTATING_WORDS = [
   { text: "DTMga", sub: "90 savol, 3 soat", badge: "5 fan, DTM tartibida" },
@@ -48,18 +47,28 @@ export default function HeroSection() {
     return () => clearInterval(timer);
   }, []);
 
-  // Spotlight lit grid follow mouse
+  // Spotlight lit grid follow mouse with rAF throttle
+  const rafId = useRef<number | null>(null);
+
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!heroRef.current || !litGridRef.current) return;
-    const rect = heroRef.current.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    heroRef.current.classList.add('is-lit');
-    litGridRef.current.style.setProperty('--mx', `${mx}px`);
-    litGridRef.current.style.setProperty('--my', `${my}px`);
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => {
+      if (!heroRef.current || !litGridRef.current) return;
+      const rect = heroRef.current.getBoundingClientRect();
+      const mx = clientX - rect.left;
+      const my = clientY - rect.top;
+      heroRef.current.classList.add('is-lit');
+      litGridRef.current.style.setProperty('--mx', `${mx}px`);
+      litGridRef.current.style.setProperty('--my', `${my}px`);
+    });
   };
 
   const handlePointerLeave = () => {
+    if (rafId.current) cancelAnimationFrame(rafId.current);
     if (heroRef.current) {
       heroRef.current.classList.remove('is-lit');
     }
@@ -71,16 +80,19 @@ export default function HeroSection() {
     setHasAnswered(true);
 
     if (isCorrect) {
-      try {
-        confetti({
-          particleCount: 40,
-          spread: 60,
-          origin: { y: 0.7 },
-          colors: ['#059669', '#10b981', '#34d399', '#f59e0b'],
+      import('canvas-confetti')
+        .then((module) => {
+          const confetti = module.default || module;
+          confetti({
+            particleCount: 40,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: ['#059669', '#10b981', '#34d399', '#f59e0b'],
+          });
+        })
+        .catch(() => {
+          // no-op
         });
-      } catch {
-        // no-op
-      }
     }
   };
 

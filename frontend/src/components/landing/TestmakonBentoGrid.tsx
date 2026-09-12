@@ -1,30 +1,11 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   BarChart3, Bot, Timer, Swords, Trophy, 
   ArrowRight, Sparkles, CheckCircle2, TrendingUp 
 } from 'lucide-react';
+import { DtmLiveTimer } from './DtmLiveTimer';
 
 export default function TestmakonBentoGrid() {
-  // Live ticking timer simulation for Card 3
-  const [secondsLeft, setSecondsLeft] = useState(3 * 3600 - 120);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 3 * 3600));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const formatTimer = (totalSec: number) => {
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
   return (
     <section id="imkoniyatlar" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 scroll-mt-24">
       {/* Sarlavha */}
@@ -213,19 +194,7 @@ export default function TestmakonBentoGrid() {
           </div>
 
           {/* Live Timer Widget */}
-          <div className="mt-5 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {formatTimer(secondsLeft)}
-              </span>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 font-mono text-xs font-bold text-emerald-800">
-                Savol 37 / 90
-              </span>
-            </div>
-            <div className="mt-3 h-2 w-full rounded-full bg-slate-200 overflow-hidden">
-              <div className="h-full rounded-full bg-emerald-600 transition-all duration-500" style={{ width: '41%' }} />
-            </div>
-          </div>
+          <DtmLiveTimer />
 
           <div className="mt-4">
             <Link href="/mock" className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-600 group-hover:translate-x-0.5 transition-all">

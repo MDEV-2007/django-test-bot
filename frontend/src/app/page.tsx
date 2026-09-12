@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Sprout } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
 import SubjectsTicker from '@/components/landing/SubjectsTicker';
@@ -12,8 +13,9 @@ import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/component
 import FaqAccordion from '@/components/landing/FaqAccordion';
 import FinalCtaSection from '@/components/landing/FinalCtaSection';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
-import LiveActivityToast from '@/components/landing/LiveActivityToast';
-import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
+
+const LiveActivityToast = dynamic(() => import('@/components/landing/LiveActivityToast'), { ssr: false });
+const LandingAiChatWidget = dynamic(() => import('@/components/landing/LandingAiChatWidget'), { ssr: false });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
