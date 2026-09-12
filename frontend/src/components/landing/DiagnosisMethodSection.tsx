@@ -1,9 +1,40 @@
 'use client';
 
-import { CheckCircle2, Target, GitCommit, Sparkles, BookCheck, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
+import { CheckCircle2, Target } from 'lucide-react';
 
-const STEPS = [
+interface BarItem {
+  name: string;
+  score: string;
+  weak: boolean;
+}
+
+type StepVisual =
+  | {
+      type: 'bar';
+      label: string;
+      items: BarItem[];
+    }
+  | {
+      type: 'task';
+      label: string;
+      items: string[];
+    }
+  | {
+      type: 'result';
+      label: string;
+      before: string;
+      after: string;
+      status: string;
+    };
+
+interface StepItem {
+  step: string;
+  title: string;
+  desc: string;
+  visual: StepVisual;
+}
+
+const STEPS: StepItem[] = [
   {
     step: '01',
     title: 'Zaif mavzularni aniqlash',
@@ -92,7 +123,7 @@ export default function DiagnosisMethodSection() {
 
                 {s.visual.type === 'bar' && (
                   <div className="space-y-2">
-                    {s.visual.items.map((item: any, i: number) => (
+                    {s.visual.items.map((item, i) => (
                       <div key={i}>
                         <div className="flex justify-between font-semibold text-slate-800 mb-1">
                           <span className="truncate pr-2">{item.name}</span>
@@ -113,7 +144,7 @@ export default function DiagnosisMethodSection() {
 
                 {s.visual.type === 'task' && (
                   <ul className="space-y-2 font-medium text-slate-700">
-                    {s.visual.items.map((item: any, i: number) => (
+                    {s.visual.items.map((item, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <CheckCircle2 className="size-4 text-emerald-600 shrink-0 mt-0.5" />
                         <span>{item}</span>
