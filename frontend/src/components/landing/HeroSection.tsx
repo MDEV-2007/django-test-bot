@@ -125,21 +125,18 @@ export default function HeroSection() {
             {/* Display H1 */}
             <h1 className="font-voice mt-6 text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.08]">
               <span className="block">
-                <span className="inline-block min-w-[220px] sm:min-w-[280px] text-emerald-600 transition-all duration-300">
+                <span className="inline-block min-w-[200px] text-emerald-600 transition-all duration-300">
                   {activeWord.text}
                 </span>
               </span>
               <span className="block text-slate-900">
-                tayyorgarlik
+                tizimli tayyorgarlik va
               </span>
               <span className="block mt-1">
-                <span className="lp-mark">
-                  <span className="lp-mark-t">xatolaringiz</span>
-                  <svg className="lp-pen" viewBox="0 0 300 16" aria-hidden="true" focusable="false">
-                    <path pathLength="1" d="M3 9 Q 21 2, 39 9 T 75 9 T 111 9 T 147 9 T 183 9 T 219 9 T 255 9 T 297 9" />
-                  </svg>
+                <span className="text-emerald-700 underline decoration-emerald-300 decoration-wavy decoration-2 underline-offset-8">
+                  zaif mavzular
                 </span>{' '}
-                <span className="text-slate-900">tahlili bilan</span>
+                <span className="text-slate-900">tahlili</span>
               </span>
             </h1>
 

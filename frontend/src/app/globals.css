@@ -902,63 +902,6 @@ html[data-tg='on'] .min-h-screen-safe {
   opacity: 0.75;
 }
 
-/* Handwritten stroke & highlighter */
-.lp-mark {
-  position: relative;
-  isolation: isolate;
-  display: inline-block;
-  padding: 0.02em 0.25em 0.06em;
-  border-radius: 0.3em;
-  line-height: 1.1;
-  color: #059669;
-  transform: rotate(-1.2deg);
-}
-.lp-mark::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background: #0f172a;
-  clip-path: inset(0 100% 0 0 round 0.3em);
-  animation: lp-wipe 620ms cubic-bezier(0.2, 0.8, 0.2, 1) 1300ms forwards;
-}
-@keyframes lp-wipe {
-  to { clip-path: inset(0 0 0 0 round 0.3em); }
-}
-.lp-mark-t {
-  color: #e11d48;
-  animation: lp-fix 420ms ease 1400ms forwards;
-}
-@keyframes lp-fix {
-  to { color: #34d399; }
-}
-.lp-pen {
-  position: absolute;
-  left: 0.15em;
-  bottom: -0.14em;
-  width: calc(100% - 0.3em);
-  height: auto;
-  overflow: visible;
-  pointer-events: none;
-  animation: lp-pen-out 320ms ease 1380ms forwards;
-}
-.lp-pen path {
-  fill: none;
-  stroke: #e11d48;
-  stroke-width: 3.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: lp-draw 520ms cubic-bezier(0.2, 0.8, 0.2, 1) 600ms forwards;
-}
-@keyframes lp-draw {
-  to { stroke-dashoffset: 0; }
-}
-@keyframes lp-pen-out {
-  to { opacity: 0; }
-}
 
 /* Light button shine sweep */
 .lp-btn-primary {
