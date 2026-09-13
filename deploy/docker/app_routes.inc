@@ -4,8 +4,8 @@
 
 # 12M to'lov cheki skrinshoti uchun yetarli edi, lekin CEFR Listening parti audiosi
 # (o'qituvchi panelidan yuklanadi) undan kattaroq bo'ladi — bir part odatda 3-10 MB,
-# uzunrog'i esa bundan ham oshadi.
-client_max_body_size 64M;
+# to'liq CEFR listening audio esa 20-80 MB gacha boradi.
+client_max_body_size 150M;
 
 # Xavfsizlik sarlavhalari (Security Headers)
 add_header X-Content-Type-Options "nosniff" always;

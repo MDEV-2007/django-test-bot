@@ -434,3 +434,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# CEFR Listening va boshqa audio/video fayllar uchun maksimal hajm (150MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024  # 150MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024  # 150MB
