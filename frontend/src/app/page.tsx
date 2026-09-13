@@ -188,7 +188,7 @@ export default async function LandingPage() {
         {/* =========================================================
             HERO SECTION (High-contrast value proposition + Interactive Quiz)
             ========================================================= */}
-        <section className="relative mx-auto max-w-7xl px-4 pb-12 pt-28 sm:px-6 sm:pb-20 sm:pt-36 lg:pt-40">
+        <section className="relative mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 sm:pb-20 sm:pt-12 lg:pt-16">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
             
             {/* Left: Value Proposition */}
