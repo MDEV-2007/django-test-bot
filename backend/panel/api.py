@@ -1224,11 +1224,11 @@ def _format_user_contact(u, profile):
 def _build_mock_attempts_qs(request):
     """Mock urinishlarini qidirish va filtrlash: barcha haqiqiy testlar, fan, sana va qidiruv bo'yicha."""
     base_filter = (
-        Q(test__isnull=False, test__is_random=False) |
         Q(test__is_live_mock=True) |
         Q(test__scheduled_at__isnull=False) |
         Q(mock_attempt__isnull=False) |
-        Q(test__title__icontains='mock')
+        Q(test__title__icontains='mock') |
+        Q(test__category='cefr')
     )
     qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter).distinct()
 
@@ -1321,11 +1321,17 @@ def mock_attempts_api(request):
         except Exception:
             available_subjects = list(Subject.objects.values('id', 'name').order_by('name'))
 
-        # Mavjud mock testlar ro'yxati (katalogdagi barcha nashr qilingan testlar)
+        # Mavjud mock testlar ro'yxati (faqat Mock testlar)
         subject_id = request.GET.get('subject_id')
         available_mocks = []
         try:
-            mock_tests_qs = TestSet.objects.filter(is_random=False)
+            mock_test_filter = (
+                Q(is_live_mock=True) |
+                Q(scheduled_at__isnull=False) |
+                Q(title__icontains='mock') |
+                Q(category='cefr')
+            )
+            mock_tests_qs = TestSet.objects.filter(mock_test_filter)
             if hasattr(TestSet, 'is_archived'):
                 mock_tests_qs = mock_tests_qs.filter(is_archived=False)
             if subject_id and subject_id.isdigit():
