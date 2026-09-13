@@ -17,6 +17,7 @@ import Reveal from '@/components/motion/Reveal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type MockLobbyData = {
   id: number;
@@ -38,23 +39,48 @@ type MockLobbyData = {
   completed_score: number | null;
 };
 
-const MILLIY_GRADING_SCALE = [
-  { range: '86 – 100 ball', grade: 'A+', label: "Oltin (Maksimal)", tone: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
-  { range: '70 – 85.9 ball', grade: 'A', label: "A'lo natija", tone: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400' },
-  { range: '60 – 69.9 ball', grade: 'B+', label: 'Juda yaxshi', tone: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400' },
-  { range: '50 – 59.9 ball', grade: 'B', label: 'Yaxshi natija', tone: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-  { range: '46 – 49.9 ball', grade: 'C+', label: "Qoniqarli", tone: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400' },
-  { range: '40 – 45.9 ball', grade: 'C', label: "O'tish darajasi", tone: 'border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
-  { range: '0 – 39.9 ball', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
+type GradingItem = {
+  score: string;
+  percent?: string;
+  grade: string;
+  label: string;
+  tone: string;
+};
+
+const MILLIY_GRADING_SCALE: GradingItem[] = [
+  { score: '86 – 100 ball', percent: '86 – 100%', grade: 'A+', label: "Oltin (Maksimal)", tone: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  { score: '70 – 85.9 ball', percent: '70 – 85.9%', grade: 'A', label: "A'lo daraja", tone: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400' },
+  { score: '60 – 69.9 ball', percent: '60 – 69.9%', grade: 'B+', label: 'Juda yaxshi', tone: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400' },
+  { score: '50 – 59.9 ball', percent: '50 – 59.9%', grade: 'B', label: 'Yaxshi natija', tone: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+  { score: '46 – 49.9 ball', percent: '46 – 49.9%', grade: 'C+', label: "Qoniqarli", tone: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400' },
+  { score: '40 – 45.9 ball', percent: '40 – 45.9%', grade: 'C', label: "O'tish darajasi", tone: 'border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
+  { score: '0 – 39.9 ball', percent: '0 – 39.9%', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
 ];
 
-const CEFR_GRADING_SCALE = [
-  { range: '65 – 75 ball (86 - 100%)', grade: 'C1', label: "Ilg'or (Advanced)", tone: 'border-violet-500/40 bg-violet-500/15 text-violet-600 dark:text-violet-300' },
-  { range: '50 – 64.9 ball (67 - 85.9%)', grade: 'B2', label: "Mustaqil (OTM Imtiyozi)", tone: 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-300' },
-  { range: '35 – 49.9 ball (47 - 66.9%)', grade: 'B1', label: "Ostonaviy (Threshold)", tone: 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-300' },
-  { range: '20 – 34.9 ball (27 - 46.9%)', grade: 'A2', label: "Boshlang'ich (Waystage)", tone: 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300' },
-  { range: '0 – 19.9 ball (0 - 26.9%)', grade: '—', label: 'Sertifikat berilmaydi', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
+const CEFR_GRADING_SCALE: GradingItem[] = [
+  { score: '65 – 75 ball', percent: '86 – 100%', grade: 'C1', label: "Ilg'or (Advanced)", tone: 'border-violet-500/40 bg-violet-500/15 text-violet-600 dark:text-violet-300' },
+  { score: '50 – 64.9 ball', percent: '67 – 85.9%', grade: 'B2', label: "Mustaqil (OTM Imtiyoz)", tone: 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-300' },
+  { score: '35 – 49.9 ball', percent: '47 – 66.9%', grade: 'B1', label: "Ostonaviy (Threshold)", tone: 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-300' },
+  { score: '20 – 34.9 ball', percent: '27 – 46.9%', grade: 'A2', label: "Boshlang'ich (Waystage)", tone: 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300' },
+  { score: '0 – 19.9 ball', percent: '0 – 26.9%', grade: '—', label: 'Sertifikat berilmaydi', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
 ];
+
+function getScheduledClock(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  try {
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    if (match) {
+      return `${match[4]}:${match[5]}`;
+    }
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+  } catch {
+    // ignore
+  }
+  return '';
+}
 
 function formatScheduledTime(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
@@ -244,6 +270,7 @@ export default function MockLobbyPage() {
     data.subject_slug === 'ingliz-tili' ||
     Boolean(data.title?.toLowerCase().includes('cefr'));
   const gradingScale = isCefr ? CEFR_GRADING_SCALE : MILLIY_GRADING_SCALE;
+  const scheduledClock = getScheduledClock(data.scheduled_at);
 
   return (
     <>
@@ -397,22 +424,27 @@ export default function MockLobbyPage() {
                       {/* Reminder Action Button */}
                       <div className="pt-1">
                         <Button
-                          variant={reminded ? 'secondary' : 'default'}
+                          variant={reminded ? 'outline' : 'default'}
                           size="lg"
                           onClick={toggleReminder}
                           disabled={togglingReminder}
-                          className="w-full rounded-2xl font-bold gap-2 text-sm sm:text-base shadow-md h-12"
+                          className={cn(
+                            "w-full rounded-2xl font-bold text-xs sm:text-sm shadow-md min-h-12 h-auto py-3 px-4 whitespace-normal text-center leading-snug transition-all",
+                            reminded
+                              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+                              : "bg-primary text-primary-foreground hover:bg-primary/90"
+                          )}
                         >
                           {reminded ? (
-                            <>
-                              <CheckCircle2 className="size-5 text-emerald-500 shrink-0" />
-                              Telegram eslatma yoqilgan (21:30 da xabar boradi)
-                            </>
+                            <span className="flex items-center justify-center gap-2">
+                              <CheckCircle2 className="size-4 sm:size-5 text-emerald-400 shrink-0" />
+                              <span>Telegram eslatma yoqilgan {scheduledClock ? `(${scheduledClock} da xabar boradi)` : ''}</span>
+                            </span>
                           ) : (
-                            <>
-                              <Bell className="size-5 animate-wiggle shrink-0" />
-                              Menga Telegramdan eslatish
-                            </>
+                            <span className="flex items-center justify-center gap-2">
+                              <Bell className="size-4 sm:size-5 animate-wiggle shrink-0 text-amber-400" />
+                              <span>Menga Telegramdan eslatish</span>
+                            </span>
                           )}
                         </Button>
                       </div>
@@ -481,9 +513,9 @@ export default function MockLobbyPage() {
 
                 <CardContent className="p-0">
                   {/* Table Header Row */}
-                  <div className="grid grid-cols-12 items-center bg-[var(--surface-hover)]/80 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-[var(--border-card)]">
+                  <div className="grid grid-cols-12 items-center bg-[var(--surface-hover)]/80 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-[var(--border-card)]">
                     <div className="col-span-5">{isCefr ? "To'plangan ball" : "Ball oralig'i"}</div>
-                    <div className="col-span-4 text-center">Daraja</div>
+                    <div className="col-span-4">Daraja</div>
                     <div className="col-span-3 text-right">Sertifikat</div>
                   </div>
 
@@ -492,21 +524,28 @@ export default function MockLobbyPage() {
                     {gradingScale.map((item, idx) => (
                       <div
                         key={idx}
-                        className="grid grid-cols-12 items-center px-4 py-3 transition-colors hover:bg-[var(--surface-hover)]/30 text-xs"
+                        className="grid grid-cols-12 items-center px-4 py-2.5 transition-colors hover:bg-[var(--surface-hover)]/30 text-xs"
                       >
                         {/* Range Column */}
-                        <div className="col-span-5 font-mono font-bold text-foreground whitespace-nowrap">
-                          {item.range}
+                        <div className="col-span-5 pr-2">
+                          <div className="font-mono font-bold text-foreground text-xs leading-snug">
+                            {item.score}
+                          </div>
+                          {item.percent && (
+                            <div className="text-[10px] font-mono text-muted-foreground leading-tight mt-0.5">
+                              {item.percent}
+                            </div>
+                          )}
                         </div>
 
                         {/* Label Column */}
-                        <div className="col-span-4 text-center text-muted-foreground font-medium truncate px-1">
+                        <div className="col-span-4 text-left text-muted-foreground font-medium text-xs leading-tight pr-1">
                           {item.label}
                         </div>
 
                         {/* Badge Column (Aligned right) */}
                         <div className="col-span-3 text-right">
-                          <span className={`inline-flex items-center justify-center w-11 py-1 rounded-md text-xs font-black border ${item.tone}`}>
+                          <span className={`inline-flex items-center justify-center min-w-[38px] px-2 py-1 rounded-md text-xs font-black border ${item.tone}`}>
                             {item.grade}
                           </span>
                         </div>
@@ -524,7 +563,7 @@ export default function MockLobbyPage() {
                   <Send className="size-4" /> Telegram Bot xabarnomasi
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Eslatmani yoqqan bo&apos;lsangiz, soat <b>21:30</b> da Telegram botimiz sizga to&apos;g&apos;ridan-to&apos;g&apos;ri imtihon boshlanganligi haqida xabar va bevosita testga o&apos;tish tugmasini yuboradi.
+                  Eslatmani yoqqan bo&apos;lsangiz, {scheduledClock ? <>soat <b>{scheduledClock}</b> da</> : 'imtihon boshlanishi bilan'} Telegram botimiz sizga to&apos;g&apos;ridan-to&apos;g&apos;ri imtihon boshlanganligi haqida xabar va bevosita testga o&apos;tish tugmasini yuboradi.
                 </p>
               </div>
             </Reveal>
