@@ -8,18 +8,23 @@ accounts.jwt_auth.AuditAwareJWTAuthentication orqali global tarzda aniqlanadi, s
 uchun bu yerdagi hech bir endpoint uni alohida chaqirmaydi.
 """
 import csv
+import logging
+import os
 import re
 import secrets
+import sys
+import time
 from datetime import timedelta
 
+import django
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Avg, Count, F, Max, Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-import logging
 from rest_framework import status
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -2220,6 +2225,19 @@ def promocode_detail_api(request, pk):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def promocode_toggle_api(request, pk):
+    try:
+        p = get_object_or_404(PromoCode, pk=pk)
+        p.is_active = not p.is_active
+        p.save(update_fields=['is_active'])
+        return Response({'is_active': p.is_active, 'message': "Holati o'zgartirildi"})
+    except Exception as e:
+        logger.exception("promocode_toggle_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 # ============================================================ FINANCIAL INTELLIGENCE
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
@@ -2315,6 +2333,9 @@ def finance_analytics_api(request):
     except Exception as e:
         logger.exception("finance_analytics_api error: %s", e)
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+financial_analytics_api = finance_analytics_api
 
 
 # ============================================================ TELEGRAM BOT CENTER
@@ -2511,60 +2532,59 @@ def users_export_csv_api(request):
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def system_health_api(request):
-    import sys
-    import django
-    import time
-    from django.db import connection
-
-    # DB latency test
-    db_ok = False
-    db_time_ms = 0
     try:
-        t0 = time.time()
-        with connection.cursor() as c:
-            c.execute("SELECT 1")
-        db_time_ms = round((time.time() - t0) * 1000, 2)
-        db_ok = True
+        # DB latency test
+        db_ok = False
+        db_time_ms = 0
+        try:
+            t0 = time.time()
+            with connection.cursor() as c:
+                c.execute("SELECT 1")
+            db_time_ms = round((time.time() - t0) * 1000, 2)
+            db_ok = True
+        except Exception as e:
+            logger.error("DB health check failed: %s", e)
+
+        # Redis/Cache latency test
+        cache_ok = False
+        cache_time_ms = 0
+        try:
+            t0 = time.time()
+            test_key = 'health:cache:test'
+            cache.set(test_key, '1', 5)
+            cache_val = cache.get(test_key)
+            cache_time_ms = round((time.time() - t0) * 1000, 2)
+            cache_ok = (cache_val == '1')
+        except Exception as e:
+            logger.error("Cache health check failed: %s", e)
+
+        # Table counts
+        table_counts = {
+            'users': User.objects.count(),
+            'attempts': Attempt.objects.count(),
+            'testsets': TestSet.objects.count(),
+            'questions': Question.objects.count(),
+            'lessons': Lesson.objects.count(),
+            'payments': Payment.objects.count(),
+            'audit_logs': AuditLog.objects.count(),
+        }
+
+        return Response({
+            'status': 'healthy' if (db_ok and cache_ok) else 'degraded',
+            'database': {'status': 'connected' if db_ok else 'error', 'latency_ms': db_time_ms},
+            'cache': {'status': 'connected' if cache_ok else 'error', 'latency_ms': cache_time_ms},
+            'environment': {
+                'python_version': sys.version.split()[0],
+                'django_version': django.__version__,
+                'server_time': timezone.now().isoformat(),
+                'debug_mode': getattr(settings, 'DEBUG', False),
+                'time_zone': str(timezone.get_current_timezone()),
+            },
+            'table_counts': table_counts,
+        })
     except Exception as e:
-        logger.error("DB health check failed: %s", e)
-
-    # Redis/Cache latency test
-    cache_ok = False
-    cache_time_ms = 0
-    try:
-        t0 = time.time()
-        test_key = 'health:cache:test'
-        cache.set(test_key, '1', 5)
-        cache_val = cache.get(test_key)
-        cache_time_ms = round((time.time() - t0) * 1000, 2)
-        cache_ok = (cache_val == '1')
-    except Exception as e:
-        logger.error("Cache health check failed: %s", e)
-
-    # Table counts
-    table_counts = {
-        'users': User.objects.count(),
-        'attempts': Attempt.objects.count(),
-        'testsets': TestSet.objects.count(),
-        'questions': Question.objects.count(),
-        'lessons': Lesson.objects.count(),
-        'payments': Payment.objects.count(),
-        'audit_logs': AuditLog.objects.count(),
-    }
-
-    return Response({
-        'status': 'healthy' if (db_ok and cache_ok) else 'degraded',
-        'database': {'status': 'connected' if db_ok else 'error', 'latency_ms': db_time_ms},
-        'cache': {'status': 'connected' if cache_ok else 'error', 'latency_ms': cache_time_ms},
-        'environment': {
-            'python_version': sys.version.split()[0],
-            'django_version': django.__version__,
-            'server_time': timezone.now().isoformat(),
-            'debug_mode': settings.DEBUG,
-            'time_zone': str(timezone.get_current_timezone()),
-        },
-        'table_counts': table_counts,
-    })
+        logger.exception("system_health_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -2581,25 +2601,31 @@ def system_cache_flush_api(request):
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def system_logs_api(request):
-    import os
-    log_file = os.path.join(settings.BASE_DIR, '..', 'logs', 'django.log')
-    if not os.path.exists(log_file):
-        log_file = os.path.join(settings.BASE_DIR, 'logs', 'django.log')
+    try:
+        base_dir = getattr(settings, 'BASE_DIR', '')
+        log_file = os.path.join(base_dir, '..', 'logs', 'django.log') if base_dir else ''
+        if not (log_file and os.path.exists(log_file)):
+            log_file = os.path.join(base_dir, 'logs', 'django.log') if base_dir else ''
 
-    lines = []
-    if os.path.exists(log_file):
-        try:
-            with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
-                all_lines = f.readlines()
-                lines = all_lines[-100:]  # Last 100 lines
-        except Exception as e:
-            lines = [f"Log faylini o'qib bo'lmadi: {str(e)}"]
-    else:
-        # Fallback to recent audit logs as system events
-        recent_audits = AuditLog.objects.select_related('user')[:50]
-        lines = [f"[{a.timestamp.strftime('%Y-%m-%d %H:%M:%S')}] {a.summary_uz}" for a in recent_audits]
+        lines = []
+        if log_file and os.path.exists(log_file):
+            try:
+                with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    all_lines = f.readlines()
+                    lines = [ln.rstrip() for ln in all_lines[-100:]]
+            except Exception as e:
+                lines = [f"Log faylini o'qib bo'lmadi: {str(e)}"]
+        else:
+            try:
+                recent_audits = AuditLog.objects.select_related('user')[:50]
+                lines = [f"[{a.timestamp.strftime('%Y-%m-%d %H:%M:%S')}] {a.summary_uz}" for a in recent_audits]
+            except Exception:
+                lines = ["Audit loglari hozircha mavjud emas."]
 
-    return Response({'lines': lines})
+        return Response({'lines': lines})
+    except Exception as e:
+        logger.exception("system_logs_api error: %s", e)
+        return Response({'lines': [f"Loglarni olishda xatolik: {str(e)}"]})
 
 
 # ============================================================ LIVE MOCK MONITOR
