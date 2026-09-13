@@ -18,10 +18,14 @@ from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+import logging
+from rest_framework import status
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
+logger = logging.getLogger(__name__)
 
 from accounts.models import Profile
 from accounts.permissions import IsSuperAdmin, is_last_active_superadmin
@@ -1118,21 +1122,41 @@ def surveys_api(request):
 
 
 # ============================================================ MOCK RESULTS
+def _safe_datetime_diff_seconds(started_at, completed_at):
+    """Xavfsiz sekundlar farqi (offset-naive va offset-aware datetime xatoliklariga qarshi)."""
+    if not started_at or not completed_at:
+        return None
+    try:
+        s = started_at
+        c = completed_at
+        if timezone.is_aware(c) and timezone.is_naive(s):
+            s = timezone.make_aware(s)
+        elif timezone.is_naive(c) and timezone.is_aware(s):
+            c = timezone.make_aware(c)
+        return max(0, int((c - s).total_seconds()))
+    except Exception:
+        return None
+
+
 def _calculate_grade(score, correct=None):
     """UzBMB (DTM) rasmiy Milliy Sertifikat 100 ballik baholash shkalasi."""
     if score is None:
         return '—', 'slate'
-    if score >= 86.0:
+    try:
+        score_f = float(score)
+    except (ValueError, TypeError):
+        return '—', 'slate'
+    if score_f >= 86.0:
         return 'A+', 'emerald'
-    if score >= 70.0:
+    if score_f >= 70.0:
         return 'A', 'teal'
-    if score >= 60.0:
+    if score_f >= 60.0:
         return 'B+', 'sky'
-    if score >= 50.0:
+    if score_f >= 50.0:
         return 'B', 'amber'
-    if score >= 46.0:
+    if score_f >= 46.0:
         return 'C+', 'orange'
-    if score >= 40.0:
+    if score_f >= 40.0:
         return 'C', 'yellow'
     return '—', 'rose'
 
@@ -1140,12 +1164,61 @@ def _calculate_grade(score, correct=None):
 def _format_duration(started_at, completed_at):
     if not completed_at or not started_at:
         return "Davom etmoqda"
-    total_sec = max(0, int((completed_at - started_at).total_seconds()))
+    total_sec = _safe_datetime_diff_seconds(started_at, completed_at)
+    if total_sec is None:
+        return "—"
     mins = total_sec // 60
     secs = total_sec % 60
     if mins > 0:
         return f"{mins} daq {secs} son"
     return f"{secs} son"
+
+
+def _format_duration_safe(started_at, completed_at, max_minutes=None):
+    """Davomiylik vaqtini hisoblash va anomal vaqtlarni (masalan 29 soat) test limiti bilan cheklash."""
+    if not completed_at or not started_at:
+        return "Davom etmoqda"
+    total_sec = _safe_datetime_diff_seconds(started_at, completed_at)
+    if total_sec is None:
+        return "—"
+    limit_min = max_minutes or 90
+    limit_sec = limit_min * 60
+
+    # Agar test anomal uzoq ochiq qolgan bo'lsa
+    if total_sec > limit_sec + 300:
+        return f"{limit_min} daqiqa (Limit)"
+
+    mins = total_sec // 60
+    secs = total_sec % 60
+    if mins > 0:
+        return f"{mins} daq {secs} son"
+    return f"{secs} son"
+
+
+def _format_user_contact(u, profile):
+    """Foydalanuvchi aloqa ma'lumoti: xom @tg_id'larni yashirib, telefon yoki toza username ko'rsatish."""
+    phone = getattr(profile, 'phone', '') if profile else ''
+    if phone:
+        p = str(phone).strip()
+        if len(p) == 12 and p.startswith('998'):
+            return f"+998 {p[3:5]} *** ** {p[10:12]}"
+        elif len(p) == 13 and p.startswith('+998'):
+            return f"+998 {p[4:6]} *** ** {p[11:13]}"
+        return p
+
+    username = getattr(u, 'username', '') if u else ''
+    if not username:
+        return '—'
+
+    # Texnik telegram id'lar (@tg_..., id_...) yoki sof raqamlarni yashirish
+    if username.startswith('tg_') or username.startswith('id_') or username.isdigit():
+        return '—'
+
+    # Agar allaqachon email bo'lsa, ikkita @ qo'ymaslik
+    if '@' in username:
+        return username
+
+    return f"@{username}"
 
 
 def _build_mock_attempts_qs(request):
@@ -1157,7 +1230,7 @@ def _build_mock_attempts_qs(request):
         Q(mock_attempt__isnull=False) |
         Q(test__title__icontains='mock')
     )
-    qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
+    qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter).distinct()
 
     subject_id = request.GET.get('subject_id')
     if subject_id and subject_id.isdigit():
@@ -1196,8 +1269,8 @@ def _build_mock_attempts_qs(request):
                 Q(test__scheduled_at__date=d)
             )
             qs = qs.filter(date_q)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Error filtering by date %s: %s", date_str, e)
 
     completed = request.GET.get('completed')
     if completed == 'True':
@@ -1228,177 +1301,214 @@ def _build_mock_attempts_qs(request):
 @permission_classes([IsSuperAdmin])
 def mock_attempts_api(request):
     """Admin uchun barcha Mock test topshirgan o'quvchilar natijalari va reytingi."""
-    qs = _build_mock_attempts_qs(request)
+    try:
+        qs = _build_mock_attempts_qs(request)
 
-    # Hisob-kitoblar
-    total_participants = qs.count()
-    completed_qs = qs.filter(is_completed=True)
-    completed_count = completed_qs.count()
+        # Hisob-kitoblar
+        total_participants = qs.count()
+        completed_qs = qs.filter(is_completed=True)
+        completed_count = completed_qs.count()
 
-    from django.db.models import Avg, Max
-    agg = completed_qs.aggregate(avg_score=Avg('score'), max_score=Max('score'))
-    avg_score = round(agg['avg_score'], 1) if agg['avg_score'] is not None else 0.0
-    max_score = round(agg['max_score'], 1) if agg['max_score'] is not None else 0.0
-    gold_count = completed_qs.filter(score__gte=80).count()
+        from django.db.models import Avg, Max
+        agg = completed_qs.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+        avg_score = round(agg['avg_score'], 1) if agg.get('avg_score') is not None else 0.0
+        max_score = round(agg['max_score'], 1) if agg.get('max_score') is not None else 0.0
+        gold_count = completed_qs.filter(score__gte=80).count()
 
-    # Mavjud fanlar ro'yxati
-    available_subjects = list(Subject.objects.values('id', 'name').order_by('order', 'name'))
+        # Mavjud fanlar ro'yxati
+        try:
+            available_subjects = list(Subject.objects.values('id', 'name').order_by('order', 'name'))
+        except Exception:
+            available_subjects = list(Subject.objects.values('id', 'name').order_by('name'))
 
-    # Mavjud mock testlar ro'yxati (katalogdagi barcha nashr qilingan testlar)
-    subject_id = request.GET.get('subject_id')
-    mock_tests_qs = TestSet.objects.filter(is_random=False, is_archived=False)
-    if subject_id and subject_id.isdigit():
-        mock_tests_qs = mock_tests_qs.filter(subject_id=int(subject_id))
-    available_mocks = list(
-        mock_tests_qs.values('id', 'title').distinct().order_by('title')[:100]
-    )
+        # Mavjud mock testlar ro'yxati (katalogdagi barcha nashr qilingan testlar)
+        subject_id = request.GET.get('subject_id')
+        available_mocks = []
+        try:
+            mock_tests_qs = TestSet.objects.filter(is_random=False)
+            if hasattr(TestSet, 'is_archived'):
+                mock_tests_qs = mock_tests_qs.filter(is_archived=False)
+            if subject_id and subject_id.isdigit():
+                mock_tests_qs = mock_tests_qs.filter(subject_id=int(subject_id))
+            available_mocks = list(
+                mock_tests_qs.values('id', 'title').distinct().order_by('title')[:100]
+            )
+        except Exception as e:
+            logger.warning("Error fetching available_mocks: %s", e)
 
-    items = []
-    tz = timezone.get_current_timezone()
-    for idx, a in enumerate(qs[:250], start=1):
-        u = a.profile.user
-        user_full = f"{u.first_name} {u.last_name}".strip() or u.username
-        grade, grade_tone = _calculate_grade(a.score, a.correct_answers)
+        items = []
+        tz = timezone.get_current_timezone()
+        for idx, a in enumerate(qs[:250], start=1):
+            profile = getattr(a, 'profile', None)
+            u = None
+            if profile:
+                try:
+                    u = profile.user
+                except Exception:
+                    u = None
 
-        completed_local = None
-        if a.completed_at:
-            dt = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
-            completed_local = dt.strftime('%d.%m.%Y %H:%M')
+            first = getattr(u, 'first_name', '') or ''
+            last = getattr(u, 'last_name', '') or ''
+            uname = getattr(u, 'username', '') or ''
+            user_full = f"{first} {last}".strip() or uname or "Noma'lum"
+            telegram_id = getattr(profile, 'telegram_id', None) if profile else None
+            phone = getattr(profile, 'phone', '') if profile else ''
 
-        started_local = None
-        if a.started_at:
-            dt = a.started_at.astimezone(tz) if timezone.is_aware(a.started_at) else a.started_at
-            started_local = dt.strftime('%d.%m.%Y %H:%M')
+            grade, grade_tone = _calculate_grade(a.score, a.correct_answers)
 
-        total_q = (a.correct_answers + a.wrong_answers + a.skipped_answers)
-        if not total_q and a.test:
-            total_q = a.test.questions.count()
+            completed_local = None
+            if a.completed_at:
+                try:
+                    dt = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+                    completed_local = dt.strftime('%d.%m.%Y %H:%M')
+                except Exception:
+                    completed_local = str(a.completed_at)[:16]
 
-        items.append({
-            'id': a.id,
-            'rank': idx,
-            'student_name': user_full,
-            'username': u.username,
-            'telegram_id': getattr(a.profile, 'telegram_id', None),
-            'phone': getattr(a.profile, 'phone', ''),
-            'test_id': a.test_id,
-            'test_title': a.test.title if a.test else "Noma'lum test",
-            'subject_name': a.test.subject.name if (a.test and a.test.subject) else "Asosiy",
-            'score': round(a.score, 1) if a.score is not None else None,
-            'grade': grade,
-            'grade_tone': grade_tone,
-            'correct_answers': a.correct_answers,
-            'wrong_answers': a.wrong_answers,
-            'skipped_answers': a.skipped_answers,
-            'total_questions': total_q or 45,
-            'duration_str': _format_duration(a.started_at, a.completed_at),
-            'is_completed': a.is_completed,
-            'completed_at': completed_local,
-            'raw_completed_at': a.completed_at.isoformat() if a.completed_at else None,
-            'started_at': started_local,
+            started_local = None
+            if a.started_at:
+                try:
+                    dt = a.started_at.astimezone(tz) if timezone.is_aware(a.started_at) else a.started_at
+                    started_local = dt.strftime('%d.%m.%Y %H:%M')
+                except Exception:
+                    started_local = str(a.started_at)[:16]
+
+            c_ans = a.correct_answers if a.correct_answers is not None else 0
+            w_ans = a.wrong_answers if a.wrong_answers is not None else 0
+            s_ans = a.skipped_answers if a.skipped_answers is not None else 0
+            total_q = c_ans + w_ans + s_ans
+            test_obj = getattr(a, 'test', None)
+            if not total_q and test_obj:
+                try:
+                    total_q = test_obj.questions.count()
+                except Exception:
+                    total_q = 45
+
+            subj_obj = getattr(test_obj, 'subject', None) if test_obj else None
+
+            score_val = None
+            if a.score is not None:
+                try:
+                    score_val = round(float(a.score), 1)
+                except (ValueError, TypeError):
+                    score_val = 0.0
+
+            items.append({
+                'id': a.id,
+                'rank': idx,
+                'student_name': user_full,
+                'username': uname or "—",
+                'telegram_id': telegram_id,
+                'phone': phone or '',
+                'test_id': getattr(a, 'test_id', None),
+                'test_title': test_obj.title if test_obj else "Noma'lum test",
+                'subject_name': subj_obj.name if subj_obj else "Asosiy",
+                'score': score_val,
+                'grade': grade,
+                'grade_tone': grade_tone,
+                'correct_answers': c_ans,
+                'wrong_answers': w_ans,
+                'skipped_answers': s_ans,
+                'total_questions': total_q or 45,
+                'duration_str': _format_duration(a.started_at, a.completed_at),
+                'is_completed': bool(a.is_completed),
+                'completed_at': completed_local,
+                'raw_completed_at': a.completed_at.isoformat() if a.completed_at else None,
+                'started_at': started_local,
+            })
+
+        return Response({
+            'total_count': total_participants,
+            'completed_count': completed_count,
+            'avg_score': avg_score,
+            'max_score': max_score,
+            'gold_count': gold_count,
+            'available_subjects': available_subjects,
+            'available_mocks': available_mocks,
+            'items': items,
         })
-
-    return Response({
-        'total_count': total_participants,
-        'completed_count': completed_count,
-        'avg_score': avg_score,
-        'max_score': max_score,
-        'gold_count': gold_count,
-        'available_subjects': available_subjects,
-        'available_mocks': available_mocks,
-        'items': items,
-    })
+    except Exception as e:
+        logger.exception("mock_attempts_api crash: %s", e)
+        return Response(
+            {
+                'error': f"Mock natijalarini yuklashda xatolik yuz berdi: {str(e)}",
+                'total_count': 0,
+                'completed_count': 0,
+                'avg_score': 0.0,
+                'max_score': 0.0,
+                'gold_count': 0,
+                'available_subjects': [],
+                'available_mocks': [],
+                'items': [],
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def mock_attempts_export_api(request):
     """Barcha mock topshirgan o'quvchilar natijalarini CSV (Excel) formatida yuklab olish."""
-    qs = _build_mock_attempts_qs(request)
+    try:
+        qs = _build_mock_attempts_qs(request)
 
-    response = HttpResponse(content_type='text/csv; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename="mock_natijalari.csv"'
-    response.write('\ufeff')  # UTF-8 BOM for Excel
-    writer = csv.writer(response)
-    writer.writerow([
-        "O'rin", "O'quvchi (F.I.SH)", "Username", "Telegram ID", "Telefon",
-        "Test", "Fan", "Ball (%)", "Daraja", "To'g'ri", "Xato", "Ketgan vaqt", "Topshirilgan sana"
-    ])
-
-    tz = timezone.get_current_timezone()
-    for idx, a in enumerate(qs, start=1):
-        u = a.profile.user
-        user_full = f"{u.first_name} {u.last_name}".strip() or u.username
-        grade, _ = _calculate_grade(a.score, a.correct_answers)
-
-        completed_str = "—"
-        if a.completed_at:
-            dt = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
-            completed_str = dt.strftime('%Y-%m-%d %H:%M')
-
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="mock_natijalari.csv"'
+        response.write('\ufeff')  # UTF-8 BOM for Excel
+        writer = csv.writer(response)
         writer.writerow([
-            idx,
-            user_full,
-            u.username,
-            getattr(a.profile, 'telegram_id', '') or '',
-            getattr(a.profile, 'phone', '') or '',
-            a.test.title if a.test else "Mock",
-            a.test.subject.name if (a.test and a.test.subject) else "",
-            f"{a.score:.1f}" if a.score is not None else '0',
-            grade,
-            a.correct_answers,
-            a.wrong_answers,
-            _format_duration(a.started_at, a.completed_at),
-            completed_str,
+            "O'rin", "O'quvchi (F.I.SH)", "Username", "Telegram ID", "Telefon",
+            "Test", "Fan", "Ball (%)", "Daraja", "To'g'ri", "Xato", "Ketgan vaqt", "Topshirilgan sana"
         ])
 
-    return response
+        tz = timezone.get_current_timezone()
+        for idx, a in enumerate(qs, start=1):
+            profile = getattr(a, 'profile', None)
+            u = None
+            if profile:
+                try:
+                    u = profile.user
+                except Exception:
+                    u = None
+            first = getattr(u, 'first_name', '') or ''
+            last = getattr(u, 'last_name', '') or ''
+            uname = getattr(u, 'username', '') or ''
+            user_full = f"{first} {last}".strip() or uname or "Noma'lum"
 
+            grade, _ = _calculate_grade(a.score, a.correct_answers)
 
+            completed_str = "—"
+            if a.completed_at:
+                try:
+                    dt = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+                    completed_str = dt.strftime('%Y-%m-%d %H:%M')
+                except Exception:
+                    completed_str = str(a.completed_at)[:16]
 
-def _format_user_contact(u, profile):
-    """Foydalanuvchi aloqa ma'lumoti: xom @tg_id'larni yashirib, telefon yoki toza username ko'rsatish."""
-    phone = getattr(profile, 'phone', '') or ''
-    if phone:
-        p = str(phone).strip()
-        if len(p) == 12 and p.startswith('998'):
-            return f"+998 {p[3:5]} *** ** {p[10:12]}"
-        elif len(p) == 13 and p.startswith('+998'):
-            return f"+998 {p[4:6]} *** ** {p[11:13]}"
-        return p
+            test_obj = getattr(a, 'test', None)
+            subj_obj = getattr(test_obj, 'subject', None) if test_obj else None
 
-    username = u.username or ''
-    if not username:
-        return '—'
+            score_str = f"{float(a.score):.1f}" if a.score is not None else '0'
 
-    # Texnik telegram id'lar (@tg_..., id_...) yoki sof raqamlarni yashirish
-    if username.startswith('tg_') or username.startswith('id_') or username.isdigit():
-        return '—'
+            writer.writerow([
+                idx,
+                user_full,
+                uname or '—',
+                getattr(profile, 'telegram_id', '') or '',
+                getattr(profile, 'phone', '') or '',
+                test_obj.title if test_obj else "Mock",
+                subj_obj.name if subj_obj else "",
+                score_str,
+                grade,
+                a.correct_answers or 0,
+                a.wrong_answers or 0,
+                _format_duration(a.started_at, a.completed_at),
+                completed_str,
+            ])
 
-    # Agar allaqachon email bo'lsa, ikkita @ qo'ymaslik
-    if '@' in username:
-        return username
-
-    return f"@{username}"
-
-
-def _format_duration_safe(started_at, completed_at, max_minutes=None):
-    """Davomiylik vaqtini hisoblash va anomal vaqtlarni (masalan 29 soat) test limiti bilan cheklash."""
-    if not completed_at or not started_at:
-        return "Davom etmoqda"
-    total_sec = max(0, int((completed_at - started_at).total_seconds()))
-    limit_min = max_minutes or 90
-    limit_sec = limit_min * 60
-
-    # Agar test anomal uzoq ochiq qolgan bo'lsa
-    if total_sec > limit_sec + 300:
-        return f"{limit_min} daqiqa (Limit)"
-
-    mins = total_sec // 60
-    secs = total_sec % 60
-    if mins > 0:
-        return f"{mins} daq {secs} son"
-    return f"{secs} son"
+        return response
+    except Exception as e:
+        logger.exception("mock_attempts_export_api crash: %s", e)
+        return Response({'error': f"CSV eksport qilishda xatolik: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -1407,282 +1517,312 @@ def mock_attempts_export_pdf_api(request):
     """Barcha mock topshirgan o'quvchilar natijalarini rasmiy, mukammal PDF formatida yuklab olish."""
     import os
     from datetime import datetime
-    import pymupdf
+    try:
+        import pymupdf
+    except ImportError:
+        return HttpResponse(
+            "PyMuPDF kutubxonasi o'rnatilmagan. Iltimos serverda `pip install pymupdf` bajaring.",
+            content_type="text/plain; charset=utf-8",
+            status=500
+        )
 
-    qs = _build_mock_attempts_qs(request)
+    try:
+        qs = _build_mock_attempts_qs(request)
 
-    selected_subject_name = "Barcha fanlar"
-    subject_id = request.GET.get('subject_id')
-    if subject_id and subject_id.isdigit():
-        s_obj = Subject.objects.filter(id=int(subject_id)).first()
-        if s_obj:
-            selected_subject_name = s_obj.name
+        selected_subject_name = "Barcha fanlar"
+        subject_id = request.GET.get('subject_id')
+        if subject_id and subject_id.isdigit():
+            s_obj = Subject.objects.filter(id=int(subject_id)).first()
+            if s_obj:
+                selected_subject_name = s_obj.name
 
-    selected_test_title = "Barcha Mock testlar"
-    test_id = request.GET.get('test_id')
-    if test_id and test_id.isdigit():
-        t_obj = TestSet.objects.filter(id=int(test_id)).first()
-        if t_obj:
-            selected_test_title = t_obj.title
-            if selected_subject_name == "Barcha fanlar" and t_obj.subject:
-                selected_subject_name = t_obj.subject.name
+        selected_test_title = "Barcha Mock testlar"
+        test_id = request.GET.get('test_id')
+        if test_id and test_id.isdigit():
+            t_obj = TestSet.objects.filter(id=int(test_id)).first()
+            if t_obj:
+                selected_test_title = t_obj.title
 
-    selected_date_display = "Barcha sanalar"
-    date_str = request.GET.get('date', '').strip()
-    if date_str:
-        try:
-            d = datetime.strptime(date_str, '%Y-%m-%d').date()
-            selected_date_display = d.strftime('%d.%m.%Y')
-        except Exception:
-            pass
+        selected_date_display = "Barcha sanalar"
+        date_str = request.GET.get('date', '').strip()
+        if date_str:
+            try:
+                d = datetime.strptime(date_str, '%Y-%m-%d').date()
+                selected_date_display = d.strftime('%d.%m.%Y')
+            except Exception:
+                pass
 
-    total_participants = qs.count()
-    completed_qs = qs.filter(is_completed=True)
+        total_participants = qs.count()
+        completed_qs = qs.filter(is_completed=True)
 
-    # 0/0 tashlab ketilgan (topshirilmagan) urinishlar sinf o'rtacha ballini sun'iy tushirib yubormasligi uchun
-    valid_completed = completed_qs.filter(Q(correct_answers__gt=0) | Q(wrong_answers__gt=0))
-    if not valid_completed.exists():
-        valid_completed = completed_qs
+        # 0/0 tashlab ketilgan (topshirilmagan) urinishlar sinf o'rtacha ballini sun'iy tushirib yubormasligi uchun
+        valid_completed = completed_qs.filter(Q(correct_answers__gt=0) | Q(wrong_answers__gt=0))
+        if not valid_completed.exists():
+            valid_completed = completed_qs
 
-    from django.db.models import Avg, Max
-    agg = valid_completed.aggregate(avg_score=Avg('score'), max_score=Max('score'))
-    avg_score = round(agg['avg_score'], 1) if agg['avg_score'] is not None else 0.0
-    max_score = round(agg['max_score'], 1) if agg['max_score'] is not None else 0.0
-    gold_count = valid_completed.filter(score__gte=80).count()
+        from django.db.models import Avg, Max
+        agg = valid_completed.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+        avg_score = round(agg['avg_score'], 1) if agg.get('avg_score') is not None else 0.0
+        max_score = round(agg['max_score'], 1) if agg.get('max_score') is not None else 0.0
+        gold_count = valid_completed.filter(score__gte=80).count()
 
-    doc = pymupdf.open()
-    page_w, page_h = 842, 595  # A4 landscape
+        doc = pymupdf.open()
+        page_w, page_h = 842, 595  # A4 landscape
 
-    font_candidates_reg = [
-        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-        r'C:\Windows\Fonts\segoeui.ttf',
-        r'C:\Windows\Fonts\arial.ttf',
-    ]
-    font_candidates_bold = [
-        '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-        '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
-        r'C:\Windows\Fonts\segoeuib.ttf',
-        r'C:\Windows\Fonts\arialbd.ttf',
-    ]
-    font_reg_file = next((p for p in font_candidates_reg if os.path.exists(p)), None)
-    font_bold_file = next((p for p in font_candidates_bold if os.path.exists(p)), None)
+        font_candidates_reg = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+            r'C:\Windows\Fonts\segoeui.ttf',
+            r'C:\Windows\Fonts\arial.ttf',
+        ]
+        font_candidates_bold = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+            r'C:\Windows\Fonts\segoeuib.ttf',
+            r'C:\Windows\Fonts\arialbd.ttf',
+        ]
+        font_reg_file = next((p for p in font_candidates_reg if os.path.exists(p)), None)
+        font_bold_file = next((p for p in font_candidates_bold if os.path.exists(p)), None)
 
-    font_reg = "FReg" if font_reg_file else "helv"
-    font_bold = "FBold" if font_bold_file else "hebo"
+        font_reg = "FReg" if font_reg_file else "helv"
+        font_bold = "FBold" if font_bold_file else "hebo"
 
-    def setup_page_fonts(p):
-        if font_reg_file:
-            p.insert_font(fontname="FReg", fontfile=font_reg_file)
-        if font_bold_file:
-            p.insert_font(fontname="FBold", fontfile=font_bold_file)
+        def setup_page_fonts(p):
+            if font_reg_file:
+                p.insert_font(fontname="FReg", fontfile=font_reg_file)
+            if font_bold_file:
+                p.insert_font(fontname="FBold", fontfile=font_bold_file)
 
-    def clean_txt(val, max_len=60):
-        if val is None:
-            return ''
-        s = str(val).strip()
-        cleaned = ''.join(c for c in s if ord(c) < 0x10000 and (c.isprintable() or c == ' '))
-        return cleaned[:max_len]
+        def clean_txt(val, max_len=60):
+            if val is None:
+                return ''
+            s = str(val).strip()
+            cleaned = ''.join(c for c in s if ord(c) < 0x10000 and (c.isprintable() or c == ' '))
+            return cleaned[:max_len]
 
-    columns = [
-        ("№", 26, 1),
-        ("O'quvchi (F.I.SH)", 136, 0),
-        ("Aloqa / Telefon", 110, 0),
-        ("Fan & Test", 164, 0),
-        ("Ball", 48, 1),
-        ("Daraja", 48, 1),
-        ("To'g'ri / Xato / Bo'sh", 86, 1),
-        ("Ketgan vaqt", 72, 1),
-        ("Topshirilgan sana", 80, 1),
-    ]
+        columns = [
+            ("№", 26, 1),
+            ("O'quvchi (F.I.SH)", 136, 0),
+            ("Aloqa / Telefon", 110, 0),
+            ("Fan & Test", 164, 0),
+            ("Ball", 48, 1),
+            ("Daraja", 48, 1),
+            ("To'g'ri / Xato / Bo'sh", 86, 1),
+            ("Ketgan vaqt", 72, 1),
+            ("Topshirilgan sana", 80, 1),
+        ]
 
-    margin_x = 36
-    table_w = sum(c[1] for c in columns)  # 770 pt
+        margin_x = 36
+        table_w = sum(c[1] for c in columns)  # 770 pt
 
-    tz = timezone.get_current_timezone()
-    now_local = timezone.now().astimezone(tz).strftime('%d.%m.%Y %H:%M')
+        tz = timezone.get_current_timezone()
+        now_local = timezone.now().astimezone(tz).strftime('%d.%m.%Y %H:%M')
 
-    c_navy = (15/255, 23/255, 42/255)
-    c_header_bg = (30/255, 41/255, 59/255)
-    c_accent = (13/255, 148/255, 136/255)
-    c_zebra = (248/255, 250/255, 252/255)
-    c_border = (226/255, 232/255, 240/255)
-    c_text_dark = (15/255, 23/255, 42/255)
-    c_text_muted = (100/255, 116/255, 139/255)
-    c_white = (1.0, 1.0, 1.0)
+        c_navy = (15/255, 23/255, 42/255)
+        c_header_bg = (30/255, 41/255, 59/255)
+        c_accent = (13/255, 148/255, 136/255)
+        c_zebra = (248/255, 250/255, 252/255)
+        c_border = (226/255, 232/255, 240/255)
+        c_text_dark = (15/255, 23/255, 42/255)
+        c_text_muted = (100/255, 116/255, 139/255)
+        c_white = (1, 1, 1)
 
-    # Rasmiy Milliy Sertifikat ranglari (abituriyentni tushkunlikka tushirmaydigan neytral ranglar)
-    grade_colors = {
-        'A+': ((209/255, 250/255, 229/255), (6/255, 95/255, 70/255)),    # emerald-100, emerald-800
-        'A':  ((209/255, 250/255, 229/255), (6/255, 95/255, 70/255)),    # emerald-100, emerald-800
-        'B+': ((224/255, 242/255, 254/255), (7/255, 89/255, 133/255)),   # sky-100, sky-800
-        'B':  ((224/255, 242/255, 254/255), (7/255, 89/255, 133/255)),   # sky-100, sky-800
-        'C+': ((254/255, 243/255, 199/255), (146/255, 64/255, 14/255)),  # amber-100, amber-800
-        'C':  ((254/255, 243/255, 199/255), (146/255, 64/255, 14/255)),  # amber-100, amber-800
-    }
-    grade_default_color = ((241/255, 245/255, 249/255), (100/255, 116/255, 139/255))  # slate-100, slate-500
-
-    def draw_table_headers(p_target, start_y):
-        h = 22
-        p_target.draw_rect(pymupdf.Rect(margin_x, start_y, margin_x + table_w, start_y + h), color=c_header_bg, fill=c_header_bg)
-        cur_x = margin_x
-        for title, w, align in columns:
-            r = pymupdf.Rect(cur_x + 3, start_y + 4, cur_x + w - 3, start_y + h - 2)
-            p_target.insert_textbox(r, title, fontsize=8, fontname=font_bold, color=c_white, align=align)
-            cur_x += w
-        return start_y + h
-
-    page = doc.new_page(width=page_w, height=page_h)
-    setup_page_fonts(page)
-
-    # 1. Yuqori bezak chizig'i
-    page.draw_rect(pymupdf.Rect(margin_x, 16, margin_x + table_w, 19), color=c_accent, fill=c_accent)
-
-    # 2. Chap qism: Sarlavha va Meta ma'lumotlar (x: 36 dan 460 gacha — KPI bloklariga aslo tegmaydi!)
-    page.draw_rect(pymupdf.Rect(margin_x, 24, margin_x + 150, 37), color=c_accent, fill=(240/255, 253/255, 250/255), width=0.6)
-    page.insert_textbox(pymupdf.Rect(margin_x + 4, 25, margin_x + 146, 36), "ILMILDIZI TA'LIM PLATFORMASI", fontsize=7.2, fontname=font_bold, color=c_accent, align=1)
-
-    page.insert_textbox(pymupdf.Rect(margin_x, 40, margin_x + 430, 60), "MOCK IMTIHON NATIJALARI VA REYTING HISOBOTI", fontsize=13, fontname=font_bold, color=c_navy, align=0)
-
-    filter_subtitle = f"Fan: {clean_txt(selected_subject_name, 25)}   •   Imtihon: {clean_txt(selected_test_title, 28)}   •   Sana: {selected_date_display}"
-    page.insert_textbox(pymupdf.Rect(margin_x, 62, margin_x + 430, 78), filter_subtitle, fontsize=8.2, fontname=font_bold, color=(71/255, 85/255, 105/255), align=0)
-
-    # 3. O'ng qism: 4 ta Statistika (KPI) qutisi (x: 472 dan 806 gacha)
-    kpi_w = 78
-    kpi_h = 42
-    kpi_y = 23
-    kpi_start_x = margin_x + table_w - (4 * kpi_w + 3 * 5)
-    kpis = [
-        ("Qatnashchilar", f"{total_participants} nafar", (37/255, 99/255, 235/255)),
-        ("O'rtacha ball", f"{avg_score}%", (5/255, 150/255, 105/255)),
-        ("Eng yuqori ball", f"{max_score}%", (217/255, 119/255, 6/255)),
-        ("Oltin daraja (A+)", f"{gold_count} ta", (147/255, 51/255, 234/255)),
-    ]
-    for idx, (label, val, border_c) in enumerate(kpis):
-        bx = kpi_start_x + idx * (kpi_w + 5)
-        page.draw_rect(pymupdf.Rect(bx, kpi_y, bx + kpi_w, kpi_y + kpi_h), color=c_border, fill=c_zebra, width=0.7)
-        page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 4, bx + kpi_w - 2, kpi_y + 16), label, fontsize=6.5, fontname=font_reg, color=c_text_muted, align=1)
-        page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 18, bx + kpi_w - 2, kpi_y + 38), val, fontsize=10, fontname=font_bold, color=border_c, align=1)
-
-    page.insert_text(pymupdf.Point(margin_x + table_w - 170, 77), f"Chop etilgan: {now_local}", fontsize=7.2, fontname=font_reg, color=c_text_muted)
-    page.draw_line(pymupdf.Point(margin_x, 84), pymupdf.Point(margin_x + table_w, 84), color=c_border, width=0.8)
-
-    current_y = 90
-    current_y = draw_table_headers(page, current_y)
-
-    row_h = 20
-    bottom_limit = page_h - 40
-
-    if total_participants == 0:
-        page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + 40), color=c_border, fill=c_zebra, width=0.5)
-        page.insert_textbox(pymupdf.Rect(margin_x, current_y + 12, margin_x + table_w, current_y + 32), "Tanlangan parametrlar bo'yicha mock natijalari topilmadi.", fontsize=10, fontname=font_reg, color=c_text_muted, align=1)
-    else:
-        for idx, a in enumerate(qs, start=1):
-            if current_y + row_h > bottom_limit:
-                page = doc.new_page(width=page_w, height=page_h)
-                setup_page_fonts(page)
-                page.draw_rect(pymupdf.Rect(margin_x, 18, margin_x + table_w, 21), color=c_accent, fill=c_accent)
-                page.insert_text(pymupdf.Point(margin_x, 34), f"ILMILDIZI • MOCK IMTIHON HISOBOTI — {clean_txt(selected_subject_name, 30)} ({selected_date_display})", fontsize=8, fontname=font_bold, color=c_navy)
-                page.insert_text(pymupdf.Point(margin_x + table_w - 130, 34), f"Vaqt: {now_local}", fontsize=7, fontname=font_reg, color=c_text_muted)
-                current_y = 40
-                current_y = draw_table_headers(page, current_y)
-
-            is_even = (idx % 2 == 0)
-            row_bg = c_zebra if is_even else c_white
-            page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + row_h), color=c_border, fill=row_bg, width=0.5)
-
-            u = a.profile.user
-            user_full = clean_txt(f"{u.first_name} {u.last_name}".strip() or u.username, 28)
-            contact_str = clean_txt(_format_user_contact(u, a.profile), 22)
-            grade, _ = _calculate_grade(a.score, a.correct_answers)
-
-            test_full = a.test.title if a.test else "Mock"
-            subj_name = a.test.subject.name if (a.test and a.test.subject) else "Fan"
-            test_col_text = clean_txt(f"{subj_name} • {test_full}", 34)
-
-            # Savollar tahlili: To'g'ri / Xato / Bo'sh
-            total_q = (a.correct_answers + a.wrong_answers + a.skipped_answers)
-            if not total_q and a.test:
-                total_q = a.test.questions.count()
-            total_q = total_q or 45
-            empty_q = max(0, total_q - a.correct_answers - a.wrong_answers)
-            answers_breakdown = f"{a.correct_answers} / {a.wrong_answers} / {empty_q}"
-
-            score_str = f"{a.score:.1f}%" if a.score is not None else "0.0%"
-            max_mins = a.test.duration_minutes if (a.test and a.test.duration_minutes) else 90
-            duration = _format_duration_safe(a.started_at, a.completed_at, max_mins)
-
-            dt_str = "—"
-            if a.completed_at:
-                dt_obj = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
-                dt_str = dt_obj.strftime('%d.%m.%Y %H:%M')
-
+        def draw_table_headers(p, start_y):
+            header_h = 24
+            p.draw_rect(pymupdf.Rect(margin_x, start_y, margin_x + table_w, start_y + header_h), color=c_header_bg, fill=c_header_bg)
             cur_x = margin_x
-            for col_idx, (col_name, w, align) in enumerate(columns):
-                r = pymupdf.Rect(cur_x + 3, current_y + 3, cur_x + w - 3, current_y + row_h - 2)
-
-                if col_idx == 0:
-                    # Top-3 Oltin, Kumush, Bronza nishonlari
-                    if idx == 1:
-                        badge_w, badge_h = 17, 14
-                        bx = cur_x + (w - badge_w) / 2
-                        by = current_y + (row_h - badge_h) / 2
-                        page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(217/255, 119/255, 6/255), fill=(254/255, 243/255, 199/255), width=0.7)
-                        page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "1", fontsize=7.8, fontname=font_bold, color=(180/255, 83/255, 9/255), align=1)
-                    elif idx == 2:
-                        badge_w, badge_h = 17, 14
-                        bx = cur_x + (w - badge_w) / 2
-                        by = current_y + (row_h - badge_h) / 2
-                        page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(148/255, 163/255, 184/255), fill=(241/255, 245/255, 249/255), width=0.7)
-                        page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "2", fontsize=7.8, fontname=font_bold, color=(71/255, 85/255, 105/255), align=1)
-                    elif idx == 3:
-                        badge_w, badge_h = 17, 14
-                        bx = cur_x + (w - badge_w) / 2
-                        by = current_y + (row_h - badge_h) / 2
-                        page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(180/255, 83/255, 9/255), fill=(254/255, 237/255, 222/255), width=0.7)
-                        page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "3", fontsize=7.8, fontname=font_bold, color=(146/255, 64/255, 14/255), align=1)
-                    else:
-                        page.insert_textbox(r, str(idx), fontsize=8, fontname=font_reg, color=c_text_muted, align=1)
-
-                elif col_idx == 1:
-                    page.insert_textbox(r, user_full, fontsize=8.2, fontname=font_bold, color=c_text_dark, align=0)
-                elif col_idx == 2:
-                    page.insert_textbox(r, contact_str, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=0)
-                elif col_idx == 3:
-                    page.insert_textbox(r, test_col_text, fontsize=7.8, fontname=font_reg, color=c_text_dark, align=0)
-                elif col_idx == 4:
-                    page.insert_textbox(r, score_str, fontsize=8.2, fontname=font_bold, color=c_navy, align=1)
-                elif col_idx == 5:
-                    gbg, gtxt = grade_colors.get(grade, grade_default_color)
-                    badge_w = 32
-                    badge_x = cur_x + (w - badge_w) / 2
-                    badge_rect = pymupdf.Rect(badge_x, current_y + 3.5, badge_x + badge_w, current_y + row_h - 3.5)
-                    page.draw_rect(badge_rect, color=gtxt, fill=gbg, width=0.5)
-                    page.insert_textbox(badge_rect, grade, fontsize=7.5, fontname=font_bold, color=gtxt, align=1)
-                elif col_idx == 6:
-                    page.insert_textbox(r, answers_breakdown, fontsize=7.8, fontname=font_reg, color=c_text_dark, align=1)
-                elif col_idx == 7:
-                    page.insert_textbox(r, duration, fontsize=7.2, fontname=font_reg, color=c_text_muted, align=1)
-                elif col_idx == 8:
-                    page.insert_textbox(r, dt_str, fontsize=7.2, fontname=font_reg, color=c_text_muted, align=1)
-
+            for name, w, align in columns:
+                r = pymupdf.Rect(cur_x + 3, start_y + 4, cur_x + w - 3, start_y + header_h - 4)
+                p.insert_textbox(r, name, fontsize=7.8, fontname=font_bold, color=c_white, align=align)
                 cur_x += w
+            return start_y + header_h
 
-            current_y += row_h
+        page = doc.new_page(width=page_w, height=page_h)
+        setup_page_fonts(page)
 
-    total_pages = doc.page_count
-    for p_num, p in enumerate(doc, start=1):
-        p.draw_line(pymupdf.Point(margin_x, page_h - 24), pymupdf.Point(margin_x + table_w, page_h - 24), color=c_border, width=0.5)
-        p.insert_text(pymupdf.Point(margin_x, page_h - 13), "IlmIldizi intellektual ta'lim platformasi • Rasmiy elektron reyting hisoboti • https://ilmildizi.uz", fontsize=6.8, fontname=font_reg, color=c_text_muted)
-        p.insert_text(pymupdf.Point(margin_x + table_w - 70, page_h - 13), f"Sahifa {p_num} / {total_pages}", fontsize=7, fontname=font_bold, color=c_text_muted)
+        # Yuqori bezak chizig'i
+        page.draw_rect(pymupdf.Rect(margin_x, 15, margin_x + table_w, 18), color=c_accent, fill=c_accent)
 
-    pdf_bytes = doc.tobytes()
-    doc.close()
+        # Sarlavha bloki (Chap qism)
+        title_box = pymupdf.Rect(margin_x, 22, margin_x + 430, 42)
+        page.insert_textbox(
+            title_box,
+            "MOCK IMTIHON NATIJALARI VA REYTING HISOBOTI",
+            fontsize=13.5, fontname=font_bold, color=c_navy, align=0
+        )
 
-    response = HttpResponse(pdf_bytes, content_type='application/pdf')
-    clean_subj = selected_subject_name.replace(' ', '_')
-    clean_date = selected_date_display.replace('.', '_')
-    response['Content-Disposition'] = f'attachment; filename="mock_hisoboti_{clean_subj}_{clean_date}.pdf"'
-    return response
+        meta_line = f"Fan: {clean_txt(selected_subject_name, 35)}   |   Test: {clean_txt(selected_test_title, 40)}   |   Sana: {selected_date_display}"
+        page.insert_textbox(
+            pymupdf.Rect(margin_x, 46, margin_x + 430, 62),
+            meta_line,
+            fontsize=8.5, fontname=font_reg, color=c_text_muted, align=0
+        )
 
+        # Statistika (KPI) qutilari (O'ng qism)
+        kpi_w = 78
+        kpi_h = 42
+        kpi_y = 23
+        kpi_start_x = margin_x + table_w - (4 * kpi_w + 3 * 5)
+        kpis = [
+            ("Qatnashchilar", f"{total_participants} nafar", (37/255, 99/255, 235/255)),
+            ("O'rtacha ball", f"{avg_score}%", (5/255, 150/255, 105/255)),
+            ("Eng yuqori ball", f"{max_score}%", (217/255, 119/255, 6/255)),
+            ("Oltin daraja (A+)", f"{gold_count} ta", (147/255, 51/255, 234/255)),
+        ]
+        for idx, (label, val, border_c) in enumerate(kpis):
+            bx = kpi_start_x + idx * (kpi_w + 5)
+            page.draw_rect(pymupdf.Rect(bx, kpi_y, bx + kpi_w, kpi_y + kpi_h), color=c_border, fill=c_zebra, width=0.7)
+            page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 4, bx + kpi_w - 2, kpi_y + 16), label, fontsize=6.5, fontname=font_reg, color=c_text_muted, align=1)
+            page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 18, bx + kpi_w - 2, kpi_y + 38), val, fontsize=10, fontname=font_bold, color=border_c, align=1)
 
+        page.insert_text(pymupdf.Point(margin_x + table_w - 170, 77), f"Chop etilgan: {now_local}", fontsize=7.2, fontname=font_reg, color=c_text_muted)
+        page.draw_line(pymupdf.Point(margin_x, 84), pymupdf.Point(margin_x + table_w, 84), color=c_border, width=0.8)
+
+        current_y = 90
+        current_y = draw_table_headers(page, current_y)
+
+        row_h = 20
+        bottom_limit = page_h - 40
+
+        if total_participants == 0:
+            page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + 40), color=c_border, fill=c_zebra, width=0.5)
+            page.insert_textbox(pymupdf.Rect(margin_x, current_y + 12, margin_x + table_w, current_y + 32), "Tanlangan parametrlar bo'yicha mock natijalari topilmadi.", fontsize=10, fontname=font_reg, color=c_text_muted, align=1)
+        else:
+            for idx, a in enumerate(qs, start=1):
+                if current_y + row_h > bottom_limit:
+                    page = doc.new_page(width=page_w, height=page_h)
+                    setup_page_fonts(page)
+                    page.draw_rect(pymupdf.Rect(margin_x, 18, margin_x + table_w, 21), color=c_accent, fill=c_accent)
+                    page.insert_text(pymupdf.Point(margin_x, 34), f"ILMILDIZI • MOCK IMTIHON HISOBOTI — {clean_txt(selected_subject_name, 30)} ({selected_date_display})", fontsize=8, fontname=font_bold, color=c_navy)
+                    page.insert_text(pymupdf.Point(margin_x + table_w - 130, 34), f"Vaqt: {now_local}", fontsize=7, fontname=font_reg, color=c_text_muted)
+                    current_y = 40
+                    current_y = draw_table_headers(page, current_y)
+
+                is_even = (idx % 2 == 0)
+                row_bg = c_zebra if is_even else c_white
+                page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + row_h), color=c_border, fill=row_bg, width=0.5)
+
+                profile = getattr(a, 'profile', None)
+                u = None
+                if profile:
+                    try:
+                        u = profile.user
+                    except Exception:
+                        u = None
+                user_full = clean_txt(f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() or getattr(u, 'username', '') or "Noma'lum", 28)
+                contact_str = clean_txt(_format_user_contact(u, profile), 22)
+                grade, _ = _calculate_grade(a.score, a.correct_answers)
+
+                test_obj = getattr(a, 'test', None)
+                subj_obj = getattr(test_obj, 'subject', None) if test_obj else None
+                test_full = test_obj.title if test_obj else "Mock"
+                subj_name = subj_obj.name if subj_obj else "Fan"
+                test_col_text = clean_txt(f"{subj_name} • {test_full}", 34)
+
+                # Savollar tahlili: To'g'ri / Xato / Bo'sh
+                c_ans = a.correct_answers if a.correct_answers is not None else 0
+                w_ans = a.wrong_answers if a.wrong_answers is not None else 0
+                s_ans = a.skipped_answers if a.skipped_answers is not None else 0
+                total_q = c_ans + w_ans + s_ans
+                if not total_q and test_obj:
+                    try:
+                        total_q = test_obj.questions.count()
+                    except Exception:
+                        total_q = 45
+                total_q = total_q or 45
+                empty_q = max(0, total_q - c_ans - w_ans)
+                answers_breakdown = f"{c_ans} / {w_ans} / {empty_q}"
+
+                score_str = f"{float(a.score):.1f}%" if a.score is not None else "0.0%"
+                max_mins = test_obj.duration_minutes if (test_obj and getattr(test_obj, 'duration_minutes', None)) else 90
+                duration = _format_duration_safe(a.started_at, a.completed_at, max_mins)
+
+                dt_str = "—"
+                if a.completed_at:
+                    try:
+                        dt_obj = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+                        dt_str = dt_obj.strftime('%d.%m.%Y %H:%M')
+                    except Exception:
+                        dt_str = str(a.completed_at)[:16]
+
+                cur_x = margin_x
+                for col_idx, (col_name, w, align) in enumerate(columns):
+                    r = pymupdf.Rect(cur_x + 3, current_y + 3, cur_x + w - 3, current_y + row_h - 2)
+
+                    if col_idx == 0:
+                        # Top-3 Oltin, Kumush, Bronza nishonlari
+                        if idx == 1:
+                            badge_w, badge_h = 17, 14
+                            bx = cur_x + (w - badge_w) / 2
+                            by = current_y + (row_h - badge_h) / 2
+                            page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(217/255, 119/255, 6/255), fill=(254/255, 243/255, 199/255), width=0.7)
+                            page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "1", fontsize=7.8, fontname=font_bold, color=(180/255, 83/255, 9/255), align=1)
+                        elif idx == 2:
+                            badge_w, badge_h = 17, 14
+                            bx = cur_x + (w - badge_w) / 2
+                            by = current_y + (row_h - badge_h) / 2
+                            page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(148/255, 163/255, 184/255), fill=(241/255, 245/255, 249/255), width=0.7)
+                            page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "2", fontsize=7.8, fontname=font_bold, color=(71/255, 85/255, 105/255), align=1)
+                        elif idx == 3:
+                            badge_w, badge_h = 17, 14
+                            bx = cur_x + (w - badge_w) / 2
+                            by = current_y + (row_h - badge_h) / 2
+                            page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(180/255, 83/255, 9/255), fill=(254/255, 237/255, 213/255), width=0.7)
+                            page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "3", fontsize=7.8, fontname=font_bold, color=(154/255, 52/255, 18/255), align=1)
+                        else:
+                            page.insert_textbox(r, str(idx), fontsize=7.5, fontname=font_reg, color=c_text_muted, align=1)
+                    elif col_idx == 1:
+                        page.insert_textbox(r, user_full, fontsize=7.8, fontname=font_bold, color=c_navy, align=0)
+                    elif col_idx == 2:
+                        page.insert_textbox(r, contact_str, fontsize=7.2, fontname=font_reg, color=c_text_muted, align=0)
+                    elif col_idx == 3:
+                        page.insert_textbox(r, test_col_text, fontsize=7.2, fontname=font_reg, color=c_text_dark, align=0)
+                    elif col_idx == 4:
+                        page.insert_textbox(r, score_str, fontsize=7.8, fontname=font_bold, color=c_navy, align=1)
+                    elif col_idx == 5:
+                        # Rasmiy daraja nishoni (A+, A, B+, B, C+, C)
+                        gb_w, gb_h = 24, 13
+                        gb_x = cur_x + (w - gb_w) / 2
+                        gb_y = current_y + (row_h - gb_h) / 2
+                        if grade.startswith('A'):
+                            fill_c, text_c, border_c = (236/255, 253/255, 245/255), (4/255, 120/255, 87/255), (167/255, 243/255, 208/255)
+                        elif grade.startswith('B'):
+                            fill_c, text_c, border_c = (240/255, 249/255, 255/255), (3/255, 105/255, 161/255), (186/255, 230/255, 253/255)
+                        elif grade.startswith('C'):
+                            fill_c, text_c, border_c = (254/255, 243/255, 199/255), (180/255, 83/255, 9/255), (253/255, 230/255, 138/255)
+                        else:
+                            fill_c, text_c, border_c = (241/255, 245/255, 249/255), (100/255, 116/255, 139/255), (203/255, 213/255, 225/255)
+                        page.draw_rect(pymupdf.Rect(gb_x, gb_y, gb_x + gb_w, gb_y + gb_h), color=border_c, fill=fill_c, width=0.6)
+                        page.insert_textbox(pymupdf.Rect(gb_x, gb_y + 1, gb_x + gb_w, gb_y + gb_h), grade, fontsize=7.2, fontname=font_bold, color=text_c, align=1)
+                    elif col_idx == 6:
+                        page.insert_textbox(r, answers_breakdown, fontsize=7.5, fontname=font_reg, color=c_text_dark, align=1)
+                    elif col_idx == 7:
+                        page.insert_textbox(r, duration, fontsize=7, fontname=font_reg, color=c_text_muted, align=1)
+                    elif col_idx == 8:
+                        page.insert_textbox(r, dt_str, fontsize=7, fontname=font_reg, color=c_text_muted, align=1)
+
+                    cur_x += w
+
+                current_y += row_h
+
+        total_pages = doc.page_count
+        for p_num, p in enumerate(doc, start=1):
+            p.draw_line(pymupdf.Point(margin_x, page_h - 24), pymupdf.Point(margin_x + table_w, page_h - 24), color=c_border, width=0.5)
+            p.insert_text(pymupdf.Point(margin_x, page_h - 13), "IlmIldizi intellektual ta'lim platformasi • Rasmiy elektron reyting hisoboti • https://ilmildizi.uz", fontsize=6.8, fontname=font_reg, color=c_text_muted)
+            p.insert_text(pymupdf.Point(margin_x + table_w - 70, page_h - 13), f"Sahifa {p_num} / {total_pages}", fontsize=7, fontname=font_bold, color=c_text_muted)
+
+        pdf_bytes = doc.tobytes()
+        doc.close()
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        clean_subj = selected_subject_name.replace(' ', '_')
+        clean_date = selected_date_display.replace('.', '_')
+        response['Content-Disposition'] = f'attachment; filename="mock_hisoboti_{clean_subj}_{clean_date}.pdf"'
+        return response
+    except Exception as e:
+        logger.exception("mock_attempts_export_pdf_api crash: %s", e)
+        return HttpResponse(
+            f"PDF hisoboti yaratishda xatolik yuz berdi: {str(e)}",
+            content_type="text/plain; charset=utf-8",
+            status=500
+        )
