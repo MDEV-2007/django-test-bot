@@ -193,9 +193,16 @@ def _build_ai_feedback_via_groq(answers, score, correct, total, subject_name="Um
     return data
 
 
+_QUESTIONS_ALREADY_SEEDED = False
+
+
 def seed_questions_if_needed():
     """Helper to seed initial high-fidelity questions and tests if database is empty."""
+    global _QUESTIONS_ALREADY_SEEDED
+    if _QUESTIONS_ALREADY_SEEDED:
+        return
     if Question.objects.exists():
+        _QUESTIONS_ALREADY_SEEDED = True
         return
         
     # Create default Topics first

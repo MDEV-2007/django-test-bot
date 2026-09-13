@@ -2636,6 +2636,8 @@ def live_mock_monitor_api(request):
     live_tests = (
         TestSet.objects
         .filter(Q(is_live_mock=True) | Q(scheduled_at__isnull=False))
+        .select_related('subject')
+        .annotate(remind_cnt=Count('remind_users', distinct=True))
         .order_by(F('scheduled_at').desc(nulls_last=True))[:10]
     )
     tests_data = []
@@ -2645,7 +2647,7 @@ def live_mock_monitor_api(request):
             'title': t.title,
             'subject_name': t.subject.name if t.subject else "Asosiy",
             'scheduled_at': t.scheduled_at.isoformat() if t.scheduled_at else None,
-            'reminders_count': t.remind_users.count() if hasattr(t, 'remind_users') else 0,
+            'reminders_count': getattr(t, 'remind_cnt', 0),
             'is_published': t.is_published,
             'is_live_mock': t.is_live_mock,
         })
@@ -2657,13 +2659,14 @@ def live_mock_monitor_api(request):
         Attempt.objects
         .filter(is_completed=False, started_at__gte=active_cutoff)
         .select_related('profile__user', 'test')
+        .annotate(answered_cnt=Count('answers'))
         .order_by('-started_at')[:30]
     )
     active_takers = []
     for a in ongoing_attempts:
         u = a.profile.user if a.profile else None
         elapsed_mins = int((now - a.started_at).total_seconds() // 60)
-        answered_cnt = AttemptAnswer.objects.filter(attempt=a).count()
+        answered_cnt = getattr(a, 'answered_cnt', 0)
         active_takers.append({
             'attempt_id': a.id,
             'user_name': f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() or getattr(u, 'username', '') or "O'quvchi",

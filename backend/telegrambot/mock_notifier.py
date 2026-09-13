@@ -43,10 +43,11 @@ def send_mock_announcement(test_or_id, send_all=None, dry_run=False):
     site_url = getattr(settings, 'NEXT_PUBLIC_SITE_URL', 'https://ilmildizi.uz').rstrip('/')
     test_link = f"{site_url}/tests/mock/{test.id}"
 
-    # Auditoriyani aniqlash
+    # Auditoriyani aniqlash (bo'sh yoki noto'g'ri telegram IDlarni chiqarib tashlaymiz)
+    base_tg_profiles = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0')
     if send_all:
         recipients = list(
-            Profile.objects.filter(telegram_id__isnull=False)
+            base_tg_profiles
             .values_list('telegram_id', flat=True)
             .distinct()
         )
@@ -54,7 +55,8 @@ def send_mock_announcement(test_or_id, send_all=None, dry_run=False):
     else:
         remind_user_ids = test.remind_users.values_list('id', flat=True)
         recipients = list(
-            Profile.objects.filter(user_id__in=remind_user_ids, telegram_id__isnull=False)
+            base_tg_profiles
+            .filter(user_id__in=remind_user_ids)
             .values_list('telegram_id', flat=True)
             .distinct()
         )

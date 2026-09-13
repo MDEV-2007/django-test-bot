@@ -392,7 +392,11 @@ class Attempt(models.Model):
     SUBMIT_GRACE_SECONDS = 15
 
     class Meta:
-        indexes = [models.Index(fields=['is_completed', 'completed_at'])]
+        indexes = [
+            models.Index(fields=['is_completed', 'completed_at']),
+            models.Index(fields=['profile', 'test', 'is_completed']),
+            models.Index(fields=['test', 'is_completed']),
+        ]
 
     def __str__(self):
         test_title = self.test.title if self.test else "Tasodifiy Test"
