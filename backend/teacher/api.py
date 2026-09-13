@@ -94,6 +94,8 @@ def test_list_api(request):
         'status_label': 'Nashr etilgan' if t.is_published else ('Arxiv' if t.is_archived else 'Qoralama'),
         'is_published': t.is_published,
         'is_archived': t.is_archived,
+        'is_live_mock': t.is_live_mock,
+        'scheduled_at': t.scheduled_at.isoformat() if t.scheduled_at else None,
         'questions_count': t.questions.count(),
         'updated_at': t.updated_at,
     } for t in tests]})
@@ -102,7 +104,10 @@ def test_list_api(request):
 @api_view(['POST'])
 @permission_classes([IsTeacher])
 def test_create_api(request):
-    form = TestInfoForm(request.data)
+    data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+    if 'scheduled_at' in data and not data['scheduled_at']:
+        data['scheduled_at'] = None
+    form = TestInfoForm(data)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     test = form.save(commit=False)
