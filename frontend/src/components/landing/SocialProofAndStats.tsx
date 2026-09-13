@@ -1,30 +1,32 @@
 'use client';
 
-import { Star, CheckCircle, Quote, Sparkles } from 'lucide-react';
+import { Star, CheckCircle2, Quote, ShieldCheck } from 'lucide-react';
 
 const STATS = [
   { value: '94.8%', label: 'Sertifikat natijasi', sub: 'A va A+ darajaga erishganlar' },
-  { value: '45,000+', label: 'Yechilgan savollar', sub: 'Har kuni yangi testlar' },
-  { value: '24/7', label: 'AI Mentor', sub: 'Darhol qadamma-qadam yechim' },
-  { value: '15 daq', label: 'Kunlik o‘rtacha vaqt', sub: 'Uzluksiz o‘sish va streak' },
+  { value: '45,000+', label: 'Yechilgan savollar', sub: 'Har kuni yangilanadigan baza' },
+  { value: '24/7', label: 'AI Mentor yordami', sub: 'Darslik iqtiboslari bilan' },
+  { value: '15 daqiqa', label: 'Kunlik o‘rtacha mashq', sub: 'Uzluksiz o‘sish va streak' },
 ];
 
 const TESTIMONIALS = [
   {
     name: 'Shahzodbek Qodirov',
     role: "TDYU talabasi (Davlat Granti)",
-    score: 'Tarix: A+ daraja (91.2 ball)',
-    text: "Milliy sertifikatga tayyorlanishda AI Mentori va zaif mavzular tahlili menga eng ko'p yordam berdi. DTMda xato qilishi mumkin bo'lgan barcha sanalarni 1v1 arenada takrorlab yodlab oldim.",
+    score: 'Tarix: A+ (91.2 ball)',
+    text: "Milliy sertifikatga tayyorlanishda AI Mentori va zaif mavzular tahlili menga eng ko'p yordam berdi. DTMda xato qilishi mumkin bo'lgan barcha sanalarni 1v1 arenada takrorlab, mustahkamlab oldim.",
     avatar: 'SQ',
     avatarBg: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    verified: 'DTM 2026 Tasdiqlangan',
   },
   {
     name: 'Dilshod Ergashov',
-    role: "Oliy toifali tarix o'qituvchisi",
+    role: "Oliy toifali tarix fani o'qituvchisi",
     score: '32 nafar o‘quvchisi talaba bo‘ldi',
-    text: "O'qituvchi paneli orqali 3 ta guruhimdagi 40 dan ortiq o'quvchining qaysi mavzudan oqsayotganini bitta jadvalda ko'raman. Darsda aynan o'sha mavzularga urg'u berish juda osonlashdi.",
+    text: "O'qituvchi paneli orqali 3 ta guruhimdagi 40 dan ortiq o'quvchining qaysi mavzudan oqsayotganini bitta monitoring jadvalida ko'raman. Darsda aynan o'sha mavzularga urg'u berish juda qulay bo'ldi.",
     avatar: 'DE',
     avatarBg: 'bg-sky-100 text-sky-800 border-sky-200',
+    verified: 'Pedagogik sertifikat',
   },
   {
     name: 'Madinabonu Saidova',
@@ -33,14 +35,16 @@ const TESTIMONIALS = [
     text: "Oldin test yechish zerikarli edi. IlmIldizida har kuni o'yin shaklida, kunlik streakni yo'qotmaslik uchun test yechdim va natijada imtihonda deyarli adashmadim!",
     avatar: 'MS',
     avatarBg: 'bg-amber-100 text-amber-800 border-amber-200',
+    verified: 'Davlat Granti',
   },
 ];
 
 export default function SocialProofAndStats() {
   return (
-    <section className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-      {/* 1. Oq rangli nafis va ixcham Trust Bar */}
-      <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+    <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      
+      {/* 1. Trust Metrics Bar */}
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-0 md:divide-x md:divide-slate-100">
           {STATS.map((stat, idx) => (
             <div
@@ -50,14 +54,14 @@ export default function SocialProofAndStats() {
               }`}
             >
               <div className="flex items-baseline gap-1">
-                <span className="font-mono text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                <span className="font-mono text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
                   {stat.value}
                 </span>
               </div>
-              <span className="mt-2 text-xs sm:text-sm font-semibold text-slate-800">
+              <span className="mt-2 text-xs sm:text-sm font-bold text-slate-800">
                 {stat.label}
               </span>
-              <span className="mt-1 text-[11px] text-slate-500">
+              <span className="mt-0.5 text-[11px] text-slate-500 font-medium">
                 {stat.sub}
               </span>
             </div>
@@ -65,55 +69,70 @@ export default function SocialProofAndStats() {
         </div>
       </div>
 
-      {/* 2. O'quvchilar fikrlari (Testimonials) */}
+      {/* 2. Testimonials (No pill badge on top) */}
       <div className="mt-20">
-        <div className="text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
-            <Sparkles className="size-3.5" />
-            Tasdiqlangan natijalar
-          </span>
-          <h3 className="font-voice mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Abituriyent va repetitorlar nima deydi?
-          </h3>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+              Ishonch va Natijalar
+            </div>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
+              Platforma orqali Grant yutgan o&apos;quvchilar
+            </h2>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-600 max-w-md">
+            Muntazam tayyorgarlik ko&apos;rgan 12,000+ o&apos;quvchilar va repetitorlarning xolis fikrlari.
+          </p>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {TESTIMONIALS.map((item) => (
             <div
               key={item.name}
-              className="relative flex flex-col justify-between rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition-all duration-300 hover:border-slate-300 hover:shadow-xl hover:-translate-y-1"
+              className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:border-emerald-300"
             >
               <div>
+                {/* Header: Avatar, Name, Verified */}
                 <div className="flex items-center justify-between">
-                  <div className="flex gap-1 text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="size-3.5 fill-current" />
-                    ))}
+                  <div className="flex items-center gap-3">
+                    <span className={`flex size-10 items-center justify-center rounded-xl border font-bold text-xs ${item.avatarBg}`}>
+                      {item.avatar}
+                    </span>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-bold text-slate-900">{item.name}</span>
+                        <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
+                      </div>
+                      <span className="text-xs text-slate-500 font-medium block">{item.role}</span>
+                    </div>
                   </div>
-                  <Quote className="size-4 text-slate-400" />
                 </div>
 
-                <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-700 italic">
+                {/* Score badge */}
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 border border-emerald-200/60">
+                  <ShieldCheck className="size-3.5" />
+                  <span>{item.score}</span>
+                </div>
+
+                {/* Text */}
+                <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600">
                   &ldquo;{item.text}&rdquo;
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-4">
-                <div className={`flex size-10 items-center justify-center rounded-full border font-mono text-xs font-bold ${item.avatarBg}`}>
-                  {item.avatar}
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-900">{item.name}</h4>
-                  <p className="text-[11px] text-slate-500">{item.role}</p>
-                  <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
-                    <CheckCircle className="size-3" /> {item.score}
-                  </span>
+              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <span className="font-semibold text-emerald-700">{item.verified}</span>
+                <div className="flex text-amber-400 gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="size-3 fill-amber-400" />
+                  ))}
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
     </section>
   );
 }

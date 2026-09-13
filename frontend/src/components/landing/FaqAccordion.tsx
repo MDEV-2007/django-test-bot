@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, HelpCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { ChevronDown } from 'lucide-react';
 
 interface FaqItem {
   q: string;
@@ -21,21 +20,23 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
   };
 
   return (
-    <section id="savollar" className="mx-auto max-w-3xl scroll-mt-28 px-4 py-20 sm:px-6 sm:py-28">
+    <section id="savollar" className="mx-auto max-w-4xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8">
+      
+      {/* Header — No pill badge */}
       <div className="text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800">
-          <HelpCircle className="size-3.5" />
-          Savollarga javoblar
-        </span>
-        <h2 className="font-voice mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <div className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+          Savol-Javoblar
+        </div>
+        <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           Ko&apos;p so&apos;raladigan savollar
         </h2>
-        <p className="mt-3 text-sm text-slate-600">
-          Platforma, imtihonlar va to&apos;lovlar haqida eng muhim ma&apos;lumotlar.
+        <p className="mt-3 text-sm text-slate-600 max-w-xl mx-auto">
+          Platforma, rasmiy mock imtihonlar, baholash va to&apos;lovlar bo&apos;yicha eng muhim ma&apos;lumotlar.
         </p>
       </div>
 
-      <div className="mt-12 space-y-3.5">
+      {/* Accordion List */}
+      <div className="mt-12 space-y-3">
         {items.map((item, index) => {
           const isOpen = openIndex === index;
 
@@ -49,13 +50,14 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
               }`}
             >
               <button
+                type="button"
                 onClick={() => toggle(index)}
                 aria-expanded={isOpen}
-                className="flex w-full items-center justify-between gap-4 p-5 text-left text-sm font-semibold text-slate-900 sm:text-base"
+                className="flex w-full items-center justify-between gap-4 p-5 text-left text-sm sm:text-base font-bold text-slate-900 cursor-pointer"
               >
                 <span>{item.q}</span>
                 <span
-                  className={`flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 transition-transform duration-200 ${
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition-transform duration-200 ${
                     isOpen ? 'rotate-180 bg-emerald-50 text-emerald-700 border-emerald-200' : ''
                   }`}
                 >
@@ -63,24 +65,16 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
                 </span>
               </button>
 
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  >
-                    <div className="border-t border-slate-100 px-5 pb-5 pt-3 text-xs leading-relaxed text-slate-600 sm:text-sm">
-                      {item.a}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {isOpen && (
+                <div className="border-t border-slate-100 px-5 pb-5 pt-3 text-xs sm:text-sm leading-relaxed text-slate-600">
+                  {item.a}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
     </section>
   );
 }
