@@ -114,17 +114,17 @@ type Dashboard = {
 };
 
 const STAT_CARDS: { key: string; label: string; icon: typeof Users; tone: string }[] = [
-  { key: 'users', label: 'Foydalanuvchilar', icon: Users, tone: 'text-[var(--accent-text)]' },
+  { key: 'users', label: 'Foydalanuvchilar', icon: Users, tone: 'text-emerald-400' },
   { key: 'teachers', label: "O'qituvchilar", icon: GraduationCap, tone: 'text-sky-400' },
   { key: 'students', label: "O'quvchilar", icon: UserRound, tone: 'text-indigo-400' },
-  { key: 'testsets', label: 'Testlar', icon: FileCheck2, tone: 'text-[var(--accent-text)]' },
+  { key: 'testsets', label: 'Testlar', icon: FileCheck2, tone: 'text-teal-400' },
   { key: 'lessons', label: 'Darslar', icon: BookOpen, tone: 'text-sky-400' },
   { key: 'games', label: "O'yinlar", icon: Gamepad2, tone: 'text-purple-400' },
-  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'text-[var(--success-text)]' },
-  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'text-[var(--success-text)]' },
-  { key: 'pending_payments', label: "Kutayotgan to'lovlar", icon: CreditCard, tone: 'text-[var(--warning-text)]' },
-  { key: 'total_revenue', label: 'Tushum', icon: Wallet, tone: 'text-[var(--warning-text)]' },
-  { key: 'active_today', label: 'Bugun faol', icon: Radio, tone: 'text-[var(--success-text)]' },
+  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'text-emerald-400' },
+  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'text-emerald-400' },
+  { key: 'pending_payments', label: "Kutayotgan to'lovlar", icon: CreditCard, tone: 'text-amber-400' },
+  { key: 'total_revenue', label: 'Tushum', icon: Wallet, tone: 'text-amber-400' },
+  { key: 'active_today', label: 'Bugun faol', icon: Radio, tone: 'text-emerald-400' },
   { key: 'premium_users', label: 'Premium', icon: Crown, tone: 'text-amber-400' },
 ];
 
@@ -219,27 +219,27 @@ export default function PanelDashboard() {
         {/* ============================================================ */}
         {/* 2. 12 TA ASOSIY STATISTIKA KARTALARI (RASMDAGI KABI 2 QATORDA) */}
         {/* ============================================================ */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          {loading && Array.from({ length: 12 }).map((_, i) => (
-            <Card key={`sk-${i}`} className="py-4">
-              <CardContent className="px-4">
-                <Skeleton className="h-3.5 w-20" />
-                <Skeleton className="mt-2 h-6 w-14" />
-              </CardContent>
-            </Card>
-          ))}
-          {!loading && data && STAT_CARDS.filter((c) => c.key in data.stats).map((c) => {
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {STAT_CARDS.map((c) => {
             const Icon = c.icon;
+            const val = data?.stats?.[c.key];
             return (
-              <Card key={c.key} className="gap-0 py-4 transition-colors hover:border-[var(--border-strong)]">
-                <CardContent className="px-4">
-                  <div className="flex items-center gap-2">
-                    <Icon className={`size-3.5 shrink-0 ${c.tone}`} />
-                    <p className="truncate text-xs text-muted-foreground">{c.label}</p>
-                  </div>
-                  <p className="mt-1.5 font-mono text-xl font-bold tabular-nums">{fmt(data.stats[c.key])}</p>
-                </CardContent>
-              </Card>
+              <div
+                key={c.key}
+                className="group relative overflow-hidden rounded-2xl border border-[#1e2330] bg-[#11141c]/95 p-4 shadow-sm transition-all hover:border-slate-700 hover:bg-[#151923]"
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className={`size-4 shrink-0 ${c.tone}`} />
+                  <p className="truncate text-xs font-medium text-slate-400">{c.label}</p>
+                </div>
+                {loading ? (
+                  <Skeleton className="mt-2.5 h-7 w-16 bg-slate-800" />
+                ) : (
+                  <p className="mt-2 font-mono text-2xl font-bold tracking-tight text-white tabular-nums">
+                    {fmt(val)}
+                  </p>
+                )}
+              </div>
             );
           })}
         </div>
