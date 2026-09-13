@@ -79,7 +79,10 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body.error || body.detail || res.statusText, body);
+    const msg = (body && typeof body === 'object' && (body.error || body.detail || body.message))
+      || (res.statusText && res.statusText.trim())
+      || `Server ${res.status} xato qaytardi`;
+    throw new ApiError(res.status, String(msg), body);
   }
   return res.json() as Promise<T>;
 }
@@ -103,7 +106,10 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, body.error || body.detail || res.statusText, body);
+    const msg = (body && typeof body === 'object' && (body.error || body.detail || body.message))
+      || (res.statusText && res.statusText.trim())
+      || `Server ${res.status} xato qaytardi`;
+    throw new ApiError(res.status, String(msg), body);
   }
   return res.json() as Promise<T>;
 }

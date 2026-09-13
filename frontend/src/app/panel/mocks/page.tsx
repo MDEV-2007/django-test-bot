@@ -59,9 +59,10 @@ const GRADE_BADGE_STYLES: Record<string, string> = {
   teal: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400',
   sky: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400',
   amber: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  orange: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400',
-  rose: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400',
-  slate: 'border-slate-500/30 bg-slate-500/10 text-slate-600 dark:text-slate-400',
+  orange: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  yellow: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  rose: 'border-slate-500/30 bg-slate-500/10 text-slate-500 dark:text-slate-400',
+  slate: 'border-slate-500/30 bg-slate-500/10 text-slate-500 dark:text-slate-400',
 };
 
 export default function PanelMocksPage() {
@@ -108,7 +109,8 @@ export default function PanelMocksPage() {
         setLoading(false);
       })
       .catch((e) => {
-        toast.error(e instanceof Error ? e.message : 'Mock natijalarini yuklashda xatolik');
+        const msg = (e instanceof Error && e.message && e.message.trim()) ? e.message : 'Mock natijalarini yuklashda xatolik yuz berdi';
+        toast.error(msg);
         setLoading(false);
       });
   }
@@ -137,7 +139,18 @@ export default function PanelMocksPage() {
       const res = await fetch(`${API_URL}/api/panel/mocks/export/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${access}` },
       });
-      if (!res.ok) throw new Error(`Server ${res.status} xato qaytardi`);
+      if (!res.ok) {
+        let errText = `Server ${res.status} xato qaytardi`;
+        try {
+          const body = await res.json();
+          if (body && typeof body === 'object') {
+            errText = body.error || body.detail || body.message || errText;
+          }
+        } catch {
+          // ignore
+        }
+        throw new Error(errText);
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -149,7 +162,8 @@ export default function PanelMocksPage() {
       URL.revokeObjectURL(url);
       toast.success('Mock natijalari CSV formatida yuklab olindi!');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'CSV yuklashda xatolik');
+      const msg = (e instanceof Error && e.message && e.message.trim()) ? e.message : 'CSV yuklashda xatolik yuz berdi';
+      toast.error(msg);
     } finally {
       setExporting(false);
     }
@@ -170,7 +184,18 @@ export default function PanelMocksPage() {
       const res = await fetch(`${API_URL}/api/panel/mocks/export-pdf/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${access}` },
       });
-      if (!res.ok) throw new Error(`Server ${res.status} xato qaytardi`);
+      if (!res.ok) {
+        let errText = `Server ${res.status} xato qaytardi`;
+        try {
+          const body = await res.json();
+          if (body && typeof body === 'object') {
+            errText = body.error || body.detail || body.message || errText;
+          }
+        } catch {
+          // ignore
+        }
+        throw new Error(errText);
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -182,7 +207,8 @@ export default function PanelMocksPage() {
       URL.revokeObjectURL(url);
       toast.success('Mock natijalari PDF hisoboti muvaffaqiyatli yuklab olindi!');
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'PDF hisobot yuklashda xatolik yuz berdi');
+      const msg = (e instanceof Error && e.message && e.message.trim()) ? e.message : 'PDF hisobot yuklashda xatolik yuz berdi';
+      toast.error(msg);
     } finally {
       setExportingPdf(false);
     }
@@ -475,7 +501,7 @@ export default function PanelMocksPage() {
                   <th className="py-3.5 px-4">O&apos;quvchi</th>
                   <th className="py-3.5 px-4">Test &amp; Fan</th>
                   <th className="py-3.5 px-4 text-center">Natija &amp; Daraja</th>
-                  <th className="py-3.5 px-4 text-center">To&apos;g&apos;ri / Xato</th>
+                  <th className="py-3.5 px-4 text-center">To&apos;g&apos;ri / Xato / Bo&apos;sh</th>
                   <th className="py-3.5 px-4">Ketgan vaqt</th>
                   <th className="py-3.5 px-4">Sana</th>
                   <th className="py-3.5 px-4 text-right">Tahlil</th>
@@ -497,11 +523,11 @@ export default function PanelMocksPage() {
                   ))
                 ) : items.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center text-muted-foreground">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <Award className="size-10 text-muted-foreground/40 stroke-1" />
-                        <p className="text-base font-medium text-foreground">Mock natijalari topilmadi</p>
-                        <p className="text-xs text-muted-foreground">
+                    <td colSpan={8} className="py-16 text-center">
+                      <div className="flex flex-col items-center justify-center max-w-sm mx-auto text-muted-foreground">
+                        <Award className="size-12 stroke-1 text-muted-foreground/40 mb-3" />
+                        <p className="font-semibold text-foreground text-sm">Mock natijalari topilmadi</p>
+                        <p className="text-xs text-muted-foreground mt-1">
                           Qidiruv yoki filtr parametrlarini o&apos;zgartirib ko&apos;ring.
                         </p>
                       </div>
@@ -566,12 +592,24 @@ export default function PanelMocksPage() {
                                 </button>
                               </div>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                <span className="truncate">@{item.username}</span>
-                                {item.phone && (
-                                  <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground/80">
-                                    <Phone className="size-2.5" /> {item.phone}
-                                  </span>
-                                )}
+                                {(() => {
+                                  const u = item.username || '';
+                                  const isTech = u.startsWith('tg_') || u.startsWith('id_') || /^\d+$/.test(u);
+                                  const displayU = isTech ? '' : (u.includes('@') ? u : `@${u}`);
+                                  return (
+                                    <>
+                                      {displayU && <span className="truncate">{displayU}</span>}
+                                      {item.phone && (
+                                        <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground/80">
+                                          <Phone className="size-2.5" /> {item.phone}
+                                        </span>
+                                      )}
+                                      {!displayU && !item.phone && (
+                                        <span className="text-muted-foreground/50">—</span>
+                                      )}
+                                    </>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </div>
@@ -602,17 +640,27 @@ export default function PanelMocksPage() {
                           </div>
                         </td>
 
-                        {/* To'g'ri / Xato */}
+                        {/* To'g'ri / Xato / Bo'sh */}
                         <td className="py-3.5 px-4 text-center">
-                          <div className="inline-flex items-center gap-2 text-xs font-mono">
-                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold" title="To'g'ri javoblar">
-                              ✓ {item.correct_answers}
-                            </span>
-                            <span className="text-muted-foreground/40">/</span>
-                            <span className="text-rose-600 dark:text-rose-400 font-semibold" title="Xato javoblar">
-                              ✗ {item.wrong_answers}
-                            </span>
-                          </div>
+                          {(() => {
+                            const totalQ = item.total_questions || (item.correct_answers + item.wrong_answers + item.skipped_answers) || 45;
+                            const emptyQ = Math.max(0, totalQ - item.correct_answers - item.wrong_answers);
+                            return (
+                              <div className="inline-flex items-center gap-1.5 text-xs font-mono">
+                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold" title="To'g'ri">
+                                  ✓ {item.correct_answers}
+                                </span>
+                                <span className="text-muted-foreground/40">/</span>
+                                <span className="text-rose-600 dark:text-rose-400 font-semibold" title="Xato">
+                                  ✗ {item.wrong_answers}
+                                </span>
+                                <span className="text-muted-foreground/40">/</span>
+                                <span className="text-amber-600 dark:text-amber-400 font-semibold" title="Bo'sh">
+                                  ○ {emptyQ}
+                                </span>
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* Ketgan vaqt */}

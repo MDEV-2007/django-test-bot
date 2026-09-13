@@ -1355,10 +1355,56 @@ def mock_attempts_export_api(request):
     return response
 
 
+
+def _format_user_contact(u, profile):
+    """Foydalanuvchi aloqa ma'lumoti: xom @tg_id'larni yashirib, telefon yoki toza username ko'rsatish."""
+    phone = getattr(profile, 'phone', '') or ''
+    if phone:
+        p = str(phone).strip()
+        if len(p) == 12 and p.startswith('998'):
+            return f"+998 {p[3:5]} *** ** {p[10:12]}"
+        elif len(p) == 13 and p.startswith('+998'):
+            return f"+998 {p[4:6]} *** ** {p[11:13]}"
+        return p
+
+    username = u.username or ''
+    if not username:
+        return '—'
+
+    # Texnik telegram id'lar (@tg_..., id_...) yoki sof raqamlarni yashirish
+    if username.startswith('tg_') or username.startswith('id_') or username.isdigit():
+        return '—'
+
+    # Agar allaqachon email bo'lsa, ikkita @ qo'ymaslik
+    if '@' in username:
+        return username
+
+    return f"@{username}"
+
+
+def _format_duration_safe(started_at, completed_at, max_minutes=None):
+    """Davomiylik vaqtini hisoblash va anomal vaqtlarni (masalan 29 soat) test limiti bilan cheklash."""
+    if not completed_at or not started_at:
+        return "Davom etmoqda"
+    total_sec = max(0, int((completed_at - started_at).total_seconds()))
+    limit_min = max_minutes or 90
+    limit_sec = limit_min * 60
+
+    # Agar test anomal uzoq ochiq qolgan bo'lsa
+    if total_sec > limit_sec + 300:
+        return f"{limit_min} daqiqa (Limit)"
+
+    mins = total_sec // 60
+    secs = total_sec % 60
+    if mins > 0:
+        return f"{mins} daq {secs} son"
+    return f"{secs} son"
+
+
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def mock_attempts_export_pdf_api(request):
-    """Barcha mock topshirgan o'quvchilar natijalarini rasmiy PDF formatida yuklab olish."""
+    """Barcha mock topshirgan o'quvchilar natijalarini rasmiy, mukammal PDF formatida yuklab olish."""
     import os
     from datetime import datetime
     import pymupdf
@@ -1392,11 +1438,17 @@ def mock_attempts_export_pdf_api(request):
 
     total_participants = qs.count()
     completed_qs = qs.filter(is_completed=True)
+
+    # 0/0 tashlab ketilgan (topshirilmagan) urinishlar sinf o'rtacha ballini sun'iy tushirib yubormasligi uchun
+    valid_completed = completed_qs.filter(Q(correct_answers__gt=0) | Q(wrong_answers__gt=0))
+    if not valid_completed.exists():
+        valid_completed = completed_qs
+
     from django.db.models import Avg, Max
-    agg = completed_qs.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+    agg = valid_completed.aggregate(avg_score=Avg('score'), max_score=Max('score'))
     avg_score = round(agg['avg_score'], 1) if agg['avg_score'] is not None else 0.0
     max_score = round(agg['max_score'], 1) if agg['max_score'] is not None else 0.0
-    gold_count = completed_qs.filter(score__gte=80).count()
+    gold_count = valid_completed.filter(score__gte=80).count()
 
     doc = pymupdf.open()
     page_w, page_h = 842, 595  # A4 landscape
@@ -1433,15 +1485,15 @@ def mock_attempts_export_pdf_api(request):
         return cleaned[:max_len]
 
     columns = [
-        ("№", 28, 1),
-        ("O'quvchi (F.I.SH)", 135, 0),
-        ("Username / Telefon", 115, 0),
-        ("Fan & Test", 165, 0),
-        ("Ball", 52, 1),
-        ("Daraja", 55, 1),
-        ("To'g'ri / Xato", 70, 1),
-        ("Ketgan vaqt", 70, 1),
-        ("Sana", 80, 1),
+        ("№", 26, 1),
+        ("O'quvchi (F.I.SH)", 136, 0),
+        ("Aloqa / Telefon", 110, 0),
+        ("Fan & Test", 164, 0),
+        ("Ball", 48, 1),
+        ("Daraja", 48, 1),
+        ("To'g'ri / Xato / Bo'sh", 86, 1),
+        ("Ketgan vaqt", 72, 1),
+        ("Topshirilgan sana", 80, 1),
     ]
 
     margin_x = 36
@@ -1459,15 +1511,16 @@ def mock_attempts_export_pdf_api(request):
     c_text_muted = (100/255, 116/255, 139/255)
     c_white = (1.0, 1.0, 1.0)
 
+    # Rasmiy Milliy Sertifikat ranglari (abituriyentni tushkunlikka tushirmaydigan neytral ranglar)
     grade_colors = {
-        'A+': ((254/255, 243/255, 199/255), (180/255, 83/255, 9/255)),
-        'A':  ((209/255, 250/255, 229/255), (4/255, 120/255, 87/255)),
-        'B+': ((224/255, 242/255, 254/255), (3/255, 105/255, 161/255)),
-        'B':  ((204/255, 251/255, 241/255), (15/255, 118/255, 110/255)),
-        'C+': ((255/255, 237/255, 213/255), (194/255, 65/255, 12/255)),
-        'C':  ((254/255, 249/255, 195/255), (161/255, 98/255, 7/255)),
+        'A+': ((209/255, 250/255, 229/255), (6/255, 95/255, 70/255)),    # emerald-100, emerald-800
+        'A':  ((209/255, 250/255, 229/255), (6/255, 95/255, 70/255)),    # emerald-100, emerald-800
+        'B+': ((224/255, 242/255, 254/255), (7/255, 89/255, 133/255)),   # sky-100, sky-800
+        'B':  ((224/255, 242/255, 254/255), (7/255, 89/255, 133/255)),   # sky-100, sky-800
+        'C+': ((254/255, 243/255, 199/255), (146/255, 64/255, 14/255)),  # amber-100, amber-800
+        'C':  ((254/255, 243/255, 199/255), (146/255, 64/255, 14/255)),  # amber-100, amber-800
     }
-    grade_default_color = ((255/255, 228/255, 230/255), (190/255, 18/255, 60/255))
+    grade_default_color = ((241/255, 245/255, 249/255), (100/255, 116/255, 139/255))  # slate-100, slate-500
 
     def draw_table_headers(p_target, start_y):
         h = 22
@@ -1475,40 +1528,46 @@ def mock_attempts_export_pdf_api(request):
         cur_x = margin_x
         for title, w, align in columns:
             r = pymupdf.Rect(cur_x + 3, start_y + 4, cur_x + w - 3, start_y + h - 2)
-            p_target.insert_textbox(r, title, fontsize=8.5, fontname=font_bold, color=c_white, align=align)
+            p_target.insert_textbox(r, title, fontsize=8, fontname=font_bold, color=c_white, align=align)
             cur_x += w
         return start_y + h
 
     page = doc.new_page(width=page_w, height=page_h)
     setup_page_fonts(page)
 
-    page.draw_rect(pymupdf.Rect(margin_x, 24, margin_x + table_w, 28), color=c_accent, fill=c_accent)
-    page.insert_text(pymupdf.Point(margin_x, 48), "ILMILDIZI TA'LIM PLATFORMASI", fontsize=8, fontname=font_bold, color=c_accent)
-    page.insert_text(pymupdf.Point(margin_x, 68), "MOCK IMTIHON NATIJALARI VA REYTING HISOBOTI", fontsize=15, fontname=font_bold, color=c_navy)
+    # 1. Yuqori bezak chizig'i
+    page.draw_rect(pymupdf.Rect(margin_x, 16, margin_x + table_w, 19), color=c_accent, fill=c_accent)
 
-    filter_subtitle = f"Fan: {clean_txt(selected_subject_name, 35)}   |   Imtihon: {clean_txt(selected_test_title, 40)}   |   Sana: {selected_date_display}"
-    page.insert_text(pymupdf.Point(margin_x, 86), filter_subtitle, fontsize=9.5, fontname=font_bold, color=(51/255, 65/255, 85/255))
+    # 2. Chap qism: Sarlavha va Meta ma'lumotlar (x: 36 dan 460 gacha — KPI bloklariga aslo tegmaydi!)
+    page.draw_rect(pymupdf.Rect(margin_x, 24, margin_x + 150, 37), color=c_accent, fill=(240/255, 253/255, 250/255), width=0.6)
+    page.insert_textbox(pymupdf.Rect(margin_x + 4, 25, margin_x + 146, 36), "ILMILDIZI TA'LIM PLATFORMASI", fontsize=7.2, fontname=font_bold, color=c_accent, align=1)
 
-    kpi_y = 44
-    kpi_w = 95
-    kpi_h = 38
+    page.insert_textbox(pymupdf.Rect(margin_x, 40, margin_x + 430, 60), "MOCK IMTIHON NATIJALARI VA REYTING HISOBOTI", fontsize=13, fontname=font_bold, color=c_navy, align=0)
+
+    filter_subtitle = f"Fan: {clean_txt(selected_subject_name, 25)}   •   Imtihon: {clean_txt(selected_test_title, 28)}   •   Sana: {selected_date_display}"
+    page.insert_textbox(pymupdf.Rect(margin_x, 62, margin_x + 430, 78), filter_subtitle, fontsize=8.2, fontname=font_bold, color=(71/255, 85/255, 105/255), align=0)
+
+    # 3. O'ng qism: 4 ta Statistika (KPI) qutisi (x: 472 dan 806 gacha)
+    kpi_w = 78
+    kpi_h = 42
+    kpi_y = 23
+    kpi_start_x = margin_x + table_w - (4 * kpi_w + 3 * 5)
     kpis = [
-        ("Qatnashchilar", f"{total_participants} nafar", (59/255, 130/255, 246/255)),
-        ("O'rtacha ball", f"{avg_score}%", (16/255, 185/255, 129/255)),
-        ("Eng yuqori ball", f"{max_score}%", (245/255, 158/255, 11/255)),
-        ("Oltin (A+)", f"{gold_count} ta", (168/255, 85/255, 247/255)),
+        ("Qatnashchilar", f"{total_participants} nafar", (37/255, 99/255, 235/255)),
+        ("O'rtacha ball", f"{avg_score}%", (5/255, 150/255, 105/255)),
+        ("Eng yuqori ball", f"{max_score}%", (217/255, 119/255, 6/255)),
+        ("Oltin daraja (A+)", f"{gold_count} ta", (147/255, 51/255, 234/255)),
     ]
-    kpi_start_x = margin_x + table_w - (len(kpis) * (kpi_w + 8))
     for idx, (label, val, border_c) in enumerate(kpis):
-        bx = kpi_start_x + idx * (kpi_w + 8)
-        page.draw_rect(pymupdf.Rect(bx, kpi_y, bx + kpi_w, kpi_y + kpi_h), color=c_border, fill=c_zebra, width=0.8)
-        page.insert_textbox(pymupdf.Rect(bx + 4, kpi_y + 4, bx + kpi_w - 4, kpi_y + 16), label, fontsize=7, fontname=font_reg, color=c_text_muted, align=1)
-        page.insert_textbox(pymupdf.Rect(bx + 4, kpi_y + 18, bx + kpi_w - 4, kpi_y + 35), val, fontsize=10.5, fontname=font_bold, color=border_c, align=1)
+        bx = kpi_start_x + idx * (kpi_w + 5)
+        page.draw_rect(pymupdf.Rect(bx, kpi_y, bx + kpi_w, kpi_y + kpi_h), color=c_border, fill=c_zebra, width=0.7)
+        page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 4, bx + kpi_w - 2, kpi_y + 16), label, fontsize=6.5, fontname=font_reg, color=c_text_muted, align=1)
+        page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 18, bx + kpi_w - 2, kpi_y + 38), val, fontsize=10, fontname=font_bold, color=border_c, align=1)
 
-    page.insert_text(pymupdf.Point(margin_x + table_w - 180, 94), f"Chop etilgan vaqt: {now_local}", fontsize=7.5, fontname=font_reg, color=c_text_muted)
-    page.draw_line(pymupdf.Point(margin_x, 102), pymupdf.Point(margin_x + table_w, 102), color=c_border, width=1)
+    page.insert_text(pymupdf.Point(margin_x + table_w - 170, 77), f"Chop etilgan: {now_local}", fontsize=7.2, fontname=font_reg, color=c_text_muted)
+    page.draw_line(pymupdf.Point(margin_x, 84), pymupdf.Point(margin_x + table_w, 84), color=c_border, width=0.8)
 
-    current_y = 110
+    current_y = 90
     current_y = draw_table_headers(page, current_y)
 
     row_h = 20
@@ -1522,10 +1581,10 @@ def mock_attempts_export_pdf_api(request):
             if current_y + row_h > bottom_limit:
                 page = doc.new_page(width=page_w, height=page_h)
                 setup_page_fonts(page)
-                page.draw_rect(pymupdf.Rect(margin_x, 20, margin_x + table_w, 23), color=c_accent, fill=c_accent)
-                page.insert_text(pymupdf.Point(margin_x, 37), f"ILMILDIZI • MOCK IMTIHON HISOBOTI — {clean_txt(selected_subject_name, 30)} ({selected_date_display})", fontsize=8.5, fontname=font_bold, color=c_navy)
-                page.insert_text(pymupdf.Point(margin_x + table_w - 120, 37), f"Vaqt: {now_local}", fontsize=7.5, fontname=font_reg, color=c_text_muted)
-                current_y = 44
+                page.draw_rect(pymupdf.Rect(margin_x, 18, margin_x + table_w, 21), color=c_accent, fill=c_accent)
+                page.insert_text(pymupdf.Point(margin_x, 34), f"ILMILDIZI • MOCK IMTIHON HISOBOTI — {clean_txt(selected_subject_name, 30)} ({selected_date_display})", fontsize=8, fontname=font_bold, color=c_navy)
+                page.insert_text(pymupdf.Point(margin_x + table_w - 130, 34), f"Vaqt: {now_local}", fontsize=7, fontname=font_reg, color=c_text_muted)
+                current_y = 40
                 current_y = draw_table_headers(page, current_y)
 
             is_even = (idx % 2 == 0)
@@ -1533,17 +1592,25 @@ def mock_attempts_export_pdf_api(request):
             page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + row_h), color=c_border, fill=row_bg, width=0.5)
 
             u = a.profile.user
-            user_full = clean_txt(f"{u.first_name} {u.last_name}".strip() or u.username, 30)
-            user_sub = clean_txt(getattr(a.profile, 'phone', '') or f"@{u.username}", 24)
+            user_full = clean_txt(f"{u.first_name} {u.last_name}".strip() or u.username, 28)
+            contact_str = clean_txt(_format_user_contact(u, a.profile), 22)
             grade, _ = _calculate_grade(a.score, a.correct_answers)
 
             test_full = a.test.title if a.test else "Mock"
             subj_name = a.test.subject.name if (a.test and a.test.subject) else "Fan"
-            test_col_text = clean_txt(f"{subj_name} • {test_full}", 35)
+            test_col_text = clean_txt(f"{subj_name} • {test_full}", 34)
 
-            score_str = f"{a.score:.1f}%" if a.score is not None else "0%"
-            correct_wrong = f"{a.correct_answers} / {a.wrong_answers}"
-            duration = _format_duration(a.started_at, a.completed_at)
+            # Savollar tahlili: To'g'ri / Xato / Bo'sh
+            total_q = (a.correct_answers + a.wrong_answers + a.skipped_answers)
+            if not total_q and a.test:
+                total_q = a.test.questions.count()
+            total_q = total_q or 45
+            empty_q = max(0, total_q - a.correct_answers - a.wrong_answers)
+            answers_breakdown = f"{a.correct_answers} / {a.wrong_answers} / {empty_q}"
+
+            score_str = f"{a.score:.1f}%" if a.score is not None else "0.0%"
+            max_mins = a.test.duration_minutes if (a.test and a.test.duration_minutes) else 90
+            duration = _format_duration_safe(a.started_at, a.completed_at, max_mins)
 
             dt_str = "—"
             if a.completed_at:
@@ -1555,28 +1622,49 @@ def mock_attempts_export_pdf_api(request):
                 r = pymupdf.Rect(cur_x + 3, current_y + 3, cur_x + w - 3, current_y + row_h - 2)
 
                 if col_idx == 0:
-                    page.insert_textbox(r, str(idx), fontsize=8, fontname=font_bold, color=c_text_dark, align=1)
+                    # Top-3 Oltin, Kumush, Bronza nishonlari
+                    if idx == 1:
+                        badge_w, badge_h = 17, 14
+                        bx = cur_x + (w - badge_w) / 2
+                        by = current_y + (row_h - badge_h) / 2
+                        page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(217/255, 119/255, 6/255), fill=(254/255, 243/255, 199/255), width=0.7)
+                        page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "1", fontsize=7.8, fontname=font_bold, color=(180/255, 83/255, 9/255), align=1)
+                    elif idx == 2:
+                        badge_w, badge_h = 17, 14
+                        bx = cur_x + (w - badge_w) / 2
+                        by = current_y + (row_h - badge_h) / 2
+                        page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(148/255, 163/255, 184/255), fill=(241/255, 245/255, 249/255), width=0.7)
+                        page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "2", fontsize=7.8, fontname=font_bold, color=(71/255, 85/255, 105/255), align=1)
+                    elif idx == 3:
+                        badge_w, badge_h = 17, 14
+                        bx = cur_x + (w - badge_w) / 2
+                        by = current_y + (row_h - badge_h) / 2
+                        page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(180/255, 83/255, 9/255), fill=(254/255, 237/255, 222/255), width=0.7)
+                        page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "3", fontsize=7.8, fontname=font_bold, color=(146/255, 64/255, 14/255), align=1)
+                    else:
+                        page.insert_textbox(r, str(idx), fontsize=8, fontname=font_reg, color=c_text_muted, align=1)
+
                 elif col_idx == 1:
-                    page.insert_textbox(r, user_full, fontsize=8.5, fontname=font_bold, color=c_text_dark, align=0)
+                    page.insert_textbox(r, user_full, fontsize=8.2, fontname=font_bold, color=c_text_dark, align=0)
                 elif col_idx == 2:
-                    page.insert_textbox(r, user_sub, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=0)
+                    page.insert_textbox(r, contact_str, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=0)
                 elif col_idx == 3:
-                    page.insert_textbox(r, test_col_text, fontsize=8, fontname=font_reg, color=c_text_dark, align=0)
+                    page.insert_textbox(r, test_col_text, fontsize=7.8, fontname=font_reg, color=c_text_dark, align=0)
                 elif col_idx == 4:
-                    page.insert_textbox(r, score_str, fontsize=8.5, fontname=font_bold, color=c_navy, align=1)
+                    page.insert_textbox(r, score_str, fontsize=8.2, fontname=font_bold, color=c_navy, align=1)
                 elif col_idx == 5:
                     gbg, gtxt = grade_colors.get(grade, grade_default_color)
-                    badge_w = 34
+                    badge_w = 32
                     badge_x = cur_x + (w - badge_w) / 2
                     badge_rect = pymupdf.Rect(badge_x, current_y + 3.5, badge_x + badge_w, current_y + row_h - 3.5)
                     page.draw_rect(badge_rect, color=gtxt, fill=gbg, width=0.5)
-                    page.insert_textbox(badge_rect, grade, fontsize=8, fontname=font_bold, color=gtxt, align=1)
+                    page.insert_textbox(badge_rect, grade, fontsize=7.5, fontname=font_bold, color=gtxt, align=1)
                 elif col_idx == 6:
-                    page.insert_textbox(r, correct_wrong, fontsize=8, fontname=font_reg, color=c_text_dark, align=1)
+                    page.insert_textbox(r, answers_breakdown, fontsize=7.8, fontname=font_reg, color=c_text_dark, align=1)
                 elif col_idx == 7:
-                    page.insert_textbox(r, duration, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=1)
+                    page.insert_textbox(r, duration, fontsize=7.2, fontname=font_reg, color=c_text_muted, align=1)
                 elif col_idx == 8:
-                    page.insert_textbox(r, dt_str, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=1)
+                    page.insert_textbox(r, dt_str, fontsize=7.2, fontname=font_reg, color=c_text_muted, align=1)
 
                 cur_x += w
 
@@ -1584,9 +1672,9 @@ def mock_attempts_export_pdf_api(request):
 
     total_pages = doc.page_count
     for p_num, p in enumerate(doc, start=1):
-        p.draw_line(pymupdf.Point(margin_x, page_h - 25), pymupdf.Point(margin_x + table_w, page_h - 25), color=c_border, width=0.5)
-        p.insert_text(pymupdf.Point(margin_x, page_h - 14), "IlmIldizi intellektual ta'lim platformasi • Rasmiy elektron hisobot • https://ilmildizi.uz", fontsize=7, fontname=font_reg, color=c_text_muted)
-        p.insert_text(pymupdf.Point(margin_x + table_w - 70, page_h - 14), f"Sahifa {p_num} / {total_pages}", fontsize=7, fontname=font_bold, color=c_text_muted)
+        p.draw_line(pymupdf.Point(margin_x, page_h - 24), pymupdf.Point(margin_x + table_w, page_h - 24), color=c_border, width=0.5)
+        p.insert_text(pymupdf.Point(margin_x, page_h - 13), "IlmIldizi intellektual ta'lim platformasi • Rasmiy elektron reyting hisoboti • https://ilmildizi.uz", fontsize=6.8, fontname=font_reg, color=c_text_muted)
+        p.insert_text(pymupdf.Point(margin_x + table_w - 70, page_h - 13), f"Sahifa {p_num} / {total_pages}", fontsize=7, fontname=font_bold, color=c_text_muted)
 
     pdf_bytes = doc.tobytes()
     doc.close()

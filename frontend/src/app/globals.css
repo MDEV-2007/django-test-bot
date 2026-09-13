@@ -789,17 +789,28 @@ html[data-tg='on'] .min-h-screen-safe {
   border-radius: 16px !important;
   font-family: inherit;
   box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-}
-
-[data-theme='dark'] .cn-toast {
+  color: #f0f6fc !important;
   background-color: rgba(22, 27, 34, 0.94) !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #f0f6fc !important;
 }
 
-[data-theme='light'] .cn-toast {
+.cn-toast [data-title],
+.cn-toast [data-description] {
+  color: #f0f6fc !important;
+  opacity: 1 !important;
+}
+
+[data-theme='light'] .cn-toast,
+.light .cn-toast {
   background-color: rgba(255, 255, 255, 0.96) !important;
   border-color: rgba(0, 0, 0, 0.1) !important;
   color: #1a202c !important;
   box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme='light'] .cn-toast [data-title],
+[data-theme='light'] .cn-toast [data-description],
+.light .cn-toast [data-title],
+.light .cn-toast [data-description] {
+  color: #1a202c !important;
 }
