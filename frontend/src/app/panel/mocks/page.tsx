@@ -43,6 +43,20 @@ interface MockItem {
   started_at: string | null;
 }
 
+interface AvailableMock {
+  id: number;
+  title: string;
+  subject_id?: number;
+  subject_name?: string;
+  scheduled_at?: string | null;
+  scheduled_date?: string | null;
+  is_live_mock?: boolean;
+  participants_count?: number;
+  completed_count?: number;
+  max_score?: number;
+  avg_score?: number;
+}
+
 interface MockData {
   total_count: number;
   completed_count: number;
@@ -50,7 +64,7 @@ interface MockData {
   max_score: number;
   gold_count: number;
   available_subjects?: { id: number; name: string }[];
-  available_mocks: { id: number; title: string }[];
+  available_mocks: AvailableMock[];
   items: MockItem[];
 }
 
@@ -155,9 +169,11 @@ export default function PanelMocksPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      const subjName = data?.available_subjects?.find(s => String(s.id) === selectedSubjectId)?.name || 'barcha_fanlar';
-      const dateSuffix = selectedDate || new Date().toISOString().slice(0, 10);
-      link.download = `mock_natijalari_${subjName}_${dateSuffix}.csv`.replace(/\s+/g, '_');
+      const activeMock = data?.available_mocks?.find((m) => String(m.id) === selectedTestId);
+      const subjName = data?.available_subjects?.find(s => String(s.id) === selectedSubjectId)?.name || activeMock?.subject_name || 'barcha_fanlar';
+      const mockName = activeMock ? activeMock.title : '';
+      const dateSuffix = selectedDate || activeMock?.scheduled_date || new Date().toISOString().slice(0, 10);
+      link.download = (mockName ? `mock_${mockName}_${dateSuffix}.csv` : `mock_natijalari_${subjName}_${dateSuffix}.csv`).replace(/\s+/g, '_');
       link.click();
       URL.revokeObjectURL(url);
       toast.success('Mock natijalari CSV formatida yuklab olindi!');
@@ -200,9 +216,11 @@ export default function PanelMocksPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      const subjName = data?.available_subjects?.find(s => String(s.id) === selectedSubjectId)?.name || 'barcha_fanlar';
-      const dateSuffix = selectedDate || new Date().toISOString().slice(0, 10);
-      link.download = `mock_hisoboti_${subjName}_${dateSuffix}.pdf`.replace(/\s+/g, '_');
+      const activeMock = data?.available_mocks?.find((m) => String(m.id) === selectedTestId);
+      const subjName = data?.available_subjects?.find(s => String(s.id) === selectedSubjectId)?.name || activeMock?.subject_name || 'barcha_fanlar';
+      const mockName = activeMock ? activeMock.title : '';
+      const dateSuffix = selectedDate || activeMock?.scheduled_date || new Date().toISOString().slice(0, 10);
+      link.download = (mockName ? `mock_${mockName}_${dateSuffix}.pdf` : `mock_hisoboti_${subjName}_${dateSuffix}.pdf`).replace(/\s+/g, '_');
       link.click();
       URL.revokeObjectURL(url);
       toast.success('Mock natijalari PDF hisoboti muvaffaqiyatli yuklab olindi!');
@@ -215,6 +233,7 @@ export default function PanelMocksPage() {
   }
 
   const items = data?.items || [];
+  const activeMock = data?.available_mocks?.find((m) => String(m.id) === selectedTestId);
 
   return (
     <PanelShell>
@@ -267,6 +286,158 @@ export default function PanelMocksPage() {
             </Button>
           </div>
         </div>
+
+        {/* Mock Imtihon Sessiyalari (Alohida imtihonlarni ajratish bloki) */}
+        {data?.available_mocks && data.available_mocks.length > 0 && (
+          <Card className="border border-border/70 shadow-xs bg-card/60 backdrop-blur-sm overflow-hidden">
+            <div className="p-3.5 sm:p-4 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5">
+                    <Trophy className="size-4.5 text-amber-500" />
+                    Mock Imtihon Sessiyalari
+                  </span>
+                  <Badge variant="secondary" className="text-[11px] font-semibold">
+                    {data.available_mocks.length} ta imtihon
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Har bir imtihon (masalan, Tarix 1-mock va 2-mock) alohida qatnashchilar va 1-o&apos;rin reytingiga ega.
+                </p>
+              </div>
+
+              {selectedTestId && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedTestId('')}
+                  className="text-xs h-8 gap-1.5 shrink-0 border-dashed"
+                >
+                  <X className="size-3.5" /> Barcha imtihonlarni ko&apos;rish
+                </Button>
+              )}
+            </div>
+
+            <div className="p-3 sm:p-3.5 bg-muted/20">
+              <div className="flex items-stretch gap-2.5 overflow-x-auto pb-2 pt-0.5 scrollbar-thin">
+                {/* Tugma: Barcha imtihonlar */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedTestId('')}
+                  className={`flex flex-col justify-between p-3 rounded-xl border transition-all text-left shrink-0 min-w-[170px] cursor-pointer ${
+                    !selectedTestId
+                      ? 'bg-primary/10 border-primary shadow-xs ring-2 ring-primary/20 text-foreground'
+                      : 'bg-card hover:bg-muted/60 border-border/80 text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between w-full">
+                      <Badge variant={!selectedTestId ? 'default' : 'outline'} className="text-[10px] px-1.5 py-0 h-4.5">
+                        Hammasi
+                      </Badge>
+                      {!selectedTestId && <CheckCircle2 className="size-3.5 text-primary" />}
+                    </div>
+                    <p className="font-bold text-xs mt-2 text-foreground">Barcha imtihonlar</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Umumiy barcha natijalar</p>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground/80 mt-2 font-medium">
+                    Jami: {data.total_count} urinish
+                  </span>
+                </button>
+
+                {/* Har bir imtihon kartochkasi */}
+                {data.available_mocks.map((m) => {
+                  const isSelected = selectedTestId === String(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setSelectedTestId(isSelected ? '' : String(m.id))}
+                      className={`flex flex-col justify-between p-3 rounded-xl border transition-all text-left shrink-0 min-w-[220px] max-w-[270px] cursor-pointer group ${
+                        isSelected
+                          ? 'bg-amber-500/10 border-amber-500 shadow-xs ring-2 ring-amber-500/30 text-foreground'
+                          : 'bg-card hover:bg-muted/60 border-border/80 text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between w-full gap-1.5">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] px-1.5 py-0 h-4.5 font-semibold ${
+                              isSelected
+                                ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/40'
+                                : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {m.subject_name || 'Fan'}
+                          </Badge>
+                          {isSelected ? (
+                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-[11px] font-bold">
+                              <span>Tanlangan</span>
+                              <CheckCircle2 className="size-3.5" />
+                            </div>
+                          ) : (
+                            m.scheduled_at && (
+                              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                <Calendar className="size-2.5" /> {m.scheduled_at.split(' ')[0]}
+                              </span>
+                            )
+                          )}
+                        </div>
+
+                        <p className="font-bold text-xs mt-2 text-foreground line-clamp-2 group-hover:text-primary transition-colors" title={m.title}>
+                          {m.title}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-border/40 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1 font-medium">
+                          <UserCheck className="size-3 text-blue-500" /> {m.participants_count || 0} o&apos;quvchi
+                        </span>
+                        {m.max_score ? (
+                          <span className="flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
+                            <Trophy className="size-3" /> Max: {m.max_score}%
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground/60">—</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Tanlangan imtihon ko'rsatgichi va xabarnomasi */}
+            {activeMock ? (
+              <div className="px-4 py-2.5 bg-amber-500/10 border-t border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1 shrink-0">
+                    🥇 Imtihon reytingi:
+                  </span>
+                  <span className="font-semibold text-foreground truncate">
+                    &ldquo;{activeMock.title}&rdquo; ({activeMock.subject_name})
+                  </span>
+                  {activeMock.scheduled_at && (
+                    <span className="text-muted-foreground shrink-0">
+                      — {activeMock.scheduled_at}
+                    </span>
+                  )}
+                </div>
+                <div className="text-muted-foreground text-[11px] shrink-0">
+                  Faqat ushbu imtihonga oid 1-o&apos;rin, 2-o&apos;rin va natijalar ko&apos;rsatilmoqda
+                </div>
+              </div>
+            ) : (
+              <div className="px-4 py-2 bg-muted/40 border-t border-border/40 text-[11px] text-muted-foreground flex items-center gap-1.5">
+                <HelpCircle className="size-3.5 text-amber-500 shrink-0" />
+                <span>
+                  Maslahat: Masalan, tarixdan 2 ta mock o&apos;tkazilgan bo&apos;lsa, har birining 1-o&apos;rin g&apos;oliblari va o&apos;rinlarini alohida ko&apos;rish uchun yuqoridagi mos imtihon kartochkasini bosing.
+                </span>
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* KPI Tezkor Statistika */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
@@ -371,13 +542,13 @@ export default function PanelMocksPage() {
                     <select
                       value={selectedTestId}
                       onChange={(e) => setSelectedTestId(e.target.value)}
-                      className="h-9.5 rounded-lg border border-input bg-background/80 px-3 pr-7 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring max-w-[190px] truncate"
+                      className="h-9.5 rounded-lg border border-input bg-background/80 px-3 pr-7 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring max-w-[260px] truncate"
                       title="Aniq mock testni tanlang"
                     >
                       <option value="">Barcha Mock testlar</option>
                       {data.available_mocks.map((m) => (
                         <option key={m.id} value={m.id}>
-                          {m.title}
+                          {m.subject_name ? `[${m.subject_name}] ` : ''}{m.title}{m.scheduled_at ? ` (${m.scheduled_at})` : ''}{m.participants_count !== undefined ? ` • ${m.participants_count} nafar` : ''}
                         </option>
                       ))}
                     </select>

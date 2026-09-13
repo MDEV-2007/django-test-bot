@@ -14,7 +14,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Avg, Count, F, Max, Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -1292,7 +1292,13 @@ def _build_mock_attempts_qs(request):
     if sort == 'date':
         qs = qs.order_by('-completed_at', '-started_at')
     else:  # score / rating
-        qs = qs.order_by('-score', 'started_at')
+        qs = qs.order_by(
+            F('is_completed').desc(),
+            F('score').desc(nulls_last=True),
+            F('correct_answers').desc(nulls_last=True),
+            F('started_at').asc(nulls_last=True),
+            'id'
+        )
 
     return qs
 
@@ -1321,7 +1327,7 @@ def mock_attempts_api(request):
         except Exception:
             available_subjects = list(Subject.objects.values('id', 'name').order_by('name'))
 
-        # Mavjud mock testlar ro'yxati (faqat Mock testlar)
+        # Mavjud mock testlar ro'yxati (faqat Mock testlar sessiyalari)
         subject_id = request.GET.get('subject_id')
         available_mocks = []
         try:
@@ -1336,9 +1342,53 @@ def mock_attempts_api(request):
                 mock_tests_qs = mock_tests_qs.filter(is_archived=False)
             if subject_id and subject_id.isdigit():
                 mock_tests_qs = mock_tests_qs.filter(subject_id=int(subject_id))
-            available_mocks = list(
-                mock_tests_qs.values('id', 'title').distinct().order_by('title')[:100]
+
+            mock_tests_qs = (
+                mock_tests_qs
+                .select_related('subject')
+                .annotate(
+                    participants_count=Count('attempts', distinct=True),
+                    completed_count=Count('attempts', filter=Q(attempts__is_completed=True), distinct=True),
+                    max_score=Max('attempts__score', filter=Q(attempts__is_completed=True)),
+                    avg_score=Avg('attempts__score', filter=Q(attempts__is_completed=True)),
+                )
+                .order_by(F('scheduled_at').desc(nulls_last=True), '-id')
             )
+
+            tz = timezone.get_current_timezone()
+            for t in mock_tests_qs[:100]:
+                sched_str = None
+                sched_date = None
+                if t.scheduled_at:
+                    try:
+                        sched_dt = t.scheduled_at.astimezone(tz) if timezone.is_aware(t.scheduled_at) else t.scheduled_at
+                        sched_str = sched_dt.strftime('%d.%m.%Y %H:%M')
+                        sched_date = sched_dt.strftime('%Y-%m-%d')
+                    except Exception:
+                        sched_str = str(t.scheduled_at)[:16]
+                        sched_date = str(t.scheduled_at)[:10]
+
+                if not sched_str and getattr(t, 'created_at', None):
+                    try:
+                        c_dt = t.created_at.astimezone(tz) if timezone.is_aware(t.created_at) else t.created_at
+                        sched_str = c_dt.strftime('%d.%m.%Y')
+                        sched_date = c_dt.strftime('%Y-%m-%d')
+                    except Exception:
+                        pass
+
+                available_mocks.append({
+                    'id': t.id,
+                    'title': t.title,
+                    'subject_id': t.subject_id,
+                    'subject_name': t.subject.name if t.subject else "Asosiy",
+                    'scheduled_at': sched_str,
+                    'scheduled_date': sched_date,
+                    'is_live_mock': bool(getattr(t, 'is_live_mock', False)),
+                    'participants_count': getattr(t, 'participants_count', 0) or 0,
+                    'completed_count': getattr(t, 'completed_count', 0) or 0,
+                    'max_score': round(float(t.max_score), 1) if getattr(t, 'max_score', None) is not None else 0.0,
+                    'avg_score': round(float(t.avg_score), 1) if getattr(t, 'avg_score', None) is not None else 0.0,
+                })
         except Exception as e:
             logger.warning("Error fetching available_mocks: %s", e)
 
