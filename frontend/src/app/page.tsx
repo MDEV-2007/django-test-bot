@@ -18,6 +18,7 @@ import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/component
 import FaqAccordion from '@/components/landing/FaqAccordion';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
+import { AuthRedirect } from '@/components/landing/AuthRedirect';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
@@ -171,6 +172,7 @@ export default async function LandingPage() {
 
   return (
     <div className="relative min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-emerald-100 selection:text-emerald-900 font-sans antialiased">
+      <AuthRedirect />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

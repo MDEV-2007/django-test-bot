@@ -2,19 +2,47 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/auth-store';
 
-// Bosh sahifa (`/`) ataylab har doim reklama sahifasi sifatida serverda to'liq chiziladi
-// — qidiruv robotlari indekslaydigan narsaga ega bo'lishi uchun (page.tsx dagi izohga
-// qarang). Lekin allaqachon kirgan foydalanuvchi domenni qayta ochsa (yorliqdan, qo'lda
-// yozib), reklama emas, o'z boshqaruv paneli kerak.
-//
-// Shuning uchun bu tekshiruv mijoz tomonida, sahifa render bo'lgandan KEYIN ishlaydi:
-// robot (tokensiz) to'liq matnni ko'radi, haqiqiy kirgan foydalanuvchi esa bir zumda
-// /dashboard'ga o'tkaziladi. `localStorage`ni to'g'ridan-to'g'ri o'qiymiz — auth-store
-// hali gidratsiya bo'lmagan bo'lishi mumkin, token esa shundoq ham faqat shu yerda
-// saqlanadi (accounts/utils.ts dagi REFRESH_KEY bilan bir xil bo'lishi shart).
 const REFRESH_KEY = 'ilmildizi_refresh';
 
 export function AuthRedirect() {
+  const router = useRouter();
+  const { access, user, authReady } = useAuthStore();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const hasRefresh = !!localStorage.getItem(REFRESH_KEY);
+    if (!hasRefresh) return;
+
+    // Foydalanuvchi tizimga kirgan bo'lsa, rolga mos bosh sahifasiga yo'naltirish
+    if (user) {
+      if (user.role === 'superadmin') {
+        router.replace('/panel');
+      } else if (user.role === 'teacher') {
+        router.replace('/teacher');
+      } else {
+        router.replace('/dashboard');
+      }
+      return;
+    }
+
+    // Token bor, lekin profil hali kelmagan bo'lsa — kutmasdan dashboardga
+    router.replace('/dashboard');
+  }, [router, user]);
+
+  useEffect(() => {
+    if (authReady && (access || user)) {
+      if (user?.role === 'superadmin') {
+        router.replace('/panel');
+      } else if (user?.role === 'teacher') {
+        router.replace('/teacher');
+      } else {
+        router.replace('/dashboard');
+      }
+    }
+  }, [authReady, access, user, router]);
+
   return null;
 }

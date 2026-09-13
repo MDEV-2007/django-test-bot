@@ -35,7 +35,7 @@ export default function LandingNav() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16 sm:h-18">
         
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
+        <Link href={loggedIn ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
           <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-md shadow-emerald-600/20 transition-transform duration-200 group-hover:scale-105">
             <Sprout className="size-5" />
           </div>
