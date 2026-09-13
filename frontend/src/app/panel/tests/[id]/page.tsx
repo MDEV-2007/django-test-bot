@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Copy, Pencil, Eye, EyeOff, Loader2, ListChecks, ClipboardCheck } from 'lucide-react';
+import { Copy, Pencil, Eye, EyeOff, Loader2, ListChecks, ClipboardCheck, Headphones, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 type TestSetDetail = {
   id: number; title: string; description: string; subject: string | null; author: string;
+  category?: string; listening_audio?: string | null;
   status: { display: string; tone: string }; attempt_count: number;
   questions: { id: number; body: string; question_type: string }[];
 };
@@ -112,6 +113,51 @@ export default function PanelTestDetailPage() {
             <CardContent><p className="text-sm text-[var(--text-secondary)]">{data.description}</p></CardContent>
           </Card>
         )}
+
+        {/* CEFR Listening Audio Status & Player */}
+        <Card className="border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 via-card to-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base text-indigo-600 dark:text-indigo-400">
+                <Headphones className="size-4" /> CEFR Listening Audio
+              </CardTitle>
+              {data.listening_audio ? (
+                <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 font-semibold">
+                  ✓ Audio yuklangan
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-muted-foreground">
+                  Mavjud emas
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {data.listening_audio ? (
+              <div className="space-y-3">
+                <audio controls className="w-full h-10 rounded-lg" src={data.listening_audio} preload="metadata">
+                  Brauzeringiz audio pleyerni qo&apos;llab-quvvatlamaydi.
+                </audio>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Music className="size-3 text-indigo-500" />
+                    Butun Listening bo&apos;limi uchun umumiy audio trek
+                  </span>
+                  <Link href={`/panel/tests/${id}/edit`} className="font-semibold text-indigo-600 hover:underline">
+                    Almashtirish yoki o&apos;chirish →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+                <p>Bu test uchun umumiy Listening audio fayli hali yuklanmagan.</p>
+                <Button asChild variant="outline" size="sm" className="h-8 border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
+                  <Link href={`/panel/tests/${id}/edit`}>Audio yuklash</Link>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

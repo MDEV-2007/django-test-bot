@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, Save, Trash2, Flame, Send, CheckCircle2 } from 'lucide-react';
+import { Loader2, Save, Trash2, Flame, Send, CheckCircle2, Headphones, Music, Upload } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch } from '@/lib/api-client';
+import { apiFetch, apiUpload } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
 import PageHeader from '@/components/panel/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +32,7 @@ type TestSetEdit = {
   is_premium: boolean; is_published: boolean; is_archived: boolean;
   is_live_mock?: boolean; scheduled_at?: string;
   notify_all?: boolean; notified_at?: string | null;
+  listening_audio?: string | null;
   /* Urinishlar soni — o'chirish mumkinmi yoki yo'qligini shu belgilaydi (server
      urinishlari bor testni o'chirmaydi, o'quvchilar natijasi yo'qolmasligi uchun). */
   attempt_count: number;
@@ -53,6 +55,8 @@ export default function PanelTestSetEditPage() {
   const [saving, setSaving] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [broadcasting, setBroadcasting] = useState(false);
+  const [audioUploading, setAudioUploading] = useState(false);
+  const [audioDeleting, setAudioDeleting] = useState(false);
 
   useEffect(() => {
     if (!access) return;
@@ -142,6 +146,48 @@ export default function PanelTestSetEditPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Arxivlashda xatolik');
       setShowDelete(false);
+    }
+  }
+
+  async function handleAudioUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !ts) return;
+    setAudioUploading(true);
+    const formData = new FormData();
+    formData.append('listening_audio', file);
+    try {
+      const res = await apiUpload<{ ok: boolean; listening_audio: string }>(
+        `/api/panel/testsets/${id}/audio/`,
+        formData
+      );
+      if (res.ok) {
+        setTs({ ...ts, listening_audio: res.listening_audio });
+        toast.success("Listening audio muvaffaqiyatli yuklandi!");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Audio yuklashda xatolik yuz berdi");
+    } finally {
+      setAudioUploading(false);
+      e.target.value = '';
+    }
+  }
+
+  async function handleAudioDelete() {
+    if (!ts || !confirm("Listening audiosini o'chirishni tasdiqlaysizmi?")) return;
+    setAudioDeleting(true);
+    try {
+      const res = await apiFetch<{ ok: boolean }>(
+        `/api/panel/testsets/${id}/audio/`,
+        { method: 'DELETE' }
+      );
+      if (res.ok) {
+        setTs({ ...ts, listening_audio: null });
+        toast.success("Listening audio o'chirildi");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Audioni o'chirishda xatolik");
+    } finally {
+      setAudioDeleting(false);
     }
   }
 
@@ -305,6 +351,95 @@ export default function PanelTestSetEditPage() {
               )}
             </CardContent>
           )}
+        </Card>
+
+        {/* CEFR Listening Audio Card */}
+        <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-500/5 via-card to-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base text-indigo-600 dark:text-indigo-400">
+                <Headphones className="size-4" /> CEFR Listening Audio (Umumiy audio)
+              </CardTitle>
+              {ts.listening_audio ? (
+                <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 font-semibold">
+                  ✓ Audio yuklangan
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-muted-foreground">
+                  Yuklanmagan
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Butun imtihon uchun umumiy to&apos;liq Listening audio treki (MP3/WAV). Agar yuklansa, o&apos;quvchi imtihonning Listening bo&apos;limiga kirishi bilan barcha Partlar davomida sahifa yuqorisida audio avtomatik o&apos;ynaydi.
+            </p>
+
+            {ts.listening_audio ? (
+              <div className="space-y-3 rounded-xl border border-indigo-500/20 bg-background/60 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Music className="size-3.5 text-indigo-500" />
+                    Joriy audio trek
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={audioDeleting}
+                    onClick={handleAudioDelete}
+                    className="h-7 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                  >
+                    {audioDeleting ? <Loader2 className="size-3 animate-spin mr-1" /> : <Trash2 className="size-3 mr-1" />}
+                    Audioni o&apos;chirish
+                  </Button>
+                </div>
+
+                <audio controls className="w-full h-10 rounded-lg" src={ts.listening_audio} preload="metadata">
+                  Brauzeringiz audio pleyerni qo&apos;llab-quvvatlamaydi.
+                </audio>
+
+                <div className="pt-2 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-[11px] text-muted-foreground">Boshqa audio fayl bilan almashtirish:</span>
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-500">
+                    <Upload className="size-3.5" />
+                    <span>{audioUploading ? "Yuklanmoqda..." : "Yangi fayl tanlash"}</span>
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      className="hidden"
+                      disabled={audioUploading}
+                      onChange={handleAudioUpload}
+                    />
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-indigo-500/30 bg-indigo-500/5 p-6 text-center">
+                <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 mb-3">
+                  <Headphones className="size-6" />
+                </div>
+                <h4 className="text-sm font-semibold text-foreground">Listening audio faylini yuklang</h4>
+                <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
+                  Rasmiy CEFR / Multi-Level imtihoni uchun to&apos;liq audio faylni (.mp3 yoki .wav) tanlang.
+                </p>
+                <div className="mt-4">
+                  <label className="cursor-pointer inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 text-xs font-bold shadow-sm transition-colors">
+                    {audioUploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                    <span>{audioUploading ? "Yuklanmoqda..." : "Audio faylni tanlash (.mp3)"}</span>
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      className="hidden"
+                      disabled={audioUploading}
+                      onChange={handleAudioUpload}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+          </CardContent>
         </Card>
 
         <Card>

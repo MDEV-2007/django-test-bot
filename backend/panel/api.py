@@ -477,8 +477,10 @@ def testset_detail_api(request, pk):
     return Response({
         'id': ts.id, 'title': ts.title, 'description': ts.description,
         'subject': ts.subject.name if ts.subject else None,
+        'category': ts.category,
         'author': (ts.created_by.get_full_name() or ts.created_by.username) if ts.created_by else '—',
         'status': _testset_status(ts), 'attempt_count': ts.attempts.count(),
+        'listening_audio': ts.listening_audio.url if ts.listening_audio else None,
         'questions': [{'id': q.id, 'body': q.body, 'question_type': q.question_type} for q in questions],
     })
 
@@ -497,6 +499,7 @@ def testset_edit_api(request, pk):
             'scheduled_at': (ts.scheduled_at.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%dT%H:%M') if timezone.is_aware(ts.scheduled_at) else ts.scheduled_at.strftime('%Y-%m-%dT%H:%M')) if ts.scheduled_at else '',
             'notify_all': ts.notify_all,
             'notified_at': ts.notified_at.isoformat() if ts.notified_at else None,
+            'listening_audio': ts.listening_audio.url if ts.listening_audio else None,
             # Urinishlari bor testni o'chirib bo'lmaydi (pastdagi DELETE shartiga
             # qarang). Interfeys buni OLDINDAN bilishi kerak: aks holda u
             # "urinishlar ham o'chadi" deb va'da beradi, so'ng server rad etadi va
@@ -518,6 +521,30 @@ def testset_edit_api(request, pk):
         return Response({'errors': _form_errors(form)}, status=400)
     form.save()
     return Response({'ok': True})
+
+
+@api_view(['POST', 'DELETE'])
+@permission_classes([IsSuperAdmin])
+@parser_classes([MultiPartParser, FormParser])
+def testset_listening_audio_api(request, pk):
+    ts = get_object_or_404(TestSet, pk=pk)
+    if request.method == 'POST':
+        audio_file = request.FILES.get('listening_audio') or request.FILES.get('audio')
+        if not audio_file:
+            return Response({'error': "Audio fayl yuklanmadi."}, status=400)
+        ts.listening_audio = audio_file
+        ts.save(update_fields=['listening_audio'])
+        return Response({
+            'ok': True,
+            'listening_audio': ts.listening_audio.url,
+            'filename': audio_file.name,
+        })
+    if request.method == 'DELETE':
+        if ts.listening_audio:
+            ts.listening_audio.delete(save=False)
+            ts.listening_audio = None
+            ts.save(update_fields=['listening_audio'])
+        return Response({'ok': True, 'listening_audio': None})
 
 
 @api_view(['POST'])

@@ -30,6 +30,7 @@ urlpatterns = [
     path('testsets/bulk/', api.testsets_bulk_api, name='testsets_bulk'),
     path('testsets/<int:pk>/', api.testset_detail_api, name='testset_detail'),
     path('testsets/<int:pk>/edit/', api.testset_edit_api, name='testset_edit'),
+    path('testsets/<int:pk>/audio/', api.testset_listening_audio_api, name='testset_listening_audio'),
     path('testsets/<int:pk>/duplicate/', api.testset_duplicate_api, name='testset_duplicate'),
     path('testsets/<int:pk>/toggle-publish/', api.testset_toggle_publish_api, name='testset_toggle_publish'),
     path('testsets/<int:pk>/review/', api.testset_review_api, name='testset_review'),
