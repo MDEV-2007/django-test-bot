@@ -1337,7 +1337,7 @@ def broadcast_delete_api(request, pk):
 @permission_classes([IsSuperAdmin])
 def surveys_api(request):
     """Admin uchun o'quvchilar qoldirgan barcha fikr-mulohazalar va sharhlar ro'yxati."""
-    surveys = ExamSurvey.objects.select_related('user', 'test', 'attempt').order_by('-created_at')
+    surveys = ExamSurvey.objects.select_related('user', 'test', 'test__subject', 'attempt').order_by('-created_at')
 
     q = request.GET.get('q', '').strip()
     if q:
@@ -1360,11 +1360,13 @@ def surveys_api(request):
     items = []
     for s in surveys[:150]:
         user_full = f"{s.user.first_name} {s.user.last_name}".strip() or s.user.username
+        subj_name = s.test.subject.name if (s.test and getattr(s.test, 'subject', None)) else ""
         items.append({
             'id': s.id,
             'user_name': user_full,
             'username': s.user.username,
-            'test_title': s.test.title,
+            'test_title': s.test.title if s.test else "Test",
+            'subject_name': subj_name,
             'score': s.attempt.score if s.attempt else None,
             'correct_answers': s.attempt.correct_answers if s.attempt else None,
             'difficulty': s.difficulty,

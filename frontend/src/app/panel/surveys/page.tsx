@@ -20,6 +20,7 @@ interface SurveyItem {
   user_name: string;
   username: string;
   test_title: string;
+  subject_name?: string;
   score: number | null;
   correct_answers: number | null;
   difficulty: string;
@@ -271,18 +272,25 @@ export default function PanelSurveysPage() {
                   <CardContent className="p-4 pt-0 space-y-3 flex-1 flex flex-col justify-between">
                     <div>
                       {/* Test nomi va O'quvchi natijasi */}
-                      <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
-                        <Badge variant="outline" className="text-[10px] font-semibold truncate max-w-[200px] border-[var(--border-strong)]">
-                          {item.test_title}
-                        </Badge>
-                        {item.score !== null && (
-                          <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-                            Natija: {item.score.toFixed(0)}%
+                      <div className="space-y-1.5 mb-2.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {item.subject_name && (
+                            <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 border-amber-500/40 bg-amber-500/10 text-amber-400 shrink-0">
+                              {item.subject_name}
+                            </Badge>
+                          )}
+                          {item.score !== null && (
+                            <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold shrink-0">
+                              Natija: {item.score.toFixed(0)}%
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className={`text-[10px] font-semibold gap-1 shrink-0 ${diff.tone}`}>
+                            <span>{diff.emoji}</span> {diff.label}
                           </Badge>
-                        )}
-                        <Badge variant="outline" className={`text-[10px] font-semibold gap-1 ${diff.tone}`}>
-                          <span>{diff.emoji}</span> {diff.label}
-                        </Badge>
+                        </div>
+                        <p className="text-xs font-semibold text-foreground/90 line-clamp-2 leading-snug" title={item.test_title}>
+                          {item.test_title}
+                        </p>
                       </div>
 
                       {/* Sharh matni (Iqtibos uslubida) */}
