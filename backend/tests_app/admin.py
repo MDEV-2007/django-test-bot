@@ -125,18 +125,6 @@ class QuestionGroupAdmin(SortableAdminBase, admin.ModelAdmin):
     inlines = [GroupOptionInline]
 
 
-@admin.register(TestSet)
-class TestSetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'subject', 'category', 'duration_minutes', 'is_archived', 'created_at')
-    list_filter = ('subject', 'category', 'is_archived')
-    search_fields = ('title', 'description')
-    filter_horizontal = ('questions',)
-    # Drag-and-drop ordering of questions *within* a test would need the plain
-    # questions M2M to gain an explicit through-model with an `order` column — a real
-    # schema change, out of scope for this pass. Ordering here still falls back to
-    # Question.Meta.ordering (by id / creation order).
-
-
 @admin.register(Attempt)
 class AttemptAdmin(admin.ModelAdmin):
     list_display = ('profile', 'test', 'score', 'correct_answers', 'wrong_answers', 'skipped_answers', 'is_completed')
