@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Users, GraduationCap, BookMarked, ShoppingBag, FileCheck2,
   BookOpen, Gamepad2, ClipboardList, CreditCard, Megaphone, ScrollText, Settings,
-  LogOut, ArrowLeft, ShieldCheck, Menu, X, ChevronRight, MessageSquareHeart, Award,
+  LogOut, ArrowLeft, ShieldCheck, ShieldAlert, HardDrive, Bot, Menu, X, ChevronRight, MessageSquareHeart, Award,
   TrendingUp, TicketPercent, Send, Activity, Server
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
@@ -50,14 +50,17 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/panel/payments', label: "To'lovlar", icon: CreditCard },
       { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent },
       { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart },
-      { href: '/panel/broadcast', label: 'Xabar yuborish', icon: Megaphone },
+      { href: '/panel/broadcast', label: 'Xabarlar & Rejalashtirish', icon: Megaphone },
     ],
   },
   {
-    label: 'Tizim & Bot',
+    label: 'Xavfsizlik & Tizim',
     items: [
+      { href: '/panel/system?tab=anticheat', label: 'Anti-Cheat Nazorati', icon: ShieldAlert },
+      { href: '/panel/system?tab=backup', label: 'Baza Zaxirasi (Backup)', icon: HardDrive },
+      { href: '/panel/system?tab=ai', label: 'AI Token Monitor', icon: Bot },
+      { href: '/panel/system?tab=health', label: 'Server & Logs', icon: Server },
       { href: '/panel/telegram', label: 'Telegram Bot', icon: Send },
-      { href: '/panel/system', label: 'Tizim Salomatligi', icon: Server },
       { href: '/panel/audit-log', label: 'Audit', icon: ScrollText },
       { href: '/panel/settings', label: 'Sozlamalar', icon: Settings },
     ],
@@ -67,8 +70,9 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
 const ALL_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
 
 function isActive(pathname: string, href: string) {
-  // '/panel' faqat aniq mos kelganda faol — aks holda hamma sahifada yonib turardi.
-  return href === '/panel' ? pathname === '/panel' : pathname.startsWith(href);
+  if (href === '/panel') return pathname === '/panel';
+  const baseHref = href.split('?')[0];
+  return pathname === baseHref || pathname.startsWith(baseHref + '/');
 }
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {

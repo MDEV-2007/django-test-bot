@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Server, Database, Zap, Cpu, RefreshCw, Trash2, CheckCircle2,
@@ -93,9 +94,19 @@ type AIUsageData = {
 
 type TabKey = 'health' | 'anticheat' | 'backup' | 'ai';
 
-export default function SystemHealthPage() {
+function SystemHealthContent() {
   const { access } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<TabKey>('health');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab') as TabKey | null;
+  const [activeTab, setActiveTab] = useState<TabKey>(
+    tabParam && ['health', 'anticheat', 'backup', 'ai'].includes(tabParam) ? tabParam : 'health'
+  );
+
+  useEffect(() => {
+    if (tabParam && ['health', 'anticheat', 'backup', 'ai'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // Health State
   const [health, setHealth] = useState<SystemHealth | null>(null);
@@ -857,5 +868,13 @@ export default function SystemHealthPage() {
         )}
       </div>
     </PanelShell>
+  );
+}
+
+export default function SystemHealthPage() {
+  return (
+    <Suspense fallback={<PanelShell><div className="p-10 text-center text-slate-400">Tizim holati yuklanmoqda...</div></PanelShell>}>
+      <SystemHealthContent />
+    </Suspense>
   );
 }

@@ -6,7 +6,7 @@ import {
   Users, GraduationCap, UserRound, FileCheck2, BookOpen, Gamepad2,
   Activity, TrendingUp, CreditCard, Wallet, Radio, Crown, AlertTriangle, ArrowRight,
   Award, Trophy, CheckCircle2, XCircle, Clock, Calendar, Flame, Sparkles, Target,
-  Zap, BarChart3, PieChart, ShieldCheck, ChevronRight, RefreshCw, Send,
+  Zap, BarChart3, PieChart, ShieldCheck, ShieldAlert, HardDrive, Bot, Megaphone, ChevronRight, RefreshCw, Send,
   HelpCircle, UserCheck
 } from 'lucide-react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
@@ -214,6 +214,63 @@ export default function PanelDashboard() {
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* YANGI SUPER ADMIN MODULLARI — TEZKOR O'TISH                  */}
+        {/* ============================================================ */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Link
+            href="/panel/system?tab=anticheat"
+            className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 transition-all hover:bg-amber-500/15 hover:border-amber-500/50 group shadow-xs"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
+              <ShieldAlert className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-xs sm:text-sm text-white group-hover:text-amber-200">🛡️ Anti-Cheat Nazorati</p>
+              <p className="text-[11px] text-amber-300/80 truncate">Tab almashtirish &amp; tezkor topshirish</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/panel/system?tab=backup"
+            className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 transition-all hover:bg-emerald-500/15 hover:border-emerald-500/50 group shadow-xs"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-300 shrink-0">
+              <HardDrive className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-xs sm:text-sm text-white group-hover:text-emerald-200">💾 Baza Zaxirasi (Backup)</p>
+              <p className="text-[11px] text-emerald-300/80 truncate">One-Click SQL zaxirasini olish</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/panel/system?tab=ai"
+            className="flex items-center gap-3 rounded-2xl border border-purple-500/30 bg-purple-500/10 p-3.5 transition-all hover:bg-purple-500/15 hover:border-purple-500/50 group shadow-xs"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/20 text-purple-300 shrink-0">
+              <Bot className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-xs sm:text-sm text-white group-hover:text-purple-200">🤖 AI Token Monitor</p>
+              <p className="text-[11px] text-purple-300/80 truncate">Groq token sarfi va xarajatlar</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/panel/broadcast"
+            className="flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3.5 transition-all hover:bg-sky-500/15 hover:border-sky-500/50 group shadow-xs"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300 shrink-0">
+              <Megaphone className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-xs sm:text-sm text-white group-hover:text-sky-200">📅 Rejali Xabarlar</p>
+              <p className="text-[11px] text-sky-300/80 truncate">Kelajak vaqtga avtomatik rejalashtirish</p>
+            </div>
+          </Link>
         </div>
 
         {/* ============================================================ */}
