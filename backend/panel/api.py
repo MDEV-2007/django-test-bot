@@ -269,30 +269,33 @@ def dashboard_api(request):
             }
 
             # Eng qiyin savollar (HTML tozalangan)
-            hard_q = (AttemptAnswer.objects
-                      .filter(attempt__is_completed=True)
-                      .values('question')
-                      .annotate(total=Count('id'), correct=Count('id', filter=Q(is_correct=True)))
-                      .filter(total__gte=5)
-                      .order_by('correct'))[:8]
-            qids = [row['question'] for row in hard_q]
-            qmap = {q.id: q for q in Question.objects.filter(id__in=qids).select_related('test_set__subject')}
             hardest_questions = []
-            for row in hard_q:
-                q = qmap.get(row['question'])
-                if not q:
-                    continue
-                rate = round(100 * row['correct'] / row['total']) if row['total'] else 0
-                clean_text = re.sub(r'<[^>]+>', '', q.body).strip()
-                clean_text = clean_text[:110]
-                s_name = q.test_set.subject.name if (q.test_set and q.test_set.subject) else "Test"
-                hardest_questions.append({
-                    'id': q.id,
-                    'text': clean_text,
-                    'subject_name': s_name,
-                    'rate': rate,
-                    'total': row['total']
-                })
+            try:
+                hard_q = (AttemptAnswer.objects
+                          .filter(attempt__is_completed=True)
+                          .values('question')
+                          .annotate(total=Count('id'), correct=Count('id', filter=Q(is_correct=True)))
+                          .filter(total__gte=5)
+                          .order_by('correct'))[:8]
+                qids = [row['question'] for row in hard_q]
+                qmap = {q.id: q for q in Question.objects.filter(id__in=qids).select_related('subject')}
+                for row in hard_q:
+                    q = qmap.get(row['question'])
+                    if not q:
+                        continue
+                    rate = round(100 * row['correct'] / row['total']) if row['total'] else 0
+                    clean_text = re.sub(r'<[^>]+>', '', q.body).strip()
+                    clean_text = clean_text[:110]
+                    s_name = q.subject.name if q.subject else "Test"
+                    hardest_questions.append({
+                        'id': q.id,
+                        'text': clean_text,
+                        'subject_name': s_name,
+                        'rate': rate,
+                        'total': row['total']
+                    })
+            except Exception as e:
+                logger.warning("Error calculating hardest questions: %s", e)
 
             ctx = {
                 'stats': {
@@ -334,7 +337,27 @@ def dashboard_api(request):
             cache.set(DASHBOARD_CACHE_KEY, ctx, 60)
         except Exception as e:
             logger.exception("Error calculating dashboard stats: %s", e)
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            today = timezone.localdate()
+            completed_cnt = Attempt.objects.filter(is_completed=True).count()
+            ctx = {
+                'stats': {
+                    'users': User.objects.count(),
+                    'teachers': Profile.objects.filter(role='teacher').count(),
+                    'students': Profile.objects.filter(role='student').count(),
+                    'testsets': TestSet.objects.filter(is_random=False).count(),
+                    'lessons': Lesson.objects.count(),
+                    'games': Game.objects.count(),
+                    'attempts_today': Attempt.objects.filter(started_at__date=today).count(),
+                    'attempts_total': completed_cnt,
+                    'pending_payments': Payment.objects.filter(status='pending').count(),
+                    'total_revenue': str(Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0),
+                    'active_today': Attempt.objects.filter(started_at__date=today).values('profile').distinct().count(),
+                    'premium_users': Profile.objects.filter(Q(is_premium=True) | Q(premium_mock_test_unlocked=True)).count(),
+                },
+                'chart_labels': [], 'chart_reg': [], 'chart_attempts': [],
+                'hardest_questions': [],
+                'recent_logs': [],
+            }
 
     return Response(ctx)
 
