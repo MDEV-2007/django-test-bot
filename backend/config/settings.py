@@ -432,6 +432,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    # Production (DEBUG=False) paytida Browsable API'ni butunlay o'chirish:
+    # Brauzer orqali ochilganda ham faqat toza JSON qaytadi, ichki docstringlar va formalar ko'rinmaydi.
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ) if not DEBUG else (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
 }
 
 SIMPLE_JWT = {
