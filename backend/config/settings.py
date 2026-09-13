@@ -368,6 +368,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Internationalization / Timezone
+# Platform O'zbekistonda faoliyat yuritadi (O'zbekiston vaqti: UTC+5)
+TIME_ZONE = 'Asia/Tashkent'
+USE_TZ = True
+LANGUAGE_CODE = 'uz'
+
 # Django 4+ sets Cross-Origin-Opener-Policy: same-origin by default (in every environment,
 # not just when DEBUG is off). That isolates the browsing-context group, which severs
 # window.opener in Google's Sign-In popup — the popup's own script then throws "Cannot read

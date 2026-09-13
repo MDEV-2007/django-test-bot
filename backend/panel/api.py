@@ -1148,11 +1148,15 @@ def _format_duration(started_at, completed_at):
     return f"{secs} son"
 
 
-@api_view(['GET'])
-@permission_classes([IsSuperAdmin])
-def mock_attempts_api(request):
-    """Admin uchun barcha Mock test topshirgan o'quvchilar natijalari va reytingi."""
-    base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
+def _build_mock_attempts_qs(request):
+    """Mock urinishlarini qidirish va filtrlash: barcha haqiqiy testlar, fan, sana va qidiruv bo'yicha."""
+    base_filter = (
+        Q(test__isnull=False, test__is_random=False) |
+        Q(test__is_live_mock=True) |
+        Q(test__scheduled_at__isnull=False) |
+        Q(mock_attempt__isnull=False) |
+        Q(test__title__icontains='mock')
+    )
     qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
 
     subject_id = request.GET.get('subject_id')
@@ -1167,20 +1171,33 @@ def mock_attempts_api(request):
     if date_str:
         try:
             from datetime import datetime, time
-            d = datetime.strptime(date_str, '%Y-%m-%d').date()
-            day_start = timezone.make_aware(datetime.combine(d, time.min))
-            day_end = timezone.make_aware(datetime.combine(d, time.max))
-            qs = qs.filter(
-                (Q(completed_at__gte=day_start) & Q(completed_at__lte=day_end)) |
-                (Q(started_at__gte=day_start) & Q(started_at__lte=day_end))
-            )
-        except Exception:
+            import zoneinfo
             try:
-                from datetime import datetime
-                d = datetime.strptime(date_str, '%Y-%m-%d').date()
-                qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
+                tz = zoneinfo.ZoneInfo('Asia/Tashkent')
             except Exception:
-                pass
+                tz = timezone.get_current_timezone()
+
+            d = datetime.strptime(date_str, '%Y-%m-%d').date()
+            day_start_tashkent = timezone.make_aware(datetime.combine(d, time.min), tz)
+            day_end_tashkent = timezone.make_aware(datetime.combine(d, time.max), tz)
+            utc_start = timezone.make_aware(datetime.combine(d, time.min), timezone.utc)
+            utc_end = timezone.make_aware(datetime.combine(d, time.max), timezone.utc)
+            min_start = min(day_start_tashkent, utc_start)
+            max_end = max(day_end_tashkent, utc_end)
+
+            date_q = (
+                (Q(completed_at__gte=min_start) & Q(completed_at__lte=max_end)) |
+                (Q(started_at__gte=min_start) & Q(started_at__lte=max_end)) |
+                (Q(test__scheduled_at__gte=min_start) & Q(test__scheduled_at__lte=max_end)) |
+                (Q(mock_attempt__mock__scheduled_start__gte=min_start) & Q(mock_attempt__mock__scheduled_start__lte=max_end)) |
+                (Q(mock_attempt__started_at__gte=min_start) & Q(mock_attempt__started_at__lte=max_end)) |
+                Q(completed_at__date=d) |
+                Q(started_at__date=d) |
+                Q(test__scheduled_at__date=d)
+            )
+            qs = qs.filter(date_q)
+        except Exception:
+            pass
 
     completed = request.GET.get('completed')
     if completed == 'True':
@@ -1204,6 +1221,15 @@ def mock_attempts_api(request):
     else:  # score / rating
         qs = qs.order_by('-score', 'started_at')
 
+    return qs
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def mock_attempts_api(request):
+    """Admin uchun barcha Mock test topshirgan o'quvchilar natijalari va reytingi."""
+    qs = _build_mock_attempts_qs(request)
+
     # Hisob-kitoblar
     total_participants = qs.count()
     completed_qs = qs.filter(is_completed=True)
@@ -1218,13 +1244,13 @@ def mock_attempts_api(request):
     # Mavjud fanlar ro'yxati
     available_subjects = list(Subject.objects.values('id', 'name').order_by('order', 'name'))
 
-    # Mavjud mock testlar ro'yxati (agar fan tanlangan bo'lsa, o'sha fanga mos)
-    test_mock_filter = Q(is_live_mock=True) | Q(title__icontains='mock')
-    mock_tests_qs = TestSet.objects.filter(test_mock_filter)
+    # Mavjud mock testlar ro'yxati (katalogdagi barcha nashr qilingan testlar)
+    subject_id = request.GET.get('subject_id')
+    mock_tests_qs = TestSet.objects.filter(is_random=False, is_archived=False)
     if subject_id and subject_id.isdigit():
         mock_tests_qs = mock_tests_qs.filter(subject_id=int(subject_id))
     available_mocks = list(
-        mock_tests_qs.values('id', 'title').distinct().order_by('title')[:50]
+        mock_tests_qs.values('id', 'title').distinct().order_by('title')[:100]
     )
 
     items = []
@@ -1288,52 +1314,7 @@ def mock_attempts_api(request):
 @permission_classes([IsSuperAdmin])
 def mock_attempts_export_api(request):
     """Barcha mock topshirgan o'quvchilar natijalarini CSV (Excel) formatida yuklab olish."""
-    base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
-    qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
-
-    subject_id = request.GET.get('subject_id')
-    if subject_id and subject_id.isdigit():
-        qs = qs.filter(test__subject_id=int(subject_id))
-
-    test_id = request.GET.get('test_id')
-    if test_id and test_id.isdigit():
-        qs = qs.filter(test_id=int(test_id))
-
-    date_str = request.GET.get('date', '').strip()
-    if date_str:
-        try:
-            from datetime import datetime, time
-            d = datetime.strptime(date_str, '%Y-%m-%d').date()
-            day_start = timezone.make_aware(datetime.combine(d, time.min))
-            day_end = timezone.make_aware(datetime.combine(d, time.max))
-            qs = qs.filter(
-                (Q(completed_at__gte=day_start) & Q(completed_at__lte=day_end)) |
-                (Q(started_at__gte=day_start) & Q(started_at__lte=day_end))
-            )
-        except Exception:
-            pass
-
-    completed = request.GET.get('completed')
-    if completed == 'True':
-        qs = qs.filter(is_completed=True)
-    elif completed == 'False':
-        qs = qs.filter(is_completed=False)
-
-    q = request.GET.get('q', '').strip()
-    if q:
-        qs = qs.filter(
-            Q(profile__user__username__icontains=q) |
-            Q(profile__user__first_name__icontains=q) |
-            Q(profile__user__last_name__icontains=q) |
-            Q(test__title__icontains=q) |
-            Q(profile__phone__icontains=q)
-        )
-
-    sort = request.GET.get('sort', 'score')
-    if sort == 'date':
-        qs = qs.order_by('-completed_at', '-started_at')
-    else:
-        qs = qs.order_by('-score', 'started_at')
+    qs = _build_mock_attempts_qs(request)
 
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="mock_natijalari.csv"'
@@ -1382,13 +1363,11 @@ def mock_attempts_export_pdf_api(request):
     from datetime import datetime
     import pymupdf
 
-    base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
-    qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
+    qs = _build_mock_attempts_qs(request)
 
     selected_subject_name = "Barcha fanlar"
     subject_id = request.GET.get('subject_id')
     if subject_id and subject_id.isdigit():
-        qs = qs.filter(test__subject_id=int(subject_id))
         s_obj = Subject.objects.filter(id=int(subject_id)).first()
         if s_obj:
             selected_subject_name = s_obj.name
@@ -1396,7 +1375,6 @@ def mock_attempts_export_pdf_api(request):
     selected_test_title = "Barcha Mock testlar"
     test_id = request.GET.get('test_id')
     if test_id and test_id.isdigit():
-        qs = qs.filter(test_id=int(test_id))
         t_obj = TestSet.objects.filter(id=int(test_id)).first()
         if t_obj:
             selected_test_title = t_obj.title
@@ -1407,39 +1385,10 @@ def mock_attempts_export_pdf_api(request):
     date_str = request.GET.get('date', '').strip()
     if date_str:
         try:
-            from datetime import datetime, time
             d = datetime.strptime(date_str, '%Y-%m-%d').date()
-            day_start = timezone.make_aware(datetime.combine(d, time.min))
-            day_end = timezone.make_aware(datetime.combine(d, time.max))
-            qs = qs.filter(
-                (Q(completed_at__gte=day_start) & Q(completed_at__lte=day_end)) |
-                (Q(started_at__gte=day_start) & Q(started_at__lte=day_end))
-            )
             selected_date_display = d.strftime('%d.%m.%Y')
         except Exception:
             pass
-
-    completed = request.GET.get('completed')
-    if completed == 'True':
-        qs = qs.filter(is_completed=True)
-    elif completed == 'False':
-        qs = qs.filter(is_completed=False)
-
-    q = request.GET.get('q', '').strip()
-    if q:
-        qs = qs.filter(
-            Q(profile__user__username__icontains=q) |
-            Q(profile__user__first_name__icontains=q) |
-            Q(profile__user__last_name__icontains=q) |
-            Q(test__title__icontains=q) |
-            Q(profile__phone__icontains=q)
-        )
-
-    sort = request.GET.get('sort', 'score')
-    if sort == 'date':
-        qs = qs.order_by('-completed_at', '-started_at')
-    else:
-        qs = qs.order_by('-score', 'started_at')
 
     total_participants = qs.count()
     completed_qs = qs.filter(is_completed=True)

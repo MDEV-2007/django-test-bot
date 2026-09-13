@@ -78,7 +78,7 @@ export default function PanelMocksPage() {
   const [selectedTestId, setSelectedTestId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedSort, setSelectedSort] = useState<'score' | 'date'>('score');
-  const [selectedStatus, setSelectedStatus] = useState<string>('True');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
 
   // Sertifikat modali holati
   const [certModalOpen, setCertModalOpen] = useState<boolean>(false);
@@ -398,12 +398,12 @@ export default function PanelMocksPage() {
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   className="h-9.5 rounded-lg border border-input bg-background/80 px-3 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                 >
-                  <option value="True">Faqat yakunlanganlar</option>
                   <option value="">Barcha urinishlar</option>
+                  <option value="True">Faqat yakunlanganlar</option>
                   <option value="False">Davom etayotganlar</option>
                 </select>
 
-                {(search || selectedSubjectId || selectedTestId || selectedDate) && (
+                {(search || selectedSubjectId || selectedTestId || selectedDate || selectedStatus) && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -412,6 +412,7 @@ export default function PanelMocksPage() {
                       setSelectedSubjectId('');
                       setSelectedTestId('');
                       setSelectedDate('');
+                      setSelectedStatus('');
                     }}
                     className="text-xs h-9.5 text-muted-foreground hover:text-foreground gap-1"
                   >
@@ -422,7 +423,7 @@ export default function PanelMocksPage() {
             </div>
 
             {/* Faol filtrlar ko'rinishi */}
-            {(selectedSubjectId || selectedDate || selectedTestId) && (
+            {(selectedSubjectId || selectedDate || selectedTestId || selectedStatus) && (
               <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/40 text-xs">
                 <span className="font-semibold text-muted-foreground flex items-center gap-1">
                   <Filter className="size-3 text-amber-500" /> Faol filtrlar:
@@ -447,6 +448,14 @@ export default function PanelMocksPage() {
                   <Badge variant="outline" className="gap-1 bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
                     Sana: {selectedDate}
                     <button type="button" onClick={() => setSelectedDate('')} className="hover:opacity-75">
+                      <X className="size-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedStatus && (
+                  <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400">
+                    Holat: {selectedStatus === 'True' ? 'Faqat yakunlanganlar' : 'Davom etayotganlar'}
+                    <button type="button" onClick={() => setSelectedStatus('')} className="hover:opacity-75">
                       <X className="size-3" />
                     </button>
                   </Badge>
