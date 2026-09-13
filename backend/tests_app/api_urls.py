@@ -32,4 +32,5 @@ urlpatterns = [
     path('history/', api.history_api, name='history'),
     path('revision/', api.revision_api, name='revision'),
     path('revision/<int:item_id>/check/', api.revision_check_api, name='revision_check'),
+    path('attempts/<int:attempt_id>/tab-switch/', api.report_tab_switch_api, name='report_tab_switch'),
 ]

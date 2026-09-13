@@ -387,6 +387,16 @@ class Attempt(models.Model):
                    "aylanib o'tish mumkin bo'lardi.",
     )
 
+    # ─── Anti-Cheat maydonlari ───────────────────────────────────────────
+    tab_switch_count = models.PositiveIntegerField(
+        default=0,
+        help_text="O'quvchi test vaqtida brauzer tabini necha marta almashtirdi.",
+    )
+    is_speed_flagged = models.BooleanField(
+        default=False,
+        help_text="Test shubhali tezlikda topshirilgan (masalan 45 savolni 3 daqiqada).",
+    )
+
     # Javob serverga kechikib yetib kelishi mumkin (tarmoq sekin, klient soati boshqa),
     # shuning uchun vaqt tugagach ham qisqa muhlat beriladi.
     SUBMIT_GRACE_SECONDS = 15

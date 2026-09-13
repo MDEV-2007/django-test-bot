@@ -82,5 +82,13 @@ urlpatterns = [
     path('system/health/', api.system_health_api, name='system_health'),
     path('system/flush-cache/', api.system_cache_flush_api, name='system_flush_cache'),
     path('system/logs/', api.system_logs_api, name='system_logs'),
+    path('system/anti-cheat/', api.anti_cheat_report_api, name='anti_cheat_report'),
+    path('system/backup/', api.database_backup_api, name='database_backup'),
+    path('system/backups/', api.backup_list_api, name='backup_list'),
+    path('system/ai-usage/', api.ai_usage_api, name='ai_usage'),
+
+    path('certificate/<int:attempt_pk>/', api.generate_certificate_api, name='generate_certificate'),
+
+    path('broadcast/schedule/', api.broadcast_schedule_api, name='broadcast_schedule'),
 ]
 

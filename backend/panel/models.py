@@ -108,8 +108,48 @@ class Broadcast(models.Model):
     sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='broadcasts')
     sent_at = models.DateTimeField(auto_now_add=True)
 
+    # ─── Broadcast Scheduler ─────────────────────────────────────────────
+    scheduled_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Xabar kelajakda ma'lum vaqtda yuboriladi. Bo'sh bo'lsa — darhol yuboriladi.",
+    )
+    is_sent = models.BooleanField(
+        default=True,
+        help_text="Rejalashtirilgan xabar yuborildi yoki yo'qligi. Darhol yuborilganlar True.",
+    )
+
     class Meta:
         ordering = ['-sent_at']
 
     def __str__(self):
         return f"{self.title} ({self.get_audience_display()}, {self.recipients_count})"
+
+
+class AIUsageLog(models.Model):
+    """Groq (yoki boshqa AI provider) API chaqiruvlarining loglari.
+    Har bir AI chaqiruv (test baholash, feedback yaratish) shu yerda saqlanadi."""
+    PROVIDER_CHOICES = [
+        ('groq', 'Groq'),
+        ('openai', 'OpenAI'),
+        ('other', 'Boshqa'),
+    ]
+    provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default='groq')
+    model_name = models.CharField(max_length=100, default='llama-3.3-70b-versatile')
+    endpoint = models.CharField(max_length=200, blank=True, help_text="Qaysi funksiya chaqirdi (masalan: grade_open_answers)")
+    prompt_tokens = models.PositiveIntegerField(default=0)
+    completion_tokens = models.PositiveIntegerField(default=0)
+    total_tokens = models.PositiveIntegerField(default=0)
+    estimated_cost_usd = models.FloatField(default=0.0, help_text="Taxminiy narx (USD)")
+    response_time_ms = models.PositiveIntegerField(default=0, help_text="API javob vaqti (ms)")
+    success = models.BooleanField(default=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "AI foydalanish logi"
+        verbose_name_plural = "AI foydalanish loglari"
+
+    def __str__(self):
+        return f"{self.provider}/{self.model_name} — {self.total_tokens} token ({self.created_at:%d.%m %H:%M})"
+

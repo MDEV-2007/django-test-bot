@@ -623,6 +623,24 @@ def finish_api(request, attempt_id):
     attempt.score = score
     attempt.is_completed = True
     attempt.completed_at = timezone.now()
+
+    # ─── Anti-Cheat: Speed Detection ─────────────────────────────────
+    # Agar test juda tez topshirilsa — bayroq tiklanadi.
+    # Shubhali chegara: ajratilgan vaqtning 20% dan kamida tugallangan va kamida 10 ta savol.
+    if attempt.started_at and scored_total >= 10:
+        elapsed = (attempt.completed_at - attempt.started_at).total_seconds()
+        allowed = (attempt.test.duration_minutes * 60) if attempt.test else 600
+        if elapsed < allowed * 0.20:
+            attempt.is_speed_flagged = True
+
+    # Tab switch countni requestdan olish (frontend yuboradi)
+    tab_switches = request.data.get('tab_switch_count')
+    if tab_switches is not None:
+        try:
+            attempt.tab_switch_count = max(0, int(tab_switches))
+        except (ValueError, TypeError):
+            pass
+
     attempt.save()
 
     profile = request.user.profile
@@ -995,3 +1013,16 @@ def story_image_api(request, attempt_id):
     # Telegram rasmni bir necha marta so'rashi mumkin; natija o'zgarmaydi.
     response['Cache-Control'] = 'public, max-age=86400'
     return response
+
+
+# ============================================================ ANTI-CHEAT: TAB SWITCH
+@api_view(['POST'])
+def report_tab_switch_api(request, attempt_id):
+    """Frontend har safar o'quvchi brauzer tabini almashtirganda chaqiradi."""
+    try:
+        attempt = Attempt.objects.get(id=attempt_id, profile=request.user.profile, is_completed=False)
+    except Attempt.DoesNotExist:
+        return Response({'error': 'Urinish topilmadi'}, status=404)
+    attempt.tab_switch_count = F('tab_switch_count') + 1
+    attempt.save(update_fields=['tab_switch_count'])
+    return Response({'ok': True})

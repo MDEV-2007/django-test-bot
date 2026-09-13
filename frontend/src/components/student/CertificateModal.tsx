@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Award, Download, Printer, ShieldCheck } from 'lucide-react';
+import { Award, Download, FileText, Printer, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/lib/auth-store';
+import { API_URL } from '@/lib/api-client';
 import {
   Dialog,
   DialogContent,
@@ -71,10 +73,39 @@ export default function CertificateModal({
   attemptId,
 }: CertificateModalProps) {
   const [downloading, setDownloading] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const { access } = useAuthStore();
   const gradeInfo = getGrade(score, correctCount, totalQuestions);
   const certDate = formatUzDate(date);
   const serialNo = `ILM-${new Date().getFullYear()}-${String(attemptId).padStart(6, '0')}`;
   const displayName = studentName.trim() || "Platforma O'quvchisi";
+
+  const handleDownloadPdf = async () => {
+    if (!attemptId) return;
+    setDownloadingPdf(true);
+    try {
+      const res = await fetch(`${API_URL}/api/panel/certificate/${attemptId}/`, {
+        headers: access ? { Authorization: `Bearer ${access}` } : {},
+      });
+      if (!res.ok) {
+        throw new Error('Rasmiy PDF sertifikat yuklab olishda xatolik yuz berdi');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Sertifikat_${studentName.replace(/\s+/g, '_')}_${attemptId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Rasmiy PDF sertifikat muvaffaqiyatli yuklab olindi!');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Yuklab olishda xatolik yuz berdi');
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   // Ballni to'g'ri yaxlitlash (57.77777777777777% muammosini hal qilish)
   const formattedScore = typeof score === 'number'
@@ -322,6 +353,17 @@ export default function CertificateModal({
             <Award className="size-5 text-[var(--tone-premium-text)]" /> Elektron Natija Sertifikati
           </DialogTitle>
           <div className="flex flex-wrap items-center gap-2">
+            {attemptId && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={downloadingPdf}
+                onClick={handleDownloadPdf}
+                className="gap-1.5 rounded-xl border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-semibold"
+              >
+                <FileText className="size-3.5 text-amber-400" /> {downloadingPdf ? 'Tayyorlanmoqda...' : 'Rasmiy PDF (Muhrli)'}
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"

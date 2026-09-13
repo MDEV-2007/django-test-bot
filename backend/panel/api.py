@@ -12,9 +12,11 @@ import logging
 import os
 import re
 import secrets
+import subprocess
 import sys
 import time
 from datetime import timedelta
+from io import BytesIO
 
 import django
 from django.conf import settings
@@ -50,7 +52,7 @@ from .forms import (
     BroadcastForm, GameForm, LessonForm, ShopItemForm, SiteSettingsForm, SubjectForm,
     TeacherCreateForm, TestSetForm, UserForm,
 )
-from .models import AuditLog, Broadcast, SiteSettings
+from .models import AIUsageLog, AuditLog, Broadcast, SiteSettings
 
 DASHBOARD_CACHE_KEY = 'panel:dashboard:stats'
 
@@ -1262,7 +1264,9 @@ def broadcast_api(request):
                 'id': b.id, 'title': b.title, 'audience': b.audience, 'recipients_count': b.recipients_count,
                 'telegram_sent_count': b.telegram_sent_count, 'sent_at': b.sent_at,
                 'image': b.image.url if b.image else None,
-            } for b in Broadcast.objects.select_related('sent_by')[:20]],
+                'scheduled_at': b.scheduled_at.isoformat() if b.scheduled_at else None,
+                'is_sent': b.is_sent,
+            } for b in Broadcast.objects.select_related('sent_by')[:30]],
             'audience_counts': {a[0]: _audience_profiles(a[0]).count() for a in Broadcast.AUDIENCE_CHOICES},
         })
 
@@ -2751,3 +2755,466 @@ def trigger_mock_reminder_api(request, pk):
         'fail_count': fail_count,
         'message': f"{sent_count} nafar o'quvchiga Telegram eslatmasi yuborildi.",
     })
+
+
+# ============================================================ ANTI-CHEAT DASHBOARD
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def anti_cheat_report_api(request):
+    """Anti-cheat hisoboti: eng ko'p tab almashtirganlar va shubhali tezlikda topshirganlar."""
+    try:
+        # Top tab switchers (5+ tab switch)
+        top_tab_switchers = (
+            Attempt.objects
+            .filter(is_completed=True, tab_switch_count__gte=3)
+            .select_related('profile__user', 'test')
+            .order_by('-tab_switch_count')[:30]
+        )
+        tab_switchers = []
+        for a in top_tab_switchers:
+            u = a.profile.user if a.profile else None
+            tab_switchers.append({
+                'attempt_id': a.id,
+                'student_name': f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() or getattr(u, 'username', '') or "Noma'lum",
+                'username': getattr(u, 'username', '') or '',
+                'test_title': a.test.title if a.test else "Test",
+                'tab_switch_count': a.tab_switch_count,
+                'score': round(float(a.score), 1) if a.score is not None else 0.0,
+                'started_at': a.started_at.isoformat() if a.started_at else None,
+            })
+
+        # Speed flagged attempts
+        speed_flagged = (
+            Attempt.objects
+            .filter(is_completed=True, is_speed_flagged=True)
+            .select_related('profile__user', 'test')
+            .order_by('-completed_at')[:30]
+        )
+        speed_flags = []
+        for a in speed_flagged:
+            u = a.profile.user if a.profile else None
+            elapsed = 0
+            if a.started_at and a.completed_at:
+                elapsed = int((a.completed_at - a.started_at).total_seconds())
+            speed_flags.append({
+                'attempt_id': a.id,
+                'student_name': f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() or getattr(u, 'username', '') or "Noma'lum",
+                'username': getattr(u, 'username', '') or '',
+                'test_title': a.test.title if a.test else "Test",
+                'score': round(float(a.score), 1) if a.score is not None else 0.0,
+                'elapsed_seconds': elapsed,
+                'allowed_minutes': a.test.duration_minutes if a.test else 0,
+                'completed_at': a.completed_at.isoformat() if a.completed_at else None,
+            })
+
+        # Summary stats
+        total_completed = Attempt.objects.filter(is_completed=True).count()
+        total_tab_issues = Attempt.objects.filter(is_completed=True, tab_switch_count__gte=3).count()
+        total_speed_flags = Attempt.objects.filter(is_completed=True, is_speed_flagged=True).count()
+
+        return Response({
+            'tab_switchers': tab_switchers,
+            'speed_flags': speed_flags,
+            'summary': {
+                'total_completed': total_completed,
+                'tab_issue_count': total_tab_issues,
+                'speed_flag_count': total_speed_flags,
+                'tab_issue_pct': round(total_tab_issues / (total_completed or 1) * 100, 1),
+                'speed_flag_pct': round(total_speed_flags / (total_completed or 1) * 100, 1),
+            },
+        })
+    except Exception as e:
+        logger.exception("anti_cheat_report_api error: %s", e)
+        return Response({
+            'tab_switchers': [], 'speed_flags': [],
+            'summary': {'total_completed': 0, 'tab_issue_count': 0, 'speed_flag_count': 0,
+                         'tab_issue_pct': 0, 'speed_flag_pct': 0},
+            'error': str(e),
+        })
+
+
+# ============================================================ PDF CERTIFICATE GENERATOR
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def generate_certificate_api(request, attempt_pk):
+    """Mock test natijasi uchun rasmiy PDF sertifikat yaratish."""
+    try:
+        import pymupdf
+    except ImportError:
+        return HttpResponse(
+            "PyMuPDF kutubxonasi o'rnatilmagan. `pip install pymupdf` bajaring.",
+            content_type="text/plain; charset=utf-8", status=500
+        )
+
+    try:
+        a = get_object_or_404(
+            Attempt.objects.select_related('profile__user', 'test', 'test__subject'),
+            pk=attempt_pk, is_completed=True
+        )
+        profile = a.profile
+        u = profile.user
+        user_full = f"{u.first_name} {u.last_name}".strip() or u.username
+
+        test_title = a.test.title if a.test else "Test"
+        subject_name = a.test.subject.name if (a.test and a.test.subject) else "Asosiy"
+
+        grade, grade_tone = _calculate_grade(a.score, a.correct_answers)
+        score_str = f"{float(a.score):.1f}%" if a.score is not None else "0%"
+
+        tz = timezone.get_current_timezone()
+        completed_str = ""
+        if a.completed_at:
+            dt = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+            completed_str = dt.strftime('%d.%m.%Y')
+
+        # PDF yaratish
+        doc = pymupdf.open()
+        page_w, page_h = 842, 595  # A4 Landscape
+        page = doc.new_page(width=page_w, height=page_h)
+
+        # Shrift
+        font_candidates_reg = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            r'C:\Windows\Fonts\segoeui.ttf', r'C:\Windows\Fonts\arial.ttf',
+        ]
+        font_candidates_bold = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            r'C:\Windows\Fonts\segoeuib.ttf', r'C:\Windows\Fonts\arialbd.ttf',
+        ]
+        font_reg_file = next((p for p in font_candidates_reg if os.path.exists(p)), None)
+        font_bold_file = next((p for p in font_candidates_bold if os.path.exists(p)), None)
+        font_reg = "FReg" if font_reg_file else "helv"
+        font_bold = "FBold" if font_bold_file else "hebo"
+        if font_reg_file:
+            page.insert_font(fontname="FReg", fontfile=font_reg_file)
+        if font_bold_file:
+            page.insert_font(fontname="FBold", fontfile=font_bold_file)
+
+        # Ranglar
+        c_navy = (15/255, 23/255, 42/255)
+        c_accent = (13/255, 148/255, 136/255)
+        c_gold = (217/255, 119/255, 6/255)
+        c_text_muted = (100/255, 116/255, 139/255)
+        c_white = (1, 1, 1)
+
+        # Ramka
+        border_w = 3
+        page.draw_rect(pymupdf.Rect(20, 20, page_w - 20, page_h - 20), color=c_accent, width=border_w)
+        page.draw_rect(pymupdf.Rect(28, 28, page_w - 28, page_h - 28), color=c_gold, width=1.5)
+
+        # Yuqori bezak chizig'i
+        page.draw_rect(pymupdf.Rect(40, 40, page_w - 40, 48), color=c_accent, fill=c_accent)
+
+        # Sarlavha
+        page.insert_textbox(
+            pymupdf.Rect(40, 60, page_w - 40, 100),
+            "SERTIFIKAT",
+            fontsize=32, fontname=font_bold, color=c_navy, align=1
+        )
+
+        # Platforma nomi
+        page.insert_textbox(
+            pymupdf.Rect(40, 105, page_w - 40, 125),
+            "IlmIldizi Ta'lim Platformasi",
+            fontsize=12, fontname=font_reg, color=c_accent, align=1
+        )
+
+        # O'quvchi ismi
+        page.insert_textbox(
+            pymupdf.Rect(40, 155, page_w - 40, 195),
+            user_full,
+            fontsize=26, fontname=font_bold, color=c_navy, align=1
+        )
+
+        # Asosiy matn
+        cert_text = (
+            f"Ushbu sertifikat yuqoridagi nomga berilgan bo'lib, u IlmIldizi ta'lim "
+            f"platformasidagi \"{test_title}\" ({subject_name}) imtihonida "
+            f"muvaffaqiyatli qatnashganini va {score_str} natija ko'rsatganini tasdiqlaydi."
+        )
+        page.insert_textbox(
+            pymupdf.Rect(80, 215, page_w - 80, 290),
+            cert_text,
+            fontsize=12, fontname=font_reg, color=c_text_muted, align=1
+        )
+
+        # Natija qutilari
+        kpis = [
+            ("Ball", score_str, c_accent),
+            ("Daraja", grade, c_gold),
+            ("To'g'ri javoblar", f"{a.correct_answers}/{a.correct_answers + a.wrong_answers + a.skipped_answers}", c_navy),
+            ("Sana", completed_str, c_text_muted),
+        ]
+        kpi_w, kpi_h = 150, 55
+        kpi_start_x = (page_w - (4 * kpi_w + 3 * 15)) / 2
+        kpi_y = 310
+
+        c_border_light = (226/255, 232/255, 240/255)
+        c_zebra = (248/255, 250/255, 252/255)
+
+        for idx, (label, val, color) in enumerate(kpis):
+            bx = kpi_start_x + idx * (kpi_w + 15)
+            page.draw_rect(pymupdf.Rect(bx, kpi_y, bx + kpi_w, kpi_y + kpi_h), color=c_border_light, fill=c_zebra, width=0.7)
+            page.insert_textbox(pymupdf.Rect(bx, kpi_y + 5, bx + kpi_w, kpi_y + 20), label, fontsize=8, fontname=font_reg, color=c_text_muted, align=1)
+            page.insert_textbox(pymupdf.Rect(bx, kpi_y + 22, bx + kpi_w, kpi_y + 48), val, fontsize=16, fontname=font_bold, color=color, align=1)
+
+        # Imzo chizig'i
+        line_y = 430
+        page.draw_line(pymupdf.Point(200, line_y), pymupdf.Point(400, line_y), color=c_border_light, width=1)
+        page.insert_textbox(pymupdf.Rect(200, line_y + 5, 400, line_y + 20), "Platforma administratori", fontsize=8, fontname=font_reg, color=c_text_muted, align=1)
+
+        page.draw_line(pymupdf.Point(450, line_y), pymupdf.Point(650, line_y), color=c_border_light, width=1)
+        page.insert_textbox(pymupdf.Rect(450, line_y + 5, 650, line_y + 20), "Muhr", fontsize=8, fontname=font_reg, color=c_text_muted, align=1)
+
+        # Sertifikat raqami
+        cert_id = f"CERT-{a.id:06d}"
+        page.insert_textbox(
+            pymupdf.Rect(40, page_h - 65, page_w - 40, page_h - 45),
+            f"Sertifikat raqami: {cert_id}  |  Tekshirish: https://ilmildizi.uz/verify/{cert_id}",
+            fontsize=8, fontname=font_reg, color=c_text_muted, align=1
+        )
+
+        # Pastki bezak
+        page.draw_rect(pymupdf.Rect(40, page_h - 48, page_w - 40, page_h - 40), color=c_accent, fill=c_accent)
+
+        pdf_bytes = doc.tobytes()
+        doc.close()
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        clean_name = user_full.replace(' ', '_')
+        response['Content-Disposition'] = f'attachment; filename="sertifikat_{clean_name}_{cert_id}.pdf"'
+        return response
+    except Exception as e:
+        logger.exception("generate_certificate_api error: %s", e)
+        return HttpResponse(f"Sertifikat yaratishda xatolik: {str(e)}", content_type="text/plain; charset=utf-8", status=500)
+
+
+# ============================================================ DATABASE BACKUP
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def database_backup_api(request):
+    """Ma'lumotlar bazasini zaxiralash (pg_dump yoki sqlite3 dump)."""
+    try:
+        db_settings = settings.DATABASES.get('default', {})
+        engine = db_settings.get('ENGINE', '')
+        backup_dir = os.path.join(settings.BASE_DIR, 'media', 'backups')
+        os.makedirs(backup_dir, exist_ok=True)
+
+        now_str = timezone.now().strftime('%Y%m%d_%H%M%S')
+
+        if 'postgresql' in engine or 'psycopg' in engine:
+            filename = f"backup_pg_{now_str}.sql"
+            filepath = os.path.join(backup_dir, filename)
+            db_name = db_settings.get('NAME', '')
+            db_user = db_settings.get('USER', '')
+            db_host = db_settings.get('HOST', 'localhost')
+            db_port = db_settings.get('PORT', '5432')
+            env = os.environ.copy()
+            if db_settings.get('PASSWORD'):
+                env['PGPASSWORD'] = db_settings['PASSWORD']
+            cmd = ['pg_dump', '-h', db_host, '-p', str(db_port), '-U', db_user, '-Fc', '-f', filepath, db_name]
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=120)
+            if result.returncode != 0:
+                return Response({
+                    'error': f"pg_dump xatosi: {result.stderr[:300]}",
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        elif 'sqlite' in engine:
+            import shutil
+            filename = f"backup_sqlite_{now_str}.db"
+            filepath = os.path.join(backup_dir, filename)
+            db_path = db_settings.get('NAME', '')
+            if db_path and os.path.exists(db_path):
+                shutil.copy2(db_path, filepath)
+            else:
+                return Response({'error': "SQLite fayli topilmadi"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': f"Qo'llab-quvvatlanmaydigan baza turi: {engine}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        file_size = os.path.getsize(filepath)
+        return Response({
+            'success': True,
+            'filename': filename,
+            'size_bytes': file_size,
+            'size_display': f"{file_size / (1024*1024):.1f} MB" if file_size > 1024*1024 else f"{file_size / 1024:.0f} KB",
+            'message': f"Ma'lumotlar bazasi muvaffaqiyatli zaxiralandi: {filename}",
+        })
+    except subprocess.TimeoutExpired:
+        return Response({'error': "Zaxiralash vaqti tugadi (timeout)"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        logger.exception("database_backup_api error: %s", e)
+        return Response({'error': f"Zaxiralashda xatolik: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def backup_list_api(request):
+    """Mavjud zaxira fayllar ro'yxati."""
+    try:
+        backup_dir = os.path.join(settings.BASE_DIR, 'media', 'backups')
+        if not os.path.exists(backup_dir):
+            return Response({'backups': []})
+
+        backups = []
+        for f in sorted(os.listdir(backup_dir), reverse=True)[:20]:
+            fpath = os.path.join(backup_dir, f)
+            if os.path.isfile(fpath):
+                size = os.path.getsize(fpath)
+                backups.append({
+                    'filename': f,
+                    'size_bytes': size,
+                    'size_display': f"{size / (1024*1024):.1f} MB" if size > 1024*1024 else f"{size / 1024:.0f} KB",
+                    'created_at': os.path.getmtime(fpath),
+                })
+        return Response({'backups': backups})
+    except Exception as e:
+        logger.exception("backup_list_api error: %s", e)
+        return Response({'backups': [], 'error': str(e)})
+
+
+# ============================================================ AI TOKEN & USAGE MONITOR
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def ai_usage_api(request):
+    """AI token sarfi va narx nazorati."""
+    try:
+        now = timezone.now()
+        tz = timezone.get_current_timezone()
+        today_start = now.astimezone(tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        month_start = now.astimezone(tz).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        thirty_days_ago = now - timedelta(days=30)
+
+        all_logs = AIUsageLog.objects.all()
+        today_logs = all_logs.filter(created_at__gte=today_start)
+        month_logs = all_logs.filter(created_at__gte=month_start)
+
+        # Aggregations
+        total_agg = all_logs.aggregate(
+            total_tokens=Sum('total_tokens'),
+            total_cost=Sum('estimated_cost_usd'),
+            total_calls=Count('id'),
+        )
+        today_agg = today_logs.aggregate(
+            total_tokens=Sum('total_tokens'),
+            total_cost=Sum('estimated_cost_usd'),
+            total_calls=Count('id'),
+        )
+        month_agg = month_logs.aggregate(
+            total_tokens=Sum('total_tokens'),
+            total_cost=Sum('estimated_cost_usd'),
+            total_calls=Count('id'),
+        )
+
+        # Success rate
+        total_calls = total_agg['total_calls'] or 0
+        failed_calls = all_logs.filter(success=False).count()
+        success_rate = round((total_calls - failed_calls) / (total_calls or 1) * 100, 1)
+
+        # Average response time
+        avg_response = all_logs.filter(success=True).aggregate(avg_time=Avg('response_time_ms'))
+        avg_response_ms = round(avg_response['avg_time'] or 0)
+
+        # Daily usage for chart (30 days)
+        daily_usage = []
+        for i in range(29, -1, -1):
+            d = (now - timedelta(days=i)).astimezone(tz).date()
+            day_logs = all_logs.filter(created_at__date=d)
+            day_agg = day_logs.aggregate(tokens=Sum('total_tokens'), cost=Sum('estimated_cost_usd'), calls=Count('id'))
+            daily_usage.append({
+                'date': d.strftime('%d.%m'),
+                'tokens': day_agg['tokens'] or 0,
+                'cost': round(float(day_agg['cost'] or 0), 4),
+                'calls': day_agg['calls'] or 0,
+            })
+
+        # By model breakdown
+        by_model = []
+        models_used = all_logs.values('model_name').annotate(
+            tokens=Sum('total_tokens'), cost=Sum('estimated_cost_usd'), calls=Count('id')
+        ).order_by('-tokens')
+        for m in models_used:
+            by_model.append({
+                'model': m['model_name'],
+                'tokens': m['tokens'] or 0,
+                'cost': round(float(m['cost'] or 0), 4),
+                'calls': m['calls'] or 0,
+            })
+
+        # Recent errors
+        recent_errors = list(
+            all_logs.filter(success=False).order_by('-created_at').values('endpoint', 'error_message', 'created_at')[:10]
+        )
+
+        return Response({
+            'summary': {
+                'total_tokens': total_agg['total_tokens'] or 0,
+                'total_cost_usd': round(float(total_agg['total_cost'] or 0), 4),
+                'total_calls': total_calls,
+                'today_tokens': today_agg['total_tokens'] or 0,
+                'today_cost_usd': round(float(today_agg['total_cost'] or 0), 4),
+                'today_calls': today_agg['total_calls'] or 0,
+                'month_tokens': month_agg['total_tokens'] or 0,
+                'month_cost_usd': round(float(month_agg['total_cost'] or 0), 4),
+                'month_calls': month_agg['total_calls'] or 0,
+                'success_rate': success_rate,
+                'avg_response_ms': avg_response_ms,
+                'failed_calls': failed_calls,
+            },
+            'daily_usage': daily_usage,
+            'by_model': by_model,
+            'recent_errors': [
+                {'endpoint': e['endpoint'], 'error': (e['error_message'] or '')[:200],
+                 'at': e['created_at'].isoformat() if e['created_at'] else None}
+                for e in recent_errors
+            ],
+        })
+    except Exception as e:
+        logger.exception("ai_usage_api error: %s", e)
+        return Response({
+            'summary': {
+                'total_tokens': 0, 'total_cost_usd': 0, 'total_calls': 0,
+                'today_tokens': 0, 'today_cost_usd': 0, 'today_calls': 0,
+                'month_tokens': 0, 'month_cost_usd': 0, 'month_calls': 0,
+                'success_rate': 0, 'avg_response_ms': 0, 'failed_calls': 0,
+            },
+            'daily_usage': [], 'by_model': [], 'recent_errors': [],
+            'error': str(e),
+        })
+
+
+# ============================================================ BROADCAST SCHEDULER
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def broadcast_schedule_api(request):
+    """Xabarni kelajakda yuborish uchun rejalashtirish."""
+    form = BroadcastForm(request.data, request.FILES)
+    if not form.is_valid():
+        return Response({'errors': _form_errors(form)}, status=400)
+
+    bc = form.save(commit=False)
+    bc.sent_by = request.user
+
+    scheduled_at = request.data.get('scheduled_at')
+    if scheduled_at:
+        try:
+            from datetime import datetime
+            if isinstance(scheduled_at, str):
+                # ISO format yoki 'YYYY-MM-DDTHH:MM' formatda kutiladi
+                dt = datetime.fromisoformat(scheduled_at.replace('Z', '+00:00'))
+                if timezone.is_naive(dt):
+                    dt = timezone.make_aware(dt)
+                bc.scheduled_at = dt
+                bc.is_sent = False
+                bc.recipients_count = _audience_profiles(bc.audience).count()
+                bc.save()
+                return Response({
+                    'id': bc.id,
+                    'scheduled_at': bc.scheduled_at.isoformat(),
+                    'recipients_count': bc.recipients_count,
+                    'message': f"Xabar {bc.scheduled_at.strftime('%d.%m.%Y %H:%M')} da yuboriladi.",
+                })
+        except Exception as e:
+            return Response({'error': f"Sana formatida xatolik: {str(e)}"}, status=400)
+
+    return Response({'error': "scheduled_at maydoni kiritilishi shart"}, status=400)
+
