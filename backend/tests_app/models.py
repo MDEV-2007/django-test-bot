@@ -326,6 +326,12 @@ class TestSet(models.Model):
         null=True, blank=True,
         help_text="Jonli mock boshlanish xabari jo'natilgan vaqt (bir marta yuboriladi).",
     )
+    listening_audio = models.FileField(
+        upload_to='cefr/audio/%Y/%m/',
+        null=True,
+        blank=True,
+        help_text="Butun imtihon uchun umumiy to'liq Listening audio fayli (Super admin yuklashi mumkin).",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

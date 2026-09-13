@@ -91,7 +91,7 @@ export type CefrExam = {
   attempt_id: number;
   is_completed: boolean;
   seconds_left: number;
-  test: { id: number | null; title: string; category: string; duration_minutes: number };
+  test: { id: number | null; title: string; category: string; duration_minutes: number; listening_audio?: string };
   sections: CefrSection[];
   loose_questions: CefrQuestion[];
   annotations: AnnotationMap;

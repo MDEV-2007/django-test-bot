@@ -10,7 +10,7 @@
    yangilash bilan cheklovni aylanib o'tish mumkin edi. */
 
 import { useEffect, useRef, useState } from 'react';
-import { Headphones, Loader2, Pause, Play, RotateCcw } from 'lucide-react';
+import { Headphones, Loader2, Pause, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -139,18 +139,7 @@ export default function ExamAudio({ src, playLimit, playsUsed, onRequestPlay }: 
           </div>
         </div>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => start(true)}
-          disabled={exhausted || asking}
-          className="h-9 w-9 shrink-0 rounded-full"
-          aria-label="Boshidan qo'yish"
-          title={exhausted ? 'Tinglash imkoni tugadi' : "Boshidan qo'yish (bitta urinish sanaladi)"}
-        >
-          <RotateCcw className="h-4 w-4" />
-        </Button>
+        {/* Imtihon qoidasi bo'yicha: audioni orqaga qaytarish yoki boshidan qo'yish taqiqlangan */}
       </div>
 
       {notice && <p className="mt-2 text-xs text-amber-400">{notice}</p>}

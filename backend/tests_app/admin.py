@@ -221,6 +221,36 @@ class MockAttemptResultAdmin(admin.ModelAdmin):
         return response
 
 
+class ExamSectionInline(admin.TabularInline):
+    model = ExamSection
+    extra = 0
+    fields = ('skill', 'part_number', 'title', 'audio', 'audio_url', 'order')
+    show_change_link = True
+
+
+@admin.register(TestSet)
+class TestSetAdmin(admin.ModelAdmin):
+    list_display = ('title', 'subject', 'category', 'duration_minutes', 'is_live_mock', 'is_published', 'created_at')
+    list_filter = ('category', 'subject', 'is_live_mock', 'is_published', 'is_premium')
+    search_fields = ('title', 'description')
+    filter_horizontal = ('questions', 'remind_users')
+    inlines = [ExamSectionInline]
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'description', 'subject', 'category', 'duration_minutes', 'created_by')
+        }),
+        ("Jonli Mock va Sozlamalar", {
+            'fields': ('is_live_mock', 'scheduled_at', 'is_published', 'is_premium', 'notify_all')
+        }),
+        ("CEFR Audio (Super Admin)", {
+            'fields': ('listening_audio',),
+            'description': "Butun Listening bo'limi uchun umumiy audio trek (MP3/WAV). Agar yuklansa, barcha Listening partlarida shu audio avtomatik ishlaydi."
+        }),
+        ("Savollar", {
+            'fields': ('questions', 'question_order')
+        }),
+    )
+
 
 @admin.register(AttemptAnswer)
 class AttemptAnswerAdmin(admin.ModelAdmin):

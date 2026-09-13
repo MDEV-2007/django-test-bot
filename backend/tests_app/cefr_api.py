@@ -88,7 +88,7 @@ def _question_payload(question, answer):
     return data
 
 
-def _section_payload(section, answers_by_question):
+def _section_payload(section, answers_by_question, master_audio=''):
     questions = [q for q in section.questions.all() if q.id in answers_by_question]
     groups, seen_groups = [], set()
     for question in questions:
@@ -103,6 +103,8 @@ def _section_payload(section, answers_by_question):
                 ],
             })
 
+    audio_src = section.audio_src or (master_audio if section.skill == 'listening' else '')
+
     return {
         'id': section.id,
         'skill': section.skill,
@@ -110,7 +112,7 @@ def _section_payload(section, answers_by_question):
         'title': section.title,
         'instruction': section.instruction,
         'passage': section.passage,
-        'audio': section.audio_src,
+        'audio': audio_src,
         'audio_play_limit': section.audio_play_limit,
         'image': section.image.url if section.image else '',
         'duration_minutes': section.duration_minutes,
@@ -126,6 +128,12 @@ def exam_api(request, attempt_id):
     """Butun urinish: partlar, matn/audio va savollar — bitta so'rovda."""
     attempt = get_object_or_404(
         Attempt.objects.select_related('test'), id=attempt_id, profile=request.user.profile)
+
+    master_audio = (
+        attempt.test.listening_audio.url
+        if attempt.test and attempt.test.listening_audio
+        else ''
+    )
 
     answers = list(
         attempt.answers
@@ -145,7 +153,7 @@ def exam_api(request, attempt_id):
         if attempt.test_id else []
     )
 
-    section_payloads = [_section_payload(s, answers_by_question) for s in sections]
+    section_payloads = [_section_payload(s, answers_by_question, master_audio) for s in sections]
     section_payloads = [s for s in section_payloads if s['questions']]
 
     # Partga bog'lanmagan savollar (oddiy testlar yoki eski CEFR to'plamlari) yo'qolib
@@ -163,6 +171,7 @@ def exam_api(request, attempt_id):
             'title': attempt.test.title if attempt.test else 'Test',
             'category': attempt.test.category if attempt.test else '',
             'duration_minutes': attempt.duration_minutes,
+            'listening_audio': master_audio,
         },
         'sections': section_payloads,
         'loose_questions': loose,
