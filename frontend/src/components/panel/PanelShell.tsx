@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, BookMarked, ShoppingBag, FileCheck2,
   BookOpen, Gamepad2, ClipboardList, CreditCard, Megaphone, ScrollText, Settings,
   LogOut, ArrowLeft, ShieldCheck, Menu, X, ChevronRight, MessageSquareHeart, Award,
+  TrendingUp, TicketPercent, Send, Activity, Server
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { Button } from '@/components/ui/button';
@@ -41,18 +42,22 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
-    label: 'Operatsiyalar',
+    label: 'Operatsiyalar & Moliya',
     items: [
       { href: '/panel/mocks', label: 'Mock Natijalari', icon: Award },
       { href: '/panel/attempts', label: 'Barcha Natijalar', icon: ClipboardList },
-      { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart },
+      { href: '/panel/finance', label: 'Moliya & Tushum', icon: TrendingUp },
       { href: '/panel/payments', label: "To'lovlar", icon: CreditCard },
+      { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent },
+      { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart },
       { href: '/panel/broadcast', label: 'Xabar yuborish', icon: Megaphone },
     ],
   },
   {
-    label: 'Tizim',
+    label: 'Tizim & Bot',
     items: [
+      { href: '/panel/telegram', label: 'Telegram Bot', icon: Send },
+      { href: '/panel/system', label: 'Tizim Salomatligi', icon: Server },
       { href: '/panel/audit-log', label: 'Audit', icon: ScrollText },
       { href: '/panel/settings', label: 'Sozlamalar', icon: Settings },
     ],

@@ -6,7 +6,7 @@ import {
   Award, Trophy, Search, Download, RefreshCw, Clock, CheckCircle2,
   XCircle, ArrowUpDown, Flame, Sparkles, Filter, ChevronRight,
   ExternalLink, UserCheck, Layers, HelpCircle, Phone, Send, Loader2,
-  BookOpen, Calendar, FileText, X
+  BookOpen, Calendar, FileText, X, Radio, Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, API_URL } from '@/lib/api-client';
@@ -18,6 +18,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 
 interface MockItem {
   id: number;
@@ -98,6 +101,47 @@ export default function PanelMocksPage() {
   // Sertifikat modali holati
   const [certModalOpen, setCertModalOpen] = useState<boolean>(false);
   const [selectedAttemptForCert, setSelectedAttemptForCert] = useState<MockItem | null>(null);
+
+  // Jonli Monitor holati
+  type LiveMonitorData = {
+    live_tests: { id: number; title: string; subject_name: string; scheduled_at: string | null; reminders_count: number }[];
+    active_takers: { attempt_id: number; user_name: string; username: string; telegram_username: string; test_title: string; started_at: string; elapsed_minutes: number; answered_count: number }[];
+    active_count: number;
+  };
+
+  const [showLiveModal, setShowLiveModal] = useState(false);
+  const [liveData, setLiveData] = useState<LiveMonitorData | null>(null);
+  const [loadingLive, setLoadingLive] = useState(false);
+  const [remindingId, setRemindingId] = useState<number | null>(null);
+
+  function openLiveMonitor() {
+    setShowLiveModal(true);
+    setLoadingLive(true);
+    apiFetch<LiveMonitorData>('/api/panel/mocks/live/')
+      .then((res) => {
+        setLiveData(res);
+        setLoadingLive(false);
+      })
+      .catch((e) => {
+        toast.error(e instanceof Error ? e.message : "Jonli ma'lumotlarni yuklashda xatolik");
+        setLoadingLive(false);
+      });
+  }
+
+  async function triggerReminder(testId: number) {
+    setRemindingId(testId);
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>(`/api/panel/mocks/${testId}/remind/`, {
+        method: 'POST',
+      });
+      toast.success(res.message || "Telegram eslatmasi yuborildi!");
+      openLiveMonitor();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Eslatma yuborishda xatolik");
+    } finally {
+      setRemindingId(null);
+    }
+  }
 
   function handleOpenCertificate(item: MockItem, e?: React.MouseEvent) {
     if (e) e.stopPropagation();
@@ -250,6 +294,20 @@ export default function PanelMocksPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* Jonli Monitor Tugmasi */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openLiveMonitor}
+              className="gap-2 border-emerald-500/40 bg-emerald-950/30 text-emerald-400 hover:bg-emerald-950/60 text-xs font-semibold shadow-xs"
+            >
+              <span className="relative flex size-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+              </span>
+              <Radio className="size-3.5" /> Jonli Monitor
+            </Button>
+
             <Button
               variant="outline"
               size="sm"
@@ -912,6 +970,100 @@ export default function PanelMocksPage() {
             attemptId={selectedAttemptForCert.id}
           />
         )}
+
+        {/* Jonli Monitor va Telegram Eslatma Modali */}
+        <Dialog open={showLiveModal} onOpenChange={setShowLiveModal}>
+          <DialogContent className="sm:max-w-2xl bg-[#11141c] border-[#1e2330] text-white max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex size-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2.5 bg-emerald-500"></span>
+                  </span>
+                  <DialogTitle className="text-base font-semibold">Jonli Mock Nazorati (Live Control Room)</DialogTitle>
+                </div>
+                <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-xs">
+                  {liveData?.active_count || 0} nafar ayni paytda test yechmoqda
+                </Badge>
+              </div>
+              <DialogDescription className="text-xs text-slate-400">
+                Ayni daqiqada test topshirayotgan o&apos;quvchilar va Telegram eslatmalarini yuborish.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-5 py-2">
+              {/* 1. Jonli test topshirayotganlar */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Hozir Test Topshirayotganlar
+                </h4>
+
+                {loadingLive ? (
+                  <div className="p-4 text-center text-xs text-slate-400">Yuklanmoqda...</div>
+                ) : (liveData?.active_takers?.length || 0) === 0 ? (
+                  <div className="p-6 rounded-xl bg-[#171b26] border border-[#222838] text-center text-xs text-slate-400">
+                    Ayni daqiqada faol test topshirayotgan o&apos;quvchilar yo&apos;q.
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-[#222838] bg-[#171b26] divide-y divide-[#222838] max-h-48 overflow-y-auto">
+                    {liveData?.active_takers.map((t) => (
+                      <div key={t.attempt_id} className="p-2.5 flex items-center justify-between text-xs">
+                        <div>
+                          <p className="font-semibold text-white">{t.user_name}</p>
+                          <p className="text-[11px] text-slate-400">{t.test_title}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-mono text-emerald-400 font-medium">
+                            {t.elapsed_minutes} daqiqa o&apos;tdi
+                          </span>
+                          <p className="text-[11px] text-slate-400">{t.answered_count} ta savol belgilandi</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Jonli Mocklar & Telegram Eslatmalari */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Rejalashtirilgan Mocklar & Telegram Eslatmalari
+                </h4>
+
+                <div className="rounded-xl border border-[#222838] bg-[#171b26] divide-y divide-[#222838]">
+                  {(liveData?.live_tests?.length || 0) === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-400">
+                      Rejalashtirilgan mock testlar topilmadi.
+                    </div>
+                  ) : (
+                    liveData?.live_tests.map((test) => (
+                      <div key={test.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        <div>
+                          <p className="font-semibold text-white text-sm">{test.title}</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            Fan: <span className="text-slate-300">{test.subject_name}</span> • 
+                            Eslatma oluvchilar: <span className="text-amber-400 font-semibold">{test.reminders_count} nafar</span>
+                          </p>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          onClick={() => triggerReminder(test.id)}
+                          disabled={remindingId === test.id || test.reminders_count === 0}
+                          className="gap-1.5 text-xs bg-sky-600 hover:bg-sky-700 text-white font-medium shrink-0"
+                        >
+                          <Bell className={`size-3.5 ${remindingId === test.id ? 'animate-bounce' : ''}`} />
+                          {remindingId === test.id ? "Yuborilmoqda..." : "Telegram Eslatmasi Yuborish"}
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
       </div>
     </PanelShell>

@@ -34,8 +34,10 @@ from accounts.utils import send_telegram_message, send_telegram_photo
 from core.models import Notification
 from games.models import Game
 from learning.models import Lesson
-from premium.models import Payment
+from premium.models import Payment, PromoCode, SubscriptionPlan
 from shop.models import ShopItem
+from telegrambot.models import RequiredChannel
+from telegrambot.client import api_call as tg_api_call
 from tests_app.models import Attempt, AttemptAnswer, ExamSurvey, Question, Subject, TestSet
 
 from .api_utils import bulk_action, list_response
@@ -2120,6 +2122,201 @@ def mock_attempts_export_pdf_api(request):
 
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         clean_subj = selected_subject_name.replace(' ', '_')
+        c_zebra = (248/255, 250/255, 252/255)
+        c_border = (226/255, 232/255, 240/255)
+        c_text_dark = (15/255, 23/255, 42/255)
+        c_text_muted = (100/255, 116/255, 139/255)
+        c_white = (1, 1, 1)
+
+        def draw_table_headers(p, start_y):
+            header_h = 24
+            p.draw_rect(pymupdf.Rect(margin_x, start_y, margin_x + table_w, start_y + header_h), color=c_header_bg, fill=c_header_bg)
+            cur_x = margin_x
+            for name, w, align in columns:
+                r = pymupdf.Rect(cur_x + 3, start_y + 4, cur_x + w - 3, start_y + header_h - 4)
+                p.insert_textbox(r, name, fontsize=7.8, fontname=font_bold, color=c_white, align=align)
+                cur_x += w
+            return start_y + header_h
+
+        page = doc.new_page(width=page_w, height=page_h)
+        setup_page_fonts(page)
+
+        # Yuqori bezak chizig'i
+        page.draw_rect(pymupdf.Rect(margin_x, 15, margin_x + table_w, 18), color=c_accent, fill=c_accent)
+
+        # Sarlavha bloki (Chap qism)
+        title_box = pymupdf.Rect(margin_x, 22, margin_x + 430, 42)
+        page.insert_textbox(
+            title_box,
+            "MOCK IMTIHON NATIJALARI VA REYTING HISOBOTI",
+            fontsize=13.5, fontname=font_bold, color=c_navy, align=0
+        )
+
+        meta_line = f"Fan: {clean_txt(selected_subject_name, 35)}   |   Test: {clean_txt(selected_test_title, 40)}   |   Sana: {selected_date_display}"
+        page.insert_textbox(
+            pymupdf.Rect(margin_x, 46, margin_x + 430, 62),
+            meta_line,
+            fontsize=8.5, fontname=font_reg, color=c_text_muted, align=0
+        )
+
+        # Statistika (KPI) qutilari (O'ng qism)
+        kpi_w = 78
+        kpi_h = 42
+        kpi_y = 23
+        kpi_start_x = margin_x + table_w - (4 * kpi_w + 3 * 5)
+        kpis = [
+            ("Qatnashchilar", f"{total_participants} nafar", (37/255, 99/255, 235/255)),
+            ("O'rtacha ball", f"{avg_score}%", (5/255, 150/255, 105/255)),
+            ("Eng yuqori ball", f"{max_score}%", (217/255, 119/255, 6/255)),
+            ("Oltin daraja (A+)", f"{gold_count} ta", (147/255, 51/255, 234/255)),
+        ]
+        for idx, (label, val, border_c) in enumerate(kpis):
+            bx = kpi_start_x + idx * (kpi_w + 5)
+            page.draw_rect(pymupdf.Rect(bx, kpi_y, bx + kpi_w, kpi_y + kpi_h), color=c_border, fill=c_zebra, width=0.7)
+            page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 4, bx + kpi_w - 2, kpi_y + 16), label, fontsize=6.5, fontname=font_reg, color=c_text_muted, align=1)
+            page.insert_textbox(pymupdf.Rect(bx + 2, kpi_y + 18, bx + kpi_w - 2, kpi_y + 38), val, fontsize=10, fontname=font_bold, color=border_c, align=1)
+
+        page.insert_text(pymupdf.Point(margin_x + table_w - 170, 77), f"Chop etilgan: {now_local}", fontsize=7.2, fontname=font_reg, color=c_text_muted)
+        page.draw_line(pymupdf.Point(margin_x, 84), pymupdf.Point(margin_x + table_w, 84), color=c_border, width=0.8)
+
+        current_y = 90
+        current_y = draw_table_headers(page, current_y)
+
+        row_h = 20
+        bottom_limit = page_h - 40
+
+        if total_participants == 0:
+            page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + 40), color=c_border, fill=c_zebra, width=0.5)
+            page.insert_textbox(pymupdf.Rect(margin_x, current_y + 12, margin_x + table_w, current_y + 32), "Tanlangan parametrlar bo'yicha mock natijalari topilmadi.", fontsize=10, fontname=font_reg, color=c_text_muted, align=1)
+        else:
+            for idx, a in enumerate(qs, start=1):
+                if current_y + row_h > bottom_limit:
+                    page = doc.new_page(width=page_w, height=page_h)
+                    setup_page_fonts(page)
+                    page.draw_rect(pymupdf.Rect(margin_x, 18, margin_x + table_w, 21), color=c_accent, fill=c_accent)
+                    page.insert_text(pymupdf.Point(margin_x, 34), f"ILMILDIZI • MOCK IMTIHON HISOBOTI — {clean_txt(selected_subject_name, 30)} ({selected_date_display})", fontsize=8, fontname=font_bold, color=c_navy)
+                    page.insert_text(pymupdf.Point(margin_x + table_w - 130, 34), f"Vaqt: {now_local}", fontsize=7, fontname=font_reg, color=c_text_muted)
+                    current_y = 40
+                    current_y = draw_table_headers(page, current_y)
+
+                is_even = (idx % 2 == 0)
+                row_bg = c_zebra if is_even else c_white
+                page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + row_h), color=c_border, fill=row_bg, width=0.5)
+
+                profile = getattr(a, 'profile', None)
+                u = None
+                if profile:
+                    try:
+                        u = profile.user
+                    except Exception:
+                        u = None
+                user_full = clean_txt(f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() or getattr(u, 'username', '') or "Noma'lum", 28)
+                contact_str = clean_txt(_format_user_contact(u, profile), 22)
+                grade, _ = _calculate_grade(a.score, a.correct_answers)
+
+                test_obj = getattr(a, 'test', None)
+                subj_obj = getattr(test_obj, 'subject', None) if test_obj else None
+                test_full = test_obj.title if test_obj else "Mock"
+                subj_name = subj_obj.name if subj_obj else "Fan"
+                test_col_text = clean_txt(f"{subj_name} • {test_full}", 34)
+
+                # Savollar tahlili: To'g'ri / Xato / Bo'sh
+                c_ans = a.correct_answers if a.correct_answers is not None else 0
+                w_ans = a.wrong_answers if a.wrong_answers is not None else 0
+                s_ans = a.skipped_answers if a.skipped_answers is not None else 0
+                total_q = c_ans + w_ans + s_ans
+                if not total_q and test_obj:
+                    try:
+                        total_q = test_obj.questions.count()
+                    except Exception:
+                        total_q = 45
+                total_q = total_q or 45
+                empty_q = max(0, total_q - c_ans - w_ans)
+                answers_breakdown = f"{c_ans} / {w_ans} / {empty_q}"
+
+                score_str = f"{float(a.score):.1f}%" if a.score is not None else "0.0%"
+                max_mins = test_obj.duration_minutes if (test_obj and getattr(test_obj, 'duration_minutes', None)) else 90
+                duration = _format_duration_safe(a.started_at, a.completed_at, max_mins)
+
+                dt_str = "—"
+                if a.completed_at:
+                    try:
+                        dt_obj = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+                        dt_str = dt_obj.strftime('%d.%m.%Y %H:%M')
+                    except Exception:
+                        dt_str = str(a.completed_at)[:16]
+
+                cur_x = margin_x
+                for col_idx, (col_name, w, align) in enumerate(columns):
+                    r = pymupdf.Rect(cur_x + 3, current_y + 3, cur_x + w - 3, current_y + row_h - 2)
+
+                    if col_idx == 0:
+                        # Top-3 Oltin, Kumush, Bronza nishonlari
+                        if idx == 1:
+                            badge_w, badge_h = 17, 14
+                            bx = cur_x + (w - badge_w) / 2
+                            by = current_y + (row_h - badge_h) / 2
+                            page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(217/255, 119/255, 6/255), fill=(254/255, 243/255, 199/255), width=0.7)
+                            page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "1", fontsize=7.8, fontname=font_bold, color=(180/255, 83/255, 9/255), align=1)
+                        elif idx == 2:
+                            badge_w, badge_h = 17, 14
+                            bx = cur_x + (w - badge_w) / 2
+                            by = current_y + (row_h - badge_h) / 2
+                            page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(148/255, 163/255, 184/255), fill=(241/255, 245/255, 249/255), width=0.7)
+                            page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "2", fontsize=7.8, fontname=font_bold, color=(71/255, 85/255, 105/255), align=1)
+                        elif idx == 3:
+                            badge_w, badge_h = 17, 14
+                            bx = cur_x + (w - badge_w) / 2
+                            by = current_y + (row_h - badge_h) / 2
+                            page.draw_rect(pymupdf.Rect(bx, by, bx + badge_w, by + badge_h), color=(180/255, 83/255, 9/255), fill=(254/255, 237/255, 213/255), width=0.7)
+                            page.insert_textbox(pymupdf.Rect(bx, by + 1, bx + badge_w, by + badge_h), "3", fontsize=7.8, fontname=font_bold, color=(154/255, 52/255, 18/255), align=1)
+                        else:
+                            page.insert_textbox(r, str(idx), fontsize=7.5, fontname=font_reg, color=c_text_muted, align=1)
+                    elif col_idx == 1:
+                        page.insert_textbox(r, user_full, fontsize=7.8, fontname=font_bold, color=c_navy, align=0)
+                    elif col_idx == 2:
+                        page.insert_textbox(r, contact_str, fontsize=7.2, fontname=font_reg, color=c_text_muted, align=0)
+                    elif col_idx == 3:
+                        page.insert_textbox(r, test_col_text, fontsize=7.2, fontname=font_reg, color=c_text_dark, align=0)
+                    elif col_idx == 4:
+                        page.insert_textbox(r, score_str, fontsize=7.8, fontname=font_bold, color=c_navy, align=1)
+                    elif col_idx == 5:
+                        # Rasmiy daraja nishoni (A+, A, B+, B, C+, C)
+                        gb_w, gb_h = 24, 13
+                        gb_x = cur_x + (w - gb_w) / 2
+                        gb_y = current_y + (row_h - gb_h) / 2
+                        if grade.startswith('A'):
+                            fill_c, text_c, border_c = (236/255, 253/255, 245/255), (4/255, 120/255, 87/255), (167/255, 243/255, 208/255)
+                        elif grade.startswith('B'):
+                            fill_c, text_c, border_c = (240/255, 249/255, 255/255), (3/255, 105/255, 161/255), (186/255, 230/255, 253/255)
+                        elif grade.startswith('C'):
+                            fill_c, text_c, border_c = (254/255, 243/255, 199/255), (180/255, 83/255, 9/255), (253/255, 230/255, 138/255)
+                        else:
+                            fill_c, text_c, border_c = (241/255, 245/255, 249/255), (100/255, 116/255, 139/255), (203/255, 213/255, 225/255)
+                        page.draw_rect(pymupdf.Rect(gb_x, gb_y, gb_x + gb_w, gb_y + gb_h), color=border_c, fill=fill_c, width=0.6)
+                        page.insert_textbox(pymupdf.Rect(gb_x, gb_y + 1, gb_x + gb_w, gb_y + gb_h), grade, fontsize=7.2, fontname=font_bold, color=text_c, align=1)
+                    elif col_idx == 6:
+                        page.insert_textbox(r, answers_breakdown, fontsize=7.5, fontname=font_reg, color=c_text_dark, align=1)
+                    elif col_idx == 7:
+                        page.insert_textbox(r, duration, fontsize=7, fontname=font_reg, color=c_text_muted, align=1)
+                    elif col_idx == 8:
+                        page.insert_textbox(r, dt_str, fontsize=7, fontname=font_reg, color=c_text_muted, align=1)
+
+                    cur_x += w
+
+                current_y += row_h
+
+        total_pages = doc.page_count
+        for p_num, p in enumerate(doc, start=1):
+            p.draw_line(pymupdf.Point(margin_x, page_h - 24), pymupdf.Point(margin_x + table_w, page_h - 24), color=c_border, width=0.5)
+            p.insert_text(pymupdf.Point(margin_x, page_h - 13), "IlmIldizi intellektual ta'lim platformasi • Rasmiy elektron reyting hisoboti • https://ilmildizi.uz", fontsize=6.8, fontname=font_reg, color=c_text_muted)
+            p.insert_text(pymupdf.Point(margin_x + table_w - 70, page_h - 13), f"Sahifa {p_num} / {total_pages}", fontsize=7, fontname=font_bold, color=c_text_muted)
+
+        pdf_bytes = doc.tobytes()
+        doc.close()
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        clean_subj = selected_subject_name.replace(' ', '_')
         clean_date = selected_date_display.replace('.', '_')
         response['Content-Disposition'] = f'attachment; filename="mock_hisoboti_{clean_subj}_{clean_date}.pdf"'
         return response
@@ -2130,3 +2327,493 @@ def mock_attempts_export_pdf_api(request):
             content_type="text/plain; charset=utf-8",
             status=500
         )
+
+
+# ============================================================ PROMO CODES
+@api_view(['GET', 'POST'])
+@permission_classes([IsSuperAdmin])
+def promocodes_api(request):
+    if request.method == 'GET':
+        promos = PromoCode.objects.select_related('plan').all()
+        results = []
+        for p in promos:
+            rev = Payment.objects.filter(promocode=p, status='approved').aggregate(s=Sum('amount'))['s'] or 0
+            results.append({
+                'id': p.id,
+                'code': p.code,
+                'description': p.description,
+                'discount_type': p.discount_type,
+                'discount_value': float(p.discount_value),
+                'plan_id': p.plan_id,
+                'plan_name': p.plan.name if p.plan else "Barcha tariflar",
+                'max_uses': p.max_uses,
+                'current_uses': p.current_uses,
+                'valid_from': p.valid_from.isoformat() if p.valid_from else None,
+                'valid_until': p.valid_until.isoformat() if p.valid_until else None,
+                'is_active': p.is_active,
+                'is_valid': p.is_valid(),
+                'total_revenue': float(rev),
+                'created_at': p.created_at.isoformat() if p.created_at else None,
+            })
+        plans = [{'id': plan.id, 'name': plan.name, 'price': float(plan.price)} for plan in SubscriptionPlan.objects.filter(is_active=True)]
+        return Response({'results': results, 'plans': plans})
+
+    # POST create
+    code = (request.data.get('code') or '').strip().upper()
+    if not code:
+        return Response({'error': "Promokod kodi kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
+    if PromoCode.objects.filter(code=code).exists():
+        return Response({'error': f"'{code}' promokodi allaqachon mavjud"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        discount_value = float(request.data.get('discount_value', 0))
+    except (ValueError, TypeError):
+        return Response({'error': "Chegirma qiymati noto'g'ri"}, status=status.HTTP_400_BAD_REQUEST)
+
+    discount_type = request.data.get('discount_type', 'percent')
+    plan_id = request.data.get('plan_id')
+    max_uses = int(request.data.get('max_uses') or 0)
+    valid_until = request.data.get('valid_until') or None
+    description = (request.data.get('description') or '').strip()
+
+    p = PromoCode.objects.create(
+        code=code,
+        description=description,
+        discount_type=discount_type,
+        discount_value=discount_value,
+        plan_id=plan_id if plan_id else None,
+        max_uses=max_uses,
+        valid_until=valid_until,
+        is_active=True
+    )
+    return Response({'id': p.id, 'code': p.code, 'message': "Promokod muvaffaqiyatli yaratildi"}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsSuperAdmin])
+def promocode_detail_api(request, pk):
+    p = get_object_or_404(PromoCode, pk=pk)
+    p.delete()
+    return Response({'message': "Promokod o'chirildi"})
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def promocode_toggle_api(request, pk):
+    p = get_object_or_404(PromoCode, pk=pk)
+    p.is_active = not p.is_active
+    p.save(update_fields=['is_active'])
+    return Response({'is_active': p.is_active, 'message': "Holati o'zgartirildi"})
+
+
+# ============================================================ FINANCE
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def financial_analytics_api(request):
+    today = timezone.localdate()
+    days = [today - timedelta(days=i) for i in range(29, -1, -1)]
+    daily_revenue = []
+    for d in days:
+        d_approved = Payment.objects.filter(status='approved', created_at__date=d)
+        rev = d_approved.aggregate(s=Sum('amount'))['s'] or 0
+        cnt = d_approved.count()
+        daily_revenue.append({
+            'date': d.strftime('%d.%m'),
+            'amount': float(rev),
+            'count': cnt,
+        })
+
+    # Plans breakdown
+    by_plan = []
+    for plan in SubscriptionPlan.objects.all():
+        p_agg = Payment.objects.filter(plan=plan, status='approved').aggregate(s=Sum('amount'), c=Count('id'))
+        by_plan.append({
+            'name': plan.name,
+            'plan_type': plan.plan_type,
+            'amount': float(p_agg['s'] or 0),
+            'count': p_agg['c'] or 0,
+        })
+
+    # Sources breakdown (web vs bot)
+    by_source = []
+    for src, label in [('web', 'Web App'), ('bot', 'Telegram Bot')]:
+        s_agg = Payment.objects.filter(source=src, status='approved').aggregate(s=Sum('amount'), c=Count('id'))
+        by_source.append({
+            'source': src,
+            'label': label,
+            'amount': float(s_agg['s'] or 0),
+            'count': s_agg['c'] or 0,
+        })
+
+    # Status counts
+    status_counts = {
+        'approved': Payment.objects.filter(status='approved').count(),
+        'pending': Payment.objects.filter(status='pending').count(),
+        'rejected': Payment.objects.filter(status='rejected').count(),
+        'awaiting_screenshot': Payment.objects.filter(status='awaiting_screenshot').count(),
+    }
+
+    # Summary
+    total_rev = Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0
+    today_rev = Payment.objects.filter(status='approved', created_at__date=today).aggregate(s=Sum('amount'))['s'] or 0
+    first_day_month = today.replace(day=1)
+    month_rev = Payment.objects.filter(status='approved', created_at__date__gte=first_day_month).aggregate(s=Sum('amount'))['s'] or 0
+    approved_cnt = status_counts['approved']
+    avg_check = round(float(total_rev) / approved_cnt, 2) if approved_cnt else 0
+
+    return Response({
+        'summary': {
+            'total_revenue': float(total_rev),
+            'today_revenue': float(today_rev),
+            'month_revenue': float(month_rev),
+            'approved_count': approved_cnt,
+            'pending_count': status_counts['pending'],
+            'avg_check': avg_check,
+        },
+        'daily_revenue': daily_revenue,
+        'by_plan': by_plan,
+        'by_source': by_source,
+        'status_counts': status_counts,
+    })
+
+
+# ============================================================ TELEGRAM BOT CENTER
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def telegram_bot_status_api(request):
+    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
+    has_token = bool(token)
+    bot_info = None
+    webhook_info = None
+    error = None
+
+    if has_token:
+        try:
+            me_res = tg_api_call('getMe')
+            if me_res.get('ok'):
+                bot_info = me_res.get('result')
+            else:
+                error = me_res.get('description', "Telegram getMe muvaffaqiyatsiz")
+
+            wh_res = tg_api_call('getWebhookInfo')
+            if wh_res.get('ok'):
+                webhook_info = wh_res.get('result')
+        except Exception as e:
+            error = str(e)
+    else:
+        error = "TELEGRAM_BOT_TOKEN sozlanmagan"
+
+    # Profile statistics
+    total_users = User.objects.count()
+    tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0').count()
+    tg_usernames = Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count()
+
+    return Response({
+        'has_token': has_token,
+        'bot_info': bot_info,
+        'webhook_info': webhook_info,
+        'error': error,
+        'stats': {
+            'total_users': total_users,
+            'tg_connected': tg_connected,
+            'tg_usernames': tg_usernames,
+            'tg_pct': round(tg_connected / (total_users or 1) * 100, 1),
+        },
+        'default_channel': getattr(settings, 'TELEGRAM_REQUIRED_CHANNEL', '') or '',
+    })
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsSuperAdmin])
+def telegram_channels_api(request):
+    if request.method == 'GET':
+        channels = RequiredChannel.objects.all()
+        return Response([{
+            'id': c.id,
+            'title': c.title,
+            'username_or_id': c.username_or_id,
+            'invite_url': c.invite_url,
+            'is_active': c.is_active,
+            'order': c.order,
+            'created_at': c.created_at.isoformat() if c.created_at else None,
+        } for c in channels])
+
+    title = (request.data.get('title') or '').strip()
+    username_or_id = (request.data.get('username_or_id') or '').strip()
+    invite_url = (request.data.get('invite_url') or '').strip()
+    is_active = bool(request.data.get('is_active', True))
+    order = int(request.data.get('order') or 0)
+
+    if not title or not username_or_id:
+        return Response({'error': "Kanal nomi va @username yoki id kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
+
+    c = RequiredChannel.objects.create(
+        title=title,
+        username_or_id=username_or_id,
+        invite_url=invite_url,
+        is_active=is_active,
+        order=order
+    )
+    return Response({'id': c.id, 'title': c.title, 'message': "Kanal qo'shildi"}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsSuperAdmin])
+def telegram_channel_delete_api(request, pk):
+    c = get_object_or_404(RequiredChannel, pk=pk)
+    c.delete()
+    return Response({'message': "Kanal o'chirildi"})
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def telegram_reset_menu_api(request):
+    try:
+        from django.core.management import call_command
+        import io
+        out = io.StringIO()
+        call_command('reset_menu_button', stdout=out)
+        return Response({'success': True, 'output': out.getvalue() or "Menyu tugmasi yangilandi"})
+    except Exception as e:
+        logger.exception("Error resetting menu button: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ============================================================ USERS CRM EXPORT
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def users_export_csv_api(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    today_str = timezone.localdate().strftime('%Y_%m_%d')
+    response['Content-Disposition'] = f'attachment; filename="ilmildizi_students_{today_str}.csv"'
+    response.write('\ufeff')  # Excel UTF-8 BOM
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'ID', 'Foydalanuvchi nomi', 'To\'liq ismi', 'Email', 'Telefon',
+        'Roli', 'Telegram Username', 'Telegram ID', 'Jami testlar',
+        'Topshirilgan testlar', 'O\'rtacha ball', 'Tangalar (Coins)',
+        'Tajriba (XP)', 'Streak (kun)', 'Premium', 'Ro\'yxatdan o\'tgan sana', 'Oxirgi faollik'
+    ])
+
+    users = (
+        User.objects
+        .select_related('profile')
+        .all()
+        .order_by('-date_joined')
+    )
+
+    for u in users:
+        p = getattr(u, 'profile', None)
+        u_attempts = Attempt.objects.filter(profile=p) if p else Attempt.objects.none()
+        total_att = u_attempts.count()
+        comp_att = u_attempts.filter(is_completed=True)
+        comp_cnt = comp_att.count()
+        avg_score = comp_att.aggregate(avg=Avg('score'))['avg']
+        avg_score_str = f"{avg_score:.1f}" if avg_score is not None else "0.0"
+
+        writer.writerow([
+            u.id,
+            u.username,
+            f"{u.first_name} {u.last_name}".strip() or u.username,
+            u.email or '',
+            getattr(p, 'phone', '') or '',
+            getattr(p, 'role', 'student'),
+            getattr(p, 'telegram_username', '') or '',
+            getattr(p, 'telegram_id', '') or '',
+            total_att,
+            comp_cnt,
+            avg_score_str,
+            getattr(p, 'coins', 0) if p else 0,
+            getattr(p, 'xp', 0) if p else 0,
+            getattr(p, 'streak', 0) if p else 0,
+            "Ha" if (p and (p.is_premium or p.premium_mock_test_unlocked)) else "Yo'q",
+            u.date_joined.strftime('%Y-%m-%d %H:%M') if u.date_joined else '',
+            p.last_seen_at.strftime('%Y-%m-%d %H:%M') if (p and p.last_seen_at) else (p.last_active_date.strftime('%Y-%m-%d') if (p and p.last_active_date) else ''),
+        ])
+
+    return response
+
+
+# ============================================================ SYSTEM HEALTH
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def system_health_api(request):
+    import sys
+    import django
+    import time
+    from django.db import connection
+
+    # DB latency test
+    db_ok = False
+    db_time_ms = 0
+    try:
+        t0 = time.time()
+        with connection.cursor() as c:
+            c.execute("SELECT 1")
+        db_time_ms = round((time.time() - t0) * 1000, 2)
+        db_ok = True
+    except Exception as e:
+        logger.error("DB health check failed: %s", e)
+
+    # Redis/Cache latency test
+    cache_ok = False
+    cache_time_ms = 0
+    try:
+        t0 = time.time()
+        test_key = 'health:cache:test'
+        cache.set(test_key, '1', 5)
+        cache_val = cache.get(test_key)
+        cache_time_ms = round((time.time() - t0) * 1000, 2)
+        cache_ok = (cache_val == '1')
+    except Exception as e:
+        logger.error("Cache health check failed: %s", e)
+
+    # Table counts
+    table_counts = {
+        'users': User.objects.count(),
+        'attempts': Attempt.objects.count(),
+        'testsets': TestSet.objects.count(),
+        'questions': Question.objects.count(),
+        'lessons': Lesson.objects.count(),
+        'payments': Payment.objects.count(),
+        'audit_logs': AuditLog.objects.count(),
+    }
+
+    return Response({
+        'status': 'healthy' if (db_ok and cache_ok) else 'degraded',
+        'database': {'status': 'connected' if db_ok else 'error', 'latency_ms': db_time_ms},
+        'cache': {'status': 'connected' if cache_ok else 'error', 'latency_ms': cache_time_ms},
+        'environment': {
+            'python_version': sys.version.split()[0],
+            'django_version': django.__version__,
+            'server_time': timezone.now().isoformat(),
+            'debug_mode': settings.DEBUG,
+            'time_zone': str(timezone.get_current_timezone()),
+        },
+        'table_counts': table_counts,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def system_cache_flush_api(request):
+    try:
+        cache.clear()
+        return Response({'success': True, 'message': "Kesh muvaffaqiyatli tozalandi (Cache flushed)"})
+    except Exception as e:
+        logger.exception("Cache flush error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def system_logs_api(request):
+    import os
+    log_file = os.path.join(settings.BASE_DIR, '..', 'logs', 'django.log')
+    if not os.path.exists(log_file):
+        log_file = os.path.join(settings.BASE_DIR, 'logs', 'django.log')
+
+    lines = []
+    if os.path.exists(log_file):
+        try:
+            with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
+                all_lines = f.readlines()
+                lines = all_lines[-100:]  # Last 100 lines
+        except Exception as e:
+            lines = [f"Log faylini o'qib bo'lmadi: {str(e)}"]
+    else:
+        # Fallback to recent audit logs as system events
+        recent_audits = AuditLog.objects.select_related('user')[:50]
+        lines = [f"[{a.timestamp.strftime('%Y-%m-%d %H:%M:%S')}] {a.summary_uz}" for a in recent_audits]
+
+    return Response({'lines': lines})
+
+
+# ============================================================ LIVE MOCK MONITOR
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def live_mock_monitor_api(request):
+    # Active live mock test sets
+    live_tests = (
+        TestSet.objects
+        .filter(Q(is_live_mock=True) | Q(scheduled_at__isnull=False))
+        .order_by(F('scheduled_at').desc(nulls_last=True))[:10]
+    )
+    tests_data = []
+    for t in live_tests:
+        tests_data.append({
+            'id': t.id,
+            'title': t.title,
+            'subject_name': t.subject.name if t.subject else "Asosiy",
+            'scheduled_at': t.scheduled_at.isoformat() if t.scheduled_at else None,
+            'reminders_count': t.remind_users.count() if hasattr(t, 'remind_users') else 0,
+            'is_published': t.is_published,
+            'is_live_mock': t.is_live_mock,
+        })
+
+    # Ongoing in-progress attempts right now
+    now = timezone.now()
+    active_cutoff = now - timedelta(hours=3)
+    ongoing_attempts = (
+        Attempt.objects
+        .filter(is_completed=False, started_at__gte=active_cutoff)
+        .select_related('profile__user', 'test')
+        .order_by('-started_at')[:30]
+    )
+    active_takers = []
+    for a in ongoing_attempts:
+        u = a.profile.user if a.profile else None
+        elapsed_mins = int((now - a.started_at).total_seconds() // 60)
+        answered_cnt = AttemptAnswer.objects.filter(attempt=a).count()
+        active_takers.append({
+            'attempt_id': a.id,
+            'user_name': f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() or getattr(u, 'username', '') or "O'quvchi",
+            'username': getattr(u, 'username', '') or '',
+            'telegram_username': getattr(a.profile, 'telegram_username', '') or '',
+            'test_title': a.test.title if a.test else "Test",
+            'started_at': a.started_at.isoformat(),
+            'elapsed_minutes': elapsed_mins,
+            'answered_count': answered_cnt,
+        })
+
+    return Response({
+        'live_tests': tests_data,
+        'active_takers': active_takers,
+        'active_count': len(active_takers),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def trigger_mock_reminder_api(request, pk):
+    test = get_object_or_404(TestSet, pk=pk)
+    if not hasattr(test, 'remind_users'):
+        return Response({'error': "Bu testda eslatma oluvchilar ro'yxati mavjud emas"}, status=status.HTTP_400_BAD_REQUEST)
+
+    users_to_remind = test.remind_users.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0')
+    sent_count = 0
+    fail_count = 0
+
+    message_text = (
+        f"🔔 <b>DIQQAT: Jonli Mock Imtihon boshlanmoqda!</b>\n\n"
+        f"📚 <b>Test:</b> {test.title}\n"
+        f"🎯 <b>Fan:</b> {test.subject.name if test.subject else 'Asosiy'}\n"
+        f"⏱ <b>Davomiyligi:</b> {test.time_limit} daqiqa\n\n"
+        f"Imtihonni topshirish uchun platformaga kiring va o'z bilimingizni sinang!\n"
+        f"👉 https://ilmildizi.uz"
+    )
+
+    for prof in users_to_remind:
+        try:
+            send_telegram_message(prof.telegram_id, message_text)
+            sent_count += 1
+        except Exception:
+            fail_count += 1
+
+    return Response({
+        'success': True,
+        'sent_count': sent_count,
+        'fail_count': fail_count,
+        'message': f"{sent_count} nafar o'quvchiga Telegram eslatmasi yuborildi.",
+    })

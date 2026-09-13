@@ -27,6 +27,43 @@ class SubscriptionPlan(models.Model):
         return [f.strip() for f in self.features_list.split('\n') if f.strip()]
 
 
+class PromoCode(models.Model):
+    DISCOUNT_TYPE_CHOICES = [
+        ('percent', 'Foiz (%)'),
+        ('fixed', "Qat'iy summa (so'm)"),
+    ]
+    code = models.CharField(max_length=50, unique=True, db_index=True)
+    description = models.CharField(max_length=255, blank=True)
+    discount_type = models.CharField(max_length=10, choices=DISCOUNT_TYPE_CHOICES, default='percent')
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True, blank=True, related_name='promocodes')
+    max_uses = models.PositiveIntegerField(default=0, help_text="0 = cheksiz foydalanish")
+    current_uses = models.PositiveIntegerField(default=0)
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_until = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        val = f"{self.discount_value:.0f}%" if self.discount_type == 'percent' else f"{self.discount_value:.0f} so'm"
+        return f"{self.code} (-{val})"
+
+    def is_valid(self) -> bool:
+        if not self.is_active:
+            return False
+        now = timezone.now()
+        if self.valid_from and now < self.valid_from:
+            return False
+        if self.valid_until and now > self.valid_until:
+            return False
+        if self.max_uses > 0 and self.current_uses >= self.max_uses:
+            return False
+        return True
+
+
 class Payment(models.Model):
     STATUS_CHOICES = [
         ('awaiting_screenshot', "Skrinshot kutilmoqda"),
@@ -48,6 +85,8 @@ class Payment(models.Model):
         related_name='payments', help_text="Faqat mock test tarifi uchun: qaysi test sotib olindi",
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    promocode = models.ForeignKey(PromoCode, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments')
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='awaiting_screenshot', db_index=True)
     source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='web')
     screenshot = models.ImageField(upload_to='payment_screenshots/', null=True, blank=True)

@@ -61,7 +61,26 @@ urlpatterns = [
 
     path('surveys/', api.surveys_api, name='surveys'),
     path('mocks/', api.mock_attempts_api, name='mock_attempts'),
+    path('mocks/live/', api.live_mock_monitor_api, name='live_mock_monitor'),
+    path('mocks/<int:pk>/remind/', api.trigger_mock_reminder_api, name='trigger_mock_reminder'),
     path('mocks/export/', api.mock_attempts_export_api, name='mock_attempts_export'),
     path('mocks/export-pdf/', api.mock_attempts_export_pdf_api, name='mock_attempts_export_pdf'),
+
+    path('promocodes/', api.promocodes_api, name='promocodes'),
+    path('promocodes/<int:pk>/', api.promocode_detail_api, name='promocode_detail'),
+    path('promocodes/<int:pk>/toggle/', api.promocode_toggle_api, name='promocode_toggle'),
+
+    path('finance/', api.financial_analytics_api, name='finance'),
+
+    path('telegram/status/', api.telegram_bot_status_api, name='telegram_status'),
+    path('telegram/channels/', api.telegram_channels_api, name='telegram_channels'),
+    path('telegram/channels/<int:pk>/', api.telegram_channel_delete_api, name='telegram_channel_delete'),
+    path('telegram/reset-menu/', api.telegram_reset_menu_api, name='telegram_reset_menu'),
+
+    path('users/export/', api.users_export_csv_api, name='users_export_csv'),
+
+    path('system/health/', api.system_health_api, name='system_health'),
+    path('system/flush-cache/', api.system_cache_flush_api, name='system_flush_cache'),
+    path('system/logs/', api.system_logs_api, name='system_logs'),
 ]
 

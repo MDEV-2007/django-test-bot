@@ -1,9 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Download, Megaphone, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
 import DataTable, { Badge, type Column, type FilterConfig } from '@/components/panel/DataTable';
+import { Button } from '@/components/ui/button';
 
 const FILTERS: FilterConfig[] = [
   { param: 'role', label: 'Rol', options: [
@@ -20,6 +25,32 @@ type UserRow = {
 
 export default function PanelUsersPage() {
   const router = useRouter();
+  const { access } = useAuthStore();
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleExportCsv() {
+    setDownloading(true);
+    try {
+      const res = await fetch('/api/panel/users/export/', {
+        headers: access ? { Authorization: `Bearer ${access}` } : {},
+      });
+      if (!res.ok) throw new Error("CSV yuklab olishda xatolik yuz berdi");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ilmildizi_students_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success("O'quvchilar bazasi CSV formatida yuklab olindi!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Eksportda xatolik");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   const columns: Column<UserRow>[] = [
     { key: 'name', label: 'Foydalanuvchi', render: (u) => u.full_name },
@@ -43,9 +74,28 @@ export default function PanelUsersPage() {
   return (
     <PanelShell>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Foydalanuvchilar</h1>
-          <Link href="/panel/broadcast" className="text-sm text-[var(--accent-text)]">Xabar yuborish</Link>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Foydalanuvchilar</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Platformadagi barcha ro&apos;yxatdan o&apos;tgan o&apos;quvchi va o&apos;qituvchilar.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCsv}
+              disabled={downloading}
+              className="gap-1.5 text-xs h-9 border-[#262c3d] bg-[#11141c] text-slate-200 hover:text-white"
+            >
+              {downloading ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5 text-emerald-400" />}
+              Excel/CSV Yuklash
+            </Button>
+            <Link href="/panel/broadcast">
+              <Button size="sm" className="gap-1.5 text-xs h-9 bg-primary/15 text-[var(--accent-text)] hover:bg-primary/25 border border-[var(--accent-border)]">
+                <Megaphone className="size-3.5" /> Xabar yuborish
+              </Button>
+            </Link>
+          </div>
         </div>
         <DataTable
           endpoint="/api/panel/users/" columns={columns}
