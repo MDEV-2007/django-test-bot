@@ -17,6 +17,7 @@ import logging
 import re
 
 import requests
+import time
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -106,19 +107,40 @@ _UNREACHABLE = (
 CONNECT_TIMEOUT = 5
 
 
+def _log_ai_usage(provider, model_name, endpoint, prompt_tokens, completion_tokens, total_tokens, cost, response_time_ms, success, error_message=''):
+    try:
+        from panel.models import AIUsageLog
+        AIUsageLog.objects.create(
+            provider=provider,
+            model_name=model_name or 'llama-3.3-70b-versatile',
+            endpoint=endpoint,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            estimated_cost_usd=cost,
+            response_time_ms=response_time_ms,
+            success=success,
+            error_message=error_message,
+        )
+    except Exception as e:
+        logger.debug("Failed to record AIUsageLog: %s", e)
+
+
 def _ask_groq(messages, temperature, response_format, timeout, on_error=None):
     api_key = settings.GROQ_API_KEY
     if not api_key or _is_down('groq'):
         return None
 
+    model_name = settings.GROQ_MODEL or 'llama-3.3-70b-versatile'
     payload = {
-        "model": settings.GROQ_MODEL,
+        "model": model_name,
         "messages": messages,
         "temperature": temperature,
     }
     if response_format:
         payload["response_format"] = response_format
 
+    t0 = time.time()
     try:
         resp = requests.post(
             GROQ_API_URL,
@@ -126,23 +148,44 @@ def _ask_groq(messages, temperature, response_format, timeout, on_error=None):
             json=payload,
             timeout=(CONNECT_TIMEOUT, timeout),
         )
+        elapsed_ms = int((time.time() - t0) * 1000)
         resp.raise_for_status()
-        return _strip_think(resp.json()["choices"][0]["message"]["content"])
+        resp_json = resp.json()
+        usage = resp_json.get("usage", {})
+        prompt_t = usage.get("prompt_tokens", 0)
+        comp_t = usage.get("completion_tokens", 0)
+        total_t = usage.get("total_tokens", prompt_t + comp_t)
+        # Groq Llama-3.3-70B pricing: ~$0.59 / 1M input, $0.79 / 1M output
+        cost = round((prompt_t * 0.00000059) + (comp_t * 0.00000079), 6)
+        _log_ai_usage(
+            provider='groq',
+            model_name=model_name,
+            endpoint='ask_groq',
+            prompt_tokens=prompt_t,
+            completion_tokens=comp_t,
+            total_tokens=total_t,
+            cost=cost,
+            response_time_ms=elapsed_ms,
+            success=True,
+        )
+        return _strip_think(resp_json["choices"][0]["message"]["content"])
     except _UNREACHABLE as exc:
+        elapsed_ms = int((time.time() - t0) * 1000)
+        _log_ai_usage('groq', model_name, 'ask_groq', 0, 0, 0, 0, elapsed_ms, False, str(exc))
         _mark_down('groq', exc)
         return None
     except requests.exceptions.HTTPError as exc:
-        # Groq javob tanasida sababni aniq yozadi ("model ... has been decommissioned",
-        # "rate limit reached", "invalid api key"), status kodning o'zi esa aytmaydi:
-        # to'xtatilgan model ham, noto'g'ri manzil ham bir xil 404 beradi. Sababsiz
-        # kodni ko'rib, kalit aybdor deb o'ylash oson — shuning uchun tanani ham yozamiz.
+        elapsed_ms = int((time.time() - t0) * 1000)
         status = exc.response.status_code if exc.response is not None else None
         body = (exc.response.text or '')[:300] if exc.response is not None else ''
+        _log_ai_usage('groq', model_name, 'ask_groq', 0, 0, 0, 0, elapsed_ms, False, f"{status}: {body}")
         logger.error("Groq API %s: %s", status, body)
         if on_error:
             on_error('groq', status, body)
         return None
-    except Exception:
+    except Exception as exc:
+        elapsed_ms = int((time.time() - t0) * 1000)
+        _log_ai_usage('groq', model_name, 'ask_groq', 0, 0, 0, 0, elapsed_ms, False, str(exc))
         logger.exception("Groq API call failed")
         return None
 
