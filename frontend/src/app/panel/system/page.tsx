@@ -34,13 +34,23 @@ export default function SystemHealthPage() {
 
   function loadHealth() {
     setLoading(true);
-    Promise.all([
+    Promise.allSettled([
       apiFetch<SystemHealth>('/api/panel/system/health/'),
       apiFetch<{ lines: string[] }>('/api/panel/system/logs/'),
     ])
       .then(([healthRes, logsRes]) => {
-        setHealth(healthRes);
-        setLogs(logsRes.lines || []);
+        if (healthRes.status === 'fulfilled') {
+          setHealth(healthRes.value);
+        } else {
+          toast.error(healthRes.reason instanceof Error ? healthRes.reason.message : "Tizim holatini yuklashda xatolik");
+        }
+
+        if (logsRes.status === 'fulfilled') {
+          setLogs(logsRes.value?.lines || []);
+        } else {
+          setLogs([]);
+          console.warn("Logs load failed:", logsRes.reason);
+        }
         setLoading(false);
       })
       .catch((e) => {

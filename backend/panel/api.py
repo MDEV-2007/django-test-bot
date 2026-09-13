@@ -2342,97 +2342,93 @@ financial_analytics_api = finance_analytics_api
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def telegram_bot_status_api(request):
+    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '') or ''
+    has_token = bool(token.strip())
+    bot_info = None
+    webhook_info = None
+    error = None
+
+    if has_token:
+        try:
+            me_res = tg_api_call('getMe')
+            if isinstance(me_res, dict) and me_res.get('ok'):
+                bot_info = me_res.get('result')
+            else:
+                desc = me_res.get('description', "Telegram getMe muvaffaqiyatsiz") if isinstance(me_res, dict) else "Telegram javobi xato"
+                error = desc
+        except Exception as e:
+            error = f"getMe xatosi: {str(e)}"
+
+        try:
+            wh_res = tg_api_call('getWebhookInfo')
+            if isinstance(wh_res, dict) and wh_res.get('ok'):
+                webhook_info = wh_res.get('result')
+        except Exception as e:
+            logger.warning("getWebhookInfo error: %s", e)
+    else:
+        error = "TELEGRAM_BOT_TOKEN sozlanmagan"
+
+    # Profile statistics
     try:
-        token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
-        has_token = bool(token)
-        bot_info = None
-        webhook_info = None
-        error = None
+        total_users = User.objects.count()
+    except Exception:
+        total_users = 0
 
-        if has_token:
-            try:
-                me_res = tg_api_call('getMe')
-                if isinstance(me_res, dict) and me_res.get('ok'):
-                    bot_info = me_res.get('result')
-                else:
-                    desc = me_res.get('description', "Telegram getMe muvaffaqiyatsiz") if isinstance(me_res, dict) else "Telegram javobi xato"
-                    error = desc
-            except Exception as e:
-                error = f"getMe xatosi: {str(e)}"
+    try:
+        tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0').count()
+    except Exception:
+        tg_connected = 0
 
-            try:
-                wh_res = tg_api_call('getWebhookInfo')
-                if isinstance(wh_res, dict) and wh_res.get('ok'):
-                    webhook_info = wh_res.get('result')
-            except Exception as e:
-                logger.warning("getWebhookInfo error: %s", e)
-        else:
-            error = "TELEGRAM_BOT_TOKEN sozlanmagan"
+    try:
+        tg_usernames = Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count()
+    except Exception:
+        tg_usernames = 0
 
-        # Profile statistics
-        try:
-            total_users = User.objects.count()
-        except Exception:
-            total_users = 0
-
-        try:
-            tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0').count()
-        except Exception:
-            tg_connected = 0
-
-        try:
-            tg_usernames = Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count()
-        except Exception:
-            tg_usernames = 0
-
-        return Response({
-            'has_token': has_token,
-            'bot_info': bot_info,
-            'webhook_info': webhook_info,
-            'error': error,
-            'stats': {
-                'total_users': total_users,
-                'tg_connected': tg_connected,
-                'tg_usernames': tg_usernames,
-                'tg_pct': round(tg_connected / (total_users or 1) * 100, 1),
-            },
-            'default_channel': getattr(settings, 'TELEGRAM_REQUIRED_CHANNEL', '') or '',
-        })
-    except Exception as e:
-        logger.exception("telegram_bot_status_api error: %s", e)
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response({
+        'has_token': has_token,
+        'bot_info': bot_info,
+        'webhook_info': webhook_info,
+        'error': error,
+        'stats': {
+            'total_users': total_users,
+            'tg_connected': tg_connected,
+            'tg_usernames': tg_usernames,
+            'tg_pct': round(tg_connected / (total_users or 1) * 100, 1),
+        },
+        'default_channel': getattr(settings, 'TELEGRAM_REQUIRED_CHANNEL', '') or '',
+    })
 
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsSuperAdmin])
 def telegram_channels_api(request):
+    if request.method == 'GET':
+        try:
+            channels = list(RequiredChannel.objects.all())
+        except Exception as db_err:
+            logger.warning("RequiredChannel table query warning: %s", db_err)
+            return Response([])
+        return Response([{
+            'id': c.id,
+            'title': c.title,
+            'username_or_id': c.username_or_id,
+            'invite_url': c.invite_url,
+            'is_active': c.is_active,
+            'order': c.order,
+            'created_at': c.created_at.isoformat() if getattr(c, 'created_at', None) else None,
+        } for c in channels])
+
+    # POST
+    title = (request.data.get('title') or '').strip()
+    username_or_id = (request.data.get('username_or_id') or '').strip()
+    invite_url = (request.data.get('invite_url') or '').strip()
+    is_active = bool(request.data.get('is_active', True))
+    order = int(request.data.get('order') or 0)
+
+    if not title or not username_or_id:
+        return Response({'error': "Kanal nomi va @username yoki id kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        if request.method == 'GET':
-            try:
-                channels = list(RequiredChannel.objects.all())
-            except Exception as db_err:
-                logger.warning("RequiredChannel table query warning: %s", db_err)
-                return Response([])
-            return Response([{
-                'id': c.id,
-                'title': c.title,
-                'username_or_id': c.username_or_id,
-                'invite_url': c.invite_url,
-                'is_active': c.is_active,
-                'order': c.order,
-                'created_at': c.created_at.isoformat() if c.created_at else None,
-            } for c in channels])
-
-        # POST
-        title = (request.data.get('title') or '').strip()
-        username_or_id = (request.data.get('username_or_id') or '').strip()
-        invite_url = (request.data.get('invite_url') or '').strip()
-        is_active = bool(request.data.get('is_active', True))
-        order = int(request.data.get('order') or 0)
-
-        if not title or not username_or_id:
-            return Response({'error': "Kanal nomi va @username yoki id kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
-
         c = RequiredChannel.objects.create(
             title=title,
             username_or_id=username_or_id,
@@ -2442,8 +2438,8 @@ def telegram_channels_api(request):
         )
         return Response({'id': c.id, 'title': c.title, 'message': "Kanal qo'shildi"}, status=status.HTTP_201_CREATED)
     except Exception as e:
-        logger.exception("telegram_channels_api error: %s", e)
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.exception("telegram_channels_api create error: %s", e)
+        return Response({'error': f"Kanalni saqlashda xatolik: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
@@ -2455,7 +2451,7 @@ def telegram_channel_delete_api(request, pk):
         return Response({'message': "Kanal o'chirildi"})
     except Exception as e:
         logger.exception("telegram_channel_delete_api error: %s", e)
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -2532,59 +2528,70 @@ def users_export_csv_api(request):
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def system_health_api(request):
+    # DB latency test
+    db_ok = False
+    db_time_ms = 0
     try:
-        # DB latency test
-        db_ok = False
-        db_time_ms = 0
-        try:
-            t0 = time.time()
-            with connection.cursor() as c:
-                c.execute("SELECT 1")
-            db_time_ms = round((time.time() - t0) * 1000, 2)
-            db_ok = True
-        except Exception as e:
-            logger.error("DB health check failed: %s", e)
-
-        # Redis/Cache latency test
-        cache_ok = False
-        cache_time_ms = 0
-        try:
-            t0 = time.time()
-            test_key = 'health:cache:test'
-            cache.set(test_key, '1', 5)
-            cache_val = cache.get(test_key)
-            cache_time_ms = round((time.time() - t0) * 1000, 2)
-            cache_ok = (cache_val == '1')
-        except Exception as e:
-            logger.error("Cache health check failed: %s", e)
-
-        # Table counts
-        table_counts = {
-            'users': User.objects.count(),
-            'attempts': Attempt.objects.count(),
-            'testsets': TestSet.objects.count(),
-            'questions': Question.objects.count(),
-            'lessons': Lesson.objects.count(),
-            'payments': Payment.objects.count(),
-            'audit_logs': AuditLog.objects.count(),
-        }
-
-        return Response({
-            'status': 'healthy' if (db_ok and cache_ok) else 'degraded',
-            'database': {'status': 'connected' if db_ok else 'error', 'latency_ms': db_time_ms},
-            'cache': {'status': 'connected' if cache_ok else 'error', 'latency_ms': cache_time_ms},
-            'environment': {
-                'python_version': sys.version.split()[0],
-                'django_version': django.__version__,
-                'server_time': timezone.now().isoformat(),
-                'debug_mode': getattr(settings, 'DEBUG', False),
-                'time_zone': str(timezone.get_current_timezone()),
-            },
-            'table_counts': table_counts,
-        })
+        t0 = time.time()
+        with connection.cursor() as c:
+            c.execute("SELECT 1")
+        db_time_ms = round((time.time() - t0) * 1000, 2)
+        db_ok = True
     except Exception as e:
-        logger.exception("system_health_api error: %s", e)
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error("DB health check failed: %s", e)
+
+    # Redis/Cache latency test
+    cache_ok = False
+    cache_time_ms = 0
+    try:
+        t0 = time.time()
+        test_key = 'health:cache:test'
+        cache.set(test_key, '1', 5)
+        cache_val = cache.get(test_key)
+        cache_time_ms = round((time.time() - t0) * 1000, 2)
+        cache_ok = (cache_val == '1')
+    except Exception as e:
+        logger.error("Cache health check failed: %s", e)
+
+    def safe_count(model_cls):
+        try:
+            return model_cls.objects.count()
+        except Exception:
+            return 0
+
+    table_counts = {
+        'users': safe_count(User),
+        'attempts': safe_count(Attempt),
+        'testsets': safe_count(TestSet),
+        'questions': safe_count(Question),
+        'lessons': safe_count(Lesson),
+        'payments': safe_count(Payment),
+        'audit_logs': safe_count(AuditLog),
+    }
+
+    try:
+        django_ver = getattr(django, '__version__', '5.x')
+    except Exception:
+        django_ver = '5.x'
+
+    try:
+        tz_name = str(timezone.get_current_timezone())
+    except Exception:
+        tz_name = 'Asia/Tashkent'
+
+    return Response({
+        'status': 'healthy' if (db_ok and cache_ok) else 'degraded',
+        'database': {'status': 'connected' if db_ok else 'error', 'latency_ms': db_time_ms},
+        'cache': {'status': 'connected' if cache_ok else 'error', 'latency_ms': cache_time_ms},
+        'environment': {
+            'python_version': sys.version.split()[0],
+            'django_version': django_ver,
+            'server_time': timezone.now().isoformat(),
+            'debug_mode': getattr(settings, 'DEBUG', False),
+            'time_zone': tz_name,
+        },
+        'table_counts': table_counts,
+    })
 
 
 @api_view(['POST'])
@@ -2595,19 +2602,19 @@ def system_cache_flush_api(request):
         return Response({'success': True, 'message': "Kesh muvaffaqiyatli tozalandi (Cache flushed)"})
     except Exception as e:
         logger.exception("Cache flush error: %s", e)
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': f"Keshni tozalashda xatolik: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def system_logs_api(request):
+    lines = []
     try:
         base_dir = getattr(settings, 'BASE_DIR', '')
         log_file = os.path.join(base_dir, '..', 'logs', 'django.log') if base_dir else ''
         if not (log_file and os.path.exists(log_file)):
             log_file = os.path.join(base_dir, 'logs', 'django.log') if base_dir else ''
 
-        lines = []
         if log_file and os.path.exists(log_file):
             try:
                 with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
@@ -2621,11 +2628,11 @@ def system_logs_api(request):
                 lines = [f"[{a.timestamp.strftime('%Y-%m-%d %H:%M:%S')}] {a.summary_uz}" for a in recent_audits]
             except Exception:
                 lines = ["Audit loglari hozircha mavjud emas."]
-
-        return Response({'lines': lines})
     except Exception as e:
         logger.exception("system_logs_api error: %s", e)
-        return Response({'lines': [f"Loglarni olishda xatolik: {str(e)}"]})
+        lines = [f"Loglarni olishda xatolik: {str(e)}"]
+
+    return Response({'lines': lines})
 
 
 # ============================================================ LIVE MOCK MONITOR
