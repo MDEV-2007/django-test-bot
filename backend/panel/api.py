@@ -1166,11 +1166,21 @@ def mock_attempts_api(request):
     date_str = request.GET.get('date', '').strip()
     if date_str:
         try:
-            from datetime import datetime
+            from datetime import datetime, time
             d = datetime.strptime(date_str, '%Y-%m-%d').date()
-            qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
-        except (ValueError, TypeError):
-            pass
+            day_start = timezone.make_aware(datetime.combine(d, time.min))
+            day_end = timezone.make_aware(datetime.combine(d, time.max))
+            qs = qs.filter(
+                (Q(completed_at__gte=day_start) & Q(completed_at__lte=day_end)) |
+                (Q(started_at__gte=day_start) & Q(started_at__lte=day_end))
+            )
+        except Exception:
+            try:
+                from datetime import datetime
+                d = datetime.strptime(date_str, '%Y-%m-%d').date()
+                qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
+            except Exception:
+                pass
 
     completed = request.GET.get('completed')
     if completed == 'True':
@@ -1206,16 +1216,11 @@ def mock_attempts_api(request):
     gold_count = completed_qs.filter(score__gte=80).count()
 
     # Mavjud fanlar ro'yxati
-    available_subjects = list(
-        Subject.objects.filter(
-            test_sets__in=TestSet.objects.filter(base_filter)
-        ).values('id', 'name').distinct().order_by('name')
-    )
-    if not available_subjects:
-        available_subjects = list(Subject.objects.values('id', 'name').order_by('name'))
+    available_subjects = list(Subject.objects.values('id', 'name').order_by('order', 'name'))
 
     # Mavjud mock testlar ro'yxati (agar fan tanlangan bo'lsa, o'sha fanga mos)
-    mock_tests_qs = TestSet.objects.filter(base_filter)
+    test_mock_filter = Q(is_live_mock=True) | Q(title__icontains='mock')
+    mock_tests_qs = TestSet.objects.filter(test_mock_filter)
     if subject_id and subject_id.isdigit():
         mock_tests_qs = mock_tests_qs.filter(subject_id=int(subject_id))
     available_mocks = list(
@@ -1297,10 +1302,15 @@ def mock_attempts_export_api(request):
     date_str = request.GET.get('date', '').strip()
     if date_str:
         try:
-            from datetime import datetime
+            from datetime import datetime, time
             d = datetime.strptime(date_str, '%Y-%m-%d').date()
-            qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
-        except (ValueError, TypeError):
+            day_start = timezone.make_aware(datetime.combine(d, time.min))
+            day_end = timezone.make_aware(datetime.combine(d, time.max))
+            qs = qs.filter(
+                (Q(completed_at__gte=day_start) & Q(completed_at__lte=day_end)) |
+                (Q(started_at__gte=day_start) & Q(started_at__lte=day_end))
+            )
+        except Exception:
             pass
 
     completed = request.GET.get('completed')
@@ -1397,10 +1407,16 @@ def mock_attempts_export_pdf_api(request):
     date_str = request.GET.get('date', '').strip()
     if date_str:
         try:
+            from datetime import datetime, time
             d = datetime.strptime(date_str, '%Y-%m-%d').date()
-            qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
+            day_start = timezone.make_aware(datetime.combine(d, time.min))
+            day_end = timezone.make_aware(datetime.combine(d, time.max))
+            qs = qs.filter(
+                (Q(completed_at__gte=day_start) & Q(completed_at__lte=day_end)) |
+                (Q(started_at__gte=day_start) & Q(started_at__lte=day_end))
+            )
             selected_date_display = d.strftime('%d.%m.%Y')
-        except (ValueError, TypeError):
+        except Exception:
             pass
 
     completed = request.GET.get('completed')
