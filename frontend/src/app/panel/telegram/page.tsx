@@ -69,13 +69,24 @@ export default function TelegramCenterPage() {
 
   function loadAll() {
     setLoading(true);
-    Promise.all([
+    Promise.allSettled([
       apiFetch<BotStatus>('/api/panel/telegram/status/'),
       apiFetch<RequiredChannel[]>('/api/panel/telegram/channels/'),
     ])
       .then(([statusRes, channelsRes]) => {
-        setStatusData(statusRes);
-        setChannels(channelsRes || []);
+        if (statusRes.status === 'fulfilled') {
+          setStatusData(statusRes.value);
+        } else {
+          toast.error(statusRes.reason instanceof Error ? statusRes.reason.message : "Bot holatini yuklashda xatolik");
+        }
+
+        if (channelsRes.status === 'fulfilled') {
+          setChannels(channelsRes.value || []);
+        } else {
+          setChannels([]);
+          // Agar hali kanallar jadvali migratsiya qilinmagan bo'lsa xavotirli emas
+          console.warn("Channels load failed:", channelsRes.reason);
+        }
         setLoading(false);
       })
       .catch((e) => {

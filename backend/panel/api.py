@@ -2138,236 +2138,303 @@ def mock_attempts_export_pdf_api(request):
 @api_view(['GET', 'POST'])
 @permission_classes([IsSuperAdmin])
 def promocodes_api(request):
-    if request.method == 'GET':
-        promos = PromoCode.objects.select_related('plan').all()
-        results = []
-        for p in promos:
-            rev = Payment.objects.filter(promocode=p, status='approved').aggregate(s=Sum('amount'))['s'] or 0
-            results.append({
-                'id': p.id,
-                'code': p.code,
-                'description': p.description,
-                'discount_type': p.discount_type,
-                'discount_value': float(p.discount_value),
-                'plan_id': p.plan_id,
-                'plan_name': p.plan.name if p.plan else "Barcha tariflar",
-                'max_uses': p.max_uses,
-                'current_uses': p.current_uses,
-                'valid_from': p.valid_from.isoformat() if p.valid_from else None,
-                'valid_until': p.valid_until.isoformat() if p.valid_until else None,
-                'is_active': p.is_active,
-                'is_valid': p.is_valid(),
-                'total_revenue': float(rev),
-                'created_at': p.created_at.isoformat() if p.created_at else None,
-            })
-        plans = [{'id': plan.id, 'name': plan.name, 'price': float(plan.price)} for plan in SubscriptionPlan.objects.filter(is_active=True)]
-        return Response({'results': results, 'plans': plans})
-
-    # POST create
-    code = (request.data.get('code') or '').strip().upper()
-    if not code:
-        return Response({'error': "Promokod kodi kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
-    if PromoCode.objects.filter(code=code).exists():
-        return Response({'error': f"'{code}' promokodi allaqachon mavjud"}, status=status.HTTP_400_BAD_REQUEST)
-
     try:
-        discount_value = float(request.data.get('discount_value', 0))
-    except (ValueError, TypeError):
-        return Response({'error': "Chegirma qiymati noto'g'ri"}, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'GET':
+            try:
+                promos = list(PromoCode.objects.select_related('plan').all())
+            except Exception as db_err:
+                logger.warning("PromoCode table query warning: %s", db_err)
+                promos = []
+            results = []
+            for p in promos:
+                try:
+                    rev = Payment.objects.filter(promocode=p, status='approved').aggregate(s=Sum('amount'))['s'] or 0
+                except Exception:
+                    rev = 0
+                results.append({
+                    'id': p.id,
+                    'code': p.code,
+                    'description': p.description,
+                    'discount_type': p.discount_type,
+                    'discount_value': float(p.discount_value),
+                    'plan_id': p.plan_id,
+                    'plan_name': p.plan.name if p.plan else "Barcha tariflar",
+                    'max_uses': p.max_uses,
+                    'current_uses': p.current_uses,
+                    'valid_from': p.valid_from.isoformat() if p.valid_from else None,
+                    'valid_until': p.valid_until.isoformat() if p.valid_until else None,
+                    'is_active': p.is_active,
+                    'is_valid': p.is_valid(),
+                    'total_revenue': float(rev),
+                    'created_at': p.created_at.isoformat() if p.created_at else None,
+                })
+            try:
+                plans = [{'id': plan.id, 'name': plan.name, 'price': float(plan.price)} for plan in SubscriptionPlan.objects.filter(is_active=True)]
+            except Exception:
+                plans = []
+            return Response({'results': results, 'plans': plans})
 
-    discount_type = request.data.get('discount_type', 'percent')
-    plan_id = request.data.get('plan_id')
-    max_uses = int(request.data.get('max_uses') or 0)
-    valid_until = request.data.get('valid_until') or None
-    description = (request.data.get('description') or '').strip()
+        # POST create
+        code = (request.data.get('code') or '').strip().upper()
+        if not code:
+            return Response({'error': "Promokod kodi kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
+        if PromoCode.objects.filter(code=code).exists():
+            return Response({'error': f"'{code}' promokodi allaqachon mavjud"}, status=status.HTTP_400_BAD_REQUEST)
 
-    p = PromoCode.objects.create(
-        code=code,
-        description=description,
-        discount_type=discount_type,
-        discount_value=discount_value,
-        plan_id=plan_id if plan_id else None,
-        max_uses=max_uses,
-        valid_until=valid_until,
-        is_active=True
-    )
-    return Response({'id': p.id, 'code': p.code, 'message': "Promokod muvaffaqiyatli yaratildi"}, status=status.HTTP_201_CREATED)
+        try:
+            discount_value = float(request.data.get('discount_value', 0))
+        except (ValueError, TypeError):
+            return Response({'error': "Chegirma qiymati noto'g'ri"}, status=status.HTTP_400_BAD_REQUEST)
+
+        discount_type = request.data.get('discount_type', 'percent')
+        plan_id = request.data.get('plan_id')
+        max_uses = int(request.data.get('max_uses') or 0)
+        valid_until = request.data.get('valid_until') or None
+        description = (request.data.get('description') or '').strip()
+
+        p = PromoCode.objects.create(
+            code=code,
+            description=description,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            plan_id=plan_id if plan_id else None,
+            max_uses=max_uses,
+            valid_until=valid_until,
+            is_active=True
+        )
+        return Response({'id': p.id, 'code': p.code, 'message': "Promokod muvaffaqiyatli yaratildi"}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        logger.exception("promocodes_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['DELETE'])
 @permission_classes([IsSuperAdmin])
 def promocode_detail_api(request, pk):
-    p = get_object_or_404(PromoCode, pk=pk)
-    p.delete()
-    return Response({'message': "Promokod o'chirildi"})
+    try:
+        p = get_object_or_404(PromoCode, pk=pk)
+        p.delete()
+        return Response({'message': "Promokod o'chirildi"})
+    except Exception as e:
+        logger.exception("promocode_detail_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['POST'])
-@permission_classes([IsSuperAdmin])
-def promocode_toggle_api(request, pk):
-    p = get_object_or_404(PromoCode, pk=pk)
-    p.is_active = not p.is_active
-    p.save(update_fields=['is_active'])
-    return Response({'is_active': p.is_active, 'message': "Holati o'zgartirildi"})
-
-
-# ============================================================ FINANCE
+# ============================================================ FINANCIAL INTELLIGENCE
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
-def financial_analytics_api(request):
-    today = timezone.localdate()
-    days = [today - timedelta(days=i) for i in range(29, -1, -1)]
-    daily_revenue = []
-    for d in days:
-        d_approved = Payment.objects.filter(status='approved', created_at__date=d)
-        rev = d_approved.aggregate(s=Sum('amount'))['s'] or 0
-        cnt = d_approved.count()
-        daily_revenue.append({
-            'date': d.strftime('%d.%m'),
-            'amount': float(rev),
-            'count': cnt,
+def finance_analytics_api(request):
+    try:
+        now = timezone.now()
+        thirty_days_ago = now - timedelta(days=30)
+        sixty_days_ago = now - timedelta(days=60)
+
+        # Revenue
+        all_approved = Payment.objects.filter(status='approved')
+        total_revenue = all_approved.aggregate(s=Sum('amount'))['s'] or 0
+
+        this_month_payments = all_approved.filter(created_at__gte=thirty_days_ago)
+        this_month_rev = this_month_payments.aggregate(s=Sum('amount'))['s'] or 0
+
+        last_month_payments = all_approved.filter(created_at__gte=sixty_days_ago, created_at__lt=thirty_days_ago)
+        last_month_rev = last_month_payments.aggregate(s=Sum('amount'))['s'] or 0
+
+        growth_pct = round(((this_month_rev - last_month_rev) / (last_month_rev or 1)) * 100, 1) if last_month_rev else (100.0 if this_month_rev else 0.0)
+
+        total_tx = all_approved.count()
+        paying_users_count = all_approved.values('user').distinct().count()
+        arpu = round(total_revenue / (paying_users_count or 1), 0)
+
+        # 30-day daily breakdown for chart
+        daily_map = {}
+        for i in range(29, -1, -1):
+            d = (now - timedelta(days=i)).date()
+            daily_map[d.strftime('%d.%m')] = 0
+
+        recent_txs = all_approved.filter(created_at__gte=thirty_days_ago)
+        for tx in recent_txs:
+            d_str = tx.created_at.astimezone(timezone.get_current_timezone()).strftime('%d.%m')
+            if d_str in daily_map:
+                daily_map[d_str] += float(tx.amount)
+
+        daily_series = [{'date': k, 'revenue': v} for k, v in daily_map.items()]
+
+        # By Plan breakdown
+        by_plan = []
+        plans = SubscriptionPlan.objects.all()
+        for pl in plans:
+            pl_rev = all_approved.filter(plan=pl).aggregate(s=Sum('amount'))['s'] or 0
+            pl_count = all_approved.filter(plan=pl).count()
+            by_plan.append({
+                'name': pl.name,
+                'revenue': float(pl_rev),
+                'count': pl_count,
+            })
+        # Mock test direct payments
+        mock_rev = all_approved.filter(test__isnull=False).aggregate(s=Sum('amount'))['s'] or 0
+        mock_count = all_approved.filter(test__isnull=False).count()
+        if mock_count > 0:
+            by_plan.append({
+                'name': "Jonli Mock Imtihonlar",
+                'revenue': float(mock_rev),
+                'count': mock_count,
+            })
+
+        # By Source (Payment provider)
+        by_source = []
+        for prov in ['click', 'payme', 'uzum', 'admin', 'manual']:
+            s_rev = all_approved.filter(provider=prov).aggregate(s=Sum('amount'))['s'] or 0
+            s_count = all_approved.filter(provider=prov).count()
+            if s_count > 0 or s_rev > 0:
+                by_source.append({
+                    'provider': prov.capitalize(),
+                    'revenue': float(s_rev),
+                    'count': s_count,
+                })
+
+        # Status counts
+        status_counts = {
+            'approved': total_tx,
+            'pending': Payment.objects.filter(status='pending').count(),
+            'cancelled': Payment.objects.filter(status='cancelled').count(),
+        }
+
+        return Response({
+            'total_revenue': float(total_revenue),
+            'this_month_revenue': float(this_month_rev),
+            'last_month_revenue': float(last_month_rev),
+            'growth_pct': growth_pct,
+            'total_transactions': total_tx,
+            'paying_users_count': paying_users_count,
+            'arpu': arpu,
+            'daily_series': daily_series,
+            'by_plan': by_plan,
+            'by_source': by_source,
+            'status_counts': status_counts,
         })
-
-    # Plans breakdown
-    by_plan = []
-    for plan in SubscriptionPlan.objects.all():
-        p_agg = Payment.objects.filter(plan=plan, status='approved').aggregate(s=Sum('amount'), c=Count('id'))
-        by_plan.append({
-            'name': plan.name,
-            'plan_type': plan.plan_type,
-            'amount': float(p_agg['s'] or 0),
-            'count': p_agg['c'] or 0,
-        })
-
-    # Sources breakdown (web vs bot)
-    by_source = []
-    for src, label in [('web', 'Web App'), ('bot', 'Telegram Bot')]:
-        s_agg = Payment.objects.filter(source=src, status='approved').aggregate(s=Sum('amount'), c=Count('id'))
-        by_source.append({
-            'source': src,
-            'label': label,
-            'amount': float(s_agg['s'] or 0),
-            'count': s_agg['c'] or 0,
-        })
-
-    # Status counts
-    status_counts = {
-        'approved': Payment.objects.filter(status='approved').count(),
-        'pending': Payment.objects.filter(status='pending').count(),
-        'rejected': Payment.objects.filter(status='rejected').count(),
-        'awaiting_screenshot': Payment.objects.filter(status='awaiting_screenshot').count(),
-    }
-
-    # Summary
-    total_rev = Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0
-    today_rev = Payment.objects.filter(status='approved', created_at__date=today).aggregate(s=Sum('amount'))['s'] or 0
-    first_day_month = today.replace(day=1)
-    month_rev = Payment.objects.filter(status='approved', created_at__date__gte=first_day_month).aggregate(s=Sum('amount'))['s'] or 0
-    approved_cnt = status_counts['approved']
-    avg_check = round(float(total_rev) / approved_cnt, 2) if approved_cnt else 0
-
-    return Response({
-        'summary': {
-            'total_revenue': float(total_rev),
-            'today_revenue': float(today_rev),
-            'month_revenue': float(month_rev),
-            'approved_count': approved_cnt,
-            'pending_count': status_counts['pending'],
-            'avg_check': avg_check,
-        },
-        'daily_revenue': daily_revenue,
-        'by_plan': by_plan,
-        'by_source': by_source,
-        'status_counts': status_counts,
-    })
+    except Exception as e:
+        logger.exception("finance_analytics_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ============================================================ TELEGRAM BOT CENTER
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def telegram_bot_status_api(request):
-    token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
-    has_token = bool(token)
-    bot_info = None
-    webhook_info = None
-    error = None
+    try:
+        token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
+        has_token = bool(token)
+        bot_info = None
+        webhook_info = None
+        error = None
 
-    if has_token:
+        if has_token:
+            try:
+                me_res = tg_api_call('getMe')
+                if isinstance(me_res, dict) and me_res.get('ok'):
+                    bot_info = me_res.get('result')
+                else:
+                    desc = me_res.get('description', "Telegram getMe muvaffaqiyatsiz") if isinstance(me_res, dict) else "Telegram javobi xato"
+                    error = desc
+            except Exception as e:
+                error = f"getMe xatosi: {str(e)}"
+
+            try:
+                wh_res = tg_api_call('getWebhookInfo')
+                if isinstance(wh_res, dict) and wh_res.get('ok'):
+                    webhook_info = wh_res.get('result')
+            except Exception as e:
+                logger.warning("getWebhookInfo error: %s", e)
+        else:
+            error = "TELEGRAM_BOT_TOKEN sozlanmagan"
+
+        # Profile statistics
         try:
-            me_res = tg_api_call('getMe')
-            if me_res.get('ok'):
-                bot_info = me_res.get('result')
-            else:
-                error = me_res.get('description', "Telegram getMe muvaffaqiyatsiz")
+            total_users = User.objects.count()
+        except Exception:
+            total_users = 0
 
-            wh_res = tg_api_call('getWebhookInfo')
-            if wh_res.get('ok'):
-                webhook_info = wh_res.get('result')
-        except Exception as e:
-            error = str(e)
-    else:
-        error = "TELEGRAM_BOT_TOKEN sozlanmagan"
+        try:
+            tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0').count()
+        except Exception:
+            tg_connected = 0
 
-    # Profile statistics
-    total_users = User.objects.count()
-    tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0').count()
-    tg_usernames = Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count()
+        try:
+            tg_usernames = Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count()
+        except Exception:
+            tg_usernames = 0
 
-    return Response({
-        'has_token': has_token,
-        'bot_info': bot_info,
-        'webhook_info': webhook_info,
-        'error': error,
-        'stats': {
-            'total_users': total_users,
-            'tg_connected': tg_connected,
-            'tg_usernames': tg_usernames,
-            'tg_pct': round(tg_connected / (total_users or 1) * 100, 1),
-        },
-        'default_channel': getattr(settings, 'TELEGRAM_REQUIRED_CHANNEL', '') or '',
-    })
+        return Response({
+            'has_token': has_token,
+            'bot_info': bot_info,
+            'webhook_info': webhook_info,
+            'error': error,
+            'stats': {
+                'total_users': total_users,
+                'tg_connected': tg_connected,
+                'tg_usernames': tg_usernames,
+                'tg_pct': round(tg_connected / (total_users or 1) * 100, 1),
+            },
+            'default_channel': getattr(settings, 'TELEGRAM_REQUIRED_CHANNEL', '') or '',
+        })
+    except Exception as e:
+        logger.exception("telegram_bot_status_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsSuperAdmin])
 def telegram_channels_api(request):
-    if request.method == 'GET':
-        channels = RequiredChannel.objects.all()
-        return Response([{
-            'id': c.id,
-            'title': c.title,
-            'username_or_id': c.username_or_id,
-            'invite_url': c.invite_url,
-            'is_active': c.is_active,
-            'order': c.order,
-            'created_at': c.created_at.isoformat() if c.created_at else None,
-        } for c in channels])
+    try:
+        if request.method == 'GET':
+            try:
+                channels = list(RequiredChannel.objects.all())
+            except Exception as db_err:
+                logger.warning("RequiredChannel table query warning: %s", db_err)
+                return Response([])
+            return Response([{
+                'id': c.id,
+                'title': c.title,
+                'username_or_id': c.username_or_id,
+                'invite_url': c.invite_url,
+                'is_active': c.is_active,
+                'order': c.order,
+                'created_at': c.created_at.isoformat() if c.created_at else None,
+            } for c in channels])
 
-    title = (request.data.get('title') or '').strip()
-    username_or_id = (request.data.get('username_or_id') or '').strip()
-    invite_url = (request.data.get('invite_url') or '').strip()
-    is_active = bool(request.data.get('is_active', True))
-    order = int(request.data.get('order') or 0)
+        # POST
+        title = (request.data.get('title') or '').strip()
+        username_or_id = (request.data.get('username_or_id') or '').strip()
+        invite_url = (request.data.get('invite_url') or '').strip()
+        is_active = bool(request.data.get('is_active', True))
+        order = int(request.data.get('order') or 0)
 
-    if not title or not username_or_id:
-        return Response({'error': "Kanal nomi va @username yoki id kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
+        if not title or not username_or_id:
+            return Response({'error': "Kanal nomi va @username yoki id kiritilishi shart"}, status=status.HTTP_400_BAD_REQUEST)
 
-    c = RequiredChannel.objects.create(
-        title=title,
-        username_or_id=username_or_id,
-        invite_url=invite_url,
-        is_active=is_active,
-        order=order
-    )
-    return Response({'id': c.id, 'title': c.title, 'message': "Kanal qo'shildi"}, status=status.HTTP_201_CREATED)
+        c = RequiredChannel.objects.create(
+            title=title,
+            username_or_id=username_or_id,
+            invite_url=invite_url,
+            is_active=is_active,
+            order=order
+        )
+        return Response({'id': c.id, 'title': c.title, 'message': "Kanal qo'shildi"}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        logger.exception("telegram_channels_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['DELETE'])
 @permission_classes([IsSuperAdmin])
 def telegram_channel_delete_api(request, pk):
-    c = get_object_or_404(RequiredChannel, pk=pk)
-    c.delete()
-    return Response({'message': "Kanal o'chirildi"})
+    try:
+        c = get_object_or_404(RequiredChannel, pk=pk)
+        c.delete()
+        return Response({'message': "Kanal o'chirildi"})
+    except Exception as e:
+        logger.exception("telegram_channel_delete_api error: %s", e)
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
