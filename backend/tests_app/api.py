@@ -657,6 +657,27 @@ def finish_api(request, attempt_id):
         score_row.xp = F('xp') + xp_awarded
         score_row.save(update_fields=['xp'])
 
+    # ─── Teacher Telegram Notification ──────────────────────────────────
+    try:
+        if attempt.test and attempt.test.created_by:
+            teacher_user = attempt.test.created_by
+            teacher_profile = getattr(teacher_user, 'profile', None)
+            if teacher_profile and teacher_profile.telegram_id and request.user != teacher_user:
+                from telegrambot.client import send_message
+                student_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+                tg_user = f" (@{profile.telegram_username})" if profile.telegram_username else ""
+                msg = (
+                    f"🎓 <b>O'quvchingiz test topshirdi!</b>\n\n"
+                    f"📝 <b>Test:</b> {attempt.test.title}\n"
+                    f"👤 <b>O'quvchi:</b> {student_name}{tg_user}\n"
+                    f"📊 <b>Natija:</b> {score}% ({correct}/{scored_total})\n"
+                    f"⏱ <b>Vaqt:</b> {timezone.localtime(attempt.completed_at).strftime('%d.%m.%Y %H:%M')}\n\n"
+                    f"<i>Batafsil natijalarni o'qituvchi panelida ko'rishingiz mumkin.</i>"
+                )
+                send_message(int(teacher_profile.telegram_id), msg)
+    except Exception as e:
+        logger.warning(f"Failed to send teacher telegram notification: {e}")
+
     # Batch revision items update (yuqori yuklamada so'rovlar sonini 95% ga qisqartiradi)
     unskipped = [ans for ans in scored if not ans.is_skipped]
     wrong_q_map = {ans.question_id: ans.question for ans in unskipped if not ans.is_correct}

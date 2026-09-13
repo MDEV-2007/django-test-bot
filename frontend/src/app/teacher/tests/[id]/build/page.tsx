@@ -121,7 +121,14 @@ export default function TestBuildPage() {
           }
           backHref="/teacher/tests"
           actions={
-            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 font-medium shadow-sm"
+                onClick={() => setShowBulkModal(true)}
+              >
+                <Sparkles className="size-4 text-emerald-400" /> Matndan import
+              </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href={`/teacher/tests/${id}/info`}><Settings2 className="size-4" /> Ma&apos;lumotlar</Link>
               </Button>

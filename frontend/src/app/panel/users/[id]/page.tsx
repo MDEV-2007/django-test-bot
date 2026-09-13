@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Ban, KeyRound, Crown, UserCog, LogIn, Trash2, Save, Loader2,
-  Zap, Coins, Trophy, Swords, ShieldCheck, Copy, Check,
+  Zap, Coins, Trophy, Swords, ShieldCheck, Copy, Check, Eye, EyeOff, Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, fetchMe } from '@/lib/api-client';
@@ -59,8 +59,20 @@ export default function UserDetailPage() {
   const [lastName, setLastName] = useState(''); const [email, setEmail] = useState(''); const [role, setRole] = useState('');
 
   const [showDelete, setShowDelete] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [customPassword, setCustomPassword] = useState('');
+  const [showCustomPassword, setShowCustomPassword] = useState(false);
   const [newPassword, setNewPassword] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  function generateSecurePassword() {
+    const words = ['Ustoz', 'Talim', 'Zukko', 'Bilim', 'Alifbo', 'Qalam'];
+    const symbols = ['!', '@', '#', '$', '%', '*'];
+    const word = words[Math.floor(Math.random() * words.length)];
+    const num = Math.floor(100 + Math.random() * 900);
+    const sym = symbols[Math.floor(Math.random() * symbols.length)];
+    return `${word}${num}${sym}`;
+  }
 
   const load = () => apiFetch<UserDetail>(`/api/panel/users/${id}/`).then((d) => {
     setData(d);
@@ -94,11 +106,25 @@ export default function UserDetailPage() {
     await load();
   }, data?.user.is_active ? 'Foydalanuvchi bloklandi' : 'Blok olib tashlandi');
 
-  const resetPassword = () => run('pwd', async () => {
-    const res = await apiFetch<{ new_password: string }>(`/api/panel/users/${id}/reset-password/`, { method: 'POST' });
+  const openPasswordDialog = () => {
+    setCustomPassword(generateSecurePassword());
+    setShowCustomPassword(true);
+    setChangePasswordOpen(true);
+  };
+
+  const submitPasswordChange = () => run('pwd', async () => {
+    if (customPassword && customPassword.length < 6) {
+      toast.error("Parol kamida 6 ta belgidan iborat bo'lishi kerak");
+      return;
+    }
+    const res = await apiFetch<{ new_password: string }>(`/api/panel/users/${id}/reset-password/`, {
+      method: 'POST',
+      body: JSON.stringify({ password: customPassword }),
+    });
+    setChangePasswordOpen(false);
     setNewPassword(res.new_password);
     setCopied(false);
-  });
+  }, "Parol muvaffaqiyatli yangilandi");
 
   const adjust = () => run('adjust', async () => {
     await apiFetch(`/api/panel/users/${id}/adjust/`, {
@@ -196,9 +222,9 @@ export default function UserDetailPage() {
               {busy === 'block' ? <Loader2 className="size-4 animate-spin" /> : <Ban className="size-4" />}
               {data.user.is_active ? 'Bloklash' : 'Blokdan chiqarish'}
             </Button>
-            <Button variant="outline" onClick={resetPassword} disabled={!!busy}>
+            <Button variant="outline" onClick={openPasswordDialog} disabled={!!busy}>
               {busy === 'pwd' ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
-              Parolni tiklash
+              Parolni o&apos;zgartirish
             </Button>
             <Button variant="outline" onClick={() => setPremium(!p.is_premium)} disabled={!!busy}>
               {busy === 'premium' ? <Loader2 className="size-4 animate-spin" /> : <Crown className="size-4" />}
@@ -333,26 +359,118 @@ export default function UserDetailPage() {
         </div>
       </div>
 
-      {/* Yangi parol — bir marta ko'rsatiladi, shuning uchun nusxalash tugmasi bilan */}
-      <Dialog open={!!newPassword} onOpenChange={(o) => !o && setNewPassword(null)}>
-        <DialogContent>
+      {/* Parolni o'zgartirish dialogi */}
+      <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+        <DialogContent className="sm:max-w-[440px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><ShieldCheck className="size-4 text-[var(--success-text)]" /> Yangi parol</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="size-5 text-primary" /> Parolni o&apos;zgartirish
+            </DialogTitle>
             <DialogDescription>
-              Bu parol faqat hozir ko&apos;rsatiladi — oynani yopgach qayta ko&apos;rsatilmaydi.
-              Foydalanuvchiga xavfsiz kanal orqali yetkazing.
+              Foydalanuvchi <span className="font-semibold text-foreground">@{data?.user.username}</span> uchun yangi parol kiriting yoki tasodifiy xavfsiz parol generatsiya qiling.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 rounded-lg border bg-muted px-3 py-2 font-mono text-sm">{newPassword}</code>
+
+          <div className="space-y-3 py-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="c-pwd">Yangi parol</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCustomPassword(generateSecurePassword());
+                  setShowCustomPassword(true);
+                }}
+                className="h-6 text-[11px] text-primary gap-1 px-1.5"
+              >
+                <Sparkles className="size-3" /> Tasodifiy parol
+              </Button>
+            </div>
+            <div className="relative">
+              <Input
+                id="c-pwd"
+                type={showCustomPassword ? 'text' : 'password'}
+                value={customPassword}
+                onChange={(e) => setCustomPassword(e.target.value)}
+                placeholder="Yangi parol (kamida 6 ta belgi)"
+                className="pr-10 font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCustomPassword(!showCustomPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Parolni ko'rsatish"
+              >
+                {showCustomPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setChangePasswordOpen(false)}>
+              Bekor qilish
+            </Button>
+            <Button onClick={submitPasswordChange} disabled={busy === 'pwd'}>
+              {busy === 'pwd' && <Loader2 className="size-4 animate-spin" />}
+              Saqlash
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Yangi parol — bir marta ko'rsatiladi, Telegram nusxalash bilan */}
+      <Dialog open={!!newPassword} onOpenChange={(o) => !o && setNewPassword(null)}>
+        <DialogContent className="sm:max-w-[460px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="size-5 text-emerald-400" /> Parol yangilandi
+            </DialogTitle>
+            <DialogDescription>
+              Yangi parol muvaffaqiyatli saqlandi. Quyidagi ma&apos;lumotlarni nusxalab Telegram orqali yuboring.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="flex items-center gap-2">
+              <code className="flex-1 rounded-lg border bg-muted px-3 py-2 font-mono text-sm font-bold text-emerald-400">
+                {newPassword}
+              </code>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(newPassword ?? '');
+                  setCopied(true);
+                  toast.success("Parol nusxalandi");
+                }}
+                aria-label="Nusxalash"
+              >
+                {copied ? <Check className="size-4 text-emerald-400" /> : <Copy className="size-4" />}
+              </Button>
+            </div>
+
             <Button
-              variant="outline" size="icon"
-              onClick={() => { navigator.clipboard.writeText(newPassword ?? ''); setCopied(true); }}
-              aria-label="Nusxalash"
+              type="button"
+              onClick={() => {
+                if (!newPassword || !data) return;
+                const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ilmildizi.uz';
+                const text = `Assalomu alaykum! Platformadagi yangilangan parolingiz:
+
+👤 F.I.SH: ${data.user.full_name}
+🔑 Username: ${data.user.username}
+🔒 Yangi parol: ${newPassword}
+🎭 Rol: ${data.user.role_display}
+🌐 Kirish manzili: ${origin}/login`;
+                navigator.clipboard.writeText(text);
+                toast.success("Telegram xabari nusxalandi!");
+              }}
+              className="w-full gap-2 font-medium bg-emerald-600 hover:bg-emerald-500 text-white"
             >
-              {copied ? <Check className="size-4 text-[var(--success-text)]" /> : <Copy className="size-4" />}
+              <Copy className="size-4" /> Telegram uchun to&apos;liq nusxalash
             </Button>
           </div>
+
           <DialogFooter>
             <Button onClick={() => setNewPassword(null)}>Yopish</Button>
           </DialogFooter>

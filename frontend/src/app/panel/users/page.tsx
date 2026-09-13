@@ -11,9 +11,11 @@ import DataTable, { Badge, type Column, type FilterConfig } from '@/components/p
 import { Button } from '@/components/ui/button';
 
 const FILTERS: FilterConfig[] = [
-  { param: 'role', label: 'Rol', options: [
-    { value: 'superadmin', label: 'Super Admin' }, { value: 'teacher', label: "O'qituvchi" }, { value: 'student', label: "O'quvchi" },
-  ] },
+  {
+    param: 'role', label: 'Rol', options: [
+      { value: 'superadmin', label: 'Super Admin' }, { value: 'teacher', label: "O'qituvchi" }, { value: 'student', label: "O'quvchi" },
+    ]
+  },
   { param: 'active', label: 'Holat', options: [{ value: 'True', label: 'Faol' }, { value: 'False', label: 'Bloklangan' }] },
   { param: 'tg', label: 'Telegram', options: [{ value: 'False', label: 'Ulangan' }, { value: 'True', label: 'Ulanmagan' }] },
 ];

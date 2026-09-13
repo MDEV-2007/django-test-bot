@@ -415,6 +415,70 @@ def users_api(request):
     return bulk_action(request, base_queryset=qs, allowed_actions={'block', 'unblock'}, perform_fn=perform)
 
 
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def user_create_api(request):
+    """Super admin panelidan yangi foydalanuvchi/ustoz/volontyor/admin yaratish."""
+    data = request.data or {}
+    username = (data.get('username') or '').strip()
+    password = (data.get('password') or '').strip()
+    full_name = (data.get('fullname') or data.get('full_name') or '').strip()
+    first_name = (data.get('first_name') or '').strip()
+    last_name = (data.get('last_name') or '').strip()
+    email = (data.get('email') or '').strip()
+    role = (data.get('role') or 'teacher').strip()
+    biography = (data.get('biography') or '').strip()
+
+    if full_name and not (first_name and last_name):
+        parts = full_name.split(None, 1)
+        first_name = parts[0]
+        last_name = parts[1] if len(parts) > 1 else ''
+
+    errors = {}
+    if not username:
+        errors['username'] = ["Username kiritilishi shart."]
+    elif len(username) < 3:
+        errors['username'] = ["Username kamida 3 ta belgidan iborat bo'lishi kerak."]
+    elif User.objects.filter(username__iexact=username).exists():
+        errors['username'] = ["Bu username allaqachon band."]
+
+    if not password:
+        errors['password'] = ["Parol kiritilishi shart."]
+    elif len(password) < 6:
+        errors['password'] = ["Parol kamida 6 ta belgidan iborat bo'lishi kerak."]
+
+    valid_roles = [r[0] for r in Profile.ROLE_CHOICES]
+    if role not in valid_roles:
+        errors['role'] = ["Noto'g'ri rol tanlandi."]
+
+    if errors:
+        return Response({'errors': errors}, status=400)
+
+    user = User.objects.create_user(
+        username=username,
+        password=password,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+    )
+    if role == 'superadmin':
+        user.is_staff = True
+        user.save(update_fields=['is_staff'])
+
+    user.profile.role = role
+    if biography:
+        user.profile.biography = biography
+    user.profile.save()
+
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'full_name': user.get_full_name() or user.username,
+        'role': role,
+        'role_display': user.profile.get_role_display(),
+    }, status=201)
+
+
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def user_detail_api(request, pk):
@@ -480,7 +544,13 @@ def user_toggle_block_api(request, pk):
 @permission_classes([IsSuperAdmin])
 def user_reset_password_api(request, pk):
     u = get_object_or_404(User, pk=pk)
-    new_password = secrets.token_urlsafe(8)
+    custom_pwd = ((request.data.get('password') if request.data else '') or '').strip()
+    if custom_pwd:
+        if len(custom_pwd) < 6:
+            return Response({'error': "Parol kamida 6 ta belgidan iborat bo'lishi kerak."}, status=400)
+        new_password = custom_pwd
+    else:
+        new_password = secrets.token_urlsafe(8)
     u.set_password(new_password)
     u.save()
     return Response({'new_password': new_password})
@@ -587,7 +657,13 @@ def teachers_api(request):
 @api_view(['POST'])
 @permission_classes([IsSuperAdmin])
 def teacher_create_api(request):
-    form = TeacherCreateForm(request.data)
+    data = dict(request.data or {})
+    full_name = (data.get('fullname') or data.get('full_name') or '').strip()
+    if full_name and not (data.get('first_name') and data.get('last_name')):
+        parts = full_name.split(None, 1)
+        data['first_name'] = parts[0]
+        data['last_name'] = parts[1] if len(parts) > 1 else ''
+    form = TeacherCreateForm(data)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     teacher = form.save()

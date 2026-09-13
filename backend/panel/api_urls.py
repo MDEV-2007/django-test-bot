@@ -8,6 +8,7 @@ urlpatterns = [
     path('', api.dashboard_api, name='dashboard'),
 
     path('users/', api.users_api, name='users'),
+    path('users/create/', api.user_create_api, name='user_create'),
     path('users/<int:pk>/', api.user_detail_api, name='user_detail'),
     path('users/<int:pk>/edit/', api.user_edit_api, name='user_edit'),
     path('users/<int:pk>/toggle-block/', api.user_toggle_block_api, name='user_toggle_block'),
