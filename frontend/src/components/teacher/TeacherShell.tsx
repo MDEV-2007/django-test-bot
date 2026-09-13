@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Gamepad2, Users, GraduationCap,
-  LogOut, ArrowLeft, Menu, X, ChevronRight,
+  LogOut, ArrowLeft, Menu, X, ChevronRight, MessageSquareQuote,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { Button } from '@/components/ui/button';
@@ -35,8 +35,11 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
-    label: 'Sinf',
-    items: [{ href: '/teacher/class', label: 'Mening sinfim', icon: Users }],
+    label: 'Tahlil va Natijalar',
+    items: [
+      { href: '/teacher/surveys', label: 'Sharh va Baholar', icon: MessageSquareQuote },
+      { href: '/teacher/class', label: 'Mening sinfim', icon: Users },
+    ],
   },
 ];
 

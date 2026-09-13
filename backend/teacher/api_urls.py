@@ -27,6 +27,7 @@ urlpatterns = [
     path('tests/<int:pk>/questions/<int:qid>/', api.question_detail_api, name='question_detail'),
     path('tests/<int:pk>/questions/<int:qid>/delete/', api.question_delete_api, name='question_delete'),
     path('tests/<int:pk>/attempts/<int:attempt_id>/grade/', api.attempt_grade_api, name='attempt_grade'),
+    path('surveys/', api.teacher_surveys_api, name='surveys'),
 
     path('topics/', api.topics_api, name='topics'),
 

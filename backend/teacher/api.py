@@ -26,7 +26,7 @@ from accounts.referrals import ensure_referral_code, get_referral_link, get_tele
 from games.models import Game, GameItem
 from learning.models import Lesson, Topic
 from tests_app.models import (
-    AcceptedAnswer, AnswerOption, Attempt, AttemptAnswer, ExamSection, GroupOption,
+    AcceptedAnswer, AnswerOption, Attempt, AttemptAnswer, ExamSection, ExamSurvey, GroupOption,
     MatchingPair, Question, QuestionGroup, SubQuestion, TestSet,
 )
 
@@ -513,15 +513,101 @@ def test_results_api(request, pk):
             'question_id': q.id, 'body': q.body, 'total': total, 'correct': correct,
             'pct': round(correct / total * 100) if total else 0,
         })
-    return Response({
-        'attempts': [{
+
+    total_attempts = attempts.count()
+    cheater_count = 0
+    speed_flagged_count = 0
+    total_score = 0
+    q_count = test.questions.count()
+
+    attempt_list = []
+    for a in attempts:
+        score_val = a.score if a.score is not None else 0
+        total_score += score_val
+        tabs = getattr(a, 'tab_switch_count', 0) or 0
+        speed = bool(getattr(a, 'is_speed_flagged', False))
+        if tabs >= 3:
+            cheater_count += 1
+        if speed:
+            speed_flagged_count += 1
+
+        attempt_list.append({
             'id': a.id,
             'student': a.profile.user.get_full_name() or a.profile.user.username,
+            'username': a.profile.user.username,
+            'telegram_username': getattr(a.profile, 'telegram_username', '') or '',
             'score': a.score,
+            'correct_answers': a.correct_answers,
+            'wrong_answers': a.wrong_answers,
+            'skipped_answers': a.skipped_answers,
+            'total_questions': q_count,
+            'tab_switch_count': tabs,
+            'is_speed_flagged': speed,
             'started_at': a.started_at,
-        } for a in attempts],
+            'completed_at': a.completed_at,
+        })
+
+    # Ushbu test uchun o'quvchilar qoldirgan sharhlar
+    surveys = (ExamSurvey.objects.filter(test=test)
+               .select_related('user', 'attempt').order_by('-created_at'))
+    survey_items = [{
+        'id': s.id,
+        'user_name': s.user.get_full_name() or s.user.username,
+        'username': s.user.username,
+        'score': s.attempt.score if s.attempt else None,
+        'difficulty': s.difficulty,
+        'difficulty_label': s.get_difficulty_display(),
+        'platform_rating': s.platform_rating,
+        'comment': s.comment,
+        'created_at': s.created_at,
+    } for s in surveys]
+
+    return Response({
+        'test': {
+            'id': test.id,
+            'title': test.title,
+            'is_live_mock': test.is_live_mock,
+            'scheduled_at': test.scheduled_at.isoformat() if test.scheduled_at else None,
+            'subject': test.subject.name if test.subject else None,
+            'category': test.category,
+        },
+        'summary': {
+            'total_attempts': total_attempts,
+            'average_score': round(total_score / total_attempts, 1) if total_attempts else 0,
+            'cheater_count': cheater_count,
+            'speed_flagged_count': speed_flagged_count,
+            'reviews_count': len(survey_items),
+        },
+        'attempts': attempt_list,
         'stats': stats,
+        'surveys': survey_items,
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsTeacher])
+def teacher_surveys_api(request):
+    """O'qituvchi tuzgan barcha testlarga yozilgan sharhlar va fikr-mulohazalar."""
+    surveys = (ExamSurvey.objects.filter(test__created_by=request.user)
+               .select_related('user', 'test', 'attempt').order_by('-created_at'))
+
+    items = []
+    for s in surveys[:150]:
+        items.append({
+            'id': s.id,
+            'user_name': s.user.get_full_name() or s.user.username,
+            'username': s.user.username,
+            'test_id': s.test.id,
+            'test_title': s.test.title,
+            'is_live_mock': s.test.is_live_mock,
+            'score': s.attempt.score if s.attempt else None,
+            'difficulty': s.difficulty,
+            'difficulty_label': s.get_difficulty_display(),
+            'platform_rating': s.platform_rating,
+            'comment': s.comment,
+            'created_at': s.created_at,
+        })
+    return Response({'results': items, 'count': len(items)})
 
 
 @api_view(['GET', 'POST'])
