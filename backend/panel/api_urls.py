@@ -62,5 +62,6 @@ urlpatterns = [
     path('surveys/', api.surveys_api, name='surveys'),
     path('mocks/', api.mock_attempts_api, name='mock_attempts'),
     path('mocks/export/', api.mock_attempts_export_api, name='mock_attempts_export'),
+    path('mocks/export-pdf/', api.mock_attempts_export_pdf_api, name='mock_attempts_export_pdf'),
 ]
 

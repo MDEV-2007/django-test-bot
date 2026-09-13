@@ -1155,9 +1155,22 @@ def mock_attempts_api(request):
     base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
     qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
 
+    subject_id = request.GET.get('subject_id')
+    if subject_id and subject_id.isdigit():
+        qs = qs.filter(test__subject_id=int(subject_id))
+
     test_id = request.GET.get('test_id')
     if test_id and test_id.isdigit():
         qs = qs.filter(test_id=int(test_id))
+
+    date_str = request.GET.get('date', '').strip()
+    if date_str:
+        try:
+            from datetime import datetime
+            d = datetime.strptime(date_str, '%Y-%m-%d').date()
+            qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
+        except (ValueError, TypeError):
+            pass
 
     completed = request.GET.get('completed')
     if completed == 'True':
@@ -1192,11 +1205,21 @@ def mock_attempts_api(request):
     max_score = round(agg['max_score'], 1) if agg['max_score'] is not None else 0.0
     gold_count = completed_qs.filter(score__gte=80).count()
 
-    # Mavjud mock testlar ro'yxati (filtr filtrlash menyusi uchun)
+    # Mavjud fanlar ro'yxati
+    available_subjects = list(
+        Subject.objects.filter(
+            test_sets__in=TestSet.objects.filter(base_filter)
+        ).values('id', 'name').distinct().order_by('name')
+    )
+    if not available_subjects:
+        available_subjects = list(Subject.objects.values('id', 'name').order_by('name'))
+
+    # Mavjud mock testlar ro'yxati (agar fan tanlangan bo'lsa, o'sha fanga mos)
+    mock_tests_qs = TestSet.objects.filter(base_filter)
+    if subject_id and subject_id.isdigit():
+        mock_tests_qs = mock_tests_qs.filter(subject_id=int(subject_id))
     available_mocks = list(
-        TestSet.objects.filter(
-            Q(is_live_mock=True) | Q(title__icontains='mock')
-        ).values('id', 'title').distinct()[:50]
+        mock_tests_qs.values('id', 'title').distinct().order_by('title')[:50]
     )
 
     items = []
@@ -1250,6 +1273,7 @@ def mock_attempts_api(request):
         'avg_score': avg_score,
         'max_score': max_score,
         'gold_count': gold_count,
+        'available_subjects': available_subjects,
         'available_mocks': available_mocks,
         'items': items,
     })
@@ -1262,11 +1286,44 @@ def mock_attempts_export_api(request):
     base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
     qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
 
+    subject_id = request.GET.get('subject_id')
+    if subject_id and subject_id.isdigit():
+        qs = qs.filter(test__subject_id=int(subject_id))
+
     test_id = request.GET.get('test_id')
     if test_id and test_id.isdigit():
         qs = qs.filter(test_id=int(test_id))
 
-    qs = qs.order_by('-score', 'started_at')
+    date_str = request.GET.get('date', '').strip()
+    if date_str:
+        try:
+            from datetime import datetime
+            d = datetime.strptime(date_str, '%Y-%m-%d').date()
+            qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
+        except (ValueError, TypeError):
+            pass
+
+    completed = request.GET.get('completed')
+    if completed == 'True':
+        qs = qs.filter(is_completed=True)
+    elif completed == 'False':
+        qs = qs.filter(is_completed=False)
+
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(
+            Q(profile__user__username__icontains=q) |
+            Q(profile__user__first_name__icontains=q) |
+            Q(profile__user__last_name__icontains=q) |
+            Q(test__title__icontains=q) |
+            Q(profile__phone__icontains=q)
+        )
+
+    sort = request.GET.get('sort', 'score')
+    if sort == 'date':
+        qs = qs.order_by('-completed_at', '-started_at')
+    else:
+        qs = qs.order_by('-score', 'started_at')
 
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="mock_natijalari.csv"'
@@ -1304,6 +1361,275 @@ def mock_attempts_export_api(request):
             completed_str,
         ])
 
+    return response
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def mock_attempts_export_pdf_api(request):
+    """Barcha mock topshirgan o'quvchilar natijalarini rasmiy PDF formatida yuklab olish."""
+    import os
+    from datetime import datetime
+    import pymupdf
+
+    base_filter = Q(test__is_live_mock=True) | Q(mock_attempt__isnull=False) | Q(test__title__icontains='mock')
+    qs = Attempt.objects.select_related('profile__user', 'test', 'test__subject').filter(base_filter)
+
+    selected_subject_name = "Barcha fanlar"
+    subject_id = request.GET.get('subject_id')
+    if subject_id and subject_id.isdigit():
+        qs = qs.filter(test__subject_id=int(subject_id))
+        s_obj = Subject.objects.filter(id=int(subject_id)).first()
+        if s_obj:
+            selected_subject_name = s_obj.name
+
+    selected_test_title = "Barcha Mock testlar"
+    test_id = request.GET.get('test_id')
+    if test_id and test_id.isdigit():
+        qs = qs.filter(test_id=int(test_id))
+        t_obj = TestSet.objects.filter(id=int(test_id)).first()
+        if t_obj:
+            selected_test_title = t_obj.title
+            if selected_subject_name == "Barcha fanlar" and t_obj.subject:
+                selected_subject_name = t_obj.subject.name
+
+    selected_date_display = "Barcha sanalar"
+    date_str = request.GET.get('date', '').strip()
+    if date_str:
+        try:
+            d = datetime.strptime(date_str, '%Y-%m-%d').date()
+            qs = qs.filter(Q(completed_at__date=d) | Q(started_at__date=d))
+            selected_date_display = d.strftime('%d.%m.%Y')
+        except (ValueError, TypeError):
+            pass
+
+    completed = request.GET.get('completed')
+    if completed == 'True':
+        qs = qs.filter(is_completed=True)
+    elif completed == 'False':
+        qs = qs.filter(is_completed=False)
+
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(
+            Q(profile__user__username__icontains=q) |
+            Q(profile__user__first_name__icontains=q) |
+            Q(profile__user__last_name__icontains=q) |
+            Q(test__title__icontains=q) |
+            Q(profile__phone__icontains=q)
+        )
+
+    sort = request.GET.get('sort', 'score')
+    if sort == 'date':
+        qs = qs.order_by('-completed_at', '-started_at')
+    else:
+        qs = qs.order_by('-score', 'started_at')
+
+    total_participants = qs.count()
+    completed_qs = qs.filter(is_completed=True)
+    from django.db.models import Avg, Max
+    agg = completed_qs.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+    avg_score = round(agg['avg_score'], 1) if agg['avg_score'] is not None else 0.0
+    max_score = round(agg['max_score'], 1) if agg['max_score'] is not None else 0.0
+    gold_count = completed_qs.filter(score__gte=80).count()
+
+    doc = pymupdf.open()
+    page_w, page_h = 842, 595  # A4 landscape
+
+    font_candidates_reg = [
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+        r'C:\Windows\Fonts\segoeui.ttf',
+        r'C:\Windows\Fonts\arial.ttf',
+    ]
+    font_candidates_bold = [
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+        r'C:\Windows\Fonts\segoeuib.ttf',
+        r'C:\Windows\Fonts\arialbd.ttf',
+    ]
+    font_reg_file = next((p for p in font_candidates_reg if os.path.exists(p)), None)
+    font_bold_file = next((p for p in font_candidates_bold if os.path.exists(p)), None)
+
+    font_reg = "FReg" if font_reg_file else "helv"
+    font_bold = "FBold" if font_bold_file else "hebo"
+
+    def setup_page_fonts(p):
+        if font_reg_file:
+            p.insert_font(fontname="FReg", fontfile=font_reg_file)
+        if font_bold_file:
+            p.insert_font(fontname="FBold", fontfile=font_bold_file)
+
+    def clean_txt(val, max_len=60):
+        if val is None:
+            return ''
+        s = str(val).strip()
+        cleaned = ''.join(c for c in s if ord(c) < 0x10000 and (c.isprintable() or c == ' '))
+        return cleaned[:max_len]
+
+    columns = [
+        ("№", 28, 1),
+        ("O'quvchi (F.I.SH)", 135, 0),
+        ("Username / Telefon", 115, 0),
+        ("Fan & Test", 165, 0),
+        ("Ball", 52, 1),
+        ("Daraja", 55, 1),
+        ("To'g'ri / Xato", 70, 1),
+        ("Ketgan vaqt", 70, 1),
+        ("Sana", 80, 1),
+    ]
+
+    margin_x = 36
+    table_w = sum(c[1] for c in columns)  # 770 pt
+
+    tz = timezone.get_current_timezone()
+    now_local = timezone.now().astimezone(tz).strftime('%d.%m.%Y %H:%M')
+
+    c_navy = (15/255, 23/255, 42/255)
+    c_header_bg = (30/255, 41/255, 59/255)
+    c_accent = (13/255, 148/255, 136/255)
+    c_zebra = (248/255, 250/255, 252/255)
+    c_border = (226/255, 232/255, 240/255)
+    c_text_dark = (15/255, 23/255, 42/255)
+    c_text_muted = (100/255, 116/255, 139/255)
+    c_white = (1.0, 1.0, 1.0)
+
+    grade_colors = {
+        'A+': ((254/255, 243/255, 199/255), (180/255, 83/255, 9/255)),
+        'A':  ((209/255, 250/255, 229/255), (4/255, 120/255, 87/255)),
+        'B+': ((224/255, 242/255, 254/255), (3/255, 105/255, 161/255)),
+        'B':  ((204/255, 251/255, 241/255), (15/255, 118/255, 110/255)),
+        'C+': ((255/255, 237/255, 213/255), (194/255, 65/255, 12/255)),
+        'C':  ((254/255, 249/255, 195/255), (161/255, 98/255, 7/255)),
+    }
+    grade_default_color = ((255/255, 228/255, 230/255), (190/255, 18/255, 60/255))
+
+    def draw_table_headers(p_target, start_y):
+        h = 22
+        p_target.draw_rect(pymupdf.Rect(margin_x, start_y, margin_x + table_w, start_y + h), color=c_header_bg, fill=c_header_bg)
+        cur_x = margin_x
+        for title, w, align in columns:
+            r = pymupdf.Rect(cur_x + 3, start_y + 4, cur_x + w - 3, start_y + h - 2)
+            p_target.insert_textbox(r, title, fontsize=8.5, fontname=font_bold, color=c_white, align=align)
+            cur_x += w
+        return start_y + h
+
+    page = doc.new_page(width=page_w, height=page_h)
+    setup_page_fonts(page)
+
+    page.draw_rect(pymupdf.Rect(margin_x, 24, margin_x + table_w, 28), color=c_accent, fill=c_accent)
+    page.insert_text(pymupdf.Point(margin_x, 48), "ILMILDIZI TA'LIM PLATFORMASI", fontsize=8, fontname=font_bold, color=c_accent)
+    page.insert_text(pymupdf.Point(margin_x, 68), "MOCK IMTIHON NATIJALARI VA REYTING HISOBOTI", fontsize=15, fontname=font_bold, color=c_navy)
+
+    filter_subtitle = f"Fan: {clean_txt(selected_subject_name, 35)}   |   Imtihon: {clean_txt(selected_test_title, 40)}   |   Sana: {selected_date_display}"
+    page.insert_text(pymupdf.Point(margin_x, 86), filter_subtitle, fontsize=9.5, fontname=font_bold, color=(51/255, 65/255, 85/255))
+
+    kpi_y = 44
+    kpi_w = 95
+    kpi_h = 38
+    kpis = [
+        ("Qatnashchilar", f"{total_participants} nafar", (59/255, 130/255, 246/255)),
+        ("O'rtacha ball", f"{avg_score}%", (16/255, 185/255, 129/255)),
+        ("Eng yuqori ball", f"{max_score}%", (245/255, 158/255, 11/255)),
+        ("Oltin (A+)", f"{gold_count} ta", (168/255, 85/255, 247/255)),
+    ]
+    kpi_start_x = margin_x + table_w - (len(kpis) * (kpi_w + 8))
+    for idx, (label, val, border_c) in enumerate(kpis):
+        bx = kpi_start_x + idx * (kpi_w + 8)
+        page.draw_rect(pymupdf.Rect(bx, kpi_y, bx + kpi_w, kpi_y + kpi_h), color=c_border, fill=c_zebra, width=0.8)
+        page.insert_textbox(pymupdf.Rect(bx + 4, kpi_y + 4, bx + kpi_w - 4, kpi_y + 16), label, fontsize=7, fontname=font_reg, color=c_text_muted, align=1)
+        page.insert_textbox(pymupdf.Rect(bx + 4, kpi_y + 18, bx + kpi_w - 4, kpi_y + 35), val, fontsize=10.5, fontname=font_bold, color=border_c, align=1)
+
+    page.insert_text(pymupdf.Point(margin_x + table_w - 180, 94), f"Chop etilgan vaqt: {now_local}", fontsize=7.5, fontname=font_reg, color=c_text_muted)
+    page.draw_line(pymupdf.Point(margin_x, 102), pymupdf.Point(margin_x + table_w, 102), color=c_border, width=1)
+
+    current_y = 110
+    current_y = draw_table_headers(page, current_y)
+
+    row_h = 20
+    bottom_limit = page_h - 40
+
+    if total_participants == 0:
+        page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + 40), color=c_border, fill=c_zebra, width=0.5)
+        page.insert_textbox(pymupdf.Rect(margin_x, current_y + 12, margin_x + table_w, current_y + 32), "Tanlangan parametrlar bo'yicha mock natijalari topilmadi.", fontsize=10, fontname=font_reg, color=c_text_muted, align=1)
+    else:
+        for idx, a in enumerate(qs, start=1):
+            if current_y + row_h > bottom_limit:
+                page = doc.new_page(width=page_w, height=page_h)
+                setup_page_fonts(page)
+                page.draw_rect(pymupdf.Rect(margin_x, 20, margin_x + table_w, 23), color=c_accent, fill=c_accent)
+                page.insert_text(pymupdf.Point(margin_x, 37), f"ILMILDIZI • MOCK IMTIHON HISOBOTI — {clean_txt(selected_subject_name, 30)} ({selected_date_display})", fontsize=8.5, fontname=font_bold, color=c_navy)
+                page.insert_text(pymupdf.Point(margin_x + table_w - 120, 37), f"Vaqt: {now_local}", fontsize=7.5, fontname=font_reg, color=c_text_muted)
+                current_y = 44
+                current_y = draw_table_headers(page, current_y)
+
+            is_even = (idx % 2 == 0)
+            row_bg = c_zebra if is_even else c_white
+            page.draw_rect(pymupdf.Rect(margin_x, current_y, margin_x + table_w, current_y + row_h), color=c_border, fill=row_bg, width=0.5)
+
+            u = a.profile.user
+            user_full = clean_txt(f"{u.first_name} {u.last_name}".strip() or u.username, 30)
+            user_sub = clean_txt(getattr(a.profile, 'phone', '') or f"@{u.username}", 24)
+            grade, _ = _calculate_grade(a.score, a.correct_answers)
+
+            test_full = a.test.title if a.test else "Mock"
+            subj_name = a.test.subject.name if (a.test and a.test.subject) else "Fan"
+            test_col_text = clean_txt(f"{subj_name} • {test_full}", 35)
+
+            score_str = f"{a.score:.1f}%" if a.score is not None else "0%"
+            correct_wrong = f"{a.correct_answers} / {a.wrong_answers}"
+            duration = _format_duration(a.started_at, a.completed_at)
+
+            dt_str = "—"
+            if a.completed_at:
+                dt_obj = a.completed_at.astimezone(tz) if timezone.is_aware(a.completed_at) else a.completed_at
+                dt_str = dt_obj.strftime('%d.%m.%Y %H:%M')
+
+            cur_x = margin_x
+            for col_idx, (col_name, w, align) in enumerate(columns):
+                r = pymupdf.Rect(cur_x + 3, current_y + 3, cur_x + w - 3, current_y + row_h - 2)
+
+                if col_idx == 0:
+                    page.insert_textbox(r, str(idx), fontsize=8, fontname=font_bold, color=c_text_dark, align=1)
+                elif col_idx == 1:
+                    page.insert_textbox(r, user_full, fontsize=8.5, fontname=font_bold, color=c_text_dark, align=0)
+                elif col_idx == 2:
+                    page.insert_textbox(r, user_sub, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=0)
+                elif col_idx == 3:
+                    page.insert_textbox(r, test_col_text, fontsize=8, fontname=font_reg, color=c_text_dark, align=0)
+                elif col_idx == 4:
+                    page.insert_textbox(r, score_str, fontsize=8.5, fontname=font_bold, color=c_navy, align=1)
+                elif col_idx == 5:
+                    gbg, gtxt = grade_colors.get(grade, grade_default_color)
+                    badge_w = 34
+                    badge_x = cur_x + (w - badge_w) / 2
+                    badge_rect = pymupdf.Rect(badge_x, current_y + 3.5, badge_x + badge_w, current_y + row_h - 3.5)
+                    page.draw_rect(badge_rect, color=gtxt, fill=gbg, width=0.5)
+                    page.insert_textbox(badge_rect, grade, fontsize=8, fontname=font_bold, color=gtxt, align=1)
+                elif col_idx == 6:
+                    page.insert_textbox(r, correct_wrong, fontsize=8, fontname=font_reg, color=c_text_dark, align=1)
+                elif col_idx == 7:
+                    page.insert_textbox(r, duration, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=1)
+                elif col_idx == 8:
+                    page.insert_textbox(r, dt_str, fontsize=7.5, fontname=font_reg, color=c_text_muted, align=1)
+
+                cur_x += w
+
+            current_y += row_h
+
+    total_pages = doc.page_count
+    for p_num, p in enumerate(doc, start=1):
+        p.draw_line(pymupdf.Point(margin_x, page_h - 25), pymupdf.Point(margin_x + table_w, page_h - 25), color=c_border, width=0.5)
+        p.insert_text(pymupdf.Point(margin_x, page_h - 14), "IlmIldizi intellektual ta'lim platformasi • Rasmiy elektron hisobot • https://ilmildizi.uz", fontsize=7, fontname=font_reg, color=c_text_muted)
+        p.insert_text(pymupdf.Point(margin_x + table_w - 70, page_h - 14), f"Sahifa {p_num} / {total_pages}", fontsize=7, fontname=font_bold, color=c_text_muted)
+
+    pdf_bytes = doc.tobytes()
+    doc.close()
+
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    clean_subj = selected_subject_name.replace(' ', '_')
+    clean_date = selected_date_display.replace('.', '_')
+    response['Content-Disposition'] = f'attachment; filename="mock_hisoboti_{clean_subj}_{clean_date}.pdf"'
     return response
 
 

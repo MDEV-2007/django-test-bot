@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import {
   Award, Trophy, Search, Download, RefreshCw, Clock, CheckCircle2,
   XCircle, ArrowUpDown, Flame, Sparkles, Filter, ChevronRight,
-  ExternalLink, UserCheck, Layers, HelpCircle, Phone, Send, Loader2
+  ExternalLink, UserCheck, Layers, HelpCircle, Phone, Send, Loader2,
+  BookOpen, Calendar, FileText, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, API_URL } from '@/lib/api-client';
@@ -48,6 +49,7 @@ interface MockData {
   avg_score: number;
   max_score: number;
   gold_count: number;
+  available_subjects?: { id: number; name: string }[];
   available_mocks: { id: number; title: string }[];
   items: MockItem[];
 }
@@ -68,10 +70,13 @@ export default function PanelMocksPage() {
   const [data, setData] = useState<MockData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [exporting, setExporting] = useState<boolean>(false);
+  const [exportingPdf, setExportingPdf] = useState<boolean>(false);
 
   // Filtrlar
   const [search, setSearch] = useState<string>('');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
   const [selectedTestId, setSelectedTestId] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedSort, setSelectedSort] = useState<'score' | 'date'>('score');
   const [selectedStatus, setSelectedStatus] = useState<string>('True');
 
@@ -91,7 +96,9 @@ export default function PanelMocksPage() {
 
     const params = new URLSearchParams();
     if (search.trim()) params.set('q', search.trim());
+    if (selectedSubjectId) params.set('subject_id', selectedSubjectId);
     if (selectedTestId) params.set('test_id', selectedTestId);
+    if (selectedDate) params.set('date', selectedDate);
     if (selectedSort) params.set('sort', selectedSort);
     if (selectedStatus) params.set('completed', selectedStatus);
 
@@ -108,7 +115,7 @@ export default function PanelMocksPage() {
 
   useEffect(() => {
     loadMocks();
-  }, [access, selectedTestId, selectedSort, selectedStatus]);
+  }, [access, selectedSubjectId, selectedTestId, selectedDate, selectedSort, selectedStatus]);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -120,7 +127,12 @@ export default function PanelMocksPage() {
     setExporting(true);
     try {
       const params = new URLSearchParams();
+      if (selectedSubjectId) params.set('subject_id', selectedSubjectId);
       if (selectedTestId) params.set('test_id', selectedTestId);
+      if (selectedDate) params.set('date', selectedDate);
+      if (selectedStatus) params.set('completed', selectedStatus);
+      if (search.trim()) params.set('q', search.trim());
+      if (selectedSort) params.set('sort', selectedSort);
 
       const res = await fetch(`${API_URL}/api/panel/mocks/export/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${access}` },
@@ -130,7 +142,9 @@ export default function PanelMocksPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `mock_natijalari_${new Date().toISOString().slice(0, 10)}.csv`;
+      const subjName = data?.available_subjects?.find(s => String(s.id) === selectedSubjectId)?.name || 'barcha_fanlar';
+      const dateSuffix = selectedDate || new Date().toISOString().slice(0, 10);
+      link.download = `mock_natijalari_${subjName}_${dateSuffix}.csv`.replace(/\s+/g, '_');
       link.click();
       URL.revokeObjectURL(url);
       toast.success('Mock natijalari CSV formatida yuklab olindi!');
@@ -138,6 +152,39 @@ export default function PanelMocksPage() {
       toast.error(e instanceof Error ? e.message : 'CSV yuklashda xatolik');
     } finally {
       setExporting(false);
+    }
+  }
+
+  async function handleExportPdf() {
+    if (!access) return;
+    setExportingPdf(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedSubjectId) params.set('subject_id', selectedSubjectId);
+      if (selectedTestId) params.set('test_id', selectedTestId);
+      if (selectedDate) params.set('date', selectedDate);
+      if (selectedStatus) params.set('completed', selectedStatus);
+      if (search.trim()) params.set('q', search.trim());
+      if (selectedSort) params.set('sort', selectedSort);
+
+      const res = await fetch(`${API_URL}/api/panel/mocks/export-pdf/?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${access}` },
+      });
+      if (!res.ok) throw new Error(`Server ${res.status} xato qaytardi`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const subjName = data?.available_subjects?.find(s => String(s.id) === selectedSubjectId)?.name || 'barcha_fanlar';
+      const dateSuffix = selectedDate || new Date().toISOString().slice(0, 10);
+      link.download = `mock_hisoboti_${subjName}_${dateSuffix}.pdf`.replace(/\s+/g, '_');
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('Mock natijalari PDF hisoboti muvaffaqiyatli yuklab olindi!');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'PDF hisobot yuklashda xatolik yuz berdi');
+    } finally {
+      setExportingPdf(false);
     }
   }
 
@@ -157,7 +204,7 @@ export default function PanelMocksPage() {
               Mock testlarini topshirgan barcha o&apos;quvchilar ro&apos;yxati, ballari, sertifikat darajalari va reytingi.
             </p>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Button
               variant="outline"
               size="sm"
@@ -167,15 +214,30 @@ export default function PanelMocksPage() {
             >
               <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} /> Yangilash
             </Button>
+            
+            {/* PDF Hisobot Yuklash */}
             <Button
               variant="default"
               size="sm"
+              onClick={handleExportPdf}
+              disabled={exportingPdf || loading}
+              className="gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-semibold shadow-sm"
+              title="Tanlangan filtrlar bo'yicha rasmiy PDF hisobot yuklab olish"
+            >
+              {exportingPdf ? <Loader2 className="size-3.5 animate-spin" /> : <FileText className="size-3.5" />}
+              PDF hisobot yuklash
+            </Button>
+
+            {/* CSV Yuklash */}
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleExportCsv}
               disabled={exporting || loading}
-              className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white"
+              className="gap-1.5 border-border/80 hover:bg-surface-hover text-xs"
             >
               {exporting ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
-              CSV (Excel) yuklash
+              CSV (Excel)
             </Button>
           </div>
         </div>
@@ -241,8 +303,8 @@ export default function PanelMocksPage() {
 
         {/* Filtr va Qidiruv qatori */}
         <Card className="border border-border/60 shadow-xs bg-card/40">
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
               
               {/* Qidiruv */}
               <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md relative">
@@ -257,13 +319,34 @@ export default function PanelMocksPage() {
 
               {/* Filtr dropdownlari */}
               <div className="flex flex-wrap items-center gap-2.5">
-                {/* Mock test tanlash */}
+                {/* 1. Fan tanlash (Subject) */}
+                <div className="relative">
+                  <select
+                    value={selectedSubjectId}
+                    onChange={(e) => {
+                      setSelectedSubjectId(e.target.value);
+                      setSelectedTestId('');
+                    }}
+                    className="h-9.5 rounded-lg border border-input bg-background/80 px-3 pr-7 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
+                    title="Fanni tanlang"
+                  >
+                    <option value="">Barcha fanlar</option>
+                    {data?.available_subjects?.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 2. Mock test tanlash */}
                 {data?.available_mocks && data.available_mocks.length > 0 && (
                   <div className="relative">
                     <select
                       value={selectedTestId}
                       onChange={(e) => setSelectedTestId(e.target.value)}
-                      className="h-9.5 rounded-lg border border-input bg-background/80 px-3 pr-8 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
+                      className="h-9.5 rounded-lg border border-input bg-background/80 px-3 pr-7 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring max-w-[190px] truncate"
+                      title="Aniq mock testni tanlang"
                     >
                       <option value="">Barcha Mock testlar</option>
                       {data.available_mocks.map((m) => (
@@ -275,7 +358,31 @@ export default function PanelMocksPage() {
                   </div>
                 )}
 
-                {/* Saralash */}
+                {/* 3. Topshirilgan kun (Sana) filtri */}
+                <div
+                  className="flex items-center gap-1.5 h-9.5 rounded-lg border border-input bg-background/80 px-2.5"
+                  title="Topshirilgan kun bo'yicha saralash"
+                >
+                  <Calendar className="size-3.5 text-muted-foreground shrink-0" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="bg-transparent text-xs font-medium text-foreground focus:outline-hidden cursor-pointer"
+                  />
+                  {selectedDate && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDate('')}
+                      title="Sanani tozalash"
+                      className="text-muted-foreground hover:text-foreground rounded p-0.5 transition-colors"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* 4. Saralash */}
                 <select
                   value={selectedSort}
                   onChange={(e) => setSelectedSort(e.target.value as 'score' | 'date')}
@@ -285,7 +392,7 @@ export default function PanelMocksPage() {
                   <option value="date">🕒 Oxirgi topshirganlar</option>
                 </select>
 
-                {/* Holat */}
+                {/* 5. Holat */}
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
@@ -296,18 +403,56 @@ export default function PanelMocksPage() {
                   <option value="False">Davom etayotganlar</option>
                 </select>
 
-                {search && (
+                {(search || selectedSubjectId || selectedTestId || selectedDate) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => { setSearch(''); loadMocks(); }}
-                    className="text-xs h-9.5 text-muted-foreground"
+                    onClick={() => {
+                      setSearch('');
+                      setSelectedSubjectId('');
+                      setSelectedTestId('');
+                      setSelectedDate('');
+                    }}
+                    className="text-xs h-9.5 text-muted-foreground hover:text-foreground gap-1"
                   >
-                    Tozalash
+                    <X className="size-3.5" /> Tozalash
                   </Button>
                 )}
               </div>
             </div>
+
+            {/* Faol filtrlar ko'rinishi */}
+            {(selectedSubjectId || selectedDate || selectedTestId) && (
+              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/40 text-xs">
+                <span className="font-semibold text-muted-foreground flex items-center gap-1">
+                  <Filter className="size-3 text-amber-500" /> Faol filtrlar:
+                </span>
+                {selectedSubjectId && (
+                  <Badge variant="outline" className="gap-1 bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400">
+                    Fan: {data?.available_subjects?.find((s) => String(s.id) === selectedSubjectId)?.name || 'Fan'}
+                    <button type="button" onClick={() => setSelectedSubjectId('')} className="hover:opacity-75">
+                      <X className="size-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedTestId && (
+                  <Badge variant="outline" className="gap-1 bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400">
+                    Test: {data?.available_mocks?.find((m) => String(m.id) === selectedTestId)?.title || 'Test'}
+                    <button type="button" onClick={() => setSelectedTestId('')} className="hover:opacity-75">
+                      <X className="size-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedDate && (
+                  <Badge variant="outline" className="gap-1 bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
+                    Sana: {selectedDate}
+                    <button type="button" onClick={() => setSelectedDate('')} className="hover:opacity-75">
+                      <X className="size-3" />
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
