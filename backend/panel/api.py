@@ -8,6 +8,7 @@ accounts.jwt_auth.AuditAwareJWTAuthentication orqali global tarzda aniqlanadi, s
 uchun bu yerdagi hech bir endpoint uni alohida chaqirmaydi.
 """
 import csv
+import re
 import secrets
 from datetime import timedelta
 
@@ -57,61 +58,282 @@ def _form_errors(form):
 def dashboard_api(request):
     ctx = cache.get(DASHBOARD_CACHE_KEY)
     if ctx is None:
-        from django.db.models import Sum
+        try:
+            today = timezone.localdate()
+            days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+            reg_series, attempt_series, labels = [], [], []
+            for d in days:
+                labels.append(d.strftime('%d.%m'))
+                reg_series.append(User.objects.filter(date_joined__date=d).count())
+                attempt_series.append(Attempt.objects.filter(started_at__date=d).count())
 
-        from tests_app.models import AttemptAnswer, Question
+            total_revenue = Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0
+            active_today = Attempt.objects.filter(started_at__date=today).values('profile').distinct().count()
+            premium_users = Profile.objects.filter(Q(is_premium=True) | Q(premium_mock_test_unlocked=True)).count()
 
-        today = timezone.localdate()
-        days = [today - timedelta(days=i) for i in range(6, -1, -1)]
-        reg_series, attempt_series, labels = [], [], []
-        for d in days:
-            labels.append(d.strftime('%d.%m'))
-            reg_series.append(User.objects.filter(date_joined__date=d).count())
-            attempt_series.append(Attempt.objects.filter(started_at__date=d).count())
+            # Asosiy urinishlar statistikasi va voronka
+            total_started_attempts = Attempt.objects.count()
+            completed_attempts_qs = Attempt.objects.filter(is_completed=True)
+            completed_attempts_count = completed_attempts_qs.count()
+            completion_rate = round((completed_attempts_count / total_started_attempts * 100), 1) if total_started_attempts else 0.0
 
-        total_revenue = Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0
-        active_today = Attempt.objects.filter(started_at__date=today).values('profile').distinct().count()
-        premium_users = Profile.objects.filter(Q(is_premium=True) | Q(premium_mock_test_unlocked=True)).count()
+            # O'rtacha va eng yuqori ball
+            score_agg = completed_attempts_qs.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+            avg_score = round(score_agg['avg_score'], 1) if score_agg.get('avg_score') is not None else 0.0
+            max_score = round(score_agg['max_score'], 1) if score_agg.get('max_score') is not None else 0.0
 
-        hard_q = (AttemptAnswer.objects
-                  .filter(attempt__is_completed=True)
-                  .values('question')
-                  .annotate(total=Count('id'), correct=Count('id', filter=Q(is_correct=True)))
-                  .filter(total__gte=5)
-                  .order_by('correct'))[:8]
-        qids = [row['question'] for row in hard_q]
-        qmap = {q.id: q for q in Question.objects.filter(id__in=qids)}
-        hardest_questions = []
-        for row in hard_q:
-            q = qmap.get(row['question'])
-            if not q:
-                continue
-            rate = round(100 * row['correct'] / row['total']) if row['total'] else 0
-            text = q.body[:90].replace('<p>', '').replace('</p>', '')
-            hardest_questions.append({'id': q.id, 'text': text, 'rate': rate, 'total': row['total']})
+            # Muvaffaqiyat ko'rsatkichi (60% dan yuqori)
+            passed_count = completed_attempts_qs.filter(score__gte=60).count()
+            pass_rate = round((passed_count / completed_attempts_count * 100), 1) if completed_attempts_count else 0.0
 
-        ctx = {
-            'stats': {
-                'users': User.objects.count(),
-                'teachers': Profile.objects.filter(role='teacher').count(),
-                'students': Profile.objects.filter(role='student').count(),
-                'testsets': TestSet.objects.filter(is_random=False).count(),
-                'lessons': Lesson.objects.count(),
-                'games': Game.objects.count(),
-                'attempts_today': Attempt.objects.filter(started_at__date=today).count(),
-                'attempts_total': Attempt.objects.filter(is_completed=True).count(),
-                'pending_payments': Payment.objects.filter(status='pending').count(),
-                'total_revenue': str(total_revenue),
-                'active_today': active_today,
-                'premium_users': premium_users,
-            },
-            'chart_labels': labels, 'chart_reg': reg_series, 'chart_attempts': attempt_series,
-            'hardest_questions': hardest_questions,
-            'recent_logs': [{
-                'id': log.id, 'summary': log.summary_uz, 'action': log.action, 'timestamp': log.timestamp,
-            } for log in AuditLog.objects.select_related('user')[:12]],
-        }
-        cache.set(DASHBOARD_CACHE_KEY, ctx, 180)
+            # Ballar darajalari taqsimoti (Score Distribution)
+            gold_count = completed_attempts_qs.filter(score__gte=85).count()
+            silver_count = completed_attempts_qs.filter(score__gte=70, score__lt=85).count()
+            bronze_count = completed_attempts_qs.filter(score__gte=60, score__lt=70).count()
+            fail_count = completed_attempts_qs.filter(score__lt=60).count()
+
+            denom_score = completed_attempts_count or 1
+            score_distribution = {
+                'gold': {'count': gold_count, 'pct': round(gold_count / denom_score * 100, 1)},
+                'silver': {'count': silver_count, 'pct': round(silver_count / denom_score * 100, 1)},
+                'bronze': {'count': bronze_count, 'pct': round(bronze_count / denom_score * 100, 1)},
+                'fail': {'count': fail_count, 'pct': round(fail_count / denom_score * 100, 1)},
+            }
+
+            # Javoblar anatomiyasi (To'g'ri / Xato / Bo'sh)
+            ans_agg = completed_attempts_qs.aggregate(
+                total_correct=Sum('correct_answers'),
+                total_wrong=Sum('wrong_answers'),
+                total_skipped=Sum('skipped_answers'),
+            )
+            c_ans = ans_agg.get('total_correct') or 0
+            w_ans = ans_agg.get('total_wrong') or 0
+            s_ans = ans_agg.get('total_skipped') or 0
+            total_answers = c_ans + w_ans + s_ans
+            denom_ans = total_answers or 1
+            answers_anatomy = {
+                'correct': c_ans,
+                'wrong': w_ans,
+                'skipped': s_ans,
+                'total': total_answers,
+                'correct_pct': round(c_ans / denom_ans * 100, 1),
+                'wrong_pct': round(w_ans / denom_ans * 100, 1),
+                'skipped_pct': round(s_ans / denom_ans * 100, 1),
+            }
+
+            # Telegram va aloqa faolligi
+            total_profiles = Profile.objects.count()
+            tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id=0).count()
+            phone_count = Profile.objects.exclude(phone='').count()
+
+            # O'quvchilar sadoqati (Retention & Loyalty)
+            user_attempts = (
+                Attempt.objects
+                .values('profile')
+                .annotate(attempt_count=Count('id'))
+            )
+            one_attempt = sum(1 for u in user_attempts if u['attempt_count'] == 1)
+            two_to_five = sum(1 for u in user_attempts if 2 <= u['attempt_count'] <= 5)
+            six_plus = sum(1 for u in user_attempts if u['attempt_count'] >= 6)
+            active_learners_count = len(user_attempts)
+            avg_attempts_per_user = round(total_started_attempts / active_learners_count, 1) if active_learners_count else 0.0
+
+            user_retention = {
+                'one_attempt': one_attempt,
+                'two_to_five': two_to_five,
+                'six_plus': six_plus,
+                'active_learners': active_learners_count,
+                'avg_attempts_per_user': avg_attempts_per_user,
+            }
+
+            # Fanlar chuqur diagnostikasi
+            subject_stats = []
+            for s in Subject.objects.all().order_by('order', 'name'):
+                s_attempts = Attempt.objects.filter(test__subject=s)
+                s_total = s_attempts.count()
+                if s_total == 0:
+                    continue
+                s_completed = s_attempts.filter(is_completed=True)
+                s_agg = s_completed.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+                s_avg = round(s_agg['avg_score'], 1) if s_agg.get('avg_score') is not None else 0.0
+                s_max = round(s_agg['max_score'], 1) if s_agg.get('max_score') is not None else 0.0
+                s_students = s_attempts.values('profile').distinct().count()
+                subject_stats.append({
+                    'id': s.id,
+                    'name': s.name,
+                    'total_attempts': s_total,
+                    'completed_attempts': s_completed.count(),
+                    'students_count': s_students,
+                    'avg_score': s_avg,
+                    'max_score': s_max,
+                })
+            subject_stats.sort(key=lambda x: x['total_attempts'], reverse=True)
+
+            # Mock imtihonlar alohida tahlili
+            mock_filter = (
+                Q(test__is_live_mock=True) |
+                Q(test__scheduled_at__isnull=False) |
+                Q(mock_attempt__isnull=False) |
+                Q(test__title__icontains='mock') |
+                Q(test__category='cefr')
+            )
+            mock_attempts_qs = Attempt.objects.filter(mock_filter)
+            mock_total = mock_attempts_qs.count()
+            mock_completed = mock_attempts_qs.filter(is_completed=True)
+            m_agg = mock_completed.aggregate(avg_score=Avg('score'), max_score=Max('score'))
+            mock_analytics = {
+                'total_attempts': mock_total,
+                'completed_count': mock_completed.count(),
+                'avg_score': round(m_agg['avg_score'], 1) if m_agg.get('avg_score') is not None else 0.0,
+                'max_score': round(m_agg['max_score'], 1) if m_agg.get('max_score') is not None else 0.0,
+                'gold_count': mock_completed.filter(score__gte=80).count(),
+            }
+
+            # Yaqinlashayotgan yoki eng so'nggi Jonli Mock
+            upcoming_mock = (
+                TestSet.objects
+                .filter(Q(is_live_mock=True) | Q(scheduled_at__isnull=False))
+                .order_by(F('scheduled_at').desc(nulls_last=True))
+                .first()
+            )
+            upcoming_mock_info = None
+            if upcoming_mock:
+                reminders_cnt = upcoming_mock.remind_users.count() if hasattr(upcoming_mock, 'remind_users') else 0
+                sched_str = None
+                if upcoming_mock.scheduled_at:
+                    tz = timezone.get_current_timezone()
+                    sched_dt = upcoming_mock.scheduled_at.astimezone(tz) if timezone.is_aware(upcoming_mock.scheduled_at) else upcoming_mock.scheduled_at
+                    sched_str = sched_dt.strftime('%d.%m.%Y %H:%M')
+                upcoming_mock_info = {
+                    'id': upcoming_mock.id,
+                    'title': upcoming_mock.title,
+                    'subject_name': upcoming_mock.subject.name if upcoming_mock.subject else "Asosiy",
+                    'scheduled_at': sched_str,
+                    'reminders_count': reminders_cnt,
+                }
+
+            # Top 5 Peshqadam O'quvchilar (Leaderboard)
+            top_students_raw = (
+                Attempt.objects
+                .filter(is_completed=True, score__isnull=False)
+                .values('profile')
+                .annotate(
+                    avg_score=Avg('score'),
+                    max_score=Max('score'),
+                    tests_count=Count('id')
+                )
+                .filter(tests_count__gte=1)
+                .order_by('-avg_score', '-max_score', '-tests_count')[:5]
+            )
+            p_ids = [row['profile'] for row in top_students_raw]
+            prof_map = {p.id: p for p in Profile.objects.filter(id__in=p_ids).select_related('user')}
+            top_students = []
+            for idx, row in enumerate(top_students_raw, start=1):
+                prof = prof_map.get(row['profile'])
+                u = prof.user if prof else None
+                user_full = f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() or getattr(u, 'username', '') or "O'quvchi"
+                top_students.append({
+                    'rank': idx,
+                    'name': user_full,
+                    'username': getattr(u, 'username', '') or '',
+                    'phone': getattr(prof, 'phone', '') or '',
+                    'tests_count': row['tests_count'],
+                    'avg_score': round(float(row['avg_score']), 1),
+                    'max_score': round(float(row['max_score']), 1),
+                })
+
+            # Kunning faol soatlari (Peak Hours)
+            tz = timezone.get_current_timezone()
+            hour_counts = {'morning': 0, 'afternoon': 0, 'evening': 0, 'night': 0}
+            for dt_val in Attempt.objects.values_list('started_at', flat=True)[:300]:
+                if not dt_val:
+                    continue
+                local_dt = dt_val.astimezone(tz) if timezone.is_aware(dt_val) else dt_val
+                h = local_dt.hour
+                if 6 <= h < 12:
+                    hour_counts['morning'] += 1
+                elif 12 <= h < 18:
+                    hour_counts['afternoon'] += 1
+                elif 18 <= h < 23:
+                    hour_counts['evening'] += 1
+                else:
+                    hour_counts['night'] += 1
+
+            total_hour_samples = sum(hour_counts.values()) or 1
+            peak_hours = {
+                'morning': {'label': 'Ertalab (06:00 - 12:00)', 'count': hour_counts['morning'], 'pct': round(hour_counts['morning'] / total_hour_samples * 100, 1)},
+                'afternoon': {'label': 'Tushdan keyin (12:00 - 18:00)', 'count': hour_counts['afternoon'], 'pct': round(hour_counts['afternoon'] / total_hour_samples * 100, 1)},
+                'evening': {'label': 'Kechki pik vaqt (18:00 - 23:00)', 'count': hour_counts['evening'], 'pct': round(hour_counts['evening'] / total_hour_samples * 100, 1)},
+                'night': {'label': 'Tun (23:00 - 06:00)', 'count': hour_counts['night'], 'pct': round(hour_counts['night'] / total_hour_samples * 100, 1)},
+            }
+
+            # Eng qiyin savollar (HTML tozalangan)
+            hard_q = (AttemptAnswer.objects
+                      .filter(attempt__is_completed=True)
+                      .values('question')
+                      .annotate(total=Count('id'), correct=Count('id', filter=Q(is_correct=True)))
+                      .filter(total__gte=5)
+                      .order_by('correct'))[:8]
+            qids = [row['question'] for row in hard_q]
+            qmap = {q.id: q for q in Question.objects.filter(id__in=qids).select_related('test_set__subject')}
+            hardest_questions = []
+            for row in hard_q:
+                q = qmap.get(row['question'])
+                if not q:
+                    continue
+                rate = round(100 * row['correct'] / row['total']) if row['total'] else 0
+                clean_text = re.sub(r'<[^>]+>', '', q.body).strip()
+                clean_text = clean_text[:110]
+                s_name = q.test_set.subject.name if (q.test_set and q.test_set.subject) else "Test"
+                hardest_questions.append({
+                    'id': q.id,
+                    'text': clean_text,
+                    'subject_name': s_name,
+                    'rate': rate,
+                    'total': row['total']
+                })
+
+            ctx = {
+                'stats': {
+                    'users': User.objects.count(),
+                    'teachers': Profile.objects.filter(role='teacher').count(),
+                    'students': Profile.objects.filter(role='student').count(),
+                    'testsets': TestSet.objects.filter(is_random=False).count(),
+                    'lessons': Lesson.objects.count(),
+                    'games': Game.objects.count(),
+                    'attempts_today': Attempt.objects.filter(started_at__date=today).count(),
+                    'attempts_total': completed_attempts_count,
+                    'pending_payments': Payment.objects.filter(status='pending').count(),
+                    'total_revenue': str(total_revenue),
+                    'active_today': active_today,
+                    'premium_users': premium_users,
+                    'completion_rate': completion_rate,
+                    'avg_score': avg_score,
+                    'max_score': max_score,
+                    'pass_rate': pass_rate,
+                    'tg_connected': tg_connected,
+                    'phone_count': phone_count,
+                    'tg_pct': round(tg_connected / (total_profiles or 1) * 100, 1),
+                },
+                'chart_labels': labels, 'chart_reg': reg_series, 'chart_attempts': attempt_series,
+                'score_distribution': score_distribution,
+                'answers_anatomy': answers_anatomy,
+                'user_retention': user_retention,
+                'subject_stats': subject_stats,
+                'mock_analytics': mock_analytics,
+                'upcoming_mock_info': upcoming_mock_info,
+                'top_students': top_students,
+                'peak_hours': peak_hours,
+                'hardest_questions': hardest_questions,
+                'recent_logs': [{
+                    'id': log.id, 'summary': log.summary_uz, 'action': log.action, 'timestamp': log.timestamp,
+                } for log in AuditLog.objects.select_related('user')[:12]],
+            }
+            cache.set(DASHBOARD_CACHE_KEY, ctx, 60)
+        except Exception as e:
+            logger.exception("Error calculating dashboard stats: %s", e)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     return Response(ctx)
 
 
