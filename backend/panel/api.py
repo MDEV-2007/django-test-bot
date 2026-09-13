@@ -36,7 +36,7 @@ from games.models import Game
 from learning.models import Lesson
 from premium.models import Payment
 from shop.models import ShopItem
-from tests_app.models import Attempt, Question, Subject, TestSet, ExamSurvey
+from tests_app.models import Attempt, AttemptAnswer, ExamSurvey, Question, Subject, TestSet
 
 from .api_utils import bulk_action, list_response
 from .forms import (
