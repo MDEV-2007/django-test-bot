@@ -2244,95 +2244,121 @@ def promocode_toggle_api(request, pk):
 def finance_analytics_api(request):
     try:
         now = timezone.now()
+        tz = timezone.get_current_timezone()
+        today_start = now.astimezone(tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        month_start = now.astimezone(tz).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         thirty_days_ago = now - timedelta(days=30)
-        sixty_days_ago = now - timedelta(days=60)
 
         # Revenue
         all_approved = Payment.objects.filter(status='approved')
-        total_revenue = all_approved.aggregate(s=Sum('amount'))['s'] or 0
+        total_rev = all_approved.aggregate(s=Sum('amount'))['s'] or 0
+        approved_cnt = all_approved.count()
 
-        this_month_payments = all_approved.filter(created_at__gte=thirty_days_ago)
-        this_month_rev = this_month_payments.aggregate(s=Sum('amount'))['s'] or 0
+        today_rev = all_approved.filter(created_at__gte=today_start).aggregate(s=Sum('amount'))['s'] or 0
+        month_rev = all_approved.filter(created_at__gte=month_start).aggregate(s=Sum('amount'))['s'] or 0
+        pending_cnt = Payment.objects.filter(status='pending').count()
+        avg_check = round(float(total_rev) / (approved_cnt or 1), 0)
 
-        last_month_payments = all_approved.filter(created_at__gte=sixty_days_ago, created_at__lt=thirty_days_ago)
-        last_month_rev = last_month_payments.aggregate(s=Sum('amount'))['s'] or 0
+        summary = {
+            'total_revenue': float(total_rev),
+            'today_revenue': float(today_rev),
+            'month_revenue': float(month_rev),
+            'approved_count': approved_cnt,
+            'pending_count': pending_cnt,
+            'avg_check': avg_check,
+        }
 
-        growth_pct = round(((this_month_rev - last_month_rev) / (last_month_rev or 1)) * 100, 1) if last_month_rev else (100.0 if this_month_rev else 0.0)
-
-        total_tx = all_approved.count()
-        paying_users_count = all_approved.values('user').distinct().count()
-        arpu = round(total_revenue / (paying_users_count or 1), 0)
-
-        # 30-day daily breakdown for chart
+        # 30-day daily breakdown for chart (frontend expects { date, amount, count })
         daily_map = {}
+        daily_cnt_map = {}
         for i in range(29, -1, -1):
-            d = (now - timedelta(days=i)).date()
-            daily_map[d.strftime('%d.%m')] = 0
+            d = (now - timedelta(days=i)).astimezone(tz).date()
+            k = d.strftime('%d.%m')
+            daily_map[k] = 0.0
+            daily_cnt_map[k] = 0
 
-        recent_txs = all_approved.filter(created_at__gte=thirty_days_ago)
-        for tx in recent_txs:
-            d_str = tx.created_at.astimezone(timezone.get_current_timezone()).strftime('%d.%m')
+        recent_approved = all_approved.filter(created_at__gte=thirty_days_ago)
+        for p in recent_approved:
+            d_str = p.created_at.astimezone(tz).strftime('%d.%m')
             if d_str in daily_map:
-                daily_map[d_str] += float(tx.amount)
+                daily_map[d_str] += float(p.amount)
+                daily_cnt_map[d_str] += 1
 
-        daily_series = [{'date': k, 'revenue': v} for k, v in daily_map.items()]
+        daily_revenue = [
+            {'date': k, 'amount': daily_map[k], 'count': daily_cnt_map[k]}
+            for k in daily_map
+        ]
 
-        # By Plan breakdown
+        # By Plan breakdown: { name, plan_type, amount, count }
         by_plan = []
-        plans = SubscriptionPlan.objects.all()
-        for pl in plans:
-            pl_rev = all_approved.filter(plan=pl).aggregate(s=Sum('amount'))['s'] or 0
-            pl_count = all_approved.filter(plan=pl).count()
-            by_plan.append({
-                'name': pl.name,
-                'revenue': float(pl_rev),
-                'count': pl_count,
-            })
+        for plan in SubscriptionPlan.objects.all():
+            plan_payments = all_approved.filter(plan=plan)
+            amt = plan_payments.aggregate(s=Sum('amount'))['s'] or 0
+            cnt = plan_payments.count()
+            if cnt > 0 or amt > 0:
+                by_plan.append({
+                    'name': plan.name,
+                    'plan_type': plan.plan_type,
+                    'amount': float(amt),
+                    'count': cnt,
+                })
         # Mock test direct payments
-        mock_rev = all_approved.filter(test__isnull=False).aggregate(s=Sum('amount'))['s'] or 0
-        mock_count = all_approved.filter(test__isnull=False).count()
-        if mock_count > 0:
+        mock_payments = all_approved.filter(test__isnull=False)
+        mock_amt = mock_payments.aggregate(s=Sum('amount'))['s'] or 0
+        mock_cnt = mock_payments.count()
+        if mock_cnt > 0:
             by_plan.append({
                 'name': "Jonli Mock Imtihonlar",
-                'revenue': float(mock_rev),
-                'count': mock_count,
+                'plan_type': 'mock_test',
+                'amount': float(mock_amt),
+                'count': mock_cnt,
             })
 
-        # By Source (Payment provider)
+        # By Source: { source: 'web'|'bot', label: '...', amount, count }
         by_source = []
-        for prov in ['click', 'payme', 'uzum', 'admin', 'manual']:
-            s_rev = all_approved.filter(provider=prov).aggregate(s=Sum('amount'))['s'] or 0
-            s_count = all_approved.filter(provider=prov).count()
-            if s_count > 0 or s_rev > 0:
-                by_source.append({
-                    'provider': prov.capitalize(),
-                    'revenue': float(s_rev),
-                    'count': s_count,
-                })
+        for src_code, src_label in [('web', 'Veb-ilova (Web App)'), ('bot', 'Telegram Bot')]:
+            src_payments = all_approved.filter(source=src_code)
+            amt = src_payments.aggregate(s=Sum('amount'))['s'] or 0
+            cnt = src_payments.count()
+            by_source.append({
+                'source': src_code,
+                'label': src_label,
+                'amount': float(amt),
+                'count': cnt,
+            })
 
-        # Status counts
+        # Status counts: { approved, pending, rejected, awaiting_screenshot }
         status_counts = {
-            'approved': total_tx,
-            'pending': Payment.objects.filter(status='pending').count(),
-            'cancelled': Payment.objects.filter(status='cancelled').count(),
+            'approved': approved_cnt,
+            'pending': pending_cnt,
+            'rejected': Payment.objects.filter(status='rejected').count(),
+            'awaiting_screenshot': Payment.objects.filter(status='awaiting_screenshot').count(),
         }
 
         return Response({
-            'total_revenue': float(total_revenue),
-            'this_month_revenue': float(this_month_rev),
-            'last_month_revenue': float(last_month_rev),
-            'growth_pct': growth_pct,
-            'total_transactions': total_tx,
-            'paying_users_count': paying_users_count,
-            'arpu': arpu,
-            'daily_series': daily_series,
+            'summary': summary,
+            'daily_revenue': daily_revenue,
             'by_plan': by_plan,
             'by_source': by_source,
             'status_counts': status_counts,
+            # Top-level backwards compat
+            'total_revenue': float(total_rev),
+            'this_month_revenue': float(month_rev),
+            'arpu': avg_check,
         })
     except Exception as e:
         logger.exception("finance_analytics_api error: %s", e)
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({
+            'summary': {
+                'total_revenue': 0, 'today_revenue': 0, 'month_revenue': 0,
+                'approved_count': 0, 'pending_count': 0, 'avg_check': 0,
+            },
+            'daily_revenue': [],
+            'by_plan': [],
+            'by_source': [],
+            'status_counts': {'approved': 0, 'pending': 0, 'rejected': 0, 'awaiting_screenshot': 0},
+            'error': str(e),
+        })
 
 
 financial_analytics_api = finance_analytics_api
