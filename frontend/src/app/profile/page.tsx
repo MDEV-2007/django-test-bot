@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Gift, Copy, Check, Award, Crown, Swords, FileCheck2,
-  Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout, type LucideIcon,
+  Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout,
+  Pencil, Camera, Trash2, Loader2, type LucideIcon,
 } from 'lucide-react';
-import { apiFetch } from '@/lib/api-client';
+import { toast } from 'sonner';
+import { apiUpload } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
-import { useAuthStore } from '@/lib/auth-store';
+import { useAuthStore, type Profile } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import KnowledgeTree from '@/components/student/KnowledgeTree';
 import PredictedScore from '@/components/student/PredictedScore';
@@ -17,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,12 +28,20 @@ import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import CosmeticBadge from '@/components/student/CosmeticBadge';
 import type { Cosmetics } from '@/lib/auth-store';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type ProfileData = {
   profile: {
     username: string; first_name: string; last_name: string; xp: number; level: number;
     coins: number; streak: number; avatar_url: string | null; is_premium: boolean;
-    next_level_xp: number; cosmetics?: Cosmetics;
+    next_level_xp: number; cosmetics?: Cosmetics; base_avatar_url?: string | null;
   };
   referral_code: string; telegram_deep_link: string;
   referral_stats: { referral_count: number; coins_earned: number };
@@ -55,9 +66,83 @@ export default function ProfilePage() {
   const { access } = useAuthStore();
   const [origin, setOrigin] = useState('');
   const [copied, setCopied] = useState(false);
-  const { data } = useApiQuery<ProfileData>('/api/auth/profile/');
+  const { data, refresh } = useApiQuery<ProfileData>('/api/auth/profile/');
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [removeAvatar, setRemoveAvatar] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { setOrigin(window.location.origin); }, []);
+
+  function handleOpenEdit() {
+    if (!data) return;
+    setFirstName(data.profile.first_name || '');
+    setLastName(data.profile.last_name || '');
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setRemoveAvatar(false);
+    setEditOpen(true);
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Faqat rasm fayllari (JPG, PNG, WebP) qabul qilinadi.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Rasm hajmi 10 MB dan oshmasligi kerak.");
+      return;
+    }
+    setAvatarFile(file);
+    setRemoveAvatar(false);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleRemoveAvatar() {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setRemoveAvatar(true);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  async function handleSaveProfile(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('first_name', firstName.trim());
+      formData.append('last_name', lastName.trim());
+      if (avatarFile) {
+        formData.append('avatar', avatarFile);
+      } else if (removeAvatar) {
+        formData.append('remove_avatar', 'true');
+      }
+
+      const res = await apiUpload<{ ok: boolean; profile: Profile }>('/api/auth/profile/', formData);
+      if (res?.profile) {
+        useAuthStore.setState({ user: res.profile });
+      }
+      await refresh();
+      toast.success("Profil muvaffaqiyatli yangilandi!");
+      setEditOpen(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Profilni saqlashda xatolik yuz berdi";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   if (!data) {
     return (
@@ -110,18 +195,37 @@ export default function ProfilePage() {
         <Card className="relative overflow-hidden">
           <div className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-primary/10 blur-3xl" />
           <CardContent className="relative flex flex-col items-center gap-5 pt-6 text-center sm:flex-row sm:text-left">
-            <div className="relative shrink-0">
-              <CosmeticAvatar
-                className="size-20 border-2 border-[var(--accent)] shadow-lg shadow-[var(--accent)]/20 sm:size-24"
-                src={p.avatar_url}
-                name={p.first_name || p.username}
-                cosmetics={p.cosmetics}
-                fallbackClassName="text-lg"
-              />
-              {p.is_premium && (
+            <div className="relative shrink-0 group">
+              <div
+                onClick={handleOpenEdit}
+                className="cursor-pointer relative rounded-full overflow-hidden transition-transform hover:scale-105"
+                title="Profilni tahrirlash"
+              >
+                <CosmeticAvatar
+                  className="size-20 border-2 border-[var(--accent)] shadow-lg shadow-[var(--accent)]/20 sm:size-24"
+                  src={p.avatar_url}
+                  name={p.first_name || p.username}
+                  cosmetics={p.cosmetics}
+                  fallbackClassName="text-lg"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                  <Camera className="size-5" />
+                </div>
+              </div>
+              {p.is_premium ? (
                 <span className="absolute -bottom-1.5 -right-1.5 rounded-xl bg-amber-500 p-1.5 text-black shadow-md">
                   <Crown className="size-4" />
                 </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenEdit}
+                  title="Rasmni o'zgartirish"
+                  aria-label="Rasmni o'zgartirish"
+                  className="absolute -bottom-1 -right-1 size-7 rounded-full bg-[var(--accent)] text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                >
+                  <Camera className="size-3.5" />
+                </button>
               )}
             </div>
 
@@ -152,14 +256,184 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <Button asChild className="shrink-0 bg-gradient-to-r from-amber-500 to-amber-600 text-black hover:from-amber-500/90 hover:to-amber-600/90">
-              <Link href="/premium">
-                {p.is_premium ? <Crown className="size-4" /> : <Lock className="size-4" />}
-                {p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}
-              </Link>
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:flex-col sm:items-end sm:shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenEdit}
+                className="h-9 gap-1.5 border-[var(--border-strong)] hover:bg-[var(--surface-hover)] shadow-sm font-medium"
+              >
+                <Pencil className="size-3.5 text-[var(--accent-text)]" />
+                Tahrirlash
+              </Button>
+              <Button asChild className="h-9 shrink-0 bg-gradient-to-r from-amber-500 to-amber-600 text-black hover:from-amber-500/90 hover:to-amber-600/90 shadow-sm font-medium">
+                <Link href="/premium">
+                  {p.is_premium ? <Crown className="size-4" /> : <Lock className="size-4" />}
+                  {p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}
+                </Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Profilni tahrirlash modali */}
+        <Dialog open={editOpen} onOpenChange={(open) => { if (!saving) setEditOpen(open); }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+                <Pencil className="size-5 text-[var(--accent-text)]" />
+                Profilni tahrirlash
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Ism, familiya va profilingiz rasmini o&apos;zgartirishingiz mumkin.
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleSaveProfile} className="space-y-5 py-2">
+              {/* Avatar yuklash qismi */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative group">
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative size-24 sm:size-28 rounded-full overflow-hidden border-2 border-[var(--accent)] shadow-md cursor-pointer bg-[var(--surface-hover)] flex items-center justify-center transition-all hover:opacity-90"
+                    title="Rasmni o'zgartirish"
+                  >
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Preview" className="size-full object-cover" />
+                    ) : removeAvatar ? (
+                      <div className="size-full flex items-center justify-center font-voice text-2xl font-bold text-[var(--accent-text)] bg-primary/10">
+                        {(firstName[0] || p.username[0] || '?').toUpperCase()}
+                      </div>
+                    ) : (
+                      <CosmeticAvatar
+                        className="size-full"
+                        src={p.base_avatar_url || p.avatar_url}
+                        name={firstName || p.username}
+                        cosmetics={p.cosmetics}
+                        fallbackClassName="text-2xl"
+                      />
+                    )}
+
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs gap-1">
+                      <Camera className="size-5" />
+                      <span>O&apos;zgartirish</span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label="Rasmni yangilash"
+                    className="absolute -bottom-1 -right-1 size-8 rounded-full bg-[var(--accent)] text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                  >
+                    <Camera className="size-4" />
+                  </button>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-8 text-xs gap-1.5"
+                  >
+                    <Camera className="size-3.5" />
+                    Rasm yuklash
+                  </Button>
+                  {(avatarPreview || (!removeAvatar && (p.base_avatar_url || p.avatar_url))) && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemoveAvatar}
+                      className="h-8 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 gap-1.5"
+                    >
+                      <Trash2 className="size-3.5" />
+                      O&apos;chirish
+                    </Button>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground">PNG, JPG yoki WebP (maks. 10 MB)</p>
+              </div>
+
+              {/* Ism va Familiya maydonlari */}
+              <div className="space-y-3.5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-first-name" className="text-xs font-semibold">
+                    Ism
+                  </Label>
+                  <Input
+                    id="edit-first-name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Ismingizni kiriting"
+                    maxLength={50}
+                    className="h-9 text-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-last-name" className="text-xs font-semibold">
+                    Familiya
+                  </Label>
+                  <Input
+                    id="edit-last-name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Familiyangizni kiriting"
+                    maxLength={50}
+                    className="h-9 text-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground">
+                    Foydalanuvchi nomi
+                  </Label>
+                  <Input
+                    disabled
+                    value={`@${p.username}`}
+                    className="h-9 text-sm bg-muted/40 cursor-not-allowed opacity-75 font-mono"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="gap-2 sm:gap-0 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={saving}
+                  onClick={() => setEditOpen(false)}
+                >
+                  Bekor qilish
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      Saqlanmoqda...
+                    </>
+                  ) : (
+                    'Saqlash'
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* DTM ball bashorati — ilovaning farqlovchi xususiyati, shuning uchun
             Hisobim ekranining eng tepasida, ro'yxat ichiga yashiringan emas. */}

@@ -17,7 +17,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -279,8 +280,9 @@ def subscription_check_api(request):
     return Response(state_for(profile, use_cache=False, in_miniapp=_from_miniapp(request)))
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST', 'PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def profile_api(request):
     from battles.models import Battle
     from django.db.models import Q as _Q
@@ -290,6 +292,73 @@ def profile_api(request):
     from .referrals import ensure_referral_code, get_telegram_deep_link, referral_stats
 
     profile = ensure_profile_for_user(request.user)
+
+    if request.method in ('POST', 'PUT', 'PATCH'):
+        user = request.user
+        updated_user_fields = []
+        if 'first_name' in request.data:
+            user.first_name = str(request.data.get('first_name', '')).strip()
+            updated_user_fields.append('first_name')
+        if 'last_name' in request.data:
+            user.last_name = str(request.data.get('last_name', '')).strip()
+            updated_user_fields.append('last_name')
+        if updated_user_fields:
+            user.save(update_fields=updated_user_fields)
+
+        remove_avatar = request.data.get('remove_avatar')
+        if remove_avatar in (True, 'true', '1'):
+            if profile.avatar_url and profile.avatar_url.startswith('/media/avatars/'):
+                from django.core.files.storage import default_storage
+                old_rel = profile.avatar_url.replace('/media/', '', 1)
+                if default_storage.exists(old_rel):
+                    try:
+                        default_storage.delete(old_rel)
+                    except Exception:
+                        pass
+            profile.avatar_url = ''
+            profile.save(update_fields=['avatar_url'])
+            try:
+                from shop.models import InventoryItem
+                from shop.services import _bust_equipped_cache
+                InventoryItem.objects.filter(profile=profile, item__category='avatar', is_equipped=True).update(is_equipped=False)
+                _bust_equipped_cache(profile.pk)
+            except Exception:
+                pass
+
+        avatar_file = request.FILES.get('avatar')
+        if avatar_file:
+            if avatar_file.size > 10 * 1024 * 1024:
+                return Response({'error': "Rasm hajmi 10 MB dan oshmasligi kerak."}, status=400)
+
+            import secrets
+            from django.core.files.storage import default_storage
+            ext = avatar_file.name.rsplit('.', 1)[-1].lower() if '.' in avatar_file.name else 'jpg'
+            if ext not in ('jpg', 'jpeg', 'png', 'webp', 'gif'):
+                ext = 'jpg'
+            fname = f"avatars/user_{user.id}_{secrets.token_hex(4)}.{ext}"
+
+            if profile.avatar_url and profile.avatar_url.startswith('/media/avatars/'):
+                old_rel = profile.avatar_url.replace('/media/', '', 1)
+                if default_storage.exists(old_rel):
+                    try:
+                        default_storage.delete(old_rel)
+                    except Exception:
+                        pass
+
+            saved_name = default_storage.save(fname, avatar_file)
+            profile.avatar_url = default_storage.url(saved_name)
+            profile.save(update_fields=['avatar_url'])
+
+            try:
+                from shop.models import InventoryItem
+                from shop.services import _bust_equipped_cache
+                InventoryItem.objects.filter(profile=profile, item__category='avatar', is_equipped=True).update(is_equipped=False)
+                _bust_equipped_cache(profile.pk)
+            except Exception:
+                pass
+
+        profile.refresh_from_db()
+
     evaluate_badges(profile)
     recent_attempts = profile.attempts.select_related('test').order_by('-started_at')[:5]
     recent_battles = (Battle.objects.filter(_Q(player1=profile) | _Q(player2=profile))
@@ -298,6 +367,7 @@ def profile_api(request):
     badges = profile.badges.select_related('badge')
 
     return Response({
+        'ok': True,
         'profile': ProfileSerializer(profile).data,
         'referral_code': ensure_referral_code(profile),
         # Telegram Mini App ichidan ulashish uchun: oddiy veb-havola brauzerni ochib,
