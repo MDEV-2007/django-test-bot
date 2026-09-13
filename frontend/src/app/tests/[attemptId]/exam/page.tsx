@@ -931,15 +931,8 @@ export default function CefrExamPage() {
                             <ExamQuestion
                               question={q}
                               group={sec.groups.find((g) => g.id === q.group_id)}
-                              flagged={flagged.has(q.id)}
-                              onToggleFlag={() => {
-                                setFlagged((prev) => {
-                                  const next = new Set(prev);
-                                  if (next.has(q.id)) next.delete(q.id);
-                                  else next.add(q.id);
-                                  return next;
-                                });
-                              }}
+                              active={activeQuestionId === q.id}
+                              onActivate={() => setActiveQuestionId(q.id)}
                               onAnswer={(payload) => answer(q, payload)}
                             />
                           </div>
@@ -1100,15 +1093,8 @@ export default function CefrExamPage() {
                           <ExamQuestion
                             question={q}
                             group={sec.groups.find((g) => g.id === q.group_id)}
-                            flagged={flagged.has(q.id)}
-                            onToggleFlag={() => {
-                              setFlagged((prev) => {
-                                const next = new Set(prev);
-                                if (next.has(q.id)) next.delete(q.id);
-                                else next.add(q.id);
-                                return next;
-                              });
-                            }}
+                            active={activeQuestionId === q.id}
+                            onActivate={() => setActiveQuestionId(q.id)}
                             onAnswer={(payload) => answer(q, payload)}
                           />
                         </div>
@@ -1274,18 +1260,27 @@ export default function CefrExamPage() {
       </main>
 
       {/* Savollar Palitrasi (Modal) */}
-      <QuestionPalette
-        open={showPalette}
-        onOpenChange={setShowPalette}
-        sections={sections}
-        flagged={flagged}
-        onSelect={(secIndex, qId) => {
-          const sec = sections[secIndex];
-          if (sec) {
-            jump(sec.id, qId);
-          }
-        }}
-      />
+      <Dialog open={showPalette} onOpenChange={setShowPalette}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Savollar xaritasi</DialogTitle>
+            <DialogDescription>
+              Yashil — javoblangan, oq — javobsiz savollar. Istalganiga bosib sakrashingiz mumkin.
+            </DialogDescription>
+          </DialogHeader>
+          <QuestionPalette
+            sections={sections}
+            activeQuestionId={activeQuestionId}
+            flagged={flagged}
+            onJump={(sectionIndex: number, questionId: number) => {
+              const sec = sections[sectionIndex];
+              if (sec) {
+                jump(sec.id, questionId);
+              }
+            }}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Chiqish Modal */}
       <Dialog open={showExit} onOpenChange={setShowExit}>
