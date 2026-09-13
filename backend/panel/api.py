@@ -123,8 +123,9 @@ def dashboard_api(request):
 
             # Telegram va aloqa faolligi
             total_profiles = Profile.objects.count()
-            tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id=0).count()
-            phone_count = Profile.objects.exclude(phone='').count()
+            tg_connected = Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0').count()
+            tg_username_count = Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count()
+            email_count = User.objects.filter(email__isnull=False).exclude(email='').count()
 
             # O'quvchilar sadoqati (Retention & Loyalty)
             user_attempts = (
@@ -312,7 +313,8 @@ def dashboard_api(request):
                     'max_score': max_score,
                     'pass_rate': pass_rate,
                     'tg_connected': tg_connected,
-                    'phone_count': phone_count,
+                    'tg_username_count': tg_username_count,
+                    'email_count': email_count,
                     'tg_pct': round(tg_connected / (total_profiles or 1) * 100, 1),
                 },
                 'chart_labels': labels, 'chart_reg': reg_series, 'chart_attempts': attempt_series,
@@ -1506,8 +1508,9 @@ def _build_mock_attempts_qs(request):
             Q(profile__user__username__icontains=q) |
             Q(profile__user__first_name__icontains=q) |
             Q(profile__user__last_name__icontains=q) |
-            Q(test__title__icontains=q) |
-            Q(profile__phone__icontains=q)
+            Q(profile__telegram_username__icontains=q) |
+            Q(profile__telegram_id__icontains=q) |
+            Q(test__title__icontains=q)
         )
 
     sort = request.GET.get('sort', 'score')

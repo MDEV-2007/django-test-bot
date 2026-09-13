@@ -305,7 +305,7 @@ export default function PanelDashboard() {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Telefon kiritganlar: {fmt(stats.phone_count)} nafar
+                Username mavjud: {fmt(stats.tg_username_count)} nafar
               </p>
             </CardContent>
           </Card>
