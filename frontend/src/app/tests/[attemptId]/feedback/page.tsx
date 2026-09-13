@@ -232,9 +232,39 @@ export default function FeedbackPage() {
             <p className="text-xs text-muted-foreground">
               {a.correct_answers} to&apos;g&apos;ri · {a.wrong_answers} xato · {a.skipped_answers} javobsiz
             </p>
-            {/* Milliy Sertifikat Darajasi (45 talik test uchun) */}
+            {/* Sertifikat Darajasi (CEFR Multi-Level yoki Milliy Sertifikat) */}
             {(() => {
               const totalQ = (a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0);
+              const isCefrTest = Boolean(data?.attempt?.test_title?.toLowerCase().includes('cefr')) || totalQ >= 60;
+
+              if (isCefrTest) {
+                const score = a.score || 0;
+                let badgeText = '';
+                let badgeClass = '';
+                if (score >= 86) {
+                  badgeText = "🏆 C1 Daraja (Ilg'or — Oliy Sertifikat)";
+                  badgeClass = 'border-purple-500/40 bg-purple-500/15 text-purple-600 dark:text-purple-300';
+                } else if (score >= 67) {
+                  badgeText = "🥇 B2 Daraja (Mustaqil — OTM Imtiyozi)";
+                  badgeClass = 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-300';
+                } else if (score >= 47) {
+                  badgeText = "🥈 B1 Daraja (Ostonaviy Sertifikat)";
+                  badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-300';
+                } else if (score >= 27) {
+                  badgeText = "🥉 A2 Daraja (Boshlang'ich Sertifikat)";
+                  badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300';
+                } else {
+                  badgeText = "❌ Sinovdan o'tmadi (Sertifikat berilmaydi)";
+                  badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400';
+                }
+
+                return (
+                  <Badge variant="outline" className={`py-1.5 px-3.5 text-xs sm:text-sm font-bold ${badgeClass}`}>
+                    {badgeText}
+                  </Badge>
+                );
+              }
+
               if (totalQ === 45) {
                 const c = a.correct_answers;
                 let badgeText = '';

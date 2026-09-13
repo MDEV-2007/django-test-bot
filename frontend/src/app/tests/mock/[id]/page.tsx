@@ -38,7 +38,7 @@ type MockLobbyData = {
   completed_score: number | null;
 };
 
-const GRADING_SCALE = [
+const MILLIY_GRADING_SCALE = [
   { range: '86 – 100 ball', grade: 'A+', label: "Oltin (Maksimal)", tone: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
   { range: '70 – 85.9 ball', grade: 'A', label: "A'lo natija", tone: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400' },
   { range: '60 – 69.9 ball', grade: 'B+', label: 'Juda yaxshi', tone: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400' },
@@ -46,6 +46,14 @@ const GRADING_SCALE = [
   { range: '46 – 49.9 ball', grade: 'C+', label: "Qoniqarli", tone: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400' },
   { range: '40 – 45.9 ball', grade: 'C', label: "O'tish darajasi", tone: 'border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
   { range: '0 – 39.9 ball', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
+];
+
+const CEFR_GRADING_SCALE = [
+  { range: '65 – 75 ball (86 - 100%)', grade: 'C1', label: "Ilg'or (Advanced)", tone: 'border-violet-500/40 bg-violet-500/15 text-violet-600 dark:text-violet-300' },
+  { range: '50 – 64.9 ball (67 - 85.9%)', grade: 'B2', label: "Mustaqil (OTM Imtiyozi)", tone: 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-300' },
+  { range: '35 – 49.9 ball (47 - 66.9%)', grade: 'B1', label: "Ostonaviy (Threshold)", tone: 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-300' },
+  { range: '20 – 34.9 ball (27 - 46.9%)', grade: 'A2', label: "Boshlang'ich (Waystage)", tone: 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300' },
+  { range: '0 – 19.9 ball (0 - 26.9%)', grade: '—', label: 'Sertifikat berilmaydi', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
 ];
 
 function formatScheduledTime(dateStr: string | null | undefined): string {
@@ -230,6 +238,12 @@ export default function MockLobbyPage() {
   const seconds = secondsLeft ? secondsLeft % 60 : 0;
 
   const isLiveNow = secondsLeft === 0;
+  const isCefr =
+    data.category === 'cefr' ||
+    data.subject_slug === 'cefr' ||
+    data.subject_slug === 'ingliz-tili' ||
+    Boolean(data.title?.toLowerCase().includes('cefr'));
+  const gradingScale = isCefr ? CEFR_GRADING_SCALE : MILLIY_GRADING_SCALE;
 
   return (
     <>
@@ -276,8 +290,8 @@ export default function MockLobbyPage() {
                     <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-400 font-semibold text-xs">
                       {data.subject}
                     </Badge>
-                    <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-semibold text-xs">
-                      Milliy Sertifikat
+                    <Badge variant="outline" className={isCefr ? "border-violet-500/30 bg-violet-500/10 text-violet-400 font-semibold text-xs" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-semibold text-xs"}>
+                      {isCefr ? 'CEFR / Multi-Level' : 'Milliy Sertifikat'}
                     </Badge>
                   </div>
 
@@ -287,7 +301,7 @@ export default function MockLobbyPage() {
                       {data.title}
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed pt-1">
-                      {data.description || "Rasmiy Milliy Sertifikat formati bo'yicha katta sinov imtihoni. Barcha o'quvchilar bir vaqtda topshiradi."}
+                      {data.description || (isCefr ? "Rasmiy CEFR (BMB Multi-Level) formati bo'yicha katta sinov imtihoni. Barcha o'quvchilar bir vaqtda topshiradi." : "Rasmiy Milliy Sertifikat formati bo'yicha katta sinov imtihoni. Barcha o'quvchilar bir vaqtda topshiradi.")}
                     </p>
                   </div>
 
@@ -295,55 +309,60 @@ export default function MockLobbyPage() {
                   <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                     <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3 sm:p-3.5 text-center">
                       <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Savollar</span>
-                      <span className="text-sm sm:text-lg font-black text-foreground mt-0.5 block">{data.questions_count || 45} ta</span>
+                      <span className="text-sm sm:text-lg font-black text-foreground mt-0.5 block">{data.questions_count || (isCefr ? 73 : 45)} ta</span>
                     </div>
                     <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3 sm:p-3.5 text-center">
                       <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Vaqt</span>
-                      <span className="text-sm sm:text-lg font-black text-foreground mt-0.5 block">{data.duration_minutes || 90} daqiqa</span>
+                      <span className="text-sm sm:text-lg font-black text-foreground mt-0.5 block">{data.duration_minutes || (isCefr ? 150 : 90)} daqiqa</span>
                     </div>
                     <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3 sm:p-3.5 text-center">
                       <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Baholash</span>
-                      <span className="text-sm sm:text-lg font-black text-emerald-500 dark:text-emerald-400 mt-0.5 block">A+ dan C+</span>
+                      <span className={`text-sm sm:text-lg font-black mt-0.5 block ${isCefr ? 'text-violet-500 dark:text-violet-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
+                        {isCefr ? 'C1 dan A2' : 'A+ dan C+'}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Countdown or Live Start Box */}
-                  {isLiveNow ? (
-                    <div className="space-y-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-6 text-center shadow-lg">
-                      <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-300 animate-pulse">
-                        <span className="size-2 rounded-full bg-emerald-500" /> Imtihon boshlandi!
+                  {/* Status & Actions Section */}
+                  {data.has_completed ? (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 sm:p-5 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="size-6 text-emerald-500 shrink-0" />
+                        <div>
+                          <h4 className="font-bold text-foreground text-sm sm:text-base">Siz ushbu mock imtihonni topshirgansiz</h4>
+                          <p className="text-xs text-muted-foreground">Natijangiz: <strong className="text-emerald-400 font-mono text-sm">{data.completed_score?.toFixed(0)}%</strong></p>
+                        </div>
                       </div>
-                      <h3 className="text-xl font-black text-foreground sm:text-2xl">
-                        Hozir topshirish oynasi ochiq!
-                      </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
-                        Sizda to&apos;liq {data.duration_minutes} daqiqa vaqt bo&apos;ladi. O&apos;z bilimingizni sinab, rasmiy sertifikat darajangizni oling.
-                      </p>
+                      <Button asChild className="w-full rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <Link href={`/tests/${data.completed_attempt_id}/feedback`}>
+                          Natijalar va Tahlilni ko&apos;rish <ArrowRight className="size-4 ml-1.5" />
+                        </Link>
+                      </Button>
+                    </div>
+                  ) : isLiveNow || data.has_active_attempt ? (
+                    <div className="rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent p-4 sm:p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="relative flex size-3">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex size-3 rounded-full bg-emerald-500" />
+                          </span>
+                          <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-400">
+                            {data.has_active_attempt ? "Imtihoningiz davom etmoqda" : "Imtihon ochiq — Hoziroq boshlang!"}
+                          </span>
+                        </div>
+                        <Badge className="bg-emerald-500 text-white font-bold text-xs">JONLI EFIR</Badge>
+                      </div>
 
-                      <div className="pt-2">
-                        {data.has_completed ? (
-                          <div className="space-y-3">
-                            <Badge className="bg-emerald-500 text-white px-3.5 py-1 text-sm font-semibold">
-                              Siz imtihonni topshirdingiz ({data.completed_score?.toFixed(0)}%)
-                            </Badge>
-                            <div>
-                              <Button size="lg" asChild className="rounded-xl font-bold shadow-lg">
-                                <Link href={`/tests/${data.completed_attempt_id}/feedback`}>
-                                  Natijalarni ko&apos;rish <ArrowRight className="ml-2 size-5" />
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        ) : data.has_active_attempt ? (
-                          <Button size="lg" onClick={startTest} disabled={starting} className="rounded-xl px-8 font-black text-base shadow-xl bg-amber-500 hover:bg-amber-600 text-white">
-                            {starting ? 'Kirilmoqda...' : 'Imtihonni davom ettirish'} <ArrowRight className="ml-2 size-5" />
-                          </Button>
-                        ) : (
-                          <Button size="lg" onClick={startTest} disabled={starting} className="rounded-xl px-10 font-black text-base shadow-xl bg-emerald-600 hover:bg-emerald-700 text-white animate-bounce">
-                            {starting ? 'Kirilmoqda...' : '🚀 Imtihonni boshlash'} <ArrowRight className="ml-2 size-5" />
-                          </Button>
-                        )}
-                      </div>
+                      <Button
+                        size="lg"
+                        onClick={startTest}
+                        disabled={starting}
+                        className="w-full rounded-2xl font-black text-base sm:text-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/25 h-14"
+                      >
+                        {starting ? 'Boshlanmoqda...' : data.has_active_attempt ? 'Davom ettirish 🚀' : 'Imtihonni boshlash 🚀'}
+                        <ArrowRight className="size-5 ml-2" />
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-5 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface-card)]/90 p-5 sm:p-6 backdrop-blur-md">
@@ -443,17 +462,19 @@ export default function MockLobbyPage() {
               ========================================================= */}
           <div className="lg:col-span-5 xl:col-span-5 space-y-6 lg:sticky lg:top-20">
             
-            {/* Baholash Mezonlari Card (Strict Grid Layout to prevent any text wrapping/collision) */}
+            {/* Baholash Mezonlari Card */}
             <Reveal delay={0.15}>
               <Card className="border-[var(--border-card)] bg-[var(--surface-card-medium)] shadow-xl overflow-hidden">
                 <CardHeader className="border-b border-[var(--border-card)] bg-[var(--surface-hover)]/60 p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500 shrink-0">
+                    <div className={`flex size-9 items-center justify-center rounded-xl shrink-0 ${isCefr ? 'bg-violet-500/15 text-violet-500' : 'bg-emerald-500/15 text-emerald-500'}`}>
                       <ShieldCheck className="size-5" />
                     </div>
                     <div>
                       <CardTitle className="text-sm sm:text-base font-bold text-foreground">Baholash Mezonlari</CardTitle>
-                      <p className="text-[11px] text-muted-foreground">To&apos;plangan to&apos;g&apos;ri javoblar bo&apos;yicha darajalar taqsimoti</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {isCefr ? "CEFR B2-C1 ballari bo'yicha darajalar taqsimoti" : "To'plangan ballar bo'yicha darajalar taqsimoti"}
+                      </p>
                     </div>
                   </div>
                 </CardHeader>
@@ -461,21 +482,21 @@ export default function MockLobbyPage() {
                 <CardContent className="p-0">
                   {/* Table Header Row */}
                   <div className="grid grid-cols-12 items-center bg-[var(--surface-hover)]/80 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-[var(--border-card)]">
-                    <div className="col-span-5">To&apos;g&apos;ri javob</div>
+                    <div className="col-span-5">{isCefr ? "To'plangan ball" : "Ball oralig'i"}</div>
                     <div className="col-span-4 text-center">Daraja</div>
                     <div className="col-span-3 text-right">Sertifikat</div>
                   </div>
 
                   {/* Table Rows */}
                   <div className="divide-y divide-[var(--border-card)]">
-                    {GRADING_SCALE.map((item, idx) => (
+                    {gradingScale.map((item, idx) => (
                       <div
                         key={idx}
                         className="grid grid-cols-12 items-center px-4 py-3 transition-colors hover:bg-[var(--surface-hover)]/30 text-xs"
                       >
-                        {/* Range Column (Never wraps) */}
+                        {/* Range Column */}
                         <div className="col-span-5 font-mono font-bold text-foreground whitespace-nowrap">
-                          {item.range} <span className="text-[11px] font-normal text-muted-foreground">ta</span>
+                          {item.range}
                         </div>
 
                         {/* Label Column */}
@@ -496,7 +517,7 @@ export default function MockLobbyPage() {
               </Card>
             </Reveal>
 
-            {/* Telegram Info Card (Clean info, no duplicate button) */}
+            {/* Telegram Info Card */}
             <Reveal delay={0.2}>
               <div className="rounded-2xl border border-sky-500/25 bg-gradient-to-br from-sky-500/10 via-[var(--surface-card-soft)] to-transparent p-4 space-y-2.5 shadow-sm">
                 <div className="flex items-center gap-2 text-sky-400 font-bold text-xs sm:text-sm">
