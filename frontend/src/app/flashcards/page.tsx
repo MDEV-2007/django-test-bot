@@ -175,8 +175,9 @@ export default function FlashcardsPage() {
     : decks.filter((d) => d.subject_slug === selectedSubject);
 
   return (
-    <AppShell>
-      <div className="space-y-6">
+    <>
+      <AppShell />
+      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
         
         {/* ============================================================ */}
         {/* REJIM 1: FOCUS STUDY SESSION (DARS / YODLASH JARAYONI)       */}
@@ -485,8 +486,7 @@ export default function FlashcardsPage() {
 
           </>
         )}
-
-      </div>
-    </AppShell>
+      </main>
+    </>
   );
 }
