@@ -102,6 +102,15 @@ function CheckoutPageInner() {
                 Ochiladigan test: <strong className="text-foreground">{info.test.title}</strong>
               </p>
             )}
+            {!info.test && (info.plan.name.toLowerCase().includes('martalik') || info.plan.name.toLowerCase().includes('alohida')) && (
+              <p className="text-xs text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20 mt-2">
+                💡 Ushbu to&apos;lov tanlangan 1 ta testni ochadi. Agar aniq biror test uchun to&apos;lamoqchi bo&apos;lsangiz,{' '}
+                <Link href="/tests" className="underline font-bold text-amber-400">
+                  Testlar bo&apos;limidan
+                </Link>{' '}
+                kerakli testni tanlang.
+              </p>
+            )}
             <p className="font-mono text-2xl font-black text-amber-400">{Number(info.plan.price).toLocaleString()} so&apos;m</p>
           </CardContent>
         </Card>

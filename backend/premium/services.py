@@ -58,7 +58,7 @@ def seed_plans_if_needed():
     komandasi bor)."""
     from .plan_catalog import sync_plans
 
-    sync_plans(update_existing=False)
+    sync_plans(update_existing=True)
 
 
 

@@ -72,13 +72,15 @@ def plans():
         },
         {
             'plan_type': 'mock_test', 'duration_days': 0, 'order': 4,
-            'name': 'Mock test — bir martalik',
-            'description': "Bitta to'lov, muddatsiz kirish. AI Mentor chegarasi obunasiz darajada qoladi.",
+            'name': 'Alohida test — bir martalik',
+            'description': "Faqat tanlangan bitta premium mock test uchun to'lov. Shu bitta testga muddatsiz (umrbod) kirish.",
             'price': Decimal('15000'),
             'features': [
-                "Barcha rasmiy mock testlar",
-                "Muddatsiz kirish",
-                "AI natija tahlili",
+                "Faqat tanlangan 1 ta premium mock test",
+                "Ushbu testga muddatsiz (umrbod) kirish",
+                "Batafsil natijalar va xatolar tahlili",
+                "Rasmiy sertifikat",
+                "Boshqa testlar va AI Mentor kirmaydi",
             ],
         },
     ]
