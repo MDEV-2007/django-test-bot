@@ -20,6 +20,7 @@ import StatNumber from '@/components/motion/StatNumber';
 import AppShell from '@/components/AppShell';
 import CardMotif from '@/components/student/CardMotif';
 import { cn } from '@/lib/utils';
+import PremiumIcon, { PremiumIconTone } from '@/components/ui/premium-icon';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -54,18 +55,16 @@ type DashboardData = {
    o'z mazmunini aks ettiradi: testda hujjat, arenada qilichlar, darsda kitob va
    tovush to'lqinlari, mentorda suhbat pufagi. */
 const QUICK_ACCESS = [
-  { href: '/flashcards', title: 'Smart Flashcardlar', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki', motif: 'lessons' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
-  { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
-  // Arena — jang, ya'ni `danger` ohangi. Ilgari u oltin edi va bosh sahifadagi
-  // "Arena unvoni" ko'rsatkichi bilan ziddiyatda turardi (u allaqachon qizil).
-  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, tone: 'text-[var(--tone-danger-text)]', bg: 'bg-[var(--tone-danger-soft)]' },
-  { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
+  { href: '/flashcards', title: 'Smart Flashcardlar', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'amber' as PremiumIconTone },
+  { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone },
+  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone },
+  { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, motifTone: 'text-[var(--tone-lesson-text)]', iconTone: 'indigo' as PremiumIconTone },
 ];
 
 const MINI_GAMES = [
-  { href: '/games/timeline', title: 'Xronologik Ketma-ketlik', desc: "Voqealarni to'g'ri tartibda joylashtiring", icon: History, motif: 'timeline' as const, tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
-  { href: '/games/map', title: "Xarita & Qal'alar Tahlili", desc: 'Qadimgi davlatlar va joylashuvlarni toping', icon: MapPin, motif: 'map' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
-  { href: '/games/character', title: 'Tarixiy Shaxsni Toping', desc: 'Maslahatlar orqali sarkarda yoki allomani toping', icon: HelpCircle, motif: 'character' as const, tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]' },
+  { href: '/games/timeline', title: 'Xronologik Ketma-ketlik', desc: "Voqealarni to'g'ri tartibda joylashtiring", icon: History, motif: 'timeline' as const, motifTone: 'text-[var(--tone-lesson-text)]', iconTone: 'indigo' as PremiumIconTone },
+  { href: '/games/map', title: "Xarita & Qal'alar Tahlili", desc: 'Qadimgi davlatlar va joylashuvlarni toping', icon: MapPin, motif: 'map' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone },
+  { href: '/games/character', title: 'Tarixiy Shaxsni Toping', desc: 'Maslahatlar orqali sarkarda yoki allomani toping', icon: HelpCircle, motif: 'character' as const, motifTone: 'text-[var(--tone-streak-text)]', iconTone: 'amber' as PremiumIconTone },
 ];
 
 function scoreTone(score: number | null) {
@@ -177,11 +176,11 @@ export default function DashboardPage() {
      matnli unvon esa oddiy matn bo'lib qoladi. */
   const stats: {
     label: string; value: React.ReactNode; icon: typeof Flame;
-    tone: string; bg: string; href?: string; hint: string; mono?: boolean;
+    tone: PremiumIconTone; href?: string; hint: string; mono?: boolean;
   }[] = [
     {
       label: 'Uzluksizlik', value: <><StatNumber value={p.streak} /> kun</>, icon: Flame,
-      tone: 'text-[var(--tone-streak-text)]', bg: 'bg-[var(--tone-streak-soft)]',
+      tone: 'amber',
       hint: data.freeze_count > 0
         ? `${data.freeze_count} ta muzlatish saqlanmoqda — kun o'tkazib yuborsangiz streak saqlanadi.`
         : 'Har kuni kamida bitta faoliyat bajarsangiz uzluksizlik o\'sadi.',
@@ -189,12 +188,12 @@ export default function DashboardPage() {
     {
       // Tanga — qiymat, ya'ni oltin (premium bilan bir oila).
       label: 'Tangalar', value: <StatNumber value={p.coins} />, icon: Coins,
-      tone: 'text-[var(--tone-premium-text)]', bg: 'bg-[var(--tone-premium-soft)]', href: '/shop',
+      tone: 'gold', href: '/shop',
       hint: "Testlar, arena va mini-o'yinlarda topiladi. Do'konda sarflanadi.",
     },
     {
       label: 'Daraja', value: <>Lvl <StatNumber value={p.level} /></>, icon: Trophy,
-      tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]', href: '/analytics',
+      tone: 'emerald', href: '/analytics',
       hint: `Keyingi darajagacha ${xpLeft.toLocaleString('uz-UZ')} XP qoldi.`,
     },
     {
@@ -202,7 +201,7 @@ export default function DashboardPage() {
          (masalan "Navkar"dagi 'r') kichik o'lchamda boshqa harfga o'xshab ko'rinadi.
          Mono shrift faqat raqamlar uchun mo'ljallangan (layout.tsx). */
       label: 'Arena unvoni', value: arenaRankTitle(p.elo_rating), icon: Swords, mono: false,
-      tone: 'text-[var(--tone-danger-text)]', bg: 'bg-[var(--tone-danger-soft)]', href: '/battles',
+      tone: 'rose', href: '/battles',
       hint: `Joriy ELO reytingi: ${p.elo_rating}.`,
     },
   ];
@@ -237,12 +236,10 @@ export default function DashboardPage() {
         {/* Mentorning kunlik jumlasi — barcha ma'lumot o'quvchining o'z statistikasidan
             olinadi (zaif mavzu, streak, missiyalar, oxirgi ball). Ilgari bu yerda faqat
             "xatolar ustida ishlash" kartasi bor edi; endi u mentor ovozining bir holati. */}
-        <Link href={nudge.href || '/tests'} className="block">
+        <Link href={nudge.href || '/tests'} className="group block">
           <Card className="tactile-btn gap-0 border-[var(--accent-border)] bg-primary/[0.05] py-4 transition-colors hover:border-[var(--accent)]/50">
             <CardContent className="flex flex-wrap items-center gap-3 px-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-text)]">
-                <Bot className="size-5" />
-              </div>
+              <PremiumIcon icon={Bot} tone="primary" size="md" glow className="shrink-0 transition-transform group-hover:scale-105" />
               <p className="min-w-[16rem] flex-1 text-sm text-[var(--text-secondary)]">
                 <span className="mr-1.5 font-mono text-xs font-bold uppercase text-[var(--accent-text)]">Mentor</span>
                 {nudge.text}
@@ -370,11 +367,15 @@ export default function DashboardPage() {
           {stats.map((s, statIdx) => {
             const Icon = s.icon;
             const inner = (
-              <Card className="h-full gap-0 py-4 transition-colors hover:border-[var(--border-strong)]">
+              <Card className="group h-full gap-0 py-3.5 transition-all hover:border-[var(--border-strong)] hover:shadow-xs">
                 <CardContent className="flex items-center gap-3 px-4">
-                  <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${s.bg} ${s.tone}`}>
-                    <Icon className="size-5" />
-                  </div>
+                  <PremiumIcon
+                    icon={Icon}
+                    tone={s.tone}
+                    size="md"
+                    glow
+                    className="shrink-0 transition-transform group-hover:scale-105"
+                  />
                   <div className="min-w-0">
                     <p className="truncate text-xs text-muted-foreground">{s.label}</p>
                     <p className={cn('truncate text-base font-bold sm:text-lg', s.mono !== false && 'font-mono tabular-nums')}>{s.value}</p>
@@ -472,13 +473,17 @@ export default function DashboardPage() {
                   {/* `relative` + `overflow-hidden` — fon naqshi karta chetidan
                       chiqib ketmasligi uchun. Naqsh rangi `item.tone` dan
                       (currentColor) olinadi, shuning uchun har karta o'z rangida. */}
-                  <Card className="relative h-full gap-0 overflow-hidden py-4 transition-all hover:border-[var(--accent-border)]">
-                    <CardMotif shape={item.motif} className={item.tone} />
+                  <Card className="relative h-full gap-0 overflow-hidden py-4 transition-all hover:border-[var(--accent-border)] hover:shadow-xs">
+                    <CardMotif shape={item.motif} className={item.motifTone} />
                     <CardContent className="relative px-4">
                       <div className="mb-3 flex items-center justify-between">
-                        <div className={`flex size-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-105 ${item.bg} ${item.tone}`}>
-                          <Icon className="size-5" />
-                        </div>
+                        <PremiumIcon
+                          icon={Icon}
+                          tone={item.iconTone}
+                          size="md"
+                          glow
+                          className="transition-transform group-hover:scale-110"
+                        />
                         <Badge variant="secondary">{item.badge}</Badge>
                       </div>
                       <p className="text-sm font-semibold transition-colors group-hover:text-[var(--accent-text)]">{item.title}</p>
@@ -499,9 +504,7 @@ export default function DashboardPage() {
               <div className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-[var(--accent)]/10 blur-2xl" />
               <CardContent className="relative flex flex-wrap items-center justify-between gap-4 px-5">
                 <div className="flex items-center gap-3.5">
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-text)] transition-transform group-hover:scale-105">
-                    <GraduationCap className="size-5" />
-                  </div>
+                  <PremiumIcon icon={GraduationCap} tone="emerald" size="lg" glow className="shrink-0 transition-transform group-hover:scale-105" />
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-text)]">
@@ -538,17 +541,21 @@ export default function DashboardPage() {
                 const Icon = game.icon;
                 return (
                   <Link key={game.href} href={game.href} className="group block">
-                    <Card className="tactile-btn relative gap-0 overflow-hidden py-4 transition-colors hover:border-[var(--accent-border)]">
-                      <CardMotif shape={game.motif} className={game.tone} />
+                    <Card className="tactile-btn relative gap-0 overflow-hidden py-4 transition-colors hover:border-[var(--accent-border)] hover:shadow-xs">
+                      <CardMotif shape={game.motif} className={game.motifTone} />
                       <CardContent className="relative flex items-center gap-3.5 px-4">
-                        <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${game.bg} ${game.tone}`}>
-                          <Icon className="size-5" />
-                        </div>
+                        <PremiumIcon
+                          icon={Icon}
+                          tone={game.iconTone}
+                          size="md"
+                          glow
+                          className="shrink-0 transition-transform group-hover:scale-105"
+                        />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{game.title}</p>
                           <p className="mt-0.5 truncate text-xs text-muted-foreground">{game.desc}</p>
                         </div>
-                        <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                        <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
                       </CardContent>
                     </Card>
                   </Link>

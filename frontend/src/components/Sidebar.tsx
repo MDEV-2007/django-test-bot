@@ -10,6 +10,7 @@ import {
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,8 @@ type NavItem = {
   label: string;
   icon: typeof LayoutDashboard;
   matchPrefixes?: string[];
+  tone?: PremiumIconTone;
+  glow?: boolean;
   /* Sahifa ochilishida so'raladigan asosiy endpoint. Havola ustiga kelgan (yoki unga
      barmoq tekkan) zahoti ma'lumot fonda olinadi — bosilganda sahifa allaqachon tayyor.
      Next'ning o'z prefetch'i faqat KOD uchun; ma'lumot baribir kutilardi. */
@@ -25,37 +28,32 @@ type NavItem = {
 };
 
 /* Havolalar guruhlangan — Super Admin (`PanelShell`) va o'qituvchi (`TeacherShell`)
-   panellaridagi bilan bir xil tuzilish.
-
-   Ilgari 10 ta havola bitta tekis ro'yxatda, bir xil vaznda turardi: "o'qish", "o'yin",
-   "hisob" bo'limlari aralashib ketgan va ko'z ularni ajrata olmasdi. Nomlar ham har xil
-   uslubda edi ("1v1 Duel Arena", "AI Mentor 24/7", "Do'kon & Sovg'a") — endi qisqa va
-   bir xil. */
+   panellaridagi bilan bir xil tuzilish. */
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Asosiy',
     items: [
-      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, api: '/api/dashboard/home/' },
-      { href: '/tests', label: 'Testlar', icon: FileCheck2, matchPrefixes: ['/tests'], api: '/api/tests/' },
-      { href: '/learning', label: 'Darslar', icon: BookOpen, api: '/api/learning/' },
-      { href: '/mentor', label: 'AI Mentor', icon: Bot },
+      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'indigo', api: '/api/dashboard/home/' },
+      { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', matchPrefixes: ['/tests'], api: '/api/tests/' },
+      { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', api: '/api/learning/' },
+      { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple' },
     ],
   },
   {
     label: 'Mashq va bellashuv',
     items: [
-      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, api: '/api/learning/flashcards/' },
-      { href: '/battles', label: '1v1 Arena', icon: Swords, matchPrefixes: ['/games'] },
-      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, api: '/api/leaderboard/?subject=all' },
+      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', api: '/api/learning/flashcards/' },
+      { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/games'] },
+      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', api: '/api/leaderboard/?subject=all' },
     ],
   },
   {
     label: 'Hisobim',
     items: [
-      { href: '/analytics', label: 'Analitika', icon: BarChart3, api: '/api/analytics/' },
-      { href: '/shop', label: "Do'kon", icon: ShoppingBag, matchPrefixes: ['/shop'] },
-      { href: '/premium', label: 'Premium', icon: Crown },
-      { href: '/profile', label: 'Profilim', icon: User, api: '/api/auth/profile/' },
+      { href: '/analytics', label: 'Analitika', icon: BarChart3, tone: 'cyan', api: '/api/analytics/' },
+      { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple', matchPrefixes: ['/shop'] },
+      { href: '/premium', label: 'Premium', icon: Crown, tone: 'gold', glow: true },
+      { href: '/profile', label: 'Profilim', icon: User, tone: 'zinc', api: '/api/auth/profile/' },
     ],
   },
 ];
@@ -95,7 +93,7 @@ export default function Sidebar() {
                 href="/teacher"
                 className="flex items-center gap-2 rounded-lg border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1.5 text-xs font-semibold text-[var(--accent-text)] transition-colors hover:bg-[var(--accent)]/20"
               >
-                <GraduationCap className="size-3.5" /> O&apos;qituvchi paneli
+                <PremiumIcon icon={GraduationCap} tone="emerald" size="xs" /> O&apos;qituvchi paneli
               </Link>
             )}
             {user.is_superadmin && (
@@ -103,7 +101,7 @@ export default function Sidebar() {
                 href="/panel"
                 className="flex items-center gap-2 rounded-lg border border-rose-500/25 bg-rose-500/10 px-2.5 py-1.5 text-xs font-semibold text-[var(--danger-text)] transition-colors hover:bg-rose-500/15"
               >
-                <ShieldCheck className="size-3.5" /> Super Admin paneli
+                <PremiumIcon icon={ShieldCheck} tone="rose" size="xs" /> Super Admin paneli
               </Link>
             )}
           </div>
@@ -137,7 +135,12 @@ export default function Sidebar() {
                   )}
                 >
                   <span className="flex min-w-0 items-center gap-2.5">
-                    <Icon className="size-4 shrink-0" />
+                    <PremiumIcon
+                      icon={Icon}
+                      tone={item.tone || 'primary'}
+                      size="sm"
+                      glow={item.glow || active}
+                    />
                     <span className="truncate">{item.label}</span>
                   </span>
 

@@ -6,12 +6,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Swords, Menu, X, Bot, ShoppingBag,
-  Crown, BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Snowflake,
+  Crown, BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Snowflake, Layers,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { Separator } from '@/components/ui/separator';
 import { easeOut } from '@/lib/motion';
 import { cn } from '@/lib/utils';
@@ -27,40 +28,35 @@ import { cn } from '@/lib/utils';
    Darslar esa (hozircha ko'p mavzuda bo'sh, "tayyorlanmoqda" holatida) varaqqa
    ko'chirilgan: eng qimmat 5 ta piksel joyi kontenti tayyor bo'lmagan bo'limga
    berilmasligi kerak. */
-const TABS = [
-  // `api` — barmoq tugmaga tekkan zahoti fonda olinadigan ma'lumot: bosish va sahifa
-  // ochilishi orasidagi ~100 ms shu bilan behuda ketmaydi.
-  { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, api: '/api/dashboard/home/' },
-  { href: '/tests', label: 'Testlar', icon: FileCheck2, matchPrefixes: ['/tests'], api: '/api/tests/' },
-  { href: '/battles', label: 'Arena', icon: Swords, matchPrefixes: ['/games'] },
-  { href: '/mentor', label: 'AI Mentor', icon: Bot },
+const TABS: { href: string; label: string; icon: typeof LayoutDashboard; tone: PremiumIconTone; matchPrefixes?: string[]; api?: string }[] = [
+  { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'indigo', api: '/api/dashboard/home/' },
+  { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', matchPrefixes: ['/tests'], api: '/api/tests/' },
+  { href: '/battles', label: 'Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/games'] },
+  { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple' },
 ];
 
-/* Guruh nomlari MA'NOGA qarab, joylashuvga qarab emas: "Hisobim" — o'z profiling
-   haqidagi narsalar, "Do'kon" — tanga sarflaydigan HAMMA narsa bir joyda (ilgari
-   Do'kon va Inventar ikkita alohida guruhda, foydalanuvchi qaysi biriga borishini
-   bilmasdi), "Ko'proq" — hali tab-bar'ga sig'maganlar. */
-const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: typeof Bot }[] }[] = [
+const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: typeof Bot; tone?: PremiumIconTone }[] }[] = [
   {
     label: 'Hisobim',
     items: [
-      { href: '/profile', label: 'Profilim', icon: User },
-      { href: '/analytics', label: 'Analitika', icon: BarChart3 },
-      { href: '/premium', label: 'Premium', icon: Crown },
+      { href: '/profile', label: 'Profilim', icon: User, tone: 'zinc' },
+      { href: '/analytics', label: 'Analitika', icon: BarChart3, tone: 'cyan' },
+      { href: '/premium', label: 'Premium', icon: Crown, tone: 'gold' },
     ],
   },
   {
     label: "Do'kon",
     items: [
-      { href: '/shop', label: "Do'kon", icon: ShoppingBag },
-      { href: '/shop/inventory', label: 'Inventar', icon: Snowflake },
+      { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple' },
+      { href: '/shop/inventory', label: 'Inventar', icon: Snowflake, tone: 'sky' },
     ],
   },
   {
     label: "Ko'proq",
     items: [
-      { href: '/learning', label: 'Darslar', icon: BookOpen },
-      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy },
+      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber' },
+      { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky' },
+      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold' },
     ],
   },
 ];
@@ -106,7 +102,7 @@ export default function MobileTabBar() {
                 active ? 'font-semibold text-[var(--accent-text)]' : 'text-muted-foreground active:bg-accent',
               )}
             >
-              <Icon className={cn('size-5', active && 'text-[var(--accent)]')} />
+              <PremiumIcon icon={Icon} tone={tab.tone} size="xs" glow={active} className={cn(active ? 'scale-110 shadow-xs' : 'opacity-80')} />
               <span className="truncate text-xs leading-none tracking-tight">{tab.label}</span>
             </Link>
           );
@@ -200,7 +196,7 @@ export default function MobileTabBar() {
                         href="/teacher"
                         className="flex min-h-12 items-center gap-2.5 rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 text-sm font-semibold text-[var(--accent-text)]"
                       >
-                        <GraduationCap className="size-4" /> O&apos;qituvchi paneli
+                        <PremiumIcon icon={GraduationCap} tone="emerald" size="xs" /> O&apos;qituvchi paneli
                       </Link>
                     )}
                     {user.is_superadmin && (
@@ -208,7 +204,7 @@ export default function MobileTabBar() {
                         href="/panel"
                         className="flex min-h-12 items-center gap-2.5 rounded-xl border border-rose-500/25 bg-rose-500/10 px-3 text-sm font-semibold text-[var(--danger-text)]"
                       >
-                        <ShieldCheck className="size-4" /> Super Admin paneli
+                        <PremiumIcon icon={ShieldCheck} tone="rose" size="xs" /> Super Admin paneli
                       </Link>
                     )}
                   </div>
@@ -233,7 +229,7 @@ export default function MobileTabBar() {
                               : 'text-foreground active:bg-accent',
                           )}
                         >
-                          <Icon className="size-4 shrink-0 text-muted-foreground" />
+                          <PremiumIcon icon={Icon} tone={item.tone || 'primary'} size="xs" glow={active} />
                           {item.label}
                         </Link>
                       );

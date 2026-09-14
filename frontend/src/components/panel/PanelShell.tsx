@@ -15,7 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-type NavItem = { href: string; label: string; icon: typeof LayoutDashboard };
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
+
+type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; tone?: PremiumIconTone };
 
 /* Bo'limlar guruhlangan: ilgari 13 ta havola bitta tekis qatorda turardi va qaysi biri
    qayerga tegishli ekani ko'rinmasdi. Guruhlash admin uchun skanerlashni tezlashtiradi. */
@@ -23,49 +25,49 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Umumiy',
     items: [
-      { href: '/panel', label: 'Dashboard', icon: LayoutDashboard },
-      { href: '/panel/marketing', label: 'Marketing & Voronka', icon: Flame },
+      { href: '/panel', label: 'Dashboard', icon: LayoutDashboard, tone: 'indigo' },
+      { href: '/panel/marketing', label: 'Marketing & Voronka', icon: Flame, tone: 'rose' },
     ],
   },
   {
     label: 'Odamlar',
     items: [
-      { href: '/panel/users', label: 'Foydalanuvchilar', icon: Users },
-      { href: '/panel/teachers', label: "O'qituvchilar", icon: GraduationCap },
+      { href: '/panel/users', label: 'Foydalanuvchilar', icon: Users, tone: 'indigo' },
+      { href: '/panel/teachers', label: "O'qituvchilar", icon: GraduationCap, tone: 'emerald' },
     ],
   },
   {
     label: 'Kontent',
     items: [
-      { href: '/panel/subjects', label: 'Fanlar', icon: BookMarked },
-      { href: '/panel/tests', label: 'Testlar', icon: FileCheck2 },
-      { href: '/panel/lessons', label: 'Darslar', icon: BookOpen },
-      { href: '/panel/games', label: "O'yinlar", icon: Gamepad2 },
-      { href: '/panel/shop', label: "Do'kon", icon: ShoppingBag },
+      { href: '/panel/subjects', label: 'Fanlar', icon: BookMarked, tone: 'purple' },
+      { href: '/panel/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald' },
+      { href: '/panel/lessons', label: 'Darslar', icon: BookOpen, tone: 'sky' },
+      { href: '/panel/games', label: "O'yinlar", icon: Gamepad2, tone: 'amber' },
+      { href: '/panel/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple' },
     ],
   },
   {
     label: 'Operatsiyalar & Moliya',
     items: [
-      { href: '/panel/mocks', label: 'Mock Natijalari', icon: Award },
-      { href: '/panel/attempts', label: 'Barcha Natijalar', icon: ClipboardList },
-      { href: '/panel/finance', label: 'Moliya & Tushum', icon: TrendingUp },
-      { href: '/panel/payments', label: "To'lovlar", icon: CreditCard },
-      { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent },
-      { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart },
-      { href: '/panel/broadcast', label: 'Xabarlar & Rejalashtirish', icon: Megaphone },
+      { href: '/panel/mocks', label: 'Mock Natijalari', icon: Award, tone: 'gold' },
+      { href: '/panel/attempts', label: 'Barcha Natijalar', icon: ClipboardList, tone: 'indigo' },
+      { href: '/panel/finance', label: 'Moliya & Tushum', icon: TrendingUp, tone: 'emerald' },
+      { href: '/panel/payments', label: "To'lovlar", icon: CreditCard, tone: 'amber' },
+      { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent, tone: 'cyan' },
+      { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart, tone: 'rose' },
+      { href: '/panel/broadcast', label: 'Xabarlar & Rejalashtirish', icon: Megaphone, tone: 'sky' },
     ],
   },
   {
     label: 'Xavfsizlik & Tizim',
     items: [
-      { href: '/panel/system?tab=anticheat', label: 'Anti-Cheat Nazorati', icon: ShieldAlert },
-      { href: '/panel/system?tab=backup', label: 'Baza Zaxirasi (Backup)', icon: HardDrive },
-      { href: '/panel/system?tab=ai', label: 'AI Token Monitor', icon: Bot },
-      { href: '/panel/system?tab=health', label: 'Server & Logs', icon: Server },
-      { href: '/panel/telegram', label: 'Telegram Bot', icon: Send },
-      { href: '/panel/audit-log', label: 'Audit', icon: ScrollText },
-      { href: '/panel/settings', label: 'Sozlamalar', icon: Settings },
+      { href: '/panel/system?tab=anticheat', label: 'Anti-Cheat Nazorati', icon: ShieldAlert, tone: 'amber' },
+      { href: '/panel/system?tab=backup', label: 'Baza Zaxirasi (Backup)', icon: HardDrive, tone: 'emerald' },
+      { href: '/panel/system?tab=ai', label: 'AI Token Monitor', icon: Bot, tone: 'purple' },
+      { href: '/panel/system?tab=health', label: 'Server & Logs', icon: Server, tone: 'cyan' },
+      { href: '/panel/telegram', label: 'Telegram Bot', icon: Send, tone: 'sky' },
+      { href: '/panel/audit-log', label: 'Audit', icon: ScrollText, tone: 'zinc' },
+      { href: '/panel/settings', label: 'Sozlamalar', icon: Settings, tone: 'zinc' },
     ],
   },
 ];
@@ -118,7 +120,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                   )}
                 >
-                  <Icon className="size-4 shrink-0" />
+                  <PremiumIcon
+                    icon={Icon}
+                    tone={item.tone || 'primary'}
+                    size="xs"
+                    glow={active}
+                  />
                   <span className="truncate">{item.label}</span>
                 </Link>
               );
@@ -133,9 +140,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <Link
           href="/dashboard"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
-          <ArrowLeft className="size-4" />
+          <PremiumIcon icon={ArrowLeft} tone="zinc" size="xs" />
           <span>Saytga qaytish</span>
         </Link>
 
