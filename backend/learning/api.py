@@ -9,8 +9,8 @@ import json
 from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -152,3 +152,304 @@ def toggle_bookmark_api(request, lesson_id):
         bookmark.delete()
         return Response({'bookmarked': False})
     return Response({'bookmarked': True})
+
+
+# ============================================================
+# SMART FLASHCARDS API (QUIZLET & ANKI STYLE LEARNING)
+# ============================================================
+
+CURATED_DECKS = [
+    {
+        'id': 101,
+        'title': "Temuriylar Saltanati: Muhim Janglar va Sanalar",
+        'subject': "Tarix",
+        'subject_slug': "tarix",
+        'icon': "Crown",
+        'description': "1370-yildan 1507-yilgacha bo'lgan eng muhim g'alabalar, yurishlar va sanalarni 3 daqiqada eslab qoling.",
+        'difficulty': "Asosiy",
+        'xp_reward': 25,
+        'cards': [
+            {
+                'id': 1,
+                'front': "1370-yil 9-aprelda Movarounnahrda qanday tarixiy burilish yuz berdi?",
+                'back': "Amir Temur Balx qurultoyida Movarounnahrning oliy hukmdori deb e'lon qilindi va Samarqandni poytaxt etib belgiladi.",
+                'hint': "Buyuk davlatning tug'ilishi"
+            },
+            {
+                'id': 2,
+                'front': "1395-yil Qunduzcha (Terek) daryosi bo'yidagi jang kimlar o'rtasida bo'ldi?",
+                'back': "Amir Temur va Oltin O'rda xoni To'xtamishxon o'rtasida bo'ldi. Temurning g'alabasi Oltin O'rdaning qudratiga yakuniy zarba berdi.",
+                'hint': "Shimoliy dushman bilan to'qnashuv"
+            },
+            {
+                'id': 3,
+                'front': "1402-yil 20-iyuldagi Anqara jangi nima uchun jahon tarixida muhim hisoblanadi?",
+                'back': "Amir Temur Usmonli sultoni Boyazid Yildirimni mag'lub etdi va Yevropani yarim asrga Usmonlilar istilosidan saqlab qoldi.",
+                'hint': "Sharq va G'arb to'qnashuvi"
+            },
+            {
+                'id': 4,
+                'front': "Ulug'bek rasadxonasi qachon va qayerda bunyod etilgan?",
+                'back': "1424–1428-yillarda Samarqand yaqinidagi Ko'hak (Cho'ponota) tepaligida qurilgan.",
+                'hint': "Yulduzlar ilmi poydevori"
+            },
+            {
+                'id': 5,
+                'front': "'Temur tuzuklari' asari necha qismdan iborat va unda nimalar bayon qilingan?",
+                'back': "2 qismdan iborat: 1-qism Amir Temurning tarjimayi holi va harbiy yurishlari, 2-qism davlatni boshqarish qonun-qoidalari.",
+                'hint': "Davlat va adolat dasturi"
+            },
+            {
+                'id': 6,
+                'front': "1405-yil 18-fevralda qanday tarixiy voqea yuz berdi?",
+                'back': "Amir Temur Xitoyga yurishi paytida O'tror shahrida 69 yoshida vafot etdi.",
+                'hint': "Buyuk sohibqironning so'nggi manzili"
+            }
+        ]
+    },
+    {
+        'id': 102,
+        'title': "Ona Tili: Imlo Qoidalari va Morfologiya",
+        'subject': "Ona tili",
+        'subject_slug': "ona-tili",
+        'icon': "BookOpen",
+        'description': "BBA va Milliy Sertifikat imtihonlarida eng ko'p xato qilinadigan imlo va tinish belgilari qoidalari.",
+        'difficulty': "Muhim",
+        'xp_reward': 25,
+        'cards': [
+            {
+                'id': 1,
+                'front': "Tutuq belgisi (') unlidan keyin kelganda qanday talaffuz qilinadi?",
+                'back': "Unli tovush cho'ziqroq talaffuz qilinadi. Masalan: ma'no, e'lon, e'tiqod, ta'sir, da'vo.",
+                'hint': "Tovushning cho'zilishi"
+            },
+            {
+                'id': 2,
+                'front': "Tutuq belgisi undoshdan keyin kelganda qanday o'qiladi?",
+                'back': "Undosh keyingi unlidan ajratib, to'xtam bilan aytiladi. Masalan: san'at, jur'at, mas'ul, qat'iy.",
+                'hint': "Ajratish vazifasi"
+            },
+            {
+                'id': 3,
+                'front': "Qanday so'zlar har doim chiziqcha (-) bilan yoziladi?",
+                'back': "Juft so'zlar (ota-ona, do'st-dushman) va takroriy so'zlar (asta-sekin, ko'pdan-ko'p, qator-qator).",
+                'hint': "Juftlik va takror"
+            },
+            {
+                'id': 4,
+                'front': "Son bilan ot birikmasida ot qachon ko'plikda kelishi to'g'ri bo'ladi?",
+                'back': "Faqat noaniq miqdorni bildiruvchi sonlardan keyin (o'nlab talabalar, yuzlab odamlar). Aniq sondan keyin esa ot birlikda keladi (beshta kitob).",
+                'hint': "Aniq va noaniq miqdor"
+            },
+            {
+                'id': 5,
+                'front': "Egalik qo'shimchalari qo'shilganda qaysi undoshlar jaranglilashadi?",
+                'back': "'k' undoshi 'g' ga (yurak -> yuragim), 'q' undoshi 'g'' ga aylanadi (quloq -> qulog'im).",
+                'hint': "Tovush o'zgarishi"
+            }
+        ]
+    },
+    {
+        'id': 103,
+        'title': "Biologiya: Hujayra, DNK va Genetika Atamalari",
+        'subject': "Biologiya",
+        'subject_slug': "biologiya",
+        'icon': "Sparkles",
+        'description': "Mitoz, meyoz, fotosintez va genetika qonunlariga oid eng muhim atamalar to'plami.",
+        'difficulty': "O'rta",
+        'xp_reward': 25,
+        'cards': [
+            {
+                'id': 1,
+                'front': "Mitoz va Meyoz bo'linishlarining eng asosiy farqi nimada?",
+                'back': "Mitozda bitta hujayradan 2 ta diploid (2n) tana hujayrasi; Meyozda esa 4 ta gaploid (n) jinsiy hujayra (gameta) hosil bo'ladi.",
+                'hint': "Xromosoma to'plami va hujayralar soni"
+            },
+            {
+                'id': 2,
+                'front': "DNK qo'sh spirali tuzilishini kimlar va qachon kashf qilgan?",
+                'back': "1953-yilda Jeyms Uotson va Frensis Krik kashf qilgan (Nobel mukofoti sohiblari).",
+                'hint': "Molekulyar biologiya inqilobi"
+            },
+            {
+                'id': 3,
+                'front': "Fotosintezning yorug'lik bosqichi xloroplastning qayerida sodir bo'ladi?",
+                'back': "Tilakoid membranalarida bo'lib o'tadi. Natijada ATF, NADPH va erkin kislorod (O2) hosil bo'ladi.",
+                'hint': "Quyosh nuri yutiladigan joy"
+            },
+            {
+                'id': 4,
+                'front': "Transkripsiya va Translyatsiya nima?",
+                'back': "Transkripsiya — DNK dan axborot RNK (iRNK) sintezi; Translyatsiya — ribosomada iRNK asosida oqsil sintezlanishi jarayoni.",
+                'hint': "Genetik axborotning amalga oshishi"
+            },
+            {
+                'id': 5,
+                'front': "Mendelning 1-qonuni qanday nomlanadi?",
+                'back': "Birinchi bo'g'in duragaylarining bir xilligi (dominantlik) qonuni.",
+                'hint': "Genetika poydevori"
+            }
+        ]
+    },
+    {
+        'id': 104,
+        'title': "English: High-Yield Collocations & Idioms (B2/C1)",
+        'subject': "Ingliz tili",
+        'subject_slug': "ingliz-tili",
+        'icon': "Zap",
+        'description': "CEFR va IELTS imtihonlarida baland ball (Band 7+) olish uchun zarur bo'lgan iboralar.",
+        'difficulty': "Yuqori",
+        'xp_reward': 25,
+        'cards': [
+            {
+                'id': 1,
+                'front': "What does the idiom 'Cut corners' mean?",
+                'back': "To do something in the easiest, cheapest, or fastest way, often compromising on quality.",
+                'hint': "Taking shortcuts"
+            },
+            {
+                'id': 2,
+                'front': "What does 'Hit the nail on the head' mean?",
+                'back': "To state or describe a situation or truth with absolute precision and accuracy.",
+                'hint': "Exactly right"
+            },
+            {
+                'id': 3,
+                'front': "What is the key difference between 'Make' and 'Do'?",
+                'back': "'Make' is for creating or producing something new (make a decision, make progress); 'Do' is for actions, obligations, or tasks (do homework, do business).",
+                'hint': "Creation vs Action"
+            },
+            {
+                'id': 4,
+                'front': "What does 'Take something for granted' mean?",
+                'back': "To fail to properly value or appreciate someone or something because you are overly used to it.",
+                'hint': "Not appreciating worth"
+            },
+            {
+                'id': 5,
+                'front': "What does the phrase 'Every cloud has a silver lining' mean?",
+                'back': "Every bad or difficult situation has some positive or hopeful aspect to it.",
+                'hint': "Optimism in difficulty"
+            }
+        ]
+    }
+]
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def flashcards_decks_api(request):
+    """Returns all available flashcard decks categorized by subject."""
+    # Also incorporate database flashcards from lessons
+    lesson_decks = []
+    lessons_with_cards = Lesson.objects.filter(is_published=True, flashcards__isnull=False).distinct()
+    for l in lessons_with_cards:
+        cards_cnt = l.flashcards.count()
+        if cards_cnt == 0:
+            continue
+        lesson_decks.append({
+            'id': l.id,
+            'title': l.title,
+            'subject': l.topic.subject.name if l.topic and l.topic.subject else "Tarix",
+            'subject_slug': l.topic.subject.slug if l.topic and l.topic.subject else "tarix",
+            'icon': "Layers",
+            'description': f"{l.topic.title if l.topic else 'Mavzu'} bo'yicha interaktiv dars flesh-kartalari.",
+            'difficulty': "O'rta",
+            'xp_reward': 20,
+            'total_cards': cards_cnt,
+            'is_custom': True,
+        })
+
+    all_decks = []
+    for d in CURATED_DECKS:
+        all_decks.append({
+            'id': d['id'],
+            'title': d['title'],
+            'subject': d['subject'],
+            'subject_slug': d['subject_slug'],
+            'icon': d['icon'],
+            'description': d['description'],
+            'difficulty': d['difficulty'],
+            'xp_reward': d['xp_reward'],
+            'total_cards': len(d['cards']),
+            'is_custom': False,
+        })
+    all_decks.extend(lesson_decks)
+
+    subjects = [
+        {'slug': 'all', 'name': 'Barchasi'},
+        {'slug': 'tarix', 'name': 'Tarix'},
+        {'slug': 'ona-tili', 'name': 'Ona tili'},
+        {'slug': 'biologiya', 'name': 'Biologiya'},
+        {'slug': 'ingliz-tili', 'name': 'Ingliz tili'},
+    ]
+
+    return Response({
+        'subjects': subjects,
+        'decks': all_decks,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def flashcards_deck_detail_api(request, deck_id):
+    """Returns details and all cards of a flashcard deck."""
+    # Check curated decks first
+    for d in CURATED_DECKS:
+        if d['id'] == deck_id:
+            return Response(d)
+
+    # Check lesson deck
+    lesson = Lesson.objects.filter(id=deck_id, is_published=True).first()
+    if lesson:
+        cards = [
+            {
+                'id': f.id,
+                'front': f.front,
+                'back': f.back,
+                'hint': "Darslik ma'lumoti"
+            }
+            for f in lesson.flashcards.all()
+        ]
+        return Response({
+            'id': lesson.id,
+            'title': lesson.title,
+            'subject': lesson.topic.subject.name if lesson.topic and lesson.topic.subject else "Tarix",
+            'subject_slug': lesson.topic.subject.slug if lesson.topic and lesson.topic.subject else "tarix",
+            'icon': "Layers",
+            'description': f"{lesson.title} bo'yicha interaktiv yodlash kartalari.",
+            'difficulty': "O'rta",
+            'xp_reward': 20,
+            'cards': cards,
+        })
+
+    return Response({'error': "To'plam topilmadi"}, status=404)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def flashcards_complete_api(request):
+    """Awards XP, coins, and updates streak upon completing a flashcard study session."""
+    profile = request.user.profile
+    deck_id = request.data.get('deck_id')
+    learned_count = int(request.data.get('learned_count') or 5)
+
+    xp_gain = 25
+    coin_gain = 10
+
+    leveled_up = profile.add_xp(xp_gain)
+    profile.add_coins(coin_gain)
+    profile.update_streak()
+
+    return Response({
+        'success': True,
+        'xp_earned': xp_gain,
+        'coins_earned': coin_gain,
+        'new_xp': profile.xp,
+        'new_level': profile.level,
+        'new_coins': profile.coins,
+        'streak': profile.streak,
+        'leveled_up': leveled_up,
+        'message': f"Ajoyib! Xotira to'plamini muvaffaqiyatli yakunladingiz va +{xp_gain} XP hamda +{coin_gain} tangaga ega bo'ldingiz!"
+    })
+

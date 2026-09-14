@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   FileCheck2, Swords, BookOpen, Bot, ArrowRight, History, MapPin, HelpCircle,
   Crown, Sparkles, Flame, Coins, Trophy, Snowflake, CheckCircle2,
-  ChevronRight, Zap, GraduationCap,
+  ChevronRight, Zap, GraduationCap, Layers, Share2,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { apiFetch } from '@/lib/api-client';
@@ -54,13 +54,12 @@ type DashboardData = {
    o'z mazmunini aks ettiradi: testda hujjat, arenada qilichlar, darsda kitob va
    tovush to'lqinlari, mentorda suhbat pufagi. */
 const QUICK_ACCESS = [
+  { href: '/flashcards', title: 'Smart Flashcardlar', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki', motif: 'lessons' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
   { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, tone: 'text-[var(--tone-growth-text)]', bg: 'bg-[var(--tone-growth-soft)]' },
   // Arena — jang, ya'ni `danger` ohangi. Ilgari u oltin edi va bosh sahifadagi
   // "Arena unvoni" ko'rsatkichi bilan ziddiyatda turardi (u allaqachon qizil).
   { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, tone: 'text-[var(--tone-danger-text)]', bg: 'bg-[var(--tone-danger-soft)]' },
   { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, tone: 'text-[var(--tone-lesson-text)]', bg: 'bg-[var(--tone-lesson-soft)]' },
-  // Fan nomi yozilmaydi — mentor tanlangan fan bo'yicha javob beradi (tarix, ingliz tili...).
-  { href: '/mentor', title: 'AI Mentor', desc: 'Savollarga 24/7 tahliliy javob', icon: Bot, badge: 'AI', motif: 'mentor' as const, tone: 'text-[var(--tone-ai-text)]', bg: 'bg-[var(--tone-ai-soft)]' },
 ];
 
 const MINI_GAMES = [
@@ -403,6 +402,63 @@ export default function DashboardPage() {
             <span><strong className="text-foreground">{data.freeze_count} ta</strong> streak muzlatish saqlanmoqda — bir kun o&apos;tkazib yuborsangiz avtomatik ishlatiladi.</span>
           </div>
         )}
+
+        {/* ============================================================ */}
+        {/* INTERAKTIV DARS QILISH & BELLASHUV VITRINASI                  */}
+        {/* ============================================================ */}
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          {/* Flashcards vitrinasi */}
+          <Link href="/flashcards" className="group block">
+            <Card className="h-full border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-card hover:border-amber-500/60 transition-all p-5 rounded-2xl flex flex-col justify-between shadow-xs">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[11px] font-bold gap-1">
+                    <Sparkles className="size-3" /> Tezkor Yodlash
+                  </Badge>
+                  <span className="text-[11px] font-bold text-amber-500">+25 XP</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-amber-500 transition-colors">
+                  🧠 Smart Flashcardlar bilan Dars Qilish
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Test yechishdan oldin sanalar, faktlar va qoidalarni 3 daqiqalik 3D kartalar bilan yodlab oling.
+                </p>
+              </div>
+              <div className="pt-3 mt-2 border-t border-border/40 flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">Anki &amp; Quizlet uslubi</span>
+                <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                  Boshlash <ChevronRight className="size-3.5" />
+                </span>
+              </div>
+            </Card>
+          </Link>
+
+          {/* 1v1 Arena vitrinasi */}
+          <Link href="/battles" className="group block">
+            <Card className="h-full border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-card to-card hover:border-rose-500/60 transition-all p-5 rounded-2xl flex flex-col justify-between shadow-xs">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 text-[11px] font-bold gap-1">
+                    <Swords className="size-3" /> Jonli Raqobat
+                  </Badge>
+                  <span className="text-[11px] font-bold text-rose-500">Live Duel</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-rose-500 transition-colors">
+                  ⚔️ 1v1 Arena: Do&apos;stni Jangga Chaqiring
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Do&apos;stingizga havola yuboring yoki onlayn o&apos;quvchilar bilan 5 ta tezkor savolda bellashing.
+                </p>
+              </div>
+              <div className="pt-3 mt-2 border-t border-border/40 flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">Telegramga ulashish</span>
+                <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">
+                  Arenaga kirish <ChevronRight className="size-3.5" />
+                </span>
+              </div>
+            </Card>
+          </Link>
+        </div>
 
         {/* Asosiy bo'limlar */}
         <section className="space-y-3">

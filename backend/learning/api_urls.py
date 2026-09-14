@@ -8,4 +8,7 @@ urlpatterns = [
     path('', api.center_api, name='center'),
     path('toggle-bookmark/<int:lesson_id>/', api.toggle_bookmark_api, name='toggle_bookmark'),
     path('mentor/stream/', api.MentorStreamAPI.as_view(), name='mentor_stream'),
+    path('flashcards/', api.flashcards_decks_api, name='flashcards_decks'),
+    path('flashcards/<int:deck_id>/', api.flashcards_deck_detail_api, name='flashcards_deck_detail'),
+    path('flashcards/complete/', api.flashcards_complete_api, name='flashcards_complete'),
 ]
