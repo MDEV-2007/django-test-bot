@@ -58,9 +58,7 @@ export default function TeacherSurveysPage() {
     if (!access) return;
     (async () => {
       try {
-        const res = await apiFetch<{ results: SurveyItem[]; count: number }>('/api/teacher/surveys/', {
-          token: access,
-        });
+        const res = await apiFetch<{ results: SurveyItem[]; count: number }>('/api/teacher/surveys/');
         setSurveys(res.results || []);
       } catch (err) {
         console.error('Surveys load error:', err);
@@ -213,7 +211,7 @@ export default function TeacherSurveysPage() {
         {/* Review list */}
         {loading ? (
           <div className="py-16">
-            <BrandLoader message="Sharhlar yuklanmoqda..." />
+            <BrandLoader label="Sharhlar yuklanmoqda..." />
           </div>
         ) : filteredSurveys.length === 0 ? (
           <Card className="border-border/60 bg-card/40 py-16 text-center">
