@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import api
+from . import api, marketing_api
 
 app_name = 'panel_api'
 
@@ -91,5 +91,7 @@ urlpatterns = [
     path('certificate/<int:attempt_pk>/', api.generate_certificate_api, name='generate_certificate'),
 
     path('broadcast/schedule/', api.broadcast_schedule_api, name='broadcast_schedule'),
+    path('marketing/analytics/', marketing_api.marketing_analytics_api, name='marketing_analytics'),
+    path('marketing/telegram-post/', marketing_api.marketing_post_to_telegram_api, name='marketing_telegram_post'),
 ]
 

@@ -208,6 +208,11 @@ export default function PanelDashboard() {
             >
               <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} /> Yangilash
             </Button>
+            <Link href="/panel/marketing">
+              <Button size="sm" className="gap-1.5 text-xs h-9 font-semibold bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white shadow-xs">
+                <Flame className="size-3.5" /> Marketing & Voronka
+              </Button>
+            </Link>
             <Link href="/panel/mocks">
               <Button size="sm" className="gap-1.5 text-xs h-9 font-semibold bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-xs">
                 <Trophy className="size-3.5" /> Mock Hisobotlari
@@ -219,7 +224,20 @@ export default function PanelDashboard() {
         {/* ============================================================ */}
         {/* YANGI SUPER ADMIN MODULLARI — TEZKOR O'TISH                  */}
         {/* ============================================================ */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <Link
+            href="/panel/marketing"
+            className="flex items-center gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-3.5 transition-all hover:bg-rose-500/15 hover:border-rose-500/50 group shadow-xs"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-rose-500/20 text-rose-300 shrink-0">
+              <Flame className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-xs sm:text-sm text-white group-hover:text-rose-200">🚀 Marketing &amp; Voronka</p>
+              <p className="text-[11px] text-rose-300/80 truncate">Acquisition, Voronka &amp; Viral Loop</p>
+            </div>
+          </Link>
+
           <Link
             href="/panel/system?tab=anticheat"
             className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 transition-all hover:bg-amber-500/15 hover:border-amber-500/50 group shadow-xs"

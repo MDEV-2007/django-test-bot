@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, BookMarked, ShoppingBag, FileCheck2,
   BookOpen, Gamepad2, ClipboardList, CreditCard, Megaphone, ScrollText, Settings,
   LogOut, ArrowLeft, ShieldCheck, ShieldAlert, HardDrive, Bot, Menu, X, ChevronRight, MessageSquareHeart, Award,
-  TrendingUp, TicketPercent, Send, Activity, Server
+  TrendingUp, TicketPercent, Send, Activity, Server, Flame
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,10 @@ type NavItem = { href: string; label: string; icon: typeof LayoutDashboard };
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Umumiy',
-    items: [{ href: '/panel', label: 'Dashboard', icon: LayoutDashboard }],
+    items: [
+      { href: '/panel', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/panel/marketing', label: 'Marketing & Voronka', icon: Flame },
+    ],
   },
   {
     label: 'Odamlar',
