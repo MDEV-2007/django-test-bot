@@ -3,7 +3,7 @@ import Link from 'next/link';
 import {
   FileCheck2, Bot, Swords, BarChart3, ArrowRight,
   Sprout, Send, Sparkles, Clock, CheckCircle2,
-  Compass, Award, ShieldCheck, Zap, Star
+  Award, ShieldCheck, Zap, Star
 } from 'lucide-react';
 import LandingNav from '@/components/landing/LandingNav';
 import RootsBackground from '@/components/landing/RootsBackground';
@@ -18,19 +18,20 @@ import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/component
 import FaqAccordion from '@/components/landing/FaqAccordion';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
+import ProductWorkflow from '@/components/landing/ProductWorkflow';
 import { AuthRedirect } from '@/components/landing/AuthRedirect';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
 
 export const metadata: Metadata = {
-  title: "IlmIldizi — Milliy sertifikat va BBA'ga onlayn tayyorgarlik platformasi",
+  title: "IlmIldizi — Milliy sertifikat va DTM imtihonlariga AI tayyorgarlik platformasi",
   description:
-    "Rasmiy formatdagi mock testlar, AI mentor, zaif mavzular tahlili va DTM ball bashorati. "
-    + "Kuchsiz mavzuni top, ildizidan yo'q qil. Telegram orqali 1 bosishda kiring.",
+    "BMB va Milliy sertifikat rasmiy formatidagi mock testlar, 24/7 AI mentor va har bir savol bo'yicha darslik tahlili. "
+    + "Kuchsiz mavzuni toping, ildizidan yo'q qiling.",
   keywords: [
     'milliy sertifikat', 'BBA', 'DTM', 'mock test', 'onlayn test', 'tarix testlari',
-    'cefr multi-level', 'abituriyent', 'test yechish', 'IlmIldizi', 'AI mentor',
+    'cefr multi-level', 'abituriyent', 'test yechish', 'IlmIldizi', 'AI mentor', 'ta\'lim platformasi',
   ],
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
@@ -39,41 +40,21 @@ export const metadata: Metadata = {
     locale: 'uz_UZ',
     url: SITE_URL,
     siteName: 'IlmIldizi',
-    title: "IlmIldizi — Milliy sertifikat va BBA'ga onlayn tayyorgarlik",
+    title: "IlmIldizi — Milliy sertifikat va DTM imtihonlariga AI tayyorgarlik",
     description:
-      "Mock testlar, AI mentor va real vaqtdagi tahlil. Kuchsiz mavzuni ildizidan yo'q qiling.",
+      "Mock testlar, 24/7 AI mentor va darslik iqtiboslari bilan chuqur tahlil. Kuchsiz mavzuni ildizidan yo'q qiling.",
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IlmIldizi',
-    description: "Milliy sertifikat va BBA'ga onlayn tayyorgarlik platformasi.",
+    title: 'IlmIldizi — Intellektual ta\'lim platformasi',
+    description: "Milliy sertifikat va DTM imtihonlariga AI bilan tayyorgarlik.",
   },
 };
 
-const STEPS = [
-  {
-    n: '01',
-    icon: Compass,
-    title: "Diagnostik test topshiring",
-    text: "Telegram yoki Google hisobingiz bilan bir bosishda kiring va 10 ta savolli ekspress diagnostikadan o'ting.",
-  },
-  {
-    n: '02',
-    icon: Bot,
-    title: 'Zaif nuqtangizni aniqlang',
-    text: "AI tizimi qaysi mavzu, davr yoki darslik betida xato qilganingizni aniqlaydi va shaxsiy reja tuzadi.",
-  },
-  {
-    n: '03',
-    icon: Award,
-    title: 'Imtihonda eng yuqori ball oling',
-    text: "Kunlik 15 daqiqalik mashqlar va 1v1 bellashuvlar orqali natijangizni A+ / Davlat Grantiga chiqaring.",
-  },
-];
 
 const RIBBONS: Record<number, string> = {
-  180: 'TAVSIYA ETAMIZ',
-  365: 'ENG PAST OYLIK NARX',
+  180: 'TAVSIYA ETILADI',
+  365: 'ENG FOYDALI NARX',
 };
 
 type ApiPlan = {
@@ -103,8 +84,8 @@ async function loadPlans(): Promise<PlanCard[]> {
         ribbon: RIBBONS[plan.duration_days],
         text: plan.description,
         features: plan.features,
-        cta: oneOff ? 'Mock testni ochish' : 'Obunani boshlash',
-        href: '/premium',
+        cta: oneOff ? 'Test tanlab ochish' : 'Obunani boshlash',
+        href: oneOff ? '/tests' : '/premium',
         highlight: plan.duration_days === 180,
       };
     });
@@ -199,23 +180,23 @@ export default async function LandingPage() {
               {/* Trust Tag */}
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-50/80 px-4 py-1.5 text-xs font-bold text-emerald-800 backdrop-blur-xs">
                 <span className="flex size-2 rounded-full bg-emerald-600 animate-ping" />
-                <span>Milliy sertifikat va Davlat Granti kafolati</span>
+                <span>BMB va Milliy sertifikat rasmiy formati asosida</span>
               </div>
 
               {/* Main Headline */}
               <h1 className="text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl md:text-6xl text-slate-900">
-                Kuchsiz mavzuni top,{' '}
+                Milliy sertifikat va DTM imtihonlariga{' '}
                 <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">
-                  ildizidan
+                  AI bilan
                 </span>{' '}
-                yo&apos;q qil.
+                tayyorlaning.
               </h1>
 
               {/* Subhead */}
               <p className="max-w-xl text-base text-slate-600 sm:text-lg leading-relaxed mx-auto lg:mx-0 font-normal">
-                Rasmiy BMB va Milliy sertifikat formatidagi mock testlar, 24/7 AI mentor va har bir savoldan keyingi darslik tahlili.
+                Rasmiy formatdagi mock testlar, 24/7 AI mentor va har bir savoldan keyingi darslik tahlili.
                 <strong className="text-slate-800 font-semibold block mt-1">
-                  Taxminiy tayyorgarlik emas — 100% Davlat Grantiga kirish tizimi.
+                  Kuchsiz mavzuni toping, ildizidan yo&apos;q qiling.
                 </strong>
               </p>
 
@@ -257,7 +238,7 @@ export default async function LandingPage() {
                   <div className="flex items-center gap-1 ml-1 text-slate-700 font-bold">
                     <Star className="size-3.5 fill-amber-400 text-amber-400" />
                     <span>4.9 / 5</span>
-                    <span className="text-slate-400 font-normal">(12,400+ o&apos;quvchi)</span>
+                    <span className="text-slate-400 font-normal">(O&apos;quvchilar va ustozlar tanlovi)</span>
                   </div>
                 </div>
 
@@ -331,57 +312,11 @@ export default async function LandingPage() {
         </RevealOnScroll>
 
         {/* =========================================================
-            QANDAY ISHLAYDI (3 QADAM - CONNECTED WORKFLOW)
+            QANDAY ISHLAYDI (ILMILDIZI O'RGANISH SIKLI - 6 BOSQICH)
             ========================================================= */}
-        <section id="qanday" className="scroll-mt-28 border-y border-slate-200/80 bg-slate-50/70 py-20 sm:py-28">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <RevealOnScroll className="mx-auto max-w-2xl text-center">
-              <div className="text-xs font-bold uppercase tracking-widest text-emerald-700">
-                Oddiy va Samarali
-              </div>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
-                Muvaffaqiyatga 3 oddiy qadam
-              </h2>
-              <p className="mt-4 text-sm text-slate-600 sm:text-base leading-relaxed">
-                Ro&apos;yxatdan o&apos;tishdan birinchi shaxsiy diagnostik tahlilgacha bor-yo&apos;g&apos;i 5 daqiqa.
-              </p>
-            </RevealOnScroll>
-
-            <div className="relative mt-16">
-              {/* Subtle connecting line across cards on desktop */}
-              <div
-                aria-hidden
-                className="hidden lg:block absolute top-1/2 left-[15%] right-[15%] h-0.5 -translate-y-6 bg-gradient-to-r from-emerald-200 via-teal-200 to-emerald-200 pointer-events-none z-0"
-              />
-
-              <div className="relative z-10 grid gap-8 md:grid-cols-3">
-                {STEPS.map((s, i) => (
-                  <RevealOnScroll key={s.n} index={i} className="relative">
-                    <div className="group relative flex h-full flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-300 hover:border-emerald-500/40 hover:shadow-xl hover:-translate-y-1">
-                      <div>
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
-                            Bosqich {s.n}
-                          </span>
-                          <div className="flex size-11 items-center justify-center rounded-xl bg-slate-900 text-white shadow-md group-hover:bg-emerald-600 transition-colors">
-                            <s.icon className="size-5" />
-                          </div>
-                        </div>
-                        <h3 className="mt-6 text-lg font-bold text-slate-900 sm:text-xl">{s.title}</h3>
-                        <p className="mt-2.5 text-xs leading-relaxed text-slate-600 sm:text-sm">{s.text}</p>
-                      </div>
-
-                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
-                        <span>Batafsil o&apos;rganish</span>
-                        <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-                      </div>
-                    </div>
-                  </RevealOnScroll>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <RevealOnScroll>
+          <ProductWorkflow />
+        </RevealOnScroll>
 
         {/* =========================================================
             NARXLAR BO'LIMI

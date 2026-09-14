@@ -3,8 +3,8 @@
 import { Star, CheckCircle2, Quote, ShieldCheck } from 'lucide-react';
 
 const STATS = [
-  { value: '94.8%', label: 'Sertifikat natijasi', sub: 'A va A+ darajaga erishganlar' },
-  { value: '45,000+', label: 'Yechilgan savollar', sub: 'Har kuni yangilanadigan baza' },
+  { value: 'BMB & Sertifikat', label: 'Rasmiy format', sub: 'Standart mezonlar asosida' },
+  { value: '5,000+', label: 'Tahlilli savollar', sub: 'Har hafta yangilanadigan baza' },
   { value: '24/7', label: 'AI Mentor yordami', sub: 'Darslik iqtiboslari bilan' },
   { value: '15 daqiqa', label: 'Kunlik o‘rtacha mashq', sub: 'Uzluksiz o‘sish va streak' },
 ];
@@ -17,7 +17,7 @@ const TESTIMONIALS = [
     text: "Milliy sertifikatga tayyorlanishda AI Mentori va zaif mavzular tahlili menga eng ko'p yordam berdi. DTMda xato qilishi mumkin bo'lgan barcha sanalarni 1v1 arenada takrorlab, mustahkamlab oldim.",
     avatar: 'SQ',
     avatarBg: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-    verified: 'DTM 2026 Tasdiqlangan',
+    verified: 'Milliy Sertifikat A+',
   },
   {
     name: 'Dilshod Ergashov',
@@ -77,11 +77,11 @@ export default function SocialProofAndStats() {
               Ishonch va Natijalar
             </div>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
-              Platforma orqali Grant yutgan o&apos;quvchilar
+              O&apos;quvchilar va ustozlar nima deydi?
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 max-w-md">
-            Muntazam tayyorgarlik ko&apos;rgan 12,000+ o&apos;quvchilar va repetitorlarning xolis fikrlari.
+            IlmIldizi bilan muntazam tayyorgarlik ko&apos;rayotgan abituriyentlar va repetitorlarning xolis fikrlari.
           </p>
         </div>
 

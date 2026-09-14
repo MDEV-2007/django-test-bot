@@ -79,9 +79,35 @@ export default function ResultsTicker() {
 
       {/* Infinite scrolling track */}
       <div className="flex w-max animate-[marquee_45s_linear_infinite] items-center gap-4 hover:[animation-play-state:paused]">
-        {[...RESULTS, ...RESULTS].map((item, idx) => (
+        {RESULTS.map((item) => (
           <div
-            key={`${item.id}-${idx}`}
+            key={item.id}
+            className="flex items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/90 px-4 py-2.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] backdrop-blur-xs transition-all hover:border-emerald-400 hover:shadow-md"
+          >
+            {/* Avatar / Icon */}
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 font-bold text-xs">
+              <Award className="size-4" />
+            </div>
+
+            {/* Info */}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-800">{item.name}</span>
+                <CheckCircle2 className="size-3 text-emerald-500" />
+              </div>
+              <span className="text-[11px] font-medium text-slate-500">{item.result}</span>
+            </div>
+
+            {/* Score pill */}
+            <span className="ml-2 rounded-lg bg-emerald-50 px-2 py-1 font-mono text-[11px] font-bold text-emerald-700 border border-emerald-200/60 whitespace-nowrap">
+              {item.badge}
+            </span>
+          </div>
+        ))}
+        {RESULTS.map((item) => (
+          <div
+            key={`dup-${item.id}`}
+            aria-hidden="true"
             className="flex items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/90 px-4 py-2.5 shadow-[0_2px_8px_rgba(15,23,42,0.04)] backdrop-blur-xs transition-all hover:border-emerald-400 hover:shadow-md"
           >
             {/* Avatar / Icon */}

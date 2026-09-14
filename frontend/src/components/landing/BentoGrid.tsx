@@ -49,7 +49,7 @@ export default function BentoGrid() {
                 </div>
               </div>
               <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-emerald-800">
-                Aniqlik: 96%
+                AI Tahlili
               </span>
             </div>
 
@@ -67,7 +67,7 @@ export default function BentoGrid() {
                 </div>
                 <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-emerald-700">
                   <CheckCircle className="size-3.5 shrink-0" />
-                  <span>TDYU Davlat Granti (94% ehtimol)</span>
+                  <span>Davlat Granti kvotasiga mos natija</span>
                 </div>
               </div>
 
@@ -241,7 +241,7 @@ export default function BentoGrid() {
           </div>
 
           <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-slate-500">1,420+ o&apos;quvchi onlayn</span>
+            <span className="text-slate-500">Jonli intellektual duel</span>
             <Link href="/register" className="font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
               Jangga kirish <ArrowRight className="size-3.5" />
             </Link>

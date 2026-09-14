@@ -119,7 +119,7 @@ export default function LandingAiChatWidget() {
   return (
     <>
       {/* 1. SUZUVCHI TUGMA (Bottom-Right Floating Trigger) */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 sm:z-50">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

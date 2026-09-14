@@ -60,12 +60,12 @@ export const FALLBACK_PLANS: PlanCard[] = [
     price: '90 000',
     unit: "so'm / 180 kun",
     perDay: "≈ 500 so'm / kun",
-    ribbon: 'ENG OMMABOP',
+    ribbon: 'TAVSIYA ETILADI',
     text: "Milliy sertifikat va DTM imtihoniga to'liq 6 oylik tayyorgarlik kursi.",
     features: [
       'Barcha to\'liq mock testlar (cheklovsiz)',
-      'AI Mentor: cheklovsiz savol-javob',
-      'Kutilayotgan DTM ball bashorati',
+      'AI Mentor: kuniga 50 ta savol tahlili',
+      'Kutilayotgan DTM ball tahlili',
       '15 000 so\'m/oy — 40% tejamkorlik',
       'Shaxsiy o\'qish rejasi va diagnostika',
     ],
@@ -74,18 +74,36 @@ export const FALLBACK_PLANS: PlanCard[] = [
     highlight: true,
   },
   {
-    name: 'Bir Martalik Mock',
+    name: 'PRO — 12 Oylik',
+    price: '150 000',
+    unit: "so'm / 365 kun",
+    perDay: "≈ 411 so'm / kun",
+    ribbon: 'ENG FOYDALI NARX',
+    text: "Eng past oylik narx. Butun o'quv yili davomida cheklovsiz tayyorgarlik.",
+    features: [
+      'Barcha to\'liq mock testlar (cheklovsiz)',
+      'AI Mentor: kuniga 50 ta savol tahlili',
+      'Kutilayotgan DTM ball tahlili',
+      '12 500 so\'m/oy — eng arzon narx',
+      '365 kun to\'liq foydalanish',
+    ],
+    cta: 'Obunani boshlash',
+    href: '/premium',
+    highlight: false,
+  },
+  {
+    name: 'Alohida Test — bir martalik',
     price: '15 000',
     unit: "so'm (bir martalik)",
-    text: "Bitta rasmiy mock testni topshirish va to'liq tahlil olish uchun.",
+    text: "Faqat tanlangan 1 ta premium mock testni muddatsiz ochish uchun.",
     features: [
-      'Tanlangan 1 ta rasmiy mock test',
-      'Imtihon taymeri va sertifikat balli',
-      'Barcha savollar xatolari tahlili',
-      'Muddatsiz natija saqlanishi',
+      'Faqat tanlangan 1 ta mock test',
+      'Ushbu testga muddatsiz (umrbod) kirish',
+      'Xatolar tahlili va sertifikat',
+      'Boshqa testlar va AI Mentor kirmaydi',
     ],
-    cta: 'Mock testni ochish',
-    href: '/premium',
+    cta: 'Test tanlab ochish',
+    href: '/tests',
     highlight: false,
   },
 ];
@@ -142,7 +160,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Obuna (Oylik / 6 oylik)
+            Obuna (1, 6 va 12 oylik)
           </button>
           <button
             onClick={() => setFilter('one_time')}
@@ -158,7 +176,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
       </div>
 
       {/* Pricing Cards Grid */}
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch">
         {filteredPlans.map((plan) => {
           const isPro = plan.highlight;
 
