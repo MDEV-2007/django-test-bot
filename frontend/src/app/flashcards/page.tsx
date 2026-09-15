@@ -293,7 +293,12 @@ export default function FlashcardsPage() {
               <div className="space-y-4">
                 <div
                   onClick={handleFlip}
-                  className="relative min-h-[280px] sm:min-h-[320px] w-full cursor-pointer rounded-2xl border-2 border-border/80 bg-gradient-to-br from-card to-card/60 p-6 sm:p-8 shadow-lg transition-all duration-300 hover:border-primary/50 flex flex-col justify-between select-none group"
+                  className={cn(
+                    "relative min-h-[280px] sm:min-h-[320px] w-full cursor-pointer rounded-2xl border-2 p-6 sm:p-8 shadow-lg transition-all duration-300 flex flex-col justify-between select-none group",
+                    isFlipped
+                      ? "border-emerald-500/50 bg-gradient-to-br from-emerald-500/[0.08] via-card to-card hover:border-emerald-500/70"
+                      : "border-border/80 bg-gradient-to-br from-card to-card/60 hover:border-primary/50"
+                  )}
                   style={{ perspective: '1000px' }}
                 >
                   {/* Karta boshi */}
@@ -301,7 +306,8 @@ export default function FlashcardsPage() {
                     <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                       {isFlipped ? (
                         <>
-                          <CheckCircle2 className="size-3.5 text-primary" /> Javob / Tushuntirish
+                          <CheckCircle2 className="size-3.5 text-emerald-500" />
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">Javob / Tushuntirish</span>
                         </>
                       ) : (
                         <>
@@ -319,7 +325,9 @@ export default function FlashcardsPage() {
                   <div className="my-auto py-4 text-center">
                     <p className={cn(
                       "text-lg sm:text-2xl font-bold leading-relaxed transition-colors",
-                      isFlipped ? "text-primary dark:text-primary-foreground font-semibold text-base sm:text-xl" : "text-foreground"
+                      isFlipped
+                        ? "text-emerald-600 dark:text-emerald-200 font-semibold text-base sm:text-xl"
+                        : "text-foreground"
                     )}>
                       {isFlipped
                         ? activeDeck.cards[currentIndex]?.back
