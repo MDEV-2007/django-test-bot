@@ -3653,10 +3653,13 @@ def panel_reels_list_create_api(request):
 @api_view(['GET', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated, IsSuperAdmin])
 def panel_reels_detail_api(request, reel_id):
-    """Reelni tahrirlash, o'chirish yoki Publish/Draft holatini o'zgartirish."""
     from learning.models import Reel
 
-    reel = get_object_or_404(Reel, id=reel_id)
+    reel = Reel.objects.filter(id=reel_id).first()
+    if not reel:
+        if request.method == 'DELETE':
+            return Response({'success': True, 'message': "Reel allaqachon o'chirilgan"})
+        return Response({'error': "Reel topilmadi"}, status=404)
 
     if request.method == 'GET':
         return Response(reel.to_dict())
@@ -3833,66 +3836,137 @@ def panel_reels_hardest_questions_api(request):
     """Platformada o'quvchilar eng ko'p xato qilgan savollarni tahlil qilib qaytaradi.
     Super admin ushbu savoldan bitta tugma bilan Reels yaratishi mumkin!"""
     from tests_app.models import Question, AttemptAnswer
-    from django.db.models import Count, Q, F
-
-    # 1. Haqiqiy urinishlardagi eng ko'p xato qilingan savollar
-    try:
-        hardest = (
-            Question.objects.filter(answers__isnull=False)
-            .annotate(
-                total_attempts=Count('answers'),
-                wrong_attempts=Count('answers', filter=Q(answers__is_correct=False))
-            )
-            .filter(total_attempts__gte=1)
-            .annotate(fail_rate=F('wrong_attempts') * 100.0 / F('total_attempts'))
-            .order_by('-fail_rate', '-wrong_attempts')[:15]
-        )
-    except Exception:
-        hardest = []
-
-    # Agar urinishlar kam bo'lsa yoki topilmasa, bazadagi 'hard' darajali savollardan tavsiya
-    if not hardest:
-        hardest = Question.objects.filter(difficulty='hard')[:15]
+    from django.db.models import Count, Q
 
     questions_data = []
-    for q in hardest:
-        # Get options
-        choices = list(q.choices.all())
-        options = [c.text for c in choices] if choices else []
-        correct_idx = 0
-        for i, c in enumerate(choices):
-            if c.is_correct:
-                correct_idx = i
+
+    # 1. Haqiqiy urinishlardagi eng ko'p xato qilingan test savollari (bitta to'g'ri javobli)
+    try:
+        wrong_stats = (
+            AttemptAnswer.objects
+            .filter(
+                is_correct=False,
+                question__question_type__in=['single_choice', 'image_based', 'table_based'],
+                question__choices__isnull=False
+            )
+            .values('question_id')
+            .annotate(wrong_count=Count('id'))
+            .order_by('-wrong_count')[:30]
+        )
+
+        seen_qids = set()
+        for item in wrong_stats:
+            qid = item['question_id']
+            if qid in seen_qids:
+                continue
+            seen_qids.add(qid)
+
+            q = Question.objects.filter(id=qid).select_related('subject').prefetch_related('choices').first()
+            if not q:
+                continue
+
+            choices = list(q.choices.all())
+            if len(choices) < 2:
+                continue
+
+            wrong_ans = item['wrong_count']
+            total_ans = AttemptAnswer.objects.filter(question_id=qid).count()
+            fail_rate = round(wrong_ans * 100.0 / total_ans, 1) if total_ans > 0 else 100.0
+
+            options = [c.text for c in choices]
+            correct_idx = 0
+            for i, c in enumerate(choices):
+                if c.is_correct:
+                    correct_idx = i
+                    break
+
+            subj_name = q.subject.name if q.subject else "Tarix"
+            subj_slug = q.subject.slug if q.subject else "tarix"
+
+            raw_body = q.body or ""
+            clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
+            if not clean_text or len(clean_text) < 10 or 'yozing' in clean_text.lower():
+                continue
+
+            questions_data.append({
+                'question_id': q.id,
+                'subject_name': subj_name,
+                'subject_slug': subj_slug,
+                'difficulty': q.get_difficulty_display(),
+                'clean_body': clean_text,
+                'options': options,
+                'correct_index': correct_idx,
+                'explanation': q.explanation or f"{subj_name} bo'yicha darslik va rasmiy BBA dasturidagi muhim qoida.",
+                'fail_rate': fail_rate,
+                'wrong_count': wrong_ans,
+                'total_count': total_ans,
+                'suggested_hook': f"O'quvchilarning {int(fail_rate)}% i shu testda yiqilgan! Sen toparmiding?",
+                'suggested_tagline': f"{wrong_ans} ta o'quvchi adashgan!",
+            })
+
+            if len(questions_data) >= 12:
                 break
+    except Exception as e:
+        logger.exception("Error analyzing hardest questions from attempts: %s", e)
 
-        # Subject name
-        subj_name = q.subject.name if q.subject else "Tarix"
-        subj_slug = q.subject.slug if q.subject else "tarix"
+    # 2. Agar urinishlar yetarli bo'lmasa, rasmiy testlar bazasidan variantli savollardan saralash
+    if len(questions_data) < 6:
+        existing_ids = {qd['question_id'] for qd in questions_data}
+        fallback_qs = (
+            Question.objects
+            .filter(
+                question_type__in=['single_choice', 'image_based', 'table_based'],
+                choices__isnull=False
+            )
+            .exclude(id__in=existing_ids)
+            .select_related('subject')
+            .prefetch_related('choices')
+            .order_by('-difficulty', '-id')[:30]
+        )
 
-        total_ans = getattr(q, 'total_attempts', 0)
-        wrong_ans = getattr(q, 'wrong_attempts', 0)
-        fail_rate = round(getattr(q, 'fail_rate', 75.0), 1) if total_ans > 0 else 82.0
+        for q in fallback_qs:
+            choices = list(q.choices.all())
+            if len(choices) < 2:
+                continue
 
-        # Clean HTML from question body
-        raw_body = q.body or ""
-        clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
+            raw_body = q.body or ""
+            clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
+            if not clean_text or len(clean_text) < 10 or 'yozing' in clean_text.lower():
+                continue
 
-        questions_data.append({
-            'question_id': q.id,
-            'subject_name': subj_name,
-            'subject_slug': subj_slug,
-            'difficulty': q.get_difficulty_display(),
-            'clean_body': clean_text,
-            'options': options,
-            'correct_index': correct_idx,
-            'explanation': q.explanation or f"{subj_name} darsliklari va rasmiy BBA dasturidagi muhim qoida.",
-            'fail_rate': fail_rate,
-            'wrong_count': wrong_ans,
-            'total_count': total_ans,
-            # Tavsiya etiladigan Reels sarlavhasi (Hook)
-            'suggested_hook': f"O'quvchilarning {int(fail_rate)}% i shu savolda adashgan! Sen toparmiding?",
-            'suggested_tagline': "Eng ko'p xato qilingan!",
-        })
+            options = [c.text for c in choices]
+            correct_idx = 0
+            for i, c in enumerate(choices):
+                if c.is_correct:
+                    correct_idx = i
+                    break
+
+            subj_name = q.subject.name if q.subject else "Tarix"
+            subj_slug = q.subject.slug if q.subject else "tarix"
+
+            # Mavjud urinishlar soni
+            total_ans = AttemptAnswer.objects.filter(question_id=q.id).count()
+            wrong_ans = AttemptAnswer.objects.filter(question_id=q.id, is_correct=False).count()
+            fail_rate = round(wrong_ans * 100.0 / total_ans, 1) if total_ans > 0 else (78.0 if q.difficulty == 'hard' else 62.0)
+
+            questions_data.append({
+                'question_id': q.id,
+                'subject_name': subj_name,
+                'subject_slug': subj_slug,
+                'difficulty': q.get_difficulty_display(),
+                'clean_body': clean_text,
+                'options': options,
+                'correct_index': correct_idx,
+                'explanation': q.explanation or f"{subj_name} bo'yicha rasmiy test mezonlari va muhim fakt.",
+                'fail_rate': fail_rate,
+                'wrong_count': wrong_ans,
+                'total_count': total_ans,
+                'suggested_hook': f"{subj_name}dan sinov savoli: Buni yecha olasizmi?",
+                'suggested_tagline': f"{subj_name} testi",
+            })
+
+            if len(questions_data) >= 12:
+                break
 
     return Response({
         'questions': questions_data,

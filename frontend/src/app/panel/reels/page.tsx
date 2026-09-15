@@ -214,8 +214,16 @@ export default function PanelReelsPage() {
   const handleDeleteReel = async (id: number) => {
     if (!window.confirm("Rostdan ham ushbu Reelni o'chirmoqchimisiz?")) return;
     try {
+      const targetReel = reels.find((r) => r.id === id);
       await apiFetch(`/api/panel/reels/${id}/`, { method: 'DELETE' });
       setReels((prev) => prev.filter((r) => r.id !== id));
+      if (targetReel) {
+        setStats((prev) => ({
+          total: Math.max(0, prev.total - 1),
+          published: targetReel.is_published ? Math.max(0, prev.published - 1) : prev.published,
+          drafts: !targetReel.is_published ? Math.max(0, prev.drafts - 1) : prev.drafts,
+        }));
+      }
       toast.success("Reel muvaffaqiyatli o'chirildi!");
     } catch (err: any) {
       toast.error(err?.message || "O'chirishda xatolik");
@@ -478,7 +486,9 @@ export default function PanelReelsPage() {
                             <span className="font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md">
                               {q.subject_name} · Xatolik: {q.fail_rate}%
                             </span>
-                            <span className="text-muted-foreground font-mono">{q.wrong_count} ta xato</span>
+                            <span className="text-muted-foreground font-mono">
+                              {q.wrong_count > 0 ? `${q.wrong_count} ta xato` : 'BBA testi'}
+                            </span>
                           </div>
                           <p className="text-xs font-semibold text-foreground line-clamp-2 leading-snug">
                             {q.clean_body}
