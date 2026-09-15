@@ -3703,86 +3703,114 @@ def panel_reels_detail_api(request, reel_id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsSuperAdmin])
+@permission_classes([IsSuperAdmin])
 def panel_community_posts_api(request):
     """Super Admin uchun Hamjamiyat postlari ro'yxati va moderatsiyasi."""
-    from learning.models import CommunityPost
-    from django.db.models import Q
+    try:
+        from learning.models import CommunityPost
+        from django.db.models import Q
 
-    qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt').order_by('-is_pinned', '-created_at')
+        qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt')
+        try:
+            qs = qs.order_by('-is_pinned', '-created_at')
+        except Exception:
+            qs = qs.order_by('-created_at')
 
-    # Filter by post_type
-    ptype = request.GET.get('type')
-    if ptype and ptype != 'all':
-        qs = qs.filter(post_type=ptype)
+        # Filter by post_type
+        ptype = request.GET.get('type')
+        if ptype and ptype != 'all':
+            qs = qs.filter(post_type=ptype)
 
-    # Search
-    search = request.GET.get('q', '').strip()
-    if search:
-        qs = qs.filter(
-            Q(title__icontains=search) |
-            Q(caption__icontains=search) |
-            Q(author__username__icontains=search) |
-            Q(author__first_name__icontains=search)
-        )
+        # Search
+        search = request.GET.get('q', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(title__icontains=search) |
+                Q(caption__icontains=search) |
+                Q(author__username__icontains=search) |
+                Q(author__first_name__icontains=search)
+            )
 
-    total = qs.count()
-    posts = qs[:100]
+        total = qs.count()
+        posts = qs[:100]
 
-    posts_data = [p.to_dict(current_user=request.user) for p in posts]
+        posts_data = []
+        for p in posts:
+            try:
+                posts_data.append(p.to_dict(current_user=request.user))
+            except Exception as e:
+                logger.warning("Error serializing post %s: %s", getattr(p, 'id', None), e)
 
-    return Response({
-        'posts': posts_data,
-        'total': total,
-    })
+        return Response({
+            'posts': posts_data,
+            'total': total,
+        })
+    except Exception as err:
+        logger.exception("panel_community_posts_api error: %s", err)
+        return Response({
+            'posts': [],
+            'total': 0,
+            'error': str(err),
+        })
 
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated, IsSuperAdmin])
+@api_view(['DELETE', 'POST'])
+@permission_classes([IsSuperAdmin])
 def panel_community_post_delete_api(request, post_id):
     """Super Admin tomonidan postni o'chirish."""
-    from learning.models import CommunityPost
-    from panel.models import AuditLog
+    try:
+        from learning.models import CommunityPost
+        from panel.models import AuditLog
 
-    post = get_object_or_404(CommunityPost, id=post_id)
-    title = post.title
-    author = post.author.username
+        post = get_object_or_404(CommunityPost, id=post_id)
+        title = post.title
+        author = post.author.username
 
-    post.delete()
+        post.delete()
 
-    AuditLog.objects.create(
-        user=request.user,
-        action=f"Hamjamiyat posti o'chirildi: '{title}' ({author})",
-        model_name='CommunityPost',
-        object_id=str(post_id),
-    )
+        try:
+            AuditLog.objects.create(
+                user=request.user,
+                action=f"Hamjamiyat posti o'chirildi: '{title}' ({author})",
+                model_name='CommunityPost',
+                object_id=str(post_id),
+            )
+        except Exception:
+            pass
 
-    return Response({'success': True, 'message': "Post muvaffaqiyatli o'chirildi."})
+        return Response({'success': True, 'message': "Post muvaffaqiyatli o'chirildi."})
+    except Exception as e:
+        logger.exception("panel_community_post_delete_api error: %s", e)
+        return Response({'error': str(e)}, status=500)
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated, IsSuperAdmin])
+@permission_classes([IsSuperAdmin])
 def panel_community_post_pin_api(request, post_id):
     """Super Admin tomonidan postni yuqoriga qadash (pin) yoki qadashdan chiqarish."""
-    from learning.models import CommunityPost
-    from panel.models import AuditLog
+    try:
+        from learning.models import CommunityPost
+        from panel.models import AuditLog
 
-    post = get_object_or_404(CommunityPost, id=post_id)
-    post.is_pinned = not post.is_pinned
-    post.save(update_fields=['is_pinned'])
+        post = get_object_or_404(CommunityPost, id=post_id)
+        is_pinned = not getattr(post, 'is_pinned', False)
+        post.is_pinned = is_pinned
+        post.save(update_fields=['is_pinned'])
 
-    AuditLog.objects.create(
-        user=request.user,
-        action=f"Post {'qadaldi' if post.is_pinned else 'qadashdan chiqarildi'}: '{post.title}'",
-        model_name='CommunityPost',
-        object_id=str(post_id),
-    )
+        try:
+            AuditLog.objects.create(
+                user=request.user,
+                action=f"Post {'qadaldi' if post.is_pinned else 'qadashdan chiqarildi'}: '{post.title}'",
+                model_name='CommunityPost',
+                object_id=str(post_id),
+            )
+        except Exception:
+            pass
 
-    return Response({
-        'success': True,
-        'is_pinned': post.is_pinned,
-        'message': "Post muvaffaqiyatli qadaldi!" if post.is_pinned else "Post qadashdan chiqarildi.",
-    })
+        return Response({'success': True, 'is_pinned': post.is_pinned})
+    except Exception as e:
+        logger.exception("panel_community_post_pin_api error: %s", e)
+        return Response({'error': str(e)}, status=500)
 
 
 @api_view(['GET'])

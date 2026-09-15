@@ -328,15 +328,18 @@ class CommunityPost(models.Model):
         }
 
         img = self.image_url
-        if not img and self.custom_image:
+        custom_img = getattr(self, 'custom_image', None)
+        if not img and custom_img:
             try:
-                img = self.custom_image.url
+                img = custom_img.url
             except Exception:
                 img = ''
 
         can_delete = False
         if current_user and current_user.is_authenticated:
-            can_delete = (current_user.id == self.author_id or current_user.is_staff or current_user.is_superuser)
+            can_delete = (current_user.id == self.author_id or getattr(current_user, 'is_staff', False) or getattr(current_user, 'is_superuser', False))
+
+        is_pinned = getattr(self, 'is_pinned', False)
 
         return {
             'id': self.id,
@@ -361,11 +364,11 @@ class CommunityPost(models.Model):
             'attempt_id': self.attempt_id,
             'likes_count': self.likes_count,
             'comments_count': self.comments_count,
-            'is_pinned': self.is_pinned,
+            'is_pinned': is_pinned,
             'can_delete': can_delete,
             'reaction_counts': reaction_counts,
             'user_reaction': user_reaction,
-            'created_at': self.created_at.strftime('%d.%m.%Y %H:%M'),
+            'created_at': self.created_at.strftime('%d.%m.%Y %H:%M') if self.created_at else '',
         }
 
 
