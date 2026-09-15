@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Swords, Menu, X, Bot, ShoppingBag,
-  Crown, BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Snowflake, Layers,
+  Crown, BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Snowflake, Layers, Sparkles,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -54,6 +54,7 @@ const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: 
   {
     label: "Ko'proq",
     items: [
+      { href: '/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose', featureKey: 'reels' },
       { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', featureKey: 'flashcards' },
       { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', featureKey: 'learning' },
       { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', featureKey: 'leaderboard' },

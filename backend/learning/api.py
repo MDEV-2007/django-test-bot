@@ -453,3 +453,187 @@ def flashcards_complete_api(request):
         'message': f"Ajoyib! Xotira to'plamini muvaffaqiyatli yakunladingiz va +{xp_gain} XP hamda +{coin_gain} tangaga ega bo'ldingiz!"
     })
 
+
+# ============================================================ BILIM REELS (SCROLL-LEARNING)
+REELS_DATA = [
+    {
+        'id': 1,
+        'subject_name': 'Tarix',
+        'subject_slug': 'tarix',
+        'category_badge': 'Amir Temur & Anqara jangi (1402)',
+        'tagline': 'Bilasizmi?',
+        'hook': "Amir Temurning 1402-yilgi Anqara jangidagi eng ayyorona harbiy hiylasi nima edi?",
+        'fact': "Sohibqiron Boyazid I qo'shinidan oldin Anqaraga yetib borib, dushmanning yagona suv manbai bo'lgan Chubuk daryosi o'zanini boshqa tomonga burib yuboradi va quduqlarni zaharlaydi/yopadi. Boyazid qo'shini suvsizlikdan sillasi qurigan holda jangga kirishga majbur bo'ladi.",
+        'takeaway': "Strategik resurslarni boshqarish — qurol-yarog'dan ham ustunroq g'alaba omili hisoblangan.",
+        'quiz': {
+            'question': "Amir Temur 1402-yilgi Anqara jangida qaysi daryoning o'zanini burib dushmanni suvsiz qoldirgan?",
+            'options': ["Chubuk daryosi", "Furot daryosi", "Dajla daryosi", "Sayxun daryosi"],
+            'correct_index': 0,
+            'explanation': "Chubuk (Çubuk) daryosi Anqara yaqinidagi asosiy suv o'zani bo'lib, Temur uni to'sib boyazid askarlarini sillasi qurishiga sabab bo'lgan."
+        },
+        'likes': 524,
+        'shares': 148,
+        'gradient': 'linear-gradient(145deg, #1e1b4b 0%, #311042 50%, #0f172a 100%)',
+    },
+    {
+        'id': 2,
+        'subject_name': 'Ona tili',
+        'subject_slug': 'ona-tili',
+        'category_badge': "Fonetika & Tutuq belgisi ( ' )",
+        'tagline': 'Oltin Qoida',
+        'hook': "Nega 'a'lo' va 'san'at' so'zlaridagi tutuq belgisi mutlaqo boshqa-boshqa vazifani bajaradi?",
+        'fact': "Unli tovushdan keyin kelgan tutuq belgisi o'sha unlini CHO'ZIB aytilishini ta'minlaydi (a'lo, e'lon, ma'no). Undoshdan keyin kelganda esa unlini undoshdan AJRATIB aytishga xizmat qiladi (san'at, jur'at, sur'at).",
+        'takeaway': "Milliy sertifikat va BBA testlarida tutuq belgisi vazifasi bo'yicha har yili savol tushadi!",
+        'quiz': {
+            'question': "Qaysi so'zda tutuq belgisi unli tovushni cho'zib talaffuz qilish uchun xizmat qilgan?",
+            'options': ["San'at", "Ma'no", "Sur'at", "Jur'at"],
+            'correct_index': 1,
+            'explanation': "'Ma'no' so'zida 'a' unlisidan keyin kelib, uni cho'zib aytilishini bildiradi. Qolganlarida undoshdan keyin kelgan."
+        },
+        'likes': 389,
+        'shares': 82,
+        'gradient': 'linear-gradient(145deg, #0c4a6e 0%, #082f49 50%, #030712 100%)',
+    },
+    {
+        'id': 3,
+        'subject_name': 'Biologiya',
+        'subject_slug': 'biologiya',
+        'category_badge': 'Genetika & DNK sirlari',
+        'tagline': 'Kashfiyot',
+        'hook': "Nima uchun inson DNK zanjiridagi Adenin har doim faqat Timin bilan bog'lanadi?",
+        'fact': "Komplementarlik qoidasiga ko'ra, Adenin (A) va Timin (T) o'rtasida 2 ta vodorod bog'i, Guanin (G) va Sitozin (C) o'rtasida esa 3 ta mustahkam vodorod bog'i hosil bo'ladi. Boshqacha juftlik molekulyar o'lcham tufayli barqaror bo'la olmaydi.",
+        'takeaway': "Ushbu qoidani 1953-yilda Jeyms Uotson va Frensis Krik kashf etgan.",
+        'quiz': {
+            'question': "DNK molekulasida Guanin va Sitozin o'rtasida nechta vodorod bog'i mavjud?",
+            'options': ["1 ta", "2 ta", "3 ta", "4 ta"],
+            'correct_index': 2,
+            'explanation': "G va C o'rtasida 3 ta, A va T o'rtasida esa 2 ta vodorod bog'i bo'ladi."
+        },
+        'likes': 412,
+        'shares': 114,
+        'gradient': 'linear-gradient(145deg, #064e3b 0%, #022c22 50%, #020617 100%)',
+    },
+    {
+        'id': 4,
+        'subject_name': 'Tarix',
+        'subject_slug': 'tarix',
+        'category_badge': 'Jaloliddin Manguberdi (1221)',
+        'tagline': 'Tarixiy Jasorat',
+        'hook': "Chingizxon Jaloliddin Manguberdining jasoratini ko'rib o'z o'g'illariga nima degan edi?",
+        'fact': "1221-yil Sind daryosi bo'yidagi ayovsiz jangda Jaloliddin asir tushmaslik uchun oti bilan baland qoyadan shiddatli daryoga sakraydi va narigi qirg'oqqa o'tib oladi. Chingizxon buni ko'rib o'z askarlariga kamondan otishni taqiqlaydi.",
+        'takeaway': "Chingizxon: 'Otaga mana shunday mard va jasur o'g'il kerak!' deb o'z farzandlariga ibrat qilib ko'rsatgan.",
+        'quiz': {
+            'question': "Jaloliddin Manguberdi va Chingizxon o'rtasidagi Sind daryosi bo'yidagi mashhur to'qnashuv qaysi yilda yuz bergan?",
+            'options': ["1219-yil", "1221-yil", "1227-yil", "1231-yil"],
+            'correct_index': 1,
+            'explanation': "Sind jangi 1221-yil noyabr oyida bo'lib o'tgan."
+        },
+        'likes': 685,
+        'shares': 190,
+        'gradient': 'linear-gradient(145deg, #881337 0%, #4c0519 50%, #0f172a 100%)',
+    },
+    {
+        'id': 5,
+        'subject_name': 'Ingliz tili',
+        'subject_slug': 'ingliz-tili',
+        'category_badge': 'Idiomalar & Collocations',
+        'tagline': 'IELTS & CEFR',
+        'hook': "'Once in a blue moon' idiomsi aslida qanday ma'noni anglatadi?",
+        'fact': "Astronomiyada 'ko'k oy' har 2.7 yilda bir marta (bitta kalendar oyida ikkinchi to'lin oy chiqqanda) sodir bo'ladi. Shu sababli bu idioma ingliz tilida 'juda ham kamdan-kam' (extremely rarely) ma'nosida ishlatiladi.",
+        'takeaway': "Masalan: 'I only eat fast food once in a blue moon.'",
+        'quiz': {
+            'question': "Qaysi so'z 'Once in a blue moon' iborasiga to'g'ridan-to'g'ri sinonim hisoblanadi?",
+            'options': ["Frequently", "Rarely", "Always", "Immediately"],
+            'correct_index': 1,
+            'explanation': "'Rarely' (juda kamdan-kam) to'g'ri ma'nodosh hisoblanadi."
+        },
+        'likes': 345,
+        'shares': 76,
+        'gradient': 'linear-gradient(145deg, #581c87 0%, #3b0764 50%, #030712 100%)',
+    },
+    {
+        'id': 6,
+        'subject_name': 'Tarix',
+        'subject_slug': 'tarix',
+        'category_badge': "Mirzo Ulug'bek & Rasadxona (1428)",
+        'tagline': "Ilmiy Mo'jiza",
+        'hook': "Ulug'bek teleskopsiz qanday qilib bir yil 365 kun, 6 soat, 10 daqiqa ekanini 1 soniya xatolik bilan hisoblagan?",
+        'fact': "1428-yil Samarqandda qurilgan Ulug'bek rasadxonasidagi 40 metrli ulkan sekstant (Kvadrant) Quyosh va yulduzlar harakatini yer osti qorong'u tuynugi orqali o'ta yuqori aniqlikda o'lchash imkonini bergan.",
+        'takeaway': "Ulug'bekning 'Ziji Jadidi Ko'ragoniy' asari 1018 ta yulduzning aniq koordinatasini bergan va butun dunyoda asrlar davomida qo'llangan.",
+        'quiz': {
+            'question': "Samarqanddagi Mirzo Ulug'bek rasadxonasi to'liq qaysi yilda barpo etilgan?",
+            'options': ["1409-yil", "1420-yil", "1428-yil", "1449-yil"],
+            'correct_index': 2,
+            'explanation': "Rasadxona qurilishi 1424-yilda boshlanib, 1428-yilda to'liq yakunlangan."
+        },
+        'likes': 512,
+        'shares': 133,
+        'gradient': 'linear-gradient(145deg, #1e3a8a 0%, #172554 50%, #020617 100%)',
+    }
+]
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def reels_feed_api(request):
+    """TikTok/Instagram formatidagi mini-darslar va savollar lentasini qaytaradi."""
+    subject_slug = request.GET.get('subject', 'all')
+    if subject_slug and subject_slug != 'all':
+        filtered = [r for r in REELS_DATA if r['subject_slug'] == subject_slug]
+    else:
+        filtered = REELS_DATA
+
+    subjects = [
+        {'slug': 'all', 'name': 'Barchasi'},
+        {'slug': 'tarix', 'name': 'Tarix'},
+        {'slug': 'ona-tili', 'name': 'Ona tili'},
+        {'slug': 'biologiya', 'name': 'Biologiya'},
+        {'slug': 'ingliz-tili', 'name': 'Ingliz tili'},
+    ]
+
+    return Response({
+        'reels': filtered,
+        'subjects': subjects,
+        'total': len(filtered),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reels_quiz_answer_api(request):
+    """Reeldagi mini-savolga javob berilganda +5 XP beradi va streakni oshiradi."""
+    reel_id = request.data.get('reel_id')
+    answer_index = request.data.get('answer_index')
+
+    target_reel = next((r for r in REELS_DATA if r['id'] == reel_id), None)
+    if not target_reel:
+        return Response({'error': 'Reel topilmadi'}, status=404)
+
+    correct_index = target_reel['quiz']['correct_index']
+    is_correct = (answer_index == correct_index)
+    explanation = target_reel['quiz']['explanation']
+
+    xp_earned = 0
+    total_xp = 0
+    streak_days = 1
+
+    if request.user and request.user.is_authenticated:
+        profile = getattr(request.user, 'profile', None)
+        if profile:
+            if is_correct:
+                xp_earned = 5
+                profile.add_xp(xp_earned)
+                profile.update_streak()
+            total_xp = profile.xp
+            streak_days = profile.streak_days
+
+    return Response({
+        'success': True,
+        'is_correct': is_correct,
+        'correct_index': correct_index,
+        'explanation': explanation,
+        'xp_earned': xp_earned,
+        'total_xp': total_xp,
+        'streak_days': streak_days,
+        'message': "Tabriklaymiz! +5 XP hisobingizga qo'shildi! 🔥" if is_correct else "Qayta urinib ko'ring!"
+    })

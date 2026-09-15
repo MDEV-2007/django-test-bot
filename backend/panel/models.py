@@ -229,6 +229,17 @@ class FeatureFlag(models.Model):
     def seed_default_flags(cls):
         defaults = [
             {
+                'key': 'reels',
+                'name': 'Bilim Reels (Scroll-Learning)',
+                'description': 'Instagram/TikTok formatidagi mini-darslar, vizual faktlar va tezkor mikrokvestlar.',
+                'category': 'learning',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'Viral',
+                'target_route': '/reels',
+                'icon_name': 'Sparkles',
+            },
+            {
                 'key': 'flashcards',
                 'name': 'Smart Flashcardlar (Yodlash)',
                 'description': 'Sanalar, qoidalar va faktlarni 3D xotira kartalari (Anki uslubida) orqali yodlash.',

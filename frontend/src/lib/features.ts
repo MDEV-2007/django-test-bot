@@ -31,6 +31,7 @@ type FeaturesStore = {
 
 // Standart holat (tarmoq kechikishida yoki birinchi ochilishda)
 const DEFAULT_FEATURES: Record<string, FeatureItem> = {
+  reels: { key: 'reels', name: 'Bilim Reels', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Viral', target_route: '/reels', icon_name: 'Sparkles' },
   flashcards: { key: 'flashcards', name: 'Smart Flashcardlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: '2.0 Beta', target_route: '/flashcards', icon_name: 'Layers' },
   battles: { key: 'battles', name: '1v1 Battle Arena', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Live', target_route: '/battles', icon_name: 'Swords' },
   learning: { key: 'learning', name: 'Darslar & Konspektlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Audio', target_route: '/learning', icon_name: 'BookOpen' },

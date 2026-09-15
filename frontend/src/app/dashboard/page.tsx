@@ -56,6 +56,7 @@ type DashboardData = {
    o'z mazmunini aks ettiradi: testda hujjat, arenada qilichlar, darsda kitob va
    tovush to'lqinlari, mentorda suhbat pufagi. */
 const QUICK_ACCESS = [
+  { href: '/reels', title: 'Bilim Reels', desc: 'Scroll-learning va mini-kvestlar', icon: Sparkles, badge: 'Viral', motif: 'lessons' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'reels' },
   { href: '/flashcards', title: 'Smart Flashcardlar', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'amber' as PremiumIconTone, featureKey: 'flashcards' },
   { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone, featureKey: 'tests' },
   { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'battles' },

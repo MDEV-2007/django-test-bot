@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { BrandMark } from '@/components/BrandMark';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Swords, Bot, ShoppingBag, Crown,
-  BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Layers
+  BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Layers, Sparkles
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -45,6 +45,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Mashq va bellashuv',
     items: [
+      { href: '/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose', featureKey: 'reels', api: '/api/learning/reels/' },
       { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
       { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
       { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', featureKey: 'leaderboard', api: '/api/leaderboard/?subject=all' },
