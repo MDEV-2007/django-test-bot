@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
+import { soundFX } from '@/lib/soundFX';
 import { cn } from '@/lib/utils';
 
 type PostItem = {
