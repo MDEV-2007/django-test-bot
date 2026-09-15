@@ -59,7 +59,7 @@ type QuizResult = {
 
 export default function ReelsPage() {
   const { isEnabled } = useFeatureFlags();
-  const { user, refreshUser } = useAuthStore();
+  const { user } = useAuthStore();
 
   const [reels, setReels] = useState<ReelItem[]>([]);
   const [subjects, setSubjects] = useState<{ slug: string; name: string }[]>([]);
@@ -232,9 +232,8 @@ export default function ReelsPage() {
           toast.success(`To'g'ri javob! +${res.xp_earned} XP hisobingizga qo'shildi! 🔥`, {
             duration: 3000,
           });
-          if (refreshUser) refreshUser();
         } else {
-          if (soundEnabled) soundFX.wrong();
+          if (soundEnabled) soundFX.incorrect();
           toast.error("Afsuski noto'g'ri. Tushuntirish bilan tanishing!", { duration: 3000 });
         }
       }
@@ -254,7 +253,7 @@ export default function ReelsPage() {
             featureKey="reels"
             title="Bilim Reels (Scroll-Learning)"
             description="Instagram va TikTok formatidagi vertikal tezkor bilim kartalari, mikrokvestlar va darslar tayyorlanmoqda."
-            badgeText="Viral 2.0"
+            badge="Viral 2.0"
           />
         </main>
       </>
