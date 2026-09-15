@@ -25,6 +25,7 @@ type ReelQuiz = {
   question: string;
   options: string[];
   explanation: string;
+  correct_index?: number;
 };
 
 type ReelItem = {
@@ -269,7 +270,31 @@ export default function ReelsPage() {
         }
       }
     } catch {
-      toast.error("Javobni tekshirishda xatolik yuz berdi");
+      // Backend keshida yoki qayta ishga tushish jarayonida lokal tekshiruv (offline fallback)
+      const targetReel = reels.find((r) => r.id === reelId);
+      const correctIdx = typeof targetReel?.quiz.correct_index === 'number' ? targetReel.quiz.correct_index : 0;
+      const isCorrect = optionIndex === correctIdx;
+      const explanation = targetReel?.quiz.explanation || "To'g'ri javob belgilandi.";
+
+      setAnsweredQuizzes((prev) => ({
+        ...prev,
+        [reelId]: {
+          selectedIndex: optionIndex,
+          isCorrect,
+          correctIndex: correctIdx,
+          explanation,
+        },
+      }));
+
+      if (isCorrect) {
+        if (soundEnabled) soundFX.correct();
+        celebrate();
+        setTodayXpEarned((prev) => prev + 5);
+        toast.success("To'g'ri javob! +5 XP hisobingizga qo'shildi! 🔥", { duration: 3000 });
+      } else {
+        if (soundEnabled) soundFX.incorrect();
+        toast.error("Afsuski noto'g'ri. Tushuntirish bilan tanishing!", { duration: 3000 });
+      }
     } finally {
       setSubmittingQuiz(null);
     }
