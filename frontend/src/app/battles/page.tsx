@@ -13,6 +13,8 @@ import { arenaRankTitle } from '@/lib/rank';
 import AppShell from '@/components/AppShell';
 import CardMotif from '@/components/student/CardMotif';
 import PageHero from '@/components/student/PageHero';
+import ComingSoonFeature from '@/components/ui/coming-soon-feature';
+import { useFeatureFlags } from '@/lib/features';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,6 +39,7 @@ type IncomingChallenge = { battle_id: number; from: { name: string; id?: number 
 
 export default function BattlesPage() {
   const { user, access } = useAuthStore();
+  const { isEnabled } = useFeatureFlags();
   const [arena, setArena] = useState<ArenaData | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>('idle');
@@ -299,6 +302,16 @@ export default function BattlesPage() {
 
   const currentQ = questions[roundIdx];
   const isWin = resultMsg.toLowerCase().includes('win') || resultMsg.toLowerCase().includes("g'alaba") || myScore > oppScore;
+
+  if (!isEnabled('battles')) {
+    return (
+      <ComingSoonFeature
+        title="1v1 Battle Arena"
+        badge="Live Duel"
+        description="O'quvchilar o'rtasida 5 ta tezkor savoldan iborat jonli intellektual jang va ELO ligalari IlmIldizi 2.0 relizida ishga tushiriladi."
+      />
+    );
+  }
 
   return (
     <>

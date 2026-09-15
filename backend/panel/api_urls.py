@@ -93,5 +93,10 @@ urlpatterns = [
     path('broadcast/schedule/', api.broadcast_schedule_api, name='broadcast_schedule'),
     path('marketing/analytics/', marketing_api.marketing_analytics_api, name='marketing_analytics'),
     path('marketing/telegram-post/', marketing_api.marketing_post_to_telegram_api, name='marketing_telegram_post'),
+
+    # Feature Flags (IlmIldizi 2.0)
+    path('features/', api.features_list_api, name='features_list'),
+    path('features/public/', api.features_public_api, name='features_public'),
+    path('features/<str:key>/toggle/', api.feature_toggle_api, name='feature_toggle'),
 ]
 

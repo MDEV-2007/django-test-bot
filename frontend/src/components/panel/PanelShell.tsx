@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, BookMarked, ShoppingBag, FileCheck2,
   BookOpen, Gamepad2, ClipboardList, CreditCard, Megaphone, ScrollText, Settings,
   LogOut, ArrowLeft, ShieldCheck, ShieldAlert, HardDrive, Bot, Menu, X, ChevronRight, MessageSquareHeart, Award,
-  TrendingUp, TicketPercent, Send, Activity, Server, Flame
+  TrendingUp, TicketPercent, Send, Activity, Server, Flame, Sliders
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { Button } from '@/components/ui/button';
@@ -67,6 +67,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/panel/system?tab=health', label: 'Server & Logs', icon: Server, tone: 'cyan' },
       { href: '/panel/telegram', label: 'Telegram Bot', icon: Send, tone: 'sky' },
       { href: '/panel/audit-log', label: 'Audit', icon: ScrollText, tone: 'zinc' },
+      { href: '/panel/features', label: 'Funksiyalar (2.0)', icon: Sliders, tone: 'purple' },
       { href: '/panel/settings', label: 'Sozlamalar', icon: Settings, tone: 'zinc' },
     ],
   },

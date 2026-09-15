@@ -20,6 +20,7 @@ import StatNumber from '@/components/motion/StatNumber';
 import AppShell from '@/components/AppShell';
 import CardMotif from '@/components/student/CardMotif';
 import { cn } from '@/lib/utils';
+import { useFeatureFlags } from '@/lib/features';
 import PremiumIcon, { PremiumIconTone } from '@/components/ui/premium-icon';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -55,10 +56,10 @@ type DashboardData = {
    o'z mazmunini aks ettiradi: testda hujjat, arenada qilichlar, darsda kitob va
    tovush to'lqinlari, mentorda suhbat pufagi. */
 const QUICK_ACCESS = [
-  { href: '/flashcards', title: 'Smart Flashcardlar', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'amber' as PremiumIconTone },
-  { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone },
-  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone },
-  { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, motifTone: 'text-[var(--tone-lesson-text)]', iconTone: 'indigo' as PremiumIconTone },
+  { href: '/flashcards', title: 'Smart Flashcardlar', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'amber' as PremiumIconTone, featureKey: 'flashcards' },
+  { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone, featureKey: 'tests' },
+  { href: '/battles', title: '1v1 Battle Arena', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live', motif: 'arena' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'battles' },
+  { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, motifTone: 'text-[var(--tone-lesson-text)]', iconTone: 'indigo' as PremiumIconTone, featureKey: 'learning' },
 ];
 
 const MINI_GAMES = [
@@ -129,6 +130,7 @@ function ProgressRing({ value }: { value: number }) {
 export default function DashboardPage() {
   const router = useRouter();
   const { access, authReady } = useAuthStore();
+  const { isEnabled } = useFeatureFlags();
   // Kesh: sahifaga qaytilganda ma'lumot darhol chiziladi, yangisi fonda keladi.
   const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
 
@@ -236,20 +238,22 @@ export default function DashboardPage() {
         {/* Mentorning kunlik jumlasi — barcha ma'lumot o'quvchining o'z statistikasidan
             olinadi (zaif mavzu, streak, missiyalar, oxirgi ball). Ilgari bu yerda faqat
             "xatolar ustida ishlash" kartasi bor edi; endi u mentor ovozining bir holati. */}
-        <Link href={nudge.href || '/tests'} className="group block">
-          <Card className="tactile-btn gap-0 border-[var(--accent-border)] bg-primary/[0.05] py-4 transition-colors hover:border-[var(--accent)]/50">
-            <CardContent className="flex flex-wrap items-center gap-3 px-4">
-              <PremiumIcon icon={Bot} tone="primary" size="md" glow className="shrink-0 transition-transform group-hover:scale-105" />
-              <p className="min-w-[16rem] flex-1 text-sm text-[var(--text-secondary)]">
-                <span className="mr-1.5 font-mono text-xs font-bold uppercase text-[var(--accent-text)]">Mentor</span>
-                {nudge.text}
-              </p>
-              <span className="flex shrink-0 items-center gap-1 rounded-xl bg-[var(--accent-soft)] px-3.5 py-2 text-xs font-bold text-[var(--accent-text)]">
-                {nudge.cta} <ArrowRight className="size-3.5" />
-              </span>
-            </CardContent>
-          </Card>
-        </Link>
+        {isEnabled('ai_mentor') && (
+          <Link href={nudge.href || '/tests'} className="group block">
+            <Card className="tactile-btn gap-0 border-[var(--accent-border)] bg-primary/[0.05] py-4 transition-colors hover:border-[var(--accent)]/50">
+              <CardContent className="flex flex-wrap items-center gap-3 px-4">
+                <PremiumIcon icon={Bot} tone="primary" size="md" glow className="shrink-0 transition-transform group-hover:scale-105" />
+                <p className="min-w-[16rem] flex-1 text-sm text-[var(--text-secondary)]">
+                  <span className="mr-1.5 font-mono text-xs font-bold uppercase text-[var(--accent-text)]">Mentor</span>
+                  {nudge.text}
+                </p>
+                <span className="flex shrink-0 items-center gap-1 rounded-xl bg-[var(--accent-soft)] px-3.5 py-2 text-xs font-bold text-[var(--accent-text)]">
+                  {nudge.cta} <ArrowRight className="size-3.5" />
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
         {/* Hero + XP halqasi */}
         <div className="grid gap-5 md:grid-cols-12">
@@ -407,65 +411,71 @@ export default function DashboardPage() {
         {/* ============================================================ */}
         {/* INTERAKTIV DARS QILISH & BELLASHUV VITRINASI                  */}
         {/* ============================================================ */}
-        <div className="grid gap-3.5 sm:grid-cols-2">
-          {/* Flashcards vitrinasi */}
-          <Link href="/flashcards" className="group block">
-            <Card className="h-full border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-card hover:border-amber-500/60 transition-all p-5 rounded-2xl flex flex-col justify-between shadow-xs">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[11px] font-bold gap-1">
-                    <Sparkles className="size-3" /> Tezkor Yodlash
-                  </Badge>
-                  <span className="text-[11px] font-bold text-amber-500">+25 XP</span>
-                </div>
-                <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-amber-500 transition-colors">
-                  🧠 Smart Flashcardlar bilan Dars Qilish
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Test yechishdan oldin sanalar, faktlar va qoidalarni 3 daqiqalik 3D kartalar bilan yodlab oling.
-                </p>
-              </div>
-              <div className="pt-3 mt-2 border-t border-border/40 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-medium">Anki &amp; Quizlet uslubi</span>
-                <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                  Boshlash <ChevronRight className="size-3.5" />
-                </span>
-              </div>
-            </Card>
-          </Link>
+        {(isEnabled('flashcards') || isEnabled('battles')) && (
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            {/* Flashcards vitrinasi */}
+            {isEnabled('flashcards') && (
+              <Link href="/flashcards" className="group block">
+                <Card className="h-full border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-card hover:border-amber-500/60 transition-all p-5 rounded-2xl flex flex-col justify-between shadow-xs">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[11px] font-bold gap-1">
+                        <Sparkles className="size-3" /> Tezkor Yodlash
+                      </Badge>
+                      <span className="text-[11px] font-bold text-amber-500">+25 XP</span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-amber-500 transition-colors">
+                      🧠 Smart Flashcardlar bilan Dars Qilish
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Test yechishdan oldin sanalar, faktlar va qoidalarni 3 daqiqalik 3D kartalar bilan yodlab oling.
+                    </p>
+                  </div>
+                  <div className="pt-3 mt-2 border-t border-border/40 flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground font-medium">Anki &amp; Quizlet uslubi</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                      Boshlash <ChevronRight className="size-3.5" />
+                    </span>
+                  </div>
+                </Card>
+              </Link>
+            )}
 
-          {/* 1v1 Arena vitrinasi */}
-          <Link href="/battles" className="group block">
-            <Card className="h-full border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-card to-card hover:border-rose-500/60 transition-all p-5 rounded-2xl flex flex-col justify-between shadow-xs">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 text-[11px] font-bold gap-1">
-                    <Swords className="size-3" /> Jonli Raqobat
-                  </Badge>
-                  <span className="text-[11px] font-bold text-rose-500">Live Duel</span>
-                </div>
-                <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-rose-500 transition-colors">
-                  ⚔️ 1v1 Arena: Do&apos;stni Jangga Chaqiring
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Do&apos;stingizga havola yuboring yoki onlayn o&apos;quvchilar bilan 5 ta tezkor savolda bellashing.
-                </p>
-              </div>
-              <div className="pt-3 mt-2 border-t border-border/40 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-medium">Telegramga ulashish</span>
-                <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">
-                  Arenaga kirish <ChevronRight className="size-3.5" />
-                </span>
-              </div>
-            </Card>
-          </Link>
-        </div>
+            {/* 1v1 Arena vitrinasi */}
+            {isEnabled('battles') && (
+              <Link href="/battles" className="group block">
+                <Card className="h-full border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-card to-card hover:border-rose-500/60 transition-all p-5 rounded-2xl flex flex-col justify-between shadow-xs">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 text-[11px] font-bold gap-1">
+                        <Swords className="size-3" /> Jonli Raqobat
+                      </Badge>
+                      <span className="text-[11px] font-bold text-rose-500">Live Duel</span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-rose-500 transition-colors">
+                      ⚔️ 1v1 Arena: Do&apos;stni Jangga Chaqiring
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Do&apos;stingizga havola yuboring yoki onlayn o&apos;quvchilar bilan 5 ta tezkor savolda bellashing.
+                    </p>
+                  </div>
+                  <div className="pt-3 mt-2 border-t border-border/40 flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground font-medium">Telegramga ulashish</span>
+                    <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">
+                      Arenaga kirish <ChevronRight className="size-3.5" />
+                    </span>
+                  </div>
+                </Card>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Asosiy bo'limlar */}
         <section className="space-y-3">
           <h2 className="section-title">Asosiy o&apos;quv bo&apos;limlari</h2>
           <div className="grid gap-3.5 sm:grid-cols-2 md:grid-cols-4">
-            {QUICK_ACCESS.map((item, qIdx) => {
+            {QUICK_ACCESS.filter((it) => !it.featureKey || isEnabled(it.featureKey)).map((item, qIdx) => {
               const Icon = item.icon;
               return (
                 <Reveal key={item.href} index={qIdx}>
@@ -498,73 +508,77 @@ export default function DashboardPage() {
         </section>
 
         {/* OTM Ball Bashorati Tezkor Banneri */}
-        <section>
-          <Link href="/analytics" className="group block">
-            <Card className="tactile-btn relative overflow-hidden border-[var(--accent-border)] bg-gradient-to-r from-emerald-950/30 via-[var(--surface-card-medium)] to-[var(--surface-card-medium)] py-4 transition-all hover:border-[var(--accent)]">
-              <div className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-[var(--accent)]/10 blur-2xl" />
-              <CardContent className="relative flex flex-wrap items-center justify-between gap-4 px-5">
-                <div className="flex items-center gap-3.5">
-                  <PremiumIcon icon={GraduationCap} tone="emerald" size="lg" glow className="shrink-0 transition-transform group-hover:scale-105" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-text)]">
-                        OTM Qabul Bashorati & Universitetlar Matcheri
+        {isEnabled('otm_predictor') && (
+          <section>
+            <Link href="/analytics" className="group block">
+              <Card className="tactile-btn relative overflow-hidden border-[var(--accent-border)] bg-gradient-to-r from-emerald-950/30 via-[var(--surface-card-medium)] to-[var(--surface-card-medium)] py-4 transition-all hover:border-[var(--accent)]">
+                <div className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-[var(--accent)]/10 blur-2xl" />
+                <CardContent className="relative flex flex-wrap items-center justify-between gap-4 px-5">
+                  <div className="flex items-center gap-3.5">
+                    <PremiumIcon icon={GraduationCap} tone="emerald" size="lg" glow className="shrink-0 transition-transform group-hover:scale-105" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-text)]">
+                          OTM Qabul Bashorati & Universitetlar Matcheri
+                        </p>
+                        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-300">
+                          2025/2026
+                        </Badge>
+                      </div>
+                      <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                        Ballingiz qaysi OTMga Grant yoki Kontraktga yetishini Analitika sahifasida real vaqtda hisoblang.
                       </p>
-                      <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-300">
-                        2025/2026
-                      </Badge>
                     </div>
-                    <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                      Ballingiz qaysi OTMga Grant yoki Kontraktga yetishini Analitika sahifasida real vaqtda hisoblang.
-                    </p>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-1 text-xs font-bold text-[var(--accent-text)]">
-                  <span>Hisoblash</span>
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </section>
+                  <div className="flex items-center gap-1 text-xs font-bold text-[var(--accent-text)]">
+                    <span>Hisoblash</span>
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </section>
+        )}
 
         <div className="grid gap-5 md:grid-cols-12">
           {/* Mini o'yinlar */}
-          <section className="min-w-0 space-y-3 md:col-span-7">
-            <div className="flex items-center justify-between">
-              <h2 className="section-title">Interaktiv mini o&apos;yinlar</h2>
-              <Badge variant="outline" className="border-[var(--tone-premium)]/25 bg-[var(--tone-premium-soft)] text-[var(--tone-premium-text)]">Bonus XP</Badge>
-            </div>
-            <div className="space-y-3">
-              {MINI_GAMES.map((game) => {
-                const Icon = game.icon;
-                return (
-                  <Link key={game.href} href={game.href} className="group block">
-                    <Card className="tactile-btn relative gap-0 overflow-hidden py-4 transition-colors hover:border-[var(--accent-border)] hover:shadow-xs">
-                      <CardMotif shape={game.motif} className={game.motifTone} />
-                      <CardContent className="relative flex items-center gap-3.5 px-4">
-                        <PremiumIcon
-                          icon={Icon}
-                          tone={game.iconTone}
-                          size="md"
-                          glow
-                          className="shrink-0 transition-transform group-hover:scale-105"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold">{game.title}</p>
-                          <p className="mt-0.5 truncate text-xs text-muted-foreground">{game.desc}</p>
-                        </div>
-                        <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
+          {isEnabled('games') && (
+            <section className="min-w-0 space-y-3 md:col-span-7">
+              <div className="flex items-center justify-between">
+                <h2 className="section-title">Interaktiv mini o&apos;yinlar</h2>
+                <Badge variant="outline" className="border-[var(--tone-premium)]/25 bg-[var(--tone-premium-soft)] text-[var(--tone-premium-text)]">Bonus XP</Badge>
+              </div>
+              <div className="space-y-3">
+                {MINI_GAMES.map((game) => {
+                  const Icon = game.icon;
+                  return (
+                    <Link key={game.href} href={game.href} className="group block">
+                      <Card className="tactile-btn relative gap-0 overflow-hidden py-4 transition-colors hover:border-[var(--accent-border)] hover:shadow-xs">
+                        <CardMotif shape={game.motif} className={game.motifTone} />
+                        <CardContent className="relative flex items-center gap-3.5 px-4">
+                          <PremiumIcon
+                            icon={Icon}
+                            tone={game.iconTone}
+                            size="md"
+                            glow
+                            className="shrink-0 transition-transform group-hover:scale-105"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold">{game.title}</p>
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground">{game.desc}</p>
+                          </div>
+                          <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
-          <div className="min-w-0 space-y-5 md:col-span-5">
+          <div className={cn("min-w-0 space-y-5", isEnabled('games') ? "md:col-span-5" : "md:col-span-12")}>
             {/* Kunlik missiyalar — hammasi bajarilganda karta bir marta "yashil nafas"
                 oladi va ro'yxat ketma-ket belgilanadi (nishonlash lahzasi). */}
             <Card className={cn(allMissionsDone && 'border-[var(--success)]/35 bg-[var(--success)]/[0.05]')}>

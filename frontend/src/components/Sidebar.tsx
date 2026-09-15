@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { BrandMark } from '@/components/BrandMark';
@@ -8,6 +9,7 @@ import {
   BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Layers
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
+import { useFeatureFlags } from '@/lib/features';
 import { prefetchApi } from '@/lib/api-cache';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
@@ -21,6 +23,7 @@ type NavItem = {
   matchPrefixes?: string[];
   tone?: PremiumIconTone;
   glow?: boolean;
+  featureKey?: string;
   /* Sahifa ochilishida so'raladigan asosiy endpoint. Havola ustiga kelgan (yoki unga
      barmoq tekkan) zahoti ma'lumot fonda olinadi — bosilganda sahifa allaqachon tayyor.
      Next'ning o'z prefetch'i faqat KOD uchun; ma'lumot baribir kutilardi. */
@@ -34,24 +37,24 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'indigo', api: '/api/dashboard/home/' },
-      { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', matchPrefixes: ['/tests'], api: '/api/tests/' },
-      { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', api: '/api/learning/' },
-      { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple' },
+      { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+      { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', featureKey: 'learning', api: '/api/learning/' },
+      { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple', featureKey: 'ai_mentor' },
     ],
   },
   {
     label: 'Mashq va bellashuv',
     items: [
-      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', api: '/api/learning/flashcards/' },
-      { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/games'] },
-      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', api: '/api/leaderboard/?subject=all' },
+      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
+      { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
+      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', featureKey: 'leaderboard', api: '/api/leaderboard/?subject=all' },
     ],
   },
   {
     label: 'Hisobim',
     items: [
       { href: '/analytics', label: 'Analitika', icon: BarChart3, tone: 'cyan', api: '/api/analytics/' },
-      { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple', matchPrefixes: ['/shop'] },
+      { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple', featureKey: 'shop', matchPrefixes: ['/shop'] },
       { href: '/premium', label: 'Premium', icon: Crown, tone: 'gold', glow: true },
       { href: '/profile', label: 'Profilim', icon: User, tone: 'zinc', api: '/api/auth/profile/' },
     ],
@@ -62,6 +65,12 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const { isEnabled, refresh } = useFeatureFlags();
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
   const isTeacher = pathname.startsWith('/teacher');
   const isAdmin = pathname.startsWith('/panel');
 
@@ -111,15 +120,18 @@ export default function Sidebar() {
       <Separator />
 
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-        {NAV_GROUPS.map((group) => (
-          <div key={group.label} className="space-y-1">
-            <p className="px-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
-              {group.label}
-            </p>
-            {group.items.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item);
-              return (
+        {NAV_GROUPS.map((group) => {
+          const visibleItems = group.items.filter((it) => !it.featureKey || isEnabled(it.featureKey));
+          if (visibleItems.length === 0) return null;
+          return (
+            <div key={group.label} className="space-y-1">
+              <p className="px-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
+                {group.label}
+              </p>
+              {visibleItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item);
+                return (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -155,7 +167,8 @@ export default function Sidebar() {
               );
             })}
           </div>
-        ))}
+        );
+      })}
       </nav>
 
       <Separator />

@@ -14,6 +14,8 @@ import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
+import ComingSoonFeature from '@/components/ui/coming-soon-feature';
+import { useFeatureFlags } from '@/lib/features';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -47,6 +49,7 @@ type DeckDetail = Deck & {
 };
 
 export default function FlashcardsPage() {
+  const { isEnabled } = useFeatureFlags();
   const [subjects, setSubjects] = useState<{ slug: string; name: string }[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
   const [selectedSubject, setSelectedSubject] = useState('all');
@@ -173,6 +176,16 @@ export default function FlashcardsPage() {
   const filteredDecks = selectedSubject === 'all'
     ? decks
     : decks.filter((d) => d.subject_slug === selectedSubject);
+
+  if (!isEnabled('flashcards')) {
+    return (
+      <ComingSoonFeature
+        title="Smart Flashcardlar"
+        badge="2.0 Beta"
+        description="Sanalar, qoidalar va faktlarni Anki uslubida 3D xotira kartalari bilan yodlash moduli tez kunda IlmIldizi 2.0 relizida taqdim etiladi."
+      />
+    );
+  }
 
   return (
     <>

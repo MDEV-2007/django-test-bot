@@ -30,6 +30,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -52,7 +53,7 @@ from .forms import (
     BroadcastForm, GameForm, LessonForm, ShopItemForm, SiteSettingsForm, SubjectForm,
     TeacherCreateForm, TestSetForm, UserForm,
 )
-from .models import AIUsageLog, AuditLog, Broadcast, SiteSettings
+from .models import AIUsageLog, AuditLog, Broadcast, SiteSettings, FeatureFlag
 
 DASHBOARD_CACHE_KEY = 'panel:dashboard:stats'
 
@@ -3351,4 +3352,174 @@ def broadcast_schedule_api(request):
             return Response({'error': f"Sana formatida xatolik: {str(e)}"}, status=400)
 
     return Response({'error': "scheduled_at maydoni kiritilishi shart"}, status=400)
+
+
+# ============================================================ FEATURE FLAGS (ILMILDIZI 2.0)
+@api_view(['GET', 'POST'])
+@permission_classes([IsSuperAdmin])
+def features_list_api(request):
+    """Super Admin uchun barcha modullar/funksiyalar ro'yxati va umumiy holati."""
+    # Baza bo'sh bo'lsa, standartlarni yaratish
+    if not FeatureFlag.objects.exists():
+        FeatureFlag.seed_default_flags()
+
+    if request.method == 'POST':
+        action = request.data.get('action')
+        if action == 'enable_all':
+            FeatureFlag.objects.all().update(is_enabled=True, admin_only=False)
+            cache.delete(FeatureFlag.CACHE_KEY_ALL)
+            AuditLog.objects.create(
+                user=request.user,
+                action='update',
+                model_name='FeatureFlag',
+                object_id='all',
+                object_repr="Barcha modullar yoqildi",
+            )
+            return Response({'message': "Barcha modullar barcha foydalanuvchilar uchun yoqildi."})
+        elif action == 'disable_all':
+            # Asosiy 'tests' dan tashqari qolganlarini o'chirish
+            FeatureFlag.objects.exclude(key='tests').update(is_enabled=False)
+            cache.delete(FeatureFlag.CACHE_KEY_ALL)
+            AuditLog.objects.create(
+                user=request.user,
+                action='update',
+                model_name='FeatureFlag',
+                object_id='all',
+                object_repr="Qo'shimcha modullar o'chirildi (Minimal rejim)",
+            )
+            return Response({'message': "Qo'shimcha modullar o'chirildi."})
+        elif action == 'reset_defaults':
+            FeatureFlag.seed_default_flags()
+            cache.delete(FeatureFlag.CACHE_KEY_ALL)
+            return Response({'message': "Standart modullar tiklandi."})
+
+    flags = FeatureFlag.objects.all()
+    items = []
+    for f in flags:
+        items.append({
+            'id': f.id,
+            'key': f.key,
+            'name': f.name,
+            'description': f.description,
+            'category': f.category,
+            'category_display': f.get_category_display(),
+            'is_enabled': f.is_enabled,
+            'admin_only': f.admin_only,
+            'badge_text': f.badge_text,
+            'target_route': f.target_route,
+            'icon_name': f.icon_name,
+            'updated_at': f.updated_at.isoformat() if f.updated_at else None,
+            'updated_by': f.updated_by.username if f.updated_by else None,
+        })
+
+    stats = {
+        'total': flags.count(),
+        'enabled': flags.filter(is_enabled=True, admin_only=False).count(),
+        'admin_only': flags.filter(admin_only=True).count(),
+        'disabled': flags.filter(is_enabled=False, admin_only=False).count(),
+    }
+
+    return Response({
+        'features': items,
+        'stats': stats,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def feature_toggle_api(request, key):
+    """Bitta modul holatini yangilash (yoqish/o'chirish, admin_only qilish)."""
+    flag = get_object_or_404(FeatureFlag, key=key)
+
+    is_enabled = request.data.get('is_enabled')
+    if is_enabled is not None:
+        flag.is_enabled = bool(is_enabled)
+
+    admin_only = request.data.get('admin_only')
+    if admin_only is not None:
+        flag.admin_only = bool(admin_only)
+
+    if 'badge_text' in request.data:
+        flag.badge_text = str(request.data.get('badge_text', '')).strip()
+
+    if 'description' in request.data:
+        flag.description = str(request.data.get('description', '')).strip()
+
+    flag.updated_by = request.user
+    flag.save()
+
+    AuditLog.objects.create(
+        user=request.user,
+        action='update',
+        model_name='FeatureFlag',
+        object_id=str(flag.id),
+        object_repr=f"{flag.name} ({flag.key}): is_enabled={flag.is_enabled}, admin_only={flag.admin_only}",
+    )
+
+    return Response({
+        'success': True,
+        'feature': {
+            'id': flag.id,
+            'key': flag.key,
+            'name': flag.name,
+            'description': flag.description,
+            'category': flag.category,
+            'is_enabled': flag.is_enabled,
+            'admin_only': flag.admin_only,
+            'badge_text': flag.badge_text,
+            'target_route': flag.target_route,
+            'icon_name': flag.icon_name,
+            'updated_at': flag.updated_at.isoformat() if flag.updated_at else None,
+        }
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def features_public_api(request):
+    """Saytdagi o'quvchilar va mehmonlar uchun ochiq modul statuslari.
+    Super admin foydalanuvchilar barcha modullarni ko'ra oladi (admin_only ham)."""
+    is_superadmin = False
+    if request.user and request.user.is_authenticated:
+        if request.user.is_superuser:
+            is_superadmin = True
+        else:
+            try:
+                prof = request.user.profile
+                if prof.role == 'superadmin' or prof.is_superadmin:
+                    is_superadmin = True
+            except Exception:
+                pass
+
+    all_flags = FeatureFlag.get_all_cached()
+
+    result = {}
+    for k, flag in all_flags.items():
+        if is_superadmin:
+            is_active = True
+            is_beta = flag.get('admin_only', False)
+        else:
+            if flag.get('admin_only', False):
+                is_active = False
+                is_beta = True
+            else:
+                is_active = bool(flag.get('is_enabled', True))
+                is_beta = False
+
+        result[k] = {
+            'key': k,
+            'name': flag.get('name', ''),
+            'is_enabled': is_active,
+            'admin_only': flag.get('admin_only', False),
+            'is_beta': is_beta,
+            'badge_text': flag.get('badge_text', ''),
+            'target_route': flag.get('target_route', ''),
+            'icon_name': flag.get('icon_name', ''),
+        }
+
+    return Response({
+        'features': result,
+        'is_superadmin': is_superadmin,
+    })
+
 

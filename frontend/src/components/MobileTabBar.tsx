@@ -9,6 +9,7 @@ import {
   Crown, BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Snowflake, Layers,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
+import { useFeatureFlags } from '@/lib/features';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
@@ -17,25 +18,24 @@ import { Separator } from '@/components/ui/separator';
 import { easeOut } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
-/* Pastki tab-bar: barmoq eng oson yetadigan 4 ta yo'nalish + "Hisobim" (avatar).
+type TabItem = {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  tone: PremiumIconTone;
+  matchPrefixes?: string[];
+  api?: string;
+  featureKey?: string;
+};
 
-   Ilgari bu yerda 5 ta havola bor edi va qolgan bo'limlar (Do'kon, Premium, Analitika,
-   Liderlar ligasi, AI Mentor) MOBILDA umuman ochilmasdi — sidebar esa faqat kattaroq
-   ekranda ko'rinadi. Endi 5-slot avatar bo'lib, pastdan chiqadigan varaqda profil va
-   qolgan barcha bo'limlar bir joyda.
-
-   AI Mentor — kunlik qaytishni ta'minlaydigan asosiy funksiya — shu tab-bar'da,
-   Darslar esa (hozircha ko'p mavzuda bo'sh, "tayyorlanmoqda" holatida) varaqqa
-   ko'chirilgan: eng qimmat 5 ta piksel joyi kontenti tayyor bo'lmagan bo'limga
-   berilmasligi kerak. */
-const TABS: { href: string; label: string; icon: typeof LayoutDashboard; tone: PremiumIconTone; matchPrefixes?: string[]; api?: string }[] = [
+const TABS: TabItem[] = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'indigo', api: '/api/dashboard/home/' },
-  { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', matchPrefixes: ['/tests'], api: '/api/tests/' },
-  { href: '/battles', label: 'Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/games'] },
-  { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple' },
+  { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+  { href: '/battles', label: 'Arena', icon: Swords, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
+  { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple', featureKey: 'ai_mentor' },
 ];
 
-const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: typeof Bot; tone?: PremiumIconTone }[] }[] = [
+const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: typeof Bot; tone?: PremiumIconTone; featureKey?: string }[] }[] = [
   {
     label: 'Hisobim',
     items: [
@@ -47,16 +47,16 @@ const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: 
   {
     label: "Do'kon",
     items: [
-      { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple' },
-      { href: '/shop/inventory', label: 'Inventar', icon: Snowflake, tone: 'sky' },
+      { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple', featureKey: 'shop' },
+      { href: '/shop/inventory', label: 'Inventar', icon: Snowflake, tone: 'sky', featureKey: 'shop' },
     ],
   },
   {
     label: "Ko'proq",
     items: [
-      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber' },
-      { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky' },
-      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold' },
+      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', featureKey: 'flashcards' },
+      { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', featureKey: 'learning' },
+      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', featureKey: 'leaderboard' },
     ],
   },
 ];
@@ -65,6 +65,7 @@ export default function MobileTabBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const { isEnabled } = useFeatureFlags();
   const [open, setOpen] = useState(false);
 
   // Sahifa almashsa varaq yopiladi, aks holda yangi sahifa ustida osilib qolardi.
@@ -84,11 +85,12 @@ export default function MobileTabBar() {
     pathname === href || (prefixes?.some((p) => pathname.startsWith(p)) ?? false);
 
   const menuActive = MENU_GROUPS.some((g) => g.items.some((i) => pathname.startsWith(i.href)));
+  const visibleTabs = TABS.filter((t) => !t.featureKey || isEnabled(t.featureKey));
 
   return (
     <>
       <nav className="ilm-mobile-tabbar fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around border-t border-[var(--border-card)] bg-[var(--surface-card-strong)]/95 px-1 pt-1.5 backdrop-blur-lg lg:hidden">
-        {TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const active = isActive(tab.href, tab.matchPrefixes);
           return (
@@ -210,32 +212,36 @@ export default function MobileTabBar() {
                   </div>
                 )}
 
-                {MENU_GROUPS.map((group) => (
-                  <div key={group.label} className="space-y-1">
-                    <p className="px-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
-                      {group.label}
-                    </p>
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const active = pathname.startsWith(item.href);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={cn(
-                            'flex min-h-12 items-center gap-3 rounded-xl px-2.5 text-sm transition-colors',
-                            active
-                              ? 'bg-primary/12 font-medium text-[var(--accent-text)]'
-                              : 'text-foreground active:bg-accent',
-                          )}
-                        >
-                          <PremiumIcon icon={Icon} tone={item.tone || 'primary'} size="xs" glow={active} />
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                ))}
+                {MENU_GROUPS.map((group) => {
+                  const visibleItems = group.items.filter((it) => !it.featureKey || isEnabled(it.featureKey));
+                  if (visibleItems.length === 0) return null;
+                  return (
+                    <div key={group.label} className="space-y-1">
+                      <p className="px-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
+                        {group.label}
+                      </p>
+                      {visibleItems.map((item) => {
+                        const Icon = item.icon;
+                        const active = pathname.startsWith(item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={cn(
+                              'flex min-h-12 items-center gap-3 rounded-xl px-2.5 text-sm transition-colors',
+                              active
+                                ? 'bg-primary/12 font-medium text-[var(--accent-text)]'
+                                : 'text-foreground active:bg-accent',
+                            )}
+                          >
+                            <PremiumIcon icon={Icon} tone={item.tone || 'primary'} size="xs" glow={active} />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
 
                 <Separator />
 

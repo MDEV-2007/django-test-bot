@@ -153,3 +153,182 @@ class AIUsageLog(models.Model):
     def __str__(self):
         return f"{self.provider}/{self.model_name} — {self.total_tokens} token ({self.created_at:%d.%m %H:%M})"
 
+
+class FeatureFlag(models.Model):
+    """IlmIldizi 2.0 modullari va sahifalarini dinamik boshqarish (Feature Flags).
+    Super Admin paneldan istalgan funksiyani bir zumda yoqish, o'chirish yoki
+    faqat adminlar uchun ochiq (Beta test) holatiga o'tkazish imkonini beradi."""
+    CATEGORY_CHOICES = [
+        ('core', 'Asosiy'),
+        ('learning', "Ta'lim & O'rganish"),
+        ('gamification', 'Geymifikatsiya & Jang'),
+        ('analytics', 'Analitika'),
+    ]
+
+    key = models.CharField(max_length=50, unique=True, db_index=True, help_text="Modulning unikal identifikatori, masalan: flashcards")
+    name = models.CharField(max_length=150, help_text="Modul nomi (o'zbek tilida)")
+    description = models.TextField(blank=True, help_text="Modul vazifasi haqida qisqacha ma'lumot")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='learning')
+    is_enabled = models.BooleanField(default=True, help_text="Barcha o'quvchilar uchun yoqilganmi?")
+    admin_only = models.BooleanField(default=False, help_text="Faqat Super Adminlar ko'rishi uchunmi? (Beta test)")
+    badge_text = models.CharField(max_length=50, blank=True, help_text="Masalan: '2.0 Beta', 'Tez kunda'")
+    target_route = models.CharField(max_length=150, blank=True, help_text="Frontend yo'li, masalan: /flashcards")
+    icon_name = models.CharField(max_length=50, blank=True, default='Sparkles', help_text="Lucide ikonka nomi")
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='updated_features')
+
+    CACHE_KEY_ALL = 'feature_flags:all_dict'
+
+    class Meta:
+        ordering = ['category', 'key']
+        verbose_name = "Funksiya bayrog'i (Feature Flag)"
+        verbose_name_plural = "Funksiya bayroqlari (Feature Flags)"
+
+    def __str__(self):
+        status = "Faol" if self.is_enabled else ("Faqat Admin" if self.admin_only else "O'chiq")
+        return f"{self.name} ({self.key}) — {status}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        from django.core.cache import cache
+        cache.delete(self.CACHE_KEY_ALL)
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        from django.core.cache import cache
+        cache.delete(self.CACHE_KEY_ALL)
+
+    @classmethod
+    def get_all_cached(cls):
+        from django.core.cache import cache
+        data = cache.get(cls.CACHE_KEY_ALL)
+        if data is None:
+            flags = list(cls.objects.all())
+            if not flags:
+                cls.seed_default_flags()
+                flags = list(cls.objects.all())
+            data = {
+                f.key: {
+                    'key': f.key,
+                    'name': f.name,
+                    'description': f.description,
+                    'category': f.category,
+                    'is_enabled': f.is_enabled,
+                    'admin_only': f.admin_only,
+                    'badge_text': f.badge_text,
+                    'target_route': f.target_route,
+                    'icon_name': f.icon_name,
+                    'updated_at': f.updated_at.isoformat() if f.updated_at else None,
+                }
+                for f in flags
+            }
+            cache.set(cls.CACHE_KEY_ALL, data, 3600)
+        return data
+
+    @classmethod
+    def seed_default_flags(cls):
+        defaults = [
+            {
+                'key': 'flashcards',
+                'name': 'Smart Flashcardlar (Yodlash)',
+                'description': 'Sanalar, qoidalar va faktlarni 3D xotira kartalari (Anki uslubida) orqali yodlash.',
+                'category': 'learning',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': '2.0 Beta',
+                'target_route': '/flashcards',
+                'icon_name': 'Layers',
+            },
+            {
+                'key': 'battles',
+                'name': '1v1 Battle Arena (Jonli duel)',
+                'description': "O'quvchilar o'rtasida 5 ta savoldan iborat real vaqtdagi intellektual jang.",
+                'category': 'gamification',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'Live',
+                'target_route': '/battles',
+                'icon_name': 'Swords',
+            },
+            {
+                'key': 'learning',
+                'name': 'Darslar & Konspektlar',
+                'description': "Mavzulashtirilgan video darslar, audio ma'ruzalar va yuklab olinuvchi konspektlar.",
+                'category': 'learning',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'Audio',
+                'target_route': '/learning',
+                'icon_name': 'BookOpen',
+            },
+            {
+                'key': 'games',
+                'name': "Tarixiy Mini O'yinlar",
+                'description': "Xronologik ketma-ketlik, xarita/qal'alar tahlili va sarkardani topish o'yinlari.",
+                'category': 'gamification',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'Bonus XP',
+                'target_route': '/games/timeline',
+                'icon_name': 'Gamepad2',
+            },
+            {
+                'key': 'ai_mentor',
+                'name': 'AI Shaxsiy Mentor',
+                'description': "O'quvchining xatolarini tahlil qiluvchi va kunlik yo'l-yo'riq beruvchi AI ovozi.",
+                'category': 'learning',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'AI',
+                'target_route': '/tests',
+                'icon_name': 'Bot',
+            },
+            {
+                'key': 'otm_predictor',
+                'name': 'OTM Qabul Bashorati & Matcher',
+                'description': "O'quvchining test ballari bo'yicha qaysi OTM grantiga yetishini hisoblash tizimi.",
+                'category': 'analytics',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': '2025/2026',
+                'target_route': '/analytics',
+                'icon_name': 'GraduationCap',
+            },
+            {
+                'key': 'shop',
+                'name': "Tangalar Do'koni & Kosmetika",
+                'description': "Ishlab topilgan tangalarga avatar, ramkalar, unvonlar va streak muzlatish sotib olish.",
+                'category': 'gamification',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'Coin',
+                'target_route': '/shop',
+                'icon_name': 'ShoppingBag',
+            },
+            {
+                'key': 'leaderboard',
+                'name': 'Reyting & Peshqadamlar',
+                'description': "Haftalik, oylik va umumiy top o'quvchilar ro'yxati hamda sovrinlar.",
+                'category': 'gamification',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'Top',
+                'target_route': '/leaderboard',
+                'icon_name': 'Trophy',
+            },
+            {
+                'key': 'tests',
+                'name': 'BBA & Rasmiy Testlar',
+                'description': "Standart va blok testlar, vaqtli imtihonlar va diagnostika.",
+                'category': 'core',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'BBA',
+                'target_route': '/tests',
+                'icon_name': 'FileCheck2',
+            },
+        ]
+        for item in defaults:
+            cls.objects.get_or_create(key=item['key'], defaults=item)
+
+
