@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, BookMarked, ShoppingBag, FileCheck2,
   BookOpen, Gamepad2, ClipboardList, CreditCard, Megaphone, ScrollText, Settings,
   LogOut, ArrowLeft, ShieldCheck, ShieldAlert, HardDrive, Bot, Menu, X, ChevronRight, MessageSquareHeart, Award,
-  TrendingUp, TicketPercent, Send, Activity, Server, Flame, Sliders
+  TrendingUp, TicketPercent, Send, Activity, Server, Flame, Sliders, Sparkles
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Kontent',
     items: [
+      { href: '/panel/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose' },
       { href: '/panel/subjects', label: 'Fanlar', icon: BookMarked, tone: 'purple' },
       { href: '/panel/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald' },
       { href: '/panel/lessons', label: 'Darslar', icon: BookOpen, tone: 'sky' },

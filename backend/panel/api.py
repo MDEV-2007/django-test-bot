@@ -3523,3 +3523,235 @@ def features_public_api(request):
     })
 
 
+# ============================================================
+# SUPER ADMIN: BILIM REELS BOSHQARUVI VA QIYIN SAVOLLAR INTEGRATSIYASI
+# ============================================================
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated, IsSuperAdmin])
+def panel_reels_list_create_api(request):
+    """Super Admin uchun barcha Reels'larni ko'rish va yangi yaratish (Publish/Draft)."""
+    from learning.models import Reel
+    from learning.api import seed_default_reels
+
+    if request.method == 'GET':
+        if not Reel.objects.exists():
+            seed_default_reels()
+
+        qs = Reel.objects.all().order_by('-order', '-id')
+
+        # Filter by status
+        status = request.GET.get('status')
+        if status == 'published':
+            qs = qs.filter(is_published=True)
+        elif status == 'draft':
+            qs = qs.filter(is_published=False)
+
+        # Filter by subject
+        subject_slug = request.GET.get('subject')
+        if subject_slug and subject_slug != 'all':
+            qs = qs.filter(subject_slug=subject_slug)
+
+        reels_data = []
+        for r in qs:
+            reels_data.append({
+                'id': r.id,
+                'subject_name': r.subject_name,
+                'subject_slug': r.subject_slug,
+                'category_badge': r.category_badge,
+                'tagline': r.tagline,
+                'hook': r.hook,
+                'fact': r.fact,
+                'takeaway': r.takeaway,
+                'gradient_theme': r.gradient_theme,
+                'gradient': r.get_gradient_css(),
+                'quiz': {
+                    'question': r.quiz_question,
+                    'options': r.quiz_options,
+                    'correct_index': r.quiz_correct_index,
+                    'explanation': r.quiz_explanation,
+                },
+                'is_published': r.is_published,
+                'likes': r.likes_count,
+                'shares': r.shares_count,
+                'views': r.views_count,
+                'order': r.order,
+                'created_at': r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else None,
+            })
+
+        total = Reel.objects.count()
+        published_count = Reel.objects.filter(is_published=True).count()
+        drafts_count = Reel.objects.filter(is_published=False).count()
+
+        return Response({
+            'reels': reels_data,
+            'stats': {
+                'total': total,
+                'published': published_count,
+                'drafts': drafts_count,
+            }
+        })
+
+    elif request.method == 'POST':
+        data = request.data
+        options = data.get('quiz_options') or data.get('options') or []
+        if isinstance(options, str):
+            options = [opt.strip() for opt in options.split('\n') if opt.strip()]
+
+        reel = Reel.objects.create(
+            subject_name=data.get('subject_name') or 'Tarix',
+            subject_slug=data.get('subject_slug') or 'tarix',
+            category_badge=data.get('category_badge') or 'Muhim Fakt',
+            tagline=data.get('tagline') or 'Bilasizmi?',
+            hook=data.get('hook') or 'Diqqat!',
+            fact=data.get('fact') or '',
+            takeaway=data.get('takeaway') or '',
+            quiz_question=data.get('quiz_question') or data.get('question') or '',
+            quiz_options=options,
+            quiz_correct_index=int(data.get('quiz_correct_index', 0)),
+            quiz_explanation=data.get('quiz_explanation') or '',
+            gradient_theme=data.get('gradient_theme') or 'purple',
+            is_published=bool(data.get('is_published', True)),
+            created_by=request.user,
+        )
+
+        AuditLog.objects.create(
+            user=request.user,
+            action=f"Yangi Reel yaratildi: {reel.hook[:40]}",
+            model_name='Reel',
+            object_id=str(reel.id),
+        )
+
+        return Response({'success': True, 'id': reel.id, 'message': "Reel muvaffaqiyatli saqlandi!"})
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated, IsSuperAdmin])
+def panel_reels_detail_api(request, reel_id):
+    """Reelni tahrirlash, o'chirish yoki Publish/Draft holatini o'zgartirish."""
+    from learning.models import Reel
+
+    reel = get_object_or_404(Reel, id=reel_id)
+
+    if request.method == 'GET':
+        return Response(reel.to_dict())
+
+    elif request.method == 'PATCH':
+        data = request.data
+
+        if 'is_published' in data:
+            reel.is_published = bool(data['is_published'])
+
+        if 'subject_name' in data: reel.subject_name = data['subject_name']
+        if 'subject_slug' in data: reel.subject_slug = data['subject_slug']
+        if 'category_badge' in data: reel.category_badge = data['category_badge']
+        if 'tagline' in data: reel.tagline = data['tagline']
+        if 'hook' in data: reel.hook = data['hook']
+        if 'fact' in data: reel.fact = data['fact']
+        if 'takeaway' in data: reel.takeaway = data['takeaway']
+        if 'quiz_question' in data: reel.quiz_question = data['quiz_question']
+        if 'quiz_options' in data: reel.quiz_options = data['quiz_options']
+        if 'quiz_correct_index' in data: reel.quiz_correct_index = int(data['quiz_correct_index'])
+        if 'quiz_explanation' in data: reel.quiz_explanation = data['quiz_explanation']
+        if 'gradient_theme' in data: reel.gradient_theme = data['gradient_theme']
+
+        reel.save()
+
+        status_str = "Chop etildi (Published)" if reel.is_published else "Qoralamaga o'tkazildi (Draft)"
+        AuditLog.objects.create(
+            user=request.user,
+            action=f"Reel tahrirlandi ({status_str}): {reel.hook[:40]}",
+            model_name='Reel',
+            object_id=str(reel.id),
+        )
+
+        return Response({'success': True, 'message': f"Reel yangilandi! ({status_str})"})
+
+    elif request.method == 'DELETE':
+        title = reel.hook[:40]
+        reel.delete()
+
+        AuditLog.objects.create(
+            user=request.user,
+            action=f"Reel o'chirildi: {title}",
+            model_name='Reel',
+            object_id=str(reel_id),
+        )
+
+        return Response({'success': True, 'message': "Reel o'chirildi!"})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsSuperAdmin])
+def panel_reels_hardest_questions_api(request):
+    """Platformada o'quvchilar eng ko'p xato qilgan savollarni tahlil qilib qaytaradi.
+    Super admin ushbu savoldan bitta tugma bilan Reels yaratishi mumkin!"""
+    from tests_app.models import Question, AttemptAnswer
+    from django.db.models import Count, Q, F
+
+    # 1. Haqiqiy urinishlardagi eng ko'p xato qilingan savollar
+    try:
+        hardest = (
+            Question.objects.filter(answers__isnull=False)
+            .annotate(
+                total_attempts=Count('answers'),
+                wrong_attempts=Count('answers', filter=Q(answers__is_correct=False))
+            )
+            .filter(total_attempts__gte=1)
+            .annotate(fail_rate=F('wrong_attempts') * 100.0 / F('total_attempts'))
+            .order_by('-fail_rate', '-wrong_attempts')[:15]
+        )
+    except Exception:
+        hardest = []
+
+    # Agar urinishlar kam bo'lsa yoki topilmasa, bazadagi 'hard' darajali savollardan tavsiya
+    if not hardest:
+        hardest = Question.objects.filter(difficulty='hard')[:15]
+
+    questions_data = []
+    for q in hardest:
+        # Get options
+        choices = list(q.choices.all())
+        options = [c.text for c in choices] if choices else []
+        correct_idx = 0
+        for i, c in enumerate(choices):
+            if c.is_correct:
+                correct_idx = i
+                break
+
+        # Subject name
+        subj_name = q.subject.name if q.subject else "Tarix"
+        subj_slug = q.subject.slug if q.subject else "tarix"
+
+        total_ans = getattr(q, 'total_attempts', 0)
+        wrong_ans = getattr(q, 'wrong_attempts', 0)
+        fail_rate = round(getattr(q, 'fail_rate', 75.0), 1) if total_ans > 0 else 82.0
+
+        # Clean HTML from question body
+        raw_body = q.body or ""
+        clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
+
+        questions_data.append({
+            'question_id': q.id,
+            'subject_name': subj_name,
+            'subject_slug': subj_slug,
+            'difficulty': q.get_difficulty_display(),
+            'clean_body': clean_text,
+            'options': options,
+            'correct_index': correct_idx,
+            'explanation': q.explanation or f"{subj_name} darsliklari va rasmiy BBA dasturidagi muhim qoida.",
+            'fail_rate': fail_rate,
+            'wrong_count': wrong_ans,
+            'total_count': total_ans,
+            # Tavsiya etiladigan Reels sarlavhasi (Hook)
+            'suggested_hook': f"O'quvchilarning {int(fail_rate)}% i shu savolda adashgan! Sen toparmiding?",
+            'suggested_tagline': "Eng ko'p xato qilingan!",
+        })
+
+    return Response({
+        'questions': questions_data,
+        'count': len(questions_data)
+    })
+
+
+

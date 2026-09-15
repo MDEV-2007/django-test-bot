@@ -98,5 +98,10 @@ urlpatterns = [
     path('features/', api.features_list_api, name='features_list'),
     path('features/public/', api.features_public_api, name='features_public'),
     path('features/<str:key>/toggle/', api.feature_toggle_api, name='feature_toggle'),
+
+    # Bilim Reels CMS & Hardest Questions
+    path('reels/', api.panel_reels_list_create_api, name='panel_reels_list_create'),
+    path('reels/<int:reel_id>/', api.panel_reels_detail_api, name='panel_reels_detail'),
+    path('reels/hardest-questions/', api.panel_reels_hardest_questions_api, name='panel_reels_hardest_questions'),
 ]
 
