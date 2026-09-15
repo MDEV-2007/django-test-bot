@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Globe, Sparkles, Award, Flame, Heart, Trophy, MessageCircle,
   Share2, ArrowRight, CheckCircle2, Send, ExternalLink,
-  ChevronRight, Filter, BookOpen, Swords, Dna, FileCheck2, X, PlusCircle
+  ChevronRight, Filter, BookOpen, Swords, Dna, FileCheck2, X, PlusCircle,
+  Plus, Trash2, Camera, UploadCloud, CornerDownRight, Pin, Loader2, Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -19,9 +20,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { apiFetch } from '@/lib/api-client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { apiFetch, API_URL } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
+import { celebrate } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
 
 type PostItem = {
@@ -33,7 +38,7 @@ type PostItem = {
     avatar: string;
     level: number;
   };
-  post_type: 'test_result' | 'certificate';
+  post_type: 'test_result' | 'certificate' | 'achievement';
   title: string;
   subject_name: string;
   subject_slug: string;
@@ -55,6 +60,8 @@ type PostItem = {
   };
   user_reaction: string | null;
   created_at: string;
+  can_delete?: boolean;
+  is_pinned?: boolean;
 };
 
 type PostComment = {
@@ -65,6 +72,7 @@ type PostComment = {
   user_avatar: string;
   text: string;
   created_at: string;
+  parent_id?: number | null;
 };
 
 type FeedResponse = {
@@ -80,6 +88,15 @@ const REACTION_EMOJIS: Record<string, { icon: string; label: string; activeClass
   heart: { icon: '❤️', label: 'Yurak', activeClass: 'bg-rose-500/20 border-rose-500/50 text-rose-300' },
 };
 
+const STUDY_MEMES = [
+  { label: 'Daho 🧠', text: '🧠 Daho rejim yoqildi!' },
+  { label: 'Grand 🎯', text: '🎯 Grand kutmoqda, olg\'a!' },
+  { label: 'Kofe ☕', text: '☕ Abituriyent kofesi kuch bag\'ishlasin!' },
+  { label: 'Kitob 📚', text: '📚 Kitoblar titilgan, natija esa bomba!' },
+  { label: 'Chempion 🏆', text: '🏆 Haqiqiy chempionlik natijasi!' },
+  { label: 'Yiqitdi 💀', text: '💀 Savol qiyin edi, lekin yorib yuboribsiz!' },
+];
+
 export default function CommunityFeedPage() {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -94,15 +111,28 @@ export default function CommunityFeedPage() {
     Record<number, { user_reaction: string | null; counts: Record<string, number> }>
   >({});
 
-  // Izohlar ochilishi va ma'lumotlari
+  // Izohlar holati
   const [expandedComments, setExpandedComments] = useState<Record<number, boolean>>({});
   const [postComments, setPostComments] = useState<Record<number, PostComment[]>>({});
   const [loadingComments, setLoadingComments] = useState<Record<number, boolean>>({});
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
   const [submittingComment, setSubmittingComment] = useState<Record<number, boolean>>({});
+  
+  // Comment reply state: postId -> { commentId, userName }
+  const [replyingTo, setReplyingTo] = useState<Record<number, { commentId: number; userName: string } | null>>({});
 
   // Rasm preview lightbox
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  // Create Post Modal State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newSubject, setNewSubject] = useState('Umumiy');
+  const [newCaption, setNewCaption] = useState('');
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Feedni yuklash
   const loadFeed = useCallback(async (filter = 'all') => {
@@ -193,7 +223,6 @@ export default function CommunityFeedPage() {
         }));
       }
     } catch {
-      // Revert if error
       loadFeed(selectedFilter);
     }
   }
@@ -231,6 +260,9 @@ export default function CommunityFeedPage() {
     const text = (commentInputs[postId] || '').trim();
     if (!text) return;
 
+    const reply = replyingTo[postId];
+    const parentId = reply ? reply.commentId : null;
+
     setSubmittingComment((prev) => ({ ...prev, [postId]: true }));
     try {
       const res = await apiFetch<{
@@ -239,7 +271,7 @@ export default function CommunityFeedPage() {
         comments_count: number;
       }>(`/api/learning/feed/${postId}/comments/`, {
         method: 'POST',
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, parent_id: parentId }),
       });
 
       if (res.success && res.comment) {
@@ -249,6 +281,7 @@ export default function CommunityFeedPage() {
           [postId]: [...(prev[postId] || []), res.comment],
         }));
         setCommentInputs((prev) => ({ ...prev, [postId]: '' }));
+        setReplyingTo((prev) => ({ ...prev, [postId]: null }));
 
         // Postlar ro'yxatidagi hisoblagichni oshirish
         setPosts((prev) =>
@@ -263,43 +296,147 @@ export default function CommunityFeedPage() {
     }
   }
 
+  // Postni o'chirish
+  async function handleDeletePost(postId: number) {
+    if (!confirm("Haqiqatan ham ushbu postni o'chirmoqchimisiz?")) return;
+
+    try {
+      soundFX.click();
+      const res = await apiFetch<{ success: boolean; message: string }>(
+        `/api/learning/feed/${postId}/delete/`,
+        { method: 'DELETE' }
+      );
+      if (res.success) {
+        toast.success("Post muvaffaqiyatli o'chirildi");
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Postni o'chirishda xatolik yuz berdi");
+    }
+  }
+
+  // Rasm tanlash handler
+  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Rasm hajmi 5MB dan oshmasligi kerak");
+        return;
+      }
+      setSelectedImageFile(file);
+      const url = URL.createObjectURL(file);
+      setImagePreviewUrl(url);
+    }
+  }
+
+  // Yangi erkin post yaratish
+  async function handleCreatePost(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Post qo'shish uchun avval tizimga kiring");
+      router.push('/login');
+      return;
+    }
+
+    if (!newTitle.trim() && !newCaption.trim() && !selectedImageFile) {
+      toast.error("Iltimos, post matni yoki rasmni kiriting");
+      return;
+    }
+
+    setIsSubmittingPost(true);
+    try {
+      const formData = new FormData();
+      formData.append('title', newTitle.trim() || 'O\'quvchi Natijasi');
+      formData.append('subject_name', newSubject.trim() || 'Umumiy');
+      formData.append('caption', newCaption.trim());
+      if (selectedImageFile) {
+        formData.append('image', selectedImageFile);
+      }
+
+      const res = await apiFetch<{ success: boolean; post: PostItem; message: string }>(
+        '/api/learning/feed/create/',
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (res.success) {
+        celebrate();
+        soundFX.celebrate();
+        toast.success(res.message || "Post muvaffaqiyatli e'lon qilindi! +15 XP");
+        setIsCreateModalOpen(false);
+        setNewTitle('');
+        setNewCaption('');
+        setSelectedImageFile(null);
+        setImagePreviewUrl(null);
+        loadFeed(selectedFilter);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Post yaratishda xatolik yuz berdi");
+    } finally {
+      setIsSubmittingPost(false);
+    }
+  }
+
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 sm:space-y-8 bg-[var(--bg-page)] p-4 pb-20 sm:p-6">
+      <main className="page-shell flex-1 space-y-6 sm:space-y-8 bg-[var(--bg-page)] p-4 pb-24 sm:p-6">
         {/* Page Hero */}
         <PageHero
           tone="emerald"
-          eyebrow="Abituriyentlar Yutuqlari"
+          eyebrow="Abituriyentlar Hamjamiyati"
           eyebrowIcon={Globe}
           title="Hamjamiyat Lentasi"
-          description="O'quvchilarning real test natijalari, sertifikatlari va yutuqlari. Bir-biringizni qo'llab-quvvatlang va bilimingizni sinang!"
+          description="O'quvchilarning erkin postlari, test natijalari, sertifikatlari va yutuqlari. Fikr almashing, bir-biringizni ilhomlantiring!"
           actions={
-            <Button
-              asChild
-              size="sm"
-              className="rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20"
-            >
-              <Link href="/tests/history">
-                <PlusCircle className="size-4 mr-1.5" /> Natijamni ulashish
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                size="sm"
+                className="rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
+              >
+                <Plus className="size-4" /> Yangi Post Yaratish
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="rounded-xl font-bold border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+              >
+                <Link href="/tests/history">
+                  <Award className="size-4 mr-1.5" /> Test Natijalarim
+                </Link>
+              </Button>
+            </div>
           }
         />
 
         {/* Hub Mode Switcher: Hamjamiyat Lentasi & Liderlar Jadvali */}
-        <div className="flex items-center gap-2 border-b border-[var(--border-card)] pb-3">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
-            <Globe className="size-4" />
-            <span>🌟 Yutuqlar Lentasi</span>
+        <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-3">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
+              <Globe className="size-4" />
+              <span>🌟 Yutuqlar Lentasi</span>
+            </div>
+            <Link
+              href="/leaderboard"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-muted-foreground hover:bg-[var(--surface-hover)] hover:text-amber-500 border border-transparent hover:border-amber-500/30"
+            >
+              <Trophy className="size-4 text-amber-500" />
+              <span>🏆 Liderlar Ligasi</span>
+            </Link>
           </div>
-          <Link
-            href="/leaderboard"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-muted-foreground hover:bg-[var(--surface-hover)] hover:text-amber-500 border border-transparent hover:border-amber-500/30"
+
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            size="sm"
+            variant="outline"
+            className="sm:hidden rounded-xl border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/10 font-bold text-xs"
           >
-            <Trophy className="size-4 text-amber-500" />
-            <span>🏆 Liderlar Ligasi</span>
-          </Link>
+            <Plus className="size-3.5 mr-1" /> Post
+          </Button>
         </div>
 
         {/* Filter Chips Bar */}
@@ -359,11 +496,15 @@ export default function CommunityFeedPage() {
                     Hozircha postlar mavjud emas
                   </h3>
                   <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
-                    Birinchi bo&apos;lib test topshiring yoki sertifikatingizni ulashing va lentada paydo bo&apos;ling!
+                    Birinchi bo&apos;lib post qoldiring, sertifikatingizni ulashing va hamjamiyatda ko&apos;rining!
                   </p>
                 </div>
-                <Button asChild size="sm" className="rounded-xl font-bold bg-primary text-primary-foreground">
-                  <Link href="/tests">Test topshirish 🚀</Link>
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  size="sm"
+                  className="rounded-xl font-bold bg-primary text-primary-foreground"
+                >
+                  <Plus className="size-4 mr-1.5" /> Birinchi bo&apos;lib post qoldirish
                 </Button>
               </div>
             </Reveal>
@@ -377,9 +518,10 @@ export default function CommunityFeedPage() {
               const isCommentsOpen = expandedComments[post.id] || false;
               const isCommentsLoading = loadingComments[post.id] || false;
               const isCert = post.post_type === 'certificate' || (post.score && post.score >= 60);
+              const postReplying = replyingTo[post.id];
 
               return (
-                <Reveal key={post.id} delay={idx * 0.05}>
+                <Reveal key={post.id} delay={idx * 0.04}>
                   <Card className="overflow-hidden border border-[var(--border-card)] bg-[var(--surface-card)] shadow-lg hover:border-[var(--border-strong)] transition-all">
                     <CardContent className="p-4 sm:p-6 space-y-4">
                       {/* 1. Author Header Row */}
@@ -392,13 +534,18 @@ export default function CommunityFeedPage() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-extrabold text-foreground text-sm leading-tight">
                                 {post.author.name}
                               </span>
                               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/20">
                                 Lv. {post.author.level}
                               </span>
+                              {post.is_pinned && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/20">
+                                  <Pin className="size-2.5" /> Qadalgan
+                                </span>
+                              )}
                             </div>
                             <p className="text-[11px] text-muted-foreground">
                               @{post.author.username} · {post.created_at}
@@ -406,70 +553,102 @@ export default function CommunityFeedPage() {
                           </div>
                         </div>
 
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "text-[11px] font-bold px-2.5 py-1",
-                            isCert
-                              ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-                              : "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                        <div className="flex items-center gap-1.5">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "text-[11px] font-bold px-2.5 py-1",
+                              post.post_type === 'achievement'
+                                ? "border-purple-500/40 bg-purple-500/10 text-purple-300"
+                                : isCert
+                                ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                                : "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                            )}
+                          >
+                            {post.post_type === 'achievement'
+                              ? '✨ Hamjamiyat'
+                              : isCert
+                              ? '🏆 Sertifikat'
+                              : '📝 Sinov Testi'}
+                          </Badge>
+
+                          {/* Delete button if owner or admin */}
+                          {post.can_delete && (
+                            <button
+                              onClick={() => handleDeletePost(post.id)}
+                              className="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                              title="Postni o'chirish"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </button>
                           )}
-                        >
-                          {isCert ? '🏆 Sertifikat' : '📝 Sinov Testi'}
-                        </Badge>
+                        </div>
                       </div>
 
-                      {/* 2. Test Title & Score Banner */}
-                      <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[var(--surface-hover)] to-[var(--surface-card-soft)] border border-[var(--border-card)] flex flex-wrap items-center justify-between gap-3">
-                        <div className="space-y-1 min-w-0 flex-1">
+                      {/* 2. Test Title & Score Banner (Only if test/cert with score or questions) */}
+                      {(post.score > 0 || post.total_questions > 0 || post.grade) ? (
+                        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[var(--surface-hover)] to-[var(--surface-card-soft)] border border-[var(--border-card)] flex flex-wrap items-center justify-between gap-3">
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground border-border/70">
+                              {post.subject_name}
+                            </Badge>
+                            <h4 className="font-black text-foreground text-sm sm:text-base leading-snug line-clamp-1">
+                              {post.title}
+                            </h4>
+                            {post.total_questions > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                To&apos;g&apos;ri: <b className="text-foreground">{post.correct_count}</b> / {post.total_questions} ta savol
+                              </p>
+                            )}
+                          </div>
+
+                          {post.score > 0 && (
+                            <div className="flex items-center gap-2 shrink-0">
+                              <div className="text-right">
+                                <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-emerald-400 block leading-none">
+                                  {post.score?.toFixed(0)}%
+                                </span>
+                                {post.grade && (
+                                  <span className="text-[10px] font-extrabold uppercase text-amber-300">
+                                    {post.grade}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
                           <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground border-border/70">
                             {post.subject_name}
                           </Badge>
-                          <h4 className="font-black text-foreground text-sm sm:text-base leading-snug line-clamp-1">
+                          <h4 className="font-black text-foreground text-base sm:text-lg leading-snug">
                             {post.title}
                           </h4>
-                          {post.total_questions > 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              To&apos;g&apos;ri: <b className="text-foreground">{post.correct_count}</b> / {post.total_questions} ta savol
-                            </p>
-                          )}
                         </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <div className="text-right">
-                            <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-emerald-400 block leading-none">
-                              {post.score?.toFixed(0)}%
-                            </span>
-                            {post.grade && (
-                              <span className="text-[10px] font-extrabold uppercase text-amber-300">
-                                {post.grade}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      )}
 
                       {/* 3. Post Caption / Student's words */}
                       {post.caption && (
-                        <div className="text-xs sm:text-sm text-foreground/90 font-medium leading-relaxed pl-3 border-l-2 border-primary/50 italic bg-primary/[0.03] py-1.5 rounded-r-xl">
+                        <div className="text-xs sm:text-sm text-foreground/90 font-medium leading-relaxed pl-3 border-l-2 border-primary/50 italic bg-primary/[0.03] py-2 rounded-r-xl">
                           &ldquo;{post.caption}&rdquo;
                         </div>
                       )}
 
-                      {/* 4. Generated Story / Certificate Card Preview */}
+                      {/* 4. Generated Story / Certificate / Custom Uploaded Image Preview (Auto-fit, never cut off) */}
                       {post.image_url && (
                         <div
                           onClick={() => setPreviewImage(post.image_url)}
-                          className="relative rounded-2xl overflow-hidden border border-white/10 bg-black/40 group cursor-pointer aspect-[16/9] sm:aspect-[2/1] flex items-center justify-center transition-all hover:border-amber-400/40"
+                          className="relative rounded-2xl overflow-hidden border border-[var(--border-card)] bg-black/40 group cursor-pointer flex items-center justify-center transition-all hover:border-primary/50 max-h-[520px] w-full"
                         >
                           <img
                             src={post.image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-auto max-h-[520px] object-contain mx-auto group-hover:scale-[1.01] transition-transform duration-300"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5 backdrop-blur-[2px]">
-                            <ExternalLink className="size-4" /> Rasmni kattalashtirish
+                          <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5 backdrop-blur-[1px]">
+                            <ExternalLink className="size-4" /> Rasmni to&apos;liq ko&apos;rish
                           </div>
                         </div>
                       )}
@@ -527,7 +706,7 @@ export default function CommunityFeedPage() {
                         </button>
                       </div>
 
-                      {/* 7. Collapsible Comments Section */}
+                      {/* 7. Collapsible Comments Section with Replies & Memes */}
                       {isCommentsOpen && (
                         <div className="pt-3 space-y-3 border-t border-[var(--border-card)]/60">
                           {isCommentsLoading ? (
@@ -536,27 +715,93 @@ export default function CommunityFeedPage() {
                             </div>
                           ) : comments.length === 0 ? (
                             <p className="text-xs text-muted-foreground text-center py-2">
-                              Hozircha izohlar yo&apos;q. Birinchi bo&apos;lib tabriklang! 🎉
+                              Hozircha izohlar yo&apos;q. Birinchi bo&apos;lib fikr bildiring! 🎉
                             </p>
                           ) : (
-                            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                              {comments.map((c) => (
-                                <div key={c.id} className="flex items-start gap-2 text-xs bg-[var(--surface-hover)]/40 p-2 rounded-xl">
-                                  <Avatar className="size-6 shrink-0 mt-0.5">
-                                    {c.user_avatar && <AvatarImage src={c.user_avatar} alt={c.user_name} />}
-                                    <AvatarFallback className="text-[9px] font-bold">
-                                      {c.user_name.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-baseline justify-between gap-2">
-                                      <span className="font-bold text-foreground truncate">{c.user_name}</span>
-                                      <span className="text-[10px] text-muted-foreground">{c.created_at}</span>
+                            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                              {comments.map((c) => {
+                                const isReply = Boolean(c.parent_id);
+                                return (
+                                  <div
+                                    key={c.id}
+                                    className={cn(
+                                      "flex items-start gap-2 text-xs p-2 rounded-xl transition-all",
+                                      isReply
+                                        ? "ml-6 bg-[var(--surface-hover)]/30 border-l-2 border-primary/40"
+                                        : "bg-[var(--surface-hover)]/50"
+                                    )}
+                                  >
+                                    {isReply && <CornerDownRight className="size-3 text-muted-foreground shrink-0 mt-1" />}
+                                    <Avatar className="size-6 shrink-0 mt-0.5">
+                                      {c.user_avatar && <AvatarImage src={c.user_avatar} alt={c.user_name} />}
+                                      <AvatarFallback className="text-[9px] font-bold">
+                                        {c.user_name.charAt(0).toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-baseline justify-between gap-2">
+                                        <span className="font-bold text-foreground truncate">{c.user_name}</span>
+                                        <span className="text-[10px] text-muted-foreground">{c.created_at}</span>
+                                      </div>
+                                      <p className="text-foreground/90 mt-0.5 leading-snug">{c.text}</p>
+                                      <div className="mt-1 flex items-center gap-2">
+                                        <button
+                                          onClick={() => {
+                                            setReplyingTo((prev) => ({
+                                              ...prev,
+                                              [post.id]: { commentId: c.id, userName: c.user_name },
+                                            }));
+                                            setCommentInputs((prev) => ({
+                                              ...prev,
+                                              [post.id]: `@${c.user_name} `,
+                                            }));
+                                          }}
+                                          className="text-[10px] font-semibold text-primary hover:underline"
+                                        >
+                                          Javob berish
+                                        </button>
+                                      </div>
                                     </div>
-                                    <p className="text-foreground/90 mt-0.5 leading-snug">{c.text}</p>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Quick Study/Comedy Memes bar */}
+                          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+                            <span className="text-[10px] font-bold text-muted-foreground shrink-0">
+                              Tezkor:
+                            </span>
+                            {STUDY_MEMES.map((m, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => {
+                                  setCommentInputs((prev) => ({
+                                    ...prev,
+                                    [post.id]: (prev[post.id] ? prev[post.id] + ' ' : '') + m.text,
+                                  }));
+                                }}
+                                className="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-[var(--surface-hover)] border border-[var(--border-card)] text-foreground/80 hover:text-foreground hover:border-primary/40 shrink-0 transition-colors"
+                              >
+                                {m.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Active Replying indicator */}
+                          {postReplying && (
+                            <div className="flex items-center justify-between text-xs px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-lg text-primary">
+                              <span className="truncate">
+                                💬 <b>@{postReplying.userName}</b> ga javob berilmoqda
+                              </span>
+                              <button
+                                onClick={() => setReplyingTo((prev) => ({ ...prev, [post.id]: null }))}
+                                className="text-muted-foreground hover:text-foreground ml-2"
+                              >
+                                <X className="size-3" />
+                              </button>
                             </div>
                           )}
 
@@ -571,7 +816,7 @@ export default function CommunityFeedPage() {
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') handleAddComment(post.id);
                               }}
-                              placeholder="Tabrik yoki fikringizni yozing..."
+                              placeholder="Fikr, tabrik yoki meme yozing..."
                               className="flex-1 rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/60 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                               maxLength={1000}
                             />
@@ -599,19 +844,129 @@ export default function CommunityFeedPage() {
       {previewImage && (
         <div
           onClick={() => setPreviewImage(null)}
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
         >
-          <div className="relative max-w-2xl w-full max-h-[85vh] overflow-hidden rounded-3xl border border-white/20 shadow-2xl">
+          <div className="relative max-w-3xl w-full max-h-[90vh] overflow-hidden rounded-3xl border border-white/20 shadow-2xl flex items-center justify-center bg-black/60">
             <button
               onClick={() => setPreviewImage(null)}
-              className="absolute top-4 right-4 z-10 size-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
+              className="absolute top-4 right-4 z-10 size-9 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90 transition-all"
             >
               <X className="size-4" />
             </button>
-            <img src={previewImage} alt="Natija kartasi" className="w-full h-auto object-contain" />
+            <img src={previewImage} alt="Post rasmi" className="w-auto h-auto max-h-[85vh] max-w-full object-contain" />
           </div>
         </div>
       )}
+
+      {/* Create New Post Dialog Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="max-w-md w-full bg-[var(--surface-card)] border-[var(--border-card)] p-6 rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-black text-foreground flex items-center gap-2">
+              <Plus className="size-5 text-emerald-500" /> Yangi Post Yaratish
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              O&apos;quv yutuqlaringiz, qiziqarli konspekt yoki natijalaringizni IlmIldizi hamjamiyatiga ulashing (+15 XP)!
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreatePost} className="space-y-4 pt-2">
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">Mavzu yoki Sarlavha</label>
+              <Input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Masalan: Bugun 50 ta biologiya testi yechdim!"
+                className="rounded-xl text-xs bg-[var(--surface-hover)] border-[var(--border-card)]"
+                maxLength={150}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">Fan / Yo&apos;nalish</label>
+              <Input
+                value={newSubject}
+                onChange={(e) => setNewSubject(e.target.value)}
+                placeholder="Biologiya, Kimyo, Tarix, Matematika..."
+                className="rounded-xl text-xs bg-[var(--surface-hover)] border-[var(--border-card)]"
+                maxLength={60}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">Fikr yoki Taassurot</label>
+              <Textarea
+                value={newCaption}
+                onChange={(e) => setNewCaption(e.target.value)}
+                placeholder="Abituriyent do'stlaringizga foydali maslahat yoki shijoatli so'zlar yozing..."
+                className="rounded-xl text-xs bg-[var(--surface-hover)] border-[var(--border-card)] min-h-[70px]"
+                maxLength={1000}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block">Rasm (Ixtiyoriy)</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+
+              {imagePreviewUrl ? (
+                <div className="relative rounded-2xl overflow-hidden border border-[var(--border-card)] bg-black/40 p-2 flex items-center justify-center">
+                  <img src={imagePreviewUrl} alt="Preview" className="max-h-48 rounded-xl object-contain" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedImageFile(null);
+                      setImagePreviewUrl(null);
+                    }}
+                    className="absolute top-3 right-3 size-7 rounded-full bg-black/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-[var(--border-card)] hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-[var(--surface-hover)]/40"
+                >
+                  <UploadCloud className="size-6 text-emerald-500" />
+                  <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
+                  <span className="text-[10px] text-muted-foreground">PNG, JPG, WebP (maks. 5MB)</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="rounded-xl text-xs font-bold"
+              >
+                Bekor qilish
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmittingPost}
+                className="rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20"
+              >
+                {isSubmittingPost ? (
+                  <>
+                    <Loader2 className="size-3.5 mr-1.5 animate-spin" /> E&apos;lon qilinmoqda...
+                  </>
+                ) : (
+                  <>E&apos;lon qilish 🚀</>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
+

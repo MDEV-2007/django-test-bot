@@ -143,6 +143,15 @@ class Reel(models.Model):
     )
 
     gradient_theme = models.CharField(max_length=30, choices=GRADIENT_CHOICES, default='purple')
+    media_type = models.CharField(
+        max_length=20,
+        default='text',
+        choices=[('text', 'Interaktiv Matn & Savol'), ('video', 'Video Reel')],
+        help_text="Reel formati: matnli interaktiv kvest yoki to'liq vertikal video"
+    )
+    video_url = models.URLField(max_length=500, blank=True, default='', help_text="MP4 video yoki streaming havolasi")
+    video_file = models.FileField(upload_to='reels_videos/', blank=True, null=True, help_text="Yuklangan video fayli")
+
     is_published = models.BooleanField(default=True, db_index=True, help_text="O'quvchilar lentasiga chiqarish")
     order = models.IntegerField(default=0)
 
@@ -163,7 +172,8 @@ class Reel(models.Model):
 
     def __str__(self):
         status = "🟢 Nashr" if self.is_published else "🟡 Qoralama"
-        return f"{status} [{self.subject_name}] {self.hook[:50]}"
+        media_icon = "🎬" if self.media_type == 'video' else "📝"
+        return f"{status} {media_icon} [{self.subject_name}] {self.hook[:50]}"
 
     def get_gradient_css(self):
         gradients = {
@@ -180,6 +190,16 @@ class Reel(models.Model):
             c_count = self.comments.count()
         except Exception:
             c_count = 0
+
+        v_url = ''
+        if self.video_file:
+            try:
+                v_url = self.video_file.url
+            except Exception:
+                v_url = ''
+        if not v_url:
+            v_url = self.video_url
+
         return {
             'id': self.id,
             'subject_name': self.subject_name,
@@ -190,6 +210,8 @@ class Reel(models.Model):
             'fact': self.fact,
             'takeaway': self.takeaway,
             'gradient': self.get_gradient_css(),
+            'media_type': self.media_type,
+            'video_url': v_url,
             'quiz': {
                 'question': self.quiz_question,
                 'options': self.quiz_options,
@@ -205,14 +227,15 @@ class Reel(models.Model):
 
 
 class ReelComment(models.Model):
-    """Reels videosi/savoliga qoldirilgan izohlar."""
+    """Reels videosi/savoliga qoldirilgan izohlar va javoblar."""
     reel = models.ForeignKey(Reel, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='reel_comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     text = models.TextField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['created_at']
         verbose_name = "Reel Izohi"
         verbose_name_plural = "Reel Izohlari"
 
@@ -235,6 +258,8 @@ class ReelComment(models.Model):
             'username': self.user.username,
             'user_avatar': avatar,
             'text': self.text,
+            'parent_id': self.parent_id,
+            'replies_count': self.replies.count(),
             'created_at': self.created_at.strftime('%d.%m.%Y, %H:%M'),
         }
 
@@ -267,6 +292,7 @@ class CommunityPost(models.Model):
 
     caption = models.TextField(blank=True, max_length=1000)
     image_url = models.CharField(max_length=500, blank=True)
+    custom_image = models.ImageField(upload_to='community_posts/', blank=True, null=True)
 
     likes_count = models.PositiveIntegerField(default=0)
     comments_count = models.PositiveIntegerField(default=0)
@@ -301,6 +327,17 @@ class CommunityPost(models.Model):
             'heart': self.reactions.filter(reaction_type='heart').count(),
         }
 
+        img = self.image_url
+        if not img and self.custom_image:
+            try:
+                img = self.custom_image.url
+            except Exception:
+                img = ''
+
+        can_delete = False
+        if current_user and current_user.is_authenticated:
+            can_delete = (current_user.id == self.author_id or current_user.is_staff or current_user.is_superuser)
+
         return {
             'id': self.id,
             'author': {
@@ -319,11 +356,13 @@ class CommunityPost(models.Model):
             'correct_count': self.correct_count,
             'total_questions': self.total_questions,
             'caption': self.caption,
-            'image_url': self.image_url,
+            'image_url': img,
             'test_id': self.test_id,
             'attempt_id': self.attempt_id,
             'likes_count': self.likes_count,
             'comments_count': self.comments_count,
+            'is_pinned': self.is_pinned,
+            'can_delete': can_delete,
             'reaction_counts': reaction_counts,
             'user_reaction': user_reaction,
             'created_at': self.created_at.strftime('%d.%m.%Y %H:%M'),
@@ -350,9 +389,10 @@ class CommunityPostReaction(models.Model):
 
 
 class CommunityPostComment(models.Model):
-    """Post ostidagi tabrik va izohlar."""
+    """Post ostidagi tabrik va izohlar hamda javoblar."""
     post = models.ForeignKey(CommunityPost, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='community_comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     text = models.TextField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -370,6 +410,8 @@ class CommunityPostComment(models.Model):
             'username': self.user.username,
             'user_avatar': getattr(profile, 'avatar_url', '') if profile else '',
             'text': self.text,
+            'parent_id': self.parent_id,
+            'replies_count': self.replies.count(),
             'created_at': self.created_at.strftime('%d.%m.%Y %H:%M'),
         }
 

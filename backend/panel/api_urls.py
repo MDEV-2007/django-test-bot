@@ -103,5 +103,10 @@ urlpatterns = [
     path('reels/', api.panel_reels_list_create_api, name='panel_reels_list_create'),
     path('reels/<int:reel_id>/', api.panel_reels_detail_api, name='panel_reels_detail'),
     path('reels/hardest-questions/', api.panel_reels_hardest_questions_api, name='panel_reels_hardest_questions'),
+
+    # Hamjamiyat (Community Feed) Moderatsiyasi
+    path('community/', api.panel_community_posts_api, name='panel_community_posts'),
+    path('community/<int:post_id>/delete/', api.panel_community_post_delete_api, name='panel_community_post_delete'),
+    path('community/<int:post_id>/pin/', api.panel_community_post_pin_api, name='panel_community_post_pin'),
 ]
 

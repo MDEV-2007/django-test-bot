@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Heart, Send, Volume2, VolumeX, ChevronDown, ChevronUp,
   CheckCircle2, XCircle, Sparkles, Flame, Award, Zap, BookOpen,
-  Swords, Dna, Globe, MessageCircle, X
+  Swords, Dna, Globe, MessageCircle, X, Play, Pause, CornerDownRight, Video
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -33,6 +33,7 @@ type ReelComment = {
   user_avatar?: string;
   text: string;
   created_at: string;
+  parent_id?: number | null;
 };
 
 type ReelItem = {
@@ -45,6 +46,8 @@ type ReelItem = {
   fact: string;
   takeaway: string;
   gradient: string;
+  media_type?: 'text' | 'video';
+  video_url?: string;
   quiz: ReelQuiz;
   likes: number;
   shares: number;
@@ -117,6 +120,16 @@ export default function ReelsPage() {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [newCommentText, setNewCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{ id: number; userName: string } | null>(null);
+
+  const REELS_STUDY_MEMES = [
+    { label: 'Daho 🧠', text: '🧠 Daho rejim!' },
+    { label: 'Grand 🎯', text: '🎯 Grand sari olg\'a!' },
+    { label: 'Kofe ☕', text: '☕ Abituriyent kofesi yordam berdi!' },
+    { label: 'Kitob 📚', text: '📚 Kitoblar titilgan!' },
+    { label: 'Yiqitdi 💀', text: '💀 Bu savol qiyin edi!' },
+    { label: 'Oltin 🏆', text: '🏆 Haqiqiy chempionlik!' },
+  ];
 
   const containerRef = useRef<HTMLDivElement>(null);
   const reelRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -322,7 +335,10 @@ export default function ReelsPage() {
         `/api/learning/reels/${activeCommentReel.id}/comments/`,
         {
           method: 'POST',
-          body: JSON.stringify({ text: textToSend }),
+          body: JSON.stringify({
+            text: textToSend,
+            parent_id: replyingTo ? replyingTo.id : null,
+          }),
         }
       );
 
@@ -330,6 +346,7 @@ export default function ReelsPage() {
         setComments((prev) => [res.comment, ...prev]);
         setCommentCounts((prev) => ({ ...prev, [activeCommentReel.id]: res.comments_count }));
         setNewCommentText('');
+        setReplyingTo(null);
         if (soundEnabled) soundFX.click();
         toast.success(res.message || "Izohingiz qo'shildi!");
       }
@@ -474,6 +491,21 @@ export default function ReelsPage() {
                     background: reel.gradient || 'linear-gradient(160deg, #090d16 0%, #171d2b 100%)',
                   }}
                 >
+                  {/* Video Player Background if media_type === 'video' */}
+                  {reel.media_type === 'video' && reel.video_url && (
+                    <div className="absolute inset-0 z-0 bg-black overflow-hidden pointer-events-none">
+                      <video
+                        src={reel.video_url}
+                        className="w-full h-full object-cover opacity-90"
+                        autoPlay={currentIndex === index}
+                        loop
+                        playsInline
+                        muted={!soundEnabled}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/70" />
+                    </div>
+                  )}
+
                   {/* Subtle ambient light glow */}
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.07] rounded-full blur-3xl pointer-events-none" />
 
@@ -733,34 +765,79 @@ export default function ReelsPage() {
                     <p className="text-xs text-white/50">Birinchi bo&apos;lib fikr bildiring va muhokamani boshlang!</p>
                   </div>
                 ) : (
-                  comments.map((c) => (
-                    <div key={c.id} className="flex gap-3 items-start group">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-extrabold text-xs shrink-0 shadow-md overflow-hidden">
-                        {c.user_avatar ? (
-                          <img src={c.user_avatar} alt={c.user_name} className="w-full h-full object-cover" />
-                        ) : (
-                          c.user_name.charAt(0).toUpperCase()
-                        )}
-                      </div>
-                      <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl p-3 space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-white/90">{c.user_name}</span>
-                          <span className="text-[10px] text-white/40 font-mono">{c.created_at}</span>
+                  comments.map((c) => {
+                    const isReply = Boolean(c.parent_id);
+                    return (
+                      <div key={c.id} className={cn("flex gap-2.5 items-start group", isReply && "ml-5 pl-2 border-l-2 border-emerald-500/40")}>
+                        {isReply && <CornerDownRight className="w-3 h-3 text-emerald-400 mt-2 shrink-0" />}
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-extrabold text-[10px] shrink-0 shadow-md overflow-hidden mt-0.5">
+                          {c.user_avatar ? (
+                            <img src={c.user_avatar} alt={c.user_name} className="w-full h-full object-cover" />
+                          ) : (
+                            c.user_name.charAt(0).toUpperCase()
+                          )}
                         </div>
-                        <p className="text-xs text-white/80 leading-relaxed break-words">{c.text}</p>
+                        <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl p-2.5 space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-white/90">{c.user_name}</span>
+                            <span className="text-[10px] text-white/40 font-mono">{c.created_at}</span>
+                          </div>
+                          <p className="text-xs text-white/80 leading-relaxed break-words">{c.text}</p>
+                          <div className="pt-0.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingTo({ id: c.id, userName: c.user_name });
+                                setNewCommentText(`@${c.user_name} `);
+                              }}
+                              className="text-[10px] font-semibold text-emerald-400 hover:underline"
+                            >
+                              Javob berish
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 
+              {/* Quick Meme Stickers */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 border-t border-white/10">
+                <span className="text-[10px] text-white/50 font-bold shrink-0">Stiker:</span>
+                {REELS_STUDY_MEMES.map((m, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setNewCommentText((prev) => (prev ? prev + ' ' : '') + m.text)}
+                    className="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 shrink-0 transition-colors"
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Replying To Banner */}
+              {replyingTo && (
+                <div className="flex items-center justify-between text-xs px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-300">
+                  <span className="truncate">💬 <b>@{replyingTo.userName}</b> ga javob berilmoqda</span>
+                  <button
+                    type="button"
+                    onClick={() => setReplyingTo(null)}
+                    className="text-white/60 hover:text-white ml-2"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               {/* Input Footer */}
-              <form onSubmit={handleSendComment} className="pt-3 border-t border-white/15 flex items-center gap-2">
+              <form onSubmit={handleSendComment} className="pt-2 flex items-center gap-2">
                 <input
                   type="text"
                   value={newCommentText}
                   onChange={(e) => setNewCommentText(e.target.value)}
-                  placeholder="Fikringizni yozing..."
+                  placeholder="Fikr, javob yoki stiker yozing..."
                   maxLength={500}
                   className="flex-1 bg-white/10 border border-white/20 focus:border-emerald-400/80 rounded-full px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-white/40 focus:outline-none transition-all"
                 />

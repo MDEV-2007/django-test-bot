@@ -39,7 +39,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Kontent',
     items: [
-      { href: '/panel/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose' },
+      { href: '/panel/reels', label: 'Bilim Reels & Hamjamiyat', icon: Sparkles, tone: 'rose' },
       { href: '/panel/subjects', label: 'Fanlar', icon: BookMarked, tone: 'purple' },
       { href: '/panel/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald' },
       { href: '/panel/lessons', label: 'Darslar', icon: BookOpen, tone: 'sky' },

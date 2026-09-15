@@ -18,4 +18,6 @@ urlpatterns = [
     path('feed/create/', api.community_post_create_api, name='community_post_create'),
     path('feed/<int:post_id>/react/', api.community_post_react_api, name='community_post_react'),
     path('feed/<int:post_id>/comments/', api.community_post_comments_api, name='community_post_comments'),
+    path('feed/<int:post_id>/delete/', api.community_post_delete_api, name='community_post_delete'),
+    path('feed/<int:post_id>/pin/', api.community_post_pin_api, name='community_post_pin'),
 ]

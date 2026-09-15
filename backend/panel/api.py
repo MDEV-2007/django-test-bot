@@ -3554,6 +3554,15 @@ def panel_reels_list_create_api(request):
 
         reels_data = []
         for r in qs:
+            v_url = ''
+            if r.video_file:
+                try:
+                    v_url = r.video_file.url
+                except Exception:
+                    v_url = ''
+            if not v_url:
+                v_url = r.video_url
+
             reels_data.append({
                 'id': r.id,
                 'subject_name': r.subject_name,
@@ -3565,6 +3574,8 @@ def panel_reels_list_create_api(request):
                 'takeaway': r.takeaway,
                 'gradient_theme': r.gradient_theme,
                 'gradient': r.get_gradient_css(),
+                'media_type': r.media_type,
+                'video_url': v_url,
                 'quiz': {
                     'question': r.quiz_question,
                     'options': r.quiz_options,
@@ -3598,6 +3609,10 @@ def panel_reels_list_create_api(request):
         if isinstance(options, str):
             options = [opt.strip() for opt in options.split('\n') if opt.strip()]
 
+        media_type = data.get('media_type') or 'text'
+        video_url = (data.get('video_url') or '').strip()
+        video_file = request.FILES.get('video_file')
+
         reel = Reel.objects.create(
             subject_name=data.get('subject_name') or 'Tarix',
             subject_slug=data.get('subject_slug') or 'tarix',
@@ -3606,6 +3621,9 @@ def panel_reels_list_create_api(request):
             hook=data.get('hook') or 'Diqqat!',
             fact=data.get('fact') or '',
             takeaway=data.get('takeaway') or '',
+            media_type=media_type,
+            video_url=video_url,
+            video_file=video_file,
             quiz_question=data.get('quiz_question') or data.get('question') or '',
             quiz_options=options,
             quiz_correct_index=int(data.get('quiz_correct_index', 0)),
@@ -3649,6 +3667,9 @@ def panel_reels_detail_api(request, reel_id):
         if 'hook' in data: reel.hook = data['hook']
         if 'fact' in data: reel.fact = data['fact']
         if 'takeaway' in data: reel.takeaway = data['takeaway']
+        if 'media_type' in data: reel.media_type = data['media_type']
+        if 'video_url' in data: reel.video_url = data['video_url']
+        if 'video_file' in request.FILES: reel.video_file = request.FILES['video_file']
         if 'quiz_question' in data: reel.quiz_question = data['quiz_question']
         if 'quiz_options' in data: reel.quiz_options = data['quiz_options']
         if 'quiz_correct_index' in data: reel.quiz_correct_index = int(data['quiz_correct_index'])
@@ -3660,25 +3681,108 @@ def panel_reels_detail_api(request, reel_id):
         status_str = "Chop etildi (Published)" if reel.is_published else "Qoralamaga o'tkazildi (Draft)"
         AuditLog.objects.create(
             user=request.user,
-            action=f"Reel tahrirlandi ({status_str}): {reel.hook[:40]}",
+            action=f"Reel tahrirlandi: '{reel.hook[:30]}' ({status_str})",
             model_name='Reel',
             object_id=str(reel.id),
         )
 
-        return Response({'success': True, 'message': f"Reel yangilandi! ({status_str})"})
+        return Response({'success': True, 'reel': reel.to_dict(), 'message': "O'zgarishlar saqlandi!"})
 
     elif request.method == 'DELETE':
-        title = reel.hook[:40]
+        hook = reel.hook[:40]
         reel.delete()
 
         AuditLog.objects.create(
             user=request.user,
-            action=f"Reel o'chirildi: {title}",
+            action=f"Reel o'chirildi: {hook}",
             model_name='Reel',
             object_id=str(reel_id),
         )
 
         return Response({'success': True, 'message': "Reel o'chirildi!"})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsSuperAdmin])
+def panel_community_posts_api(request):
+    """Super Admin uchun Hamjamiyat postlari ro'yxati va moderatsiyasi."""
+    from learning.models import CommunityPost
+    from django.db.models import Q
+
+    qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt').order_by('-is_pinned', '-created_at')
+
+    # Filter by post_type
+    ptype = request.GET.get('type')
+    if ptype and ptype != 'all':
+        qs = qs.filter(post_type=ptype)
+
+    # Search
+    search = request.GET.get('q', '').strip()
+    if search:
+        qs = qs.filter(
+            Q(title__icontains=search) |
+            Q(caption__icontains=search) |
+            Q(author__username__icontains=search) |
+            Q(author__first_name__icontains=search)
+        )
+
+    total = qs.count()
+    posts = qs[:100]
+
+    posts_data = [p.to_dict(current_user=request.user) for p in posts]
+
+    return Response({
+        'posts': posts_data,
+        'total': total,
+    })
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated, IsSuperAdmin])
+def panel_community_post_delete_api(request, post_id):
+    """Super Admin tomonidan postni o'chirish."""
+    from learning.models import CommunityPost
+    from panel.models import AuditLog
+
+    post = get_object_or_404(CommunityPost, id=post_id)
+    title = post.title
+    author = post.author.username
+
+    post.delete()
+
+    AuditLog.objects.create(
+        user=request.user,
+        action=f"Hamjamiyat posti o'chirildi: '{title}' ({author})",
+        model_name='CommunityPost',
+        object_id=str(post_id),
+    )
+
+    return Response({'success': True, 'message': "Post muvaffaqiyatli o'chirildi."})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsSuperAdmin])
+def panel_community_post_pin_api(request, post_id):
+    """Super Admin tomonidan postni yuqoriga qadash (pin) yoki qadashdan chiqarish."""
+    from learning.models import CommunityPost
+    from panel.models import AuditLog
+
+    post = get_object_or_404(CommunityPost, id=post_id)
+    post.is_pinned = not post.is_pinned
+    post.save(update_fields=['is_pinned'])
+
+    AuditLog.objects.create(
+        user=request.user,
+        action=f"Post {'qadaldi' if post.is_pinned else 'qadashdan chiqarildi'}: '{post.title}'",
+        model_name='CommunityPost',
+        object_id=str(post_id),
+    )
+
+    return Response({
+        'success': True,
+        'is_pinned': post.is_pinned,
+        'message': "Post muvaffaqiyatli qadaldi!" if post.is_pinned else "Post qadashdan chiqarildi.",
+    })
 
 
 @api_view(['GET'])

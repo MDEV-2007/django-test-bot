@@ -783,9 +783,15 @@ def reels_comments_api(request, reel_id):
             if len(text) > 1000:
                 return Response({'error': 'Izoh 1000 belgidan oshmasligi kerak'}, status=400)
 
+            parent_id = request.data.get('parent_id')
+            parent = None
+            if parent_id:
+                parent = ReelComment.objects.filter(id=parent_id, reel=reel).first()
+
             comment = ReelComment.objects.create(
                 reel=reel,
                 user=request.user,
+                parent=parent,
                 text=text,
             )
 
@@ -854,10 +860,36 @@ def community_post_create_api(request):
     attempt_id = request.data.get('attempt_id')
     caption = (request.data.get('caption') or '').strip()
     post_type = request.data.get('post_type', 'test_result')
+    custom_img = request.FILES.get('image') or request.FILES.get('custom_image')
 
+    # 1. Agar erkin yutuq yoki konspekt posti bo'lsa (attempt_id yo'q):
     if not attempt_id:
-        return Response({'error': "attempt_id kiritilishi shart."}, status=400)
+        title = (request.data.get('title') or "Mening Yutug'im").strip()
+        subject_name = request.data.get('subject_name') or "Asosiy"
+        subject_slug = request.data.get('subject_slug') or "tarix"
 
+        post = CommunityPost.objects.create(
+            author=request.user,
+            post_type='achievement',
+            title=title,
+            subject_name=subject_name,
+            subject_slug=subject_slug,
+            caption=caption,
+            custom_image=custom_img,
+        )
+
+        profile = request.user.profile
+        profile.xp += 15
+        profile.save(update_fields=['xp'])
+
+        return Response({
+            'success': True,
+            'message': "Yutug'ingiz muvaffaqiyatli hamjamiyat lentasiga joylandi! +15 XP berildi 🔥",
+            'post': post.to_dict(current_user=request.user),
+            'xp_earned': 15,
+        })
+
+    # 2. Agar test natijasi bo'lsa:
     try:
         attempt = Attempt.objects.select_related('test', 'test__subject', 'profile').get(
             id=attempt_id,
@@ -919,6 +951,7 @@ def community_post_create_api(request):
         total_questions=total_q or 1,
         caption=caption,
         image_url=image_url,
+        custom_image=custom_img,
     )
 
     # O'quvchiga +15 XP bonus beramiz
@@ -931,6 +964,43 @@ def community_post_create_api(request):
         'message': "Natijangiz muvaffaqiyatli hamjamiyat lentasiga joylandi! +15 XP berildi 🔥",
         'post': post.to_dict(current_user=request.user),
         'xp_earned': 15,
+    })
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def community_post_delete_api(request, post_id):
+    """Post muallifi yoki super admin tomonidan postni o'chirish."""
+    try:
+        post = CommunityPost.objects.get(id=post_id)
+    except CommunityPost.DoesNotExist:
+        return Response({'error': "Post topilmadi."}, status=404)
+
+    if not (post.author == request.user or request.user.is_staff or request.user.is_superuser):
+        return Response({'error': "Faqat post muallifi yoki admin o'chira oladi."}, status=403)
+
+    post.delete()
+    return Response({'success': True, 'message': "Post muvaffaqiyatli o'chirildi."})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_post_pin_api(request, post_id):
+    """Admin tomonidan postni eng yuqoriga qadash (pin) yoki qadashdan chiqarish."""
+    if not (request.user.is_staff or request.user.is_superuser):
+        return Response({'error': "Faqat adminlar postni qaday oladi."}, status=403)
+
+    try:
+        post = CommunityPost.objects.get(id=post_id)
+    except CommunityPost.DoesNotExist:
+        return Response({'error': "Post topilmadi."}, status=404)
+
+    post.is_pinned = not post.is_pinned
+    post.save(update_fields=['is_pinned'])
+    return Response({
+        'success': True,
+        'is_pinned': post.is_pinned,
+        'message': "Post yuqoriga qadaldi!" if post.is_pinned else "Post qadashdan chiqarildi.",
     })
 
 
@@ -982,7 +1052,7 @@ def community_post_react_api(request, post_id):
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def community_post_comments_api(request, post_id):
-    """Post izohlarini olish yoki yangi izoh qoldirish."""
+    """Post izohlarini olish yoki yangi izoh (hamda javob) qoldirish."""
     try:
         post = CommunityPost.objects.get(id=post_id)
     except CommunityPost.DoesNotExist:
@@ -1003,9 +1073,15 @@ def community_post_comments_api(request, post_id):
         if not text:
             return Response({'error': "Izoh matni bo'sh bo'lishi mumkin emas."}, status=400)
 
+        parent_id = request.data.get('parent_id')
+        parent = None
+        if parent_id:
+            parent = CommunityPostComment.objects.filter(id=parent_id, post=post).first()
+
         comment = CommunityPostComment.objects.create(
             post=post,
             user=request.user,
+            parent=parent,
             text=text,
         )
         post.comments_count = post.comments.count()
