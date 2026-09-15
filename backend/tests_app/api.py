@@ -175,6 +175,19 @@ def center_api(request):
             pinned_mock = mock_qs.filter(category=category).first()
         else:
             pinned_mock = mock_qs.first()
+
+    # Agar yaqin 3 soatda rejalashtirilgan mock topilmasa, mavjud eng so'nggi jonli mockni fallback sifatida ko'rsatamiz
+    if not pinned_mock:
+        fallback_qs = TestSet.objects.filter(
+            is_published=True,
+            is_archived=False,
+            is_live_mock=True,
+        ).select_related('subject').order_by('-scheduled_at', '-id')
+        if subject:
+            pinned_mock = fallback_qs.filter(subject=subject).first()
+        if not pinned_mock:
+            pinned_mock = fallback_qs.first()
+
     pinned_payload = None
     if pinned_mock:
         pinned_payload = {
