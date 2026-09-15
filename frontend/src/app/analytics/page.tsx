@@ -100,7 +100,7 @@ export default function AnalyticsPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+      <main className="page-shell flex-1 space-y-6 sm:space-y-8 bg-[var(--bg-page)] p-3 sm:p-6 pb-24 sm:pb-12 max-w-full overflow-x-hidden">
         <PageHero
           eyebrow="AI analitika"
           eyebrowIcon={TrendingUp}

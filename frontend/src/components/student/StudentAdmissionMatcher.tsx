@@ -140,10 +140,10 @@ export default function StudentAdmissionMatcher() {
   });
 
   return (
-    <Card className="relative overflow-hidden border-[var(--border-card)] bg-[var(--surface-card-medium)] shadow-sm">
+    <Card className="relative overflow-hidden border-[var(--border-card)] bg-[var(--surface-card-medium)] shadow-sm w-full max-w-full">
       <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-emerald-500/10 blur-3xl" />
 
-      <CardHeader className="relative pb-4">
+      <CardHeader className="relative p-4 sm:p-6 pb-3 sm:pb-4">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
           <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <Sparkles className="size-3" /> OTM Qabul Bashorati (2025/2026)
@@ -154,13 +154,13 @@ export default function StudentAdmissionMatcher() {
               onClick={handleApplyRealScore}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline"
             >
-              <Target className="size-3.5" />
-              Sizning real DTM ballingiz: <strong className="font-mono">{realPredictedScore.toFixed(1)}</strong> (Qo&apos;yish)
+              <Target className="size-3.5 shrink-0" />
+              <span>Sizning real DTM ballingiz: <strong className="font-mono">{realPredictedScore.toFixed(1)}</strong> (Qo&apos;yish)</span>
             </button>
           )}
         </div>
 
-        <CardTitle className="font-voice text-xl sm:text-2xl font-bold tracking-tight">
+        <CardTitle className="font-voice text-lg sm:text-2xl font-bold tracking-tight">
           Ballingiz qaysi universitetga yetadi?
         </CardTitle>
         <CardDescription className="text-xs sm:text-sm leading-relaxed">
@@ -168,10 +168,10 @@ export default function StudentAdmissionMatcher() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="relative space-y-6">
+      <CardContent className="relative p-4 sm:p-6 pt-0 sm:pt-0 space-y-5 overflow-hidden">
         {/* Controls Row */}
-        <div className="grid gap-3.5 sm:grid-cols-12 items-end">
-          <div className="sm:col-span-4">
+        <div className="grid gap-3 sm:grid-cols-12 items-end">
+          <div className="sm:col-span-4 min-w-0">
             <label className="block text-xs font-bold text-foreground mb-1">
               DTM / Mock ballingiz (0 — 189)
             </label>
@@ -182,33 +182,33 @@ export default function StudentAdmissionMatcher() {
                 value={scoreInput}
                 onChange={(e) => handleScoreChange(e.target.value)}
                 placeholder="164.5"
-                className="font-mono text-base sm:text-lg font-black bg-[var(--surface-input)] border-[var(--border-card)] focus-visible:ring-emerald-500"
+                className="font-mono text-base sm:text-lg font-black bg-[var(--surface-input)] border-[var(--border-card)] focus-visible:ring-emerald-500 pr-12"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground pointer-events-none">
                 ball
               </span>
             </div>
           </div>
 
-          <div className="sm:col-span-5">
+          <div className="sm:col-span-5 min-w-0">
             <label className="block text-xs font-bold text-foreground mb-1">
               Fanlar bloki
             </label>
             <select
               value={selectedBlock}
               onChange={(e) => handleBlockChange(e.target.value)}
-              className="w-full h-10 rounded-md border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full max-w-full truncate min-w-0 h-10 rounded-md border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="tarix,ona-tili">Tarix + Ona tili (Gumanitar & Yuridik)</option>
-              <option value="matematika,fizika">Matematika + Fizika (Axborot texnologiyalari & Muhandislik)</option>
+              <option value="matematika,fizika">Matematika + Fizika (AT & Muhandislik)</option>
               <option value="biologiya,kimyo">Biologiya + Kimyo (Tibbiyot & Farmatsevtika)</option>
               <option value="matematika,english">Matematika + Ingliz tili (Iqtisodiyot & Moliya)</option>
-              <option value="ona-tili,english">Ona tili + Ingliz tili (Xalqaro munosabatlar & Filologiya)</option>
+              <option value="ona-tili,english">Ona tili + Ingliz tili (Xalqaro munosabatlar)</option>
               <option value="all">Barcha yo&apos;nalishlar</option>
             </select>
           </div>
 
-          <div className="sm:col-span-3">
+          <div className="sm:col-span-3 min-w-0">
             <Button asChild className="w-full h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm">
               <Link href="/mock">
                 Mock test ishlash <ArrowRight className="size-3.5" />
@@ -218,11 +218,11 @@ export default function StudentAdmissionMatcher() {
         </div>
 
         {/* Filter bar & Search */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-card)] pt-4 text-xs">
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--border-card)] pt-3.5 text-xs">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
             <button
               onClick={() => setFilterType('all')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 filterType === 'all'
                   ? 'bg-primary text-primary-foreground font-bold shadow-xs'
                   : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
@@ -232,7 +232,7 @@ export default function StudentAdmissionMatcher() {
             </button>
             <button
               onClick={() => setFilterType('grant')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 filterType === 'grant'
                   ? 'bg-emerald-600 text-white font-bold shadow-xs'
                   : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
@@ -242,7 +242,7 @@ export default function StudentAdmissionMatcher() {
             </button>
             <button
               onClick={() => setFilterType('kontrakt')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 filterType === 'kontrakt'
                   ? 'bg-sky-600 text-white font-bold shadow-xs'
                   : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
@@ -252,7 +252,7 @@ export default function StudentAdmissionMatcher() {
             </button>
             <button
               onClick={() => setFilterType('close')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 filterType === 'close'
                   ? 'bg-amber-600 text-white font-bold shadow-xs'
                   : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
@@ -262,8 +262,8 @@ export default function StudentAdmissionMatcher() {
             </button>
           </div>
 
-          <div className="relative w-full sm:w-56">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <div className="relative w-full sm:w-56 shrink-0">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
@@ -275,7 +275,7 @@ export default function StudentAdmissionMatcher() {
         </div>
 
         {/* Matching Cards Grid */}
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full">
           {filteredItems.length === 0 ? (
             <div className="col-span-full py-8 text-center text-xs text-muted-foreground">
               Mos keluvchi OTM yo&apos;nalishlari topilmadi. Qidiruv so&apos;zini yoki filtrni o&apos;zgartirib ko&apos;ring.
@@ -289,14 +289,14 @@ export default function StudentAdmissionMatcher() {
               return (
                 <div
                   key={item.id}
-                  className="flex flex-col justify-between rounded-xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-4 hover:border-emerald-500/40 hover:shadow-md transition-all"
+                  className="flex flex-col justify-between rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-3.5 sm:p-4 hover:border-emerald-500/40 hover:shadow-md transition-all w-full min-w-0 overflow-hidden"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                  <div className="min-w-0">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground truncate flex-1 min-w-0">
                         {item.faculty}
                       </span>
-                      <span className={`rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
+                      <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
                         isGrant 
                           ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' 
                           : isKontrakt
@@ -307,27 +307,27 @@ export default function StudentAdmissionMatcher() {
                       </span>
                     </div>
 
-                    <h4 className="mt-2 text-sm font-bold text-foreground leading-snug line-clamp-2">
+                    <h4 className="mt-1.5 text-sm font-bold text-foreground leading-snug line-clamp-2">
                       {item.major}
                     </h4>
-                    <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
+                    <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1 min-w-0">
                       <Building2 className="size-3 shrink-0" />
-                      <span className="truncate">{item.uni} ({item.city})</span>
+                      <span className="truncate flex-1 min-w-0">{item.uni} ({item.city})</span>
                     </p>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-[var(--border-card)]/60 flex items-center justify-between text-xs font-mono">
-                    <div>
+                  <div className="mt-3.5 pt-2.5 border-t border-[var(--border-card)]/60 grid grid-cols-3 gap-1 text-xs font-mono">
+                    <div className="min-w-0">
                       <span className="text-muted-foreground block text-[10px]">Grant</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{item.grantBall}</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 block truncate">{item.grantBall}</span>
                     </div>
-                    <div>
+                    <div className="min-w-0 text-center sm:text-left">
                       <span className="text-muted-foreground block text-[10px]">Kontrakt</span>
-                      <span className="font-bold text-sky-600 dark:text-sky-400">{item.kontraktBall}</span>
+                      <span className="font-bold text-sky-600 dark:text-sky-400 block truncate">{item.kontraktBall}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right min-w-0">
                       <span className="text-muted-foreground block text-[10px]">Farq</span>
-                      <span className={`font-bold ${diffGrant >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--danger-text)]'}`}>
+                      <span className={`font-bold block truncate ${diffGrant >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--danger-text)]'}`}>
                         {diffGrant >= 0 ? `+${diffGrant.toFixed(1)}` : diffGrant.toFixed(1)}
                       </span>
                     </div>
@@ -339,7 +339,7 @@ export default function StudentAdmissionMatcher() {
         </div>
 
         {/* Footer Note */}
-        <div className="pt-2 text-center text-[11px] text-muted-foreground">
+        <div className="pt-1 text-center text-[11px] text-muted-foreground">
           O&apos;tgan yilgi rasmiy qabul natijalari asosida hisoblangan. Yangi imtihonda yuqoriroq natija olish uchun zaif mavzular ustida ishlang.
         </div>
       </CardContent>
