@@ -6,7 +6,7 @@ JWT instead of session cookies). The frontend keeps its own chat history and onl
 the model's reply, so no session and no new DB model are needed."""
 import json
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
@@ -616,27 +616,74 @@ def seed_default_reels():
 @permission_classes([AllowAny])
 def reels_feed_api(request):
     """TikTok/Instagram formatidagi mini-darslar va savollar lentasini bazadan qaytaradi."""
-    subject_slug = request.GET.get('subject', 'all')
+    subject_slug = request.GET.get('subject', 'for_you')
+
+    user_weak_slugs = []
+    subject_error_counts = {}
+    if request.user and request.user.is_authenticated:
+        try:
+            from tests_app.models import AttemptAnswer
+            mistakes = (
+                AttemptAnswer.objects.filter(
+                    attempt__profile__user=request.user,
+                    is_correct=False
+                )
+                .values('question__subject__slug')
+                .annotate(cnt=Count('id'))
+                .order_by('-cnt')
+            )
+            for m in mistakes:
+                s_slug = m.get('question__subject__slug')
+                if s_slug:
+                    user_weak_slugs.append(s_slug)
+                    subject_error_counts[s_slug] = m['cnt']
+        except Exception:
+            pass
 
     try:
         if not Reel.objects.filter(is_published=True).exists():
             seed_default_reels()
 
         qs = Reel.objects.filter(is_published=True)
-        if subject_slug and subject_slug != 'all':
+        if subject_slug and subject_slug not in ('all', 'for_you'):
             qs = qs.filter(subject_slug=subject_slug)
 
         reels_list = [r.to_dict() for r in qs]
         if not reels_list:
-            reels_list = [r for r in REELS_DATA if subject_slug == 'all' or r['subject_slug'] == subject_slug]
+            if subject_slug not in ('all', 'for_you'):
+                reels_list = [r for r in REELS_DATA if r['subject_slug'] == subject_slug]
+            else:
+                reels_list = list(REELS_DATA)
     except Exception:
         # Fallback to in-memory list if DB tables aren't migrated yet
-        if subject_slug and subject_slug != 'all':
+        if subject_slug and subject_slug not in ('all', 'for_you'):
             reels_list = [r for r in REELS_DATA if r['subject_slug'] == subject_slug]
         else:
-            reels_list = REELS_DATA
+            reels_list = list(REELS_DATA)
+
+    # Shaxsiylashtirish va tavsiya sababi
+    for r in reels_list:
+        r_slug = r.get('subject_slug')
+        if r_slug in user_weak_slugs:
+            err_cnt = subject_error_counts.get(r_slug, 0)
+            r['is_personalized'] = True
+            r['recommendation_reason'] = f"{r.get('subject_name', '')} bo'yicha xatolaringiz ({err_cnt} ta) asosida"
+            r['relevance_score'] = 100 + err_cnt
+        else:
+            r['is_personalized'] = False
+            r['recommendation_reason'] = "Siz uchun tavsiya"
+            r['relevance_score'] = r.get('likes', 0)
+
+    if subject_slug == 'for_you':
+        # Zaif fanlardagi mavzularni birinchi o'ringa olib chiqish
+        reels_list.sort(key=lambda x: (1 if x.get('is_personalized') else 0, x.get('relevance_score', 0)), reverse=True)
+        if not user_weak_slugs and len(reels_list) > 0:
+            for i, r in enumerate(reels_list[:2]):
+                r['is_personalized'] = True
+                r['recommendation_reason'] = "Eng yuqori reytingli tavsiya"
 
     subjects = [
+        {'slug': 'for_you', 'name': '✨ Siz uchun'},
         {'slug': 'all', 'name': 'Barchasi'},
         {'slug': 'tarix', 'name': 'Tarix'},
         {'slug': 'ona-tili', 'name': 'Ona tili'},

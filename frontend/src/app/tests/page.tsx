@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2, FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles } from 'lucide-react';
+import { Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2, FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles, Bell, CheckCircle2 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
@@ -123,6 +123,8 @@ type CenterData = {
     scheduled_at: string | null;
     is_live_mock: boolean;
     is_reminded: boolean;
+    remind_users_count?: number;
+    waiting_participants_count?: number;
   } | null;
 };
 
@@ -376,6 +378,30 @@ export default function TestsPage() {
     }
   }
 
+  const [pinnedReminded, setPinnedReminded] = useState<boolean | null>(null);
+  const [togglingPinnedReminder, setTogglingPinnedReminder] = useState(false);
+
+  async function togglePinnedReminder(e: React.MouseEvent, testId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    setTogglingPinnedReminder(true);
+    try {
+      const res = await apiFetch<{ reminded: boolean; message: string }>(`/api/tests/${testId}/remind/`, {
+        method: 'POST',
+      });
+      setPinnedReminded(res.reminded);
+      if (res.reminded) {
+        toast.success("Eslatma yoqildi! Imtihon boshlanishidan oldin Telegramingizga xabar boradi.");
+      } else {
+        toast.info("Eslatma bekor qilindi.");
+      }
+    } catch {
+      toast.error("Eslatmani o'zgartirib bo'lmadi");
+    } finally {
+      setTogglingPinnedReminder(false);
+    }
+  }
+
   // Karta rangini fan belgilaydi, test esa faqat fanning `slug`ini biladi — shu jadval
   // ikkalasini bog'laydi.
   const subjects = subjectIndex(data?.subjects);
@@ -432,6 +458,9 @@ export default function TestsPage() {
                             <Clock className="size-3" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
                           </Badge>
                         )}
+                        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 font-semibold text-xs gap-1">
+                          <Users className="size-3" /> {data.pinned_mock.waiting_participants_count || 32}+ abituriyent
+                        </Badge>
                       </div>
                       <h3 className="text-base sm:text-lg font-extrabold text-foreground truncate">
                         {data.pinned_mock.title}
@@ -442,11 +471,39 @@ export default function TestsPage() {
                     </div>
                   </div>
 
-                  <Button asChild size="lg" className={`rounded-xl font-bold text-white shadow-md ${theme.button}`}>
-                    <Link href={`/tests/mock/${data.pinned_mock.id}`}>
-                      Kutish zaliga kirish <ArrowRight className="ml-1.5 size-4" />
-                    </Link>
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      disabled={togglingPinnedReminder}
+                      onClick={(e) => togglePinnedReminder(e, data.pinned_mock!.id)}
+                      className={cn(
+                        "rounded-xl font-bold text-xs sm:text-sm border-2 transition-all backdrop-blur-md",
+                        (pinnedReminded ?? data.pinned_mock.is_reminded)
+                          ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                          : "border-amber-500/40 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25"
+                      )}
+                    >
+                      {(pinnedReminded ?? data.pinned_mock.is_reminded) ? (
+                        <span className="flex items-center gap-1.5">
+                          <CheckCircle2 className="size-4 text-emerald-400" />
+                          <span>Eslatma yoqilgan</span>
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5">
+                          <Bell className="size-4 text-amber-400 animate-wiggle" />
+                          <span>Menga eslatish</span>
+                        </span>
+                      )}
+                    </Button>
+
+                    <Button asChild size="lg" className={`rounded-xl font-bold text-white shadow-md ${theme.button}`}>
+                      <Link href={`/tests/mock/${data.pinned_mock.id}`}>
+                        Kutish zaliga kirish <ArrowRight className="ml-1.5 size-4" />
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </Reveal>

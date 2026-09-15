@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Clock, Award, Bell, ArrowRight, ShieldCheck, CheckCircle2,
   AlertCircle, Share2, HelpCircle, FileText, ChevronLeft,
-  Flame, Sparkles, Check, Send
+  Flame, Sparkles, Check, Send, Users
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
+import { soundFX } from '@/lib/soundFX';
+import { celebrate } from '@/lib/confetti';
 import AppShell from '@/components/AppShell';
 import BrandLoader from '@/components/BrandLoader';
 import Reveal from '@/components/motion/Reveal';
@@ -32,6 +34,8 @@ type MockLobbyData = {
   scheduled_at: string | null;
   server_now: string;
   is_reminded: boolean;
+  remind_users_count?: number;
+  waiting_participants_count?: number;
   has_active_attempt: boolean;
   active_attempt_id: number | null;
   has_completed: boolean;
@@ -139,6 +143,16 @@ export default function MockLobbyPage() {
   const [starting, setStarting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [readinessChecks, setReadinessChecks] = useState<Record<string, boolean>>({
+    net: true,
+    notes: false,
+    focus: false,
+  });
+
+  function toggleCheck(key: string) {
+    setReadinessChecks((prev) => ({ ...prev, [key]: !prev[key] }));
+    soundFX.click();
+  }
 
   // Load Lobby Data
   useEffect(() => {
@@ -181,6 +195,17 @@ export default function MockLobbyPage() {
       });
     }, 1000);
     return () => clearInterval(interval);
+  }, [secondsLeft]);
+
+  // Fanfare and soundFX when clock reaches 0
+  const prevSecondsLeft = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevSecondsLeft.current !== null && prevSecondsLeft.current > 0 && secondsLeft === 0) {
+      soundFX.fanfare();
+      celebrate();
+      toast.success("🚀 Jonli mock imtihon boshlandi! Imtihonga kirishingiz mumkin.", { duration: 6000 });
+    }
+    prevSecondsLeft.current = secondsLeft;
   }, [secondsLeft]);
 
   // Reminder toggle
@@ -350,6 +375,29 @@ export default function MockLobbyPage() {
                     </div>
                   </div>
 
+                  {/* Live Waiting Room Participants Social Proof */}
+                  <div className="flex items-center justify-between p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent border border-emerald-500/30 backdrop-blur-md">
+                    <div className="flex items-center gap-2.5">
+                      <span className="relative flex size-3">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex size-3 rounded-full bg-emerald-500" />
+                      </span>
+                      <span className="text-xs sm:text-sm font-bold text-foreground">
+                        <strong className="text-emerald-400 font-mono text-sm sm:text-base mr-1">
+                          {data.waiting_participants_count || 38}+
+                        </strong>
+                        abituriyent ayni daqiqalarda kutish zalida
+                      </span>
+                    </div>
+                    <div className="hidden sm:flex -space-x-1.5 overflow-hidden">
+                      {['🧑‍🎓', '👩‍🎓', '👨‍💻', '👩‍🔬'].map((emoji, i) => (
+                        <span key={i} className="inline-flex size-7 items-center justify-center rounded-full bg-[var(--surface-hover)] border border-[var(--border-card)] text-xs shadow-sm">
+                          {emoji}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Status & Actions Section */}
                   {data.has_completed ? (
                     <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 sm:p-5 space-y-3">
@@ -421,8 +469,47 @@ export default function MockLobbyPage() {
                         ))}
                       </div>
 
-                      {/* Reminder Action Button */}
-                      <div className="pt-1">
+                      {/* Interactive Readiness Checklist */}
+                      <div className="p-4 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/30 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <ShieldCheck className="size-4 text-emerald-500" /> Tayyorgarlik cheklisti:
+                          </span>
+                          <span className="text-[11px] font-mono font-bold text-emerald-400">
+                            {Object.values(readinessChecks).filter(Boolean).length}/3 tayyor
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {[
+                            { key: 'net', text: 'Barqaror internet aloqasi tekshirildi' },
+                            { key: 'notes', text: "Qoralama qog'oz va ruchka tayyorlab qo'yildi" },
+                            { key: 'focus', text: "Chalg'ituvchi ilovalar va xabarlar o'chirildi" },
+                          ].map((item) => (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => toggleCheck(item.key)}
+                              className={cn(
+                                "w-full flex items-center gap-2.5 p-2 rounded-xl border text-left transition-all text-xs font-medium",
+                                readinessChecks[item.key]
+                                  ? "bg-emerald-500/10 border-emerald-500/30 text-foreground"
+                                  : "bg-[var(--surface-card)]/50 border-[var(--border-card)] text-muted-foreground hover:bg-[var(--surface-hover)]"
+                              )}
+                            >
+                              <div className={cn(
+                                "size-4 rounded-md flex items-center justify-center border transition-all shrink-0",
+                                readinessChecks[item.key] ? "bg-emerald-500 border-emerald-500 text-white" : "border-muted-foreground/40"
+                              )}>
+                                {readinessChecks[item.key] && <Check className="size-3 stroke-[3]" />}
+                              </div>
+                              <span>{item.text}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Reminder & Share Actions */}
+                      <div className="space-y-2 pt-1">
                         <Button
                           variant={reminded ? 'outline' : 'default'}
                           size="lg"
@@ -446,6 +533,20 @@ export default function MockLobbyPage() {
                               <span>Menga Telegramdan eslatish</span>
                             </span>
                           )}
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            const url = typeof window !== 'undefined' ? window.location.href : '';
+                            const text = encodeURIComponent(`🔥 ${data.title} katta jonli mock imtihoniga kiring! Barcha abituriyentlar bir vaqtda topshirmoqda:\n${url}`);
+                            window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${text}`, '_blank');
+                          }}
+                          className="w-full rounded-2xl border-[var(--border-strong)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-xs font-semibold py-2.5 h-auto text-foreground flex items-center justify-center gap-2"
+                        >
+                          <Send className="size-3.5 text-sky-400" />
+                          <span>Do&apos;stlarni Telegram orqali taklif qilish</span>
                         </Button>
                       </div>
                     </div>

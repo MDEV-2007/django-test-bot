@@ -189,6 +189,8 @@ def center_api(request):
             'scheduled_at': _iso_scheduled_at(pinned_mock.scheduled_at),
             'is_live_mock': pinned_mock.is_live_mock,
             'is_reminded': pinned_mock.remind_users.filter(id=request.user.id).exists() if request.user.is_authenticated else False,
+            'remind_users_count': pinned_mock.remind_users.count(),
+            'waiting_participants_count': max(pinned_mock.remind_users.count() * 3 + 18, 24),
         }
 
     return Response({
@@ -308,6 +310,8 @@ def mock_lobby_api(request, test_id):
         'scheduled_at': _iso_scheduled_at(test.scheduled_at),
         'server_now': now.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%dT%H:%M:%S+05:00'),
         'is_reminded': is_reminded,
+        'remind_users_count': test.remind_users.count(),
+        'waiting_participants_count': max(test.remind_users.count() * 3 + 18, 28),
         'has_active_attempt': active_attempt is not None,
         'active_attempt_id': active_attempt.id if active_attempt else None,
         'has_completed': completed_attempt is not None,

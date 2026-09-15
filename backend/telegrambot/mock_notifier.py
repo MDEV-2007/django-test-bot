@@ -134,3 +134,67 @@ def send_mock_announcement(test_or_id, send_all=None, dry_run=False):
         'fail_count': fail_count,
         'notified_at': test.notified_at.isoformat(),
     }
+
+
+def send_mock_reminder_15m(test_or_id):
+    """Jonli mock test boshlanishiga 15 daqiqa qolganida eslatma so'raganlarga Telegram xabari yuboradi."""
+    if isinstance(test_or_id, TestSet):
+        test = test_or_id
+    else:
+        try:
+            test = TestSet.objects.get(pk=test_or_id)
+        except TestSet.DoesNotExist:
+            return {'ok': False, 'error': f"TestSet #{test_or_id} topilmadi."}
+
+    subject_name = test.subject.name if test.subject else "Tarix"
+    duration = test.duration_minutes or 90
+    site_url = getattr(settings, 'NEXT_PUBLIC_SITE_URL', 'https://ilmildizi.uz').rstrip('/')
+    test_link = f"{site_url}/tests/mock/{test.id}"
+
+    remind_user_ids = test.remind_users.values_list('id', flat=True)
+    recipients = list(
+        Profile.objects.filter(user_id__in=remind_user_ids, telegram_id__isnull=False)
+        .exclude(telegram_id='')
+        .exclude(telegram_id='0')
+        .values_list('telegram_id', flat=True)
+        .distinct()
+    )
+
+    if not recipients:
+        return {'ok': True, 'total': 0, 'sent_count': 0}
+
+    message_text = (
+        f"⏳ <b>Eslatma! {subject_name} fanidan Jonli Mock Imtihoni 15 daqiqadan so'ng boshlanadi!</b>\n\n"
+        f"📝 <b>Imtihon davomiyligi:</b> {duration} daqiqa\n"
+        f"💡 Qoralama qog'oz, ruchka tayyorlang va internetingizni tekshiring.\n\n"
+        f"👇 <b>Kutish zaliga hoziroq ulaning:</b>"
+    )
+
+    reply_markup = {
+        'inline_keyboard': [
+            [{'text': "🚪 Kutish zaliga kirish", 'web_app': {'url': test_link}}],
+            [{'text': "🌐 Brauzerda ochish", 'url': test_link}]
+        ]
+    }
+
+    sent_count = 0
+    fail_count = 0
+    for tg_id in recipients:
+        try:
+            res = api_call(
+                'sendMessage',
+                chat_id=tg_id,
+                text=message_text,
+                parse_mode='HTML',
+                reply_markup=json.dumps(reply_markup),
+            )
+            if res and res.get('ok'):
+                sent_count += 1
+            else:
+                fail_count += 1
+        except Exception as e:
+            logger.error(f"Telegram reminder error ({tg_id}): {e}")
+            fail_count += 1
+        time.sleep(0.04)
+
+    return {'ok': True, 'total': len(recipients), 'sent_count': sent_count, 'fail_count': fail_count}

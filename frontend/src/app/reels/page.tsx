@@ -49,6 +49,8 @@ type ReelItem = {
   likes: number;
   shares: number;
   comments_count?: number;
+  is_personalized?: boolean;
+  recommendation_reason?: string;
 };
 
 type ReelsResponse = {
@@ -94,7 +96,7 @@ export default function ReelsPage() {
 
   const [reels, setReels] = useState<ReelItem[]>([]);
   const [subjects, setSubjects] = useState<{ slug: string; name: string }[]>([]);
-  const [selectedSubject, setSelectedSubject] = useState('all');
+  const [selectedSubject, setSelectedSubject] = useState('for_you');
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -120,10 +122,10 @@ export default function ReelsPage() {
   const reelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Load reels
-  const loadReels = useCallback(async (subject = 'all') => {
+  const loadReels = useCallback(async (subject = 'for_you') => {
     setLoading(true);
     try {
-      const query = subject && subject !== 'all' ? `?subject=${encodeURIComponent(subject)}` : '';
+      const query = subject ? `?subject=${encodeURIComponent(subject)}` : '';
       const data = await apiFetch<ReelsResponse>(`/api/learning/reels/${query}`);
       if (data && data.reels && data.reels.length > 0) {
         setReels(data.reels);
@@ -385,28 +387,25 @@ export default function ReelsPage() {
 
             {/* Minimal Subject Pills Slider */}
             <div className="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar px-2 min-w-0">
-              <button
-                onClick={() => setSelectedSubject('all')}
-                className={cn(
-                  "px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border",
-                  selectedSubject === 'all'
-                    ? "bg-white text-black border-white shadow-md scale-105"
-                    : "bg-black/50 text-white/80 border-white/15 hover:bg-white/20"
-                )}
-              >
-                Barchasi
-              </button>
-              {subjects.filter(s => s.slug !== 'all').map((subj) => {
+              {(subjects.length > 0 ? subjects : [
+                { slug: 'for_you', name: '✨ Siz uchun' },
+                { slug: 'all', name: 'Barchasi' },
+              ]).map((subj) => {
                 const isSel = selectedSubject === subj.slug;
+                const isForYou = subj.slug === 'for_you';
                 return (
                   <button
                     key={subj.slug}
                     onClick={() => setSelectedSubject(subj.slug)}
                     className={cn(
-                      "px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border",
+                      "px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border flex items-center gap-1",
                       isSel
-                        ? "bg-white text-black border-white shadow-md scale-105"
-                        : "bg-black/50 text-white/80 border-white/15 hover:bg-white/20"
+                        ? isForYou
+                          ? "bg-gradient-to-r from-amber-400 to-orange-400 text-black border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.5)] scale-105"
+                          : "bg-white text-black border-white shadow-md scale-105"
+                        : isForYou
+                          ? "bg-amber-400/15 text-amber-300 border-amber-400/30 hover:bg-amber-400/25"
+                          : "bg-black/50 text-white/80 border-white/15 hover:bg-white/20"
                     )}
                   >
                     {subj.name}
@@ -498,10 +497,18 @@ export default function ReelsPage() {
                   {/* ── MIDDLE CONTENT: Hook, Fact, Takeaway & Micro-Quiz ── */}
                   <div className="relative z-10 my-auto py-2 space-y-2.5">
                     {/* Hook Sarlavha */}
-                    <div className="space-y-1">
-                      <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                        {reel.tagline || 'Bilasizmi?'}
-                      </span>
+                    <div className="space-y-1.5">
+                      {reel.is_personalized && reel.recommendation_reason && (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/30 via-orange-500/25 to-rose-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-bold backdrop-blur-md shadow-sm">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                          <span>{reel.recommendation_reason}</span>
+                        </div>
+                      )}
+                      <div>
+                        <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                          {reel.tagline || 'Bilasizmi?'}
+                        </span>
+                      </div>
                       <h2 className="text-base sm:text-lg font-black leading-snug tracking-tight text-white drop-shadow-md">
                         {reel.hook}
                       </h2>
