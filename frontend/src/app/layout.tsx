@@ -9,6 +9,7 @@ import Script from "next/script";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TelegramProvider from "@/components/TelegramProvider";
 import SubscriptionGate from "@/components/SubscriptionGate";
+import BrandSplashScreen from "@/components/BrandSplashScreen";
 
 /* Uch shriftli tizim (UI_UX_ANALIZ_VA_REJA.md, 2.1-bo'lim):
    - Plus Jakarta Sans — butun interfeys matni. Inter'ga nisbatan x-height'i baland,
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
             <AuthProvider>
+              <BrandSplashScreen />
               {children}
               {/* Majburiy kanal obunasi — kirgan foydalanuvchi obuna bo'lmagan
                   bo'lsagina butun ekranni yopadi (qarang: SubscriptionGate). */}

@@ -57,7 +57,25 @@ location ~ ^/(api|telegram|admin)/ {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_read_timeout 120s;    # AI javoblari sekinroq bo'lishi mumkin
+
+    # 502 / 504 xatolarini to'sish uchun chidamli timeout va qayta urinish
+    proxy_connect_timeout 8s;
+    proxy_send_timeout 120s;
+    proxy_read_timeout 120s;
+    proxy_next_upstream error timeout invalid_header http_502 http_503;
+    proxy_next_upstream_tries 3;
+    proxy_next_upstream_timeout 10s;
+}
+
+# Next.js statik fayllari (JS/CSS bundle) — brauzerda 1 yil keshlanadi, sahifa ochilishi bir zumda bo'ladi
+location /_next/static/ {
+    proxy_pass http://frontend;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    expires 365d;
+    access_log off;
+    add_header Cache-Control "public, max-age=31536000, immutable";
 }
 
 # Qolgan hamma narsa — Next.js.
@@ -69,4 +87,9 @@ location / {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_connect_timeout 6s;
+    proxy_read_timeout 60s;
+    proxy_next_upstream error timeout invalid_header http_502 http_503;
+    proxy_next_upstream_tries 2;
 }
