@@ -15,7 +15,7 @@ export default function PageHero({
   title: string;
   description?: string;
   actions?: React.ReactNode;
-  tone?: 'accent' | 'amber' | 'rose' | 'indigo' | 'sky';
+  tone?: 'accent' | 'amber' | 'rose' | 'indigo' | 'sky' | 'emerald';
   className?: string;
 }) {
   const TONE: Record<string, { border: string; badge: string; glow: string }> = {
@@ -24,6 +24,7 @@ export default function PageHero({
     rose: { border: 'border-rose-500/25', badge: 'border-rose-500/30 bg-rose-500/12 text-rose-600 dark:text-rose-300', glow: 'bg-rose-500/10' },
     indigo: { border: 'border-indigo-500/25', badge: 'border-indigo-500/30 bg-indigo-500/12 text-indigo-600 dark:text-indigo-300', glow: 'bg-indigo-500/10' },
     sky: { border: 'border-sky-500/25', badge: 'border-sky-500/30 bg-sky-500/12 text-sky-600 dark:text-sky-300', glow: 'bg-sky-500/10' },
+    emerald: { border: 'border-emerald-500/25', badge: 'border-emerald-500/30 bg-emerald-500/12 text-emerald-600 dark:text-emerald-300', glow: 'bg-emerald-500/10' },
   };
   const t = TONE[tone] ?? TONE.accent;
 
