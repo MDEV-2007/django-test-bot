@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { apiFetch } from '@/lib/api-client';
 import PremiumIcon, { PremiumIconTone } from '@/components/ui/premium-icon';
 import { toast } from 'sonner';
+import { useFeaturesStore } from '@/lib/features';
 
 type FeatureItem = {
   id: number;
@@ -127,6 +128,9 @@ export default function FeaturesManagementPage() {
               ? `${res.feature.name} faqat Super Adminlar uchun o'tkazildi (Beta)`
               : `${res.feature.name} Beta rejimidan chiqarildi`,
         );
+
+        // Sidebar va ilova menyularini bir zumda yangilash
+        useFeaturesStore.getState().fetchFeatures();
       }
     } catch {
       toast.error("Holatni o'zgartirishda xatolik yuz berdi");
@@ -153,6 +157,7 @@ export default function FeaturesManagementPage() {
       });
       toast.success(res.message || 'Muvaffaqiyatli bajarildi');
       await loadFeatures();
+      useFeaturesStore.getState().fetchFeatures();
     } catch {
       toast.error('Amalni bajarishda xatolik');
       setLoading(false);

@@ -3495,22 +3495,29 @@ def features_public_api(request):
 
     result = {}
     for k, flag in all_flags.items():
+        flag_is_enabled = bool(flag.get('is_enabled', True))
+        flag_admin_only = bool(flag.get('admin_only', False))
+
         if is_superadmin:
-            is_active = True
-            is_beta = flag.get('admin_only', False)
+            # Agar ikkala bayroq ham o'chirilgan bo'lsa (is_enabled=False va admin_only=False),
+            # modul to'liq o'chirilgan hisoblanadi va admin menyusida ham yashirinadi.
+            # Agar admin_only=True bo'lsa, super admin uchun Beta holatida ochiq bo'ladi.
+            is_active = flag_is_enabled or flag_admin_only
+            is_beta = flag_admin_only
         else:
-            if flag.get('admin_only', False):
+            if flag_admin_only:
                 is_active = False
                 is_beta = True
             else:
-                is_active = bool(flag.get('is_enabled', True))
+                is_active = flag_is_enabled
                 is_beta = False
 
         result[k] = {
             'key': k,
             'name': flag.get('name', ''),
             'is_enabled': is_active,
-            'admin_only': flag.get('admin_only', False),
+            'raw_is_enabled': flag_is_enabled,
+            'admin_only': flag_admin_only,
             'is_beta': is_beta,
             'badge_text': flag.get('badge_text', ''),
             'target_route': flag.get('target_route', ''),
@@ -3689,17 +3696,24 @@ def panel_reels_detail_api(request, reel_id):
         return Response({'success': True, 'reel': reel.to_dict(), 'message': "O'zgarishlar saqlandi!"})
 
     elif request.method == 'DELETE':
-        hook = reel.hook[:40]
-        reel.delete()
+        try:
+            hook = reel.hook[:40] if getattr(reel, 'hook', None) else f"Reel #{reel_id}"
+            reel.delete()
 
-        AuditLog.objects.create(
-            user=request.user,
-            action=f"Reel o'chirildi: {hook}",
-            model_name='Reel',
-            object_id=str(reel_id),
-        )
+            try:
+                AuditLog.objects.create(
+                    user=request.user,
+                    action=f"Reel o'chirildi: {hook}",
+                    model_name='Reel',
+                    object_id=str(reel_id),
+                )
+            except Exception:
+                pass
 
-        return Response({'success': True, 'message': "Reel o'chirildi!"})
+            return Response({'success': True, 'message': "Reel o'chirildi!"})
+        except Exception as e:
+            logger.exception("Reel delete error: %s", e)
+            return Response({'error': f"O'chirishda xatolik: {str(e)}"}, status=500)
 
 
 @api_view(['GET'])

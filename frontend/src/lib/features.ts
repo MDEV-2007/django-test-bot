@@ -66,12 +66,17 @@ export const useFeaturesStore = create<FeaturesStore>((set, get) => ({
 
   isFeatureEnabled: (key: string) => {
     const { user } = useAuthStore.getState();
-    // Super admin har doim barcha modullarni sinovdan o'tkaza oladi
-    if (user?.is_superadmin) return true;
-
     const feat = get().features[key];
     if (!feat) return true; // noma'lum kalit bo'lsa sukut bo'yicha ruxsat
-    return Boolean(feat.is_enabled);
+
+    // 1. Agar modul barcha o'quvchilar uchun yoqilgan bo'lsa
+    if (feat.is_enabled) return true;
+
+    // 2. Agar "Faqat Admin (Beta test)" rejimida bo'lsa va foydalanuvchi super admin bo'lsa
+    if (feat.admin_only && user?.is_superadmin) return true;
+
+    // 3. Agar ikkala holat ham o'chiq bo'lsa (yoki foydalanuvchi oddiy o'quvchi bo'lsa), ko'rinmaydi
+    return false;
   },
 
   getFeature: (key: string) => {

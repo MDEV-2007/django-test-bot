@@ -217,8 +217,8 @@ export default function PanelReelsPage() {
       await apiFetch(`/api/panel/reels/${id}/`, { method: 'DELETE' });
       setReels((prev) => prev.filter((r) => r.id !== id));
       toast.success("Reel muvaffaqiyatli o'chirildi!");
-    } catch {
-      toast.error("O'chirishda xatolik");
+    } catch (err: any) {
+      toast.error(err?.message || "O'chirishda xatolik");
     }
   };
 
