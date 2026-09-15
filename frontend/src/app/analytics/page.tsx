@@ -137,20 +137,40 @@ export default function AnalyticsPage() {
         />
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-xl bg-[var(--surface-input)] p-1 border border-[var(--border-card)]">
-            <TabsTrigger value="overview" className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
-              <TrendingUp className="size-4" />
-              <span>Umumiy Tahlil</span>
-            </TabsTrigger>
-            <TabsTrigger value="admission" className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[var(--accent-text)]">
-              <GraduationCap className="size-4" />
-              <span>OTM Bashorati</span>
-            </TabsTrigger>
-            <TabsTrigger value="topics" className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
-              <BarChart2 className="size-4" />
-              <span>Fanlar & Mavzular</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto no-scrollbar py-1">
+            <TabsList className="inline-flex h-auto w-auto items-center gap-1.5 rounded-2xl bg-card/90 dark:bg-zinc-900/90 p-1.5 border border-border/80 dark:border-white/10 shadow-lg shadow-black/10 backdrop-blur-xl">
+              <TabsTrigger
+                value="overview"
+                className="group flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/40 data-[state=active]:bg-background dark:data-[state=active]:bg-zinc-800/90 data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:shadow-md border border-transparent data-[state=active]:border-border/60 dark:data-[state=active]:border-white/10"
+              >
+                <div className="flex size-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400 group-data-[state=active]:bg-sky-500/20 group-data-[state=active]:scale-105 transition-all">
+                  <TrendingUp className="size-4 shrink-0" />
+                </div>
+                <span>Umumiy Tahlil</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="admission"
+                className="group flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/40 data-[state=active]:bg-emerald-500/10 dark:data-[state=active]:bg-emerald-950/40 data-[state=active]:text-emerald-400 data-[state=active]:font-bold data-[state=active]:shadow-md border border-transparent data-[state=active]:border-emerald-500/30"
+              >
+                <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 group-data-[state=active]:bg-emerald-500/25 group-data-[state=active]:scale-105 transition-all">
+                  <GraduationCap className="size-4 shrink-0" />
+                </div>
+                <span>OTM Bashorati</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 ml-0.5">
+                  2026
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="topics"
+                className="group flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/40 data-[state=active]:bg-background dark:data-[state=active]:bg-zinc-800/90 data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:shadow-md border border-transparent data-[state=active]:border-border/60 dark:data-[state=active]:border-white/10"
+              >
+                <div className="flex size-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 group-data-[state=active]:bg-amber-500/20 group-data-[state=active]:scale-105 transition-all">
+                  <BarChart2 className="size-4 shrink-0" />
+                </div>
+                <span>Fanlar & Mavzular</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* ── TAB 1: UMUMIY TAHLIL ── */}
           <TabsContent value="overview" className="space-y-6 mt-0">

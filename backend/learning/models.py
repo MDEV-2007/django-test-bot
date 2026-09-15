@@ -195,6 +195,42 @@ class Reel(models.Model):
             'likes': self.likes_count,
             'shares': self.shares_count,
             'views': self.views_count,
+            'comments_count': self.comments.count() if hasattr(self, 'comments') else 0,
             'is_published': self.is_published,
+        }
+
+
+class ReelComment(models.Model):
+    """Reels videosi/savoliga qoldirilgan izohlar."""
+    reel = models.ForeignKey(Reel, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='reel_comments')
+    text = models.TextField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Reel Izohi"
+        verbose_name_plural = "Reel Izohlari"
+
+    def __str__(self):
+        return f"{self.user.username}: {self.text[:30]}"
+
+    def to_dict(self):
+        full_name = self.user.get_full_name() or self.user.first_name or self.user.username
+        avatar = ""
+        profile = getattr(self.user, 'profile', None)
+        if profile and hasattr(profile, 'avatar') and profile.avatar:
+            try:
+                avatar = profile.avatar.url
+            except Exception:
+                avatar = ""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_name': full_name,
+            'username': self.user.username,
+            'user_avatar': avatar,
+            'text': self.text,
+            'created_at': self.created_at.strftime('%d.%m.%Y, %H:%M'),
         }
 

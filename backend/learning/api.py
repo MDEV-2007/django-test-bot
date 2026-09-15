@@ -19,7 +19,7 @@ from core.ai_client import ask_groq_stream
 from tests_app.models import Subject
 from tests_app.subject_utils import resolve_subject
 
-from .models import Bookmark, Lesson, Topic, Reel
+from .models import Bookmark, Lesson, Topic, Reel, ReelComment
 from .services import (
     _build_mentor_context, _greeting_reply, _mentor_ai_allowed, _mentor_rate_limited,
     _mentor_system_prompt, build_mentor_reply, seed_learning_if_needed,
@@ -898,3 +898,42 @@ def reels_quiz_answer_api(request):
         'streak_days': streak_days,
         'message': "Tabriklaymiz! +5 XP hisobingizga qo'shildi! 🔥" if is_correct else "Qayta urinib ko'ring!"
     })
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def reels_comments_api(request, reel_id):
+    """Reel izohlarini olish va yangi izoh qo'shish."""
+    reel = Reel.objects.filter(id=reel_id).first()
+    if not reel:
+        return Response({'error': 'Reel topilmadi'}, status=404)
+
+    if request.method == 'GET':
+        comments = ReelComment.objects.filter(reel=reel).select_related('user', 'user__profile').order_by('-created_at')[:100]
+        return Response({
+            'comments': [c.to_dict() for c in comments],
+            'count': ReelComment.objects.filter(reel=reel).count(),
+        })
+
+    elif request.method == 'POST':
+        if not request.user or not request.user.is_authenticated:
+            return Response({'error': 'Izoh qoldirish uchun tizimga kiring'}, status=401)
+
+        text = (request.data.get('text') or '').strip()
+        if not text:
+            return Response({'error': 'Izoh matni bo\'sh bo\'lishi mumkin emas'}, status=400)
+        if len(text) > 1000:
+            return Response({'error': 'Izoh 1000 belgidan oshmasligi kerak'}, status=400)
+
+        comment = ReelComment.objects.create(
+            reel=reel,
+            user=request.user,
+            text=text,
+        )
+
+        return Response({
+            'success': True,
+            'comment': comment.to_dict(),
+            'comments_count': ReelComment.objects.filter(reel=reel).count(),
+            'message': 'Izohingiz muvaffaqiyatli qoldirildi!',
+        }, status=201)

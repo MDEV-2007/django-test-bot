@@ -556,13 +556,16 @@ export default function TestsPage() {
             ham mavjud emas. */}
 
         {data && data.subjects.length > 0 && (
-          <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
+          <div className="scroll-row flex items-center gap-2 overflow-x-auto py-1 px-1 pr-12 no-scrollbar">
             {data.subjects.map((s) => (
               <Button
                 key={s.slug}
                 size="sm"
                 variant="outline"
-                className={cn('shrink-0 rounded-full', subject === s.slug && 'chip-active')}
+                className={cn(
+                  'shrink-0 rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all',
+                  subject === s.slug ? 'chip-active shadow-sm' : 'hover:bg-muted/60'
+                )}
                 onClick={() => setSubject(s.slug)}
               >
                 {s.name}
@@ -572,15 +575,18 @@ export default function TestsPage() {
         )}
 
         <div className="flex flex-col gap-3">
-          {/* Faqat SHU FANDA mavjud imtihon turlari ko'rsatiladi (ro'yxat serverdan
-              keladi). Ilgari bu yerda umumiy ro'yxat turardi va natijada Ona tili yoki
-              Biologiya ostida ham "Tarix", "CEFR" kabi mos kelmaydigan turlar chiqib
-              turardi. Bitta tur qolsa filtrning ma'nosi yo'q — umuman ko'rsatilmaydi. */}
+          {/* Faqat SHU FANDA mavjud imtihon turlari ko'rsatiladi */}
           {visibleCategories.length > 1 && (
             <Tabs value={category} onValueChange={setCategory}>
-              <TabsList>
+              <TabsList className="inline-flex h-auto w-auto items-center gap-1 rounded-xl bg-card/80 border border-border/70 p-1">
                 {visibleCategories.map((c) => (
-                  <TabsTrigger key={c.value} value={c.value}>{c.label}</TabsTrigger>
+                  <TabsTrigger
+                    key={c.value}
+                    value={c.value}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    {c.label}
+                  </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
@@ -588,17 +594,25 @@ export default function TestsPage() {
 
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <Tabs value={answerMode} onValueChange={setAnswerMode}>
-              <TabsList>
-                {ANSWER_MODES.map((m) => <TabsTrigger key={m.value} value={m.value}>{m.label}</TabsTrigger>)}
+              <TabsList className="inline-flex h-auto w-auto items-center gap-1 rounded-xl bg-card/80 border border-border/70 p-1">
+                {ANSWER_MODES.map((m) => (
+                  <TabsTrigger
+                    key={m.value}
+                    value={m.value}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    {m.label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </Tabs>
 
             <div className="relative w-full sm:w-72">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Test nomi bo'yicha qidirish..."
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Test nomi bo'yicha qidirish..."
                 className="pl-9"
               />
             </div>

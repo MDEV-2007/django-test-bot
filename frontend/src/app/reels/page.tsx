@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Heart, Send, Volume2, VolumeX, ChevronDown, ChevronUp,
   CheckCircle2, XCircle, Sparkles, Flame, Award, Zap, BookOpen,
-  Swords, Dna, Globe
+  Swords, Dna, Globe, MessageCircle, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -25,6 +25,16 @@ type ReelQuiz = {
   explanation: string;
 };
 
+type ReelComment = {
+  id: number;
+  user_id: number;
+  user_name: string;
+  username: string;
+  user_avatar?: string;
+  text: string;
+  created_at: string;
+};
+
 type ReelItem = {
   id: number;
   subject_slug: string;
@@ -38,6 +48,7 @@ type ReelItem = {
   quiz: ReelQuiz;
   likes: number;
   shares: number;
+  comments_count?: number;
 };
 
 type ReelsResponse = {
@@ -97,6 +108,14 @@ export default function ReelsPage() {
   const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [todayXpEarned, setTodayXpEarned] = useState(0);
 
+  // Comments state
+  const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
+  const [activeCommentReel, setActiveCommentReel] = useState<ReelItem | null>(null);
+  const [comments, setComments] = useState<ReelComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [newCommentText, setNewCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const reelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -111,10 +130,13 @@ export default function ReelsPage() {
         if (data.subjects) setSubjects(data.subjects);
 
         const initialLikes: Record<number, number> = {};
+        const initialComments: Record<number, number> = {};
         data.reels.forEach((r) => {
           initialLikes[r.id] = r.likes;
+          initialComments[r.id] = r.comments_count || 0;
         });
         setLikeCounts(initialLikes);
+        setCommentCounts(initialComments);
       }
     } catch {
       toast.error("Reels yuklanmadi");
@@ -267,6 +289,56 @@ export default function ReelsPage() {
       } else {
         if (soundEnabled) soundFX.incorrect();
       }
+    }
+  };
+
+  // Open Comments Drawer
+  const handleOpenComments = async (reel: ReelItem) => {
+    setActiveCommentReel(reel);
+    setCommentsLoading(true);
+    try {
+      const data = await apiFetch<{ comments: ReelComment[]; count: number }>(`/api/learning/reels/${reel.id}/comments/`);
+      setComments(data.comments || []);
+      setCommentCounts((prev) => ({ ...prev, [reel.id]: data.count }));
+    } catch {
+      setComments([]);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  // Submit Comment
+  const handleSendComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeCommentReel || !newCommentText.trim() || submittingComment) return;
+
+    const textToSend = newCommentText.trim();
+    setSubmittingComment(true);
+
+    try {
+      const res = await apiFetch<{ success: boolean; comment: ReelComment; comments_count: number; message: string }>(
+        `/api/learning/reels/${activeCommentReel.id}/comments/`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ text: textToSend }),
+        }
+      );
+
+      if (res && res.comment) {
+        setComments((prev) => [res.comment, ...prev]);
+        setCommentCounts((prev) => ({ ...prev, [activeCommentReel.id]: res.comments_count }));
+        setNewCommentText('');
+        if (soundEnabled) soundFX.click();
+        toast.success(res.message || "Izohingiz qo'shildi!");
+      }
+    } catch (err: any) {
+      if (err?.status === 401 || err?.message?.includes('tizimga')) {
+        toast.error("Izoh qoldirish uchun tizimga kiring!");
+      } else {
+        toast.error(err?.message || "Izoh yuborishda xatolik yuz berdi");
+      }
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
@@ -531,6 +603,16 @@ export default function ReelsPage() {
                         <span className="text-xs font-black">{likes}</span>
                       </button>
 
+                      {/* Comments button */}
+                      <button
+                        onClick={() => handleOpenComments(reel)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-bold active:scale-90 transition-all"
+                        title="Izohlar"
+                      >
+                        <MessageCircle className="w-4 h-4 text-white" />
+                        <span className="text-xs font-black">{commentCounts[reel.id] ?? reel.comments_count ?? 0}</span>
+                      </button>
+
                       {/* Telegram share */}
                       <button
                         onClick={() => handleShare(reel)}
@@ -577,6 +659,102 @@ export default function ReelsPage() {
             <ChevronDown className="w-5 h-5" />
           </button>
         </div>
+
+        {/* ── COMMENTS BOTTOM DRAWER MODAL ── */}
+        {activeCommentReel && (
+          <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setActiveCommentReel(null)}
+          >
+            <div
+              className="w-full sm:max-w-lg bg-zinc-950/95 border-t sm:border border-white/20 rounded-t-[2.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col h-[75vh] sm:h-[580px] shadow-2xl relative text-white animate-in slide-in-from-bottom duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Drawer Drag handle for mobile */}
+              <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-3 sm:hidden" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-white/15">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-emerald-400" />
+                  <h3 className="font-extrabold text-base text-white">
+                    Izohlar ({commentCounts[activeCommentReel.id] ?? comments.length})
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setActiveCommentReel(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all active:scale-95"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Comments List */}
+              <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-3.5">
+                {commentsLoading ? (
+                  <div className="space-y-3 py-6 animate-pulse">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex gap-3 items-start">
+                        <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
+                        <div className="space-y-1.5 flex-1">
+                          <div className="h-3 w-28 bg-white/15 rounded" />
+                          <div className="h-4 w-full bg-white/10 rounded" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : comments.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-white/60">
+                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/40 mb-1">
+                      <MessageCircle className="w-6 h-6" />
+                    </div>
+                    <p className="font-semibold text-sm text-white/90">Hozircha izohlar yo&apos;q</p>
+                    <p className="text-xs text-white/50">Birinchi bo&apos;lib fikr bildiring va muhokamani boshlang!</p>
+                  </div>
+                ) : (
+                  comments.map((c) => (
+                    <div key={c.id} className="flex gap-3 items-start group">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-extrabold text-xs shrink-0 shadow-md overflow-hidden">
+                        {c.user_avatar ? (
+                          <img src={c.user_avatar} alt={c.user_name} className="w-full h-full object-cover" />
+                        ) : (
+                          c.user_name.charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl p-3 space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white/90">{c.user_name}</span>
+                          <span className="text-[10px] text-white/40 font-mono">{c.created_at}</span>
+                        </div>
+                        <p className="text-xs text-white/80 leading-relaxed break-words">{c.text}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Input Footer */}
+              <form onSubmit={handleSendComment} className="pt-3 border-t border-white/15 flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  placeholder="Fikringizni yozing..."
+                  maxLength={500}
+                  className="flex-1 bg-white/10 border border-white/20 focus:border-emerald-400/80 rounded-full px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-white/40 focus:outline-none transition-all"
+                />
+                <button
+                  type="submit"
+                  disabled={!newCommentText.trim() || submittingComment}
+                  className="px-4 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-extrabold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all shrink-0"
+                >
+                  <span>Yuborish</span>
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
