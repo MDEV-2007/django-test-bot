@@ -573,13 +573,13 @@ export default function CommunityFeedPage() {
                           </Badge>
 
                           {/* Delete button if owner or admin */}
-                          {post.can_delete && (
+                          {(post.can_delete || (user && (user.id === post.author.id || user.username === post.author.username || user.is_superadmin))) && (
                             <button
                               onClick={() => handleDeletePost(post.id)}
-                              className="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                              className="size-8 rounded-lg flex items-center justify-center text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/15 transition-colors"
                               title="Postni o'chirish"
                             >
-                              <Trash2 className="size-3.5" />
+                              <Trash2 className="size-4" />
                             </button>
                           )}
                         </div>
