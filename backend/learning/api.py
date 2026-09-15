@@ -904,36 +904,50 @@ def reels_quiz_answer_api(request):
 @permission_classes([AllowAny])
 def reels_comments_api(request, reel_id):
     """Reel izohlarini olish va yangi izoh qo'shish."""
-    reel = Reel.objects.filter(id=reel_id).first()
-    if not reel:
-        return Response({'error': 'Reel topilmadi'}, status=404)
+    try:
+        reel = Reel.objects.filter(id=reel_id).first()
+        if not reel:
+            return Response({'error': 'Reel topilmadi'}, status=404)
 
-    if request.method == 'GET':
-        comments = ReelComment.objects.filter(reel=reel).select_related('user', 'user__profile').order_by('-created_at')[:100]
-        return Response({
-            'comments': [c.to_dict() for c in comments],
-            'count': ReelComment.objects.filter(reel=reel).count(),
-        })
+        if request.method == 'GET':
+            try:
+                comments = ReelComment.objects.filter(reel=reel).select_related('user', 'user__profile').order_by('-created_at')[:100]
+                c_list = [c.to_dict() for c in comments]
+                c_count = ReelComment.objects.filter(reel=reel).count()
+            except Exception:
+                c_list = []
+                c_count = 0
+            return Response({
+                'comments': c_list,
+                'count': c_count,
+            })
 
-    elif request.method == 'POST':
-        if not request.user or not request.user.is_authenticated:
-            return Response({'error': 'Izoh qoldirish uchun tizimga kiring'}, status=401)
+        elif request.method == 'POST':
+            if not request.user or not request.user.is_authenticated:
+                return Response({'error': 'Izoh qoldirish uchun tizimga kiring'}, status=401)
 
-        text = (request.data.get('text') or '').strip()
-        if not text:
-            return Response({'error': 'Izoh matni bo\'sh bo\'lishi mumkin emas'}, status=400)
-        if len(text) > 1000:
-            return Response({'error': 'Izoh 1000 belgidan oshmasligi kerak'}, status=400)
+            text = (request.data.get('text') or '').strip()
+            if not text:
+                return Response({'error': 'Izoh matni bo\'sh bo\'lishi mumkin emas'}, status=400)
+            if len(text) > 1000:
+                return Response({'error': 'Izoh 1000 belgidan oshmasligi kerak'}, status=400)
 
-        comment = ReelComment.objects.create(
-            reel=reel,
-            user=request.user,
-            text=text,
-        )
+            comment = ReelComment.objects.create(
+                reel=reel,
+                user=request.user,
+                text=text,
+            )
 
-        return Response({
-            'success': True,
-            'comment': comment.to_dict(),
-            'comments_count': ReelComment.objects.filter(reel=reel).count(),
-            'message': 'Izohingiz muvaffaqiyatli qoldirildi!',
-        }, status=201)
+            try:
+                count = ReelComment.objects.filter(reel=reel).count()
+            except Exception:
+                count = 1
+
+            return Response({
+                'success': True,
+                'comment': comment.to_dict(),
+                'comments_count': count,
+                'message': 'Izohingiz muvaffaqiyatli qoldirildi!',
+            }, status=201)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

@@ -176,6 +176,10 @@ class Reel(models.Model):
         return gradients.get(self.gradient_theme, gradients['purple'])
 
     def to_dict(self):
+        try:
+            c_count = self.comments.count()
+        except Exception:
+            c_count = 0
         return {
             'id': self.id,
             'subject_name': self.subject_name,
@@ -195,7 +199,7 @@ class Reel(models.Model):
             'likes': self.likes_count,
             'shares': self.shares_count,
             'views': self.views_count,
-            'comments_count': self.comments.count() if hasattr(self, 'comments') else 0,
+            'comments_count': c_count,
             'is_published': self.is_published,
         }
 
@@ -218,12 +222,12 @@ class ReelComment(models.Model):
     def to_dict(self):
         full_name = self.user.get_full_name() or self.user.first_name or self.user.username
         avatar = ""
-        profile = getattr(self.user, 'profile', None)
-        if profile and hasattr(profile, 'avatar') and profile.avatar:
-            try:
-                avatar = profile.avatar.url
-            except Exception:
-                avatar = ""
+        try:
+            profile = getattr(self.user, 'profile', None)
+            if profile and getattr(profile, 'avatar_url', None):
+                avatar = profile.avatar_url
+        except Exception:
+            avatar = ""
         return {
             'id': self.id,
             'user_id': self.user_id,
