@@ -337,7 +337,7 @@ class CommunityPost(models.Model):
 
         can_delete = False
         if current_user and current_user.is_authenticated:
-            can_delete = (current_user.id == self.author_id or getattr(current_user, 'is_staff', False) or getattr(current_user, 'is_superuser', False))
+            can_delete = (current_user.id == self.author_id)
 
         is_pinned = getattr(self, 'is_pinned', False)
 

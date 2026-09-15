@@ -572,12 +572,15 @@ export default function CommunityFeedPage() {
                               : '📝 Sinov Testi'}
                           </Badge>
 
-                          {/* Delete button if owner or admin */}
-                          {(post.can_delete || (user && (user.id === post.author.id || user.username === post.author.username || user.is_superadmin))) && (
+                          {/* Delete button: faqat o'zining posti bo'lsa ko'rinadi */}
+                          {(post.can_delete || (user && (
+                            (user.id && post.author?.id && Number(user.id) === Number(post.author.id)) ||
+                            (user.username && post.author?.username && user.username.toLowerCase() === post.author.username.toLowerCase())
+                          ))) && (
                             <button
                               onClick={() => handleDeletePost(post.id)}
                               className="size-8 rounded-lg flex items-center justify-center text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/15 transition-colors"
-                              title="Postni o'chirish"
+                              title="Postimni o'chirish"
                             >
                               <Trash2 className="size-4" />
                             </button>

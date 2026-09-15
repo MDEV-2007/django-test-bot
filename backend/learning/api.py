@@ -976,11 +976,25 @@ def community_post_delete_api(request, post_id):
     except CommunityPost.DoesNotExist:
         return Response({'error': "Post topilmadi."}, status=404)
 
-    if not (post.author == request.user or request.user.is_staff or request.user.is_superuser):
-        return Response({'error': "Faqat post muallifi yoki admin o'chira oladi."}, status=403)
+    is_author = (post.author_id == request.user.id or post.author == request.user)
+    is_admin = getattr(request.user, 'is_superuser', False) or getattr(request.user, 'is_staff', False)
+    if not is_admin:
+        try:
+            prof = getattr(request.user, 'profile', None)
+            if prof and (getattr(prof, 'is_superadmin', False) or getattr(prof, 'role', '') == 'superadmin'):
+                is_admin = True
+        except Exception:
+            pass
 
-    post.delete()
-    return Response({'success': True, 'message': "Post muvaffaqiyatli o'chirildi."})
+    if not (is_author or is_admin):
+        return Response({'error': "Faqat post muallifi o'z postini o'chira oladi."}, status=403)
+
+    try:
+        post.delete()
+        return Response({'success': True, 'message': "Post muvaffaqiyatli o'chirildi."})
+    except Exception as e:
+        logger.exception("Error deleting community post: %s", e)
+        return Response({'error': f"O'chirishda xatolik: {str(e)}"}, status=500)
 
 
 @api_view(['POST'])
