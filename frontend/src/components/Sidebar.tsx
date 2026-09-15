@@ -54,6 +54,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Hisobim',
     items: [
+      { href: '/profile', label: 'Profilim', icon: User, tone: 'indigo', matchPrefixes: ['/profile'] },
       { href: '/analytics', label: 'Analitika', icon: BarChart3, tone: 'cyan', api: '/api/analytics/' },
       { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple', featureKey: 'shop', matchPrefixes: ['/shop'] },
       { href: '/premium', label: 'Premium', icon: Crown, tone: 'gold', glow: true },
@@ -176,6 +177,7 @@ export default function Sidebar() {
       <div className="p-3">
         <div
           onClick={() => router.push('/profile')}
+          title="Profilim"
           className="group flex cursor-pointer items-center gap-2.5 rounded-lg p-2 transition-colors hover:bg-accent"
         >
           <div className="relative shrink-0">

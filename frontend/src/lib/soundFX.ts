@@ -50,4 +50,7 @@ export const soundFX = {
   fanfare: () => play(() => {
     [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.3, 0.08));
   }),
+  celebrate: () => play(() => {
+    [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.3, 0.08));
+  }),
 };

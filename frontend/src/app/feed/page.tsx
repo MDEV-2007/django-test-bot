@@ -363,7 +363,7 @@ export default function CommunityFeedPage() {
 
       if (res.success) {
         celebrate();
-        soundFX.celebrate();
+        soundFX.fanfare();
         toast.success(res.message || "Post muvaffaqiyatli e'lon qilindi! +15 XP");
         setIsCreateModalOpen(false);
         setNewTitle('');
