@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Award, Download, FileText, Printer, ShieldCheck } from 'lucide-react';
+import { Award, Download, FileText, Printer, ShieldCheck, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import { API_URL } from '@/lib/api-client';
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import ShareToCommunityModal from './ShareToCommunityModal';
 
 interface CertificateModalProps {
   open: boolean;
@@ -74,6 +75,7 @@ export default function CertificateModal({
 }: CertificateModalProps) {
   const [downloading, setDownloading] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [communityModalOpen, setCommunityModalOpen] = useState(false);
   const { access } = useAuthStore();
   const gradeInfo = getGrade(score, correctCount, totalQuestions);
   const certDate = formatUzDate(date);
@@ -364,6 +366,16 @@ export default function CertificateModal({
                 <FileText className="size-3.5 text-amber-400" /> {downloadingPdf ? 'Tayyorlanmoqda...' : 'Rasmiy PDF (Muhrli)'}
               </Button>
             )}
+            {attemptId && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setCommunityModalOpen(true)}
+                className="gap-1.5 rounded-xl border-amber-400/40 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 hover:from-amber-500/30 hover:to-orange-500/30 text-xs font-bold shadow-sm"
+              >
+                <Sparkles className="size-3.5 text-amber-400" /> Hamjamiyatda ulashish (+15 XP)
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"
@@ -548,6 +560,19 @@ export default function CertificateModal({
           }
         `}</style>
       </DialogContent>
+      {attemptId && (
+        <ShareToCommunityModal
+          open={communityModalOpen}
+          onOpenChange={setCommunityModalOpen}
+          attemptId={attemptId}
+          testTitle={testTitle}
+          score={score}
+          grade={gradeInfo.grade}
+          correctCount={correctCount}
+          totalQuestions={totalQuestions}
+          postType="certificate"
+        />
+      )}
     </Dialog>
   );
 }

@@ -238,3 +238,138 @@ class ReelComment(models.Model):
             'created_at': self.created_at.strftime('%d.%m.%Y, %H:%M'),
         }
 
+
+# ============================================================
+# COMMUNITY FEED (HAMJAMIYAT LENTASI)
+# ============================================================
+
+class CommunityPost(models.Model):
+    """O'quvchilar tomonidan platformada ulashilgan test natijalari, sertifikatlar va postlar."""
+    POST_TYPES = (
+        ('test_result', 'Test Natijasi'),
+        ('certificate', 'Milliy Sertifikat'),
+        ('achievement', 'Yutuq'),
+    )
+
+    author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='community_posts')
+    attempt = models.ForeignKey('tests_app.Attempt', on_delete=models.SET_NULL, null=True, blank=True, related_name='community_posts')
+    test = models.ForeignKey('tests_app.TestSet', on_delete=models.SET_NULL, null=True, blank=True, related_name='community_posts')
+
+    post_type = models.CharField(max_length=20, choices=POST_TYPES, default='test_result')
+    title = models.CharField(max_length=255)
+    subject_name = models.CharField(max_length=100, default='Asosiy')
+    subject_slug = models.CharField(max_length=50, default='tarix')
+
+    score = models.FloatField(null=True, blank=True)
+    grade = models.CharField(max_length=30, blank=True)
+    correct_count = models.IntegerField(default=0)
+    total_questions = models.IntegerField(default=0)
+
+    caption = models.TextField(blank=True, max_length=1000)
+    image_url = models.CharField(max_length=500, blank=True)
+
+    likes_count = models.PositiveIntegerField(default=0)
+    comments_count = models.PositiveIntegerField(default=0)
+    is_pinned = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-is_pinned', '-created_at']
+        verbose_name = "Hamjamiyat Posti"
+        verbose_name_plural = "Hamjamiyat Postlari"
+
+    def __str__(self):
+        return f"{self.author.username} - {self.title} ({self.score}%)"
+
+    def to_dict(self, current_user=None):
+        profile = getattr(self.author, 'profile', None)
+        author_name = self.author.get_full_name() or self.author.first_name or self.author.username
+        author_avatar = getattr(profile, 'avatar_url', '') if profile else ''
+        author_level = getattr(profile, 'level', 1) if profile else 1
+
+        user_reaction = None
+        if current_user and current_user.is_authenticated:
+            reaction = self.reactions.filter(user=current_user).first()
+            if reaction:
+                user_reaction = reaction.reaction_type
+
+        # Reaksiyalar hisobi turlari bo'yicha
+        reaction_counts = {
+            'fire': self.reactions.filter(reaction_type='fire').count(),
+            'clap': self.reactions.filter(reaction_type='clap').count(),
+            'trophy': self.reactions.filter(reaction_type='trophy').count(),
+            'heart': self.reactions.filter(reaction_type='heart').count(),
+        }
+
+        return {
+            'id': self.id,
+            'author': {
+                'id': self.author_id,
+                'name': author_name,
+                'username': self.author.username,
+                'avatar': author_avatar,
+                'level': author_level,
+            },
+            'post_type': self.post_type,
+            'title': self.title,
+            'subject_name': self.subject_name,
+            'subject_slug': self.subject_slug,
+            'score': self.score,
+            'grade': self.grade,
+            'correct_count': self.correct_count,
+            'total_questions': self.total_questions,
+            'caption': self.caption,
+            'image_url': self.image_url,
+            'test_id': self.test_id,
+            'attempt_id': self.attempt_id,
+            'likes_count': self.likes_count,
+            'comments_count': self.comments_count,
+            'reaction_counts': reaction_counts,
+            'user_reaction': user_reaction,
+            'created_at': self.created_at.strftime('%d.%m.%Y %H:%M'),
+        }
+
+
+class CommunityPostReaction(models.Model):
+    """Postga bildirilgan emodzi reaksiyalar: fire, clap, trophy, heart"""
+    REACTION_TYPES = (
+        ('fire', 'Olov'),
+        ('clap', 'Qarsak'),
+        ('trophy', 'Kubok'),
+        ('heart', 'Yurak'),
+    )
+    post = models.ForeignKey(CommunityPost, on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='post_reactions')
+    reaction_type = models.CharField(max_length=15, choices=REACTION_TYPES, default='fire')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('post', 'user')
+        verbose_name = "Post Reaksiyasi"
+        verbose_name_plural = "Post Reaksiyalari"
+
+
+class CommunityPostComment(models.Model):
+    """Post ostidagi tabrik va izohlar."""
+    post = models.ForeignKey(CommunityPost, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='community_comments')
+    text = models.TextField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = "Post Izohi"
+        verbose_name_plural = "Post Izohlari"
+
+    def to_dict(self):
+        profile = getattr(self.user, 'profile', None)
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_name': self.user.get_full_name() or self.user.first_name or self.user.username,
+            'username': self.user.username,
+            'user_avatar': getattr(profile, 'avatar_url', '') if profile else '',
+            'text': self.text,
+            'created_at': self.created_at.strftime('%d.%m.%Y %H:%M'),
+        }
+

@@ -19,7 +19,7 @@ from core.ai_client import ask_groq_stream
 from tests_app.models import Subject
 from tests_app.subject_utils import resolve_subject
 
-from .models import Bookmark, Lesson, Topic, Reel, ReelComment
+from .models import Bookmark, Lesson, Topic, Reel, ReelComment, CommunityPost, CommunityPostReaction, CommunityPostComment
 from .services import (
     _build_mentor_context, _greeting_reply, _mentor_ai_allowed, _mentor_rate_limited,
     _mentor_system_prompt, build_mentor_reply, seed_learning_if_needed,
@@ -802,3 +802,217 @@ def reels_comments_api(request, reel_id):
             }, status=201)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+# ============================================================
+# COMMUNITY FEED API (HAMJAMIYAT LENTASI)
+# ============================================================
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def community_feed_api(request):
+    """Platforma o'quvchilarining test natijalari va sertifikatlar lentasi."""
+    post_type = request.GET.get('type', 'all')
+    subject_slug = request.GET.get('subject', 'all')
+
+    qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt').prefetch_related('reactions')
+
+    if post_type and post_type != 'all':
+        qs = qs.filter(post_type=post_type)
+
+    if subject_slug and subject_slug != 'all':
+        qs = qs.filter(subject_slug=subject_slug)
+
+    total = qs.count()
+    posts = qs[:50]
+
+    posts_list = [p.to_dict(current_user=request.user) for p in posts]
+
+    subjects = [
+        {'slug': 'all', 'name': 'Barchasi'},
+        {'slug': 'tarix', 'name': 'Tarix'},
+        {'slug': 'ona-tili', 'name': 'Ona tili'},
+        {'slug': 'biologiya', 'name': 'Biologiya'},
+        {'slug': 'ingliz-tili', 'name': 'Ingliz tili'},
+        {'slug': 'matematika', 'name': 'Matematika'},
+    ]
+
+    return Response({
+        'posts': posts_list,
+        'total': total,
+        'subjects': subjects,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_post_create_api(request):
+    """Test natijasi yoki sertifikatni hamjamiyat lentasiga chiqarish."""
+    from tests_app.models import Attempt
+    from tests_app.story import sign_attempt
+
+    attempt_id = request.data.get('attempt_id')
+    caption = (request.data.get('caption') or '').strip()
+    post_type = request.data.get('post_type', 'test_result')
+
+    if not attempt_id:
+        return Response({'error': "attempt_id kiritilishi shart."}, status=400)
+
+    try:
+        attempt = Attempt.objects.select_related('test', 'test__subject', 'profile').get(
+            id=attempt_id,
+            profile__user=request.user,
+            is_completed=True
+        )
+    except Attempt.DoesNotExist:
+        return Response({'error': "Urinish topilmadi yoki hali yakunlanmagan."}, status=404)
+
+    # Allaqachon ulashilgan bo'lsa
+    existing = CommunityPost.objects.filter(author=request.user, attempt=attempt).first()
+    if existing:
+        if caption:
+            existing.caption = caption
+            existing.save(update_fields=['caption'])
+        return Response({
+            'success': True,
+            'message': "Natijangiz allaqachon hamjamiyat lentasida mavjud!",
+            'post': existing.to_dict(current_user=request.user),
+            'xp_earned': 0,
+        })
+
+    # Baholash darajasi
+    score = attempt.score or 0.0
+    if score >= 86.0:
+        grade = 'A+ (Oltin)'
+    elif score >= 70.0:
+        grade = 'A'
+    elif score >= 60.0:
+        grade = 'B+'
+    elif score >= 50.0:
+        grade = 'B'
+    elif score >= 46.0:
+        grade = 'C+'
+    elif score >= 40.0:
+        grade = 'C'
+    else:
+        grade = 'Ishtirokchi'
+
+    subject_name = attempt.test.subject.name if (attempt.test and attempt.test.subject) else "Tarix"
+    subject_slug = attempt.test.subject.slug if (attempt.test and attempt.test.subject) else "tarix"
+    title = attempt.test.title if attempt.test else "Katta Sinov Testi"
+
+    total_q = attempt.correct_answers + attempt.wrong_answers + attempt.skipped_answers
+    sig = sign_attempt(attempt.id)
+    image_url = f"/api/tests/attempts/{attempt.id}/story/?sig={sig}"
+
+    post = CommunityPost.objects.create(
+        author=request.user,
+        attempt=attempt,
+        test=attempt.test,
+        post_type=post_type,
+        title=title,
+        subject_name=subject_name,
+        subject_slug=subject_slug,
+        score=score,
+        grade=grade,
+        correct_count=attempt.correct_answers,
+        total_questions=total_q or 1,
+        caption=caption,
+        image_url=image_url,
+    )
+
+    # O'quvchiga +15 XP bonus beramiz
+    profile = request.user.profile
+    profile.xp += 15
+    profile.save(update_fields=['xp'])
+
+    return Response({
+        'success': True,
+        'message': "Natijangiz muvaffaqiyatli hamjamiyat lentasiga joylandi! +15 XP berildi 🔥",
+        'post': post.to_dict(current_user=request.user),
+        'xp_earned': 15,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_post_react_api(request, post_id):
+    """Postga emodzi reaksiya bildirish yoki bekor qilish."""
+    try:
+        post = CommunityPost.objects.get(id=post_id)
+    except CommunityPost.DoesNotExist:
+        return Response({'error': "Post topilmadi."}, status=404)
+
+    reaction_type = request.data.get('reaction_type', 'fire')
+    if reaction_type not in ('fire', 'clap', 'trophy', 'heart'):
+        reaction_type = 'fire'
+
+    existing = CommunityPostReaction.objects.filter(post=post, user=request.user).first()
+    if existing:
+        if existing.reaction_type == reaction_type:
+            # Ikkinchi marta bossa o'chiramiz
+            existing.delete()
+            active_reaction = None
+        else:
+            existing.reaction_type = reaction_type
+            existing.save(update_fields=['reaction_type'])
+            active_reaction = reaction_type
+    else:
+        CommunityPostReaction.objects.create(post=post, user=request.user, reaction_type=reaction_type)
+        active_reaction = reaction_type
+
+    post.likes_count = post.reactions.count()
+    post.save(update_fields=['likes_count'])
+
+    reaction_counts = {
+        'fire': post.reactions.filter(reaction_type='fire').count(),
+        'clap': post.reactions.filter(reaction_type='clap').count(),
+        'trophy': post.reactions.filter(reaction_type='trophy').count(),
+        'heart': post.reactions.filter(reaction_type='heart').count(),
+    }
+
+    return Response({
+        'success': True,
+        'user_reaction': active_reaction,
+        'reaction_counts': reaction_counts,
+        'total_likes': post.likes_count,
+    })
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def community_post_comments_api(request, post_id):
+    """Post izohlarini olish yoki yangi izoh qoldirish."""
+    try:
+        post = CommunityPost.objects.get(id=post_id)
+    except CommunityPost.DoesNotExist:
+        return Response({'error': "Post topilmadi."}, status=404)
+
+    if request.method == 'GET':
+        comments = post.comments.select_related('user', 'user__profile').order_by('created_at')[:100]
+        return Response({
+            'comments': [c.to_dict() for c in comments],
+            'count': post.comments.count(),
+        })
+
+    elif request.method == 'POST':
+        if not request.user or not request.user.is_authenticated:
+            return Response({'error': "Izoh yozish uchun tizimga kiring."}, status=401)
+
+        text = (request.data.get('text') or '').strip()
+        if not text:
+            return Response({'error': "Izoh matni bo'sh bo'lishi mumkin emas."}, status=400)
+
+        comment = CommunityPostComment.objects.create(
+            post=post,
+            user=request.user,
+            text=text,
+        )
+        post.comments_count = post.comments.count()
+        post.save(update_fields=['comments_count'])
+
+        return Response({
+            'success': True,
+            'comment': comment.to_dict(),
+            'comments_count': post.comments_count,
+        })

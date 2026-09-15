@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import CertificateModal from '@/components/student/CertificateModal';
+import ShareToCommunityModal from '@/components/student/ShareToCommunityModal';
 import ExamSurveyCard from '@/components/student/ExamSurveyCard';
 import { WritingReviewCard } from '@/components/cefr/WritingTask';
 import type { WritingReview } from '@/lib/cefr-types';
@@ -108,6 +109,7 @@ export default function FeedbackPage() {
   const [error, setError] = useState<string | null>(null);
   const [mistakesError, setMistakesError] = useState<string | null>(null);
   const [certOpen, setCertOpen] = useState(false);
+  const [communityModalOpen, setCommunityModalOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -203,6 +205,14 @@ export default function FeedbackPage() {
               <Award className="size-4" /> Sertifikat
             </Button>
             <StoryShareButton attemptId={attemptId} />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setCommunityModalOpen(true)}
+              className="border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/15 font-bold text-amber-300 hover:from-amber-500/25 hover:to-orange-500/25 gap-1.5 shadow-sm"
+            >
+              <Sparkles className="size-4 text-amber-400" /> Hamjamiyatga ulashish (+15 XP)
+            </Button>
             {a.score < 100 && (
             <Button
               size="sm"
@@ -488,17 +498,29 @@ export default function FeedbackPage() {
           </section>
         )}
         {a && (
-          <CertificateModal
-            open={certOpen}
-            onOpenChange={setCertOpen}
-            studentName={`${user?.first_name || user?.username || ''} ${user?.last_name || ''}`.trim()}
-            testTitle={data?.attempt?.test_title || "Rasmiy Formatdagi Sinov Testi"}
-            score={a.score || 0}
-            correctCount={a.correct_answers || 0}
-            totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
-            date={data?.attempt?.completed_at}
-            attemptId={attemptId}
-          />
+          <>
+            <CertificateModal
+              open={certOpen}
+              onOpenChange={setCertOpen}
+              studentName={`${user?.first_name || user?.username || ''} ${user?.last_name || ''}`.trim()}
+              testTitle={data?.attempt?.test_title || "Rasmiy Formatdagi Sinov Testi"}
+              score={a.score || 0}
+              correctCount={a.correct_answers || 0}
+              totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
+              date={data?.attempt?.completed_at}
+              attemptId={attemptId}
+            />
+            <ShareToCommunityModal
+              open={communityModalOpen}
+              onOpenChange={setCommunityModalOpen}
+              attemptId={attemptId}
+              testTitle={data?.attempt?.test_title || "Rasmiy Formatdagi Sinov Testi"}
+              score={a.score || 0}
+              correctCount={a.correct_answers || 0}
+              totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
+              postType={a.score >= 60 ? 'certificate' : 'test_result'}
+            />
+          </>
         )}
       </main>
     </>
