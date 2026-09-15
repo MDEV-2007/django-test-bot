@@ -287,6 +287,21 @@ export default function CommunityFeedPage() {
           }
         />
 
+        {/* Hub Mode Switcher: Hamjamiyat Lentasi & Liderlar Jadvali */}
+        <div className="flex items-center gap-2 border-b border-[var(--border-card)] pb-3">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
+            <Globe className="size-4" />
+            <span>🌟 Yutuqlar Lentasi</span>
+          </div>
+          <Link
+            href="/leaderboard"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-muted-foreground hover:bg-[var(--surface-hover)] hover:text-amber-500 border border-transparent hover:border-amber-500/30"
+          >
+            <Trophy className="size-4 text-amber-500" />
+            <span>🏆 Liderlar Ligasi</span>
+          </Link>
+        </div>
+
         {/* Filter Chips Bar */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
           {[

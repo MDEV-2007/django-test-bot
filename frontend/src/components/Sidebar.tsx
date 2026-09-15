@@ -48,8 +48,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose', featureKey: 'reels', api: '/api/learning/reels/' },
       { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
       { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
-      { href: '/feed', label: 'Hamjamiyat', icon: Globe, tone: 'emerald', matchPrefixes: ['/feed'], api: '/api/learning/feed/' },
-      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', featureKey: 'leaderboard', api: '/api/leaderboard/?subject=all' },
+      { href: '/feed', label: 'Hamjamiyat & Liga', icon: Globe, tone: 'emerald', matchPrefixes: ['/feed', '/leaderboard'], api: '/api/learning/feed/' },
     ],
   },
   {
@@ -58,7 +57,6 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/analytics', label: 'Analitika', icon: BarChart3, tone: 'cyan', api: '/api/analytics/' },
       { href: '/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple', featureKey: 'shop', matchPrefixes: ['/shop'] },
       { href: '/premium', label: 'Premium', icon: Crown, tone: 'gold', glow: true },
-      { href: '/profile', label: 'Profilim', icon: User, tone: 'zinc', api: '/api/auth/profile/' },
     ],
   },
 ];

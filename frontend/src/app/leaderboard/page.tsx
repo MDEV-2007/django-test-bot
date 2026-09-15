@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trophy, Crown, Zap, Users } from 'lucide-react';
+import Link from 'next/link';
+import { Trophy, Crown, Zap, Users, Globe } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
@@ -83,6 +84,21 @@ export default function LeaderboardPage() {
             </div>
           )}
         />
+
+        {/* Hub Mode Switcher: Hamjamiyat Lentasi & Liderlar Jadvali */}
+        <div className="flex items-center gap-2 border-b border-[var(--border-card)] pb-3">
+          <Link
+            href="/feed"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-muted-foreground hover:bg-[var(--surface-hover)] hover:text-emerald-500 border border-transparent hover:border-emerald-500/30"
+          >
+            <Globe className="size-4 text-emerald-500" />
+            <span>🌟 Yutuqlar Lentasi</span>
+          </Link>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30 shadow-sm">
+            <Trophy className="size-4" />
+            <span>🏆 Liderlar Ligasi</span>
+          </div>
+        </div>
 
         <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
           <Button

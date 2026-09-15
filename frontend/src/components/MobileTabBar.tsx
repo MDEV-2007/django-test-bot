@@ -54,11 +54,10 @@ const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: 
   {
     label: "Ko'proq",
     items: [
-      { href: '/feed', label: 'Hamjamiyat', icon: Globe, tone: 'emerald' },
+      { href: '/feed', label: 'Hamjamiyat & Liga', icon: Globe, tone: 'emerald' },
       { href: '/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose', featureKey: 'reels' },
       { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', featureKey: 'flashcards' },
       { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', featureKey: 'learning' },
-      { href: '/leaderboard', label: 'Liderlar ligasi', icon: Trophy, tone: 'gold', featureKey: 'leaderboard' },
     ],
   },
 ];
