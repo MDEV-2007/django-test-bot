@@ -86,6 +86,7 @@ def home_api(request):
             'target_count': pm.mission.target_count,
             'current_count': pm.current_count,
             'is_completed': pm.is_completed,
+            'action_type': pm.mission.action_type,
         } for pm in missions_today],
         'recent_attempts': [{
             'id': a.id,

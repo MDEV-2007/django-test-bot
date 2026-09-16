@@ -30,7 +30,7 @@ type TabItem = {
 
 const TABS: TabItem[] = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'indigo', api: '/api/dashboard/home/' },
-  { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+  { href: '/tests', label: 'Mashqlar', icon: FileCheck2, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
   { href: '/battles', label: 'Arena', icon: Swords, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
   { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple', featureKey: 'ai_mentor' },
 ];
@@ -58,7 +58,7 @@ const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: 
       { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', featureKey: 'learning' },
       { href: '/feed', label: 'Hamjamiyat & Liga', icon: Globe, tone: 'emerald' },
       { href: '/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose', featureKey: 'reels' },
-      { href: '/flashcards', label: 'Flashcardlar', icon: Layers, tone: 'amber', featureKey: 'flashcards' },
+      { href: '/flashcards', label: 'Quick Learn', icon: Layers, tone: 'amber', featureKey: 'flashcards' },
     ],
   },
 ];
