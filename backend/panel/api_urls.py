@@ -101,8 +101,13 @@ urlpatterns = [
 
     # Bilim Reels CMS & Hardest Questions
     path('reels/', api.panel_reels_list_create_api, name='panel_reels_list_create'),
+    path('reels', api.panel_reels_list_create_api),
     path('reels/<int:reel_id>/', api.panel_reels_detail_api, name='panel_reels_detail'),
+    path('reels/<int:reel_id>', api.panel_reels_detail_api),
+    path('reels/<int:reel_id>/delete/', api.panel_reels_delete_api, name='panel_reels_delete'),
+    path('reels/<int:reel_id>/delete', api.panel_reels_delete_api),
     path('reels/hardest-questions/', api.panel_reels_hardest_questions_api, name='panel_reels_hardest_questions'),
+    path('reels/hardest-questions', api.panel_reels_hardest_questions_api),
 
     # Hamjamiyat (Community Feed) Moderatsiyasi
     path('community/', api.panel_community_posts_api, name='panel_community_posts'),

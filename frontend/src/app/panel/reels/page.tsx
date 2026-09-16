@@ -105,6 +105,7 @@ export default function PanelReelsPage() {
   const [stats, setStats] = useState({ total: 0, published: 0, drafts: 0 });
   const [loading, setLoading] = useState(true);
   const [questionsLoading, setQuestionsLoading] = useState(true);
+  const [deletingReelId, setDeletingReelId] = useState<number | null>(null);
 
   // Hamjamiyat state
   const [communityPosts, setCommunityPosts] = useState<PanelCommunityPost[]>([]);
@@ -224,9 +225,18 @@ export default function PanelReelsPage() {
   // Delete Reel
   const handleDeleteReel = async (id: number) => {
     if (!window.confirm("Rostdan ham ushbu Reelni o'chirmoqchimisiz?")) return;
+    setDeletingReelId(id);
     try {
       const targetReel = reels.find((r) => r.id === id);
-      await apiFetch(`/api/panel/reels/${id}/`, { method: 'DELETE' });
+      try {
+        await apiFetch(`/api/panel/reels/${id}/delete/`, { method: 'POST' });
+      } catch (err: any) {
+        if (err?.status === 404) {
+          await apiFetch(`/api/panel/reels/${id}/`, { method: 'DELETE' });
+        } else {
+          throw err;
+        }
+      }
       setReels((prev) => prev.filter((r) => r.id !== id));
       if (targetReel) {
         setStats((prev) => ({
@@ -238,6 +248,8 @@ export default function PanelReelsPage() {
       toast.success("Reel muvaffaqiyatli o'chirildi!");
     } catch (err: any) {
       toast.error(err?.message || "O'chirishda xatolik");
+    } finally {
+      setDeletingReelId(null);
     }
   };
 
@@ -701,10 +713,15 @@ export default function PanelReelsPage() {
                             <Button
                               size="sm"
                               variant="ghost"
+                              disabled={deletingReelId === reel.id}
                               onClick={() => handleDeleteReel(reel.id)}
-                              className="size-8 p-0 text-rose-500 hover:bg-rose-500/10 rounded-xl"
+                              className="size-8 p-0 text-rose-500 hover:bg-rose-500/10 rounded-xl disabled:opacity-50"
                             >
-                              <Trash2 className="size-4" />
+                              {deletingReelId === reel.id ? (
+                                <RefreshCw className="size-4 animate-spin text-rose-500" />
+                              ) : (
+                                <Trash2 className="size-4" />
+                              )}
                             </Button>
                           </div>
                         </div>

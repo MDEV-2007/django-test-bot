@@ -3650,14 +3650,14 @@ def panel_reels_list_create_api(request):
         return Response({'success': True, 'id': reel.id, 'message': "Reel muvaffaqiyatli saqlandi!"})
 
 
-@api_view(['GET', 'PATCH', 'DELETE'])
+@api_view(['GET', 'PATCH', 'DELETE', 'POST'])
 @permission_classes([IsAuthenticated, IsSuperAdmin])
 def panel_reels_detail_api(request, reel_id):
     from learning.models import Reel
 
     reel = Reel.objects.filter(id=reel_id).first()
     if not reel:
-        if request.method == 'DELETE':
+        if request.method in ['DELETE', 'POST']:
             return Response({'success': True, 'message': "Reel allaqachon o'chirilgan"})
         return Response({'error': "Reel topilmadi"}, status=404)
 
@@ -3698,7 +3698,7 @@ def panel_reels_detail_api(request, reel_id):
 
         return Response({'success': True, 'reel': reel.to_dict(), 'message': "O'zgarishlar saqlandi!"})
 
-    elif request.method == 'DELETE':
+    elif request.method in ['DELETE', 'POST']:
         try:
             hook = reel.hook[:40] if getattr(reel, 'hook', None) else f"Reel #{reel_id}"
             reel.delete()
@@ -3717,6 +3717,34 @@ def panel_reels_detail_api(request, reel_id):
         except Exception as e:
             logger.exception("Reel delete error: %s", e)
             return Response({'error': f"O'chirishda xatolik: {str(e)}"}, status=500)
+
+
+@api_view(['DELETE', 'POST'])
+@permission_classes([IsAuthenticated, IsSuperAdmin])
+def panel_reels_delete_api(request, reel_id):
+    """Super admin uchun Reelni o'chirish maxsus xavfsiz endpointi."""
+    from learning.models import Reel
+    try:
+        reel = Reel.objects.filter(id=reel_id).first()
+        if not reel:
+            return Response({'success': True, 'message': "Reel allaqachon o'chirilgan."})
+        hook = reel.hook[:40] if getattr(reel, 'hook', None) else f"Reel #{reel_id}"
+        reel.delete()
+
+        try:
+            AuditLog.objects.create(
+                user=request.user,
+                action=f"Reel o'chirildi: {hook}",
+                model_name='Reel',
+                object_id=str(reel_id),
+            )
+        except Exception:
+            pass
+
+        return Response({'success': True, 'message': "Reel muvaffaqiyatli o'chirildi!"})
+    except Exception as e:
+        logger.exception("panel_reels_delete_api error: %s", e)
+        return Response({'error': f"O'chirishda xatolik: {str(e)}"}, status=500)
 
 
 @api_view(['GET'])
