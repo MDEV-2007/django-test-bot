@@ -3855,7 +3855,7 @@ def panel_reels_hardest_questions_api(request):
             )
             .values('question_id')
             .annotate(wrong_count=Count('id'))
-            .order_by('-wrong_count')[:30]
+            .order_by('-wrong_count')[:60]
         )
 
         seen_qids = set()
@@ -3889,7 +3889,9 @@ def panel_reels_hardest_questions_api(request):
 
             raw_body = q.body or ""
             clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
-            if not clean_text or len(clean_text) < 10 or 'yozing' in clean_text.lower():
+            lower_body = clean_text.lower()
+            unwanted_words = ['yozing', 'topshiriq', "lo'nda", 'lo‘nda', 'moslashtiring', 'matnni']
+            if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
                 continue
 
             questions_data.append({
@@ -3908,13 +3910,13 @@ def panel_reels_hardest_questions_api(request):
                 'suggested_tagline': f"{wrong_ans} ta o'quvchi adashgan!",
             })
 
-            if len(questions_data) >= 12:
+            if len(questions_data) >= 24:
                 break
     except Exception as e:
         logger.exception("Error analyzing hardest questions from attempts: %s", e)
 
     # 2. Agar urinishlar yetarli bo'lmasa, rasmiy testlar bazasidan variantli savollardan saralash
-    if len(questions_data) < 6:
+    if len(questions_data) < 24:
         existing_ids = {qd['question_id'] for qd in questions_data}
         fallback_qs = (
             Question.objects
@@ -3925,7 +3927,7 @@ def panel_reels_hardest_questions_api(request):
             .exclude(id__in=existing_ids)
             .select_related('subject')
             .prefetch_related('choices')
-            .order_by('-difficulty', '-id')[:30]
+            .order_by('-difficulty', '-id')[:100]
         )
 
         for q in fallback_qs:
@@ -3935,7 +3937,9 @@ def panel_reels_hardest_questions_api(request):
 
             raw_body = q.body or ""
             clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
-            if not clean_text or len(clean_text) < 10 or 'yozing' in clean_text.lower():
+            lower_body = clean_text.lower()
+            unwanted_words = ['yozing', 'topshiriq', "lo'nda", 'lo‘nda', 'moslashtiring', 'matnni']
+            if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
                 continue
 
             options = [c.text for c in choices]
@@ -3969,7 +3973,7 @@ def panel_reels_hardest_questions_api(request):
                 'suggested_tagline': f"{subj_name} testi",
             })
 
-            if len(questions_data) >= 12:
+            if len(questions_data) >= 24:
                 break
 
     return Response({

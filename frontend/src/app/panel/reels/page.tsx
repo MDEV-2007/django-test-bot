@@ -100,6 +100,8 @@ export default function PanelReelsPage() {
   // Reels state
   const [reels, setReels] = useState<PanelReelItem[]>([]);
   const [hardestQuestions, setHardestQuestions] = useState<HardestQuestion[]>([]);
+  const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const [questionSubjectFilter, setQuestionSubjectFilter] = useState('all');
   const [stats, setStats] = useState({ total: 0, published: 0, drafts: 0 });
   const [loading, setLoading] = useState(true);
   const [questionsLoading, setQuestionsLoading] = useState(true);
@@ -490,54 +492,126 @@ export default function PanelReelsPage() {
             </div>
 
             {/* AI Generator Recommendation: Hardest questions */}
-            {hardestQuestions.length > 0 && (
-              <Card className="rounded-3xl border-rose-500/20 bg-rose-500/5 shadow-sm">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-5 h-5 text-rose-500 animate-pulse" />
-                    <CardTitle className="text-base font-bold text-foreground">
-                      Eng Ko&apos;p Xato Qilingan Savollar (AI Reel Tavsiyalari)
-                    </CardTitle>
-                  </div>
-                  <CardDescription className="text-xs">
-                    O&apos;quvchilar eng ko&apos;p yiqilgan savollardan bir bosishda qiziqarli Reel yarating:
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                    {hardestQuestions.slice(0, 3).map((q) => (
-                      <div
-                        key={q.question_id}
-                        className="p-3 rounded-2xl bg-card border border-border/80 space-y-2 flex flex-col justify-between"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md">
-                              {q.subject_name} · Xatolik: {q.fail_rate}%
-                            </span>
-                            <span className="text-muted-foreground font-mono">
-                              {q.wrong_count > 0 ? `${q.wrong_count} ta xato` : 'BBA testi'}
-                            </span>
-                          </div>
-                          <p className="text-xs font-semibold text-foreground line-clamp-2 leading-snug">
-                            {q.clean_body}
-                          </p>
+            {hardestQuestions.length > 0 && (() => {
+              const filtered = hardestQuestions.filter((q) => {
+                if (questionSubjectFilter === 'all') return true;
+                return q.subject_name.toLowerCase() === questionSubjectFilter.toLowerCase();
+              });
+              const displayed = showAllQuestions ? filtered : filtered.slice(0, 6);
+              const uniqueSubjects = Array.from(new Set(hardestQuestions.map((q) => q.subject_name))).filter(Boolean);
+
+              return (
+                <Card className="rounded-3xl border-rose-500/20 bg-rose-500/5 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <Flame className="w-5 h-5 text-rose-500 animate-pulse shrink-0" />
+                        <div>
+                          <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
+                            <span>Eng Ko&apos;p Xato Qilingan Savollar</span>
+                            <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 text-xs font-bold">
+                              {hardestQuestions.length} ta tavsiya
+                            </Badge>
+                          </CardTitle>
+                          <CardDescription className="text-xs mt-0.5">
+                            O&apos;quvchilar eng ko&apos;p yiqilgan testlardan bir bosishda qiziqarli Reel yarating:
+                          </CardDescription>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2 self-start sm:self-auto">
                         <Button
                           size="sm"
-                          variant="outline"
-                          onClick={() => handleUseHardestQuestion(q)}
-                          className="w-full text-xs font-bold rounded-xl gap-1 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+                          variant="ghost"
+                          onClick={loadHardestQuestions}
+                          disabled={questionsLoading}
+                          className="text-xs h-8 gap-1.5 text-muted-foreground hover:text-foreground"
                         >
-                          <Sparkles className="w-3.5 h-3.5" />
-                          <span>Reelga Aylantirish</span>
+                          <RefreshCw className={`w-3.5 h-3.5 ${questionsLoading ? 'animate-spin' : ''}`} />
+                          <span>Yangilash</span>
                         </Button>
+                        {filtered.length > 6 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowAllQuestions(!showAllQuestions)}
+                            className="text-xs h-8 font-semibold border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+                          >
+                            {showAllQuestions ? "Kamroq ko'rsatish" : `Barchasini ko'rish (${filtered.length})`}
+                          </Button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Fanlar bo'yicha filterlar */}
+                    {uniqueSubjects.length > 1 && (
+                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setQuestionSubjectFilter('all')}
+                          className={`px-3 py-1 rounded-xl text-xs transition-all font-medium ${
+                            questionSubjectFilter === 'all'
+                              ? 'bg-rose-500 text-white shadow-xs font-bold'
+                              : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
+                          }`}
+                        >
+                          Barchasi ({hardestQuestions.length})
+                        </button>
+                        {uniqueSubjects.map((sName) => {
+                          const count = hardestQuestions.filter(q => q.subject_name === sName).length;
+                          return (
+                            <button
+                              key={sName}
+                              type="button"
+                              onClick={() => setQuestionSubjectFilter(sName)}
+                              className={`px-3 py-1 rounded-xl text-xs transition-all whitespace-nowrap font-medium ${
+                                questionSubjectFilter === sName
+                                  ? 'bg-rose-500 text-white shadow-xs font-bold'
+                                  : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
+                              }`}
+                            >
+                              {sName} ({count})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                      {displayed.map((q) => (
+                        <div
+                          key={q.question_id}
+                          className="p-3.5 rounded-2xl bg-card border border-border/80 space-y-2.5 flex flex-col justify-between hover:border-rose-500/40 transition-colors shadow-xs"
+                        >
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md">
+                                {q.subject_name} · Xatolik: {q.fail_rate}%
+                              </span>
+                              <span className="text-muted-foreground font-mono">
+                                {q.wrong_count > 0 ? `${q.wrong_count} ta xato` : 'BBA testi'}
+                              </span>
+                            </div>
+                            <p className="text-xs font-semibold text-foreground line-clamp-2 leading-snug">
+                              {q.clean_body}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUseHardestQuestion(q)}
+                            className="w-full text-xs font-bold rounded-xl gap-1 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Reelga Aylantirish</span>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
             {/* Reels Table List */}
             <div className="space-y-3">
