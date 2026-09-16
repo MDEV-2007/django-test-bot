@@ -564,8 +564,8 @@ export default function StudyRoomPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/40 pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-xs font-black uppercase px-2.5 py-0.5 rounded-xl gap-1">
-                    <Target className="size-3.5" />
+                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-xs font-black uppercase px-2.5 py-0.5 rounded-xl gap-1.5">
+                    <PremiumIcon icon={Target} tone="primary" size="xs" />
                     <span>STUDY MODE</span>
                   </Badge>
                   <span className="text-xs text-muted-foreground">
@@ -602,9 +602,7 @@ export default function StudyRoomPage() {
             <Card className="rounded-3xl border border-primary/30 bg-gradient-to-r from-primary/[0.08] via-card to-card p-5 sm:p-6 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
                 <div className="flex items-start gap-3.5">
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-primary border border-primary/30 shadow-xs">
-                    <Bot className="size-6" />
-                  </div>
+                  <PremiumIcon icon={Bot} tone="primary" size="lg" glow className="shrink-0" />
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs font-black uppercase tracking-wider text-primary">
@@ -842,7 +840,7 @@ export default function StudyRoomPage() {
                 <Card className="rounded-3xl border border-border/80 bg-card p-5 shadow-xs space-y-3.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Headphones className="size-4 text-emerald-500" />
+                      <PremiumIcon icon={Headphones} tone="emerald" size="sm" glow />
                       <h4 className="text-sm font-bold text-foreground">
                         🎧 Fokus Muhiti (Ambient Tovushlar)
                       </h4>
@@ -872,7 +870,7 @@ export default function StudyRoomPage() {
                               : "bg-background border-border/70 hover:border-border text-foreground"
                           )}
                         >
-                          <Icon className={cn("size-4 mb-1.5", isActive ? "text-emerald-400 animate-pulse" : "text-muted-foreground")} />
+                          <PremiumIcon icon={Icon} tone={isActive ? "emerald" : "zinc"} size="xs" glow={isActive} className="mb-1.5" />
                           <span className="text-xs font-bold block truncate">{snd.name}</span>
                           <span className="text-[10px] text-muted-foreground block truncate">
                             {isActive ? '🔊 Yangramoqda' : 'Yoqish'}
@@ -907,7 +905,7 @@ export default function StudyRoomPage() {
                 <Card className="rounded-3xl border-2 border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-card to-card p-6 shadow-sm space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-border/50">
                     <div className="flex items-center gap-2">
-                      <Flame className="size-5 text-amber-500 animate-pulse" />
+                      <PremiumIcon icon={Flame} tone="amber" size="sm" glow />
                       <h3 className="text-sm font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 font-mono">
                         FOCUS STREAK
                       </h3>
@@ -965,7 +963,7 @@ export default function StudyRoomPage() {
                 {/* Tezkor navigatsiya kartalari */}
                 <Card className="rounded-3xl border border-border/80 bg-card p-5 shadow-xs space-y-3">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="size-4 text-indigo-500" />
+                    <PremiumIcon icon={BookOpen} tone="indigo" size="sm" glow />
                     <h4 className="text-xs font-mono font-black uppercase tracking-wider text-muted-foreground">
                       O&apos;quv Qurollari
                     </h4>
@@ -976,8 +974,8 @@ export default function StudyRoomPage() {
                       href="/tests"
                       className="p-3 rounded-2xl bg-background border border-border/70 hover:border-primary/40 transition-colors flex items-center justify-between text-xs font-bold group"
                     >
-                      <span className="flex items-center gap-2">
-                        <span>🧠</span>
+                      <span className="flex items-center gap-2.5">
+                        <PremiumIcon icon={Brain} tone="emerald" size="xs" />
                         <span>Amaliy Mashqlar Banki</span>
                       </span>
                       <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
@@ -987,8 +985,8 @@ export default function StudyRoomPage() {
                       href="/flashcards"
                       className="p-3 rounded-2xl bg-background border border-border/70 hover:border-primary/40 transition-colors flex items-center justify-between text-xs font-bold group"
                     >
-                      <span className="flex items-center gap-2">
-                        <span>🎴</span>
+                      <span className="flex items-center gap-2.5">
+                        <PremiumIcon icon={Layers} tone="amber" size="xs" />
                         <span>Quick Learn Flashcards</span>
                       </span>
                       <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
@@ -998,8 +996,8 @@ export default function StudyRoomPage() {
                       href="/reels"
                       className="p-3 rounded-2xl bg-background border border-border/70 hover:border-primary/40 transition-colors flex items-center justify-between text-xs font-bold group"
                     >
-                      <span className="flex items-center gap-2">
-                        <span>🎬</span>
+                      <span className="flex items-center gap-2.5">
+                        <PremiumIcon icon={Sparkles} tone="rose" size="xs" />
                         <span>Bilim Reels Videolari</span>
                       </span>
                       <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />

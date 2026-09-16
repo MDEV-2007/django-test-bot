@@ -240,9 +240,7 @@ export default function DashboardPage() {
                     href="/profile"
                     className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-amber-500/10 transition-colors group"
                   >
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500 group-hover:scale-110 transition-transform">
-                      <Flame className="size-4 animate-pulse" />
-                    </div>
+                    <PremiumIcon icon={Flame} tone="amber" size="sm" glow className="group-hover:scale-110" />
                     <div>
                       <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Streak</p>
                       <p className="font-mono text-xs sm:text-sm font-black text-foreground">
@@ -267,9 +265,7 @@ export default function DashboardPage() {
                     href="/shop"
                     className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-yellow-500/10 transition-colors group"
                   >
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-yellow-500/15 text-yellow-500 group-hover:scale-110 transition-transform">
-                      <Coins className="size-4" />
-                    </div>
+                    <PremiumIcon icon={Coins} tone="gold" size="sm" glow className="group-hover:scale-110" />
                     <div>
                       <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Tangalar</p>
                       <p className="font-mono text-xs sm:text-sm font-black text-foreground">
@@ -292,9 +288,7 @@ export default function DashboardPage() {
                     href="/battles"
                     className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-rose-500/10 transition-colors group"
                   >
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-rose-500/15 text-rose-500 group-hover:scale-110 transition-transform">
-                      <Swords className="size-4" />
-                    </div>
+                    <PremiumIcon icon={Swords} tone="rose" size="sm" glow className="group-hover:scale-110" />
                     <div>
                       <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Arena</p>
                       <p className="font-mono text-xs sm:text-sm font-black text-foreground">
@@ -395,9 +389,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-rose-500/40 hover:shadow-xs transition-all group"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-500 border border-rose-500/25 group-hover:scale-105 transition-transform">
-                      <Sparkles className="size-4" />
-                    </div>
+                    <PremiumIcon icon={Sparkles} tone="rose" size="md" glow className="group-hover:scale-105" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-foreground group-hover:text-rose-500 transition-colors">
@@ -423,9 +415,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-emerald-500/40 hover:shadow-xs transition-all group"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/25 group-hover:scale-105 transition-transform">
-                      <FileCheck2 className="size-4" />
-                    </div>
+                    <PremiumIcon icon={FileCheck2} tone="emerald" size="md" glow className="group-hover:scale-105" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-foreground group-hover:text-emerald-500 transition-colors">
@@ -451,9 +441,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-purple-500/40 hover:shadow-xs transition-all group"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/15 text-purple-500 border border-purple-500/25 group-hover:scale-105 transition-transform">
-                      <Swords className="size-4" />
-                    </div>
+                    <PremiumIcon icon={Swords} tone="purple" size="md" glow className="group-hover:scale-105" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-foreground group-hover:text-purple-500 transition-colors">
@@ -494,7 +482,7 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center justify-between pb-3.5 border-b border-border/60">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-2xl">🌳</span>
+                  <PremiumIcon icon={Brain} tone="emerald" size="sm" glow />
                   <div>
                     <h3 className="text-base font-black text-foreground">
                       BILIM DARAJANG
@@ -512,15 +500,15 @@ export default function DashboardPage() {
               {/* Fanlar bo'yicha progress barlar */}
               <div className="space-y-3 pt-4">
                 {[
-                  { name: 'Matematika', icon: '📐', mastery: 72, color: 'from-blue-500 to-cyan-400' },
-                  { name: 'Biologiya', icon: '🧬', mastery: 51, color: 'from-emerald-500 to-teal-400' },
-                  { name: 'Tarix', icon: '📜', mastery: 83, color: 'from-amber-500 to-orange-400' },
-                  { name: 'Ona tili', icon: '📖', mastery: 78, color: 'from-purple-500 to-indigo-400' },
+                  { name: 'Matematika', icon: Brain, tone: 'sky' as const, mastery: 72, color: 'from-blue-500 to-cyan-400' },
+                  { name: 'Biologiya', icon: Dna, tone: 'emerald' as const, mastery: 51, color: 'from-emerald-500 to-teal-400' },
+                  { name: 'Tarix', icon: BookOpen, tone: 'amber' as const, mastery: 83, color: 'from-amber-500 to-orange-400' },
+                  { name: 'Ona tili', icon: Layers, tone: 'purple' as const, mastery: 78, color: 'from-purple-500 to-indigo-400' },
                 ].map((item) => (
                   <div key={item.name} className="p-2.5 rounded-2xl bg-background/60 border border-border/60 space-y-1.5 hover:border-border transition-colors">
                     <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-foreground flex items-center gap-1.5">
-                        <span>{item.icon}</span>
+                      <span className="text-foreground flex items-center gap-2">
+                        <PremiumIcon icon={item.icon} tone={item.tone} size="xs" />
                         <span>{item.name}</span>
                       </span>
                       <span className="font-mono text-xs font-black text-foreground">
@@ -540,7 +528,7 @@ export default function DashboardPage() {
               {/* Zaif fanni mustahkamlash mini tavsiya (Card bo'sh joyini to'ldiradi) */}
               <div className="mt-3.5 p-3 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Sparkles className="size-4 text-primary shrink-0" />
+                  <PremiumIcon icon={Sparkles} tone="primary" size="xs" glow />
                   <p className="text-[11px] text-muted-foreground truncate">
                     Zaif fan: <strong className="text-foreground font-semibold">Biologiya (51%)</strong>
                   </p>
@@ -568,9 +556,7 @@ export default function DashboardPage() {
         <section className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
-                <Brain className="size-5" />
-              </div>
+              <PremiumIcon icon={Brain} tone="emerald" size="md" glow />
               <div>
                 <h2 className="text-lg sm:text-xl font-black text-foreground flex items-center gap-2">
                   <span>🌳 Skill Tree (Bilim Daraxti)</span>
@@ -600,8 +586,8 @@ export default function DashboardPage() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="border-purple-500/30 bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1">
-                  <Swords className="size-3.5" />
+                <Badge variant="outline" className="border-purple-500/30 bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1.5">
+                  <PremiumIcon icon={Swords} tone="purple" size="xs" glow />
                   <span>ARENA</span>
                 </Badge>
                 <span className="text-[11px] font-mono font-bold text-purple-500">Live 1v1</span>
@@ -683,8 +669,8 @@ export default function DashboardPage() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="border-rose-500/30 bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1">
-                  <Sparkles className="size-3.5" />
+                <Badge variant="outline" className="border-rose-500/30 bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1.5">
+                  <PremiumIcon icon={Sparkles} tone="rose" size="xs" glow />
                   <span>BILIM REELS</span>
                 </Badge>
                 <span className="text-[11px] font-bold text-rose-500">+20 XP</span>
@@ -741,8 +727,8 @@ export default function DashboardPage() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="border-amber-500/30 bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1">
-                  <Layers className="size-3.5" />
+                <Badge variant="outline" className="border-amber-500/30 bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1.5">
+                  <PremiumIcon icon={Layers} tone="amber" size="xs" glow />
                   <span>QUICK LEARN</span>
                 </Badge>
                 <span className="text-[11px] font-bold text-amber-500">+25 XP</span>
@@ -796,9 +782,7 @@ export default function DashboardPage() {
           <CardHeader className="pb-3 border-b border-border/40">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex size-9 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                  <Target className="size-5" />
-                </div>
+                <PremiumIcon icon={Target} tone="rose" size="md" glow />
                 <div>
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-base font-black tracking-tight text-foreground flex items-center gap-2">
@@ -844,6 +828,7 @@ export default function DashboardPage() {
                 const href = isReel ? '/reels' : isBattle ? '/battles' : '/tests';
                 const ctaText = isReel ? 'Reels ko\'rish' : isBattle ? 'Jangga kirish' : 'Mashqni boshlash';
                 const ActionIconComp = isReel ? Sparkles : isBattle ? Swords : FileCheck2;
+                const missionTone = isReel ? 'rose' : isBattle ? 'purple' : 'emerald';
 
                 return (
                   <div
@@ -860,13 +845,13 @@ export default function DashboardPage() {
                         <Badge
                           variant="outline"
                           className={cn(
-                            "text-[10px] font-bold px-2 py-0.5 rounded-lg gap-1",
+                            "text-[10px] font-bold px-2 py-0.5 rounded-lg gap-1.5",
                             isReel ? "bg-rose-500/10 text-rose-600 border-rose-500/25" :
                             isBattle ? "bg-purple-500/10 text-purple-600 border-purple-500/25" :
                             "bg-emerald-500/10 text-emerald-600 border-emerald-500/25"
                           )}
                         >
-                          <ActionIconComp className="size-3" />
+                          <PremiumIcon icon={ActionIconComp} tone={missionTone} size="xs" />
                           <span>{isReel ? "Bilim Reels" : isBattle ? "Arena Jangi" : "Amaliy Mashq"}</span>
                         </Badge>
                         <span className="flex items-center gap-1 font-mono text-xs font-bold text-primary">

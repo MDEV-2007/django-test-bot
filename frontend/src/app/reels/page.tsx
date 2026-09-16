@@ -512,8 +512,8 @@ export default function ReelsPage() {
                   {/* ── REEL HEADER: Subject Badge & Index Counter ── */}
                   <div className="relative z-10 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-black uppercase tracking-wider">
-                        <SubjectIcon className="w-3.5 h-3.5 text-white" />
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-black uppercase tracking-wider">
+                        <PremiumIcon icon={SubjectIcon} tone={subjectTone} size="xs" glow />
                         <span>{reel.subject_name}</span>
                       </div>
                       <span className="text-[11px] text-white/80 font-medium truncate max-w-[150px]">
@@ -532,7 +532,7 @@ export default function ReelsPage() {
                     <div className="space-y-1.5">
                       {reel.is_personalized && reel.recommendation_reason && (
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/30 via-orange-500/25 to-rose-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-bold backdrop-blur-md shadow-sm">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                          <PremiumIcon icon={Sparkles} tone="amber" size="xs" />
                           <span>{reel.recommendation_reason}</span>
                         </div>
                       )}
@@ -555,7 +555,7 @@ export default function ReelsPage() {
 
                     {/* Takeaway / Golden rule */}
                     <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-200">
-                      <Award className="w-4 h-4 shrink-0 text-emerald-300" />
+                      <PremiumIcon icon={Award} tone="emerald" size="xs" glow />
                       <span className="text-[11px] font-semibold leading-tight line-clamp-2">
                         {reel.takeaway}
                       </span>
@@ -564,8 +564,8 @@ export default function ReelsPage() {
                     {/* ⚡ MICRO-QUIZ: Seamless Interactive 4-options ── */}
                     <div className="p-3 rounded-2xl bg-black/50 backdrop-blur-xl border border-white/15 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-black text-amber-300 flex items-center gap-1">
-                          <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                        <span className="text-[11px] font-black text-amber-300 flex items-center gap-1.5">
+                          <PremiumIcon icon={Flame} tone="amber" size="xs" glow />
                           Tezkor Savol:
                         </span>
                         <span className="text-[10px] font-mono text-white/70">

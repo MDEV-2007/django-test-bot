@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Layers, ArrowLeft, ArrowRight, RotateCw, Check, X, Sparkles, Trophy,
   Flame, BookOpen, Crown, Zap, RefreshCcw, Volume2, HelpCircle, CheckCircle2,
-  ChevronRight, Brain, Swords
+  ChevronRight, Brain, Swords, Dna
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,6 +15,7 @@ import { soundFX } from '@/lib/soundFX';
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { useFeatureFlags } from '@/lib/features';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -187,6 +188,8 @@ export default function FlashcardsPage() {
     );
   }
 
+  const currentCard = activeDeck?.cards[currentIndex];
+
   return (
     <>
       <AppShell />
@@ -231,9 +234,7 @@ export default function FlashcardsPage() {
             {/* ============================================================ */}
             {isCompleted ? (
               <Card className="border-2 border-primary/40 bg-gradient-to-br from-card via-card to-primary/10 shadow-xl p-6 sm:p-8 text-center space-y-6 animate-in zoom-in-95 duration-300">
-                <div className="size-16 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center mx-auto shadow-inner">
-                  <Trophy className="size-8 animate-bounce" />
-                </div>
+                <PremiumIcon icon={Trophy} tone="gold" size="xl" glow className="mx-auto" />
 
                 <div className="space-y-1.5">
                   <h3 className="text-2xl font-black tracking-tight text-foreground">
@@ -258,15 +259,11 @@ export default function FlashcardsPage() {
                 <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto text-xs">
                   <div className="p-3 bg-muted/40 rounded-xl border">
                     <span className="text-muted-foreground">Xotirada mustahkamlandi</span>
-                    <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                      {masteredIds.length} ta
-                    </p>
+                    <p className="text-lg font-black text-emerald-500 mt-0.5">{masteredIds.length} ta</p>
                   </div>
                   <div className="p-3 bg-muted/40 rounded-xl border">
-                    <span className="text-muted-foreground">Qaytarish tavsiya etiladi</span>
-                    <p className="text-xl font-bold text-amber-500 mt-0.5">
-                      {reviewIds.length} ta
-                    </p>
+                    <span className="text-muted-foreground">Qayta takrorlanadi</span>
+                    <p className="text-lg font-black text-rose-500 mt-0.5">{reviewIds.length} ta</p>
                   </div>
                 </div>
 
@@ -274,15 +271,15 @@ export default function FlashcardsPage() {
                   <Button
                     onClick={restartDeck}
                     variant="outline"
-                    className="w-full sm:w-auto gap-1.5 text-xs font-semibold"
+                    className="w-full sm:w-auto rounded-xl gap-2 font-semibold"
                   >
-                    <RefreshCcw className="size-3.5" /> Qayta takrorlash
+                    <RefreshCcw className="size-4" /> Qaytadan boshlash
                   </Button>
                   <Button
                     onClick={() => setActiveDeck(null)}
-                    className="w-full sm:w-auto gap-1.5 text-xs font-semibold bg-primary hover:opacity-90"
+                    className="w-full sm:w-auto rounded-xl gap-2 font-bold bg-primary"
                   >
-                    Boshqa to&apos;plam tanlash <ArrowRight className="size-3.5" />
+                    Keyingi to&apos;plamga o&apos;tish <ArrowRight className="size-4" />
                   </Button>
                 </div>
               </Card>
@@ -290,75 +287,55 @@ export default function FlashcardsPage() {
               /* ============================================================ */
               /* 3D INTERAKTIV FLIP CARD                                      */
               /* ============================================================ */
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* 3D Flip Flashcard */}
                 <div
-                  onClick={handleFlip}
-                  className={cn(
-                    "relative min-h-[280px] sm:min-h-[320px] w-full cursor-pointer rounded-2xl border-2 p-6 sm:p-8 shadow-lg transition-all duration-300 flex flex-col justify-between select-none group",
-                    isFlipped
-                      ? "border-emerald-500/50 bg-gradient-to-br from-emerald-500/[0.08] via-card to-card hover:border-emerald-500/70"
-                      : "border-border/80 bg-gradient-to-br from-card to-card/60 hover:border-primary/50"
-                  )}
-                  style={{ perspective: '1000px' }}
+                  onClick={() => setIsFlipped(!isFlipped)}
+                  className="relative min-h-[18rem] sm:min-h-[22rem] w-full cursor-pointer select-none rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-2 border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 hover:border-primary/60 transition-all shadow-lg group active:scale-[0.99]"
                 >
-                  {/* Karta boshi */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      {isFlipped ? (
-                        <>
-                          <CheckCircle2 className="size-3.5 text-emerald-500" />
-                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">Javob / Tushuntirish</span>
-                        </>
-                      ) : (
-                        <>
-                          <HelpCircle className="size-3.5 text-amber-500" /> Savol / Fakt
-                        </>
-                      )}
+                  <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                    <span className="flex items-center gap-1.5 uppercase font-mono tracking-wider text-[11px] text-primary">
+                      <Sparkles className="size-3.5" />
+                      {isFlipped ? 'Javob / Izoh' : 'Savol / Fakt'}
                     </span>
-                    <span className="text-xs text-muted-foreground/80 flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-[11px] bg-muted/70 px-2.5 py-1 rounded-full">
                       <RotateCw className="size-3 group-hover:rotate-180 transition-transform duration-500" />
                       Aylantirish uchun bosing
                     </span>
                   </div>
 
-                  {/* Karta matni */}
-                  <div className="my-auto py-4 text-center">
+                  <div className="my-auto py-4 text-center space-y-3">
                     <p className={cn(
-                      "text-lg sm:text-2xl font-bold leading-relaxed transition-colors",
-                      isFlipped
-                        ? "text-emerald-600 dark:text-emerald-200 font-semibold text-base sm:text-xl"
-                        : "text-foreground"
+                      "text-xl sm:text-2xl font-black leading-snug tracking-tight text-foreground transition-all",
+                      isFlipped && "text-emerald-600 dark:text-emerald-400"
                     )}>
-                      {isFlipped
-                        ? activeDeck.cards[currentIndex]?.back
-                        : activeDeck.cards[currentIndex]?.front
-                      }
+                      {isFlipped ? currentCard?.back : currentCard?.front}
                     </p>
 
-                    {/* Maslahat (Hint) */}
-                    {!isFlipped && activeDeck.cards[currentIndex]?.hint && (
-                      <div className="mt-4">
-                        {showHint ? (
-                          <p className="text-xs text-amber-500 font-medium italic">
-                            💡 Maslahat: {activeDeck.cards[currentIndex].hint}
-                          </p>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setShowHint(true); }}
-                            className="text-[11px] text-muted-foreground hover:text-amber-500 underline transition-colors"
-                          >
-                            💡 Maslahatni ko&apos;rish
-                          </button>
-                        )}
-                      </div>
+                    {showHint && currentCard?.hint && (
+                      <p className="text-xs text-amber-500 italic bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl max-w-md mx-auto animate-in fade-in">
+                        💡 Maslahat: {currentCard.hint}
+                      </p>
                     )}
                   </div>
 
-                  {/* Karta osti */}
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/40">
-                    <span>Bo&apos;shliq (Space) — aylantirish</span>
-                    <span className="font-mono">Kartalar: {currentIndex + 1} / {activeDeck.cards.length}</span>
+                  <div className="flex items-center justify-between pt-4 border-t border-border/60 text-xs">
+                    {currentCard?.hint && !showHint ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowHint(true);
+                        }}
+                        className="text-amber-500 hover:underline flex items-center gap-1 font-medium"
+                      >
+                        <HelpCircle className="size-3.5" /> Maslahatni ko&apos;rish
+                      </button>
+                    ) : <div />}
+
+                    <span className="text-muted-foreground text-[11px] font-mono">
+                      {isFlipped ? 'To\'g\'ri bildingizmi?' : 'O\'ylab ko\'ring'}
+                    </span>
                   </div>
                 </div>
 
@@ -391,8 +368,9 @@ export default function FlashcardsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs font-bold gap-1">
-                    <Brain className="size-3 text-amber-500" /> Smart Flashcards
+                  <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs font-bold gap-1.5">
+                    <PremiumIcon icon={Brain} tone="amber" size="xs" glow />
+                    <span>Smart Flashcards</span>
                   </Badge>
                   <Badge variant="secondary" className="text-xs font-medium">Anki & Quizlet uslubi</Badge>
                 </div>
@@ -446,53 +424,60 @@ export default function FlashcardsPage() {
               </Card>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredDecks.map((deck) => (
-                  <Card
-                    key={deck.id}
-                    onClick={() => startDeck(deck.id)}
-                    className="cursor-pointer border border-border/70 hover:border-primary/50 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-card to-card/60 rounded-2xl p-5 flex flex-col justify-between group"
-                  >
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-[11px] font-semibold">
-                          {deck.subject}
-                        </Badge>
-                        <span className="text-[11px] text-amber-500 font-bold flex items-center gap-1">
-                          <Zap className="size-3" /> +{deck.xp_reward} XP
-                        </span>
+                {filteredDecks.map((deck) => {
+                  const DeckIcon = deck.subject_slug === 'tarix' ? Swords : deck.subject_slug === 'biologiya' ? Dna : BookOpen;
+                  const deckTone = deck.subject_slug === 'tarix' ? 'rose' : deck.subject_slug === 'biologiya' ? 'emerald' : 'indigo';
+
+                  return (
+                    <Card
+                      key={deck.id}
+                      onClick={() => startDeck(deck.id)}
+                      className="cursor-pointer border border-border/70 hover:border-primary/50 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-card to-card/60 rounded-2xl p-5 flex flex-col justify-between group"
+                    >
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="text-[11px] font-semibold gap-1.5">
+                            <PremiumIcon icon={DeckIcon} tone={deckTone} size="xs" />
+                            <span>{deck.subject}</span>
+                          </Badge>
+                          <span className="text-[11px] text-amber-500 font-bold flex items-center gap-1">
+                            <Zap className="size-3" /> +{deck.xp_reward} XP
+                          </span>
+                        </div>
+
+                        <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
+                          {deck.title}
+                        </h3>
+
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                          {deck.description}
+                        </p>
                       </div>
 
-                      <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
-                        {deck.title}
-                      </h3>
-
-                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                        {deck.description}
-                      </p>
-                    </div>
-
-                    <div className="pt-4 mt-2 border-t border-border/50 flex items-center justify-between text-xs">
-                      <span className="font-mono font-medium text-muted-foreground">
-                        {deck.total_cards} ta karta
-                      </span>
-                      <Button
-                        size="sm"
-                        disabled={loadingDeck}
-                        className="h-8 text-xs font-semibold gap-1 bg-primary/15 text-primary hover:bg-primary hover:text-primary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all"
-                      >
-                        Yodlash <ChevronRight className="size-3" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                      <div className="pt-4 mt-2 border-t border-border/50 flex items-center justify-between text-xs">
+                        <span className="font-mono font-medium text-muted-foreground">
+                          {deck.total_cards} ta karta
+                        </span>
+                        <Button
+                          size="sm"
+                          disabled={loadingDeck}
+                          className="h-8 text-xs font-semibold gap-1 bg-primary/15 text-primary hover:bg-primary hover:text-primary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all"
+                        >
+                          Yodlash <ChevronRight className="size-3" />
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             )}
 
             {/* VIRAL MOTIVATSION BANNER */}
             <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-rose-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1 max-w-xl">
-                <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                  <Flame className="size-4 text-rose-500" /> Ilmiy Qoidalar: Har kuni 5 daqiqa flashcard!
+                <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <PremiumIcon icon={Flame} tone="rose" size="xs" glow />
+                  <span>Ilmiy Qoidalar: Har kuni 5 daqiqa flashcard!</span>
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Tadqiqotlarga ko&apos;ra, interval takrorlash (Spaced Repetition) orqali sanalar va atamalar xotirada 3 barobar uzoqroq saqlanib qoladi.
