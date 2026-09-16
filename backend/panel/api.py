@@ -3640,12 +3640,16 @@ def panel_reels_list_create_api(request):
             created_by=request.user,
         )
 
-        AuditLog.objects.create(
-            user=request.user,
-            action=f"Yangi Reel yaratildi: {reel.hook[:40]}",
-            model_name='Reel',
-            object_id=str(reel.id),
-        )
+        try:
+            AuditLog.objects.create(
+                user=request.user,
+                action='create',
+                model_name='Reel',
+                object_id=str(reel.id),
+                object_repr=f"Yangi Reel yaratildi: {reel.hook[:200]}",
+            )
+        except Exception:
+            pass
 
         return Response({'success': True, 'id': reel.id, 'message': "Reel muvaffaqiyatli saqlandi!"})
 
@@ -3689,26 +3693,35 @@ def panel_reels_detail_api(request, reel_id):
         reel.save()
 
         status_str = "Chop etildi (Published)" if reel.is_published else "Qoralamaga o'tkazildi (Draft)"
-        AuditLog.objects.create(
-            user=request.user,
-            action=f"Reel tahrirlandi: '{reel.hook[:30]}' ({status_str})",
-            model_name='Reel',
-            object_id=str(reel.id),
-        )
+        try:
+            AuditLog.objects.create(
+                user=request.user,
+                action='update',
+                model_name='Reel',
+                object_id=str(reel.id),
+                object_repr=f"Reel tahrirlandi: '{reel.hook[:200]}' ({status_str})",
+            )
+        except Exception:
+            pass
 
         return Response({'success': True, 'reel': reel.to_dict(), 'message': "O'zgarishlar saqlandi!"})
 
     elif request.method in ['DELETE', 'POST']:
         try:
             hook = reel.hook[:40] if getattr(reel, 'hook', None) else f"Reel #{reel_id}"
-            reel.delete()
+            try:
+                reel.delete()
+            except Exception as del_err:
+                logger.warning("Normal reel.delete() failed, attempting QuerySet delete: %s", del_err)
+                Reel.objects.filter(id=reel_id).delete()
 
             try:
                 AuditLog.objects.create(
                     user=request.user,
-                    action=f"Reel o'chirildi: {hook}",
+                    action='delete',
                     model_name='Reel',
                     object_id=str(reel_id),
+                    object_repr=f"Reel o'chirildi: {hook}",
                 )
             except Exception:
                 pass
@@ -3729,14 +3742,19 @@ def panel_reels_delete_api(request, reel_id):
         if not reel:
             return Response({'success': True, 'message': "Reel allaqachon o'chirilgan."})
         hook = reel.hook[:40] if getattr(reel, 'hook', None) else f"Reel #{reel_id}"
-        reel.delete()
+        try:
+            reel.delete()
+        except Exception as del_err:
+            logger.warning("Normal reel.delete() failed, attempting QuerySet delete: %s", del_err)
+            Reel.objects.filter(id=reel_id).delete()
 
         try:
             AuditLog.objects.create(
                 user=request.user,
-                action=f"Reel o'chirildi: {hook}",
+                action='delete',
                 model_name='Reel',
                 object_id=str(reel_id),
+                object_repr=f"Reel o'chirildi: {hook}",
             )
         except Exception:
             pass
@@ -3810,17 +3828,22 @@ def panel_community_post_delete_api(request, post_id):
         post = CommunityPost.objects.filter(id=post_id).first()
         if not post:
             return Response({'success': True, 'message': "Post topilmadi yoki allaqachon o'chirilgan."})
-        title = post.title
+        title = post.title or ""
         author = post.author.username if post.author else "Noma'lum"
 
-        post.delete()
+        try:
+            post.delete()
+        except Exception as del_err:
+            logger.warning("Normal post.delete() failed, attempting QuerySet delete: %s", del_err)
+            CommunityPost.objects.filter(id=post_id).delete()
 
         try:
             AuditLog.objects.create(
                 user=request.user,
-                action=f"Hamjamiyat posti o'chirildi: '{title}' ({author})",
+                action='delete',
                 model_name='CommunityPost',
                 object_id=str(post_id),
+                object_repr=f"Hamjamiyat posti o'chirildi: '{title[:150]}' ({author})",
             )
         except Exception:
             pass
@@ -3849,9 +3872,10 @@ def panel_community_post_pin_api(request, post_id):
         try:
             AuditLog.objects.create(
                 user=request.user,
-                action=f"Post {'qadaldi' if post.is_pinned else 'qadashdan chiqarildi'}: '{post.title}'",
+                action='update',
                 model_name='CommunityPost',
                 object_id=str(post_id),
+                object_repr=f"Post {'qadaldi' if post.is_pinned else 'qadashdan chiqarildi'}: '{post.title[:200]}'",
             )
         except Exception:
             pass
