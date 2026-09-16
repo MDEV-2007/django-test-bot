@@ -6,10 +6,9 @@ import Link from 'next/link';
 import {
   FileCheck2, Swords, BookOpen, Bot, ArrowRight, History, MapPin, HelpCircle,
   Crown, Sparkles, Flame, Coins, Trophy, Snowflake, CheckCircle2,
-  ChevronRight, Zap, GraduationCap, Layers, Share2,
+  ChevronRight, Zap, GraduationCap, Layers, Share2, Headphones,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
-import { apiFetch } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
 import { arenaRankTitle } from '@/lib/rank';
 import Reveal from '@/components/motion/Reveal';
@@ -56,6 +55,7 @@ type DashboardData = {
    o'z mazmunini aks ettiradi: testda hujjat, arenada qilichlar, darsda kitob va
    tovush to'lqinlari, mentorda suhbat pufagi. */
 const QUICK_ACCESS = [
+  { href: '/study', title: 'Fokus Xonasi', desc: 'Pomodoro darsi va ambient tovushlar', icon: Headphones, badge: 'Yangi 🔥', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone },
   { href: '/reels', title: 'Bilim Reels', desc: 'Scroll-learning va mini-kvestlar', icon: Sparkles, badge: 'Viral', motif: 'lessons' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'reels' },
   { href: '/flashcards', title: 'Smart Flashcardlar', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'amber' as PremiumIconTone, featureKey: 'flashcards' },
   { href: '/tests', title: 'BBA & Sertifikat Testlari', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone, featureKey: 'tests' },
