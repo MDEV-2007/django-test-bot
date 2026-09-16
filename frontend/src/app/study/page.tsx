@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { apiFetch } from '@/lib/api-client';
+import { apiFetch, fetchMe } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import { celebrate } from '@/lib/confetti';
@@ -48,7 +48,7 @@ type GoalItem = {
 };
 
 export default function StudyRoomPage() {
-  const { user, refreshUser } = useAuthStore();
+  const { user } = useAuthStore();
 
   // Pomodoro Taymer holatlari
   const [timerMode, setTimerMode] = useState<'focus' | 'shortBreak' | 'longBreak'>('focus');
@@ -211,7 +211,7 @@ export default function StudyRoomPage() {
   // Fokus sessiyasi yakunlanganda mukofot olish
   async function handleSessionComplete() {
     celebrate();
-    soundFX.levelUp();
+    soundFX.fanfare();
     const completedGoals = goals.filter((g) => g.completed).length;
 
     if (timerMode === 'focus') {
@@ -237,7 +237,7 @@ export default function StudyRoomPage() {
         toast.success(res.message || `Ajoyib natija! +${res.xp_earned} XP qo'lga kiritildi! 🚀`, {
           duration: 6000,
         });
-        if (refreshUser) refreshUser();
+        fetchMe().catch(() => {});
       } catch {
         toast.success(`Fokus sessiyasi muvaffaqiyatli yakunlandi! +25 XP berildi! 🔥`);
       }
@@ -308,11 +308,11 @@ export default function StudyRoomPage() {
         {/* Page Hero Header */}
         {!isFullscreen && (
           <PageHero
-            eyebrow="Fokus & Hamfikrlar Xonasi"
+            eyebrow="Fokus 2.0 · Hamfikrlar Xonasi"
+            eyebrowIcon={Headphones}
             title="Sokin Tayyorgarlik Zali"
             description="Ilmiy Pomodoro taymeri, sokin ambient tovushlari va jonli abituriyentlar zali. Chalg'imasdan dars qiling va bilimingizni yangi bosqichga olib chiqing."
-            badgeText="Fokus 2.0"
-            badgeVariant="streak"
+            tone="emerald"
           />
         )}
 
