@@ -15,9 +15,15 @@ import { apiFetch } from '@/lib/api-client';
 import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
 import { useFeatureFlags } from '@/lib/features';
+import { tgHaptic, openTelegramLink } from '@/lib/telegram';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
+
+function cleanOptionText(text: string): string {
+  if (!text) return '';
+  return text.replace(/^[A-Za-z0-9][\)\.\:\-]\s*/, '').trim();
+}
 
 type ReelQuiz = {
   question: string;
@@ -217,6 +223,7 @@ export default function ReelsPage() {
   const handleLike = (reelId: number, e?: React.MouseEvent) => {
     const isCurrentlyLiked = likedReels[reelId];
     if (soundEnabled && !isCurrentlyLiked) soundFX.click();
+    tgHaptic(isCurrentlyLiked ? 'light' : 'medium');
 
     setLikedReels((prev) => ({ ...prev, [reelId]: !isCurrentlyLiked }));
     setLikeCounts((prev) => ({
@@ -239,20 +246,20 @@ export default function ReelsPage() {
   // Handle Telegram Share
   const handleShare = (reel: ReelItem) => {
     if (soundEnabled) soundFX.click();
+    tgHaptic('light');
     const text = encodeURIComponent(
       `🔥 *${reel.subject_name.toUpperCase()} REELS* — Ilm Ildizi\n\n` +
-      `💡 *${reel.hook}*\n\n` +
-      `📖 ${reel.fact}\n\n` +
-      `✨ *Xulosa:* ${reel.takeaway}\n\n` +
+      `💡 *${reel.quiz.question || reel.hook}*\n\n` +
       `🎯 O'zingni sinab ko'r va ball to'pla: ${window.location.origin}/reels`
     );
-    const url = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin + '/reels')}&text=${text}`;
-    window.open(url, '_blank');
+    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin + '/reels')}&text=${text}`;
+    openTelegramLink(tgUrl);
   };
 
   // Handle Quiz Answer
   const handleAnswerQuiz = async (reelId: number, optionIndex: number) => {
     if (answeredQuizzes[reelId]) return;
+    tgHaptic('select');
 
     try {
       const res = await apiFetch<QuizResult>('/api/learning/reels/quiz/', {
@@ -273,11 +280,13 @@ export default function ReelsPage() {
 
         if (res.is_correct) {
           if (soundEnabled) soundFX.correct();
+          tgHaptic('success');
           celebrate();
           setTodayXpEarned((prev) => prev + (res.xp_earned || 5));
           toast.success(`To'g'ri javob! +${res.xp_earned} XP 🔥`, { duration: 2500 });
         } else {
           if (soundEnabled) soundFX.incorrect();
+          tgHaptic('error');
         }
       }
     } catch {
@@ -299,11 +308,13 @@ export default function ReelsPage() {
 
       if (isCorrect) {
         if (soundEnabled) soundFX.correct();
+        tgHaptic('success');
         celebrate();
         setTodayXpEarned((prev) => prev + 5);
         toast.success("To'g'ri javob! +5 XP 🔥", { duration: 2500 });
       } else {
         if (soundEnabled) soundFX.incorrect();
+        tgHaptic('error');
       }
     }
   };
@@ -378,11 +389,11 @@ export default function ReelsPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 bg-[var(--bg-page)] w-full flex items-center justify-center p-0 sm:p-4 pb-20 sm:pb-6 overflow-hidden select-none font-sans">
+      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-3 overflow-hidden select-none font-sans min-h-0">
         {/* Phone Frame Container */}
-        <div className="w-full h-[calc(100svh-4.5rem)] sm:h-[86vh] sm:max-w-[420px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-white/15 shadow-2xl bg-black flex flex-col">
+        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[84vh] sm:max-w-[420px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-white/15 shadow-2xl bg-black flex flex-col my-auto">
           {/* ── TOP FLOATING HEADER (Inside Phone Frame) ── */}
-          <header className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-3 pt-3 pb-2.5 bg-gradient-to-b from-black/90 via-black/50 to-transparent backdrop-blur-[2px] sm:rounded-t-3xl">
+          <header className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-2.5 sm:px-3 pt-2 pb-2 bg-gradient-to-b from-black/95 via-black/70 to-transparent backdrop-blur-[4px] sm:rounded-t-3xl border-b border-white/5">
             {/* Minimal Subject Pills Slider */}
             <div className="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-2 min-w-0">
               {(subjects.length > 0 ? subjects : [
@@ -394,16 +405,16 @@ export default function ReelsPage() {
                 return (
                   <button
                     key={subj.slug}
-                    onClick={() => setSelectedSubject(subj.slug)}
+                    onClick={() => { tgHaptic('select'); setSelectedSubject(subj.slug); }}
                     className={cn(
-                      "px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border flex items-center gap-1 cursor-pointer",
+                      "px-2.5 py-1 rounded-full text-[11px] font-bold transition-all shrink-0 border flex items-center gap-1 cursor-pointer",
                       isSel
                         ? isForYou
-                          ? "bg-gradient-to-r from-amber-400 to-orange-400 text-black border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.5)] scale-105"
+                          ? "bg-gradient-to-r from-amber-400 to-orange-400 text-black border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.4)] scale-105"
                           : "bg-white text-black border-white shadow-md scale-105"
                         : isForYou
                           ? "bg-amber-400/15 text-amber-300 border-amber-400/30 hover:bg-amber-400/25"
-                          : "bg-black/50 text-white/80 border-white/15 hover:bg-white/20"
+                          : "bg-black/60 text-white/80 border-white/15 hover:bg-white/20"
                     )}
                   >
                     {subj.name}
@@ -413,9 +424,9 @@ export default function ReelsPage() {
             </div>
 
             {/* Top Right: XP badge */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-black backdrop-blur-md">
-                <Zap className="size-3.5 fill-amber-400 text-amber-400" />
+            <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-[11px] font-black backdrop-blur-md">
+                <Zap className="size-3 fill-amber-400 text-amber-400" />
                 <span>+{todayXpEarned}</span>
               </div>
             </div>
@@ -463,7 +474,7 @@ export default function ReelsPage() {
                     key={reel.id}
                     ref={(el) => { reelRefs.current[index] = el; }}
                     data-index={index}
-                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between pt-14 pb-4 px-4 sm:px-5 overflow-hidden text-white select-none"
+                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between pt-12 pb-2 px-3 sm:px-4 overflow-hidden text-white select-none"
                     style={{
                       background: reel.gradient || 'linear-gradient(160deg, #090d16 0%, #171d2b 100%)',
                     }}
@@ -487,24 +498,25 @@ export default function ReelsPage() {
                     <div className="absolute top-0 right-0 size-64 bg-white/[0.06] rounded-full blur-3xl pointer-events-none" />
 
                     {/* ── 1. TOP HEADER ROW: Subject Badge & Counter ── */}
-                    <div className="relative z-10 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-black uppercase tracking-wider shrink-0">
+                    <div className="relative z-10 flex items-center justify-between gap-1.5 shrink-0 pt-0.5">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-black uppercase tracking-wider shrink-0">
                           <PremiumIcon icon={SubjectIcon} tone={subjectTone} size="xs" glow />
                           <span>{reel.subject_name}</span>
                         </div>
-                        <span className="text-[11px] text-white/80 font-medium truncate">
-                          {reel.category_badge}
-                        </span>
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/25 border border-rose-400/30 text-rose-200 text-[10px] font-bold backdrop-blur-md shrink-0">
+                          <Flame className="size-2.5 text-rose-400 fill-rose-400 animate-pulse" />
+                          <span>{failRate}% adashgan</span>
+                        </div>
                       </div>
 
-                      <div className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-black/40 backdrop-blur-md text-white/80 border border-white/15 shrink-0">
+                      <div className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/50 backdrop-blur-md text-white/80 border border-white/15 shrink-0">
                         {index + 1} / {reels.length}
                       </div>
                     </div>
 
                     {/* ── 2. VERTICAL ACTION BAR (Right Edge - Reels/TikTok Style) ── */}
-                    <div className="absolute right-2.5 sm:right-3 bottom-6 z-30 flex flex-col items-center gap-3">
+                    <div className="absolute right-2 sm:right-2.5 bottom-8 sm:bottom-10 z-30 flex flex-col items-center gap-2 sm:gap-2.5">
                       {/* Like Button */}
                       <button
                         onClick={(e) => handleLike(reel.id, e)}
@@ -512,28 +524,28 @@ export default function ReelsPage() {
                         title="Yoqdi"
                       >
                         <div className={cn(
-                          "size-10 rounded-full flex items-center justify-center backdrop-blur-md border transition-all active:scale-75 shadow-lg",
+                          "size-9 sm:size-10 rounded-full flex items-center justify-center backdrop-blur-xl border transition-all active:scale-75 shadow-lg",
                           isLiked
                             ? "bg-rose-500/30 border-rose-400 text-rose-400 ring-2 ring-rose-500/40 scale-105"
-                            : "bg-black/45 border-white/20 text-white/90 group-hover:bg-white/20"
+                            : "bg-black/55 border-white/20 text-white/90 group-hover:bg-white/20"
                         )}>
-                          <Heart className={cn("size-5", isLiked ? "fill-rose-500 text-rose-500" : "text-white")} />
+                          <Heart className={cn("size-4.5 sm:size-5", isLiked ? "fill-rose-500 text-rose-500" : "text-white")} />
                         </div>
-                        <span className="text-[11px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
+                        <span className="text-[10px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
                           {likes}
                         </span>
                       </button>
 
                       {/* Comments Button */}
                       <button
-                        onClick={() => handleOpenComments(reel)}
+                        onClick={() => { tgHaptic('light'); handleOpenComments(reel); }}
                         className="flex flex-col items-center gap-0.5 group cursor-pointer"
                         title="Izohlar"
                       >
-                        <div className="size-10 rounded-full bg-black/45 border border-white/20 flex items-center justify-center text-white/90 group-hover:bg-white/20 backdrop-blur-md transition-all active:scale-75 shadow-lg">
-                          <MessageCircle className="size-5 text-white" />
+                        <div className="size-9 sm:size-10 rounded-full bg-black/55 border border-white/20 flex items-center justify-center text-white/90 group-hover:bg-white/20 backdrop-blur-xl transition-all active:scale-75 shadow-lg">
+                          <MessageCircle className="size-4.5 sm:size-5 text-white" />
                         </div>
-                        <span className="text-[11px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
+                        <span className="text-[10px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
                           {commentCounts[reel.id] ?? reel.comments_count ?? 0}
                         </span>
                       </button>
@@ -544,65 +556,64 @@ export default function ReelsPage() {
                         className="flex flex-col items-center gap-0.5 group cursor-pointer"
                         title="Ulashish"
                       >
-                        <div className="size-10 rounded-full bg-black/45 border border-white/20 flex items-center justify-center text-sky-300 group-hover:bg-sky-500/20 backdrop-blur-md transition-all active:scale-75 shadow-lg">
-                          <Send className="size-4.5 -translate-x-0.5" />
+                        <div className="size-9 sm:size-10 rounded-full bg-black/55 border border-white/20 flex items-center justify-center text-sky-300 group-hover:bg-sky-500/20 backdrop-blur-xl transition-all active:scale-75 shadow-lg">
+                          <Send className="size-4 -translate-x-0.5" />
                         </div>
-                        <span className="text-[10px] font-bold text-white/80">
+                        <span className="text-[9px] font-bold text-white/80">
                           Ulashish
                         </span>
                       </button>
 
                       {/* Sound Toggle */}
                       <button
-                        onClick={() => setSoundEnabled(!soundEnabled)}
-                        className="size-8 rounded-full bg-black/45 border border-white/15 flex items-center justify-center text-white/70 hover:text-white transition-all active:scale-90 cursor-pointer"
+                        onClick={() => { tgHaptic('light'); setSoundEnabled(!soundEnabled); }}
+                        className="size-7.5 sm:size-8 rounded-full bg-black/55 border border-white/15 flex items-center justify-center text-white/70 hover:text-white transition-all active:scale-90 cursor-pointer"
                         title={soundEnabled ? "Ovozsiz" : "Ovozni yoqish"}
                       >
-                        {soundEnabled ? <Volume2 className="size-3.5 text-emerald-400" /> : <VolumeX className="size-3.5 text-white/50" />}
+                        {soundEnabled ? <Volume2 className="size-3 text-emerald-400" /> : <VolumeX className="size-3 text-white/50" />}
                       </button>
                     </div>
 
-                    {/* ── 3. MAIN HERO CONTENT: Single Question + Vertical 1-Column Options ── */}
-                    <div className="relative z-10 my-auto py-1 space-y-3 pr-14">
-                      {/* Compact Badge: Logical failure rate (Max 1 chip) */}
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-200 text-[11px] font-bold backdrop-blur-md shadow-xs">
-                        <Flame className="size-3.5 text-rose-400 fill-rose-400 animate-pulse" />
-                        <span>Qiyinlik: O&apos;rta &bull; {failRate}% adashgan ({studentCount} kishi)</span>
-                      </div>
-
-                      {/* SINGLE HERO QUESTION BLOCK (No repetition!) */}
-                      <div className="space-y-1">
-                        <h2 className="text-sm sm:text-base font-extrabold leading-snug tracking-tight text-white drop-shadow-md">
+                    {/* ── 3. MAIN HERO CONTENT: Question Glass Card + Vertical Options ── */}
+                    <div className="relative z-10 my-auto py-1 w-full pr-12 sm:pr-14 space-y-2 sm:space-y-2.5">
+                      {/* Frosted Glass Question Card */}
+                      <div className="p-3 sm:p-3.5 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-xl space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-extrabold tracking-wider text-amber-300 uppercase flex items-center gap-1">
+                            <Sparkles className="size-3 text-amber-400" />
+                            Savol
+                          </span>
+                          <span className="text-[10px] text-white/60 font-medium">
+                            {studentCount} o&apos;quvchi adashgan
+                          </span>
+                        </div>
+                        <h2 className="text-xs sm:text-sm font-bold leading-snug tracking-tight text-white drop-shadow-sm">
                           {reel.quiz.question || reel.hook}
                         </h2>
-                        {reel.tagline && (
-                          <p className="text-[11px] text-amber-300/90 font-medium line-clamp-1">
-                            💡 {reel.tagline}: {reel.hook !== reel.quiz.question ? reel.hook : reel.takeaway}
-                          </p>
-                        )}
                       </div>
 
                       {/* ── 4. VERTICAL 1-COLUMN OPTIONS STACK (A, B, C, D) ── */}
-                      <div className="flex flex-col gap-2 pt-0.5 w-full">
+                      <div className="flex flex-col gap-1.5 sm:gap-2 w-full">
                         {reel.quiz.options.map((opt, optIdx) => {
+                          const cleanOpt = cleanOptionText(opt);
                           const letter = OPTION_LETTERS[optIdx] || `${optIdx + 1}`;
                           const isSelected = quizAnswer?.selectedIndex === optIdx;
                           const isCorrectOption = quizAnswer?.correctIndex === optIdx;
                           const hasAnswered = !!quizAnswer;
 
-                          let btnClass = "bg-white/[0.09] hover:bg-white/[0.18] border-white/20 text-white";
-                          let badgeClass = "bg-white/20 text-white";
+                          let btnClass = "bg-white/[0.08] hover:bg-white/[0.15] border-white/15 text-white shadow-sm";
+                          let badgeClass = "bg-white/15 text-white/90 border-white/20";
 
                           if (hasAnswered) {
                             if (isCorrectOption) {
-                              btnClass = "bg-emerald-600/90 border-emerald-400 text-white font-bold ring-2 ring-emerald-400/60 shadow-[0_0_14px_rgba(16,185,129,0.5)]";
-                              badgeClass = "bg-emerald-800 text-white";
+                              btnClass = "bg-emerald-600/90 border-emerald-400 text-white font-bold ring-2 ring-emerald-400/60 shadow-[0_0_16px_rgba(16,185,129,0.5)]";
+                              badgeClass = "bg-emerald-800 text-white border-emerald-400";
                             } else if (isSelected && !quizAnswer.isCorrect) {
-                              btnClass = "bg-rose-600/90 border-rose-400 text-white opacity-90 ring-2 ring-rose-400/50";
-                              badgeClass = "bg-rose-800 text-white";
+                              btnClass = "bg-rose-600/90 border-rose-400 text-white opacity-90 ring-2 ring-rose-400/50 shadow-[0_0_16px_rgba(244,63,94,0.4)]";
+                              badgeClass = "bg-rose-800 text-white border-rose-400";
                             } else {
-                              btnClass = "bg-white/[0.04] border-white/10 text-white/30";
-                              badgeClass = "bg-white/[0.06] text-white/25";
+                              btnClass = "bg-white/[0.03] border-white/10 text-white/35";
+                              badgeClass = "bg-white/[0.05] text-white/25 border-transparent";
                             }
                           }
 
@@ -612,15 +623,15 @@ export default function ReelsPage() {
                               disabled={hasAnswered}
                               onClick={() => handleAnswerQuiz(reel.id, optIdx)}
                               className={cn(
-                                "w-full min-h-[44px] py-2 px-3 rounded-xl text-left border flex items-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer",
+                                "w-full min-h-[42px] sm:min-h-[44px] py-2 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl text-left border flex items-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer",
                                 btnClass
                               )}
                             >
-                              <span className={cn("size-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0", badgeClass)}>
+                              <span className={cn("size-6 sm:size-7 rounded-lg sm:rounded-xl border flex items-center justify-center text-xs font-black shrink-0 shadow-inner", badgeClass)}>
                                 {letter}
                               </span>
                               <span className="text-xs sm:text-sm font-medium leading-tight flex-1 break-words">
-                                {opt}
+                                {cleanOpt}
                               </span>
                               {hasAnswered && isCorrectOption && (
                                 <CheckCircle2 className="size-4 text-emerald-300 shrink-0 ml-auto" />
@@ -635,15 +646,15 @@ export default function ReelsPage() {
 
                       {/* ── 5. EXPLANATION CARD (Animated when answered) ── */}
                       {quizAnswer && (
-                        <div className="p-3 rounded-2xl bg-black/70 border border-white/20 backdrop-blur-xl space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-xl">
+                        <div className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-black/80 border border-white/20 backdrop-blur-xl space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-xl">
                           <div className="flex items-center justify-between text-xs font-bold">
                             <span className={quizAnswer.isCorrect ? "text-emerald-400 flex items-center gap-1" : "text-rose-400 flex items-center gap-1"}>
                               {quizAnswer.isCorrect ? "✅ To'g'ri javob! (+5 XP)" : "❌ Noto'g'ri javob"}
                             </span>
                             <button
-                              onClick={() => scrollToReel(index + 1)}
+                              onClick={() => { tgHaptic('light'); scrollToReel(index + 1); }}
                               disabled={index === reels.length - 1}
-                              className="text-[11px] text-amber-300 hover:text-amber-200 flex items-center gap-1 underline font-semibold cursor-pointer disabled:opacity-30"
+                              className="text-[11px] text-amber-300 hover:text-amber-200 flex items-center gap-1 font-bold cursor-pointer disabled:opacity-30"
                             >
                               Keyingisi &darr;
                             </button>
@@ -656,16 +667,16 @@ export default function ReelsPage() {
                     </div>
 
                     {/* ── 6. BOTTOM SWIPE / NEXT HINT ── */}
-                    <div className="relative z-10 flex items-center justify-between pt-1 border-t border-white/10 text-white/60 text-xs">
+                    <div className="relative z-10 flex items-center justify-between pt-1 border-t border-white/10 text-white/60 text-xs shrink-0">
                       <button
-                        onClick={() => scrollToReel(index + 1)}
+                        onClick={() => { tgHaptic('light'); scrollToReel(index + 1); }}
                         disabled={index === reels.length - 1}
-                        className="flex items-center gap-1 text-[11px] font-semibold text-white/70 hover:text-white transition-colors disabled:opacity-20 cursor-pointer"
+                        className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-white/70 hover:text-white transition-colors disabled:opacity-20 cursor-pointer"
                       >
                         <span>Keyingi bilim</span>
                         <ChevronDown className="size-3.5 animate-bounce" />
                       </button>
-                      <span className="text-[10px] font-mono text-white/50">
+                      <span className="text-[9px] sm:text-[10px] font-mono text-white/50">
                         Tepaga suring &uarr;
                       </span>
                     </div>
