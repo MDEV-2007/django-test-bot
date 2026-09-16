@@ -976,261 +976,272 @@ export default function CommunityFeedPage() {
 
       {/* Create New Post Dialog Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="w-[calc(100%-1.25rem)] sm:max-w-xl md:max-w-2xl bg-[#11141d] border border-white/10 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-h-[90svh] sm:max-h-[85vh] overflow-y-auto overflow-x-hidden shadow-2xl space-y-3.5 sm:space-y-4">
-          <DialogHeader className="space-y-1 pr-6">
-            <DialogTitle className="text-base sm:text-lg font-black text-foreground flex items-center gap-2">
+        <DialogContent className="w-[calc(100%-1.25rem)] sm:w-full sm:max-w-lg md:max-w-xl bg-[#11141d] border border-white/10 p-0 rounded-2xl sm:rounded-3xl max-h-[85svh] flex flex-col overflow-hidden shadow-2xl">
+          {/* 1. Header with Tab Switcher (Pinned Top) */}
+          <div className="p-4 sm:p-5 pb-3 border-b border-white/10 shrink-0 bg-[#141824]/60">
+            <div className="flex items-center gap-2 pr-8">
               <PremiumIcon icon={Plus} tone="emerald" size="sm" glow />
-              <span>Hamjamiyatga Post Qo&apos;yish</span>
-            </DialogTitle>
-            <DialogDescription className="text-[11px] sm:text-xs text-muted-foreground leading-normal">
+              <h3 className="text-base sm:text-lg font-black text-foreground">Hamjamiyatga Post Qo&apos;yish</h3>
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
               O&apos;quv yutuqlaringiz, test natijalaringiz yoki fikrlaringizni ulashing (+15 XP)!
-            </DialogDescription>
-          </DialogHeader>
+            </p>
 
-          {/* Rejim tablari: Test Natijasini Qo'yish vs Erkin Post (Grid 2-ustun - overflow bo'lmaydi) */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl sm:rounded-2xl bg-[#181d28] border border-white/10">
-            <button
-              type="button"
-              onClick={() => setActiveModalTab('result')}
-              className={cn(
-                "py-2 px-1.5 sm:px-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0",
-                activeModalTab === 'result'
-                  ? "bg-[#242b3d] text-foreground shadow-xs border border-white/15 text-amber-500"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
+            {/* Segment Tab Switcher: 50% - 50% split */}
+            <div
+              className="mt-3 p-1 rounded-xl bg-[#181d28] border border-white/10"
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}
             >
-              <PremiumIcon icon={Award} tone="amber" size="xs" glow={activeModalTab === 'result'} />
-              <span className="truncate">Natijani Ulashish</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveModalTab('custom')}
-              className={cn(
-                "py-2 px-1.5 sm:px-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0",
-                activeModalTab === 'custom'
-                  ? "bg-[#242b3d] text-foreground shadow-xs border border-white/15 text-emerald-500"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <PremiumIcon icon={UploadCloud} tone="emerald" size="xs" glow={activeModalTab === 'custom'} />
-              <span className="truncate">Erkin Post &amp; Rasm</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveModalTab('result')}
+                className={cn(
+                  "py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0 cursor-pointer",
+                  activeModalTab === 'result'
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.05]"
+                )}
+              >
+                <PremiumIcon icon={Award} tone="amber" size="xs" glow={activeModalTab === 'result'} />
+                <span className="truncate">Natijani Ulashish</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveModalTab('custom')}
+                className={cn(
+                  "py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0 cursor-pointer",
+                  activeModalTab === 'custom'
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.05]"
+                )}
+              >
+                <PremiumIcon icon={UploadCloud} tone="emerald" size="xs" glow={activeModalTab === 'custom'} />
+                <span className="truncate">Erkin Post &amp; Rasm</span>
+              </button>
+            </div>
           </div>
 
           {/* ── TAB 1: TEST NATIJASINI / SERTIFIKATNI ULASHISH ── */}
           {activeModalTab === 'result' && (
-            <div className="space-y-3.5 pt-0.5">
-              {loadingAttempts ? (
-                <div className="py-8 text-center space-y-2">
-                  <Loader2 className="size-6 animate-spin mx-auto text-primary" />
-                  <p className="text-xs text-muted-foreground">Test natijalaringiz yuklanmoqda...</p>
-                </div>
-              ) : userAttempts.length === 0 ? (
-                <div className="py-6 text-center space-y-2.5 p-4 rounded-xl sm:rounded-2xl bg-[#181d28] border border-dashed border-white/15">
-                  <PremiumIcon icon={Award} tone="zinc" size="lg" className="mx-auto" />
-                  <div>
-                    <p className="text-xs font-bold text-foreground">Hali topshirilgan testlar yo&apos;q</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs mx-auto">
-                      Avval birorta test yoki sertifikat imtihonini yeching, so&apos;ng natijangizni bu yerda ulashing.
-                    </p>
+            <>
+              {/* Scrollable Body */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-3.5 space-y-3.5">
+                {loadingAttempts ? (
+                  <div className="py-10 text-center space-y-2">
+                    <Loader2 className="size-6 animate-spin mx-auto text-primary" />
+                    <p className="text-xs text-muted-foreground">Test natijalaringiz yuklanmoqda...</p>
                   </div>
-                  <Button asChild size="sm" className="rounded-xl font-bold text-xs">
-                    <Link href="/tests">Amaliy Test Ishlash</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-[11px] sm:text-xs">
-                    <span className="font-bold text-foreground">Ulashish uchun natijani tanlang:</span>
-                    <span className="text-muted-foreground font-mono text-[10px] sm:text-[11px]">{userAttempts.length} ta natija</span>
-                  </div>
-
-                  {/* Testlar ro'yxati (Smooth vertical scroll without horizontal bar) */}
-                  <div className="space-y-2 max-h-48 sm:max-h-56 overflow-y-auto overflow-x-hidden pr-0.5">
-                    {userAttempts.map((att) => {
-                      const isSelected = selectedAttemptId === att.id;
-                      const scoreVal = att.score || 0;
-                      const isCert = scoreVal >= 60;
-                      return (
-                        <div
-                          key={att.id}
-                          onClick={() => setSelectedAttemptId(att.id)}
-                          className={cn(
-                            "p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 text-xs",
-                            isSelected
-                              ? "bg-[#142322] border-emerald-500/70 shadow-xs ring-1 ring-emerald-500/40"
-                              : "bg-[#181d28] border-white/10 hover:border-emerald-500/40"
-                          )}
-                        >
-                          <div className="min-w-0 flex-1 space-y-0.5">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="font-bold text-foreground text-xs sm:text-sm truncate block">
-                                {att.test_title}
-                              </span>
-                              {isCert && (
-                                <Badge className="bg-amber-500/20 text-amber-500 text-[9px] sm:text-[10px] px-1.5 py-0.5 shrink-0 border border-amber-500/30 font-semibold">
-                                  🏆 Sertifikat
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
-                              {att.correct_answers} to&apos;g&apos;ri &bull; {att.wrong_answers} xato &bull; {new Date(att.completed_at).toLocaleDateString('uz-UZ')}
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className={cn(
-                              "font-mono font-black text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border",
-                              scoreVal >= 80 ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" :
-                              scoreVal >= 60 ? "bg-amber-500/15 text-amber-500 border-amber-500/30" :
-                              "bg-rose-500/15 text-rose-500 border-rose-500/30"
-                            )}>
-                              {scoreVal.toFixed(0)}%
-                            </span>
-                            <div className={cn(
-                              "size-4.5 sm:size-5 rounded-full border flex items-center justify-center transition-colors",
-                              isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/20"
-                            )}>
-                              {isSelected && <CheckCircle2 className="size-3 sm:size-3.5" />}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Fikr / Izoh */}
-                  <div>
-                    <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fikr yoki Maslahat (Ixtiyoriy)</label>
-                    <Textarea
-                      value={attemptCaption}
-                      onChange={(e) => setAttemptCaption(e.target.value)}
-                      placeholder="Masalan: Mehnat o'z mevasini berdi! 88% A+ natija bilan sertifikat oldim..."
-                      className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[55px] sm:min-h-[65px] focus-visible:ring-emerald-500"
-                      maxLength={500}
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => setIsCreateModalOpen(false)}
-                      className="rounded-xl text-xs font-bold h-9 sm:h-10 px-3 sm:px-4"
-                    >
-                      Bekor qilish
+                ) : userAttempts.length === 0 ? (
+                  <div className="py-8 text-center space-y-2.5 p-4 rounded-xl bg-[#181d28] border border-dashed border-white/15">
+                    <PremiumIcon icon={Award} tone="zinc" size="lg" className="mx-auto" />
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Hali topshirilgan testlar yo&apos;q</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs mx-auto">
+                        Avval birorta test yoki sertifikat imtihonini yeching, so&apos;ng natijangizni bu yerda ulashing.
+                      </p>
+                    </div>
+                    <Button asChild size="sm" className="rounded-xl font-bold text-xs">
+                      <Link href="/tests">Amaliy Test Ishlash</Link>
                     </Button>
-                    <Button
-                      type="button"
-                      disabled={!selectedAttemptId || isSharingAttempt}
-                      onClick={() => {
-                        const att = userAttempts.find((a) => a.id === selectedAttemptId);
-                        if (att) handleShareAttempt(att.id, att.score);
-                      }}
-                      className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-1.5 sm:gap-2 h-9 sm:h-10 px-3.5 sm:px-5"
-                    >
-                      {isSharingAttempt ? (
-                        <>
-                          <Loader2 className="size-4 animate-spin" /> Joylanmoqda...
-                        </>
-                      ) : (
-                        <>
-                          <span>🚀 Joylash (+15 XP)</span>
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── TAB 2: ERKIN POST & RASM ── */}
-          {activeModalTab === 'custom' && (
-            <form onSubmit={handleCreatePost} className="space-y-3.5 pt-0.5">
-              <div>
-                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Mavzu yoki Sarlavha</label>
-                <Input
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Masalan: Bugun 50 ta biologiya testi yechdim!"
-                  className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-9 sm:h-10"
-                  maxLength={150}
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fan / Yo&apos;nalish</label>
-                <Input
-                  value={newSubject}
-                  onChange={(e) => setNewSubject(e.target.value)}
-                  placeholder="Biologiya, Kimyo, Tarix, Matematika..."
-                  className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-9 sm:h-10"
-                  maxLength={60}
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fikr yoki Taassurot</label>
-                <Textarea
-                  value={newCaption}
-                  onChange={(e) => setNewCaption(e.target.value)}
-                  placeholder="Abituriyent do'stlaringizga foydali maslahat yoki shijoatli so'zlar yozing..."
-                  className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[65px] sm:min-h-[75px]"
-                  maxLength={1000}
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Rasm (Ixtiyoriy)</label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="hidden"
-                />
-
-                {imagePreviewUrl ? (
-                  <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-white/15 bg-black/60 p-2 flex items-center justify-center">
-                    <img src={imagePreviewUrl} alt="Preview" className="max-h-40 sm:max-h-48 rounded-lg sm:rounded-xl object-contain" />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedImageFile(null);
-                        setImagePreviewUrl(null);
-                      }}
-                      className="absolute top-2.5 right-2.5 size-7 rounded-full bg-black/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors"
-                    >
-                      <X className="size-3.5" />
-                    </button>
                   </div>
                 ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/15 hover:border-emerald-500/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1 sm:gap-1.5 bg-[#181d28]"
-                  >
-                    <PremiumIcon icon={UploadCloud} tone="emerald" size="md" glow />
-                    <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
-                    <span className="text-[10px] text-muted-foreground">PNG, JPG, WebP (maks. 5MB)</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-[11px] sm:text-xs">
+                      <span className="font-bold text-foreground">Ulashish uchun natijani tanlang:</span>
+                      <span className="text-muted-foreground font-mono text-[10px] sm:text-[11px]">{userAttempts.length} ta natija</span>
+                    </div>
+
+                    {/* Testlar ro'yxati */}
+                    <div className="space-y-2 max-h-52 sm:max-h-60 overflow-y-auto overflow-x-hidden pr-0.5">
+                      {userAttempts.map((att) => {
+                        const isSelected = selectedAttemptId === att.id;
+                        const scoreVal = att.score || 0;
+                        const isCert = scoreVal >= 60;
+                        return (
+                          <div
+                            key={att.id}
+                            onClick={() => setSelectedAttemptId(att.id)}
+                            className={cn(
+                              "p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 text-xs",
+                              isSelected
+                                ? "bg-[#142322] border-emerald-500/70 shadow-xs ring-1 ring-emerald-500/40"
+                                : "bg-[#181d28] border-white/10 hover:border-emerald-500/40"
+                            )}
+                          >
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="font-bold text-foreground text-xs sm:text-sm truncate block">
+                                  {att.test_title}
+                                </span>
+                                {isCert && (
+                                  <Badge className="bg-amber-500/20 text-amber-500 text-[9px] sm:text-[10px] px-1.5 py-0.5 shrink-0 border border-amber-500/30 font-semibold">
+                                    🏆 Sertifikat
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
+                                {att.correct_answers} to&apos;g&apos;ri &bull; {att.wrong_answers} xato &bull; {new Date(att.completed_at).toLocaleDateString('uz-UZ')}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={cn(
+                                "font-mono font-black text-xs px-2.5 py-1 rounded-lg border",
+                                scoreVal >= 80 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                                scoreVal >= 60 ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
+                                "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                              )}>
+                                {scoreVal.toFixed(0)}%
+                              </span>
+                              <div className={cn(
+                                "size-5 rounded-full border flex items-center justify-center transition-colors",
+                                isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/20"
+                              )}>
+                                {isSelected && <CheckCircle2 className="size-3.5 text-white" />}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Fikr / Izoh */}
+                    <div>
+                      <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fikr yoki Maslahat (Ixtiyoriy)</label>
+                      <Textarea
+                        value={attemptCaption}
+                        onChange={(e) => setAttemptCaption(e.target.value)}
+                        placeholder="Masalan: Mehnat o'z mevasini berdi! 88% A+ natija bilan sertifikat oldim..."
+                        className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[55px] sm:min-h-[65px] focus-visible:ring-emerald-500 resize-none"
+                        maxLength={500}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+              {/* Pinned Footer */}
+              <div className="p-3.5 sm:p-4 bg-[#0d1017] border-t border-white/10 flex items-center justify-end gap-2.5 shrink-0">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="rounded-xl text-xs font-bold h-9 sm:h-10 px-3 sm:px-4"
+                  className="rounded-xl text-xs sm:text-sm font-semibold h-10 px-4 text-muted-foreground hover:text-foreground"
+                >
+                  Bekor qilish
+                </Button>
+                <Button
+                  type="button"
+                  disabled={!selectedAttemptId || isSharingAttempt}
+                  onClick={() => {
+                    const att = userAttempts.find((a) => a.id === selectedAttemptId);
+                    if (att) handleShareAttempt(att.id, att.score);
+                  }}
+                  className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-2 h-10 px-5"
+                >
+                  {isSharingAttempt ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Joylanmoqda...
+                    </>
+                  ) : (
+                    <>
+                      <span>🚀 Hamjamiyatga Joylash (+15 XP)</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* ── TAB 2: ERKIN POST & RASM ── */}
+          {activeModalTab === 'custom' && (
+            <form onSubmit={handleCreatePost} className="flex-1 flex flex-col overflow-hidden">
+              {/* Scrollable Body */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-3.5 space-y-3.5">
+                <div>
+                  <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Mavzu yoki Sarlavha</label>
+                  <Input
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    placeholder="Masalan: Bugun 50 ta biologiya testi yechdim!"
+                    className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-10"
+                    maxLength={150}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fan / Yo&apos;nalish</label>
+                  <Input
+                    value={newSubject}
+                    onChange={(e) => setNewSubject(e.target.value)}
+                    placeholder="Biologiya, Kimyo, Tarix, Matematika..."
+                    className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-10"
+                    maxLength={60}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fikr yoki Taassurot</label>
+                  <Textarea
+                    value={newCaption}
+                    onChange={(e) => setNewCaption(e.target.value)}
+                    placeholder="Abituriyent do'stlaringizga foydali maslahat yoki shijoatli so'zlar yozing..."
+                    className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[65px] sm:min-h-[75px] resize-none"
+                    maxLength={1000}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Rasm (Ixtiyoriy)</label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+
+                  {imagePreviewUrl ? (
+                    <div className="relative rounded-xl overflow-hidden border border-white/15 bg-black/60 p-2 flex items-center justify-center">
+                      <img src={imagePreviewUrl} alt="Preview" className="max-h-40 rounded-lg object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedImageFile(null);
+                          setImagePreviewUrl(null);
+                        }}
+                        className="absolute top-2.5 right-2.5 size-7 rounded-full bg-black/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-white/15 hover:border-emerald-500/50 rounded-xl p-3 sm:p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-[#181d28]"
+                    >
+                      <PremiumIcon icon={UploadCloud} tone="emerald" size="md" glow />
+                      <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
+                      <span className="text-[10px] text-muted-foreground">PNG, JPG, WebP (maks. 5MB)</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pinned Footer */}
+              <div className="p-3.5 sm:p-4 bg-[#0d1017] border-t border-white/10 flex items-center justify-end gap-2.5 shrink-0">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="rounded-xl text-xs sm:text-sm font-semibold h-10 px-4 text-muted-foreground hover:text-foreground"
                 >
                   Bekor qilish
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmittingPost}
-                  className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-1.5 sm:gap-2 h-9 sm:h-10 px-3.5 sm:px-5"
+                  className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-2 h-10 px-5"
                 >
                   {isSubmittingPost ? (
                     <>
