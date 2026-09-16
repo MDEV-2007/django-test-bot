@@ -19,6 +19,7 @@ import { useFeatureFlags } from '@/lib/features';
 import { tgHaptic, openTelegramLink } from '@/lib/telegram';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
+import VerifiedBadge from '@/components/ui/verified-badge';
 import { cn } from '@/lib/utils';
 
 function cleanOptionText(text: string): string {
@@ -90,6 +91,9 @@ type ReelComment = {
   text: string;
   created_at: string;
   parent_id?: number | null;
+  role?: string;
+  is_superadmin?: boolean;
+  is_teacher?: boolean;
 };
 
 type ReelItem = {
@@ -922,8 +926,11 @@ export default function ReelsPage() {
                         </div>
                         <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl p-2.5 space-y-1">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-white/90">{c.user_name}</span>
-                            <span className="text-[10px] text-white/40 font-mono">{c.created_at}</span>
+                            <div className="flex items-center gap-1 min-w-0">
+                              <span className="font-bold text-white/90 truncate">{c.user_name}</span>
+                              <VerifiedBadge role={c.role} isSuperadmin={c.is_superadmin} isTeacher={c.is_teacher} size="xs" />
+                            </div>
+                            <span className="text-[10px] text-white/40 font-mono shrink-0">{c.created_at}</span>
                           </div>
                           <p className="text-xs text-white/80 leading-relaxed break-words">{c.text}</p>
                           <div className="pt-0.5">

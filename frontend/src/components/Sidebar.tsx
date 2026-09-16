@@ -13,6 +13,7 @@ import { useFeatureFlags } from '@/lib/features';
 import { prefetchApi } from '@/lib/api-cache';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
+import VerifiedBadge from '@/components/ui/verified-badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
@@ -200,9 +201,12 @@ export default function Sidebar() {
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium transition-colors group-hover:text-[var(--accent-text)]">
-              {user?.first_name || user?.username}
-            </p>
+            <div className="flex items-center gap-1 min-w-0">
+              <p className="truncate text-xs font-medium transition-colors group-hover:text-[var(--accent-text)]">
+                {user?.first_name || user?.username}
+              </p>
+              <VerifiedBadge role={user?.role} isSuperadmin={user?.is_superadmin} isTeacher={user?.is_teacher} size="xs" />
+            </div>
             <p className="truncate font-mono text-xs text-muted-foreground">
               Lvl {user?.level} · <span className="text-[var(--accent-text)]">{user?.xp} XP</span>
             </p>

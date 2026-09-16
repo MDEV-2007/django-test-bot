@@ -41,6 +41,9 @@ def rankings_api(request):
             'xp': r['xp'] if view != 'all' else p.xp,
             'level': p.level,
             'cosmetics': cosmetics,
+            'role': p.role,
+            'is_superadmin': p.is_superadmin,
+            'is_teacher': p.is_teacher,
         }
 
     ranked = [row(r) for r in top]

@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import CosmeticBadge from '@/components/student/CosmeticBadge';
+import VerifiedBadge from '@/components/ui/verified-badge';
 import type { Cosmetics } from '@/lib/auth-store';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,9 @@ type Row = {
   avatar_url: string | null; xp: number; level: number;
   /* Do'kondan taqilgan bezaklar: ramka halqasi va unvon reytingda ham ko'rinadi. */
   cosmetics?: Cosmetics;
+  role?: string;
+  is_superadmin?: boolean;
+  is_teacher?: boolean;
 };
 type GroupRow = Row & { rank: number; is_me: boolean };
 type RankingsData = {
@@ -168,6 +172,7 @@ export default function LeaderboardPage() {
                         <div className="min-w-0 flex-1 sm:w-full sm:flex-none">
                           <h4 className={cn('flex items-center justify-center gap-1 truncate font-bold', isChampion ? 'text-sm sm:mt-2 sm:text-base' : 'text-sm sm:mt-2')}>
                             <span className="truncate">{name(r)}</span>
+                            <VerifiedBadge role={r.role} isSuperadmin={r.is_superadmin} isTeacher={r.is_teacher} size="xs" />
                             <CosmeticBadge cosmetics={r.cosmetics} />
                           </h4>
                           <span className="font-mono text-xs text-muted-foreground">
@@ -231,6 +236,7 @@ export default function LeaderboardPage() {
                       <div className="min-w-0">
                         <p className="flex items-center gap-1 truncate text-sm font-medium">
                           <span className="truncate">{name(r)}</span>
+                          <VerifiedBadge role={r.role} isSuperadmin={r.is_superadmin} isTeacher={r.is_teacher} size="xs" />
                           <CosmeticBadge cosmetics={r.cosmetics} />
                           {r.is_me && <span className="ml-0.5 font-mono text-xs text-[var(--accent-text)]">(Siz)</span>}
                         </p>
@@ -287,6 +293,7 @@ export default function LeaderboardPage() {
                         <div className="min-w-0">
                           <p className="flex items-center gap-1 truncate text-sm font-medium">
                             <span className="truncate">{name(r)}</span>
+                            <VerifiedBadge role={r.role} isSuperadmin={r.is_superadmin} isTeacher={r.is_teacher} size="xs" />
                             <CosmeticBadge cosmetics={r.cosmetics} />
                             {isMe && <span className="ml-0.5 font-mono text-xs text-[var(--accent-text)]">(Siz)</span>}
                           </p>

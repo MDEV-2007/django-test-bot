@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import CosmeticBadge from '@/components/student/CosmeticBadge';
+import VerifiedBadge from '@/components/ui/verified-badge';
 import type { Cosmetics } from '@/lib/auth-store';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -42,6 +43,9 @@ type ProfileData = {
     username: string; first_name: string; last_name: string; xp: number; level: number;
     coins: number; streak: number; avatar_url: string | null; is_premium: boolean;
     next_level_xp: number; cosmetics?: Cosmetics; base_avatar_url?: string | null;
+    role?: 'superadmin' | 'teacher' | 'student';
+    is_superadmin?: boolean;
+    is_teacher?: boolean;
   };
   referral_code: string; telegram_deep_link: string;
   referral_stats: { referral_count: number; coins_earned: number };
@@ -231,7 +235,10 @@ export default function ProfilePage() {
 
             <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <h1 className="font-voice text-xl font-bold sm:text-2xl">{fullName}</h1>
+                <h1 className="font-voice text-xl font-bold sm:text-2xl flex items-center gap-2 flex-wrap">
+                  <span>{fullName}</span>
+                  <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
+                </h1>
                 <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
                 <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 font-mono text-[var(--accent-text)]">
                   Daraja {p.level}

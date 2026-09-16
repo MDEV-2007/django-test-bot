@@ -28,6 +28,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import { celebrate } from '@/lib/confetti';
 import PremiumIcon from '@/components/ui/premium-icon';
+import VerifiedBadge from '@/components/ui/verified-badge';
 import { cn } from '@/lib/utils';
 
 type PostItem = {
@@ -38,6 +39,9 @@ type PostItem = {
     username: string;
     avatar: string;
     level: number;
+    role?: string;
+    is_superadmin?: boolean;
+    is_teacher?: boolean;
   };
   post_type: 'test_result' | 'certificate' | 'achievement';
   title: string;
@@ -74,6 +78,9 @@ type PostComment = {
   text: string;
   created_at: string;
   parent_id?: number | null;
+  role?: string;
+  is_superadmin?: boolean;
+  is_teacher?: boolean;
 };
 
 type FeedResponse = {
@@ -650,6 +657,7 @@ export default function CommunityFeedPage() {
                               <span className="font-extrabold text-foreground text-sm leading-tight">
                                 {post.author.name}
                               </span>
+                              <VerifiedBadge role={post.author.role} isSuperadmin={post.author.is_superadmin} isTeacher={post.author.is_teacher} size="xs" />
                               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/20">
                                 Lv. {post.author.level}
                               </span>
@@ -855,8 +863,11 @@ export default function CommunityFeedPage() {
                                     </Avatar>
                                     <div className="min-w-0 flex-1">
                                       <div className="flex items-baseline justify-between gap-2">
-                                        <span className="font-bold text-foreground truncate">{c.user_name}</span>
-                                        <span className="text-[10px] text-muted-foreground">{c.created_at}</span>
+                                        <div className="flex items-center gap-1 min-w-0">
+                                          <span className="font-bold text-foreground truncate">{c.user_name}</span>
+                                          <VerifiedBadge role={c.role} isSuperadmin={c.is_superadmin} isTeacher={c.is_teacher} size="xs" />
+                                        </div>
+                                        <span className="text-[10px] text-muted-foreground shrink-0">{c.created_at}</span>
                                       </div>
                                       <p className="text-foreground/90 mt-0.5 leading-snug">{c.text}</p>
                                       <div className="mt-1 flex items-center gap-2">

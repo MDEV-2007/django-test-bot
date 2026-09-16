@@ -245,10 +245,20 @@ class ReelComment(models.Model):
     def to_dict(self):
         full_name = self.user.get_full_name() or self.user.first_name or self.user.username
         avatar = ""
+        role = 'student'
+        is_superadmin = False
+        is_teacher = False
         try:
             profile = getattr(self.user, 'profile', None)
             if profile and getattr(profile, 'avatar_url', None):
                 avatar = profile.avatar_url
+            if profile:
+                role = getattr(profile, 'role', 'student')
+                is_superadmin = getattr(profile, 'is_superadmin', False)
+                is_teacher = getattr(profile, 'is_teacher', False)
+            elif self.user.is_superuser:
+                role = 'superadmin'
+                is_superadmin = True
         except Exception:
             avatar = ""
         return {
@@ -257,6 +267,9 @@ class ReelComment(models.Model):
             'user_name': full_name,
             'username': self.user.username,
             'user_avatar': avatar,
+            'role': role,
+            'is_superadmin': is_superadmin,
+            'is_teacher': is_teacher,
             'text': self.text,
             'parent_id': self.parent_id,
             'replies_count': self.replies.count(),
@@ -312,6 +325,9 @@ class CommunityPost(models.Model):
         author_name = self.author.get_full_name() or self.author.first_name or self.author.username
         author_avatar = getattr(profile, 'avatar_url', '') if profile else ''
         author_level = getattr(profile, 'level', 1) if profile else 1
+        author_role = getattr(profile, 'role', 'student') if profile else ('superadmin' if self.author.is_superuser else 'student')
+        author_is_superadmin = getattr(profile, 'is_superadmin', self.author.is_superuser) if profile else self.author.is_superuser
+        author_is_teacher = getattr(profile, 'is_teacher', False) if profile else False
 
         user_reaction = None
         if current_user and current_user.is_authenticated:
@@ -349,6 +365,9 @@ class CommunityPost(models.Model):
                 'username': self.author.username,
                 'avatar': author_avatar,
                 'level': author_level,
+                'role': author_role,
+                'is_superadmin': author_is_superadmin,
+                'is_teacher': author_is_teacher,
             },
             'post_type': self.post_type,
             'title': self.title,
@@ -406,12 +425,18 @@ class CommunityPostComment(models.Model):
 
     def to_dict(self):
         profile = getattr(self.user, 'profile', None)
+        role = getattr(profile, 'role', 'student') if profile else ('superadmin' if self.user.is_superuser else 'student')
+        is_superadmin = getattr(profile, 'is_superadmin', self.user.is_superuser) if profile else self.user.is_superuser
+        is_teacher = getattr(profile, 'is_teacher', False) if profile else False
         return {
             'id': self.id,
             'user_id': self.user_id,
             'user_name': self.user.get_full_name() or self.user.first_name or self.user.username,
             'username': self.user.username,
             'user_avatar': getattr(profile, 'avatar_url', '') if profile else '',
+            'role': role,
+            'is_superadmin': is_superadmin,
+            'is_teacher': is_teacher,
             'text': self.text,
             'parent_id': self.parent_id,
             'replies_count': self.replies.count(),
