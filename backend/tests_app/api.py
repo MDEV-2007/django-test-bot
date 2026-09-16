@@ -60,6 +60,25 @@ def _iso_scheduled_at(dt):
     return dt.isoformat()
 
 
+def _author_payload(user):
+    if not user:
+        return None
+    profile = getattr(user, 'profile', None)
+    full_name = f"{user.last_name} {user.first_name}".strip() or user.get_full_name() or user.username
+    role = getattr(profile, 'role', 'teacher') if profile else 'teacher'
+    is_super = getattr(profile, 'is_superadmin', user.is_superuser) if profile else user.is_superuser
+    is_teach = getattr(profile, 'is_teacher', True) if profile else True
+    return {
+        'id': user.id,
+        'name': full_name,
+        'username': user.username,
+        'avatar': getattr(profile, 'avatar_url', '') if profile else '',
+        'role': role,
+        'is_superadmin': is_super,
+        'is_teacher': is_teach,
+    }
+
+
 def _test_payload(t, social=None, unlocked=False):
     """`social` — shu testning so'nggi 7 kunlik ijtimoiy dalili
     ({'solvers': N, 'avg': X}); ma'lumot bo'lmasa None qaytadi."""
@@ -82,6 +101,7 @@ def _test_payload(t, social=None, unlocked=False):
         'is_unlocked': unlocked,
         'recent_solvers': (social or {}).get('solvers', 0),
         'recent_avg_score': (social or {}).get('avg'),
+        'author': _author_payload(getattr(t, 'created_by', None)),
     }
 
 
@@ -114,7 +134,7 @@ def center_api(request):
         tests.order_by().exclude(category='').values_list('category', flat=True).distinct()
     )
 
-    tests = tests.select_related('subject').annotate(
+    tests = tests.select_related('subject', 'created_by', 'created_by__profile').annotate(
         q_count=Count('questions', distinct=True),
         open_count=Count(
             Case(When(questions__question_type='open_written', then=F('questions__id')),
@@ -161,7 +181,7 @@ def center_api(request):
         is_archived=False,
         is_live_mock=True,
         scheduled_at__gte=now - timezone.timedelta(hours=3),
-    ).select_related('subject').order_by('scheduled_at')
+    ).select_related('subject', 'created_by', 'created_by__profile').order_by('scheduled_at')
 
     pinned_mock = None
     if subject:
@@ -182,7 +202,7 @@ def center_api(request):
             is_published=True,
             is_archived=False,
             is_live_mock=True,
-        ).select_related('subject').order_by('-scheduled_at', '-id')
+        ).select_related('subject', 'created_by', 'created_by__profile').order_by('-scheduled_at', '-id')
         if subject:
             pinned_mock = fallback_qs.filter(subject=subject).first()
         if not pinned_mock:
@@ -204,6 +224,7 @@ def center_api(request):
             'is_reminded': pinned_mock.remind_users.filter(id=request.user.id).exists() if request.user.is_authenticated else False,
             'remind_users_count': pinned_mock.remind_users.count(),
             'waiting_participants_count': max(pinned_mock.remind_users.count() * 3 + 18, 24),
+            'author': _author_payload(getattr(pinned_mock, 'created_by', None)),
         }
 
     return Response({
@@ -301,7 +322,7 @@ def start_test_api(request, test_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsChannelSubscribed])
 def mock_lobby_api(request, test_id):
-    test = get_object_or_404(TestSet, id=test_id, is_published=True, is_archived=False)
+    test = get_object_or_404(TestSet.objects.select_related('subject', 'created_by', 'created_by__profile'), id=test_id, is_published=True, is_archived=False)
     profile = ensure_profile_for_user(request.user)
     is_reminded = test.remind_users.filter(id=request.user.id).exists()
     now = timezone.now()
@@ -330,6 +351,7 @@ def mock_lobby_api(request, test_id):
         'has_completed': completed_attempt is not None,
         'completed_attempt_id': completed_attempt.id if completed_attempt else None,
         'completed_score': completed_attempt.score if completed_attempt else None,
+        'author': _author_payload(getattr(test, 'created_by', None)),
     })
 
 

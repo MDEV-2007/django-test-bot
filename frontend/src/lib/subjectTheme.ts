@@ -54,6 +54,11 @@ const MOTIFS: Record<string, string> = {
     <circle cx="20" cy="22" r="15" stroke="currentColor" stroke-width="2" fill="none"/>
     <path d="M5 22h30M20 7c8 8 8 22 0 30M20 7c-8 8-8 22 0 30" stroke="currentColor" stroke-width="2" fill="none"/>
     <path d="M28 40h18v12H36l-6 6v-6h-2z" stroke="currentColor" stroke-width="2" fill="none"/>`,
+  // Rus tili — ochiq kitob va qalam chiziqlari.
+  'rus-tili': `
+    <path d="M10 14h14a5 5 0 0 1 5 5v30a4 4 0 0 0-4-4H10z" stroke="currentColor" stroke-width="2" fill="none"/>
+    <path d="M46 14H32a5 5 0 0 0-5 5v30a4 4 0 0 1 4-4h15z" stroke="currentColor" stroke-width="2" fill="none"/>
+    <path d="M16 22h7M16 29h7M33 22h7M33 29h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
   // Nomi noma'lum fan uchun — neytral kitob.
   default: `
     <path d="M8 12h14a6 6 0 0 1 6 6v30a6 6 0 0 0-6-6H8z" stroke="currentColor" stroke-width="2" fill="none"/>

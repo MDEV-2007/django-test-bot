@@ -21,8 +21,19 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { VerifiedBadge } from '@/components/ui/verified-badge';
 
 type AnswerMode = 'open' | 'closed' | 'mixed' | null;
+
+export type TestAuthor = {
+  id: number;
+  name: string;
+  username: string;
+  avatar?: string;
+  role?: string;
+  is_superadmin?: boolean;
+  is_teacher?: boolean;
+};
 
 type TestItem = {
   id: number; title: string; description: string; category: string;
@@ -32,6 +43,7 @@ type TestItem = {
   scheduled_at?: string | null;
   recent_solvers: number; recent_avg_score: number | null;
   answer_mode: AnswerMode;
+  author?: TestAuthor | null;
 };
 
 function formatScheduledTime(dateStr: string | null | undefined): string {
@@ -125,6 +137,7 @@ type CenterData = {
     is_reminded: boolean;
     remind_users_count?: number;
     waiting_participants_count?: number;
+    author?: TestAuthor | null;
   } | null;
 };
 
@@ -465,9 +478,15 @@ export default function TestsPage() {
                       <h3 className="text-base sm:text-lg font-extrabold text-foreground truncate">
                         {data.pinned_mock.title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                        {data.pinned_mock.questions_count || 45} ta savol · {data.pinned_mock.duration_minutes || 90} daqiqa · Milliy Sertifikat Formati
-                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground mt-0.5">
+                        <span>{data.pinned_mock.questions_count || 45} ta savol · {data.pinned_mock.duration_minutes || 90} daqiqa · Milliy Sertifikat Formati</span>
+                        {data.pinned_mock.author && (
+                          <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                            <span>· {data.pinned_mock.author.name}</span>
+                            <VerifiedBadge role={data.pinned_mock.author.role} isSuperadmin={data.pinned_mock.author.is_superadmin} isTeacher={data.pinned_mock.author.is_teacher} size="xs" />
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -770,6 +789,20 @@ export default function TestsPage() {
                   <p className="mt-1.5 line-clamp-2 flex-1 text-xs leading-relaxed text-muted-foreground">{t.description}</p>
 
                   <Separator className="my-3" />
+
+                  {t.author && (
+                    <div className="mb-2.5 flex items-center gap-1.5 text-xs">
+                      {t.author.avatar ? (
+                        <img src={t.author.avatar} alt="" className="size-4 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex size-4 items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-500">
+                          {t.author.name[0] || 'O'}
+                        </div>
+                      )}
+                      <span className="font-medium text-foreground truncate max-w-[180px]">{t.author.name}</span>
+                      <VerifiedBadge role={t.author.role} isSuperadmin={t.author.is_superadmin} isTeacher={t.author.is_teacher} size="xs" />
+                    </div>
+                  )}
 
                   <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1 font-mono">
