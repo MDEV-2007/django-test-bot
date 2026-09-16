@@ -382,8 +382,8 @@ export default function PanelReelsPage() {
       setOptionC('');
       setOptionD('');
       setQuizExplanation('');
-    } catch {
-      toast.error("Reelni saqlashda xatolik yuz berdi");
+    } catch (err: any) {
+      toast.error(err?.message || "Reelni saqlashda xatolik yuz berdi");
     } finally {
       setSaving(false);
     }

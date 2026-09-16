@@ -3611,47 +3611,59 @@ def panel_reels_list_create_api(request):
         })
 
     elif request.method == 'POST':
-        data = request.data
-        options = data.get('quiz_options') or data.get('options') or []
-        if isinstance(options, str):
-            options = [opt.strip() for opt in options.split('\n') if opt.strip()]
-
-        media_type = data.get('media_type') or 'text'
-        video_url = (data.get('video_url') or '').strip()
-        video_file = request.FILES.get('video_file')
-
-        reel = Reel.objects.create(
-            subject_name=data.get('subject_name') or 'Tarix',
-            subject_slug=data.get('subject_slug') or 'tarix',
-            category_badge=data.get('category_badge') or 'Muhim Fakt',
-            tagline=data.get('tagline') or 'Bilasizmi?',
-            hook=data.get('hook') or 'Diqqat!',
-            fact=data.get('fact') or '',
-            takeaway=data.get('takeaway') or '',
-            media_type=media_type,
-            video_url=video_url,
-            video_file=video_file,
-            quiz_question=data.get('quiz_question') or data.get('question') or '',
-            quiz_options=options,
-            quiz_correct_index=int(data.get('quiz_correct_index', 0)),
-            quiz_explanation=data.get('quiz_explanation') or '',
-            gradient_theme=data.get('gradient_theme') or 'purple',
-            is_published=bool(data.get('is_published', True)),
-            created_by=request.user,
-        )
-
         try:
-            AuditLog.objects.create(
-                user=request.user,
-                action='create',
-                model_name='Reel',
-                object_id=str(reel.id),
-                object_repr=f"Yangi Reel yaratildi: {reel.hook[:200]}",
-            )
-        except Exception:
-            pass
+            from django.utils.text import slugify
+            data = request.data
+            options = data.get('quiz_options') or data.get('options') or []
+            if isinstance(options, str):
+                options = [opt.strip() for opt in options.split('\n') if opt.strip()]
 
-        return Response({'success': True, 'id': reel.id, 'message': "Reel muvaffaqiyatli saqlandi!"})
+            media_type = data.get('media_type') or 'text'
+            video_url = (data.get('video_url') or '').strip()
+            video_file = request.FILES.get('video_file')
+
+            sub_slug = data.get('subject_slug') or slugify(data.get('subject_name') or 'tarix') or 'tarix'
+
+            try:
+                correct_idx = int(data.get('quiz_correct_index', 0))
+            except (ValueError, TypeError):
+                correct_idx = 0
+
+            reel = Reel.objects.create(
+                subject_name=str(data.get('subject_name') or 'Tarix')[:100],
+                subject_slug=str(sub_slug)[:100],
+                category_badge=str(data.get('category_badge') or 'Muhim Fakt')[:150],
+                tagline=str(data.get('tagline') or 'Bilasizmi?')[:100],
+                hook=str(data.get('hook') or 'Diqqat!')[:300],
+                fact=str(data.get('fact') or ''),
+                takeaway=str(data.get('takeaway') or '')[:300],
+                media_type=media_type,
+                video_url=video_url[:500],
+                video_file=video_file,
+                quiz_question=str(data.get('quiz_question') or data.get('question') or ''),
+                quiz_options=options,
+                quiz_correct_index=correct_idx,
+                quiz_explanation=str(data.get('quiz_explanation') or ''),
+                gradient_theme=str(data.get('gradient_theme') or 'purple')[:30],
+                is_published=bool(data.get('is_published', True)),
+                created_by=request.user,
+            )
+
+            try:
+                AuditLog.objects.create(
+                    user=request.user,
+                    action='create',
+                    model_name='Reel',
+                    object_id=str(reel.id),
+                    object_repr=f"Yangi Reel yaratildi: {reel.hook[:200]}",
+                )
+            except Exception:
+                pass
+
+            return Response({'success': True, 'id': reel.id, 'message': "Reel muvaffaqiyatli saqlandi!"})
+        except Exception as e:
+            logger.exception("panel_reels_create error: %s", e)
+            return Response({'error': f"Reelni saqlashda xatolik: {str(e)}"}, status=400)
 
 
 @api_view(['GET', 'PATCH', 'DELETE', 'POST'])
