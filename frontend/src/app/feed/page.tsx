@@ -976,26 +976,26 @@ export default function CommunityFeedPage() {
 
       {/* Create New Post Dialog Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-xl md:max-w-2xl bg-card border border-border p-5 sm:p-7 rounded-3xl max-h-[88vh] overflow-y-auto overflow-x-hidden shadow-2xl space-y-4">
-          <DialogHeader className="space-y-1">
-            <DialogTitle className="text-lg sm:text-xl font-black text-foreground flex items-center gap-2">
+        <DialogContent className="w-[calc(100%-1.25rem)] sm:max-w-xl md:max-w-2xl bg-[#11141d] border border-white/10 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-h-[90svh] sm:max-h-[85vh] overflow-y-auto overflow-x-hidden shadow-2xl space-y-3.5 sm:space-y-4">
+          <DialogHeader className="space-y-1 pr-6">
+            <DialogTitle className="text-base sm:text-lg font-black text-foreground flex items-center gap-2">
               <PremiumIcon icon={Plus} tone="emerald" size="sm" glow />
               <span>Hamjamiyatga Post Qo&apos;yish</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="text-[11px] sm:text-xs text-muted-foreground leading-normal">
               O&apos;quv yutuqlaringiz, test natijalaringiz yoki fikrlaringizni ulashing (+15 XP)!
             </DialogDescription>
           </DialogHeader>
 
           {/* Rejim tablari: Test Natijasini Qo'yish vs Erkin Post (Grid 2-ustun - overflow bo'lmaydi) */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-muted/60 border border-border/60">
+          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl sm:rounded-2xl bg-[#181d28] border border-white/10">
             <button
               type="button"
               onClick={() => setActiveModalTab('result')}
               className={cn(
-                "py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 min-w-0",
+                "py-2 px-1.5 sm:px-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0",
                 activeModalTab === 'result'
-                  ? "bg-card text-foreground shadow-xs border border-border text-amber-500"
+                  ? "bg-[#242b3d] text-foreground shadow-xs border border-white/15 text-amber-500"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -1006,9 +1006,9 @@ export default function CommunityFeedPage() {
               type="button"
               onClick={() => setActiveModalTab('custom')}
               className={cn(
-                "py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 min-w-0",
+                "py-2 px-1.5 sm:px-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0",
                 activeModalTab === 'custom'
-                  ? "bg-card text-foreground shadow-xs border border-border text-emerald-500"
+                  ? "bg-[#242b3d] text-foreground shadow-xs border border-white/15 text-emerald-500"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -1019,14 +1019,14 @@ export default function CommunityFeedPage() {
 
           {/* ── TAB 1: TEST NATIJASINI / SERTIFIKATNI ULASHISH ── */}
           {activeModalTab === 'result' && (
-            <div className="space-y-4 pt-1">
+            <div className="space-y-3.5 pt-0.5">
               {loadingAttempts ? (
                 <div className="py-8 text-center space-y-2">
                   <Loader2 className="size-6 animate-spin mx-auto text-primary" />
                   <p className="text-xs text-muted-foreground">Test natijalaringiz yuklanmoqda...</p>
                 </div>
               ) : userAttempts.length === 0 ? (
-                <div className="py-8 text-center space-y-3 p-5 rounded-2xl bg-muted/30 border border-dashed border-border">
+                <div className="py-6 text-center space-y-2.5 p-4 rounded-xl sm:rounded-2xl bg-[#181d28] border border-dashed border-white/15">
                   <PremiumIcon icon={Award} tone="zinc" size="lg" className="mx-auto" />
                   <div>
                     <p className="text-xs font-bold text-foreground">Hali topshirilgan testlar yo&apos;q</p>
@@ -1040,13 +1040,13 @@ export default function CommunityFeedPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between text-[11px] sm:text-xs">
                     <span className="font-bold text-foreground">Ulashish uchun natijani tanlang:</span>
-                    <span className="text-muted-foreground font-mono text-[11px]">{userAttempts.length} ta natija</span>
+                    <span className="text-muted-foreground font-mono text-[10px] sm:text-[11px]">{userAttempts.length} ta natija</span>
                   </div>
 
                   {/* Testlar ro'yxati (Smooth vertical scroll without horizontal bar) */}
-                  <div className="space-y-2 max-h-56 sm:max-h-64 overflow-y-auto overflow-x-hidden pr-1">
+                  <div className="space-y-2 max-h-48 sm:max-h-56 overflow-y-auto overflow-x-hidden pr-0.5">
                     {userAttempts.map((att) => {
                       const isSelected = selectedAttemptId === att.id;
                       const scoreVal = att.score || 0;
@@ -1056,31 +1056,31 @@ export default function CommunityFeedPage() {
                           key={att.id}
                           onClick={() => setSelectedAttemptId(att.id)}
                           className={cn(
-                            "p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 text-xs",
+                            "p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 text-xs",
                             isSelected
-                              ? "bg-emerald-500/10 border-emerald-500/50 shadow-xs ring-1 ring-emerald-500/30"
-                              : "bg-background/80 border-border/70 hover:border-primary/40"
+                              ? "bg-[#142322] border-emerald-500/70 shadow-xs ring-1 ring-emerald-500/40"
+                              : "bg-[#181d28] border-white/10 hover:border-emerald-500/40"
                           )}
                         >
-                          <div className="min-w-0 flex-1 space-y-1">
-                            <div className="flex items-center gap-2 min-w-0">
+                          <div className="min-w-0 flex-1 space-y-0.5">
+                            <div className="flex items-center gap-1.5 min-w-0">
                               <span className="font-bold text-foreground text-xs sm:text-sm truncate block">
                                 {att.test_title}
                               </span>
                               {isCert && (
-                                <Badge className="bg-amber-500/20 text-amber-500 text-[10px] px-1.5 py-0.5 shrink-0 border border-amber-500/30 font-semibold">
+                                <Badge className="bg-amber-500/20 text-amber-500 text-[9px] sm:text-[10px] px-1.5 py-0.5 shrink-0 border border-amber-500/30 font-semibold">
                                   🏆 Sertifikat
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-[11px] text-muted-foreground">
+                            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
                               {att.correct_answers} to&apos;g&apos;ri &bull; {att.wrong_answers} xato &bull; {new Date(att.completed_at).toLocaleDateString('uz-UZ')}
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-2.5 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0">
                             <span className={cn(
-                              "font-mono font-black text-xs sm:text-sm px-2.5 py-1 rounded-xl border",
+                              "font-mono font-black text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border",
                               scoreVal >= 80 ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" :
                               scoreVal >= 60 ? "bg-amber-500/15 text-amber-500 border-amber-500/30" :
                               "bg-rose-500/15 text-rose-500 border-rose-500/30"
@@ -1088,10 +1088,10 @@ export default function CommunityFeedPage() {
                               {scoreVal.toFixed(0)}%
                             </span>
                             <div className={cn(
-                              "size-5 rounded-full border flex items-center justify-center transition-colors",
-                              isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-muted-foreground/30"
+                              "size-4.5 sm:size-5 rounded-full border flex items-center justify-center transition-colors",
+                              isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/20"
                             )}>
-                              {isSelected && <CheckCircle2 className="size-3.5" />}
+                              {isSelected && <CheckCircle2 className="size-3 sm:size-3.5" />}
                             </div>
                           </div>
                         </div>
@@ -1101,23 +1101,23 @@ export default function CommunityFeedPage() {
 
                   {/* Fikr / Izoh */}
                   <div>
-                    <label className="text-xs font-bold text-foreground mb-1 block">Fikr yoki Maslahat (Ixtiyoriy)</label>
+                    <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fikr yoki Maslahat (Ixtiyoriy)</label>
                     <Textarea
                       value={attemptCaption}
                       onChange={(e) => setAttemptCaption(e.target.value)}
                       placeholder="Masalan: Mehnat o'z mevasini berdi! 88% A+ natija bilan sertifikat oldim..."
-                      className="rounded-xl text-xs bg-muted/30 border-border/80 min-h-[65px] focus-visible:ring-emerald-500"
+                      className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[55px] sm:min-h-[65px] focus-visible:ring-emerald-500"
                       maxLength={500}
                     />
                   </div>
 
                   {/* Submit Button */}
-                  <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/60">
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
                     <Button
                       type="button"
                       variant="ghost"
                       onClick={() => setIsCreateModalOpen(false)}
-                      className="rounded-xl text-xs font-bold"
+                      className="rounded-xl text-xs font-bold h-9 sm:h-10 px-3 sm:px-4"
                     >
                       Bekor qilish
                     </Button>
@@ -1128,7 +1128,7 @@ export default function CommunityFeedPage() {
                         const att = userAttempts.find((a) => a.id === selectedAttemptId);
                         if (att) handleShareAttempt(att.id, att.score);
                       }}
-                      className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-2 h-10 px-4"
+                      className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-1.5 sm:gap-2 h-9 sm:h-10 px-3.5 sm:px-5"
                     >
                       {isSharingAttempt ? (
                         <>
@@ -1136,7 +1136,7 @@ export default function CommunityFeedPage() {
                         </>
                       ) : (
                         <>
-                          <span>🚀 Hamjamiyatga Joylash (+15 XP)</span>
+                          <span>🚀 Joylash (+15 XP)</span>
                         </>
                       )}
                     </Button>
@@ -1148,42 +1148,42 @@ export default function CommunityFeedPage() {
 
           {/* ── TAB 2: ERKIN POST & RASM ── */}
           {activeModalTab === 'custom' && (
-            <form onSubmit={handleCreatePost} className="space-y-4 pt-1">
+            <form onSubmit={handleCreatePost} className="space-y-3.5 pt-0.5">
               <div>
-                <label className="text-xs font-bold text-foreground mb-1 block">Mavzu yoki Sarlavha</label>
+                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Mavzu yoki Sarlavha</label>
                 <Input
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Masalan: Bugun 50 ta biologiya testi yechdim!"
-                  className="rounded-xl text-xs bg-muted/30 border-border/80"
+                  className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-9 sm:h-10"
                   maxLength={150}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-foreground mb-1 block">Fan / Yo&apos;nalish</label>
+                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fan / Yo&apos;nalish</label>
                 <Input
                   value={newSubject}
                   onChange={(e) => setNewSubject(e.target.value)}
                   placeholder="Biologiya, Kimyo, Tarix, Matematika..."
-                  className="rounded-xl text-xs bg-muted/30 border-border/80"
+                  className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-9 sm:h-10"
                   maxLength={60}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-foreground mb-1 block">Fikr yoki Taassurot</label>
+                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Fikr yoki Taassurot</label>
                 <Textarea
                   value={newCaption}
                   onChange={(e) => setNewCaption(e.target.value)}
                   placeholder="Abituriyent do'stlaringizga foydali maslahat yoki shijoatli so'zlar yozing..."
-                  className="rounded-xl text-xs bg-muted/30 border-border/80 min-h-[75px]"
+                  className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[65px] sm:min-h-[75px]"
                   maxLength={1000}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-foreground mb-1 block">Rasm (Ixtiyoriy)</label>
+                <label className="text-[11px] sm:text-xs font-bold text-foreground mb-1 block">Rasm (Ixtiyoriy)</label>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -1193,15 +1193,15 @@ export default function CommunityFeedPage() {
                 />
 
                 {imagePreviewUrl ? (
-                  <div className="relative rounded-2xl overflow-hidden border border-border bg-black/40 p-2 flex items-center justify-center">
-                    <img src={imagePreviewUrl} alt="Preview" className="max-h-48 rounded-xl object-contain" />
+                  <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-white/15 bg-black/60 p-2 flex items-center justify-center">
+                    <img src={imagePreviewUrl} alt="Preview" className="max-h-40 sm:max-h-48 rounded-lg sm:rounded-xl object-contain" />
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedImageFile(null);
                         setImagePreviewUrl(null);
                       }}
-                      className="absolute top-3 right-3 size-7 rounded-full bg-black/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors"
+                      className="absolute top-2.5 right-2.5 size-7 rounded-full bg-black/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors"
                     >
                       <X className="size-3.5" />
                     </button>
@@ -1209,7 +1209,7 @@ export default function CommunityFeedPage() {
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-border/80 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-muted/20"
+                    className="border-2 border-dashed border-white/15 hover:border-emerald-500/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1 sm:gap-1.5 bg-[#181d28]"
                   >
                     <PremiumIcon icon={UploadCloud} tone="emerald" size="md" glow />
                     <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
@@ -1218,19 +1218,19 @@ export default function CommunityFeedPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/60">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="rounded-xl text-xs font-bold"
+                  className="rounded-xl text-xs font-bold h-9 sm:h-10 px-3 sm:px-4"
                 >
                   Bekor qilish
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmittingPost}
-                  className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-2 h-10 px-4"
+                  className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-1.5 sm:gap-2 h-9 sm:h-10 px-3.5 sm:px-5"
                 >
                   {isSubmittingPost ? (
                     <>
