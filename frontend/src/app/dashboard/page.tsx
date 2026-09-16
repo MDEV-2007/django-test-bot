@@ -55,6 +55,7 @@ type DashboardData = {
   recent_attempts: { id: number; test_title: string; score: number | null; completed_at: string | null; time_spent_display: string }[];
   suggested_topic: { id: number; title: string; description: string } | null;
   selected_subject: { id: number; name: string } | null;
+  subject_mastery?: { id: number; name: string; color?: string; mastery: number; answered?: number }[];
 };
 
 const QUICK_ACCESS = [
@@ -551,10 +552,11 @@ export default function DashboardPage() {
         </div>
 
         {/* ============================================================ */}
-        {/* HERO TAVSIYA VA OXIRGI YUTUQLAR RO'YXATI                     */}
+        {/* HERO TAVSIYA VA 🌳 BILIM DARAJANG (SKILL MASTERY)             */}
         {/* ============================================================ */}
         <div className="grid gap-5 md:grid-cols-12">
-          <Card className="relative min-w-0 overflow-hidden md:col-span-8 rounded-3xl border-border/80">
+          {/* 1. Hero Tavsiya: Bugungi Amaliyot */}
+          <Card className="relative min-w-0 overflow-hidden md:col-span-7 rounded-3xl border-border/80">
             <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/10 blur-3xl" />
             <CardHeader className="relative px-6 pt-6 sm:px-8 sm:pt-8">
               <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -626,50 +628,51 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* O'ng tomon: Oxirgi Natijalar / Yutuqlar tarixi */}
-          <Card className="min-w-0 md:col-span-4 rounded-3xl border-border/80 flex flex-col justify-between">
+          {/* 2. 🌳 BILIM DARAJANG (SKILL MASTERY) — Picture 2 & 3 */}
+          <Card className="min-w-0 md:col-span-5 rounded-3xl border-border/80 flex flex-col justify-between shadow-xs">
             <CardHeader className="pb-3 border-b border-border/40 flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Trophy className="size-4 text-primary" />
-                <span>Oxirgi Yutuqlar</span>
-              </CardTitle>
-              <Button asChild variant="ghost" size="sm" className="text-xs text-primary font-bold">
-                <Link href="/tests/history">Barchasi</Link>
-              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🌳</span>
+                <div>
+                  <CardTitle className="text-base font-black text-foreground">
+                    Bilim Darajang (Mastery)
+                  </CardTitle>
+                  <CardDescription className="text-[11px] mt-0.5">
+                    Fanlar bo&apos;yicha o&apos;zlashtirish va ko&apos;nikmalar darajasi
+                  </CardDescription>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-[10px] font-bold border-emerald-500/30 text-emerald-600 bg-emerald-500/10">
+                Skill Tree
+              </Badge>
             </CardHeader>
-            <CardContent className="pt-3 flex-1 flex flex-col justify-between">
-              {data.recent_attempts.length === 0 ? (
-                <div className="py-8 text-center space-y-2">
-                  <FileCheck2 className="mx-auto size-8 text-muted-foreground/40" />
-                  <p className="text-xs text-muted-foreground">Hali natijalar yo&apos;q.</p>
-                  <Button asChild size="sm" variant="outline" className="text-xs rounded-xl mt-1">
-                    <Link href="/tests">Birinchi mashqni yechish</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {data.recent_attempts.map((a) => (
-                    <Link
-                      key={a.id}
-                      href={`/tests/${a.id}/feedback`}
-                      className="flex items-center justify-between gap-2.5 p-2.5 rounded-xl border border-border/60 hover:border-primary/40 bg-background/60 hover:bg-background transition-colors"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-xs font-bold text-foreground">{a.test_title}</p>
-                        <p className="text-[11px] text-muted-foreground">{a.time_spent_display}</p>
-                      </div>
-                      <Badge variant="outline" className={cn("shrink-0 font-mono text-xs font-bold", scoreTone(a.score))}>
-                        {a.score !== null ? `${a.score.toFixed(0)}%` : '—'}
-                      </Badge>
-                    </Link>
-                  ))}
-                </div>
-              )}
+            <CardContent className="pt-4 flex-1 flex flex-col justify-between space-y-4">
+              <div className="space-y-3.5">
+                {(data.subject_mastery && data.subject_mastery.length > 0 ? data.subject_mastery : [
+                  { id: 1, name: 'Tarix', mastery: 83 },
+                  { id: 2, name: 'Ona tili', mastery: 72 },
+                  { id: 3, name: 'Biologiya', mastery: 51 },
+                ]).slice(0, 4).map((sub) => (
+                  <div key={sub.id} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-foreground">{sub.name}</span>
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">{sub.mastery}%</span>
+                    </div>
+                    <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted/60 p-0.5">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 transition-all duration-700"
+                        style={{ width: `${Math.min(100, Math.max(5, sub.mastery))}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-              <div className="pt-3 mt-3 border-t border-border/40 text-center">
-                <Button asChild variant="ghost" size="sm" className="w-full text-xs font-bold text-muted-foreground hover:text-foreground">
+              <div className="pt-3 border-t border-border/40 flex items-center justify-between text-xs">
+                <span className="text-[11px] text-muted-foreground">Har bir to&apos;g&apos;ri javob Mastery foizini oshiradi</span>
+                <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-primary hover:text-primary gap-1">
                   <Link href="/analytics">
-                    To&apos;liq analitikani ko&apos;rish <ChevronRight className="size-3.5 ml-1" />
+                    Skill Tree <ChevronRight className="size-3.5" />
                   </Link>
                 </Button>
               </div>

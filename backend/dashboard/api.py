@@ -69,6 +69,23 @@ def home_api(request):
     if subject:
         topic_qs = topic_qs.filter(subject=subject)
     suggested_topic = topic_qs.order_by('order').first()
+    from analytics.services import compute_mastery
+    from tests_app.models import Subject
+    try:
+        mastery_res = compute_mastery(profile)
+        subject_mastery = mastery_res.get('subjects', [])
+    except Exception:
+        subject_mastery = []
+
+    if not subject_mastery:
+        all_subs = Subject.objects.all().order_by('order', 'name')[:5]
+        subject_mastery = [{
+            'id': s.id,
+            'name': s.name,
+            'color': s.color or '#2d6cff',
+            'mastery': 0,
+            'answered': 0,
+        } for s in all_subs]
 
     return Response({
         'profile': ProfileSerializer(profile).data,
@@ -78,6 +95,7 @@ def home_api(request):
         'online_peers': online_peers,
         'solved_today': solved_today,
         'weak_review': weak_review,
+        'subject_mastery': subject_mastery,
         'missions': [{
             'title': pm.mission.title,
             'description': pm.mission.description,
