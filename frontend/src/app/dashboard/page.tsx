@@ -7,6 +7,7 @@ import {
   FileCheck2, Swords, BookOpen, Bot, ArrowRight, History, MapPin, HelpCircle,
   Crown, Sparkles, Flame, Coins, Trophy, Snowflake, CheckCircle2,
   ChevronRight, Zap, GraduationCap, Layers, Share2, Headphones, Target, Shield, Play,
+  Heart, Bookmark, Dna, Microscope,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
@@ -18,6 +19,7 @@ import { mentorNudge } from '@/lib/mentorVoice';
 import StatNumber from '@/components/motion/StatNumber';
 import AppShell from '@/components/AppShell';
 import CardMotif from '@/components/student/CardMotif';
+import SkillTreeGraph from '@/components/student/SkillTreeGraph';
 import { cn } from '@/lib/utils';
 import { useFeatureFlags } from '@/lib/features';
 import PremiumIcon, { PremiumIconTone } from '@/components/ui/premium-icon';
@@ -62,7 +64,7 @@ const QUICK_ACCESS = [
   { href: '/study', title: 'Fokus Xonasi', desc: 'Pomodoro darsi va ambient tovushlar', icon: Headphones, badge: 'Yangi 🔥', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone },
   { href: '/reels', title: 'Bilim Reels', desc: 'Scroll-learning va mini-kvestlar', icon: Sparkles, badge: 'Viral 🎬', motif: 'lessons' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'reels' },
   { href: '/flashcards', title: 'Quick Learn', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki ⚡', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'amber' as PremiumIconTone, featureKey: 'flashcards' },
-  { href: '/tests', title: 'Amaliy Mashqlar', desc: 'Rasmiy formatdagi mock testlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone, featureKey: 'tests' },
+  { href: '/tests', title: 'Amaliy Mashqlar', desc: 'Rasmiy formatdagi mock mashqlar', icon: FileCheck2, badge: 'BBA', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone, featureKey: 'tests' },
   { href: '/battles', title: 'Arena: Jonli Duel', desc: 'Jonli intellektual jang', icon: Swords, badge: 'Live ⚔️', motif: 'arena' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'battles' },
   { href: '/learning', title: 'Darslar & Konspektlar', desc: 'Video va audio darslar', icon: BookOpen, badge: 'Audio', motif: 'lessons' as const, motifTone: 'text-[var(--tone-lesson-text)]', iconTone: 'indigo' as PremiumIconTone, featureKey: 'learning' },
 ];
@@ -72,13 +74,6 @@ const MINI_GAMES = [
   { href: '/games/map', title: "Xarita & Qal'alar Tahlili", desc: 'Qadimgi davlatlar va joylashuvlarni toping', icon: MapPin, motif: 'map' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone },
   { href: '/games/character', title: 'Tarixiy Shaxsni Toping', desc: 'Maslahatlar orqali sarkarda yoki allomani toping', icon: HelpCircle, motif: 'character' as const, motifTone: 'text-[var(--tone-streak-text)]', iconTone: 'amber' as PremiumIconTone },
 ];
-
-function scoreTone(score: number | null) {
-  if (score === null) return 'border-[var(--border-card)] bg-[var(--surface-hover)] text-[var(--text-secondary)]';
-  if (score >= 80) return 'border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success-text)]';
-  if (score >= 50) return 'border-[var(--tone-streak)]/30 bg-[var(--tone-streak-soft)] text-[var(--tone-streak-text)]';
-  return 'border-[var(--danger)]/30 bg-[var(--danger-soft)] text-[var(--danger-text)]';
-}
 
 function greeting() {
   const h = new Date().getHours();
@@ -137,6 +132,7 @@ export default function DashboardPage() {
   const lastAttempt = data.recent_attempts[0] ?? null;
   const allMissionsDone = data.missions.length > 0 && doneMissions === data.missions.length;
   const xpLeft = Math.max(0, p.next_level_xp - p.xp);
+
   const nudge = mentorNudge({
     firstName,
     streak: p.streak,
@@ -149,20 +145,24 @@ export default function DashboardPage() {
     solvedToday: data.solved_today ?? 0,
   });
 
+  // Tanlangan yoki faol fan
+  const activeSubject = data.selected_subject?.name || 'Biologiya';
+  const suggestedMissionTitle = data.suggested_topic?.title || 'Hujayra mavzusini Master qil';
+
   return (
     <>
       <AppShell />
       <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-16 sm:p-6 sm:space-y-8">
-        {/* Yuqori qator: Salomlashish & Onlayn hamrohlar */}
+        {/* ============================================================ */}
+        {/* YUQORI QATOR: SALOMLASHISH & ONLAYN HAMROHLAR               */}
+        {/* ============================================================ */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-voice text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               {greeting()}, {firstName}! 👋
             </h1>
             <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-              {doneMissions === data.missions.length && data.missions.length > 0
-                ? "Bugungi barcha missiyalar bajarildi — ajoyib yutuq! 🚀"
-                : `Bugun ${data.missions.length - doneMissions} ta missiya sizni kutmoqda.`}
+              Bugun qanday bilim va ko&apos;nikmalarni kashf qilamiz?
             </p>
           </div>
           <PresenceRow
@@ -173,14 +173,14 @@ export default function DashboardPage() {
         </div>
 
         {/* ============================================================ */}
-        {/* 🎮 GAME HUD — O'YINCHI STATUSI VA RPG KO'RSATKICHLARI          */}
+        {/* 🎮 GAME HUD — O'YINCHI STATUSI (Picture 1 Wireframe)          */}
         {/* ============================================================ */}
-        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-4 sm:p-6 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-card to-primary/5 p-4 sm:p-6 shadow-sm">
           <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-primary/10 blur-3xl" />
           <div className="pointer-events-none absolute -left-16 -bottom-16 size-64 rounded-full bg-rose-500/5 blur-3xl" />
 
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            {/* Chap tomon: O'yinchi profili, Avatar va Unvon */}
+            {/* O'yinchi Profili & Unvon yo'li */}
             <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
               <div className="relative shrink-0">
                 <Avatar className="size-16 sm:size-20 border-2 border-primary/40 shadow-md ring-4 ring-primary/10">
@@ -196,7 +196,8 @@ export default function DashboardPage() {
 
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-lg sm:text-2xl font-black text-foreground truncate">
+                  <span className="text-emerald-500 text-lg sm:text-xl">🌱</span>
+                  <h2 className="text-lg sm:text-2xl font-black text-foreground truncate uppercase tracking-tight">
                     {fullName}
                   </h2>
                   <Badge
@@ -213,7 +214,6 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                {/* Unvon progresi: Navkar -> Qo'riqchi -> Sarkarda -> Olim */}
                 <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                   <span>Unvon yo&apos;li:</span>
                   <span className="font-semibold text-foreground">{rankInfo.title}</span>
@@ -230,12 +230,12 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* O'rta: Level va XP Progress Bar */}
-            <div className="flex-1 max-w-md space-y-2 rounded-2xl bg-background/50 border border-border/60 p-3.5 backdrop-blur-xs">
+            {/* O'rta: Level 7 → Level 8 Progress Bar */}
+            <div className="flex-1 max-w-md space-y-2 rounded-2xl bg-background/60 border border-border/70 p-3.5 backdrop-blur-xs">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-black text-foreground flex items-center gap-1.5">
                   <Trophy className="size-4 text-emerald-500" />
-                  <span>DARAJA {p.level}</span>
+                  <span>Level {p.level} → Level {p.level + 1}</span>
                 </span>
                 <span className="font-mono font-bold text-muted-foreground">
                   <span className="text-primary font-black">{p.xp.toLocaleString('uz-UZ')}</span> / {p.next_level_xp.toLocaleString('uz-UZ')} XP
@@ -250,12 +250,12 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>{data.xp_progress}% to&apos;ldirildi</span>
-                <span>Keyingi darajaga <strong className="text-foreground">{xpLeft.toLocaleString('uz-UZ')} XP</strong></span>
+                <span className="font-bold text-foreground">{data.xp_progress}% bajarildi</span>
+                <span>Keyingi bosqichga <strong className="text-foreground">{xpLeft.toLocaleString('uz-UZ')} XP</strong></span>
               </div>
             </div>
 
-            {/* O'ng tomon: Resurslar (HUD Counters) */}
+            {/* O'ng: Resurslar (HUD Counters: Streak, Coins, Arena) */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {/* Streak */}
               <Tooltip>
@@ -320,7 +320,400 @@ export default function DashboardPage() {
         <Celebration level={p.level} streak={p.streak} completedAttempts={data.recent_attempts.length} />
 
         {/* ============================================================ */}
-        {/* 🎯 BUGUNGI MISSIYALAR (DAILY QUESTS — NEXT ACTIONS)          */}
+        {/* 🚀 BUGUNGI MISSIYA & 🌳 BILIM DARAJANG (Picture 2 Wireframe)   */}
+        {/* ============================================================ */}
+        <div className="grid gap-5 md:grid-cols-12">
+          {/* 1. HERO CARD: BUGUNGI MISSIYA (Picture 2) */}
+          <Card className="relative overflow-hidden md:col-span-7 rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 p-6 sm:p-7 shadow-md flex flex-col justify-between">
+            <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/10 blur-3xl" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="border-primary/40 bg-primary/15 text-primary text-xs font-black uppercase tracking-wider px-3 py-1 rounded-xl gap-1.5">
+                    <Dna className="size-3.5" />
+                    <span>{activeSubject}</span>
+                  </Badge>
+                  <span className="text-[11px] font-mono font-bold text-amber-500 flex items-center gap-1">
+                    <Zap className="size-3" /> +120 XP Kvest
+                  </span>
+                </div>
+
+                <Badge variant="secondary" className="text-xs font-bold font-mono">
+                  BUGUNGI MISSIYA
+                </Badge>
+              </div>
+
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight leading-tight">
+                  {suggestedMissionTitle}
+                </h3>
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Bugungi 3 bosqichli o&apos;quv rejasini yakunlang va mavzuni to&apos;liq o&apos;zlashtiring:
+                </p>
+              </div>
+
+              {/* 3 ta bosqich (Picture 2: ① 5 min Reels, ② 10 ta savol, ③ Boss Challenge) */}
+              <div className="space-y-2.5 pt-2">
+                <Link
+                  href="/reels"
+                  className="flex items-center justify-between p-3 rounded-2xl border border-rose-500/20 bg-rose-500/[0.04] hover:bg-rose-500/10 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex size-7 items-center justify-center rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 font-black text-xs font-mono">
+                      ①
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-foreground group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                        5 min Reels
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">Mavzu bo&apos;yicha mikrokvest va video</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-rose-500 flex items-center gap-1">
+                    Ko&apos;rish <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+
+                <Link
+                  href="/tests"
+                  className="flex items-center justify-between p-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] hover:bg-emerald-500/10 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex size-7 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-xs font-mono">
+                      ②
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        10 ta amaliy mashq
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">Bilimni mustahkamlash savollari</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    Ishlash <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+
+                <Link
+                  href="/battles"
+                  className="flex items-center justify-between p-3 rounded-2xl border border-purple-500/20 bg-purple-500/[0.04] hover:bg-purple-500/10 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex size-7 items-center justify-center rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 font-black text-xs font-mono">
+                      ③
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                        Boss Challenge (Arena Jangi)
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">Raqib bilan 1v1 duelda g&apos;alaba qozonish</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                    Jang <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Asosiy Missiya Tugmasi */}
+            <div className="pt-6 mt-4 border-t border-border/60 flex flex-col sm:flex-row items-center gap-3">
+              <Button asChild size="lg" className="w-full sm:flex-1 h-12 rounded-2xl font-black text-sm tracking-wide gap-2 bg-gradient-to-r from-emerald-600 via-primary to-cyan-600 shadow-md hover:opacity-95">
+                <Link href="/tests">
+                  <Zap className="size-5" />
+                  <span>🚀 MISSIYANI BOSHLASH</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto h-12 rounded-2xl font-bold text-xs border-border/80">
+                <Link href="/learning">Konspektni o&apos;qish</Link>
+              </Button>
+            </div>
+          </Card>
+
+          {/* 2. 🌳 BILIM DARAJANG (Subject Mastery Bars - Picture 2) */}
+          <Card className="md:col-span-5 rounded-3xl border border-border/80 bg-card p-6 flex flex-col justify-between shadow-xs">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🌳</span>
+                  <div>
+                    <h3 className="text-base font-black text-foreground">
+                      BILIM DARAJANG
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Fanlar bo&apos;yicha o&apos;zlashtirish foizlari
+                    </p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-[10px] font-bold border-emerald-500/30 text-emerald-600 bg-emerald-500/10">
+                  Mastery
+                </Badge>
+              </div>
+
+              {/* Fanlar bo'yicha progress barlar (Picture 2: Matematika 72%, Biologiya 51%, Tarix 83%) */}
+              <div className="space-y-4 pt-4">
+                {[
+                  { name: 'Matematika', mastery: 72, color: 'from-blue-500 to-cyan-400' },
+                  { name: 'Biologiya', mastery: 51, color: 'from-emerald-500 to-teal-400' },
+                  { name: 'Tarix', mastery: 83, color: 'from-amber-500 to-orange-400' },
+                  { name: 'Ona tili', mastery: 78, color: 'from-purple-500 to-indigo-400' },
+                ].map((item) => (
+                  <div key={item.name} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-foreground">{item.name}</span>
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-black">
+                        {item.mastery}%
+                      </span>
+                    </div>
+                    <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted/70 p-0.5">
+                      <div
+                        className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-700", item.color)}
+                        style={{ width: `${item.mastery}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-border/50 flex items-center justify-between text-xs">
+              <span className="text-[11px] text-muted-foreground">Har bir to&apos;g&apos;ri mashq foizni oshiradi</span>
+              <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-primary hover:text-primary gap-1">
+                <Link href="/analytics">
+                  Batafsil <ChevronRight className="size-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </Card>
+        </div>
+
+        {/* ============================================================ */}
+        {/* 🌳 ENG KATTA O'ZGARISH: "SKILL TREE" (Picture 3 Wireframe)    */}
+        {/* ============================================================ */}
+        <section className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-9 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                <Brain className="size-5" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-foreground flex items-center gap-2">
+                  <span>🌳 Skill Tree (Bilim Daraxti)</span>
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  Khan Academy & RPG modeli: Har bir shox va ko&apos;nikmani bosqichma-bosqich o&apos;zlashtiring
+                </p>
+              </div>
+            </div>
+
+            <Badge variant="outline" className="self-start sm:self-auto text-xs font-bold text-primary border-primary/30 bg-primary/10">
+              Mastery → XP → Level
+            </Badge>
+          </div>
+
+          {/* Interaktiv Skill Tree grafi */}
+          <SkillTreeGraph activeSubjectName={activeSubject} />
+        </section>
+
+        {/* ============================================================ */}
+        {/* ⚔️ ARENA, 📱 REELS & 🎴 QUICK LEARN (Picture 4 & 5)           */}
+        {/* ============================================================ */}
+        <div className="grid gap-5 md:grid-cols-3">
+          {/* 1. ⚔️ BUGUNGI ARENA (Picture 4 Wireframe) */}
+          <Card className="rounded-3xl border-2 border-purple-500/30 bg-gradient-to-b from-purple-500/10 via-card to-card p-5 sm:p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
+            <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-purple-500/10 blur-2xl" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="border-purple-500/30 bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1">
+                  <Swords className="size-3.5" />
+                  <span>ARENA</span>
+                </Badge>
+                <span className="text-[11px] font-mono font-bold text-purple-500">Live 1v1</span>
+              </div>
+
+              <div className="text-center space-y-1">
+                <p className="text-[11px] font-mono uppercase tracking-wider font-extrabold text-muted-foreground">
+                  ⚔️ BUGUNGI JANG
+                </p>
+                <h4 className="text-base font-black text-foreground">
+                  Intellektual Duel
+                </h4>
+              </div>
+
+              {/* Matchup: Murodulla VS Azizbek (Picture 4) */}
+              <div className="p-4 rounded-2xl bg-background/80 border border-border/80 flex items-center justify-between gap-3 shadow-inner">
+                {/* O'yinchi */}
+                <div className="flex flex-col items-center text-center space-y-1 min-w-0">
+                  <Avatar className="size-12 border-2 border-primary/50 shadow-xs">
+                    <AvatarImage src={p.avatar_url || undefined} alt={firstName} />
+                    <AvatarFallback className="text-xs font-black bg-primary/20 text-primary">
+                      {firstName.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-xs font-black text-foreground truncate max-w-[5rem]">
+                    {firstName}
+                  </p>
+                  <span className="text-[10px] font-mono text-muted-foreground">{p.elo_rating} ELO</span>
+                </div>
+
+                {/* Markaziy VS & 5 Savol & Score Dots */}
+                <div className="flex flex-col items-center space-y-1.5 shrink-0">
+                  <span className="px-2 py-0.5 rounded-lg bg-rose-500 text-white font-black text-[10px] uppercase tracking-wider shadow-xs">
+                    VS
+                  </span>
+                  <span className="text-[11px] font-black text-foreground font-mono">
+                    5 SAVOL
+                  </span>
+                  {/* 🟢 3   🔴 2 ko'rsatkichi (Picture 4) */}
+                  <div className="flex items-center gap-1.5 font-mono text-xs font-extrabold">
+                    <span className="text-emerald-500 flex items-center gap-0.5">🟢 3</span>
+                    <span className="text-muted-foreground">:</span>
+                    <span className="text-rose-500 flex items-center gap-0.5">🔴 2</span>
+                  </div>
+                </div>
+
+                {/* Raqib */}
+                <div className="flex flex-col items-center text-center space-y-1 min-w-0">
+                  <Avatar className="size-12 border-2 border-purple-500/50 shadow-xs">
+                    <AvatarFallback className="text-xs font-black bg-purple-500/20 text-purple-600 dark:text-purple-400">
+                      AZ
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-xs font-black text-foreground truncate max-w-[5rem]">
+                    Azizbek
+                  </p>
+                  <span className="text-[10px] font-mono text-muted-foreground">1180 ELO</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-center text-muted-foreground italic">
+                «Test ishlash emas, jang qilish hissiyoti»
+              </p>
+            </div>
+
+            <div className="pt-4 mt-3 border-t border-border/50">
+              <Button asChild size="lg" className="w-full rounded-2xl font-black text-xs gap-2 bg-gradient-to-r from-purple-600 to-rose-600 text-white shadow-md hover:opacity-95">
+                <Link href="/battles">
+                  <Swords className="size-4" />
+                  <span>[ ⚔️ JANGGA KIRISH ]</span>
+                </Link>
+              </Button>
+            </div>
+          </Card>
+
+          {/* 2. 📱 BILIM REELS (Picture 5 Smartphone Wireframe) */}
+          <Card className="rounded-3xl border-2 border-rose-500/30 bg-gradient-to-b from-rose-500/10 via-card to-card p-5 sm:p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
+            <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-rose-500/10 blur-2xl" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="border-rose-500/30 bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1">
+                  <Sparkles className="size-3.5" />
+                  <span>BILIM REELS</span>
+                </Badge>
+                <span className="text-[11px] font-bold text-rose-500">+20 XP</span>
+              </div>
+
+              {/* Smartphone Frame Mockup (Picture 5) */}
+              <Link href="/reels" className="group block">
+                <div className="relative mx-auto max-w-[15rem] rounded-3xl border-2 border-foreground/20 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black p-4 text-white shadow-lg transition-transform group-hover:scale-[1.02]">
+                  {/* Phone notch */}
+                  <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-zinc-700" />
+
+                  <div className="space-y-3 text-center py-2">
+                    <span className="text-3xl animate-bounce">🧬</span>
+
+                    <h5 className="font-black text-xs sm:text-sm tracking-wide text-rose-300 uppercase leading-snug">
+                      DNK NIMA UCHUN IKKI QAVATLI?
+                    </h5>
+
+                    <p className="text-[10px] text-zinc-400">
+                      ↓ pastga suring va bilib oling
+                    </p>
+
+                    {/* Likes & Bookmarks (Picture 5: ❤️ 1.2K   🔖 342) */}
+                    <div className="flex items-center justify-center gap-4 pt-2 border-t border-zinc-800 text-[11px] font-mono text-zinc-300">
+                      <span className="flex items-center gap-1 text-rose-400 font-bold">
+                        <Heart className="size-3.5 fill-rose-500 text-rose-500" /> 1.2K
+                      </span>
+                      <span className="flex items-center gap-1 text-amber-400 font-bold">
+                        <Bookmark className="size-3.5 fill-amber-500 text-amber-500" /> 342
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              <p className="text-xs text-center text-muted-foreground italic">
+                «Instagramga kirmay turib, Reels formatida bilim ol»
+              </p>
+            </div>
+
+            <div className="pt-4 mt-3 border-t border-border/50">
+              <Button asChild size="lg" className="w-full rounded-2xl font-black text-xs gap-2 bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md hover:opacity-95">
+                <Link href="/reels">
+                  <Play className="size-4 fill-white" />
+                  <span>[ 🎬 REELS BOSHLASH ]</span>
+                </Link>
+              </Button>
+            </div>
+          </Card>
+
+          {/* 3. 🎴 QUICK LEARN (Picture 2 Wireframe: 3 daqiqalik Flashcard) */}
+          <Card className="rounded-3xl border-2 border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-card to-card p-5 sm:p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
+            <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-amber-500/10 blur-2xl" />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="border-amber-500/30 bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-black px-2.5 py-0.5 rounded-xl gap-1">
+                  <Layers className="size-3.5" />
+                  <span>QUICK LEARN</span>
+                </Badge>
+                <span className="text-[11px] font-bold text-amber-500">+25 XP</span>
+              </div>
+
+              <div className="text-center space-y-1">
+                <p className="text-[11px] font-mono uppercase tracking-wider font-extrabold text-muted-foreground">
+                  🎴 TEZKOR XOTIRA
+                </p>
+                <h4 className="text-base font-black text-foreground">
+                  3 daqiqalik Flashcard
+                </h4>
+              </div>
+
+              {/* Flashcard 3D karta interfeysi */}
+              <Link href="/flashcards" className="group block">
+                <div className="p-4 rounded-2xl bg-background/80 border-2 border-dashed border-amber-500/40 text-center space-y-2 group-hover:border-amber-500 transition-colors">
+                  <span className="text-2xl">⚡</span>
+                  <p className="text-xs font-bold text-foreground">
+                    Anki oraliq takrorlash algoritmi
+                  </p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Qiyin sanalar, formulalar va terminlarni 3 daqiqada xotirangizda mustahkamlang.
+                  </p>
+                </div>
+              </Link>
+
+              <p className="text-xs text-center text-muted-foreground italic">
+                «Kuniga 3 daqiqa — 10 barobar kuchli xotira»
+              </p>
+            </div>
+
+            <div className="pt-4 mt-3 border-t border-border/50">
+              <Button asChild size="lg" className="w-full rounded-2xl font-black text-xs gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black shadow-md hover:opacity-95 font-bold">
+                <Link href="/flashcards">
+                  <Zap className="size-4" />
+                  <span>[ ⚡ O&apos;RGANISHNI BOSHLASH ]</span>
+                </Link>
+              </Button>
+            </div>
+          </Card>
+        </div>
+
+        {/* ============================================================ */}
+        {/* KUNLIK QO'SHIMCHA VAZIFALAR (DAILY QUESTS CHECKLIST)          */}
         {/* ============================================================ */}
         <Card className={cn(
           "rounded-3xl border transition-all shadow-sm overflow-hidden",
@@ -335,7 +728,7 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-base font-black tracking-tight text-foreground flex items-center gap-2">
-                      Bugungi Missiyalar
+                      Kunlik Missiyalar Ro&apos;yxati
                     </CardTitle>
                     <Badge variant="outline" className={cn(
                       "text-xs font-bold px-2 py-0.2",
@@ -347,7 +740,7 @@ export default function DashboardPage() {
                     </Badge>
                   </div>
                   <CardDescription className="text-xs mt-0.5">
-                    Har bir topshiriqni yakunlang va qo&apos;shimcha XP hamda tangalar yig&apos;ing:
+                    Har bir topshiriq uchun qo&apos;shimcha XP va tangalar yig&apos;ing:
                   </CardDescription>
                 </div>
               </div>
@@ -461,224 +854,6 @@ export default function DashboardPage() {
             </Card>
           </Link>
         )}
-
-        {/* ============================================================ */}
-        {/* INTERAKTIV REELS, ARENA & QUICK LEARN VITRINASI               */}
-        {/* ============================================================ */}
-        <div className="grid gap-4 sm:grid-cols-3">
-          {/* 1. Bilim Reels vitrinasi */}
-          {isEnabled('reels') && (
-            <Link href="/reels" className="group block h-full">
-              <Card className="h-full rounded-3xl border border-rose-500/25 bg-gradient-to-br from-rose-500/10 via-card to-card hover:border-rose-500/50 p-5 flex flex-col justify-between shadow-xs transition-all">
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 text-[11px] font-bold gap-1">
-                      <Sparkles className="size-3" /> Instagram Formati
-                    </Badge>
-                    <span className="text-[11px] font-bold text-rose-500">+20 XP</span>
-                  </div>
-                  <h3 className="text-base font-bold text-foreground group-hover:text-rose-500 transition-colors leading-snug">
-                    🎬 Bilim Reels: Tezkor Mikrokvestlar
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    «Instagramga kirmay turib, Reels formatida bilim ol». Qiyin testlar va qiziqarli faktlar vertikal videolarda.
-                  </p>
-                </div>
-                <div className="pt-3 mt-3 border-t border-border/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Scroll-learning</span>
-                  <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    Reelsni ko&apos;rish <ArrowRight className="size-3.5" />
-                  </span>
-                </div>
-              </Card>
-            </Link>
-          )}
-
-          {/* 2. 1v1 Arena vitrinasi */}
-          {isEnabled('battles') && (
-            <Link href="/battles" className="group block h-full">
-              <Card className="h-full rounded-3xl border border-purple-500/25 bg-gradient-to-br from-purple-500/10 via-card to-card hover:border-purple-500/50 p-5 flex flex-col justify-between shadow-xs transition-all">
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30 text-[11px] font-bold gap-1">
-                      <Swords className="size-3" /> Jonli Duel
-                    </Badge>
-                    <span className="text-[11px] font-bold text-purple-500">Live 1v1</span>
-                  </div>
-                  <h3 className="text-base font-bold text-foreground group-hover:text-purple-500 transition-colors leading-snug">
-                    ⚔️ Arena: {firstName} vs Raqib
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Test ishlash emas, raqib bilan intellektual jang! 5 ta tezkor savol orqali unvoningizni oshiring.
-                  </p>
-                </div>
-                <div className="pt-3 mt-3 border-t border-border/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Jonli raqobat</span>
-                  <span className="text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    Jangga kirish <ArrowRight className="size-3.5" />
-                  </span>
-                </div>
-              </Card>
-            </Link>
-          )}
-
-          {/* 3. Quick Learn Flashcards */}
-          {isEnabled('flashcards') && (
-            <Link href="/flashcards" className="group block h-full">
-              <Card className="h-full rounded-3xl border border-amber-500/25 bg-gradient-to-br from-amber-500/10 via-card to-card hover:border-amber-500/50 p-5 flex flex-col justify-between shadow-xs transition-all">
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[11px] font-bold gap-1">
-                      <Layers className="size-3" /> Tezkor Xotira
-                    </Badge>
-                    <span className="text-[11px] font-bold text-amber-500">+25 XP</span>
-                  </div>
-                  <h3 className="text-base font-bold text-foreground group-hover:text-amber-500 transition-colors leading-snug">
-                    ⚡ Quick Learn: Smart Kartalar
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Qoidalar, formulalar va sanalarni 3 daqiqalik 3D kartalar orqali xotirangizda mustahkamlang.
-                  </p>
-                </div>
-                <div className="pt-3 mt-3 border-t border-border/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">Anki uslubi</span>
-                  <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    O&apos;rganish <ArrowRight className="size-3.5" />
-                  </span>
-                </div>
-              </Card>
-            </Link>
-          )}
-        </div>
-
-        {/* ============================================================ */}
-        {/* HERO TAVSIYA VA 🌳 BILIM DARAJANG (SKILL MASTERY)             */}
-        {/* ============================================================ */}
-        <div className="grid gap-5 md:grid-cols-12">
-          {/* 1. Hero Tavsiya: Bugungi Amaliyot */}
-          <Card className="relative min-w-0 overflow-hidden md:col-span-7 rounded-3xl border-border/80">
-            <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/10 blur-3xl" />
-            <CardHeader className="relative px-6 pt-6 sm:px-8 sm:pt-8">
-              <div className="mb-1 flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]">
-                  <Sparkles className="size-3" /> Bugungi Tavsiya
-                </Badge>
-                {data.selected_subject && <Badge variant="secondary">{data.selected_subject.name}</Badge>}
-              </div>
-              <CardTitle className="font-voice text-xl leading-snug sm:text-2xl md:text-3xl">
-                {data.suggested_topic ? data.suggested_topic.title : 'Bugun qanday bilimni egallaymiz?'}
-              </CardTitle>
-              <CardDescription className="max-w-xl leading-relaxed text-sm">
-                {data.suggested_topic?.description
-                  || "Bilim ildizingiz o'sishda davom etsin — 15 daqiqalik amaliy mashq bajaring va yangi darajaga ko'tariling."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="relative flex flex-1 flex-col justify-between gap-6 px-6 pb-6 sm:px-8 sm:pb-8">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <Button asChild size="lg" className="rounded-xl font-bold gap-2">
-                  <Link href="/tests">
-                    <Zap className="size-4" />
-                    <span>Missiyani Boshlash</span>
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-                {data.suggested_topic && (
-                  <Button asChild variant="outline" size="lg" className="rounded-xl font-semibold">
-                    <Link href="/learning">Avval darsni o&apos;qish</Link>
-                  </Button>
-                )}
-                <Button asChild variant="ghost" size="lg" className="rounded-xl font-semibold text-muted-foreground hover:text-foreground">
-                  <Link href="/reels">Reels ko&apos;rish</Link>
-                </Button>
-              </div>
-
-              {/* Hero pastki qatori */}
-              <div className="grid gap-3 border-t pt-4 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground font-medium">Kunlik missiyalar</p>
-                  <p className="font-mono text-sm font-bold tabular-nums">{doneMissions} / {data.missions.length}</p>
-                  <Progress value={missionPct} className="h-1.5" />
-                </div>
-                <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground font-medium">Oxirgi yutuq</p>
-                  {lastAttempt ? (
-                    <>
-                      <p className="font-mono text-sm font-bold tabular-nums">
-                        {lastAttempt.score !== null ? `${lastAttempt.score.toFixed(0)}% natija` : '—'}
-                      </p>
-                      <p className="truncate text-xs text-[var(--text-secondary)]">{lastAttempt.test_title}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-mono text-sm font-bold">—</p>
-                      <p className="text-xs text-[var(--text-secondary)]">Hali mashq bajarilmagan</p>
-                    </>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground font-medium">Uzluksizlik</p>
-                  <p className="flex items-center gap-1.5 font-mono text-sm font-bold tabular-nums">
-                    <Flame className="size-3.5 text-[var(--tone-streak-text)]" /> {p.streak} kun
-                  </p>
-                  <p className="truncate text-xs text-[var(--text-secondary)]">
-                    {data.freeze_count > 0 ? `${data.freeze_count} ta muzlatish zaxirada` : 'Bugun ham davom ettiring'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 2. 🌳 BILIM DARAJANG (SKILL MASTERY) — Picture 2 & 3 */}
-          <Card className="min-w-0 md:col-span-5 rounded-3xl border-border/80 flex flex-col justify-between shadow-xs">
-            <CardHeader className="pb-3 border-b border-border/40 flex-row items-center justify-between space-y-0">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🌳</span>
-                <div>
-                  <CardTitle className="text-base font-black text-foreground">
-                    Bilim Darajang (Mastery)
-                  </CardTitle>
-                  <CardDescription className="text-[11px] mt-0.5">
-                    Fanlar bo&apos;yicha o&apos;zlashtirish va ko&apos;nikmalar darajasi
-                  </CardDescription>
-                </div>
-              </div>
-              <Badge variant="outline" className="text-[10px] font-bold border-emerald-500/30 text-emerald-600 bg-emerald-500/10">
-                Skill Tree
-              </Badge>
-            </CardHeader>
-            <CardContent className="pt-4 flex-1 flex flex-col justify-between space-y-4">
-              <div className="space-y-3.5">
-                {(data.subject_mastery && data.subject_mastery.length > 0 ? data.subject_mastery : [
-                  { id: 1, name: 'Tarix', mastery: 83 },
-                  { id: 2, name: 'Ona tili', mastery: 72 },
-                  { id: 3, name: 'Biologiya', mastery: 51 },
-                ]).slice(0, 4).map((sub) => (
-                  <div key={sub.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-foreground">{sub.name}</span>
-                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">{sub.mastery}%</span>
-                    </div>
-                    <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted/60 p-0.5">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 transition-all duration-700"
-                        style={{ width: `${Math.min(100, Math.max(5, sub.mastery))}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-3 border-t border-border/40 flex items-center justify-between text-xs">
-                <span className="text-[11px] text-muted-foreground">Har bir to&apos;g&apos;ri javob Mastery foizini oshiradi</span>
-                <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-primary hover:text-primary gap-1">
-                  <Link href="/analytics">
-                    Skill Tree <ChevronRight className="size-3.5" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* ============================================================ */}
         {/* ASOSIY O'QUV BO'LIMLARI (QUICK ACCESS)                       */}
