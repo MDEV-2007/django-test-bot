@@ -3637,7 +3637,15 @@ def panel_reels_list_create_api(request):
             except (ValueError, TypeError):
                 correct_idx = 0
 
+            source_qid = data.get('source_question_id')
+            if source_qid:
+                try:
+                    source_qid = int(source_qid)
+                except (ValueError, TypeError):
+                    source_qid = None
+
             reel = Reel.objects.create(
+                source_question_id=source_qid,
                 subject_name=str(data.get('subject_name') or 'Tarix')[:100],
                 subject_slug=str(sub_slug)[:100],
                 category_badge=str(data.get('category_badge') or 'Muhim Fakt')[:150],
@@ -3916,6 +3924,16 @@ def panel_reels_hardest_questions_api(request):
 
     questions_data = []
 
+    # 1. Oldindan Reel yaratilgan savollarni aniqlash (ularni qayta tavsiya qilmaslik uchun)
+    from learning.models import Reel
+    used_qids = set(Reel.objects.filter(source_question__isnull=False).values_list('source_question_id', flat=True))
+    existing_reels = list(Reel.objects.all().values('quiz_question', 'fact'))
+    used_snippets = set()
+    for r in existing_reels:
+        for t in [r.get('quiz_question'), r.get('fact')]:
+            if t and len(t.strip()) >= 15:
+                used_snippets.add(re.sub(r'\s+', ' ', t).strip().lower()[:35])
+
     # 1. Haqiqiy urinishlardagi eng ko'p xato qilingan test savollari (bitta to'g'ri javobli)
     try:
         wrong_stats = (
@@ -3927,13 +3945,13 @@ def panel_reels_hardest_questions_api(request):
             )
             .values('question_id')
             .annotate(wrong_count=Count('id'))
-            .order_by('-wrong_count')[:60]
+            .order_by('-wrong_count')[:100]
         )
 
         seen_qids = set()
         for item in wrong_stats:
             qid = item['question_id']
-            if qid in seen_qids:
+            if qid in seen_qids or qid in used_qids:
                 continue
             seen_qids.add(qid)
 
@@ -3943,6 +3961,17 @@ def panel_reels_hardest_questions_api(request):
 
             choices = list(q.choices.all())
             if len(choices) < 2:
+                continue
+
+            raw_body = q.body or ""
+            clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
+            lower_body = clean_text.lower()
+            unwanted_words = ['yozing', 'topshiriq', "lo'nda", 'lo‘nda', 'moslashtiring', 'matnni']
+            if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
+                continue
+
+            clean_snippet = re.sub(r'\s+', ' ', clean_text).strip().lower()[:35]
+            if clean_snippet in used_snippets:
                 continue
 
             wrong_ans = item['wrong_count']
@@ -3958,13 +3987,6 @@ def panel_reels_hardest_questions_api(request):
 
             subj_name = q.subject.name if q.subject else "Tarix"
             subj_slug = q.subject.slug if q.subject else "tarix"
-
-            raw_body = q.body or ""
-            clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
-            lower_body = clean_text.lower()
-            unwanted_words = ['yozing', 'topshiriq', "lo'nda", 'lo‘nda', 'moslashtiring', 'matnni']
-            if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
-                continue
 
             questions_data.append({
                 'question_id': q.id,
@@ -3996,10 +4018,10 @@ def panel_reels_hardest_questions_api(request):
                 question_type__in=['single_choice', 'image_based', 'table_based'],
                 choices__isnull=False
             )
-            .exclude(id__in=existing_ids)
+            .exclude(id__in=existing_ids | used_qids)
             .select_related('subject')
             .prefetch_related('choices')
-            .order_by('-difficulty', '-id')[:100]
+            .order_by('-difficulty', '-id')[:120]
         )
 
         for q in fallback_qs:
@@ -4012,6 +4034,10 @@ def panel_reels_hardest_questions_api(request):
             lower_body = clean_text.lower()
             unwanted_words = ['yozing', 'topshiriq', "lo'nda", 'lo‘nda', 'moslashtiring', 'matnni']
             if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
+                continue
+
+            clean_snippet = re.sub(r'\s+', ' ', clean_text).strip().lower()[:35]
+            if clean_snippet in used_snippets:
                 continue
 
             options = [c.text for c in choices]

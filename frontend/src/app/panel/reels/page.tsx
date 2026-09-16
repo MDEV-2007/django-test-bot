@@ -117,6 +117,8 @@ export default function PanelReelsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [previewReel, setPreviewReel] = useState<PanelReelItem | null>(null);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
+  const [convertedQuestionIds, setConvertedQuestionIds] = useState<Set<number>>(new Set());
 
   // Form inputs
   const [mediaType, setMediaType] = useState<'text' | 'video'>('text');
@@ -305,6 +307,7 @@ export default function PanelReelsPage() {
 
   // Auto-fill from hardest question
   const handleUseHardestQuestion = (q: HardestQuestion) => {
+    setSelectedQuestionId(q.question_id);
     setMediaType('text');
     setVideoUrl('');
     setSubjectName(q.subject_name);
@@ -344,10 +347,12 @@ export default function PanelReelsPage() {
     }
 
     setSaving(true);
+    const createdFromQid = selectedQuestionId;
     try {
       await apiFetch('/api/panel/reels/', {
         method: 'POST',
         body: JSON.stringify({
+          source_question_id: createdFromQid,
           subject_name: subjectName,
           subject_slug: subjectSlug,
           category_badge: categoryBadge || `${subjectName} Fani`,
@@ -368,7 +373,15 @@ export default function PanelReelsPage() {
 
       toast.success(isPublished ? "Reel yaratildi va chop etildi! 🚀" : "Reel qoralama sifatida saqlandi 🟡");
       setIsModalOpen(false);
+
+      // Savolni yuqoridagi tavsiyalar ro'yxatidan darhol o'chirish va pastga tushirish
+      if (createdFromQid) {
+        setConvertedQuestionIds((prev) => new Set(prev).add(createdFromQid));
+        setHardestQuestions((prev) => prev.filter((q) => q.question_id !== createdFromQid));
+        setSelectedQuestionId(null);
+      }
       loadReels();
+      loadHardestQuestions();
 
       // Reset form
       setHook('');
@@ -505,12 +518,26 @@ export default function PanelReelsPage() {
 
             {/* AI Generator Recommendation: Hardest questions */}
             {hardestQuestions.length > 0 && (() => {
-              const filtered = hardestQuestions.filter((q) => {
+              // Avvaldan Reel yaratilgan yoki chop etilgan savollarni ro'yxatdan chiqarib tashlash
+              const availableQuestions = hardestQuestions.filter((q) => {
+                if (convertedQuestionIds.has(q.question_id)) return false;
+                const cleanSample = (q.clean_body || '').slice(0, 30).toLowerCase();
+                const alreadyHasReel = reels.some((r) => {
+                  const qPart = (r.quiz?.question || '').toLowerCase();
+                  const factPart = (r.fact || '').toLowerCase();
+                  return cleanSample.length > 10 && (qPart.includes(cleanSample) || factPart.includes(cleanSample));
+                });
+                return !alreadyHasReel;
+              });
+
+              if (availableQuestions.length === 0) return null;
+
+              const filtered = availableQuestions.filter((q) => {
                 if (questionSubjectFilter === 'all') return true;
                 return q.subject_name.toLowerCase() === questionSubjectFilter.toLowerCase();
               });
               const displayed = showAllQuestions ? filtered : filtered.slice(0, 6);
-              const uniqueSubjects = Array.from(new Set(hardestQuestions.map((q) => q.subject_name))).filter(Boolean);
+              const uniqueSubjects = Array.from(new Set(availableQuestions.map((q) => q.subject_name))).filter(Boolean);
 
               return (
                 <Card className="rounded-3xl border-rose-500/20 bg-rose-500/5 shadow-sm">
@@ -522,7 +549,7 @@ export default function PanelReelsPage() {
                           <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
                             <span>Eng Ko&apos;p Xato Qilingan Savollar</span>
                             <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 text-xs font-bold">
-                              {hardestQuestions.length} ta tavsiya
+                              {availableQuestions.length} ta tavsiya
                             </Badge>
                           </CardTitle>
                           <CardDescription className="text-xs mt-0.5">
@@ -567,10 +594,10 @@ export default function PanelReelsPage() {
                               : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
                           }`}
                         >
-                          Barchasi ({hardestQuestions.length})
+                          Barchasi ({availableQuestions.length})
                         </button>
                         {uniqueSubjects.map((sName) => {
-                          const count = hardestQuestions.filter(q => q.subject_name === sName).length;
+                          const count = availableQuestions.filter(q => q.subject_name === sName).length;
                           return (
                             <button
                               key={sName}
