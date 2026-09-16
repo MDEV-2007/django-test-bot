@@ -7,7 +7,7 @@ import {
   FileCheck2, Swords, BookOpen, Bot, ArrowRight, History, MapPin, HelpCircle,
   Crown, Sparkles, Flame, Coins, Trophy, Snowflake, CheckCircle2,
   ChevronRight, Zap, GraduationCap, Layers, Share2, Headphones, Target, Shield, Play,
-  Heart, Bookmark, Dna, Microscope,
+  Heart, Bookmark, Dna, Microscope, Brain,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';

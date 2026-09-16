@@ -131,6 +131,7 @@ export default function CommunityFeedPage() {
   const [newCaption, setNewCaption] = useState('');
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Natijalarni ulashish holati
