@@ -3779,9 +3779,11 @@ def panel_community_post_delete_api(request, post_id):
         from learning.models import CommunityPost
         from panel.models import AuditLog
 
-        post = get_object_or_404(CommunityPost, id=post_id)
+        post = CommunityPost.objects.filter(id=post_id).first()
+        if not post:
+            return Response({'success': True, 'message': "Post topilmadi yoki allaqachon o'chirilgan."})
         title = post.title
-        author = post.author.username
+        author = post.author.username if post.author else "Noma'lum"
 
         post.delete()
 
@@ -3809,7 +3811,9 @@ def panel_community_post_pin_api(request, post_id):
         from learning.models import CommunityPost
         from panel.models import AuditLog
 
-        post = get_object_or_404(CommunityPost, id=post_id)
+        post = CommunityPost.objects.filter(id=post_id).first()
+        if not post:
+            return Response({'error': "Post topilmadi."}, status=404)
         is_pinned = not getattr(post, 'is_pinned', False)
         post.is_pinned = is_pinned
         post.save(update_fields=['is_pinned'])

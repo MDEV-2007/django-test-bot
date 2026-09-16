@@ -106,7 +106,10 @@ urlpatterns = [
 
     # Hamjamiyat (Community Feed) Moderatsiyasi
     path('community/', api.panel_community_posts_api, name='panel_community_posts'),
+    path('community', api.panel_community_posts_api),
     path('community/<int:post_id>/delete/', api.panel_community_post_delete_api, name='panel_community_post_delete'),
+    path('community/<int:post_id>/delete', api.panel_community_post_delete_api),
     path('community/<int:post_id>/pin/', api.panel_community_post_pin_api, name='panel_community_post_pin'),
+    path('community/<int:post_id>/pin', api.panel_community_post_pin_api),
 ]
 

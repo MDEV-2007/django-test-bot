@@ -155,8 +155,17 @@ export default function PanelReelsPage() {
   const loadCommunityPosts = useCallback(async (filter = 'all') => {
     setCommunityLoading(true);
     try {
-      const q = filter !== 'all' ? `?type=${filter}` : '';
-      const data = await apiFetch<{ posts: PanelCommunityPost[]; total: number }>(`/api/panel/community/${q}`);
+      const q = filter !== 'all' ? `?type=${encodeURIComponent(filter)}` : '';
+      let data: { posts: PanelCommunityPost[]; total: number } | null = null;
+      try {
+        data = await apiFetch<{ posts: PanelCommunityPost[]; total: number }>(`/api/panel/community/${q}`);
+      } catch (err: any) {
+        if (err?.status === 404) {
+          data = await apiFetch<{ posts: PanelCommunityPost[]; total: number }>(`/api/learning/feed/${q}`);
+        } else {
+          throw err;
+        }
+      }
       if (data && data.posts) {
         setCommunityPosts(data.posts);
       }
@@ -233,10 +242,22 @@ export default function PanelReelsPage() {
   // Toggle Pin for community post
   const handleTogglePin = async (postId: number) => {
     try {
-      const res = await apiFetch<{ success: boolean; is_pinned: boolean }>(
-        `/api/panel/community/${postId}/pin/`,
-        { method: 'POST' }
-      );
+      let res: { success: boolean; is_pinned: boolean } | null = null;
+      try {
+        res = await apiFetch<{ success: boolean; is_pinned: boolean }>(
+          `/api/panel/community/${postId}/pin/`,
+          { method: 'POST' }
+        );
+      } catch (err: any) {
+        if (err?.status === 404) {
+          res = await apiFetch<{ success: boolean; is_pinned: boolean }>(
+            `/api/learning/feed/${postId}/pin/`,
+            { method: 'POST' }
+          );
+        } else {
+          throw err;
+        }
+      }
       if (res) {
         setCommunityPosts((prev) =>
           prev.map((p) => (p.id === postId ? { ...p, is_pinned: res.is_pinned } : p))
@@ -252,7 +273,15 @@ export default function PanelReelsPage() {
   const handleDeleteCommunityPost = async (postId: number) => {
     if (!window.confirm("Haqiqatan ham ushbu postni o'chirmoqchimisiz?")) return;
     try {
-      await apiFetch(`/api/panel/community/${postId}/delete/`, { method: 'DELETE' });
+      try {
+        await apiFetch(`/api/panel/community/${postId}/delete/`, { method: 'DELETE' });
+      } catch (err: any) {
+        if (err?.status === 404) {
+          await apiFetch(`/api/learning/feed/${postId}/delete/`, { method: 'DELETE' });
+        } else {
+          throw err;
+        }
+      }
       setCommunityPosts((prev) => prev.filter((p) => p.id !== postId));
       toast.success("Post hamjamiyatdan o'chirildi");
     } catch {
