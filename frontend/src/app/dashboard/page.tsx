@@ -354,18 +354,18 @@ export default function DashboardPage() {
 
             <div className="space-y-4 sm:space-y-5">
               {/* Header */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-xl gap-1.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-xl gap-1.5 whitespace-nowrap shrink-0">
                     <Dna className="size-3.5" />
                     <span>{activeSubject}</span>
                   </Badge>
-                  <span className="text-xs font-mono font-bold text-amber-500 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-lg">
-                    <Zap className="size-3" /> +120 XP Kvest
+                  <span className="text-xs font-mono font-bold text-amber-500 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-xl whitespace-nowrap shrink-0">
+                    <Zap className="size-3.5" /> +120 XP Kvest
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-muted/60 px-3 py-1 rounded-xl">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-muted/60 border border-border/40 px-2.5 py-1 rounded-xl whitespace-nowrap shrink-0">
                   <Target className="size-3.5 text-primary" />
                   <span>KUNLIK MISSIYA</span>
                 </div>
@@ -386,25 +386,25 @@ export default function DashboardPage() {
                 {/* Step 1: Reels */}
                 <Link
                   href="/reels"
-                  className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-rose-500/40 hover:shadow-xs transition-all group"
+                  className="flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-rose-500/40 hover:shadow-xs transition-all group"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <PremiumIcon icon={Sparkles} tone="rose" size="md" glow className="group-hover:scale-105" />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-foreground group-hover:text-rose-500 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <PremiumIcon icon={Sparkles} tone="rose" size="md" glow className="group-hover:scale-105 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <span className="text-xs sm:text-sm font-bold text-foreground group-hover:text-rose-500 transition-colors">
                           ① 5 min Reels
                         </span>
-                        <span className="text-[10px] font-mono font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono font-bold text-rose-500 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
                           +30 XP
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">
+                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                         Mavzu bo&apos;yicha mikrokvest va video
                       </p>
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs font-bold text-rose-500 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500/10 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                  <span className="shrink-0 text-xs font-bold text-rose-500 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500/10 group-hover:bg-rose-500 group-hover:text-white transition-all whitespace-nowrap">
                     Ko&apos;rish <ArrowRight className="size-3" />
                   </span>
                 </Link>
@@ -412,25 +412,25 @@ export default function DashboardPage() {
                 {/* Step 2: Mashq */}
                 <Link
                   href="/tests"
-                  className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-emerald-500/40 hover:shadow-xs transition-all group"
+                  className="flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-emerald-500/40 hover:shadow-xs transition-all group"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <PremiumIcon icon={FileCheck2} tone="emerald" size="md" glow className="group-hover:scale-105" />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-foreground group-hover:text-emerald-500 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <PremiumIcon icon={FileCheck2} tone="emerald" size="md" glow className="group-hover:scale-105 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <span className="text-xs sm:text-sm font-bold text-foreground group-hover:text-emerald-500 transition-colors">
                           ② 10 ta amaliy mashq
                         </span>
-                        <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
                           +50 XP
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">
+                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                         Bilimni mustahkamlash savollari
                       </p>
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                  <span className="shrink-0 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-600 group-hover:text-white transition-all whitespace-nowrap">
                     Ishlash <ArrowRight className="size-3" />
                   </span>
                 </Link>
@@ -438,25 +438,25 @@ export default function DashboardPage() {
                 {/* Step 3: Arena */}
                 <Link
                   href="/battles"
-                  className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-purple-500/40 hover:shadow-xs transition-all group"
+                  className="flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-purple-500/40 hover:shadow-xs transition-all group"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <PremiumIcon icon={Swords} tone="purple" size="md" glow className="group-hover:scale-105" />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-foreground group-hover:text-purple-500 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <PremiumIcon icon={Swords} tone="purple" size="md" glow className="group-hover:scale-105 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <span className="text-xs sm:text-sm font-bold text-foreground group-hover:text-purple-500 transition-colors">
                           ③ Boss Challenge (Arena)
                         </span>
-                        <span className="text-[10px] font-mono font-bold text-purple-500 bg-purple-500/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono font-bold text-purple-500 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
                           +40 XP
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">
+                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                         Raqib bilan 1v1 duelda g&apos;alaba qozonish
                       </p>
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-500/10 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                  <span className="shrink-0 text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-500/10 group-hover:bg-purple-600 group-hover:text-white transition-all whitespace-nowrap">
                     Jang <ArrowRight className="size-3" />
                   </span>
                 </Link>
