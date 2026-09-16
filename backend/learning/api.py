@@ -111,10 +111,18 @@ def center_api(request):
         all_lessons = all_lessons.filter(topic__subject=subject)
 
     lesson_id = request.query_params.get('lesson_id')
+    lesson_qs = (
+        Lesson.objects.filter(is_published=True)
+        .select_related('topic')
+        .prefetch_related('videos', 'audios', 'flashcards')
+    )
     if lesson_id:
-        lesson = get_object_or_404(Lesson, id=lesson_id, is_published=True)
+        lesson = lesson_qs.filter(id=lesson_id).first()
     else:
-        lesson = all_lessons.first()
+        if subject:
+            lesson = lesson_qs.filter(topic__subject=subject).first()
+        else:
+            lesson = lesson_qs.first()
 
     has_lessons_access = profile.has_active_premium_lessons
     is_bookmarked = Bookmark.objects.filter(profile=profile, lesson=lesson).exists() if lesson else False
@@ -453,6 +461,47 @@ def flashcards_complete_api(request):
         'message': f"Ajoyib! Xotira to'plamini muvaffaqiyatli yakunladingiz va +{xp_gain} XP hamda +{coin_gain} tangaga ega bo'ldingiz!"
     })
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def study_session_complete_api(request):
+    """O'quvchi Pomodoro fokus dars sessiyasini yakunlaganda XP, tanga va streak beradi."""
+    profile = request.user.profile
+    try:
+        duration_minutes = int(request.data.get('duration_minutes', 25))
+    except (ValueError, TypeError):
+        duration_minutes = 25
+    try:
+        goals_done = int(request.data.get('goals_done', 1))
+    except (ValueError, TypeError):
+        goals_done = 1
+
+    # Har 25 daqiqa dars uchun 25 XP va 10 tanga
+    xp_gain = max(10, min(150, int((duration_minutes / 25) * 25) + goals_done * 5))
+    coin_gain = max(5, min(50, int((duration_minutes / 25) * 10)))
+
+    leveled_up = profile.add_xp(xp_gain)
+    profile.add_coins(coin_gain)
+    profile.update_streak()
+
+    try:
+        from core.missions import advance_missions
+        advance_missions(profile, 'lesson')
+    except Exception:
+        pass
+
+    return Response({
+        'success': True,
+        'xp_earned': xp_gain,
+        'coins_earned': coin_gain,
+        'new_xp': profile.xp,
+        'new_level': profile.level,
+        'new_coins': profile.coins,
+        'streak': profile.streak,
+        'leveled_up': leveled_up,
+        'message': f"Barakalla! {duration_minutes} daqiqa diqqat bilan dars qildingiz va +{xp_gain} XP hamda +{coin_gain} tanga qo'lga kiritdingiz! 🔥",
+    })
+
 # ============================================================ BILIM REELS (SCROLL-LEARNING)
 REELS_DATA = [
     {
@@ -641,25 +690,14 @@ def reels_feed_api(request):
             pass
 
     try:
-        if not Reel.objects.filter(is_published=True).exists():
-            seed_default_reels()
-
-        qs = Reel.objects.filter(is_published=True)
+        qs = Reel.objects.filter(is_published=True).order_by('-order', '-id')
         if subject_slug and subject_slug not in ('all', 'for_you'):
             qs = qs.filter(subject_slug=subject_slug)
 
         reels_list = [r.to_dict() for r in qs]
-        if not reels_list:
-            if subject_slug not in ('all', 'for_you'):
-                reels_list = [r for r in REELS_DATA if r['subject_slug'] == subject_slug]
-            else:
-                reels_list = list(REELS_DATA)
-    except Exception:
-        # Fallback to in-memory list if DB tables aren't migrated yet
-        if subject_slug and subject_slug not in ('all', 'for_you'):
-            reels_list = [r for r in REELS_DATA if r['subject_slug'] == subject_slug]
-        else:
-            reels_list = list(REELS_DATA)
+    except Exception as e:
+        logger.warning("reels_feed_api query error: %s", e)
+        reels_list = []
 
     # Shaxsiylashtirish va tavsiya sababi
     for r in reels_list:

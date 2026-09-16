@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { BrandMark } from '@/components/BrandMark';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Swords, Bot, ShoppingBag, Crown,
-  BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Layers, Sparkles, Globe
+  BarChart3, Trophy, User, LogOut, GraduationCap, ShieldCheck, Layers, Sparkles, Globe, Headphones
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -37,8 +37,9 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'indigo', api: '/api/dashboard/home/' },
-      { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, tone: 'emerald' },
       { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', featureKey: 'learning', api: '/api/learning/' },
+      { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
       { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple', featureKey: 'ai_mentor' },
     ],
   },

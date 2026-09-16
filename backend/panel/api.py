@@ -2668,6 +2668,7 @@ def system_health_api(request):
         except Exception:
             return 0
 
+    from learning.models import Reel, CommunityPost
     table_counts = {
         'users': safe_count(User),
         'attempts': safe_count(Attempt),
@@ -2676,7 +2677,22 @@ def system_health_api(request):
         'lessons': safe_count(Lesson),
         'payments': safe_count(Payment),
         'audit_logs': safe_count(AuditLog),
+        'reels': safe_count(Reel),
+        'community_posts': safe_count(CommunityPost),
     }
+
+    import shutil
+    disk_info = {}
+    try:
+        disk = shutil.disk_usage('/')
+        disk_info = {
+            'total_gb': round(disk.total / (1024**3), 2),
+            'used_gb': round(disk.used / (1024**3), 2),
+            'free_gb': round(disk.free / (1024**3), 2),
+            'percent_used': round((disk.used / disk.total) * 100, 1),
+        }
+    except Exception:
+        disk_info = {'status': 'unavailable'}
 
     try:
         django_ver = getattr(django, '__version__', '5.x')
@@ -2692,6 +2708,7 @@ def system_health_api(request):
         'status': 'healthy' if (db_ok and cache_ok) else 'degraded',
         'database': {'status': 'connected' if db_ok else 'error', 'latency_ms': db_time_ms},
         'cache': {'status': 'connected' if cache_ok else 'error', 'latency_ms': cache_time_ms},
+        'disk': disk_info,
         'environment': {
             'python_version': sys.version.split()[0],
             'django_version': django_ver,
@@ -3542,9 +3559,6 @@ def panel_reels_list_create_api(request):
     from learning.api import seed_default_reels
 
     if request.method == 'GET':
-        if not Reel.objects.exists():
-            seed_default_reels()
-
         qs = Reel.objects.all().order_by('-order', '-id')
 
         # Filter by status

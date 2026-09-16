@@ -25,6 +25,7 @@ urlpatterns = [
     # Docker healthcheck (konteyner ichidan chaqiriladi; nginx bu manzilni tashqariga
     # ochmaydi — u /api, /telegram, /admin dan tashqari hammasini frontendga yuboradi).
     path('healthz', healthz),
+    path('api/health/', healthz),
 
     path('admin/', admin.site.urls),
 
