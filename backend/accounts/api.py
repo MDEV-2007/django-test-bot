@@ -202,19 +202,30 @@ def telegram_login_api(request):
             profile.telegram_username = tg_username
             profile.save(update_fields=['telegram_username'])
     except Profile.DoesNotExist:
-        django_username = f'tg_{tg_id}'
-        user, created = User.objects.get_or_create(username=django_username)
-        if created:
-            user.first_name = first_name
-            user.last_name = last_name
-            user.save()
+        # Agar ilgari vebda yoki botda username orqali ro'yxatdan o'tgan bo'lsa va telegram_id bo'sh bo'lsa,
+        # hisoblarni birlashtiramiz (yangi bo'sh foydalanuvchi yaratmasdan)
+        profile = None
+        if tg_username:
+            profile = Profile.objects.filter(telegram_username__iexact=tg_username, telegram_id__isnull=True).first()
 
-        profile = ensure_profile_for_user(user)
-        profile.telegram_id = tg_id
-        profile.telegram_username = tg_username
-        profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={tg_username or tg_id}'
-        profile.last_active_date = timezone.localdate()
-        profile.save()
+        if profile:
+            profile.telegram_id = tg_id
+            profile.save(update_fields=['telegram_id'])
+            user = profile.user
+        else:
+            django_username = f'tg_{tg_id}'
+            user, created = User.objects.get_or_create(username=django_username)
+            if created:
+                user.first_name = first_name
+                user.last_name = last_name
+                user.save()
+
+            profile = ensure_profile_for_user(user)
+            profile.telegram_id = tg_id
+            profile.telegram_username = tg_username
+            profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={tg_username or tg_id}'
+            profile.last_active_date = timezone.localdate()
+            profile.save()
 
         start_param = (request.data.get('start_param') or '').strip()
         if start_param:
