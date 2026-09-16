@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { VerifiedBadge } from '@/components/ui/verified-badge';
+import VerifiedBadge from '@/components/ui/verified-badge';
 
 type AnswerMode = 'open' | 'closed' | 'mixed' | null;
 

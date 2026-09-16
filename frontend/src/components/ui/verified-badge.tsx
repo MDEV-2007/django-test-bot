@@ -18,7 +18,7 @@ const SIZE_MAP = {
   lg: 'size-6',
 };
 
-export default function VerifiedBadge({
+export function VerifiedBadge({
   role,
   isSuperadmin,
   isTeacher,
@@ -76,3 +76,5 @@ export default function VerifiedBadge({
     </span>
   );
 }
+
+export default VerifiedBadge;
