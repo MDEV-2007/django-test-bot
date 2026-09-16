@@ -46,6 +46,7 @@ function play(fn: () => void) {
 export const soundFX = {
   click: () => play(() => tone(600, 0, 0.07, 0.05)),
   correct: () => play(() => { tone(523, 0, 0.12); tone(659, 0.1, 0.12); tone(784, 0.2, 0.22); }),
+  success: () => play(() => { tone(523, 0, 0.12); tone(659, 0.1, 0.12); tone(784, 0.2, 0.22); }),
   incorrect: () => play(() => { tone(220, 0, 0.16, 0.07, 'triangle'); tone(180, 0.12, 0.22, 0.07, 'triangle'); }),
   fanfare: () => play(() => {
     [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.3, 0.08));
