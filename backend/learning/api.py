@@ -967,14 +967,13 @@ def community_post_create_api(request):
     })
 
 
-@api_view(['DELETE'])
+@api_view(['DELETE', 'POST'])
 @permission_classes([IsAuthenticated])
 def community_post_delete_api(request, post_id):
     """Post muallifi yoki super admin tomonidan postni o'chirish."""
-    try:
-        post = CommunityPost.objects.get(id=post_id)
-    except CommunityPost.DoesNotExist:
-        return Response({'error': "Post topilmadi."}, status=404)
+    post = CommunityPost.objects.filter(id=post_id).first()
+    if not post:
+        return Response({'success': True, 'message': "Post allaqachon o'chirilgan."}, status=200)
 
     is_author = (post.author_id == request.user.id or post.author == request.user)
     is_admin = getattr(request.user, 'is_superuser', False) or getattr(request.user, 'is_staff', False)

@@ -311,7 +311,12 @@ export default function CommunityFeedPage() {
         setPosts((prev) => prev.filter((p) => p.id !== postId));
       }
     } catch (err: any) {
-      toast.error(err.message || "Postni o'chirishda xatolik yuz berdi");
+      if (err?.status === 404) {
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+        toast.info("Post allaqachon o'chirilgan");
+      } else {
+        toast.error(err?.message || "Postni o'chirishda xatolik yuz berdi");
+      }
     }
   }
 
