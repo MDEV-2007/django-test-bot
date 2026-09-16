@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Sliders, CheckCircle2, ShieldAlert, Sparkles, RefreshCw,
   ExternalLink, Layers, Swords, BookOpen, Gamepad2, Bot,
-  GraduationCap, ShoppingBag, Trophy, FileCheck2, Info,
+  GraduationCap, ShoppingBag, Trophy, FileCheck2, Info, Headphones,
 } from 'lucide-react';
 import PanelShell from '@/components/panel/PanelShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,9 +54,12 @@ const ICON_MAP: Record<string, any> = {
   Trophy,
   FileCheck2,
   Sparkles,
+  Headphones,
 };
 
 const TONE_MAP: Record<string, PremiumIconTone> = {
+  reels: 'rose',
+  study: 'emerald',
   flashcards: 'amber',
   battles: 'rose',
   learning: 'indigo',

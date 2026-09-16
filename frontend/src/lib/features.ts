@@ -34,6 +34,7 @@ const FEATURES_CACHE_KEY = 'ilmildizi_features_cache_v2';
 // Standart zaxira holat
 const DEFAULT_FEATURES: Record<string, FeatureItem> = {
   reels: { key: 'reels', name: 'Bilim Reels', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Viral', target_route: '/reels', icon_name: 'Sparkles' },
+  study: { key: 'study', name: 'Fokus Xonasi', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Zen', target_route: '/study', icon_name: 'Headphones' },
   flashcards: { key: 'flashcards', name: 'Smart Flashcardlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: '2.0 Beta', target_route: '/flashcards', icon_name: 'Layers' },
   battles: { key: 'battles', name: '1v1 Battle Arena', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Live', target_route: '/battles', icon_name: 'Swords' },
   learning: { key: 'learning', name: 'Darslar & Konspektlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Audio', target_route: '/learning', icon_name: 'BookOpen' },
@@ -73,12 +74,14 @@ export const useFeaturesStore = create<FeaturesStore>((set, get) => ({
     try {
       const data = await apiFetch<FeaturesResponse>('/api/panel/features/public/');
       if (data && data.features) {
+        // Barcha yangi va mavjud modullarni birlashtirish
+        const merged = { ...DEFAULT_FEATURES, ...data.features };
         if (typeof window !== 'undefined') {
           try {
-            localStorage.setItem(FEATURES_CACHE_KEY, JSON.stringify(data.features));
+            localStorage.setItem(FEATURES_CACHE_KEY, JSON.stringify(merged));
           } catch {}
         }
-        set({ features: data.features, loaded: true, loading: false });
+        set({ features: merged, loaded: true, loading: false });
       } else {
         set({ loaded: true, loading: false });
       }
@@ -90,7 +93,7 @@ export const useFeaturesStore = create<FeaturesStore>((set, get) => ({
 
   isFeatureEnabled: (key: string) => {
     const { user } = useAuthStore.getState();
-    const feat = get().features[key];
+    const feat = get().features[key] || DEFAULT_FEATURES[key];
     if (!feat) return false;
 
     // 1. Agar faqat admin uchun (Beta test) yoqilgan bo'lsa:

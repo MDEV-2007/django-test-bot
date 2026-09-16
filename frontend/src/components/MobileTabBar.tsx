@@ -54,7 +54,7 @@ const MENU_GROUPS: { label: string; items: { href: string; label: string; icon: 
   {
     label: "Ko'proq",
     items: [
-      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, tone: 'emerald' },
+      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, tone: 'emerald', featureKey: 'study' },
       { href: '/learning', label: 'Darslar', icon: BookOpen, tone: 'sky', featureKey: 'learning' },
       { href: '/feed', label: 'Hamjamiyat & Liga', icon: Globe, tone: 'emerald' },
       { href: '/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'rose', featureKey: 'reels' },

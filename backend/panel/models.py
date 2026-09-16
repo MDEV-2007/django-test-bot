@@ -200,13 +200,9 @@ class FeatureFlag(models.Model):
 
     @classmethod
     def get_all_cached(cls):
-        # Kesh muddati o'rniga to'g'ridan-to'g'ri bazadan olish (atigi 10 ta qator, <0.2ms)
-        # multi-worker Gunicorn/ASGI ishchilarida kesh eskirib qolishi va "bazida bor, bazida yo'q"
-        # bo'lib qolishining oldini oladi.
+        # Har doim barcha standart modullar (reels, flashcards va h.k.) bazada mavjudligini ta'minlaydi
+        cls.ensure_all_defaults_exist()
         flags = list(cls.objects.all())
-        if not flags:
-            cls.seed_default_flags()
-            flags = list(cls.objects.all())
         return {
             f.key: {
                 'key': f.key,
@@ -224,8 +220,8 @@ class FeatureFlag(models.Model):
         }
 
     @classmethod
-    def seed_default_flags(cls):
-        defaults = [
+    def get_default_flag_items(cls):
+        return [
             {
                 'key': 'reels',
                 'name': 'Bilim Reels (Scroll-Learning)',
@@ -236,6 +232,17 @@ class FeatureFlag(models.Model):
                 'badge_text': 'Viral',
                 'target_route': '/reels',
                 'icon_name': 'Sparkles',
+            },
+            {
+                'key': 'study',
+                'name': 'Fokus Xonasi (Pomodoro & Ambient)',
+                'description': "Chuqur diqqatni jamlash, lofi va tabiat tovushlari hamda Pomodoro taymeri.",
+                'category': 'learning',
+                'is_enabled': True,
+                'admin_only': False,
+                'badge_text': 'Zen',
+                'target_route': '/study',
+                'icon_name': 'Headphones',
             },
             {
                 'key': 'flashcards',
@@ -337,7 +344,19 @@ class FeatureFlag(models.Model):
                 'icon_name': 'FileCheck2',
             },
         ]
+
+    @classmethod
+    def seed_default_flags(cls):
+        defaults = cls.get_default_flag_items()
         for item in defaults:
+            cls.objects.get_or_create(key=item['key'], defaults=item)
+
+    @classmethod
+    def ensure_all_defaults_exist(cls):
+        existing_keys = set(cls.objects.values_list('key', flat=True))
+        defaults = cls.get_default_flag_items()
+        missing = [d for d in defaults if d['key'] not in existing_keys]
+        for item in missing:
             cls.objects.get_or_create(key=item['key'], defaults=item)
 
 

@@ -3376,9 +3376,8 @@ def broadcast_schedule_api(request):
 @permission_classes([IsSuperAdmin])
 def features_list_api(request):
     """Super Admin uchun barcha modullar/funksiyalar ro'yxati va umumiy holati."""
-    # Baza bo'sh bo'lsa, standartlarni yaratish
-    if not FeatureFlag.objects.exists():
-        FeatureFlag.seed_default_flags()
+    # Yangi yoki yetishmayotgan standart modullarni avtomatik bazada yaratish
+    FeatureFlag.ensure_all_defaults_exist()
 
     if request.method == 'POST':
         action = request.data.get('action')
