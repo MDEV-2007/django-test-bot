@@ -466,37 +466,38 @@ export default function CommunityFeedPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 bg-[var(--bg-page)] p-3.5 sm:p-6 pb-24">
-        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-5">
+      <main className="page-shell flex-1 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-3 sm:p-6 pb-28 sm:pb-24">
+        <div className="max-w-2xl mx-auto space-y-3.5 sm:space-y-5 w-full min-w-0">
           {/* 1. Header & Tab Switcher Bar */}
-          <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 pt-1 w-full min-w-0">
             {/* Segment switch: Hamjamiyat vs Liderlar */}
-            <div className="flex items-center p-1 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] shadow-xs">
-              <div className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs">
+            <div className="flex items-center p-0.5 sm:p-1 rounded-xl sm:rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] shadow-xs shrink-0">
+              <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs">
                 <Globe className="size-3.5 sm:size-4" />
                 <span>Hamjamiyat</span>
               </div>
               <Link
                 href="/leaderboard"
-                className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-amber-400 transition-colors"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-amber-400 transition-colors"
               >
                 <Trophy className="size-3.5 sm:size-4 text-amber-500" />
-                <span>Liderlar Ligasi</span>
+                <span className="hidden sm:inline">Liderlar Ligasi</span>
+                <span className="sm:hidden">Liga</span>
               </Link>
             </div>
 
             {/* Actions */}
-            {/* Actions */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               <Button
                 asChild
                 variant="outline"
                 size="sm"
-                className="rounded-xl font-bold border-[var(--border-card)] text-xs h-9 flex items-center px-2.5 sm:px-3"
+                className="rounded-xl font-bold border-[var(--border-card)] text-xs h-8 sm:h-9 flex items-center px-2 sm:px-3"
+                title="Natijalarim tarixi"
               >
                 <Link href="/tests/history">
-                  <Award className="size-3.5 mr-1 text-amber-400" />
-                  <span>Natijalarim</span>
+                  <Award className="size-3.5 text-amber-400 sm:mr-1" />
+                  <span className="hidden sm:inline">Natijalarim</span>
                 </Link>
               </Button>
               <Button
@@ -505,11 +506,10 @@ export default function CommunityFeedPage() {
                   setIsCreateModalOpen(true);
                 }}
                 size="sm"
-                className="rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 text-xs sm:text-sm h-9 px-2.5 sm:px-4 flex items-center gap-1.5"
+                className="rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4 flex items-center gap-1.5"
               >
                 <Plus className="size-4" />
-                <span className="hidden xs:inline">Yangi Post</span>
-                <span className="xs:hidden">Post</span>
+                <span>Post</span>
               </Button>
             </div>
           </div>
@@ -520,7 +520,7 @@ export default function CommunityFeedPage() {
               setActiveModalTab('result');
               setIsCreateModalOpen(true);
             }}
-            className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] hover:border-emerald-500/40 transition-all cursor-pointer shadow-xs group"
+            className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] hover:border-emerald-500/40 transition-all cursor-pointer shadow-xs group min-w-0"
           >
             <Avatar className="size-8 sm:size-10 border border-primary/20 shrink-0">
               {user?.avatar_url && <AvatarImage src={user.avatar_url} alt={user.first_name || user.username} />}
@@ -528,7 +528,7 @@ export default function CommunityFeedPage() {
                 {(user?.first_name || user?.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 text-xs sm:text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors truncate">
+            <div className="flex-1 min-w-0 text-xs sm:text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors truncate">
               Fikringiz, natijangiz yoki savolingizni ulashing...
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -539,10 +539,10 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('result');
                   setIsCreateModalOpen(true);
                 }}
-                className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 sm:px-3 py-1.5 rounded-xl border border-amber-500/25 transition-colors"
+                className="flex items-center gap-1 text-[11px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl border border-amber-500/25 transition-colors"
               >
-                <Award className="size-3.5 text-amber-400" />
-                <span className="text-[11px] sm:text-xs">Natija qo&apos;yish</span>
+                <Award className="size-3 sm:size-3.5 text-amber-400" />
+                <span>Natija qo&apos;yish</span>
               </button>
               <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/15 px-2.5 sm:px-3 py-1.5 rounded-xl border border-emerald-500/20 transition-colors">
                 <Camera className="size-3.5" />
@@ -552,7 +552,7 @@ export default function CommunityFeedPage() {
           </div>
 
           {/* 3. Filter Chips Bar */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-3 px-3 sm:mx-0 sm:px-0">
             {[
               { slug: 'all', label: 'Barchasi', icon: Sparkles },
               { slug: 'certificate', label: '🏆 Sertifikatlar', icon: Award },
@@ -568,7 +568,7 @@ export default function CommunityFeedPage() {
                   key={tab.slug}
                   onClick={() => setSelectedFilter(tab.slug)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 border",
+                    "flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 border",
                     isSel
                       ? "bg-primary text-primary-foreground border-primary shadow-xs scale-102"
                       : "bg-[var(--surface-card)] text-muted-foreground border-[var(--border-card)] hover:bg-[var(--surface-hover)]"
@@ -581,7 +581,7 @@ export default function CommunityFeedPage() {
           </div>
 
           {/* 4. Main Feed Content List */}
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6 w-full min-w-0">
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -634,8 +634,8 @@ export default function CommunityFeedPage() {
 
               return (
                 <Reveal key={post.id} delay={idx * 0.04}>
-                  <Card className="overflow-hidden border border-[var(--border-card)] bg-[var(--surface-card)] shadow-lg hover:border-[var(--border-strong)] transition-all">
-                    <CardContent className="p-4 sm:p-6 space-y-4">
+                  <Card className="overflow-hidden border border-[var(--border-card)] bg-[var(--surface-card)] shadow-lg hover:border-[var(--border-strong)] transition-all min-w-0">
+                    <CardContent className="p-3.5 sm:p-6 space-y-3.5 sm:space-y-4 min-w-0">
                       {/* 1. Author Header Row */}
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
@@ -702,16 +702,16 @@ export default function CommunityFeedPage() {
 
                       {/* 2. Test Title & Score Banner (Only if test/cert with score or questions) */}
                       {(post.score > 0 || post.total_questions > 0 || post.grade) ? (
-                        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[var(--surface-hover)] to-[var(--surface-card-soft)] border border-[var(--border-card)] flex flex-wrap items-center justify-between gap-3">
+                        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[var(--surface-hover)] to-[var(--surface-card-soft)] border border-[var(--border-card)] flex items-center justify-between gap-2.5 min-w-0">
                           <div className="space-y-1 min-w-0 flex-1">
                             <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground border-border/70">
                               {post.subject_name}
                             </Badge>
-                            <h4 className="font-black text-foreground text-sm sm:text-base leading-snug line-clamp-1">
+                            <h4 className="font-black text-foreground text-xs sm:text-base leading-snug line-clamp-1">
                               {post.title}
                             </h4>
                             {post.total_questions > 0 && (
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
                                 To&apos;g&apos;ri: <b className="text-foreground">{post.correct_count}</b> / {post.total_questions} ta savol
                               </p>
                             )}
@@ -720,7 +720,7 @@ export default function CommunityFeedPage() {
                           {post.score > 0 && (
                             <div className="flex items-center gap-2 shrink-0">
                               <div className="text-right">
-                                <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-emerald-400 block leading-none">
+                                <span className="text-xl sm:text-3xl font-black font-mono tracking-tight text-emerald-400 block leading-none">
                                   {post.score?.toFixed(0)}%
                                 </span>
                                 {post.grade && (
