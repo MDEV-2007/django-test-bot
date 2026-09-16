@@ -9,6 +9,7 @@ Includes:
 - Viral Telegram Content Generator (Product Data -> Telegram loop)
 """
 
+import html
 import logging
 import re
 from datetime import timedelta
@@ -36,11 +37,15 @@ MARKETING_CACHE_KEY = 'panel:marketing:analytics'
 
 
 def _clean_html(text: str) -> str:
-    """Strip HTML tags and condense whitespace."""
+    """Strip HTML tags, unescape entities, and preserve clean readable formatting."""
     if not text:
         return ""
-    clean = re.sub(r'<[^>]+>', ' ', text)
-    return ' '.join(clean.split()).strip()
+    # Convert block/break tags to newlines
+    text = re.sub(r'<(?:br|br\s*/|/p|/div|/li)>', '\n', text, flags=re.IGNORECASE)
+    unescaped = html.unescape(text)
+    clean = re.sub(r'<[^>]+>', ' ', unescaped)
+    lines = [re.sub(r'[ \t]+', ' ', line).strip() for line in clean.split('\n')]
+    return '\n'.join([line for line in lines if line]).strip()
 
 
 @api_view(['GET'])
@@ -281,17 +286,32 @@ def marketing_analytics_api(request):
             .order_by('correct')[:5]
         )
         q_ids = [r['question'] for r in hard_q_raw]
-        q_map = {q.id: q for q in Question.objects.filter(id__in=q_ids).select_related('subject', 'topic')}
+        q_map = {
+            q.id: q for q in Question.objects.filter(id__in=q_ids)
+            .select_related('subject', 'topic')
+            .prefetch_related('choices')
+        }
         for r in hard_q_raw:
             q = q_map.get(r['question'])
             if not q:
                 continue
-            clean_body = _clean_html(q.body)[:140]
+            clean_body = _clean_html(q.body)
+            # Retrieve answer choices if any
+            option_letters = ['A', 'B', 'C', 'D', 'E', 'F']
+            options_lines = []
+            for i, c in enumerate(q.choices.all()[:6]):
+                letter = option_letters[i] if i < len(option_letters) else f"{i+1}"
+                clean_opt = _clean_html(c.text)
+                if clean_opt:
+                    options_lines.append(f"{letter}) {clean_opt}")
+            options_text = "\n".join(options_lines)
+
             corr_pct = round((r['correct'] / r['total']) * 100, 1) if r['total'] else 0
             err_pct = round(100 - corr_pct, 1)
             hardest_questions.append({
                 'id': q.id,
                 'text': clean_body,
+                'options_text': options_text,
                 'subject': q.subject.name if q.subject else "Fan",
                 'topic': q.topic.title if q.topic else None,
                 'total_answered': r['total'],
@@ -345,6 +365,7 @@ def marketing_analytics_api(request):
         weak_topic_name = weakest_topics[0]['title'] if weakest_topics else "Temuriylar davlati harbiy san'ati"
         hardest_q_sample = hardest_questions[0] if hardest_questions else {
             'text': "1402-yilgi Anqara jangida Amir Temurning g'alabasiga sabab bo'lgan asosiy taktik omil nima edi?",
+            'options_text': "A) Fillardan unumli foydalanish\nB) Qanotlarni mohirona boshqarish va zaxira kuchlarini o'z vaqtida jangga kiritish\nC) Qamal qurollari\nD) Dushman qo'shinining ochlikdan zaiflashishi",
             'subject': "Tarix",
             'correct_pct': 28,
             'total_answered': 42,
@@ -363,11 +384,13 @@ def marketing_analytics_api(request):
             f"👉 https://ilmildizi.uz/tests"
         )
 
+        options_part = f"\n\n{hardest_q_sample['options_text']}" if hardest_q_sample.get('options_text') else ""
+
         # Template 2: Hardest Question of the Day
         post_template_question = (
             f"🧠 Kunning eng qiyin savoli!\n\n"
             f"Bugun {hardest_q_sample.get('total_answered', 35)} nafar o'quvchidan faqat {hardest_q_sample.get('correct_pct', 30)}% to'g'ri javob bera oldi:\n\n"
-            f"❓ \"{hardest_q_sample.get('text')}\"\n\n"
+            f"❓ \"{hardest_q_sample.get('text')}\"{options_part}\n\n"
             f"📚 Fan: #{hardest_q_sample.get('subject', 'Test').replace(' ', '_')}\n"
             f"📌 Siz to'g'ri javobni topa olasizmi? O'zingizni sinab ko'ring:\n"
             f"👉 https://ilmildizi.uz/tests"

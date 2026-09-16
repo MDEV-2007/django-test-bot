@@ -54,6 +54,7 @@ type FunnelStep = {
 type HardQuestion = {
   id: number;
   text: string;
+  options_text?: string;
   subject: string;
   topic: string | null;
   total_answered: number;
@@ -170,7 +171,7 @@ export default function MarketingPage() {
       const url = `/api/panel/marketing/analytics/${isRefresh ? '?refresh=1' : ''}`;
       const res = await apiFetch<MarketingData>(url);
       setData(res);
-      if (!postText && res.viral_generator?.templates) {
+      if ((!postText || isRefresh) && res.viral_generator?.templates) {
         setPostText(res.viral_generator.templates[activeTemplate]);
       }
       if (!targetChannel && res.viral_generator?.default_channel) {
@@ -945,7 +946,21 @@ export default function MarketingPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span className="font-medium">Post matni (Telegram uchun tayyor, tahrirlash mumkin):</span>
-                      <span>{postText.length} ta belgi</span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (data?.viral_generator?.templates[activeTemplate]) {
+                              setPostText(data.viral_generator.templates[activeTemplate]);
+                              toast.info("Shablon dastlabki holatiga qaytarildi");
+                            }
+                          }}
+                          className="hover:text-foreground text-[11px] underline underline-offset-2 transition-colors cursor-pointer"
+                        >
+                          Shablonni yangilash
+                        </button>
+                        <span>{postText.length} ta belgi</span>
+                      </div>
                     </div>
                     <Textarea
                       value={postText}
