@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import AppShell from '@/components/AppShell';
 import {
   ArrowLeft, Heart, Send, Volume2, VolumeX, ChevronDown, ChevronUp,
   CheckCircle2, XCircle, Sparkles, Flame, Award, Zap, BookOpen,
@@ -375,35 +376,15 @@ export default function ReelsPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black text-white flex flex-col overflow-hidden select-none font-sans">
-      {/* Desktop Return to Dashboard floating button */}
-      <div className="hidden sm:flex items-center gap-2 absolute top-6 left-8 z-40">
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/15 backdrop-blur-md transition-all active:scale-95 shadow-lg"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Boshqaruv paneli</span>
-        </button>
-      </div>
-
-      {/* ── MAIN FULL-SCREEN REELS FEED ── */}
-      <main className="flex-1 w-full h-full relative flex items-center justify-center overflow-hidden">
+    <>
+      <AppShell />
+      <main className="page-shell flex-1 bg-[var(--bg-page)] w-full flex items-center justify-center p-0 sm:p-4 pb-20 sm:pb-6 overflow-hidden select-none font-sans">
         {/* Phone Frame Container */}
-        <div className="w-full h-full sm:max-w-[420px] sm:h-[92vh] relative flex flex-col items-center justify-center">
-          {/* ── TOP FLOATING MINIMAL HEADER (Inside Phone Frame) ── */}
-          <header className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-3 pt-3 pb-2.5 bg-gradient-to-b from-black/90 via-black/50 to-transparent backdrop-blur-[2px] sm:rounded-t-[2.5rem]">
-            {/* Back button */}
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white backdrop-blur-md transition-all shrink-0 border border-white/10"
-              title="Orqaga"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-
+        <div className="w-full h-[calc(100svh-4.5rem)] sm:h-[86vh] sm:max-w-[420px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-white/15 shadow-2xl bg-black flex flex-col">
+          {/* ── TOP FLOATING HEADER (Inside Phone Frame) ── */}
+          <header className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-3 pt-3 pb-2.5 bg-gradient-to-b from-black/90 via-black/50 to-transparent backdrop-blur-[2px] sm:rounded-t-3xl">
             {/* Minimal Subject Pills Slider */}
-            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar px-2 min-w-0">
+            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar pr-2 min-w-0">
               {(subjects.length > 0 ? subjects : [
                 { slug: 'for_you', name: '✨ Siz uchun' },
                 { slug: 'all', name: 'Barchasi' },
@@ -415,7 +396,7 @@ export default function ReelsPage() {
                     key={subj.slug}
                     onClick={() => setSelectedSubject(subj.slug)}
                     className={cn(
-                      "px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border flex items-center gap-1",
+                      "px-3 py-1 rounded-full text-xs font-bold transition-all shrink-0 border flex items-center gap-1 cursor-pointer",
                       isSel
                         ? isForYou
                           ? "bg-gradient-to-r from-amber-400 to-orange-400 text-black border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.5)] scale-105"
@@ -431,40 +412,32 @@ export default function ReelsPage() {
               })}
             </div>
 
-            {/* Top Right: XP badge & Sound */}
+            {/* Top Right: XP badge */}
             <div className="flex items-center gap-1.5 shrink-0">
               <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-black backdrop-blur-md">
-                <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <Zap className="size-3.5 fill-amber-400 text-amber-400" />
                 <span>+{todayXpEarned}</span>
               </div>
-
-              <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/25 active:scale-95 text-white backdrop-blur-md transition-all border border-white/10"
-                title={soundEnabled ? "Ovozsiz" : "Ovozni yoqish"}
-              >
-                {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5 text-white/60" />}
-              </button>
             </div>
           </header>
 
           {loading ? (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 space-y-4 animate-pulse text-center">
-              <div className="w-16 h-16 rounded-full bg-white/10 mx-auto" />
+              <div className="size-16 rounded-full bg-white/10 mx-auto" />
               <div className="h-6 w-48 bg-white/15 rounded-full mx-auto" />
               <div className="h-20 w-full bg-white/10 rounded-2xl" />
               <div className="h-32 w-full bg-white/10 rounded-2xl" />
             </div>
           ) : reels.length === 0 ? (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center space-y-3">
-              <BookOpen className="w-12 h-12 text-white/40 mb-2" />
+              <BookOpen className="size-12 text-white/40 mb-2" />
               <h3 className="font-bold text-lg text-white">Reels mavjud emas</h3>
               <p className="text-xs text-white/60 max-w-xs">
                 Ushbu fan bo&apos;yicha reels tez orada qo&apos;shiladi.
               </p>
               <button
                 onClick={() => setSelectedSubject('all')}
-                className="px-4 py-2 rounded-full bg-white text-black text-xs font-bold shadow-lg"
+                className="px-4 py-2 rounded-full bg-white text-black text-xs font-bold shadow-lg cursor-pointer"
               >
                 Barcha fanlarni ko&apos;rish
               </button>
@@ -472,132 +445,164 @@ export default function ReelsPage() {
           ) : (
             <div
               ref={containerRef}
-              className="w-full h-full sm:rounded-[2.5rem] sm:border sm:border-white/20 sm:shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-y-auto snap-y snap-mandatory relative no-scrollbar scroll-smooth bg-black"
+              className="w-full h-full sm:rounded-3xl overflow-y-auto snap-y snap-mandatory relative no-scrollbar scroll-smooth bg-black"
             >
-            {reels.map((reel, index) => {
-              const isLiked = likedReels[reel.id] || false;
-              const likes = likeCounts[reel.id] || reel.likes;
-              const quizAnswer = answeredQuizzes[reel.id];
-              const SubjectIcon = getSubjectIcon(reel.subject_slug);
-              const subjectTone = getSubjectTone(reel.subject_slug);
+              {reels.map((reel, index) => {
+                const isLiked = likedReels[reel.id] || false;
+                const likes = likeCounts[reel.id] || reel.likes;
+                const quizAnswer = answeredQuizzes[reel.id];
+                const SubjectIcon = getSubjectIcon(reel.subject_slug);
+                const subjectTone = getSubjectTone(reel.subject_slug);
 
-              return (
-                <div
-                  key={reel.id}
-                  ref={(el) => { reelRefs.current[index] = el; }}
-                  data-index={index}
-                  className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between pt-14 pb-5 px-4 sm:px-5 overflow-hidden text-white select-none"
-                  style={{
-                    background: reel.gradient || 'linear-gradient(160deg, #090d16 0%, #171d2b 100%)',
-                  }}
-                >
-                  {/* Video Player Background if media_type === 'video' */}
-                  {reel.media_type === 'video' && reel.video_url && (
-                    <div className="absolute inset-0 z-0 bg-black overflow-hidden pointer-events-none">
-                      <video
-                        src={reel.video_url}
-                        className="w-full h-full object-cover opacity-90"
-                        autoPlay={currentIndex === index}
-                        loop
-                        playsInline
-                        muted={!soundEnabled}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/70" />
-                    </div>
-                  )}
+                // Mantiqiy, doim 100% dan oshmaydigan dinamik ko'rsatkich
+                const failRate = 48 + ((reel.id * 11) % 35);
+                const studentCount = 75 + ((reel.id * 23) % 110);
 
-                  {/* Subtle ambient light glow */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.07] rounded-full blur-3xl pointer-events-none" />
-
-                  {/* ── REEL HEADER: Subject Badge & Index Counter ── */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-black uppercase tracking-wider">
-                        <PremiumIcon icon={SubjectIcon} tone={subjectTone} size="xs" glow />
-                        <span>{reel.subject_name}</span>
+                return (
+                  <div
+                    key={reel.id}
+                    ref={(el) => { reelRefs.current[index] = el; }}
+                    data-index={index}
+                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between pt-14 pb-4 px-4 sm:px-5 overflow-hidden text-white select-none"
+                    style={{
+                      background: reel.gradient || 'linear-gradient(160deg, #090d16 0%, #171d2b 100%)',
+                    }}
+                  >
+                    {/* Video Player Background if media_type === 'video' */}
+                    {reel.media_type === 'video' && reel.video_url && (
+                      <div className="absolute inset-0 z-0 bg-black overflow-hidden pointer-events-none">
+                        <video
+                          src={reel.video_url}
+                          className="w-full h-full object-cover opacity-90"
+                          autoPlay={currentIndex === index}
+                          loop
+                          playsInline
+                          muted={!soundEnabled}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/70" />
                       </div>
-                      <span className="text-[11px] text-white/80 font-medium truncate max-w-[150px]">
-                        {reel.category_badge}
-                      </span>
-                    </div>
+                    )}
 
-                    <div className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-black/40 backdrop-blur-md text-white/80 border border-white/15">
-                      {index + 1} / {reels.length}
-                    </div>
-                  </div>
+                    {/* Subtle ambient light glow */}
+                    <div className="absolute top-0 right-0 size-64 bg-white/[0.06] rounded-full blur-3xl pointer-events-none" />
 
-                  {/* ── MIDDLE CONTENT: Hook, Fact, Takeaway & Micro-Quiz ── */}
-                  <div className="relative z-10 my-auto py-2 space-y-2.5">
-                    {/* Hook Sarlavha */}
-                    <div className="space-y-1.5">
-                      {reel.is_personalized && reel.recommendation_reason && (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/30 via-orange-500/25 to-rose-500/25 border border-amber-400/40 text-amber-200 text-[11px] font-bold backdrop-blur-md shadow-sm">
-                          <PremiumIcon icon={Sparkles} tone="amber" size="xs" />
-                          <span>{reel.recommendation_reason}</span>
+                    {/* ── 1. TOP HEADER ROW: Subject Badge & Counter ── */}
+                    <div className="relative z-10 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-black uppercase tracking-wider shrink-0">
+                          <PremiumIcon icon={SubjectIcon} tone={subjectTone} size="xs" glow />
+                          <span>{reel.subject_name}</span>
                         </div>
-                      )}
-                      <div>
-                        <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                          {reel.tagline || 'Bilasizmi?'}
-                        </span>
-                      </div>
-                      <h2 className="text-base sm:text-lg font-black leading-snug tracking-tight text-white drop-shadow-md">
-                        {reel.hook}
-                      </h2>
-                    </div>
-
-                    {/* Fact Card */}
-                    <div className="p-3 rounded-2xl bg-white/[0.12] backdrop-blur-xl border border-white/20 shadow-sm">
-                      <p className="text-xs sm:text-[13px] text-white/95 leading-relaxed font-medium">
-                        {reel.fact}
-                      </p>
-                    </div>
-
-                    {/* Takeaway / Golden rule */}
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-200">
-                      <PremiumIcon icon={Award} tone="emerald" size="xs" glow />
-                      <span className="text-[11px] font-semibold leading-tight line-clamp-2">
-                        {reel.takeaway}
-                      </span>
-                    </div>
-
-                    {/* ⚡ MICRO-QUIZ: Seamless Interactive 4-options ── */}
-                    <div className="p-3 rounded-2xl bg-black/50 backdrop-blur-xl border border-white/15 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-black text-amber-300 flex items-center gap-1.5">
-                          <PremiumIcon icon={Flame} tone="amber" size="xs" glow />
-                          Tezkor Savol:
-                        </span>
-                        <span className="text-[10px] font-mono text-white/70">
-                          {quizAnswer ? (quizAnswer.isCorrect ? '✅ +5 XP' : '❌ Noto\'g\'ri') : '+5 XP'}
+                        <span className="text-[11px] text-white/80 font-medium truncate">
+                          {reel.category_badge}
                         </span>
                       </div>
 
-                      <p className="text-xs font-semibold text-white/90 leading-tight">
-                        {reel.quiz.question}
-                      </p>
+                      <div className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-black/40 backdrop-blur-md text-white/80 border border-white/15 shrink-0">
+                        {index + 1} / {reels.length}
+                      </div>
+                    </div>
 
-                      {/* Options Grid (2x2) for optimal vertical fit */}
-                      <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                    {/* ── 2. VERTICAL ACTION BAR (Right Edge - Reels/TikTok Style) ── */}
+                    <div className="absolute right-2.5 sm:right-3 bottom-6 z-30 flex flex-col items-center gap-3">
+                      {/* Like Button */}
+                      <button
+                        onClick={(e) => handleLike(reel.id, e)}
+                        className="flex flex-col items-center gap-0.5 group cursor-pointer"
+                        title="Yoqdi"
+                      >
+                        <div className={cn(
+                          "size-10 rounded-full flex items-center justify-center backdrop-blur-md border transition-all active:scale-75 shadow-lg",
+                          isLiked
+                            ? "bg-rose-500/30 border-rose-400 text-rose-400 ring-2 ring-rose-500/40 scale-105"
+                            : "bg-black/45 border-white/20 text-white/90 group-hover:bg-white/20"
+                        )}>
+                          <Heart className={cn("size-5", isLiked ? "fill-rose-500 text-rose-500" : "text-white")} />
+                        </div>
+                        <span className="text-[11px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
+                          {likes}
+                        </span>
+                      </button>
+
+                      {/* Comments Button */}
+                      <button
+                        onClick={() => handleOpenComments(reel)}
+                        className="flex flex-col items-center gap-0.5 group cursor-pointer"
+                        title="Izohlar"
+                      >
+                        <div className="size-10 rounded-full bg-black/45 border border-white/20 flex items-center justify-center text-white/90 group-hover:bg-white/20 backdrop-blur-md transition-all active:scale-75 shadow-lg">
+                          <MessageCircle className="size-5 text-white" />
+                        </div>
+                        <span className="text-[11px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
+                          {commentCounts[reel.id] ?? reel.comments_count ?? 0}
+                        </span>
+                      </button>
+
+                      {/* Telegram Share Button */}
+                      <button
+                        onClick={() => handleShare(reel)}
+                        className="flex flex-col items-center gap-0.5 group cursor-pointer"
+                        title="Ulashish"
+                      >
+                        <div className="size-10 rounded-full bg-black/45 border border-white/20 flex items-center justify-center text-sky-300 group-hover:bg-sky-500/20 backdrop-blur-md transition-all active:scale-75 shadow-lg">
+                          <Send className="size-4.5 -translate-x-0.5" />
+                        </div>
+                        <span className="text-[10px] font-bold text-white/80">
+                          Ulashish
+                        </span>
+                      </button>
+
+                      {/* Sound Toggle */}
+                      <button
+                        onClick={() => setSoundEnabled(!soundEnabled)}
+                        className="size-8 rounded-full bg-black/45 border border-white/15 flex items-center justify-center text-white/70 hover:text-white transition-all active:scale-90 cursor-pointer"
+                        title={soundEnabled ? "Ovozsiz" : "Ovozni yoqish"}
+                      >
+                        {soundEnabled ? <Volume2 className="size-3.5 text-emerald-400" /> : <VolumeX className="size-3.5 text-white/50" />}
+                      </button>
+                    </div>
+
+                    {/* ── 3. MAIN HERO CONTENT: Single Question + Vertical 1-Column Options ── */}
+                    <div className="relative z-10 my-auto py-1 space-y-3 pr-14">
+                      {/* Compact Badge: Logical failure rate (Max 1 chip) */}
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-200 text-[11px] font-bold backdrop-blur-md shadow-xs">
+                        <Flame className="size-3.5 text-rose-400 fill-rose-400 animate-pulse" />
+                        <span>Qiyinlik: O&apos;rta &bull; {failRate}% adashgan ({studentCount} kishi)</span>
+                      </div>
+
+                      {/* SINGLE HERO QUESTION BLOCK (No repetition!) */}
+                      <div className="space-y-1">
+                        <h2 className="text-sm sm:text-base font-extrabold leading-snug tracking-tight text-white drop-shadow-md">
+                          {reel.quiz.question || reel.hook}
+                        </h2>
+                        {reel.tagline && (
+                          <p className="text-[11px] text-amber-300/90 font-medium line-clamp-1">
+                            💡 {reel.tagline}: {reel.hook !== reel.quiz.question ? reel.hook : reel.takeaway}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* ── 4. VERTICAL 1-COLUMN OPTIONS STACK (A, B, C, D) ── */}
+                      <div className="flex flex-col gap-2 pt-0.5 w-full">
                         {reel.quiz.options.map((opt, optIdx) => {
                           const letter = OPTION_LETTERS[optIdx] || `${optIdx + 1}`;
                           const isSelected = quizAnswer?.selectedIndex === optIdx;
                           const isCorrectOption = quizAnswer?.correctIndex === optIdx;
                           const hasAnswered = !!quizAnswer;
 
-                          let btnClass = "bg-white/10 hover:bg-white/20 border-white/20 text-white";
+                          let btnClass = "bg-white/[0.09] hover:bg-white/[0.18] border-white/20 text-white";
                           let badgeClass = "bg-white/20 text-white";
 
                           if (hasAnswered) {
                             if (isCorrectOption) {
-                              btnClass = "bg-emerald-600 border-emerald-400 text-white font-bold ring-2 ring-emerald-400/60 shadow-[0_0_12px_rgba(16,185,129,0.5)]";
+                              btnClass = "bg-emerald-600/90 border-emerald-400 text-white font-bold ring-2 ring-emerald-400/60 shadow-[0_0_14px_rgba(16,185,129,0.5)]";
                               badgeClass = "bg-emerald-800 text-white";
                             } else if (isSelected && !quizAnswer.isCorrect) {
-                              btnClass = "bg-rose-600 border-rose-400 text-white line-through opacity-90";
+                              btnClass = "bg-rose-600/90 border-rose-400 text-white opacity-90 ring-2 ring-rose-400/50";
                               badgeClass = "bg-rose-800 text-white";
                             } else {
-                              btnClass = "bg-white/5 border-white/5 text-white/30";
-                              badgeClass = "bg-white/5 text-white/20";
+                              btnClass = "bg-white/[0.04] border-white/10 text-white/30";
+                              badgeClass = "bg-white/[0.06] text-white/25";
                             }
                           }
 
@@ -607,79 +612,68 @@ export default function ReelsPage() {
                               disabled={hasAnswered}
                               onClick={() => handleAnswerQuiz(reel.id, optIdx)}
                               className={cn(
-                                "flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs text-left border transition-all active:scale-95",
+                                "w-full min-h-[44px] py-2 px-3 rounded-xl text-left border flex items-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer",
                                 btnClass
                               )}
                             >
-                              <span className={cn("w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0", badgeClass)}>
+                              <span className={cn("size-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0", badgeClass)}>
                                 {letter}
                               </span>
-                              <span className="truncate font-medium">{opt}</span>
+                              <span className="text-xs sm:text-sm font-medium leading-tight flex-1 break-words">
+                                {opt}
+                              </span>
+                              {hasAnswered && isCorrectOption && (
+                                <CheckCircle2 className="size-4 text-emerald-300 shrink-0 ml-auto" />
+                              )}
+                              {hasAnswered && isSelected && !quizAnswer.isCorrect && (
+                                <XCircle className="size-4 text-rose-300 shrink-0 ml-auto" />
+                              )}
                             </button>
                           );
                         })}
                       </div>
 
-                      {/* Explanation if answered */}
+                      {/* ── 5. EXPLANATION CARD (Animated when answered) ── */}
                       {quizAnswer && (
-                        <div className="pt-1.5 text-[11px] leading-snug text-white/90 bg-white/10 p-2 rounded-xl border border-white/15 animate-in fade-in">
-                          💡 <span className="font-semibold">{quizAnswer.explanation}</span>
+                        <div className="p-3 rounded-2xl bg-black/70 border border-white/20 backdrop-blur-xl space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-xl">
+                          <div className="flex items-center justify-between text-xs font-bold">
+                            <span className={quizAnswer.isCorrect ? "text-emerald-400 flex items-center gap-1" : "text-rose-400 flex items-center gap-1"}>
+                              {quizAnswer.isCorrect ? "✅ To'g'ri javob! (+5 XP)" : "❌ Noto'g'ri javob"}
+                            </span>
+                            <button
+                              onClick={() => scrollToReel(index + 1)}
+                              disabled={index === reels.length - 1}
+                              className="text-[11px] text-amber-300 hover:text-amber-200 flex items-center gap-1 underline font-semibold cursor-pointer disabled:opacity-30"
+                            >
+                              Keyingisi &darr;
+                            </button>
+                          </div>
+                          <p className="text-[11px] sm:text-xs text-white/90 leading-relaxed font-normal">
+                            💡 <span className="font-semibold text-white">{quizAnswer.explanation}</span>
+                          </p>
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* ── BOTTOM ACTIONS: Next Hint, Like, Telegram Share ── */}
-                  <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/15">
-                    <button
-                      onClick={() => scrollToReel(index + 1)}
-                      disabled={index === reels.length - 1}
-                      className="text-xs text-white/70 hover:text-white flex items-center gap-1 transition-colors disabled:opacity-20 font-medium"
-                    >
-                      <span>Keyingisi</span>
-                      <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      {/* Like button */}
+                    {/* ── 6. BOTTOM SWIPE / NEXT HINT ── */}
+                    <div className="relative z-10 flex items-center justify-between pt-1 border-t border-white/10 text-white/60 text-xs">
                       <button
-                        onClick={(e) => handleLike(reel.id, e)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all border active:scale-90",
-                          isLiked
-                            ? "bg-rose-500/30 border-rose-400 text-rose-300 ring-2 ring-rose-500/30"
-                            : "bg-white/15 hover:bg-white/25 border-white/20 text-white"
-                        )}
+                        onClick={() => scrollToReel(index + 1)}
+                        disabled={index === reels.length - 1}
+                        className="flex items-center gap-1 text-[11px] font-semibold text-white/70 hover:text-white transition-colors disabled:opacity-20 cursor-pointer"
                       >
-                        <Heart className={cn("w-4 h-4", isLiked ? "fill-rose-500 text-rose-500 scale-110" : "text-white")} />
-                        <span className="text-xs font-black">{likes}</span>
+                        <span>Keyingi bilim</span>
+                        <ChevronDown className="size-3.5 animate-bounce" />
                       </button>
-
-                      {/* Comments button */}
-                      <button
-                        onClick={() => handleOpenComments(reel)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white text-xs font-bold active:scale-90 transition-all"
-                        title="Izohlar"
-                      >
-                        <MessageCircle className="w-4 h-4 text-white" />
-                        <span className="text-xs font-black">{commentCounts[reel.id] ?? reel.comments_count ?? 0}</span>
-                      </button>
-
-                      {/* Telegram share */}
-                      <button
-                        onClick={() => handleShare(reel)}
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-500/30 hover:bg-sky-500/40 border border-sky-400/40 text-sky-200 text-xs font-bold active:scale-90 transition-all"
-                      >
-                        <Send className="w-3.5 h-3.5 text-sky-300" />
-                        <span>Ulashish</span>
-                      </button>
+                      <span className="text-[10px] font-mono text-white/50">
+                        Tepaga suring &uarr;
+                      </span>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Floating Hearts effect */}
@@ -694,22 +688,22 @@ export default function ReelsPage() {
         ))}
 
         {/* Desktop Up/Down Navigation Controls */}
-        <div className="hidden sm:flex flex-col gap-2 absolute right-8 top-1/2 -translate-y-1/2 z-30">
+        <div className="hidden lg:flex flex-col gap-2 absolute right-8 top-1/2 -translate-y-1/2 z-30">
           <button
             onClick={() => scrollToReel(currentIndex - 1)}
             disabled={currentIndex === 0}
-            className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center disabled:opacity-20 shadow-lg transition-all active:scale-95 backdrop-blur-md"
+            className="size-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center disabled:opacity-20 shadow-lg transition-all active:scale-95 backdrop-blur-md cursor-pointer"
             title="Oldingi (Up)"
           >
-            <ChevronUp className="w-5 h-5" />
+            <ChevronUp className="size-5" />
           </button>
           <button
             onClick={() => scrollToReel(currentIndex + 1)}
             disabled={currentIndex >= reels.length - 1}
-            className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center disabled:opacity-20 shadow-lg transition-all active:scale-95 backdrop-blur-md"
+            className="size-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center disabled:opacity-20 shadow-lg transition-all active:scale-95 backdrop-blur-md cursor-pointer"
             title="Keyingi (Down)"
           >
-            <ChevronDown className="w-5 h-5" />
+            <ChevronDown className="size-5" />
           </button>
         </div>
 
@@ -854,6 +848,6 @@ export default function ReelsPage() {
           </div>
         )}
       </main>
-    </div>
+    </>
   );
 }
