@@ -27,6 +27,7 @@ import { apiFetch, API_URL } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import { celebrate } from '@/lib/confetti';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 type PostItem = {
@@ -975,60 +976,61 @@ export default function CommunityFeedPage() {
 
       {/* Create New Post Dialog Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-lg w-full bg-[var(--surface-card)] border-[var(--border-card)] p-5 sm:p-6 rounded-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-black text-foreground flex items-center gap-2">
-              <Plus className="size-5 text-emerald-500" /> Hamjamiyatga Post Qo&apos;yish
+        <DialogContent className="w-[95vw] sm:max-w-xl md:max-w-2xl bg-card border border-border p-5 sm:p-7 rounded-3xl max-h-[88vh] overflow-y-auto overflow-x-hidden shadow-2xl space-y-4">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-lg sm:text-xl font-black text-foreground flex items-center gap-2">
+              <PremiumIcon icon={Plus} tone="emerald" size="sm" glow />
+              <span>Hamjamiyatga Post Qo&apos;yish</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               O&apos;quv yutuqlaringiz, test natijalaringiz yoki fikrlaringizni ulashing (+15 XP)!
             </DialogDescription>
           </DialogHeader>
 
-          {/* Rejim tablari: Test Natijasini Qo'yish vs Erkin Post */}
-          <div className="flex items-center p-1 rounded-2xl bg-muted/60 border border-border/60 mt-1">
+          {/* Rejim tablari: Test Natijasini Qo'yish vs Erkin Post (Grid 2-ustun - overflow bo'lmaydi) */}
+          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-muted/60 border border-border/60">
             <button
               type="button"
               onClick={() => setActiveModalTab('result')}
               className={cn(
-                "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5",
+                "py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 min-w-0",
                 activeModalTab === 'result'
                   ? "bg-card text-foreground shadow-xs border border-border text-amber-500"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Award className="size-3.5 text-amber-400" />
-              <span>🏆 Test Natijasini Qo&apos;yish</span>
+              <PremiumIcon icon={Award} tone="amber" size="xs" glow={activeModalTab === 'result'} />
+              <span className="truncate">Natijani Ulashish</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveModalTab('custom')}
               className={cn(
-                "flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5",
+                "py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 min-w-0",
                 activeModalTab === 'custom'
                   ? "bg-card text-foreground shadow-xs border border-border text-emerald-500"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <UploadCloud className="size-3.5 text-emerald-500" />
-              <span>✍️ Erkin Post &amp; Rasm</span>
+              <PremiumIcon icon={UploadCloud} tone="emerald" size="xs" glow={activeModalTab === 'custom'} />
+              <span className="truncate">Erkin Post &amp; Rasm</span>
             </button>
           </div>
 
           {/* ── TAB 1: TEST NATIJASINI / SERTIFIKATNI ULASHISH ── */}
           {activeModalTab === 'result' && (
-            <div className="space-y-4 pt-2">
+            <div className="space-y-4 pt-1">
               {loadingAttempts ? (
                 <div className="py-8 text-center space-y-2">
                   <Loader2 className="size-6 animate-spin mx-auto text-primary" />
                   <p className="text-xs text-muted-foreground">Test natijalaringiz yuklanmoqda...</p>
                 </div>
               ) : userAttempts.length === 0 ? (
-                <div className="py-8 text-center space-y-3 p-4 rounded-2xl bg-muted/30 border border-dashed border-border">
-                  <Award className="size-8 text-muted-foreground/50 mx-auto" />
+                <div className="py-8 text-center space-y-3 p-5 rounded-2xl bg-muted/30 border border-dashed border-border">
+                  <PremiumIcon icon={Award} tone="zinc" size="lg" className="mx-auto" />
                   <div>
                     <p className="text-xs font-bold text-foreground">Hali topshirilgan testlar yo&apos;q</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs mx-auto">
                       Avval birorta test yoki sertifikat imtihonini yeching, so&apos;ng natijangizni bu yerda ulashing.
                     </p>
                   </div>
@@ -1043,8 +1045,8 @@ export default function CommunityFeedPage() {
                     <span className="text-muted-foreground font-mono text-[11px]">{userAttempts.length} ta natija</span>
                   </div>
 
-                  {/* Testlar ro'yxati */}
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {/* Testlar ro'yxati (Smooth vertical scroll without horizontal bar) */}
+                  <div className="space-y-2 max-h-56 sm:max-h-64 overflow-y-auto overflow-x-hidden pr-1">
                     {userAttempts.map((att) => {
                       const isSelected = selectedAttemptId === att.id;
                       const scoreVal = att.score || 0;
@@ -1056,29 +1058,29 @@ export default function CommunityFeedPage() {
                           className={cn(
                             "p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 text-xs",
                             isSelected
-                              ? "bg-emerald-500/10 border-emerald-500/50 shadow-xs"
-                              : "bg-background border-border/70 hover:border-primary/40"
+                              ? "bg-emerald-500/10 border-emerald-500/50 shadow-xs ring-1 ring-emerald-500/30"
+                              : "bg-background/80 border-border/70 hover:border-primary/40"
                           )}
                         >
-                          <div className="min-w-0 space-y-0.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-foreground truncate block">
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="font-bold text-foreground text-xs sm:text-sm truncate block">
                                 {att.test_title}
                               </span>
                               {isCert && (
-                                <Badge className="bg-amber-500/20 text-amber-500 text-[9px] px-1 py-0 h-4 border border-amber-500/30">
+                                <Badge className="bg-amber-500/20 text-amber-500 text-[10px] px-1.5 py-0.5 shrink-0 border border-amber-500/30 font-semibold">
                                   🏆 Sertifikat
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-[11px] text-muted-foreground">
                               {att.correct_answers} to&apos;g&apos;ri &bull; {att.wrong_answers} xato &bull; {new Date(att.completed_at).toLocaleDateString('uz-UZ')}
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2.5 shrink-0">
                             <span className={cn(
-                              "font-mono font-black text-sm px-2 py-0.5 rounded-lg border",
+                              "font-mono font-black text-xs sm:text-sm px-2.5 py-1 rounded-xl border",
                               scoreVal >= 80 ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" :
                               scoreVal >= 60 ? "bg-amber-500/15 text-amber-500 border-amber-500/30" :
                               "bg-rose-500/15 text-rose-500 border-rose-500/30"
@@ -1086,10 +1088,10 @@ export default function CommunityFeedPage() {
                               {scoreVal.toFixed(0)}%
                             </span>
                             <div className={cn(
-                              "size-4 rounded-full border flex items-center justify-center",
+                              "size-5 rounded-full border flex items-center justify-center transition-colors",
                               isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-muted-foreground/30"
                             )}>
-                              {isSelected && <CheckCircle2 className="size-3" />}
+                              {isSelected && <CheckCircle2 className="size-3.5" />}
                             </div>
                           </div>
                         </div>
@@ -1104,13 +1106,13 @@ export default function CommunityFeedPage() {
                       value={attemptCaption}
                       onChange={(e) => setAttemptCaption(e.target.value)}
                       placeholder="Masalan: Mehnat o'z mevasini berdi! 88% A+ natija bilan sertifikat oldim..."
-                      className="rounded-xl text-xs bg-[var(--surface-hover)] border-[var(--border-card)] min-h-[60px]"
+                      className="rounded-xl text-xs bg-muted/30 border-border/80 min-h-[65px] focus-visible:ring-emerald-500"
                       maxLength={500}
                     />
                   </div>
 
                   {/* Submit Button */}
-                  <div className="flex items-center justify-end gap-2 pt-2">
+                  <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/60">
                     <Button
                       type="button"
                       variant="ghost"
@@ -1126,11 +1128,11 @@ export default function CommunityFeedPage() {
                         const att = userAttempts.find((a) => a.id === selectedAttemptId);
                         if (att) handleShareAttempt(att.id, att.score);
                       }}
-                      className="rounded-xl text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20 gap-1.5"
+                      className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-2 h-10 px-4"
                     >
                       {isSharingAttempt ? (
                         <>
-                          <Loader2 className="size-3.5 animate-spin" /> Joylanmoqda...
+                          <Loader2 className="size-4 animate-spin" /> Joylanmoqda...
                         </>
                       ) : (
                         <>
@@ -1146,14 +1148,14 @@ export default function CommunityFeedPage() {
 
           {/* ── TAB 2: ERKIN POST & RASM ── */}
           {activeModalTab === 'custom' && (
-            <form onSubmit={handleCreatePost} className="space-y-4 pt-2">
+            <form onSubmit={handleCreatePost} className="space-y-4 pt-1">
               <div>
                 <label className="text-xs font-bold text-foreground mb-1 block">Mavzu yoki Sarlavha</label>
                 <Input
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Masalan: Bugun 50 ta biologiya testi yechdim!"
-                  className="rounded-xl text-xs bg-[var(--surface-hover)] border-[var(--border-card)]"
+                  className="rounded-xl text-xs bg-muted/30 border-border/80"
                   maxLength={150}
                 />
               </div>
@@ -1164,7 +1166,7 @@ export default function CommunityFeedPage() {
                   value={newSubject}
                   onChange={(e) => setNewSubject(e.target.value)}
                   placeholder="Biologiya, Kimyo, Tarix, Matematika..."
-                  className="rounded-xl text-xs bg-[var(--surface-hover)] border-[var(--border-card)]"
+                  className="rounded-xl text-xs bg-muted/30 border-border/80"
                   maxLength={60}
                 />
               </div>
@@ -1175,7 +1177,7 @@ export default function CommunityFeedPage() {
                   value={newCaption}
                   onChange={(e) => setNewCaption(e.target.value)}
                   placeholder="Abituriyent do'stlaringizga foydali maslahat yoki shijoatli so'zlar yozing..."
-                  className="rounded-xl text-xs bg-[var(--surface-hover)] border-[var(--border-card)] min-h-[70px]"
+                  className="rounded-xl text-xs bg-muted/30 border-border/80 min-h-[75px]"
                   maxLength={1000}
                 />
               </div>
@@ -1191,7 +1193,7 @@ export default function CommunityFeedPage() {
                 />
 
                 {imagePreviewUrl ? (
-                  <div className="relative rounded-2xl overflow-hidden border border-[var(--border-card)] bg-black/40 p-2 flex items-center justify-center">
+                  <div className="relative rounded-2xl overflow-hidden border border-border bg-black/40 p-2 flex items-center justify-center">
                     <img src={imagePreviewUrl} alt="Preview" className="max-h-48 rounded-xl object-contain" />
                     <button
                       type="button"
@@ -1207,16 +1209,16 @@ export default function CommunityFeedPage() {
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-[var(--border-card)] hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-[var(--surface-hover)]/40"
+                    className="border-2 border-dashed border-border/80 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-muted/20"
                   >
-                    <UploadCloud className="size-6 text-emerald-500" />
+                    <PremiumIcon icon={UploadCloud} tone="emerald" size="md" glow />
                     <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
                     <span className="text-[10px] text-muted-foreground">PNG, JPG, WebP (maks. 5MB)</span>
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/60">
                 <Button
                   type="button"
                   variant="ghost"
@@ -1228,11 +1230,11 @@ export default function CommunityFeedPage() {
                 <Button
                   type="submit"
                   disabled={isSubmittingPost}
-                  className="rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20"
+                  className="rounded-xl text-xs sm:text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md gap-2 h-10 px-4"
                 >
                   {isSubmittingPost ? (
                     <>
-                      <Loader2 className="size-3.5 mr-1.5 animate-spin" /> E&apos;lon qilinmoqda...
+                      <Loader2 className="size-4 animate-spin" /> E&apos;lon qilinmoqda...
                     </>
                   ) : (
                     <>E&apos;lon qilish 🚀</>
