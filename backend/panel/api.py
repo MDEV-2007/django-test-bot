@@ -3580,6 +3580,7 @@ def panel_reels_list_create_api(request):
 
             reels_data.append({
                 'id': r.id,
+                'source_question_id': r.source_question_id,
                 'subject_name': r.subject_name,
                 'subject_slug': r.subject_slug,
                 'category_badge': r.category_badge,
@@ -3924,15 +3925,37 @@ def panel_reels_hardest_questions_api(request):
 
     questions_data = []
 
-    # 1. Oldindan Reel yaratilgan savollarni aniqlash (ularni qayta tavsiya qilmaslik uchun)
+    # 1. Oldindan Reel yaratilgan savollarni aniqlash
     from learning.models import Reel
-    used_qids = set(Reel.objects.filter(source_question__isnull=False).values_list('source_question_id', flat=True))
-    existing_reels = list(Reel.objects.all().values('quiz_question', 'fact'))
-    used_snippets = set()
+
+    def normalize_snip(val):
+        if not val:
+            return ""
+        v = re.sub(r'<[^>]+>', '', val)
+        v = re.sub(r'[\'"`«»’‘“”\.,:;!?\(\)\-\—\–]', '', v)
+        return re.sub(r'\s+', ' ', v).strip().lower()[:40]
+
+    existing_reels = list(Reel.objects.all().values('id', 'quiz_question', 'fact', 'source_question_id'))
+    reel_map = {r['source_question_id']: r['id'] for r in existing_reels if r.get('source_question_id')}
+    snippet_reel_map = {}
     for r in existing_reels:
         for t in [r.get('quiz_question'), r.get('fact')]:
-            if t and len(t.strip()) >= 15:
-                used_snippets.add(re.sub(r'\s+', ' ', t).strip().lower()[:35])
+            snip = normalize_snip(t)
+            if snip and len(snip) >= 8:
+                snippet_reel_map[snip] = r['id']
+
+    def find_converted_reel(qid, snip):
+        if qid in reel_map:
+            return reel_map[qid]
+        if not snip or len(snip) < 8:
+            return None
+        if snip in snippet_reel_map:
+            return snippet_reel_map[snip]
+        if len(snip) >= 12:
+            for s_key, r_id in snippet_reel_map.items():
+                if len(s_key) >= 12 and (s_key[:20] in snip or snip[:20] in s_key):
+                    return r_id
+        return None
 
     # 1. Haqiqiy urinishlardagi eng ko'p xato qilingan test savollari (bitta to'g'ri javobli)
     try:
@@ -3951,7 +3974,7 @@ def panel_reels_hardest_questions_api(request):
         seen_qids = set()
         for item in wrong_stats:
             qid = item['question_id']
-            if qid in seen_qids or qid in used_qids:
+            if qid in seen_qids:
                 continue
             seen_qids.add(qid)
 
@@ -3970,9 +3993,16 @@ def panel_reels_hardest_questions_api(request):
             if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
                 continue
 
-            clean_snippet = re.sub(r'\s+', ' ', clean_text).strip().lower()[:35]
-            if clean_snippet in used_snippets:
-                continue
+            clean_snippet = normalize_snip(clean_text)
+            converted_reel_id = find_converted_reel(q.id, clean_snippet)
+            is_converted = bool(converted_reel_id)
+
+            if converted_reel_id and q.id not in reel_map:
+                try:
+                    Reel.objects.filter(id=converted_reel_id, source_question__isnull=True).update(source_question_id=q.id)
+                    reel_map[q.id] = converted_reel_id
+                except Exception:
+                    pass
 
             wrong_ans = item['wrong_count']
             total_ans = AttemptAnswer.objects.filter(question_id=qid).count()
@@ -4002,6 +4032,8 @@ def panel_reels_hardest_questions_api(request):
                 'total_count': total_ans,
                 'suggested_hook': f"O'quvchilarning {int(fail_rate)}% i shu testda yiqilgan! Sen toparmiding?",
                 'suggested_tagline': f"{wrong_ans} ta o'quvchi adashgan!",
+                'is_converted': is_converted,
+                'converted_reel_id': converted_reel_id,
             })
 
             if len(questions_data) >= 24:
@@ -4018,7 +4050,7 @@ def panel_reels_hardest_questions_api(request):
                 question_type__in=['single_choice', 'image_based', 'table_based'],
                 choices__isnull=False
             )
-            .exclude(id__in=existing_ids | used_qids)
+            .exclude(id__in=existing_ids)
             .select_related('subject')
             .prefetch_related('choices')
             .order_by('-difficulty', '-id')[:120]
@@ -4036,9 +4068,16 @@ def panel_reels_hardest_questions_api(request):
             if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
                 continue
 
-            clean_snippet = re.sub(r'\s+', ' ', clean_text).strip().lower()[:35]
-            if clean_snippet in used_snippets:
-                continue
+            clean_snippet = normalize_snip(clean_text)
+            converted_reel_id = find_converted_reel(q.id, clean_snippet)
+            is_converted = bool(converted_reel_id)
+
+            if converted_reel_id and q.id not in reel_map:
+                try:
+                    Reel.objects.filter(id=converted_reel_id, source_question__isnull=True).update(source_question_id=q.id)
+                    reel_map[q.id] = converted_reel_id
+                except Exception:
+                    pass
 
             options = [c.text for c in choices]
             correct_idx = 0
@@ -4050,7 +4089,6 @@ def panel_reels_hardest_questions_api(request):
             subj_name = q.subject.name if q.subject else "Tarix"
             subj_slug = q.subject.slug if q.subject else "tarix"
 
-            # Mavjud urinishlar soni
             total_ans = AttemptAnswer.objects.filter(question_id=q.id).count()
             wrong_ans = AttemptAnswer.objects.filter(question_id=q.id, is_correct=False).count()
             fail_rate = round(wrong_ans * 100.0 / total_ans, 1) if total_ans > 0 else (78.0 if q.difficulty == 'hard' else 62.0)
@@ -4069,14 +4107,24 @@ def panel_reels_hardest_questions_api(request):
                 'total_count': total_ans,
                 'suggested_hook': f"{subj_name}dan sinov savoli: Buni yecha olasizmi?",
                 'suggested_tagline': f"{subj_name} testi",
+                'is_converted': is_converted,
+                'converted_reel_id': converted_reel_id,
             })
 
             if len(questions_data) >= 24:
                 break
 
+    pending_count = sum(1 for q in questions_data if not q.get('is_converted'))
+    converted_count = sum(1 for q in questions_data if q.get('is_converted'))
+
     return Response({
         'questions': questions_data,
-        'count': len(questions_data)
+        'count': len(questions_data),
+        'stats': {
+            'total': len(questions_data),
+            'pending': pending_count,
+            'converted': converted_count,
+        }
     })
 
 

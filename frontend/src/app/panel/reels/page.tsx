@@ -41,6 +41,7 @@ type PanelReelItem = {
   gradient: string;
   media_type?: 'text' | 'video';
   video_url?: string;
+  source_question_id?: number | null;
   quiz: ReelQuiz;
   is_published: boolean;
   likes: number;
@@ -84,6 +85,8 @@ type HardestQuestion = {
   total_count: number;
   suggested_hook: string;
   suggested_tagline: string;
+  is_converted?: boolean;
+  converted_reel_id?: number | null;
 };
 
 const THEMES = [
@@ -102,6 +105,7 @@ export default function PanelReelsPage() {
   const [hardestQuestions, setHardestQuestions] = useState<HardestQuestion[]>([]);
   const [showAllQuestions, setShowAllQuestions] = useState(false);
   const [questionSubjectFilter, setQuestionSubjectFilter] = useState('all');
+  const [recommendationFilter, setRecommendationFilter] = useState<'pending' | 'converted' | 'all'>('pending');
   const [stats, setStats] = useState({ total: 0, published: 0, drafts: 0 });
   const [loading, setLoading] = useState(true);
   const [questionsLoading, setQuestionsLoading] = useState(true);
@@ -148,6 +152,16 @@ export default function PanelReelsPage() {
       if (data && data.reels) {
         setReels(data.reels);
         if (data.stats) setStats(data.stats);
+        const qids = data.reels
+          .map((r) => r.source_question_id)
+          .filter((id): id is number => typeof id === 'number' && id > 0);
+        if (qids.length > 0) {
+          setConvertedQuestionIds((prev) => {
+            const next = new Set(prev);
+            qids.forEach((id) => next.add(id));
+            return next;
+          });
+        }
       }
     } catch {
       toast.error("Reels ro'yxatini yuklashda xatolik yuz berdi");
@@ -188,6 +202,16 @@ export default function PanelReelsPage() {
       const data = await apiFetch<{ questions: HardestQuestion[]; count: number }>('/api/panel/reels/hardest-questions/');
       if (data && data.questions) {
         setHardestQuestions(data.questions);
+        const converted = data.questions
+          .filter((q) => q.is_converted)
+          .map((q) => q.question_id);
+        if (converted.length > 0) {
+          setConvertedQuestionIds((prev) => {
+            const next = new Set(prev);
+            converted.forEach((id) => next.add(id));
+            return next;
+          });
+        }
       }
     } catch {
       // ignore
@@ -377,11 +401,13 @@ export default function PanelReelsPage() {
       // Savolni yuqoridagi tavsiyalar ro'yxatidan darhol o'chirish va pastga tushirish
       if (createdFromQid) {
         setConvertedQuestionIds((prev) => new Set(prev).add(createdFromQid));
-        setHardestQuestions((prev) => prev.filter((q) => q.question_id !== createdFromQid));
+        setHardestQuestions((prev) =>
+          prev.map((q) => (q.question_id === createdFromQid ? { ...q, is_converted: true } : q))
+        );
         setSelectedQuestionId(null);
       }
-      loadReels();
-      loadHardestQuestions();
+      await loadReels();
+      await loadHardestQuestions();
 
       // Reset form
       setHook('');
@@ -518,26 +544,49 @@ export default function PanelReelsPage() {
 
             {/* AI Generator Recommendation: Hardest questions */}
             {hardestQuestions.length > 0 && (() => {
-              // Avvaldan Reel yaratilgan yoki chop etilgan savollarni ro'yxatdan chiqarib tashlash
-              const availableQuestions = hardestQuestions.filter((q) => {
-                if (convertedQuestionIds.has(q.question_id)) return false;
-                const cleanSample = (q.clean_body || '').slice(0, 30).toLowerCase();
-                const alreadyHasReel = reels.some((r) => {
-                  const qPart = (r.quiz?.question || '').toLowerCase();
-                  const factPart = (r.fact || '').toLowerCase();
-                  return cleanSample.length > 10 && (qPart.includes(cleanSample) || factPart.includes(cleanSample));
+              // Avvaldan Reel yaratilgan yoki chop etilgan savollarni aniqlash
+              const isConverted = (q: HardestQuestion) => {
+                if (convertedQuestionIds.has(q.question_id)) return true;
+                if (q.is_converted) return true;
+                if (q.converted_reel_id) return true;
+                const cleanSample = (q.clean_body || '')
+                  .toLowerCase()
+                  .replace(/<[^>]+>/g, '')
+                  .replace(/[\'"`«»’‘“”\.,:;!?\(\)\-\—\–\s]/g, '')
+                  .slice(0, 25);
+                if (!cleanSample || cleanSample.length < 8) return false;
+                return reels.some((r) => {
+                  if (r.source_question_id && r.source_question_id === q.question_id) return true;
+                  const qPart = (r.quiz?.question || '')
+                    .toLowerCase()
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/[\'"`«»’‘“”\.,:;!?\(\)\-\—\–\s]/g, '');
+                  const factPart = (r.fact || '')
+                    .toLowerCase()
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/[\'"`«»’‘“”\.,:;!?\(\)\-\—\–\s]/g, '');
+                  return (qPart.includes(cleanSample) || factPart.includes(cleanSample) || cleanSample.includes(qPart.slice(0, 20)));
                 });
-                return !alreadyHasReel;
-              });
+              };
 
-              if (availableQuestions.length === 0) return null;
+              const pendingQuestions = hardestQuestions.filter((q) => !isConverted(q));
+              const convertedQuestions = hardestQuestions.filter((q) => isConverted(q));
 
-              const filtered = availableQuestions.filter((q) => {
+              let activeList: HardestQuestion[] = [];
+              if (recommendationFilter === 'pending') {
+                activeList = pendingQuestions;
+              } else if (recommendationFilter === 'converted') {
+                activeList = convertedQuestions;
+              } else {
+                activeList = hardestQuestions;
+              }
+
+              const filtered = activeList.filter((q) => {
                 if (questionSubjectFilter === 'all') return true;
                 return q.subject_name.toLowerCase() === questionSubjectFilter.toLowerCase();
               });
               const displayed = showAllQuestions ? filtered : filtered.slice(0, 6);
-              const uniqueSubjects = Array.from(new Set(availableQuestions.map((q) => q.subject_name))).filter(Boolean);
+              const uniqueSubjects = Array.from(new Set(activeList.map((q) => q.subject_name))).filter(Boolean);
 
               return (
                 <Card className="rounded-3xl border-rose-500/20 bg-rose-500/5 shadow-sm">
@@ -546,14 +595,19 @@ export default function PanelReelsPage() {
                       <div className="flex items-center gap-2">
                         <Flame className="w-5 h-5 text-rose-500 animate-pulse shrink-0" />
                         <div>
-                          <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
+                          <CardTitle className="text-base font-bold text-foreground flex items-center flex-wrap gap-2">
                             <span>Eng Ko&apos;p Xato Qilingan Savollar</span>
                             <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 text-xs font-bold">
-                              {availableQuestions.length} ta tavsiya
+                              {pendingQuestions.length} ta kutilmoqda
                             </Badge>
+                            {convertedQuestions.length > 0 && (
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-xs font-bold">
+                                ✓ {convertedQuestions.length} ta tayyorlandi
+                              </Badge>
+                            )}
                           </CardTitle>
                           <CardDescription className="text-xs mt-0.5">
-                            O&apos;quvchilar eng ko&apos;p yiqilgan testlardan bir bosishda qiziqarli Reel yarating:
+                            O&apos;quvchilar eng ko&apos;p yiqilgan testlardan bir bosishda qiziqarli Reel yarating. Reel qilingan savol pastdagi lentaga tushadi:
                           </CardDescription>
                         </div>
                       </div>
@@ -581,7 +635,67 @@ export default function PanelReelsPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-3.5">
+                    {/* Status Tabs: Kutilayotganlar / Chop etilganlar / Barchasi */}
+                    <div className="flex flex-wrap items-center gap-2 border-b border-border/40 pb-2.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecommendationFilter('pending');
+                          setShowAllQuestions(false);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs transition-all font-semibold flex items-center gap-1.5 ${
+                          recommendationFilter === 'pending'
+                            ? 'bg-rose-500 text-white shadow-xs'
+                            : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
+                        }`}
+                      >
+                        <Flame className="w-3.5 h-3.5" />
+                        <span>Kutilayotganlar</span>
+                        <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ${
+                          recommendationFilter === 'pending' ? 'bg-white/20 text-white' : 'bg-rose-500/10 text-rose-600'
+                        }`}>
+                          {pendingQuestions.length}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecommendationFilter('converted');
+                          setShowAllQuestions(false);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs transition-all font-semibold flex items-center gap-1.5 ${
+                          recommendationFilter === 'converted'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
+                        }`}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Chop etilganlar</span>
+                        <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ${
+                          recommendationFilter === 'converted' ? 'bg-white/20 text-white' : 'bg-emerald-500/10 text-emerald-600'
+                        }`}>
+                          {convertedQuestions.length}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecommendationFilter('all');
+                          setShowAllQuestions(false);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs transition-all font-semibold flex items-center gap-1.5 ${
+                          recommendationFilter === 'all'
+                            ? 'bg-foreground text-background shadow-xs'
+                            : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
+                        }`}
+                      >
+                        <span>Barchasi ({hardestQuestions.length})</span>
+                      </button>
+                    </div>
+
                     {/* Fanlar bo'yicha filterlar */}
                     {uniqueSubjects.length > 1 && (
                       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
@@ -590,14 +704,14 @@ export default function PanelReelsPage() {
                           onClick={() => setQuestionSubjectFilter('all')}
                           className={`px-3 py-1 rounded-xl text-xs transition-all font-medium ${
                             questionSubjectFilter === 'all'
-                              ? 'bg-rose-500 text-white shadow-xs font-bold'
+                              ? 'bg-rose-500/90 text-white shadow-xs font-bold'
                               : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
                           }`}
                         >
-                          Barchasi ({availableQuestions.length})
+                          Barcha fanlar ({activeList.length})
                         </button>
                         {uniqueSubjects.map((sName) => {
-                          const count = availableQuestions.filter(q => q.subject_name === sName).length;
+                          const count = activeList.filter(q => q.subject_name === sName).length;
                           return (
                             <button
                               key={sName}
@@ -605,7 +719,7 @@ export default function PanelReelsPage() {
                               onClick={() => setQuestionSubjectFilter(sName)}
                               className={`px-3 py-1 rounded-xl text-xs transition-all whitespace-nowrap font-medium ${
                                 questionSubjectFilter === sName
-                                  ? 'bg-rose-500 text-white shadow-xs font-bold'
+                                  ? 'bg-rose-500/90 text-white shadow-xs font-bold'
                                   : 'bg-card text-muted-foreground hover:text-foreground border border-border/70'
                               }`}
                             >
@@ -616,36 +730,93 @@ export default function PanelReelsPage() {
                       </div>
                     )}
 
+                    {/* Bo'sh holat: Agar kutilayotganlar tugagan bo'lsa */}
+                    {filtered.length === 0 && (
+                      <div className="text-center py-8 px-4 rounded-2xl bg-card border border-border/70 space-y-2">
+                        {recommendationFilter === 'pending' ? (
+                          <>
+                            <p className="text-sm font-bold text-foreground">🎉 Barcha tavsiya etilgan testlar bo&apos;yicha Reelslar muvaffaqiyatli yaratildi!</p>
+                            <p className="text-xs text-muted-foreground">Kutilayotgan boshqa test qolmadi. Tayyorlanganlarni &quot;Chop etilganlar&quot; bo&apos;limida ko&apos;rishingiz mumkin.</p>
+                            {convertedQuestions.length > 0 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setRecommendationFilter('converted')}
+                                className="mt-2 text-xs font-semibold text-emerald-600 border-emerald-500/30"
+                              >
+                                Chop etilganlarni ko&apos;rish ({convertedQuestions.length})
+                              </Button>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-xs text-muted-foreground py-4">Ushbu bo&apos;limda hozircha savollar mavjud emas.</p>
+                        )}
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                      {displayed.map((q) => (
-                        <div
-                          key={q.question_id}
-                          className="p-3.5 rounded-2xl bg-card border border-border/80 space-y-2.5 flex flex-col justify-between hover:border-rose-500/40 transition-colors shadow-xs"
-                        >
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between text-[10px]">
-                              <span className="font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md">
-                                {q.subject_name} · Xatolik: {q.fail_rate}%
-                              </span>
-                              <span className="text-muted-foreground font-mono">
-                                {q.wrong_count > 0 ? `${q.wrong_count} ta xato` : 'BBA testi'}
-                              </span>
-                            </div>
-                            <p className="text-xs font-semibold text-foreground line-clamp-2 leading-snug">
-                              {q.clean_body}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUseHardestQuestion(q)}
-                            className="w-full text-xs font-bold rounded-xl gap-1 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+                      {displayed.map((q) => {
+                        const converted = isConverted(q);
+                        return (
+                          <div
+                            key={q.question_id}
+                            className={`p-3.5 rounded-2xl bg-card border space-y-2.5 flex flex-col justify-between transition-colors shadow-xs ${
+                              converted
+                                ? 'border-emerald-500/40 bg-emerald-500/5'
+                                : 'border-border/80 hover:border-rose-500/40'
+                            }`}
                           >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>Reelga Aylantirish</span>
-                          </Button>
-                        </div>
-                      ))}
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className={`font-bold px-2 py-0.5 rounded-md ${
+                                  converted ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/15' : 'text-rose-600 dark:text-rose-400 bg-rose-500/10'
+                                }`}>
+                                  {q.subject_name} · Xatolik: {q.fail_rate}%
+                                </span>
+                                {converted ? (
+                                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3" /> Reel tayyor
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground font-mono">
+                                    {q.wrong_count > 0 ? `${q.wrong_count} ta xato` : 'BBA testi'}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs font-semibold text-foreground line-clamp-2 leading-snug">
+                                {q.clean_body}
+                              </p>
+                            </div>
+                            {converted ? (
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 text-center py-1.5 px-2 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>Chop etildi</span>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleUseHardestQuestion(q)}
+                                  className="text-xs h-8 px-2 text-muted-foreground hover:text-foreground"
+                                  title="Qayta yangi Reel yaratish"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleUseHardestQuestion(q)}
+                                className="w-full text-xs font-bold rounded-xl gap-1 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>Reelga Aylantirish</span>
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
