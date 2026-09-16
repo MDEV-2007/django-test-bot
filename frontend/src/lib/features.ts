@@ -29,7 +29,9 @@ type FeaturesStore = {
   getFeature: (key: string) => FeatureItem | undefined;
 };
 
-// Standart holat (tarmoq kechikishida yoki birinchi ochilishda)
+const FEATURES_CACHE_KEY = 'ilmildizi_features_cache_v2';
+
+// Standart zaxira holat
 const DEFAULT_FEATURES: Record<string, FeatureItem> = {
   reels: { key: 'reels', name: 'Bilim Reels', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Viral', target_route: '/reels', icon_name: 'Sparkles' },
   flashcards: { key: 'flashcards', name: 'Smart Flashcardlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: '2.0 Beta', target_route: '/flashcards', icon_name: 'Layers' },
@@ -43,9 +45,26 @@ const DEFAULT_FEATURES: Record<string, FeatureItem> = {
   tests: { key: 'tests', name: 'BBA & Testlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'BBA', target_route: '/tests', icon_name: 'FileCheck2' },
 };
 
+function getInitialFeatures(): { features: Record<string, FeatureItem>; loaded: boolean } {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(FEATURES_CACHE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          return { features: { ...DEFAULT_FEATURES, ...parsed }, loaded: true };
+        }
+      }
+    } catch {}
+  }
+  return { features: DEFAULT_FEATURES, loaded: false };
+}
+
+const initial = getInitialFeatures();
+
 export const useFeaturesStore = create<FeaturesStore>((set, get) => ({
-  features: DEFAULT_FEATURES,
-  loaded: false,
+  features: initial.features,
+  loaded: initial.loaded,
   loading: false,
 
   fetchFeatures: async () => {
@@ -54,12 +73,17 @@ export const useFeaturesStore = create<FeaturesStore>((set, get) => ({
     try {
       const data = await apiFetch<FeaturesResponse>('/api/panel/features/public/');
       if (data && data.features) {
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(FEATURES_CACHE_KEY, JSON.stringify(data.features));
+          } catch {}
+        }
         set({ features: data.features, loaded: true, loading: false });
       } else {
         set({ loaded: true, loading: false });
       }
     } catch {
-      // Tarmoq xatoligida mavjud standart qiymatlarda davom etadi
+      // Tarmoq xatoligida mavjud keshdagi qiymatlarda davom etadi
       set({ loaded: true, loading: false });
     }
   },
@@ -67,22 +91,38 @@ export const useFeaturesStore = create<FeaturesStore>((set, get) => ({
   isFeatureEnabled: (key: string) => {
     const { user } = useAuthStore.getState();
     const feat = get().features[key];
-    if (!feat) return true; // noma'lum kalit bo'lsa sukut bo'yicha ruxsat
+    if (!feat) return false;
 
-    // 1. Agar modul barcha o'quvchilar uchun yoqilgan bo'lsa
-    if (feat.is_enabled) return true;
+    // 1. Agar faqat admin uchun (Beta test) yoqilgan bo'lsa:
+    // Faqatgina superadmin kirgan bo'lsa ko'rinadi, oddiy foydalanuvchiga yopiq
+    if (feat.admin_only) {
+      return Boolean(user?.is_superadmin);
+    }
 
-    // 2. Agar "Faqat Admin (Beta test)" rejimida bo'lsa va foydalanuvchi super admin bo'lsa
-    if (feat.admin_only && user?.is_superadmin) return true;
-
-    // 3. Agar ikkala holat ham o'chiq bo'lsa (yoki foydalanuvchi oddiy o'quvchi bo'lsa), ko'rinmaydi
-    return false;
+    // 2. Agar admin_only bo'lmasa, qat'iy is_enabled holatiga bo'ysunadi.
+    // Agar admin modulni o'chirgan bo'lsa (is_enabled: false), u butunlay yopilgan
+    // hisoblanadi va barchadan (shu jumladan adminga ham student menyusida) yashirinadi.
+    return Boolean(feat.is_enabled);
   },
 
   getFeature: (key: string) => {
     return get().features[key];
   },
 }));
+
+// Brauzer tablari o'rtasida feature flags sinxronizatsiyasi
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === FEATURES_CACHE_KEY && e.newValue) {
+      try {
+        const parsed = JSON.parse(e.newValue);
+        if (parsed && typeof parsed === 'object') {
+          useFeaturesStore.setState({ features: { ...DEFAULT_FEATURES, ...parsed }, loaded: true });
+        }
+      } catch {}
+    }
+  });
+}
 
 /**
  * React komponentlari ichida ishlatish uchun qulay hook

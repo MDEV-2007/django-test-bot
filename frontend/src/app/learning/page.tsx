@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import LessonAudioPlayer from '@/components/learning/LessonAudioPlayer';
+import ComingSoonFeature from '@/components/ui/coming-soon-feature';
+import { useFeatureFlags } from '@/lib/features';
 import { cn } from '@/lib/utils';
 
 type TopicRef = { id: number; title: string; lessons: { id: number; title: string }[] };
@@ -40,6 +42,7 @@ export default function LearningPage() {
 }
 
 function LearningPageInner() {
+  const { isEnabled } = useFeatureFlags();
   const { access } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -53,6 +56,16 @@ function LearningPageInner() {
   const query = params.toString() ? `?${params.toString()}` : '';
 
   const { data, refresh } = useApiQuery<CenterData>(`/api/learning/${query}`);
+
+  if (!isEnabled('learning')) {
+    return (
+      <ComingSoonFeature
+        title="Darslar & Konspektlar"
+        badge="Tez kunda"
+        description="Mavzulashtirilgan video darslar, audio ma'ruzalar va yuklab olinuvchi konspektlar moduli tez kunda taqdim etiladi."
+      />
+    );
+  }
 
   useEffect(() => {
     if (!data) return;

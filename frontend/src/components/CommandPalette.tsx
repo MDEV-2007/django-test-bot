@@ -7,28 +7,30 @@ import {
   BarChart3, Trophy, User, Search, RotateCcw, Map, Sprout, ScrollText,
 } from 'lucide-react';
 import { soundFX } from '@/lib/soundFX';
+import { useFeatureFlags } from '@/lib/features';
 
-type Item = { href: string; label: string; hint: string; icon: typeof LayoutDashboard };
+type Item = { href: string; label: string; hint: string; icon: typeof LayoutDashboard; featureKey?: string };
 
 const ITEMS: Item[] = [
   { href: '/dashboard', label: 'Boshqaruv', hint: 'Bosh sahifa', icon: LayoutDashboard },
-  { href: '/tests', label: 'Test Markazi', hint: 'BBA & Milliy Sertifikat testlari', icon: FileCheck2 },
-  { href: '/tests/revision', label: 'Xatolar Ustida Ishlash', hint: 'Spaced repetition', icon: RotateCcw },
-  { href: '/learning', label: "O'quv Markazi", hint: 'Konspekt, audio, flashcard', icon: BookOpen },
-  { href: '/battles', label: '1v1 Duel Arena', hint: 'Jonli intellektual jang', icon: Swords },
-  { href: '/games/timeline', label: 'Xronologik Ketma-ketlik', hint: "O'yin", icon: ScrollText },
-  { href: '/games/map', label: 'Xarita Challenge', hint: "O'yin", icon: Map },
-  { href: '/games/character', label: 'Tarixiy Shaxsni Toping', hint: "O'yin", icon: Sprout },
-  { href: '/mentor', label: 'AI Mentor 24/7', hint: 'Savol-javob', icon: Bot },
-  { href: '/shop', label: "Do'kon & Sovg'a", hint: 'Artefaktlar', icon: ShoppingBag },
+  { href: '/tests', label: 'Test Markazi', hint: 'BBA & Milliy Sertifikat testlari', icon: FileCheck2, featureKey: 'tests' },
+  { href: '/tests/revision', label: 'Xatolar Ustida Ishlash', hint: 'Spaced repetition', icon: RotateCcw, featureKey: 'tests' },
+  { href: '/learning', label: "O'quv Markazi", hint: 'Konspekt, audio, flashcard', icon: BookOpen, featureKey: 'learning' },
+  { href: '/battles', label: '1v1 Duel Arena', hint: 'Jonli intellektual jang', icon: Swords, featureKey: 'battles' },
+  { href: '/games/timeline', label: 'Xronologik Ketma-ketlik', hint: "O'yin", icon: ScrollText, featureKey: 'games' },
+  { href: '/games/map', label: 'Xarita Challenge', hint: "O'yin", icon: Map, featureKey: 'games' },
+  { href: '/games/character', label: 'Tarixiy Shaxsni Toping', hint: "O'yin", icon: Sprout, featureKey: 'games' },
+  { href: '/mentor', label: 'AI Mentor 24/7', hint: 'Savol-javob', icon: Bot, featureKey: 'ai_mentor' },
+  { href: '/shop', label: "Do'kon & Sovg'a", hint: 'Artefaktlar', icon: ShoppingBag, featureKey: 'shop' },
   { href: '/premium', label: 'Premium PRO', hint: 'Tariflar', icon: Crown },
-  { href: '/analytics', label: 'Analitika', hint: "O'sish va natijalar", icon: BarChart3 },
-  { href: '/leaderboard', label: 'Liderlar Ligasi', hint: 'Respublika reytingi', icon: Trophy },
+  { href: '/analytics', label: 'Analitika', hint: "O'sish va natijalar", icon: BarChart3, featureKey: 'otm_predictor' },
+  { href: '/leaderboard', label: 'Liderlar Ligasi', hint: 'Respublika reytingi', icon: Trophy, featureKey: 'leaderboard' },
   { href: '/profile', label: 'Mening Profilim', hint: 'Sozlamalar, referral', icon: User },
 ];
 
 export default function CommandPalette() {
   const router = useRouter();
+  const { isEnabled } = useFeatureFlags();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
@@ -51,7 +53,9 @@ export default function CommandPalette() {
     if (open) { setQuery(''); setActive(0); setTimeout(() => inputRef.current?.focus(), 30); }
   }, [open]);
 
-  const filtered = ITEMS.filter((i) => (i.label + i.hint).toLowerCase().includes(query.toLowerCase()));
+  const filtered = ITEMS.filter(
+    (i) => (!i.featureKey || isEnabled(i.featureKey)) && (i.label + i.hint).toLowerCase().includes(query.toLowerCase()),
+  );
 
   function go(item: Item) {
     soundFX.click();

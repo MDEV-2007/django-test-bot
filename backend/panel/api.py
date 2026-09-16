@@ -3515,19 +3515,14 @@ def features_public_api(request):
         flag_is_enabled = bool(flag.get('is_enabled', True))
         flag_admin_only = bool(flag.get('admin_only', False))
 
-        if is_superadmin:
-            # Agar ikkala bayroq ham o'chirilgan bo'lsa (is_enabled=False va admin_only=False),
-            # modul to'liq o'chirilgan hisoblanadi va admin menyusida ham yashirinadi.
-            # Agar admin_only=True bo'lsa, super admin uchun Beta holatida ochiq bo'ladi.
-            is_active = flag_is_enabled or flag_admin_only
-            is_beta = flag_admin_only
+        if flag_admin_only:
+            # Beta test rejimi: faqat superadmin ko'radi, oddiy foydalanuvchiga yopiq
+            is_active = is_superadmin
+            is_beta = True
         else:
-            if flag_admin_only:
-                is_active = False
-                is_beta = True
-            else:
-                is_active = flag_is_enabled
-                is_beta = False
+            # Standart rejim: agar is_enabled=False bo'lsa, modul to'liq yashirilgan (hech kimga chiqmaydi)
+            is_active = flag_is_enabled
+            is_beta = False
 
         result[k] = {
             'key': k,

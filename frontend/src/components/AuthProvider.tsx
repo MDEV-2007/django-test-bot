@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useAuthStore, TG_MANUAL_LOGOUT_KEY } from '@/lib/auth-store';
 import { fetchMe, loginWithTelegram, refreshAccessToken } from '@/lib/api-client';
 import { isTelegramEnv, loadTelegramSdk } from '@/lib/telegram';
+import { useFeaturesStore } from '@/lib/features';
 
 /** Runs once on app load: pulls the refresh token back out of localStorage, exchanges it
  * for a fresh access token, then fetches /api/auth/me/ to repopulate the user in the store.
@@ -35,11 +36,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           }
         }
         setAuthReady();
+        useFeaturesStore.getState().fetchFeatures();
         return;
       }
       const access = await refreshAccessToken();
       if (!access) {
         setAuthReady();
+        useFeaturesStore.getState().fetchFeatures();
         return;
       }
       setAccess(access);
@@ -50,6 +53,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         logout();
       }
       setAuthReady();
+      useFeaturesStore.getState().fetchFeatures();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

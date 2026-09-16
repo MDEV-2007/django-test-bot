@@ -200,30 +200,28 @@ class FeatureFlag(models.Model):
 
     @classmethod
     def get_all_cached(cls):
-        from django.core.cache import cache
-        data = cache.get(cls.CACHE_KEY_ALL)
-        if data is None:
+        # Kesh muddati o'rniga to'g'ridan-to'g'ri bazadan olish (atigi 10 ta qator, <0.2ms)
+        # multi-worker Gunicorn/ASGI ishchilarida kesh eskirib qolishi va "bazida bor, bazida yo'q"
+        # bo'lib qolishining oldini oladi.
+        flags = list(cls.objects.all())
+        if not flags:
+            cls.seed_default_flags()
             flags = list(cls.objects.all())
-            if not flags:
-                cls.seed_default_flags()
-                flags = list(cls.objects.all())
-            data = {
-                f.key: {
-                    'key': f.key,
-                    'name': f.name,
-                    'description': f.description,
-                    'category': f.category,
-                    'is_enabled': f.is_enabled,
-                    'admin_only': f.admin_only,
-                    'badge_text': f.badge_text,
-                    'target_route': f.target_route,
-                    'icon_name': f.icon_name,
-                    'updated_at': f.updated_at.isoformat() if f.updated_at else None,
-                }
-                for f in flags
+        return {
+            f.key: {
+                'key': f.key,
+                'name': f.name,
+                'description': f.description,
+                'category': f.category,
+                'is_enabled': f.is_enabled,
+                'admin_only': f.admin_only,
+                'badge_text': f.badge_text,
+                'target_route': f.target_route,
+                'icon_name': f.icon_name,
+                'updated_at': f.updated_at.isoformat() if f.updated_at else None,
             }
-            cache.set(cls.CACHE_KEY_ALL, data, 3600)
-        return data
+            for f in flags
+        }
 
     @classmethod
     def seed_default_flags(cls):
