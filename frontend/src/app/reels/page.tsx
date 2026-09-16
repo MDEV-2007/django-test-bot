@@ -25,6 +25,54 @@ function cleanOptionText(text: string): string {
   return text.replace(/^[A-Za-z0-9][\)\.\:\-]\s*/, '').trim();
 }
 
+type FormattedQuestion = {
+  prompt: string;
+  romanItems: string[];
+  letterItems: string[];
+  isMatching: boolean;
+};
+
+function formatQuestionText(text: string): FormattedQuestion {
+  if (!text) return { prompt: '', romanItems: [], letterItems: [], isMatching: false };
+
+  let t = text;
+
+  // 1. Separate Roman numerals (I, II, III, IV, V...):
+  // Masalan: "toping. I.Jakeriya" yoki "JakeriyaII "Orlean""
+  t = t.replace(/([a-z0-9"”»\.\:\;])\s*(I{1,3}|IV|V|VI{1,3}|IX|X)[\.\:\)]/gi, '$1\n$2. ');
+  t = t.replace(/([a-z"”»])\s*(II|III|IV|V|VI|VII|VIII|IX|X)([A-Z"“«\s])/g, '$1\n$2. $3');
+  t = t.replace(/(I{1,3}|IV|V|VI{1,3}|IX|X)\.\s*([A-Z"“«])/g, '$1. $2');
+
+  // 2. Separate lowercase letter definitions (a, b, c, d, e, f, g...):
+  // Masalan: "AkvitaniyaaJanna" yoki "nomb1358" yoki "qo'zg'olonicAngliya"
+  t = t.replace(/([a-z0-9"”»\.\,\'\’])([a-h])([A-Z0-9"“«])/g, '$1\n$2) $3');
+  t = t.replace(/([a-h][\)\.])\s*([A-Z0-9"“«])/g, '$1 $2');
+
+  const lines = t.split('\n').map((l) => l.trim()).filter(Boolean);
+  const romanItems: string[] = [];
+  const letterItems: string[] = [];
+  const promptLines: string[] = [];
+
+  for (const line of lines) {
+    if (/^(I{1,3}|IV|V|VI{1,3}|IX|X)[\.\)]/i.test(line)) {
+      romanItems.push(line);
+    } else if (/^[a-h][\)\.]/i.test(line)) {
+      letterItems.push(line);
+    } else {
+      promptLines.push(line);
+    }
+  }
+
+  const isMatching = romanItems.length >= 2 && letterItems.length >= 2;
+
+  return {
+    prompt: promptLines.join(' ') || text,
+    romanItems,
+    letterItems,
+    isMatching,
+  };
+}
+
 type ReelQuiz = {
   question: string;
   options: string[];
@@ -390,8 +438,8 @@ export default function ReelsPage() {
     <>
       <AppShell />
       <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-3 overflow-hidden select-none font-sans min-h-0">
-        {/* Phone Frame Container */}
-        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[84vh] sm:max-w-[420px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-white/15 shadow-2xl bg-black flex flex-col my-auto">
+        {/* Phone Frame Container - Widened for Desktop */}
+        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[86vh] sm:max-w-[540px] md:max-w-[620px] lg:max-w-[660px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-white/15 shadow-2xl bg-black flex flex-col my-auto transition-all">
           {/* ── TOP FLOATING HEADER (Inside Phone Frame) ── */}
           <header className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-2.5 sm:px-3 pt-2 pb-2 bg-gradient-to-b from-black/95 via-black/70 to-transparent backdrop-blur-[4px] sm:rounded-t-3xl border-b border-white/5">
             {/* Minimal Subject Pills Slider */}
@@ -468,13 +516,14 @@ export default function ReelsPage() {
                 // Mantiqiy, doim 100% dan oshmaydigan dinamik ko'rsatkich
                 const failRate = 48 + ((reel.id * 11) % 35);
                 const studentCount = 75 + ((reel.id * 23) % 110);
+                const formattedQ = formatQuestionText(reel.quiz.question || reel.hook);
 
                 return (
                   <div
                     key={reel.id}
                     ref={(el) => { reelRefs.current[index] = el; }}
                     data-index={index}
-                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between pt-12 pb-2 px-3 sm:px-4 overflow-hidden text-white select-none"
+                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between pt-12 pb-2 px-3 sm:px-5 overflow-hidden text-white select-none"
                     style={{
                       background: reel.gradient || 'linear-gradient(160deg, #090d16 0%, #171d2b 100%)',
                     }}
@@ -500,7 +549,7 @@ export default function ReelsPage() {
                     {/* ── 1. TOP HEADER ROW: Subject Badge & Counter ── */}
                     <div className="relative z-10 flex items-center justify-between gap-1.5 shrink-0 pt-0.5">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-black uppercase tracking-wider shrink-0">
+                        <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0">
                           <PremiumIcon icon={SubjectIcon} tone={subjectTone} size="xs" glow />
                           <span>{reel.subject_name}</span>
                         </div>
@@ -510,13 +559,13 @@ export default function ReelsPage() {
                         </div>
                       </div>
 
-                      <div className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/50 backdrop-blur-md text-white/80 border border-white/15 shrink-0">
+                      <div className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold bg-black/50 backdrop-blur-md text-white/80 border border-white/15 shrink-0">
                         {index + 1} / {reels.length}
                       </div>
                     </div>
 
                     {/* ── 2. VERTICAL ACTION BAR (Right Edge - Reels/TikTok Style) ── */}
-                    <div className="absolute right-2 sm:right-2.5 bottom-8 sm:bottom-10 z-30 flex flex-col items-center gap-2 sm:gap-2.5">
+                    <div className="absolute right-2 sm:right-3 bottom-8 sm:bottom-10 z-30 flex flex-col items-center gap-2 sm:gap-2.5">
                       {/* Like Button */}
                       <button
                         onClick={(e) => handleLike(reel.id, e)}
@@ -531,7 +580,7 @@ export default function ReelsPage() {
                         )}>
                           <Heart className={cn("size-4.5 sm:size-5", isLiked ? "fill-rose-500 text-rose-500" : "text-white")} />
                         </div>
-                        <span className="text-[10px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
+                        <span className="text-[10px] sm:text-[11px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
                           {likes}
                         </span>
                       </button>
@@ -545,7 +594,7 @@ export default function ReelsPage() {
                         <div className="size-9 sm:size-10 rounded-full bg-black/55 border border-white/20 flex items-center justify-center text-white/90 group-hover:bg-white/20 backdrop-blur-xl transition-all active:scale-75 shadow-lg">
                           <MessageCircle className="size-4.5 sm:size-5 text-white" />
                         </div>
-                        <span className="text-[10px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
+                        <span className="text-[10px] sm:text-[11px] font-extrabold tracking-tight text-white/90 drop-shadow-sm">
                           {commentCounts[reel.id] ?? reel.comments_count ?? 0}
                         </span>
                       </button>
@@ -559,7 +608,7 @@ export default function ReelsPage() {
                         <div className="size-9 sm:size-10 rounded-full bg-black/55 border border-white/20 flex items-center justify-center text-sky-300 group-hover:bg-sky-500/20 backdrop-blur-xl transition-all active:scale-75 shadow-lg">
                           <Send className="size-4 -translate-x-0.5" />
                         </div>
-                        <span className="text-[9px] font-bold text-white/80">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-white/80">
                           Ulashish
                         </span>
                       </button>
@@ -577,7 +626,7 @@ export default function ReelsPage() {
                     {/* ── 3. MAIN HERO CONTENT: Question Glass Card + Vertical Options ── */}
                     <div className="relative z-10 my-auto py-1 w-full pr-12 sm:pr-14 space-y-2 sm:space-y-2.5">
                       {/* Frosted Glass Question Card */}
-                      <div className="p-3 sm:p-3.5 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-xl space-y-1.5">
+                      <div className="p-3 sm:p-4 rounded-2xl bg-black/45 backdrop-blur-xl border border-white/15 shadow-xl space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-extrabold tracking-wider text-amber-300 uppercase flex items-center gap-1">
                             <Sparkles className="size-3 text-amber-400" />
@@ -587,9 +636,40 @@ export default function ReelsPage() {
                             {studentCount} o&apos;quvchi adashgan
                           </span>
                         </div>
-                        <h2 className="text-xs sm:text-sm font-bold leading-snug tracking-tight text-white drop-shadow-sm">
-                          {reel.quiz.question || reel.hook}
-                        </h2>
+
+                        {formattedQ.isMatching ? (
+                          <div className="space-y-2">
+                            <h2 className="text-xs sm:text-sm font-bold leading-snug text-white drop-shadow-sm">
+                              {formattedQ.prompt}
+                            </h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] sm:text-xs pt-1.5 border-t border-white/10 max-h-[30vh] sm:max-h-[36vh] overflow-y-auto no-scrollbar pr-1">
+                              <div className="space-y-1 bg-white/[0.04] p-2 sm:p-2.5 rounded-xl border border-white/10">
+                                <span className="text-[10px] font-extrabold text-amber-300 uppercase tracking-wider block mb-1">
+                                  📌 Atamalar:
+                                </span>
+                                {formattedQ.romanItems.map((item, idx) => (
+                                  <div key={idx} className="leading-snug text-white/90 font-medium">
+                                    {item}
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="space-y-1 bg-white/[0.04] p-2 sm:p-2.5 rounded-xl border border-white/10">
+                                <span className="text-[10px] font-extrabold text-sky-300 uppercase tracking-wider block mb-1">
+                                  📝 Izohlar:
+                                </span>
+                                {formattedQ.letterItems.map((item, idx) => (
+                                  <div key={idx} className="leading-snug text-white/80">
+                                    {item}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <h2 className="text-xs sm:text-sm md:text-base font-bold leading-snug tracking-tight text-white drop-shadow-sm max-h-[28vh] sm:max-h-[34vh] overflow-y-auto no-scrollbar">
+                            {formattedQ.prompt}
+                          </h2>
+                        )}
                       </div>
 
                       {/* ── 4. VERTICAL 1-COLUMN OPTIONS STACK (A, B, C, D) ── */}
@@ -623,7 +703,7 @@ export default function ReelsPage() {
                               disabled={hasAnswered}
                               onClick={() => handleAnswerQuiz(reel.id, optIdx)}
                               className={cn(
-                                "w-full min-h-[42px] sm:min-h-[44px] py-2 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl text-left border flex items-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer",
+                                "w-full min-h-[42px] sm:min-h-[46px] py-2 px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl text-left border flex items-center gap-2.5 sm:gap-3 transition-all active:scale-[0.98] cursor-pointer",
                                 btnClass
                               )}
                             >
@@ -698,21 +778,24 @@ export default function ReelsPage() {
           </div>
         ))}
 
-        {/* Desktop Up/Down Navigation Controls */}
-        <div className="hidden lg:flex flex-col gap-2 absolute right-8 top-1/2 -translate-y-1/2 z-30">
+        {/* Desktop Navigation Floating Dock beside the card */}
+        <div className="hidden lg:flex flex-col items-center gap-2 fixed right-4 xl:right-10 top-1/2 -translate-y-1/2 z-30 bg-zinc-950/80 backdrop-blur-xl border border-white/15 p-2 rounded-2xl shadow-2xl">
           <button
             onClick={() => scrollToReel(currentIndex - 1)}
             disabled={currentIndex === 0}
-            className="size-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center disabled:opacity-20 shadow-lg transition-all active:scale-95 backdrop-blur-md cursor-pointer"
-            title="Oldingi (Up)"
+            className="size-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center disabled:opacity-20 shadow-md transition-all active:scale-95 cursor-pointer"
+            title="Oldingi savol (Klaviatura ↑)"
           >
             <ChevronUp className="size-5" />
           </button>
+          <div className="text-[11px] font-mono font-bold text-white/60 py-0.5">
+            {currentIndex + 1} / {reels.length}
+          </div>
           <button
             onClick={() => scrollToReel(currentIndex + 1)}
             disabled={currentIndex >= reels.length - 1}
-            className="size-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center disabled:opacity-20 shadow-lg transition-all active:scale-95 backdrop-blur-md cursor-pointer"
-            title="Keyingi (Down)"
+            className="size-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center disabled:opacity-20 shadow-md transition-all active:scale-95 cursor-pointer"
+            title="Keyingi savol (Klaviatura ↓)"
           >
             <ChevronDown className="size-5" />
           </button>

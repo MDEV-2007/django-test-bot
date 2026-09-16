@@ -3987,7 +3987,11 @@ def panel_reels_hardest_questions_api(request):
                 continue
 
             raw_body = q.body or ""
-            clean_text = re.sub(r'<[^>]+>', '', raw_body).strip()
+            # Block teglar (p, div, tr, br, li) dan keyin yangi qator qo'yish orqali matnlar yopishib qolishining oldini olish:
+            clean_text = re.sub(r'</?(?:p|div|tr|br|li|h[1-6])[^>]*>', '\n', raw_body)
+            clean_text = re.sub(r'<[^>]+>', ' ', clean_text)
+            clean_text = re.sub(r'[ \t]+', ' ', clean_text)
+            clean_text = re.sub(r'\n\s*\n', '\n', clean_text).strip()
             lower_body = clean_text.lower()
             unwanted_words = ['yozing', 'topshiriq', "lo'nda", 'lo‘nda', 'moslashtiring', 'matnni']
             if not clean_text or len(clean_text) < 10 or any(w in lower_body for w in unwanted_words):
