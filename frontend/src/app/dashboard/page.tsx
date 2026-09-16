@@ -173,17 +173,18 @@ export default function DashboardPage() {
         </div>
 
         {/* ============================================================ */}
-        {/* 🎮 GAME HUD — O'YINCHI STATUSI (Picture 1 Wireframe)          */}
+        {/* 🎮 GAME HUD — O'YINCHI STATUSI (Executive Game HUD)           */}
         {/* ============================================================ */}
-        <div className="relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-card to-primary/5 p-4 sm:p-6 shadow-sm">
-          <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-primary/10 blur-3xl" />
-          <div className="pointer-events-none absolute -left-16 -bottom-16 size-64 rounded-full bg-rose-500/5 blur-3xl" />
+        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card/95 p-5 sm:p-6 shadow-md backdrop-blur-md">
+          <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -left-20 -bottom-20 size-72 rounded-full bg-emerald-500/5 blur-3xl" />
 
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          {/* Yuqori qator: Profil va Unvon (Chapda) + Yagona Game HUD Dok (O'ngda) */}
+          <div className="relative flex flex-col gap-4 sm:gap-5 md:flex-row md:items-center md:justify-between">
             {/* O'yinchi Profili & Unvon yo'li */}
             <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
               <div className="relative shrink-0">
-                <Avatar className="size-16 sm:size-20 border-2 border-primary/40 shadow-md ring-4 ring-primary/10">
+                <Avatar className="size-16 sm:size-18 border-2 border-primary/40 shadow-lg ring-4 ring-primary/10">
                   <AvatarImage src={p.avatar_url || undefined} alt={fullName} />
                   <AvatarFallback className="text-base font-black bg-primary/20 text-primary">
                     {firstName.slice(0, 2).toUpperCase()}
@@ -196,13 +197,13 @@ export default function DashboardPage() {
 
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-emerald-500 text-lg sm:text-xl">🌱</span>
-                  <h2 className="text-lg sm:text-2xl font-black text-foreground truncate uppercase tracking-tight">
+                  <span className="text-emerald-500 text-lg">🌱</span>
+                  <h2 className="text-lg sm:text-xl font-black text-foreground truncate uppercase tracking-tight">
                     {fullName}
                   </h2>
                   <Badge
                     variant="outline"
-                    className="border-primary/30 bg-primary/10 text-primary text-[11px] sm:text-xs font-extrabold px-2.5 py-0.5 rounded-xl gap-1"
+                    className="border-primary/30 bg-primary/10 text-primary text-[11px] font-extrabold px-2.5 py-0.5 rounded-xl gap-1"
                   >
                     <span>{rankInfo.icon}</span>
                     <span className="uppercase tracking-wider">{rankInfo.title}</span>
@@ -230,42 +231,22 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* O'rta: Level 7 → Level 8 Progress Bar */}
-            <div className="flex-1 max-w-md space-y-2 rounded-2xl bg-background/60 border border-border/70 p-3.5 backdrop-blur-xs">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-black text-foreground flex items-center gap-1.5">
-                  <Trophy className="size-4 text-emerald-500" />
-                  <span>Level {p.level} → Level {p.level + 1}</span>
-                </span>
-                <span className="font-mono font-bold text-muted-foreground">
-                  <span className="text-primary font-black">{p.xp.toLocaleString('uz-UZ')}</span> / {p.next_level_xp.toLocaleString('uz-UZ')} XP
-                </span>
-              </div>
-
-              <div className="relative h-3 w-full overflow-hidden rounded-full bg-muted/60 p-0.5">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 transition-all duration-700 shadow-sm"
-                  style={{ width: `${Math.min(100, Math.max(0, data.xp_progress))}%` }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span className="font-bold text-foreground">{data.xp_progress}% bajarildi</span>
-                <span>Keyingi bosqichga <strong className="text-foreground">{xpLeft.toLocaleString('uz-UZ')} XP</strong></span>
-              </div>
-            </div>
-
-            {/* O'ng: Resurslar (HUD Counters: Streak, Coins, Arena) */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* O'ng tomon: Yagona Game HUD Resurslar Dok (Streak, Tangalar, Arena) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 self-start md:self-auto rounded-2xl bg-background/80 border border-border/80 p-1.5 shadow-xs backdrop-blur-sm">
               {/* Streak */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href="/profile" className="flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 hover:border-amber-500/50 transition-all">
-                    <Flame className="size-5 sm:size-6 text-amber-500 animate-pulse" />
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-amber-500/10 transition-colors group"
+                  >
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500 group-hover:scale-110 transition-transform">
+                      <Flame className="size-4 animate-pulse" />
+                    </div>
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-amber-600/80 dark:text-amber-400/80">Streak</p>
-                      <p className="font-mono text-sm sm:text-base font-black text-amber-600 dark:text-amber-400 leading-tight">
-                        {p.streak} <span className="text-[10px] font-bold">kun</span>
+                      <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Streak</p>
+                      <p className="font-mono text-xs sm:text-sm font-black text-foreground">
+                        {p.streak} <span className="text-[10px] font-medium text-muted-foreground">kun</span>
                       </p>
                     </div>
                   </Link>
@@ -277,14 +258,21 @@ export default function DashboardPage() {
                 </TooltipContent>
               </Tooltip>
 
+              <div className="h-6 w-px bg-border/60" />
+
               {/* Tangalar */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href="/shop" className="flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-yellow-500/10 border border-yellow-500/25 hover:border-yellow-500/50 transition-all">
-                    <Coins className="size-5 sm:size-6 text-yellow-500" />
+                  <Link
+                    href="/shop"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-yellow-500/10 transition-colors group"
+                  >
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-yellow-500/15 text-yellow-500 group-hover:scale-110 transition-transform">
+                      <Coins className="size-4" />
+                    </div>
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-yellow-600/80 dark:text-yellow-400/80">Tangalar</p>
-                      <p className="font-mono text-sm sm:text-base font-black text-yellow-600 dark:text-yellow-400 leading-tight">
+                      <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Tangalar</p>
+                      <p className="font-mono text-xs sm:text-sm font-black text-foreground">
                         {p.coins.toLocaleString('uz-UZ')}
                       </p>
                     </div>
@@ -295,14 +283,21 @@ export default function DashboardPage() {
                 </TooltipContent>
               </Tooltip>
 
+              <div className="h-6 w-px bg-border/60" />
+
               {/* Arena ELO */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href="/battles" className="flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 hover:border-rose-500/50 transition-all">
-                    <Swords className="size-5 sm:size-6 text-rose-500" />
+                  <Link
+                    href="/battles"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-rose-500/10 transition-colors group"
+                  >
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-rose-500/15 text-rose-500 group-hover:scale-110 transition-transform">
+                      <Swords className="size-4" />
+                    </div>
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-rose-600/80 dark:text-rose-400/80">Arena</p>
-                      <p className="font-mono text-sm sm:text-base font-black text-rose-600 dark:text-rose-400 leading-tight">
+                      <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Arena</p>
+                      <p className="font-mono text-xs sm:text-sm font-black text-foreground">
                         {p.elo_rating}
                       </p>
                     </div>
@@ -314,38 +309,77 @@ export default function DashboardPage() {
               </Tooltip>
             </div>
           </div>
+
+          {/* Pastki qator: To'liq kenglikdagi Level Progress Bari */}
+          <div className="mt-5 pt-4 border-t border-border/60 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 font-bold text-foreground">
+                <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                  <Trophy className="size-3.5" />
+                  <span>Level {p.level}</span>
+                </span>
+                <ChevronRight className="size-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Level {p.level + 1}</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <span className="text-muted-foreground">
+                  <strong className="text-foreground font-bold">{p.xp.toLocaleString('uz-UZ')}</strong> / {p.next_level_xp.toLocaleString('uz-UZ')} XP
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-bold text-[11px]">
+                  {data.xp_progress}%
+                </span>
+              </div>
+            </div>
+
+            {/* Smooth glowing progress track */}
+            <div className="relative h-2.5 sm:h-3 w-full overflow-hidden rounded-full bg-muted/60 p-0.5">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-primary transition-all duration-700 shadow-xs"
+                style={{ width: `${Math.min(100, Math.max(0, data.xp_progress))}%` }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+              <span>Keyingi bosqichga: <strong className="text-foreground font-semibold">{xpLeft.toLocaleString('uz-UZ')} XP</strong></span>
+              <span className="hidden sm:inline italic">Har bir to&apos;g&apos;ri mashq +15~30 XP beradi</span>
+            </div>
+          </div>
         </div>
 
         {/* Nishonlash lahzasi */}
         <Celebration level={p.level} streak={p.streak} completedAttempts={data.recent_attempts.length} />
 
         {/* ============================================================ */}
-        {/* 🚀 BUGUNGI MISSIYA & 🌳 BILIM DARAJANG (Picture 2 Wireframe)   */}
+        {/* 🚀 BUGUNGI MISSIYA & 🌳 BILIM DARAJANG                        */}
         {/* ============================================================ */}
         <div className="grid gap-5 md:grid-cols-12">
-          {/* 1. HERO CARD: BUGUNGI MISSIYA (Picture 2) */}
-          <Card className="relative overflow-hidden md:col-span-7 rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 p-6 sm:p-7 shadow-md flex flex-col justify-between">
+          {/* 1. HERO CARD: BUGUNGI MISSIYA */}
+          <Card className="relative overflow-hidden md:col-span-7 rounded-3xl border border-primary/25 bg-gradient-to-br from-card via-card to-primary/5 p-6 sm:p-7 shadow-md flex flex-col justify-between">
             <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/10 blur-3xl" />
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="space-y-4 sm:space-y-5">
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/40 bg-primary/15 text-primary text-xs font-black uppercase tracking-wider px-3 py-1 rounded-xl gap-1.5">
+                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-xl gap-1.5">
                     <Dna className="size-3.5" />
                     <span>{activeSubject}</span>
                   </Badge>
-                  <span className="text-[11px] font-mono font-bold text-amber-500 flex items-center gap-1">
+                  <span className="text-xs font-mono font-bold text-amber-500 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-lg">
                     <Zap className="size-3" /> +120 XP Kvest
                   </span>
                 </div>
 
-                <Badge variant="secondary" className="text-xs font-bold font-mono">
-                  BUGUNGI MISSIYA
-                </Badge>
+                <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-muted/60 px-3 py-1 rounded-xl">
+                  <Target className="size-3.5 text-primary" />
+                  <span>KUNLIK MISSIYA</span>
+                </div>
               </div>
 
+              {/* Title & Subtitle */}
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight leading-tight">
+                <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight leading-snug">
                   {suggestedMissionTitle}
                 </h3>
                 <p className="mt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed">
@@ -353,89 +387,113 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              {/* 3 ta bosqich (Picture 2: ① 5 min Reels, ② 10 ta savol, ③ Boss Challenge) */}
-              <div className="space-y-2.5 pt-2">
+              {/* 3 ta bosqich (Clean, structured quest rows) */}
+              <div className="space-y-2.5">
+                {/* Step 1: Reels */}
                 <Link
                   href="/reels"
-                  className="flex items-center justify-between p-3 rounded-2xl border border-rose-500/20 bg-rose-500/[0.04] hover:bg-rose-500/10 transition-colors group"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-rose-500/40 hover:shadow-xs transition-all group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="flex size-7 items-center justify-center rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 font-black text-xs font-mono">
-                      ①
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-foreground group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
-                        5 min Reels
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-500 border border-rose-500/25 group-hover:scale-105 transition-transform">
+                      <Sparkles className="size-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-foreground group-hover:text-rose-500 transition-colors">
+                          ① 5 min Reels
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded">
+                          +30 XP
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        Mavzu bo&apos;yicha mikrokvest va video
                       </p>
-                      <p className="text-[11px] text-muted-foreground">Mavzu bo&apos;yicha mikrokvest va video</p>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-rose-500 flex items-center gap-1">
-                    Ko&apos;rish <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+                  <span className="shrink-0 text-xs font-bold text-rose-500 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500/10 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                    Ko&apos;rish <ArrowRight className="size-3" />
                   </span>
                 </Link>
 
+                {/* Step 2: Mashq */}
                 <Link
                   href="/tests"
-                  className="flex items-center justify-between p-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] hover:bg-emerald-500/10 transition-colors group"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-emerald-500/40 hover:shadow-xs transition-all group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="flex size-7 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-xs font-mono">
-                      ②
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                        10 ta amaliy mashq
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/25 group-hover:scale-105 transition-transform">
+                      <FileCheck2 className="size-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-foreground group-hover:text-emerald-500 transition-colors">
+                          ② 10 ta amaliy mashq
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                          +50 XP
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        Bilimni mustahkamlash savollari
                       </p>
-                      <p className="text-[11px] text-muted-foreground">Bilimni mustahkamlash savollari</p>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    Ishlash <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+                  <span className="shrink-0 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                    Ishlash <ArrowRight className="size-3" />
                   </span>
                 </Link>
 
+                {/* Step 3: Arena */}
                 <Link
                   href="/battles"
-                  className="flex items-center justify-between p-3 rounded-2xl border border-purple-500/20 bg-purple-500/[0.04] hover:bg-purple-500/10 transition-colors group"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-purple-500/40 hover:shadow-xs transition-all group"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="flex size-7 items-center justify-center rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 font-black text-xs font-mono">
-                      ③
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                        Boss Challenge (Arena Jangi)
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/15 text-purple-500 border border-purple-500/25 group-hover:scale-105 transition-transform">
+                      <Swords className="size-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-foreground group-hover:text-purple-500 transition-colors">
+                          ③ Boss Challenge (Arena)
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-purple-500 bg-purple-500/10 px-1.5 py-0.5 rounded">
+                          +40 XP
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        Raqib bilan 1v1 duelda g&apos;alaba qozonish
                       </p>
-                      <p className="text-[11px] text-muted-foreground">Raqib bilan 1v1 duelda g&apos;alaba qozonish</p>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
-                    Jang <ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
+                  <span className="shrink-0 text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-500/10 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                    Jang <ArrowRight className="size-3" />
                   </span>
                 </Link>
               </div>
             </div>
 
-            {/* Asosiy Missiya Tugmasi */}
-            <div className="pt-6 mt-4 border-t border-border/60 flex flex-col sm:flex-row items-center gap-3">
-              <Button asChild size="lg" className="w-full sm:flex-1 h-12 rounded-2xl font-black text-sm tracking-wide gap-2 bg-gradient-to-r from-emerald-600 via-primary to-cyan-600 shadow-md hover:opacity-95">
+            {/* Asosiy Missiya Tugmalari */}
+            <div className="pt-5 mt-4 border-t border-border/60 flex flex-col sm:flex-row items-center gap-3">
+              <Button asChild size="lg" className="w-full sm:flex-1 h-11 sm:h-12 rounded-2xl font-black text-sm tracking-wide gap-2 bg-gradient-to-r from-emerald-600 via-primary to-teal-600 shadow-md hover:opacity-95 text-white">
                 <Link href="/tests">
-                  <Zap className="size-5" />
-                  <span>🚀 MISSIYANI BOSHLASH</span>
+                  <Zap className="size-4" />
+                  <span>Missiyani Boshlash (+120 XP)</span>
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto h-12 rounded-2xl font-bold text-xs border-border/80">
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto h-11 sm:h-12 rounded-2xl font-bold text-xs border-border/80 hover:bg-muted/50">
                 <Link href="/learning">Konspektni o&apos;qish</Link>
               </Button>
             </div>
           </Card>
 
-          {/* 2. 🌳 BILIM DARAJANG (Subject Mastery Bars - Picture 2) */}
+          {/* 2. 🌳 BILIM DARAJANG (Subject Mastery) */}
           <Card className="md:col-span-5 rounded-3xl border border-border/80 bg-card p-6 flex flex-col justify-between shadow-xs">
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-border/50">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between pb-3.5 border-b border-border/60">
+                <div className="flex items-center gap-2.5">
                   <span className="text-2xl">🌳</span>
                   <div>
                     <h3 className="text-base font-black text-foreground">
@@ -451,22 +509,25 @@ export default function DashboardPage() {
                 </Badge>
               </div>
 
-              {/* Fanlar bo'yicha progress barlar (Picture 2: Matematika 72%, Biologiya 51%, Tarix 83%) */}
-              <div className="space-y-4 pt-4">
+              {/* Fanlar bo'yicha progress barlar */}
+              <div className="space-y-3 pt-4">
                 {[
-                  { name: 'Matematika', mastery: 72, color: 'from-blue-500 to-cyan-400' },
-                  { name: 'Biologiya', mastery: 51, color: 'from-emerald-500 to-teal-400' },
-                  { name: 'Tarix', mastery: 83, color: 'from-amber-500 to-orange-400' },
-                  { name: 'Ona tili', mastery: 78, color: 'from-purple-500 to-indigo-400' },
+                  { name: 'Matematika', icon: '📐', mastery: 72, color: 'from-blue-500 to-cyan-400' },
+                  { name: 'Biologiya', icon: '🧬', mastery: 51, color: 'from-emerald-500 to-teal-400' },
+                  { name: 'Tarix', icon: '📜', mastery: 83, color: 'from-amber-500 to-orange-400' },
+                  { name: 'Ona tili', icon: '📖', mastery: 78, color: 'from-purple-500 to-indigo-400' },
                 ].map((item) => (
-                  <div key={item.name} className="space-y-1.5">
+                  <div key={item.name} className="p-2.5 rounded-2xl bg-background/60 border border-border/60 space-y-1.5 hover:border-border transition-colors">
                     <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-foreground">{item.name}</span>
-                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-black">
+                      <span className="text-foreground flex items-center gap-1.5">
+                        <span>{item.icon}</span>
+                        <span>{item.name}</span>
+                      </span>
+                      <span className="font-mono text-xs font-black text-foreground">
                         {item.mastery}%
                       </span>
                     </div>
-                    <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted/70 p-0.5">
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted/60">
                       <div
                         className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-700", item.color)}
                         style={{ width: `${item.mastery}%` }}
@@ -475,11 +536,24 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
+
+              {/* Zaif fanni mustahkamlash mini tavsiya (Card bo'sh joyini to'ldiradi) */}
+              <div className="mt-3.5 p-3 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Sparkles className="size-4 text-primary shrink-0" />
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    Zaif fan: <strong className="text-foreground font-semibold">Biologiya (51%)</strong>
+                  </p>
+                </div>
+                <Button asChild variant="ghost" size="sm" className="h-7 text-[11px] font-bold text-primary hover:text-primary px-2">
+                  <Link href="/tests">Mashq qilish ➔</Link>
+                </Button>
+              </div>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-border/50 flex items-center justify-between text-xs">
+            <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between text-xs">
               <span className="text-[11px] text-muted-foreground">Har bir to&apos;g&apos;ri mashq foizni oshiradi</span>
-              <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-primary hover:text-primary gap-1">
+              <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-primary hover:text-primary gap-1 h-7 px-2">
                 <Link href="/analytics">
                   Batafsil <ChevronRight className="size-3.5" />
                 </Link>
