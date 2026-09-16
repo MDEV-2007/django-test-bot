@@ -9,7 +9,8 @@ import json
 from django.db.models import Prefetch, Count
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -890,6 +891,7 @@ def community_feed_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def community_post_create_api(request):
     """Test natijasi yoki sertifikatni hamjamiyat lentasiga chiqarish."""
     from tests_app.models import Attempt
