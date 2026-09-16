@@ -382,94 +382,99 @@ export default function CommunityFeedPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 sm:space-y-8 bg-[var(--bg-page)] p-4 pb-24 sm:p-6">
-        {/* Page Hero */}
-        <PageHero
-          tone="emerald"
-          eyebrow="Abituriyentlar Hamjamiyati"
-          eyebrowIcon={Globe}
-          title="Hamjamiyat Lentasi"
-          description="O'quvchilarning erkin postlari, test natijalari, sertifikatlari va yutuqlari. Fikr almashing, bir-biringizni ilhomlantiring!"
-          actions={
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                size="sm"
-                className="rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
+      <main className="page-shell flex-1 bg-[var(--bg-page)] p-3.5 sm:p-6 pb-24">
+        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-5">
+          {/* 1. Header & Tab Switcher Bar */}
+          <div className="flex items-center justify-between gap-2 pt-1">
+            {/* Segment switch: Hamjamiyat vs Liderlar */}
+            <div className="flex items-center p-1 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] shadow-xs">
+              <div className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs">
+                <Globe className="size-3.5 sm:size-4" />
+                <span>Hamjamiyat</span>
+              </div>
+              <Link
+                href="/leaderboard"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-amber-400 transition-colors"
               >
-                <Plus className="size-4" /> Yangi Post Yaratish
-              </Button>
+                <Trophy className="size-3.5 sm:size-4 text-amber-500" />
+                <span>Liderlar Ligasi</span>
+              </Link>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
               <Button
                 asChild
                 variant="outline"
                 size="sm"
-                className="rounded-xl font-bold border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                className="hidden sm:inline-flex rounded-xl font-bold border-[var(--border-card)] text-xs h-9"
               >
                 <Link href="/tests/history">
-                  <Award className="size-4 mr-1.5" /> Test Natijalarim
+                  <Award className="size-3.5 mr-1 text-amber-400" /> Natijalarim
                 </Link>
               </Button>
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                size="sm"
+                className="rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 text-xs sm:text-sm h-9 px-3 sm:px-4 flex items-center gap-1.5"
+              >
+                <Plus className="size-4" />
+                <span>Yangi Post</span>
+              </Button>
             </div>
-          }
-        />
-
-        {/* Hub Mode Switcher: Hamjamiyat Lentasi & Liderlar Jadvali */}
-        <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-3">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
-              <Globe className="size-4" />
-              <span>🌟 Yutuqlar Lentasi</span>
-            </div>
-            <Link
-              href="/leaderboard"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-muted-foreground hover:bg-[var(--surface-hover)] hover:text-amber-500 border border-transparent hover:border-amber-500/30"
-            >
-              <Trophy className="size-4 text-amber-500" />
-              <span>🏆 Liderlar Ligasi</span>
-            </Link>
           </div>
 
-          <Button
+          {/* 2. Quick Post Creator Card (Twitter / Threads style) */}
+          <div
             onClick={() => setIsCreateModalOpen(true)}
-            size="sm"
-            variant="outline"
-            className="sm:hidden rounded-xl border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/10 font-bold text-xs"
+            className="flex items-center gap-3 p-3 sm:p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] hover:border-emerald-500/40 transition-all cursor-pointer shadow-xs group"
           >
-            <Plus className="size-3.5 mr-1" /> Post
-          </Button>
-        </div>
+            <Avatar className="size-9 sm:size-10 border border-primary/20 shrink-0">
+              {user?.avatar_url && <AvatarImage src={user.avatar_url} alt={user.first_name || user.username} />}
+              <AvatarFallback className="font-bold bg-primary/10 text-primary text-xs">
+                {(user?.first_name || user?.username || 'U').charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 text-xs sm:text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors truncate">
+              Fikringiz, natijangiz yoki savolingizni ulashing...
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/15 px-2.5 sm:px-3 py-1.5 rounded-xl border border-emerald-500/20 shrink-0 transition-colors">
+              <Camera className="size-3.5" />
+              <span className="hidden sm:inline">Rasm</span>
+            </div>
+          </div>
 
-        {/* Filter Chips Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-          {[
-            { slug: 'all', label: 'Barchasi', icon: Sparkles },
-            { slug: 'certificate', label: '🏆 Sertifikatlar', icon: Award },
-            ...subjects.filter((s) => s.slug !== 'all').map((s) => ({
-              slug: s.slug,
-              label: s.name,
-              icon: BookOpen,
-            })),
-          ].map((tab) => {
-            const isSel = selectedFilter === tab.slug;
-            return (
-              <button
-                key={tab.slug}
-                onClick={() => setSelectedFilter(tab.slug)}
-                className={cn(
-                  "flex items-center gap-1.5 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 border",
-                  isSel
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
-                    : "bg-[var(--surface-card)] text-muted-foreground border-[var(--border-card)] hover:bg-[var(--surface-hover)]"
-                )}
-              >
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+          {/* 3. Filter Chips Bar */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+            {[
+              { slug: 'all', label: 'Barchasi', icon: Sparkles },
+              { slug: 'certificate', label: '🏆 Sertifikatlar', icon: Award },
+              ...subjects.filter((s) => s.slug !== 'all').map((s) => ({
+                slug: s.slug,
+                label: s.name,
+                icon: BookOpen,
+              })),
+            ].map((tab) => {
+              const isSel = selectedFilter === tab.slug;
+              return (
+                <button
+                  key={tab.slug}
+                  onClick={() => setSelectedFilter(tab.slug)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 border",
+                    isSel
+                      ? "bg-primary text-primary-foreground border-primary shadow-xs scale-102"
+                      : "bg-[var(--surface-card)] text-muted-foreground border-[var(--border-card)] hover:bg-[var(--surface-hover)]"
+                  )}
+                >
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Main Feed Content List */}
-        <div className="max-w-2xl mx-auto space-y-6">
+          {/* 4. Main Feed Content List */}
+          <div className="space-y-4 sm:space-y-6">
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -840,6 +845,7 @@ export default function CommunityFeedPage() {
               );
             })
           )}
+          </div>
         </div>
       </main>
 
