@@ -6,4 +6,5 @@ app_name = 'dashboard_api'
 
 urlpatterns = [
     path('home/', api.home_api, name='home'),
+    path('notifications/', api.notifications_api, name='notifications'),
 ]

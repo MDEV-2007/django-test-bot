@@ -116,4 +116,30 @@ def home_api(request):
         'suggested_topic': {'id': suggested_topic.id, 'title': suggested_topic.title,
                              'description': suggested_topic.description} if suggested_topic else None,
         'selected_subject': {'id': subject.id, 'name': subject.name} if subject else None,
+        'unread_notifications_count': profile.notifications.filter(is_read=False).count(),
+    })
+
+
+@api_view(['GET', 'POST'])
+def notifications_api(request):
+    profile = ensure_profile_for_user(request.user)
+    if request.method == 'POST':
+        action = request.data.get('action', 'mark_all_read')
+        if action == 'mark_all_read':
+            profile.notifications.filter(is_read=False).update(is_read=True)
+        elif 'id' in request.data:
+            profile.notifications.filter(id=request.data['id']).update(is_read=True)
+        return Response({'success': True, 'unread_count': profile.notifications.filter(is_read=False).count()})
+
+    notifs = profile.notifications.all()[:40]
+    return Response({
+        'notifications': [{
+            'id': n.id,
+            'title': n.title,
+            'message': n.message,
+            'type': n.type,
+            'is_read': n.is_read,
+            'created_at': n.created_at.strftime('%d.%m.%Y %H:%M') if n.created_at else '',
+        } for n in notifs],
+        'unread_count': profile.notifications.filter(is_read=False).count(),
     })

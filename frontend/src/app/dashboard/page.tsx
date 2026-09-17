@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   FileCheck2, Swords, BookOpen,
   Crown, Sparkles, Flame, Coins, Trophy,
   CheckCircle2, ChevronRight, Zap, Layers, Headphones,
-  Dna, Brain, ArrowRight, Play, Check
+  Dna, Brain, ArrowRight, Play, Check,
+  Bell, CheckCheck, Heart, MessageCircle, X
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
+import { apiFetch } from '@/lib/api-client';
 import { getRankInfo } from '@/lib/rank';
 import PresenceRow from '@/components/student/PresenceRow';
 import Celebration from '@/components/student/Celebration';
@@ -24,6 +26,15 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
+type NotificationItem = {
+  id: number;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+};
 
 type DashboardData = {
   profile: {
@@ -51,6 +62,7 @@ type DashboardData = {
   suggested_topic: { id: number; title: string; description: string } | null;
   selected_subject: { id: number; name: string } | null;
   subject_mastery?: { id: number; name: string; color?: string; mastery: number; answered?: number }[];
+  unread_notifications_count?: number;
 };
 
 type LeaderboardRow = {
@@ -132,6 +144,27 @@ function greeting() {
   return 'Xayrli kech';
 }
 
+function getNotifIcon(type: string, title: string) {
+  const t = (type || '').toLowerCase();
+  const lowerTitle = (title || '').toLowerCase();
+  if (lowerTitle.includes('reaksiya') || lowerTitle.includes('like') || lowerTitle.includes('yurak')) {
+    return <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500"><Heart className="size-4 fill-rose-500" /></div>;
+  }
+  if (lowerTitle.includes('izoh') || lowerTitle.includes('fikr') || lowerTitle.includes('comment')) {
+    return <div className="p-2 rounded-xl bg-sky-500/10 text-sky-500"><MessageCircle className="size-4" /></div>;
+  }
+  if (t === 'battle') {
+    return <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500"><Swords className="size-4" /></div>;
+  }
+  if (t === 'achievement') {
+    return <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500"><Trophy className="size-4" /></div>;
+  }
+  if (t === 'mission') {
+    return <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500"><Sparkles className="size-4" /></div>;
+  }
+  return <div className="p-2 rounded-xl bg-primary/10 text-primary"><Bell className="size-4" /></div>;
+}
+
 function DashboardSkeleton() {
   return (
     <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-16 sm:p-6">
@@ -162,6 +195,66 @@ export default function DashboardPage() {
 
   const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
   const { data: lbData } = useApiQuery<LeaderboardData>('/api/leaderboard/');
+
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
+
+  useEffect(() => {
+    if (data && typeof data.unread_notifications_count === 'number') {
+      setUnreadCount(data.unread_notifications_count);
+    }
+  }, [data]);
+
+  const loadNotifications = async () => {
+    setLoadingNotifs(true);
+    try {
+      const res = await apiFetch<{ notifications: NotificationItem[]; unread_count: number }>('/api/dashboard/notifications/');
+      setNotifications(res.notifications || []);
+      setUnreadCount(res.unread_count || 0);
+    } catch (err) {
+      console.error('Failed to load notifications', err);
+    } finally {
+      setLoadingNotifs(false);
+    }
+  };
+
+  const handleOpenNotifications = () => {
+    const nextState = !showNotifications;
+    setShowNotifications(nextState);
+    if (nextState) {
+      loadNotifications();
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await apiFetch('/api/dashboard/notifications/', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'mark_all_read' }),
+      });
+      setUnreadCount(0);
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    } catch (err) {
+      console.error('Failed to mark all as read', err);
+    }
+  };
+
+  const handleMarkSingleRead = async (id: number) => {
+    try {
+      await apiFetch('/api/dashboard/notifications/', {
+        method: 'POST',
+        body: JSON.stringify({ id }),
+      });
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+    } catch (err) {
+      console.error('Failed to mark notification as read', err);
+    }
+  };
 
   useEffect(() => {
     if (authReady && !access) router.push('/login');
@@ -318,6 +411,146 @@ export default function DashboardPage() {
                 Arena ELO reytingi
               </TooltipContent>
             </Tooltip>
+
+            {/* Notification Bell with Dropdown Popover */}
+            <div className="relative">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleOpenNotifications}
+                    className={cn(
+                      "relative flex items-center justify-center size-9 rounded-full transition-all text-foreground",
+                      showNotifications
+                        ? "bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/30"
+                        : "bg-muted/70 hover:bg-muted border border-border/60 hover:border-primary/40"
+                    )}
+                    aria-label="Bildirishnomalar"
+                  >
+                    <Bell className={cn("size-4", unreadCount > 0 && "text-primary animate-pulse")} />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-xs animate-bounce">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs font-medium">
+                  Bildirishnomalar {unreadCount > 0 ? `(${unreadCount} yangi)` : ''}
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Notification Backdrop & Dropdown Popover */}
+              {showNotifications && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowNotifications(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-border/80 bg-background/95 backdrop-blur-md shadow-2xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+                      <div className="flex items-center gap-2">
+                        <Bell className="size-4 text-primary" />
+                        <h3 className="text-sm font-bold text-foreground">Bildirishnomalar</h3>
+                        {unreadCount > 0 && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary font-bold">
+                            {unreadCount} yangi
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {unreadCount > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleMarkAllRead}
+                            className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 px-1.5 py-1 rounded"
+                            title="Barchasini o'qilgan deb belgilash"
+                          >
+                            <CheckCheck className="size-3.5" />
+                            <span>Barchasi o&apos;qildi</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setShowNotifications(false)}
+                          className="size-7 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                          aria-label="Yopish"
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Body */}
+                    <div className="max-h-[380px] overflow-y-auto divide-y divide-border/40">
+                      {loadingNotifs && notifications.length === 0 ? (
+                        <div className="p-6 space-y-3">
+                          <Skeleton className="h-14 w-full rounded-xl" />
+                          <Skeleton className="h-14 w-full rounded-xl" />
+                          <Skeleton className="h-14 w-full rounded-xl" />
+                        </div>
+                      ) : notifications.length === 0 ? (
+                        <div className="p-8 text-center space-y-2">
+                          <div className="inline-flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground mx-auto">
+                            <Bell className="size-6 opacity-40" />
+                          </div>
+                          <p className="text-sm font-bold text-foreground">Yangi bildirishnoma yo&apos;q</p>
+                          <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
+                            Hamjamiyatda post yozing, darslarni bajaring yoki bellashuvlarda qatnashing!
+                          </p>
+                        </div>
+                      ) : (
+                        notifications.map((n) => (
+                          <div
+                            key={n.id}
+                            onClick={() => !n.is_read && handleMarkSingleRead(n.id)}
+                            className={cn(
+                              "flex items-start gap-3 p-3.5 transition-colors cursor-pointer",
+                              n.is_read ? "hover:bg-muted/40" : "bg-primary/5 hover:bg-primary/10"
+                            )}
+                          >
+                            <div className="shrink-0 pt-0.5">
+                              {getNotifIcon(n.type, n.title)}
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className={cn("text-xs font-bold truncate", n.is_read ? "text-foreground" : "text-primary")}>
+                                  {n.title}
+                                </p>
+                                {!n.is_read && (
+                                  <span className="size-2 rounded-full bg-primary shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                                {n.message}
+                              </p>
+                              {n.created_at && (
+                                <p className="text-[10px] text-muted-foreground/80 font-mono pt-0.5">
+                                  {n.created_at}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-2.5 border-t border-border/60 bg-muted/20 text-center">
+                      <Link
+                        href="/community"
+                        onClick={() => setShowNotifications(false)}
+                        className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>Hamjamiyat muhokamalariga o&apos;tish</span>
+                        <ChevronRight className="size-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
