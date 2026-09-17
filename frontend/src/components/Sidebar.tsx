@@ -73,7 +73,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'LIVE', glow: true, featureKey: 'battles', matchPrefixes: ['/games'] },
       { href: '/reels', label: 'Bilim Reels', icon: Sparkles, badge: 'Yangi', featureKey: 'reels', api: '/api/learning/reels/' },
       { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: 'Anki', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
-      { href: '/leaderboard', label: 'Reyting & Liga', icon: Trophy, badge: null, matchPrefixes: ['/feed', '/leaderboard'] },
+      { href: '/leaderboard', label: 'Hamjamiyat va liga', icon: Trophy, badge: null, matchPrefixes: ['/feed', '/leaderboard'] },
     ],
   },
   {
