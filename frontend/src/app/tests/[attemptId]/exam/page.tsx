@@ -234,9 +234,33 @@ export default function CefrExamPage() {
       const patch = (q: CefrQuestion): CefrQuestion => {
         if (q.id !== question.id) return q;
         const next = { ...q, ...payload } as CefrQuestion;
+
+        if ('group_option_id' in payload) {
+          next.selected_group_option_id = (payload.group_option_id as number | null) ?? null;
+        }
+        if ('choice_id' in payload) {
+          next.selected_choice_id = (payload.choice_id as number | null) ?? null;
+        }
+        if ('text_answer' in payload) {
+          next.text_answer = (payload.text_answer as string) ?? '';
+        }
+        if ('matches' in payload && next.matching_rows) {
+          const matches = (payload.matches || {}) as Record<string, string>;
+          next.matching_rows = next.matching_rows.map((row) => ({
+            ...row,
+            selected_right_key: matches[row.left_key] || '',
+          }));
+        }
+
         next.answered = isText
-          ? String(payload.text_answer ?? '').trim().length > 0
-          : Boolean(payload.choice_id ?? payload.group_option_id ?? payload.matches);
+          ? String(next.text_answer ?? '').trim().length > 0
+          : Boolean(
+              next.selected_choice_id ??
+              next.selected_group_option_id ??
+              payload.choice_id ??
+              payload.group_option_id ??
+              payload.matches
+            );
         return next;
       };
       return {
@@ -374,26 +398,25 @@ export default function CefrExamPage() {
   return (
     <>
       <AppShell />
-      <main className="mx-auto w-full max-w-[1440px] flex-1 px-3 pb-24 pt-3 sm:px-6">
+      <main className="mx-auto w-full max-w-[1440px] flex-1 px-2.5 pb-24 pt-2.5 sm:px-6 min-w-0 max-w-full overflow-x-hidden">
         
         {/* =========================================================
             TOP HEADER BAR (Timer, Mode Switch, Palette, Submit)
             ========================================================= */}
-        <header className="sticky top-0 z-30 -mx-3 mb-5 border-b border-[var(--border-card)] bg-[var(--surface-base)]/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <header className="sticky top-0 z-30 mb-4 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-base)]/95 px-3 py-2 sm:px-4 sm:py-2.5 backdrop-blur-md shadow-md min-w-0 max-w-full">
+          <div className="flex items-center justify-between gap-2 min-w-0">
             
             {/* Left: Exit or Back to Hub */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               {viewMode !== 'hub' ? (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setViewMode('hub')}
-                  className="rounded-xl font-semibold gap-1.5 border-[var(--border-card)] text-muted-foreground hover:text-foreground"
+                  className="rounded-xl font-semibold gap-1 border-[var(--border-card)] text-muted-foreground hover:text-foreground shrink-0 h-8 px-2 sm:px-3 text-xs"
                 >
-                  <ChevronLeft className="size-4" />
-                  <span className="hidden sm:inline">Bo&apos;limlar markazi (Hub)</span>
-                  <span className="sm:hidden">Hub</span>
+                  <ChevronLeft className="size-3.5 sm:size-4" />
+                  <span className="hidden sm:inline">Hub</span>
                 </Button>
               ) : (
                 <Button
@@ -401,38 +424,38 @@ export default function CefrExamPage() {
                   size="icon"
                   onClick={() => setShowExit(true)}
                   aria-label="Chiqish"
-                  className="rounded-xl text-muted-foreground hover:text-foreground"
+                  className="rounded-xl text-muted-foreground hover:text-foreground shrink-0 size-8"
                 >
-                  <X className="size-5" />
+                  <X className="size-4 sm:size-5" />
                 </Button>
               )}
 
-              <div className="min-w-0">
-                <div className="truncate text-sm sm:text-base font-bold text-foreground">
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs sm:text-sm font-bold text-foreground" title={exam.test.title}>
                   {exam.test.title}
                 </div>
-                <div className="text-[11px] text-muted-foreground">
-                  Jami: <strong className="text-foreground">{totals.answered} / {totals.total}</strong> savol belgilandi
+                <div className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
+                  Jami: <strong className="text-foreground">{totals.answered}/{totals.total}</strong> savol
                 </div>
               </div>
             </div>
 
             {/* Right: Timer, Questions button, Finish Button */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Countdown Timer */}
               <div className={cn(
-                'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs sm:text-sm font-black font-mono tracking-wider',
+                'flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-black font-mono tracking-wider shrink-0',
                 exam.seconds_left <= 300
                   ? 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/40'
                   : 'bg-[var(--surface-card-medium)] border border-[var(--border-card)] text-foreground',
               )}>
-                <Clock className="size-3.5 sm:size-4" />
+                <Clock className="size-3 sm:size-3.5" />
                 {formatTime(exam.seconds_left)}
               </div>
 
               {/* Font size picker (Reading rejimida) */}
               {viewMode === 'reading' && (
-                <div className="hidden sm:flex items-center rounded-xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] p-0.5">
+                <div className="hidden md:flex items-center rounded-xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] p-0.5">
                   {FONT_STEPS.map((step) => (
                     <button
                       key={step.key}
@@ -456,9 +479,10 @@ export default function CefrExamPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowPalette(true)}
-                className="gap-1.5 rounded-xl border-[var(--border-card)] text-xs font-semibold"
+                className="gap-1 rounded-xl border-[var(--border-card)] text-xs font-semibold h-8 px-2 sm:px-2.5"
+                title="Savollar xaritasi"
               >
-                <LayoutGrid className="size-4" />
+                <LayoutGrid className="size-3.5 sm:size-4" />
                 <span className="hidden md:inline">Savollar</span>
               </Button>
 
@@ -467,7 +491,7 @@ export default function CefrExamPage() {
                 size="sm"
                 variant="destructive"
                 onClick={() => setShowFinishConfirm(true)}
-                className="rounded-xl font-bold text-xs shadow-md bg-rose-600 hover:bg-rose-700 text-white"
+                className="rounded-xl font-bold text-xs shadow-md bg-rose-600 hover:bg-rose-700 text-white h-8 px-2.5 sm:px-3.5"
               >
                 Tugatish
               </Button>
@@ -775,22 +799,22 @@ export default function CefrExamPage() {
           <div className="space-y-6 max-w-4xl mx-auto">
             
             {/* Top Navigation & Status */}
-            <div className="flex items-center justify-between gap-3 bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-2 bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-2.5 sm:p-4 shadow-sm min-w-0 max-w-full">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setViewMode('hub')}
-                className="rounded-xl font-bold gap-1 text-xs"
+                className="rounded-xl font-bold gap-1 text-xs shrink-0 h-8 px-2.5"
               >
-                <ChevronLeft className="size-4" /> Bo&apos;limlar (Hub)
+                <ChevronLeft className="size-4" /> Bo&apos;limlar
               </Button>
 
-              <div className="text-center">
-                <span className="text-xs sm:text-sm font-black text-foreground block">
-                  Listening (Tinglab tushunish)
+              <div className="text-center min-w-0 px-1">
+                <span className="text-xs sm:text-sm font-black text-foreground block truncate">
+                  Listening
                 </span>
-                <span className="text-[11px] text-muted-foreground">
-                  {skillStats.listening.answered} / {skillStats.listening.total} savol belgilandi
+                <span className="text-[10px] sm:text-[11px] text-muted-foreground truncate block">
+                  {skillStats.listening.answered} / {skillStats.listening.total} savol
                 </span>
               </div>
 
@@ -800,7 +824,7 @@ export default function CefrExamPage() {
                   markSkillCompleted('listening');
                   setViewMode('hub');
                 }}
-                className="rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md gap-1"
+                className="rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md gap-1 shrink-0 h-8 px-2.5"
               >
                 <CheckCircle2 className="size-4" />
                 <span className="hidden sm:inline">Listeningni yakunlash</span>
@@ -809,13 +833,13 @@ export default function CefrExamPage() {
             </div>
 
             {/* Sticky Audio Player (Strict Forward, No Rewind) */}
-            <div className="sticky top-18 z-20 rounded-2xl border border-violet-500/40 bg-[var(--surface-base)]/95 backdrop-blur-md p-4 shadow-xl space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold flex items-center gap-1.5 text-violet-400">
-                  <Headphones className="size-4" /> CEFR Listening Audio Trek
+            <div className="sticky top-18 z-20 rounded-2xl border border-violet-500/40 bg-[var(--surface-base)]/95 backdrop-blur-md p-3.5 sm:p-4 shadow-xl space-y-2 min-w-0 max-w-full">
+              <div className="flex items-center justify-between text-xs gap-2 min-w-0">
+                <span className="font-bold flex items-center gap-1.5 text-violet-400 truncate">
+                  <Headphones className="size-4 shrink-0" /> CEFR Listening Audio
                 </span>
-                <span className="text-[11px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">
-                  Qaytarish mumkin emas (No rewind)
+                <span className="text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md shrink-0">
+                  No rewind
                 </span>
               </div>
 
@@ -834,7 +858,7 @@ export default function CefrExamPage() {
             </div>
 
             {/* Quick Part Anchor Bar */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 min-w-0 max-w-full scrollbar-none">
               {listeningSections.map((sec) => (
                 <button
                   key={sec.id}
@@ -986,18 +1010,32 @@ export default function CefrExamPage() {
           <div className="space-y-4">
             
             {/* Reading Part Navigation Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-3 sm:p-4 shadow-sm">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setViewMode('hub')}
-                className="rounded-xl font-bold gap-1 text-xs"
-              >
-                <ChevronLeft className="size-4" /> Bo&apos;limlar (Hub)
-              </Button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-2.5 sm:p-4 shadow-sm min-w-0 max-w-full">
+              <div className="flex items-center justify-between gap-2 min-w-0 w-full sm:w-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode('hub')}
+                  className="rounded-xl font-bold gap-1 text-xs shrink-0 h-8 px-2.5"
+                >
+                  <ChevronLeft className="size-4" /> Bo&apos;limlar (Hub)
+                </Button>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    markSkillCompleted('reading');
+                    setViewMode('hub');
+                  }}
+                  className="sm:hidden rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md gap-1 shrink-0 h-8 px-2.5"
+                >
+                  <CheckCircle2 className="size-3.5" />
+                  Yakunlash
+                </Button>
+              </div>
 
               {/* Part selector pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto">
+              <div className="flex items-center gap-1.5 overflow-x-auto min-w-0 max-w-full py-0.5 scrollbar-none">
                 {readingSections.map((sec, idx) => (
                   <button
                     key={sec.id}
@@ -1007,7 +1045,7 @@ export default function CefrExamPage() {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     className={cn(
-                      'shrink-0 rounded-xl px-3 py-1.5 text-xs font-bold transition-all',
+                      'shrink-0 rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-bold transition-all cursor-pointer select-none',
                       idx === readingPartIndex
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'border border-[var(--border-card)] bg-[var(--surface-hover)]/50 text-muted-foreground hover:text-foreground'
@@ -1027,11 +1065,10 @@ export default function CefrExamPage() {
                   markSkillCompleted('reading');
                   setViewMode('hub');
                 }}
-                className="rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md gap-1"
+                className="hidden sm:inline-flex rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md gap-1"
               >
                 <CheckCircle2 className="size-4" />
-                <span className="hidden sm:inline">Readingni yakunlash</span>
-                <span className="sm:hidden">Yakunlash</span>
+                Readingni yakunlash
               </Button>
             </div>
 
@@ -1300,10 +1337,10 @@ export default function CefrExamPage() {
 
       {/* Savollar Palitrasi (Modal) */}
       <Dialog open={showPalette} onOpenChange={setShowPalette}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg rounded-2xl">
+        <DialogContent className="max-h-[85vh] overflow-y-auto w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6 mx-auto">
           <DialogHeader>
-            <DialogTitle>Savollar xaritasi</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg font-black">Savollar xaritasi</DialogTitle>
+            <DialogDescription className="text-xs">
               Yashil — javoblangan, oq — javobsiz savollar. Istalganiga bosib sakrashingiz mumkin.
             </DialogDescription>
           </DialogHeader>

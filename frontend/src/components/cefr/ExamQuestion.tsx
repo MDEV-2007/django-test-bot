@@ -78,14 +78,17 @@ function Body({ question, group, onAnswer, onActivate, hideInlineGap }: Omit<Pro
     case 'table_based':
       return (
         <div className="space-y-2">
-          {question.choices?.map((choice) => (
-            <Choice
-              key={choice.id}
-              text={choice.text}
-              selected={question.selected_choice_id === choice.id}
-              onClick={() => onAnswer({ choice_id: choice.id })}
-            />
-          ))}
+          {question.choices?.map((choice) => {
+            const selectedChoiceId = question.selected_choice_id ?? (question as any).choice_id;
+            return (
+              <Choice
+                key={choice.id}
+                text={choice.text}
+                selected={selectedChoiceId === choice.id}
+                onClick={() => onAnswer({ choice_id: choice.id })}
+              />
+            );
+          })}
         </div>
       );
 
@@ -213,8 +216,9 @@ function GroupedItemSelector({
   onAnswer: (payload: Record<string, unknown>) => void;
 }) {
   const [showOptionsList, setShowOptionsList] = useState(false);
+  const selectedId = question.selected_group_option_id ?? (question as any).group_option_id;
   const selectedOption = group?.options.find(
-    (o) => o.id === question.selected_group_option_id
+    (o) => o.id === selectedId
   );
 
   return (
@@ -222,7 +226,7 @@ function GroupedItemSelector({
       {/* Letter buttons row */}
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
         {group?.options.map((option) => {
-          const selected = question.selected_group_option_id === option.id;
+          const selected = selectedId === option.id;
           return (
             <button
               key={option.id}
@@ -289,7 +293,7 @@ function GroupedItemSelector({
           </p>
           <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
             {group.options.map((opt) => {
-              const isSelected = question.selected_group_option_id === opt.id;
+              const isSelected = selectedId === opt.id;
               return (
                 <button
                   key={opt.id}

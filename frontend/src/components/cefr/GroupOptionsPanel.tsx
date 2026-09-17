@@ -33,7 +33,7 @@ export default function GroupOptionsPanel({
         // Hisoblash: nechta variant ishlatildi
         const totalOptions = group.options.length;
         const usedOptionsCount = group.options.filter((opt) =>
-          questions.some((q) => q.selected_group_option_id === opt.id)
+          questions.some((q) => (q.selected_group_option_id ?? (q as any).group_option_id) === opt.id)
         ).length;
 
         const groupTitle =
@@ -95,7 +95,7 @@ export default function GroupOptionsPanel({
                 {group.options.map((option) => {
                   // Bu variant qaysi savolda tanlangan?
                   const matchedQuestion = questions.find(
-                    (q) => q.selected_group_option_id === option.id
+                    (q) => (q.selected_group_option_id ?? (q as any).group_option_id) === option.id
                   );
                   const isUsed = Boolean(matchedQuestion);
                   const isForActiveQuestion =
