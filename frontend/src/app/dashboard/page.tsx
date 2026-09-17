@@ -56,7 +56,7 @@ type DashboardData = {
   xp_progress: number;
   freeze_count: number;
   online_count: number;
-  online_peers: { name: string; avatar_url: string | null }[];
+  online_peers: { name: string; username?: string; avatar_url: string | null; is_me?: boolean }[];
   solved_today: number;
   weak_review: { topic_title: string; times_wrong: number; days_ago: number } | null;
   missions: {

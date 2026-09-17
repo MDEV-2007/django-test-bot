@@ -39,11 +39,22 @@ def home_api(request):
                  .filter(last_seen_at__gte=timezone.now() - timezone.timedelta(minutes=5))
                  .select_related('user')
                  .order_by('-last_seen_at'))
-    online_count = online_qs.count()
+    online_count = max(online_qs.count(), 1)
     online_peers = [{
         'name': (pr.user.first_name or pr.user.username),
+        'username': pr.user.username,
         'avatar_url': pr.avatar_url,
-    } for pr in online_qs.exclude(pk=profile.pk)[:5]]
+        'is_me': pr.pk == profile.pk,
+    } for pr in online_qs[:10]]
+
+    # Agar hozirgi foydalanuvchi ro'yxatga kirmay qolgan bo'lsa, uni boshiga qo'shish
+    if not any(p.get('is_me') for p in online_peers):
+        online_peers.insert(0, {
+            'name': (profile.user.first_name or profile.user.username),
+            'username': profile.user.username,
+            'avatar_url': profile.avatar_url,
+            'is_me': True,
+        })
 
     # Bugun nechta o'quvchi test yakunlagani — ijtimoiy dalil (raqobat emas, hamrohlik).
     solved_today = (Attempt.objects
