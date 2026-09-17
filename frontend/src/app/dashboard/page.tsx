@@ -22,7 +22,6 @@ import PresenceRow from '@/components/student/PresenceRow';
 import Celebration from '@/components/student/Celebration';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
 import ModernHeroDashboard from '@/components/dashboard/ModernHeroDashboard';
-import ModernSkillsSection from '@/components/dashboard/ModernSkillsSection';
 import ModernTestCenter from '@/components/dashboard/ModernTestCenter';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -301,12 +300,7 @@ export default function DashboardPage() {
       />
 
       {/* ============================================================ */}
-      {/* 2. SKILLS ACCELERATOR (4 PASTEL / FROSTED TILES)            */}
-      {/* ============================================================ */}
-      <ModernSkillsSection />
-
-      {/* ============================================================ */}
-      {/* 3. TEST & EXAM CENTER (VIP BOARDING PASS & SUBJECT TABS)     */}
+      {/* 2. TEST & EXAM CENTER (VIP BOARDING PASS & SUBJECT TABS)     */}
       {/* ============================================================ */}
       <ModernTestCenter />
 
