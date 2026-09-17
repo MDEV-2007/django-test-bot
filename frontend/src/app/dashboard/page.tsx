@@ -331,7 +331,7 @@ export default function DashboardPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-4 sm:space-y-6 bg-[var(--bg-page)] p-3.5 sm:p-6 pb-24 sm:pb-20 sm:space-y-7">
+      <main className="page-shell flex-1 space-y-4 sm:space-y-6 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-3.5 sm:p-6 pb-24 sm:pb-20 sm:space-y-7">
         
         {/* ============================================================ */}
         {/* TOP STATUS BAR: GREETING & FLOATING GAMIFICATION PILLS       */}
@@ -574,13 +574,23 @@ export default function DashboardPage() {
                     <ChevronRight className="size-3 text-muted-foreground" />
                   </div>
 
-                  <div className="space-y-1">
-                    <h1 className="text-xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
-                      {greeting()}, {firstName}! 👋
-                    </h1>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm">
-                      Har bir yechilgan savol sizni orzuingizdagi OTM va sertifikatga bir qadam yaqinlashtiradi!
-                    </p>
+                  <div className="flex items-start justify-between gap-3 sm:block">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <h1 className="text-xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
+                        {greeting()}, {firstName}! 👋
+                      </h1>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm">
+                        Har bir yechilgan savol sizni orzuingizdagi OTM va sertifikatga bir qadam yaqinlashtiradi!
+                      </p>
+                    </div>
+                    {/* On mobile: compact mascot thumbnail to save vertical space */}
+                    <div className="sm:hidden size-16 shrink-0 rounded-2xl overflow-hidden shadow-md border-2 border-white dark:border-sky-800/40 ring-2 ring-sky-200/30">
+                      <img
+                        src="/images/mascot-hero.jpg"
+                        alt="Ilm Mascot"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
 
                   <div className="pt-1">
@@ -593,9 +603,9 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Right 3D Mascot Image */}
-                <div className="sm:col-span-5 flex justify-center sm:justify-end">
-                  <div className="relative w-36 sm:w-52 md:w-60 aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border-2 border-white dark:border-sky-800/40 ring-2 sm:ring-4 ring-sky-200/30 dark:ring-sky-900/30">
+                {/* Right 3D Mascot Image (Desktop) */}
+                <div className="hidden sm:flex sm:col-span-5 justify-end">
+                  <div className="relative w-44 sm:w-52 md:w-60 aspect-[4/3] rounded-3xl overflow-hidden shadow-lg border-2 border-white dark:border-sky-800/40 ring-4 ring-sky-200/30 dark:ring-sky-900/30">
                     <img
                       src="/images/mascot-hero.jpg"
                       alt="Ilm Mascot"
@@ -618,41 +628,39 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-card p-3.5 sm:p-5 shadow-xs hover:border-sky-500/40 transition-all group">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
-                    <div className="flex size-12 sm:size-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-md shadow-sky-500/20">
+              <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-card p-3 sm:p-5 shadow-xs hover:border-sky-500/40 transition-all group">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                    <div className="flex size-11 sm:size-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-md shadow-sky-500/20">
                       <BookOpen className="size-5 sm:size-7" />
                     </div>
-                    <div className="min-w-0 space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-500 text-[10px] font-bold">
-                          {lastAttempt ? "Oxirgi topshiriq" : "Tavsiya"}
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-500 text-[9px] sm:text-[10px] font-bold px-1.5 py-0 h-4 shrink-0">
+                          {lastAttempt ? "Oxirgi" : "Tavsiya"}
                         </Badge>
-                        <span className="text-[11px] text-muted-foreground">Mavzu 1 · 15 daq</span>
+                        <span className="text-[10px] sm:text-[11px] text-muted-foreground truncate">Mavzu 1 · 15 daq</span>
                       </div>
-                      <h3 className="text-sm sm:text-base font-extrabold text-foreground truncate group-hover:text-sky-500 transition-colors">
+                      <h3 className="text-xs sm:text-base font-extrabold text-foreground truncate group-hover:text-sky-500 transition-colors">
                         {continueTitle}
                       </h3>
                       <div className="flex items-center gap-2 pt-0.5">
-                        <div className="h-1.5 w-24 sm:w-28 rounded-full bg-muted overflow-hidden">
+                        <div className="h-1.5 w-16 sm:w-28 rounded-full bg-muted overflow-hidden shrink-0">
                           <div className="h-full bg-sky-500 rounded-full" style={{ width: `${lastAttempt?.score || 60}%` }} />
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground font-bold">
+                        <span className="text-[9px] sm:text-[10px] font-mono text-muted-foreground font-bold shrink-0">
                           {lastAttempt?.score || 60}%
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 self-stretch sm:self-center">
-                    <Button asChild className="w-full sm:w-auto rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold px-5 gap-1.5 shadow-sm h-9 sm:h-10 text-xs cursor-pointer">
-                      <Link href="/tests">
-                        <Play className="size-3.5 fill-white" />
-                        <span>Boshlash</span>
-                      </Link>
-                    </Button>
-                  </div>
+                  <Button asChild className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold px-3 sm:px-5 gap-1.5 shadow-sm h-8 sm:h-10 text-xs shrink-0 cursor-pointer">
+                    <Link href="/tests">
+                      <Play className="size-3 sm:size-3.5 fill-white" />
+                      <span>Boshlash</span>
+                    </Link>
+                  </Button>
                 </div>
               </Card>
             </div>
