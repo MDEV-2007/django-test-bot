@@ -23,6 +23,7 @@ import Celebration from '@/components/student/Celebration';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
 import ModernHeroDashboard from '@/components/dashboard/ModernHeroDashboard';
 import ModernTestCenter from '@/components/dashboard/ModernTestCenter';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -103,21 +104,21 @@ function getNotifIcon(type: string, title: string) {
   const t = (type || '').toLowerCase();
   const lowerTitle = (title || '').toLowerCase();
   if (lowerTitle.includes('reaksiya') || lowerTitle.includes('like') || lowerTitle.includes('yurak')) {
-    return <div className="p-2 rounded-xl bg-rose-500/15 text-rose-400"><Heart className="size-4 fill-rose-500" /></div>;
+    return <PremiumIcon icon={Heart} tone="rose" size="sm" glow />;
   }
   if (lowerTitle.includes('izoh') || lowerTitle.includes('fikr') || lowerTitle.includes('comment')) {
-    return <div className="p-2 rounded-xl bg-sky-500/15 text-sky-400"><MessageCircle className="size-4" /></div>;
+    return <PremiumIcon icon={MessageCircle} tone="sky" size="sm" glow />;
   }
   if (t === 'battle') {
-    return <div className="p-2 rounded-xl bg-purple-500/15 text-purple-400"><Swords className="size-4" /></div>;
+    return <PremiumIcon icon={Swords} tone="purple" size="sm" glow />;
   }
   if (t === 'achievement') {
-    return <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400"><Trophy className="size-4" /></div>;
+    return <PremiumIcon icon={Trophy} tone="gold" size="sm" glow />;
   }
   if (t === 'mission') {
-    return <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-400"><Sparkles className="size-4" /></div>;
+    return <PremiumIcon icon={Sparkles} tone="emerald" size="sm" glow />;
   }
-  return <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-400"><Bell className="size-4" /></div>;
+  return <PremiumIcon icon={Bell} tone="emerald" size="sm" glow />;
 }
 
 function DashboardSkeleton() {
@@ -312,9 +313,7 @@ export default function DashboardPage() {
         <Card className="lg:col-span-7 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5 sm:p-6 backdrop-blur-xl border-t border-white/10 shadow-xl space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-400">
-                <Trophy className="size-4.5" />
-              </div>
+              <PremiumIcon icon={Trophy} tone="gold" size="sm" glow />
               <div>
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">
                   Haftalik Reyting (Top Abituriyentlar)

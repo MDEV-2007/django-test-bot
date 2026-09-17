@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 interface HeroDashboardProps {
@@ -184,9 +185,7 @@ export default function ModernHeroDashboard({
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
-                  <Target className="size-4" />
-                </div>
+                <PremiumIcon icon={Target} tone="amber" size="sm" glow />
                 <div>
                   <h3 className="text-xs font-black text-white uppercase tracking-wider">
                     Kunlik Marra
@@ -278,9 +277,7 @@ export default function ModernHeroDashboard({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex size-9 items-center justify-center rounded-2xl bg-rose-500/20 text-rose-400 ring-2 ring-rose-500/30">
-                  <Swords className="size-4.5" />
-                </div>
+                <PremiumIcon icon={Swords} tone="rose" size="sm" glow />
                 <div>
                   <h3 className="text-xs font-black text-white uppercase tracking-wider">
                     1v1 Jonli Bellashuv

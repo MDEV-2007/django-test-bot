@@ -22,6 +22,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VerifiedBadge from '@/components/ui/verified-badge';
+import PremiumIcon from '@/components/ui/premium-icon';
 
 type AnswerMode = 'open' | 'closed' | 'mixed' | null;
 
@@ -544,9 +545,7 @@ export default function TestsPage() {
           <CardMotif shape="quick" className="text-[var(--accent)]" />
           <CardContent className="relative flex flex-wrap items-center justify-between gap-4 pt-6">
             <div className="flex min-w-0 items-center gap-3.5">
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-[var(--accent)] transition-transform group-hover:scale-110">
-                <Shuffle className="size-6" />
-              </div>
+              <PremiumIcon icon={Shuffle} tone="emerald" size="lg" glow className="transition-transform group-hover:scale-110" />
               <div className="min-w-0">
                 <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">
                   Tezkor test

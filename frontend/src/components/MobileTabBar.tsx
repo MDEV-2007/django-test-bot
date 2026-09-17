@@ -7,21 +7,23 @@ import { LayoutDashboard, FileCheck2, Swords, Bot, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 type TabItem = {
   href: string;
   label: string;
   icon: any;
+  tone: PremiumIconTone;
   matchPrefixes?: string[];
   api?: string;
 };
 
 const TABS: TabItem[] = [
-  { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, api: '/api/dashboard/home/' },
-  { href: '/tests', label: 'Testlar', icon: FileCheck2, matchPrefixes: ['/tests'], api: '/api/tests/' },
-  { href: '/battles', label: 'Arena', icon: Swords, matchPrefixes: ['/battles', '/games'] },
-  { href: '/mentor', label: 'AI Mentor', icon: Bot },
+  { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
+  { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
+  { href: '/battles', label: 'Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/battles', '/games'] },
+  { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'cyan' },
 ];
 
 export default function MobileTabBar() {
@@ -58,16 +60,13 @@ export default function MobileTabBar() {
               <span className="absolute top-0 h-1 w-7 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
             )}
 
-            <div
-              className={cn(
-                'flex size-7 items-center justify-center rounded-xl transition-all',
-                active
-                  ? 'bg-emerald-500/20 text-emerald-400 scale-105'
-                  : 'bg-transparent text-slate-400'
-              )}
-            >
-              <Icon className="size-4" />
-            </div>
+            <PremiumIcon
+              icon={Icon}
+              tone={active ? tab.tone : 'zinc'}
+              size="sm"
+              glow={active}
+              className={cn('transition-transform duration-200', active ? 'scale-105' : 'opacity-70')}
+            />
 
             <span className="truncate text-[10px] leading-none tracking-tight">
               {tab.label}

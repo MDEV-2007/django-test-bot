@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import PremiumIcon from '@/components/ui/premium-icon';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -392,9 +393,7 @@ export default function BattlesPage() {
               >
                 <CardMotif shape="bot" className="text-[var(--accent)]" />
                 <CardContent className="relative pt-6">
-                  <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/20 text-[var(--accent)] transition-transform group-hover:scale-110">
-                    <Bot className="size-6" />
-                  </div>
+                  <PremiumIcon icon={Bot} tone="primary" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
                   <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">AI bilan mashg&apos;ulot jangi</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, bilimlarni mustahkamlang.
@@ -409,9 +408,7 @@ export default function BattlesPage() {
               >
                 <CardMotif shape="arena" className="text-rose-400" />
                 <CardContent className="relative pt-6">
-                  <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-rose-500/20 text-rose-400 transition-transform group-hover:scale-110">
-                    <Swords className="size-6" />
-                  </div>
+                  <PremiumIcon icon={Swords} tone="rose" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
                   <h3 className="text-base font-bold transition-colors group-hover:text-rose-400">Jonli abituriyent bilan duel</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
@@ -426,9 +423,7 @@ export default function BattlesPage() {
               >
                 <CardMotif shape="arena" className="text-amber-400" />
                 <CardContent className="relative pt-6">
-                  <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 transition-transform group-hover:scale-110">
-                    <Share2 className="size-6" />
-                  </div>
+                  <PremiumIcon icon={Share2} tone="amber" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
                   <h3 className="text-base font-bold transition-colors group-hover:text-amber-400">Do&apos;stni jangga chorlash</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.
@@ -451,9 +446,7 @@ export default function BattlesPage() {
             <div className="space-y-3 pt-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 font-bold">
-                    <Sparkles className="size-4" />
-                  </div>
+                  <PremiumIcon icon={Sparkles} tone="emerald" size="xs" glow />
                   <div>
                     <h3 className="text-base font-black text-foreground">Intellektual O&apos;yinlar &amp; Mini-Gamlar</h3>
                     <p className="text-xs text-muted-foreground">Xaritalar, tarixiy shaxslar va xronologiya bo&apos;yicha maxsus sinovlar</p>
@@ -468,9 +461,7 @@ export default function BattlesPage() {
                     <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
-                            <MapPin className="size-5" />
-                          </div>
+                          <PremiumIcon icon={MapPin} tone="sky" size="md" glow className="group-hover:scale-110" />
                           <Badge variant="outline" className="border-blue-500/40 bg-blue-500/10 text-blue-400 text-[10px] font-black">
                             XARITA GAME
                           </Badge>
@@ -479,7 +470,7 @@ export default function BattlesPage() {
                           Xarita topshirig&apos;i
                         </h4>
                         <p className="text-xs text-muted-foreground leading-relaxed">
-                          Tarixiy xaritalardan qadimiy shaharlar, hududlar va davlatlarni toping.
+                          Tarixiy xaritalardan qadimiy hudud, shahar va davlatlarni aniqlang.
                         </p>
                       </div>
 
@@ -499,9 +490,7 @@ export default function BattlesPage() {
                     <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
-                            <UserCheck className="size-5" />
-                          </div>
+                          <PremiumIcon icon={UserCheck} tone="purple" size="md" glow className="group-hover:scale-110" />
                           <Badge variant="outline" className="border-purple-500/40 bg-purple-500/10 text-purple-400 text-[10px] font-black">
                             SHAXSLAR
                           </Badge>
@@ -530,9 +519,7 @@ export default function BattlesPage() {
                     <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition-transform">
-                            <History className="size-5" />
-                          </div>
+                          <PremiumIcon icon={History} tone="emerald" size="md" glow className="group-hover:scale-110" />
                           <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-black">
                             XRONOLOGIYA
                           </Badge>

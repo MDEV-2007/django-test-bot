@@ -30,6 +30,7 @@ import { prefetchApi } from '@/lib/api-cache';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import { BrandMark } from '@/components/BrandMark';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -50,6 +51,7 @@ interface NavItem {
   glow?: boolean;
   vip?: boolean;
   highlight?: boolean;
+  tone?: PremiumIconTone;
 }
 
 interface NavGroup {
@@ -61,28 +63,28 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'ASOSIY NAVIGATSIYA',
     items: [
-      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, api: '/api/dashboard/home/' },
-      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: 'Audio', featureKey: 'study' },
-      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'DTM', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
-      { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'GPT-4o', highlight: true, featureKey: 'ai_mentor' },
+      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, api: '/api/dashboard/home/', tone: 'emerald' },
+      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: 'Audio', featureKey: 'study', tone: 'purple' },
+      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'DTM', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/', tone: 'sky' },
+      { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'GPT-4o', highlight: true, featureKey: 'ai_mentor', tone: 'cyan' },
     ],
   },
   {
     label: 'BELLASHUV & AMALIYOT',
     items: [
-      { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'LIVE', glow: true, featureKey: 'battles', matchPrefixes: ['/games'] },
-      { href: '/reels', label: 'Bilim Reels', icon: Sparkles, badge: 'Yangi', featureKey: 'reels', api: '/api/learning/reels/' },
-      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: 'Anki', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
-      { href: '/leaderboard', label: 'Hamjamiyat va liga', icon: Trophy, badge: null, matchPrefixes: ['/feed', '/leaderboard'] },
+      { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'LIVE', glow: true, featureKey: 'battles', matchPrefixes: ['/games'], tone: 'rose' },
+      { href: '/reels', label: 'Bilim Reels', icon: Sparkles, badge: 'Yangi', featureKey: 'reels', api: '/api/learning/reels/', tone: 'amber' },
+      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: 'Anki', featureKey: 'flashcards', api: '/api/learning/flashcards/', tone: 'indigo' },
+      { href: '/leaderboard', label: 'Hamjamiyat va liga', icon: Trophy, badge: null, matchPrefixes: ['/feed', '/leaderboard'], tone: 'gold' },
     ],
   },
   {
     label: 'SHAXSIY KABINET',
     items: [
-      { href: '/profile', label: 'Profilim', icon: User, badge: null, matchPrefixes: ['/profile'] },
-      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, api: '/api/analytics/' },
-      { href: '/shop', label: "Artefakt Do'koni", icon: ShoppingBag, badge: null, featureKey: 'shop', matchPrefixes: ['/shop'] },
-      { href: '/premium', label: 'VIP Pass', icon: Crown, badge: 'PRO', vip: true },
+      { href: '/profile', label: 'Profilim', icon: User, badge: null, matchPrefixes: ['/profile'], tone: 'emerald' },
+      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, api: '/api/analytics/', tone: 'cyan' },
+      { href: '/shop', label: "Artefakt Do'koni", icon: ShoppingBag, badge: null, featureKey: 'shop', matchPrefixes: ['/shop'], tone: 'amber' },
+      { href: '/premium', label: 'VIP Pass', icon: Crown, badge: 'PRO', vip: true, tone: 'gold' },
     ],
   },
 ];
@@ -158,7 +160,7 @@ export default function Sidebar({
                 onClick={onMobileClose}
                 className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition-all"
               >
-                <GraduationCap className="size-3.5 text-emerald-400" />
+                <PremiumIcon icon={GraduationCap} tone="emerald" size="xs" glow />
                 <span>O&apos;qituvchi paneli</span>
               </Link>
             )}
@@ -168,7 +170,7 @@ export default function Sidebar({
                 onClick={onMobileClose}
                 className="flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-300 hover:bg-rose-500/20 transition-all"
               >
-                <ShieldCheck className="size-3.5 text-rose-400" />
+                <PremiumIcon icon={ShieldCheck} tone="rose" size="xs" glow />
                 <span>Super Admin paneli</span>
               </Link>
             )}
@@ -206,16 +208,13 @@ export default function Sidebar({
                         )}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div
-                            className={cn(
-                              'flex size-7 shrink-0 items-center justify-center rounded-xl transition-colors',
-                              active
-                                ? 'bg-emerald-500/20 text-emerald-400'
-                                : 'bg-slate-800/60 text-slate-400 group-hover:text-slate-200 group-hover:bg-slate-800'
-                            )}
-                          >
-                            <Icon className={cn('size-3.5', item.glow && 'animate-pulse text-rose-400')} />
-                          </div>
+                          <PremiumIcon
+                            icon={Icon as any}
+                            tone={active ? (item.tone || 'emerald') : 'zinc'}
+                            size="sm"
+                            glow={active || item.glow}
+                            className={cn('transition-transform duration-200 group-hover:scale-110', !active && 'group-hover:border-slate-700')}
+                          />
                           <span className="truncate">{item.label}</span>
                         </div>
 
