@@ -167,21 +167,21 @@ function getNotifIcon(type: string, title: string) {
 
 function DashboardSkeleton() {
   return (
-    <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-16 sm:p-6">
-      <Skeleton className="h-32 w-full rounded-[2rem]" />
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
-          <Skeleton className="h-64 w-full rounded-[2rem]" />
-          <Skeleton className="h-28 w-full rounded-[1.75rem]" />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <main className="page-shell flex-1 space-y-4 sm:space-y-6 bg-[var(--bg-page)] p-3.5 sm:p-6 pb-24 sm:pb-20">
+      <Skeleton className="h-28 sm:h-32 w-full rounded-2xl sm:rounded-[2rem]" />
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
+        <div className="space-y-4 sm:space-y-6 lg:col-span-8">
+          <Skeleton className="h-44 sm:h-64 w-full rounded-2xl sm:rounded-[2rem]" />
+          <Skeleton className="h-24 sm:h-28 w-full rounded-2xl sm:rounded-[1.75rem]" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-2xl" />
+              <Skeleton key={i} className="h-28 sm:h-32 rounded-xl sm:rounded-2xl" />
             ))}
           </div>
         </div>
-        <div className="space-y-6 lg:col-span-4">
-          <Skeleton className="h-56 w-full rounded-[1.75rem]" />
-          <Skeleton className="h-72 w-full rounded-[1.75rem]" />
+        <div className="space-y-4 sm:space-y-6 lg:col-span-4">
+          <Skeleton className="h-52 sm:h-56 w-full rounded-2xl sm:rounded-[1.75rem]" />
+          <Skeleton className="h-64 sm:h-72 w-full rounded-2xl sm:rounded-[1.75rem]" />
         </div>
       </div>
     </main>
@@ -331,47 +331,47 @@ export default function DashboardPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-20 sm:p-6 sm:space-y-7">
+      <main className="page-shell flex-1 space-y-4 sm:space-y-6 bg-[var(--bg-page)] p-3.5 sm:p-6 pb-24 sm:pb-20 sm:space-y-7">
         
         {/* ============================================================ */}
         {/* TOP STATUS BAR: GREETING & FLOATING GAMIFICATION PILLS       */}
         {/* ============================================================ */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <Avatar className="size-11 sm:size-12 border-2 border-sky-400/50 ring-2 ring-sky-400/20 shadow-xs">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <Avatar className="size-10 sm:size-12 border-2 border-sky-400/50 ring-2 ring-sky-400/20 shadow-xs shrink-0">
               <AvatarImage src={p.avatar_url || undefined} alt={fullName} />
-              <AvatarFallback className="font-black bg-sky-500/20 text-sky-600 dark:text-sky-300 text-sm">
+              <AvatarFallback className="font-black bg-sky-500/20 text-sky-600 dark:text-sky-300 text-xs sm:text-sm">
                 {firstName.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted-foreground">{greeting()},</span>
-                <span className="text-sm font-black text-foreground">{firstName}</span>
+                <span className="text-xs text-muted-foreground hidden xs:inline">{greeting()},</span>
+                <span className="text-sm font-black text-foreground truncate max-w-[110px] sm:max-w-none">{firstName}</span>
                 {p.is_premium && (
-                  <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[9px] font-bold px-1.5 py-0 h-4">
+                  <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[9px] font-bold px-1.5 py-0 h-4 shrink-0">
                     PRO
                   </Badge>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
                 <span>{rankInfo.icon}</span>
-                <span className="font-semibold text-primary">{rankInfo.title}</span>
-                <span>· Level {p.level}</span>
+                <span className="font-semibold text-primary truncate">{rankInfo.title}</span>
+                <span className="shrink-0">· Level {p.level}</span>
               </p>
             </div>
           </div>
 
           {/* Gamification Pills (Streak, Coins, Online) */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Streak Pill */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
                   href="/profile"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all text-foreground"
+                  className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all text-foreground"
                 >
-                  <Flame className="size-4 text-amber-500 fill-amber-500 animate-bounce" />
+                  <Flame className="size-3.5 sm:size-4 text-amber-500 fill-amber-500 animate-bounce" />
                   <span className="font-mono text-xs font-black">{p.streak}</span>
                 </Link>
               </TooltipTrigger>
@@ -385,9 +385,9 @@ export default function DashboardPage() {
               <TooltipTrigger asChild>
                 <Link
                   href="/shop"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-all text-foreground"
+                  className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-all text-foreground"
                 >
-                  <Coins className="size-4 text-sky-500 fill-sky-500" />
+                  <Coins className="size-3.5 sm:size-4 text-sky-500 fill-sky-500" />
                   <span className="font-mono text-xs font-black">{p.coins.toLocaleString('uz-UZ')}</span>
                 </Link>
               </TooltipTrigger>
@@ -420,16 +420,16 @@ export default function DashboardPage() {
                     type="button"
                     onClick={handleOpenNotifications}
                     className={cn(
-                      "relative flex items-center justify-center size-9 rounded-full transition-all text-foreground",
+                      "relative flex items-center justify-center size-8 sm:size-9 rounded-full transition-all text-foreground cursor-pointer",
                       showNotifications
                         ? "bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/30"
                         : "bg-muted/70 hover:bg-muted border border-border/60 hover:border-primary/40"
                     )}
                     aria-label="Bildirishnomalar"
                   >
-                    <Bell className={cn("size-4", unreadCount > 0 && "text-primary animate-pulse")} />
+                    <Bell className={cn("size-3.5 sm:size-4", unreadCount > 0 && "text-primary animate-pulse")} />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-xs animate-bounce">
+                      <span className="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-3.5 sm:h-4 sm:min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[8px] sm:text-[9px] font-black text-white shadow-xs animate-bounce">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
@@ -563,19 +563,19 @@ export default function DashboardPage() {
           <div className="space-y-6 lg:col-span-8">
             
             {/* 1. LINGORA 3D MASCOT HERO CARD */}
-            <div className="relative overflow-hidden rounded-[2rem] border border-sky-200/80 dark:border-sky-800/50 bg-gradient-to-br from-sky-100/90 via-sky-50/50 to-white dark:from-sky-950/40 dark:via-background dark:to-card p-5 sm:p-7 shadow-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-5 sm:gap-6">
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] border border-sky-200/80 dark:border-sky-800/50 bg-gradient-to-br from-sky-100/90 via-sky-50/50 to-white dark:from-sky-950/40 dark:via-background dark:to-card p-4 sm:p-7 shadow-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-4 sm:gap-6">
                 
                 {/* Left Text & CTA */}
-                <div className="sm:col-span-7 space-y-3 z-10">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 dark:bg-card/90 border border-sky-200/80 dark:border-sky-800/50 text-xs font-extrabold text-sky-600 dark:text-sky-400 shadow-2xs">
+                <div className="sm:col-span-7 space-y-2.5 sm:space-y-3 z-10">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/90 dark:bg-card/90 border border-sky-200/80 dark:border-sky-800/50 text-[11px] sm:text-xs font-extrabold text-sky-600 dark:text-sky-400 shadow-2xs">
                     <span>🇷🇺</span>
                     <span>{activeSubject}</span>
                     <ChevronRight className="size-3 text-muted-foreground" />
                   </div>
 
                   <div className="space-y-1">
-                    <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
+                    <h1 className="text-xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
                       {greeting()}, {firstName}! 👋
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm">
@@ -583,8 +583,8 @@ export default function DashboardPage() {
                     </p>
                   </div>
 
-                  <div className="pt-1.5">
-                    <Button asChild size="lg" className="rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold shadow-md shadow-sky-500/25 gap-2 px-6 h-11 text-xs sm:text-sm transition-all hover:scale-[1.02]">
+                  <div className="pt-1">
+                    <Button asChild size="lg" className="w-full sm:w-auto rounded-xl sm:rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold shadow-md shadow-sky-500/25 gap-2 px-6 h-10 sm:h-11 text-xs sm:text-sm transition-all hover:scale-[1.02] cursor-pointer">
                       <Link href={nudge.href || "/tests"}>
                         <span>Darsni davom ettirish</span>
                         <ArrowRight className="size-4" />
@@ -595,7 +595,7 @@ export default function DashboardPage() {
 
                 {/* Right 3D Mascot Image */}
                 <div className="sm:col-span-5 flex justify-center sm:justify-end">
-                  <div className="relative w-44 sm:w-52 md:w-60 aspect-[4/3] rounded-3xl overflow-hidden shadow-lg border-2 border-white dark:border-sky-800/40 ring-4 ring-sky-200/30 dark:ring-sky-900/30">
+                  <div className="relative w-36 sm:w-52 md:w-60 aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border-2 border-white dark:border-sky-800/40 ring-2 sm:ring-4 ring-sky-200/30 dark:ring-sky-900/30">
                     <img
                       src="/images/mascot-hero.jpg"
                       alt="Ilm Mascot"
@@ -608,9 +608,9 @@ export default function DashboardPage() {
             </div>
 
             {/* 2. CONTINUE LEARNING BANNER */}
-            <div className="space-y-2.5">
+            <div className="space-y-2 sm:space-y-2.5">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-black tracking-tight text-foreground">
+                <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground">
                   O&apos;qishni davom ettirish
                 </h2>
                 <Link href="/tests" className="text-xs font-bold text-sky-500 hover:underline">
@@ -618,11 +618,11 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <Card className="rounded-[1.75rem] border border-border/70 bg-card p-4 sm:p-5 shadow-xs hover:border-sky-500/40 transition-all group">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex size-13 sm:size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-md shadow-sky-500/20">
-                      <BookOpen className="size-6 sm:size-7" />
+              <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-card p-3.5 sm:p-5 shadow-xs hover:border-sky-500/40 transition-all group">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+                    <div className="flex size-12 sm:size-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-md shadow-sky-500/20">
+                      <BookOpen className="size-5 sm:size-7" />
                     </div>
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-2">
@@ -635,7 +635,7 @@ export default function DashboardPage() {
                         {continueTitle}
                       </h3>
                       <div className="flex items-center gap-2 pt-0.5">
-                        <div className="h-1.5 w-28 rounded-full bg-muted overflow-hidden">
+                        <div className="h-1.5 w-24 sm:w-28 rounded-full bg-muted overflow-hidden">
                           <div className="h-full bg-sky-500 rounded-full" style={{ width: `${lastAttempt?.score || 60}%` }} />
                         </div>
                         <span className="text-[10px] font-mono text-muted-foreground font-bold">
@@ -645,8 +645,8 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 self-end sm:self-center">
-                    <Button asChild className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold px-5 gap-1.5 shadow-sm h-10 text-xs">
+                  <div className="flex items-center gap-3 self-stretch sm:self-center">
+                    <Button asChild className="w-full sm:w-auto rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold px-5 gap-1.5 shadow-sm h-9 sm:h-10 text-xs cursor-pointer">
                       <Link href="/tests">
                         <Play className="size-3.5 fill-white" />
                         <span>Boshlash</span>
@@ -658,36 +658,36 @@ export default function DashboardPage() {
             </div>
 
             {/* 3. BUILD YOUR SKILLS (4 PASTEL TILES) */}
-            <div className="space-y-2.5">
+            <div className="space-y-2 sm:space-y-2.5">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-black tracking-tight text-foreground">
+                <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground">
                   Ko&apos;nikmalarni rivojlantirish
                 </h2>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 {SKILL_CARDS.map((sk, idx) => {
                   const Icon = sk.icon;
                   return (
                     <Link key={idx} href={sk.href} className="group block">
-                      <Card className={cn("relative overflow-hidden rounded-2xl p-4 border transition-all hover:shadow-xs group h-full flex flex-col justify-between", sk.bg)}>
-                        <div className="space-y-2.5">
+                      <Card className={cn("relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 border transition-all hover:shadow-xs group h-full flex flex-col justify-between", sk.bg)}>
+                        <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className={cn("flex size-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110", sk.iconBg)}>
-                              <Icon className="size-5" />
+                            <div className={cn("flex size-9 sm:size-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110", sk.iconBg)}>
+                              <Icon className="size-4.5 sm:size-5" />
                             </div>
-                            <span className="text-[10px] font-bold text-muted-foreground/80">{sk.badge}</span>
+                            <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/80">{sk.badge}</span>
                           </div>
                           <div>
-                            <p className={cn("text-xs sm:text-sm font-extrabold text-foreground transition-colors", sk.textHover)}>
+                            <p className={cn("text-xs sm:text-sm font-extrabold text-foreground transition-colors truncate", sk.textHover)}>
                               {sk.title}
                             </p>
-                            <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-1">
+                            <p className="mt-0.5 text-[10px] sm:text-[11px] text-muted-foreground line-clamp-1">
                               {sk.desc}
                             </p>
                           </div>
                         </div>
-                        <div className="mt-3 flex items-center justify-end text-muted-foreground/60 group-hover:text-foreground transition-colors">
+                        <div className="mt-2.5 flex items-center justify-end text-muted-foreground/60 group-hover:text-foreground transition-colors">
                           <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
                         </div>
                       </Card>
@@ -698,9 +698,9 @@ export default function DashboardPage() {
             </div>
 
             {/* 4. POPULAR SUBJECTS CHIPS */}
-            <div className="space-y-2.5 pt-1">
+            <div className="space-y-2 sm:space-y-2.5 pt-0.5">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-black tracking-tight text-foreground">
+                <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground">
                   Mashhur O&apos;quv Fanlari
                 </h2>
                 <Link href="/tests" className="text-xs font-bold text-sky-500 hover:underline">
@@ -708,15 +708,15 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1 sm:mx-0 sm:px-0 sm:flex-wrap">
                 {POPULAR_SUBJECTS.map((sub, idx) => (
                   <Link
                     key={idx}
                     href={`/tests?subject=${sub.slug}`}
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-card border border-border/70 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-xs font-bold text-foreground shadow-2xs group"
+                    className="flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl bg-card border border-border/70 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-xs font-bold text-foreground shadow-2xs group shrink-0"
                   >
-                    <span className="text-base">{sub.icon}</span>
-                    <span className="group-hover:text-sky-500 transition-colors">{sub.name}</span>
+                    <span className="text-sm sm:text-base">{sub.icon}</span>
+                    <span className="group-hover:text-sky-500 transition-colors whitespace-nowrap">{sub.name}</span>
                   </Link>
                 ))}
               </div>
@@ -725,11 +725,11 @@ export default function DashboardPage() {
           </div>
 
           {/* RIGHT COLUMN: DAILY GOAL, MINI LEADERBOARD, GIFT QUEST */}
-          <div className="space-y-6 lg:col-span-4">
+          <div className="space-y-4 sm:space-y-6 lg:col-span-4">
             
             {/* 1. DAILY GOAL CARD (CIRCULAR RING + 7-DAY STREAK TRACKER) */}
-            <Card className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-xs">
-              <div className="flex items-center justify-between mb-4">
+            <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-card p-4 sm:p-5 shadow-xs">
+              <div className="flex items-center justify-between mb-3.5 sm:mb-4">
                 <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <span>Kunlik Maqsad</span>
                 </h3>
@@ -738,9 +738,9 @@ export default function DashboardPage() {
                 </Badge>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3.5 sm:gap-4">
                 {/* Circular Progress Ring */}
-                <div className="relative flex items-center justify-center size-24 shrink-0">
+                <div className="relative flex items-center justify-center size-20 sm:size-24 shrink-0">
                   <svg className="size-full -rotate-90" viewBox="0 0 96 96">
                     <circle
                       cx="48"
@@ -773,23 +773,23 @@ export default function DashboardPage() {
 
                 {/* Goal description */}
                 <div className="min-w-0 space-y-1">
-                  <p className="text-sm font-extrabold text-foreground leading-snug">
+                  <p className="text-xs sm:text-sm font-extrabold text-foreground leading-snug">
                     {goalPct >= 100 ? "Kunlik marra bajarildi! 🎉" : "Juda zo'r ketyapsiz!"}
                   </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
                     Siz <strong className="text-amber-500">{p.streak} kunlik</strong> olovli streakdasiz.
                   </p>
                 </div>
               </div>
 
               {/* 7 Days of Week Dots */}
-              <div className="mt-4 pt-3.5 border-t border-border/60">
-                <div className="flex items-center justify-between">
+              <div className="mt-3.5 sm:mt-4 pt-3 sm:pt-3.5 border-t border-border/60">
+                <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center">
                   {weekDays.map((d, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1.5">
+                    <div key={i} className="flex flex-col items-center gap-1 min-w-0">
                       <div
                         className={cn(
-                          "flex size-6 items-center justify-center rounded-full text-[10px] font-bold transition-all",
+                          "flex size-6 sm:size-7 items-center justify-center rounded-full text-[10px] font-bold transition-all",
                           d.active
                             ? "bg-sky-500 text-white shadow-xs shadow-sky-500/30"
                             : "border-2 border-border/80 bg-muted/40 text-muted-foreground"
@@ -805,7 +805,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* 2. MINI LEADERBOARD */}
-            <Card className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-xs space-y-3.5">
+            <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-card p-4 sm:p-5 shadow-xs space-y-3 sm:space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Trophy className="size-4 text-amber-500" />
@@ -824,30 +824,30 @@ export default function DashboardPage() {
                     <div
                       key={idx}
                       className={cn(
-                        "flex items-center justify-between p-2.5 rounded-2xl transition-colors",
+                        "flex items-center justify-between p-2 sm:p-2.5 rounded-xl sm:rounded-2xl transition-colors",
                         isCurrentUser
                           ? "bg-sky-500/15 border border-sky-500/30 text-sky-600 dark:text-sky-300 font-bold"
                           : "hover:bg-muted/40"
                       )}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
                         <span className={cn(
-                          "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-black",
+                          "flex size-5 sm:size-6 shrink-0 items-center justify-center rounded-full text-[11px] sm:text-xs font-black",
                           idx === 0 ? "bg-amber-400 text-neutral-950 shadow-xs" :
                           idx === 1 ? "bg-slate-300 text-neutral-950" :
                           idx === 2 ? "bg-amber-700/80 text-white" : "bg-muted text-muted-foreground"
                         )}>
                           {idx + 1}
                         </span>
-                        <Avatar className="size-7 shrink-0">
+                        <Avatar className="size-6 sm:size-7 shrink-0">
                           <AvatarImage src={item.avatar_url} />
-                          <AvatarFallback className="text-[10px] font-bold">{item.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                          <AvatarFallback className="text-[9px] sm:text-[10px] font-bold">{item.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
-                        <span className="text-xs font-bold truncate max-w-[120px]">
+                        <span className="text-xs font-bold truncate">
                           {isCurrentUser ? "Siz" : itemFullName}
                         </span>
                       </div>
-                      <span className="font-mono text-xs font-black text-muted-foreground shrink-0">
+                      <span className="font-mono text-xs font-black text-muted-foreground shrink-0 whitespace-nowrap pl-2">
                         {item.xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
@@ -857,21 +857,21 @@ export default function DashboardPage() {
             </Card>
 
             {/* 3. BONUS GIFT BOX QUEST */}
-            <Card className="rounded-[1.75rem] border border-border/70 bg-gradient-to-br from-indigo-500/10 via-card to-purple-500/10 p-5 shadow-xs space-y-3">
-              <div className="flex items-center gap-3.5">
-                <div className="size-13 shrink-0 rounded-2xl overflow-hidden shadow-md border border-white/40">
+            <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-gradient-to-br from-indigo-500/10 via-card to-purple-500/10 p-4 sm:p-5 shadow-xs space-y-2.5 sm:space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="size-12 sm:size-13 shrink-0 rounded-xl sm:rounded-2xl overflow-hidden shadow-md border border-white/40">
                   <img src="/images/gift-box.jpg" alt="Gift" className="size-full object-cover" />
                 </div>
                 <div className="min-w-0 space-y-0.5">
                   <p className="text-xs font-black text-foreground leading-snug">
                     Bugun yana 2 ta test yeching va 200 tanga bonus oling! 🎁
                   </p>
-                  <p className="text-[11px] text-muted-foreground">Kvest progressi: 3 / 5</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Kvest progressi: 3 / 5</p>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="h-2 w-full rounded-full bg-muted/60 overflow-hidden">
+                <div className="h-1.5 sm:h-2 w-full rounded-full bg-muted/60 overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full" style={{ width: '60%' }} />
                 </div>
               </div>
