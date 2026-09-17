@@ -15,6 +15,7 @@ import StreakModal from '@/components/student/StreakModal';
 import Sidebar from './Sidebar';
 import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
+import { BrandMark } from './BrandMark';
 import { cn } from '@/lib/utils';
 
 export default function AppShell() {
@@ -66,7 +67,7 @@ export default function AppShell() {
 
       {/* Modern Unicorn Topbar */}
       <header className="ilm-topbar sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-slate-800/70 bg-slate-950/75 px-4 sm:px-6 backdrop-blur-xl border-t border-white/5 lg:pl-68">
-        {/* Left: Hamburger on Mobile + Impersonation Alert + Brand/Search */}
+        {/* Left: Hamburger on Mobile + Brand Logo + Impersonation Alert + Search */}
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -76,6 +77,11 @@ export default function AppShell() {
           >
             <Menu className="size-5" />
           </button>
+
+          <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
+            <BrandMark size={28} rounded="rounded-xl" />
+            <span className="font-bold text-sm text-foreground">Ilm<span className="text-emerald-400">Ildizi</span></span>
+          </Link>
 
           {impersonating != null && (
             <button

@@ -29,6 +29,7 @@ import { useFeatureFlags } from '@/lib/features';
 import { prefetchApi } from '@/lib/api-cache';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import VerifiedBadge from '@/components/ui/verified-badge';
+import { BrandMark } from '@/components/BrandMark';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -117,8 +118,8 @@ export default function Sidebar({
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
           <Link href="/dashboard" onClick={onMobileClose} className="group flex items-center gap-3">
-            <div className="relative flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 font-black shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-2 ring-emerald-400/20 group-hover:scale-105 transition-transform">
-              <Zap className="size-5 fill-slate-950" />
+            <div className="relative flex size-10 shrink-0 items-center justify-center rounded-2xl overflow-hidden shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-2 ring-emerald-400/20 group-hover:scale-105 transition-transform bg-slate-900">
+              <BrandMark size={40} rounded="rounded-2xl" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
