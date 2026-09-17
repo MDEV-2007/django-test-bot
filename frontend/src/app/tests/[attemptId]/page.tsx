@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { celebrate } from '@/lib/confetti';
-import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, Layers, X, Volume2 } from 'lucide-react';
+import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import {
   tgHaptic, useIsTelegram, useTelegramBackButton, useTelegramClosingConfirmation, useTelegramMainButton,
@@ -107,15 +107,21 @@ export default function TestScreenPage() {
     if (access) load(qIdx);
   }, [authReady, access, attemptId, load, qIdx, router]);
 
-  // Local countdown between server syncs so the timer doesn't visibly stall.
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+
+  // Local countdown between server syncs so the timer doesn't visibly stall and doesn't re-render entire question data
   useEffect(() => {
-    if (typeof data?.seconds_left !== 'number') return;
+    if (typeof data?.seconds_left === 'number') {
+      setSecondsLeft(data.seconds_left);
+    }
+  }, [data?.seconds_left]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
-      setData((prev) => (prev && typeof prev.seconds_left === 'number' && prev.seconds_left > 0
-        ? { ...prev, seconds_left: prev.seconds_left - 1 } : prev));
+      setSecondsLeft((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
-  }, [data?.q_idx]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   async function submit(payload: Record<string, unknown>) {
     if (!data) return;
@@ -208,7 +214,7 @@ export default function TestScreenPage() {
   }
 
   const q = data.question;
-  const timeLeft = data.seconds_left;
+  const timeLeft = secondsLeft ?? data.seconds_left;
   const progress = (answeredIdxs.size / Math.max(1, data.total_questions)) * 100;
 
   return (
@@ -393,20 +399,50 @@ export default function TestScreenPage() {
         </div>
 
         <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader className="items-center text-center sm:text-center">
-              <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400">
-                <AlertCircle className="size-6" />
+          <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-lg shadow-amber-500/10">
+                <AlertTriangle className="size-7" />
               </div>
-              <DialogTitle>Imtihondan chiqmoqchimisiz?</DialogTitle>
-              <DialogDescription>
-                Joriy javoblaringiz saqlanadi, ammo imtihon taymeri to&apos;xtatilmaydi.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="sm:justify-center">
-              <Button variant="outline" className="flex-1" onClick={() => setShowExitModal(false)}>Davom etish</Button>
-              <Button variant="destructive" className="flex-1" onClick={() => router.push('/tests')}>Chiqish</Button>
-            </DialogFooter>
+
+              <div className="space-y-1.5">
+                <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+                  Imtihondan chiqmoqchimisiz?
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Imtihon sessiyangiz faol holatda qoladi.
+                </DialogDescription>
+              </div>
+
+              {/* Warning info callout */}
+              <div className="w-full text-left rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-200/90 leading-relaxed space-y-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-amber-400">
+                  <Clock className="size-4 shrink-0" />
+                  <span>Diqqat: Imtihon vaqti to&apos;xtatilmaydi!</span>
+                </div>
+                <p className="text-[11px] text-amber-300/80">
+                  Sahifani tark etsangiz ham taymer orqa fonda hisoblanadi. Javoblaringiz esa saqlab qolinadi.
+                </p>
+              </div>
+
+              <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/tests')}
+                  className="w-full sm:w-auto flex-1 rounded-xl font-bold border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 h-10 gap-1.5"
+                >
+                  <LogOut className="size-4" />
+                  Chiqish
+                </Button>
+                <Button
+                  onClick={() => setShowExitModal(false)}
+                  className="w-full sm:w-auto flex-1 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 h-10 gap-1.5"
+                >
+                  <CheckCircle2 className="size-4" />
+                  Davom etish
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </main>

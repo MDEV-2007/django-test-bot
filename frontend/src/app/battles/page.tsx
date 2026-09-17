@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Swords, Bot, Trophy, Shield, Loader2, RotateCcw, Radio, Share2, Copy } from 'lucide-react';
+import Link from 'next/link';
+import { Swords, Bot, Trophy, Shield, Loader2, RotateCcw, Radio, Share2, Copy, MapPin, UserCheck, History, Sparkles, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -444,6 +445,116 @@ export default function BattlesPage() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Maxsus O'yinlar & Mini-Arenalar (Xarita, Shaxslar, Xronologiya) */}
+            <div className="space-y-3 pt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 font-bold">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-foreground">Intellektual O&apos;yinlar &amp; Mini-Gamlar</h3>
+                    <p className="text-xs text-muted-foreground">Xaritalar, tarixiy shaxslar va xronologiya bo&apos;yicha maxsus sinovlar</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {/* 1. Xarita Game */}
+                <Link href="/games/map" className="group">
+                  <Card className="h-full border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-[var(--surface-card)] to-transparent hover:border-blue-500 hover:shadow-lg transition-all">
+                    <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
+                            <MapPin className="size-5" />
+                          </div>
+                          <Badge variant="outline" className="border-blue-500/40 bg-blue-500/10 text-blue-400 text-[10px] font-black">
+                            XARITA GAME
+                          </Badge>
+                        </div>
+                        <h4 className="text-base font-black text-foreground group-hover:text-blue-400 transition-colors">
+                          Xarita topshirig&apos;i
+                        </h4>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Tarixiy xaritalardan qadimiy shaharlar, hududlar va davlatlarni toping.
+                        </p>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
+                        <span className="text-[11px] font-bold text-amber-400">+25 XP · +10 tanga</span>
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
+                          O&apos;ynash <ArrowRight className="size-3.5" />
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                {/* 2. Shaxs Game */}
+                <Link href="/games/character" className="group">
+                  <Card className="h-full border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-[var(--surface-card)] to-transparent hover:border-purple-500 hover:shadow-lg transition-all">
+                    <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
+                            <UserCheck className="size-5" />
+                          </div>
+                          <Badge variant="outline" className="border-purple-500/40 bg-purple-500/10 text-purple-400 text-[10px] font-black">
+                            SHAXSLAR
+                          </Badge>
+                        </div>
+                        <h4 className="text-base font-black text-foreground group-hover:text-purple-400 transition-colors">
+                          Tarixiy shaxsni top
+                        </h4>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          3 ta fakt va maslahat orqali alloma yoki davlat arbobini aniqlang.
+                        </p>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
+                        <span className="text-[11px] font-bold text-amber-400">+20 XP · +10 tanga</span>
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
+                          O&apos;ynash <ArrowRight className="size-3.5" />
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                {/* 3. Timeline Game */}
+                <Link href="/games/timeline" className="group">
+                  <Card className="h-full border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-[var(--surface-card)] to-transparent hover:border-emerald-500 hover:shadow-lg transition-all">
+                    <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition-transform">
+                            <History className="size-5" />
+                          </div>
+                          <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-black">
+                            XRONOLOGIYA
+                          </Badge>
+                        </div>
+                        <h4 className="text-base font-black text-foreground group-hover:text-emerald-400 transition-colors">
+                          Vaqt o&apos;qi (Timeline)
+                        </h4>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Voqealar ketma-ketligini xronologik tartibda to&apos;g&apos;ri joylashtiring.
+                        </p>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
+                        <span className="text-[11px] font-bold text-amber-400">+30 XP · +15 tanga</span>
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
+                          O&apos;ynash <ArrowRight className="size-3.5" />
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </div>
             </div>
 
             {onlineUsers.length > 0 && (

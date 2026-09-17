@@ -8,8 +8,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  AlertCircle, ArrowRight, BookOpen, CheckCircle2, ChevronLeft, ChevronRight,
-  Clock, FileEdit, Headphones, LayoutGrid, Loader2, Sparkles, X,
+  AlertCircle, AlertTriangle, ArrowRight, BookOpen, CheckCircle2, ChevronLeft, ChevronRight,
+  Clock, FileEdit, Headphones, LayoutGrid, Loader2, LogOut, ShieldAlert, Sparkles, X,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -81,6 +81,7 @@ export default function CefrExamPage() {
   const [finishing, setFinishing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState<number>(0);
 
   const saveTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const annotationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -151,6 +152,7 @@ export default function CefrExamPage() {
     apiFetch<CefrExam>(`/api/tests/attempts/${attemptId}/exam/`)
       .then((data) => {
         setExam(data);
+        setSecondsLeft(data.seconds_left);
         setAnnotations(data.annotations ?? {});
         if (data.is_completed) router.replace(`/tests/${attemptId}/feedback`);
       })
@@ -160,21 +162,29 @@ export default function CefrExamPage() {
       });
   }, [authReady, access, attemptId, router]);
 
-  // Taymer
+  // Yengil Taymer (butun exam ob'ektini qayta chizmaslik uchun alohida state)
   useEffect(() => {
-    if (!exam) return;
+    if (!exam || exam.is_completed) return;
     const timer = setInterval(() => {
-      setExam((prev) => (prev && prev.seconds_left > 0 ? { ...prev, seconds_left: prev.seconds_left - 1 } : prev));
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setTimeUp(true);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, [exam?.attempt_id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [exam?.attempt_id, exam?.is_completed]);
 
-  // Vaqt tugaganda
+  // Vaqt tugaganda avtomatik topshirish
   useEffect(() => {
-    if (!exam || exam.is_completed || exam.seconds_left > 0 || finishing) return;
-    setTimeUp(true);
-    void finish();
-  }, [exam?.seconds_left]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (secondsLeft === 0 && exam && !exam.is_completed && !finishing && exam.seconds_left > 0) {
+      setTimeUp(true);
+      void finish();
+    }
+  }, [secondsLeft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sections = exam?.sections ?? [];
 
@@ -445,12 +455,12 @@ export default function CefrExamPage() {
               {/* Countdown Timer */}
               <div className={cn(
                 'flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-black font-mono tracking-wider shrink-0',
-                exam.seconds_left <= 300
+                secondsLeft <= 300
                   ? 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/40'
                   : 'bg-[var(--surface-card-medium)] border border-[var(--border-card)] text-foreground',
               )}>
                 <Clock className="size-3 sm:size-3.5" />
-                {formatTime(exam.seconds_left)}
+                {formatTime(secondsLeft)}
               </div>
 
               {/* Font size picker (Reading rejimida) */}
@@ -1358,55 +1368,129 @@ export default function CefrExamPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Chiqish Modal */}
+      {/* Chiqish Ogohlantirish Modali */}
       <Dialog open={showExit} onOpenChange={setShowExit}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Imtihon sahifasidan chiqmoqchimisiz?</DialogTitle>
-            <DialogDescription>
-              Vaqtingiz hisoblanishda davom etadi. Istalgan vaqtda qaytib kelib davom ettirishingiz mumkin.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowExit(false)} className="rounded-xl font-bold">
-              Davom ettirish
-            </Button>
-            <Button variant="secondary" onClick={() => router.push('/tests')} className="rounded-xl font-bold">
-              Chiqish
-            </Button>
-          </DialogFooter>
+        <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-lg shadow-amber-500/10">
+              <AlertTriangle className="size-7" />
+            </div>
+
+            <div className="space-y-1.5">
+              <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+                Imtihondan chiqmoqchimisiz?
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Imtihon sessiyangiz faol holatda qoladi.
+              </DialogDescription>
+            </div>
+
+            {/* Warning info callout */}
+            <div className="w-full text-left rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-200/90 leading-relaxed space-y-1.5">
+              <div className="flex items-center gap-1.5 font-bold text-amber-400">
+                <Clock className="size-4 shrink-0" />
+                <span>Diqqat: Imtihon vaqti to&apos;xtatilmaydi!</span>
+              </div>
+              <p className="text-[11px] text-amber-300/80">
+                Sahifani yopsangiz ham serverda taymer hisoblanishda davom etadi. Belgilangan barcha javoblaringiz esa saqlab qolinadi.
+              </p>
+            </div>
+
+            <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => router.push('/tests')}
+                className="w-full sm:w-auto flex-1 rounded-xl font-bold border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 h-10 gap-1.5"
+              >
+                <LogOut className="size-4" />
+                Chiqish
+              </Button>
+              <Button
+                onClick={() => setShowExit(false)}
+                className="w-full sm:w-auto flex-1 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 h-10 gap-1.5"
+              >
+                <CheckCircle2 className="size-4" />
+                Davom ettirish
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Yakuniy Tasdiqlash Modal */}
       <Dialog open={showFinishConfirm} onOpenChange={setShowFinishConfirm}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-black">Imtihonni topshirasizmi?</DialogTitle>
-            <DialogDescription className="space-y-2 pt-2">
-              <span className="block text-sm text-foreground">
-                Jami <strong className="text-emerald-400">{totals.answered}</strong> / {totals.total} ta savolga javob berildi.
-              </span>
-              {totals.answered < totals.total && (
-                <span className="block text-xs text-amber-400">
-                  ⚠️ Diqqat: {totals.total - totals.answered} ta savol javobsiz qolmoqda.
+        <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-emerald-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/10">
+              <CheckCircle2 className="size-7" />
+            </div>
+
+            <div className="space-y-1">
+              <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+                Imtihonni topshirasizmi?
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Topshirgach, natijalaringiz hisoblanadi va to&apos;liq tahlil taqdim etiladi.
+              </DialogDescription>
+            </div>
+
+            {/* Answer stats card */}
+            <div className="w-full grid grid-cols-2 gap-2.5">
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">Javoblangan</span>
+                <span className="text-lg sm:text-xl font-black text-emerald-300 font-mono mt-0.5 block">
+                  {totals.answered} <span className="text-xs text-muted-foreground font-normal">/ {totals.total}</span>
                 </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0 pt-3">
-            <Button variant="outline" onClick={() => setShowFinishConfirm(false)} className="rounded-xl font-bold">
-              Qaytish
-            </Button>
-            <Button
-              onClick={finish}
-              disabled={finishing}
-              className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              {finishing ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
-              Ha, yakunlash
-            </Button>
-          </DialogFooter>
+              </div>
+
+              <div className={cn(
+                'rounded-2xl border p-3 text-center',
+                totals.total - totals.answered > 0
+                  ? 'border-amber-500/30 bg-amber-500/10'
+                  : 'border-[var(--border-card)] bg-[var(--surface-card-medium)]'
+              )}>
+                <span className={cn(
+                  'text-[10px] font-bold uppercase tracking-wider block',
+                  totals.total - totals.answered > 0 ? 'text-amber-400' : 'text-muted-foreground'
+                )}>
+                  Javobsiz qolgan
+                </span>
+                <span className={cn(
+                  'text-lg sm:text-xl font-black font-mono mt-0.5 block',
+                  totals.total - totals.answered > 0 ? 'text-amber-300' : 'text-muted-foreground'
+                )}>
+                  {totals.total - totals.answered} ta
+                </span>
+              </div>
+            </div>
+
+            {totals.answered < totals.total && (
+              <div className="w-full text-left rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-300 flex items-start gap-2">
+                <AlertCircle className="size-4 text-amber-400 shrink-0 mt-0.5" />
+                <span>
+                  {totals.total - totals.answered} ta savol javobsiz qolgan. Topshirgandan so&apos;ng javoblarni o&apos;zgartirib bo&apos;lmaydi.
+                </span>
+              </div>
+            )}
+
+            <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowFinishConfirm(false)}
+                className="w-full sm:w-auto flex-1 rounded-xl font-bold h-10 border-[var(--border-card)]"
+              >
+                Savollarga qaytish
+              </Button>
+              <Button
+                onClick={finish}
+                disabled={finishing}
+                className="w-full sm:w-auto flex-1 rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-600/25 h-10 gap-1.5"
+              >
+                {finishing ? <Loader2 className="size-4 animate-spin" /> : null}
+                Ha, topshirish 🏁
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -9,7 +9,6 @@ import Script from "next/script";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TelegramProvider from "@/components/TelegramProvider";
 import SubscriptionGate from "@/components/SubscriptionGate";
-import BrandSplashScreen from "@/components/BrandSplashScreen";
 
 /* Uch shriftli tizim (UI_UX_ANALIZ_VA_REJA.md, 2.1-bo'lim):
    - Plus Jakarta Sans — butun interfeys matni. Inter'ga nisbatan x-height'i baland,
@@ -79,7 +78,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
             <AuthProvider>
-              <BrandSplashScreen />
               {/* Dynamic Atmospheric Glow Gradients (Universal Across All Pages) */}
               <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[450px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.08),transparent_70%)]" />
