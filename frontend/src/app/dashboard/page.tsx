@@ -6,8 +6,8 @@ import Link from 'next/link';
 import {
   FileCheck2, Swords, BookOpen,
   Crown, Sparkles, Flame, Coins, Trophy,
-  CheckCircle2, ChevronRight, Zap, Layers, Headphones, Target,
-  Dna, Brain, ArrowRight,
+  CheckCircle2, ChevronRight, Zap, Layers, Headphones,
+  Dna, Brain, ArrowRight, Play, Check
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
@@ -16,11 +16,9 @@ import PresenceRow from '@/components/student/PresenceRow';
 import Celebration from '@/components/student/Celebration';
 import { mentorNudge } from '@/lib/mentorVoice';
 import AppShell from '@/components/AppShell';
-import CardMotif from '@/components/student/CardMotif';
 import { cn } from '@/lib/utils';
 import { useFeatureFlags } from '@/lib/features';
-import PremiumIcon, { PremiumIconTone } from '@/components/ui/premium-icon';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -55,13 +53,75 @@ type DashboardData = {
   subject_mastery?: { id: number; name: string; color?: string; mastery: number; answered?: number }[];
 };
 
-const QUICK_ACCESS = [
-  { href: '/tests', title: 'Amaliy Mashqlar', desc: 'DTM va mavzuli testlar', icon: FileCheck2, badge: 'Asosiy', motif: 'tests' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone, featureKey: 'tests' },
-  { href: '/battles', title: 'Arena: 1v1 Jang', desc: 'Jonli intellektual bellashuv', icon: Swords, badge: 'Live ⚔️', motif: 'arena' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'battles' },
-  { href: '/learning', title: 'Darslar & Konspekt', desc: 'Video, audio va qisqa darslar', icon: BookOpen, badge: 'Nazariya', motif: 'lessons' as const, motifTone: 'text-[var(--tone-lesson-text)]', iconTone: 'indigo' as PremiumIconTone, featureKey: 'learning' },
-  { href: '/flashcards', title: 'Quick Learn', desc: 'Sanalar va qoidalarni yodlash', icon: Layers, badge: 'Anki ⚡', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'amber' as PremiumIconTone, featureKey: 'flashcards' },
-  { href: '/study', title: 'Fokus Xonasi', desc: 'Pomodoro darsi va ambient ovozlar', icon: Headphones, badge: 'Fokus', motif: 'lessons' as const, motifTone: 'text-[var(--tone-growth-text)]', iconTone: 'emerald' as PremiumIconTone },
-  { href: '/reels', title: 'Bilim Reels', desc: 'Qisqa ta\'limiy videolar', icon: Sparkles, badge: 'Reels 🎬', motif: 'lessons' as const, motifTone: 'text-[var(--tone-danger-text)]', iconTone: 'rose' as PremiumIconTone, featureKey: 'reels' },
+type LeaderboardRow = {
+  profile_id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
+  xp: number;
+  level: number;
+  role: string;
+  is_superadmin: boolean;
+  is_teacher: boolean;
+};
+
+type LeaderboardData = {
+  top: LeaderboardRow[];
+  my_group: (LeaderboardRow & { rank: number; is_me: boolean })[];
+  my_rank: number;
+};
+
+const SKILL_CARDS = [
+  {
+    title: "Audio & Fokus",
+    desc: "Ambient va tinglab tushunish",
+    icon: Headphones,
+    href: "/study",
+    badge: "12 dars",
+    bg: "bg-purple-500/10 hover:bg-purple-500/15 border-purple-500/25",
+    iconBg: "bg-purple-500/20 text-purple-600 dark:text-purple-400",
+    textHover: "group-hover:text-purple-600 dark:group-hover:text-purple-400",
+  },
+  {
+    title: "Nazariya & Konspekt",
+    desc: "Video va qisqa darslar",
+    icon: BookOpen,
+    href: "/learning",
+    badge: "Barcha fanlar",
+    bg: "bg-rose-500/10 hover:bg-rose-500/15 border-rose-500/25",
+    iconBg: "bg-rose-500/20 text-rose-600 dark:text-rose-400",
+    textHover: "group-hover:text-rose-600 dark:group-hover:text-rose-400",
+  },
+  {
+    title: "Lug'at & Flashcard",
+    desc: "Sanalar va formulalar",
+    icon: Layers,
+    href: "/flashcards",
+    badge: "Anki ⚡",
+    bg: "bg-emerald-500/10 hover:bg-emerald-500/15 border-emerald-500/25",
+    iconBg: "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400",
+    textHover: "group-hover:text-emerald-600 dark:group-hover:text-emerald-400",
+  },
+  {
+    title: "Amaliy Testlar",
+    desc: "DTM & Milliy Sertifikat",
+    icon: Zap,
+    href: "/tests",
+    badge: "Mock Test",
+    bg: "bg-amber-500/10 hover:bg-amber-500/15 border-amber-500/25",
+    iconBg: "bg-amber-500/20 text-amber-600 dark:text-amber-400",
+    textHover: "group-hover:text-amber-600 dark:group-hover:text-amber-400",
+  },
+];
+
+const POPULAR_SUBJECTS = [
+  { name: "Rus tili", icon: "🇷🇺", slug: "rus-tili" },
+  { name: "Tarix", icon: "🏛", slug: "tarix" },
+  { name: "Ona tili", icon: "📖", slug: "ona-tili" },
+  { name: "Ingliz tili", icon: "🇬🇧", slug: "ingliz-tili" },
+  { name: "Matematika", icon: "📐", slug: "matematika" },
+  { name: "Biologiya", icon: "🌿", slug: "biologiya" },
 ];
 
 function greeting() {
@@ -74,15 +134,22 @@ function greeting() {
 
 function DashboardSkeleton() {
   return (
-    <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-      <Skeleton className="h-28 w-full rounded-3xl" />
-      <Skeleton className="h-44 w-full rounded-3xl" />
-      <div className="grid gap-5 md:grid-cols-12">
-        <Skeleton className="h-64 md:col-span-7 rounded-3xl" />
-        <Skeleton className="h-64 md:col-span-5 rounded-3xl" />
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+    <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-16 sm:p-6">
+      <Skeleton className="h-32 w-full rounded-[2rem]" />
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-8">
+          <Skeleton className="h-64 w-full rounded-[2rem]" />
+          <Skeleton className="h-28 w-full rounded-[1.75rem]" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-32 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+        <div className="space-y-6 lg:col-span-4">
+          <Skeleton className="h-56 w-full rounded-[1.75rem]" />
+          <Skeleton className="h-72 w-full rounded-[1.75rem]" />
+        </div>
       </div>
     </main>
   );
@@ -92,7 +159,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { access, authReady } = useAuthStore();
   const { isEnabled } = useFeatureFlags();
+
   const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
+  const { data: lbData } = useApiQuery<LeaderboardData>('/api/leaderboard/');
 
   useEffect(() => {
     if (authReady && !access) router.push('/login');
@@ -118,12 +187,7 @@ export default function DashboardPage() {
   const firstName = p.first_name || p.username;
   const fullName = `${firstName} ${p.last_name || ''}`.trim();
   const doneMissions = data.missions.filter((m) => m.is_completed).length;
-  const missionPct = data.missions.length ? Math.round((doneMissions / data.missions.length) * 100) : 0;
-  const allMissionsDone = data.missions.length > 0 && doneMissions === data.missions.length;
-  const xpLeft = Math.max(0, p.next_level_xp - p.xp);
-
-  const activeSubject = data.selected_subject?.name || 'Umumiy Ta\'lim';
-  const suggestedMissionTitle = data.suggested_topic?.title || 'Bugungi Mashqlar To\'plami';
+  const activeSubject = data.selected_subject?.name || 'Rus tili';
 
   const nudge = mentorNudge({
     firstName,
@@ -137,440 +201,459 @@ export default function DashboardPage() {
     solvedToday: data.solved_today ?? 0,
   });
 
+  const lastAttempt = data.recent_attempts[0] || null;
+  const continueTitle = lastAttempt
+    ? lastAttempt.test_title
+    : (data.suggested_topic?.title || "Rus tili — Boshlang'ich grammatika");
+
+  // Daily Goal progress
+  const targetGoals = 3;
+  const currentGoals = Math.min(targetGoals, data.solved_today || (doneMissions > 0 ? doneMissions : 1));
+  const goalPct = Math.min(100, Math.round((currentGoals / targetGoals) * 100));
+
+  // Circular ring measurements
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (goalPct / 100) * circumference;
+
+  // 7 Days of Week Dots
+  const weekDays = [
+    { label: 'D', active: p.streak >= 1 },
+    { label: 'S', active: p.streak >= 2 },
+    { label: 'CH', active: p.streak >= 3 },
+    { label: 'P', active: p.streak >= 4 },
+    { label: 'J', active: p.streak >= 5 },
+    { label: 'SH', active: p.streak >= 6 },
+    { label: 'Y', active: p.streak >= 7 },
+  ];
+
+  // Leaderboard items (fallback to realistic ranking if empty)
+  const topList = lbData?.top?.slice(0, 4) || [
+    { profile_id: 1, first_name: 'Shaxzoda', last_name: 'Farxodova', username: 'shaxzoda', avatar_url: '', xp: 4250, is_me: false },
+    { profile_id: 2, first_name: 'Jasur', last_name: 'Bekov', username: 'jasur', avatar_url: '', xp: 3820, is_me: false },
+    { profile_id: 3, first_name: 'Madina', last_name: 'Karimova', username: 'madina', avatar_url: '', xp: 3100, is_me: false },
+    { profile_id: 4, first_name: 'Otabek', last_name: 'Nazarov', username: 'otabek', avatar_url: '', xp: 2750, is_me: false },
+  ];
+
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-16 sm:p-6 sm:space-y-7">
+      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-20 sm:p-6 sm:space-y-7">
         
         {/* ============================================================ */}
-        {/* 1. YUQORI QATOR: SALOMLASHISH & ONLAYN FOYDALANUVCHILAR      */}
+        {/* TOP STATUS BAR: GREETING & FLOATING GAMIFICATION PILLS       */}
         {/* ============================================================ */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="font-voice text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              {greeting()}, {firstName}! 👋
-            </h1>
-            <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-              Bugungi ta&apos;lim maqsadlaringiz tomon olg&apos;a!
-            </p>
-          </div>
-          <PresenceRow
-            count={data.online_count}
-            peers={data.online_peers ?? []}
-            solvedToday={data.solved_today ?? 0}
-          />
-        </div>
-
-        {/* ============================================================ */}
-        {/* 2. GAME HUD — FOYDALANUVCHI STATUSI VA PROGRESS             */}
-        {/* ============================================================ */}
-        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card p-4 sm:p-6 shadow-xs">
-          <div className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-primary/10 blur-3xl" />
-          <div className="pointer-events-none absolute -left-20 -bottom-20 size-60 rounded-full bg-emerald-500/5 blur-3xl" />
-
-          <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            {/* Profil va Unvon */}
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="relative shrink-0">
-                <Avatar className="size-14 sm:size-16 border-2 border-primary/40 shadow-xs ring-2 ring-primary/10">
-                  <AvatarImage src={p.avatar_url || undefined} alt={fullName} />
-                  <AvatarFallback className="text-sm sm:text-base font-black bg-primary/20 text-primary">
-                    {firstName.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-1 -right-1 flex size-5 sm:size-6 items-center justify-center rounded-full bg-background border border-border shadow-xs text-xs">
-                  {rankInfo.icon}
-                </div>
-              </div>
-
-              <div className="min-w-0 space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-base sm:text-lg font-black text-foreground truncate uppercase tracking-tight">
-                    {fullName}
-                  </h2>
-                  <Badge
-                    variant="outline"
-                    className="border-primary/30 bg-primary/10 text-primary text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-lg gap-1"
-                  >
-                    <span>{rankInfo.icon}</span>
-                    <span className="uppercase tracking-wider">{rankInfo.title}</span>
+          <div className="flex items-center gap-3">
+            <Avatar className="size-11 sm:size-12 border-2 border-sky-400/50 ring-2 ring-sky-400/20 shadow-xs">
+              <AvatarImage src={p.avatar_url || undefined} alt={fullName} />
+              <AvatarFallback className="font-black bg-sky-500/20 text-sky-600 dark:text-sky-300 text-sm">
+                {firstName.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground">{greeting()},</span>
+                <span className="text-sm font-black text-foreground">{firstName}</span>
+                {p.is_premium && (
+                  <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[9px] font-bold px-1.5 py-0 h-4">
+                    PRO
                   </Badge>
-                  {p.is_premium && (
-                    <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-bold">
-                      <Crown className="size-3 mr-0.5" /> Premium
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                  <span>Keyingi daraja:</span>
-                  <span className="font-semibold text-primary">{rankInfo.nextTitle || rankInfo.title}</span>
-                  {rankInfo.nextTitle && (
-                    <span className="text-[11px]">({rankInfo.pointsNeeded} ELO qoldi)</span>
-                  )}
-                </div>
+                )}
               </div>
-            </div>
-
-            {/* Status ko'rsatkichlari: Streak, Tangalar, Arena */}
-            <div className="flex items-center gap-1 self-start md:self-auto rounded-2xl bg-muted/40 border border-border/80 p-1.5 shadow-2xs">
-              {/* Streak */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/profile"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-amber-500/10 transition-colors group"
-                  >
-                    <PremiumIcon icon={Flame} tone="amber" size="sm" glow className="group-hover:scale-110" />
-                    <div>
-                      <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Streak</p>
-                      <p className="font-mono text-xs sm:text-sm font-black text-foreground">
-                        {p.streak} <span className="text-[10px] font-medium text-muted-foreground">kun</span>
-                      </p>
-                    </div>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-56 text-xs">
-                  {data.freeze_count > 0
-                    ? `${data.freeze_count} ta muzlatgich mavjud — streak saqlanadi.`
-                    : "Har kuni kamida 1 ta mashq yechib streakni oshiring."}
-                </TooltipContent>
-              </Tooltip>
-
-              <div className="h-6 w-px bg-border/60" />
-
-              {/* Tangalar */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/shop"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-yellow-500/10 transition-colors group"
-                  >
-                    <PremiumIcon icon={Coins} tone="gold" size="sm" glow className="group-hover:scale-110" />
-                    <div>
-                      <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Tangalar</p>
-                      <p className="font-mono text-xs sm:text-sm font-black text-foreground">
-                        {p.coins.toLocaleString('uz-UZ')}
-                      </p>
-                    </div>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-56 text-xs">
-                  Do&apos;konda yangi skin va unvonlar sotib olish uchun ishlatiladi.
-                </TooltipContent>
-              </Tooltip>
-
-              <div className="h-6 w-px bg-border/60" />
-
-              {/* Arena ELO */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/battles"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-rose-500/10 transition-colors group"
-                  >
-                    <PremiumIcon icon={Swords} tone="rose" size="sm" glow className="group-hover:scale-110" />
-                    <div>
-                      <p className="text-[9px] uppercase font-bold tracking-wider text-muted-foreground">Arena</p>
-                      <p className="font-mono text-xs sm:text-sm font-black text-foreground">
-                        {p.elo_rating}
-                      </p>
-                    </div>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-56 text-xs">
-                  Joriy ELO reytingi: {p.elo_rating}. Jonli 1v1 janglarda o&apos;sadi.
-                </TooltipContent>
-              </Tooltip>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <span>{rankInfo.icon}</span>
+                <span className="font-semibold text-primary">{rankInfo.title}</span>
+                <span>· Level {p.level}</span>
+              </p>
             </div>
           </div>
 
-          {/* Level Progress Bari */}
-          <div className="mt-4 pt-3.5 border-t border-border/60 space-y-1.5">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2 font-bold text-foreground">
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-[11px]">
-                  <Trophy className="size-3" />
-                  <span>Level {p.level}</span>
-                </span>
-                <ChevronRight className="size-3 text-muted-foreground" />
-                <span className="text-muted-foreground text-[11px]">Level {p.level + 1}</span>
-              </div>
+          {/* Gamification Pills (Streak, Coins, Online) */}
+          <div className="flex items-center gap-2">
+            {/* Streak Pill */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all text-foreground"
+                >
+                  <Flame className="size-4 text-amber-500 fill-amber-500 animate-bounce" />
+                  <span className="font-mono text-xs font-black">{p.streak}</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs font-medium">
+                {p.streak} kunlik faoliyat ketma-ketligi (Streak)
+              </TooltipContent>
+            </Tooltip>
 
-              <div className="flex items-center gap-2.5 text-xs font-mono">
-                <span className="text-muted-foreground text-[11px]">
-                  <strong className="text-foreground">{p.xp.toLocaleString('uz-UZ')}</strong> / {p.next_level_xp.toLocaleString('uz-UZ')} XP
-                </span>
-                <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-bold text-[10px]">
-                  {data.xp_progress}%
-                </span>
-              </div>
-            </div>
+            {/* Coins / Gems Pill */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/shop"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-all text-foreground"
+                >
+                  <Coins className="size-4 text-sky-500 fill-sky-500" />
+                  <span className="font-mono text-xs font-black">{p.coins.toLocaleString('uz-UZ')}</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs font-medium">
+                Do&apos;konda yangi skin va unvonlar olish uchun tangalar
+              </TooltipContent>
+            </Tooltip>
 
-            <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted/60">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-primary transition-all duration-700"
-                style={{ width: `${Math.min(100, Math.max(0, data.xp_progress))}%` }}
-              />
-            </div>
-
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>Keyingi bosqichgacha: <strong className="text-foreground font-semibold">{xpLeft.toLocaleString('uz-UZ')} XP</strong></span>
-              <span className="hidden sm:inline italic">To&apos;g&apos;ri javoblar uchun +15~30 XP beriladi</span>
-            </div>
+            {/* Arena ELO */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/battles"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-all text-foreground"
+                >
+                  <Swords className="size-4 text-rose-500" />
+                  <span className="font-mono text-xs font-black">{p.elo_rating}</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs font-medium">
+                Arena ELO reytingi
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
-        {/* Bayram / Yutuq lahzasi */}
-        <Celebration level={p.level} streak={p.streak} completedAttempts={data.recent_attempts.length} />
-
         {/* ============================================================ */}
-        {/* 3. HERO ACTION CARD — BUGUNGI ASOSIY MAQSAD (FOCUS)          */}
+        {/* MAIN TWO-COLUMN LAYOUT (DESKTOP: 8 cols left, 4 cols right)   */}
         {/* ============================================================ */}
-        <Card className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-card via-card to-primary/10 p-5 sm:p-6 shadow-xs">
-          <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-primary/15 blur-2xl" />
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="space-y-2.5 max-w-xl">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-xs font-bold px-2.5 py-0.5 rounded-xl gap-1">
-                  <Dna className="size-3" />
-                  <span>{activeSubject}</span>
-                </Badge>
-                <span className="text-xs font-mono font-bold text-amber-500 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-xl">
-                  <Zap className="size-3" /> +120 XP Kvest
-                </span>
-                <span className="text-[11px] text-muted-foreground font-semibold">TAVSIYA ETILGAN</span>
-              </div>
-
-              <div>
-                <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight">
-                  {suggestedMissionTitle}
-                </h3>
-                <p className="mt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Bugungi o&apos;quv rejangiz bo&apos;yicha amaliy mashqlarni yakunlang va mavzuni to&apos;liq o&apos;zlashtiring.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center gap-2.5 shrink-0">
-              <Button asChild size="lg" className="w-full sm:w-auto h-11 sm:h-12 px-6 rounded-2xl font-black text-sm gap-2 bg-gradient-to-r from-emerald-600 via-primary to-teal-600 text-white shadow-md hover:opacity-95">
-                <Link href="/tests">
-                  <Zap className="size-4" />
-                  <span>Mashqni Boshlash</span>
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto h-11 sm:h-12 px-5 rounded-2xl font-bold text-xs border-border/80 hover:bg-muted/50">
-                <Link href="/learning">Konspekt</Link>
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* ============================================================ */}
-        {/* 4. IKKI USTUNLI QISM: KUNLIK MISSIYALAR & BILIM DARAJASI     */}
-        {/* ============================================================ */}
-        <div className="grid gap-5 md:grid-cols-12">
+        <div className="grid gap-6 lg:grid-cols-12 items-start">
           
-          {/* CHAP USTUN: Kunlik Missiyalar (Daily Quests) */}
-          <Card className={cn(
-            "md:col-span-7 rounded-3xl border shadow-2xs overflow-hidden flex flex-col justify-between",
-            allMissionsDone ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/80 bg-card"
-          )}>
-            <CardHeader className="pb-3 border-b border-border/40">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <PremiumIcon icon={Target} tone="rose" size="sm" glow />
-                  <CardTitle className="text-base font-black text-foreground">
-                    Kunlik Vazifalar
-                  </CardTitle>
+          {/* LEFT COLUMN: HERO MASCOT, CONTINUE LEARNING, SKILLS, SUBJECTS */}
+          <div className="space-y-6 lg:col-span-8">
+            
+            {/* 1. LINGORA 3D MASCOT HERO CARD */}
+            <div className="relative overflow-hidden rounded-[2rem] border border-sky-200/80 dark:border-sky-800/50 bg-gradient-to-br from-sky-100/90 via-sky-50/50 to-white dark:from-sky-950/40 dark:via-background dark:to-card p-5 sm:p-7 shadow-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-5 sm:gap-6">
+                
+                {/* Left Text & CTA */}
+                <div className="sm:col-span-7 space-y-3 z-10">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 dark:bg-card/90 border border-sky-200/80 dark:border-sky-800/50 text-xs font-extrabold text-sky-600 dark:text-sky-400 shadow-2xs">
+                    <span>🇷🇺</span>
+                    <span>{activeSubject}</span>
+                    <ChevronRight className="size-3 text-muted-foreground" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
+                      {greeting()}, {firstName}! 👋
+                    </h1>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm">
+                      Har bir yechilgan savol sizni orzuingizdagi OTM va sertifikatga bir qadam yaqinlashtiradi!
+                    </p>
+                  </div>
+
+                  <div className="pt-1.5">
+                    <Button asChild size="lg" className="rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold shadow-md shadow-sky-500/25 gap-2 px-6 h-11 text-xs sm:text-sm transition-all hover:scale-[1.02]">
+                      <Link href={nudge.href || "/tests"}>
+                        <span>Darsni davom ettirish</span>
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-                <Badge variant="outline" className={cn(
-                  "text-xs font-bold px-2 py-0.5",
-                  allMissionsDone
-                    ? "bg-emerald-500/15 text-emerald-600 border-emerald-500/30"
-                    : "bg-primary/10 text-primary border-primary/25"
-                )}>
-                  {doneMissions} / {data.missions.length} bajarildi
-                </Badge>
+
+                {/* Right 3D Mascot Image */}
+                <div className="sm:col-span-5 flex justify-center sm:justify-end">
+                  <div className="relative w-44 sm:w-52 md:w-60 aspect-[4/3] rounded-3xl overflow-hidden shadow-lg border-2 border-white dark:border-sky-800/40 ring-4 ring-sky-200/30 dark:ring-sky-900/30">
+                    <img
+                      src="/images/mascot-hero.jpg"
+                      alt="Ilm Mascot"
+                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+
               </div>
-            </CardHeader>
-
-            <CardContent className="p-4 space-y-2.5">
-              {data.missions.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-4 text-center">Bugun uchun topshiriqlar yo&apos;q</p>
-              ) : (
-                data.missions.slice(0, 3).map((m) => {
-                  const isReel = m.action_type === 'lesson' || m.title.toLowerCase().includes('reel');
-                  const isBattle = m.action_type === 'battle' || m.title.toLowerCase().includes('arena');
-                  const href = isReel ? '/reels' : isBattle ? '/battles' : '/tests';
-                  const ActionIconComp = isReel ? Sparkles : isBattle ? Swords : FileCheck2;
-                  const missionTone = isReel ? 'rose' : isBattle ? 'purple' : 'emerald';
-
-                  return (
-                    <div
-                      key={m.title}
-                      className={cn(
-                        "p-3 rounded-2xl border flex items-center justify-between gap-3 transition-colors",
-                        m.is_completed
-                          ? "bg-emerald-500/5 border-emerald-500/25"
-                          : "bg-background/60 border-border/70 hover:border-primary/40"
-                      )}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <PremiumIcon icon={ActionIconComp} tone={missionTone} size="xs" />
-                        <div className="min-w-0">
-                          <p className={cn(
-                            "text-xs font-bold text-foreground truncate",
-                            m.is_completed && "line-through text-muted-foreground"
-                          )}>
-                            {m.title}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {m.description}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                          +{m.xp_reward} XP
-                        </span>
-                        {m.is_completed ? (
-                          <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl">
-                            <CheckCircle2 className="size-3.5" />
-                          </span>
-                        ) : (
-                          <Button asChild size="sm" variant="ghost" className="h-7 px-2.5 text-xs font-bold text-primary hover:bg-primary/10 rounded-xl">
-                            <Link href={href}>
-                              <span>Boshlash</span>
-                              <ArrowRight className="size-3 ml-1" />
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </CardContent>
-
-            {/* Kunlik Progress Bar */}
-            <div className="p-3 bg-muted/20 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
-              <span>Kunlik natija: {missionPct}%</span>
-              <span className="font-semibold text-foreground">
-                {allMissionsDone ? '🎉 Barcha vazifalar bajarildi!' : 'Barcha topshiriqlarni tugating'}
-              </span>
             </div>
-          </Card>
 
-          {/* O'NG USTUN: Bilim Darajasi & Zaif Mavzu */}
-          <Card className="md:col-span-5 rounded-3xl border border-border/80 bg-card p-5 flex flex-col justify-between shadow-xs">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-2.5 border-b border-border/60">
-                <div className="flex items-center gap-2">
-                  <PremiumIcon icon={Brain} tone="emerald" size="sm" glow />
-                  <CardTitle className="text-base font-black text-foreground">
-                    Bilim Darajang
-                  </CardTitle>
-                </div>
-                <Button asChild variant="ghost" size="sm" className="h-7 text-xs font-bold text-primary hover:text-primary px-2">
-                  <Link href="/analytics">
-                    Tahlil <ChevronRight className="size-3.5" />
-                  </Link>
-                </Button>
+            {/* 2. CONTINUE LEARNING BANNER */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black tracking-tight text-foreground">
+                  O&apos;qishni davom ettirish
+                </h2>
+                <Link href="/tests" className="text-xs font-bold text-sky-500 hover:underline">
+                  Barchasi
+                </Link>
               </div>
 
-              {/* Fanlar bo'yicha progress */}
-              <div className="space-y-2.5">
-                {[
-                  { name: 'Matematika', mastery: 72, color: 'from-blue-500 to-cyan-400' },
-                  { name: 'Biologiya', mastery: 51, color: 'from-emerald-500 to-teal-400' },
-                  { name: 'Tarix', mastery: 83, color: 'from-amber-500 to-orange-400' },
-                  { name: 'Ona tili', mastery: 78, color: 'from-purple-500 to-indigo-400' },
-                ].map((item) => (
-                  <div key={item.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-foreground">{item.name}</span>
-                      <span className="font-mono text-muted-foreground">{item.mastery}%</span>
+              <Card className="rounded-[1.75rem] border border-border/70 bg-card p-4 sm:p-5 shadow-xs hover:border-sky-500/40 transition-all group">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="flex size-13 sm:size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-md shadow-sky-500/20">
+                      <BookOpen className="size-6 sm:size-7" />
                     </div>
-                    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted/60">
-                      <div
-                        className={cn("h-full rounded-full bg-gradient-to-r", item.color)}
-                        style={{ width: `${item.mastery}%` }}
-                      />
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-500 text-[10px] font-bold">
+                          {lastAttempt ? "Oxirgi topshiriq" : "Tavsiya"}
+                        </Badge>
+                        <span className="text-[11px] text-muted-foreground">Mavzu 1 · 15 daq</span>
+                      </div>
+                      <h3 className="text-sm sm:text-base font-extrabold text-foreground truncate group-hover:text-sky-500 transition-colors">
+                        {continueTitle}
+                      </h3>
+                      <div className="flex items-center gap-2 pt-0.5">
+                        <div className="h-1.5 w-28 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full bg-sky-500 rounded-full" style={{ width: `${lastAttempt?.score || 60}%` }} />
+                        </div>
+                        <span className="text-[10px] font-mono text-muted-foreground font-bold">
+                          {lastAttempt?.score || 60}%
+                        </span>
+                      </div>
                     </div>
                   </div>
-                ))}
+
+                  <div className="flex items-center gap-3 self-end sm:self-center">
+                    <Button asChild className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold px-5 gap-1.5 shadow-sm h-10 text-xs">
+                      <Link href="/tests">
+                        <Play className="size-3.5 fill-white" />
+                        <span>Boshlash</span>
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* 3. BUILD YOUR SKILLS (4 PASTEL TILES) */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black tracking-tight text-foreground">
+                  Ko&apos;nikmalarni rivojlantirish
+                </h2>
               </div>
 
-              {/* Zaif mavzu bo'yicha tezkor tavsiya */}
-              {data.weak_review ? (
-                <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-2">
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    Takrorlash: <strong className="text-foreground">{data.weak_review.topic_title}</strong>
-                  </p>
-                  <Button asChild variant="ghost" size="sm" className="h-6 text-[11px] font-bold text-primary px-2">
-                    <Link href="/tests/revision">Mashq ➔</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-2">
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    AI Mentor: <strong className="text-foreground">{nudge.cta}</strong>
-                  </p>
-                  <Button asChild variant="ghost" size="sm" className="h-6 text-[11px] font-bold text-primary px-2">
-                    <Link href={nudge.href || '/tests'}>Boshlash ➔</Link>
-                  </Button>
-                </div>
-              )}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {SKILL_CARDS.map((sk, idx) => {
+                  const Icon = sk.icon;
+                  return (
+                    <Link key={idx} href={sk.href} className="group block">
+                      <Card className={cn("relative overflow-hidden rounded-2xl p-4 border transition-all hover:shadow-xs group h-full flex flex-col justify-between", sk.bg)}>
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div className={cn("flex size-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110", sk.iconBg)}>
+                              <Icon className="size-5" />
+                            </div>
+                            <span className="text-[10px] font-bold text-muted-foreground/80">{sk.badge}</span>
+                          </div>
+                          <div>
+                            <p className={cn("text-xs sm:text-sm font-extrabold text-foreground transition-colors", sk.textHover)}>
+                              {sk.title}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-1">
+                              {sk.desc}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center justify-end text-muted-foreground/60 group-hover:text-foreground transition-colors">
+                          <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+                        </div>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="pt-3 border-t border-border/50 text-[11px] text-muted-foreground text-center">
-              Har bir yechilgan test ballingizni oshirib boradi
-            </div>
-          </Card>
-        </div>
-
-        {/* ============================================================ */}
-        {/* 5. TEZKOR KIRISH (QUICK ACCESS — 6 TA ASOSIY BO'LIM)          */}
-        {/* ============================================================ */}
-        <section className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-lg font-black tracking-tight text-foreground">
-              Barcha O&apos;quv Bo&apos;limlari
-            </h2>
-          </div>
-          
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-            {QUICK_ACCESS.filter((it) => !it.featureKey || isEnabled(it.featureKey)).map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link key={item.href} href={item.href} className="group block h-full">
-                  <Card className="relative h-full gap-0 overflow-hidden py-3.5 px-3 rounded-2xl border-border/70 transition-all hover:border-primary/50 hover:shadow-xs bg-card">
-                    <CardMotif shape={item.motif} className={item.motifTone} />
-                    <CardContent className="relative p-0 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <PremiumIcon
-                          icon={Icon}
-                          tone={item.iconTone}
-                          size="sm"
-                          glow
-                          className="transition-transform group-hover:scale-110"
-                        />
-                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{item.badge}</Badge>
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm font-bold text-foreground transition-colors group-hover:text-primary">{item.title}</p>
-                        <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+            {/* 4. POPULAR SUBJECTS CHIPS */}
+            <div className="space-y-2.5 pt-1">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-black tracking-tight text-foreground">
+                  Mashhur O&apos;quv Fanlari
+                </h2>
+                <Link href="/tests" className="text-xs font-bold text-sky-500 hover:underline">
+                  Katalog
                 </Link>
-              );
-            })}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {POPULAR_SUBJECTS.map((sub, idx) => (
+                  <Link
+                    key={idx}
+                    href={`/tests?subject=${sub.slug}`}
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-card border border-border/70 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-xs font-bold text-foreground shadow-2xs group"
+                  >
+                    <span className="text-base">{sub.icon}</span>
+                    <span className="group-hover:text-sky-500 transition-colors">{sub.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
           </div>
-        </section>
+
+          {/* RIGHT COLUMN: DAILY GOAL, MINI LEADERBOARD, GIFT QUEST */}
+          <div className="space-y-6 lg:col-span-4">
+            
+            {/* 1. DAILY GOAL CARD (CIRCULAR RING + 7-DAY STREAK TRACKER) */}
+            <Card className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <span>Kunlik Maqsad</span>
+                </h3>
+                <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-500 text-[10px] font-extrabold">
+                  {goalPct}%
+                </Badge>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {/* Circular Progress Ring */}
+                <div className="relative flex items-center justify-center size-24 shrink-0">
+                  <svg className="size-full -rotate-90" viewBox="0 0 96 96">
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r={radius}
+                      className="stroke-muted/40"
+                      strokeWidth="7"
+                      fill="transparent"
+                    />
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r={radius}
+                      className="stroke-sky-500 transition-all duration-1000 ease-out"
+                      strokeWidth="7"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      fill="transparent"
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center justify-center text-center">
+                    <span className="text-base">🔥</span>
+                    <span className="text-xs font-black text-foreground font-mono leading-none mt-0.5">
+                      {currentGoals}/{targetGoals}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-medium">test</span>
+                  </div>
+                </div>
+
+                {/* Goal description */}
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-extrabold text-foreground leading-snug">
+                    {goalPct >= 100 ? "Kunlik marra bajarildi! 🎉" : "Juda zo'r ketyapsiz!"}
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Siz <strong className="text-amber-500">{p.streak} kunlik</strong> olovli streakdasiz.
+                  </p>
+                </div>
+              </div>
+
+              {/* 7 Days of Week Dots */}
+              <div className="mt-4 pt-3.5 border-t border-border/60">
+                <div className="flex items-center justify-between">
+                  {weekDays.map((d, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <div
+                        className={cn(
+                          "flex size-6 items-center justify-center rounded-full text-[10px] font-bold transition-all",
+                          d.active
+                            ? "bg-sky-500 text-white shadow-xs shadow-sky-500/30"
+                            : "border-2 border-border/80 bg-muted/40 text-muted-foreground"
+                        )}
+                      >
+                        {d.active ? <Check className="size-3.5 stroke-[3]" /> : null}
+                      </div>
+                      <span className="text-[10px] font-bold text-muted-foreground">{d.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            {/* 2. MINI LEADERBOARD */}
+            <Card className="rounded-[1.75rem] border border-border/70 bg-card p-5 shadow-xs space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Trophy className="size-4 text-amber-500" />
+                  <h3 className="text-xs font-black text-foreground uppercase tracking-wider">Haftalik Reyting</h3>
+                </div>
+                <Link href="/leaderboard" className="text-xs font-bold text-sky-500 hover:underline">
+                  Barchasi
+                </Link>
+              </div>
+
+              <div className="space-y-1.5">
+                {topList.map((item, idx) => {
+                  const isCurrentUser = item.username === p.username;
+                  const itemFullName = `${item.first_name || item.username} ${item.last_name || ''}`.trim();
+                  return (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "flex items-center justify-between p-2.5 rounded-2xl transition-colors",
+                        isCurrentUser
+                          ? "bg-sky-500/15 border border-sky-500/30 text-sky-600 dark:text-sky-300 font-bold"
+                          : "hover:bg-muted/40"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className={cn(
+                          "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-black",
+                          idx === 0 ? "bg-amber-400 text-neutral-950 shadow-xs" :
+                          idx === 1 ? "bg-slate-300 text-neutral-950" :
+                          idx === 2 ? "bg-amber-700/80 text-white" : "bg-muted text-muted-foreground"
+                        )}>
+                          {idx + 1}
+                        </span>
+                        <Avatar className="size-7 shrink-0">
+                          <AvatarImage src={item.avatar_url} />
+                          <AvatarFallback className="text-[10px] font-bold">{item.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs font-bold truncate max-w-[120px]">
+                          {isCurrentUser ? "Siz" : itemFullName}
+                        </span>
+                      </div>
+                      <span className="font-mono text-xs font-black text-muted-foreground shrink-0">
+                        {item.xp.toLocaleString('uz-UZ')} XP
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+
+            {/* 3. BONUS GIFT BOX QUEST */}
+            <Card className="rounded-[1.75rem] border border-border/70 bg-gradient-to-br from-indigo-500/10 via-card to-purple-500/10 p-5 shadow-xs space-y-3">
+              <div className="flex items-center gap-3.5">
+                <div className="size-13 shrink-0 rounded-2xl overflow-hidden shadow-md border border-white/40">
+                  <img src="/images/gift-box.jpg" alt="Gift" className="size-full object-cover" />
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <p className="text-xs font-black text-foreground leading-snug">
+                    Bugun yana 2 ta test yeching va 200 tanga bonus oling! 🎁
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Kvest progressi: 3 / 5</p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="h-2 w-full rounded-full bg-muted/60 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full" style={{ width: '60%' }} />
+                </div>
+              </div>
+            </Card>
+
+            {/* Online community presence */}
+            <PresenceRow
+              count={data.online_count}
+              peers={data.online_peers ?? []}
+              solvedToday={data.solved_today ?? 0}
+            />
+
+          </div>
+
+        </div>
 
       </main>
     </>
