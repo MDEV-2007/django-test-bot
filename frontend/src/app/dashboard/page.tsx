@@ -263,7 +263,11 @@ export default function DashboardPage() {
       unreadCount={unreadCount}
       onNotificationsClick={handleOpenNotifications}
     >
-      <Celebration />
+      <Celebration
+        level={p.level || 1}
+        streak={p.streak || 0}
+        completedAttempts={data.recent_attempts.length}
+      />
 
       {/* ============================================================ */}
       {/* 1. HERO DASHBOARD & GAMIFICATION STATS (NEXT ACTION + ARENA) */}

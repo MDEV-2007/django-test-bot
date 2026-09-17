@@ -42,7 +42,22 @@ interface ModernSidebarProps {
   onLogout?: () => void;
 }
 
-const NAV_GROUPS = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge: string | null;
+  highlight?: boolean;
+  glow?: boolean;
+  vip?: boolean;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
   {
     label: 'ASOSIY NAVIGATSIYA',
     items: [
