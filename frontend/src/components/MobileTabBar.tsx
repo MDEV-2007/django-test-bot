@@ -19,7 +19,7 @@ type TabItem = {
 
 const TABS: TabItem[] = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, api: '/api/dashboard/home/' },
-  { href: '/tests', label: 'Mashqlar', icon: FileCheck2, matchPrefixes: ['/tests'], api: '/api/tests/' },
+  { href: '/tests', label: 'Testlar', icon: FileCheck2, matchPrefixes: ['/tests'], api: '/api/tests/' },
   { href: '/battles', label: 'Arena', icon: Swords, matchPrefixes: ['/battles', '/games'] },
   { href: '/mentor', label: 'AI Mentor', icon: Bot },
 ];
