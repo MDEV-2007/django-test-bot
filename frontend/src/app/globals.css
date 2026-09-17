@@ -12,47 +12,43 @@
    changes, then mirror it here. */
 :root, :root[data-theme="dark"] {
   color-scheme: dark;
-  /* Obsidian Slate & Emerald Luxury palette — see figma_ui_prompt.md master brief.
-     Mirrored from templates/base.html's :root block. */
-  /* v2 chuqurlik: sahifa foni qoraytirildi, sirtlar esa yoritildi. Ilgari fon #0c0e12,
-     karta #14171d edi — atigi ~2.5% yorug'lik farqi, shuning uchun kartaning chekkasi
-     ko'rinmay, butun ekran bir tekis qora dog'ga aylanardi. */
-  --bg-page: #08090c;
-  --accent: #2fb3a3;
-  --accent-hover: #269488;
-  --accent-soft: rgba(47, 179, 163, 0.16);
-  --accent-border: rgba(47, 179, 163, 0.35);
-  --accent-text: #5cc4b6;
-  --on-accent: #0d1416;
+  /* Elite Unicorn Dark Mode: Slate-950 base + Frosted Glass + Glowing Emerald Accent */
+  --bg-page: #020617;
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-soft: rgba(16, 185, 129, 0.15);
+  --accent-border: rgba(16, 185, 129, 0.35);
+  --accent-text: #34d399;
+  --on-accent: #020617;
 
-  --success: #52a86b;
-  --success-soft: rgba(82, 168, 107, 0.16);
-  --success-text: #7ad192;
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.15);
+  --success-text: #34d399;
   --danger: #f43f5e;
-  --danger-soft: rgba(244, 63, 94, 0.14);
+  --danger-soft: rgba(244, 63, 94, 0.15);
   --danger-text: #fb7185;
-  --warning: #d99a38;
-  --warning-soft: rgba(217, 154, 56, 0.15);
-  --warning-text: #f59e0b;
+  --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.15);
+  --warning-text: #fbbf24;
 
-  --text-primary: #f0f1f3;
-  --text-secondary: #a3a7ae;
-  --text-muted: #8d9094;
-  --text-subtitle: #8d9094;
-  --text-faint: #5a5d63;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-subtitle: #94a3b8;
+  --text-faint: #475569;
 
-  --border-soft: rgba(255, 255, 255, 0.06);
-  --border-card: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  /* Karta ustidagi 1px ichki yorug'lik — "shisha" hissini beruvchi asosiy detal. */
-  --border-highlight: rgba(255, 255, 255, 0.06);
+  --border-soft: rgba(255, 255, 255, 0.05);
+  --border-card: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  /* Top rim highlight that gives the premium frosted glass illusion */
+  --border-highlight: rgba(255, 255, 255, 0.12);
 
-  --surface-hover: rgba(255, 255, 255, 0.05);
-  --surface-hover-strong: rgba(255, 255, 255, 0.09);
-  --surface-card-soft: #101319;
-  --surface-card-medium: #161a22;
-  --surface-card-strong: #161a22;
-  --surface-input: #1d222c;
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --surface-hover-strong: rgba(255, 255, 255, 0.1);
+  --surface-card-soft: rgba(15, 23, 42, 0.65);
+  --surface-card-medium: rgba(15, 23, 42, 0.78);
+  --surface-card-strong: rgba(15, 23, 42, 0.9);
+  --surface-input: rgba(30, 41, 59, 0.6);
 
   /* ── Semantik "tone" oilasi ──────────────────────────────────────────────────
      Ilgari ikonka ranglari to'g'ridan-to'g'ri Tailwind palitrasidan olinardi
@@ -327,15 +323,19 @@ body::before {
 
 /* "Shisha karta" — asosiy konteyner birligi butun saytda */
 .glass-card,
-.bento-card {
+.bento-card,
+[data-slot="card"] {
   background-color: var(--surface-card-soft);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.022) 0%, rgba(255, 255, 255, 0) 55%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-card);
+  border-top-color: var(--border-highlight);
   border-radius: 20px;
-  box-shadow: var(--shadow-card), inset 0 1px 0 var(--border-highlight);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4), inset 0 1px 0 var(--border-highlight);
 }
 
-.bento-card {
+.bento-card,
+[data-slot="card"] {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .bento-card:hover {
