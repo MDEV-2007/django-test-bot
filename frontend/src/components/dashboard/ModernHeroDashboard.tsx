@@ -88,9 +88,9 @@ export default function ModernHeroDashboard({
         <div className="pointer-events-none absolute -left-20 -bottom-20 size-80 rounded-full bg-purple-500/10 blur-3xl" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-15" />
 
-        <div className="relative z-10 grid gap-6 lg:grid-cols-12 items-center">
+        <div className="relative z-10 grid gap-6 lg:grid-cols-12 items-center min-w-0 max-w-full">
           {/* Left: Personalized Guidance */}
-          <div className="lg:col-span-8 space-y-4">
+          <div className="lg:col-span-8 space-y-4 min-w-0 max-w-full">
             {/* Subject / AI Compass Chip */}
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-bold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <span className="relative flex size-2">
@@ -113,16 +113,16 @@ export default function ModernHeroDashboard({
             </div>
 
             {/* Recommended Sprint Strip */}
-            <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60 p-3 sm:p-4 backdrop-blur-md space-y-2.5">
-              <div className="flex items-center justify-between gap-2 text-xs">
+            <div className="w-full max-w-xl min-w-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60 p-3 sm:p-4 backdrop-blur-md space-y-2.5">
+              <div className="flex items-center justify-between gap-2 text-xs min-w-0">
                 <span className="font-bold text-slate-300 truncate min-w-0 flex-1">
                   📌 {recommendedSprint.title}
                 </span>
                 <span className="shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] sm:text-[11px] font-mono font-bold text-emerald-400 whitespace-nowrap">
-                  {Math.round(recommendedSprint.progressPct)}% o&apos;zlashtirildi
+                  {Math.round(recommendedSprint.progressPct)}%
                 </span>
               </div>
-              <div className="relative h-2 w-full max-w-full rounded-full bg-slate-800/90 overflow-hidden">
+              <div className="relative h-2 w-full rounded-full bg-slate-800/90 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-all duration-500"
                   style={{ width: `${Math.min(100, Math.max(0, recommendedSprint.progressPct))}%` }}
