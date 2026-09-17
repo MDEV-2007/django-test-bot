@@ -1083,6 +1083,9 @@ def community_post_react_api(request, post_id):
     else:
         CommunityPostReaction.objects.create(post=post, user=request.user, reaction_type=reaction_type)
         active_reaction = reaction_type
+        from core import background
+        from .notifications import send_post_reaction_notification
+        background.submit(send_post_reaction_notification, post.id, request.user.id, reaction_type)
 
     post.likes_count = post.reactions.count()
     post.save(update_fields=['likes_count'])
@@ -1139,6 +1142,10 @@ def community_post_comments_api(request, post_id):
         )
         post.comments_count = post.comments.count()
         post.save(update_fields=['comments_count'])
+
+        from core import background
+        from .notifications import send_post_comment_notification
+        background.submit(send_post_comment_notification, post.id, comment.id, request.user.id)
 
         return Response({
             'success': True,
