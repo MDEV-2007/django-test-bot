@@ -27,6 +27,7 @@ import GapInput from '@/components/cefr/GapInput';
 import PassageView from '@/components/cefr/PassageView';
 import QuestionPalette from '@/components/cefr/QuestionPalette';
 import WritingTask from '@/components/cefr/WritingTask';
+import GroupOptionsPanel from '@/components/cefr/GroupOptionsPanel';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -926,6 +927,17 @@ export default function CefrExamPage() {
                     {/* Questions of this part */}
                     {sideQuestions.length > 0 && (
                       <div className="space-y-4 pt-2">
+                        {sec.groups.length > 0 && (
+                          <GroupOptionsPanel
+                            groups={sec.groups}
+                            questions={sec.questions}
+                            activeQuestionId={activeQuestionId}
+                            onSelectOption={(qId, optId) => {
+                              const q = sec.questions.find((item) => item.id === qId);
+                              if (q) answer(q, { group_option_id: optId });
+                            }}
+                          />
+                        )}
                         {sideQuestions.map((q) => (
                           <div key={q.id} id={`q-${q.id}`}>
                             <ExamQuestion
@@ -1056,14 +1068,16 @@ export default function CefrExamPage() {
               };
 
               const hasPassage = Boolean(sec.passage || sec.image);
-              const hasSide = sideQuestions.length > 0 || sec.groups.length > 0;
+              const hasGroups = (sec.groups?.length ?? 0) > 0;
+              const hasSide = sideQuestions.length > 0 || hasGroups;
+              const isTwoColumn = hasPassage || hasGroups;
 
               return (
-                <div className={cn('grid gap-6', hasPassage && hasSide ? 'lg:grid-cols-2' : 'max-w-3xl mx-auto')}>
+                <div className={cn('grid gap-6', isTwoColumn ? 'lg:grid-cols-12 items-start' : 'max-w-3xl mx-auto')}>
                   
-                  {/* Left Column: Passage */}
-                  {hasPassage && (
-                    <div className="rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] p-5 sm:p-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto space-y-4 shadow-sm">
+                  {/* Left Column: Passage OR Sticky Group Options (Statements / Headings) */}
+                  {hasPassage ? (
+                    <div className="lg:col-span-6 rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] p-5 sm:p-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto space-y-4 shadow-sm">
                       {sec.title && (
                         <h2 className="text-lg sm:text-xl font-black text-foreground border-b border-[var(--border-card)] pb-3">
                           {sec.title}
@@ -1083,11 +1097,36 @@ export default function CefrExamPage() {
                         />
                       )}
                     </div>
-                  )}
+                  ) : hasGroups ? (
+                    <div className="lg:col-span-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+                      <GroupOptionsPanel
+                        groups={sec.groups}
+                        questions={sec.questions}
+                        activeQuestionId={activeQuestionId}
+                        onSelectOption={(qId, optId) => {
+                          const q = sec.questions.find((item) => item.id === qId);
+                          if (q) answer(q, { group_option_id: optId });
+                        }}
+                      />
+                    </div>
+                  ) : null}
 
                   {/* Right Column: Questions */}
                   {hasSide && (
-                    <div className="space-y-5">
+                    <div className={cn('space-y-5', hasPassage ? 'lg:col-span-6' : hasGroups ? 'lg:col-span-7' : 'w-full')}>
+                      {/* If both passage AND groups exist, render groups above questions */}
+                      {hasPassage && hasGroups && (
+                        <GroupOptionsPanel
+                          groups={sec.groups}
+                          questions={sec.questions}
+                          activeQuestionId={activeQuestionId}
+                          onSelectOption={(qId, optId) => {
+                            const q = sec.questions.find((item) => item.id === qId);
+                            if (q) answer(q, { group_option_id: optId });
+                          }}
+                        />
+                      )}
+
                       {sideQuestions.map((q) => (
                         <div key={q.id} id={`q-${q.id}`}>
                           <ExamQuestion

@@ -5,7 +5,8 @@
    javob berganini rangdan darhol ko'radi (yashil chegara). To'g'ri/xato esa test
    tugagunicha ko'rsatilmaydi — bu imtihon, mashq emas. */
 
-import { Check } from 'lucide-react';
+import { useState } from 'react';
+import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import type { CefrGroup, CefrQuestion } from '@/lib/cefr-types';
 import GapInput from './GapInput';
 import { cn } from '@/lib/utils';
@@ -114,27 +115,11 @@ function Body({ question, group, onAnswer, onActivate, hideInlineGap }: Omit<Pro
 
     case 'grouped_item':
       return (
-        <div className="flex flex-wrap gap-2">
-          {group?.options.map((option) => {
-            const selected = question.selected_group_option_id === option.id;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                title={option.text}
-                onClick={() => onAnswer({ group_option_id: option.id })}
-                className={cn(
-                  'h-10 w-10 rounded-xl border text-sm font-bold transition',
-                  selected
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border/70 bg-card/60 hover:border-primary/50 hover:bg-primary/5',
-                )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
+        <GroupedItemSelector
+          question={question}
+          group={group}
+          onAnswer={onAnswer}
+        />
       );
 
     case 'gap_fill':
@@ -217,3 +202,121 @@ function Choice({ text, selected, onClick }: { text: string; selected: boolean; 
     </button>
   );
 }
+
+function GroupedItemSelector({
+  question,
+  group,
+  onAnswer,
+}: {
+  question: CefrQuestion;
+  group?: CefrGroup;
+  onAnswer: (payload: Record<string, unknown>) => void;
+}) {
+  const [showOptionsList, setShowOptionsList] = useState(false);
+  const selectedOption = group?.options.find(
+    (o) => o.id === question.selected_group_option_id
+  );
+
+  return (
+    <div className="space-y-3 pt-1">
+      {/* Letter buttons row */}
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        {group?.options.map((option) => {
+          const selected = question.selected_group_option_id === option.id;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              title={option.text}
+              onClick={() => onAnswer({ group_option_id: selected ? null : option.id })}
+              className={cn(
+                'flex h-9 min-w-9 sm:h-10 sm:min-w-10 px-2 items-center justify-center rounded-xl border text-xs sm:text-sm font-black transition-all cursor-pointer select-none active:scale-95',
+                selected
+                  ? 'border-blue-500 bg-blue-600 text-white shadow-md ring-2 ring-blue-500/30 scale-105'
+                  : 'border-border/80 bg-card/70 hover:border-blue-500/50 hover:bg-blue-500/10 text-foreground'
+              )}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+
+        {/* Toggle full options list preview on mobile/desktop */}
+        {group && group.options.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowOptionsList(!showOptionsList)}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-border/70 bg-card/50 hover:bg-[var(--surface-hover)] text-[11px] font-bold text-muted-foreground hover:text-foreground transition ml-auto cursor-pointer"
+          >
+            <span>{showOptionsList ? "Variantlarni yashirish" : "Variantlar matni"}</span>
+            {showOptionsList ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+          </button>
+        )}
+      </div>
+
+      {/* Selected Option Preview Card */}
+      {selectedOption && (
+        <div className="flex items-start justify-between gap-2.5 rounded-2xl border border-blue-500/40 bg-blue-500/10 p-3 text-xs text-blue-300 shadow-xs animate-in fade-in-50">
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white text-[11px] font-black mt-0.5">
+              {selectedOption.label}
+            </span>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 block">
+                Tanlangan javob
+              </span>
+              <p className="font-semibold text-foreground leading-relaxed mt-0.5">
+                {selectedOption.text}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onAnswer({ group_option_id: null })}
+            className="text-[11px] text-muted-foreground hover:text-rose-400 font-bold shrink-0 px-2 py-1 rounded-lg hover:bg-rose-500/10 transition cursor-pointer"
+            title="Bekor qilish"
+          >
+            Bekor qilish ✕
+          </button>
+        </div>
+      )}
+
+      {/* Expandable Options List */}
+      {showOptionsList && group && (
+        <div className="rounded-2xl border border-border/80 bg-card/90 p-3 space-y-1.5 animate-in fade-in-50">
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pb-1">
+            Mavjud variantlardan birini tanlang:
+          </p>
+          <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
+            {group.options.map((opt) => {
+              const isSelected = question.selected_group_option_id === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => onAnswer({ group_option_id: isSelected ? null : opt.id })}
+                  className={cn(
+                    'w-full flex items-start gap-2.5 p-2 rounded-xl text-left text-xs transition-all cursor-pointer',
+                    isSelected
+                      ? 'bg-blue-600/20 border border-blue-500/40 font-bold text-foreground'
+                      : 'hover:bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground border border-transparent'
+                  )}
+                >
+                  <span className={cn(
+                    'flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-black',
+                    isSelected ? 'bg-blue-600 text-white' : 'bg-muted text-foreground border border-border/60'
+                  )}>
+                    {opt.label}
+                  </span>
+                  <span className="leading-relaxed flex-1">{opt.text}</span>
+                  {isSelected && <Check className="size-4 text-blue-400 shrink-0 ml-1 mt-0.5" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
