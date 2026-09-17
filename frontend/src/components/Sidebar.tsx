@@ -34,6 +34,8 @@ import { cn } from '@/lib/utils';
 interface SidebarProps {
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  user?: any;
+  onLogout?: () => void;
 }
 
 interface NavItem {
@@ -60,7 +62,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, api: '/api/dashboard/home/' },
       { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: 'Audio', featureKey: 'study' },
-      { href: '/learning', label: 'Darslar & Nazariya', icon: BookOpen, badge: null, featureKey: 'learning', api: '/api/learning/' },
       { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'DTM', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
       { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'GPT-4o', highlight: true, featureKey: 'ai_mentor' },
     ],
@@ -85,10 +86,17 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
+export default function Sidebar({
+  mobileOpen = false,
+  onMobileClose,
+  user: propUser,
+  onLogout: propLogout,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user: storeUser, logout } = useAuthStore();
+  const user = propUser || storeUser;
+  const handleLogout = propLogout || logout;
   const { isEnabled, refresh } = useFeatureFlags();
 
   useEffect(() => {
@@ -280,7 +288,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
               <button
                 type="button"
                 onClick={() => {
-                  logout();
+                  handleLogout();
                   router.push('/login');
                 }}
                 className="flex size-7 shrink-0 items-center justify-center rounded-xl border border-slate-800 hover:border-rose-500/40 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition cursor-pointer"

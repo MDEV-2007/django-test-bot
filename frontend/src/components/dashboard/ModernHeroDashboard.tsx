@@ -113,19 +113,19 @@ export default function ModernHeroDashboard({
             </div>
 
             {/* Recommended Sprint Strip */}
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-3.5 sm:p-4 backdrop-blur-md max-w-xl space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-300 truncate pr-2">
+            <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60 p-3 sm:p-4 backdrop-blur-md space-y-2.5">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-bold text-slate-300 truncate min-w-0 flex-1">
                   📌 {recommendedSprint.title}
                 </span>
-                <span className="text-[11px] font-mono text-emerald-400 font-bold shrink-0">
-                  {recommendedSprint.progressPct}% o&apos;zlashtirildi
+                <span className="shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] sm:text-[11px] font-mono font-bold text-emerald-400 whitespace-nowrap">
+                  {Math.round(recommendedSprint.progressPct)}% o&apos;zlashtirildi
                 </span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+              <div className="relative h-2 w-full max-w-full rounded-full bg-slate-800/90 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"
-                  style={{ width: `${recommendedSprint.progressPct}%` }}
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(0, recommendedSprint.progressPct))}%` }}
                 />
               </div>
             </div>
