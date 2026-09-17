@@ -166,15 +166,15 @@ function getNotifIcon(type: string, title: string) {
 
 function DashboardSkeleton() {
   return (
-    <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-16 sm:p-6">
-      <Skeleton className="h-32 w-full rounded-[2rem]" />
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
-          <Skeleton className="h-64 w-full rounded-[2rem]" />
-          <Skeleton className="h-28 w-full rounded-[1.75rem]" />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <main className="page-shell flex-1 space-y-3.5 sm:space-y-6 bg-[var(--bg-page)] p-3 sm:p-6 pb-20 sm:pb-16">
+      <Skeleton className="h-28 sm:h-32 w-full rounded-2xl sm:rounded-[2rem]" />
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
+        <div className="space-y-4 sm:space-y-6 lg:col-span-8">
+          <Skeleton className="h-44 sm:h-64 w-full rounded-2xl sm:rounded-[2rem]" />
+          <Skeleton className="h-24 sm:h-28 w-full rounded-2xl sm:rounded-[1.75rem]" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-2xl" />
+              <Skeleton key={i} className="h-24 sm:h-32 rounded-xl sm:rounded-2xl" />
             ))}
           </div>
         </div>
@@ -304,7 +304,7 @@ export default function DashboardPage() {
   const goalPct = Math.min(100, Math.round((currentGoals / targetGoals) * 100));
 
   // Circular ring measurements
-  const radius = 38;
+  const radius = 34;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (goalPct / 100) * circumference;
 
@@ -327,27 +327,103 @@ export default function DashboardPage() {
     { profile_id: 4, first_name: 'Otabek', last_name: 'Nazarov', username: 'otabek', avatar_url: '', xp: 2750, is_me: false },
   ];
 
+  // Kunlik Maqsad kartasi — mobil va desktop uchun yagona toza komponent
+  const dailyGoalCard = (
+    <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-card p-3.5 sm:p-5 shadow-xs">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5">
+          <span>Kunlik Maqsad</span>
+        </h3>
+        <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-500 text-[10px] font-extrabold shrink-0">
+          {goalPct}%
+        </Badge>
+      </div>
+
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Circular Progress Ring */}
+        <div className="relative flex items-center justify-center size-16 sm:size-20 shrink-0">
+          <svg className="size-full -rotate-90" viewBox="0 0 84 84">
+            <circle
+              cx="42"
+              cy="42"
+              r={radius}
+              className="stroke-muted/40"
+              strokeWidth="6.5"
+              fill="transparent"
+            />
+            <circle
+              cx="42"
+              cy="42"
+              r={radius}
+              className="stroke-sky-500 transition-all duration-1000 ease-out"
+              strokeWidth="6.5"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="transparent"
+            />
+          </svg>
+          <div className="absolute flex flex-col items-center justify-center text-center">
+            <span className="text-sm sm:text-base leading-none">🔥</span>
+            <span className="text-[11px] sm:text-xs font-black text-foreground font-mono leading-none mt-0.5">
+              {currentGoals}/{targetGoals}
+            </span>
+            <span className="text-[8px] sm:text-[9px] text-muted-foreground font-medium">test</span>
+          </div>
+        </div>
+
+        {/* Goal description */}
+        <div className="min-w-0 flex-1 space-y-0.5 sm:space-y-1">
+          <p className="text-xs sm:text-sm font-extrabold text-foreground leading-snug">
+            {goalPct >= 100 ? "Kunlik marra bajarildi! 🎉" : "Juda zo'r ketyapsiz!"}
+          </p>
+          <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
+            Siz <strong className="text-amber-500">{p.streak} kunlik</strong> olovli streakdasiz.
+          </p>
+        </div>
+      </div>
+
+      {/* 7 Days of Week Dots */}
+      <div className="mt-3 sm:mt-4 pt-3 sm:pt-3.5 border-t border-border/60">
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center">
+          {weekDays.map((d, i) => (
+            <div key={i} className="flex flex-col items-center gap-1 min-w-0">
+              <div
+                className={cn(
+                  "flex size-6 sm:size-7 items-center justify-center rounded-full text-[10px] font-bold transition-all",
+                  d.active
+                    ? "bg-sky-500 text-white shadow-xs shadow-sky-500/30"
+                    : "border-2 border-border/80 bg-muted/40 text-muted-foreground"
+                )}
+              >
+                {d.active ? <Check className="size-3.5 stroke-[3]" /> : null}
+              </div>
+              <span className="text-[10px] font-bold text-muted-foreground">{d.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
+  );
+
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-4 sm:space-y-6 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-3.5 sm:p-6 pb-24 sm:pb-16">
+      <main className="page-shell flex-1 space-y-3.5 sm:space-y-6 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-3 sm:p-6 pb-24 sm:pb-16">
         
-        {/* ============================================================ */}
-        {/* 🟢 TOP LIVE ACTIVITY & ONLINE USERS (PLATFORMA TEPASIDA)     */}
-        {/* ============================================================ */}
         {/* ============================================================ */}
         {/* TOP STATUS BAR: PROFILE, LIVE ONLINE & NOTIFICATIONS         */}
         {/* ============================================================ */}
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center justify-between gap-2.5 pt-0.5 sm:pt-1">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="relative shrink-0">
-              <Avatar className="size-11 sm:size-12 border-2 border-sky-400/60 ring-2 ring-sky-400/20 shadow-xs">
+              <Avatar className="size-10 sm:size-12 border-2 border-sky-400/60 ring-2 ring-sky-400/20 shadow-xs">
                 <AvatarImage src={p.avatar_url || undefined} alt={fullName} />
-                <AvatarFallback className="font-black bg-sky-500/20 text-sky-600 dark:text-sky-300 text-sm">
+                <AvatarFallback className="font-black bg-sky-500/20 text-sky-600 dark:text-sky-300 text-xs sm:text-sm">
                   {firstName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 border-2 border-background ring-1 ring-emerald-400" />
+              <span className="absolute bottom-0 right-0 size-2.5 sm:size-3 rounded-full bg-emerald-500 border-2 border-background ring-1 ring-emerald-400" />
             </div>
             <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-1.5">
@@ -371,8 +447,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Gamification Pills (On desktop: Streak + Coins + Arena + Bell; On mobile: Bell only since AppShell header already displays Streak & Coins) */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Gamification Pills (desktop) & Notification Bell */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Streak Pill - Desktop only */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -429,16 +505,16 @@ export default function DashboardPage() {
                     type="button"
                     onClick={handleOpenNotifications}
                     className={cn(
-                      "relative flex items-center justify-center size-9 rounded-full transition-all text-foreground",
+                      "relative flex items-center justify-center size-8 sm:size-9 rounded-full transition-all text-foreground cursor-pointer",
                       showNotifications
                         ? "bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/30"
                         : "bg-muted/70 hover:bg-muted border border-border/60 hover:border-primary/40"
                     )}
                     aria-label="Bildirishnomalar"
                   >
-                    <Bell className={cn("size-4", unreadCount > 0 && "text-primary animate-pulse")} />
+                    <Bell className={cn("size-3.5 sm:size-4", unreadCount > 0 && "text-primary animate-pulse")} />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-xs animate-bounce">
+                      <span className="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-3.5 sm:h-4 sm:min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[8px] sm:text-[9px] font-black text-white shadow-xs animate-bounce">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
@@ -456,12 +532,12 @@ export default function DashboardPage() {
                     className="fixed inset-0 z-40"
                     onClick={() => setShowNotifications(false)}
                   />
-                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-border/80 bg-background/95 backdrop-blur-md shadow-2xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95">
+                  <div className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 rounded-2xl border border-border/80 bg-background/95 backdrop-blur-md shadow-2xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
+                    <div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-border/60 bg-muted/30">
                       <div className="flex items-center gap-2">
                         <Bell className="size-4 text-primary" />
-                        <h3 className="text-sm font-bold text-foreground">Bildirishnomalar</h3>
+                        <h3 className="text-xs sm:text-sm font-bold text-foreground">Bildirishnomalar</h3>
                         {unreadCount > 0 && (
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary font-bold">
                             {unreadCount} yangi
@@ -473,10 +549,10 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={handleMarkAllRead}
-                            className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 px-1.5 py-1 rounded"
+                            className="text-[10px] sm:text-[11px] text-primary hover:underline font-medium flex items-center gap-1 px-1.5 py-1 rounded"
                             title="Barchasini o'qilgan deb belgilash"
                           >
-                            <CheckCheck className="size-3.5" />
+                            <CheckCheck className="size-3" />
                             <span>Barchasi o&apos;qildi</span>
                           </button>
                         )}
@@ -486,26 +562,26 @@ export default function DashboardPage() {
                           className="size-7 flex items-center justify-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
                           aria-label="Yopish"
                         >
-                          <X className="size-4" />
+                          <X className="size-3.5" />
                         </button>
                       </div>
                     </div>
 
                     {/* Body */}
-                    <div className="max-h-[380px] overflow-y-auto divide-y divide-border/40">
+                    <div className="max-h-[340px] sm:max-h-[380px] overflow-y-auto divide-y divide-border/40">
                       {loadingNotifs && notifications.length === 0 ? (
-                        <div className="p-6 space-y-3">
-                          <Skeleton className="h-14 w-full rounded-xl" />
-                          <Skeleton className="h-14 w-full rounded-xl" />
-                          <Skeleton className="h-14 w-full rounded-xl" />
+                        <div className="p-4 sm:p-6 space-y-2.5 sm:space-y-3">
+                          <Skeleton className="h-12 w-full rounded-xl" />
+                          <Skeleton className="h-12 w-full rounded-xl" />
+                          <Skeleton className="h-12 w-full rounded-xl" />
                         </div>
                       ) : notifications.length === 0 ? (
-                        <div className="p-8 text-center space-y-2">
-                          <div className="inline-flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground mx-auto">
-                            <Bell className="size-6 opacity-40" />
+                        <div className="p-6 sm:p-8 text-center space-y-2">
+                          <div className="inline-flex size-10 sm:size-12 items-center justify-center rounded-full bg-muted text-muted-foreground mx-auto">
+                            <Bell className="size-5 sm:size-6 opacity-40" />
                           </div>
-                          <p className="text-sm font-bold text-foreground">Yangi bildirishnoma yo&apos;q</p>
-                          <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
+                          <p className="text-xs sm:text-sm font-bold text-foreground">Yangi bildirishnoma yo&apos;q</p>
+                          <p className="text-[11px] sm:text-xs text-muted-foreground max-w-[240px] mx-auto">
                             Hamjamiyatda post yozing, darslarni bajaring yoki bellashuvlarda qatnashing!
                           </p>
                         </div>
@@ -515,27 +591,27 @@ export default function DashboardPage() {
                             key={n.id}
                             onClick={() => !n.is_read && handleMarkSingleRead(n.id)}
                             className={cn(
-                              "flex items-start gap-3 p-3.5 transition-colors cursor-pointer",
+                              "flex items-start gap-2.5 sm:gap-3 p-3 sm:p-3.5 transition-colors cursor-pointer",
                               n.is_read ? "hover:bg-muted/40" : "bg-primary/5 hover:bg-primary/10"
                             )}
                           >
                             <div className="shrink-0 pt-0.5">
                               {getNotifIcon(n.type, n.title)}
                             </div>
-                            <div className="flex-1 min-w-0 space-y-1">
+                            <div className="flex-1 min-w-0 space-y-0.5 sm:space-y-1">
                               <div className="flex items-center justify-between gap-2">
                                 <p className={cn("text-xs font-bold truncate", n.is_read ? "text-foreground" : "text-primary")}>
                                   {n.title}
                                 </p>
                                 {!n.is_read && (
-                                  <span className="size-2 rounded-full bg-primary shrink-0" />
+                                  <span className="size-1.5 rounded-full bg-primary shrink-0" />
                                 )}
                               </div>
-                              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                              <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                                 {n.message}
                               </p>
                               {n.created_at && (
-                                <p className="text-[10px] text-muted-foreground/80 font-mono pt-0.5">
+                                <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 font-mono pt-0.5">
                                   {n.created_at}
                                 </p>
                               )}
@@ -546,9 +622,9 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Footer */}
-                    <div className="p-2.5 border-t border-border/60 bg-muted/20 text-center">
+                    <div className="p-2 sm:p-2.5 border-t border-border/60 bg-muted/20 text-center">
                       <Link
-                        href="/community"
+                        href="/feed"
                         onClick={() => setShowNotifications(false)}
                         className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
                       >
@@ -566,49 +642,49 @@ export default function DashboardPage() {
         {/* ============================================================ */}
         {/* MAIN TWO-COLUMN LAYOUT (DESKTOP: 8 cols left, 4 cols right)   */}
         {/* ============================================================ */}
-        <div className="grid gap-6 lg:grid-cols-12 items-start">
+        <div className="grid gap-3.5 sm:gap-6 lg:grid-cols-12 items-start">
           
-          {/* LEFT COLUMN: HERO MASCOT, CONTINUE LEARNING, SKILLS, SUBJECTS */}
-          <div className="space-y-6 lg:col-span-8">
+          {/* LEFT COLUMN: HERO MASCOT, (MOBILE DAILY GOAL), SKILLS, SUBJECTS */}
+          <div className="space-y-3.5 sm:space-y-6 lg:col-span-8">
             
             {/* 1. LINGORA ACTIVE STUDY HERO CARD */}
-            <div className="relative overflow-hidden rounded-[2rem] border border-sky-200/80 dark:border-sky-800/50 bg-gradient-to-br from-sky-100/90 via-sky-50/50 to-white dark:from-sky-950/40 dark:via-background dark:to-card p-4 sm:p-6 shadow-xs group">
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] border border-sky-200/80 dark:border-sky-800/50 bg-gradient-to-br from-sky-100/90 via-sky-50/50 to-white dark:from-sky-950/40 dark:via-background dark:to-card p-3.5 sm:p-6 shadow-xs group">
               <div className="flex items-start justify-between gap-3">
                 {/* Left: Current Subject, Lesson Title & Status */}
-                <div className="space-y-1.5 min-w-0 flex-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-500/15 dark:bg-sky-500/25 border border-sky-500/30 text-xs font-black text-sky-600 dark:text-sky-400 shadow-2xs">
+                <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-sky-500/15 dark:bg-sky-500/25 border border-sky-500/30 text-[11px] sm:text-xs font-black text-sky-600 dark:text-sky-400 shadow-2xs">
                     <span>🇷🇺</span>
                     <span>{activeSubject}</span>
                     <span className="text-muted-foreground/70 font-normal">· {lastAttempt ? "Oxirgi dars" : "Tavsiya"}</span>
                   </div>
 
-                  <h2 className="text-base sm:text-2xl font-black text-foreground tracking-tight leading-snug line-clamp-2 group-hover:text-sky-500 transition-colors">
+                  <h2 className="text-sm sm:text-2xl font-black text-foreground tracking-tight leading-snug line-clamp-2 group-hover:text-sky-500 transition-colors">
                     {continueTitle}
                   </h2>
 
-                  <p className="text-xs text-muted-foreground line-clamp-1">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1">
                     Mavzu 1 · 15 daqiqa · {data.solved_today > 0 ? `Bugun ${data.solved_today} ta test yechildi ⚡` : "Bugungi darsingizni davom ettiring!"}
                   </p>
                 </div>
 
                 {/* Right: 3D Mascot Bird Badge */}
-                <div className="size-16 sm:size-24 shrink-0 rounded-2xl overflow-hidden border-2 border-white dark:border-sky-800 shadow-md ring-2 ring-sky-400/25 bg-sky-100 dark:bg-sky-950">
+                <div className="size-14 sm:size-24 shrink-0 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-white dark:border-sky-800 shadow-md ring-2 ring-sky-400/25 bg-sky-100 dark:bg-sky-950">
                   <img src="/images/mascot-hero.jpg" alt="Ilm Mascot" className="size-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
               </div>
 
               {/* Progress & Single Main CTA */}
-              <div className="mt-4 pt-3.5 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                  <div className="h-2 w-full max-w-[180px] rounded-full bg-muted overflow-hidden">
+              <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="h-1.5 sm:h-2 w-full max-w-[150px] sm:max-w-[180px] rounded-full bg-muted overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-sky-400 to-blue-600 rounded-full" style={{ width: `${lastAttempt?.score || 60}%` }} />
                   </div>
-                  <span className="text-[11px] font-mono font-bold text-muted-foreground shrink-0">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-muted-foreground shrink-0">
                     {lastAttempt?.score || 60}% o&apos;zlashtirildi
                   </span>
                 </div>
 
-                <Button asChild className="w-full sm:w-auto rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold shadow-md shadow-sky-500/25 gap-2 px-6 h-10 text-xs sm:text-sm transition-all hover:scale-[1.02]">
+                <Button asChild className="w-full sm:w-auto rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold shadow-md shadow-sky-500/25 gap-2 px-5 h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-[1.02] cursor-pointer">
                   <Link href={nudge.href || "/tests"}>
                     <Play className="size-3.5 fill-white" />
                     <span>Darsni davom ettirish</span>
@@ -618,23 +694,28 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* 2. BUILD YOUR SKILLS (4 PASTEL TILES) */}
-            <div className="space-y-2.5">
+            {/* 🟢 MOBILDA KUNLIK MAQSAD HERO'NING OSTIDA CHIQADI */}
+            <div className="lg:hidden">
+              {dailyGoalCard}
+            </div>
+
+            {/* 2. BUILD YOUR SKILLS (4 COMPACT TILES) */}
+            <div className="space-y-2 sm:space-y-2.5">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-black tracking-tight text-foreground">
+                <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground">
                   Ko&apos;nikmalarni rivojlantirish
                 </h2>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                 {SKILL_CARDS.map((sk, idx) => {
                   const Icon = sk.icon;
                   return (
                     <Link key={idx} href={sk.href} className="group block">
-                      <Card className={cn("relative overflow-hidden rounded-2xl p-3 sm:p-4 border transition-all hover:shadow-xs group h-full flex flex-col justify-between", sk.bg)}>
-                        <div className="space-y-2">
+                      <Card className={cn("relative overflow-hidden rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border transition-all hover:shadow-xs group h-full flex flex-col justify-between", sk.bg)}>
+                        <div className="space-y-1.5 sm:space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className={cn("flex size-9 sm:size-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110", sk.iconBg)}>
+                            <div className={cn("flex size-8 sm:size-10 items-center justify-center rounded-lg sm:rounded-xl transition-transform group-hover:scale-110", sk.iconBg)}>
                               <Icon className="size-4 sm:size-5" />
                             </div>
                             <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/80">{sk.badge}</span>
@@ -648,7 +729,7 @@ export default function DashboardPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="mt-2.5 flex items-center justify-end text-muted-foreground/60 group-hover:text-foreground transition-colors">
+                        <div className="hidden sm:flex mt-2.5 items-center justify-end text-muted-foreground/60 group-hover:text-foreground transition-colors">
                           <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
                         </div>
                       </Card>
@@ -659,7 +740,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 3. POPULAR SUBJECTS (HORIZONTAL SCROLL) */}
-            <div className="space-y-2.5 pt-1">
+            <div className="space-y-2 sm:space-y-2.5 pt-0.5">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-sm sm:text-base font-black tracking-tight text-foreground truncate">
                   Fanlar bo&apos;yicha testlar
@@ -669,14 +750,14 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
                 {POPULAR_SUBJECTS.map((sub, idx) => (
                   <Link
                     key={idx}
                     href={`/tests?subject=${sub.slug}`}
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-card border border-border/70 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-xs font-bold text-foreground shadow-2xs group shrink-0"
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl bg-card border border-border/70 hover:border-sky-500/50 hover:bg-sky-500/5 transition-all text-xs font-bold text-foreground shadow-2xs group shrink-0"
                   >
-                    <span className="text-base">{sub.icon}</span>
+                    <span className="text-sm sm:text-base">{sub.icon}</span>
                     <span className="group-hover:text-sky-500 transition-colors whitespace-nowrap">{sub.name}</span>
                   </Link>
                 ))}
@@ -685,91 +766,19 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* RIGHT COLUMN: DAILY GOAL, MINI LEADERBOARD, GIFT QUEST */}
-          <div className="space-y-5 sm:space-y-6 lg:col-span-4">
+          {/* RIGHT COLUMN: DAILY GOAL (DESKTOP), MINI LEADERBOARD, GIFT QUEST */}
+          <div className="space-y-3.5 sm:space-y-6 lg:col-span-4">
             
-            {/* 1. DAILY GOAL CARD (CIRCULAR RING + 7-DAY STREAK TRACKER) */}
-            <Card className="rounded-[1.75rem] border border-border/70 bg-card p-4 sm:p-5 shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <span>Kunlik Maqsad</span>
-                </h3>
-                <Badge variant="outline" className="border-sky-500/30 bg-sky-500/10 text-sky-500 text-[10px] font-extrabold shrink-0">
-                  {goalPct}%
-                </Badge>
-              </div>
-
-              <div className="flex items-center gap-3.5 sm:gap-4">
-                {/* Circular Progress Ring */}
-                <div className="relative flex items-center justify-center size-20 sm:size-24 shrink-0">
-                  <svg className="size-full -rotate-90" viewBox="0 0 96 96">
-                    <circle
-                      cx="48"
-                      cy="48"
-                      r={radius}
-                      className="stroke-muted/40"
-                      strokeWidth="7"
-                      fill="transparent"
-                    />
-                    <circle
-                      cx="48"
-                      cy="48"
-                      r={radius}
-                      className="stroke-sky-500 transition-all duration-1000 ease-out"
-                      strokeWidth="7"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      fill="transparent"
-                    />
-                  </svg>
-                  <div className="absolute flex flex-col items-center justify-center text-center">
-                    <span className="text-base">🔥</span>
-                    <span className="text-xs font-black text-foreground font-mono leading-none mt-0.5">
-                      {currentGoals}/{targetGoals}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground font-medium">test</span>
-                  </div>
-                </div>
-
-                {/* Goal description */}
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-sm font-extrabold text-foreground leading-snug">
-                    {goalPct >= 100 ? "Kunlik marra bajarildi! 🎉" : "Juda zo'r ketyapsiz!"}
-                  </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Siz <strong className="text-amber-500">{p.streak} kunlik</strong> olovli streakdasiz.
-                  </p>
-                </div>
-              </div>
-
-              {/* 7 Days of Week Dots (7-column responsive grid) */}
-              <div className="mt-4 pt-3.5 border-t border-border/60">
-                <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center">
-                  {weekDays.map((d, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1 min-w-0">
-                      <div
-                        className={cn(
-                          "flex size-6 sm:size-7 items-center justify-center rounded-full text-[10px] font-bold transition-all",
-                          d.active
-                            ? "bg-sky-500 text-white shadow-xs shadow-sky-500/30"
-                            : "border-2 border-border/80 bg-muted/40 text-muted-foreground"
-                        )}
-                      >
-                        {d.active ? <Check className="size-3.5 stroke-[3]" /> : null}
-                      </div>
-                      <span className="text-[10px] font-bold text-muted-foreground">{d.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
+            {/* 1. DESKTOP DAILY GOAL */}
+            <div className="hidden lg:block">
+              {dailyGoalCard}
+            </div>
 
             {/* 2. MINI LEADERBOARD */}
-            <Card className="rounded-[1.75rem] border border-border/70 bg-card p-4 sm:p-5 shadow-xs space-y-3.5">
+            <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-card p-3.5 sm:p-5 shadow-xs space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Trophy className="size-4 text-amber-500 shrink-0" />
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Trophy className="size-3.5 sm:size-4 text-amber-500 shrink-0" />
                   <h3 className="text-xs font-black text-foreground uppercase tracking-wider truncate">Haftalik Reyting</h3>
                 </div>
                 <Link href="/leaderboard" className="text-xs font-bold text-sky-500 hover:underline shrink-0">
@@ -777,7 +786,7 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1 sm:space-y-1.5">
                 {topList.map((item, idx) => {
                   const isCurrentUser = item.username === p.username;
                   const itemFullName = `${item.first_name || item.username} ${item.last_name || ''}`.trim();
@@ -785,7 +794,7 @@ export default function DashboardPage() {
                     <div
                       key={idx}
                       className={cn(
-                        "flex items-center justify-between p-2 sm:p-2.5 rounded-2xl transition-colors",
+                        "flex items-center justify-between p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl transition-colors",
                         isCurrentUser
                           ? "bg-sky-500/15 border border-sky-500/30 text-sky-600 dark:text-sky-300 font-bold"
                           : "hover:bg-muted/40"
@@ -793,16 +802,16 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <span className={cn(
-                          "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-black",
+                          "flex size-5 sm:size-6 shrink-0 items-center justify-center rounded-full text-[11px] sm:text-xs font-black",
                           idx === 0 ? "bg-amber-400 text-neutral-950 shadow-xs" :
                           idx === 1 ? "bg-slate-300 text-neutral-950" :
                           idx === 2 ? "bg-amber-700/80 text-white" : "bg-muted text-muted-foreground"
                         )}>
                           {idx + 1}
                         </span>
-                        <Avatar className="size-7 shrink-0">
+                        <Avatar className="size-6 sm:size-7 shrink-0">
                           <AvatarImage src={item.avatar_url} />
-                          <AvatarFallback className="text-[10px] font-bold">{item.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                          <AvatarFallback className="text-[9px] sm:text-[10px] font-bold">{item.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs font-bold truncate">
                           {isCurrentUser ? "Siz" : itemFullName}
@@ -818,21 +827,21 @@ export default function DashboardPage() {
             </Card>
 
             {/* 3. BONUS GIFT BOX QUEST */}
-            <Card className="rounded-[1.75rem] border border-border/70 bg-gradient-to-br from-indigo-500/10 via-card to-purple-500/10 p-4 sm:p-5 shadow-xs space-y-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="size-12 sm:size-13 shrink-0 rounded-2xl overflow-hidden shadow-md border border-white/40">
+            <Card className="rounded-2xl sm:rounded-[1.75rem] border border-border/70 bg-gradient-to-br from-indigo-500/10 via-card to-purple-500/10 p-3.5 sm:p-5 shadow-xs space-y-2.5 sm:space-y-3">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="size-11 sm:size-13 shrink-0 rounded-xl sm:rounded-2xl overflow-hidden shadow-md border border-white/40">
                   <img src="/images/gift-box.jpg" alt="Gift" className="size-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <p className="text-xs font-black text-foreground leading-snug">
                     Bugun yana 2 ta test yeching va 200 tanga bonus oling! 🎁
                   </p>
-                  <p className="text-[11px] text-muted-foreground">Kvest progressi: 3 / 5</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Kvest progressi: 3 / 5</p>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="h-2 w-full rounded-full bg-muted/60 overflow-hidden">
+                <div className="h-1.5 sm:h-2 w-full rounded-full bg-muted/60 overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full" style={{ width: '60%' }} />
                 </div>
               </div>

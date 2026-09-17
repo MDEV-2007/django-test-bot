@@ -761,26 +761,34 @@ nav.ilm-mobile-tabbar {
   [data-slot='card'] { --card-spacing: 1rem; border-radius: 16px; }
 }
 
+/* ── Mobil tab-bar safe-area ────────────────────────────────────────────────── */
+.ilm-mobile-tabbar {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
 /* ── Telegram Mini App ────────────────────────────────────────────────────────
    Bu qoidalar FAQAT <html data-tg="on"> bo'lganda, ya'ni sahifa Telegram ichida
    ochilganda kuchga kiradi (atributni `TelegramProvider` qo'yadi) — oddiy
-   brauzerdagi ko'rinishga hech qanday ta'siri yo'q.
+   brauzerdagi ko'rinishga hech qanday ta'siri yo'q. */
+html[data-tg='on'] body {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
 
-   Telegram webview'da `100svh` ishonchsiz: panel yuqoridan joy oladi va oyna
-   balandligi tortish paytida o'zgaradi. SDK bergan `viewportStableHeight`
-   (--tg-viewport) aniqroq. */
+html[data-tg='on'] .ilm-topbar {
+  padding-block: 0.35rem;
+  padding-inline: 0.75rem;
+}
+
+/* Telegram o'zining tepasidagi sarlavhasida "IlmIldizi" yoki bot nomini ko'rsatadi —
+   shuning uchun AppShell'dagi ikkinchi IlmIldizi logosini yashirib, ekranni tejaymiz. */
+html[data-tg='on'] .ilm-topbar .font-voice {
+  display: none !important;
+}
+
 html[data-tg='on'] .min-h-screen-safe {
   min-height: var(--tg-viewport, 100svh);
 }
-
-/* MUHIM: bu yerda avvalgi qoida `env(safe-area-inset-bottom)`ni Telegram uchun
-   qattiq 0.5rem bilan almashtirar edi, "Telegram'da tizim chizig'i yo'q" degan
-   tekshirilmagan taxmin asosida. iOS'da Telegram Mini App to'liq ekranda ochilganda
-   ham iPhone'ning home indicator zonasi odatda hali ham bor — shu taxmin noto'g'ri
-   chiqsa, pastki tab-bar aynan shu chiziq bilan ustma-ust tushib qolardi. Endi
-   `nav.ilm-mobile-tabbar`ning umumiy qoidasi (yuqorida, `env(safe-area-inset-bottom)`
-   bilan) Telegram'da ham ishlaydi — notch yo'q qurilmada `env()` baribir 0ga teng
-   bo'ladi, shuning uchun bu hech qanday amaliy holatni yomonlashtirmaydi. */
 
 /* ── Toast (Sonner) Premium Design ─────────────────────────────────────────── */
 .cn-toast {
