@@ -179,6 +179,8 @@ MIDDLEWARE = [
     # WhiteNoise serves compressed, far-future-cached static files straight from Django in
     # production (no separate nginx needed). Must sit right after SecurityMiddleware.
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    # GZipMiddleware compresses large API JSON responses automatically for fast transmission.
+    'django.middleware.gzip.GZipMiddleware',
     # Must come before CommonMiddleware (django-cors-headers requirement) — the Next.js
     # frontend (frontend/) is a separate origin and calls the JSON API under /api/.
     'corsheaders.middleware.CorsMiddleware',

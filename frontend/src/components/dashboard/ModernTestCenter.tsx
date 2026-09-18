@@ -18,6 +18,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useApiQuery } from '@/lib/api-cache';
 
 const SUBJECT_FILTERS = [
   { id: 'all', label: 'Barchasi', icon: '🌟' },
@@ -74,13 +75,52 @@ const SAMPLE_TESTS = [
   },
 ];
 
+type RealTestItem = {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  subject: string | null;
+  duration_minutes: number;
+  questions_count: number;
+  is_premium: boolean;
+  is_new?: boolean;
+  created_at?: string | null;
+};
+
 export default function ModernTestCenter() {
   const [activeSubject, setActiveSubject] = useState('all');
+  const { data } = useApiQuery<{ tests: RealTestItem[] }>('/api/tests/');
 
+  const realTests = (data?.tests || []).map((t) => {
+    const isNew = Boolean(
+      t.is_new ||
+      (t.created_at && (Date.now() - new Date(t.created_at).getTime()) < 10 * 24 * 60 * 60 * 1000)
+    );
+    const subSlug = t.subject || 'tarix';
+    const subName = subSlug === 'tarix' ? 'Tarix' : subSlug === 'ona-tili' ? 'Ona tili' : subSlug === 'ingliz-tili' ? 'Ingliz tili' : subSlug.toUpperCase();
+    return {
+      id: t.id,
+      subject: subSlug,
+      subjectName: subName,
+      title: t.title,
+      level: t.category === 'certificate' ? 'Milliy Sertifikat' : (t.category === 'cefr' ? 'CEFR' : 'Mavzulashtirilgan'),
+      questionsCount: t.questions_count,
+      timeMinutes: t.duration_minutes,
+      tag: isNew ? 'Yangi Sinov' : 'Rasmiy Test',
+      accent: isNew ? 'from-amber-500/20 via-slate-900 to-slate-950' : 'from-emerald-500/20 via-slate-900 to-slate-950',
+      border: isNew ? 'border-amber-500/40 hover:border-amber-400' : 'hover:border-emerald-500/50',
+      glow: isNew ? 'hover:shadow-[0_0_25px_rgba(245,158,11,0.2)]' : 'hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]',
+      badgeBg: isNew ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+      isNew,
+    };
+  });
+
+  const allList = realTests.length > 0 ? realTests : SAMPLE_TESTS;
   const filteredTests =
     activeSubject === 'all'
-      ? SAMPLE_TESTS
-      : SAMPLE_TESTS.filter((t) => t.subject === activeSubject);
+      ? allList
+      : allList.filter((t) => t.subject === activeSubject);
 
   return (
     <div className="space-y-6">
@@ -222,12 +262,24 @@ export default function ModernTestCenter() {
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Badge
-                  variant="outline"
-                  className={cn('text-[10px] font-black px-2 py-0.5 rounded-full border', test.badgeBg)}
-                >
-                  {test.level}
-                </Badge>
+                <div className="flex items-center gap-1.5">
+                  {test.isNew && (
+                    <Badge className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white font-black text-[9px] tracking-wider uppercase px-2 py-0.5 gap-1 shadow-sm border-0 animate-pulse">
+                      <span className="relative flex size-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-200 opacity-80" />
+                        <span className="relative inline-flex size-1.5 rounded-full bg-white" />
+                      </span>
+                      <Sparkles className="size-2 text-amber-200 fill-amber-200" />
+                      Yangi
+                    </Badge>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className={cn('text-[10px] font-black px-2 py-0.5 rounded-full border', test.badgeBg)}
+                  >
+                    {test.level}
+                  </Badge>
+                </div>
                 <span className="text-[11px] font-bold text-slate-500">{test.tag}</span>
               </div>
 

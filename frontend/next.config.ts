@@ -5,9 +5,15 @@ const nextConfig: NextConfig = {
      yig'adi, natijada runtime obrazga `npm install` ham, butun node_modules ham kerak
      emas (obraz ~1 GB o'rniga ~200 MB). */
   output: 'standalone',
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
 
-  // The repo root also has its own package-lock.json (Tailwind build for the Django
-  // templates) — pin Turbopack's root to this app so it doesn't guess wrong.
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400,
+  },
+
   turbopack: {
     root: __dirname,
   },
@@ -46,6 +52,20 @@ const nextConfig: NextConfig = {
       afterFiles: [],
       fallback: [],
     };
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/:all*(svg|jpg|png|webp|avif|woff2|woff)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 

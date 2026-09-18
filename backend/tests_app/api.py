@@ -79,6 +79,16 @@ def _author_payload(user):
     }
 
 
+def _is_new_test(t, days=10):
+    """Test so'nggi 10 kun ichida yuklangan yoki yaratilgan bo'lsa True."""
+    created_at = getattr(t, 'created_at', None)
+    if not created_at:
+        return False
+    from django.utils import timezone
+    from datetime import timedelta
+    return (timezone.now() - created_at) <= timedelta(days=days)
+
+
 def _test_payload(t, social=None, unlocked=False):
     """`social` — shu testning so'nggi 7 kunlik ijtimoiy dalili
     ({'solvers': N, 'avg': X}); ma'lumot bo'lmasa None qaytadi."""
@@ -102,6 +112,8 @@ def _test_payload(t, social=None, unlocked=False):
         'recent_solvers': (social or {}).get('solvers', 0),
         'recent_avg_score': (social or {}).get('avg'),
         'author': _author_payload(getattr(t, 'created_by', None)),
+        'created_at': t.created_at.isoformat() if getattr(t, 'created_at', None) else None,
+        'is_new': _is_new_test(t, days=10),
     }
 
 

@@ -45,6 +45,8 @@ type TestItem = {
   recent_solvers: number; recent_avg_score: number | null;
   answer_mode: AnswerMode;
   author?: TestAuthor | null;
+  created_at?: string | null;
+  is_new?: boolean;
 };
 
 function formatScheduledTime(dateStr: string | null | undefined): string {
@@ -718,6 +720,10 @@ export default function TestsPage() {
             const isLiveMock = Boolean(t.is_live_mock);
             const examDate = parseExamDate(t.scheduled_at);
             const isScheduledFuture = Boolean(isLiveMock && examDate && examDate.getTime() > Date.now());
+            const isNew = Boolean(
+              t.is_new ||
+              (t.created_at && (Date.now() - new Date(t.created_at).getTime()) < 10 * 24 * 60 * 60 * 1000)
+            );
             const buyHref = data.mock_plan
               ? `/premium/checkout/${data.mock_plan.id}?test=${t.id}`
               : '/premium';
@@ -735,15 +741,30 @@ export default function TestsPage() {
                   "group relative flex h-full flex-col justify-between transition-all duration-300",
                   isLiveMock
                     ? cn("border-2", cTheme.liveCardBorder, cTheme.liveCardBg, cTheme.liveCardGlow)
+                    : isNew
+                    ? "border-amber-500/40 hover:border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:shadow-[0_0_28px_rgba(245,158,11,0.18)]"
                     : "transition-colors hover:border-[var(--accent-border)]"
                 )}
               >
                 {isLiveMock && (
                   <div className={cn("absolute -top-px left-8 right-8 h-[2px] opacity-80 bg-gradient-to-r", cTheme.liveTopLine)} />
                 )}
+                {!isLiveMock && isNew && (
+                  <div className="absolute -top-px left-8 right-8 h-[2px] opacity-80 bg-gradient-to-r from-transparent via-amber-500 to-transparent pointer-events-none" />
+                )}
                 <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1.5">
+                      {isNew && (
+                        <Badge className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white font-black text-[10px] tracking-wider uppercase px-2.5 py-0.5 gap-1.5 shadow-md shadow-orange-500/25 border-0 hover:from-amber-600 hover:to-rose-600">
+                          <span className="relative flex size-1.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-200 opacity-80" />
+                            <span className="relative inline-flex size-1.5 rounded-full bg-white" />
+                          </span>
+                          <Sparkles className="size-2.5 text-amber-200 fill-amber-200" />
+                          Yangi
+                        </Badge>
+                      )}
                       {isLiveMock ? (
                         <>
                           <Badge className={cn("text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 gap-1.5 shadow-sm border-0", cTheme.liveBadge)}>
