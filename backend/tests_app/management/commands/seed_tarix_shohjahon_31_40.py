@@ -942,5 +942,6 @@ class Command(BaseCommand):
                 f"   • Savollar soni  : {test_set.questions.count()} ta (35 test + 10 yozma ochiq savol)\n"
                 f"   • Davomiyligi    : {test_set.duration_minutes} daqiqa\n"
                 f"   • Holati         : Nashr etilgan (is_published=True)\n"
+                f"   • Bildirishnoma  : O'quvchilarga (Sayt & Telegram) avtomatik yuboriladi\n"
             )
         )

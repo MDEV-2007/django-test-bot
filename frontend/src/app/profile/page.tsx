@@ -13,7 +13,6 @@ import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore, type Profile } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import KnowledgeTree from '@/components/student/KnowledgeTree';
-import PredictedScore from '@/components/student/PredictedScore';
 import { AudioToggle, ThemeToggle } from '@/components/SettingsToggles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -442,9 +441,6 @@ export default function ProfilePage() {
           </DialogContent>
         </Dialog>
 
-        {/* DTM ball bashorati — ilovaning farqlovchi xususiyati, shuning uchun
-            Hisobim ekranining eng tepasida, ro'yxat ichiga yashiringan emas. */}
-        <PredictedScore />
 
         {/* Referral */}
         <Card className="border-[var(--accent-border)]">
@@ -480,27 +476,108 @@ export default function ProfilePage() {
 
         {/* Bilim Ildizi — brend metaforasi. Daraxt to'liq real ma'lumotdan quriladi:
             daraja (shoxlar), joriy darajadagi XP (bo'y), streak (barglar), yutuqlar (mevalar). */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sprout className="size-4 text-[var(--accent-text)]" /> Bilim Ildizingiz
-            </CardTitle>
+        <Card className="overflow-hidden border border-emerald-500/20 bg-gradient-to-br from-emerald-950/15 via-background to-background shadow-xl">
+          <CardHeader className="pb-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <CardTitle className="flex items-center gap-2 text-base font-black">
+                  <span className="flex size-7 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <Sprout className="size-4" />
+                  </span>
+                  <span>Bilim Ildizingiz</span>
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Sizning dars faolligingiz va muvaffaqiyatlaringizdan unib o&apos;suvchi tirik daraxt
+                </p>
+              </div>
+
+              <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-bold gap-1.5 py-1 px-3">
+                <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+                <span>Faol Ekologiya</span>
+              </Badge>
+            </div>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-[minmax(0,240px)_1fr] sm:items-center">
-            <KnowledgeTree
-              level={p.level}
-              xpProgress={xpProgress}
-              streak={p.streak}
-              badges={data.badges.length}
-            />
-            <div className="space-y-2 text-sm text-[var(--text-secondary)]">
-              <p><strong className="text-foreground">{p.level}</strong> ta shox — erishilgan darajangiz</p>
-              <p><strong className="text-foreground">{p.streak}</strong> kunlik uzluksizlik — barglarning zichligi</p>
-              <p><strong className="text-foreground">{data.badges.length}</strong> ta meva — ochilgan yutuqlar</p>
-              <p><strong className="text-foreground">{xpProgress}%</strong> — keyingi darajagacha o'sish</p>
-              <p className="pt-1 text-xs text-muted-foreground">
-                Har bir yechilgan test va takrorlangan xato bu daraxtni o&apos;stiradi.
-              </p>
+          <CardContent className="grid gap-6 lg:grid-cols-12 items-center pt-2">
+            {/* Chap tomon: Tirik Organik Daraxt */}
+            <div className="lg:col-span-5 flex items-center justify-center rounded-3xl border border-emerald-500/15 bg-slate-950/30 dark:bg-slate-900/40 p-4 backdrop-blur-md shadow-inner">
+              <KnowledgeTree
+                level={p.level}
+                xpProgress={xpProgress}
+                streak={p.streak}
+                badges={data.badges.length}
+              />
+            </div>
+
+            {/* O'ng tomon: 4 ta Gamifikatsiyalangan Metrika Kartochkalari */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* 1. Shoxlar (Daraja) */}
+                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 space-y-1 transition-all hover:border-emerald-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground">Daraxt kuchi</span>
+                    <span className="text-xs">🌳</span>
+                  </div>
+                  <p className="text-sm sm:text-base font-black text-foreground">
+                    {p.level} ta mustahkam shox
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Erishilgan intellektual darajangiz
+                  </p>
+                </div>
+
+                {/* 2. Barglar toji (Streak) */}
+                <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3.5 space-y-1 transition-all hover:border-orange-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground">Barglar zichligi</span>
+                    <span className="text-xs">🔥</span>
+                  </div>
+                  <p className="text-sm sm:text-base font-black text-foreground">
+                    {p.streak} kunlik yashillik
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Uzluksiz dars seriyasi va hayotiylik
+                  </p>
+                </div>
+
+                {/* 3. Oltin mevalar (Yutuqlar) */}
+                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3.5 space-y-1 transition-all hover:border-amber-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground">Tojdagi mevalar</span>
+                    <span className="text-xs">🍎</span>
+                  </div>
+                  <p className="text-sm sm:text-base font-black text-foreground">
+                    {data.badges.length} ta oltin meva
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Ochilgan maxsus yutuqlar va nishonlar
+                  </p>
+                </div>
+
+                {/* 4. O'sish progressi */}
+                <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-3.5 space-y-1.5 transition-all hover:border-blue-500/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground">O&apos;sish sur&apos;ati</span>
+                    <span className="font-mono text-xs font-black text-blue-400">{xpProgress}%</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                      style={{ width: `${Math.max(4, Math.min(100, xpProgress))}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Keyingi shox nish urishigacha progress
+                  </p>
+                </div>
+              </div>
+
+              {/* Motivatsion Iqtibos */}
+              <div className="rounded-2xl border border-border/80 bg-muted/40 p-3.5 text-xs text-muted-foreground leading-relaxed flex items-start gap-2.5">
+                <span className="text-base leading-none pt-0.5">🌱</span>
+                <span>
+                  <strong className="text-foreground font-semibold">Har bir yechilgan test</strong>, ko&apos;rilgan dars va takrorlangan xato bu daraxt ildizini chuqurlashtirib, unga yangi yashil shoxlar baxsh etadi.
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -501,8 +501,8 @@ export default function PanelReelsPage() {
                 : "text-muted-foreground hover:bg-muted border-transparent"
             )}
           >
-            <Globe className="size-4" />
-            <span>🌟 Hamjamiyat Moderatsiyasi ({communityPosts.length})</span>
+            <Sparkles className="size-4" />
+            <span>Hamjamiyat Moderatsiyasi ({communityPosts.length})</span>
           </button>
         </div>
 

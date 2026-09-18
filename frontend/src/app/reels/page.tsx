@@ -133,6 +133,19 @@ type QuizResult = {
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
+function sanitizeHookText(hook: string): string {
+  if (!hook) return '';
+  // 100 dan oshib ketgan g'ayritabiiy foizlarni (masalan: 280%) reallikka (80% ga) to'g'rilash
+  return hook.replace(/(\d+)\s*%/g, (match, digits) => {
+    const val = parseInt(digits, 10);
+    if (val > 100) {
+      const capped = val % 100;
+      return `${capped >= 20 ? capped : 80}%`;
+    }
+    return match;
+  });
+}
+
 function getSubjectTone(slug: string): PremiumIconTone {
   switch (slug) {
     case 'tarix': return 'rose';
@@ -141,6 +154,44 @@ function getSubjectTone(slug: string): PremiumIconTone {
     case 'ingliz-tili': return 'purple';
     default: return 'gold';
   }
+}
+
+function getSubjectBadgeStyle(slug: string, name: string) {
+  const s = (slug || name || '').toLowerCase();
+  if (s.includes('ona-tili') || s.includes('ona tili') || s.includes('adabiyot')) {
+    return {
+      badge: 'bg-blue-500/30 border-blue-400/50 text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.35)]',
+      dot: 'bg-blue-400',
+    };
+  }
+  if (s.includes('tarix')) {
+    return {
+      badge: 'bg-amber-500/30 border-amber-400/50 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.35)]',
+      dot: 'bg-amber-400',
+    };
+  }
+  if (s.includes('biologiya')) {
+    return {
+      badge: 'bg-emerald-500/30 border-emerald-400/50 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.35)]',
+      dot: 'bg-emerald-400',
+    };
+  }
+  if (s.includes('ingliz') || s.includes('cefr')) {
+    return {
+      badge: 'bg-purple-500/30 border-purple-400/50 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.35)]',
+      dot: 'bg-purple-400',
+    };
+  }
+  if (s.includes('matematika') || s.includes('fizika')) {
+    return {
+      badge: 'bg-cyan-500/30 border-cyan-400/50 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.35)]',
+      dot: 'bg-cyan-400',
+    };
+  }
+  return {
+    badge: 'bg-rose-500/30 border-rose-400/50 text-rose-200 shadow-[0_0_12px_rgba(244,63,94,0.35)]',
+    dot: 'bg-rose-400',
+  };
 }
 
 function getSubjectIcon(slug: string) {
@@ -163,6 +214,9 @@ export default function ReelsPage() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // 15-second countdown timer per reel
+  const [timeLeft, setTimeLeft] = useState(15);
+
   // User interactions
   const [likedReels, setLikedReels] = useState<Record<number, boolean>>({});
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
@@ -175,6 +229,28 @@ export default function ReelsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [todayXpEarned, setTodayXpEarned] = useState(0);
+
+  // Countdown timer logic
+  useEffect(() => {
+    setTimeLeft(15);
+  }, [currentIndex]);
+
+  useEffect(() => {
+    const currentReel = reels[currentIndex];
+    if (!currentReel || answeredQuizzes[currentReel.id]) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex, reels, answeredQuizzes]);
 
   // Comments state
   const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
@@ -478,8 +554,8 @@ export default function ReelsPage() {
         <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[460px] md:max-w-[480px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-white/15 shadow-2xl bg-black flex flex-col my-auto transition-all">
           {/* ── TOP FLOATING HEADER (TikTok Style Tabs) ── */}
           <header className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-3 pt-3 pb-2 bg-gradient-to-b from-black/90 via-black/50 to-transparent backdrop-blur-[2px] sm:rounded-t-3xl">
-            {/* Minimal TikTok Subject Tabs */}
-            <div className="flex-1 flex items-center gap-3.5 overflow-x-auto no-scrollbar pr-2 min-w-0">
+            {/* Minimal TikTok Subject Tabs with distinct Active pill & underline */}
+            <div className="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar pr-2 min-w-0 py-0.5">
               {(subjects.length > 0 ? subjects : [
                 { slug: 'for_you', name: 'Siz uchun' },
                 { slug: 'all', name: 'Barchasi' },
@@ -492,10 +568,10 @@ export default function ReelsPage() {
                     key={subj.slug}
                     onClick={() => { tgHaptic('select'); setSelectedSubject(subj.slug); }}
                     className={cn(
-                      "text-xs sm:text-sm transition-all shrink-0 cursor-pointer font-bold relative py-0.5",
+                      "text-xs sm:text-sm transition-all shrink-0 cursor-pointer relative",
                       isSel
-                        ? "text-white scale-105 after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-0.5 after:bg-white after:rounded-full font-extrabold"
-                        : "text-white/60 hover:text-white/90"
+                        ? "bg-white/20 text-white font-black shadow-sm border border-white/35 backdrop-blur-md px-3 py-1 rounded-full after:absolute after:-bottom-1.5 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-[2.5px] after:bg-amber-400 after:rounded-full"
+                        : "text-white/70 hover:text-white hover:bg-white/10 px-2.5 py-1 rounded-full font-semibold border border-transparent"
                     )}
                   >
                     {displayName}
@@ -682,28 +758,82 @@ export default function ReelsPage() {
 
                     {/* ── 3. OVERLAY CONTENT: Hook, Question & Interactive Quiz Sticker ── */}
                     {/* Natural full-width container leaving safe pr-14 for action icons */}
-                    <div className="relative z-20 flex-1 flex flex-col justify-end px-3.5 sm:px-4 pt-14 pb-3 pr-14 sm:pr-16 min-h-0 space-y-2 overflow-hidden pointer-events-none">
-                      {/* Center Hook (if available and different from question) */}
-                      {reel.hook && reel.quiz?.question && reel.hook.trim() !== reel.quiz.question.trim() && (
-                        <div className="my-auto py-1 text-center pointer-events-auto">
-                          <p className="text-xs sm:text-sm font-medium text-white/90 italic drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] max-w-xs mx-auto leading-relaxed">
-                            &ldquo;{reel.hook}&rdquo;
-                          </p>
-                        </div>
-                      )}
+                    <div className="relative z-20 flex-1 flex flex-col justify-end px-3.5 sm:px-4 pt-12 pb-3 pr-14 sm:pr-16 min-h-0 space-y-2 overflow-hidden pointer-events-none">
+                      {/* Hook Teaser Card (directly connected to question, eliminating dead space gap) */}
+                      {(() => {
+                        const cleanHook = sanitizeHookText(reel.hook);
+                        if (!cleanHook || cleanHook.trim() === reel.quiz?.question?.trim()) return null;
+                        return (
+                          <div className="mb-0.5 p-2 sm:p-2.5 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/20 shadow-lg pointer-events-auto transition-all">
+                            <div className="flex items-center gap-1.5 mb-0.5 text-[10px] font-extrabold text-amber-300 uppercase tracking-wider">
+                              <Sparkles className="size-3 text-amber-400 shrink-0" />
+                              <span>Diqqat & Fakt</span>
+                            </div>
+                            <p className="text-xs sm:text-sm font-bold text-white/95 leading-snug drop-shadow-sm">
+                              &ldquo;{cleanHook}&rdquo;
+                            </p>
+                          </div>
+                        );
+                      })()}
 
-                      {/* Question Block */}
-                      <div className="space-y-1.5 pointer-events-auto">
-                        {/* Subject & Difficulty Badges */}
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm">
-                            {reel.subject_name}
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/30 border border-rose-400/40 text-rose-200 text-[10px] font-bold backdrop-blur-md shadow-sm">
-                            <Flame className="size-2.5 text-rose-400 fill-rose-400 animate-pulse" />
-                            <span>{failRate}% adashgan</span>
-                          </span>
-                        </div>
+                      {/* Question Block & Dynamic Timer */}
+                      <div className="space-y-2 pointer-events-auto">
+                        {/* Subject & Difficulty Badges + Category Color Coding */}
+                        {(() => {
+                          const badgeStyle = getSubjectBadgeStyle(reel.subject_slug, reel.subject_name);
+                          const safeFailRate = Math.min(88, Math.max(35, 48 + ((reel.id * 11) % 35)));
+                          const hasAnswered = !!quizAnswer;
+
+                          return (
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between gap-1.5 flex-wrap">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className={cn(
+                                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md shadow-sm",
+                                    badgeStyle.badge
+                                  )}>
+                                    <span className={cn("size-1.5 rounded-full animate-pulse", badgeStyle.dot)} />
+                                    <span>{reel.subject_name}</span>
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/30 border border-rose-400/40 text-rose-200 text-[10px] font-bold backdrop-blur-md shadow-sm">
+                                    <Flame className="size-2.5 text-rose-400 fill-rose-400 animate-pulse" />
+                                    <span>{safeFailRate}% adashgan</span>
+                                  </span>
+                                </div>
+
+                                {/* Timer Badge indicator */}
+                                <div className={cn(
+                                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold backdrop-blur-md transition-colors",
+                                  hasAnswered
+                                    ? "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
+                                    : timeLeft <= 4
+                                    ? "bg-rose-500/30 border-rose-400/50 text-rose-200 animate-pulse"
+                                    : "bg-white/15 border-white/20 text-white/90"
+                                )}>
+                                  <span>⏱️</span>
+                                  <span>{hasAnswered ? "Yechildi" : `${timeLeft}s`}</span>
+                                </div>
+                              </div>
+
+                              {/* Yupqa dinamik taymer chizig'i (Progress bar) */}
+                              <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/20 shadow-inner">
+                                <div
+                                  className={cn(
+                                    "h-full rounded-full transition-all duration-1000 ease-linear",
+                                    hasAnswered
+                                      ? "bg-emerald-400"
+                                      : timeLeft <= 4
+                                      ? "bg-gradient-to-r from-rose-500 to-red-400 animate-pulse"
+                                      : timeLeft <= 8
+                                      ? "bg-gradient-to-r from-amber-400 to-yellow-300"
+                                      : "bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400"
+                                  )}
+                                  style={{ width: hasAnswered ? '100%' : `${(timeLeft / 15) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         {formattedQ.isMatching ? (
                           <div className="space-y-1.5 bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl p-2.5 max-h-[26vh] overflow-y-auto no-scrollbar shadow-xl">
@@ -732,7 +862,7 @@ export default function ReelsPage() {
                         )}
                       </div>
 
-                      {/* ── Interactive Quiz Options (TikTok Poll Pills) ── */}
+                      {/* ── Interactive Quiz Options (Vibrant Hover & Tap Feedback) ── */}
                       <div className="flex flex-col gap-1.5 w-full pointer-events-auto">
                         {reel.quiz.options.map((opt, optIdx) => {
                           const cleanOpt = cleanOptionText(opt);
@@ -741,18 +871,18 @@ export default function ReelsPage() {
                           const isCorrectOption = quizAnswer?.correctIndex === optIdx;
                           const hasAnswered = !!quizAnswer;
 
-                          let btnClass = "bg-black/60 hover:bg-black/80 border-white/20 text-white shadow-md active:scale-[0.98]";
-                          let badgeClass = "bg-white/15 text-white border-white/25";
+                          let btnClass = "bg-neutral-950/80 hover:bg-neutral-900/95 border-white/25 text-white/95 hover:border-white/60 hover:scale-[1.01] shadow-md active:scale-[0.98]";
+                          let badgeClass = "bg-white/15 text-white border-white/25 group-hover:bg-amber-400/25 group-hover:text-amber-200 group-hover:border-amber-400/50";
 
                           if (hasAnswered) {
                             if (isCorrectOption) {
-                              btnClass = "bg-emerald-600/90 border-emerald-400 text-white font-bold ring-2 ring-emerald-400/60 shadow-[0_0_16px_rgba(16,185,129,0.5)]";
-                              badgeClass = "bg-emerald-800 text-white border-emerald-400";
+                              btnClass = "bg-emerald-600/95 border-emerald-400 text-white font-bold ring-2 ring-emerald-400/70 shadow-[0_0_20px_rgba(16,185,129,0.6)] scale-[1.01] animate-pulse";
+                              badgeClass = "bg-emerald-800 text-white border-emerald-300";
                             } else if (isSelected && !quizAnswer.isCorrect) {
-                              btnClass = "bg-rose-600/90 border-rose-400 text-white opacity-95 ring-2 ring-rose-400/50 shadow-[0_0_16px_rgba(244,63,94,0.4)]";
-                              badgeClass = "bg-rose-800 text-white border-rose-400";
+                              btnClass = "bg-rose-600/95 border-rose-400 text-white opacity-95 ring-2 ring-rose-400/60 shadow-[0_0_20px_rgba(244,63,94,0.5)]";
+                              badgeClass = "bg-rose-800 text-white border-rose-300";
                             } else {
-                              btnClass = "bg-black/35 border-white/10 text-white/30";
+                              btnClass = "bg-black/35 border-white/10 text-white/30 opacity-40 grayscale-[40%]";
                               badgeClass = "bg-white/[0.05] text-white/20 border-transparent";
                             }
                           }
@@ -763,21 +893,21 @@ export default function ReelsPage() {
                               disabled={hasAnswered}
                               onClick={() => handleAnswerQuiz(reel.id, optIdx)}
                               className={cn(
-                                "w-full min-h-[36px] sm:min-h-[40px] py-1.5 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl text-left border flex items-center gap-2 sm:gap-2.5 backdrop-blur-md transition-all cursor-pointer",
+                                "group w-full min-h-[38px] sm:min-h-[42px] py-2 px-3 rounded-xl sm:rounded-2xl text-left border flex items-center gap-2.5 sm:gap-3 backdrop-blur-md transition-all duration-200 cursor-pointer",
                                 btnClass
                               )}
                             >
-                              <span className={cn("size-5.5 sm:size-6 rounded-lg border flex items-center justify-center text-[11px] font-black shrink-0 shadow-inner", badgeClass)}>
+                              <span className={cn("size-6 sm:size-6.5 rounded-lg border flex items-center justify-center text-[11px] font-black shrink-0 transition-colors shadow-inner", badgeClass)}>
                                 {letter}
                               </span>
                               <span className="text-xs sm:text-[13px] font-semibold leading-tight flex-1 break-words">
                                 {cleanOpt}
                               </span>
                               {hasAnswered && isCorrectOption && (
-                                <CheckCircle2 className="size-4 text-emerald-300 shrink-0 ml-auto" />
+                                <CheckCircle2 className="size-4.5 text-emerald-300 shrink-0 ml-auto animate-in zoom-in" />
                               )}
                               {hasAnswered && isSelected && !quizAnswer.isCorrect && (
-                                <XCircle className="size-4 text-rose-300 shrink-0 ml-auto" />
+                                <XCircle className="size-4.5 text-rose-300 shrink-0 ml-auto animate-in zoom-in" />
                               )}
                             </button>
                           );

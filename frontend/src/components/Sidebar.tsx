@@ -38,6 +38,7 @@ interface SidebarProps {
   onMobileClose?: () => void;
   user?: any;
   onLogout?: () => void;
+  theme?: 'dark' | 'light';
 }
 
 interface NavItem {
@@ -94,7 +95,9 @@ export default function Sidebar({
   onMobileClose,
   user: propUser,
   onLogout: propLogout,
+  theme = 'dark',
 }: SidebarProps) {
+  const isLight = theme === 'light';
   const pathname = usePathname();
   const router = useRouter();
   const { user: storeUser, logout } = useAuthStore();
@@ -120,19 +123,25 @@ export default function Sidebar({
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
           <Link href="/dashboard" onClick={onMobileClose} className="group flex items-center gap-3">
-            <div className="relative flex size-10 shrink-0 items-center justify-center rounded-2xl overflow-hidden shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-2 ring-emerald-400/20 group-hover:scale-105 transition-transform bg-slate-900">
+            <div className={cn(
+              "relative flex size-10 shrink-0 items-center justify-center rounded-2xl overflow-hidden group-hover:scale-105 transition-transform",
+              isLight ? "shadow-sm ring-2 ring-blue-500/20 bg-blue-50" : "shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-2 ring-emerald-400/20 bg-slate-900"
+            )}>
               <BrandMark size={40} rounded="rounded-2xl" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-black tracking-tight text-white">
-                  Ilm<span className="text-emerald-400">Ildizi</span>
+                <span className={cn("text-base font-black tracking-tight", isLight ? "text-slate-900" : "text-white")}>
+                  Ilm<span className={isLight ? "text-blue-600" : "text-emerald-400"}>Ildizi</span>
                 </span>
-                <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-extrabold text-emerald-400 uppercase tracking-widest">
+                <span className={cn(
+                  "rounded-full px-1.5 py-0.2 text-[9px] font-extrabold uppercase tracking-widest border",
+                  isLight ? "bg-blue-50 border-blue-200 text-blue-700 font-black" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                )}>
                   2.0
                 </span>
               </div>
-              <p className="text-[11px] font-medium text-slate-400 truncate">
+              <p className={cn("text-[11px] font-medium truncate", isLight ? "text-slate-500 font-semibold" : "text-slate-400")}>
                 Gamified EdTech Platform
               </p>
             </div>
@@ -143,7 +152,10 @@ export default function Sidebar({
             <button
               type="button"
               onClick={onMobileClose}
-              className="lg:hidden flex size-8 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-400 hover:text-white cursor-pointer"
+              className={cn(
+                "lg:hidden flex size-8 items-center justify-center rounded-xl border cursor-pointer",
+                isLight ? "border-slate-200 bg-slate-100 text-slate-600 hover:text-slate-950" : "border-slate-800 bg-slate-900/80 text-slate-400 hover:text-white"
+              )}
               aria-label="Yopish"
             >
               <X className="size-4" />
@@ -185,7 +197,10 @@ export default function Sidebar({
 
             return (
               <div key={gIdx} className="space-y-1">
-                <span className="px-3 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                <span className={cn(
+                  "px-3 text-[10px] font-black uppercase tracking-wider",
+                  isLight ? "text-slate-400" : "text-slate-500"
+                )}>
                   {group.label}
                 </span>
                 <div className="space-y-1">
@@ -201,19 +216,23 @@ export default function Sidebar({
                         onMouseEnter={() => item.api && prefetchApi(item.api)}
                         onTouchStart={() => item.api && prefetchApi(item.api)}
                         className={cn(
-                          'group relative flex min-h-[42px] items-center justify-between rounded-2xl px-3 py-2 text-xs font-semibold transition-all duration-200',
+                          'group relative flex min-h-[44px] items-center justify-between rounded-2xl px-3 py-2 text-xs font-semibold transition-all duration-200',
                           active
-                            ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-transparent text-emerald-300 font-bold border-l-2 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
-                            : 'text-slate-400 hover:bg-slate-900/60 hover:text-slate-200 hover:translate-x-0.5'
+                            ? (isLight
+                                ? 'bg-blue-50/90 text-blue-700 font-black border-l-4 border-blue-600 shadow-xs'
+                                : 'bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-transparent text-emerald-300 font-bold border-l-2 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.12)]')
+                            : (isLight
+                                ? 'text-slate-600 hover:bg-slate-100/90 hover:text-slate-950 hover:translate-x-0.5 font-medium'
+                                : 'text-slate-400 hover:bg-slate-900/60 hover:text-slate-200 hover:translate-x-0.5')
                         )}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <PremiumIcon
                             icon={Icon as any}
-                            tone={active ? (item.tone || 'emerald') : 'zinc'}
+                            tone={active ? (isLight ? 'sky' : (item.tone || 'emerald')) : 'zinc'}
                             size="sm"
-                            glow={active || item.glow}
-                            className={cn('transition-transform duration-200 group-hover:scale-110', !active && 'group-hover:border-slate-700')}
+                            glow={!isLight && (active || item.glow)}
+                            className={cn('transition-transform duration-200 group-hover:scale-110')}
                           />
                           <span className="truncate">{item.label}</span>
                         </div>
@@ -247,19 +266,25 @@ export default function Sidebar({
 
       {/* 3. USER FOOTER CARD */}
       {user && (
-        <div className="pt-4 border-t border-slate-800/80">
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-900/50 p-3 backdrop-blur-md shadow-lg space-y-2.5">
+        <div className={cn("pt-4 border-t", isLight ? "border-slate-200" : "border-slate-800/80")}>
+          <div className={cn(
+            "rounded-2xl border p-3 backdrop-blur-md space-y-2.5",
+            isLight ? "border-slate-200 bg-white/90 shadow-sm" : "border-slate-800/80 bg-slate-900/50 shadow-lg"
+          )}>
             <div className="flex items-center gap-2.5">
               <div
                 onClick={() => { onMobileClose?.(); router.push('/profile'); }}
                 className="relative shrink-0 cursor-pointer"
               >
                 <CosmeticAvatar
-                  className="size-9 border border-emerald-500/40 ring-2 ring-emerald-500/20"
+                  className={cn(
+                    "size-9 border ring-2",
+                    isLight ? "border-blue-500/30 ring-blue-500/10" : "border-emerald-500/40 ring-emerald-500/20"
+                  )}
                   src={user.avatar_url}
                   name={user.first_name || user.username}
                   cosmetics={user.cosmetics}
-                  fallbackClassName="text-xs font-bold text-emerald-400"
+                  fallbackClassName={cn("text-xs font-bold", isLight ? "text-blue-600" : "text-emerald-400")}
                 />
                 {user.is_premium && (
                   <span className="absolute -top-1 -right-1 size-4 rounded-full bg-amber-500 flex items-center justify-center text-[8px] text-slate-950 font-black shadow-sm">
@@ -273,15 +298,15 @@ export default function Sidebar({
                 className="min-w-0 flex-1 cursor-pointer"
               >
                 <div className="flex items-center gap-1">
-                  <p className="text-xs font-bold text-white truncate hover:text-emerald-300 transition-colors">
+                  <p className={cn("text-xs font-bold truncate transition-colors", isLight ? "text-slate-900 hover:text-blue-600" : "text-white hover:text-emerald-300")}>
                     {user.first_name || user.username}
                   </p>
                   <VerifiedBadge role={user.role} isSuperadmin={user.is_superadmin} isTeacher={user.is_teacher} size="xs" />
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-slate-400 font-medium">
-                  <span className="text-emerald-400 font-mono font-bold">Lvl {user.level || 1}</span>
+                <div className={cn("flex items-center gap-1 text-[10px] font-medium", isLight ? "text-slate-500" : "text-slate-400")}>
+                  <span className={cn("font-mono font-bold", isLight ? "text-blue-600" : "text-emerald-400")}>Lvl {user.level || 1}</span>
                   <span>·</span>
-                  <span className="text-slate-400 font-mono font-semibold">{(user.xp || 0).toLocaleString()} XP</span>
+                  <span className="font-mono font-semibold">{(user.xp || 0).toLocaleString()} XP</span>
                 </div>
               </div>
 
@@ -291,7 +316,10 @@ export default function Sidebar({
                   handleLogout();
                   router.push('/login');
                 }}
-                className="flex size-7 shrink-0 items-center justify-center rounded-xl border border-slate-800 hover:border-rose-500/40 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition cursor-pointer"
+                className={cn(
+                  "flex size-7 shrink-0 items-center justify-center rounded-xl border transition cursor-pointer",
+                  isLight ? "border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600" : "border-slate-800 hover:border-rose-500/40 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400"
+                )}
                 title="Tizimdan chiqish"
               >
                 <LogOut className="size-3.5" />
@@ -300,13 +328,18 @@ export default function Sidebar({
 
             {/* Micro XP Bar */}
             <div className="space-y-1 pt-0.5">
-              <div className="flex justify-between text-[9px] font-mono text-slate-400">
+              <div className={cn("flex justify-between text-[9px] font-mono", isLight ? "text-slate-500" : "text-slate-400")}>
                 <span>Daraja progressi</span>
-                <span className="text-emerald-400 font-bold">{Math.min(100, Math.round(((user.xp || 0) % 1000) / 10))}%</span>
+                <span className={cn("font-bold", isLight ? "text-blue-600" : "text-emerald-400")}>
+                  {Math.min(100, Math.round(((user.xp || 0) % 1000) / 10))}%
+                </span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+              <div className={cn("h-1.5 w-full rounded-full overflow-hidden", isLight ? "bg-slate-100" : "bg-slate-800")}>
                 <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-500"
+                  className={cn(
+                    "h-full rounded-full transition-all duration-500",
+                    isLight ? "bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]" : "bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                  )}
                   style={{ width: `${Math.max(5, Math.min(100, Math.round(((user.xp || 0) % 1000) / 10)))}%` }}
                 />
               </div>
@@ -320,7 +353,10 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop Fixed Sidebar */}
-      <aside className="ilm-sidebar fixed left-0 top-0 z-30 hidden h-screen w-64 select-none flex-col border-r border-slate-800/80 bg-slate-950/80 backdrop-blur-2xl lg:flex border-t border-white/5">
+      <aside className={cn(
+        "ilm-sidebar fixed left-0 top-0 z-30 hidden h-screen w-64 select-none flex-col border-r backdrop-blur-2xl lg:flex",
+        isLight ? "border-slate-200/90 bg-white/95 shadow-xs text-slate-900" : "border-slate-800/80 bg-slate-950/80 backdrop-blur-2xl border-t border-white/5 text-white"
+      )}>
         {sidebarContent}
       </aside>
 
@@ -333,14 +369,17 @@ export default function Sidebar({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onMobileClose}
-              className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
             />
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-slate-950/95 border-r border-slate-800 shadow-2xl backdrop-blur-2xl lg:hidden"
+              className={cn(
+                "fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] border-r shadow-2xl backdrop-blur-2xl lg:hidden",
+                isLight ? "bg-white/98 border-slate-200 text-slate-900" : "bg-slate-950/95 border-slate-800 text-white"
+              )}
             >
               {sidebarContent}
             </motion.div>

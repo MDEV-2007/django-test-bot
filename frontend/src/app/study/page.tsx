@@ -316,6 +316,13 @@ export default function StudyRoomPage() {
     setIsRunning(!isRunning);
   };
 
+  const changeDurationPreset = (mins: number) => {
+    soundFX.click();
+    setDurationMinutes(mins);
+    setTimeLeft(mins * 60);
+    setIsRunning(false);
+  };
+
   const resetTimer = () => {
     soundFX.click();
     setIsRunning(false);
@@ -599,36 +606,47 @@ export default function StudyRoomPage() {
             {/* ============================================================ */}
             {/* 🤖 AI MENTOR: BUGUN SIZ UCHUN TAVSIYA                        */}
             {/* ============================================================ */}
-            <Card className="rounded-3xl border border-primary/30 bg-gradient-to-r from-primary/[0.08] via-card to-card p-5 sm:p-6 shadow-sm">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-                <div className="flex items-start gap-3.5">
-                  <PremiumIcon icon={Bot} tone="primary" size="lg" glow className="shrink-0" />
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-black uppercase tracking-wider text-primary">
-                        AI Mentor Tavsiyasi
+            <Card className="rounded-3xl border-2 border-indigo-500/35 bg-gradient-to-r from-indigo-950/20 via-card to-purple-950/20 p-5 sm:p-6 shadow-md relative overflow-hidden backdrop-blur-md">
+              <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-indigo-500/10 blur-2xl" />
+
+              <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5 max-w-2xl">
+                  <div className="size-11 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center shrink-0 shadow-xs">
+                    <Bot className="size-6 text-indigo-400" />
+                  </div>
+
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 font-mono text-[10px] font-black uppercase tracking-wider">
+                        🤖 AI Mentor Tavsiyasi
                       </span>
                       <Badge variant="secondary" className="text-[10px] font-mono">
                         Bugun siz uchun
                       </Badge>
                     </div>
-                    <p className="text-xs sm:text-sm text-foreground font-medium leading-relaxed max-w-2xl">
-                      &ldquo;{activeMission.aiReason}&rdquo;
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1 font-bold text-foreground">
-                        <SubjectIcon className="size-3.5 text-primary" /> {activeMission.subject}: {activeMission.topic}
+
+                    {/* Alohida ajralib turuvchi iqtibos ramkasi */}
+                    <div className="border-l-2 border-indigo-400/70 pl-3 py-0.5 my-1">
+                      <p className="text-xs sm:text-[13px] text-foreground/90 italic font-medium leading-relaxed">
+                        &ldquo;{activeMission.aiReason}&rdquo;
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5 pt-0.5 text-xs text-muted-foreground">
+                      <span className="text-[11px] font-semibold text-muted-foreground">
+                        Tavsiya etilgan: <strong className="text-indigo-300">{activeMission.subject}</strong>
                       </span>
-                      <span>•</span>
-                      <span>Hozirgi Mastery: <strong className="text-emerald-500 font-mono">{activeMission.currentMastery}%</strong></span>
-                      <span>➔</span>
-                      <span>Kutilayotgan: <strong className="text-primary font-mono">{activeMission.targetMastery}%</strong></span>
+                      <span className="text-muted-foreground/40">•</span>
+                      <span className="text-[11px]">
+                        Mastery: <strong className="text-emerald-400 font-mono">{activeMission.currentMastery}%</strong> ➔ <strong className="text-primary font-mono">{activeMission.targetMastery}%</strong>
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Switch Subject presets */}
-                <div className="flex flex-wrap items-center gap-2 self-start md:self-auto shrink-0">
+                <div className="flex flex-wrap items-center gap-1.5 self-start md:self-auto shrink-0 bg-background/60 p-1.5 rounded-2xl border border-border/80">
+                  <span className="text-[10px] uppercase font-mono font-bold text-muted-foreground px-2">Fanlar:</span>
                   {PRESET_MISSIONS.map((m) => (
                     <button
                       key={m.id}
@@ -637,10 +655,10 @@ export default function StudyRoomPage() {
                         setActiveMission(m);
                       }}
                       className={cn(
-                        "px-3 py-1.5 rounded-xl text-xs font-bold transition-all border",
+                        "px-2.5 py-1 rounded-xl text-xs font-bold transition-all",
                         activeMission.id === m.id
-                          ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                          : "bg-background border-border/80 text-muted-foreground hover:text-foreground"
+                          ? "bg-indigo-600 text-white shadow-xs"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                       )}
                     >
                       {m.subject}
@@ -659,18 +677,18 @@ export default function StudyRoomPage() {
                 <Card className="rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 p-6 sm:p-7 shadow-md relative overflow-hidden">
                   <div className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-primary/10 blur-3xl" />
 
-                  {/* Header: Fan & Mavzu */}
+                  {/* Header: Fan & Mavzu - Asosiy Dominant Sarlavha */}
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-4">
-                    <div className="space-y-0.5">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono uppercase tracking-wider font-extrabold text-primary flex items-center gap-1">
-                          <Target className="size-3.5" /> BUGUNGI FOKUS
+                          <Target className="size-3.5" /> BUGUNGI FOKUS MAQSADI
                         </span>
-                        <Badge variant="outline" className="text-[10px] font-bold border-primary/30 text-primary">
+                        <Badge variant="outline" className="text-[10px] font-bold border-primary/30 text-primary bg-primary/10">
                           {activeMission.subject}
                         </Badge>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-black text-foreground">
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-foreground tracking-tight">
                         {activeMission.topic}
                       </h3>
                     </div>
@@ -693,8 +711,28 @@ export default function StudyRoomPage() {
 
                   {/* Ikki ustunli Session Layout: Timer chapda, Vazifalar o'ngda */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-6 items-center">
-                    {/* Chap ustun: Katta Digital Taymer & Tugmalar (Col 6) */}
-                    <div className="md:col-span-6 flex flex-col items-center justify-center p-4 rounded-3xl bg-background/80 border border-border/70 text-center space-y-4">
+                    {/* Chap ustun: Katta Digital Taymer, Sozlama Presets & Tugmalar (Col 6) */}
+                    <div className="md:col-span-6 flex flex-col items-center justify-center p-4 sm:p-5 rounded-3xl bg-background/80 border border-border/70 text-center space-y-4">
+                      
+                      {/* Pomodoro vaqtini tezda o'zgartirish (15, 25, 50 min presets) */}
+                      <div className="flex items-center justify-center gap-1.5 p-1 rounded-2xl bg-muted/50 border border-border/60">
+                        {[15, 25, 50].map((mins) => (
+                          <button
+                            key={mins}
+                            onClick={() => changeDurationPreset(mins)}
+                            className={cn(
+                              "px-3 py-1 rounded-xl text-xs font-bold transition-all",
+                              durationMinutes === mins
+                                ? "bg-primary text-primary-foreground shadow-xs font-extrabold"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            )}
+                            title={`${mins} daqiqalik taymer`}
+                          >
+                            {mins} daq {mins === 25 && '⚡'}
+                          </button>
+                        ))}
+                      </div>
+
                       <div className="relative size-48 sm:size-52 flex items-center justify-center">
                         <svg className="size-full -rotate-90" viewBox="0 0 100 100">
                           <circle
@@ -836,25 +874,39 @@ export default function StudyRoomPage() {
                   </div>
                 </Card>
 
-                {/* 🎧 FOKUS MUHITI (AMBIENT SOUND GENERATOR) */}
-                <Card className="rounded-3xl border border-border/80 bg-card p-5 shadow-xs space-y-3.5">
-                  <div className="flex items-center justify-between">
+                {/* 🎧 FOKUS MUHITI (AMBIENT SOUND MIXER) */}
+                <Card className="rounded-3xl border border-border/80 bg-card p-5 shadow-xs space-y-4">
+                  {/* Header: Title + Realtime Master Volume Slayderi */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
                     <div className="flex items-center gap-2">
                       <PremiumIcon icon={Headphones} tone="emerald" size="sm" glow />
-                      <h4 className="text-sm font-bold text-foreground">
-                        🎧 Fokus Muhiti (Ambient Tovushlar)
-                      </h4>
+                      <div>
+                        <h4 className="text-sm font-bold text-foreground">
+                          🎧 Fokus Muhiti (Ambient Fon Tovushlari)
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground">
+                          Miyani tinchlantiruvchi va diqqatni jamlovchi tabiiy tovushlar
+                        </p>
+                      </div>
                     </div>
-                    {activeSound && (
-                      <button
-                        onClick={stopAmbientSound}
-                        className="text-xs font-semibold text-rose-500 hover:underline"
-                      >
-                        Ovozni o&apos;chirish
-                      </button>
-                    )}
+
+                    {/* Mikser: Doimiy ko'rinib turuvchi ovoz slayderi */}
+                    <div className="flex items-center gap-2.5 bg-muted/40 px-3 py-1.5 rounded-2xl border border-border/60 shrink-0 self-start sm:self-auto">
+                      <Volume2 className="size-4 text-emerald-500 shrink-0" />
+                      <Slider
+                        value={[volume]}
+                        max={1}
+                        step={0.05}
+                        onValueChange={handleVolumeChange}
+                        className="w-24 sm:w-28"
+                      />
+                      <span className="text-xs font-mono font-bold text-foreground w-8 text-right">
+                        {Math.round(volume * 100)}%
+                      </span>
+                    </div>
                   </div>
 
+                  {/* Tovush kartochkalari (Alohida holat va mini-indikator bilan) */}
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     {AMBIENT_SOUNDS.map((snd) => {
                       const Icon = snd.icon;
@@ -864,15 +916,24 @@ export default function StudyRoomPage() {
                           key={snd.id}
                           onClick={() => toggleSound(snd.id, snd.type)}
                           className={cn(
-                            "p-2.5 rounded-2xl border text-left transition-all relative overflow-hidden",
+                            "p-3 rounded-2xl border text-left transition-all relative overflow-hidden group cursor-pointer",
                             isActive
-                              ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 ring-1 ring-emerald-500/40"
-                              : "bg-background border-border/70 hover:border-border text-foreground"
+                              ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-400 ring-2 ring-emerald-500/30 shadow-xs"
+                              : "bg-background border-border/70 hover:border-border/90 text-foreground hover:scale-[1.01]"
                           )}
                         >
-                          <PremiumIcon icon={Icon} tone={isActive ? "emerald" : "zinc"} size="xs" glow={isActive} className="mb-1.5" />
+                          <div className="flex items-center justify-between mb-2">
+                            <PremiumIcon icon={Icon} tone={isActive ? "emerald" : "zinc"} size="xs" glow={isActive} />
+                            {isActive && (
+                              <span className="flex items-center gap-0.5">
+                                <span className="size-1 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <span className="size-1.5 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <span className="size-1 rounded-full bg-emerald-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                              </span>
+                            )}
+                          </div>
                           <span className="text-xs font-bold block truncate">{snd.name}</span>
-                          <span className="text-[10px] text-muted-foreground block truncate">
+                          <span className="text-[10px] text-muted-foreground block truncate mt-0.5">
                             {isActive ? '🔊 Yangramoqda' : 'Yoqish'}
                           </span>
                         </button>
@@ -880,20 +941,15 @@ export default function StudyRoomPage() {
                     })}
                   </div>
 
-                  {/* Volume Slider */}
                   {activeSound && (
-                    <div className="flex items-center gap-3 pt-1">
-                      <Volume2 className="size-4 text-muted-foreground shrink-0" />
-                      <Slider
-                        value={[volume]}
-                        max={1}
-                        step={0.05}
-                        onValueChange={handleVolumeChange}
-                        className="w-full"
-                      />
-                      <span className="text-xs font-mono text-muted-foreground w-8 text-right">
-                        {Math.round(volume * 100)}%
-                      </span>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+                      <span className="italic text-[11px]">Hozir faol: <strong className="text-foreground">{currentAmbient?.name}</strong></span>
+                      <button
+                        onClick={stopAmbientSound}
+                        className="text-xs font-semibold text-rose-500 hover:underline"
+                      >
+                        Ovozni o&apos;chirish
+                      </button>
                     </div>
                   )}
                 </Card>
@@ -952,6 +1008,29 @@ export default function StudyRoomPage() {
                     </div>
                   </div>
 
+                  {/* Bugungi fokus maqsadi mini progress bar */}
+                  <div className="p-3.5 rounded-2xl bg-background/80 border border-border/70 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-foreground flex items-center gap-1.5">
+                        <Target className="size-3.5 text-amber-500" />
+                        <span>Bugungi Maqsad</span>
+                      </span>
+                      <span className="font-mono text-amber-500 font-black">
+                        25 / 50 daq (50%)
+                      </span>
+                    </div>
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted/60">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-700"
+                        style={{ width: '50%' }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground flex items-center justify-between">
+                      <span>🎯 Yana 1 ta Pomodoro qoldi</span>
+                      <span className="font-semibold text-emerald-500">+25 XP</span>
+                    </p>
+                  </div>
+
                   <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-center text-xs">
                     <span className="text-muted-foreground block text-[11px]">Bugun sessiyani yakunlab uzluksizlikni saqlang:</span>
                     <strong className="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5 inline-block">
@@ -960,13 +1039,19 @@ export default function StudyRoomPage() {
                   </div>
                 </Card>
 
-                {/* Tezkor navigatsiya kartalari */}
+                {/* Tezkor navigatsiya kartalari with Pulsing Notification Badges */}
                 <Card className="rounded-3xl border border-border/80 bg-card p-5 shadow-xs space-y-3">
-                  <div className="flex items-center gap-2">
-                    <PremiumIcon icon={BookOpen} tone="indigo" size="sm" glow />
-                    <h4 className="text-xs font-mono font-black uppercase tracking-wider text-muted-foreground">
-                      O&apos;quv Qurollari
-                    </h4>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <PremiumIcon icon={BookOpen} tone="indigo" size="sm" glow />
+                      <h4 className="text-xs font-mono font-black uppercase tracking-wider text-muted-foreground">
+                        O&apos;quv Qurollari
+                      </h4>
+                    </div>
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                      <span className="size-1.5 rounded-full bg-rose-500 animate-ping" />
+                      <span>Yangiliklar</span>
+                    </span>
                   </div>
 
                   <div className="space-y-2">
@@ -978,7 +1063,12 @@ export default function StudyRoomPage() {
                         <PremiumIcon icon={Brain} tone="emerald" size="xs" />
                         <span>Amaliy Mashqlar Banki</span>
                       </span>
-                      <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-black">
+                          +15 yangi
+                        </span>
+                        <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </Link>
 
                     <Link
@@ -989,7 +1079,12 @@ export default function StudyRoomPage() {
                         <PremiumIcon icon={Layers} tone="amber" size="xs" />
                         <span>Quick Learn Flashcards</span>
                       </span>
-                      <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-mono font-black">
+                          8 ta takrorlash
+                        </span>
+                        <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </Link>
 
                     <Link
@@ -1000,7 +1095,13 @@ export default function StudyRoomPage() {
                         <PremiumIcon icon={Sparkles} tone="rose" size="xs" />
                         <span>Bilim Reels Videolari</span>
                       </span>
-                      <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-500 text-[10px] font-mono font-black flex items-center gap-1">
+                          <span className="size-1.5 rounded-full bg-rose-500 animate-ping" />
+                          <span>Yangi 🔥</span>
+                        </span>
+                        <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </Link>
                   </div>
                 </Card>

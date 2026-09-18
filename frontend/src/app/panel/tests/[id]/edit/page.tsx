@@ -469,28 +469,41 @@ export default function PanelTestSetEditPage() {
       </div>
 
       <Dialog open={showDelete} onOpenChange={setShowDelete}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Testni o&apos;chirish</DialogTitle>
-            <DialogDescription>
-              {ts.attempt_count > 0 ? (
-                <>
-                  Bu testda <b>{ts.attempt_count} ta urinish</b> bor. O&apos;quvchilar
-                  natijasi yo&apos;qolmasligi uchun uni o&apos;chirish mumkin emas.
-                  O&apos;rniga <b>arxivlash</b> tavsiya etiladi: test katalogdan
-                  yo&apos;qoladi, yangi urinishlar yopiladi, ammo eski natijalar saqlanadi.
-                </>
-              ) : (
-                "Haqiqatan ham ushbu testni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi."
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowDelete(false)}>Bekor qilish</Button>
+        <DialogContent className="max-w-md">
+          <div className="flex items-start gap-4">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500">
+              <Trash2 className="size-5" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <DialogHeader className="p-0 pr-0">
+                <DialogTitle className="text-lg font-black text-slate-900 dark:text-white">
+                  Testni o&apos;chirish
+                </DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed pt-1">
+                  {ts.attempt_count > 0 ? (
+                    <>
+                      Bu testda <b className="text-foreground">{ts.attempt_count} ta urinish</b> bor. O&apos;quvchilar
+                      natijasi yo&apos;qolmasligi uchun uni o&apos;chirish mumkin emas.
+                      O&apos;rniga <b className="text-foreground">arxivlash</b> tavsiya etiladi: test katalogdan
+                      yo&apos;qoladi, yangi urinishlar yopiladi, ammo eski natijalar saqlanadi.
+                    </>
+                  ) : (
+                    "Haqiqatan ham ushbu testni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi."
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+          </div>
+          <DialogFooter className="mt-6 gap-2 sm:gap-2.5">
+            <Button variant="outline" onClick={() => setShowDelete(false)}>
+              Bekor qilish
+            </Button>
             {ts.attempt_count > 0 ? (
               <Button onClick={archive}>Arxivlash</Button>
             ) : (
-              <Button variant="destructive" onClick={remove}>Ha, o&apos;chirish</Button>
+              <Button variant="destructive" onClick={remove}>
+                Ha, o&apos;chirish
+              </Button>
             )}
           </DialogFooter>
         </DialogContent>

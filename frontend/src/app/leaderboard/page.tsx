@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Trophy, Crown, Zap, Users, Globe } from 'lucide-react';
+import { Trophy, Crown, Zap, Users, Sparkles } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
@@ -89,18 +89,18 @@ export default function LeaderboardPage() {
           )}
         />
 
-        {/* Hub Mode Switcher: Hamjamiyat Lentasi & Liderlar Jadvali */}
-        <div className="flex items-center gap-2 border-b border-[var(--border-card)] pb-3">
+        {/* Hub Mode Switcher: Yutuqlar Lentasi & Liderlar Jadvali */}
+        <div className="flex items-center p-1 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] shadow-xs w-fit">
           <Link
             href="/feed"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-muted-foreground hover:bg-[var(--surface-hover)] hover:text-emerald-500 border border-transparent hover:border-emerald-500/30"
+            className="flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-emerald-500 hover:bg-[var(--surface-hover)] transition-all"
           >
-            <Globe className="size-4 text-emerald-500" />
-            <span>🌟 Yutuqlar Lentasi</span>
+            <Sparkles className="size-4 text-emerald-500" />
+            <span>Yutuqlar Lentasi</span>
           </Link>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30 shadow-sm">
+          <div className="flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30 shadow-xs">
             <Trophy className="size-4" />
-            <span>🏆 Liderlar Ligasi</span>
+            <span>Liderlar Ligasi</span>
           </div>
         </div>
 

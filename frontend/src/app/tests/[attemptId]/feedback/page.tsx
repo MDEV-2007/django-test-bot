@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
   AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
+  CheckCircle2, HelpCircle, Trophy,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
@@ -232,75 +233,218 @@ export default function FeedbackPage() {
           </Card>
         )}
 
-        {/* Natija */}
-        <Card className="overflow-hidden">
-          <CardContent className="flex flex-col items-center gap-3 pt-8 text-center">
-            <div className="bg-gradient-to-r from-[var(--accent)] via-[var(--accent-text)] to-[var(--success)] bg-clip-text text-4xl font-black text-transparent sm:text-5xl">
-              {a.score.toFixed(0)}%
+        {/* Natija Hero Card */}
+        {(() => {
+          const totalQ = (a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0);
+          const safeTotal = totalQ || 1;
+          const correctPct = ((a.correct_answers || 0) / safeTotal) * 100;
+          const wrongPct = ((a.wrong_answers || 0) / safeTotal) * 100;
+          const skippedPct = ((a.skipped_answers || 0) / safeTotal) * 100;
+
+          const radius = 54;
+          const circumference = 2 * Math.PI * radius;
+          const scoreVal = Math.min(100, Math.max(0, a.score || 0));
+          const strokeDashoffset = circumference - (scoreVal / 100) * circumference;
+
+          const isCefrTest = Boolean(data?.attempt?.test_title?.toLowerCase().includes('cefr')) || totalQ >= 60;
+
+          return (
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#11141d]/95 p-6 sm:p-8 shadow-xl backdrop-blur-md">
+              {/* Dynamic Ambient Glow behind Score */}
+              <div
+                className={cn(
+                  "pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-72 rounded-full blur-3xl opacity-25",
+                  scoreVal >= 80 ? "bg-emerald-500" :
+                  scoreVal >= 60 ? "bg-sky-500" :
+                  scoreVal >= 40 ? "bg-amber-500" : "bg-rose-500"
+                )}
+              />
+
+              <div className="relative z-10 flex flex-col items-center text-center">
+                {/* Test Title / Eyebrow */}
+                {data?.attempt?.test_title && (
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                    {data.attempt.test_title} natijalari
+                  </span>
+                )}
+
+                {/* Circular Score Gauge Centerpiece */}
+                <div className="relative flex size-36 sm:size-40 items-center justify-center my-2">
+                  <svg className="size-full -rotate-90" viewBox="0 0 130 130">
+                    <circle
+                      cx="65"
+                      cy="65"
+                      r={radius}
+                      className="stroke-slate-100 dark:stroke-white/10"
+                      strokeWidth="10"
+                      fill="transparent"
+                    />
+                    <circle
+                      cx="65"
+                      cy="65"
+                      r={radius}
+                      className={cn(
+                        "transition-all duration-1000 ease-out",
+                        scoreVal >= 80 ? "stroke-emerald-500" :
+                        scoreVal >= 60 ? "stroke-sky-500" :
+                        scoreVal >= 40 ? "stroke-amber-500" : "stroke-rose-500"
+                      )}
+                      strokeWidth="10"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      fill="transparent"
+                    />
+                  </svg>
+
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="font-mono text-3xl sm:text-4xl font-black tracking-tight text-foreground">
+                      {scoreVal.toFixed(0)}%
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5">
+                      Umumiy ball
+                    </span>
+                  </div>
+                </div>
+
+                {/* Dynamic Status Pill */}
+                <div className="mt-1">
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold font-sans shadow-2xs",
+                      scoreVal >= 80 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30" :
+                      scoreVal >= 60 ? "bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30" :
+                      scoreVal >= 40 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30" :
+                      "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                    )}
+                  >
+                    {scoreVal >= 80 ? "A'lo natija! 🏆" :
+                     scoreVal >= 60 ? "Yaxshi natija! 🎯" :
+                     scoreVal >= 40 ? "O'rtacha natija 📈" : "Ko'proq mashq zarur 💡"}
+                  </span>
+                </div>
+
+                {/* Multi-Color Segmented Progress Bar */}
+                <div className="w-full max-w-md mt-6 space-y-1.5">
+                  <div className="h-2.5 w-full rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden flex shadow-inner">
+                    {correctPct > 0 && (
+                      <div
+                        style={{ width: `${correctPct}%` }}
+                        className="bg-emerald-500 transition-all duration-700"
+                        title={`To'g'ri: ${a.correct_answers}`}
+                      />
+                    )}
+                    {wrongPct > 0 && (
+                      <div
+                        style={{ width: `${wrongPct}%` }}
+                        className="bg-rose-500 transition-all duration-700"
+                        title={`Xato: ${a.wrong_answers}`}
+                      />
+                    )}
+                    {skippedPct > 0 && (
+                      <div
+                        style={{ width: `${skippedPct}%` }}
+                        className="bg-slate-300 dark:bg-slate-700 transition-all duration-700"
+                        title={`Javobsiz: ${a.skipped_answers}`}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* 3 Metric Cards: To'g'ri / Xato / Javobsiz */}
+                <div className="grid grid-cols-3 gap-2.5 sm:gap-4 w-full max-w-md mt-4">
+                  <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10 p-3 sm:p-3.5 flex flex-col items-center justify-center gap-1 transition-transform hover:scale-[1.02]">
+                    <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                      <CheckCircle2 className="size-3.5" />
+                      <span>To&apos;g&apos;ri</span>
+                    </div>
+                    <span className="font-mono text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                      {a.correct_answers}
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 dark:bg-rose-500/10 p-3 sm:p-3.5 flex flex-col items-center justify-center gap-1 transition-transform hover:scale-[1.02]">
+                    <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
+                      <XCircle className="size-3.5" />
+                      <span>Xato</span>
+                    </div>
+                    <span className="font-mono text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400">
+                      {a.wrong_answers}
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/50 dark:bg-white/5 p-3 sm:p-3.5 flex flex-col items-center justify-center gap-1 transition-transform hover:scale-[1.02]">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-bold">
+                      <HelpCircle className="size-3.5" />
+                      <span>Javobsiz</span>
+                    </div>
+                    <span className="font-mono text-xl sm:text-2xl font-black text-slate-600 dark:text-slate-300">
+                      {a.skipped_answers}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sertifikat & Prognoz Badges */}
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+                  {/* CEFR Daraja */}
+                  {isCefrTest && (() => {
+                    const score = a.score || 0;
+                    let badgeText = '';
+                    let badgeClass = '';
+                    if (score >= 86) {
+                      badgeText = "🏆 C1 Daraja (Ilg'or — Oliy Sertifikat)";
+                      badgeClass = 'border-purple-500/40 bg-purple-500/15 text-purple-600 dark:text-purple-300';
+                    } else if (score >= 67) {
+                      badgeText = "🥇 B2 Daraja (Mustaqil — OTM Imtiyozi)";
+                      badgeClass = 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-300';
+                    } else if (score >= 47) {
+                      badgeText = "🥈 B1 Daraja (Ostonaviy Sertifikat)";
+                      badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-300';
+                    } else if (score >= 27) {
+                      badgeText = "🥉 A2 Daraja (Boshlang'ich Sertifikat)";
+                      badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300';
+                    } else {
+                      badgeText = "❌ Sinovdan o'tmadi (Sertifikat berilmaydi)";
+                      badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400';
+                    }
+                    return (
+                      <Badge variant="outline" className={`py-1.5 px-3.5 text-xs sm:text-sm font-bold ${badgeClass}`}>
+                        {badgeText}
+                      </Badge>
+                    );
+                  })()}
+
+                  {/* Milliy Sertifikat 45 talik */}
+                  {!isCefrTest && totalQ === 45 && (() => {
+                    const c = a.correct_answers;
+                    let badgeText = '';
+                    let badgeClass = '';
+                    if (c >= 34) { badgeText = '🏆 A+ Daraja (Oltin Sertifikat)'; badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-500 dark:text-amber-400'; }
+                    else if (c >= 28) { badgeText = '🥇 A Daraja (A\'lo Sertifikat)'; badgeClass = 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'; }
+                    else if (c >= 24) { badgeText = '🥈 B+ Daraja (Juda yaxshi)'; badgeClass = 'border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400'; }
+                    else if (c >= 21) { badgeText = '🥉 B Daraja (Yaxshi)'; badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400'; }
+                    else if (c >= 18) { badgeText = '📜 C+ Daraja (Qoniqarli)'; badgeClass = 'border-orange-500/40 bg-orange-500/15 text-orange-600 dark:text-orange-400'; }
+                    else { badgeText = '❌ Sinovdan o\'tmadi (Sertifikat berilmaydi)'; badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400'; }
+
+                    return (
+                      <Badge variant="outline" className={`py-1.5 px-3 text-xs sm:text-sm font-bold ${badgeClass}`}>
+                        {badgeText}
+                      </Badge>
+                    );
+                  })()}
+
+                  {/* Prognoz Sertifikat */}
+                  {data.predicted_score && (
+                    <div className="flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-500 dark:text-amber-300 shadow-xs">
+                      <Crown className="size-4 text-amber-400 shrink-0 animate-pulse" />
+                      <span>Prognoz Sertifikat: <b>{data.predicted_score} Daraja</b></span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-            <Progress value={a.score} className="h-2 max-w-sm" />
-            <p className="text-xs text-muted-foreground">
-              {a.correct_answers} to&apos;g&apos;ri · {a.wrong_answers} xato · {a.skipped_answers} javobsiz
-            </p>
-            {/* Sertifikat Darajasi (CEFR Multi-Level yoki Milliy Sertifikat) */}
-            {(() => {
-              const totalQ = (a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0);
-              const isCefrTest = Boolean(data?.attempt?.test_title?.toLowerCase().includes('cefr')) || totalQ >= 60;
-
-              if (isCefrTest) {
-                const score = a.score || 0;
-                let badgeText = '';
-                let badgeClass = '';
-                if (score >= 86) {
-                  badgeText = "🏆 C1 Daraja (Ilg'or — Oliy Sertifikat)";
-                  badgeClass = 'border-purple-500/40 bg-purple-500/15 text-purple-600 dark:text-purple-300';
-                } else if (score >= 67) {
-                  badgeText = "🥇 B2 Daraja (Mustaqil — OTM Imtiyozi)";
-                  badgeClass = 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-300';
-                } else if (score >= 47) {
-                  badgeText = "🥈 B1 Daraja (Ostonaviy Sertifikat)";
-                  badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-300';
-                } else if (score >= 27) {
-                  badgeText = "🥉 A2 Daraja (Boshlang'ich Sertifikat)";
-                  badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300';
-                } else {
-                  badgeText = "❌ Sinovdan o'tmadi (Sertifikat berilmaydi)";
-                  badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400';
-                }
-
-                return (
-                  <Badge variant="outline" className={`py-1.5 px-3.5 text-xs sm:text-sm font-bold ${badgeClass}`}>
-                    {badgeText}
-                  </Badge>
-                );
-              }
-
-              if (totalQ === 45) {
-                const c = a.correct_answers;
-                let badgeText = '';
-                let badgeClass = '';
-                if (c >= 34) { badgeText = '🏆 A+ Daraja (Oltin Sertifikat)'; badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-500 dark:text-amber-400'; }
-                else if (c >= 28) { badgeText = '🥇 A Daraja (A\'lo Sertifikat)'; badgeClass = 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'; }
-                else if (c >= 24) { badgeText = '🥈 B+ Daraja (Juda yaxshi)'; badgeClass = 'border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400'; }
-                else if (c >= 21) { badgeText = '🥉 B Daraja (Yaxshi)'; badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400'; }
-                else if (c >= 18) { badgeText = '📜 C+ Daraja (Qoniqarli)'; badgeClass = 'border-orange-500/40 bg-orange-500/15 text-orange-600 dark:text-orange-400'; }
-                else { badgeText = '❌ Sinovdan o\'tmadi (Sertifikat berilmaydi)'; badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400'; }
-
-                return (
-                  <Badge variant="outline" className={`py-1.5 px-3 text-xs sm:text-sm font-bold ${badgeClass}`}>
-                    {badgeText}
-                  </Badge>
-                );
-              }
-              return null;
-            })()}
-            {data.predicted_score && (
-              <Badge variant="outline" className="border-amber-500/25 bg-amber-500/10 py-1.5 text-amber-300">
-                <Crown className="size-4" /> Prognoz Sertifikat: {data.predicted_score} Daraja
-              </Badge>
-            )}
-          </CardContent>
-        </Card>
+          );
+        })()}
 
         {/* Imtihon taassuroti / Tezkor so'rovnoma */}
         <ExamSurveyCard attemptId={attemptId} testTitle={data?.attempt?.test_title} />

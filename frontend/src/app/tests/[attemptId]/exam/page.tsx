@@ -1396,20 +1396,20 @@ export default function CefrExamPage() {
               </p>
             </div>
 
-            <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">
+            <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-3 pt-3">
               <Button
                 variant="outline"
                 onClick={() => router.push('/tests')}
-                className="w-full sm:w-auto flex-1 rounded-xl font-bold border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 h-10 gap-1.5"
+                className="w-full sm:w-auto flex-1 rounded-2xl font-bold border-rose-500/40 text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 active:scale-[0.98] transition-all h-12 sm:h-12.5 text-sm sm:text-base gap-2"
               >
-                <LogOut className="size-4" />
+                <LogOut className="size-5" />
                 Chiqish
               </Button>
               <Button
                 onClick={() => setShowExit(false)}
-                className="w-full sm:w-auto flex-1 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 h-10 gap-1.5"
+                className="w-full sm:w-auto flex-1 rounded-2xl font-black bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white shadow-lg shadow-emerald-600/30 h-12 sm:h-12.5 text-sm sm:text-base gap-2"
               >
-                <CheckCircle2 className="size-4" />
+                <CheckCircle2 className="size-5" />
                 Davom ettirish
               </Button>
             </div>
@@ -1473,20 +1473,20 @@ export default function CefrExamPage() {
               </div>
             )}
 
-            <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">
+            <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-3 pt-3">
               <Button
                 variant="outline"
                 onClick={() => setShowFinishConfirm(false)}
-                className="w-full sm:w-auto flex-1 rounded-xl font-bold h-10 border-[var(--border-card)]"
+                className="w-full sm:w-auto flex-1 rounded-2xl font-bold text-sm sm:text-base border-[var(--border-card)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all h-12 sm:h-12.5"
               >
                 Savollarga qaytish
               </Button>
               <Button
                 onClick={finish}
                 disabled={finishing}
-                className="w-full sm:w-auto flex-1 rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-600/25 h-10 gap-1.5"
+                className="w-full sm:w-auto flex-1 rounded-2xl font-black text-sm sm:text-base bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-600/25 active:scale-[0.98] transition-all h-12 sm:h-12.5 gap-2"
               >
-                {finishing ? <Loader2 className="size-4 animate-spin" /> : null}
+                {finishing ? <Loader2 className="size-5 animate-spin" /> : null}
                 Ha, topshirish 🏁
               </Button>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   FileCheck2, AlertCircle, MapPin, Bot, BookOpen,
@@ -112,6 +112,35 @@ const WORKFLOW_STEPS = [
 
 export default function ProductWorkflow() {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Auto-cycle through the 6 workflow steps smoothly (every 3.8 seconds)
+  useEffect(() => {
+    if (isHovered) return;
+    const interval = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % WORKFLOW_STEPS.length);
+    }, 3800);
+    return () => clearInterval(interval);
+  }, [isHovered]);
+
+  // Smoothly keep the active tab visible and centered as it cycles
+  useEffect(() => {
+    const el = tabRefs.current[activeIdx];
+    const container = tabsContainerRef.current;
+    if (el && container) {
+      const elLeft = el.offsetLeft;
+      const elWidth = el.offsetWidth;
+      const containerWidth = container.offsetWidth;
+      const targetScroll = elLeft - containerWidth / 2 + elWidth / 2;
+      container.scrollTo({
+        left: Math.max(0, targetScroll),
+        behavior: 'smooth',
+      });
+    }
+  }, [activeIdx]);
+
   const activeStep = WORKFLOW_STEPS[activeIdx];
 
   return (
@@ -133,17 +162,25 @@ export default function ProductWorkflow() {
         </p>
       </div>
 
-      {/* Interactive Workflow Tabs Bar */}
-      <div className="mt-12 flex items-center justify-start lg:justify-center gap-2 overflow-x-auto pb-3 pt-1 no-scrollbar">
+      {/* Interactive Workflow Tabs Bar (Auto-cycling workflow pipeline) */}
+      <div
+        ref={tabsContainerRef}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="mt-12 flex items-center justify-start lg:justify-center gap-2 overflow-x-auto pb-3 pt-1 scroll-smooth no-scrollbar"
+      >
         {WORKFLOW_STEPS.map((step, idx) => {
           const isActive = idx === activeIdx;
           const Icon = step.icon;
           return (
             <button
               key={step.id}
+              ref={(el) => {
+                tabRefs.current[idx] = el;
+              }}
               onClick={() => setActiveIdx(idx)}
               className={cn(
-                'flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all shrink-0 cursor-pointer border',
+                'relative flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all shrink-0 cursor-pointer border overflow-hidden',
                 isActive
                   ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-900'
@@ -159,6 +196,14 @@ export default function ProductWorkflow() {
               </span>
               <Icon className={cn('size-3.5', isActive ? 'text-emerald-400' : 'text-slate-400')} />
               <span>{step.title}</span>
+
+              {/* Dynamic live progress line for active step */}
+              {isActive && !isHovered && (
+                <span
+                  key={`progress-${activeIdx}`}
+                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-emerald-400 animate-step-progress"
+                />
+              )}
             </button>
           );
         })}

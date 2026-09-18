@@ -3,7 +3,8 @@
 import {
   Target, Swords, Bot, CheckCircle, ArrowRight,
   TrendingUp, BookOpen, AlertTriangle,
-  Flame, ShieldCheck, Users, BarChart2
+  Flame, ShieldCheck, Users, BarChart2,
+  Film, Play, Heart, MessageCircle, Award, Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -322,7 +323,166 @@ export default function BentoGrid() {
         </div>
 
         {/* =========================================================
-            TILE 5: TEACHER & COHORT MONITORING (Full 12 Cols)
+            TILE 5: BILIM REELS (6 Cols)
+            ========================================================= */}
+        <div className="group relative col-span-1 md:col-span-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-fuchsia-300 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-fuchsia-50 text-fuchsia-600 border border-fuchsia-200">
+                  <Film className="size-5" />
+                </span>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-fuchsia-600">
+                    Fokus & Qisqa Format
+                  </span>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                    Bilim Reels: 30 Soniyalik Darslar & Mini-Testlar
+                  </h3>
+                </div>
+              </div>
+              <span className="rounded-md border border-fuchsia-200 bg-fuchsia-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-fuchsia-800">
+                Reels
+              </span>
+            </div>
+
+            <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600">
+              Vaqtni behuda sarflamang! Instagram / TikTok Reels uslubida qisqa video-darslarni ko&apos;ring va videodan keyin darhol tezkor mini-testni yechib, bilimingizni mustahkamlang va XP ishlang.
+            </p>
+
+            {/* Micro-Reels Visual Simulation Card */}
+            <div className="mt-4 rounded-xl border border-slate-900 bg-slate-950 p-4 text-white space-y-3 shadow-inner">
+              <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-2 rounded-full bg-rose-500 animate-pulse" />
+                  <span className="font-bold text-slate-300">Tarix: 6-sinf · Mil.avv. VI asr</span>
+                </div>
+                <span className="font-mono text-[11px] text-fuchsia-400 font-bold bg-fuchsia-500/15 px-2 py-0.5 rounded border border-fuchsia-500/30">
+                  00:24
+                </span>
+              </div>
+
+              <div className="p-3 rounded-lg bg-gradient-to-r from-slate-900 via-fuchsia-950/40 to-slate-900 border border-slate-800 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="size-8 rounded-full bg-fuchsia-600/30 border border-fuchsia-500 flex items-center justify-center text-fuchsia-300">
+                    <Play className="size-4 fill-fuchsia-400 text-fuchsia-400 ml-0.5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-200">Kir II va Tomaris to&apos;qnashuvi</p>
+                    <p className="text-[10px] text-slate-400">Asosiy sanalar va darslik fokuslari</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded">
+                  +15 XP
+                </span>
+              </div>
+
+              {/* Interactive attached question mockup */}
+              <div className="space-y-1.5 pt-1">
+                <p className="text-[11px] font-semibold text-slate-300">
+                  ❓ Videodan savol: Kir II qaysi jangda halok bo&apos;lgan?
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold flex items-center justify-between">
+                    <span>A) Massagetlar bilan</span>
+                    <CheckCircle className="size-3.5 text-emerald-400" />
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400">
+                    B) Marafon jangi
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500">100+ saralangan darslik videolari</span>
+            <Link href="/reels" className="font-bold text-fuchsia-600 hover:text-fuchsia-700 flex items-center gap-1">
+              Reelslarni ko&apos;rish <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* =========================================================
+            TILE 6: HAMJAMIYAT & YUTUQLAR LENTASI (6 Cols)
+            ========================================================= */}
+        <div className="group relative col-span-1 md:col-span-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-teal-300 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 border border-teal-200">
+                  <Sparkles className="size-5" />
+                </span>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700">
+                    Ijtimoiy Ta&apos;lim Tarmog&apos;i
+                  </span>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                    Hamjamiyat va Yutuqlar Lentasi
+                  </h3>
+                </div>
+              </div>
+              <span className="rounded-md border border-teal-200 bg-teal-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-teal-800">
+                Jonli Feed
+              </span>
+            </div>
+
+            <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600">
+              Yakka o&apos;zingiz emas, butun O&apos;zbekiston bo&apos;ylab minglab intiluvchan abituriyentlar bilan birga o&apos;sing. Milliy sertifikat, DTM balli va rekordlaringizni e&apos;lon qiling, boshqalardan motivatsiya oling.
+            </p>
+
+            {/* Social Proof Community Post Mockup */}
+            <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-xs">
+                    MS
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
+                      Madinabonu S.
+                      <span className="text-slate-400 font-normal">· 2 daqiqa oldin</span>
+                    </div>
+                    <div className="text-[10px] text-teal-700 font-semibold">Toshkent Davlat Yuridik Universiteti maqsad</div>
+                  </div>
+                </div>
+                <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-800 flex items-center gap-1">
+                  <Award className="size-3 text-amber-600" /> A+ Sertifikat
+                </span>
+              </div>
+
+              <div className="rounded-lg bg-white border border-slate-200/90 p-2.5 text-xs text-slate-700 space-y-1.5 shadow-2xs">
+                <p className="leading-relaxed">
+                  &quot;Tarixdan Milliy Sertifikat imtihonida <strong>96.2 ball</strong> bilan A+ oldim! 🎉 AI Mentor zaif mavzularimni topib bergani va testlar rasmiy formatdaligi juda asqatdi!&quot;
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-200/60 font-medium">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1 text-rose-600 font-bold">
+                    <Heart className="size-3.5 fill-rose-500 text-rose-500" /> 148
+                  </span>
+                  <span className="flex items-center gap-1 text-slate-600">
+                    <MessageCircle className="size-3.5 text-slate-400" /> 32 ta fikr
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  +100 XP Sertifikat bonusi
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500">5,000+ faol abituriyentlar safi</span>
+            <Link href="/feed" className="font-bold text-teal-700 hover:text-teal-800 flex items-center gap-1">
+              Hamjamiyatga qo&apos;shilish <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* =========================================================
+            TILE 7: TEACHER & COHORT MONITORING (Full 12 Cols)
             ========================================================= */}
         <div className="group relative col-span-1 md:col-span-12 overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">

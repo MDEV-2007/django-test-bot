@@ -77,8 +77,8 @@ export default function ResultsTicker() {
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 sm:w-32 bg-gradient-to-r from-[#f8fafc] to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-32 bg-gradient-to-l from-[#f8fafc] to-transparent" />
 
-      {/* Infinite scrolling track */}
-      <div className="flex w-max animate-[marquee_45s_linear_infinite] items-center gap-4 hover:[animation-play-state:paused]">
+      {/* Infinite scrolling track (continuous non-stop rotation) */}
+      <div className="animate-marquee-continuous items-center gap-4" style={{ animation: 'marquee 35s linear infinite' }}>
         {RESULTS.map((item) => (
           <div
             key={item.id}

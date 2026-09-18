@@ -4,3 +4,6 @@ class Tests_appConfig(AppConfig):
     name = 'tests_app'
     verbose_name = 'Testlar'
 
+    def ready(self):
+        import tests_app.signals  # noqa
+

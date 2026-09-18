@@ -425,20 +425,20 @@ export default function TestScreenPage() {
                 </p>
               </div>
 
-              <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">
+              <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-3 pt-3">
                 <Button
                   variant="outline"
                   onClick={() => router.push('/tests')}
-                  className="w-full sm:w-auto flex-1 rounded-xl font-bold border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 h-10 gap-1.5"
+                  className="w-full sm:w-auto flex-1 rounded-2xl font-bold border-rose-500/40 text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 active:scale-[0.98] transition-all h-12 sm:h-12.5 text-sm sm:text-base gap-2"
                 >
-                  <LogOut className="size-4" />
+                  <LogOut className="size-5" />
                   Chiqish
                 </Button>
                 <Button
                   onClick={() => setShowExitModal(false)}
-                  className="w-full sm:w-auto flex-1 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 h-10 gap-1.5"
+                  className="w-full sm:w-auto flex-1 rounded-2xl font-black bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white shadow-lg shadow-emerald-600/30 h-12 sm:h-12.5 text-sm sm:text-base gap-2"
                 >
-                  <CheckCircle2 className="size-4" />
+                  <CheckCircle2 className="size-5" />
                   Davom etish
                 </Button>
               </div>

@@ -822,3 +822,37 @@ html[data-tg='on'] .min-h-screen-safe {
 .light .cn-toast [data-description] {
   color: #1a202c !important;
 }
+
+/* ── Continuous Marquee Ticker (Landing Page Results) ───────── */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-continuous {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+  will-change: transform;
+}
+
+/* ── Step Progress Indicator (Product Workflow Carousel) ────── */
+@keyframes stepProgress {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.animate-step-progress {
+  transform-origin: left;
+  animation: stepProgress 3.8s linear forwards;
+}
+
+

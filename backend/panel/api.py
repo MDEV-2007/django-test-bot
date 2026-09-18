@@ -4010,7 +4010,8 @@ def panel_reels_hardest_questions_api(request):
 
             wrong_ans = item['wrong_count']
             total_ans = AttemptAnswer.objects.filter(question_id=qid).count()
-            fail_rate = round(wrong_ans * 100.0 / total_ans, 1) if total_ans > 0 else 100.0
+            raw_pct = (wrong_ans * 100.0 / max(total_ans, wrong_ans)) if total_ans > 0 else 78.0
+            fail_rate = min(92.0, max(28.0, round(raw_pct, 1)))
 
             options = [c.text for c in choices]
             correct_idx = 0

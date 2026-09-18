@@ -3,7 +3,7 @@ import Link from 'next/link';
 import {
   FileCheck2, Bot, Swords, BarChart3, ArrowRight,
   Sprout, Send, Sparkles, Clock, CheckCircle2,
-  Award, ShieldCheck, Zap, Star
+  Award, ShieldCheck, Zap, Star, Film
 } from 'lucide-react';
 import LandingNav from '@/components/landing/LandingNav';
 import RootsBackground from '@/components/landing/RootsBackground';
@@ -251,20 +251,23 @@ export default async function LandingPage() {
               </div>
 
               {/* Feature Highlights */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 pt-4 border-t border-slate-100">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 pt-4 border-t border-slate-100">
                 {[
-                  { icon: FileCheck2, label: 'Rasmiy format' },
-                  { icon: Clock, label: 'Imtihon taymeri' },
-                  { icon: Bot, label: 'AI mentor' },
-                  { icon: BarChart3, label: 'Zaiflik tahlili' },
+                  { icon: FileCheck2, label: 'Rasmiy Mock Testlar', href: '/tests' },
+                  { icon: Bot, label: '24/7 AI Mentor', href: '#imkoniyatlar' },
+                  { icon: BarChart3, label: 'Zaiflik Tahlili', href: '#imkoniyatlar' },
+                  { icon: Film, label: 'Bilim Reels', href: '/reels' },
+                  { icon: Sparkles, label: 'Hamjamiyat Lentasi', href: '/feed' },
+                  { icon: Swords, label: '1v1 Battle Arena', href: '/battles' },
                 ].map((item) => (
-                  <div
+                  <Link
                     key={item.label}
-                    className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-2xs"
+                    href={item.href}
+                    className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-2xs hover:border-emerald-400 hover:shadow-xs transition-all group"
                   >
-                    <item.icon className="size-4 text-emerald-600 shrink-0" />
-                    <span className="text-xs font-bold text-slate-700">{item.label}</span>
-                  </div>
+                    <item.icon className="size-4 text-emerald-600 shrink-0 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-700 group-hover:text-slate-900">{item.label}</span>
+                  </Link>
                 ))}
               </div>
 

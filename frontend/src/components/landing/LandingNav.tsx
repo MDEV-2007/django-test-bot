@@ -7,6 +7,8 @@ import { useAuthStore } from '@/lib/auth-store';
 
 const LINKS = [
   { href: '#imkoniyatlar', label: 'Imkoniyatlar' },
+  { href: '/reels', label: 'Bilim Reels' },
+  { href: '/feed', label: 'Hamjamiyat' },
   { href: '#qanday', label: 'Qanday ishlaydi' },
   { href: '#narxlar', label: 'Narxlar' },
   { href: '#savollar', label: 'Savollar' },

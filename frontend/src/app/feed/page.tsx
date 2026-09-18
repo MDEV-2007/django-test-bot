@@ -480,8 +480,8 @@ export default function CommunityFeedPage() {
             {/* Segment switch: Hamjamiyat vs Liderlar */}
             <div className="flex items-center p-0.5 sm:p-1 rounded-xl sm:rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] shadow-xs shrink-0">
               <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs">
-                <Globe className="size-3.5 sm:size-4" />
-                <span>Hamjamiyat</span>
+                <Sparkles className="size-3.5 sm:size-4" />
+                <span>Yutuqlar Lentasi</span>
               </div>
               <Link
                 href="/leaderboard"
