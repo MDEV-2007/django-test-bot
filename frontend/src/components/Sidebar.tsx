@@ -82,8 +82,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'SHAXSIY KABINET',
     items: [
-      { href: '/profile', label: 'Profilim', icon: User, badge: null, matchPrefixes: ['/profile'], tone: 'emerald' },
-      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, api: '/api/analytics/', tone: 'cyan' },
+      { href: '/profile', label: 'Profilim', icon: User, badge: null, matchPrefixes: ['/profile'], tone: 'indigo' },
+      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, api: '/api/analytics/', tone: 'emerald' },
       { href: '/shop', label: "Artefakt Do'koni", icon: ShoppingBag, badge: null, featureKey: 'shop', matchPrefixes: ['/shop'], tone: 'amber' },
       { href: '/premium', label: 'VIP Pass', icon: Crown, badge: 'PRO', vip: true, tone: 'gold' },
     ],
@@ -229,10 +229,10 @@ export default function Sidebar({
                         <div className="flex items-center gap-2.5 min-w-0">
                           <PremiumIcon
                             icon={Icon as any}
-                            tone={active ? (isLight ? 'sky' : (item.tone || 'emerald')) : 'zinc'}
+                            tone={item.tone || 'emerald'}
                             size="sm"
-                            glow={!isLight && (active || item.glow)}
-                            className={cn('transition-transform duration-200 group-hover:scale-110')}
+                            glow={active || item.glow}
+                            className={cn('transition-transform duration-200 group-hover:scale-110', active ? 'scale-105' : 'opacity-90 group-hover:opacity-100')}
                           />
                           <span className="truncate">{item.label}</span>
                         </div>
@@ -243,12 +243,20 @@ export default function Sidebar({
                             className={cn(
                               'rounded-full px-2 py-0.5 text-[9px] font-black tracking-wide shrink-0',
                               item.glow
-                                ? 'bg-rose-500/15 border border-rose-500/30 text-rose-400 animate-pulse'
+                                ? (isLight ? 'bg-rose-50 border border-rose-200 text-rose-600 animate-pulse' : 'bg-rose-500/15 border border-rose-500/30 text-rose-400 animate-pulse')
                                 : item.vip
-                                ? 'bg-amber-500/15 border border-amber-500/30 text-amber-400'
+                                ? (isLight ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400')
                                 : item.highlight
-                                ? 'bg-purple-500/15 border border-purple-500/30 text-purple-300'
-                                : 'bg-slate-800 border border-slate-700/60 text-slate-400'
+                                ? (isLight ? 'bg-purple-50 border border-purple-200 text-purple-700' : 'bg-purple-500/15 border border-purple-500/30 text-purple-300')
+                                : item.badge === 'DTM'
+                                ? (isLight ? 'bg-sky-50 border border-sky-200 text-sky-700' : 'bg-sky-500/15 border border-sky-500/30 text-sky-300')
+                                : item.badge === 'Audio'
+                                ? (isLight ? 'bg-purple-50 border border-purple-200 text-purple-700' : 'bg-purple-500/15 border border-purple-500/30 text-purple-300')
+                                : item.badge === 'Anki'
+                                ? (isLight ? 'bg-indigo-50 border border-indigo-200 text-indigo-700' : 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-300')
+                                : item.badge === 'Yangi'
+                                ? (isLight ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400')
+                                : (isLight ? 'bg-slate-100 border border-slate-200 text-slate-700' : 'bg-slate-800 border border-slate-700/60 text-slate-400')
                             )}
                           >
                             {item.badge}
