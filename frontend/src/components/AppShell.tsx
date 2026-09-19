@@ -67,7 +67,7 @@ export default function AppShell() {
       />
 
       {/* Modern Unicorn Topbar */}
-      <header className="ilm-topbar sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 sm:px-6 backdrop-blur-xl shadow-[0_1px_12px_rgba(15,23,42,0.04)] lg:pl-68">
+      <header className="ilm-topbar sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 shadow-[0_1px_0_0_rgba(15,23,42,0.08)] lg:pl-64">
         {/* Left: Hamburger on Mobile + Brand Logo + Impersonation Alert + Search */}
         <div className="flex items-center gap-3">
           <button
