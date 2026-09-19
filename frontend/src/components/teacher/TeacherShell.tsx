@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -144,27 +144,35 @@ export default function TeacherShell({ children }: { children: React.ReactNode }
   const [mobileOpen, setMobileOpen] = useState(false);
   const current = ALL_ITEMS.find((i) => isActive(pathname, i.href));
 
+  useEffect(() => {
+    const prevTheme = document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = 'dark';
+    return () => {
+      document.documentElement.dataset.theme = prevTheme || 'light';
+    };
+  }, []);
+
   return (
-    <div className="flex min-h-screen w-full">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r bg-[var(--surface-card-strong)] lg:block">
+    <div data-panel="teacher" className="dark flex min-h-screen w-full bg-[#08090c] text-[#f0f1f3]">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r border-white/10 bg-[#0f1117] lg:block">
         <SidebarContent />
       </aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-60 border-r bg-[var(--surface-card-strong)]">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-60 border-r border-white/10 bg-[#0f1117]">
             <SidebarContent onNavigate={() => setMobileOpen(false)} />
           </aside>
         </div>
       )}
 
       <div className="flex min-w-0 flex-1 flex-col lg:pl-60">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-[var(--bg-page)]/85 px-4 backdrop-blur-md sm:px-6">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/10 bg-[#08090c]/90 px-4 backdrop-blur-md sm:px-6">
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden text-slate-300 hover:text-white"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Menyu"
           >
@@ -172,19 +180,19 @@ export default function TeacherShell({ children }: { children: React.ReactNode }
           </Button>
 
           <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
-            <Link href="/teacher" className="shrink-0 text-muted-foreground hover:text-foreground">
+            <Link href="/teacher" className="shrink-0 text-slate-400 hover:text-slate-200">
               O&apos;qituvchi
             </Link>
             {current && current.href !== '/teacher' && (
               <>
-                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" />
-                <span className="truncate font-medium text-foreground">{current.label}</span>
+                <ChevronRight className="size-3.5 shrink-0 text-slate-600" />
+                <span className="truncate font-medium text-slate-200">{current.label}</span>
               </>
             )}
           </nav>
         </header>
 
-        <main className="flex-1 bg-[var(--bg-page)] p-4 sm:p-6">{children}</main>
+        <main className="flex-1 bg-[#08090c] p-4 sm:p-6 text-slate-100">{children}</main>
       </div>
     </div>
   );

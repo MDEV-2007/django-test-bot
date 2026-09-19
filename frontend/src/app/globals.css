@@ -802,6 +802,69 @@ html[data-tg='on'] .min-h-screen-safe {
   min-height: var(--tg-viewport, 100svh);
 }
 
+/* ── Super Admin Panel & Teacher Panel — Qat'iy Qorong'i (Dark Mode) ────────── */
+[data-panel="superadmin"],
+[data-panel="teacher"] {
+  color-scheme: dark !important;
+  --bg-page: #08090c !important;
+  --bg-surface: #0f1117 !important;
+  --surface-base: #0f1117 !important;
+  --surface-card: #101319 !important;
+  --surface-card-soft: #101319 !important;
+  --surface-card-medium: #161a22 !important;
+  --surface-card-strong: #161a22 !important;
+  --surface-input: #1d222c !important;
+  --surface-hover: rgba(255, 255, 255, 0.05) !important;
+  --surface-hover-strong: rgba(255, 255, 255, 0.09) !important;
+  --border-card: rgba(255, 255, 255, 0.09) !important;
+  --border-soft: rgba(255, 255, 255, 0.06) !important;
+  --border-strong: rgba(255, 255, 255, 0.18) !important;
+  --text-primary: #f0f1f3 !important;
+  --text-secondary: #a3a7ae !important;
+  --text-muted: #8d9094 !important;
+  --text-subtitle: #8d9094 !important;
+  --text-faint: #5a5d63 !important;
+  --foreground: #f0f1f3 !important;
+  --background: #08090c !important;
+  --card: #101319 !important;
+  --card-foreground: #f0f1f3 !important;
+  --popover: #101319 !important;
+  --popover-foreground: #f0f1f3 !important;
+  --muted: #161a22 !important;
+  --muted-foreground: #8d9094 !important;
+  --border: rgba(255, 255, 255, 0.1) !important;
+  --input: #1d222c !important;
+  background-color: #08090c !important;
+  color: #f0f1f3 !important;
+}
+
+[data-panel="superadmin"] [data-slot="card"],
+[data-panel="superadmin"] .bg-card,
+[data-panel="teacher"] [data-slot="card"],
+[data-panel="teacher"] .bg-card {
+  background-color: #101319 !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  color: #f0f1f3 !important;
+}
+
+[data-panel="superadmin"] [data-slot="button"][data-variant="outline"],
+[data-panel="teacher"] [data-slot="button"][data-variant="outline"] {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  color: #f0f1f3 !important;
+}
+
+[data-panel="superadmin"] [data-slot="input"],
+[data-panel="superadmin"] [data-slot="select-trigger"],
+[data-panel="superadmin"] [data-slot="textarea"],
+[data-panel="teacher"] [data-slot="input"],
+[data-panel="teacher"] [data-slot="select-trigger"],
+[data-panel="teacher"] [data-slot="textarea"] {
+  background-color: #1d222c !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f0f1f3 !important;
+}
+
 /* ── Toast (Sonner) Premium Design ─────────────────────────────────────────── */
 .cn-toast {
   backdrop-filter: blur(16px);
