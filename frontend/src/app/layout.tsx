@@ -62,12 +62,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="uz" suppressHydrationWarning className={`h-full antialiased ${sans.variable} ${display.variable} ${mono.variable}`}>
       <body className="min-h-full flex flex-col">
-        {/* Tema birinchi bo'yoqdan oldin qo'llanadi: tema tugmasi faqat AppShell
-            ichida bo'lgani uchun login/register sahifalari saqlangan tanlovni
-            bilmasdi va doim qorong'i chiziladi. `beforeInteractive` — Next.js'ning
-            root layout uchun tavsiya etilgan usuli (docs: app/script.md). */}
+        {/* Tema birinchi bo'yoqdan oldin qo'llanadi: login/register/telegram barcha
+            sahifalarda sukut bo'yicha yorug' (light) rejimda chiziladi. */}
         <Script id="ilm-theme" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('ilm_theme_v2');if(!t){try{localStorage.removeItem('ilm_theme');localStorage.setItem('ilm_theme_v2','light');}catch(err){}t='light';}document.documentElement.dataset.theme=(t==='dark')?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();`}
+          {`(function(){try{localStorage.setItem('ilm_theme','light');localStorage.setItem('ilm_theme_v2','light');document.documentElement.dataset.theme='light';var h=window.location.hash||'';if(h.indexOf('tgWebAppData')!==-1||h.indexOf('tgWebAppPlatform')!==-1||window.TelegramWebviewProxy){document.documentElement.dataset.tg='on';}}catch(e){document.documentElement.dataset.theme='light';}})();`}
         </Script>
         <ServiceWorkerRegister />
         {/* Telegram Mini App qobig'i. Oddiy brauzerda hech narsa qilmaydi —

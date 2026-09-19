@@ -741,8 +741,47 @@ nav.ilm-mobile-tabbar {
 
 /* ── Telegram Mini App ────────────────────────────────────────────────────────
    Bu qoidalar FAQAT <html data-tg="on"> bo'lganda, ya'ni sahifa Telegram ichida
-   ochilganda kuchga kiradi (atributni `TelegramProvider` qo'yadi) — oddiy
-   brauzerdagi ko'rinishga hech qanday ta'siri yo'q. */
+   ochilganda kuchga kiradi (atributni `TelegramProvider` qo'yadi).
+   Telegram Web App'da barcha sahifalar qat'iy yorug' (light) rejimda ishlaydi. */
+html[data-tg='on'],
+html[data-tg='on'] body {
+  color-scheme: light !important;
+  background-color: #F8FAFC !important;
+}
+
+html[data-tg='on'],
+html[data-tg='on'][data-theme='dark'] {
+  --bg-page: #F8FAFC !important;
+  --bg-surface: #FFFFFF !important;
+  --surface-base: #FFFFFF !important;
+  --surface-card: #FFFFFF !important;
+  --surface-card-soft: #FFFFFF !important;
+  --surface-card-medium: #FFFFFF !important;
+  --surface-card-strong: #FFFFFF !important;
+  --border-card: rgba(18, 20, 24, 0.14) !important;
+  --border-soft: rgba(18, 20, 24, 0.09) !important;
+  --border-strong: rgba(18, 20, 24, 0.26) !important;
+  --text-primary: #16181a !important;
+  --text-secondary: #43474c !important;
+  --text-muted: #5c6067 !important;
+  --text-subtitle: #5c6067 !important;
+  --text-faint: #6f747b !important;
+  --foreground: #16181a !important;
+  --background: #F8FAFC !important;
+  --card: #FFFFFF !important;
+  --card-foreground: #16181a !important;
+  --popover: #FFFFFF !important;
+  --popover-foreground: #16181a !important;
+  --primary: #2563EB !important;
+  --primary-foreground: #FFFFFF !important;
+  --muted: #F1F5F9 !important;
+  --muted-foreground: #64748B !important;
+  --border: #E2E8F0 !important;
+  --input: #E2E8F0 !important;
+  --accent: #16776a !important;
+  --accent-text: #0f5c52 !important;
+}
+
 html[data-tg='on'] body {
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;

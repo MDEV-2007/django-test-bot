@@ -499,7 +499,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="grid gap-6 lg:grid-cols-12 items-center pt-2">
             {/* Chap tomon: Tirik Organik Daraxt */}
-            <div className="lg:col-span-5 flex items-center justify-center rounded-3xl border border-emerald-500/15 bg-slate-950/30 dark:bg-slate-900/40 p-4 backdrop-blur-md shadow-inner">
+            <div className="lg:col-span-5 flex items-center justify-center rounded-3xl border border-emerald-500/20 bg-emerald-50/40 p-4 backdrop-blur-md shadow-inner">
               <KnowledgeTree
                 level={p.level}
                 xpProgress={xpProgress}

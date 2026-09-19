@@ -12,6 +12,11 @@ export function ThemeToggle() {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
+    if (typeof document !== 'undefined' && document.documentElement.dataset.tg === 'on') {
+      document.documentElement.dataset.theme = 'light';
+      setDark(false);
+      return;
+    }
     const saved = localStorage.getItem('ilm_theme_v2');
     const isDark = saved === 'dark';
     setDark(isDark);
@@ -19,10 +24,18 @@ export function ThemeToggle() {
   }, []);
 
   function toggle() {
+    if (typeof document !== 'undefined' && document.documentElement.dataset.tg === 'on') {
+      return;
+    }
     const next = !dark;
     setDark(next);
     document.documentElement.dataset.theme = next ? 'dark' : 'light';
     localStorage.setItem('ilm_theme_v2', next ? 'dark' : 'light');
+  }
+
+  // Telegram Mini App ichida doim light mode
+  if (typeof document !== 'undefined' && document.documentElement.dataset.tg === 'on') {
+    return null;
   }
 
   return (

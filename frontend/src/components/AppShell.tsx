@@ -126,7 +126,7 @@ export default function AppShell() {
                   <span className="hidden sm:inline text-[10px] font-semibold text-amber-400/80">kun</span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="bg-slate-900 border-slate-800 text-xs font-semibold">
+              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
                 {user.streak || 0} kunlik uzluksiz olovli dars seriyasi (Streak)
               </TooltipContent>
             </Tooltip>
@@ -142,7 +142,7 @@ export default function AppShell() {
                   <span className="font-mono"><StatNumber value={user.coins || 0} /></span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="bg-slate-900 border-slate-800 text-xs font-semibold">
+              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
                 Tangalar balansi — do&apos;kondan buyumlar olish uchun
               </TooltipContent>
             </Tooltip>
@@ -159,7 +159,7 @@ export default function AppShell() {
                   <span className="text-[10px] font-semibold text-rose-500">ELO</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="bg-slate-900 border-slate-800 text-xs font-semibold">
+              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
                 Arena ELO reytingi va 1v1 bellashuvlar
               </TooltipContent>
             </Tooltip>
@@ -180,7 +180,7 @@ export default function AppShell() {
                   )}
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="bg-slate-900 border-slate-800 text-xs font-semibold">
+              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
                 Bildirishnomalar {unreadCount > 0 ? `(${unreadCount} ta yangi)` : ''}
               </TooltipContent>
             </Tooltip>

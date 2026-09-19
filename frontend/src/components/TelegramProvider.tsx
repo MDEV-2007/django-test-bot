@@ -50,18 +50,21 @@ export default function TelegramProvider() {
       wa.onEvent('viewportChanged', applyViewport);
       cleanups.push(() => wa.offEvent('viewportChanged', applyViewport));
 
-      /* Tema: foydalanuvchi ilovada o'zi tanlagan bo'lsa (localStorage) — uning
-         tanlovi ustun. Aks holda Telegram temasiga ergashamiz. */
+      /* Tema: Telegram Web App'da barcha sahifalar qat'iy yorug' (light) rejimda bo'lishi kerak.
+         Telegram mijozi qorong'i (dark) rejimda bo'lsa ham (wa.colorScheme === 'dark'),
+         veb-ilova qat'iy yorug' (light) rejimda ishlaydi. */
       const applyTheme = () => {
-        let saved: string | null = null;
-        try { saved = localStorage.getItem('ilm_theme'); } catch { /* noop */ }
-        if (!saved) document.documentElement.dataset.theme = wa.colorScheme === 'light' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = 'light';
+        try {
+          localStorage.setItem('ilm_theme', 'light');
+          localStorage.setItem('ilm_theme_v2', 'light');
+        } catch { /* noop */ }
 
-        // Telegram sarlavhasi/foni ilova foni bilan bir xil bo'lsin — chegara ko'rinmaydi.
-        const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-page').trim();
-        if (/^#[0-9a-f]{6}$/i.test(bg)) {
-          try { wa.setHeaderColor?.(bg); wa.setBackgroundColor?.(bg); } catch { /* eski versiya */ }
-        }
+        // Telegram sarlavhasi (header) va foni och rangda bo'lsin (#ffffff / #F8FAFC)
+        try {
+          wa.setHeaderColor?.('#ffffff');
+          wa.setBackgroundColor?.('#F8FAFC');
+        } catch { /* eski versiya */ }
       };
       applyTheme();
       wa.onEvent('themeChanged', applyTheme);
