@@ -17,7 +17,6 @@ import {
   Clock,
   Layers,
   Play,
-  Flame,
   Zap,
   Target,
   ArrowRight,
@@ -327,16 +326,30 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Quick Gamified Badges in Light Mode Palette */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-xs font-bold text-orange-700 shadow-2xs">
-            <Flame className="size-4 text-orange-500 fill-orange-500 animate-bounce" />
-            <span>Streak: <strong className="text-orange-700 font-black">{p.streak} kun</strong></span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800 shadow-2xs">
-            <span>🪙</span>
-            <span className="font-mono text-amber-700 font-extrabold">{p.coins.toLocaleString('uz-UZ')} tanga</span>
-          </div>
+        {/* Online Users Widget */}
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+          {/* Pulsing green dot */}
+          <span className="relative flex size-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+          </span>
+          {/* Avatar stack */}
+          {data.online_peers && data.online_peers.length > 0 && (
+            <div className="flex -space-x-2">
+              {data.online_peers.slice(0, 5).map((peer, i) => (
+                <Avatar key={i} className="size-6 ring-2 ring-white shrink-0">
+                  <AvatarImage src={peer.avatar_url || ''} />
+                  <AvatarFallback className="bg-blue-100 text-blue-700 text-[9px] font-black">
+                    {peer.name?.slice(0, 2).toUpperCase() || '??'}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          )}
+          <span className="text-xs font-bold text-slate-700">
+            <strong className="text-emerald-600 font-black">{data.online_count || 0}</strong>
+            <span className="text-slate-500 font-medium"> ta onlayn</span>
+          </span>
         </div>
       </div>
 
