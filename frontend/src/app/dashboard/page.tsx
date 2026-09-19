@@ -137,7 +137,7 @@ function getNotifIcon(type: string, title: string) {
 
 function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-8 space-y-6">
+    <div className="min-h-screen bg-[var(--bg-page)] p-4 sm:p-8 space-y-6">
       <Skeleton className="h-64 w-full rounded-3xl bg-slate-200/70" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Skeleton className="h-44 w-full rounded-3xl bg-slate-200/70" />
@@ -230,7 +230,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-page)] p-6 flex items-center justify-center">
         <Card className="border-rose-200 bg-rose-50/80 p-6 text-rose-800 text-sm max-w-md rounded-3xl backdrop-blur-xl shadow-sm">
           {error}
         </Card>

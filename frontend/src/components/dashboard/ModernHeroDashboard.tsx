@@ -92,9 +92,9 @@ export function HeroFocusBanner({
         </>
       )}
 
-      <div className="relative z-10 grid gap-6 lg:grid-cols-12 items-center min-w-0 max-w-full">
+      <div className="relative z-10 flex flex-col gap-6 min-w-0 max-w-full">
         {/* Left: Personalized Guidance */}
-        <div className="lg:col-span-8 space-y-4 min-w-0 max-w-full">
+        <div className="space-y-4 min-w-0 max-w-full">
           {/* Subject / AI Compass Chip */}
           <div
             className={cn(
@@ -218,52 +218,6 @@ export function HeroFocusBanner({
             >
               Fokus Xonasi (Pomodoro)
             </Link>
-          </div>
-        </div>
-
-        {/* Right: 3D Hologram / Mascot Visual */}
-        <div className="hidden lg:flex lg:col-span-4 justify-end">
-          <div className="relative group">
-            <div
-              className={cn(
-                'absolute -inset-1 rounded-3xl opacity-25 blur-xl group-hover:opacity-40 transition',
-                isLight
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500'
-                  : 'bg-gradient-to-r from-emerald-500 to-teal-500'
-              )}
-            />
-            <div
-              className={cn(
-                'relative w-52 xl:w-60 aspect-[4/3] rounded-3xl overflow-hidden border-2 shadow-2xl ring-4',
-                isLight
-                  ? 'border-white bg-slate-100 ring-blue-500/10'
-                  : 'border-white/20 bg-slate-900 ring-emerald-500/20'
-              )}
-            >
-              <img
-                src="/images/mascot-hero.jpg"
-                alt="Ilm Mascot"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div
-                className={cn(
-                  'absolute inset-0 flex items-end p-4',
-                  isLight
-                    ? 'bg-gradient-to-t from-slate-900/70 via-transparent to-transparent'
-                    : 'bg-gradient-to-t from-slate-950/80 via-transparent to-transparent'
-                )}
-              >
-                <div
-                  className={cn(
-                    'flex items-center gap-1.5 text-xs font-bold',
-                    isLight ? 'text-white' : 'text-emerald-300'
-                  )}
-                >
-                  <Sparkles className="size-3.5 text-amber-300" />
-                  <span>AI Mentor Faol</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

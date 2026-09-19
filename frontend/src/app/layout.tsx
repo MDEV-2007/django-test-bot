@@ -25,7 +25,7 @@ const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: 
    qiymatlari doim 0 qaytadi va pastki tab-bar telefonning "home indicator" chizig'i
    ostida qolib ketadi. `maximumScale` cheklanmaydi — bu qulaylikni buzadi. */
 export const viewport: Viewport = {
-  themeColor: '#08090c',
+  themeColor: '#F8FAFC',
   viewportFit: 'cover',
   width: 'device-width',
   initialScale: 1,
@@ -67,7 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             bilmasdi va doim qorong'i chiziladi. `beforeInteractive` — Next.js'ning
             root layout uchun tavsiya etilgan usuli (docs: app/script.md). */}
         <Script id="ilm-theme" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('ilm_theme');document.documentElement.dataset.theme=(t==='light')?'light':'dark';}catch(e){document.documentElement.dataset.theme='dark';}})();`}
+          {`(function(){try{var t=localStorage.getItem('ilm_theme');document.documentElement.dataset.theme=(t==='dark')?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();`}
         </Script>
         <ServiceWorkerRegister />
         {/* Telegram Mini App qobig'i. Oddiy brauzerda hech narsa qilmaydi —
@@ -78,11 +78,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
             <AuthProvider>
-              {/* Dynamic Atmospheric Glow Gradients (Universal Across All Pages) */}
+              {/* Dynamic Atmospheric Glow Gradients (Universal Across All Pages - Light Mode) */}
               <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[450px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.08),transparent_70%)]" />
-                <div className="absolute top-1/3 -left-40 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.05),transparent_70%)]" />
-                <div className="absolute bottom-0 right-0 w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_bottom_right,rgba(14,165,233,0.05),transparent_70%)]" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.05),transparent_70%)]" />
+                <div className="absolute top-1/3 -right-32 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.035),transparent_70%)]" />
+                <div className="absolute bottom-0 -left-20 w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.04),transparent_70%)]" />
               </div>
               {children}
               {/* Majburiy kanal obunasi — kirgan foydalanuvchi obuna bo'lmagan
