@@ -67,7 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             bilmasdi va doim qorong'i chiziladi. `beforeInteractive` — Next.js'ning
             root layout uchun tavsiya etilgan usuli (docs: app/script.md). */}
         <Script id="ilm-theme" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('ilm_theme');document.documentElement.dataset.theme=(t==='dark')?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();`}
+          {`(function(){try{var t=localStorage.getItem('ilm_theme_v2');if(!t){try{localStorage.removeItem('ilm_theme');localStorage.setItem('ilm_theme_v2','light');}catch(err){}t='light';}document.documentElement.dataset.theme=(t==='dark')?'dark':'light';}catch(e){document.documentElement.dataset.theme='light';}})();`}
         </Script>
         <ServiceWorkerRegister />
         {/* Telegram Mini App qobig'i. Oddiy brauzerda hech narsa qilmaydi —

@@ -9,11 +9,11 @@ import { isAudioEnabled, setAudioEnabled, soundFX } from '@/lib/soundFX';
    Telegram o'zining header'ini chizadi, ustiga bizniki qo'shilsa ekran ~15%
    ikki qavat header'ga ketadi). */
 export function ThemeToggle() {
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('ilm_theme');
-    const isDark = saved !== 'light';
+    const saved = localStorage.getItem('ilm_theme_v2');
+    const isDark = saved === 'dark';
     setDark(isDark);
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
   }, []);
@@ -22,7 +22,7 @@ export function ThemeToggle() {
     const next = !dark;
     setDark(next);
     document.documentElement.dataset.theme = next ? 'dark' : 'light';
-    localStorage.setItem('ilm_theme', next ? 'dark' : 'light');
+    localStorage.setItem('ilm_theme_v2', next ? 'dark' : 'light');
   }
 
   return (

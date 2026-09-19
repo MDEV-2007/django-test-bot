@@ -149,11 +149,11 @@ export default function MentorPage() {
   }
 
   return (
-    <ModernAppLayout user={user}>
+    <ModernAppLayout user={user} theme="light">
       {/* Centered Cognitive Ease Container (max-w-3xl) */}
       <div className="max-w-3xl mx-auto space-y-6 pb-24">
         {/* Mentor Header Card */}
-        <div className="rounded-3xl border border-slate-800/80 bg-slate-900/60 p-5 sm:p-6 backdrop-blur-xl border-t border-white/10 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="relative flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-black shadow-[0_0_20px_rgba(168,85,247,0.35)] ring-2 ring-purple-500/20">
               <Bot className="size-6" />
@@ -164,14 +164,14 @@ export default function MentorPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                   AI Mentor 24/7
                 </h1>
-                <Badge className="bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-bold">
+                <Badge className="bg-purple-50 border border-purple-200 text-purple-700 text-[10px] font-bold">
                   FOCUS MODE
                 </Badge>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 DTM &amp; Milliy Sertifikat bo&apos;yicha ixtisoslashgan aqlli repetitor
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function MentorPage() {
             variant="outline"
             size="sm"
             onClick={clearChat}
-            className="rounded-xl border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white hover:border-slate-700 text-xs font-bold gap-1.5 self-start sm:self-auto cursor-pointer"
+            className="rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-xs font-bold gap-1.5 self-start sm:self-auto cursor-pointer shadow-2xs"
           >
             <RefreshCw className="size-3.5" />
             <span>Tozalash</span>
@@ -197,10 +197,10 @@ export default function MentorPage() {
                 type="button"
                 onClick={() => setSubject(s.slug)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer shadow-2xs',
                   subject === s.slug
-                    ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                    : 'border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-white hover:border-slate-700'
+                    ? 'bg-purple-600 text-white shadow-xs'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 )}
               >
                 <span>{s.name}</span>
@@ -217,22 +217,22 @@ export default function MentorPage() {
               type="button"
               disabled={sending}
               onClick={() => send(p)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 bg-slate-900/40 hover:border-purple-500/40 hover:bg-purple-500/10 text-xs text-slate-300 font-medium transition shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-purple-200 bg-purple-50/80 hover:bg-purple-100 hover:border-purple-300 text-xs text-purple-900 font-medium transition shrink-0 cursor-pointer shadow-2xs"
             >
-              <Sparkles className="size-3 text-purple-400 shrink-0" />
+              <Sparkles className="size-3 text-purple-600 shrink-0" />
               <span className="truncate max-w-[280px]">{p}</span>
             </button>
           ))}
         </div>
 
         {error && (
-          <div className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-4 text-xs text-rose-300">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700">
             {error}
           </div>
         )}
 
         {/* Chat Messages Stream Container */}
-        <div className="rounded-3xl border border-slate-800/80 bg-slate-900/40 p-4 sm:p-6 backdrop-blur-xl min-h-[460px] space-y-5">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm min-h-[460px] space-y-5">
           {messages.map((m, i) => (
             <div
               key={i}
@@ -242,16 +242,16 @@ export default function MentorPage() {
                 className={cn(
                   'size-9 shrink-0 ring-2',
                   m.sender === 'ai'
-                    ? 'border border-purple-500/40 ring-purple-500/20'
-                    : 'border border-emerald-500/40 ring-emerald-500/20'
+                    ? 'border border-purple-300 ring-purple-100'
+                    : 'border border-blue-300 ring-blue-100'
                 )}
               >
                 <AvatarFallback
                   className={cn(
                     'text-xs font-black',
                     m.sender === 'user'
-                      ? 'bg-emerald-600 text-slate-950'
-                      : 'bg-purple-950 text-purple-300'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-purple-100 text-purple-700'
                   )}
                 >
                   {m.sender === 'user' ? 'Siz' : <Bot className="size-4" />}
@@ -260,10 +260,10 @@ export default function MentorPage() {
 
               <div
                 className={cn(
-                  'max-w-[85%] sm:max-w-[75%] rounded-3xl px-4 sm:px-5 py-3.5 text-xs sm:text-sm leading-relaxed shadow-lg',
+                  'max-w-[85%] sm:max-w-[75%] rounded-3xl px-4 sm:px-5 py-3.5 text-xs sm:text-sm leading-relaxed shadow-sm',
                   m.sender === 'user'
-                    ? 'rounded-tr-sm bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-bold shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                    : 'rounded-tl-sm border border-slate-800 bg-slate-950/80 text-slate-100'
+                    ? 'rounded-tr-sm bg-blue-600 text-white font-medium shadow-sm'
+                    : 'rounded-tl-sm border border-slate-200 bg-slate-50 text-slate-800'
                 )}
               >
                 {m.sender === 'user' ? (
@@ -271,15 +271,15 @@ export default function MentorPage() {
                 ) : m.text ? (
                   <MentorMessage text={m.text} />
                 ) : (
-                  <span className="flex items-center gap-2 text-slate-400">
-                    <Loader2 className="size-3.5 animate-spin text-purple-400" />
+                  <span className="flex items-center gap-2 text-slate-500">
+                    <Loader2 className="size-3.5 animate-spin text-purple-600" />
                     <span>Javob shakllanmoqda...</span>
                   </span>
                 )}
                 <span
                   className={cn(
                     'mt-2 block text-right font-mono text-[10px]',
-                    m.sender === 'user' ? 'text-slate-950/70' : 'text-slate-500'
+                    m.sender === 'user' ? 'text-blue-100' : 'text-slate-400'
                   )}
                 >
                   {m.time}
@@ -290,8 +290,8 @@ export default function MentorPage() {
           <div ref={chatEndRef} />
         </div>
 
-        {/* Sticky Input Bar at Bottom with Frosted Glass */}
-        <div className="sticky bottom-4 z-20 rounded-3xl border border-slate-800 bg-slate-900/80 p-2 sm:p-2.5 backdrop-blur-2xl shadow-2xl border-t border-white/10">
+        {/* Sticky Input Bar at Bottom with Clean Frosted Glass */}
+        <div className="sticky bottom-4 z-20 rounded-3xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 backdrop-blur-xl shadow-lg">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -304,12 +304,12 @@ export default function MentorPage() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Savolingizni yozing yoki formulani so'rang..."
               disabled={sending}
-              className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm h-11"
+              className="flex-1 bg-transparent border-none text-slate-900 placeholder:text-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm h-11"
             />
             <button
               type="submit"
               disabled={sending || !input.trim()}
-              className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-40 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] transition cursor-pointer"
+              className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-40 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)] transition cursor-pointer"
               aria-label="Yuborish"
             >
               {sending ? (

@@ -25,7 +25,7 @@ export default function ModernAppLayout({
   unreadCount = 0,
   onNotificationsClick,
   onLogout,
-  theme = 'dark',
+  theme = 'light',
 }: ModernAppLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [streakModalOpen, setStreakModalOpen] = useState(false);

@@ -30,7 +30,7 @@ export default function ModernTopbar({
   onNotificationsClick,
   onSearchClick,
   onStreakClick,
-  theme = 'dark',
+  theme = 'light',
 }: ModernTopbarProps) {
   const isLight = theme === 'light';
 

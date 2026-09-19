@@ -463,122 +463,139 @@ export default function DashboardPage() {
                 theme="light"
               />
 
-              {/* EXPANDED WEEKLY LEADERBOARD & PODIUM IN ARENA */}
-              <Card className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-[0_4px_25px_rgba(15,23,42,0.05)] space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex size-8 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-amber-600">
-                      <Trophy className="size-4" />
+              {/* EXPANDED WEEKLY LEADERBOARD & PODIUM IN ARENA — PREMIUM REDESIGN */}
+              <div className="relative overflow-hidden rounded-3xl border border-amber-200/60 bg-gradient-to-b from-amber-50/60 via-white to-white shadow-[0_8px_32px_rgba(251,191,36,0.12)] space-y-5 p-5 sm:p-6">
+                {/* Ambient glow */}
+                <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-amber-400/10 blur-3xl" />
+                <div className="pointer-events-none absolute -left-16 bottom-0 size-48 rounded-full bg-blue-500/6 blur-3xl" />
+
+                {/* Header */}
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-9 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-[0_4px_12px_rgba(251,191,36,0.4)]">
+                      <Trophy className="size-4 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-base font-black text-slate-900">
+                      <h3 className="text-sm font-black text-slate-900 tracking-tight">
                         Haftalik Liga &amp; Podest
                       </h3>
-                      <p className="text-xs font-medium text-slate-500">
+                      <p className="text-[11px] font-medium text-slate-500">
                         Oltin Liga yetakchilari va joriy musobaqa jadvali
                       </p>
                     </div>
                   </div>
                   <Link
                     href="/leaderboard"
-                    className="text-xs font-bold text-blue-600 hover:text-blue-700 transition"
+                    className="flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-800 transition bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl hover:bg-amber-100 active:scale-95"
                   >
-                    Barcha Ligalar →
+                    Barchasi <ArrowRight className="size-3" />
                   </Link>
                 </div>
 
-                {/* Top 3 Podium Visual (Light Mode) */}
-                <div className="grid grid-cols-3 gap-2.5 pt-2 pb-1">
-                  {/* 2nd Place */}
+                {/* Top 3 Podium */}
+                <div className="relative grid grid-cols-3 gap-2 pt-1 pb-2 items-end">
+                  {/* 2nd Place — Silver */}
                   {topList[1] && (
-                    <div className="flex flex-col items-center justify-end rounded-2xl border border-slate-200 bg-slate-50/70 p-3 text-center shadow-2xs">
-                      <span className="text-xs">🥈</span>
-                      <Avatar className="size-10 border-2 border-slate-300 my-1.5">
+                    <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-3 text-center shadow-sm relative">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-slate-400 px-2 py-0.5 text-[9px] font-black text-white shadow-sm whitespace-nowrap">#2 KUMUSH</span>
+                      <span className="text-base mt-2">🥈</span>
+                      <Avatar className="size-10 border-2 border-slate-300 my-1.5 shadow-sm">
                         <AvatarImage src={topList[1].avatar_url} />
-                        <AvatarFallback className="text-xs font-bold bg-slate-200 text-slate-700">
+                        <AvatarFallback className="text-[10px] font-black bg-slate-200 text-slate-700">
                           {topList[1].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs font-bold text-slate-900 truncate max-w-full">
+                      <span className="text-[11px] font-bold text-slate-800 truncate w-full">
                         {topList[1].first_name || topList[1].username}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-slate-500">
+                      <span className="text-[10px] font-mono font-bold text-slate-500 mt-0.5">
                         {topList[1].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
                   )}
 
-                  {/* 1st Place Champion */}
+                  {/* 1st Place — Gold Champion */}
                   {topList[0] && (
-                    <div className="flex flex-col items-center justify-end rounded-2xl border border-amber-300 bg-amber-50/70 p-3.5 text-center shadow-[0_4px_16px_rgba(251,191,36,0.15)] relative -top-1">
-                      <span className="text-sm">👑 🥇</span>
-                      <Avatar className="size-12 border-2 border-amber-400 my-1.5 shadow-sm">
+                    <div className="flex flex-col items-center rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-50 to-white p-3.5 text-center shadow-[0_8px_24px_rgba(251,191,36,0.25)] relative -translate-y-2">
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[9px] font-black text-white shadow-md whitespace-nowrap">#1 CHEMPION</span>
+                      <span className="text-xl mt-2">👑</span>
+                      <Avatar className="size-12 border-2 border-amber-400 my-1.5 shadow-[0_4px_12px_rgba(251,191,36,0.3)]">
                         <AvatarImage src={topList[0].avatar_url} />
-                        <AvatarFallback className="text-xs font-bold bg-amber-500 text-slate-950">
+                        <AvatarFallback className="text-sm font-black bg-gradient-to-br from-amber-400 to-orange-500 text-white">
                           {topList[0].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs sm:text-sm font-black text-slate-900 truncate max-w-full">
+                      <span className="text-xs font-black text-slate-900 truncate w-full">
                         {topList[0].first_name || topList[0].username}
                       </span>
-                      <span className="text-xs font-mono font-black text-blue-600">
+                      <span className="text-[11px] font-mono font-black text-amber-600 mt-0.5">
                         {topList[0].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
                   )}
 
-                  {/* 3rd Place */}
+                  {/* 3rd Place — Bronze */}
                   {topList[2] && (
-                    <div className="flex flex-col items-center justify-end rounded-2xl border border-slate-200 bg-slate-50/70 p-3 text-center shadow-2xs">
-                      <span className="text-xs">🥉</span>
-                      <Avatar className="size-10 border-2 border-amber-600/60 my-1.5">
+                    <div className="flex flex-col items-center rounded-2xl border border-orange-200/80 bg-gradient-to-b from-orange-50/60 to-white p-3 text-center shadow-sm relative">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-orange-600 px-2 py-0.5 text-[9px] font-black text-white shadow-sm whitespace-nowrap">#3 BRONZA</span>
+                      <span className="text-base mt-2">🥉</span>
+                      <Avatar className="size-10 border-2 border-orange-300 my-1.5 shadow-sm">
                         <AvatarImage src={topList[2].avatar_url} />
-                        <AvatarFallback className="text-xs font-bold bg-slate-200 text-slate-700">
+                        <AvatarFallback className="text-[10px] font-black bg-orange-100 text-orange-700">
                           {topList[2].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs font-bold text-slate-900 truncate max-w-full">
+                      <span className="text-[11px] font-bold text-slate-800 truncate w-full">
                         {topList[2].first_name || topList[2].username}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-slate-500">
+                      <span className="text-[10px] font-mono font-bold text-orange-600 mt-0.5">
                         {topList[2].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* Ranked List */}
-                <div className="space-y-2 pt-2">
+                {/* Ranked List — premium rows */}
+                <div className="space-y-1.5 relative">
                   {topList.map((item, idx) => {
                     const isCurrentUser = item.username === p.username;
                     const itemFullName = `${item.first_name || item.username} ${item.last_name || ''}`.trim();
+                    const rankColors = ['text-amber-600', 'text-slate-500', 'text-orange-600'];
+                    const rankBg = ['bg-amber-50 border-amber-200', 'bg-slate-50 border-slate-200', 'bg-orange-50/60 border-orange-200/60'];
 
                     return (
                       <div
                         key={idx}
                         className={cn(
-                          'flex items-center justify-between p-3 rounded-2xl transition-colors border',
+                          'flex items-center justify-between px-3.5 py-2.5 rounded-2xl border transition-all',
                           isCurrentUser
-                            ? 'bg-blue-50/90 border-blue-200 text-blue-800 font-bold'
-                            : 'border-slate-200/80 bg-white hover:bg-slate-50'
+                            ? 'bg-blue-50 border-blue-300 shadow-[0_2px_8px_rgba(37,99,235,0.1)]'
+                            : idx < 3
+                            ? rankBg[idx]
+                            : 'border-slate-200/70 bg-white hover:bg-slate-50/80'
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="font-mono text-xs font-bold text-slate-400 w-4 text-center">
+                          <span className={cn(
+                            'font-mono text-[11px] font-black w-5 text-center shrink-0',
+                            isCurrentUser ? 'text-blue-600' : idx < 3 ? rankColors[idx] : 'text-slate-400'
+                          )}>
                             #{idx + 1}
                           </span>
-                          <Avatar className="size-7 border border-slate-200 shrink-0">
+                          <Avatar className={cn('size-7 shrink-0 border', idx === 0 ? 'border-amber-300' : idx === 1 ? 'border-slate-300' : idx === 2 ? 'border-orange-300' : 'border-slate-200')}>
                             <AvatarImage src={item.avatar_url} />
-                            <AvatarFallback className="text-[10px] font-bold bg-slate-100 text-slate-700">
+                            <AvatarFallback className={cn('text-[9px] font-black', idx === 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600')}>
                               {item.username.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                          <span className={cn('text-xs font-bold truncate', isCurrentUser ? 'text-blue-800' : 'text-slate-800')}>
                             {isCurrentUser ? `${itemFullName} (Siz)` : itemFullName}
                           </span>
                         </div>
-
-                        <span className="font-mono text-xs font-black text-blue-600 shrink-0 pl-2">
+                        <span className={cn(
+                          'font-mono text-[11px] font-black shrink-0 pl-2',
+                          isCurrentUser ? 'text-blue-600' : idx === 0 ? 'text-amber-600' : 'text-slate-600'
+                        )}>
                           {item.xp.toLocaleString('uz-UZ')} XP
                         </span>
                       </div>
@@ -586,15 +603,17 @@ export default function DashboardPage() {
                   })}
                 </div>
 
-                {/* Arena Rules Strip */}
-                <div className="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-600">
-                  <span className="flex items-center gap-1.5">
-                    <Zap className="size-3.5 text-orange-500" />
-                    <span>G&apos;alaba: <strong>+50 XP</strong> va <strong>+25 tanga</strong></span>
+                {/* Reward strip */}
+                <div className="flex items-center justify-between rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 text-xs">
+                  <span className="flex items-center gap-2 text-slate-700 font-medium">
+                    <Zap className="size-3.5 text-orange-500 fill-orange-500" />
+                    G&apos;alaba: <strong className="text-orange-700 font-black">+50 XP</strong> va <strong className="text-amber-700 font-black">+25 tanga</strong>
                   </span>
-                  <span className="text-blue-700 font-black">Oltin Liga: Top 10</span>
+                  <span className="font-black text-amber-700 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-xl text-[10px]">
+                    🏆 Oltin Liga: Top 10
+                  </span>
                 </div>
-              </Card>
+              </div>
             </>
           )}
         </div>

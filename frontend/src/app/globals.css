@@ -10,108 +10,9 @@
    copied verbatim so pages built here match the existing app instead of drifting into a
    second visual language. Edit templates/base.html's :root block first if the palette
    changes, then mirror it here. */
-:root, :root[data-theme="dark"] {
-  color-scheme: dark;
-  /* Obsidian Slate & Emerald Luxury palette — see figma_ui_prompt.md master brief.
-     Mirrored from templates/base.html's :root block. */
-  /* v2 chuqurlik: sahifa foni qoraytirildi, sirtlar esa yoritildi. Ilgari fon #0c0e12,
-     karta #14171d edi — atigi ~2.5% yorug'lik farqi, shuning uchun kartaning chekkasi
-     ko'rinmay, butun ekran bir tekis qora dog'ga aylanardi. */
-  --bg-page: #08090c;
-  --accent: #2fb3a3;
-  --accent-hover: #269488;
-  --accent-soft: rgba(47, 179, 163, 0.16);
-  --accent-border: rgba(47, 179, 163, 0.35);
-  --accent-text: #5cc4b6;
-  --on-accent: #0d1416;
-
-  --success: #52a86b;
-  --success-soft: rgba(82, 168, 107, 0.16);
-  --success-text: #7ad192;
-  --danger: #f43f5e;
-  --danger-soft: rgba(244, 63, 94, 0.14);
-  --danger-text: #fb7185;
-  --warning: #d99a38;
-  --warning-soft: rgba(217, 154, 56, 0.15);
-  --warning-text: #f59e0b;
-
-  --text-primary: #f0f1f3;
-  --text-secondary: #a3a7ae;
-  --text-muted: #8d9094;
-  --text-subtitle: #8d9094;
-  --text-faint: #5a5d63;
-
-  --border-soft: rgba(255, 255, 255, 0.06);
-  --border-card: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  /* Karta ustidagi 1px ichki yorug'lik — "shisha" hissini beruvchi asosiy detal. */
-  --border-highlight: rgba(255, 255, 255, 0.06);
-
-  --surface-hover: rgba(255, 255, 255, 0.05);
-  --surface-hover-strong: rgba(255, 255, 255, 0.09);
-  --surface-card-soft: #101319;
-  --surface-card-medium: #161a22;
-  --surface-card-strong: #161a22;
-  --surface-input: #1d222c;
-
-  /* ── Semantik "tone" oilasi ──────────────────────────────────────────────────
-     Ilgari ikonka ranglari to'g'ridan-to'g'ri Tailwind palitrasidan olinardi
-     (bg-amber-500/12, text-sky-400 ...) va ular brend tizimiga bog'lanmagan edi —
-     natijada "rangli o'yinchoq" hissi. Endi har bir rang MA'NOGA biriktirilgan:
-
-       growth  — o'sish, asosiy harakat (brend zumradi)
-       streak  — uzluksizlik (olov, to'q sariq)
-       premium — qiymat: premium obuna, tanga, mukofot (OLTIN, boshqa hech qayerda)
-       danger  — xato, yo'qotish
-       lesson  — o'quv kontenti (dars, video, audio)
-       ai      — sun'iy intellekt (mentor, tahlil)
-
-     Yangi kod shu o'zgaruvchilarni ishlatadi; rang o'zgarsa — bitta joyda o'zgaradi. */
-  --tone-growth: var(--accent);
-  --tone-growth-text: var(--accent-text);
-  --tone-growth-soft: var(--accent-soft);
-
-  /* Streak — OLOV, ya'ni to'q sariq. Ilgari bu token oltin edi va bir vaqtda
-     "uzluksizlik + premium + mukofot" degan uch ma'noni bildirardi. Bir rang uch
-     narsani bildirsa, u aksent bo'lishdan to'xtaydi: foydalanuvchi sariqni ko'rib
-     "bu pulmi, yutuqmi yoki shunchaki bezakmi?" deb o'ylab qoladi. Endi oltin
-     alohida tokenda (`--tone-premium`) va faqat qiymat/mukofot uchun ishlatiladi. */
-  --tone-streak: #d97538;
-  --tone-streak-text: #f09a5c;
-  --tone-streak-soft: rgba(217, 117, 56, 0.14);
-
-  /* Oltin — YAGONA rol: premium, tanga, mukofot. Boshqa hech qayerda ishlatilmaydi. */
-  --tone-premium: #d99a38;
-  --tone-premium-text: #f0b45c;
-  --tone-premium-soft: rgba(217, 154, 56, 0.14);
-
-  --tone-danger: var(--danger);
-  --tone-danger-text: var(--danger-text);
-  --tone-danger-soft: var(--danger-soft);
-
-  --tone-lesson: #4a90c2;
-  --tone-lesson-text: #79b8e0;
-  --tone-lesson-soft: rgba(74, 144, 194, 0.14);
-
-  --tone-ai: #7d7ad1;
-  --tone-ai-text: #a7a4ec;
-  --tone-ai-soft: rgba(125, 122, 209, 0.14);
-
-  /* Balandlik (elevation) shkalasi — soyasiz dark UI har doim yassi ko'rinadi. */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
-  --shadow-float: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 48px -12px rgba(0, 0, 0, 0.6);
-  --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 32px -8px rgba(47, 179, 163, 0.35);
-}
-
-:root[data-theme="light"] {
+:root, :root[data-theme="light"] {
   color-scheme: light;
-  /* ── Yorug' tema v2 ────────────────────────────────────────────────────────
-     Muammolar (o'lchangan kontrast nisbatlari):
-       --text-faint  2.72:1  → matn "hira" ko'rinardi (AA uchun 4.5 kerak)
-       --on-accent   4.21:1  → asosiy tugma yozuvi ham chegaradan past edi
-       karta/fon     1.14:1  → oq karta oq-kulrang fondan ajralmasdi
-       input/karta   1.11:1  → maydonlar deyarli ko'rinmasdi
-     Quyidagi qiymatlar shu to'rt muammoni to'g'irlaydi. */
+  /* ── Yorug' tema v2 (Default) ────────────────────────────────────────────── */
   --bg-page: #F8FAFC;
   --accent: #16776a;
   --accent-hover: #115f55;
@@ -142,10 +43,12 @@
 
   --surface-hover: rgba(18, 20, 24, 0.055);
   --surface-hover-strong: rgba(18, 20, 24, 0.09);
+  --surface-card: #ffffff;
   --surface-card-soft: #ffffff;
   --surface-card-medium: #ffffff;
   --surface-card-strong: #ffffff;
-  --surface-input: #e9edf2;
+  --surface-input: #f1f5f9;
+  --surface-bg: var(--bg-page);
 
   --tone-growth: var(--accent);
   --tone-growth-text: var(--accent-text);
@@ -175,6 +78,76 @@
   --shadow-card: 0 1px 2px rgba(16, 20, 26, 0.06), 0 8px 24px -12px rgba(16, 20, 26, 0.12);
   --shadow-float: 0 2px 6px rgba(16, 20, 26, 0.08), 0 18px 44px -16px rgba(16, 20, 26, 0.18);
   --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 28px -10px rgba(31, 138, 124, 0.35);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  /* Obsidian Slate & Emerald Luxury palette */
+  --bg-page: #08090c;
+  --accent: #2fb3a3;
+  --accent-hover: #269488;
+  --accent-soft: rgba(47, 179, 163, 0.16);
+  --accent-border: rgba(47, 179, 163, 0.35);
+  --accent-text: #5cc4b6;
+  --on-accent: #0d1416;
+
+  --success: #52a86b;
+  --success-soft: rgba(82, 168, 107, 0.16);
+  --success-text: #7ad192;
+  --danger: #f43f5e;
+  --danger-soft: rgba(244, 63, 94, 0.14);
+  --danger-text: #fb7185;
+  --warning: #d99a38;
+  --warning-soft: rgba(217, 154, 56, 0.15);
+  --warning-text: #f59e0b;
+
+  --text-primary: #f0f1f3;
+  --text-secondary: #a3a7ae;
+  --text-muted: #8d9094;
+  --text-subtitle: #8d9094;
+  --text-faint: #5a5d63;
+
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --border-card: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-highlight: rgba(255, 255, 255, 0.06);
+
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  --surface-hover-strong: rgba(255, 255, 255, 0.09);
+  --surface-card: #101319;
+  --surface-card-soft: #101319;
+  --surface-card-medium: #161a22;
+  --surface-card-strong: #161a22;
+  --surface-input: #1d222c;
+  --surface-bg: var(--bg-page);
+
+  --tone-growth: var(--accent);
+  --tone-growth-text: var(--accent-text);
+  --tone-growth-soft: var(--accent-soft);
+
+  --tone-streak: #d97538;
+  --tone-streak-text: #f09a5c;
+  --tone-streak-soft: rgba(217, 117, 56, 0.14);
+
+  --tone-premium: #d99a38;
+  --tone-premium-text: #f0b45c;
+  --tone-premium-soft: rgba(217, 154, 56, 0.14);
+
+  --tone-danger: var(--danger);
+  --tone-danger-text: var(--danger-text);
+  --tone-danger-soft: var(--danger-soft);
+
+  --tone-lesson: #4a90c2;
+  --tone-lesson-text: #79b8e0;
+  --tone-lesson-soft: rgba(74, 144, 194, 0.14);
+
+  --tone-ai: #7d7ad1;
+  --tone-ai-text: #a7a4ec;
+  --tone-ai-soft: rgba(125, 122, 209, 0.14);
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-float: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 32px -8px rgba(47, 179, 163, 0.35);
 }
 
 @theme inline {

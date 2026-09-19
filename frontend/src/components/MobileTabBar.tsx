@@ -30,7 +30,7 @@ interface MobileTabBarProps {
   theme?: 'dark' | 'light';
 }
 
-export default function MobileTabBar({ theme = 'dark' }: MobileTabBarProps) {
+export default function MobileTabBar({ theme = 'light' }: MobileTabBarProps) {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const isLight = theme === 'light';

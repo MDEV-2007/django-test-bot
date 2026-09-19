@@ -95,7 +95,7 @@ export default function Sidebar({
   onMobileClose,
   user: propUser,
   onLogout: propLogout,
-  theme = 'dark',
+  theme = 'light',
 }: SidebarProps) {
   const isLight = theme === 'light';
   const pathname = usePathname();
