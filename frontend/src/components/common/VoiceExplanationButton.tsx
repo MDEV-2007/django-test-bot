@@ -1,20 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Volume2, VolumeX, Square, Loader2 } from 'lucide-react';
+import { Volume2, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { tgHaptic } from '@/lib/telegram';
+import { toast } from 'sonner';
 
 interface VoiceExplanationButtonProps {
-  text: string;
+  text?: string;
   label?: string;
   className?: string;
   size?: 'sm' | 'default' | 'icon';
   variant?: 'outline' | 'ghost' | 'secondary' | 'default';
 }
 
-// Strip HTML tags for clean text-to-speech reading
 function cleanHtml(raw: string): string {
   return raw
     .replace(/<[^>]*>?/gm, ' ')
@@ -26,23 +26,17 @@ function cleanHtml(raw: string): string {
 }
 
 export default function VoiceExplanationButton({
-  text,
+  text = '',
   label = "Ovozli tahlil",
   className,
   size = 'sm',
   variant = 'outline',
 }: VoiceExplanationButtonProps) {
   const [status, setStatus] = useState<'idle' | 'playing'>('idle');
-  const [supported, setSupported] = useState(true);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      setSupported(false);
-    }
-
     return () => {
-      // Component unmount bo'lganda ovozni to'xtatish
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
@@ -50,9 +44,12 @@ export default function VoiceExplanationButton({
   }, []);
 
   const handleToggle = () => {
-    if (!supported || !text.trim()) return;
-
     tgHaptic('select');
+
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      toast.info("Qurilmangizda nutq sintezi (TTS) qo'llab-quvvatlanmadi.");
+      return;
+    }
 
     if (status === 'playing') {
       window.speechSynthesis.cancel();
@@ -60,18 +57,14 @@ export default function VoiceExplanationButton({
       return;
     }
 
-    // Oldingi barcha ovozlarni to'xtatish
     window.speechSynthesis.cancel();
 
-    const plainText = cleanHtml(text);
-    if (!plainText) return;
+    const plainText = cleanHtml(text) || "Savol yuzasidan tushuntirish: To'g'ri javobni tanlashda savol shartiga va qoidalariga diqqat qiling.";
 
     const utterance = new SpeechSynthesisUtterance(plainText);
     utteranceRef.current = utterance;
 
-    // Mavjud ovozlardan mos keladiganini tanlash
     const voices = window.speechSynthesis.getVoices();
-    // O'zbek, turkiy yoki tabiiy ovozlar ustuvor
     const voice =
       voices.find((v) => v.lang.startsWith('uz')) ||
       voices.find((v) => v.lang.startsWith('tr')) ||
@@ -83,7 +76,6 @@ export default function VoiceExplanationButton({
       utterance.voice = voice;
     }
 
-    // Nutq tezligi va ohangi — aniq va tushunarli eshitilishi uchun
     utterance.rate = 0.92;
     utterance.pitch = 1.0;
 
@@ -102,8 +94,6 @@ export default function VoiceExplanationButton({
     window.speechSynthesis.speak(utterance);
   };
 
-  if (!supported || !text.trim()) return null;
-
   return (
     <Button
       type="button"
@@ -111,10 +101,10 @@ export default function VoiceExplanationButton({
       variant={variant}
       onClick={handleToggle}
       className={cn(
-        'group relative inline-flex items-center gap-1.5 transition-all',
+        'group relative inline-flex items-center gap-1.5 transition-all font-semibold rounded-xl',
         status === 'playing'
-          ? 'border-indigo-500/40 bg-indigo-500/15 text-indigo-500 shadow-sm shadow-indigo-500/20'
-          : 'text-[var(--text-secondary)] hover:text-foreground',
+          ? 'border-indigo-500/50 bg-indigo-500/20 text-indigo-500 shadow-md shadow-indigo-500/20'
+          : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20',
         className,
       )}
       title={status === 'playing' ? "Ovozni to'xtatish" : "Tushuntirishni ovozli eshitish"}

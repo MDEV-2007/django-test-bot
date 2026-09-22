@@ -524,14 +524,18 @@ export default function FeedbackPage() {
                       <p className="font-semibold text-[var(--success-text)]">{m.togri_javob}</p>
                     </div>
                   </div>
-                  {m.nega_muhim && (
-                    <div className="flex items-start justify-between gap-3 pt-1">
-                      <p className="text-xs leading-relaxed text-muted-foreground flex-1">
-                        <strong>Izoh:</strong> {m.nega_muhim}
-                      </p>
-                      <VoiceExplanationButton text={m.nega_muhim} size="sm" variant="ghost" className="shrink-0 h-7" />
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between gap-3 pt-1 border-t border-[var(--border-card)]">
+                    <p className="text-xs leading-relaxed text-muted-foreground flex-1">
+                      {m.nega_muhim ? <><strong>Izoh:</strong> {m.nega_muhim}</> : null}
+                    </p>
+                    <VoiceExplanationButton
+                      text={m.nega_muhim || `Mavzu: ${m.mavzu}. Savol: ${m.savol_mazmuni}. To'g'ri javob: ${m.togri_javob}.`}
+                      size="sm"
+                      label="🎙️ Ovozli tushuntirish"
+                      variant="outline"
+                      className="shrink-0 h-7 text-[11px]"
+                    />
+                  </div>
                   {m.eslab_qolish && (
                     <p className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs italic text-amber-300">
                       <Lightbulb className="size-4 shrink-0 text-amber-400" /> {m.eslab_qolish}
@@ -621,18 +625,31 @@ export default function FeedbackPage() {
                     <p className="mt-1 text-xs text-muted-foreground">To&apos;g&apos;ri javob: {r.correct_answer}</p>
                   )}
                   {r.grading_note && <p className="mt-1 text-xs italic text-[var(--text-secondary)]">{r.grading_note}</p>}
-                  {r.explanation && (
-                    <>
-                      <Separator className="my-2" />
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)] flex-1">
-                          <Lightbulb className="size-3.5 shrink-0 text-amber-400 mt-0.5" />
-                          <span>{r.explanation}</span>
-                        </p>
-                        <VoiceExplanationButton text={r.explanation} size="sm" variant="ghost" className="shrink-0 h-7" />
-                      </div>
-                    </>
-                  )}
+                  {/* Savol tushuntirishi va Ovozli tahlil — har bir savolda ko'rinadi */}
+                  <div className="mt-3 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-input)] p-3">
+                    {r.explanation ? (
+                      <p className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)] mb-2.5 leading-relaxed">
+                        <Lightbulb className="size-3.5 shrink-0 text-amber-500 mt-0.5" />
+                        <span>{r.explanation}</span>
+                      </p>
+                    ) : null}
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--border-card)]">
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        {r.is_correct ? "✅ To'g'ri javob" : "❌ Xato javob tahlili:"}
+                      </span>
+                      <VoiceExplanationButton
+                        text={
+                          r.explanation
+                            ? r.explanation
+                            : `Savol: ${r.body.replace(/<[^>]*>?/gm, ' ')}. To'g'ri javob: ${r.correct_answer}. Siz tanlagan javob: ${r.your_answer || "belgilanmagan"}.`
+                        }
+                        label="🎙️ Ovozli tushuntirish"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs font-bold border-indigo-500/40 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                      />
+                    </div>
+                  </div>
 
                   {/* Writing topshirig'i to'g'ri/xato emas — mezonlar bo'yicha baholanadi.
                       Baholatilmagan bo'lsa, premium tekshiruv taklif qilinadi. */}

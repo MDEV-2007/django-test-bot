@@ -448,35 +448,33 @@ export default function TestScreenPage() {
                 </Button>
               </div>
 
-              {/* Status badges: Oflayn / Sinxronlash / Saqlandi */}
-              {!isOnline && (
-                <Badge
-                  variant="outline"
-                  className="animate-pulse border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 gap-1 text-[11px] font-medium h-7 px-2"
+              {/* Status badges: Doimiy Offline Resilience himoyasi */}
+              {!isOnline ? (
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-bold animate-pulse shrink-0"
                   title="Internet aloqasi yo'q. Belgilangan javoblaringiz xavfsiz saqlanmoqda."
                 >
-                  <WifiOff className="size-3" />
-                  <span className="hidden xs:inline">Oflayn</span>
-                  {pendingCount > 0 && <span className="font-mono tabular-nums">({pendingCount})</span>}
-                </Badge>
-              )}
-              {isOnline && syncStatus === 'syncing' && (
-                <Badge
-                  variant="outline"
-                  className="border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400 gap-1 text-[11px] font-medium h-7 px-2"
-                >
-                  <RefreshCw className="size-3 animate-spin" />
+                  <WifiOff className="size-3.5" />
+                  <span>Oflayn{pendingCount > 0 ? ` (${pendingCount})` : ''}</span>
+                </div>
+              ) : syncStatus === 'syncing' ? (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400 text-xs font-bold shrink-0">
+                  <RefreshCw className="size-3.5 animate-spin" />
                   <span className="hidden sm:inline">Sinxronlanmoqda...</span>
-                </Badge>
-              )}
-              {isOnline && syncStatus === 'synced' && (
-                <Badge
-                  variant="outline"
-                  className="border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 gap-1 text-[11px] font-medium h-7 px-2"
-                >
-                  <Check className="size-3" />
+                </div>
+              ) : syncStatus === 'synced' ? (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0">
+                  <Check className="size-3.5" />
                   <span className="hidden sm:inline">Saqlandi</span>
-                </Badge>
+                </div>
+              ) : (
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold shrink-0"
+                  title="Offline himoya faol: har bir belgilagan javobingiz lokal xotiraga zaxiralanadi va internet uzilsa ham saqlanadi"
+                >
+                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[11px] font-bold">Himoyalangan</span>
+                </div>
               )}
 
               <span className="hidden font-mono text-xs text-[var(--text-faint)] xl:inline">A-D tanlash · → keyingi · ← oldingi</span>
