@@ -368,6 +368,39 @@ def question_add_api(request, pk):
 
 @api_view(['POST'])
 @permission_classes([IsTeacher])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def test_ai_parse_api(request, pk):
+    """Word (.docx), PDF (.pdf) yoki matndan AI orqali test savollarini avtomatik ajratish."""
+    test = _own_test(request, pk)
+    uploaded_file = request.FILES.get('file')
+    raw_text = request.data.get('text') or ''
+
+    if uploaded_file:
+        from .ai_importer import extract_text_from_upload
+        text = extract_text_from_upload(uploaded_file)
+    else:
+        text = raw_text
+
+    text = (text or '').strip()
+    if not text:
+        return Response({'error': "Fayl bo'sh yoki matn kiritilmadi."}, status=400)
+
+    from .ai_importer import ai_parse_test_questions
+    parsed_questions = ai_parse_test_questions(text)
+
+    if not parsed_questions:
+        return Response({'error': "Matndan birorta ham test savoli aniqlanmadi. Iltimos, fayl yoki matnni tekshiring."}, status=400)
+
+    return Response({
+        'ok': True,
+        'count': len(parsed_questions),
+        'questions': parsed_questions,
+        'extracted_chars': len(text),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsTeacher])
 def question_bulk_api(request, pk):
     """Matndan yoki tashqi manbadan bir nechta savollarni birdaniga testga qo'shish."""
     test = _own_test(request, pk)

@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { celebrate } from '@/lib/confetti';
-import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut } from 'lucide-react';
+import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut, Wifi, WifiOff, RefreshCw, Check } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import {
   tgHaptic, useIsTelegram, useTelegramBackButton, useTelegramClosingConfirmation, useTelegramMainButton,
@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const DIFFICULTY_LABEL: Record<string, string> = { easy: 'Oson', medium: "O'rta", hard: 'Qiyin' };
 const DIFFICULTY_TONE: Record<string, string> = {
@@ -40,6 +41,13 @@ const FONT_STEPS = [
   { key: 'lg', label: 'A+', rem: '1.25rem' },
 ] as const;
 type FontKey = (typeof FONT_STEPS)[number]['key'];
+
+type PendingAnswer = {
+  question_id: number;
+  q_idx: number;
+  payload: Record<string, unknown>;
+  timestamp: number;
+};
 
 function formatTime(sec: number) {
   const m = Math.floor(sec / 60);
@@ -61,6 +69,53 @@ export default function TestScreenPage() {
   const [fontKey, setFontKey] = useState<FontKey>('md');
   const inTelegram = useIsTelegram();
 
+  // Offline resilience holatlari
+  const [isOnline, setIsOnline] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced'>('idle');
+  const isSyncingRef = useRef(false);
+
+  const pendingKey = `ilm_pending_answers_${attemptId}`;
+  const cacheKey = `ilm_cached_questions_${attemptId}`;
+
+  // Offline saqlash yordamchilari
+  const getPendingQueue = useCallback((): PendingAnswer[] => {
+    try {
+      const raw = localStorage.getItem(pendingKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }, [pendingKey]);
+
+  const savePendingQueue = useCallback((queue: PendingAnswer[]) => {
+    try {
+      localStorage.setItem(pendingKey, JSON.stringify(queue));
+      setPendingCount(queue.length);
+    } catch {
+      // quota or private mode fallback
+    }
+  }, [pendingKey]);
+
+  const getCachedQuestions = useCallback((): Record<number, QuestionData> => {
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }, [cacheKey]);
+
+  const cacheQuestion = useCallback((qData: QuestionData) => {
+    try {
+      const all = getCachedQuestions();
+      all[qData.q_idx] = qData;
+      localStorage.setItem(cacheKey, JSON.stringify(all));
+    } catch {
+      // ignore
+    }
+  }, [cacheKey, getCachedQuestions]);
+
   /* Telegram Mini App: imtihon davomida ilova tasodifan yopilsa javoblar oralig'i
      yo'qoladi — yopishdan oldin Telegram tasdiq so'raydi. Telegramdan tashqarida
      bu chaqiruvlar hech narsa qilmaydi. */
@@ -70,9 +125,7 @@ export default function TestScreenPage() {
   // tasdiqlash modalini ochadi, imtihondan to'g'ridan-to'g'ri chiqarib yubormaydi.
   useTelegramBackButton(() => setShowExitModal(true));
 
-  // Zen Mode: imtihon davomida sidebar/header/tab-bar yashiriladi. Sahifadan chiqilganda
-  // (yoki komponent unmount bo'lganda) atribut albatta tozalanadi, aks holda boshqa
-  // sahifalarda ham navigatsiya yo'qolib qolardi.
+  // Zen Mode: imtihon davomida sidebar/header/tab-bar yashiriladi.
   useEffect(() => {
     document.documentElement.dataset.zen = 'on';
     return () => { delete document.documentElement.dataset.zen; };
@@ -90,14 +143,103 @@ export default function TestScreenPage() {
     return () => { document.documentElement.style.removeProperty('--reading-size'); };
   }, [fontKey]);
 
+  // Online / Offline hodisalarini kuzatish
+  useEffect(() => {
+    setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
+    setPendingCount(getPendingQueue().length);
+
+    const onOnline = () => {
+      setIsOnline(true);
+      toast.success("Internet aloqasi tiklandi! Javoblar sinxronlanmoqda...", { duration: 3000 });
+      flushPendingQueue();
+    };
+
+    const onOffline = () => {
+      setIsOnline(false);
+      toast.warning("Internet aloqasi uzildi. Oflayn rejimda ishlash davom etmoqda — javoblaringiz xavfsiz saqlanadi!", { duration: 4000 });
+    };
+
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Navbatdagi javoblarni serverga sinxronlash (Background Sync)
+  const flushPendingQueue = useCallback(async () => {
+    if (isSyncingRef.current) return;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+
+    const queue = getPendingQueue();
+    if (queue.length === 0) return;
+
+    isSyncingRef.current = true;
+    setSyncStatus('syncing');
+
+    let remaining = [...queue];
+    for (const item of queue) {
+      try {
+        await apiFetch(`/api/tests/attempts/${attemptId}/answer/`, {
+          method: 'POST',
+          body: JSON.stringify({ question_id: item.question_id, q_idx: item.q_idx, ...item.payload }),
+        });
+        remaining = remaining.filter((r) => !(r.question_id === item.question_id && r.timestamp === item.timestamp));
+        savePendingQueue(remaining);
+      } catch {
+        // Serverga yetib bormadi — navbatda qoladi
+        break;
+      }
+    }
+
+    isSyncingRef.current = false;
+    if (remaining.length === 0) {
+      setSyncStatus('synced');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    } else {
+      setSyncStatus('idle');
+    }
+  }, [attemptId, getPendingQueue, savePendingQueue]);
+
+  // Har 6 soniyada navbatda javob bo'lsa fonda sinxronlab turish
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (getPendingQueue().length > 0 && navigator.onLine) {
+        flushPendingQueue();
+      }
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [flushPendingQueue, getPendingQueue]);
+
   const load = useCallback((idx: number) => {
-    apiFetch<QuestionData>(`/api/tests/attempts/${attemptId}/question/?q_idx=${idx}`)
-      .then((d) => { setData(d); setQIdx(d.q_idx); })
-      .catch((e: unknown) => {
-        if (e instanceof ApiError && e.status === 409) { router.push(`/tests/${attemptId}/feedback`); return; }
-        setError(e instanceof Error ? e.message : 'Xatolik');
-      });
-  }, [attemptId, router]);
+    // Agar oflayn bo'lsa yoki tezkor navigatsiya uchun — avval keshdan qidiramiz
+    const cachedMap = getCachedQuestions();
+    if (cachedMap[idx]) {
+      setData(cachedMap[idx]);
+      setQIdx(idx);
+    }
+
+    // Serverga so'rov (agar online bo'lsa yangi ma'lumotlarni oladi)
+    if (typeof navigator === 'undefined' || navigator.onLine) {
+      apiFetch<QuestionData>(`/api/tests/attempts/${attemptId}/question/?q_idx=${idx}`)
+        .then((d) => {
+          setData(d);
+          setQIdx(d.q_idx);
+          cacheQuestion(d);
+        })
+        .catch((e: unknown) => {
+          if (e instanceof ApiError && e.status === 409) {
+            router.push(`/tests/${attemptId}/feedback`);
+            return;
+          }
+          // Agar keshda yo'q bo'lsa va xato bersa
+          if (!cachedMap[idx]) {
+            setError(e instanceof Error ? e.message : 'Xatolik');
+          }
+        });
+    }
+  }, [attemptId, cacheQuestion, getCachedQuestions, router]);
 
   useEffect(() => {
     if (authReady && !access) {
@@ -109,7 +251,7 @@ export default function TestScreenPage() {
 
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
-  // Local countdown between server syncs so the timer doesn't visibly stall and doesn't re-render entire question data
+  // Local countdown between server syncs
   useEffect(() => {
     if (typeof data?.seconds_left === 'number') {
       setSecondsLeft(data.seconds_left);
@@ -125,25 +267,89 @@ export default function TestScreenPage() {
 
   async function submit(payload: Record<string, unknown>) {
     if (!data) return;
-    try {
-      const updated = await apiFetch<QuestionData>(`/api/tests/attempts/${attemptId}/answer/`, {
-        method: 'POST',
-        body: JSON.stringify({ question_id: data.question.id, q_idx: qIdx, ...payload }),
-      });
-      setData(updated);
-      setAnsweredIdxs((prev) => new Set(prev).add(qIdx));
-      tgHaptic('select');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Xatolik');
+
+    // 1. Optimistic UI update — foydalanuvchiga darhol tanlangan deb ko'rsatamiz
+    const currentQIdx = qIdx;
+    const currentQuestionId = data.question.id;
+    let updatedLocalData: QuestionData = { ...data };
+
+    if (payload.choice_id !== undefined) {
+      updatedLocalData.selected_choice_id = payload.choice_id as number;
+    }
+    if (payload.group_option_id !== undefined) {
+      updatedLocalData.selected_group_option_id = payload.group_option_id as number;
+    }
+    if (payload.matches !== undefined && updatedLocalData.matching_rows) {
+      const matchObj = payload.matches as Record<string, string>;
+      updatedLocalData.matching_rows = updatedLocalData.matching_rows.map((r) => ({
+        ...r,
+        selected_right_key: matchObj[r.left_key] ?? r.selected_right_key,
+      }));
+    }
+    if (payload.text_answer !== undefined) {
+      updatedLocalData.text_answer = payload.text_answer as string;
+    }
+
+    setData(updatedLocalData);
+    cacheQuestion(updatedLocalData);
+    setAnsweredIdxs((prev) => new Set(prev).add(currentQIdx));
+    tgHaptic('select');
+
+    // 2. Offline Queue ga joylash
+    const queue = getPendingQueue();
+    const item: PendingAnswer = {
+      question_id: currentQuestionId,
+      q_idx: currentQIdx,
+      payload,
+      timestamp: Date.now(),
+    };
+    const nextQueue = [...queue.filter((q) => q.question_id !== currentQuestionId), item];
+    savePendingQueue(nextQueue);
+
+    // 3. Agar internet bo'lsa, darhol serverga jo'natish
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      try {
+        const updated = await apiFetch<QuestionData>(`/api/tests/attempts/${attemptId}/answer/`, {
+          method: 'POST',
+          body: JSON.stringify({ question_id: currentQuestionId, q_idx: currentQIdx, ...payload }),
+        });
+        setData(updated);
+        cacheQuestion(updated);
+        // Queue dan chiqarib tashlash
+        const currentQ = getPendingQueue().filter((q) => q.question_id !== currentQuestionId);
+        savePendingQueue(currentQ);
+        setSyncStatus('synced');
+        setTimeout(() => setSyncStatus('idle'), 2500);
+      } catch {
+        // Tarmoq xatosi yuz berganda sahifani buzmaymiz, javob local queue da qoladi
+        setSyncStatus('idle');
+      }
     }
   }
 
   async function finish() {
+    // Agar oflayn bo'lsa va saqlanmagan javoblar bo'lsa — ogohlantiramiz
+    const pending = getPendingQueue();
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error("Oflayn holatda testni yakunlay olmaysiz. Iltimos, internetga ulaning!", { duration: 4000 });
+      return;
+    }
+
+    if (pending.length > 0) {
+      setSyncStatus('syncing');
+      await flushPendingQueue();
+    }
+
     setFinishing(true);
     try {
       await apiFetch(`/api/tests/attempts/${attemptId}/finish/`, { method: 'POST' });
       soundFX.fanfare();
       tgHaptic('success');
+      // Tozalash
+      try {
+        localStorage.removeItem(pendingKey);
+        localStorage.removeItem(cacheKey);
+      } catch { /* noop */ }
       try { celebrate({ particleCount: 80, spread: 70, origin: { y: 0.6 } }); } catch { /* noop */ }
       router.push(`/tests/${attemptId}/feedback`);
     } catch (e) {
@@ -153,8 +359,7 @@ export default function TestScreenPage() {
     }
   }
 
-  /* Oxirgi savolda Telegram'ning nativ pastki tugmasi "Yakunlash" bo'lib chiqadi —
-     Mini App'da bu eng ko'rinadigan va eng qulay joy. */
+  /* Oxirgi savolda Telegram'ning nativ pastki tugmasi "Yakunlash" bo'lib chiqadi */
   useTelegramMainButton(
     data && !data.has_next ? 'Imtihonni Yakunlash' : null,
     finish,
@@ -236,6 +441,39 @@ export default function TestScreenPage() {
                   <Layers className="size-3.5 text-[var(--accent-text)]" />
                   Savol <span className="font-mono tabular-nums text-[var(--accent-text)]">{data.q_idx}</span> / {data.total_questions}
                 </Button>
+              </div>
+
+              {/* Status badges: Oflayn / Sinxronlash / Saqlandi */}
+              <div className="flex items-center gap-2">
+                {!isOnline && (
+                  <Badge
+                    variant="outline"
+                    className="animate-pulse border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 gap-1 text-[11px] font-medium"
+                    title="Internet aloqasi yo'q. Belgilangan javoblaringiz xavfsiz saqlanmoqda."
+                  >
+                    <WifiOff className="size-3.5" />
+                    <span>Oflayn</span>
+                    {pendingCount > 0 && <span className="font-mono tabular-nums">({pendingCount})</span>}
+                  </Badge>
+                )}
+                {isOnline && syncStatus === 'syncing' && (
+                  <Badge
+                    variant="outline"
+                    className="border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400 gap-1 text-[11px] font-medium"
+                  >
+                    <RefreshCw className="size-3.5 animate-spin" />
+                    <span className="hidden sm:inline">Sinxronlanmoqda...</span>
+                  </Badge>
+                )}
+                {isOnline && syncStatus === 'synced' && (
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 gap-1 text-[11px] font-medium"
+                  >
+                    <Check className="size-3.5" />
+                    <span className="hidden sm:inline">Saqlandi</span>
+                  </Badge>
+                )}
               </div>
 
               <span className="hidden font-mono text-xs text-[var(--text-faint)] xl:inline">A-D tanlash · → keyingi · ← oldingi</span>
@@ -399,7 +637,7 @@ export default function TestScreenPage() {
         </div>
 
         <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-          <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+          <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--surface-card-strong)] p-6 shadow-2xl mx-auto">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-lg shadow-amber-500/10">
                 <AlertTriangle className="size-7" />

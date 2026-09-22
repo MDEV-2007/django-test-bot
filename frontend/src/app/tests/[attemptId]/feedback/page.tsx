@@ -25,6 +25,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import VoiceExplanationButton from '@/components/common/VoiceExplanationButton';
 
 type Mistake = {
   mavzu: string; savol_mazmuni: string; bola_javobi: string; togri_javob: string;
@@ -523,7 +524,14 @@ export default function FeedbackPage() {
                       <p className="font-semibold text-[var(--success-text)]">{m.togri_javob}</p>
                     </div>
                   </div>
-                  {m.nega_muhim && <p className="pt-1 text-xs leading-relaxed text-muted-foreground"><strong>Izoh:</strong> {m.nega_muhim}</p>}
+                  {m.nega_muhim && (
+                    <div className="flex items-start justify-between gap-3 pt-1">
+                      <p className="text-xs leading-relaxed text-muted-foreground flex-1">
+                        <strong>Izoh:</strong> {m.nega_muhim}
+                      </p>
+                      <VoiceExplanationButton text={m.nega_muhim} size="sm" variant="ghost" className="shrink-0 h-7" />
+                    </div>
+                  )}
                   {m.eslab_qolish && (
                     <p className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs italic text-amber-300">
                       <Lightbulb className="size-4 shrink-0 text-amber-400" /> {m.eslab_qolish}
@@ -616,9 +624,13 @@ export default function FeedbackPage() {
                   {r.explanation && (
                     <>
                       <Separator className="my-2" />
-                      <p className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)]">
-                        <Lightbulb className="size-3.5 shrink-0 text-amber-400" /> {r.explanation}
-                      </p>
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)] flex-1">
+                          <Lightbulb className="size-3.5 shrink-0 text-amber-400 mt-0.5" />
+                          <span>{r.explanation}</span>
+                        </p>
+                        <VoiceExplanationButton text={r.explanation} size="sm" variant="ghost" className="shrink-0 h-7" />
+                      </div>
                     </>
                   )}
 

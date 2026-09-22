@@ -24,6 +24,7 @@ urlpatterns = [
     path('tests/<int:pk>/sections/<int:sid>/', api.section_detail_api, name='section_detail'),
     path('tests/<int:pk>/questions/add/', api.question_add_api, name='question_add'),
     path('tests/<int:pk>/questions/bulk/', api.question_bulk_api, name='question_bulk'),
+    path('tests/<int:pk>/ai-parse/', api.test_ai_parse_api, name='test_ai_parse'),
     path('tests/<int:pk>/questions/<int:qid>/', api.question_detail_api, name='question_detail'),
     path('tests/<int:pk>/questions/<int:qid>/delete/', api.question_delete_api, name='question_delete'),
     path('tests/<int:pk>/attempts/<int:attempt_id>/grade/', api.attempt_grade_api, name='attempt_grade'),

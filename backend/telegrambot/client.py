@@ -67,10 +67,12 @@ def api_call(method, **params):
         return {'ok': False}
 
 
-def send_message(chat_id, text, reply_markup=None):
+def send_message(chat_id, text, reply_markup=None, parse_mode='HTML'):
     kwargs = {'chat_id': chat_id, 'text': text}
+    if parse_mode:
+        kwargs['parse_mode'] = parse_mode
     if reply_markup:
-        kwargs['reply_markup'] = json.dumps(reply_markup)
+        kwargs['reply_markup'] = json.dumps(reply_markup) if isinstance(reply_markup, dict) else reply_markup
     return api_call('sendMessage', **kwargs)
 
 

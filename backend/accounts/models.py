@@ -97,6 +97,7 @@ class Profile(models.Model):
                 self.level = 1
                 self.save(update_fields=['xp', 'level'])
             return False
+        old_xp = self.xp
         self.xp += amount
         leveled_up = False
         # Simple levelling threshold: 1000 XP per level
@@ -106,6 +107,15 @@ class Profile(models.Model):
             leveled_up = True
             next_level_threshold = self.level * 1000
         self.save()
+
+        # Leaderboard overtake alerts via Telegram Bot
+        if amount > 0 and self.role == 'student':
+            try:
+                from telegrambot.retention import check_and_send_overtake_alerts
+                check_and_send_overtake_alerts(self, old_xp, self.xp)
+            except Exception:
+                pass
+
         return leveled_up
 
     def add_coins(self, amount):
