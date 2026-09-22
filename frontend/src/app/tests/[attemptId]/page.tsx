@@ -428,58 +428,73 @@ export default function TestScreenPage() {
       <main className="page-shell-focus flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-24 sm:p-6 sm:pb-12">
         {/* Sticky boshqaruv paneli */}
         <Card className="sticky top-2 z-20 gap-0 border-[var(--border-card)] bg-[var(--surface-card-strong)]/95 py-0 shadow-lg backdrop-blur-xl">
-          <CardContent className="space-y-2.5 p-3.5 sm:p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
+          <CardContent className="space-y-2 p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2 sm:gap-3">
+              <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost" size="icon" className="size-8 text-muted-foreground hover:bg-rose-500/20 hover:text-rose-300"
+                  variant="ghost" size="icon" className="size-8 rounded-xl text-muted-foreground hover:bg-rose-500/20 hover:text-rose-400 shrink-0"
                   title="Imtihondan chiqish" onClick={() => setShowExitModal(true)}
                 >
                   <X className="size-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setShowJumpDrawer(!showJumpDrawer)}>
-                  <Layers className="size-3.5 text-[var(--accent-text)]" />
-                  Savol <span className="font-mono tabular-nums text-[var(--accent-text)]">{data.q_idx}</span> / {data.total_questions}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowJumpDrawer(!showJumpDrawer)}
+                  className="h-8 rounded-xl px-2.5 sm:px-3 text-xs font-semibold gap-1.5 shrink-0"
+                >
+                  <Layers className="size-3.5 text-primary" />
+                  <span>Savol <span className="font-mono tabular-nums text-primary">{data.q_idx}</span>/{data.total_questions}</span>
                 </Button>
               </div>
 
               {/* Status badges: Oflayn / Sinxronlash / Saqlandi */}
-              <div className="flex items-center gap-2">
-                {!isOnline && (
-                  <Badge
-                    variant="outline"
-                    className="animate-pulse border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 gap-1 text-[11px] font-medium"
-                    title="Internet aloqasi yo'q. Belgilangan javoblaringiz xavfsiz saqlanmoqda."
-                  >
-                    <WifiOff className="size-3.5" />
-                    <span>Oflayn</span>
-                    {pendingCount > 0 && <span className="font-mono tabular-nums">({pendingCount})</span>}
-                  </Badge>
-                )}
-                {isOnline && syncStatus === 'syncing' && (
-                  <Badge
-                    variant="outline"
-                    className="border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400 gap-1 text-[11px] font-medium"
-                  >
-                    <RefreshCw className="size-3.5 animate-spin" />
-                    <span className="hidden sm:inline">Sinxronlanmoqda...</span>
-                  </Badge>
-                )}
-                {isOnline && syncStatus === 'synced' && (
-                  <Badge
-                    variant="outline"
-                    className="border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 gap-1 text-[11px] font-medium"
-                  >
-                    <Check className="size-3.5" />
-                    <span className="hidden sm:inline">Saqlandi</span>
-                  </Badge>
-                )}
-              </div>
+              {!isOnline && (
+                <Badge
+                  variant="outline"
+                  className="animate-pulse border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 gap-1 text-[11px] font-medium h-7 px-2"
+                  title="Internet aloqasi yo'q. Belgilangan javoblaringiz xavfsiz saqlanmoqda."
+                >
+                  <WifiOff className="size-3" />
+                  <span className="hidden xs:inline">Oflayn</span>
+                  {pendingCount > 0 && <span className="font-mono tabular-nums">({pendingCount})</span>}
+                </Badge>
+              )}
+              {isOnline && syncStatus === 'syncing' && (
+                <Badge
+                  variant="outline"
+                  className="border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400 gap-1 text-[11px] font-medium h-7 px-2"
+                >
+                  <RefreshCw className="size-3 animate-spin" />
+                  <span className="hidden sm:inline">Sinxronlanmoqda...</span>
+                </Badge>
+              )}
+              {isOnline && syncStatus === 'synced' && (
+                <Badge
+                  variant="outline"
+                  className="border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 gap-1 text-[11px] font-medium h-7 px-2"
+                >
+                  <Check className="size-3" />
+                  <span className="hidden sm:inline">Saqlandi</span>
+                </Badge>
+              )}
 
               <span className="hidden font-mono text-xs text-[var(--text-faint)] xl:inline">A-D tanlash · → keyingi · ← oldingi</span>
 
-              <div className="ml-auto flex items-center gap-2 sm:ml-0">
-                <div className="flex items-center gap-0.5 rounded-xl border bg-[var(--surface-hover)] p-0.5" title="Matn o'lchami">
+              {/* O'ng tomon: Matn o'lchami va Taymer */}
+              <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+                {/* Mobilda: ixcham 1 ta harf tugmasi (bosganda A- -> A -> A+ aylanadi) */}
+                <button
+                  type="button"
+                  onClick={() => setFontKey((prev) => (prev === 'sm' ? 'md' : prev === 'md' ? 'lg' : 'sm'))}
+                  className="sm:hidden flex size-8 items-center justify-center rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)] font-mono text-xs font-bold text-muted-foreground hover:text-foreground active:scale-95 transition-all"
+                  title="Matn o'lchamini almashtirish"
+                >
+                  {fontKey === 'sm' ? 'A-' : fontKey === 'lg' ? 'A+' : 'A'}
+                </button>
+
+                {/* Desktopda: 3 ta alohida tugma */}
+                <div className="hidden sm:flex items-center gap-0.5 rounded-xl border bg-[var(--surface-hover)] p-0.5" title="Matn o'lchami">
                   {FONT_STEPS.map((s) => (
                     <button
                       key={s.key}
@@ -495,23 +510,24 @@ export default function TestScreenPage() {
                   ))}
                 </div>
 
+                {/* Taymer nishoni — chiroyli, mutanosib va sig'adigan */}
                 {typeof timeLeft === 'number' && (
-                  <Badge
-                    variant="outline"
+                  <div
                     className={cn(
-                      'gap-1.5 px-3 py-1.5 font-mono tabular-nums',
+                      'flex items-center gap-1.5 rounded-xl px-2.5 sm:px-3 h-8 text-xs font-mono font-bold tabular-nums border transition-colors shrink-0 shadow-sm',
                       timeLeft < 300
-                        ? 'animate-pulse border-rose-500/30 bg-rose-500/15 text-rose-300'
-                        : 'border-[var(--accent)]/25 bg-primary/10 text-[var(--accent-text)]',
+                        ? 'animate-pulse border-rose-500/30 bg-rose-500/15 text-rose-500'
+                        : 'border-primary/25 bg-primary/10 text-primary',
                     )}
                   >
-                    <Clock className="size-3.5" /> {formatTime(timeLeft)}
-                  </Badge>
+                    <Clock className="size-3.5" />
+                    <span>{formatTime(timeLeft)}</span>
+                  </div>
                 )}
               </div>
             </div>
 
-            <Progress value={progress} className="h-1.5" />
+            <Progress value={progress} className="h-1 sm:h-1.5" />
           </CardContent>
         </Card>
 
