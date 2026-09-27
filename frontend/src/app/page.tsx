@@ -19,6 +19,8 @@ import FaqAccordion from '@/components/landing/FaqAccordion';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
 import ProductWorkflow from '@/components/landing/ProductWorkflow';
+import WeeklyLeaderboardSection from '@/components/landing/WeeklyLeaderboardSection';
+import TelegramBannerCta from '@/components/landing/TelegramBannerCta';
 import { AuthRedirect } from '@/components/landing/AuthRedirect';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
@@ -301,6 +303,13 @@ export default async function LandingPage() {
         </RevealOnScroll>
 
         {/* =========================================================
+            HAFTALIK YETAKCHILAR REYTINGI VA SHARHLAR (Image 1)
+            ========================================================= */}
+        <RevealOnScroll>
+          <WeeklyLeaderboardSection />
+        </RevealOnScroll>
+
+        {/* =========================================================
             ISHONCH VA JONLI METRIKALAR
             ========================================================= */}
         <RevealOnScroll>
@@ -319,6 +328,13 @@ export default async function LandingPage() {
             ========================================================= */}
         <RevealOnScroll>
           <ProductWorkflow />
+        </RevealOnScroll>
+
+        {/* =========================================================
+            TELEGRAM BOT CTA BANNER (/start) (Image 2)
+            ========================================================= */}
+        <RevealOnScroll>
+          <TelegramBannerCta />
         </RevealOnScroll>
 
         {/* =========================================================
