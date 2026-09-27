@@ -1,4 +1,4 @@
-import { useAuthStore, type Profile } from './auth-store';
+import { useAuthStore, type Profile, ACCESS_KEY, REFRESH_KEY } from './auth-store';
 import { isTelegramEnv } from './telegram';
 
 /* API manzili.
@@ -37,28 +37,72 @@ function miniAppHeader(): Record<string, string> {
   return isTelegramEnv() ? { 'X-Telegram-Miniapp': '1' } : {};
 }
 
-async function refreshAccessToken(): Promise<string | null> {
-  const { refresh, setAccess, logout } = useAuthStore.getState();
-  if (!refresh) return null;
+// Bir vaqtning o'zida bir nechta so'rovlar refresh chaqirsa, ularni bitta
+// yagona Promise'ga birlashtirish (Deduplication / Mutex). Bu serverga parallel
+// so'rovlar tushishi va token rotation poygasi (race condition) tufayli
+// sessiya o'chib ketishining oldini oladi.
+let refreshPromise: Promise<string | null> | null = null;
 
-  const res = await fetch(`${API_URL}/api/auth/refresh/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh }),
-  });
-  if (!res.ok) {
-    logout();
-    return null;
+async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) {
+    return refreshPromise;
   }
-  const data = await res.json();
-  setAccess(data.access);
-  return data.access as string;
+
+  refreshPromise = (async () => {
+    try {
+      const state = useAuthStore.getState();
+      const currentRefresh = state.refresh || (typeof window !== 'undefined' ? localStorage.getItem(REFRESH_KEY) : null);
+      if (!currentRefresh) return null;
+
+      const res = await fetch(`${API_URL}/api/auth/refresh/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: currentRefresh }),
+      });
+
+      if (!res.ok) {
+        // MUHIM: Faqat server token yaroqsiz deb 401 yoki 400 qaytargandagina logout qilish kerak!
+        // 500, 502, 503, 504 (server vaqtincha restart bo'layotgan) yoki 429 xatolarida sessiyani O'CHIRMASLIK kerak!
+        if (res.status === 401 || res.status === 400) {
+          useAuthStore.getState().logout();
+        }
+        return null;
+      }
+
+      const data = await res.json();
+      if (data.access) {
+        useAuthStore.getState().setAccess(data.access);
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(ACCESS_KEY, data.access);
+            if (data.refresh) {
+              localStorage.setItem(REFRESH_KEY, data.refresh);
+              useAuthStore.setState({ refresh: data.refresh });
+            }
+          } catch { /* storage */ }
+        }
+        return data.access as string;
+      }
+      return null;
+    } catch (err) {
+      // Tarmoq uzilishi yoki reload paytida so'rov bekor bo'lishi (Abort) — sessiyani o'chirmaslik kerak!
+      console.warn('Token refresh network error:', err);
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 /** JSON API call to the Django backend, attaching the JWT and retrying once on a 401
  * after a token refresh — see accounts/api.py for why this is JWT, not the session cookie. */
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   let { access } = useAuthStore.getState();
+  if (!access && typeof window !== 'undefined') {
+    access = localStorage.getItem(ACCESS_KEY);
+  }
 
   const isFormData = typeof FormData !== 'undefined' && init.body instanceof FormData;
 
@@ -76,9 +120,12 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   let res: Response;
   try {
     res = await doFetch(access);
-    if (res.status === 401 && useAuthStore.getState().refresh) {
+    const hasRefresh = useAuthStore.getState().refresh || (typeof window !== 'undefined' && localStorage.getItem(REFRESH_KEY));
+    if (res.status === 401 && hasRefresh) {
       access = await refreshAccessToken();
-      res = await doFetch(access);
+      if (access) {
+        res = await doFetch(access);
+      }
     }
   } catch (err: unknown) {
     if (err instanceof ApiError) throw err;
@@ -99,6 +146,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
  * own Content-Type (with the multipart boundary), so this deliberately does NOT send one. */
 export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
   let { access } = useAuthStore.getState();
+  if (!access && typeof window !== 'undefined') {
+    access = localStorage.getItem(ACCESS_KEY);
+  }
 
   const doFetch = async (token: string | null) =>
     fetch(`${API_URL}${path}`, {
@@ -110,9 +160,12 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   let res: Response;
   try {
     res = await doFetch(access);
-    if (res.status === 401 && useAuthStore.getState().refresh) {
+    const hasRefresh = useAuthStore.getState().refresh || (typeof window !== 'undefined' && localStorage.getItem(REFRESH_KEY));
+    if (res.status === 401 && hasRefresh) {
       access = await refreshAccessToken();
-      res = await doFetch(access);
+      if (access) {
+        res = await doFetch(access);
+      }
     }
   } catch (err: unknown) {
     if (err instanceof ApiError) throw err;
