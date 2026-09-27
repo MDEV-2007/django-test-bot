@@ -73,10 +73,16 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       },
     });
 
-  let res = await doFetch(access);
-  if (res.status === 401 && useAuthStore.getState().refresh) {
-    access = await refreshAccessToken();
+  let res: Response;
+  try {
     res = await doFetch(access);
+    if (res.status === 401 && useAuthStore.getState().refresh) {
+      access = await refreshAccessToken();
+      res = await doFetch(access);
+    }
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(0, "Internet aloqasi yoki server bilan bog'lanishda uzilish yuz berdi. Iltimos qayta urinib ko'ring.");
   }
 
   if (!res.ok) {
@@ -101,10 +107,16 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
       body: formData,
     });
 
-  let res = await doFetch(access);
-  if (res.status === 401 && useAuthStore.getState().refresh) {
-    access = await refreshAccessToken();
+  let res: Response;
+  try {
     res = await doFetch(access);
+    if (res.status === 401 && useAuthStore.getState().refresh) {
+      access = await refreshAccessToken();
+      res = await doFetch(access);
+    }
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(0, "Fayl yuklashda tarmoq xatoligi yuz berdi. Internetni tekshirib qayta urinib ko'ring.");
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
