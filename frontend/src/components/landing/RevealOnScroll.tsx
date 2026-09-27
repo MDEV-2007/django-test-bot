@@ -1,19 +1,15 @@
 'use client';
 
-import { motion } from 'motion/react';
-import { dur, easeOut } from '@/lib/motion';
+import React from 'react';
 
-/* `Reveal` dan farqi: bu blok EKRANGA KIRGANDA jonlanadi.
-   Uzun landing sahifasida barcha bo'limni bir vaqtda animatsiya qilish ma'nosiz —
-   foydalanuvchi ularning ko'pini o'sha paytda ko'rmaydi.
-
-   Reduced-motion `MotionProvider` (MotionConfig reducedMotion="user") orqali global
-   hal qilinadi, shuning uchun bu yerda shartli render yo'q. */
+/**
+ * RevealOnScroll wrapper.
+ * Kontent dastlabki renderdayoq 100% ko'rinib turishi shart (opacity: 0 bo'lmasligi kerak),
+ * aks holda JS yuklanguncha sahifa bo'sh (oq) ko'rinib qotib qoladi.
+ */
 export default function RevealOnScroll({
   children,
-  index = 0,
   className,
-  y = 16,
 }: {
   children: React.ReactNode;
   index?: number;
@@ -21,14 +17,8 @@ export default function RevealOnScroll({
   y?: number;
 }) {
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 'some', margin: '0px 0px -40px 0px' }}
-      transition={{ duration: dur.slow, ease: easeOut, delay: index * 0.06 }}
-    >
+    <div className={`transition-opacity duration-300 ${className || ''}`}>
       {children}
-    </motion.div>
+    </div>
   );
 }

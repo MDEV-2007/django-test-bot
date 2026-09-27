@@ -183,7 +183,7 @@ export default async function LandingPage() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
             
             {/* Left: Value Proposition */}
-            <RevealOnScroll className="lg:col-span-6 text-center lg:text-left space-y-6">
+            <div className="lg:col-span-6 text-center lg:text-left space-y-6">
               
               {/* Trust Tag */}
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-50/80 px-4 py-1.5 text-xs font-bold text-emerald-800 backdrop-blur-xs">
@@ -279,12 +279,12 @@ export default async function LandingPage() {
                 ))}
               </div>
 
-            </RevealOnScroll>
+            </div>
 
             {/* Right: Interactive Quiz Simulator */}
-            <RevealOnScroll index={1} className="lg:col-span-6">
+            <div className="lg:col-span-6">
               <HeroInteractiveQuiz />
-            </RevealOnScroll>
+            </div>
 
           </div>
         </section>
