@@ -59,12 +59,15 @@ location ~ ^/(api|telegram|admin)/ {
     proxy_set_header X-Forwarded-Proto $scheme;
 
     # 502 / 504 xatolarini to'sish uchun chidamli timeout va qayta urinish
-    proxy_connect_timeout 8s;
+    proxy_connect_timeout 20s;
     proxy_send_timeout 120s;
     proxy_read_timeout 120s;
+    proxy_buffer_size 128k;
+    proxy_buffers 4 256k;
+    proxy_busy_buffers_size 256k;
     proxy_next_upstream error timeout invalid_header http_502 http_503;
     proxy_next_upstream_tries 3;
-    proxy_next_upstream_timeout 10s;
+    proxy_next_upstream_timeout 15s;
 }
 
 # Next.js statik fayllari (JS/CSS bundle) — brauzerda 1 yil keshlanadi, sahifa ochilishi bir zumda bo'ladi
@@ -88,8 +91,11 @@ location / {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
 
-    proxy_connect_timeout 6s;
-    proxy_read_timeout 60s;
+    proxy_connect_timeout 20s;
+    proxy_read_timeout 120s;
+    proxy_buffer_size 128k;
+    proxy_buffers 4 256k;
+    proxy_busy_buffers_size 256k;
     proxy_next_upstream error timeout invalid_header http_502 http_503;
-    proxy_next_upstream_tries 2;
+    proxy_next_upstream_tries 3;
 }

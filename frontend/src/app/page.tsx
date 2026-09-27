@@ -67,7 +67,13 @@ type ApiPlan = {
 async function loadPlans(): Promise<PlanCard[]> {
   try {
     const base = process.env.BACKEND_ORIGIN || 'http://127.0.0.1:8001';
-    const res = await fetch(`${base}/api/premium/public-plans/`, { next: { revalidate: 300 } });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 2500);
+    const res = await fetch(`${base}/api/premium/public-plans/`, {
+      signal: controller.signal,
+      next: { revalidate: 300 },
+    });
+    clearTimeout(timer);
     if (!res.ok) return FALLBACK_PLANS;
 
     const data: { plans: ApiPlan[] } = await res.json();
