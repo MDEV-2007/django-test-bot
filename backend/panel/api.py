@@ -1419,6 +1419,7 @@ def surveys_api(request):
     q = request.GET.get('q', '').strip()
     if q:
         surveys = surveys.filter(
+            Q(author_name__icontains=q) |
             Q(user__username__icontains=q) |
             Q(user__first_name__icontains=q) |
             Q(user__last_name__icontains=q) |
@@ -1434,21 +1435,31 @@ def surveys_api(request):
     if rating and rating.isdigit():
         surveys = surveys.filter(platform_rating=int(rating))
 
+    featured = request.GET.get('featured')
+    if featured in ('1', 'true', 'True'):
+        surveys = surveys.filter(is_featured=True)
+    elif featured in ('0', 'false', 'False'):
+        surveys = surveys.filter(is_featured=False)
+
     items = []
     for s in surveys[:150]:
-        user_full = f"{s.user.first_name} {s.user.last_name}".strip() or s.user.username
+        user_full = s.author_name or (f"{s.user.first_name} {s.user.last_name}".strip() if s.user else "") or (s.user.username if s.user else "Anonim")
         subj_name = s.test.subject.name if (s.test and getattr(s.test, 'subject', None)) else ""
         items.append({
             'id': s.id,
+            'author_name': s.author_name,
             'user_name': user_full,
-            'username': s.user.username,
-            'test_title': s.test.title if s.test else "Test",
+            'username': s.user.username if s.user else "",
+            'test_title': s.test.title if s.test else "Umumiy sharh",
             'subject_name': subj_name,
             'score': s.attempt.score if s.attempt else None,
             'correct_answers': s.attempt.correct_answers if s.attempt else None,
             'difficulty': s.difficulty,
             'platform_rating': s.platform_rating,
             'comment': s.comment,
+            'is_featured': s.is_featured,
+            'featured_badge': s.featured_badge,
+            'custom_role': s.custom_role,
             'created_at': s.created_at.strftime('%Y-%m-%d %H:%M'),
         })
 
@@ -1456,6 +1467,87 @@ def surveys_api(request):
         'count': surveys.count(),
         'items': items,
     })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def survey_toggle_featured_api(request, pk):
+    """Sharhni Landing sahifasiga chiqarish/yashirish va uning nishoni/rolini yangilash."""
+    try:
+        survey = ExamSurvey.objects.get(pk=pk)
+    except ExamSurvey.DoesNotExist:
+        return Response({'detail': "Sharh topilmadi"}, status=404)
+
+    if 'is_featured' in request.data:
+        survey.is_featured = bool(request.data['is_featured'])
+    else:
+        survey.is_featured = not survey.is_featured
+
+    if 'featured_badge' in request.data:
+        survey.featured_badge = request.data['featured_badge'].strip()
+    if 'custom_role' in request.data:
+        survey.custom_role = request.data['custom_role'].strip()
+    if 'author_name' in request.data and request.data['author_name'].strip():
+        survey.author_name = request.data['author_name'].strip()
+
+    survey.save()
+
+    return Response({
+        'id': survey.id,
+        'is_featured': survey.is_featured,
+        'featured_badge': survey.featured_badge,
+        'custom_role': survey.custom_role,
+        'author_name': survey.author_name,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def survey_create_api(request):
+    """Super admin tomonidan to'g'ridan-to'g'ri yangi sharh yaratish."""
+    author_name = request.data.get('author_name', '').strip()
+    comment = request.data.get('comment', '').strip()
+    if not comment:
+        return Response({'detail': "Sharh matni kiritilishi shart"}, status=400)
+
+    custom_role = request.data.get('custom_role', '').strip()
+    featured_badge = request.data.get('featured_badge', '').strip()
+    rating = int(request.data.get('platform_rating', 5))
+    is_featured = bool(request.data.get('is_featured', True))
+
+    survey = ExamSurvey.objects.create(
+        user=request.user,
+        author_name=author_name or f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
+        comment=comment,
+        custom_role=custom_role or "Abituriyent",
+        featured_badge=featured_badge or "A+ (92 ball)",
+        platform_rating=max(1, min(5, rating)),
+        is_featured=is_featured,
+    )
+
+    return Response({
+        'id': survey.id,
+        'author_name': survey.author_name,
+        'comment': survey.comment,
+        'custom_role': survey.custom_role,
+        'featured_badge': survey.featured_badge,
+        'platform_rating': survey.platform_rating,
+        'is_featured': survey.is_featured,
+        'created_at': survey.created_at.strftime('%Y-%m-%d %H:%M'),
+    }, status=201)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsSuperAdmin])
+def survey_delete_api(request, pk):
+    """Super admin tomonidan sharhni o'chirish."""
+    try:
+        survey = ExamSurvey.objects.get(pk=pk)
+        survey.delete()
+        return Response({'deleted': True})
+    except ExamSurvey.DoesNotExist:
+        return Response({'detail': "Sharh topilmadi"}, status=404)
+
 
 
 # ============================================================ MOCK RESULTS

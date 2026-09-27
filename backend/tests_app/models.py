@@ -700,8 +700,12 @@ class ExamSurvey(models.Model):
     ]
 
     attempt = models.ForeignKey(Attempt, on_delete=models.CASCADE, related_name='surveys', null=True, blank=True)
-    test = models.ForeignKey(TestSet, on_delete=models.CASCADE, related_name='surveys')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='exam_surveys')
+    test = models.ForeignKey(TestSet, on_delete=models.CASCADE, related_name='surveys', null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='exam_surveys', null=True, blank=True)
+    author_name = models.CharField(max_length=150, blank=True, default='', help_text="Sharh muallifi ismi")
+    custom_role = models.CharField(max_length=150, blank=True, default='', help_text="Masalan: 'Toshkent Davlat Yuridik Universiteti talabasi'")
+    featured_badge = models.CharField(max_length=100, blank=True, default='', help_text="Masalan: 'Ona tili A+ (92 ball)'")
+    is_featured = models.BooleanField(default=False, db_index=True, help_text="Landing sahifasiga chiqarilgan sharh")
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='medium')
     platform_rating = models.PositiveSmallIntegerField(default=5)  # 1-5
     comment = models.TextField(blank=True, default='')
@@ -711,5 +715,6 @@ class ExamSurvey(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.username} — {self.test.title} ({self.get_difficulty_display()}, {self.platform_rating}★)"
+        name = self.author_name or (self.user.username if self.user else "Anonim")
+        return f"{name} ({self.platform_rating}★) {'[LANDING]' if self.is_featured else ''}"
 

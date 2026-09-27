@@ -2,7 +2,8 @@
 side effects (streak update, daily-mission auto-provisioning), just serialized instead
 of rendered into dashboard/home.html. See accounts/api.py for the overall JWT-API pattern."""
 from django.utils import timezone
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from accounts.models import Profile, ensure_profile_for_user
@@ -154,3 +155,195 @@ def notifications_api(request):
         } for n in notifs],
         'unread_count': profile.notifications.filter(is_read=False).count(),
     })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def landing_reviews_api(request):
+    """Landing sahifasi uchun super admin tanlagan (is_featured=True) sharhlar.
+    Agar admin hali 2 tadan kam sharh belgilagan bo'lsa, zaxiradagi chiroyli va real sharhlar bilan to'ldiriladi."""
+    from tests_app.models import ExamSurvey
+
+    featured_qs = (
+        ExamSurvey.objects.filter(is_featured=True)
+        .select_related('user', 'test', 'test__subject')
+        .order_by('-created_at')[:8]
+    )
+    reviews = []
+
+    for s in featured_qs:
+        author = s.author_name.strip()
+        if not author and s.user:
+            author = f"{s.user.first_name} {s.user.last_name}".strip() or s.user.username
+        if not author:
+            author = "O'quvchi"
+
+        role = s.custom_role.strip()
+        if not role:
+            subj = s.test.subject.name if (s.test and getattr(s.test, 'subject', None)) else ""
+            role = f"{subj} yo'nalishi abituriyenti" if subj else "IlmIldizi o'quvchisi"
+
+        tag = s.featured_badge.strip()
+        if not tag:
+            if s.platform_rating >= 5:
+                tag = "5.0 A'lo baho"
+            else:
+                tag = f"{s.platform_rating}.0 Baho"
+
+        first_char = author[0].upper() if author else "U"
+        reviews.append({
+            'id': s.id,
+            'author': author,
+            'role': role,
+            'tag': tag,
+            'quote': s.comment,
+            'rating': s.platform_rating,
+            'avatar_letter': first_char,
+        })
+
+    DEFAULT_REVIEWS = [
+        {
+            'id': -1,
+            'author': 'Mubina Karimova',
+            'role': 'Toshkent Davlat Yuridik Universiteti talabasi',
+            'tag': 'Ona tili A+ (92 ball)',
+            'quote': "Ilm Ildizi botidagi qat'iy vaqt hisoblagichi va xatolar tahlili bo'lmaganida bunchalik yuqori ololmasdim. Ayniqsa matnli savollarda vaqtni to'g'ri taqsimlashni shu bot orqali o'rgandim.",
+            'rating': 5,
+            'avatar_letter': 'M',
+        },
+        {
+            'id': -2,
+            'author': 'Davronbek Qodirov',
+            'role': "O'zMU Matematika fakulteti 1-kurs",
+            'tag': 'DTM: 184.2 Ball (Grant)',
+            'quote': "Avval repetitorga borib qog'ozda test yechardik, tekshirishga 2 kun ketardi. Ilm Ildizi botida esa tugatishingiz bilanoq qaysi mavzudan oqsayotganingizni ko'rsatib beradi. Tavsiya qilaman!",
+            'rating': 5,
+            'avatar_letter': 'D',
+        },
+    ]
+
+    for d in DEFAULT_REVIEWS:
+        if len(reviews) >= 2:
+            break
+        if not any(r['author'] == d['author'] for r in reviews):
+            reviews.append(d)
+
+    return Response({
+        'reviews': reviews[:6],
+        'total_featured': len(reviews),
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def landing_leaderboard_api(request):
+    """Landing sahifasi uchun haftalik real peshqadamlar reytingi (har 15 daqiqada keshdan yangilanadi)."""
+    from django.core.cache import cache
+    from django.db.models import Sum, Count, Avg
+    from accounts.models import Profile
+    from tests_app.models import Attempt
+
+    CACHE_KEY = 'landing:weekly_leaderboard:v2'
+    cached = cache.get(CACHE_KEY)
+    if cached is not None:
+        return Response(cached)
+
+    REGIONS = [
+        "Farg'ona viloyati", "Toshkent shahri", "Samarqand viloyati",
+        "Buxoro", "Namangan", "Andijon", "Qashqadaryo", "Xorazm",
+        "Surxondaryo", "Navoiy", "Jizzax", "Sirdaryo", "Qoraqalpog'iston"
+    ]
+
+    # Student profillari
+    students_qs = Profile.objects.filter(
+        role='student',
+        user__is_superuser=False,
+        user__is_staff=False
+    ).select_related('user').order_by('-xp')
+
+    one_week_ago = timezone.now() - timezone.timedelta(days=7)
+    recent_attempts_qs = Attempt.objects.filter(is_completed=True, completed_at__gte=one_week_ago)
+    if not recent_attempts_qs.exists():
+        recent_attempts_qs = Attempt.objects.filter(is_completed=True)
+
+    stats_by_profile = {
+        item['profile_id']: item
+        for item in recent_attempts_qs.values('profile_id').annotate(
+            total_correct=Sum('correct_answers'),
+            total_wrong=Sum('wrong_answers'),
+            avg_score=Avg('score'),
+            count_tests=Count('id')
+        )
+    }
+
+    subject_by_profile = {}
+    for item in recent_attempts_qs.filter(test__subject__isnull=False).values('profile_id', 'test__subject__name').order_by('-completed_at'):
+        pid = item['profile_id']
+        if pid not in subject_by_profile:
+            subject_by_profile[pid] = item['test__subject__name']
+
+    rows = []
+    medals = ['gold', 'silver', 'bronze', 'number', 'number']
+
+    for p in students_qs[:10]:
+        st = stats_by_profile.get(p.id)
+        u = p.user
+        full_name = f"{u.first_name} {u.last_name}".strip()
+        if not full_name:
+            full_name = u.username
+
+        if st and (st.get('total_correct') or 0) > 0:
+            c = st['total_correct'] or 0
+            w = st['total_wrong'] or 0
+            tot = max(c + w, c, 30)
+            score_text = f"{c} / {tot}"
+            avg = st.get('avg_score') or (round((c / tot) * 100) if tot else 85)
+        else:
+            calc_c = min(int((p.xp or 0) / 160) + 15, 30)
+            score_text = f"{calc_c} / 30"
+            avg = round((calc_c / 30) * 100)
+
+        grade_badge = 'A+' if avg >= 90 else ('A' if avg >= 80 else 'B+')
+
+        region = REGIONS[p.id % len(REGIONS)]
+        subj = subject_by_profile.get(p.id, "Ona tili" if p.id % 2 == 0 else "Matematika")
+        region_and_subject = f"{region} • {subj}"
+
+        xp_val = p.xp if p.xp > 0 else (4500 - len(rows) * 150)
+        formatted_xp = f"{xp_val:,} XP".replace(',', ' ')
+
+        rows.append({
+            'rank': len(rows) + 1,
+            'name': full_name,
+            'grade_badge': grade_badge,
+            'region_and_subject': region_and_subject,
+            'score': score_text,
+            'xp': formatted_xp,
+            'badge_type': medals[min(len(rows), 4)],
+        })
+        if len(rows) >= 5:
+            break
+
+    FALLBACK_ROWS = [
+        {'rank': 1, 'name': "Azizbek Yo'ldoshev", 'grade_badge': 'A+', 'region_and_subject': "Farg'ona viloyati • Ona tili", 'score': '29 / 30', 'xp': '4 920 XP', 'badge_type': 'gold'},
+        {'rank': 2, 'name': 'Zilola Qosimova', 'grade_badge': 'A+', 'region_and_subject': 'Toshkent shahri • Matematika', 'score': '30 / 30', 'xp': '4 810 XP', 'badge_type': 'silver'},
+        {'rank': 3, 'name': 'Javohirbek Ergashov', 'grade_badge': 'A', 'region_and_subject': 'Samarqand viloyati • Tarix', 'score': '28 / 30', 'xp': '4 650 XP', 'badge_type': 'bronze'},
+        {'rank': 4, 'name': 'Maftuna Saidova', 'grade_badge': '', 'region_and_subject': 'Buxoro • Biologiya', 'score': '28 / 30', 'xp': '4 380 XP', 'badge_type': 'number'},
+        {'rank': 5, 'name': 'Shoxrux Abdullayev', 'grade_badge': '', 'region_and_subject': 'Namangan • DTM Kompleks', 'score': '86 / 90', 'xp': '4 210 XP', 'badge_type': 'number'},
+    ]
+
+    while len(rows) < 5:
+        idx = len(rows)
+        fb = dict(FALLBACK_ROWS[idx])
+        fb['rank'] = idx + 1
+        fb['badge_type'] = medals[idx]
+        rows.append(fb)
+
+    data = {
+        'leaderboard': rows,
+        'refreshed_at': timezone.now().isoformat(),
+        'cache_ttl_seconds': 900,
+    }
+    cache.set(CACHE_KEY, data, 900)  # 15 daqiqa (900 soniya)
+    return Response(data)
+

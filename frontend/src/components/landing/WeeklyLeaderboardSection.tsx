@@ -1,18 +1,37 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RotateCw, Star } from 'lucide-react';
 
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=leaderboard';
 
-const LEADERBOARD_DATA = [
+interface LeaderboardItem {
+  rank: number;
+  name: string;
+  gradeBadge?: string;
+  regionAndSubject: string;
+  score: string;
+  xp: string;
+  badgeType: 'gold' | 'silver' | 'bronze' | 'number' | string;
+}
+
+interface ReviewItem {
+  rating: number;
+  tag: string;
+  quote: string;
+  author: string;
+  role: string;
+  avatarLetter: string;
+}
+
+const FALLBACK_LEADERBOARD: LeaderboardItem[] = [
   {
     rank: 1,
     name: "Azizbek Yo'ldoshev",
     gradeBadge: 'A+',
     regionAndSubject: "Farg'ona viloyati • Ona tili",
     score: '29 / 30',
-    xp: '4,920 XP',
+    xp: '4 920 XP',
     badgeType: 'gold',
   },
   {
@@ -21,7 +40,7 @@ const LEADERBOARD_DATA = [
     gradeBadge: 'A+',
     regionAndSubject: 'Toshkent shahri • Matematika',
     score: '30 / 30',
-    xp: '4,810 XP',
+    xp: '4 810 XP',
     badgeType: 'silver',
   },
   {
@@ -30,7 +49,7 @@ const LEADERBOARD_DATA = [
     gradeBadge: 'A',
     regionAndSubject: 'Samarqand viloyati • Tarix',
     score: '28 / 30',
-    xp: '4,650 XP',
+    xp: '4 650 XP',
     badgeType: 'bronze',
   },
   {
@@ -38,7 +57,7 @@ const LEADERBOARD_DATA = [
     name: 'Maftuna Saidova',
     regionAndSubject: 'Buxoro • Biologiya',
     score: '28 / 30',
-    xp: '4,380 XP',
+    xp: '4 380 XP',
     badgeType: 'number',
   },
   {
@@ -46,12 +65,12 @@ const LEADERBOARD_DATA = [
     name: 'Shoxrux Abdullayev',
     regionAndSubject: 'Namangan • DTM Kompleks',
     score: '86 / 90',
-    xp: '4,210 XP',
+    xp: '4 210 XP',
     badgeType: 'number',
   },
 ];
 
-const REVIEWS = [
+const FALLBACK_REVIEWS: ReviewItem[] = [
   {
     rating: 5,
     tag: 'Ona tili A+ (92 ball)',
@@ -73,6 +92,58 @@ const REVIEWS = [
 ];
 
 export default function WeeklyLeaderboardSection() {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>(FALLBACK_LEADERBOARD);
+  const [reviews, setReviews] = useState<ReviewItem[]>(FALLBACK_REVIEWS);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const [lbRes, revRes] = await Promise.all([
+        fetch('/api/dashboard/landing-leaderboard/').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/dashboard/landing-reviews/').then((r) => (r.ok ? r.json() : null)),
+      ]);
+
+      if (lbRes?.leaderboard?.length) {
+        setLeaderboard(
+          lbRes.leaderboard.map((r: any) => ({
+            rank: r.rank,
+            name: r.name,
+            gradeBadge: r.grade_badge,
+            regionAndSubject: r.region_and_subject,
+            score: r.score,
+            xp: r.xp,
+            badgeType: r.badge_type,
+          }))
+        );
+      }
+
+      if (revRes?.reviews?.length) {
+        setReviews(
+          revRes.reviews.map((rv: any) => ({
+            rating: rv.rating || 5,
+            tag: rv.tag || "A'lo baho",
+            quote: rv.quote,
+            author: rv.author,
+            role: rv.role,
+            avatarLetter: rv.avatar_letter || rv.author?.[0] || 'U',
+          }))
+        );
+      }
+    } catch {
+      // Fallback ma'lumotlar saqlanadi
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    // Har 15 daqiqada yangilanadi (15 * 60 * 1000 ms)
+    const interval = setInterval(fetchData, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
   return (
     <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       {/* Header */}
@@ -93,10 +164,14 @@ export default function WeeklyLeaderboardSection() {
         </div>
 
         {/* Refresh Badge */}
-        <div className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50/80 border border-emerald-200/60 rounded-full px-3.5 py-1.5 self-start md:self-end">
-          <RotateCw className="size-3.5 text-emerald-600 animate-[spin_6s_linear_infinite]" />
+        <button
+          onClick={fetchData}
+          title="Reytingni yangilash"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/60 rounded-full px-3.5 py-1.5 self-start md:self-end transition-all active:scale-95 cursor-pointer"
+        >
+          <RotateCw className={`size-3.5 text-emerald-600 ${isRefreshing ? 'animate-spin' : 'animate-[spin_8s_linear_infinite]'}`} />
           <span>Har 15 daqiqada yangilanadi</span>
-        </div>
+        </button>
       </div>
 
       {/* Main Grid: Left = Leaderboard, Right = Reviews */}
@@ -112,7 +187,7 @@ export default function WeeklyLeaderboardSection() {
 
           {/* Table Rows */}
           <div className="divide-y divide-slate-100">
-            {LEADERBOARD_DATA.map((row) => (
+            {leaderboard.map((row) => (
               <div
                 key={row.rank}
                 className="grid grid-cols-12 items-center py-4 hover:bg-slate-50/80 rounded-2xl px-2 sm:px-3 -mx-2 sm:-mx-3 transition-colors group"
@@ -194,7 +269,7 @@ export default function WeeklyLeaderboardSection() {
 
         {/* Right Column: Review Cards */}
         <div className="lg:col-span-5 flex flex-col gap-5">
-          {REVIEWS.map((review, i) => (
+          {reviews.slice(0, 2).map((review, i) => (
             <div
               key={i}
               className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-[0_4px_25px_rgba(15,23,42,0.04)] flex flex-col justify-between transition-all hover:border-emerald-300 hover:shadow-md"
@@ -217,7 +292,7 @@ export default function WeeklyLeaderboardSection() {
 
                 {/* Quote */}
                 <p className="mt-4 text-xs sm:text-sm text-slate-700 leading-relaxed italic font-normal">
-                  {review.quote}
+                  &ldquo;{review.quote}&rdquo;
                 </p>
               </div>
 

@@ -61,6 +61,9 @@ urlpatterns = [
     path('broadcast/<int:pk>/delete/', api.broadcast_delete_api, name='broadcast_delete'),
 
     path('surveys/', api.surveys_api, name='surveys'),
+    path('surveys/<int:pk>/toggle-featured/', api.survey_toggle_featured_api, name='survey_toggle_featured'),
+    path('surveys/create/', api.survey_create_api, name='survey_create'),
+    path('surveys/<int:pk>/delete/', api.survey_delete_api, name='survey_delete'),
     path('mocks/', api.mock_attempts_api, name='mock_attempts'),
     path('mocks/live/', api.live_mock_monitor_api, name='live_mock_monitor'),
     path('mocks/<int:pk>/remind/', api.trigger_mock_reminder_api, name='trigger_mock_reminder'),
