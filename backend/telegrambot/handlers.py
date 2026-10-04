@@ -113,10 +113,11 @@ def handle_check_subscription(chat_id, tg_user, callback_query_id):
 
 
 def handle_start(chat_id, tg_user, referral_code=None):
-    # Deep link: 'landing' yoki 'pdf_gift' referal kodi emas, maxsus kirish belgisi
+    # Deep link: 'landing', 'pdf_gift' yoki 'mock_<id>' referal kodi emas, maxsus kirish belgisi
     is_landing = (referral_code == 'landing')
     is_pdf_gift = (referral_code == 'pdf_gift')
-    actual_ref = None if (is_landing or is_pdf_gift) else referral_code
+    is_mock = bool(referral_code and referral_code.startswith('mock_'))
+    actual_ref = None if (is_landing or is_pdf_gift or is_mock) else referral_code
 
     # Profil gate'dan OLDIN yaratiladi
     get_or_create_profile(tg_user, referral_code=actual_ref)
@@ -132,6 +133,33 @@ def handle_start(chat_id, tg_user, referral_code=None):
             }))
         except Exception:
             pass
+
+    if is_mock:
+        mock_id_str = referral_code.replace('mock_', '').strip()
+        from tests_app.models import TestSet
+        test = TestSet.objects.filter(pk=mock_id_str).first() if mock_id_str.isdigit() else None
+        if test:
+            subject_name = test.subject.name if test.subject else "Milliy sertifikat"
+            base_url = url.rstrip('/')
+            mock_url = f"{base_url}/tests/mock/{test.id}"
+            mock_button = {'text': "🚀 Imtihonga kirish", 'web_app': {'url': mock_url}}
+            mock_keyboard = {'inline_keyboard': [
+                [mock_button],
+                [{'text': "\U0001F393 Ilm Ildizi bosh sahifasi", 'web_app': {'url': url}}],
+            ]}
+            q_count = test.questions.count() or 45
+            welcome_text = (
+                f"🎯 <b>{test.title}</b> — Katta Jonli Mock Imtihoniga taklif qilindingiz!\n\n"
+                f"📌 <b>Fan:</b> {subject_name}\n"
+                f"⏳ <b>Berilgan vaqt:</b> {test.duration_minutes} daqiqa\n"
+                f"📝 <b>Savollar soni:</b> {q_count} ta\n"
+                f"🏆 <b>Baholash:</b> Milliy Sertifikat darajalari\n\n"
+                "👇 Imtihon topshirish uchun quyidagi tugmani bosing:"
+            )
+            send_message(chat_id, welcome_text, reply_markup=mock_keyboard)
+            return
+
+    if url.startswith('https://'):
         open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'web_app': {'url': url}}
     else:
         open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'url': url}

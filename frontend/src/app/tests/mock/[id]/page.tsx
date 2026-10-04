@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import ShareTestModal from '@/components/teacher/ShareTestModal';
 
 type MockLobbyData = {
   id: number;
@@ -143,6 +144,7 @@ export default function MockLobbyPage() {
   const [starting, setStarting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [readinessChecks, setReadinessChecks] = useState<Record<string, boolean>>({
     net: true,
     notes: false,
@@ -225,6 +227,30 @@ export default function MockLobbyPage() {
       toast.error(e instanceof Error ? e.message : 'Xatolik yuz berdi');
     } finally {
       setTogglingReminder(false);
+    }
+  }
+
+  function handleShareToTelegram() {
+    if (!data) return;
+    soundFX.click();
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ilmildizi.uz';
+    const tgBotUrl = `https://t.me/ilmildiziuz_bot?start=mock_${data.id}`;
+    const webUrl = `${origin}/tests/mock/${data.id}`;
+    const shareText = `🔥 ${data.title} katta jonli mock imtihoniga taklif qilamiz!\n` +
+      (data.subject ? `📌 Fan: ${data.subject}\n` : '') +
+      (data.duration_minutes ? `⏳ Berilgan vaqt: ${data.duration_minutes} daqiqa\n` : '') +
+      (data.questions_count ? `📝 Savollar: ${data.questions_count} ta\n` : '') +
+      `🎯 Format: Milliy Sertifikat (A+ dan C+ gacha)\n\n` +
+      `Barcha abituriyentlar bir vaqtda topshirmoqda. Siz ham bilimingizni sinab ko'ring!\n\n` +
+      `📱 Telegram orqali topshirish:\n${tgBotUrl}\n\n` +
+      `🌐 Sayt orqali topshirish:\n${webUrl}`;
+
+    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(tgBotUrl)}&text=${encodeURIComponent(shareText)}`;
+
+    if (typeof window !== 'undefined' && (window as unknown as { Telegram?: { WebApp?: { openTelegramLink: (url: string) => void } } })?.Telegram?.WebApp?.openTelegramLink) {
+      (window as unknown as { Telegram: { WebApp: { openTelegramLink: (url: string) => void } } }).Telegram.WebApp.openTelegramLink(tgShareUrl);
+    } else {
+      window.open(tgShareUrl, '_blank');
     }
   }
 
@@ -535,19 +561,30 @@ export default function MockLobbyPage() {
                           )}
                         </Button>
 
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            const url = typeof window !== 'undefined' ? window.location.href : '';
-                            const text = encodeURIComponent(`🔥 ${data.title} katta jonli mock imtihoniga kiring! Barcha abituriyentlar bir vaqtda topshirmoqda:\n${url}`);
-                            window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${text}`, '_blank');
-                          }}
-                          className="w-full rounded-2xl border-[var(--border-strong)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-xs font-semibold py-2.5 h-auto text-foreground flex items-center justify-center gap-2"
-                        >
-                          <Send className="size-3.5 text-sky-400" />
-                          <span>Do&apos;stlarni Telegram orqali taklif qilish</span>
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleShareToTelegram}
+                            className="flex-1 rounded-2xl border-[var(--border-strong)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-xs font-semibold py-2.5 h-auto text-foreground flex items-center justify-center gap-2 shadow-sm transition-all"
+                          >
+                            <Send className="size-3.5 text-sky-400" />
+                            <span>Do&apos;stlarni Telegram orqali taklif qilish</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              soundFX.click();
+                              setShareModalOpen(true);
+                            }}
+                            title="Ulashish parametrlari va havolalarni nusxalash"
+                            className="size-10 rounded-2xl shrink-0 border-[var(--border-strong)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground shadow-sm"
+                          >
+                            <Share2 className="size-4 text-sky-400" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -673,6 +710,18 @@ export default function MockLobbyPage() {
 
         </div>
       </main>
+      {data && (
+        <ShareTestModal
+          test={{
+            id: data.id,
+            title: data.title,
+            subject: data.subject,
+            duration_minutes: data.duration_minutes,
+          }}
+          isOpen={shareModalOpen}
+          onClose={() => setShareModalOpen(false)}
+        />
+      )}
     </>
   );
 }

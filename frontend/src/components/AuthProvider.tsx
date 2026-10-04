@@ -29,6 +29,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             const manualOut = typeof window !== 'undefined' && sessionStorage.getItem(TG_MANUAL_LOGOUT_KEY) === '1';
             if (wa?.initData && !manualOut) {
               await loginWithTelegram(wa.initData, wa.initDataUnsafe?.start_param);
+              const sp = wa?.initDataUnsafe?.start_param;
+              if (sp && sp.startsWith('mock_')) {
+                const mockId = sp.replace('mock_', '').trim();
+                if (mockId && typeof window !== 'undefined' && !window.location.pathname.includes(`/tests/mock/${mockId}`)) {
+                  window.location.href = `/tests/mock/${mockId}`;
+                  return;
+                }
+              }
               setAuthReady();
               return;
             }
@@ -39,6 +47,21 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         setAuthReady();
         useFeaturesStore.getState().fetchFeatures();
         return;
+      }
+
+      // Telegram ichida mavjud sessiya bilan ochilganda ham start_param orqali mockga yo'naltirish
+      if (isTelegramEnv()) {
+        try {
+          const wa = await loadTelegramSdk();
+          const sp = wa?.initDataUnsafe?.start_param;
+          if (sp && sp.startsWith('mock_')) {
+            const mockId = sp.replace('mock_', '').trim();
+            if (mockId && typeof window !== 'undefined' && !window.location.pathname.includes(`/tests/mock/${mockId}`)) {
+              window.location.href = `/tests/mock/${mockId}`;
+              return;
+            }
+          }
+        } catch { /* ignore */ }
       }
 
       // Agar access token bo'lmasa, refresh orqali yangilab olamiz

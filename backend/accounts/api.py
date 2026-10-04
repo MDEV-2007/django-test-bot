@@ -228,7 +228,7 @@ def telegram_login_api(request):
             profile.save()
 
         start_param = (request.data.get('start_param') or '').strip()
-        if start_param:
+        if start_param and not start_param.startswith(('mock_', 'arena_', 'landing', 'pdf_')):
             apply_referral(profile, start_param)
 
     tg_photo = sync_telegram_avatar(tg_id)
