@@ -767,7 +767,7 @@ class Command(BaseCommand):
         for i, item in enumerate(mcq_data, start=1):
             q = Question.objects.create(
                 body=item["body"],
-                question_type="mcq",
+                question_type="single_choice",
                 category="certificate",
                 difficulty="medium",
                 subject=subject,

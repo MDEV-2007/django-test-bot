@@ -94,12 +94,17 @@ class Question(models.Model):
     # image_based/table_based render and behave exactly like single_choice (same
     # AnswerOption-based grading) — they exist as distinct choices only so admins can tag
     # a question by what it visually contains, not because grading differs.
-    SINGLE_ANSWER_TYPES = ('single_choice', 'image_based', 'table_based')
+    SINGLE_ANSWER_TYPES = ('single_choice', 'image_based', 'table_based', 'mcq')
     # O'quvchi matn yozadigan, lekin AI'siz — aniq solishtirish bilan — baholanadigan
     # turlar. Javob AttemptAnswer.text_answer'da saqlanadi.
     TEXT_INPUT_TYPES = ('gap_fill', 'tfng')
     # AI baholaydigan turlar. `writing_task` bundan tashqari premium tekshiruv talab qiladi.
     AI_GRADED_TYPES = ('open_written', 'writing_task')
+
+    def save(self, *args, **kwargs):
+        if self.question_type == 'mcq':
+            self.question_type = 'single_choice'
+        super().save(*args, **kwargs)
 
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, related_name='questions')
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True, related_name='questions',

@@ -477,7 +477,7 @@ def _question_screen_data(attempt, q_idx, current_answer, total_questions, secon
         'question': {
             'id': question.id,
             'body': question.body,
-            'type': question.question_type,
+            'type': 'single_choice' if question.question_type == 'mcq' else question.question_type,
             'difficulty': question.difficulty,
             'image': question.image.url if question.image else (question.image_url or ''),
             'image_position': question.image_position,
@@ -487,8 +487,8 @@ def _question_screen_data(attempt, q_idx, current_answer, total_questions, secon
     if seconds_left is not None:
         data['seconds_left'] = seconds_left
 
-    qtype = question.question_type
-    if qtype in Question.SINGLE_ANSWER_TYPES:
+    qtype = 'single_choice' if question.question_type == 'mcq' else question.question_type
+    if qtype in Question.SINGLE_ANSWER_TYPES or qtype == 'single_choice':
         data['choices'] = [{'id': c.id, 'text': c.text} for c in question.choices.all()]
         data['selected_choice_id'] = current_answer.selected_choice_id
     elif qtype == 'matching':

@@ -372,7 +372,7 @@ export default function TestScreenPage() {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
       const q = data.question;
-      const isChoiceType = q.type === 'single_choice' || q.type === 'image_based' || q.type === 'table_based';
+      const isChoiceType = q.type === 'single_choice' || q.type === 'image_based' || q.type === 'table_based' || (q.type as string) === 'mcq';
 
       if (isChoiceType && data.choices) {
         const letterIdx = 'abcdef'.indexOf(e.key.toLowerCase());
@@ -592,7 +592,7 @@ export default function TestScreenPage() {
               </div>
             )}
 
-            {(q.type === 'single_choice' || q.type === 'image_based' || q.type === 'table_based') && (
+            {(q.type === 'single_choice' || q.type === 'image_based' || q.type === 'table_based' || (q.type as string) === 'mcq') && (
               <SingleChoiceQuestion data={data} onSelect={(choiceId) => submit({ choice_id: choiceId })} />
             )}
             {q.type === 'matching' && (
