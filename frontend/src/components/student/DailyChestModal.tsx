@@ -15,19 +15,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+export interface DailyChestClaimData {
+  reward_type: string;
+  reward_amount: number;
+  reward_title: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  streak_bonus_pct: number;
+  streak_at_claim?: number;
+  extra_note?: string;
+  claimed_at?: string;
+}
+
 export interface DailyChestStatus {
   can_claim: boolean;
   seconds_remaining: number;
   streak: number;
   streak_bonus_pct: number;
-  today_claim?: {
-    reward_type: string;
-    reward_amount: number;
-    reward_title: string;
-    rarity: 'common' | 'rare' | 'epic' | 'legendary';
-    streak_bonus_pct: number;
-    claimed_at: string;
-  } | null;
+  today_claim?: DailyChestClaimData | null;
 }
 
 interface DailyChestModalProps {
@@ -46,14 +50,7 @@ export default function DailyChestModal({
   const [status, setStatus] = useState<DailyChestStatus | null>(initialStatus || null);
   const [loading, setLoading] = useState(false);
   const [opening, setOpening] = useState(false);
-  const [openedReward, setOpenedReward] = useState<{
-    reward_type: string;
-    reward_amount: number;
-    reward_title: string;
-    rarity: 'common' | 'rare' | 'epic' | 'legendary';
-    streak_bonus_pct: number;
-    extra_note?: string;
-  } | null>(null);
+  const [openedReward, setOpenedReward] = useState<DailyChestClaimData | null>(null);
 
   const [countdown, setCountdown] = useState<number>(0);
 
