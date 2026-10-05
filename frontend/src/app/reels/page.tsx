@@ -8,7 +8,7 @@ import {
   ArrowLeft, Heart, Send, Volume2, VolumeX, ChevronDown, ChevronUp,
   CheckCircle2, XCircle, Sparkles, Flame, Award, Zap, BookOpen,
   Swords, Dna, Globe, MessageCircle, X, Play, Pause, CornerDownRight, Video,
-  Bookmark, Music, Plus, Check, Share2
+  Bookmark, Music, Plus, Check, Share2, AlertTriangle, Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -40,13 +40,11 @@ function formatQuestionText(text: string): FormattedQuestion {
   let t = text;
 
   // 1. Separate Roman numerals (I, II, III, IV, V...):
-  // Masalan: "toping. I.Jakeriya" yoki "JakeriyaII "Orlean""
   t = t.replace(/([a-z0-9"”»\.\:\;])\s*(I{1,3}|IV|V|VI{1,3}|IX|X)[\.\:\)]/gi, '$1\n$2. ');
   t = t.replace(/([a-z"”»])\s*(II|III|IV|V|VI|VII|VIII|IX|X)([A-Z"“«\s])/g, '$1\n$2. $3');
   t = t.replace(/(I{1,3}|IV|V|VI{1,3}|IX|X)\.\s*([A-Z"“«])/g, '$1. $2');
 
   // 2. Separate lowercase letter definitions (a, b, c, d, e, f, g...):
-  // Masalan: "AkvitaniyaaJanna" yoki "nomb1358" yoki "qo'zg'olonicAngliya"
   t = t.replace(/([a-z0-9"”»\.\,\'\’])([a-h])([A-Z0-9"“«])/g, '$1\n$2) $3');
   t = t.replace(/([a-h][\)\.])\s*([A-Z0-9"“«])/g, '$1 $2');
 
@@ -133,84 +131,13 @@ type QuizResult = {
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
-function sanitizeHookText(hook: string): string {
-  if (!hook) return '';
-  // 100 dan oshib ketgan g'ayritabiiy foizlarni (masalan: 280%) reallikka (80% ga) to'g'rilash
-  return hook.replace(/(\d+)\s*%/g, (match, digits) => {
-    const val = parseInt(digits, 10);
-    if (val > 100) {
-      const capped = val % 100;
-      return `${capped >= 20 ? capped : 80}%`;
-    }
-    return match;
-  });
-}
-
-function getSubjectTone(slug: string): PremiumIconTone {
-  switch (slug) {
-    case 'tarix': return 'rose';
-    case 'ona-tili': return 'sky';
-    case 'biologiya': return 'emerald';
-    case 'ingliz-tili': return 'purple';
-    default: return 'gold';
-  }
-}
-
-function getSubjectBadgeStyle(slug: string, name: string) {
-  const s = (slug || name || '').toLowerCase();
-  if (s.includes('ona-tili') || s.includes('ona tili') || s.includes('adabiyot')) {
-    return {
-      badge: 'bg-blue-500/30 border-blue-400/50 text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.35)]',
-      dot: 'bg-blue-400',
-    };
-  }
-  if (s.includes('tarix')) {
-    return {
-      badge: 'bg-amber-500/30 border-amber-400/50 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.35)]',
-      dot: 'bg-amber-400',
-    };
-  }
-  if (s.includes('biologiya')) {
-    return {
-      badge: 'bg-emerald-500/30 border-emerald-400/50 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.35)]',
-      dot: 'bg-emerald-400',
-    };
-  }
-  if (s.includes('ingliz') || s.includes('cefr')) {
-    return {
-      badge: 'bg-purple-500/30 border-purple-400/50 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.35)]',
-      dot: 'bg-purple-400',
-    };
-  }
-  if (s.includes('matematika') || s.includes('fizika')) {
-    return {
-      badge: 'bg-cyan-500/30 border-cyan-400/50 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.35)]',
-      dot: 'bg-cyan-400',
-    };
-  }
-  return {
-    badge: 'bg-rose-500/30 border-rose-400/50 text-rose-200 shadow-[0_0_12px_rgba(244,63,94,0.35)]',
-    dot: 'bg-rose-400',
-  };
-}
-
-function getSubjectIcon(slug: string) {
-  switch (slug) {
-    case 'tarix': return Swords;
-    case 'ona-tili': return BookOpen;
-    case 'biologiya': return Dna;
-    case 'ingliz-tili': return Globe;
-    default: return Sparkles;
-  }
-}
-
 export default function ReelsPage() {
   const router = useRouter();
   const { isEnabled } = useFeatureFlags();
 
   const [reels, setReels] = useState<ReelItem[]>([]);
   const [subjects, setSubjects] = useState<{ slug: string; name: string }[]>([]);
-  const [selectedSubject, setSelectedSubject] = useState('for_you');
+  const [selectedSubject, setSelectedSubject] = useState('all');
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -274,10 +201,10 @@ export default function ReelsPage() {
   const reelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Load reels
-  const loadReels = useCallback(async (subject = 'for_you') => {
+  const loadReels = useCallback(async (subject = 'all') => {
     setLoading(true);
     try {
-      const query = subject ? `?subject=${encodeURIComponent(subject)}` : '';
+      const query = subject && subject !== 'all' ? `?subject=${encodeURIComponent(subject)}` : '';
       const data = await apiFetch<ReelsResponse>(`/api/learning/reels/${query}`);
       if (data && data.reels && data.reels.length > 0) {
         setReels(data.reels);
@@ -294,6 +221,8 @@ export default function ReelsPage() {
         setLikeCounts(initialLikes);
         setCommentCounts(initialComments);
         setSaveCounts(initialSaves);
+      } else {
+        setReels([]);
       }
     } catch {
       toast.error("Reels yuklanmadi");
@@ -402,18 +331,6 @@ export default function ReelsPage() {
       [reelId]: (prev[reelId] || 38) + (isCurrentlySaved ? -1 : 1),
     }));
     toast.success(isCurrentlySaved ? "Xatcho'plardan olindi" : "Xatcho'plarga saqlandi! ⭐");
-  };
-
-  // Handle Follow Subject
-  const handleFollow = (slug: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (soundEnabled) soundFX.success();
-    tgHaptic('success');
-    setFollowedSubjects((prev) => {
-      const next = !prev[slug];
-      toast.success(next ? "Fan obunachilariga qo'shildingiz! 🎉" : "Obuna bekor qilindi");
-      return { ...prev, [slug]: next };
-    });
   };
 
   // Handle Quiz Answer
@@ -533,6 +450,29 @@ export default function ReelsPage() {
     }
   };
 
+  // Prepare categories list matching user UI: Barchasi, Tarix, Ona tili va adabiyot, Biologiya, Matematika, etc.
+  const displayCategories = (() => {
+    const defaultList = [
+      { slug: 'all', name: 'Barchasi' },
+      { slug: 'tarix', name: 'Tarix' },
+      { slug: 'ona-tili', name: 'Ona tili va adabiyot' },
+      { slug: 'biologiya', name: 'Biologiya' },
+      { slug: 'matematika', name: 'Matematika' },
+      { slug: 'ingliz-tili', name: 'Ingliz tili' },
+    ];
+
+    if (!subjects || subjects.length === 0) return defaultList;
+
+    const mapped = subjects
+      .filter((s) => s.slug !== 'all' && s.slug !== 'for_you')
+      .map((s) => {
+        if (s.slug === 'ona-tili') return { ...s, name: 'Ona tili va adabiyot' };
+        return s;
+      });
+
+    return [{ slug: 'all', name: 'Barchasi' }, ...mapped];
+  })();
+
   if (!isEnabled('reels')) {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center p-4">
@@ -549,341 +489,225 @@ export default function ReelsPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-3 overflow-hidden select-none font-sans min-h-0">
-        {/* Phone Frame Container - Authentic 9:16 vertical ratio for Desktop & Mobile */}
-        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[460px] md:max-w-[480px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-white/15 shadow-2xl bg-black flex flex-col my-auto transition-all">
-          {/* ── TOP FLOATING HEADER (TikTok Style Tabs) ── */}
-          <header className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-3 pt-3 pb-2 bg-gradient-to-b from-black/90 via-black/50 to-transparent backdrop-blur-[2px] sm:rounded-t-3xl">
-            {/* Minimal TikTok Subject Tabs with distinct Active pill & underline */}
-            <div className="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar pr-2 min-w-0 py-0.5">
-              {(subjects.length > 0 ? subjects : [
-                { slug: 'for_you', name: 'Siz uchun' },
-                { slug: 'all', name: 'Barchasi' },
-              ]).map((subj) => {
+      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-4 select-none font-sans min-h-0 bg-slate-100/70 dark:bg-zinc-950">
+        {/* Main Phone Card Container */}
+        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[480px] md:max-w-[500px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-slate-200/90 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-900 flex flex-col my-auto transition-all">
+          
+          {/* ── TOP HORIZONTAL CATEGORY BAR (Matches Screenshot) ── */}
+          <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-white dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800/80">
+            <div className="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+              {displayCategories.map((subj) => {
                 const isSel = selectedSubject === subj.slug;
-                const isForYou = subj.slug === 'for_you';
-                const displayName = isForYou ? 'Siz uchun' : subj.name;
                 return (
                   <button
                     key={subj.slug}
                     onClick={() => { tgHaptic('select'); setSelectedSubject(subj.slug); }}
                     className={cn(
-                      "text-xs sm:text-sm transition-all shrink-0 cursor-pointer relative",
+                      "text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full transition-all shrink-0 cursor-pointer",
                       isSel
-                        ? "bg-white/20 text-white font-black shadow-sm border border-white/35 backdrop-blur-md px-3 py-1 rounded-full after:absolute after:-bottom-1.5 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-[2.5px] after:bg-amber-400 after:rounded-full"
-                        : "text-white/70 hover:text-white hover:bg-white/10 px-2.5 py-1 rounded-full font-semibold border border-transparent"
+                        ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300"
                     )}
                   >
-                    {displayName}
+                    {subj.name}
                   </button>
                 );
               })}
             </div>
 
-            {/* Top Right: XP badge */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-black backdrop-blur-md shadow-sm">
-                <Zap className="size-3 fill-amber-400 text-amber-400" />
+            {/* Sound & XP indicators */}
+            <div className="flex items-center gap-1.5 shrink-0 pl-2">
+              <button
+                onClick={() => { tgHaptic('light'); setSoundEnabled(!soundEnabled); }}
+                className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors cursor-pointer"
+                title={soundEnabled ? "Ovozsiz qilish" : "Ovozni yoqish"}
+              >
+                {soundEnabled ? <Volume2 className="size-4 text-slate-600 dark:text-zinc-300" /> : <VolumeX className="size-4 text-rose-500" />}
+              </button>
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
+                <Zap className="size-3 fill-amber-500 text-amber-500" />
                 <span>+{todayXpEarned}</span>
               </div>
             </div>
           </header>
 
+          {/* ── CARD CONTENT / REELS LIST ── */}
           {loading ? (
-            <div className="w-full h-full flex flex-col items-center justify-center p-6 space-y-4 animate-pulse text-center">
-              <div className="size-16 rounded-full bg-white/10 mx-auto" />
-              <div className="h-6 w-48 bg-white/15 rounded-full mx-auto" />
-              <div className="h-20 w-full bg-white/10 rounded-2xl" />
-              <div className="h-32 w-full bg-white/10 rounded-2xl" />
+            <div className="w-full flex-1 flex flex-col items-center justify-center p-6 space-y-4 animate-pulse text-center">
+              <div className="size-14 rounded-full bg-slate-200 dark:bg-zinc-800 mx-auto" />
+              <div className="h-5 w-44 bg-slate-200 dark:bg-zinc-800 rounded-full mx-auto" />
+              <div className="h-20 w-full bg-slate-100 dark:bg-zinc-800/60 rounded-2xl" />
+              <div className="h-32 w-full bg-slate-100 dark:bg-zinc-800/60 rounded-2xl" />
             </div>
           ) : reels.length === 0 ? (
-            <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center space-y-3">
-              <BookOpen className="size-12 text-white/40 mb-2" />
-              <h3 className="font-bold text-lg text-white">Reels mavjud emas</h3>
-              <p className="text-xs text-white/60 max-w-xs">
-                Ushbu fan bo&apos;yicha reels tez orada qo&apos;shiladi.
+            <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center space-y-3">
+              <BookOpen className="size-12 text-slate-300 dark:text-zinc-600 mb-1" />
+              <h3 className="font-bold text-base text-slate-800 dark:text-zinc-200">Reels mavjud emas</h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-xs">
+                Ushbu fan bo&apos;yicha tezkor savollar tez orada qo&apos;shiladi.
               </p>
               <button
                 onClick={() => setSelectedSubject('all')}
-                className="px-4 py-2 rounded-full bg-white text-black text-xs font-bold shadow-lg cursor-pointer"
+                className="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-semibold shadow cursor-pointer hover:bg-blue-700 transition-colors"
               >
-                Barcha fanlarni ko&apos;rish
+                Barchasini ko&apos;rish
               </button>
             </div>
           ) : (
             <div
               ref={containerRef}
-              className="w-full h-full sm:rounded-3xl overflow-y-auto snap-y snap-mandatory relative no-scrollbar scroll-smooth bg-black"
+              className="w-full flex-1 overflow-y-auto snap-y snap-mandatory relative no-scrollbar scroll-smooth"
             >
               {reels.map((reel, index) => {
                 const isLiked = likedReels[reel.id] || false;
                 const likes = likeCounts[reel.id] || reel.likes;
                 const isSaved = savedReels[reel.id] || false;
                 const savedCount = saveCounts[reel.id] || 38;
-                const isFollowed = followedSubjects[reel.subject_slug] || false;
                 const quizAnswer = answeredQuizzes[reel.id];
-                const SubjectIcon = getSubjectIcon(reel.subject_slug);
-                const subjectTone = getSubjectTone(reel.subject_slug);
+                const hasAnswered = !!quizAnswer;
 
-                const failRate = 48 + ((reel.id * 11) % 35);
+                const failRate = Math.min(88, Math.max(35, 48 + ((reel.id * 11) % 35)));
                 const formattedQ = formatQuestionText(reel.quiz.question || reel.hook);
+                const isLongQuestion = (formattedQ.prompt?.length || 0) > 140 || formattedQ.isMatching;
 
                 return (
                   <div
                     key={reel.id}
                     ref={(el) => { reelRefs.current[index] = el; }}
                     data-index={index}
-                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between overflow-hidden text-white select-none bg-black"
-                    style={{
-                      background: reel.gradient || 'radial-gradient(ellipse at center, #182234 0%, #0d121c 70%, #06080d 100%)',
-                    }}
+                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between p-4 sm:p-5 overflow-y-auto no-scrollbar select-none bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
                   >
-                    {/* ── 1. FULLSCREEN MEDIA CANVAS (Video or Ambient Glow) ── */}
-                    {reel.media_type === 'video' && reel.video_url ? (
-                      <div className="absolute inset-0 z-0 bg-black overflow-hidden pointer-events-none">
-                        <video
-                          src={reel.video_url}
-                          className="w-full h-full object-cover opacity-95"
-                          autoPlay={currentIndex === index}
-                          loop
-                          playsInline
-                          muted={!soundEnabled}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90 pointer-events-none" />
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 size-72 rounded-full bg-white/[0.05] blur-3xl" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/85 pointer-events-none" />
-                      </div>
-                    )}
-
-                    {/* ── 2. VERTICAL ACTION BAR (TikTok Exact Stack) ── */}
-                    <div className="absolute right-2 sm:right-3 bottom-4 sm:bottom-6 z-30 flex flex-col items-center gap-3 sm:gap-3.5 select-none pointer-events-auto">
-                      {/* Creator / Subject Avatar with TikTok '+' Badge */}
-                      <div
-                        className="relative group cursor-pointer mb-0.5"
-                        onClick={(e) => handleFollow(reel.subject_slug, e)}
-                        title={`${reel.subject_name} obunasi`}
-                      >
-                        <div className="size-10 sm:size-11 rounded-full border-2 border-white/95 bg-neutral-900 overflow-hidden flex items-center justify-center shadow-xl transition-transform active:scale-90">
-                          <PremiumIcon icon={SubjectIcon} tone={subjectTone} size="xs" glow />
+                    {/* ── TOP SECTION: Warning Box & Progress Bar ── */}
+                    <div className="space-y-3 shrink-0">
+                      {/* Pale Yellow / Amber Warning Card */}
+                      <div className="bg-[#fffbeb] dark:bg-amber-950/30 border border-[#fef3c7] dark:border-amber-800/40 rounded-2xl p-3 sm:p-3.5 flex items-start gap-3 shadow-sm">
+                        <div className="size-8 rounded-full bg-[#fef3c7] dark:bg-amber-900/60 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+                          <AlertTriangle className="size-4 stroke-[2.5]" />
                         </div>
-                        <div className={cn(
-                          "absolute -bottom-1 left-1/2 -translate-x-1/2 size-4.5 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg transition-all",
-                          isFollowed ? "bg-emerald-500 scale-95" : "bg-rose-500 hover:scale-110 active:scale-90"
-                        )}>
-                          {isFollowed ? <Check className="size-2.5 stroke-[3]" /> : <Plus className="size-3 stroke-[3]" />}
+                        <div className="space-y-0.5 flex-1 min-w-0">
+                          <h4 className="text-[11px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-400">
+                            MURAKKAB SAVOL
+                          </h4>
+                          <p className="text-xs text-slate-600 dark:text-amber-200/90 leading-snug">
+                            O&apos;quvchilarning {failRate}% i bu savolda yiqilgan. Diqqat bilan belgilang!
+                          </p>
                         </div>
                       </div>
 
-                      {/* Heart (Like) Button */}
-                      <button
-                        onClick={(e) => handleLike(reel.id, e)}
-                        className="flex flex-col items-center gap-0.5 group cursor-pointer active:scale-75 transition-all"
-                        title="Yoqdi"
-                      >
-                        <div className="p-1">
-                          <Heart className={cn(
-                            "size-7 sm:size-7.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-all",
-                            isLiked ? "fill-rose-500 text-rose-500 scale-110" : "text-white fill-black/25 group-hover:scale-110"
-                          )} />
-                        </div>
-                        <span className="text-[11px] font-extrabold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                          {likes}
-                        </span>
-                      </button>
-
-                      {/* Comments Button */}
-                      <button
-                        onClick={() => { tgHaptic('light'); handleOpenComments(reel); }}
-                        className="flex flex-col items-center gap-0.5 group cursor-pointer active:scale-75 transition-all"
-                        title="Izohlar"
-                      >
-                        <div className="p-1">
-                          <MessageCircle className="size-7 sm:size-7.5 text-white fill-black/25 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-all" />
-                        </div>
-                        <span className="text-[11px] font-extrabold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                          {commentCounts[reel.id] ?? reel.comments_count ?? 0}
-                        </span>
-                      </button>
-
-                      {/* Bookmark / Save Button */}
-                      <button
-                        onClick={() => handleSave(reel.id)}
-                        className="flex flex-col items-center gap-0.5 group cursor-pointer active:scale-75 transition-all"
-                        title="Xatcho'pga saqlash"
-                      >
-                        <div className="p-1">
-                          <Bookmark className={cn(
-                            "size-7 sm:size-7.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-all",
-                            isSaved ? "fill-amber-400 text-amber-400 scale-110" : "text-white fill-black/25 group-hover:scale-110"
-                          )} />
-                        </div>
-                        <span className="text-[11px] font-extrabold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                          {savedCount}
-                        </span>
-                      </button>
-
-                      {/* Telegram Share Button */}
-                      <button
-                        onClick={() => handleShare(reel)}
-                        className="flex flex-col items-center gap-0.5 group cursor-pointer active:scale-75 transition-all"
-                        title="Telegram'ga ulashish"
-                      >
-                        <div className="p-1">
-                          <Send className="size-6.5 sm:size-7 text-white fill-black/25 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-all -translate-x-0.5" />
-                        </div>
-                        <span className="text-[11px] font-extrabold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                          {reel.shares || 93}
-                        </span>
-                      </button>
-
-                      {/* Rotating Vinyl Music Disc */}
-                      <button
-                        onClick={() => { tgHaptic('light'); setSoundEnabled(!soundEnabled); }}
-                        className="mt-1 size-8.5 sm:size-9 rounded-full bg-gradient-to-tr from-neutral-900 via-neutral-800 to-neutral-700 border-2 border-neutral-600 flex items-center justify-center animate-[spin_5s_linear_infinite] shadow-xl relative cursor-pointer active:scale-90 transition-transform"
-                        title={soundEnabled ? "Ovozsiz qilish" : "Ovozni yoqish"}
-                      >
-                        <div className="size-3.5 rounded-full bg-black border border-neutral-600 flex items-center justify-center">
-                          <Music className="size-2 text-white" />
-                        </div>
-                        {!soundEnabled && (
-                          <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center">
-                            <VolumeX className="size-3 text-rose-400" />
+                      {/* Question Counter & Progress Timer Row */}
+                      <div className="space-y-1.5 pt-0.5">
+                        <div className="flex items-center justify-between text-xs sm:text-sm font-semibold">
+                          <div className="flex items-center gap-2 text-slate-700 dark:text-zinc-300">
+                            <span className="size-2 rounded-full bg-indigo-600 shrink-0" />
+                            <span>{index + 1}-savol / {reels.length}</span>
                           </div>
-                        )}
-                      </button>
+                          <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold text-xs sm:text-sm">
+                            <Clock className="size-3.5" />
+                            <span>{hasAnswered ? "Yechildi" : `${timeLeft}s`}</span>
+                          </div>
+                        </div>
+
+                        {/* Indigo Progress Bar */}
+                        <div className="h-1.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all duration-1000 ease-linear",
+                              hasAnswered
+                                ? "bg-emerald-500"
+                                : timeLeft <= 4
+                                ? "bg-rose-500 animate-pulse"
+                                : "bg-indigo-600"
+                            )}
+                            style={{ width: `${hasAnswered ? 100 : Math.max(5, (timeLeft / 15) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    {/* ── 3. OVERLAY CONTENT: Hook, Question & Interactive Quiz Sticker ── */}
-                    {/* Natural full-width container leaving safe pr-14 for action icons */}
-                    <div className="relative z-20 flex-1 flex flex-col justify-end px-3.5 sm:px-4 pt-12 pb-3 pr-14 sm:pr-16 min-h-0 space-y-2 overflow-hidden pointer-events-none">
-                      {/* Hook Teaser Card (directly connected to question, eliminating dead space gap) */}
-                      {(() => {
-                        const cleanHook = sanitizeHookText(reel.hook);
-                        if (!cleanHook || cleanHook.trim() === reel.quiz?.question?.trim()) return null;
-                        return (
-                          <div className="mb-0.5 p-2 sm:p-2.5 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/20 shadow-lg pointer-events-auto transition-all">
-                            <div className="flex items-center gap-1.5 mb-0.5 text-[10px] font-extrabold text-amber-300 uppercase tracking-wider">
-                              <Sparkles className="size-3 text-amber-400 shrink-0" />
-                              <span>Diqqat & Fakt</span>
-                            </div>
-                            <p className="text-xs sm:text-sm font-bold text-white/95 leading-snug drop-shadow-sm">
-                              &ldquo;{cleanHook}&rdquo;
-                            </p>
-                          </div>
-                        );
-                      })()}
+                    {/* ── MIDDLE SECTION: Question & Option Cards (Smooth Adaptability for Long Questions) ── */}
+                    <div className="flex-1 flex flex-col justify-center py-2.5 sm:py-3 min-h-0 space-y-3 overflow-hidden">
+                      {/* Optional Video / Media Attachment if present */}
+                      {reel.media_type === 'video' && reel.video_url && (
+                        <div className="w-full h-36 rounded-2xl overflow-hidden bg-black shrink-0 relative">
+                          <video
+                            src={reel.video_url}
+                            className="w-full h-full object-cover"
+                            autoPlay={currentIndex === index}
+                            loop
+                            playsInline
+                            muted={!soundEnabled}
+                          />
+                        </div>
+                      )}
 
-                      {/* Question Block & Dynamic Timer */}
-                      <div className="space-y-2 pointer-events-auto">
-                        {/* Subject & Difficulty Badges + Category Color Coding */}
-                        {(() => {
-                          const badgeStyle = getSubjectBadgeStyle(reel.subject_slug, reel.subject_name);
-                          const safeFailRate = Math.min(88, Math.max(35, 48 + ((reel.id * 11) % 35)));
-                          const hasAnswered = !!quizAnswer;
-
-                          return (
-                            <div className="space-y-1.5">
-                              <div className="flex items-center justify-between gap-1.5 flex-wrap">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className={cn(
-                                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md shadow-sm",
-                                    badgeStyle.badge
-                                  )}>
-                                    <span className={cn("size-1.5 rounded-full animate-pulse", badgeStyle.dot)} />
-                                    <span>{reel.subject_name}</span>
-                                  </span>
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/30 border border-rose-400/40 text-rose-200 text-[10px] font-bold backdrop-blur-md shadow-sm">
-                                    <Flame className="size-2.5 text-rose-400 fill-rose-400 animate-pulse" />
-                                    <span>{safeFailRate}% adashgan</span>
-                                  </span>
-                                </div>
-
-                                {/* Timer Badge indicator */}
-                                <div className={cn(
-                                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold backdrop-blur-md transition-colors",
-                                  hasAnswered
-                                    ? "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
-                                    : timeLeft <= 4
-                                    ? "bg-rose-500/30 border-rose-400/50 text-rose-200 animate-pulse"
-                                    : "bg-white/15 border-white/20 text-white/90"
-                                )}>
-                                  <span>⏱️</span>
-                                  <span>{hasAnswered ? "Yechildi" : `${timeLeft}s`}</span>
-                                </div>
-                              </div>
-
-                              {/* Yupqa dinamik taymer chizig'i (Progress bar) */}
-                              <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/20 shadow-inner">
-                                <div
-                                  className={cn(
-                                    "h-full rounded-full transition-all duration-1000 ease-linear",
-                                    hasAnswered
-                                      ? "bg-emerald-400"
-                                      : timeLeft <= 4
-                                      ? "bg-gradient-to-r from-rose-500 to-red-400 animate-pulse"
-                                      : timeLeft <= 8
-                                      ? "bg-gradient-to-r from-amber-400 to-yellow-300"
-                                      : "bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400"
-                                  )}
-                                  style={{ width: hasAnswered ? '100%' : `${(timeLeft / 15) * 100}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })()}
-
-                        {formattedQ.isMatching ? (
-                          <div className="space-y-1.5 bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl p-2.5 max-h-[26vh] overflow-y-auto no-scrollbar shadow-xl">
-                            <h2 className="text-xs sm:text-sm font-bold leading-snug text-white drop-shadow-sm">
-                              {formattedQ.prompt}
-                            </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] pt-1 border-t border-white/10">
-                              <div className="space-y-0.5 bg-white/[0.04] p-1.5 rounded-lg">
-                                <span className="text-[10px] font-black text-amber-300 uppercase block mb-0.5">📌 Atamalar:</span>
-                                {formattedQ.romanItems.map((item, idx) => (
-                                  <div key={idx} className="text-white/90 font-medium leading-tight">{item}</div>
-                                ))}
-                              </div>
-                              <div className="space-y-0.5 bg-white/[0.04] p-1.5 rounded-lg">
-                                <span className="text-[10px] font-black text-sky-300 uppercase block mb-0.5">📝 Izohlar:</span>
-                                {formattedQ.letterItems.map((item, idx) => (
-                                  <div key={idx} className="text-white/80 leading-tight">{item}</div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <h2 className="text-xs sm:text-sm md:text-base font-extrabold leading-snug text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] max-h-[20vh] overflow-y-auto no-scrollbar">
+                      {/* Question Content (Auto-fits long prompts, matching questions, reading passages) */}
+                      {formattedQ.isMatching ? (
+                        <div className="space-y-2 max-h-[28vh] overflow-y-auto no-scrollbar p-3 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60">
+                          <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-snug">
                             {formattedQ.prompt}
                           </h2>
-                        )}
-                      </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1.5 border-t border-slate-200/60 dark:border-zinc-700/50">
+                            <div className="space-y-1 bg-white dark:bg-zinc-900/60 p-2 rounded-xl border border-slate-200/50 dark:border-zinc-800">
+                              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase block mb-1">
+                                📌 Atamalar:
+                              </span>
+                              {formattedQ.romanItems.map((item, idx) => (
+                                <div key={idx} className="text-slate-800 dark:text-zinc-200 font-medium leading-snug">
+                                  {item}
+                                </div>
+                              ))}
+                            </div>
+                            <div className="space-y-1 bg-white dark:bg-zinc-900/60 p-2 rounded-xl border border-slate-200/50 dark:border-zinc-800">
+                              <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase block mb-1">
+                                📝 Izohlar:
+                              </span>
+                              {formattedQ.letterItems.map((item, idx) => (
+                                <div key={idx} className="text-slate-700 dark:text-zinc-300 leading-snug">
+                                  {item}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={cn(
+                          "overflow-y-auto pr-1 no-scrollbar space-y-1",
+                          isLongQuestion ? "max-h-[26vh] sm:max-h-[30vh]" : "max-h-[22vh]"
+                        )}>
+                          <h2 className={cn(
+                            "font-extrabold text-slate-900 dark:text-white leading-snug",
+                            (formattedQ.prompt?.length || 0) > 180
+                              ? "text-xs sm:text-sm"
+                              : (formattedQ.prompt?.length || 0) > 90
+                              ? "text-sm sm:text-base"
+                              : "text-base sm:text-lg md:text-xl"
+                          )}>
+                            {formattedQ.prompt}
+                          </h2>
+                        </div>
+                      )}
 
-                      {/* ── Interactive Quiz Options (Vibrant Hover & Tap Feedback) ── */}
-                      <div className="flex flex-col gap-1.5 w-full pointer-events-auto">
+                      {/* Option Cards (A, B, C, D with Letter Badge Boxes) */}
+                      <div className="space-y-2 sm:space-y-2.5 w-full shrink-0">
                         {reel.quiz.options.map((opt, optIdx) => {
                           const cleanOpt = cleanOptionText(opt);
                           const letter = OPTION_LETTERS[optIdx] || `${optIdx + 1}`;
                           const isSelected = quizAnswer?.selectedIndex === optIdx;
                           const isCorrectOption = quizAnswer?.correctIndex === optIdx;
-                          const hasAnswered = !!quizAnswer;
 
-                          let btnClass = "bg-neutral-950/80 hover:bg-neutral-900/95 border-white/25 text-white/95 hover:border-white/60 hover:scale-[1.01] shadow-md active:scale-[0.98]";
-                          let badgeClass = "bg-white/15 text-white border-white/25 group-hover:bg-amber-400/25 group-hover:text-amber-200 group-hover:border-amber-400/50";
+                          let cardStyle = "border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-slate-300 dark:hover:border-zinc-700 text-slate-800 dark:text-zinc-100";
+                          let badgeStyle = "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300";
 
                           if (hasAnswered) {
                             if (isCorrectOption) {
-                              btnClass = "bg-emerald-600/95 border-emerald-400 text-white font-bold ring-2 ring-emerald-400/70 shadow-[0_0_20px_rgba(16,185,129,0.6)] scale-[1.01] animate-pulse";
-                              badgeClass = "bg-emerald-800 text-white border-emerald-300";
+                              cardStyle = "border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100 ring-1 ring-emerald-500 shadow-sm";
+                              badgeStyle = "bg-emerald-500 text-white";
                             } else if (isSelected && !quizAnswer.isCorrect) {
-                              btnClass = "bg-rose-600/95 border-rose-400 text-white opacity-95 ring-2 ring-rose-400/60 shadow-[0_0_20px_rgba(244,63,94,0.5)]";
-                              badgeClass = "bg-rose-800 text-white border-rose-300";
+                              cardStyle = "border-rose-500 bg-rose-50/70 dark:bg-rose-950/40 text-rose-900 dark:text-rose-100 ring-1 ring-rose-500 shadow-sm";
+                              badgeStyle = "bg-rose-500 text-white";
                             } else {
-                              btnClass = "bg-black/35 border-white/10 text-white/30 opacity-40 grayscale-[40%]";
-                              badgeClass = "bg-white/[0.05] text-white/20 border-transparent";
+                              cardStyle = "border-slate-200/50 dark:border-zinc-800/50 bg-slate-50/40 dark:bg-zinc-900/30 text-slate-400 dark:text-zinc-500 opacity-60";
+                              badgeStyle = "bg-slate-100/50 dark:bg-zinc-800/50 text-slate-400 dark:text-zinc-500";
                             }
                           }
 
@@ -893,61 +717,92 @@ export default function ReelsPage() {
                               disabled={hasAnswered}
                               onClick={() => handleAnswerQuiz(reel.id, optIdx)}
                               className={cn(
-                                "group w-full min-h-[38px] sm:min-h-[42px] py-2 px-3 rounded-xl sm:rounded-2xl text-left border flex items-center gap-2.5 sm:gap-3 backdrop-blur-md transition-all duration-200 cursor-pointer",
-                                btnClass
+                                "w-full p-3 sm:p-3.5 rounded-2xl border text-left flex items-center gap-3 sm:gap-3.5 transition-all shadow-sm cursor-pointer group active:scale-[0.99]",
+                                cardStyle
                               )}
                             >
-                              <span className={cn("size-6 sm:size-6.5 rounded-lg border flex items-center justify-center text-[11px] font-black shrink-0 transition-colors shadow-inner", badgeClass)}>
+                              <div className={cn("size-8 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 transition-colors", badgeStyle)}>
                                 {letter}
-                              </span>
-                              <span className="text-xs sm:text-[13px] font-semibold leading-tight flex-1 break-words">
+                              </div>
+                              <span className="text-xs sm:text-sm font-semibold flex-1 leading-snug break-words">
                                 {cleanOpt}
                               </span>
                               {hasAnswered && isCorrectOption && (
-                                <CheckCircle2 className="size-4.5 text-emerald-300 shrink-0 ml-auto animate-in zoom-in" />
+                                <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                               )}
                               {hasAnswered && isSelected && !quizAnswer.isCorrect && (
-                                <XCircle className="size-4.5 text-rose-300 shrink-0 ml-auto animate-in zoom-in" />
+                                <XCircle className="size-5 text-rose-600 dark:text-rose-400 shrink-0" />
                               )}
                             </button>
                           );
                         })}
                       </div>
 
-                      {/* ── Explanation Drawer (Animated on Answer) ── */}
+                      {/* Explanation Drawer when Answered */}
                       {quizAnswer && (
-                        <div className="p-2 sm:p-2.5 rounded-xl bg-black/85 border border-white/20 backdrop-blur-xl space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-xl pointer-events-auto">
+                        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/60 space-y-1.5 animate-in fade-in duration-300 shrink-0">
                           <div className="flex items-center justify-between text-xs font-bold">
-                            <span className={quizAnswer.isCorrect ? "text-emerald-400 flex items-center gap-1" : "text-rose-400 flex items-center gap-1"}>
+                            <span className={quizAnswer.isCorrect ? "text-emerald-600 dark:text-emerald-400 flex items-center gap-1" : "text-rose-600 dark:text-rose-400 flex items-center gap-1"}>
                               {quizAnswer.isCorrect ? "✅ To'g'ri javob! (+5 XP)" : "❌ Noto'g'ri javob"}
                             </span>
                             <button
                               onClick={() => { tgHaptic('light'); scrollToReel(index + 1); }}
                               disabled={index === reels.length - 1}
-                              className="text-[11px] text-amber-300 hover:text-amber-200 flex items-center gap-1 font-bold cursor-pointer disabled:opacity-30"
+                              className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-bold cursor-pointer disabled:opacity-30"
                             >
-                              Keyingisi &darr;
+                              Keyingi savol &darr;
                             </button>
                           </div>
-                          <p className="text-[11px] text-white/90 leading-snug font-normal">
-                            💡 <span className="font-semibold text-white">{quizAnswer.explanation}</span>
+                          <p className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed">
+                            💡 <span className="font-medium">{quizAnswer.explanation}</span>
                           </p>
                         </div>
                       )}
+                    </div>
 
-                      {/* ── Bottom Author Handle & Music Marquee ── */}
-                      <div className="pt-0.5 flex items-center justify-between text-[11px] text-white/80 shrink-0 select-none pointer-events-auto">
-                        <div className="flex items-center gap-1.5 min-w-0 font-bold truncate">
-                          <span className="text-white drop-shadow-sm font-extrabold">@ilm_ildizi</span>
-                          <span className="text-white/40">•</span>
-                          <span className="text-white/70 text-[10px] font-normal truncate">
-                            🎵 Asl audio — {reel.subject_name} Reels
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-mono text-white/40 shrink-0">
-                          {index + 1}/{reels.length}
-                        </span>
+                    {/* ── BOTTOM ENGAGEMENT BAR (Matches Screenshot) ── */}
+                    <div className="pt-3 pb-1 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-slate-500 dark:text-zinc-400 text-xs sm:text-sm font-medium shrink-0">
+                      <div className="flex items-center gap-4 sm:gap-5">
+                        {/* Heart / Like */}
+                        <button
+                          onClick={(e) => handleLike(reel.id, e)}
+                          className="flex items-center gap-1.5 hover:text-rose-500 transition-colors cursor-pointer group"
+                          title="Yoqdi"
+                        >
+                          <Heart className={cn("size-4.5 transition-all", isLiked ? "fill-rose-500 text-rose-500 scale-110" : "group-hover:scale-110")} />
+                          <span className="font-semibold text-xs sm:text-sm">{likes}</span>
+                        </button>
+
+                        {/* Comment */}
+                        <button
+                          onClick={() => { tgHaptic('light'); handleOpenComments(reel); }}
+                          className="flex items-center gap-1.5 hover:text-blue-500 transition-colors cursor-pointer group"
+                          title="Izohlar"
+                        >
+                          <MessageCircle className="size-4.5 group-hover:scale-110 transition-all" />
+                          <span className="font-semibold text-xs sm:text-sm">{commentCounts[reel.id] ?? reel.comments_count ?? 0}</span>
+                        </button>
+
+                        {/* Bookmark / Save */}
+                        <button
+                          onClick={() => handleSave(reel.id)}
+                          className="flex items-center gap-1.5 hover:text-amber-500 transition-colors cursor-pointer group"
+                          title="Xatcho'pga saqlash"
+                        >
+                          <Bookmark className={cn("size-4.5 transition-all", isSaved ? "fill-amber-500 text-amber-500 scale-110" : "group-hover:scale-110")} />
+                          <span className="font-semibold text-xs sm:text-sm">{savedCount}</span>
+                        </button>
                       </div>
+
+                      {/* Share / Ulashish */}
+                      <button
+                        onClick={() => handleShare(reel)}
+                        className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-pointer font-semibold group"
+                        title="Telegram'ga ulashish"
+                      >
+                        <Share2 className="size-4.5 group-hover:scale-110 transition-all" />
+                        <span>Ulashish</span>
+                      </button>
                     </div>
                   </div>
                 );
@@ -968,22 +823,22 @@ export default function ReelsPage() {
         ))}
 
         {/* Desktop Navigation Floating Dock beside the card */}
-        <div className="hidden lg:flex flex-col items-center gap-2 fixed right-4 xl:right-10 top-1/2 -translate-y-1/2 z-30 bg-zinc-950/80 backdrop-blur-xl border border-white/15 p-2 rounded-2xl shadow-2xl">
+        <div className="hidden lg:flex flex-col items-center gap-2 fixed right-4 xl:right-10 top-1/2 -translate-y-1/2 z-30 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-slate-200 dark:border-zinc-800 p-2 rounded-2xl shadow-xl">
           <button
             onClick={() => scrollToReel(currentIndex - 1)}
             disabled={currentIndex === 0}
-            className="size-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center disabled:opacity-20 shadow-md transition-all active:scale-95 cursor-pointer"
+            className="size-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 flex items-center justify-center disabled:opacity-20 shadow-sm transition-all active:scale-95 cursor-pointer"
             title="Oldingi savol (Klaviatura ↑)"
           >
             <ChevronUp className="size-5" />
           </button>
-          <div className="text-[11px] font-mono font-bold text-white/60 py-0.5">
+          <div className="text-[11px] font-mono font-bold text-slate-500 dark:text-zinc-400 py-0.5">
             {currentIndex + 1} / {reels.length}
           </div>
           <button
             onClick={() => scrollToReel(currentIndex + 1)}
             disabled={currentIndex >= reels.length - 1}
-            className="size-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center disabled:opacity-20 shadow-md transition-all active:scale-95 cursor-pointer"
+            className="size-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 flex items-center justify-center disabled:opacity-20 shadow-sm transition-all active:scale-95 cursor-pointer"
             title="Keyingi savol (Klaviatura ↓)"
           >
             <ChevronDown className="size-5" />
@@ -993,27 +848,27 @@ export default function ReelsPage() {
         {/* ── COMMENTS BOTTOM DRAWER MODAL ── */}
         {activeCommentReel && (
           <div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setActiveCommentReel(null)}
           >
             <div
-              className="w-full sm:max-w-lg bg-zinc-950/95 border-t sm:border border-white/20 rounded-t-[2.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col h-[75vh] sm:h-[580px] shadow-2xl relative text-white animate-in slide-in-from-bottom duration-200"
+              className="w-full sm:max-w-lg bg-white dark:bg-zinc-950 border-t sm:border border-slate-200 dark:border-zinc-800 rounded-t-[2.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col h-[75vh] sm:h-[580px] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Drag handle for mobile */}
-              <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-3 sm:hidden" />
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mb-3 sm:hidden" />
 
               {/* Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-white/15">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5 text-emerald-400" />
-                  <h3 className="font-extrabold text-base text-white">
+                  <MessageCircle className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
                     Izohlar ({commentCounts[activeCommentReel.id] ?? comments.length})
                   </h3>
                 </div>
                 <button
                   onClick={() => setActiveCommentReel(null)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all active:scale-95"
+                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center text-slate-600 dark:text-zinc-400 transition-all active:scale-95 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1025,44 +880,44 @@ export default function ReelsPage() {
                   <div className="space-y-3 py-6 animate-pulse">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex gap-3 items-start">
-                        <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />
+                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-zinc-800 shrink-0" />
                         <div className="space-y-1.5 flex-1">
-                          <div className="h-3 w-28 bg-white/15 rounded" />
-                          <div className="h-4 w-full bg-white/10 rounded" />
+                          <div className="h-3 w-28 bg-slate-200 dark:bg-zinc-800 rounded" />
+                          <div className="h-4 w-full bg-slate-100 dark:bg-zinc-800/60 rounded" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : comments.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-white/60">
-                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/40 mb-1">
+                  <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-400 dark:text-zinc-500">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-400 dark:text-zinc-500 mb-1">
                       <MessageCircle className="w-6 h-6" />
                     </div>
-                    <p className="font-semibold text-sm text-white/90">Hozircha izohlar yo&apos;q</p>
-                    <p className="text-xs text-white/50">Birinchi bo&apos;lib fikr bildiring va muhokamani boshlang!</p>
+                    <p className="font-semibold text-sm text-slate-700 dark:text-zinc-300">Hozircha izohlar yo&apos;q</p>
+                    <p className="text-xs text-slate-400 dark:text-zinc-500">Birinchi bo&apos;lib fikr bildiring va muhokamani boshlang!</p>
                   </div>
                 ) : (
                   comments.map((c) => {
                     const isReply = Boolean(c.parent_id);
                     return (
-                      <div key={c.id} className={cn("flex gap-2.5 items-start group", isReply && "ml-5 pl-2 border-l-2 border-emerald-500/40")}>
-                        {isReply && <CornerDownRight className="w-3 h-3 text-emerald-400 mt-2 shrink-0" />}
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-extrabold text-[10px] shrink-0 shadow-md overflow-hidden mt-0.5">
+                      <div key={c.id} className={cn("flex gap-2.5 items-start group", isReply && "ml-5 pl-2 border-l-2 border-indigo-500/40")}>
+                        {isReply && <CornerDownRight className="w-3 h-3 text-indigo-500 mt-2 shrink-0" />}
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 flex items-center justify-center text-white font-extrabold text-[10px] shrink-0 shadow-sm overflow-hidden mt-0.5">
                           {c.user_avatar ? (
                             <img src={c.user_avatar} alt={c.user_name} className="w-full h-full object-cover" />
                           ) : (
                             c.user_name.charAt(0).toUpperCase()
                           )}
                         </div>
-                        <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl p-2.5 space-y-1">
+                        <div className="flex-1 bg-slate-50 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-2.5 space-y-1">
                           <div className="flex items-center justify-between text-xs">
                             <div className="flex items-center gap-1 min-w-0">
-                              <span className="font-bold text-white/90 truncate">{c.user_name}</span>
+                              <span className="font-bold text-slate-900 dark:text-zinc-100 truncate">{c.user_name}</span>
                               <VerifiedBadge role={c.role} isSuperadmin={c.is_superadmin} isTeacher={c.is_teacher} size="xs" />
                             </div>
-                            <span className="text-[10px] text-white/40 font-mono shrink-0">{c.created_at}</span>
+                            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono shrink-0">{c.created_at}</span>
                           </div>
-                          <p className="text-xs text-white/80 leading-relaxed break-words">{c.text}</p>
+                          <p className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed break-words">{c.text}</p>
                           <div className="pt-0.5">
                             <button
                               type="button"
@@ -1070,7 +925,7 @@ export default function ReelsPage() {
                                 setReplyingTo({ id: c.id, userName: c.user_name });
                                 setNewCommentText(`@${c.user_name} `);
                               }}
-                              className="text-[10px] font-semibold text-emerald-400 hover:underline"
+                              className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
                             >
                               Javob berish
                             </button>
@@ -1083,14 +938,14 @@ export default function ReelsPage() {
               </div>
 
               {/* Quick Meme Stickers */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 border-t border-white/10">
-                <span className="text-[10px] text-white/50 font-bold shrink-0">Stiker:</span>
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 border-t border-slate-100 dark:border-zinc-800">
+                <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold shrink-0">Stiker:</span>
                 {REELS_STUDY_MEMES.map((m, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => setNewCommentText((prev) => (prev ? prev + ' ' : '') + m.text)}
-                    className="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 shrink-0 transition-colors"
+                    className="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 shrink-0 transition-colors cursor-pointer"
                   >
                     {m.label}
                   </button>
@@ -1099,12 +954,12 @@ export default function ReelsPage() {
 
               {/* Replying To Banner */}
               {replyingTo && (
-                <div className="flex items-center justify-between text-xs px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-300">
+                <div className="flex items-center justify-between text-xs px-3 py-1 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-indigo-700 dark:text-indigo-300">
                   <span className="truncate">💬 <b>@{replyingTo.userName}</b> ga javob berilmoqda</span>
                   <button
                     type="button"
                     onClick={() => setReplyingTo(null)}
-                    className="text-white/60 hover:text-white ml-2"
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-white ml-2 cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1119,12 +974,12 @@ export default function ReelsPage() {
                   onChange={(e) => setNewCommentText(e.target.value)}
                   placeholder="Fikr, javob yoki stiker yozing..."
                   maxLength={500}
-                  className="flex-1 bg-white/10 border border-white/20 focus:border-emerald-400/80 rounded-full px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-white/40 focus:outline-none transition-all"
+                  className="flex-1 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:border-indigo-500 rounded-full px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none transition-all"
                 />
                 <button
                   type="submit"
                   disabled={!newCommentText.trim() || submittingComment}
-                  className="px-4 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-extrabold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all shrink-0"
+                  className="px-4 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   <span>Yuborish</span>
                   <Send className="w-3.5 h-3.5" />
