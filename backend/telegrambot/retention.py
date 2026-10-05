@@ -163,3 +163,80 @@ def send_streak_saver_reminders(limit: int = 500) -> dict:
         'sent': sent_count,
         'failed': fail_count,
     }
+
+
+def send_daily_chest_reminders(limit: int = 500) -> dict:
+    """Kundalik sirli sandiqni (Variable Reward) hali ochmagan o'quvchilarga
+    Telegram orqali eslatma va qiziqish uyg'otuvchi xabar yuboradi.
+    """
+    from accounts.models import Profile
+    from core.models import DailyChestClaim
+
+    today = timezone.localdate()
+    claimed_ids = DailyChestClaim.objects.filter(date=today).values_list('profile_id', flat=True)
+
+    candidates = (
+        Profile.objects.filter(
+            telegram_id__isnull=False,
+            role='student',
+        )
+        .exclude(id__in=claimed_ids)
+        .select_related('user')[:limit]
+    )
+
+    site_url = getattr(settings, 'NEXT_PUBLIC_SITE_URL', 'https://ilmildizi.uz')
+    sent_count = 0
+    fail_count = 0
+
+    reply_markup = {
+        "inline_keyboard": [
+            [
+                {
+                    "text": "🎁 Sirli Sandiqni Ochish",
+                    "web_app": {"url": f"{site_url}/dashboard?open_chest=1"},
+                }
+            ],
+            [
+                {
+                    "text": "⚡️ 15 daqiqalik Test Ishlash",
+                    "web_app": {"url": f"{site_url}/tests"},
+                }
+            ]
+        ]
+    }
+
+    for profile in candidates:
+        cache_key = f"retention:chest_reminder:{profile.id}:{today}"
+        if cache.get(cache_key):
+            continue
+
+        name = profile.user.first_name or profile.user.username
+        streak = profile.streak or 0
+        streak_note = f" (🔥 {streak} kunlik olov bonusi bilan!)" if streak > 0 else ""
+
+        text = (
+            f"Salom, <b>{name}</b>! 🎁\n\n"
+            f"✨ <b>Bugungi 'Kundalik Sirli Sandig'ingiz' tayyor!</b>{streak_note}\n\n"
+            f"Sandiq ichida nima borligini bilasizmi? <b>500 XP</b>, tangalar, noyob unvonlar "
+            f"yoki olovingizni saqlab qoluvchi <b>Streak Freeze</b> chiqishi mumkin!\n\n"
+            f"Bugungi omadingizni sinab ko'ring va mukofotingizni oling 👇"
+        )
+
+        res = send_message(
+            chat_id=profile.telegram_id,
+            text=text,
+            reply_markup=reply_markup,
+            parse_mode='HTML',
+        )
+
+        if res.get('ok'):
+            sent_count += 1
+            cache.set(cache_key, '1', 86400)
+        else:
+            fail_count += 1
+
+    return {
+        'total_candidates': len(candidates),
+        'sent': sent_count,
+        'failed': fail_count,
+    }

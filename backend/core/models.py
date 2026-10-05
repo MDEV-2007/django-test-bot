@@ -100,3 +100,32 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.profile.user.username}: {self.title} (Read: {self.is_read})"
+
+
+class DailyChestClaim(models.Model):
+    """Foydalanuvchining kunlik sirli sandiq (Variable Reward) ochish tarixi.
+    (profile, date) cheklovi tufayli bir kunda faqat bir marta ochish mumkin.
+    """
+    RARITY_CHOICES = [
+        ('common', 'Oddiy'),
+        ('rare', 'Noyob'),
+        ('epic', 'Epik'),
+        ('legendary', 'Afsonaviy'),
+    ]
+
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='daily_chest_claims')
+    date = models.DateField(default=timezone.localdate, db_index=True)
+    reward_type = models.CharField(max_length=50)  # 'coins', 'xp', 'streak_freeze', 'legendary_bundle'
+    reward_amount = models.PositiveIntegerField(default=0)
+    reward_title = models.CharField(max_length=150, blank=True)
+    rarity = models.CharField(max_length=20, choices=RARITY_CHOICES, default='common')
+    streak_at_claim = models.PositiveIntegerField(default=0)
+    streak_bonus_pct = models.PositiveIntegerField(default=0)
+    claimed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-claimed_at']
+        unique_together = ('profile', 'date')
+
+    def __str__(self):
+        return f"{self.profile.user.username} claimed {self.reward_title} ({self.rarity}) on {self.date}"

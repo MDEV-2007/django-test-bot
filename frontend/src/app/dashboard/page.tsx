@@ -21,6 +21,7 @@ import {
   Target,
   ArrowRight,
   TrendingUp,
+  Gift,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
@@ -28,6 +29,7 @@ import { apiFetch } from '@/lib/api-client';
 import { getRankInfo } from '@/lib/rank';
 import PresenceRow from '@/components/student/PresenceRow';
 import Celebration from '@/components/student/Celebration';
+import DailyChestModal, { DailyChestStatus } from '@/components/student/DailyChestModal';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
 import {
   HeroFocusBanner,
@@ -39,6 +41,7 @@ import PomodoroTimerCard from '@/components/dashboard/PomodoroTimerCard';
 import PremiumIcon from '@/components/ui/premium-icon';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -92,6 +95,7 @@ type DashboardData = {
   suggested_topic: { id: number; title: string; description: string } | null;
   selected_subject: { id: number; name: string } | null;
   unread_notifications_count?: number;
+  daily_chest?: DailyChestStatus;
 };
 
 type LeaderboardRow = {
@@ -165,6 +169,23 @@ export default function DashboardPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
+
+  // Daily Mystery Chest (Variable Reward)
+  const [chestModalOpen, setChestModalOpen] = useState(false);
+  const [chestStatus, setChestStatus] = useState<DailyChestStatus | null>(null);
+
+  useEffect(() => {
+    if (data?.daily_chest) {
+      setChestStatus(data.daily_chest);
+    }
+    // Telegram bildirishnomasidan (?open_chest=1) kirganda avtomatik ochiladi
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('open_chest') === '1') {
+        setChestModalOpen(true);
+      }
+    }
+  }, [data]);
 
   useEffect(() => {
     if (data && typeof data.unread_notifications_count === 'number') {
@@ -571,8 +592,8 @@ export default function DashboardPage() {
                           isCurrentUser
                             ? 'bg-blue-50 border-blue-300 shadow-[0_2px_8px_rgba(37,99,235,0.1)]'
                             : idx < 3
-                            ? rankBg[idx]
-                            : 'border-slate-200/70 bg-white hover:bg-slate-50/80'
+                              ? rankBg[idx]
+                              : 'border-slate-200/70 bg-white hover:bg-slate-50/80'
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -633,7 +654,74 @@ export default function DashboardPage() {
             theme="light"
           />
 
-          {/* 2. BONUS QUEST BOX (PURE WHITE + ENERGETIC ACCENTS) */}
+          {/* 2. KUNDALIK SIRLI SANDIQ (VARIABLE REWARD WIDGET) */}
+          <div
+            onClick={() => setChestModalOpen(true)}
+            className={cn(
+              "group relative overflow-hidden rounded-3xl p-5 border transition-all duration-300 cursor-pointer select-none",
+              chestStatus?.can_claim !== false
+                ? "border-amber-400/90 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-500/15 shadow-[0_4px_25px_rgba(245,158,11,0.15)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.25)] hover:scale-[1.01]"
+                : "border-slate-200/90 bg-white hover:border-slate-300 shadow-[0_4px_20px_rgba(15,23,42,0.04)]"
+            )}
+          >
+            {/* Shimmer light effect if claimable */}
+            {chestStatus?.can_claim !== false && (
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+            )}
+
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className={cn(
+                  "size-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110",
+                  chestStatus?.can_claim !== false
+                    ? "bg-gradient-to-br from-amber-400 to-yellow-500 border-amber-300 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-bounce"
+                    : "bg-slate-100 border-slate-200 text-slate-500"
+                )}>
+                  <Gift className="size-6" />
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Badge className={cn(
+                      "text-[9px] font-black px-2 py-0.2 uppercase tracking-wider",
+                      chestStatus?.can_claim !== false
+                        ? "bg-amber-100 text-amber-800 border-amber-300"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
+                    )}>
+                      {chestStatus?.can_claim !== false ? "🎁 Ochishga tayyor!" : "✅ Bugun ochildi"}
+                    </Badge>
+                    {chestStatus?.streak_bonus_pct ? (
+                      <span className="text-[10px] font-bold text-orange-600">
+                        +{chestStatus.streak_bonus_pct}% bonus
+                      </span>
+                    ) : null}
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-snug truncate">
+                    Kundalik Sirli Sandiq
+                  </h4>
+                  <p className="text-[11px] text-slate-500 truncate">
+                    {chestStatus?.can_claim !== false
+                      ? "500 XP gacha, tangalar yoki Freeze!"
+                      : "Ertaga yangi kutilmagan mukofot kutmoqda"}
+                  </p>
+                </div>
+              </div>
+              <div className="shrink-0">
+                <Button
+                  size="sm"
+                  className={cn(
+                    "rounded-xl text-xs font-black shadow-sm",
+                    chestStatus?.can_claim !== false
+                      ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:from-amber-400 hover:to-yellow-400"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  )}
+                >
+                  {chestStatus?.can_claim !== false ? "Ochish" : "Ko'rish"}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. BONUS QUEST BOX (PURE WHITE + ENERGETIC ACCENTS) */}
           <Card className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_25px_rgba(15,23,42,0.05)] space-y-3">
             <div className="flex items-center gap-3">
               <div className="size-12 shrink-0 rounded-2xl overflow-hidden shadow-sm border border-slate-200 ring-2 ring-orange-500/10">
@@ -834,6 +922,16 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+
+      {/* Daily Mystery Chest Modal */}
+      <DailyChestModal
+        isOpen={chestModalOpen}
+        onClose={() => setChestModalOpen(false)}
+        initialStatus={chestStatus}
+        onClaimSuccess={(newStats) => {
+          setChestStatus((prev) => prev ? { ...prev, can_claim: false } : null);
+        }}
+      />
     </ModernAppLayout>
   );
 }

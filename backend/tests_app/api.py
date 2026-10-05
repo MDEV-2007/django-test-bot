@@ -701,6 +701,15 @@ def finish_api(request, attempt_id):
     profile.add_coins(coins_awarded)
     profile.update_streak()
 
+    # O'zgaruvchan Mukofot (Variable Reward): 25% omadli test bonusi
+    lucky_bonus = None
+    if not profile.is_privileged:
+        try:
+            from core.rewards import roll_test_lucky_bonus
+            lucky_bonus = roll_test_lucky_bonus(profile, correct, xp_awarded, coins_awarded)
+        except Exception as e:
+            logger.warning(f"Failed to roll test lucky bonus: {e}")
+
     subject = attempt.test.subject if attempt.test else None
     if subject and xp_awarded:
         from .models import SubjectScore
@@ -778,7 +787,17 @@ def finish_api(request, attempt_id):
 
     _dispatch_ai_feedback(attempt.id)
 
-    return Response({'attempt_id': attempt.id, 'score': score, 'correct': correct, 'wrong': wrong, 'skipped': skipped})
+    return Response({
+        'attempt_id': attempt.id,
+        'score': score,
+        'correct': correct,
+        'wrong': wrong,
+        'skipped': skipped,
+        'xp_awarded': xp_awarded,
+        'coins_awarded': coins_awarded,
+        'streak': profile.streak,
+        'lucky_bonus': lucky_bonus,
+    })
 
 
 @api_view(['GET'])
@@ -835,6 +854,10 @@ def feedback_api(request, attempt_id):
         'ai_motivation': ai_feedback.ai_motivation,
         'detailed_mistakes': ai_feedback.detailed_mistakes,
         'review_items': review_items,
+        'daily_chest': (lambda p: {
+            'can_claim': not p.daily_chest_claims.filter(date=timezone.localdate()).exists(),
+            'streak': p.streak,
+        })(request.user.profile),
     })
 
 

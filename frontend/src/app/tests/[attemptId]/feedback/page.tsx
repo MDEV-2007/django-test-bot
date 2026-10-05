@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
   AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
-  CheckCircle2, HelpCircle, Trophy,
+  CheckCircle2, HelpCircle, Trophy, Gift,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
@@ -15,6 +15,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import CertificateModal from '@/components/student/CertificateModal';
 import ShareToCommunityModal from '@/components/student/ShareToCommunityModal';
+import DailyChestModal from '@/components/student/DailyChestModal';
 import ExamSurveyCard from '@/components/student/ExamSurveyCard';
 import { WritingReviewCard } from '@/components/cefr/WritingTask';
 import type { WritingReview } from '@/lib/cefr-types';
@@ -53,6 +54,7 @@ type FeedbackData = {
   roadmap?: RoadmapStep[];
   detailed_mistakes?: Mistake[];
   review_items?: ReviewItem[];
+  daily_chest?: { can_claim: boolean; streak: number };
 };
 
 /* Natijani Telegram Story'ga qo'yish.
@@ -112,6 +114,7 @@ export default function FeedbackPage() {
   const [mistakesError, setMistakesError] = useState<string | null>(null);
   const [certOpen, setCertOpen] = useState(false);
   const [communityModalOpen, setCommunityModalOpen] = useState(false);
+  const [chestModalOpen, setChestModalOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -447,6 +450,38 @@ export default function FeedbackPage() {
           );
         })()}
 
+        {/* Kundalik Sirli Sandiq (Variable Reward) Chaqiruvi */}
+        {data.daily_chest?.can_claim && (
+          <div
+            onClick={() => setChestModalOpen(true)}
+            className="group relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-orange-500/15 p-5 shadow-[0_4px_25px_rgba(245,158,11,0.15)] cursor-pointer select-none transition-all hover:scale-[1.01]"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="size-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-0.5 shadow-lg shadow-amber-500/30 flex items-center justify-center shrink-0">
+                  <div className="size-full rounded-[14px] bg-slate-950 flex items-center justify-center">
+                    <Gift className="size-7 text-amber-300 animate-bounce" />
+                  </div>
+                </div>
+                <div>
+                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px] font-black uppercase mb-1">
+                    KUNDALIK SOVRIN KUTMOQDA! 🎁
+                  </Badge>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                    Bugungi Sirli Sandiqni Ochdingizmi?
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                    Sinovni muvaffaqiyatli yakunladingiz! Endi kutilmagan sirli mukofotingizni oling (500 XP gacha, tangalar, Streak Freeze).
+                  </p>
+                </div>
+              </div>
+              <Button className="h-11 px-6 font-black rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:from-amber-400 hover:to-yellow-400 shadow-md shrink-0">
+                <Sparkles className="size-4 mr-2" /> Sandiqni Ochish
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Imtihon taassuroti / Tezkor so'rovnoma */}
         <ExamSurveyCard attemptId={attemptId} testTitle={data?.attempt?.test_title} />
 
@@ -692,6 +727,16 @@ export default function FeedbackPage() {
               correctCount={a.correct_answers || 0}
               totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
               postType={a.score >= 60 ? 'certificate' : 'test_result'}
+            />
+            <DailyChestModal
+              isOpen={chestModalOpen}
+              onClose={() => setChestModalOpen(false)}
+              onClaimSuccess={() => {
+                setData((prev) => prev ? {
+                  ...prev,
+                  daily_chest: { can_claim: false, streak: prev.daily_chest?.streak || 0 }
+                } : null);
+              }}
             />
           </>
         )}

@@ -12,6 +12,7 @@ from core.models import DailyMission, ProfileMission
 from learning.models import Topic
 from shop.services import available_freezes
 from tests_app.models import Attempt, RevisionItem
+from core.rewards import get_daily_chest_status, open_daily_chest
 from tests_app.subject_utils import current_subject
 
 
@@ -129,6 +130,7 @@ def home_api(request):
                              'description': suggested_topic.description} if suggested_topic else None,
         'selected_subject': {'id': subject.id, 'name': subject.name} if subject else None,
         'unread_notifications_count': profile.notifications.filter(is_read=False).count(),
+        'daily_chest': get_daily_chest_status(profile),
     })
 
 
@@ -346,4 +348,21 @@ def landing_leaderboard_api(request):
     }
     cache.set(CACHE_KEY, data, 900)  # 15 daqiqa (900 soniya)
     return Response(data)
+
+
+@api_view(['GET'])
+def daily_chest_api(request):
+    """Bugungi sirli sandiq holati, qolgan vaqt va streak multiplikatori."""
+    profile = ensure_profile_for_user(request.user)
+    data = get_daily_chest_status(profile)
+    return Response(data)
+
+
+@api_view(['POST'])
+def daily_chest_open_api(request):
+    """Kunlik sirli sandiqni ochish va o'zgaruvchan mukofot (Variable Reward) olish."""
+    profile = ensure_profile_for_user(request.user)
+    result = open_daily_chest(profile.pk)
+    status_code = 200 if result.get('success') else 400
+    return Response(result, status=status_code)
 
