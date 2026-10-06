@@ -64,20 +64,20 @@ export default function ModernTopbar({
           type="button"
           onClick={onSearchClick}
           className={cn(
-            'hidden md:flex items-center gap-2.5 rounded-2xl border px-3.5 py-2 text-xs transition-all cursor-pointer',
+            'hidden md:flex items-center gap-2.5 rounded-2xl border px-3.5 py-2 text-xs transition-all cursor-pointer font-medium',
             isLight
-              ? 'border-slate-200 bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-950 shadow-2xs'
-              : 'border-slate-800/80 bg-slate-900/40 text-slate-400 hover:text-white hover:border-slate-700 hover:bg-slate-900/70 shadow-inner'
+              ? 'border-slate-300/80 bg-slate-100/90 text-[#52525B] hover:bg-white hover:text-slate-900 shadow-2xs'
+              : 'border-slate-700/80 bg-slate-900/60 text-[#A1A1AA] hover:text-white hover:border-slate-600 hover:bg-slate-900/80 shadow-inner'
           )}
         >
           <Search className={cn('size-3.5', isLight ? 'text-blue-600' : 'text-emerald-400')} />
-          <span>Kurslar, testlar va mavzularni qidirish...</span>
+          <span className="text-[#52525B] dark:text-[#A1A1AA] font-medium">Kurslar, testlar va mavzularni qidirish...</span>
           <kbd
             className={cn(
-              'ml-4 rounded-lg border px-1.5 py-0.5 font-mono text-[10px]',
+              'ml-4 rounded-lg border px-1.5 py-0.5 font-mono text-[10px] font-semibold',
               isLight
-                ? 'border-slate-300 bg-white text-slate-700 shadow-2xs'
-                : 'border-slate-700/60 bg-slate-800/80 text-slate-300'
+                ? 'border-slate-300 bg-white text-[#52525B] shadow-2xs'
+                : 'border-slate-700/60 bg-slate-800/80 text-[#A1A1AA]'
             )}
           >
             Ctrl K

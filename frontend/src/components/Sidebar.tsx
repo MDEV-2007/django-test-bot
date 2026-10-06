@@ -65,8 +65,8 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'ASOSIY NAVIGATSIYA',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, api: '/api/dashboard/home/', tone: 'emerald' },
-      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: 'Audio', featureKey: 'study', tone: 'purple' },
-      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'DTM', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/', tone: 'sky' },
+      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: null, featureKey: 'study', tone: 'purple' },
+      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: null, featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/', tone: 'sky' },
       { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'GPT-4o', highlight: true, featureKey: 'ai_mentor', tone: 'cyan' },
     ],
   },
@@ -75,7 +75,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'LIVE', glow: true, featureKey: 'battles', matchPrefixes: ['/games'], tone: 'rose' },
       { href: '/reels', label: 'Bilim Reels', icon: Sparkles, badge: 'Yangi', featureKey: 'reels', api: '/api/learning/reels/', tone: 'amber' },
-      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: 'Anki', featureKey: 'flashcards', api: '/api/learning/flashcards/', tone: 'indigo' },
+      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, featureKey: 'flashcards', api: '/api/learning/flashcards/', tone: 'indigo' },
       { href: '/leaderboard', label: 'Hamjamiyat va liga', icon: Trophy, badge: null, matchPrefixes: ['/feed', '/leaderboard'], tone: 'gold' },
     ],
   },
@@ -237,26 +237,20 @@ export default function Sidebar({
                           <span className="truncate">{item.label}</span>
                         </div>
 
-                        {/* Badges */}
+                        {/* Badges - Subtle, clean and uncluttered */}
                         {item.badge && (
                           <span
                             className={cn(
-                              'rounded-full px-2 py-0.5 text-[9px] font-black tracking-wide shrink-0',
+                              'rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight shrink-0 transition-all select-none',
                               item.glow
-                                ? (isLight ? 'bg-rose-50 border border-rose-200 text-rose-600 animate-pulse' : 'bg-rose-500/15 border border-rose-500/30 text-rose-400 animate-pulse')
+                                ? (isLight ? 'bg-rose-50 text-rose-600 border border-rose-200/70 shadow-2xs' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20')
                                 : item.vip
-                                ? (isLight ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400')
+                                ? (isLight ? 'bg-amber-50 text-amber-700 border border-amber-200/70' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20')
                                 : item.highlight
-                                ? (isLight ? 'bg-purple-50 border border-purple-200 text-purple-700' : 'bg-purple-500/15 border border-purple-500/30 text-purple-300')
-                                : item.badge === 'DTM'
-                                ? (isLight ? 'bg-sky-50 border border-sky-200 text-sky-700' : 'bg-sky-500/15 border border-sky-500/30 text-sky-300')
-                                : item.badge === 'Audio'
-                                ? (isLight ? 'bg-purple-50 border border-purple-200 text-purple-700' : 'bg-purple-500/15 border border-purple-500/30 text-purple-300')
-                                : item.badge === 'Anki'
-                                ? (isLight ? 'bg-indigo-50 border border-indigo-200 text-indigo-700' : 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-300')
+                                ? (isLight ? 'bg-cyan-50/80 text-cyan-700 border border-cyan-200/60 font-mono text-[8.5px]' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono text-[8.5px]')
                                 : item.badge === 'Yangi'
-                                ? (isLight ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400')
-                                : (isLight ? 'bg-slate-100 border border-slate-200 text-slate-700' : 'bg-slate-800 border border-slate-700/60 text-slate-400')
+                                ? (isLight ? 'bg-emerald-50/80 text-emerald-700 border border-emerald-200/60' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20')
+                                : (isLight ? 'bg-slate-100 text-slate-600 border border-slate-200/60' : 'bg-slate-800 text-slate-400 border border-slate-700/40')
                             )}
                           >
                             {item.badge}

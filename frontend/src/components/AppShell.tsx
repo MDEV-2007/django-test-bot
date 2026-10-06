@@ -97,11 +97,11 @@ export default function AppShell() {
           <button
             type="button"
             onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
-            className="hidden md:flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-500 hover:text-slate-800 hover:border-slate-300 hover:bg-white transition-all shadow-inner group cursor-pointer"
+            className="hidden md:flex items-center gap-2.5 rounded-2xl border border-slate-300 bg-slate-100/90 px-3.5 py-2 text-xs text-[#52525B] hover:text-slate-900 hover:border-slate-400 hover:bg-white transition-all shadow-xs group cursor-pointer font-medium"
           >
-            <Search className="size-3.5 group-hover:text-blue-600 transition-colors" />
-            <span>Kurslar, testlar va mavzularni qidirish...</span>
-            <kbd className="ml-3 rounded-lg border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
+            <Search className="size-3.5 group-hover:text-blue-600 text-[#71717A] transition-colors" />
+            <span className="text-[#52525B] font-medium">Kurslar, testlar va mavzularni qidirish...</span>
+            <kbd className="ml-3 rounded-lg border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[10px] text-[#52525B] font-semibold">
               Ctrl K
             </kbd>
           </button>

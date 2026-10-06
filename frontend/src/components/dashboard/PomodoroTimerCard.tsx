@@ -86,7 +86,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
             <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
               Pomodoro Taymeri
             </h3>
-            <p className="text-[11px] font-semibold text-slate-500">
+            <p className="text-[11px] font-semibold text-[#52525B] dark:text-[#A1A1AA]">
               Ilmiy 25-daqiqalik chuqur fokus rejim
             </p>
           </div>
@@ -95,10 +95,10 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
         <Badge
           variant="outline"
           className={cn(
-            'px-2.5 py-0.5 text-xs font-black rounded-full border transition-colors',
+            'px-2.5 py-0.5 text-xs font-bold rounded-full border transition-colors',
             isRunning
-              ? 'border-blue-300 bg-blue-50 text-blue-700 animate-pulse'
-              : 'border-slate-200 bg-slate-50 text-slate-600'
+              ? 'border-blue-400 bg-blue-50 text-blue-700 animate-pulse font-black'
+              : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100/90 dark:bg-zinc-800 text-[#52525B] dark:text-[#D4D4D8]'
           )}
         >
           {isRunning ? '● Fokus Jarayoni' : 'Kutish rejimida'}
@@ -140,7 +140,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
               <span className="text-2xl font-black font-mono tracking-tight text-slate-900 leading-none">
                 {formattedTime}
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#52525B] dark:text-[#A1A1AA] mt-1">
                 {isRunning ? 'Qoldi' : 'Seans'}
               </span>
             </div>
@@ -151,7 +151,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
         <div className="sm:col-span-7 space-y-4">
           {/* Duration Presets */}
           <div className="space-y-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#52525B] dark:text-[#A1A1AA]">
               Vaqtni tanlash
             </span>
             <div className="grid grid-cols-3 gap-2">
@@ -215,32 +215,37 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
       </div>
 
       {/* Ambient Sound Mini Selector Strip */}
-      <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-slate-500">Fon tovushi:</span>
-          <div className="flex items-center gap-1.5">
+      <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between gap-3 text-xs flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="text-xs font-bold text-[#52525B] dark:text-[#D4D4D8]">Fon tovushi:</span>
+          <div className="flex items-center gap-2">
             {[
               { id: 'rain', label: 'Yomg\'ir', icon: '🌧️' },
               { id: 'library', label: 'Kutubxona', icon: '📚' },
               { id: 'fire', label: 'Olov', icon: '🔥' },
-            ].map((snd) => (
-              <button
-                key={snd.id}
-                type="button"
-                onClick={() => {
-                  setActiveSound(snd.id);
-                  setSoundMuted(false);
-                }}
-                className={cn(
-                  'px-2 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer',
-                  activeSound === snd.id && !soundMuted
-                    ? 'border-blue-300 bg-blue-50 text-blue-700'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                )}
-              >
-                <span>{snd.icon}</span> {snd.label}
-              </button>
-            ))}
+            ].map((snd) => {
+              const isSelected = activeSound === snd.id && !soundMuted;
+              return (
+                <button
+                  key={snd.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveSound(snd.id);
+                    setSoundMuted(false);
+                  }}
+                  className={cn(
+                    'px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all duration-150 cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-xs',
+                    isSelected
+                      ? 'border-blue-600 bg-blue-600 text-white shadow-sm shadow-blue-500/30 ring-2 ring-blue-500/20'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#52525B] dark:text-zinc-200 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50/80 dark:hover:bg-blue-950/40 dark:hover:text-blue-400 dark:hover:border-blue-400'
+                  )}
+                  title={`${snd.label} fon tovushini yoqish`}
+                >
+                  <span className="text-sm">{snd.icon}</span>
+                  <span>{snd.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

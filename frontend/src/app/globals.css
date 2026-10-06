@@ -33,9 +33,9 @@
 
   --text-primary: #16181a;
   --text-secondary: #43474c;
-  --text-muted: #5c6067;
-  --text-subtitle: #5c6067;
-  --text-faint: #6f747b;
+  --text-muted: #52525b;
+  --text-subtitle: #52525b;
+  --text-faint: #71717a;
 
   --border-soft: rgba(18, 20, 24, 0.09);
   --border-card: rgba(18, 20, 24, 0.14);
@@ -103,9 +103,9 @@
 
   --text-primary: #f0f1f3;
   --text-secondary: #a3a7ae;
-  --text-muted: #8d9094;
-  --text-subtitle: #8d9094;
-  --text-faint: #5a5d63;
+  --text-muted: #a1a1aa;
+  --text-subtitle: #a1a1aa;
+  --text-faint: #71717a;
 
   --border-soft: rgba(255, 255, 255, 0.06);
   --border-card: rgba(255, 255, 255, 0.09);
@@ -929,5 +929,21 @@ html[data-tg='on'] .min-h-screen-safe {
   transform-origin: left;
   animation: stepProgress 3.8s linear forwards;
 }
+
+/* ── Accessible Contrast for Inputs & Placeholders ──────────── */
+input::placeholder,
+textarea::placeholder,
+::placeholder {
+  color: #71717a !important;
+  opacity: 1;
+}
+
+[data-theme='dark'] input::placeholder,
+[data-theme='dark'] textarea::placeholder,
+[data-theme='dark'] ::placeholder {
+  color: #a1a1aa !important;
+  opacity: 1;
+}
+
 
 
