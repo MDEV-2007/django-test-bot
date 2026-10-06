@@ -223,6 +223,11 @@ class Reel(models.Model):
             'views': self.views_count,
             'comments_count': c_count,
             'is_published': self.is_published,
+            'author': {
+                'id': self.created_by.id,
+                'name': self.created_by.get_full_name() or self.created_by.username,
+                'username': self.created_by.username,
+            } if self.created_by else None,
         }
 
 

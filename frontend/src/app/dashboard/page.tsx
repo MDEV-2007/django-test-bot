@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Gift,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
 import { apiFetch } from '@/lib/api-client';
@@ -173,6 +174,47 @@ export default function DashboardPage() {
   // Daily Mystery Chest (Variable Reward)
   const [chestModalOpen, setChestModalOpen] = useState(false);
   const [chestStatus, setChestStatus] = useState<DailyChestStatus | null>(null);
+
+  // Smart Mistakes Notebook state (Aqlli Xatolar Daftari)
+  const [mistakesSummary, setMistakesSummary] = useState<{
+    total_mistakes: number;
+    subject_counts: { name: string; count: number }[];
+    recent_mistakes: { id: number; body: string; subject_name: string; difficulty: number; explanation: string }[];
+  } | null>(null);
+  const [startingMistakesTest, setStartingMistakesTest] = useState(false);
+
+  useEffect(() => {
+    apiFetch<{
+      total_mistakes: number;
+      subject_counts: { name: string; count: number }[];
+      recent_mistakes: any[];
+    }>('/api/tests/mistakes-summary/')
+      .then((res) => {
+        if (res) setMistakesSummary(res);
+      })
+      .catch((err) => console.error('Failed to load mistakes summary', err));
+  }, []);
+
+  const handleStartMistakesTest = async () => {
+    if (startingMistakesTest) return;
+    setStartingMistakesTest(true);
+    try {
+      const res = await apiFetch<{ attempt_id?: number; error?: string }>('/api/tests/start-mistakes/', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      if (res && res.attempt_id) {
+        toast.success("Xatolar ustida ishlash testi boshlandi!");
+        router.push(`/tests/${res.attempt_id}`);
+      } else if (res?.error) {
+        toast.info(res.error);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Xatolar ustida ishlash testini boshlab bo'lmadi");
+    } finally {
+      setStartingMistakesTest(false);
+    }
+  };
 
   useEffect(() => {
     if (data?.daily_chest) {
@@ -415,7 +457,75 @@ export default function DashboardPage() {
                 theme="light"
               />
 
-              {/* 4. TEZKOR O'QUV ASBOBLARI (COMPACT CARDS IN PURE WHITE) */}
+              {/* 4. SMART MISTAKES NOTEBOOK WIDGET (AQLLI XATOLAR DAFTARI) */}
+              <div className="relative overflow-hidden rounded-3xl border border-rose-200/90 bg-gradient-to-br from-rose-50/70 via-white to-amber-50/40 p-5 sm:p-6 shadow-[0_4px_20px_rgba(244,63,94,0.08)]">
+                {/* Ambient background glow */}
+                <div className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-rose-400/10 blur-2xl" />
+
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="size-11 rounded-2xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-[0_4px_14px_rgba(244,63,94,0.3)] shrink-0">
+                      <Target className="size-5.5 stroke-[2.5]" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+                          Aqlli Xatolar Daftari
+                        </h3>
+                        <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-black uppercase tracking-wider">
+                          AI Tahlil &amp; Mashq
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-snug max-w-xl">
+                        Avvalgi testlarda yo&apos;l qo&apos;ygan xatolaringiz sun&apos;iy intellekt tomonidan saralandi. Qayta ishlab, bilimingizni mustahkamlang!
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* CTA Button */}
+                  <Button
+                    onClick={handleStartMistakesTest}
+                    disabled={startingMistakesTest || (mistakesSummary?.total_mistakes === 0)}
+                    className="shrink-0 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm px-5 py-2.5 rounded-2xl shadow-md shadow-rose-500/25 flex items-center gap-2 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {startingMistakesTest ? (
+                      <span>Yuklanmoqda...</span>
+                    ) : (
+                      <>
+                        <span>Xatolar ustida ishlash</span>
+                        <ArrowRight className="size-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Mistakes breakdown badges */}
+                <div className="mt-4 pt-3.5 border-t border-rose-100/80 flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white border border-rose-200 text-xs font-bold text-rose-700 shadow-xs">
+                    <span className="size-2 rounded-full bg-rose-500" />
+                    <span>Jami xatolar: {mistakesSummary?.total_mistakes ?? 0} ta</span>
+                  </div>
+                  {mistakesSummary?.subject_counts && mistakesSummary.subject_counts.length > 0 ? (
+                    mistakesSummary.subject_counts.map((sc) => (
+                      <div
+                        key={sc.name}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700"
+                      >
+                        <span>{sc.name}:</span>
+                        <span className="font-bold text-rose-600">{sc.count}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-xs text-slate-500 italic">
+                      {mistakesSummary?.total_mistakes === 0
+                        ? "Hozircha xato javoblaringiz yo'q, ajoyib natija! 🎯"
+                        : "Xatolar tahlili tayyorlanmoqda..."}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 5. TEZKOR O'QUV ASBOBLARI (COMPACT CARDS IN PURE WHITE) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">

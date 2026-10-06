@@ -464,6 +464,47 @@ def start_mistakes_test_api(request):
     return Response({'attempt_id': attempt.id})
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def mistakes_summary_api(request):
+    """Foydalanuvchining umumiy va fanlar kesimidagi xato savollar tahlili."""
+    profile = ensure_profile_for_user(request.user)
+
+    wrong_answers = (AttemptAnswer.objects
+                      .filter(attempt__profile=profile, attempt__is_completed=True, is_correct=False)
+                      .select_related('question__subject')
+                      .order_by('-attempt__completed_at'))
+
+    seen = set()
+    unique_mistakes = []
+    subject_counts = {}
+
+    for ans in wrong_answers:
+        if ans.question_id in seen or ans.is_skipped:
+            continue
+        seen.add(ans.question_id)
+        q = ans.question
+        s_name = q.subject.name if q.subject else "Umumiy"
+        s_slug = q.subject.slug if q.subject else "all"
+        subject_counts[s_name] = subject_counts.get(s_name, 0) + 1
+
+        if len(unique_mistakes) < 10:
+            unique_mistakes.append({
+                'id': q.id,
+                'body': q.body[:200] if q.body else "",
+                'subject_name': s_name,
+                'subject_slug': s_slug,
+                'difficulty': q.difficulty,
+                'explanation': q.explanation[:160] if q.explanation else "",
+            })
+
+    return Response({
+        'total_mistakes': len(seen),
+        'subject_counts': [{'name': k, 'count': v} for k, v in subject_counts.items()],
+        'recent_mistakes': unique_mistakes,
+    })
+
+
 def _question_screen_data(attempt, q_idx, current_answer, total_questions, seconds_left=None):
     question = current_answer.question
     data = {

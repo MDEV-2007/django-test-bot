@@ -12,6 +12,7 @@ urlpatterns = [
     path('<int:test_id>/start/', api.start_test_api, name='start'),
     path('start-random/', api.start_random_test_api, name='start_random'),
     path('start-mistakes/', api.start_mistakes_test_api, name='start_mistakes'),
+    path('mistakes-summary/', api.mistakes_summary_api, name='mistakes_summary'),
     path('attempts/<int:attempt_id>/question/', api.question_api, name='question'),
     path('attempts/<int:attempt_id>/answer/', api.answer_api, name='answer'),
     path('attempts/<int:attempt_id>/finish/', api.finish_api, name='finish'),

@@ -849,6 +849,57 @@ def reels_comments_api(request, reel_id):
         return Response({'error': str(e)}, status=500)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def reels_create_user_question_api(request):
+    """O'quvchi tomonidan qiyin savol yaratish va Reels lentasiga chiqarish."""
+    subject_slug = request.data.get('subject_slug', 'tarix')
+    subject_name = request.data.get('subject_name', 'Tarix')
+    quiz_question = (request.data.get('quiz_question') or '').strip()
+    options = request.data.get('options') or []
+    correct_index = int(request.data.get('correct_index', 0))
+    explanation = (request.data.get('explanation') or '').strip()
+
+    if not quiz_question:
+        return Response({'error': 'Savol matni kiritilishi shart'}, status=400)
+    if len(options) < 2:
+        return Response({'error': 'Kamida 2 ta javob varianti kiritilishi kerak'}, status=400)
+    if correct_index < 0 or correct_index >= len(options):
+        correct_index = 0
+
+    gradient_theme = request.data.get('gradient_theme', 'purple')
+    if gradient_theme not in ['rose', 'sky', 'emerald', 'purple', 'amber']:
+        gradient_theme = 'purple'
+
+    reel = Reel.objects.create(
+        created_by=request.user,
+        subject_name=subject_name,
+        subject_slug=subject_slug,
+        category_badge=f"Abituriyent • {request.user.username}",
+        tagline="Abituriyent Chaqirig'i",
+        hook=quiz_question,
+        fact=explanation or "Ushbu savol abituriyent tomonidan tuzilgan va bilim almashish uchun ulashilgan.",
+        takeaway="Xatolaringiz ustida ishlang va boshqalarni ham sinab ko'ring!",
+        quiz_question=quiz_question,
+        quiz_options=options,
+        quiz_correct_index=correct_index,
+        quiz_explanation=explanation or "To'g'ri javob muallif tomonidan belgilangan.",
+        gradient_theme=gradient_theme,
+        media_type='text',
+        is_published=True,
+    )
+
+    profile = getattr(request.user, 'profile', None)
+    if profile:
+        profile.add_xp(20)
+
+    return Response({
+        'success': True,
+        'message': "Savolingiz Bilim Reels lentasiga muvaffaqiyatli qo'shildi! (+20 XP) 🔥",
+        'reel': reel.to_dict(),
+    }, status=201)
+
+
 # ============================================================
 # COMMUNITY FEED API (HAMJAMIYAT LENTASI)
 # ============================================================

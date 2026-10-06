@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import AppShell from '@/components/AppShell';
 import {
   ArrowLeft, Heart, Send, Volume2, VolumeX, ChevronDown, ChevronUp,
@@ -112,6 +112,11 @@ type ReelItem = {
   comments_count?: number;
   is_personalized?: boolean;
   recommendation_reason?: string;
+  author?: {
+    id: number;
+    name: string;
+    username: string;
+  } | null;
 };
 
 type ReelsResponse = {
@@ -131,8 +136,10 @@ type QuizResult = {
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
-export default function ReelsPage() {
+function ReelsInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const deepLinkReelId = searchParams?.get('reel') || searchParams?.get('challenge');
   const { isEnabled } = useFeatureFlags();
 
   const [reels, setReels] = useState<ReelItem[]>([]);
@@ -140,6 +147,18 @@ export default function ReelsPage() {
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Gamification: Combo streak counter
+  const [comboStreak, setComboStreak] = useState(0);
+
+  // Student Question Creator modal state ("Mening qiyin savolim")
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createSubject, setCreateSubject] = useState('tarix');
+  const [createQuestion, setCreateQuestion] = useState('');
+  const [createOptions, setCreateOptions] = useState(['', '', '', '']);
+  const [createCorrectIndex, setCreateCorrectIndex] = useState(0);
+  const [createExplanation, setCreateExplanation] = useState('');
+  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false);
 
   // 15-second countdown timer per reel
   const [timeLeft, setTimeLeft] = useState(15);
@@ -221,6 +240,21 @@ export default function ReelsPage() {
         setLikeCounts(initialLikes);
         setCommentCounts(initialComments);
         setSaveCounts(initialSaves);
+
+        let targetIndex = 0;
+        if (deepLinkReelId) {
+          const foundIdx = data.reels.findIndex((r) => r.id === Number(deepLinkReelId));
+          if (foundIdx !== -1) {
+            targetIndex = foundIdx;
+            toast.info("⚔️ Do'stingiz chaqirig'i! Savolga to'g'ri javob topa olasizmi?", { duration: 4000 });
+          }
+        }
+        setCurrentIndex(targetIndex);
+        if (targetIndex > 0) {
+          setTimeout(() => {
+            reelRefs.current[targetIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 300);
+        }
       } else {
         setReels([]);
       }
@@ -228,9 +262,8 @@ export default function ReelsPage() {
       toast.error("Reels yuklanmadi");
     } finally {
       setLoading(false);
-      setCurrentIndex(0);
     }
-  }, []);
+  }, [deepLinkReelId]);
 
   useEffect(() => {
     loadReels(selectedSubject);
@@ -320,6 +353,22 @@ export default function ReelsPage() {
     openTelegramLink(tgUrl);
   };
 
+  // Handle Telegram Challenge to friend (Deep-linked challenge)
+  const handleChallengeFriend = (reel: ReelItem) => {
+    if (soundEnabled) soundFX.click();
+    tgHaptic('medium');
+    const shareUrl = `${window.location.origin}/reels?reel=${reel.id}`;
+    const text = encodeURIComponent(
+      `⚔️ *BILIM JANGI CHAQIRIG'I!* \n\n` +
+      `Men Ilm Ildizi Reels'da ushbu qiyin savolga duch keldim:\n` +
+      `❓ "${reel.quiz.question || reel.hook}"\n\n` +
+      `Qani, sen bu savolga to'g'ri javob topa olasanmi? O'zingni sinab ko'r:\n` +
+      `👉 ${shareUrl}`
+    );
+    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${text}`;
+    openTelegramLink(tgUrl);
+  };
+
   // Handle Save / Bookmark
   const handleSave = (reelId: number) => {
     if (soundEnabled) soundFX.click();
@@ -333,7 +382,7 @@ export default function ReelsPage() {
     toast.success(isCurrentlySaved ? "Xatcho'plardan olindi" : "Xatcho'plarga saqlandi! ⭐");
   };
 
-  // Handle Quiz Answer
+  // Handle Quiz Answer with Combo Multiplier
   const handleAnswerQuiz = async (reelId: number, optionIndex: number) => {
     if (answeredQuizzes[reelId]) return;
     tgHaptic('select');
@@ -359,11 +408,32 @@ export default function ReelsPage() {
           if (soundEnabled) soundFX.correct();
           tgHaptic('success');
           celebrate();
-          setTodayXpEarned((prev) => prev + (res.xp_earned || 5));
-          toast.success(`To'g'ri javob! +${res.xp_earned} XP 🔥`, { duration: 2500 });
+
+          const nextCombo = comboStreak + 1;
+          setComboStreak(nextCombo);
+
+          let bonusXp = 0;
+          let comboMessage = `To'g'ri javob! +${res.xp_earned} XP 🔥`;
+          if (nextCombo >= 5) {
+            bonusXp = 10;
+            comboMessage = `👑 5x DAHO COMBO! +${res.xp_earned + bonusXp} XP 🚀`;
+          } else if (nextCombo >= 3) {
+            bonusXp = 5;
+            comboMessage = `⚡ 3x MEGA COMBO! +${res.xp_earned + bonusXp} XP 🔥`;
+          } else if (nextCombo >= 2) {
+            bonusXp = 2;
+            comboMessage = `🔥 2x COMBO! +${res.xp_earned + bonusXp} XP ✨`;
+          }
+
+          setTodayXpEarned((prev) => prev + (res.xp_earned || 5) + bonusXp);
+          toast.success(comboMessage, { duration: 3000 });
         } else {
           if (soundEnabled) soundFX.incorrect();
           tgHaptic('error');
+          if (comboStreak >= 2) {
+            toast.info(`Combo to'xtadi (${comboStreak}x). Qayta boshlaymiz! 💪`);
+          }
+          setComboStreak(0);
         }
       }
     } catch {
@@ -387,12 +457,81 @@ export default function ReelsPage() {
         if (soundEnabled) soundFX.correct();
         tgHaptic('success');
         celebrate();
+        const nextCombo = comboStreak + 1;
+        setComboStreak(nextCombo);
         setTodayXpEarned((prev) => prev + 5);
-        toast.success("To'g'ri javob! +5 XP 🔥", { duration: 2500 });
+        toast.success(nextCombo >= 2 ? `🔥 ${nextCombo}x Combo! +5 XP` : "To'g'ri javob! +5 XP 🔥", { duration: 2500 });
       } else {
         if (soundEnabled) soundFX.incorrect();
         tgHaptic('error');
+        setComboStreak(0);
       }
+    }
+  };
+
+  // Submit Student-Created Question to Bilim Reels
+  const handleCreateQuestionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createQuestion.trim()) {
+      toast.error("Savol matnini kiriting");
+      return;
+    }
+    if (createOptions.some((opt) => !opt.trim())) {
+      toast.error("Barcha 4 ta variantni to'ldiring");
+      return;
+    }
+    if (!createExplanation.trim()) {
+      toast.error("To'g'ri javob izohini kiriting");
+      return;
+    }
+
+    setIsSubmittingQuestion(true);
+    try {
+      const res = await apiFetch<{
+        success: boolean;
+        message: string;
+        reel: ReelItem;
+        xp_earned: number;
+      }>('/api/learning/reels/create/', {
+        method: 'POST',
+        body: JSON.stringify({
+          subject_slug: createSubject,
+          question: createQuestion.trim(),
+          options: createOptions.map((o) => o.trim()),
+          correct_index: createCorrectIndex,
+          explanation: createExplanation.trim(),
+        }),
+      });
+
+      if (res && res.success) {
+        if (soundEnabled) soundFX.correct();
+        celebrate();
+        tgHaptic('success');
+        toast.success(res.message || "Savolingiz muvaffaqiyatli qo'shildi! +20 XP berildi 🔥", { duration: 4000 });
+        setTodayXpEarned((prev) => prev + (res.xp_earned || 20));
+
+        if (res.reel) {
+          setReels((prev) => [res.reel, ...prev]);
+          setLikeCounts((prev) => ({ ...prev, [res.reel.id]: 0 }));
+          setCommentCounts((prev) => ({ ...prev, [res.reel.id]: 0 }));
+          setSaveCounts((prev) => ({ ...prev, [res.reel.id]: 0 }));
+          setCurrentIndex(0);
+          setTimeout(() => {
+            reelRefs.current[0]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
+
+        // Reset form
+        setCreateQuestion('');
+        setCreateOptions(['', '', '', '']);
+        setCreateCorrectIndex(0);
+        setCreateExplanation('');
+        setIsCreateModalOpen(false);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Savolni saqlashda xatolik yuz berdi");
+    } finally {
+      setIsSubmittingQuestion(false);
     }
   };
 
@@ -515,8 +654,23 @@ export default function ReelsPage() {
               })}
             </div>
 
-            {/* Sound & XP indicators */}
+            {/* Sound & XP indicators, +Savol & Combo */}
             <div className="flex items-center gap-1.5 shrink-0 pl-2">
+              {comboStreak >= 2 && (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[10px] font-black animate-pulse shadow-sm">
+                  <Flame className="size-3 fill-white" />
+                  <span>{comboStreak}x</span>
+                </div>
+              )}
+              <button
+                onClick={() => { tgHaptic('medium'); setIsCreateModalOpen(true); }}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-[11px] font-bold shadow-sm transition-all cursor-pointer"
+                title="O'z qiyin savolingizni qo'shing va +20 XP oling"
+              >
+                <Plus className="size-3" />
+                <span className="hidden sm:inline">Savol qo&apos;shish</span>
+                <span className="sm:hidden">+Savol</span>
+              </button>
               <button
                 onClick={() => { tgHaptic('light'); setSoundEnabled(!soundEnabled); }}
                 className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors cursor-pointer"
@@ -579,6 +733,17 @@ export default function ReelsPage() {
                   >
                     {/* ── TOP SECTION: Warning Box & Progress Bar ── */}
                     <div className="space-y-3 shrink-0">
+                      {/* Author badge if question was submitted by a user */}
+                      {reel.author && (
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-300 text-[11px] font-bold w-fit shadow-xs">
+                          <Sparkles className="size-3.5 text-blue-500" />
+                          <span>Muallif: @{reel.author.username || reel.author.name}</span>
+                          <span className="text-[10px] bg-blue-200 dark:bg-blue-900/60 px-1.5 py-0.5 rounded-md font-extrabold text-blue-800 dark:text-blue-200">
+                            Hamjamiyat
+                          </span>
+                        </div>
+                      )}
+
                       {/* Pale Yellow / Amber Warning Card */}
                       <div className="bg-[#fffbeb] dark:bg-amber-950/30 border border-[#fef3c7] dark:border-amber-800/40 rounded-2xl p-3 sm:p-3.5 flex items-start gap-3 shadow-sm">
                         <div className="size-8 rounded-full bg-[#fef3c7] dark:bg-amber-900/60 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
@@ -794,15 +959,27 @@ export default function ReelsPage() {
                         </button>
                       </div>
 
-                      {/* Share / Ulashish */}
-                      <button
-                        onClick={() => handleShare(reel)}
-                        className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-pointer font-semibold group"
-                        title="Telegram'ga ulashish"
-                      >
-                        <Share2 className="size-4.5 group-hover:scale-110 transition-all" />
-                        <span>Ulashish</span>
-                      </button>
+                      {/* Action buttons: Challenge & Share */}
+                      <div className="flex items-center gap-2 sm:gap-2.5">
+                        <button
+                          onClick={() => handleChallengeFriend(reel)}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 transition-all cursor-pointer font-bold text-xs group active:scale-95"
+                          title="Do'stga Telegram chaqiriq yuborish"
+                        >
+                          <Swords className="size-3.5 group-hover:rotate-12 transition-transform text-amber-600 dark:text-amber-400" />
+                          <span>Chaqiriq ⚔️</span>
+                        </button>
+
+                        {/* Share / Ulashish */}
+                        <button
+                          onClick={() => handleShare(reel)}
+                          className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-pointer font-semibold group"
+                          title="Telegram'ga ulashish"
+                        >
+                          <Share2 className="size-4.5 group-hover:scale-110 transition-all" />
+                          <span className="hidden xs:inline">Ulashish</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -987,8 +1164,203 @@ export default function ReelsPage() {
               </form>
             </div>
           </div>
+        {/* ── STUDENT QUESTION CREATION MODAL ("Mening qiyin savolim") ── */}
+        {isCreateModalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setIsCreateModalOpen(false)}
+          >
+            <div
+              className="w-full sm:max-w-xl bg-white dark:bg-zinc-950 border-t sm:border border-slate-200 dark:border-zinc-800 rounded-t-[2.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col max-h-[90vh] sm:max-h-[85vh] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Drawer Drag handle for mobile */}
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mb-3 sm:hidden" />
+
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-xl bg-blue-100 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                      Mening qiyin savolim (Reels)
+                    </h3>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      O&apos;quvchilarni sinovdan o&apos;tkazing va +20 XP oling!
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center text-slate-600 dark:text-zinc-400 transition-all active:scale-95 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleCreateQuestionSubmit} className="flex-1 overflow-y-auto no-scrollbar py-3.5 space-y-4">
+                {/* Subject Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                    Fan:
+                  </label>
+                  <select
+                    value={createSubject}
+                    onChange={(e) => setCreateSubject(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="tarix">Tarix</option>
+                    <option value="ona-tili">Ona tili va adabiyot</option>
+                    <option value="biologiya">Biologiya</option>
+                    <option value="matematika">Matematika</option>
+                    <option value="ingliz-tili">Ingliz tili</option>
+                  </select>
+                </div>
+
+                {/* Question Input */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                    Savol matni:
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={createQuestion}
+                    onChange={(e) => setCreateQuestion(e.target.value)}
+                    placeholder="Masalan: Qaysi sulola davrida Mirzo Ulug'bek madrasasi qurilgan?.."
+                    required
+                    maxLength={500}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                </div>
+
+                {/* 4 Options with Radio Selector for Correct Answer */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center justify-between">
+                    <span>Variantlar (To&apos;g&apos;ri javobni tanlang):</span>
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                      To&apos;g&apos;ri javob: {OPTION_LETTERS[createCorrectIndex]}
+                    </span>
+                  </label>
+                  <div className="space-y-2">
+                    {createOptions.map((opt, idx) => {
+                      const letter = OPTION_LETTERS[idx];
+                      const isCorrect = createCorrectIndex === idx;
+                      return (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "flex items-center gap-2 p-1.5 rounded-xl border transition-all",
+                            isCorrect
+                              ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30"
+                              : "border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                          )}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => { tgHaptic('select'); setCreateCorrectIndex(idx); }}
+                            className={cn(
+                              "size-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 transition-colors cursor-pointer",
+                              isCorrect
+                                ? "bg-emerald-600 text-white"
+                                : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200"
+                            )}
+                            title={`${letter} variantini to'g'ri deb belgilash`}
+                          >
+                            {letter}
+                          </button>
+                          <input
+                            type="text"
+                            value={opt}
+                            onChange={(e) => {
+                              const next = [...createOptions];
+                              next[idx] = e.target.value;
+                              setCreateOptions(next);
+                            }}
+                            placeholder={`${letter} varianti matni...`}
+                            required
+                            maxLength={200}
+                            className="flex-1 bg-transparent border-0 px-2 py-1 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Explanation Input */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                    To&apos;g&apos;ri javob izohi / tushuntirish:
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={createExplanation}
+                    onChange={(e) => setCreateExplanation(e.target.value)}
+                    placeholder="Nima uchun bu javob to'g'ri ekanligini qisqacha izohlang..."
+                    required
+                    maxLength={350}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                </div>
+
+                {/* Reward Banner */}
+                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-medium">
+                    <Zap className="size-4 text-amber-500 fill-amber-500 shrink-0" />
+                    <span>Tasdiqlanganda darhol hisobingizga mukofot:</span>
+                  </div>
+                  <span className="font-black text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/60 px-2.5 py-1 rounded-xl text-xs">
+                    +20 XP 🔥
+                  </span>
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="pt-2 flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs cursor-pointer transition-colors"
+                  >
+                    Bekor qilish
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingQuestion}
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-500/25 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
+                  >
+                    {isSubmittingQuestion ? (
+                      <span>Yuklanmoqda...</span>
+                    ) : (
+                      <>
+                        <Sparkles className="size-3.5" />
+                        <span>Reels&apos;ga joylash (+20 XP)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
       </main>
     </>
+  );
+}
+
+export default function ReelsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-100 dark:bg-zinc-950 flex items-center justify-center p-4">
+          <div className="w-10 h-10 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <ReelsInner />
+    </Suspense>
   );
 }
