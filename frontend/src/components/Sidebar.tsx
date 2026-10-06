@@ -371,7 +371,7 @@ export default function Sidebar({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onMobileClose}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm lg:hidden"
             />
             <motion.div
               initial={{ x: '-100%' }}
@@ -379,7 +379,7 @@ export default function Sidebar({
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
               className={cn(
-                "fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] border-r shadow-2xl backdrop-blur-2xl lg:hidden",
+                "fixed inset-y-0 left-0 z-[80] w-72 max-w-[85vw] border-r shadow-2xl backdrop-blur-2xl lg:hidden",
                 isLight ? "bg-white/98 border-slate-200 text-slate-900" : "bg-slate-950/95 border-slate-800 text-white"
               )}
             >

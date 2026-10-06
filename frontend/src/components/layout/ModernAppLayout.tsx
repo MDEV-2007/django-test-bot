@@ -61,16 +61,16 @@ export default function ModernAppLayout({
         )}
       </div>
 
-      <div className="relative z-10 flex min-h-screen">
-        {/* Modern Sidebar */}
-        <ModernSidebar
-          mobileOpen={mobileMenuOpen}
-          onMobileClose={() => setMobileMenuOpen(false)}
-          user={user}
-          onLogout={handleLogout}
-          theme={theme}
-        />
+      {/* Modern Sidebar (Desktop fixed + Mobile drawer) */}
+      <ModernSidebar
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+        user={user}
+        onLogout={handleLogout}
+        theme={theme}
+      />
 
+      <div className="relative z-10 flex min-h-screen">
         {/* Main Content Column */}
         <div className="flex flex-1 flex-col min-w-0 lg:pl-64 xl:pl-72 pb-24 sm:pb-8">
           {/* Topbar */}
@@ -93,8 +93,8 @@ export default function ModernAppLayout({
         </div>
       </div>
 
-      {/* Floating Mobile Tab Bar on Phones */}
-      <MobileTabBar theme={theme} />
+      {/* Floating Mobile Tab Bar on Phones (hidden when mobile drawer is open) */}
+      {!mobileMenuOpen && <MobileTabBar theme={theme} />}
 
       {/* Command Palette */}
       <CommandPalette />

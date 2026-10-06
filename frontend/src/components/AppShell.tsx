@@ -188,8 +188,8 @@ export default function AppShell() {
         )}
       </header>
 
-      {/* Mobile Tab Bar */}
-      <MobileTabBar theme="light" />
+      {/* Mobile Tab Bar (hidden when mobile drawer is open) */}
+      {!mobileMenuOpen && <MobileTabBar theme="light" />}
 
       {/* Command Palette */}
       {user && <CommandPalette />}
