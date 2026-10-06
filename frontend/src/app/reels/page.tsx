@@ -1164,6 +1164,8 @@ function ReelsInner() {
               </form>
             </div>
           </div>
+        )}
+
         {/* ── STUDENT QUESTION CREATION MODAL ("Mening qiyin savolim") ── */}
         {isCreateModalOpen && (
           <div
