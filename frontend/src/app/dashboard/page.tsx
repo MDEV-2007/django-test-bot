@@ -175,25 +175,17 @@ export default function DashboardPage() {
   const [chestModalOpen, setChestModalOpen] = useState(false);
   const [chestStatus, setChestStatus] = useState<DailyChestStatus | null>(null);
 
-  // Smart Mistakes Notebook state (Aqlli Xatolar Daftari)
-  const [mistakesSummary, setMistakesSummary] = useState<{
+  // Smart Mistakes Notebook query (Aqlli Xatolar Daftari)
+  type MistakesSummaryData = {
     total_mistakes: number;
     subject_counts: { name: string; count: number }[];
     recent_mistakes: { id: number; body: string; subject_name: string; difficulty: number; explanation: string }[];
-  } | null>(null);
-  const [startingMistakesTest, setStartingMistakesTest] = useState(false);
+  };
 
-  useEffect(() => {
-    apiFetch<{
-      total_mistakes: number;
-      subject_counts: { name: string; count: number }[];
-      recent_mistakes: any[];
-    }>('/api/tests/mistakes-summary/')
-      .then((res) => {
-        if (res) setMistakesSummary(res);
-      })
-      .catch((err) => console.error('Failed to load mistakes summary', err));
-  }, []);
+  const { data: mistakesSummary, refresh: refreshMistakes } = useApiQuery<MistakesSummaryData>(
+    access ? '/api/tests/mistakes-summary/' : null
+  );
+  const [startingMistakesTest, setStartingMistakesTest] = useState(false);
 
   const handleStartMistakesTest = async () => {
     if (startingMistakesTest) return;
@@ -205,6 +197,7 @@ export default function DashboardPage() {
       });
       if (res && res.attempt_id) {
         toast.success("Xatolar ustida ishlash testi boshlandi!");
+        refreshMistakes();
         router.push(`/tests/${res.attempt_id}`);
       } else if (res?.error) {
         toast.info(res.error);
@@ -517,7 +510,9 @@ export default function DashboardPage() {
                     ))
                   ) : (
                     <span className="text-xs text-slate-500 italic">
-                      {mistakesSummary?.total_mistakes === 0
+                      {!mistakesSummary
+                        ? "Xatolar tahlili yuklanmoqda..."
+                        : mistakesSummary.total_mistakes === 0
                         ? "Hozircha xato javoblaringiz yo'q, ajoyib natija! 🎯"
                         : "Xatolar tahlili tayyorlanmoqda..."}
                     </span>

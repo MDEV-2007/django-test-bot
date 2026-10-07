@@ -480,7 +480,7 @@ def mistakes_summary_api(request):
     subject_counts = {}
 
     for ans in wrong_answers:
-        if ans.question_id in seen or ans.is_skipped:
+        if not ans.question or ans.question_id in seen or ans.is_skipped:
             continue
         seen.add(ans.question_id)
         q = ans.question
