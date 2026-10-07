@@ -384,7 +384,7 @@ export default function StudyRoomPage() {
   const currentAmbient = AMBIENT_SOUNDS.find((s) => s.id === activeSound);
 
   return (
-    <div className={cn("min-h-screen bg-[var(--bg-page)] text-foreground flex flex-col transition-colors", isFullscreen && "bg-[#080b12] text-white")}>
+    <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors">
       {!isFullscreen && <AppShell />}
 
       <main className={cn(
@@ -395,19 +395,19 @@ export default function StudyRoomPage() {
         {/* TO'LIQ EKRAN (ZEN ANTI-DISTRACTION MODE)                      */}
         {/* ============================================================ */}
         {isFullscreen ? (
-          <div data-theme="dark" className="mx-auto w-full max-w-2xl space-y-6 text-center text-white selection:bg-emerald-500/30">
+          <div className="mx-auto w-full max-w-2xl space-y-6 text-center text-foreground">
             {/* Top exit & logo */}
-            <div className="flex items-center justify-between text-xs text-slate-400 border-b border-white/10 pb-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <span className="font-mono font-black text-emerald-400 text-sm tracking-wider">ILMILDIZI</span>
-                <span className="text-white/30">•</span>
-                <span className="font-bold text-white tracking-wide">ZEN STUDY MODE</span>
+                <span className="font-mono font-bold text-primary text-sm tracking-wider">ILMILDIZI</span>
+                <span className="text-muted-foreground/40">•</span>
+                <span className="font-semibold text-foreground tracking-wide">ZEN STUDY MODE</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsFullscreen(false)}
-                className="text-xs font-bold gap-1 rounded-xl text-slate-400 hover:text-white hover:bg-white/10"
+                className="text-xs font-semibold gap-1.5 rounded-lg text-muted-foreground hover:text-foreground"
               >
                 <Minimize2 className="size-3.5" />
                 <span>Chiqish</span>
@@ -416,56 +416,56 @@ export default function StudyRoomPage() {
 
             {/* Title & Subject */}
             <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider">
                 <SubjectIcon className="size-3.5" />
                 <span>{activeMission.subject}</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-sm">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
                 {activeMission.topic}
               </h2>
             </div>
 
             {/* Giant Countdown */}
             <div className="py-6 space-y-3">
-              <span className="font-mono text-7xl sm:text-8xl font-black tracking-tight drop-shadow-2xl text-white">
+              <span className="font-mono text-7xl sm:text-8xl font-black tracking-tight text-foreground">
                 {formatTime(timeLeft)}
               </span>
 
               {/* Progress Bar */}
-              <div className="max-w-md mx-auto relative h-3.5 w-full overflow-hidden rounded-full bg-white/10 p-0.5 border border-white/5">
+              <div className="max-w-md mx-auto relative h-2.5 w-full overflow-hidden rounded-full bg-muted border border-border">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 transition-all duration-700 shadow-sm"
+                  className="h-full rounded-full bg-primary transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
 
-              <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
-                <span className="inline-flex items-center gap-1 font-bold text-emerald-400">
-                  <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1 font-semibold text-primary">
+                  <span className="size-2 rounded-full bg-primary animate-ping" />
                   🎯 FOKUSDA
                 </span>
-                <span className="text-white/30">•</span>
+                <span className="text-muted-foreground/40">•</span>
                 <span>{Math.round(progressPercent)}% o&apos;tdi</span>
               </div>
             </div>
 
             {/* Inline Ambient Audio Controller */}
-            <div className="flex flex-wrap items-center justify-center gap-3 p-3.5 rounded-2xl bg-[#10141f] border border-white/10 shadow-xl max-w-lg mx-auto">
-              <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                <Headphones className="size-4 text-emerald-400" />
+            <div className="flex flex-wrap items-center justify-center gap-3 p-3 rounded-xl bg-card border border-border shadow-xs max-w-lg mx-auto">
+              <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                <Headphones className="size-4 text-primary" />
                 <span>{currentAmbient ? `${currentAmbient.name} • ${Math.round(volume * 100)}%` : 'Ovoz o\'chirilgan'}</span>
               </span>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {AMBIENT_SOUNDS.map((snd) => (
                   <button
                     key={snd.id}
                     onClick={() => toggleSound(snd.id, snd.type)}
                     className={cn(
-                      "px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all",
+                      "px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                       activeSound === snd.id
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs"
-                        : "bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+                        ? "bg-primary text-primary-foreground font-semibold"
+                        : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
                     )}
                   >
                     {snd.name}
@@ -475,29 +475,29 @@ export default function StudyRoomPage() {
             </div>
 
             {/* Live Task Progress */}
-            <div className="max-w-md mx-auto p-4 sm:p-5 rounded-3xl bg-[#10141f] border border-white/10 text-left space-y-3 shadow-2xl">
-              <div className="flex items-center justify-between text-xs font-bold">
-                <span className="text-white font-extrabold tracking-wide">Sessiya Vazifalari</span>
-                <span className="text-amber-400 font-mono">+{activeMission.xpReward} XP</span>
+            <div className="max-w-md mx-auto p-4 sm:p-5 rounded-2xl bg-card border border-border text-left space-y-3 shadow-card">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-foreground tracking-wide">Sessiya Vazifalari</span>
+                <span className="text-amber-500 font-mono font-bold">+{activeMission.xpReward} XP</span>
               </div>
 
               <div className="space-y-2">
                 {activeMission.tasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-[#161b29] border border-white/10 text-xs transition-all hover:border-white/20"
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 border border-border text-xs transition-colors"
                   >
                     <button
                       onClick={() => toggleTask(task.id)}
-                      className="flex items-center gap-2.5 text-left flex-1 min-w-0"
+                      className="flex items-center gap-2.5 text-left flex-1 min-w-0 cursor-pointer"
                     >
                       <div className={cn(
                         "size-4 rounded-full border flex items-center justify-center shrink-0 transition-colors",
-                        task.completed ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/30"
+                        task.completed ? "bg-primary border-primary text-primary-foreground" : "border-border"
                       )}>
                         {task.completed && <CheckCircle2 className="size-3" />}
                       </div>
-                      <span className={cn("truncate font-medium text-white/90", task.completed && "line-through text-slate-500")}>
+                      <span className={cn("truncate font-medium text-foreground", task.completed && "line-through text-muted-foreground")}>
                         {task.label}
                       </span>
                     </button>
@@ -506,14 +506,14 @@ export default function StudyRoomPage() {
                       <div className="flex items-center gap-1.5 shrink-0 ml-2 font-mono text-xs">
                         <button
                           onClick={() => incrementTaskCounter(task.id, -1)}
-                          className="size-5 rounded-md bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold transition-colors"
+                          className="size-5 rounded bg-muted hover:bg-muted/80 text-foreground flex items-center justify-center font-bold transition-colors cursor-pointer"
                         >
                           -
                         </button>
-                        <span className="font-bold text-white px-1">{task.current} / {task.total}</span>
+                        <span className="font-semibold text-foreground px-1">{task.current} / {task.total}</span>
                         <button
                           onClick={() => incrementTaskCounter(task.id, 1)}
-                          className="size-5 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold transition-colors"
+                          className="size-5 rounded bg-primary/20 hover:bg-primary/30 text-primary flex items-center justify-center font-bold transition-colors cursor-pointer"
                         >
                           +
                         </button>
@@ -530,10 +530,10 @@ export default function StudyRoomPage() {
                 onClick={toggleTimer}
                 size="lg"
                 className={cn(
-                  "px-8 py-5 rounded-2xl font-black text-sm transition-all shadow-lg",
+                  "px-8 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-xs",
                   isRunning
-                    ? "bg-amber-600 hover:bg-amber-500 text-white shadow-amber-950/40"
-                    : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/50"
+                    ? "bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+                    : "bg-primary hover:bg-primary/90 text-primary-foreground"
                 )}
               >
                 {isRunning ? (
@@ -551,14 +551,14 @@ export default function StudyRoomPage() {
                 onClick={handleFinishSession}
                 variant="outline"
                 size="lg"
-                className="py-5 px-6 rounded-2xl font-bold text-xs border border-emerald-500/40 bg-white/5 text-emerald-400 hover:bg-emerald-500/15 hover:text-emerald-300 transition-all"
+                className="py-2.5 px-6 rounded-lg font-semibold text-xs border border-border bg-card text-foreground hover:bg-muted transition-all"
               >
-                <CheckCircle2 className="size-4 mr-1.5" />
+                <CheckCircle2 className="size-4 mr-1.5 text-primary" />
                 <span>Yakunlash</span>
               </Button>
             </div>
 
-            <p className="text-xs text-slate-400 font-mono">
+            <p className="text-xs text-muted-foreground font-mono">
               🔥 {currentStreak} kunlik streak saqlanmoqda
             </p>
           </div>
@@ -568,25 +568,25 @@ export default function StudyRoomPage() {
           /* ============================================================ */
           <>
             {/* Sarlavha */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-card)] pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-xs font-black uppercase px-2.5 py-0.5 rounded-xl gap-1.5">
-                    <PremiumIcon icon={Target} tone="primary" size="xs" />
+                  <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary text-xs font-semibold uppercase px-2.5 py-0.5 rounded-md gap-1.5">
+                    <Target className="size-3.5" />
                     <span>STUDY MODE</span>
                   </Badge>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground font-medium">
                     25 daqiqa. Bitta maqsad. Nol chalg&apos;ituvchi.
                   </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight mt-1">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mt-1">
                   Fokus Xonasi &amp; Study Session
                 </h1>
               </div>
 
               {/* Jonli talabalar & Zen button */}
               <div className="flex items-center gap-2.5 self-start sm:self-auto">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                   <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
                   <span>{peerCount} nafar o&apos;quvchi zalda</span>
                 </div>
@@ -595,7 +595,7 @@ export default function StudyRoomPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsFullscreen(true)}
-                  className="rounded-2xl text-xs font-bold gap-1.5 border-[var(--border-card)] bg-[var(--surface-card)] hover:border-primary/40 text-foreground"
+                  className="rounded-lg text-xs font-semibold gap-1.5 border-border bg-card hover:bg-muted text-foreground"
                 >
                   <Maximize2 className="size-3.5" />
                   <span className="hidden sm:inline">Zen Mode</span>
@@ -606,47 +606,44 @@ export default function StudyRoomPage() {
             {/* ============================================================ */}
             {/* 🤖 AI MENTOR: BUGUN SIZ UCHUN TAVSIYA                        */}
             {/* ============================================================ */}
-            <Card className="rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card)] p-5 sm:p-6 shadow-sm relative overflow-hidden">
-              <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-indigo-500/5 blur-2xl" />
-
-              <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <Card className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-card">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-3.5 max-w-2xl">
-                  <div className="size-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 flex items-center justify-center shrink-0 shadow-2xs">
-                    <Bot className="size-6 text-indigo-500" />
+                  <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
+                    <Bot className="size-5" />
                   </div>
 
                   <div className="space-y-1.5 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] font-black uppercase tracking-wider">
-                        🤖 AI Mentor Tavsiyasi
+                      <span className="px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-primary font-mono text-[10px] font-semibold uppercase tracking-wider">
+                        AI Mentor Tavsiyasi
                       </span>
-                      <Badge variant="secondary" className="text-[10px] font-mono bg-[var(--surface-input)] text-muted-foreground border border-[var(--border-card)]">
+                      <Badge variant="secondary" className="text-[10px] font-mono bg-muted text-muted-foreground border-border">
                         Bugun siz uchun
                       </Badge>
                     </div>
 
-                    {/* Alohida ajralib turuvchi iqtibos ramkasi */}
-                    <div className="border-l-2 border-indigo-500 pl-3 py-0.5 my-1">
+                    <div className="border-l-2 border-primary pl-3 py-0.5 my-1">
                       <p className="text-xs sm:text-[13px] text-foreground italic font-medium leading-relaxed">
                         &ldquo;{activeMission.aiReason}&rdquo;
                       </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2.5 pt-0.5 text-xs text-muted-foreground">
-                      <span className="text-[11px] font-semibold text-muted-foreground">
-                        Tavsiya etilgan: <strong className="text-indigo-600 dark:text-indigo-400">{activeMission.subject}</strong>
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        Tavsiya etilgan: <strong className="text-primary font-semibold">{activeMission.subject}</strong>
                       </span>
                       <span className="opacity-40">•</span>
                       <span className="text-[11px]">
-                        Mastery: <strong className="text-emerald-500 font-mono">{activeMission.currentMastery}%</strong> ➔ <strong className="text-indigo-500 font-mono">{activeMission.targetMastery}%</strong>
+                        Mastery: <strong className="text-emerald-500 font-mono font-semibold">{activeMission.currentMastery}%</strong> ➔ <strong className="text-primary font-mono font-semibold">{activeMission.targetMastery}%</strong>
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Switch Subject presets */}
-                <div className="flex flex-wrap items-center gap-1.5 self-start md:self-auto shrink-0 bg-[var(--surface-input)] p-1.5 rounded-2xl border border-[var(--border-card)]">
-                  <span className="text-[10px] uppercase font-mono font-bold text-muted-foreground px-2">Fanlar:</span>
+                <div className="flex flex-wrap items-center gap-1 self-start md:self-auto shrink-0 bg-muted/50 p-1.5 rounded-xl border border-border">
+                  <span className="text-[10px] uppercase font-mono font-semibold text-muted-foreground px-2">Fanlar:</span>
                   {PRESET_MISSIONS.map((m) => (
                     <button
                       key={m.id}
@@ -655,10 +652,10 @@ export default function StudyRoomPage() {
                         setActiveMission(m);
                       }}
                       className={cn(
-                        "px-2.5 py-1 rounded-xl text-xs font-bold transition-all",
+                        "px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                         activeMission.id === m.id
-                          ? "bg-indigo-600 text-white shadow-xs"
-                          : "text-muted-foreground hover:text-foreground hover:bg-[var(--surface-hover)]"
+                          ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       )}
                     >
                       {m.subject}
@@ -674,34 +671,32 @@ export default function StudyRoomPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* ASOSIY STUDY SESSION KARTASI (Col 8) */}
               <div className="lg:col-span-8 space-y-6">
-                <Card className="rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card)] p-6 sm:p-7 shadow-sm relative overflow-hidden">
-                  <div className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-emerald-500/5 blur-3xl" />
-
-                  {/* Header: Fan & Mavzu - Asosiy Dominant Sarlavha */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-card)] pb-4">
+                <Card className="rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-card">
+                  {/* Header: Fan & Mavzu */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono uppercase tracking-wider font-extrabold text-teal-600 dark:text-teal-400 flex items-center gap-1">
+                        <span className="text-xs font-mono uppercase tracking-wider font-semibold text-primary flex items-center gap-1">
                           <Target className="size-3.5" /> BUGUNGI FOKUS MAQSADI
                         </span>
-                        <Badge variant="outline" className="text-[10px] font-bold border-teal-500/30 text-teal-600 dark:text-teal-400 bg-teal-500/10">
+                        <Badge variant="outline" className="text-[10px] font-semibold border-primary/20 text-primary bg-primary/10">
                           {activeMission.subject}
                         </Badge>
                       </div>
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-foreground tracking-tight">
+                      <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                         {activeMission.topic}
                       </h3>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10 gap-1">
-                        <Zap className="size-3.5 text-amber-500 fill-amber-500" /> +{activeMission.xpReward} XP
+                      <Badge variant="outline" className="font-mono text-xs font-semibold text-amber-500 border-amber-500/30 bg-amber-500/10 gap-1">
+                        <Zap className="size-3.5 fill-amber-500" /> +{activeMission.xpReward} XP
                       </Badge>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsFullscreen(true)}
-                        className="size-8 rounded-xl text-muted-foreground hover:text-foreground"
+                        className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
                         title="To'liq ekran (Zen Mode)"
                       >
                         <Maximize2 className="size-4" />
@@ -711,20 +706,20 @@ export default function StudyRoomPage() {
 
                   {/* Ikki ustunli Session Layout: Timer chapda, Vazifalar o'ngda */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-6 items-center">
-                    {/* Chap ustun: Katta Digital Taymer, Sozlama Presets & Tugmalar (Col 6) */}
-                    <div className="md:col-span-6 flex flex-col items-center justify-center p-4 sm:p-5 rounded-3xl bg-[var(--surface-input)] border border-[var(--border-card)] text-center space-y-4">
+                    {/* Chap ustun: Digital Taymer & Tugmalar (Col 6) */}
+                    <div className="md:col-span-6 flex flex-col items-center justify-center p-4 sm:p-5 rounded-xl bg-muted/30 border border-border text-center space-y-4">
                       
-                      {/* Pomodoro vaqtini tezda o'zgartirish (15, 25, 50 min presets) */}
-                      <div className="flex items-center justify-center gap-1.5 p-1 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-card)] shadow-2xs">
+                      {/* Pomodoro presets */}
+                      <div className="flex items-center justify-center gap-1.5 p-1 rounded-lg bg-card border border-border shadow-xs">
                         {[15, 25, 50].map((mins) => (
                           <button
                             key={mins}
                             onClick={() => changeDurationPreset(mins)}
                             className={cn(
-                              "px-3 py-1 rounded-xl text-xs font-bold transition-all",
+                              "px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer",
                               durationMinutes === mins
-                                ? "bg-teal-600 text-white shadow-xs font-extrabold"
-                                : "text-muted-foreground hover:text-foreground hover:bg-[var(--surface-hover)]"
+                                ? "bg-primary text-primary-foreground font-semibold"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
                             )}
                             title={`${mins} daqiqalik taymer`}
                           >
@@ -737,12 +732,12 @@ export default function StudyRoomPage() {
                         <svg className="size-full -rotate-90" viewBox="0 0 100 100">
                           <circle
                             cx="50" cy="50" r="42"
-                            className="stroke-[var(--border-strong)] fill-none"
+                            className="stroke-muted fill-none"
                             strokeWidth="6"
                           />
                           <circle
                             cx="50" cy="50" r="42"
-                            className="stroke-teal-500 fill-none transition-all duration-500 stroke-linecap-round"
+                            className="stroke-primary fill-none transition-all duration-500 stroke-linecap-round"
                             strokeWidth="6"
                             strokeDasharray="263.89"
                             strokeDashoffset={263.89 - (263.89 * progressPercent) / 100}
@@ -753,12 +748,12 @@ export default function StudyRoomPage() {
                           <span className="font-mono text-4xl sm:text-5xl font-black text-foreground tracking-tight">
                             {formatTime(timeLeft)}
                           </span>
-                          <span className="text-[10px] uppercase tracking-widest font-extrabold text-muted-foreground mt-1">
+                          <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mt-1">
                             FOKUS JARAYONI
                           </span>
                           {isRunning && (
-                            <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20">
-                              <Flame className="size-3 text-teal-500 animate-pulse" /> Davom etmoqda
+                            <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                              <Flame className="size-3 text-amber-500 animate-pulse fill-amber-500" /> Davom etmoqda
                             </span>
                           )}
                         </div>
@@ -770,10 +765,10 @@ export default function StudyRoomPage() {
                           onClick={toggleTimer}
                           size="lg"
                           className={cn(
-                            "flex-1 h-12 rounded-2xl font-black text-xs sm:text-sm transition-all shadow-sm gap-2",
+                            "flex-1 h-11 rounded-lg font-semibold text-xs sm:text-sm transition-all shadow-xs gap-2 cursor-pointer",
                             isRunning
-                              ? "bg-amber-600 hover:bg-amber-700 text-white"
-                              : "bg-teal-600 hover:bg-teal-700 text-white"
+                              ? "bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+                              : "bg-primary hover:bg-primary/90 text-primary-foreground"
                           )}
                         >
                           {isRunning ? (
@@ -782,7 +777,7 @@ export default function StudyRoomPage() {
                             </>
                           ) : (
                             <>
-                              <Play className="size-4 fill-current" /> [ 🚀 BOSHLASH ]
+                              <Play className="size-4 fill-current" /> Boshlash
                             </>
                           )}
                         </Button>
@@ -791,7 +786,7 @@ export default function StudyRoomPage() {
                           onClick={resetTimer}
                           size="icon"
                           variant="outline"
-                          className="size-12 rounded-2xl border-[var(--border-card)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-foreground shrink-0 shadow-2xs"
+                          className="size-11 rounded-lg border-border bg-card hover:bg-muted text-foreground shrink-0 shadow-xs cursor-pointer"
                           title="Qayta o'rnatish"
                         >
                           <RotateCcw className="size-4" />
@@ -802,10 +797,10 @@ export default function StudyRoomPage() {
                     {/* O'ng ustun: BUGUNGI MISSIYA CHECKLIST (Col 6) */}
                     <div className="md:col-span-6 space-y-3.5">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-mono font-black uppercase tracking-wider text-muted-foreground">
+                        <h4 className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
                           BUGUNGI MISSIYA
                         </h4>
-                        <span className="text-xs font-bold text-foreground">
+                        <span className="text-xs font-semibold text-foreground">
                           {activeMission.tasks.filter((t) => t.completed).length} / {activeMission.tasks.length} bajarildi
                         </span>
                       </div>
@@ -815,25 +810,25 @@ export default function StudyRoomPage() {
                           <div
                             key={task.id}
                             className={cn(
-                              "p-3 rounded-2xl border transition-all flex items-center justify-between gap-2 text-xs group",
+                              "p-3 rounded-xl border transition-colors flex items-center justify-between gap-2 text-xs",
                               task.completed
-                                ? "bg-emerald-500/10 border-emerald-500/30 text-muted-foreground"
-                                : "bg-[var(--surface-card)] border-[var(--border-card)] hover:border-[var(--border-strong)] text-foreground shadow-2xs"
+                                ? "bg-muted/40 border-border text-muted-foreground"
+                                : "bg-card border-border hover:border-primary/40 text-foreground shadow-xs"
                             )}
                           >
                             <button
                               onClick={() => toggleTask(task.id)}
-                              className="flex items-center gap-2.5 text-left flex-1 min-w-0"
+                              className="flex items-center gap-2.5 text-left flex-1 min-w-0 cursor-pointer"
                             >
                               <div className={cn(
-                                "size-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                                "size-5 rounded-full border flex items-center justify-center shrink-0 transition-colors",
                                 task.completed
-                                  ? "bg-emerald-600 border-emerald-600 text-white"
-                                  : "border-[var(--border-strong)] group-hover:border-teal-500"
+                                  ? "bg-primary border-primary text-primary-foreground"
+                                  : "border-border hover:border-primary"
                               )}>
                                 {task.completed && <CheckCircle2 className="size-3.5" />}
                               </div>
-                              <span className={cn("font-bold truncate", task.completed && "line-through text-muted-foreground")}>
+                              <span className={cn("font-medium truncate", task.completed && "line-through text-muted-foreground")}>
                                 {task.label}
                               </span>
                             </button>
@@ -842,15 +837,15 @@ export default function StudyRoomPage() {
                               <div className="flex items-center gap-1 shrink-0 font-mono text-xs">
                                 <button
                                   onClick={() => incrementTaskCounter(task.id, -1)}
-                                  className="size-6 rounded-lg bg-[var(--surface-hover)] hover:bg-[var(--surface-hover-strong)] text-foreground flex items-center justify-center font-bold"
+                                  className="size-6 rounded-md bg-muted hover:bg-muted/80 text-foreground flex items-center justify-center font-bold cursor-pointer"
                                   title="Kamaytirish"
                                 >
                                   -
                                 </button>
-                                <span className="font-bold px-1 text-foreground">{task.current} / {task.total}</span>
+                                <span className="font-semibold px-1 text-foreground">{task.current} / {task.total}</span>
                                 <button
                                   onClick={() => incrementTaskCounter(task.id, 1)}
-                                  className="size-6 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold"
+                                  className="size-6 rounded-md bg-primary/10 hover:bg-primary/20 text-primary flex items-center justify-center font-bold cursor-pointer"
                                   title="Oshirish"
                                 >
                                   +
@@ -862,8 +857,8 @@ export default function StudyRoomPage() {
                       </div>
 
                       {/* Mukofot badge */}
-                      <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs">
-                        <span className="font-bold text-amber-600 dark:text-amber-400">
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between text-xs">
+                        <span className="font-semibold text-amber-600 dark:text-amber-400">
                           🎁 Sessiya Mukofoti:
                         </span>
                         <span className="font-mono font-black text-amber-600 dark:text-amber-400">

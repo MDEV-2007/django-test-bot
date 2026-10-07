@@ -628,12 +628,12 @@ function ReelsInner() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-4 select-none font-sans min-h-0 bg-slate-100/70 dark:bg-zinc-950">
+      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-4 select-none font-sans min-h-0 bg-background">
         {/* Main Phone Card Container */}
-        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[480px] md:max-w-[500px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-slate-200/90 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-900 flex flex-col my-auto transition-all">
+        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[480px] md:max-w-[500px] relative rounded-none sm:rounded-2xl overflow-hidden border-0 sm:border border-border shadow-card bg-card text-card-foreground flex flex-col my-auto transition-all">
           
-          {/* ── TOP HORIZONTAL CATEGORY BAR (Matches Screenshot) ── */}
-          <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-white dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800/80">
+          {/* ── TOP HORIZONTAL CATEGORY BAR ── */}
+          <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-card border-b border-border">
             <div className="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
               {displayCategories.map((subj) => {
                 const isSel = selectedSubject === subj.slug;
@@ -642,10 +642,10 @@ function ReelsInner() {
                     key={subj.slug}
                     onClick={() => { tgHaptic('select'); setSelectedSubject(subj.slug); }}
                     className={cn(
-                      "text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full transition-all shrink-0 cursor-pointer",
+                      "text-xs sm:text-sm px-3.5 py-1.5 rounded-full transition-colors shrink-0 cursor-pointer",
                       isSel
-                        ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
-                        : "bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300"
+                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground font-medium"
                     )}
                   >
                     {subj.name}
@@ -657,14 +657,14 @@ function ReelsInner() {
             {/* Sound & XP indicators, +Savol & Combo */}
             <div className="flex items-center gap-1.5 shrink-0 pl-2">
               {comboStreak >= 2 && (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[10px] font-black animate-pulse shadow-sm">
-                  <Flame className="size-3 fill-white" />
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold shadow-xs">
+                  <Flame className="size-3 fill-current" />
                   <span>{comboStreak}x</span>
                 </div>
               )}
               <button
                 onClick={() => { tgHaptic('medium'); setIsCreateModalOpen(true); }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-[11px] font-bold shadow-sm transition-all cursor-pointer"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary hover:bg-primary/90 active:scale-95 text-primary-foreground text-[11px] font-semibold shadow-xs transition-colors cursor-pointer"
                 title="O'z qiyin savolingizni qo'shing va +20 XP oling"
               >
                 <Plus className="size-3" />
@@ -673,12 +673,12 @@ function ReelsInner() {
               </button>
               <button
                 onClick={() => { tgHaptic('light'); setSoundEnabled(!soundEnabled); }}
-                className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors cursor-pointer"
+                className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 title={soundEnabled ? "Ovozsiz qilish" : "Ovozni yoqish"}
               >
-                {soundEnabled ? <Volume2 className="size-4 text-slate-600 dark:text-zinc-300" /> : <VolumeX className="size-4 text-rose-500" />}
+                {soundEnabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4 text-destructive" />}
               </button>
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300 text-[11px] font-bold">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-semibold font-mono">
                 <Zap className="size-3 fill-amber-500 text-amber-500" />
                 <span>+{todayXpEarned}</span>
               </div>

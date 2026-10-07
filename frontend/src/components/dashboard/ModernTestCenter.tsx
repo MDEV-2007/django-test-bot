@@ -152,47 +152,32 @@ export default function ModernTestCenter({
         {curatedList.map((test) => (
           <div
             key={test.id}
-            className={cn(
-              'relative rounded-3xl p-5 backdrop-blur-xl transition-all duration-300 flex flex-col justify-between shadow-lg',
-              isLight
-                ? 'border border-slate-200/90 bg-white hover:border-slate-300 shadow-[0_4px_20px_rgba(15,23,42,0.05)]'
-                : 'border border-slate-800/80 bg-gradient-to-br from-emerald-500/15 via-slate-900/60 to-slate-950 hover:border-slate-700'
-            )}
+            className="relative rounded-2xl p-5 border border-border bg-card hover:border-primary/40 transition-colors flex flex-col justify-between shadow-card"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <Badge
                   variant="outline"
-                  className={cn(
-                    'text-[10px] font-black px-2.5 py-0.5 rounded-full border',
-                    isLight
-                      ? 'border-blue-200 bg-blue-50 text-blue-700'
-                      : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                  )}
+                  className="text-[10px] font-semibold px-2.5 py-0.5 rounded-md border-primary/20 bg-primary/10 text-primary"
                 >
                   {test.level}
                 </Badge>
-                <span className={cn('text-[11px] font-bold flex items-center gap-1', isLight ? 'text-slate-500' : 'text-slate-400')}>
+                <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
                   {test.isPriority && <Sparkles className="size-3 text-amber-500" />}
                   <span>{test.tag}</span>
                 </span>
               </div>
 
               <div>
-                <span className={cn('text-[10px] font-bold uppercase tracking-wider', isLight ? 'text-slate-400' : 'text-slate-400')}>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {test.subjectName}
                 </span>
-                <h4
-                  className={cn(
-                    'text-sm sm:text-base font-black mt-0.5 leading-snug line-clamp-2',
-                    isLight ? 'text-slate-900' : 'text-white'
-                  )}
-                >
+                <h4 className="text-sm sm:text-base font-bold text-foreground mt-0.5 leading-snug line-clamp-2">
                   {test.title}
                 </h4>
               </div>
 
-              <div className={cn('flex items-center gap-4 text-xs font-mono pt-1', isLight ? 'text-slate-500' : 'text-slate-400')}>
+              <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground pt-1">
                 <span className="flex items-center gap-1.5">
                   <FileCheck2 className="size-3.5" />
                   <span>{test.questionsCount} savol</span>
@@ -204,16 +189,11 @@ export default function ModernTestCenter({
               </div>
             </div>
 
-            <div className={cn('mt-5 pt-3.5 border-t flex items-center justify-between', isLight ? 'border-slate-100' : 'border-slate-800/80')}>
-              <span className={cn('text-xs', isLight ? 'text-slate-500' : 'text-slate-400')}>Haqiqiy imtihon muhiti</span>
+            <div className="mt-5 pt-3.5 border-t border-border flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Haqiqiy imtihon muhiti</span>
               <Link
                 href={`/tests?subject=${test.subjectSlug}`}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer select-none active:scale-95',
-                  isLight
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
-                    : 'bg-slate-800/80 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300'
-                )}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all cursor-pointer select-none active:scale-95 shadow-xs"
               >
                 <span>Boshlash</span>
                 <ArrowRight className="size-3.5" />

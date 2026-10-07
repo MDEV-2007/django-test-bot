@@ -233,11 +233,13 @@ export default function FlashcardsPage() {
             {/* NATIJA VA YAKUNLASH EKRANI                                  */}
             {/* ============================================================ */}
             {isCompleted ? (
-              <Card className="border-2 border-primary/40 bg-gradient-to-br from-card via-card to-primary/10 shadow-xl p-6 sm:p-8 text-center space-y-6 animate-in zoom-in-95 duration-300">
-                <PremiumIcon icon={Trophy} tone="gold" size="xl" glow className="mx-auto" />
+              <Card className="border border-border bg-card shadow-card p-6 sm:p-8 text-center space-y-6">
+                <div className="size-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mx-auto">
+                  <Trophy className="size-6 text-amber-500" />
+                </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="text-2xl font-black tracking-tight text-foreground">
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                     Ajoyib Natija! To&apos;plam Yakunlandi!
                   </h3>
                   <p className="text-xs sm:text-sm text-muted-foreground">
@@ -247,39 +249,39 @@ export default function FlashcardsPage() {
 
                 {earnedReward && (
                   <div className="flex items-center justify-center gap-3">
-                    <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-black text-sm">
-                      <Zap className="size-4" /> +{earnedReward.xp} XP
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs font-mono">
+                      <Zap className="size-3.5 fill-amber-500" /> +{earnedReward.xp} XP
                     </div>
-                    <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-black text-sm">
-                      <Sparkles className="size-4" /> +{earnedReward.coins} Tanga
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary font-bold text-xs font-mono">
+                      <Sparkles className="size-3.5" /> +{earnedReward.coins} Tanga
                     </div>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto text-xs">
-                  <div className="p-3 bg-muted/40 rounded-xl border">
+                  <div className="p-3 bg-muted/40 rounded-xl border border-border">
                     <span className="text-muted-foreground">Xotirada mustahkamlandi</span>
-                    <p className="text-lg font-black text-emerald-500 mt-0.5">{masteredIds.length} ta</p>
+                    <p className="text-lg font-bold text-emerald-500 mt-0.5">{masteredIds.length} ta</p>
                   </div>
-                  <div className="p-3 bg-muted/40 rounded-xl border">
+                  <div className="p-3 bg-muted/40 rounded-xl border border-border">
                     <span className="text-muted-foreground">Qayta takrorlanadi</span>
-                    <p className="text-lg font-black text-rose-500 mt-0.5">{reviewIds.length} ta</p>
+                    <p className="text-lg font-bold text-destructive mt-0.5">{reviewIds.length} ta</p>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
                   <Button
                     onClick={restartDeck}
                     variant="outline"
-                    className="w-full sm:w-auto rounded-xl gap-2 font-semibold"
+                    className="w-full sm:w-auto rounded-lg gap-2 font-medium"
                   >
-                    <RefreshCcw className="size-4" /> Qaytadan boshlash
+                    <RefreshCcw className="size-3.5" /> Qaytadan boshlash
                   </Button>
                   <Button
                     onClick={() => setActiveDeck(null)}
-                    className="w-full sm:w-auto rounded-xl gap-2 font-bold bg-primary"
+                    className="w-full sm:w-auto rounded-lg gap-2 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs"
                   >
-                    Keyingi to&apos;plamga o&apos;tish <ArrowRight className="size-4" />
+                    Keyingi to&apos;plamga o&apos;tish <ArrowRight className="size-3.5" />
                   </Button>
                 </div>
               </Card>
@@ -291,14 +293,14 @@ export default function FlashcardsPage() {
                 {/* 3D Flip Flashcard */}
                 <div
                   onClick={() => setIsFlipped(!isFlipped)}
-                  className="relative min-h-[18rem] sm:min-h-[22rem] w-full cursor-pointer select-none rounded-3xl p-6 sm:p-8 flex flex-col justify-between border-2 border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 hover:border-primary/60 transition-all shadow-lg group active:scale-[0.99]"
+                  className="relative min-h-[18rem] sm:min-h-[22rem] w-full cursor-pointer select-none rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-border bg-card hover:border-primary/50 transition-colors shadow-card group active:scale-[0.99]"
                 >
                   <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
                     <span className="flex items-center gap-1.5 uppercase font-mono tracking-wider text-[11px] text-primary">
                       <Sparkles className="size-3.5" />
                       {isFlipped ? 'Javob / Izoh' : 'Savol / Fakt'}
                     </span>
-                    <span className="flex items-center gap-1 text-[11px] bg-muted/70 px-2.5 py-1 rounded-full">
+                    <span className="flex items-center gap-1 text-[11px] bg-muted px-2.5 py-1 rounded-md text-muted-foreground">
                       <RotateCw className="size-3 group-hover:rotate-180 transition-transform duration-500" />
                       Aylantirish uchun bosing
                     </span>
@@ -306,20 +308,20 @@ export default function FlashcardsPage() {
 
                   <div className="my-auto py-4 text-center space-y-3">
                     <p className={cn(
-                      "text-xl sm:text-2xl font-black leading-snug tracking-tight text-foreground transition-all",
-                      isFlipped && "text-emerald-600 dark:text-emerald-400"
+                      "text-xl sm:text-2xl font-bold leading-snug tracking-tight text-foreground transition-colors",
+                      isFlipped && "text-primary"
                     )}>
                       {isFlipped ? currentCard?.back : currentCard?.front}
                     </p>
 
                     {showHint && currentCard?.hint && (
-                      <p className="text-xs text-amber-500 italic bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl max-w-md mx-auto animate-in fade-in">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 italic bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg max-w-md mx-auto">
                         💡 Maslahat: {currentCard.hint}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-border/60 text-xs">
+                  <div className="flex items-center justify-between pt-4 border-t border-border text-xs">
                     {currentCard?.hint && !showHint ? (
                       <button
                         type="button"
@@ -327,7 +329,7 @@ export default function FlashcardsPage() {
                           e.stopPropagation();
                           setShowHint(true);
                         }}
-                        className="text-amber-500 hover:underline flex items-center gap-1 font-medium"
+                        className="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-medium"
                       >
                         <HelpCircle className="size-3.5" /> Maslahatni ko&apos;rish
                       </button>
@@ -344,13 +346,13 @@ export default function FlashcardsPage() {
                   <Button
                     variant="outline"
                     onClick={() => handleAnswer(false)}
-                    className="h-12 border-rose-500/30 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold gap-2 text-xs sm:text-sm"
+                    className="h-11 border-border hover:bg-destructive/10 text-destructive font-semibold gap-2 text-xs sm:text-sm rounded-lg"
                   >
-                    <X className="size-4 text-rose-500" /> Qaytarish kerak (Qiyin)
+                    <X className="size-4" /> Qaytarish kerak (Qiyin)
                   </Button>
                   <Button
                     onClick={() => handleAnswer(true)}
-                    className="h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 text-xs sm:text-sm shadow-md"
+                    className="h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 text-xs sm:text-sm rounded-lg shadow-xs"
                   >
                     <Check className="size-4" /> Yaxshi bilaman (Oson)
                   </Button>
@@ -365,16 +367,16 @@ export default function FlashcardsPage() {
           /* ============================================================ */
           <>
             {/* HERO BLOKI */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs font-bold gap-1.5">
-                    <PremiumIcon icon={Brain} tone="amber" size="xs" glow />
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs font-semibold gap-1.5 rounded-md">
+                    <Brain className="size-3.5" />
                     <span>Smart Flashcards</span>
                   </Badge>
-                  <Badge variant="secondary" className="text-xs font-medium">Anki & Quizlet uslubi</Badge>
+                  <Badge variant="secondary" className="text-xs font-normal">Anki & Quizlet uslubi</Badge>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mt-1.5">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-1.5">
                   Xotira Kartalari bilan Dars Qilish
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl">
@@ -384,12 +386,12 @@ export default function FlashcardsPage() {
 
               <div className="flex items-center gap-2 shrink-0">
                 <Link href="/battles">
-                  <Button variant="outline" size="sm" className="gap-1.5 text-xs font-semibold">
-                    <Swords className="size-3.5 text-rose-500" /> 1v1 Arena
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs font-medium rounded-lg">
+                    <Swords className="size-3.5 text-primary" /> 1v1 Arena
                   </Button>
                 </Link>
                 <Link href="/tests">
-                  <Button size="sm" className="gap-1.5 text-xs font-semibold bg-primary">
+                  <Button size="sm" className="gap-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-xs">
                     <BookOpen className="size-3.5" /> Testlarga o&apos;tish
                   </Button>
                 </Link>
@@ -399,9 +401,9 @@ export default function FlashcardsPage() {
             {/* FANLAR BO'YICHA FILTR TABLARI */}
             <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1">
               <Tabs value={selectedSubject} onValueChange={setSelectedSubject}>
-                <TabsList className="bg-muted/60 p-1 border">
+                <TabsList className="bg-muted/50 p-1 border border-border rounded-lg">
                   {subjects.map((s) => (
-                    <TabsTrigger key={s.slug} value={s.slug} className="text-xs font-semibold">
+                    <TabsTrigger key={s.slug} value={s.slug} className="text-xs font-medium rounded-md">
                       {s.name}
                     </TabsTrigger>
                   ))}
@@ -413,11 +415,11 @@ export default function FlashcardsPage() {
             {loading ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-44 rounded-2xl w-full" />
+                  <Skeleton key={i} className="h-44 rounded-xl w-full" />
                 ))}
               </div>
             ) : filteredDecks.length === 0 ? (
-              <Card className="p-8 text-center border-dashed">
+              <Card className="p-8 text-center border-dashed border-border rounded-xl">
                 <Brain className="size-10 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm font-semibold text-foreground">Bu fanda hozircha to&apos;plamlar yo&apos;q</p>
                 <p className="text-xs text-muted-foreground mt-1">Boshqa fanni tanlab ko&apos;ring.</p>
@@ -425,23 +427,19 @@ export default function FlashcardsPage() {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredDecks.map((deck) => {
-                  const DeckIcon = deck.subject_slug === 'tarix' ? Swords : deck.subject_slug === 'biologiya' ? Dna : BookOpen;
-                  const deckTone = deck.subject_slug === 'tarix' ? 'rose' : deck.subject_slug === 'biologiya' ? 'emerald' : 'indigo';
-
                   return (
                     <Card
                       key={deck.id}
                       onClick={() => startDeck(deck.id)}
-                      className="cursor-pointer border border-border/70 hover:border-primary/50 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-card to-card/60 rounded-2xl p-5 flex flex-col justify-between group"
+                      className="cursor-pointer border border-border hover:border-primary/50 transition-colors bg-card rounded-xl p-5 flex flex-col justify-between shadow-card group"
                     >
                       <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
-                          <Badge variant="outline" className="text-[11px] font-semibold gap-1.5">
-                            <PremiumIcon icon={DeckIcon} tone={deckTone} size="xs" />
+                          <Badge variant="outline" className="text-[11px] font-medium border-border">
                             <span>{deck.subject}</span>
                           </Badge>
-                          <span className="text-[11px] text-amber-500 font-bold flex items-center gap-1">
-                            <Zap className="size-3" /> +{deck.xp_reward} XP
+                          <span className="text-[11px] text-amber-500 font-semibold flex items-center gap-1 font-mono">
+                            <Zap className="size-3 fill-amber-500" /> +{deck.xp_reward} XP
                           </span>
                         </div>
 
@@ -454,14 +452,14 @@ export default function FlashcardsPage() {
                         </p>
                       </div>
 
-                      <div className="pt-4 mt-2 border-t border-border/50 flex items-center justify-between text-xs">
+                      <div className="pt-4 mt-2 border-t border-border flex items-center justify-between text-xs">
                         <span className="font-mono font-medium text-muted-foreground">
                           {deck.total_cards} ta karta
                         </span>
                         <Button
                           size="sm"
                           disabled={loadingDeck}
-                          className="h-8 text-xs font-semibold gap-1 bg-primary/15 text-primary hover:bg-primary hover:text-primary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all"
+                          className="h-8 text-xs font-semibold gap-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-xs"
                         >
                           Yodlash <ChevronRight className="size-3" />
                         </Button>
@@ -472,11 +470,11 @@ export default function FlashcardsPage() {
               </div>
             )}
 
-            {/* VIRAL MOTIVATSION BANNER */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-rose-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            {/* MOTIVATSION BANNER */}
+            <div className="p-4 sm:p-5 rounded-xl bg-card border border-border shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1 max-w-xl">
-                <p className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <PremiumIcon icon={Flame} tone="rose" size="xs" glow />
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Flame className="size-4 text-amber-500 fill-amber-500" />
                   <span>Ilmiy Qoidalar: Har kuni 5 daqiqa flashcard!</span>
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -484,7 +482,7 @@ export default function FlashcardsPage() {
                 </p>
               </div>
               <Link href="/battles">
-                <Button size="sm" className="gap-1.5 text-xs font-bold shrink-0 bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-sm">
+                <Button size="sm" className="gap-1.5 text-xs font-semibold shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-xs">
                   <Swords className="size-3.5" /> 1v1 Arenada Do&apos;st bilan Bellashuv
                 </Button>
               </Link>
