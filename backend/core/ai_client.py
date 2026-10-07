@@ -126,12 +126,19 @@ def _log_ai_usage(provider, model_name, endpoint, prompt_tokens, completion_toke
         logger.debug("Failed to record AIUsageLog: %s", e)
 
 
+def _clean_groq_model(model):
+    m = (model or '').strip()
+    if not m or 'openai' in m.lower():
+        return 'llama-3.3-70b-versatile'
+    return m
+
+
 def _ask_groq(messages, temperature, response_format, timeout, on_error=None):
     api_key = settings.GROQ_API_KEY
     if not api_key or _is_down('groq'):
         return None
 
-    model_name = settings.GROQ_MODEL or 'llama-3.3-70b-versatile'
+    model_name = _clean_groq_model(settings.GROQ_MODEL)
     payload = {
         "model": model_name,
         "messages": messages,
@@ -261,7 +268,7 @@ def ask_groq_stream(messages, temperature=0.6, timeout=20):
             return
 
         payload = {
-            "model": settings.GROQ_MODEL,
+            "model": _clean_groq_model(settings.GROQ_MODEL),
             "messages": messages,
             "temperature": temperature,
             "stream": True,

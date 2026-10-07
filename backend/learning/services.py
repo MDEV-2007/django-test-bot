@@ -13,8 +13,8 @@ from .models import Topic, Lesson, VideoLesson, AudioLesson, Flashcard
 # qiymati emas, hammaga bir xil bepul xizmat edi: xarajat obunachi bo'lmaganlarga ham
 # ketardi, PRO esa buning uchun hech nima bermasdi. Endi limit tarif farqi:
 # obuna bo'lmagan o'quvchi kuniga 5 ta AI javob oladi, PRO — 50 ta.
-MENTOR_AI_DAILY_LIMIT_FREE = 5
-MENTOR_AI_DAILY_LIMIT_PRO = 50
+MENTOR_AI_DAILY_LIMIT_FREE = 30
+MENTOR_AI_DAILY_LIMIT_PRO = 150
 
 
 def mentor_daily_limit(is_pro):
@@ -23,17 +23,14 @@ def mentor_daily_limit(is_pro):
 
 def _mentor_ai_allowed(user_id, is_pro=False):
     """Increments today's mentor-AI counter for a user and returns whether they are
-    still under the daily limit. Uses the cache (resets naturally at end of day).
-
-    Hisoblagich tarifdan QAT'I NAZAR bitta kalitda yuritiladi — obuna kun o'rtasida
-    yoqilsa, o'quvchi shu kuni allaqachon ishlatgan javoblarini qaytadan olmaydi, lekin
-    yuqoriroq chegaraga o'tadi."""
+    still under the daily limit. Uses the cache (resets naturally at end of day)."""
+    if is_pro:
+        return True
     key = f"mentor_ai:{user_id}:{date.today().isoformat()}"
     try:
         count = cache.get_or_set(key, 0, 60 * 60 * 26)
         cache.incr(key)
     except ValueError:
-        # Key expired between get_or_set and incr — treat as first use of the day.
         cache.set(key, 1, 60 * 60 * 26)
         count = 0
     return count < mentor_daily_limit(is_pro)

@@ -129,7 +129,7 @@ GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 # Standart model — Groq `llama-3.3-70b-versatile` ni ishdan chiqargan va u endi bo'sh
 # 404 qaytaradi (bu esa noto'g'ri kalitga o'xshab ko'rinadi). `.env` dagi GROQ_MODEL uni
 # bekor qiladi.
-GROQ_MODEL = os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b')
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 # Lokal Ollama zaxira (ixtiyoriy): Groq kaliti yo'q yoki limitga urilganda AI
 # funksiyalari (mentor chat, test feedback, xato izohlari) shu lokal server

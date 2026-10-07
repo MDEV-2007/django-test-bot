@@ -43,7 +43,13 @@ class MentorStreamAPI(APIView):
 
         seed_learning_if_needed()
         subject_name = subject.name if subject else "tanlangan fan"
-        allow_ai = _mentor_ai_allowed(request.user.id, is_pro=profile.has_active_premium_lessons)
+        is_pro = (
+            profile.has_active_premium_lessons
+            or request.user.is_staff
+            or request.user.is_superuser
+            or getattr(profile, 'is_superadmin', False)
+        )
+        allow_ai = _mentor_ai_allowed(request.user.id, is_pro=is_pro)
         is_greeting = any(greet in user_message.lower() for greet in ['salom', 'assalomu', 'hello', 'hi '])
 
         def generate():
