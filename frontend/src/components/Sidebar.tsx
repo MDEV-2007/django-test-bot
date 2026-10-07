@@ -356,7 +356,7 @@ export default function Sidebar({
     <>
       {/* Desktop Fixed Sidebar */}
       <aside className={cn(
-        "ilm-sidebar fixed left-0 top-0 z-30 hidden h-screen w-64 select-none flex-col border-r lg:flex",
+        "ilm-sidebar fixed left-0 top-0 z-40 hidden h-screen w-64 select-none flex-col border-r lg:flex",
         isLight ? "border-slate-200 bg-white shadow-[1px_0_0_0_rgba(15,23,42,0.06)] text-slate-900" : "border-slate-800/80 bg-slate-950/80 backdrop-blur-2xl border-t border-white/5 text-white"
       )}>
         {sidebarContent}
