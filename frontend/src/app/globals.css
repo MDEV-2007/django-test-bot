@@ -12,142 +12,142 @@
    changes, then mirror it here. */
 :root, :root[data-theme="light"] {
   color-scheme: light;
-  /* ── Yorug' tema v2 (Default) ────────────────────────────────────────────── */
+  /* ── Clean & Minimalist Palette (Modern Blue & Slate) ────────────────── */
   --bg-page: #F8FAFC;
-  --accent: #16776a;
-  --accent-hover: #115f55;
-  --accent-soft: #d6efea;
-  --accent-border: rgba(22, 119, 106, 0.32);
-  --accent-text: #0f5c52;
+  --accent: #2563EB;              /* Modern Vibrant Blue */
+  --accent-hover: #1D4ED8;
+  --accent-soft: #EFF6FF;
+  --accent-border: rgba(37, 99, 235, 0.25);
+  --accent-text: #1D4ED8;
   --on-accent: #ffffff;
 
-  --success: #35704a;
-  --success-soft: #dcecdf;
-  --success-text: #245538;
-  --danger: #a3392c;
-  --danger-soft: #f7dcd7;
-  --danger-text: #7f2d20;
-  --warning: #9a5f0f;
-  --warning-soft: #fbecd4;
-  --warning-text: #6b3f04;
+  --success: #10B981;
+  --success-soft: #D1FAE5;
+  --success-text: #059669;
+  --danger: #EF4444;
+  --danger-soft: #FEE2E2;
+  --danger-text: #DC2626;
+  --warning: #F59E0B;
+  --warning-soft: #FEF3C7;
+  --warning-text: #D97706;
 
-  --text-primary: #16181a;
-  --text-secondary: #43474c;
-  --text-muted: #52525b;
-  --text-subtitle: #52525b;
-  --text-faint: #71717a;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --text-subtitle: #64748B;
+  --text-faint: #94A3B8;
 
-  --border-soft: rgba(18, 20, 24, 0.09);
-  --border-card: rgba(18, 20, 24, 0.14);
-  --border-strong: rgba(18, 20, 24, 0.26);
+  --border-soft: #E2E8F0;
+  --border-card: #E2E8F0;
+  --border-strong: #CBD5E1;
 
-  --surface-hover: rgba(18, 20, 24, 0.055);
-  --surface-hover-strong: rgba(18, 20, 24, 0.09);
+  --surface-hover: rgba(15, 23, 42, 0.04);
+  --surface-hover-strong: rgba(15, 23, 42, 0.08);
   --surface-card: #ffffff;
   --surface-card-soft: #ffffff;
   --surface-card-medium: #ffffff;
   --surface-card-strong: #ffffff;
-  --surface-input: #f1f5f9;
+  --surface-input: #F8FAFC;
   --surface-bg: var(--bg-page);
 
   --tone-growth: var(--accent);
   --tone-growth-text: var(--accent-text);
   --tone-growth-soft: var(--accent-soft);
 
-  --tone-streak: #b55a1e;
-  --tone-streak-text: #8a3f12;
-  --tone-streak-soft: rgba(181, 90, 30, 0.12);
+  --tone-streak: #F59E0B;
+  --tone-streak-text: #D97706;
+  --tone-streak-soft: #FEF3C7;
 
-  --tone-premium: #b57a1e;
-  --tone-premium-text: #8a5c12;
-  --tone-premium-soft: rgba(181, 122, 30, 0.12);
+  --tone-premium: #D97706;
+  --tone-premium-text: #B45309;
+  --tone-premium-soft: #FEF9C3;
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
   --tone-danger-soft: var(--danger-soft);
 
-  --tone-lesson: #2f6f9c;
-  --tone-lesson-text: #245a80;
-  --tone-lesson-soft: rgba(47, 111, 156, 0.12);
+  --tone-lesson: #2563EB;
+  --tone-lesson-text: #1D4ED8;
+  --tone-lesson-soft: #EFF6FF;
 
-  --tone-ai: #5b57a8;
-  --tone-ai-text: #494590;
-  --tone-ai-soft: rgba(91, 87, 168, 0.12);
+  --tone-ai: #6366F1;
+  --tone-ai-text: #4F46E5;
+  --tone-ai-soft: #EEF2FF;
 
-  --border-highlight: rgba(255, 255, 255, 0.9);
-  --shadow-card: 0 1px 2px rgba(16, 20, 26, 0.06), 0 8px 24px -12px rgba(16, 20, 26, 0.12);
-  --shadow-float: 0 2px 6px rgba(16, 20, 26, 0.08), 0 18px 44px -16px rgba(16, 20, 26, 0.18);
-  --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 28px -10px rgba(31, 138, 124, 0.35);
+  --border-highlight: transparent;
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --glow-accent: none;
 }
 
 :root[data-theme="dark"], :root.dark, html.dark, .dark {
   color-scheme: dark;
-  /* Obsidian Slate & Emerald Luxury palette */
-  --bg-page: #08090c;
-  --accent: #2fb3a3;
-  --accent-hover: #269488;
-  --accent-soft: rgba(47, 179, 163, 0.16);
-  --accent-border: rgba(47, 179, 163, 0.35);
-  --accent-text: #5cc4b6;
-  --on-accent: #0d1416;
+  /* ── Clean Dark Palette (Soft Slate-950, no harsh pure black) ──────── */
+  --bg-page: #0B0F19;
+  --accent: #3B82F6;              /* Modern Blue for dark mode */
+  --accent-hover: #60A5FA;
+  --accent-soft: rgba(59, 130, 246, 0.15);
+  --accent-border: rgba(59, 130, 246, 0.3);
+  --accent-text: #93C5FD;
+  --on-accent: #FFFFFF;
 
-  --success: #52a86b;
-  --success-soft: rgba(82, 168, 107, 0.16);
-  --success-text: #7ad192;
-  --danger: #f43f5e;
-  --danger-soft: rgba(244, 63, 94, 0.14);
-  --danger-text: #fb7185;
-  --warning: #d99a38;
-  --warning-soft: rgba(217, 154, 56, 0.15);
-  --warning-text: #f59e0b;
+  --success: #34D399;
+  --success-soft: rgba(52, 211, 153, 0.15);
+  --success-text: #6EE7B7;
+  --danger: #F87171;
+  --danger-soft: rgba(248, 113, 113, 0.15);
+  --danger-text: #FCA5A5;
+  --warning: #FBBF24;
+  --warning-soft: rgba(251, 191, 36, 0.15);
+  --warning-text: #FDE68A;
 
-  --text-primary: #f0f1f3;
-  --text-secondary: #a3a7ae;
-  --text-muted: #a1a1aa;
-  --text-subtitle: #a1a1aa;
-  --text-faint: #71717a;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-subtitle: #94A3B8;
+  --text-faint: #64748B;
 
-  --border-soft: rgba(255, 255, 255, 0.06);
-  --border-card: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --border-highlight: rgba(255, 255, 255, 0.06);
+  --border-soft: #1E293B;
+  --border-card: #232E47;
+  --border-strong: #334155;
+  --border-highlight: transparent;
 
-  --surface-hover: rgba(255, 255, 255, 0.05);
-  --surface-hover-strong: rgba(255, 255, 255, 0.09);
-  --surface-card: #101319;
-  --surface-card-soft: #101319;
-  --surface-card-medium: #161a22;
-  --surface-card-strong: #161a22;
-  --surface-input: #1d222c;
+  --surface-hover: rgba(255, 255, 255, 0.04);
+  --surface-hover-strong: rgba(255, 255, 255, 0.08);
+  --surface-card: #131B2E;
+  --surface-card-soft: #131B2E;
+  --surface-card-medium: #182238;
+  --surface-card-strong: #182238;
+  --surface-input: #1E293B;
   --surface-bg: var(--bg-page);
 
   --tone-growth: var(--accent);
   --tone-growth-text: var(--accent-text);
   --tone-growth-soft: var(--accent-soft);
 
-  --tone-streak: #d97538;
-  --tone-streak-text: #f09a5c;
-  --tone-streak-soft: rgba(217, 117, 56, 0.14);
+  --tone-streak: #F59E0B;
+  --tone-streak-text: #FBBF24;
+  --tone-streak-soft: rgba(245, 158, 11, 0.15);
 
-  --tone-premium: #d99a38;
-  --tone-premium-text: #f0b45c;
-  --tone-premium-soft: rgba(217, 154, 56, 0.14);
+  --tone-premium: #F59E0B;
+  --tone-premium-text: #FBBF24;
+  --tone-premium-soft: rgba(245, 158, 11, 0.15);
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
   --tone-danger-soft: var(--danger-soft);
 
-  --tone-lesson: #4a90c2;
-  --tone-lesson-text: #79b8e0;
-  --tone-lesson-soft: rgba(74, 144, 194, 0.14);
+  --tone-lesson: #3B82F6;
+  --tone-lesson-text: #93C5FD;
+  --tone-lesson-soft: rgba(59, 130, 246, 0.15);
 
-  --tone-ai: #7d7ad1;
-  --tone-ai-text: #a7a4ec;
-  --tone-ai-soft: rgba(125, 122, 209, 0.14);
+  --tone-ai: #818CF8;
+  --tone-ai-text: #C7D2FE;
+  --tone-ai-soft: rgba(129, 140, 248, 0.15);
 
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
-  --shadow-float: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 48px -12px rgba(0, 0, 0, 0.6);
-  --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 32px -8px rgba(47, 179, 163, 0.35);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+  --shadow-float: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --glow-accent: none;
 }
 
 @theme inline {
@@ -241,18 +241,7 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* Nozik shovqin qatlami — dark UI ni "arzon tekis rang" dan qutqaradigan detal.
-   Faqat 2.5% shaffoflik, bosishlarni to'smaydi. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-:root[data-theme='light'] body::before { opacity: 0.02; }
+
 
 /* Yagona sahifa konteyneri. Har bir sahifa o'z max-w-* ini tanlagani uchun kengliklar
    2xl dan 6xl gacha tarqalib ketgan edi — natijada sidebar yonida katta bo'sh maydon
@@ -298,22 +287,21 @@ body::before {
   color: var(--text-muted);
 }
 
-/* "Shisha karta" — asosiy konteyner birligi butun saytda */
+/* Clean Minimalist Karta — asosiy konteyner birligi butun saytda */
 .glass-card,
 .bento-card {
-  background-color: var(--surface-card-soft);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.022) 0%, rgba(255, 255, 255, 0) 55%);
+  background-color: var(--surface-card);
   border: 1px solid var(--border-card);
-  border-radius: 20px;
-  box-shadow: var(--shadow-card), inset 0 1px 0 var(--border-highlight);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
 }
 
 .bento-card {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .bento-card:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-float), inset 0 1px 0 var(--border-highlight);
+  box-shadow: var(--shadow-float);
 }
 
 .icon-tile {
@@ -510,32 +498,12 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
      (ular `@layer utilities` da, ya'ni keyinroq) o'z rangini saqlaydi va faqat
      gradient + soya qo'shiladi. */
   [data-slot='card'] {
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.022) 0%, rgba(255, 255, 255, 0) 55%);
-    box-shadow: var(--shadow-card), inset 0 1px 0 var(--border-highlight);
-    /* Radius tili: karta 20px, boshqaruv elementlari 12px. Ilgari rounded-xl/2xl/3xl
-       (16/24/28px) aralash ishlatilar edi. */
-    border-radius: 20px;
-    /* Ichki bo'shliq ritmi: 20px (kartaning o'z --card-spacing o'zgaruvchisi). */
+    border-radius: 16px;
     --card-spacing: 1.25rem;
+    box-shadow: var(--shadow-card);
   }
   [data-slot='card'] [data-slot='card'] {
-    /* Ichma-ich karta — optik ichma-ichlik qoidasi bo'yicha radiusi kichikroq. */
-    border-radius: 14px;
-  }
-  /* Bosiladigan kartalar (havola yoki tugma ichidagi) hover'da 2px ko'tariladi va
-     soyasi kuchayadi — "bu element bosiladi" degan jismoniy signal. */
-  [data-slot='card'] {
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-  a:hover > [data-slot='card'],
-  button:hover > [data-slot='card'],
-  a:hover [data-slot='card'].tactile-btn {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-float), inset 0 1px 0 var(--border-highlight);
-  }
-  a:active > [data-slot='card'],
-  button:active > [data-slot='card'] {
-    transform: translateY(0) scale(0.995);
+    border-radius: 12px;
   }
 
   /* Progress chizig'i qiymat o'zgarganda "to'ladi" (sakramaydi). */

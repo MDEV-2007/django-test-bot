@@ -76,12 +76,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
             <AuthProvider>
-              {/* Dynamic Atmospheric Glow Gradients (Universal Across All Pages - Light Mode) */}
-              <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-[radial-gradient(ellipse_at_top,rgba(37,99,235,0.05),transparent_70%)]" />
-                <div className="absolute top-1/3 -right-32 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.035),transparent_70%)]" />
-                <div className="absolute bottom-0 -left-20 w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.04),transparent_70%)]" />
-              </div>
               {children}
               {/* Majburiy kanal obunasi — kirgan foydalanuvchi obuna bo'lmagan
                   bo'lsagina butun ekranni yopadi (qarang: SubscriptionGate). */}
