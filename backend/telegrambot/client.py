@@ -50,9 +50,17 @@ def api_call(method, **params):
         return {'ok': False, 'description': 'telegram api unreachable (circuit open)'}
 
     try:
+        # Telegram API expects complex objects (reply_markup, entities, etc.) as JSON strings
+        clean_params = {}
+        for k, v in params.items():
+            if isinstance(v, (dict, list)):
+                clean_params[k] = json.dumps(v)
+            elif v is not None:
+                clean_params[k] = v
+
         # (connect, read): fail fast on a dead connection instead of burning the
         # read-timeout window meant for slow responses.
-        resp = SESSION.post(api_url(method), data=params, timeout=(5, 15))
+        resp = SESSION.post(api_url(method), data=clean_params, timeout=(5, 15))
         data = resp.json()
         if not data.get('ok'):
             logger.warning("Telegram API %s failed: %s", method, data)

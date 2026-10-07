@@ -12,7 +12,7 @@ from django.utils import timezone
 from accounts.models import Profile
 from core.models import Notification
 from tests_app.models import TestSet
-from telegrambot.client import api_call
+from telegrambot.client import send_message, api_call
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +94,7 @@ def send_new_test_notifications(test_id: int):
     channel = getattr(settings, 'TELEGRAM_REQUIRED_CHANNEL', '')
     if channel:
         try:
-            res = api_call(
-                'sendMessage',
+            res = send_message(
                 chat_id=channel,
                 text=tg_text,
                 parse_mode='HTML',
@@ -113,8 +112,7 @@ def send_new_test_notifications(test_id: int):
     sent_count = 0
     for p in tg_profiles:
         try:
-            res = api_call(
-                'sendMessage',
+            res = send_message(
                 chat_id=p.telegram_id,
                 text=tg_text,
                 parse_mode='HTML',
