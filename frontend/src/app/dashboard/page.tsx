@@ -226,6 +226,12 @@ export default function DashboardPage() {
     if (data && typeof data.unread_notifications_count === 'number') {
       setUnreadCount(data.unread_notifications_count);
     }
+    if (data?.profile) {
+      const current = useAuthStore.getState().user;
+      if (current) {
+        useAuthStore.getState().setUser({ ...current, ...data.profile });
+      }
+    }
   }, [data]);
 
   const loadNotifications = async () => {

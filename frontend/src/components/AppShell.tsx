@@ -68,7 +68,7 @@ export default function AppShell() {
       />
 
       {/* Clean Minimalist Topbar */}
-      <header className="ilm-topbar sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 text-foreground backdrop-blur-md px-4 sm:px-6 lg:pl-64 transition-colors">
+      <header className="ilm-topbar sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 text-foreground backdrop-blur-md px-4 sm:px-6 lg:pl-[calc(16rem+1.5rem)] lg:pr-6 transition-colors">
         {/* Left: Mobile Menu + Impersonation + Search */}
         <div className="flex items-center gap-3">
           <button
@@ -102,7 +102,7 @@ export default function AppShell() {
           >
             <Search className="size-3.5 text-muted-foreground" />
             <span>Kurslar, testlar va mavzularni qidirish...</span>
-            <kbd className="ml-3 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground font-semibold">
+            <kbd className="ml-4 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground font-semibold">
               Ctrl K
             </kbd>
           </button>
@@ -124,7 +124,7 @@ export default function AppShell() {
                     className="flex h-8 items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 active:scale-95 transition cursor-pointer"
                   >
                     <Flame className="size-3.5 fill-current text-amber-500" />
-                    <span className="font-mono"><StatNumber value={user.streak || 0} /></span>
+                    <span className="font-mono">{user.streak || 0}</span>
                     <span className="hidden sm:inline text-[10px] font-medium opacity-80">kun</span>
                   </button>
                 </TooltipTrigger>
@@ -141,7 +141,7 @@ export default function AppShell() {
                     className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/70 px-2.5 text-xs font-semibold text-foreground active:scale-95 transition cursor-pointer"
                   >
                     <Coins className="size-3.5 text-amber-500 fill-amber-500" />
-                    <span className="font-mono"><StatNumber value={user.coins || 0} /></span>
+                    <span className="font-mono">{(user.coins || 0).toLocaleString()}</span>
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs font-medium">

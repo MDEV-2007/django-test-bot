@@ -17,7 +17,8 @@ MUHIM QOIDALAR:
 2. REGISTR VA HARF KATTALIGI: O'quvchi javobni HAMMASI KATTA HARFDA (masalan "XAMMURAPI", "DORO I", "MIXXAT YOZUVI"), hammasi kichik harfda ("xammurapi", "doro i", "mixxat") yoki bosh harf bilan yozganidan qat'i nazar — ALBATTA TO'G'RI deb top. Katta-kichik harf farqi mutlaqo hisobga olinmaydi!
 3. IMLO VA SHAKL: Kichik imlo xatolari, tinish belgilari, so'z tartibi yoki qo'shimchalar (masalan "Zikkurat" o'rniga "Zikkuratlar" yoki "Zikkurat ibodatxonasi") ahamiyatsiz — MOHIYAT to'g'ri bo'lsa, to'g'ri deb top.
 4. Bo'sh, "bilmayman" kabi javoblarni xato deb top.
-5. Har bir baho uchun juda qisqa (5-10 so'z) izoh yoz.
+5. BBA VA MILLIY SERTIFIKAT STANDARTI: O'quvchi javobi namunaviy javobga kamida 70% mos kelsa (yoki imlo jihatdan 70% o'xshash bo'lsa), shuningdek qattiq va yumshoq 'x' va 'h' harflari almashib qolgan bo'lsa (masalan 'xun' o'rniga 'hun', 'buxoro' o'rniga 'buhoro', 'gaznaviy' o'rniga 'g'aznaviy'), ALBATTA TO'G'RI (is_correct: true) deb bahola!
+6. Har bir baho uchun juda qisqa (5-10 so'z) izoh yoz.
 
 Faqat so'ralgan JSON formatida javob ber, boshqa hech narsa yozma."""
 
@@ -58,9 +59,22 @@ def normalize_text(text: str) -> str:
     return ' '.join(s.split())
 
 
+from difflib import SequenceMatcher
+
+def normalize_phonetic(text: str) -> str:
+    """O'zbek tilidagi qattiq/yumshoq 'x'/'h', tutuq belgilari va harf farqlarini tekislash.
+    BBA va Milliy sertifikat qoidasiga ko'ra 'xun' va 'hun', 'buxoro' va 'buhoro' bir xil hisoblanadi."""
+    s = normalize_text(text)
+    # Qattiq va yumshoq x/h ni unifikatsiya qilish
+    s = s.replace('x', 'h')
+    # Tutuq va o'/g' belgilarini tekislash
+    s = s.replace("o'", "o").replace("g'", "g")
+    return s
+
+
 def is_deterministic_match(student_text: str, reference_text: str) -> bool:
     """Aniq faktik savollar uchun o'quvchi javobi va namunaviy javobni tezkor,
-    xatosiz solishtirish (AI ga muhtoj bo'lmagan holatlar)."""
+    xatosiz solishtirish (BBA 70% o'xshashlik va x/h qoidalariga to'liq mos)."""
     s_clean = normalize_text(student_text)
     r_clean = normalize_text(reference_text)
 
@@ -71,64 +85,71 @@ def is_deterministic_match(student_text: str, reference_text: str) -> bool:
     if s_clean == r_clean:
         return True
 
-    # 2. Qavs ichida muqobil variantlar berilgan bo'lsa (masalan: "Zardusht (Zoroastr)")
-    # yoki '/' bilan ajratilgan bo'lsa
+    s_phon = normalize_phonetic(s_clean)
+    r_phon = normalize_phonetic(r_clean)
+
+    # 2. Fonetik jihatdan bir xil (x <-> h, masalan "xun" <-> "hun", "buxoro" <-> "buhoro")
+    if s_phon == r_phon:
+        return True
+
+    # 3. 70% va undan yuqori o'xshashlik (BBA / Milliy sertifikat standarti)
+    if SequenceMatcher(None, s_phon, r_phon).ratio() >= 0.70:
+        return True
+
+    # 4. Qavs ichida yoki '/' yoki ';' bilan ajratilgan muqobil variantlar
+    # Masalan: "892-yil (888/892)", "Hind (Sind) daryosi", "Parvon jangi (1221-yil)"
+    parts = re.split(r'[/();,]', reference_text)
     ref_alternatives = []
-    # Qavslar ichidagi va tashqarisidagi qismlarni ajratish
-    parts = re.split(r'[/()]', reference_text)
     for p in parts:
         c = normalize_text(p)
-        if c and len(c) >= 3:
+        if c:
             ref_alternatives.append(c)
 
     for alt in ref_alternatives:
-        if s_clean == alt or alt in s_clean:
+        alt_phon = normalize_phonetic(alt)
+        if s_phon == alt_phon or alt_phon in s_phon or s_phon in alt_phon:
+            return True
+        if len(alt_phon) >= 3 and SequenceMatcher(None, s_phon, alt_phon).ratio() >= 0.70:
             return True
 
-    # 3. Katta javob ichida asosiy kalit so'z to'liq bo'lsa
-    # Masalan: reference="Mixxat yozuvi", student="Mixxat" yoki "Mixxat yozuvlari"
-    # Yoki: reference="Xammurapi", student="Xammurapi podshosi"
+    # 5. Katta javob ichida asosiy kalit so'z to'liq bo'lsa
+    # Masalan: reference="Qutayba ibn Muslim", student="Qutayba" yoki "Qutayba ibn Muslim sarkardasi"
     s_words = set(s_clean.split())
     r_words = set(r_clean.split())
+    s_phon_words = set(s_phon.split())
+    r_phon_words = set(r_phon.split())
 
     # Agar reference bitta so'zdan iborat bo'lsa va o'quvchi javobida o'sha so'z bo'lsa
-    # (masalan: "xammurapi", "zikkuratlar", "nineviya", "oshshur", "braxmanlar", "avesto")
     if len(r_words) == 1:
         single_r = next(iter(r_words))
-        if len(single_r) >= 4 and any(single_r in w or w in single_r for w in s_words):
+        single_r_phon = next(iter(r_phon_words))
+        if any(single_r_phon in w or w in single_r_phon for w in s_phon_words):
             return True
 
     # Agar barcha muhim kalit so'zlar o'quvchi javobida mavjud bo'lsa
-    # Masalan: reference="Moxenjodaro va Xarappa" -> {"moxenjodaro", "xarappa"}
-    # Masalan: reference="Mixxat yozuvi", student="Mixxat" -> "yozuvi" so'zsiz to'g'ri
-    stop_words = {'va', 'hamda', 'yoki', 'davlati', 'shahri', 'kitobi', 'dini', 'odam', 'yili', 'yozuvi', 'sulolasi', 'podshosi', 'podsholigi', 'ilohasi', 'xudosi', 'qabilasi', 'guruhi', 'qozgoloni', 'qo`zg`oloni'}
-    content_r_words = {w for w in r_words if w not in stop_words}
-    if content_r_words and content_r_words.issubset(s_words):
+    stop_words = {'va', 'hamda', 'yoki', 'davlati', 'shahri', 'kitobi', 'dini', 'odam', 'yili', 'yozuvi',
+                  'sulolasi', 'podshosi', 'podsholigi', 'ilohasi', 'xudosi', 'qabilasi', 'guruhi', 'qozgoloni',
+                  'jangi', 'daryosi', 'qo`zg`oloni', 'hukmdori', 'sarkardasi'}
+    content_r_words = {w for w in r_phon_words if w not in stop_words}
+    if content_r_words and content_r_words.issubset(s_phon_words):
         return True
 
-    # Rim raqamli hukmdorlar (masalan "Kir II" -> "kir 2" yoki "kir ii", "Doro I" -> "doro 1" yoki "doro i")
+    # 6. Yillar va raqamlarni aniq solishtirish (masalan: "552-yil" va "552", "715" va "715-yil")
+    s_digits = re.findall(r'\d+', s_clean)
+    r_digits = re.findall(r'\d+', r_clean)
+    if s_digits and r_digits and any(d in r_digits for d in s_digits):
+        # Agar asosiy yil mos kelsa (masalan 552 yoki 715 yoki 892)
+        return True
+
+    # 7. Rim raqamli hukmdorlar (masalan "Kir II" -> "kir 2" yoki "kir ii", "Doro I" -> "doro 1" yoki "doro i")
     roman_map = {'1': 'i', '2': 'ii', '3': 'iii', '4': 'iv', '5': 'v'}
-    s_roman = s_clean
+    s_roman = s_phon
     for digit, rom in roman_map.items():
         s_roman = re.sub(rf'\b{digit}\b', rom, s_roman)
-    r_roman = r_clean
+    r_roman = r_phon
     for digit, rom in roman_map.items():
         r_roman = re.sub(rf'\b{digit}\b', rom, r_roman)
-    if s_roman == r_roman:
-        return True
-
-    # Raqamli ifodalar: 720000 yoki 720 000 <-> 720 ming
-    s_num = s_clean.replace('720000', '720 ming').replace('720 000', '720 ming')
-    r_num = r_clean.replace('720000', '720 ming').replace('720 000', '720 ming')
-    if '720 ming' in s_num and '720 ming' in r_num:
-        return True
-
-    # X / H harfi muqobilligi (Hammurapi <-> Xammurapi)
-    if s_clean.replace('h', 'x') == r_clean.replace('h', 'x'):
-        return True
-
-    # Oshshur <-> Ashshur
-    if s_clean.replace('a', 'o') == r_clean.replace('a', 'o'):
+    if s_roman == r_roman or SequenceMatcher(None, s_roman, r_roman).ratio() >= 0.70:
         return True
 
     return False
