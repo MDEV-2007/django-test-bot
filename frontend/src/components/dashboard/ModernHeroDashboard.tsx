@@ -41,6 +41,7 @@ export interface HeroDashboardProps {
     currentRank: string;
     elo: number;
   };
+  theme?: string;
 }
 
 /**
@@ -56,9 +57,11 @@ export function HeroFocusBanner({
     subjectName: 'Biologiya',
     actionUrl: '/tests',
   },
+  theme,
 }: {
   user: HeroDashboardProps['user'];
   recommendedSprint?: HeroDashboardProps['recommendedSprint'];
+  theme?: string;
 }) {
   const firstName = user.first_name || user.username;
 
@@ -143,9 +146,11 @@ export function DailyGoalCard({
     target: 3,
     streakDays: [true, true, true, true, true, false, false],
   },
+  theme,
 }: {
   user: { streak?: number };
   dailyGoals?: HeroDashboardProps['dailyGoals'];
+  theme?: string;
 }) {
   const goalPct = Math.min(100, Math.round((dailyGoals.current / dailyGoals.target) * 100));
   const radius = 32;
@@ -261,8 +266,10 @@ export function BattleArenaCard({
     currentRank: 'Navkar II',
     elo: 1420,
   },
+  theme,
 }: {
   battleArena?: HeroDashboardProps['battleArena'];
+  theme?: string;
 }) {
   return (
     <Card className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-card">
@@ -332,14 +339,17 @@ export default function ModernHeroDashboard(props: HeroDashboardProps) {
       <HeroFocusBanner
         user={props.user}
         recommendedSprint={props.recommendedSprint}
+        theme={props.theme}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <DailyGoalCard
           user={props.user}
           dailyGoals={props.dailyGoals}
+          theme={props.theme}
         />
         <BattleArenaCard
           battleArena={props.battleArena}
+          theme={props.theme}
         />
       </div>
     </div>
