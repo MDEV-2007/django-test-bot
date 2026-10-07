@@ -9,6 +9,7 @@ import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/hooks/useTheme';
 
 type TabItem = {
   href: string;
@@ -38,10 +39,11 @@ interface MobileTabBarProps {
   theme?: 'dark' | 'light';
 }
 
-export default function MobileTabBar({ theme = 'light' }: MobileTabBarProps) {
+export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const pathname = usePathname();
   const { user } = useAuthStore();
-  const isLight = theme === 'light';
+  const { isLight: systemIsLight } = useTheme();
+  const isLight = propTheme !== undefined ? propTheme === 'light' : systemIsLight;
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 

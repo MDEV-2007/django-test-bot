@@ -65,7 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Tema birinchi bo'yoqdan oldin qo'llanadi: login/register/telegram barcha
             sahifalarda sukut bo'yicha yorug' (light) rejimda chiziladi. */}
         <Script id="ilm-theme" strategy="beforeInteractive">
-          {`(function(){try{localStorage.setItem('ilm_theme','light');localStorage.setItem('ilm_theme_v2','light');document.documentElement.dataset.theme='light';var h=window.location.hash||'';if(h.indexOf('tgWebAppData')!==-1||h.indexOf('tgWebAppPlatform')!==-1||window.TelegramWebviewProxy){document.documentElement.dataset.tg='on';}}catch(e){document.documentElement.dataset.theme='light';}})();`}
+          {`(function(){try{var h=window.location.hash||'';var isTg=(h.indexOf('tgWebAppData')!==-1||h.indexOf('tgWebAppPlatform')!==-1||window.TelegramWebviewProxy);if(isTg){document.documentElement.dataset.tg='on';document.documentElement.dataset.theme='light';}else{var saved=localStorage.getItem('ilm_theme_v2')||localStorage.getItem('ilm_theme');var theme=(saved==='dark')?'dark':'light';document.documentElement.dataset.theme=theme;if(theme==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}}catch(e){document.documentElement.dataset.theme='light';}})();`}
         </Script>
         <ServiceWorkerRegister />
         {/* Telegram Mini App qobig'i. Oddiy brauzerda hech narsa qilmaydi —

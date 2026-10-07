@@ -32,6 +32,7 @@ import VerifiedBadge from '@/components/ui/verified-badge';
 import { BrandMark } from '@/components/BrandMark';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/hooks/useTheme';
 
 interface SidebarProps {
   mobileOpen?: boolean;
@@ -95,9 +96,10 @@ export default function Sidebar({
   onMobileClose,
   user: propUser,
   onLogout: propLogout,
-  theme = 'light',
+  theme: propTheme,
 }: SidebarProps) {
-  const isLight = theme === 'light';
+  const { isLight: systemIsLight } = useTheme();
+  const isLight = propTheme !== undefined ? propTheme === 'light' : systemIsLight;
   const pathname = usePathname();
   const router = useRouter();
   const { user: storeUser, logout } = useAuthStore();

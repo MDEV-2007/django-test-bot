@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Menu, Flame, Coins, Swords, Bell, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/hooks/useTheme';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ModernTopbarProps {
@@ -30,9 +31,10 @@ export default function ModernTopbar({
   onNotificationsClick,
   onSearchClick,
   onStreakClick,
-  theme = 'light',
+  theme: propTheme,
 }: ModernTopbarProps) {
-  const isLight = theme === 'light';
+  const { isLight: systemIsLight } = useTheme();
+  const isLight = propTheme !== undefined ? propTheme === 'light' : systemIsLight;
 
   return (
     <header

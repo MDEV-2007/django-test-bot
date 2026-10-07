@@ -2,9 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Loyihada tema `[data-theme]` atributi orqali almashadi (.dark klassi emas) —
+/* Loyihada tema `[data-theme]` atributi yoki `.dark` klassi orqali almashadi —
    shadcn'ning `dark:` variantini ham shunga moslaymiz. */
-@custom-variant dark (&:is([data-theme="dark"] *));
+@custom-variant dark (&:is([data-theme="dark"] *, .dark, .dark *));
 
 /* Same "Grafit neytral" design tokens as the Django templates (templates/base.html) —
    copied verbatim so pages built here match the existing app instead of drifting into a
@@ -80,7 +80,7 @@
   --glow-accent: 0 0 0 1px var(--accent-border), 0 8px 28px -10px rgba(31, 138, 124, 0.35);
 }
 
-:root[data-theme="dark"] {
+:root[data-theme="dark"], :root.dark, html.dark, .dark {
   color-scheme: dark;
   /* Obsidian Slate & Emerald Luxury palette */
   --bg-page: #08090c;

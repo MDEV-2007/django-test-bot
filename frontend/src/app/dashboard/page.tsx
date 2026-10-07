@@ -335,7 +335,6 @@ export default function DashboardPage() {
       user={p}
       unreadCount={unreadCount}
       onNotificationsClick={handleOpenNotifications}
-      theme="light"
     >
       <Celebration
         level={p.level || 1}

@@ -149,11 +149,11 @@ export default function MentorPage() {
   }
 
   return (
-    <ModernAppLayout user={user} theme="light">
+    <ModernAppLayout user={user}>
       {/* Centered Cognitive Ease Container (max-w-3xl) */}
       <div className="max-w-3xl mx-auto space-y-6 pb-24">
         {/* Mentor Header Card */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
           <div className="flex items-center gap-3.5">
             <div className="relative flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-black shadow-[0_0_20px_rgba(168,85,247,0.35)] ring-2 ring-purple-500/20">
               <Bot className="size-6" />
@@ -164,14 +164,14 @@ export default function MentorPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
                   AI Mentor 24/7
                 </h1>
-                <Badge className="bg-purple-50 border border-purple-200 text-purple-700 text-[10px] font-bold">
+                <Badge className="bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-[10px] font-bold">
                   FOCUS MODE
                 </Badge>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 DTM &amp; Milliy Sertifikat bo&apos;yicha ixtisoslashgan aqlli repetitor
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function MentorPage() {
             variant="outline"
             size="sm"
             onClick={clearChat}
-            className="rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-xs font-bold gap-1.5 self-start sm:self-auto cursor-pointer shadow-2xs"
+            className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold gap-1.5 self-start sm:self-auto cursor-pointer shadow-2xs"
           >
             <RefreshCw className="size-3.5" />
             <span>Tozalash</span>
@@ -200,7 +200,7 @@ export default function MentorPage() {
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer shadow-2xs',
                   subject === s.slug
                     ? 'bg-purple-600 text-white shadow-xs'
-                    : 'border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    : 'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800'
                 )}
               >
                 <span>{s.name}</span>
@@ -232,7 +232,7 @@ export default function MentorPage() {
         )}
 
         {/* Chat Messages Stream Container */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm min-h-[460px] space-y-5">
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm min-h-[460px] space-y-5 transition-colors">
           {messages.map((m, i) => (
             <div
               key={i}
@@ -242,8 +242,8 @@ export default function MentorPage() {
                 className={cn(
                   'size-9 shrink-0 ring-2',
                   m.sender === 'ai'
-                    ? 'border border-purple-300 ring-purple-100'
-                    : 'border border-blue-300 ring-blue-100'
+                    ? 'border border-purple-300 dark:border-purple-600 ring-purple-100 dark:ring-purple-900/30'
+                    : 'border border-blue-300 dark:border-blue-600 ring-blue-100 dark:ring-blue-900/30'
                 )}
               >
                 <AvatarFallback
@@ -251,7 +251,7 @@ export default function MentorPage() {
                     'text-xs font-black',
                     m.sender === 'user'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-purple-100 text-purple-700'
+                      : 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
                   )}
                 >
                   {m.sender === 'user' ? 'Siz' : <Bot className="size-4" />}
@@ -263,7 +263,7 @@ export default function MentorPage() {
                   'max-w-[85%] sm:max-w-[75%] rounded-3xl px-4 sm:px-5 py-3.5 text-xs sm:text-sm leading-relaxed shadow-sm',
                   m.sender === 'user'
                     ? 'rounded-tr-sm bg-blue-600 text-white font-medium shadow-sm'
-                    : 'rounded-tl-sm border border-slate-200 bg-slate-50 text-slate-800'
+                    : 'rounded-tl-sm border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100'
                 )}
               >
                 {m.sender === 'user' ? (
@@ -271,15 +271,15 @@ export default function MentorPage() {
                 ) : m.text ? (
                   <MentorMessage text={m.text} />
                 ) : (
-                  <span className="flex items-center gap-2 text-slate-500">
-                    <Loader2 className="size-3.5 animate-spin text-purple-600" />
+                  <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <Loader2 className="size-3.5 animate-spin text-purple-600 dark:text-purple-400" />
                     <span>Javob shakllanmoqda...</span>
                   </span>
                 )}
                 <span
                   className={cn(
                     'mt-2 block text-right font-mono text-[10px]',
-                    m.sender === 'user' ? 'text-blue-100' : 'text-slate-400'
+                    m.sender === 'user' ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
                   )}
                 >
                   {m.time}
@@ -291,7 +291,7 @@ export default function MentorPage() {
         </div>
 
         {/* Sticky Input Bar at Bottom with Clean Frosted Glass */}
-        <div className="sticky bottom-4 z-20 rounded-3xl border border-slate-200/90 bg-white/95 p-2 sm:p-2.5 backdrop-blur-xl shadow-lg">
+        <div className="sticky bottom-4 z-20 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 p-2 sm:p-2.5 backdrop-blur-xl shadow-lg transition-colors">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -304,7 +304,7 @@ export default function MentorPage() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Savolingizni yozing yoki formulani so'rang..."
               disabled={sending}
-              className="flex-1 bg-transparent border-none text-slate-900 placeholder:text-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm h-11"
+              className="flex-1 bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs sm:text-sm h-11"
             />
             <button
               type="submit"

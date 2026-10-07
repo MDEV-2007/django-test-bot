@@ -63,17 +63,16 @@ export default function AppShell() {
       <Sidebar
         mobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
-        theme="light"
       />
 
       {/* Modern Unicorn Topbar */}
-      <header className="ilm-topbar sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 shadow-[0_1px_0_0_rgba(15,23,42,0.08)] lg:pl-64">
+      <header className="ilm-topbar sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/90 text-slate-900 dark:text-slate-100 backdrop-blur-md px-4 sm:px-6 shadow-[0_1px_0_0_rgba(15,23,42,0.08)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.04)] lg:pl-64 transition-colors">
         {/* Left: Hamburger on Mobile + Brand Logo + Impersonation Alert + Search */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden flex size-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 active:scale-95 transition cursor-pointer shadow-sm"
+            className="lg:hidden flex size-10 items-center justify-center rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 active:scale-95 transition cursor-pointer shadow-sm"
             aria-label="Menyu ochish"
           >
             <Menu className="size-5" />
@@ -81,7 +80,7 @@ export default function AppShell() {
 
           <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
             <BrandMark size={28} rounded="rounded-xl" />
-            <span className="font-bold text-sm text-slate-800">Ilm<span className="text-emerald-600">Ildizi</span></span>
+            <span className="font-bold text-sm text-slate-800 dark:text-white">Ilm<span className="text-emerald-600 dark:text-emerald-400">Ildizi</span></span>
           </Link>
 
           {impersonating != null && (
@@ -97,11 +96,11 @@ export default function AppShell() {
           <button
             type="button"
             onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
-            className="hidden md:flex items-center gap-2.5 rounded-2xl border border-slate-300 bg-slate-100/90 px-3.5 py-2 text-xs text-[#52525B] hover:text-slate-900 hover:border-slate-400 hover:bg-white transition-all shadow-xs group cursor-pointer font-medium"
+            className="hidden md:flex items-center gap-2.5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-900/90 px-3.5 py-2 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-xs group cursor-pointer font-medium"
           >
-            <Search className="size-3.5 group-hover:text-blue-600 text-[#71717A] transition-colors" />
-            <span className="text-[#52525B] font-medium">Kurslar, testlar va mavzularni qidirish...</span>
-            <kbd className="ml-3 rounded-lg border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[10px] text-[#52525B] font-semibold">
+            <Search className="size-3.5 group-hover:text-blue-600 dark:group-hover:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors" />
+            <span className="text-slate-600 dark:text-slate-300 font-medium">Kurslar, testlar va mavzularni qidirish...</span>
+            <kbd className="ml-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-600 dark:text-slate-300 font-semibold">
               Ctrl K
             </kbd>
           </button>
@@ -119,14 +118,14 @@ export default function AppShell() {
                     soundFX.click();
                     setStreakModalOpen(true);
                   }}
-                  className="group flex min-h-[38px] items-center gap-1.5 rounded-2xl border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-700 shadow-sm hover:border-orange-300 hover:scale-105 active:scale-95 transition cursor-pointer"
+                  className="group flex min-h-[38px] items-center gap-1.5 rounded-2xl border border-orange-200 dark:border-amber-500/30 bg-orange-50 dark:bg-amber-500/10 px-3 py-1.5 text-xs font-black text-orange-700 dark:text-amber-400 shadow-sm hover:border-orange-300 dark:hover:border-amber-500/50 hover:scale-105 active:scale-95 transition cursor-pointer"
                 >
-                  <Flame className="size-4 text-amber-400 fill-amber-400 animate-bounce" />
+                  <Flame className="size-4 text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400 animate-bounce" />
                   <span className="font-mono"><StatNumber value={user.streak || 0} /></span>
-                  <span className="hidden sm:inline text-[10px] font-semibold text-amber-400/80">kun</span>
+                  <span className="hidden sm:inline text-[10px] font-semibold text-amber-600/80 dark:text-amber-400/80">kun</span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
+              <TooltipContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 shadow-md text-xs font-semibold">
                 {user.streak || 0} kunlik uzluksiz olovli dars seriyasi (Streak)
               </TooltipContent>
             </Tooltip>
@@ -136,13 +135,13 @@ export default function AppShell() {
               <TooltipTrigger asChild>
                 <Link
                   href="/shop"
-                  className="group flex min-h-[38px] items-center gap-1.5 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 shadow-sm hover:border-emerald-300 hover:scale-105 active:scale-95 transition cursor-pointer"
+                  className="group flex min-h-[38px] items-center gap-1.5 rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 text-xs font-black text-emerald-700 dark:text-emerald-300 shadow-sm hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:scale-105 active:scale-95 transition cursor-pointer"
                 >
-                  <Coins className="size-4 text-emerald-600 fill-emerald-600" />
+                  <Coins className="size-4 text-emerald-600 dark:text-emerald-400 fill-emerald-600 dark:fill-emerald-400" />
                   <span className="font-mono"><StatNumber value={user.coins || 0} /></span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
+              <TooltipContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 shadow-md text-xs font-semibold">
                 Tangalar balansi — do&apos;kondan buyumlar olish uchun
               </TooltipContent>
             </Tooltip>
@@ -152,14 +151,14 @@ export default function AppShell() {
               <TooltipTrigger asChild>
                 <Link
                   href="/battles"
-                  className="hidden sm:flex min-h-[38px] items-center gap-1.5 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 shadow-sm hover:border-rose-300 hover:scale-105 active:scale-95 transition cursor-pointer"
+                  className="hidden sm:flex min-h-[38px] items-center gap-1.5 rounded-2xl border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 text-xs font-black text-rose-700 dark:text-rose-300 shadow-sm hover:border-rose-300 dark:hover:border-rose-500/50 hover:scale-105 active:scale-95 transition cursor-pointer"
                 >
-                  <Swords className="size-4 text-rose-600" />
+                  <Swords className="size-4 text-rose-600 dark:text-rose-400" />
                   <span className="font-mono">{user.elo_rating || 1200}</span>
-                  <span className="text-[10px] font-semibold text-rose-500">ELO</span>
+                  <span className="text-[10px] font-semibold text-rose-500 dark:text-rose-400">ELO</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
+              <TooltipContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 shadow-md text-xs font-semibold">
                 Arena ELO reytingi va 1v1 bellashuvlar
               </TooltipContent>
             </Tooltip>
@@ -169,10 +168,10 @@ export default function AppShell() {
               <TooltipTrigger asChild>
                 <Link
                   href="/dashboard"
-                  className="relative flex size-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:border-slate-300 active:scale-95 transition cursor-pointer shadow-sm"
+                  className="relative flex size-10 items-center justify-center rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:border-slate-300 dark:hover:border-slate-700 active:scale-95 transition cursor-pointer shadow-sm"
                   aria-label="Bildirishnomalar"
                 >
-                  <Bell className={cn('size-4', unreadCount > 0 && 'text-blue-600 animate-pulse')} />
+                  <Bell className={cn('size-4', unreadCount > 0 && 'text-blue-600 dark:text-emerald-400 animate-pulse')} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-bounce">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -180,7 +179,7 @@ export default function AppShell() {
                   )}
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="bg-white border-slate-200 text-slate-800 shadow-md text-xs font-semibold">
+              <TooltipContent className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 shadow-md text-xs font-semibold">
                 Bildirishnomalar {unreadCount > 0 ? `(${unreadCount} ta yangi)` : ''}
               </TooltipContent>
             </Tooltip>
@@ -189,7 +188,7 @@ export default function AppShell() {
       </header>
 
       {/* Mobile Tab Bar (hidden when mobile drawer is open) */}
-      {!mobileMenuOpen && <MobileTabBar theme="light" />}
+      {!mobileMenuOpen && <MobileTabBar />}
 
       {/* Command Palette */}
       {user && <CommandPalette />}

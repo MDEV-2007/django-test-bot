@@ -8,6 +8,7 @@ import StreakModal from '@/components/student/StreakModal';
 import CosmeticTheme from '@/components/student/CosmeticTheme';
 import CommandPalette from '@/components/CommandPalette';
 import { useAuthStore } from '@/lib/auth-store';
+import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
 
 interface ModernAppLayoutProps {
@@ -25,14 +26,15 @@ export default function ModernAppLayout({
   unreadCount = 0,
   onNotificationsClick,
   onLogout,
-  theme = 'light',
+  theme: propTheme,
 }: ModernAppLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
   const { logout } = useAuthStore();
-
+  const { isLight: systemIsLight } = useTheme();
+  const isLight = propTheme !== undefined ? propTheme === 'light' : systemIsLight;
+  const activeTheme: 'light' | 'dark' = isLight ? 'light' : 'dark';
   const handleLogout = onLogout || logout;
-  const isLight = theme === 'light';
 
   return (
     <div
@@ -67,7 +69,7 @@ export default function ModernAppLayout({
         onMobileClose={() => setMobileMenuOpen(false)}
         user={user}
         onLogout={handleLogout}
-        theme={theme}
+        theme={activeTheme}
       />
 
       <div className="relative z-10 flex min-h-screen">
@@ -83,7 +85,7 @@ export default function ModernAppLayout({
             onSearchClick={() => {
               document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
             }}
-            theme={theme}
+            theme={activeTheme}
           />
 
           {/* Page Main Content Area */}
@@ -94,7 +96,7 @@ export default function ModernAppLayout({
       </div>
 
       {/* Floating Mobile Tab Bar on Phones (hidden when mobile drawer is open) */}
-      {!mobileMenuOpen && <MobileTabBar theme={theme} />}
+      {!mobileMenuOpen && <MobileTabBar theme={activeTheme} />}
 
       {/* Command Palette */}
       <CommandPalette />
