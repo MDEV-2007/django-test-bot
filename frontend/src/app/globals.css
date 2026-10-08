@@ -203,6 +203,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   /* shadcn'ning `bg-accent` (hover sirti) — brend `--accent` zumradiga EMAS,
      yumshoq sirt rangiga bog'lanadi, aks holda har bir hover yorqin yashil bo'lardi. */

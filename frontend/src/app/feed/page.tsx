@@ -987,9 +987,9 @@ export default function CommunityFeedPage() {
 
       {/* Create New Post Dialog Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="w-[calc(100%-1.25rem)] sm:w-full sm:max-w-lg md:max-w-xl bg-[#11141d] border border-white/10 p-0 rounded-2xl sm:rounded-3xl max-h-[85svh] flex flex-col overflow-hidden shadow-2xl">
+        <DialogContent className="w-[calc(100%-1.25rem)] sm:w-full sm:max-w-lg md:max-w-xl bg-card text-card-foreground border border-border p-0 rounded-2xl sm:rounded-3xl max-h-[85svh] flex flex-col overflow-hidden shadow-2xl">
           {/* 1. Header with Tab Switcher (Pinned Top) */}
-          <div className="p-4 sm:p-5 pb-3 border-b border-white/10 shrink-0 bg-[#141824]/60">
+          <div className="p-4 sm:p-5 pb-3 border-b border-border shrink-0 bg-muted/30">
             <div className="flex items-center gap-2 pr-8">
               <PremiumIcon icon={Plus} tone="emerald" size="sm" glow />
               <h3 className="text-base sm:text-lg font-black text-foreground">Hamjamiyatga Post Qo&apos;yish</h3>
@@ -1000,7 +1000,7 @@ export default function CommunityFeedPage() {
 
             {/* Segment Tab Switcher: 50% - 50% split */}
             <div
-              className="mt-3 p-1 rounded-xl bg-[#181d28] border border-white/10"
+              className="mt-3 p-1 rounded-xl bg-muted/60 border border-border"
               style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}
             >
               <button
@@ -1009,8 +1009,8 @@ export default function CommunityFeedPage() {
                 className={cn(
                   "py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0 cursor-pointer",
                   activeModalTab === 'result'
-                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.05]"
+                    ? "bg-card text-amber-600 dark:text-amber-400 border border-amber-500/40 shadow-xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 )}
               >
                 <PremiumIcon icon={Award} tone="amber" size="xs" glow={activeModalTab === 'result'} />
@@ -1022,8 +1022,8 @@ export default function CommunityFeedPage() {
                 className={cn(
                   "py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 min-w-0 cursor-pointer",
                   activeModalTab === 'custom'
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.05]"
+                    ? "bg-card text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 shadow-xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 )}
               >
                 <PremiumIcon icon={UploadCloud} tone="emerald" size="xs" glow={activeModalTab === 'custom'} />
@@ -1043,7 +1043,7 @@ export default function CommunityFeedPage() {
                     <p className="text-xs text-muted-foreground">Test natijalaringiz yuklanmoqda...</p>
                   </div>
                 ) : userAttempts.length === 0 ? (
-                  <div className="py-8 text-center space-y-2.5 p-4 rounded-xl bg-[#181d28] border border-dashed border-white/15">
+                  <div className="py-8 text-center space-y-2.5 p-4 rounded-xl bg-muted/30 border border-dashed border-border">
                     <PremiumIcon icon={Award} tone="zinc" size="lg" className="mx-auto" />
                     <div>
                       <p className="text-xs font-bold text-foreground">Hali topshirilgan testlar yo&apos;q</p>
@@ -1075,8 +1075,8 @@ export default function CommunityFeedPage() {
                             className={cn(
                               "p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 text-xs",
                               isSelected
-                                ? "bg-[#142322] border-emerald-500/70 shadow-xs ring-1 ring-emerald-500/40"
-                                : "bg-[#181d28] border-white/10 hover:border-emerald-500/40"
+                                ? "bg-emerald-500/10 border-emerald-500 shadow-xs ring-1 ring-emerald-500/30 text-foreground"
+                                : "bg-card border-border hover:border-emerald-500/40 hover:bg-muted/40 text-foreground"
                             )}
                           >
                             <div className="min-w-0 flex-1 space-y-0.5">
@@ -1085,7 +1085,7 @@ export default function CommunityFeedPage() {
                                   {att.test_title}
                                 </span>
                                 {isCert && (
-                                  <Badge className="bg-amber-500/20 text-amber-500 text-[9px] sm:text-[10px] px-1.5 py-0.5 shrink-0 border border-amber-500/30 font-semibold">
+                                  <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 text-[9px] sm:text-[10px] px-1.5 py-0.5 shrink-0 border border-amber-500/30 font-semibold">
                                     🏆 Sertifikat
                                   </Badge>
                                 )}
@@ -1098,15 +1098,15 @@ export default function CommunityFeedPage() {
                             <div className="flex items-center gap-2 shrink-0">
                               <span className={cn(
                                 "font-mono font-black text-xs px-2.5 py-1 rounded-lg border",
-                                scoreVal >= 80 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
-                                scoreVal >= 60 ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
-                                "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                                scoreVal >= 80 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" :
+                                scoreVal >= 60 ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" :
+                                "bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30"
                               )}>
                                 {scoreVal.toFixed(0)}%
                               </span>
                               <div className={cn(
                                 "size-5 rounded-full border flex items-center justify-center transition-colors",
-                                isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/20"
+                                isSelected ? "bg-emerald-500 border-emerald-500 text-white" : "border-border bg-muted/40"
                               )}>
                                 {isSelected && <CheckCircle2 className="size-3.5 text-white" />}
                               </div>
@@ -1123,7 +1123,7 @@ export default function CommunityFeedPage() {
                         value={attemptCaption}
                         onChange={(e) => setAttemptCaption(e.target.value)}
                         placeholder="Masalan: Mehnat o'z mevasini berdi! 88% A+ natija bilan sertifikat oldim..."
-                        className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[55px] sm:min-h-[65px] focus-visible:ring-emerald-500 resize-none"
+                        className="rounded-xl text-xs sm:text-sm bg-background border-border text-foreground placeholder:text-muted-foreground min-h-[55px] sm:min-h-[65px] focus-visible:ring-emerald-500 resize-none"
                         maxLength={500}
                       />
                     </div>
@@ -1132,7 +1132,7 @@ export default function CommunityFeedPage() {
               </div>
 
               {/* Pinned Footer */}
-              <div className="p-3.5 sm:p-4 bg-[#0d1017] border-t border-white/10 flex items-center justify-end gap-2.5 shrink-0">
+              <div className="p-3.5 sm:p-4 bg-muted/30 border-t border-border flex items-center justify-end gap-2.5 shrink-0">
                 <Button
                   type="button"
                   variant="ghost"
@@ -1175,7 +1175,7 @@ export default function CommunityFeedPage() {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="Masalan: Bugun 50 ta biologiya testi yechdim!"
-                    className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-10"
+                    className="rounded-xl text-xs sm:text-sm bg-background border-border text-foreground placeholder:text-muted-foreground h-10"
                     maxLength={150}
                   />
                 </div>
@@ -1186,7 +1186,7 @@ export default function CommunityFeedPage() {
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
                     placeholder="Biologiya, Kimyo, Tarix, Matematika..."
-                    className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground h-10"
+                    className="rounded-xl text-xs sm:text-sm bg-background border-border text-foreground placeholder:text-muted-foreground h-10"
                     maxLength={60}
                   />
                 </div>
@@ -1197,7 +1197,7 @@ export default function CommunityFeedPage() {
                     value={newCaption}
                     onChange={(e) => setNewCaption(e.target.value)}
                     placeholder="Abituriyent do'stlaringizga foydali maslahat yoki shijoatli so'zlar yozing..."
-                    className="rounded-xl text-xs sm:text-sm bg-[#181d28] border-white/10 text-foreground min-h-[65px] sm:min-h-[75px] resize-none"
+                    className="rounded-xl text-xs sm:text-sm bg-background border-border text-foreground placeholder:text-muted-foreground min-h-[65px] sm:min-h-[75px] resize-none"
                     maxLength={1000}
                   />
                 </div>
@@ -1213,7 +1213,7 @@ export default function CommunityFeedPage() {
                   />
 
                   {imagePreviewUrl ? (
-                    <div className="relative rounded-xl overflow-hidden border border-white/15 bg-black/60 p-2 flex items-center justify-center">
+                    <div className="relative rounded-xl overflow-hidden border border-border bg-black/60 p-2 flex items-center justify-center">
                       <img src={imagePreviewUrl} alt="Preview" className="max-h-40 rounded-lg object-contain" />
                       <button
                         type="button"
@@ -1229,7 +1229,7 @@ export default function CommunityFeedPage() {
                   ) : (
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-white/15 hover:border-emerald-500/50 rounded-xl p-3 sm:p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-[#181d28]"
+                      className="border-2 border-dashed border-border hover:border-emerald-500/50 rounded-xl p-3 sm:p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-muted/30"
                     >
                       <PremiumIcon icon={UploadCloud} tone="emerald" size="md" glow />
                       <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
@@ -1240,7 +1240,7 @@ export default function CommunityFeedPage() {
               </div>
 
               {/* Pinned Footer */}
-              <div className="p-3.5 sm:p-4 bg-[#0d1017] border-t border-white/10 flex items-center justify-end gap-2.5 shrink-0">
+              <div className="p-3.5 sm:p-4 bg-muted/30 border-t border-border flex items-center justify-end gap-2.5 shrink-0">
                 <Button
                   type="button"
                   variant="ghost"

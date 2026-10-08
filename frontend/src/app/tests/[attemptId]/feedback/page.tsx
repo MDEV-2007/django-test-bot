@@ -458,24 +458,24 @@ export default function FeedbackPage() {
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="size-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-0.5 shadow-lg shadow-amber-500/30 flex items-center justify-center shrink-0">
-                  <div className="size-full rounded-[14px] bg-slate-950 flex items-center justify-center">
-                    <Gift className="size-7 text-amber-300 animate-bounce" />
+                <div className="size-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 p-0.5 shadow-lg shadow-amber-500/25 flex items-center justify-center shrink-0">
+                  <div className="size-full rounded-[14px] bg-gradient-to-br from-amber-400 via-amber-300 to-yellow-400 flex items-center justify-center shadow-inner">
+                    <Gift className="size-7 text-amber-950 animate-bounce" />
                   </div>
                 </div>
                 <div>
-                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px] font-black uppercase mb-1">
+                  <Badge className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/30 text-[10px] font-black uppercase mb-1">
                     KUNDALIK SOVRIN KUTMOQDA! 🎁
                   </Badge>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                  <h3 className="text-base sm:text-lg font-black text-foreground">
                     Bugungi Sirli Sandiqni Ochdingizmi?
                   </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Sinovni muvaffaqiyatli yakunladingiz! Endi kutilmagan sirli mukofotingizni oling (500 XP gacha, tangalar, Streak Freeze).
                   </p>
                 </div>
               </div>
-              <Button className="h-11 px-6 font-black rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:from-amber-400 hover:to-yellow-400 shadow-md shrink-0">
+              <Button className="h-11 px-6 font-black rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shrink-0">
                 <Sparkles className="size-4 mr-2" /> Sandiqni Ochish
               </Button>
             </div>

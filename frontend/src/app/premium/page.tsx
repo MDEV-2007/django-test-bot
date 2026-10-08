@@ -486,9 +486,9 @@ export default function PremiumPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
-            <div className="p-5 rounded-xl border border-rose-500/20 bg-rose-500/5 space-y-3">
-              <p className="text-xs font-bold text-rose-400 uppercase tracking-wider">Oddiy Repetitor</p>
-              <p className="text-2xl font-black text-rose-300">400,000+ so&apos;m</p>
+            <div className="p-5 rounded-2xl border border-rose-500/25 bg-rose-500/5 space-y-3">
+              <p className="text-xs font-bold text-rose-500 dark:text-rose-400 uppercase tracking-wider">Oddiy Repetitor</p>
+              <p className="text-2xl font-black text-rose-600 dark:text-rose-300">400,000+ so&apos;m</p>
               <p className="text-xs text-muted-foreground">Har oy to&apos;lanadi</p>
               <ul className="text-xs space-y-1.5 text-muted-foreground pt-2 border-t border-rose-500/15">
                 <li>❌ Haftada atigi 3 kun dars</li>
@@ -497,24 +497,24 @@ export default function PremiumPage() {
               </ul>
             </div>
 
-            <div className="p-5 rounded-xl border border-slate-700 bg-slate-800/40 space-y-3">
-              <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">Alohida 1 ta test</p>
-              <p className="text-2xl font-black text-slate-200">15,000 so&apos;m</p>
+            <div className="p-5 rounded-2xl border border-border bg-card space-y-3 shadow-xs">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Alohida 1 ta test</p>
+              <p className="text-2xl font-black text-foreground">15,000 so&apos;m</p>
               <p className="text-xs text-muted-foreground">Har bir test uchun alohida</p>
-              <ul className="text-xs space-y-1.5 text-muted-foreground pt-2 border-t border-slate-700">
+              <ul className="text-xs space-y-1.5 text-muted-foreground pt-2 border-t border-border">
                 <li>⚠️ Faqat o&apos;sha 1 ta test ochiladi</li>
                 <li>❌ Boshqa 50+ ta testlar yopiq qoladi</li>
                 <li>❌ AI Mentor kirmaydi</li>
               </ul>
             </div>
 
-            <div className="p-5 rounded-xl border-2 border-amber-400 bg-gradient-to-b from-amber-500/15 to-card space-y-3 shadow-xl relative">
-              <span className="absolute -top-3 right-4 bg-amber-400 text-black font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase">
+            <div className="p-5 rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-card space-y-3 shadow-xl relative">
+              <span className="absolute -top-3 right-4 bg-amber-400 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase shadow-xs">
                 ENG ZO&apos;R TANLOV
               </span>
-              <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">ILMILDIZI PRO (12 OY)</p>
-              <p className="text-2xl font-black text-amber-300">12,500 so&apos;m/oy</p>
-              <p className="text-xs text-amber-400/80">Butun yilga bor-yo&apos;g&apos;i 150,000 so&apos;m!</p>
+              <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">ILMILDIZI PRO (12 OY)</p>
+              <p className="text-2xl font-black text-amber-600 dark:text-amber-300">12,500 so&apos;m/oy</p>
+              <p className="text-xs text-amber-700/80 dark:text-amber-400/80 font-medium">Butun yilga bor-yo&apos;g&apos;i 150,000 so&apos;m!</p>
               <ul className="text-xs space-y-1.5 text-foreground/90 pt-2 border-t border-amber-400/30 font-medium">
                 <li>✅ Barcha 50+ ta rasmiy mock testlar</li>
                 <li>✅ Yangi chiqadigan barcha testlar bepul</li>
