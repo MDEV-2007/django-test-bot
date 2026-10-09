@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileCheck2, Swords, Bot, User } from 'lucide-react';
+import { LayoutDashboard, FileCheck2, Film, Users, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,8 +23,8 @@ type TabItem = {
 const TABS: TabItem[] = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
   { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
-  { href: '/battles', label: 'Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/battles', '/games'] },
-  { href: '/mentor', label: 'AI Mentor', icon: Bot, tone: 'purple' },
+  { href: '/reels', label: 'Reels', icon: Film, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
+  { href: '/feed', label: 'Hamjamiyat', icon: Users, tone: 'purple', matchPrefixes: ['/feed', '/leaderboard'], api: '/api/learning/feed/' },
 ];
 
 const TONE_ACTIVE_MAP: Record<string, { text: string; indicator: string }> = {
@@ -32,6 +32,7 @@ const TONE_ACTIVE_MAP: Record<string, { text: string; indicator: string }> = {
   sky: { text: 'text-blue-600', indicator: 'bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]' },
   rose: { text: 'text-rose-600', indicator: 'bg-rose-600 shadow-[0_0_10px_rgba(244,63,94,0.5)]' },
   purple: { text: 'text-purple-600', indicator: 'bg-purple-600 shadow-[0_0_10px_rgba(168,85,247,0.5)]' },
+  amber: { text: 'text-amber-600', indicator: 'bg-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.5)]' },
   indigo: { text: 'text-indigo-600', indicator: 'bg-indigo-600 shadow-[0_0_10px_rgba(99,102,241,0.5)]' },
 };
 
