@@ -24,7 +24,7 @@ const TABS: TabItem[] = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
   { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
   { href: '/reels', label: 'Reels', icon: Film, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
-  { href: '/feed', label: 'Hamjamiyat', icon: Users, tone: 'purple', matchPrefixes: ['/feed', '/leaderboard'], api: '/api/learning/feed/' },
+  { href: '/feed', label: 'Lenta & Liga', icon: Users, tone: 'purple', matchPrefixes: ['/feed', '/leaderboard'], api: '/api/learning/feed/' },
 ];
 
 const TONE_ACTIVE_MAP: Record<string, { text: string; indicator: string }> = {
