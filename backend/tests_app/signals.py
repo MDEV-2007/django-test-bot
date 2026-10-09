@@ -19,9 +19,11 @@ def on_test_set_saved(sender, instance, created, **kwargs):
         and not instance.is_archived
         and instance.notified_at is None
     ):
-        test_id = instance.id
-        # Fire once transaction commits so that any atomic block is completed
-        transaction.on_commit(lambda: background.submit(send_new_test_notifications, test_id))
+        # Agar savollar hali bo'lmasa (masalan test endi yaratildi), m2m_changed signali orqali yuboriladi
+        if instance.questions.exists():
+            test_id = instance.id
+            # Fire once transaction commits so that any atomic block is completed
+            transaction.on_commit(lambda: background.submit(send_new_test_notifications, test_id))
 
 
 @receiver(m2m_changed, sender=TestSet.questions.through)

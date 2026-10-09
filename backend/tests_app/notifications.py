@@ -35,14 +35,18 @@ def send_new_test_notifications(test_id: int):
         logger.info("Test #%s has 0 questions yet, deferring notification", test_id)
         return
 
-    # Prevent duplicate broadcasting
-    if test.notified_at is not None:
-        logger.info("Test #%s was already notified at %s", test_id, test.notified_at)
-        return
+    # ATOMIC DATABASE LOCK: Faqat 1 ta jarayon notified_at ni NULL dan hozirgi vaqtga o'zgartira oladi.
+    # Barcha parallel thread'lar rows_updated == 0 olib, darhol chiqib ketadi (dublikatlarning oldi olinadi).
+    now = timezone.now()
+    rows_updated = TestSet.objects.filter(
+        pk=test_id,
+        is_published=True,
+        notified_at__isnull=True
+    ).update(notified_at=now)
 
-    # Mark as notified right away to prevent race conditions
-    test.notified_at = timezone.now()
-    test.save(update_fields=['notified_at'])
+    if rows_updated == 0:
+        logger.info("Test #%s was already notified (or processed concurrently), skipping duplicate", test_id)
+        return
 
     subject_name = test.subject.name if test.subject else "Umumiy"
     duration = test.duration_minutes or 30
@@ -83,10 +87,18 @@ def send_new_test_notifications(test_id: int):
         f"🚀 <i>Hoziroq testni yeching, o'z natijangizni tekshiring va Respublika reytingida yuqori o'rinlarni egallang!</i>"
     )
 
-    reply_markup = {
+    # Shaxsiy chatlar uchun (Web App + Link)
+    user_reply_markup = {
         'inline_keyboard': [
             [{'text': "🎯 Testni boshlash", 'web_app': {'url': test_link}}],
             [{'text': "🌐 Saytda ochish", 'url': test_link}]
+        ]
+    }
+
+    # Telegram kanallari uchun (Kanalda web_app tugmasi ruxsat berilmagan, BUTTON_TYPE_INVALID bo'ladi)
+    channel_reply_markup = {
+        'inline_keyboard': [
+            [{'text': "🎯 Testni boshlash", 'url': test_link}]
         ]
     }
 
@@ -98,7 +110,7 @@ def send_new_test_notifications(test_id: int):
                 chat_id=channel,
                 text=tg_text,
                 parse_mode='HTML',
-                reply_markup=reply_markup
+                reply_markup=channel_reply_markup
             )
             logger.info("Posted new test #%s to channel %s: %s", test_id, channel, res.get('ok'))
         except Exception as e:
@@ -116,7 +128,7 @@ def send_new_test_notifications(test_id: int):
                 chat_id=p.telegram_id,
                 text=tg_text,
                 parse_mode='HTML',
-                reply_markup=reply_markup
+                reply_markup=user_reply_markup
             )
             if res.get('ok'):
                 sent_count += 1
