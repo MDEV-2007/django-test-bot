@@ -116,31 +116,23 @@ export default function ModernTestCenter({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className={cn('text-lg sm:text-xl font-black tracking-tight', isLight ? 'text-slate-900' : 'text-white')}>
+            <h2 className="text-lg sm:text-xl font-black tracking-tight text-foreground">
               Tavsiya Etilgan Sinovlar
             </h2>
             <Badge
-              className={cn(
-                'text-[10px] font-bold border',
-                isLight
-                  ? 'border-blue-200 bg-blue-50 text-blue-700'
-                  : 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
-              )}
+              className="text-[10px] font-bold border border-primary/20 bg-primary/10 text-primary"
             >
               DARAJANGA MOS
             </Badge>
           </div>
-          <p className={cn('text-xs font-medium', isLight ? 'text-slate-500' : 'text-slate-400')}>
+          <p className="text-xs font-medium text-muted-foreground">
             AI tahlili asosida aynan sizning bilim darajangiz uchun saralangan 2 ta sinov
           </p>
         </div>
 
         <Link
           href="/tests"
-          className={cn(
-            'inline-flex items-center gap-1.5 text-xs font-bold transition shrink-0 group',
-            isLight ? 'text-blue-600 hover:text-blue-700' : 'text-emerald-400 hover:text-emerald-300'
-          )}
+          className="inline-flex items-center gap-1.5 text-xs font-bold transition shrink-0 group text-primary hover:text-primary/90"
         >
           <span>Barcha testlar katalogi (50+)</span>
           <ChevronRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
@@ -206,37 +198,22 @@ export default function ModernTestCenter({
       {/* Progressive Disclosure Link Strip: Invites to Full Catalog */}
       <Link
         href="/tests"
-        className={cn(
-          'flex items-center justify-between rounded-2xl p-3.5 text-xs transition-all group cursor-pointer border',
-          isLight
-            ? 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 shadow-[0_2px_10px_rgba(15,23,42,0.03)]'
-            : 'border-slate-800/70 bg-slate-900/40 hover:bg-slate-800/40 text-slate-300'
-        )}
+        className="flex items-center justify-between rounded-2xl p-3.5 text-xs transition-all group cursor-pointer border border-border bg-card hover:bg-muted/50 text-card-foreground shadow-card"
       >
         <div className="flex items-center gap-2.5">
-          <div
-            className={cn(
-              'flex size-8 shrink-0 items-center justify-center rounded-xl',
-              isLight ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-slate-800 text-slate-300'
-            )}
-          >
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
             <Layers className="size-4" />
           </div>
           <div>
-            <span className={cn('font-bold block', isLight ? 'text-slate-900' : 'text-white')}>
+            <span className="font-bold block text-foreground">
               Barcha fanlar bo&apos;yicha to&apos;liq testlar bazasi
             </span>
-            <span className={cn('text-[11px]', isLight ? 'text-slate-500' : 'text-slate-400')}>
+            <span className="text-[11px] text-muted-foreground">
               Ona tili, Tarix, Biologiya, Matematika, Ingliz tili va CEFR formatlari
             </span>
           </div>
         </div>
-        <div
-          className={cn(
-            'flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform',
-            isLight ? 'text-blue-600' : 'text-emerald-400'
-          )}
-        >
+        <div className="flex items-center gap-1 font-bold text-primary group-hover:translate-x-1 transition-transform">
           <span>Katalogga o&apos;tish</span>
           <ChevronRight className="size-4" />
         </div>

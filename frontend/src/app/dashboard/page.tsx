@@ -32,6 +32,7 @@ import PresenceRow from '@/components/student/PresenceRow';
 import Celebration from '@/components/student/Celebration';
 import DailyChestModal, { DailyChestStatus } from '@/components/student/DailyChestModal';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
+import { useTheme } from '@/hooks/useTheme';
 import {
   HeroFocusBanner,
   DailyGoalCard,
@@ -159,6 +160,7 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const router = useRouter();
   const { access, authReady } = useAuthStore();
+  const { isDark, isLight } = useTheme();
 
   const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
   const { data: lbData } = useApiQuery<LeaderboardData>('/api/leaderboard/');
@@ -353,8 +355,8 @@ export default function DashboardPage() {
       {/* Separates Academic learning from Gamification & Esports     */}
       {/* ============================================================ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-        {/* Segmented Mode Pills in Pure White with Soft Shadow */}
-        <div className="inline-flex p-1.5 rounded-2xl bg-white border border-slate-200/90 shadow-[0_2px_12px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+        {/* Segmented Mode Pills with Theme Awareness */}
+        <div className="inline-flex p-1.5 rounded-2xl bg-card border border-border shadow-xs backdrop-blur-xl">
           <button
             type="button"
             onClick={() => setActiveMode('study')}
@@ -362,7 +364,7 @@ export default function DashboardPage() {
               'flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer select-none',
               activeMode === 'study'
                 ? 'bg-blue-600 text-white shadow-[0_2px_12px_rgba(37,99,235,0.35)]'
-                : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <BookOpen className="size-4" />
@@ -375,7 +377,7 @@ export default function DashboardPage() {
               'flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer select-none',
               activeMode === 'arena'
                 ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-[0_2px_12px_rgba(249,115,22,0.35)]'
-                : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <Swords className="size-4" />
@@ -388,7 +390,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Online Users Widget */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white border border-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-card border border-border shadow-xs backdrop-blur-xl">
           {/* Pulsing green dot */}
           <span className="relative flex size-2 shrink-0">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -398,7 +400,7 @@ export default function DashboardPage() {
           {data.online_peers && data.online_peers.length > 0 && (
             <div className="flex -space-x-2">
               {data.online_peers.slice(0, 5).map((peer, i) => (
-                <Avatar key={i} className="size-6 ring-2 ring-white shrink-0">
+                <Avatar key={i} className="size-6 ring-2 ring-card shrink-0">
                   <AvatarImage src={peer.avatar_url || ''} />
                   <AvatarFallback className="bg-blue-100 text-blue-700 text-[9px] font-black">
                     {peer.name?.slice(0, 2).toUpperCase() || '??'}
@@ -407,9 +409,9 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-          <span className="text-xs font-bold text-slate-700">
-            <strong className="text-emerald-600 font-black">{data.online_count || 0}</strong>
-            <span className="text-slate-500 font-medium"> ta onlayn</span>
+          <span className="text-xs font-bold text-foreground">
+            <strong className="text-emerald-500 font-black">{data.online_count || 0}</strong>
+            <span className="text-muted-foreground font-medium"> ta onlayn</span>
           </span>
         </div>
       </div>
@@ -425,7 +427,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-8 space-y-6">
           {activeMode === 'study' ? (
             <>
-              {/* 1. SINGLE COMMANDING PRIMARY HERO CTA (LIGHT MODE) */}
+              {/* 1. SINGLE COMMANDING PRIMARY HERO CTA */}
               <HeroFocusBanner
                 user={{
                   first_name: firstName,
@@ -442,7 +444,7 @@ export default function DashboardPage() {
                   subjectName: activeSubject,
                   actionUrl: '/tests',
                 }}
-                theme="light"
+                theme={isDark ? 'dark' : 'light'}
               />
 
               {/* 2. CLEAN 25-MINUTE POMODORO TIMER CARD */}
@@ -452,11 +454,11 @@ export default function DashboardPage() {
               <ModernTestCenter
                 activeSubject={activeSubject}
                 weakReviewTopic={data.weak_review?.topic_title || null}
-                theme="light"
+                theme={isDark ? 'dark' : 'light'}
               />
 
               {/* 4. SMART MISTAKES NOTEBOOK WIDGET (AQLLI XATOLAR DAFTARI) */}
-              <div className="relative overflow-hidden rounded-3xl border border-rose-200/90 bg-gradient-to-br from-rose-50/70 via-white to-amber-50/40 p-5 sm:p-6 shadow-[0_4px_20px_rgba(244,63,94,0.08)]">
+              <div className="relative overflow-hidden rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-gradient-to-br from-rose-50/70 via-card to-amber-50/30 dark:from-rose-950/20 dark:via-card dark:to-amber-950/20 p-5 sm:p-6 shadow-xs">
                 {/* Ambient background glow */}
                 <div className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-rose-400/10 blur-2xl" />
 
@@ -467,14 +469,14 @@ export default function DashboardPage() {
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+                        <h3 className="text-sm sm:text-base font-black text-foreground tracking-tight">
                           Aqlli Xatolar Daftari
                         </h3>
-                        <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-black uppercase tracking-wider">
+                        <span className="px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-wider">
                           AI Tahlil &amp; Mashq
                         </span>
                       </div>
-                      <p className="text-xs text-slate-600 leading-snug max-w-xl">
+                      <p className="text-xs text-muted-foreground leading-snug max-w-xl">
                         Avvalgi testlarda yo&apos;l qo&apos;ygan xatolaringiz sun&apos;iy intellekt tomonidan saralandi. Qayta ishlab, bilimingizni mustahkamlang!
                       </p>
                     </div>
@@ -498,8 +500,8 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Mistakes breakdown badges */}
-                <div className="mt-4 pt-3.5 border-t border-rose-100/80 flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white border border-rose-200 text-xs font-bold text-rose-700 shadow-xs">
+                <div className="mt-4 pt-3.5 border-t border-border flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-card border border-rose-500/30 text-xs font-bold text-rose-600 dark:text-rose-400 shadow-xs">
                     <span className="size-2 rounded-full bg-rose-500" />
                     <span>Jami xatolar: {mistakesSummary?.total_mistakes ?? 0} ta</span>
                   </div>
@@ -507,14 +509,14 @@ export default function DashboardPage() {
                     mistakesSummary.subject_counts.map((sc) => (
                       <div
                         key={sc.name}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-muted border border-border text-xs font-semibold text-foreground"
                       >
                         <span>{sc.name}:</span>
-                        <span className="font-bold text-rose-600">{sc.count}</span>
+                        <span className="font-bold text-rose-500">{sc.count}</span>
                       </div>
                     ))
                   ) : (
-                    <span className="text-xs text-slate-500 italic">
+                    <span className="text-xs text-muted-foreground italic">
                       {!mistakesSummary
                         ? "Xatolar tahlili yuklanmoqda..."
                         : mistakesSummary.total_mistakes === 0
@@ -525,57 +527,57 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* 5. TEZKOR O'QUV ASBOBLARI (COMPACT CARDS IN PURE WHITE) */}
+              {/* 5. TEZKOR O'QUV ASBOBLARI */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                  <h3 className="text-xs font-black text-foreground uppercase tracking-wider">
                     O&apos;quv Qurollari
                   </h3>
-                  <span className="text-xs font-medium text-slate-500">Fokus va xotira mashqlari</span>
+                  <span className="text-xs font-medium text-muted-foreground">Fokus va xotira mashqlari</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                   <Link
                     href="/study"
-                    className="group rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 p-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)] hover:shadow-md transition-all hover:-translate-y-0.5"
+                    className="group rounded-2xl border border-border bg-card hover:border-primary/40 p-4 shadow-card hover:shadow-md transition-all hover:-translate-y-0.5"
                   >
-                    <div className="size-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 mb-2.5 group-hover:scale-110 transition-transform">
+                    <div className="size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2.5 group-hover:scale-110 transition-transform">
                       <Clock className="size-4" />
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-blue-600 transition-colors">
                       Fokus Xonasi
                     </h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                       Pomodoro &amp; Ambient tovushlar
                     </p>
                   </Link>
 
                   <Link
                     href="/flashcards"
-                    className="group rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 p-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)] hover:shadow-md transition-all hover:-translate-y-0.5"
+                    className="group rounded-2xl border border-border bg-card hover:border-primary/40 p-4 shadow-card hover:shadow-md transition-all hover:-translate-y-0.5"
                   >
-                    <div className="size-9 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 mb-2.5 group-hover:scale-110 transition-transform">
+                    <div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-2.5 group-hover:scale-110 transition-transform">
                       <Layers className="size-4" />
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-purple-600 transition-colors">
                       Flashcards
                     </h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                       Interval takrorlash &amp; lug&apos;at
                     </p>
                   </Link>
 
                   <Link
                     href="/reels"
-                    className="group rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 p-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)] hover:shadow-md transition-all hover:-translate-y-0.5"
+                    className="group rounded-2xl border border-border bg-card hover:border-primary/40 p-4 shadow-card hover:shadow-md transition-all hover:-translate-y-0.5"
                   >
-                    <div className="size-9 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 mb-2.5 group-hover:scale-110 transition-transform">
+                    <div className="size-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-600 dark:text-orange-400 mb-2.5 group-hover:scale-110 transition-transform">
                       <Play className="size-4" />
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-orange-600 transition-colors">
                       Bilim Reels
                     </h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                       15-sekundlik tezkor savollar
                     </p>
                   </Link>
@@ -591,11 +593,11 @@ export default function DashboardPage() {
                   currentRank: rankInfo.title,
                   elo: p.elo_rating || 1200,
                 }}
-                theme="light"
+                theme={isDark ? 'dark' : 'light'}
               />
 
-              {/* EXPANDED WEEKLY LEADERBOARD & PODIUM IN ARENA — PREMIUM REDESIGN */}
-              <div className="relative overflow-hidden rounded-3xl border border-amber-200/60 bg-gradient-to-b from-amber-50/60 via-white to-white shadow-[0_8px_32px_rgba(251,191,36,0.12)] space-y-5 p-5 sm:p-6">
+              {/* EXPANDED WEEKLY LEADERBOARD & PODIUM IN ARENA */}
+              <div className="relative overflow-hidden rounded-3xl border border-amber-400/40 dark:border-amber-500/20 bg-gradient-to-b from-amber-500/10 via-card to-card shadow-card space-y-5 p-5 sm:p-6">
                 {/* Ambient glow */}
                 <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-amber-400/10 blur-3xl" />
                 <div className="pointer-events-none absolute -left-16 bottom-0 size-48 rounded-full bg-blue-500/6 blur-3xl" />
@@ -607,17 +609,17 @@ export default function DashboardPage() {
                       <Trophy className="size-4 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                      <h3 className="text-sm font-black text-foreground tracking-tight">
                         Haftalik Liga &amp; Podest
                       </h3>
-                      <p className="text-[11px] font-medium text-slate-500">
+                      <p className="text-[11px] font-medium text-muted-foreground">
                         Oltin Liga yetakchilari va joriy musobaqa jadvali
                       </p>
                     </div>
                   </div>
                   <Link
                     href="/leaderboard"
-                    className="flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-800 transition bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl hover:bg-amber-100 active:scale-95"
+                    className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 transition bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl hover:bg-amber-500/20 active:scale-95"
                   >
                     Barchasi <ArrowRight className="size-3" />
                   </Link>
@@ -627,19 +629,19 @@ export default function DashboardPage() {
                 <div className="relative grid grid-cols-3 gap-2 pt-1 pb-2 items-end">
                   {/* 2nd Place — Silver */}
                   {topList[1] && (
-                    <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-3 text-center shadow-sm relative">
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-slate-400 px-2 py-0.5 text-[9px] font-black text-white shadow-sm whitespace-nowrap">#2 KUMUSH</span>
+                    <div className="flex flex-col items-center rounded-2xl border border-border bg-card p-3 text-center shadow-xs relative">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-slate-500 px-2 py-0.5 text-[9px] font-black text-white shadow-xs whitespace-nowrap">#2 KUMUSH</span>
                       <span className="text-base mt-2">🥈</span>
-                      <Avatar className="size-10 border-2 border-slate-300 my-1.5 shadow-sm">
+                      <Avatar className="size-10 border-2 border-slate-400 my-1.5 shadow-xs">
                         <AvatarImage src={topList[1].avatar_url} />
-                        <AvatarFallback className="text-[10px] font-black bg-slate-200 text-slate-700">
+                        <AvatarFallback className="text-[10px] font-black bg-muted text-muted-foreground">
                           {topList[1].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-[11px] font-bold text-slate-800 truncate w-full">
+                      <span className="text-[11px] font-bold text-foreground truncate w-full">
                         {topList[1].first_name || topList[1].username}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-slate-500 mt-0.5">
+                      <span className="text-[10px] font-mono font-bold text-muted-foreground mt-0.5">
                         {topList[1].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
@@ -647,7 +649,7 @@ export default function DashboardPage() {
 
                   {/* 1st Place — Gold Champion */}
                   {topList[0] && (
-                    <div className="flex flex-col items-center rounded-2xl border-2 border-amber-400 bg-gradient-to-b from-amber-50 to-white p-3.5 text-center shadow-[0_8px_24px_rgba(251,191,36,0.25)] relative -translate-y-2">
+                    <div className="flex flex-col items-center rounded-2xl border-2 border-amber-500 bg-card p-3.5 text-center shadow-[0_8px_24px_rgba(251,191,36,0.25)] relative -translate-y-2">
                       <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[9px] font-black text-white shadow-md whitespace-nowrap">#1 CHEMPION</span>
                       <span className="text-xl mt-2">👑</span>
                       <Avatar className="size-12 border-2 border-amber-400 my-1.5 shadow-[0_4px_12px_rgba(251,191,36,0.3)]">
@@ -656,10 +658,10 @@ export default function DashboardPage() {
                           {topList[0].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs font-black text-slate-900 truncate w-full">
+                      <span className="text-xs font-black text-foreground truncate w-full">
                         {topList[0].first_name || topList[0].username}
                       </span>
-                      <span className="text-[11px] font-mono font-black text-amber-600 mt-0.5">
+                      <span className="text-[11px] font-mono font-black text-amber-500 mt-0.5">
                         {topList[0].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
@@ -667,32 +669,36 @@ export default function DashboardPage() {
 
                   {/* 3rd Place — Bronze */}
                   {topList[2] && (
-                    <div className="flex flex-col items-center rounded-2xl border border-orange-200/80 bg-gradient-to-b from-orange-50/60 to-white p-3 text-center shadow-sm relative">
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-orange-600 px-2 py-0.5 text-[9px] font-black text-white shadow-sm whitespace-nowrap">#3 BRONZA</span>
+                    <div className="flex flex-col items-center rounded-2xl border border-border bg-card p-3 text-center shadow-xs relative">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-orange-600 px-2 py-0.5 text-[9px] font-black text-white shadow-xs whitespace-nowrap">#3 BRONZA</span>
                       <span className="text-base mt-2">🥉</span>
-                      <Avatar className="size-10 border-2 border-orange-300 my-1.5 shadow-sm">
+                      <Avatar className="size-10 border-2 border-orange-400 my-1.5 shadow-xs">
                         <AvatarImage src={topList[2].avatar_url} />
-                        <AvatarFallback className="text-[10px] font-black bg-orange-100 text-orange-700">
+                        <AvatarFallback className="text-[10px] font-black bg-muted text-muted-foreground">
                           {topList[2].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-[11px] font-bold text-slate-800 truncate w-full">
+                      <span className="text-[11px] font-bold text-foreground truncate w-full">
                         {topList[2].first_name || topList[2].username}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-orange-600 mt-0.5">
+                      <span className="text-[10px] font-mono font-bold text-orange-500 mt-0.5">
                         {topList[2].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* Ranked List — premium rows */}
+                {/* Ranked List — theme-aware rows */}
                 <div className="space-y-1.5 relative">
                   {topList.map((item, idx) => {
                     const isCurrentUser = item.username === p.username;
                     const itemFullName = `${item.first_name || item.username} ${item.last_name || ''}`.trim();
-                    const rankColors = ['text-amber-600', 'text-slate-500', 'text-orange-600'];
-                    const rankBg = ['bg-amber-50 border-amber-200', 'bg-slate-50 border-slate-200', 'bg-orange-50/60 border-orange-200/60'];
+                    const rankColors = ['text-amber-500', 'text-slate-400', 'text-orange-500'];
+                    const rankBg = [
+                      'bg-amber-500/10 border-amber-500/30',
+                      'bg-muted/80 border-border',
+                      'bg-orange-500/10 border-orange-500/30',
+                    ];
 
                     return (
                       <div
@@ -700,32 +706,32 @@ export default function DashboardPage() {
                         className={cn(
                           'flex items-center justify-between px-3.5 py-2.5 rounded-2xl border transition-all',
                           isCurrentUser
-                            ? 'bg-blue-50 border-blue-300 shadow-[0_2px_8px_rgba(37,99,235,0.1)]'
+                            ? 'bg-blue-500/15 border-blue-500/40 shadow-xs'
                             : idx < 3
                               ? rankBg[idx]
-                              : 'border-slate-200/70 bg-white hover:bg-slate-50/80'
+                              : 'border-border bg-card/60 hover:bg-muted/50'
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <span className={cn(
                             'font-mono text-[11px] font-black w-5 text-center shrink-0',
-                            isCurrentUser ? 'text-blue-600' : idx < 3 ? rankColors[idx] : 'text-slate-400'
+                            isCurrentUser ? 'text-blue-500' : idx < 3 ? rankColors[idx] : 'text-muted-foreground'
                           )}>
                             #{idx + 1}
                           </span>
-                          <Avatar className={cn('size-7 shrink-0 border', idx === 0 ? 'border-amber-300' : idx === 1 ? 'border-slate-300' : idx === 2 ? 'border-orange-300' : 'border-slate-200')}>
+                          <Avatar className={cn('size-7 shrink-0 border', idx === 0 ? 'border-amber-400' : idx === 1 ? 'border-border' : idx === 2 ? 'border-orange-400' : 'border-border')}>
                             <AvatarImage src={item.avatar_url} />
-                            <AvatarFallback className={cn('text-[9px] font-black', idx === 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600')}>
+                            <AvatarFallback className="text-[9px] font-black bg-muted text-muted-foreground">
                               {item.username.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <span className={cn('text-xs font-bold truncate', isCurrentUser ? 'text-blue-800' : 'text-slate-800')}>
+                          <span className={cn('text-xs font-bold truncate', isCurrentUser ? 'text-primary' : 'text-foreground')}>
                             {isCurrentUser ? `${itemFullName} (Siz)` : itemFullName}
                           </span>
                         </div>
                         <span className={cn(
                           'font-mono text-[11px] font-black shrink-0 pl-2',
-                          isCurrentUser ? 'text-blue-600' : idx === 0 ? 'text-amber-600' : 'text-slate-600'
+                          isCurrentUser ? 'text-primary' : idx === 0 ? 'text-amber-500' : 'text-muted-foreground'
                         )}>
                           {item.xp.toLocaleString('uz-UZ')} XP
                         </span>
@@ -735,12 +741,12 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Reward strip */}
-                <div className="flex items-center justify-between rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 text-xs">
-                  <span className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="flex items-center justify-between rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs">
+                  <span className="flex items-center gap-2 text-foreground font-medium">
                     <Zap className="size-3.5 text-orange-500 fill-orange-500" />
-                    G&apos;alaba: <strong className="text-orange-700 font-black">+50 XP</strong> va <strong className="text-amber-700 font-black">+25 tanga</strong>
+                    G&apos;alaba: <strong className="text-orange-500 font-black">+50 XP</strong> va <strong className="text-amber-500 font-black">+25 tanga</strong>
                   </span>
-                  <span className="font-black text-amber-700 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-xl text-[10px]">
+                  <span className="font-black text-amber-600 dark:text-amber-400 bg-amber-500/20 border border-amber-500/40 px-2.5 py-1 rounded-xl text-[10px]">
                     🏆 Oltin Liga: Top 10
                   </span>
                 </div>
@@ -753,7 +759,7 @@ export default function DashboardPage() {
         {/* COMPANION SIDEBAR (lg:col-span-4): GAMIFICATION & SOCIAL   */}
         {/* ========================================================== */}
         <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-20">
-          {/* 1. DAILY GOAL & STREAK WIDGET (LIGHT MODE) */}
+          {/* 1. DAILY GOAL & STREAK WIDGET */}
           <DailyGoalCard
             user={{ streak: p.streak }}
             dailyGoals={{
@@ -761,17 +767,17 @@ export default function DashboardPage() {
               target: targetGoals,
               streakDays: weekDays,
             }}
-            theme="light"
+            theme={isDark ? 'dark' : 'light'}
           />
 
-          {/* 2. KUNDALIK SIRLI SANDIQ (VARIABLE REWARD WIDGET) */}
+          {/* 2. KUNDALIK SIRLI SANDIQ */}
           <div
             onClick={() => setChestModalOpen(true)}
             className={cn(
               "group relative overflow-hidden rounded-3xl p-5 border transition-all duration-300 cursor-pointer select-none",
               chestStatus?.can_claim !== false
                 ? "border-amber-400/90 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-500/15 shadow-[0_4px_25px_rgba(245,158,11,0.15)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.25)] hover:scale-[1.01]"
-                : "border-slate-200/90 bg-white hover:border-slate-300 shadow-[0_4px_20px_rgba(15,23,42,0.04)]"
+                : "border-border bg-card hover:border-border/80 shadow-card"
             )}
           >
             {/* Shimmer light effect if claimable */}
@@ -785,7 +791,7 @@ export default function DashboardPage() {
                   "size-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110",
                   chestStatus?.can_claim !== false
                     ? "bg-gradient-to-br from-amber-400 to-yellow-500 border-amber-300 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-bounce"
-                    : "bg-slate-100 border-slate-200 text-slate-500"
+                    : "bg-muted border-border text-muted-foreground"
                 )}>
                   <Gift className="size-6" />
                 </div>
@@ -795,20 +801,20 @@ export default function DashboardPage() {
                       "text-[9px] font-black px-2 py-0.2 uppercase tracking-wider",
                       chestStatus?.can_claim !== false
                         ? "bg-amber-100 text-amber-800 border-amber-300"
-                        : "bg-slate-100 text-slate-600 border-slate-200"
+                        : "bg-muted text-muted-foreground border-border"
                     )}>
                       {chestStatus?.can_claim !== false ? "🎁 Ochishga tayyor!" : "✅ Bugun ochildi"}
                     </Badge>
                     {chestStatus?.streak_bonus_pct ? (
-                      <span className="text-[10px] font-bold text-orange-600">
+                      <span className="text-[10px] font-bold text-orange-500">
                         +{chestStatus.streak_bonus_pct}% bonus
                       </span>
                     ) : null}
                   </div>
-                  <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-snug truncate">
+                  <h4 className="text-xs sm:text-sm font-black text-foreground leading-snug truncate">
                     Kundalik Sirli Sandiq
                   </h4>
-                  <p className="text-[11px] text-slate-500 truncate">
+                  <p className="text-[11px] text-muted-foreground truncate">
                     {chestStatus?.can_claim !== false
                       ? "500 XP gacha, tangalar yoki Freeze!"
                       : "Ertaga yangi kutilmagan mukofot kutmoqda"}
@@ -819,10 +825,10 @@ export default function DashboardPage() {
                 <Button
                   size="sm"
                   className={cn(
-                    "rounded-xl text-xs font-black shadow-sm",
+                    "rounded-xl text-xs font-black shadow-xs",
                     chestStatus?.can_claim !== false
                       ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:from-amber-400 hover:to-yellow-400"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      : "bg-muted text-foreground hover:bg-muted/80"
                   )}
                 >
                   {chestStatus?.can_claim !== false ? "Ochish" : "Ko'rish"}
@@ -831,25 +837,25 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 3. BONUS QUEST BOX (PURE WHITE + ENERGETIC ACCENTS) */}
-          <Card className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_25px_rgba(15,23,42,0.05)] space-y-3">
+          {/* 3. BONUS QUEST BOX */}
+          <Card className="rounded-3xl border border-border bg-card p-5 shadow-card space-y-3">
             <div className="flex items-center gap-3">
-              <div className="size-12 shrink-0 rounded-2xl overflow-hidden shadow-sm border border-slate-200 ring-2 ring-orange-500/10">
+              <div className="size-12 shrink-0 rounded-2xl overflow-hidden shadow-xs border border-border ring-2 ring-orange-500/10">
                 <img src="/images/gift-box.jpg" alt="Gift" className="size-full object-cover" />
               </div>
               <div className="min-w-0 space-y-0.5">
-                <Badge className="bg-orange-50 text-orange-700 border-orange-200 text-[9px] font-black px-2 py-0.2">
+                <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 text-[9px] font-black px-2 py-0.2">
                   KUNLIK BONUS KVEST
                 </Badge>
-                <p className="text-xs sm:text-sm font-black text-slate-900 leading-snug">
+                <p className="text-xs sm:text-sm font-black text-foreground leading-snug">
                   Yana 2 ta test yeching va 200 tanga oling! 🎁
                 </p>
-                <p className="text-[10px] text-slate-500 font-mono font-semibold">Progress: 3 / 5 test</p>
+                <p className="text-[10px] text-muted-foreground font-mono font-semibold">Progress: 3 / 5 test</p>
               </div>
             </div>
 
             <div className="space-y-1 pt-1">
-              <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.4)]"
                   style={{ width: '60%' }}
@@ -858,22 +864,22 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* 3. MINI LEADERBOARD (Shown in Study Mode for quick awareness) */}
+          {/* 4. MINI LEADERBOARD */}
           {activeMode === 'study' && (
-            <Card className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_25px_rgba(15,23,42,0.05)] space-y-3.5">
+            <Card className="rounded-3xl border border-border bg-card p-5 shadow-card space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex size-6 items-center justify-center rounded-lg bg-amber-50 border border-amber-200 text-amber-600">
+                  <div className="flex size-6 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500">
                     <Trophy className="size-3.5" />
                   </div>
-                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                  <h3 className="text-xs font-black text-foreground uppercase tracking-wider">
                     Haftalik Reyting
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveMode('arena')}
-                  className="text-[11px] font-bold text-blue-600 hover:text-blue-700 transition cursor-pointer"
+                  className="text-[11px] font-bold text-primary hover:underline transition cursor-pointer"
                 >
                   To&apos;liq →
                 </button>
@@ -883,23 +889,23 @@ export default function DashboardPage() {
                 {topList.slice(0, 3).map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2 rounded-xl border border-slate-200 bg-slate-50/70 text-xs shadow-2xs"
+                    className="flex items-center justify-between p-2 rounded-xl border border-border bg-muted/40 text-xs shadow-xs"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-mono font-bold text-slate-400 w-3">
+                      <span className="text-[10px] font-mono font-bold text-muted-foreground w-3">
                         #{idx + 1}
                       </span>
-                      <Avatar className="size-6 border border-slate-300 shrink-0">
+                      <Avatar className="size-6 border border-border shrink-0">
                         <AvatarImage src={item.avatar_url} />
-                        <AvatarFallback className="text-[9px] font-bold bg-slate-200 text-slate-700">
+                        <AvatarFallback className="text-[9px] font-bold bg-muted text-muted-foreground">
                           {item.username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-bold text-slate-800 truncate max-w-[120px]">
+                      <span className="font-bold text-foreground truncate max-w-[120px]">
                         {item.first_name || item.username}
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] font-black text-blue-600">
+                    <span className="font-mono text-[11px] font-black text-primary">
                       {item.xp.toLocaleString('uz-UZ')} XP
                     </span>
                   </div>
@@ -908,8 +914,8 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* 4. ONLINE COMMUNITY PRESENCE */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
+          {/* 5. ONLINE COMMUNITY PRESENCE */}
+          <div className="rounded-3xl border border-border bg-card p-4 shadow-card">
             <PresenceRow
               count={data.online_count}
               peers={data.online_peers ?? []}
@@ -919,24 +925,21 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ============================================================ */}
-      {/* NOTIFICATION POPOVER MODAL (WHEN BELL CLICKED)              */}
-      {/* High contrast, Pure White in Light Mode                      */}
-      {/* ============================================================ */}
+      {/* NOTIFICATION POPOVER MODAL (WHEN BELL CLICKED) */}
       {showNotifications && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs"
             onClick={() => setShowNotifications(false)}
           />
-          <div className="fixed right-4 sm:right-8 top-20 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-3xl border border-slate-200 bg-white/95 backdrop-blur-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95">
+          <div className="fixed right-4 sm:right-8 top-20 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-3xl border border-border bg-card/95 backdrop-blur-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95 text-card-foreground">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-200 bg-slate-50/80">
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-border bg-muted/50">
               <div className="flex items-center gap-2">
-                <Bell className="size-4 text-blue-600" />
-                <h3 className="text-sm font-bold text-slate-900">Bildirishnomalar</h3>
+                <Bell className="size-4 text-primary" />
+                <h3 className="text-sm font-bold text-foreground">Bildirishnomalar</h3>
                 {unreadCount > 0 && (
-                  <Badge className="text-[10px] px-1.5 py-0 h-4 bg-blue-50 text-blue-700 font-bold border border-blue-200">
+                  <Badge className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary font-bold border border-primary/20">
                     {unreadCount} yangi
                   </Badge>
                 )}
@@ -946,7 +949,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={handleMarkAllRead}
-                    className="text-[11px] text-blue-600 hover:underline font-semibold flex items-center gap-1 px-1.5 py-1 rounded cursor-pointer"
+                    className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1 px-1.5 py-1 rounded cursor-pointer"
                     title="Barchasini o'qilgan deb belgilash"
                   >
                     <CheckCheck className="size-3.5" />
@@ -956,7 +959,7 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowNotifications(false)}
-                  className="size-7 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
+                  className="size-7 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                   aria-label="Yopish"
                 >
                   <X className="size-4" />
@@ -965,20 +968,20 @@ export default function DashboardPage() {
             </div>
 
             {/* Body */}
-            <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100">
+            <div className="max-h-[380px] overflow-y-auto divide-y divide-border">
               {loadingNotifs && notifications.length === 0 ? (
                 <div className="p-6 space-y-3">
-                  <Skeleton className="h-14 w-full rounded-2xl bg-slate-100" />
-                  <Skeleton className="h-14 w-full rounded-2xl bg-slate-100" />
-                  <Skeleton className="h-14 w-full rounded-2xl bg-slate-100" />
+                  <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
+                  <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
+                  <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="p-8 text-center space-y-2">
-                  <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mx-auto">
+                  <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground mx-auto">
                     <Bell className="size-6 opacity-40" />
                   </div>
-                  <p className="text-sm font-bold text-slate-900">Yangi bildirishnoma yo&apos;q</p>
-                  <p className="text-xs text-slate-500 max-w-[240px] mx-auto">
+                  <p className="text-sm font-bold text-foreground">Yangi bildirishnoma yo&apos;q</p>
+                  <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
                     Hamjamiyatda post yozing, darslarni bajaring yoki bellashuvlarda qatnashing!
                   </p>
                 </div>
@@ -989,7 +992,7 @@ export default function DashboardPage() {
                     onClick={() => !n.is_read && handleMarkSingleRead(n.id)}
                     className={cn(
                       'flex items-start gap-3 p-3.5 transition-colors cursor-pointer',
-                      n.is_read ? 'hover:bg-slate-50' : 'bg-blue-50/50 hover:bg-blue-50/80'
+                      n.is_read ? 'hover:bg-muted/50' : 'bg-primary/5 hover:bg-primary/10'
                     )}
                   >
                     <div className="shrink-0 pt-0.5">
@@ -997,18 +1000,18 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className={cn('text-xs font-bold truncate', n.is_read ? 'text-slate-900' : 'text-blue-800')}>
+                        <p className={cn('text-xs font-bold truncate', n.is_read ? 'text-foreground' : 'text-primary font-black')}>
                           {n.title}
                         </p>
                         {!n.is_read && (
-                          <span className="size-2 rounded-full bg-blue-600 shrink-0" />
+                          <span className="size-2 rounded-full bg-primary shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                         {n.message}
                       </p>
                       {n.created_at && (
-                        <p className="text-[10px] text-slate-400 font-mono pt-0.5">
+                        <p className="text-[10px] text-muted-foreground font-mono pt-0.5 opacity-80">
                           {n.created_at}
                         </p>
                       )}
@@ -1019,11 +1022,11 @@ export default function DashboardPage() {
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-slate-200 bg-slate-50/80 text-center">
+            <div className="p-3 border-t border-border bg-muted/50 text-center">
               <Link
-                href="/community"
+                href="/feed"
                 onClick={() => setShowNotifications(false)}
-                className="text-xs font-bold text-blue-600 hover:underline inline-flex items-center gap-1"
+                className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
               >
                 <span>Hamjamiyat muhokamalariga o&apos;tish</span>
                 <ChevronRight className="size-3" />

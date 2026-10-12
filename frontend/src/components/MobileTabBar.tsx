@@ -76,7 +76,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
               'group relative flex min-h-[48px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-1 transition-all duration-200 active:scale-95',
               active
                 ? `${toneStyle.text} font-bold`
-                : 'text-slate-600 hover:text-slate-950 font-medium'
+                : 'text-muted-foreground hover:text-foreground font-medium'
             )}
           >
             {/* Active Pill Indicator */}
@@ -111,7 +111,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
           'group relative flex min-h-[48px] min-w-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-1 transition-all duration-200 active:scale-95',
           isProfileActive
             ? 'text-indigo-600 font-bold'
-            : 'text-slate-600 hover:text-slate-950 font-medium'
+            : 'text-muted-foreground hover:text-foreground font-medium'
         )}
       >
         {isProfileActive && (

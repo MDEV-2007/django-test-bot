@@ -72,21 +72,21 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
   return (
     <Card
       className={cn(
-        'rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-[0_4px_25px_rgba(15,23,42,0.05)] transition-all duration-300',
+        'rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-card transition-all duration-300',
         className
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-xl bg-blue-50 border border-blue-200/80 text-blue-600">
+          <div className="flex size-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
             <Sparkles className="size-4" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+            <h3 className="text-sm font-black text-foreground uppercase tracking-wider">
               Pomodoro Taymeri
             </h3>
-            <p className="text-[11px] font-semibold text-[#52525B] dark:text-[#A1A1AA]">
+            <p className="text-[11px] font-semibold text-muted-foreground">
               Ilmiy 25-daqiqalik chuqur fokus rejim
             </p>
           </div>
@@ -97,8 +97,8 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
           className={cn(
             'px-2.5 py-0.5 text-xs font-bold rounded-full border transition-colors',
             isRunning
-              ? 'border-blue-400 bg-blue-50 text-blue-700 animate-pulse font-black'
-              : 'border-zinc-300 dark:border-zinc-700 bg-zinc-100/90 dark:bg-zinc-800 text-[#52525B] dark:text-[#D4D4D8]'
+              ? 'border-blue-400 bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse font-black'
+              : 'border-border bg-muted/60 text-muted-foreground'
           )}
         >
           {isRunning ? '● Fokus Jarayoni' : 'Kutish rejimida'}
@@ -116,7 +116,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                 cx="50"
                 cy="50"
                 r={radius}
-                className="stroke-slate-100"
+                className="stroke-muted"
                 strokeWidth="7"
                 fill="transparent"
               />
@@ -125,7 +125,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                 cx="50"
                 cy="50"
                 r={radius}
-                className="stroke-blue-600 transition-all duration-700 ease-out"
+                className="stroke-primary transition-all duration-700 ease-out"
                 strokeWidth="7"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
@@ -137,10 +137,10 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
 
             {/* Time Display Inside Circle */}
             <div className="absolute flex flex-col items-center justify-center text-center select-none">
-              <span className="text-2xl font-black font-mono tracking-tight text-slate-900 leading-none">
+              <span className="text-2xl font-black font-mono tracking-tight text-foreground leading-none">
                 {formattedTime}
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#52525B] dark:text-[#A1A1AA] mt-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-1">
                 {isRunning ? 'Qoldi' : 'Seans'}
               </span>
             </div>
@@ -151,7 +151,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
         <div className="sm:col-span-7 space-y-4">
           {/* Duration Presets */}
           <div className="space-y-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#52525B] dark:text-[#A1A1AA]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Vaqtni tanlash
             </span>
             <div className="grid grid-cols-3 gap-2">
@@ -165,8 +165,8 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                     className={cn(
                       'min-h-[44px] rounded-xl border text-xs font-black transition-all cursor-pointer select-none active:scale-95',
                       isCurrent
-                        ? 'border-blue-600 bg-blue-600 text-white shadow-[0_2px_10px_rgba(37,99,235,0.3)]'
-                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                        ? 'border-primary bg-primary text-primary-foreground shadow-[0_2px_10px_rgba(37,99,235,0.3)]'
+                        : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                     )}
                   >
                     {mins} daq
@@ -185,7 +185,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                 'flex-1 min-h-[48px] rounded-2xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm transition-all cursor-pointer select-none active:scale-95 shadow-md',
                 isRunning
                   ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-[0_4px_16px_rgba(245,158,11,0.3)]'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_16px_rgba(37,99,235,0.35)]'
+                  : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)]'
               )}
             >
               {isRunning ? (
@@ -195,7 +195,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                 </>
               ) : (
                 <>
-                  <Play className="size-4 fill-white" />
+                  <Play className="size-4 fill-current" />
                   <span>Boshlash</span>
                 </>
               )}
@@ -204,7 +204,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
             <button
               type="button"
               onClick={handleReset}
-              className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all cursor-pointer active:scale-95"
+              className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer active:scale-95"
               title="Qayta boshlash"
               aria-label="Qayta boshlash"
             >
@@ -215,9 +215,9 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
       </div>
 
       {/* Ambient Sound Mini Selector Strip */}
-      <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between gap-3 text-xs flex-wrap">
+      <div className="mt-4 pt-3.5 border-t border-border flex items-center justify-between gap-3 text-xs flex-wrap">
         <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="text-xs font-bold text-[#52525B] dark:text-[#D4D4D8]">Fon tovushi:</span>
+          <span className="text-xs font-bold text-muted-foreground">Fon tovushi:</span>
           <div className="flex items-center gap-2">
             {[
               { id: 'rain', label: 'Yomg\'ir', icon: '🌧️' },
@@ -236,8 +236,8 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                   className={cn(
                     'px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all duration-150 cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-xs',
                     isSelected
-                      ? 'border-blue-600 bg-blue-600 text-white shadow-sm shadow-blue-500/30 ring-2 ring-blue-500/20'
-                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#52525B] dark:text-zinc-200 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50/80 dark:hover:bg-blue-950/40 dark:hover:text-blue-400 dark:hover:border-blue-400'
+                      ? 'border-primary bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/20'
+                      : 'border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground'
                   )}
                   title={`${snd.label} fon tovushini yoqish`}
                 >
@@ -251,7 +251,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
 
         <Link
           href="/study"
-          className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline shrink-0"
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline shrink-0"
         >
           <span>Fokus xonasi</span>
           <ArrowRight className="size-3" />
