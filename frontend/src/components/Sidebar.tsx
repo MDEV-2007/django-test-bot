@@ -21,6 +21,7 @@ import {
   X,
   GraduationCap,
   ShieldCheck,
+  BookOpen,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -62,11 +63,13 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, api: '/api/dashboard/home/' },
+      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: 'Yangi', matchPrefixes: ['/library'], api: '/api/learning/library/' },
       { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: null, featureKey: 'study' },
       { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: null, featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
       { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, featureKey: 'ai_mentor' },
     ],
   },
+
   {
     label: 'Amaliyot & Bellashuv',
     items: [

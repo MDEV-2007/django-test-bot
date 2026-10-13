@@ -1209,3 +1209,180 @@ def community_post_comments_api(request, post_id):
             'comment': comment.to_dict(),
             'comments_count': post.comments_count,
         })
+
+
+# ============================================================
+# KUTUBXONA API (LIBRARY: DARSLIKLAR VA QO'LLANMALAR)
+# ============================================================
+
+from .models import Book, BookBookmark
+from tests_app.models import Subject
+from django.db.models import Q, F
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def library_books_api(request):
+    """Kutubxona darslik va qo'llanmalar ro'yxati, filtrlash va toifalar."""
+    current_user = request.user if request.user.is_authenticated else None
+
+    qs = Book.objects.filter(is_published=True).select_related('subject')
+
+    # 1. Fan bo'yicha filter
+    subject_param = request.GET.get('subject', '').strip()
+    if subject_param and subject_param != 'all':
+        if subject_param.isdigit():
+            qs = qs.filter(subject_id=int(subject_param))
+        else:
+            qs = qs.filter(Q(subject__slug=subject_param) | Q(subject__name__iexact=subject_param))
+
+    # 2. Sinf bo'yicha filter
+    grade_param = request.GET.get('grade', '').strip()
+    if grade_param and grade_param != 'all':
+        qs = qs.filter(grade=grade_param)
+
+    # 3. Kategoriya bo'yicha filter (textbook, manual, collection, tables)
+    category_param = request.GET.get('category', '').strip()
+    if category_param and category_param != 'all':
+        qs = qs.filter(category=category_param)
+
+    # 4. Qidiruv
+    search_q = request.GET.get('q', '').strip()
+    if search_q:
+        qs = qs.filter(
+            Q(title__icontains=search_q) |
+            Q(author__icontains=search_q) |
+            Q(description__icontains=search_q)
+        )
+
+    # 5. Saqlanganlar (Faqat sevimlilar)
+    bookmarked_only = request.GET.get('bookmarked') == '1'
+    if bookmarked_only and current_user:
+        bookmarked_ids = BookBookmark.objects.filter(user=current_user).values_list('book_id', flat=True)
+        qs = qs.filter(id__in=bookmarked_ids)
+
+    # Fanlar ro'yxati (har bir fanda nechta kitob borligi bilan)
+    all_published_books = Book.objects.filter(is_published=True)
+    subjects_list = []
+    subjects = Subject.objects.all().order_by('order', 'name')
+    for s in subjects:
+        cnt = all_published_books.filter(subject=s).count()
+        if cnt > 0:
+            subjects_list.append({
+                'id': s.id,
+                'name': s.name,
+                'slug': s.slug,
+                'color': s.color,
+                'icon_name': s.icon_name,
+                'books_count': cnt,
+            })
+
+    # Kategoriyalar ro'yxati
+    categories_list = [
+        {'id': 'all', 'name': 'Barcha turlar', 'count': all_published_books.count()},
+        {'id': 'textbook', 'name': 'Maktab darsliklari', 'count': all_published_books.filter(category='textbook').count()},
+        {'id': 'manual', 'name': "Qo'llanma & Spravochnik", 'count': all_published_books.filter(category='manual').count()},
+        {'id': 'tables', 'name': 'Xronologiya & Jadvallar', 'count': all_published_books.filter(category='tables').count()},
+        {'id': 'collection', 'name': "Testlar to'plami", 'count': all_published_books.filter(category='collection').count()},
+    ]
+
+    # Sinflar ro'yxati
+    grades_list = [
+        {'id': 'all', 'name': 'Barcha sinflar'},
+        {'id': '5', 'name': '5-sinf'},
+        {'id': '6', 'name': '6-sinf'},
+        {'id': '7', 'name': '7-sinf'},
+        {'id': '8', 'name': '8-sinf'},
+        {'id': '9', 'name': '9-sinf'},
+        {'id': '10', 'name': '10-sinf'},
+        {'id': '11', 'name': '11-sinf'},
+        {'id': 'abiturient', 'name': 'Abituriyent'},
+    ]
+
+    books_data = [b.to_dict(current_user=current_user) for b in qs]
+
+    # Umumiy statistika
+    stats = {
+        'total_books': all_published_books.count(),
+        'total_reads': sum(all_published_books.values_list('views_count', flat=True) or [0]),
+        'total_downloads': sum(all_published_books.values_list('downloads_count', flat=True) or [0]),
+    }
+
+    return Response({
+        'books': books_data,
+        'subjects': subjects_list,
+        'categories': categories_list,
+        'grades': grades_list,
+        'stats': stats,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def library_book_detail_api(request, book_id):
+    """Kitob tafsilotlari va o'qish (view sanagich oshiriladi)."""
+    try:
+        book = Book.objects.select_related('subject').get(id=book_id, is_published=True)
+    except Book.DoesNotExist:
+        return Response({'error': "Kitob topilmadi."}, status=404)
+
+    # Ko'rishlar sonini oshiramiz
+    Book.objects.filter(id=book.id).update(views_count=F('views_count') + 1)
+    book.views_count += 1
+
+    current_user = request.user if request.user.is_authenticated else None
+    data = book.to_dict(current_user=current_user)
+
+    # Tavsiya etiladigan boshqa kitoblar
+    related_qs = Book.objects.filter(is_published=True).exclude(id=book.id)
+    if book.subject:
+        related_qs = related_qs.filter(Q(subject=book.subject) | Q(grade=book.grade))
+    related_books = [b.to_dict(current_user=current_user) for b in related_qs[:4]]
+    data['related_books'] = related_books
+
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def library_book_bookmark_api(request, book_id):
+    """Kitobni sevimlilarga qo'shish yoki olib tashlash."""
+    try:
+        book = Book.objects.get(id=book_id, is_published=True)
+    except Book.DoesNotExist:
+        return Response({'error': "Kitob topilmadi."}, status=404)
+
+    existing = BookBookmark.objects.filter(user=request.user, book=book).first()
+    if existing:
+        existing.delete()
+        is_bookmarked = False
+        message = "Kitob saqlanganlardan olib tashlandi."
+    else:
+        BookBookmark.objects.create(user=request.user, book=book)
+        is_bookmarked = True
+        message = "Kitob saqlanganlarga qo'shildi!"
+
+    return Response({
+        'success': True,
+        'is_bookmarked': is_bookmarked,
+        'message': message,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def library_book_download_api(request, book_id):
+    """Yuklab olishlar sanagichini 1 taga oshirish."""
+    try:
+        book = Book.objects.get(id=book_id, is_published=True)
+    except Book.DoesNotExist:
+        return Response({'error': "Kitob topilmadi."}, status=404)
+
+    Book.objects.filter(id=book.id).update(downloads_count=F('downloads_count') + 1)
+    book.downloads_count += 1
+
+    return Response({
+        'success': True,
+        'downloads_count': book.downloads_count,
+    })
+

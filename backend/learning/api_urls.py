@@ -21,6 +21,11 @@ urlpatterns = [
     path('feed/<int:post_id>/react/', api.community_post_react_api, name='community_post_react'),
     path('feed/<int:post_id>/comments/', api.community_post_comments_api, name='community_post_comments'),
     path('feed/<int:post_id>/delete/', api.community_post_delete_api, name='community_post_delete'),
-    path('feed/<int:post_id>/delete', api.community_post_delete_api),
     path('feed/<int:post_id>/pin/', api.community_post_pin_api, name='community_post_pin'),
+    # Kutubxona (Library)
+    path('library/', api.library_books_api, name='library_books'),
+    path('library/<int:book_id>/', api.library_book_detail_api, name='library_book_detail'),
+    path('library/<int:book_id>/bookmark/', api.library_book_bookmark_api, name='library_book_bookmark'),
+    path('library/<int:book_id>/download/', api.library_book_download_api, name='library_book_download'),
 ]
+

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileCheck2, Film, Users, User } from 'lucide-react';
+import { LayoutDashboard, FileCheck2, Film, Users, User, BookOpen } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,9 +23,11 @@ type TabItem = {
 const TABS: TabItem[] = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
   { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
+  { href: '/library', label: 'Kutubxona', icon: BookOpen, tone: 'amber', matchPrefixes: ['/library'], api: '/api/learning/library/' },
   { href: '/reels', label: 'Reels', icon: Film, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
   { href: '/feed', label: 'Lenta & Liga', icon: Users, tone: 'purple', matchPrefixes: ['/feed', '/leaderboard'], api: '/api/learning/feed/' },
 ];
+
 
 const TONE_ACTIVE_MAP: Record<string, { text: string; indicator: string }> = {
   emerald: { text: 'text-emerald-600', indicator: 'bg-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.5)]' },

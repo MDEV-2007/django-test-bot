@@ -448,3 +448,137 @@ class CommunityPostComment(models.Model):
             'created_at': self.created_at.strftime('%d.%m.%Y %H:%M'),
         }
 
+
+# ============================================================
+# KUTUBXONA (LIBRARY: DARSLIKLAR VA QO'LLANMALAR)
+# ============================================================
+
+class Book(models.Model):
+    """Platformadagi maktab darsliklari, qo'llanmalar, jadvallar va manbalar."""
+    CATEGORY_CHOICES = (
+        ('textbook', 'Maktab darsligi'),
+        ('manual', "Qo'llanma & Spravochnik"),
+        ('collection', "Testlar to'plami"),
+        ('tables', "Xronologiya & Jadvallar"),
+    )
+
+    GRADE_CHOICES = (
+        ('all', 'Barcha uchun'),
+        ('5', '5-sinf'),
+        ('6', '6-sinf'),
+        ('7', '7-sinf'),
+        ('8', '8-sinf'),
+        ('9', '9-sinf'),
+        ('10', '10-sinf'),
+        ('11', '11-sinf'),
+        ('abiturient', 'Abituriyent'),
+    )
+
+    title = models.CharField(max_length=255, verbose_name="Kitob nomi")
+    description = models.TextField(blank=True, verbose_name="Tavsif")
+    author = models.CharField(max_length=200, blank=True, verbose_name="Muallif(lar)")
+    subject = models.ForeignKey(
+        'tests_app.Subject', on_delete=models.SET_NULL, null=True, blank=True, related_name='library_books',
+        verbose_name="Fan"
+    )
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='textbook', verbose_name="Turi")
+    grade = models.CharField(max_length=20, choices=GRADE_CHOICES, default='all', verbose_name="Sinf / Bosqich")
+
+    file = models.FileField(upload_to='library/books/', blank=True, null=True, verbose_name="PDF fayli")
+    file_url = models.URLField(max_length=500, blank=True, verbose_name="Tashqi PDF havolasi")
+    file_size = models.CharField(max_length=50, blank=True, default='15 MB', verbose_name="Fayl hajmi")
+    page_count = models.IntegerField(default=0, verbose_name="Sahifalar soni")
+    year = models.IntegerField(null=True, blank=True, verbose_name="Nashr yili")
+
+    cover_image = models.ImageField(upload_to='library/covers/', blank=True, null=True, verbose_name="Muqova rasmi")
+    cover_color = models.CharField(
+        max_length=100, default='from-blue-600 to-indigo-800',
+        help_text="CSS gradient sinflari yoki Hex rang (masalan: from-amber-600 to-orange-800)"
+    )
+
+    is_premium = models.BooleanField(default=False, verbose_name="Faqat Premium")
+    coin_price = models.IntegerField(default=0, verbose_name="Tanga narxi (0 = bepul)")
+    is_published = models.BooleanField(default=True, verbose_name="Nashr qilingan")
+
+    views_count = models.PositiveIntegerField(default=0, verbose_name="Ko'rishlar soni")
+    downloads_count = models.PositiveIntegerField(default=0, verbose_name="Yuklab olishlar soni")
+
+    created_by = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='created_books',
+        verbose_name="Yuklagan foydalanuvchi"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['grade', 'title']
+        verbose_name = "Kitob / Qo'llanma"
+        verbose_name_plural = "Kutubxona kitoblari"
+
+    def __str__(self):
+        return f"{self.title} ({self.get_grade_display()})"
+
+    def to_dict(self, current_user=None):
+        cover_url = ''
+        if self.cover_image:
+            try:
+                cover_url = self.cover_image.url
+            except Exception:
+                cover_url = ''
+
+        pdf_url = ''
+        if self.file:
+            try:
+                pdf_url = self.file.url
+            except Exception:
+                pdf_url = ''
+        if not pdf_url:
+            pdf_url = self.file_url
+
+        is_bookmarked = False
+        if current_user and current_user.is_authenticated:
+            is_bookmarked = self.bookmarks.filter(user=current_user).exists()
+
+        subj_name = self.subject.name if self.subject else 'Umumiy'
+        subj_slug = self.subject.slug if self.subject else 'general'
+        subj_color = getattr(self.subject, 'color', '#3b82f6')
+
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'author': self.author,
+            'subject_name': subj_name,
+            'subject_slug': subj_slug,
+            'subject_color': subj_color,
+            'category': self.category,
+            'category_display': self.get_category_display(),
+            'grade': self.grade,
+            'grade_display': self.get_grade_display(),
+            'file_url': pdf_url,
+            'file_size': self.file_size or '15 MB',
+            'page_count': self.page_count,
+            'year': self.year,
+            'cover_image': cover_url,
+            'cover_color': self.cover_color,
+            'is_premium': self.is_premium,
+            'coin_price': self.coin_price,
+            'views_count': self.views_count,
+            'downloads_count': self.downloads_count,
+            'is_bookmarked': is_bookmarked,
+            'created_at': self.created_at.strftime('%d.%m.%Y') if self.created_at else '',
+        }
+
+
+class BookBookmark(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='book_bookmarks')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='bookmarks')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'book')
+        ordering = ['-created_at']
+        verbose_name = "Saqlangan kitob"
+        verbose_name_plural = "Saqlangan kitoblar"
+
+
