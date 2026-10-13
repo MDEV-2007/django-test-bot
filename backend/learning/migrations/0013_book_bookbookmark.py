@@ -5,6 +5,24 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+def safe_create_models(apps, schema_editor):
+    """PostgreSQL'da agar learning_book jadvali mavjud bo'lsa xatolik bermasdan o'tkazib yuboradi,
+    agar learning_bookbookmark yo'q bo'lsa uni xavfsiz yaratadi."""
+    Book = apps.get_model('learning', 'Book')
+    BookBookmark = apps.get_model('learning', 'BookBookmark')
+    existing_tables = schema_editor.connection.introspection.table_names()
+
+    if Book._meta.db_table not in existing_tables:
+        schema_editor.create_model(Book)
+
+    if BookBookmark._meta.db_table not in existing_tables:
+        schema_editor.create_model(BookBookmark)
+
+
+def safe_reverse_models(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -14,51 +32,58 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Book',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255, verbose_name='Kitob nomi')),
-                ('description', models.TextField(blank=True, verbose_name='Tavsif')),
-                ('author', models.CharField(blank=True, max_length=200, verbose_name='Muallif(lar)')),
-                ('category', models.CharField(choices=[('textbook', 'Maktab darsligi'), ('manual', "Qo'llanma & Spravochnik"), ('collection', "Testlar to'plami"), ('tables', 'Xronologiya & Jadvallar')], default='textbook', max_length=30, verbose_name='Turi')),
-                ('grade', models.CharField(choices=[('all', 'Barcha uchun'), ('5', '5-sinf'), ('6', '6-sinf'), ('7', '7-sinf'), ('8', '8-sinf'), ('9', '9-sinf'), ('10', '10-sinf'), ('11', '11-sinf'), ('abiturient', 'Abituriyent')], default='all', max_length=20, verbose_name='Sinf / Bosqich')),
-                ('file', models.FileField(blank=True, null=True, upload_to='library/books/', verbose_name='PDF fayli')),
-                ('file_url', models.URLField(blank=True, max_length=500, verbose_name='Tashqi PDF havolasi')),
-                ('file_size', models.CharField(blank=True, default='15 MB', max_length=50, verbose_name='Fayl hajmi')),
-                ('page_count', models.IntegerField(default=0, verbose_name='Sahifalar soni')),
-                ('year', models.IntegerField(blank=True, null=True, verbose_name='Nashr yili')),
-                ('cover_image', models.ImageField(blank=True, null=True, upload_to='library/covers/', verbose_name='Muqova rasmi')),
-                ('cover_color', models.CharField(default='from-blue-600 to-indigo-800', help_text='CSS gradient sinflari yoki Hex rang', max_length=100)),
-                ('is_premium', models.BooleanField(default=False, verbose_name='Faqat Premium')),
-                ('coin_price', models.IntegerField(default=0, verbose_name='Tanga narxi (0 = bepul)')),
-                ('is_published', models.BooleanField(default=True, verbose_name='Nashr qilingan')),
-                ('views_count', models.PositiveIntegerField(default=0, verbose_name="Ko'rishlar soni")),
-                ('downloads_count', models.PositiveIntegerField(default=0, verbose_name='Yuklab olishlar soni')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_books', to=settings.AUTH_USER_MODEL, verbose_name='Yuklagan foydalanuvchi')),
-                ('subject', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='library_books', to='tests_app.subject', verbose_name='Fan')),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.CreateModel(
+                    name='Book',
+                    fields=[
+                        ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                        ('title', models.CharField(max_length=255, verbose_name='Kitob nomi')),
+                        ('description', models.TextField(blank=True, verbose_name='Tavsif')),
+                        ('author', models.CharField(blank=True, max_length=200, verbose_name='Muallif(lar)')),
+                        ('category', models.CharField(choices=[('textbook', 'Maktab darsligi'), ('manual', "Qo'llanma & Spravochnik"), ('collection', "Testlar to'plami"), ('tables', 'Xronologiya & Jadvallar')], default='textbook', max_length=30, verbose_name='Turi')),
+                        ('grade', models.CharField(choices=[('all', 'Barcha uchun'), ('5', '5-sinf'), ('6', '6-sinf'), ('7', '7-sinf'), ('8', '8-sinf'), ('9', '9-sinf'), ('10', '10-sinf'), ('11', '11-sinf'), ('abiturient', 'Abituriyent')], default='all', max_length=20, verbose_name='Sinf / Bosqich')),
+                        ('file', models.FileField(blank=True, null=True, upload_to='library/books/', verbose_name='PDF fayli')),
+                        ('file_url', models.URLField(blank=True, max_length=500, verbose_name='Tashqi PDF havolasi')),
+                        ('file_size', models.CharField(blank=True, default='15 MB', max_length=50, verbose_name='Fayl hajmi')),
+                        ('page_count', models.IntegerField(default=0, verbose_name='Sahifalar soni')),
+                        ('year', models.IntegerField(blank=True, null=True, verbose_name='Nashr yili')),
+                        ('cover_image', models.ImageField(blank=True, null=True, upload_to='library/covers/', verbose_name='Muqova rasmi')),
+                        ('cover_color', models.CharField(default='from-blue-600 to-indigo-800', help_text='CSS gradient sinflari yoki Hex rang', max_length=100)),
+                        ('is_premium', models.BooleanField(default=False, verbose_name='Faqat Premium')),
+                        ('coin_price', models.IntegerField(default=0, verbose_name='Tanga narxi (0 = bepul)')),
+                        ('is_published', models.BooleanField(default=True, verbose_name='Nashr qilingan')),
+                        ('views_count', models.PositiveIntegerField(default=0, verbose_name="Ko'rishlar soni")),
+                        ('downloads_count', models.PositiveIntegerField(default=0, verbose_name='Yuklab olishlar soni')),
+                        ('created_at', models.DateTimeField(auto_now_add=True)),
+                        ('updated_at', models.DateTimeField(auto_now=True)),
+                        ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_books', to=settings.AUTH_USER_MODEL, verbose_name='Yuklagan foydalanuvchi')),
+                        ('subject', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='library_books', to='tests_app.subject', verbose_name='Fan')),
+                    ],
+                    options={
+                        'verbose_name': "Kitob / Qo'llanma",
+                        'verbose_name_plural': 'Kutubxona kitoblari',
+                        'ordering': ['grade', 'title'],
+                    },
+                ),
+                migrations.CreateModel(
+                    name='BookBookmark',
+                    fields=[
+                        ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                        ('created_at', models.DateTimeField(auto_now_add=True)),
+                        ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarks', to='learning.book')),
+                        ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='book_bookmarks', to=settings.AUTH_USER_MODEL)),
+                    ],
+                    options={
+                        'verbose_name': 'Saqlangan kitob',
+                        'verbose_name_plural': 'Saqlangan kitoblar',
+                        'ordering': ['-created_at'],
+                        'unique_together': {('user', 'book')},
+                    },
+                ),
             ],
-            options={
-                'verbose_name': "Kitob / Qo'llanma",
-                'verbose_name_plural': 'Kutubxona kitoblari',
-                'ordering': ['grade', 'title'],
-            },
-        ),
-        migrations.CreateModel(
-            name='BookBookmark',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarks', to='learning.book')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='book_bookmarks', to=settings.AUTH_USER_MODEL)),
+            database_operations=[
+                migrations.RunPython(safe_create_models, reverse_code=safe_reverse_models),
             ],
-            options={
-                'verbose_name': 'Saqlangan kitob',
-                'verbose_name_plural': 'Saqlangan kitoblar',
-                'ordering': ['-created_at'],
-                'unique_together': {('user', 'book')},
-            },
         ),
     ]
