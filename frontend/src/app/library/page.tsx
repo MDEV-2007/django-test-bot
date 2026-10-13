@@ -172,8 +172,10 @@ export default function LibraryPage() {
   };
 
   return (
-    <AppShell>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <>
+      <AppShell />
+      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-20 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
         
         {/* ── 1. HERO HEADER BANNER ─────────────────────────────────────────── */}
         <div className={cn(
@@ -756,7 +758,8 @@ export default function LibraryPage() {
           )}
         </AnimatePresence>
 
-      </div>
-    </AppShell>
+        </div>
+      </main>
+    </>
   );
 }
