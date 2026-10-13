@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Download, Megaphone, Loader2 } from 'lucide-react';
+import { Download, Megaphone, Loader2, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
@@ -115,6 +115,47 @@ export default function PanelUsersPage() {
             </Link>
           </div>
         </div>
+
+        {/* Tezkor filtr tugmalari */}
+        <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+          <Link href="/panel/users">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7 px-3 rounded-lg border-border/80 text-muted-foreground hover:text-foreground"
+            >
+              Hammasi
+            </Button>
+          </Link>
+          <Link href="/panel/users?role=premium">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7 px-3 rounded-lg border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 font-bold gap-1.5 shadow-xs"
+            >
+              <Crown className="size-3 text-amber-400" /> Faqat Premium Foydalanuvchilar ⭐
+            </Button>
+          </Link>
+          <Link href="/panel/users?role=student">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7 px-3 rounded-lg border-border/80 text-muted-foreground hover:text-foreground"
+            >
+              O&apos;quvchilar
+            </Button>
+          </Link>
+          <Link href="/panel/users?role=teacher">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7 px-3 rounded-lg border-sky-500/30 text-sky-400 bg-sky-500/10 hover:bg-sky-500/20"
+            >
+              O&apos;qituvchilar
+            </Button>
+          </Link>
+        </div>
+
         <DataTable
           endpoint="/api/panel/users/" columns={columns}
           onRowClick={(u) => router.push(`/panel/users/${u.id}`)}

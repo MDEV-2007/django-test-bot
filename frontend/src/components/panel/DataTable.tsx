@@ -59,11 +59,39 @@ export default function DataTable<T extends { id: number }>({
   const [qInput, setQInput] = useState('');
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
-  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+  const [filterValues, setFilterValues] = useState<Record<string, string>>(() => {
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const init: Record<string, string> = {};
+      sp.forEach((val, key) => {
+        if (key !== 'page' && key !== 'q') {
+          init[key] = val;
+        }
+      });
+      return init;
+    }
+    return {};
+  });
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [bulkAction, setBulkAction] = useState('');
   const [busy, setBusy] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // URL query o'zgarsa (masalan boshqa sahifadan ?role=premium bilan kelsa)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const init: Record<string, string> = {};
+      sp.forEach((val, key) => {
+        if (key !== 'page' && key !== 'q') {
+          init[key] = val;
+        }
+      });
+      if (Object.keys(init).length > 0) {
+        setFilterValues((prev) => ({ ...prev, ...init }));
+      }
+    }
+  }, []);
 
   // Qidiruvni debounce qilamiz — ilgari har bosilgan harf uchun so'rov ketardi.
   useEffect(() => {
@@ -140,7 +168,19 @@ export default function DataTable<T extends { id: number }>({
             <Select
               key={f.param}
               value={filterValues[f.param] || ALL}
-              onValueChange={(v) => { setFilterValues((prev) => ({ ...prev, [f.param]: v })); setPage(1); }}
+              onValueChange={(v) => {
+                setFilterValues((prev) => ({ ...prev, [f.param]: v }));
+                setPage(1);
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  if (v && v !== ALL) {
+                    url.searchParams.set(f.param, v);
+                  } else {
+                    url.searchParams.delete(f.param);
+                  }
+                  window.history.replaceState({}, '', url.toString());
+                }
+              }}
             >
               <SelectTrigger className="w-auto min-w-36">
                 <SelectValue placeholder={f.label} />

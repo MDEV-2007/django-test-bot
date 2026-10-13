@@ -113,19 +113,19 @@ type Dashboard = {
   recent_logs: AuditRow[];
 };
 
-const STAT_CARDS: { key: string; label: string; icon: typeof Users; tone: string }[] = [
-  { key: 'users', label: 'Foydalanuvchilar', icon: Users, tone: 'text-emerald-400' },
-  { key: 'teachers', label: "O'qituvchilar", icon: GraduationCap, tone: 'text-sky-400' },
-  { key: 'students', label: "O'quvchilar", icon: UserRound, tone: 'text-indigo-400' },
-  { key: 'testsets', label: 'Testlar', icon: FileCheck2, tone: 'text-teal-400' },
-  { key: 'lessons', label: 'Darslar', icon: BookOpen, tone: 'text-sky-400' },
-  { key: 'games', label: "O'yinlar", icon: Gamepad2, tone: 'text-purple-400' },
-  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'text-emerald-400' },
-  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'text-emerald-400' },
-  { key: 'pending_payments', label: "Kutayotgan to'lovlar", icon: CreditCard, tone: 'text-amber-400' },
-  { key: 'total_revenue', label: 'Tushum', icon: Wallet, tone: 'text-amber-400' },
-  { key: 'active_today', label: 'Bugun faol', icon: Radio, tone: 'text-emerald-400' },
-  { key: 'premium_users', label: 'Premium', icon: Crown, tone: 'text-amber-400' },
+const STAT_CARDS: { key: string; label: string; icon: typeof Users; tone: string; href: string }[] = [
+  { key: 'users', label: 'Foydalanuvchilar', icon: Users, tone: 'text-emerald-400', href: '/panel/users' },
+  { key: 'teachers', label: "O'qituvchilar", icon: GraduationCap, tone: 'text-sky-400', href: '/panel/users?role=teacher' },
+  { key: 'students', label: "O'quvchilar", icon: UserRound, tone: 'text-indigo-400', href: '/panel/users?role=student' },
+  { key: 'testsets', label: 'Testlar', icon: FileCheck2, tone: 'text-teal-400', href: '/panel/tests' },
+  { key: 'lessons', label: 'Darslar', icon: BookOpen, tone: 'text-sky-400', href: '/panel/lessons' },
+  { key: 'games', label: "O'yinlar", icon: Gamepad2, tone: 'text-purple-400', href: '/panel/games' },
+  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'text-emerald-400', href: '/panel/results' },
+  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'text-emerald-400', href: '/panel/results' },
+  { key: 'pending_payments', label: "Kutayotgan to'lovlar", icon: CreditCard, tone: 'text-amber-400', href: '/panel/payments?status=pending' },
+  { key: 'total_revenue', label: 'Tushum', icon: Wallet, tone: 'text-amber-400', href: '/panel/payments' },
+  { key: 'active_today', label: 'Bugun faol', icon: Radio, tone: 'text-emerald-400', href: '/panel/users' },
+  { key: 'premium_users', label: 'Premium', icon: Crown, tone: 'text-amber-400', href: '/panel/users?role=premium' },
 ];
 
 const ACTION_TONE: Record<string, string> = {
@@ -299,22 +299,23 @@ export default function PanelDashboard() {
             const Icon = c.icon;
             const val = data?.stats?.[c.key];
             return (
-              <div
+              <Link
                 key={c.key}
-                className="group relative overflow-hidden rounded-2xl border border-[#1e2330] bg-[#11141c]/95 p-4 shadow-sm transition-all hover:border-slate-700 hover:bg-[#151923]"
+                href={c.href}
+                className="group relative overflow-hidden rounded-2xl border border-[#1e2330] bg-[#11141c]/95 p-4 shadow-sm transition-all hover:border-slate-700 hover:bg-[#151923] block"
               >
                 <div className="flex items-center gap-2">
                   <Icon className={`size-4 shrink-0 ${c.tone}`} />
-                  <p className="truncate text-xs font-medium text-slate-400">{c.label}</p>
+                  <p className="truncate text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">{c.label}</p>
                 </div>
                 {loading ? (
                   <Skeleton className="mt-2.5 h-7 w-16 bg-slate-800" />
                 ) : (
-                  <p className="mt-2 font-mono text-2xl font-bold tracking-tight text-white tabular-nums">
+                  <p className="mt-2 font-mono text-2xl font-bold tracking-tight text-white tabular-nums group-hover:text-amber-300 transition-colors">
                     {fmt(val)}
                   </p>
                 )}
-              </div>
+              </Link>
             );
           })}
         </div>

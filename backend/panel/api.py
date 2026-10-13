@@ -78,8 +78,9 @@ def dashboard_api(request):
                 attempt_series.append(Attempt.objects.filter(started_at__date=d).count())
 
             total_revenue = Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0
-            active_today = Attempt.objects.filter(started_at__date=today).values('profile').distinct().count()
-            premium_users = Profile.objects.filter(Q(is_premium=True) | Q(premium_mock_test_unlocked=True)).count()
+            premium_users = Profile.objects.filter(
+                Q(is_premium=True) | Q(premium_mock_test_unlocked=True) | Q(payments__status='approved')
+            ).distinct().count()
 
             # Asosiy urinishlar statistikasi va voronka
             total_started_attempts = Attempt.objects.count()
@@ -362,7 +363,9 @@ def dashboard_api(request):
                     'pending_payments': Payment.objects.filter(status='pending').count(),
                     'total_revenue': str(Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0),
                     'active_today': Attempt.objects.filter(started_at__date=today).values('profile').distinct().count(),
-                    'premium_users': Profile.objects.filter(Q(is_premium=True) | Q(premium_mock_test_unlocked=True)).count(),
+                    'premium_users': Profile.objects.filter(
+                        Q(is_premium=True) | Q(premium_mock_test_unlocked=True) | Q(payments__status='approved')
+                    ).distinct().count(),
                 },
                 'chart_labels': [], 'chart_reg': [], 'chart_attempts': [],
                 'hardest_questions': [],
@@ -381,7 +384,8 @@ def _role_tone(role, is_premium=False):
 
 def _user_row(u):
     profile = getattr(u, 'profile', None)
-    is_premium = bool(profile and (profile.is_premium or profile.premium_mock_test_unlocked))
+    has_approved_payment = Payment.objects.filter(profile=profile, status='approved').exists() if profile else False
+    is_premium = bool(profile and (profile.is_premium or profile.premium_mock_test_unlocked or has_approved_payment))
     role_display = profile.get_role_display() if profile else ''
     if is_premium and profile and profile.role == 'student':
         role_display = "Premium ⭐"
@@ -409,15 +413,23 @@ def users_api(request):
         ]
 
         if role_param == 'premium':
-            qs = qs.filter(Q(profile__is_premium=True) | Q(profile__premium_mock_test_unlocked=True))
+            qs = qs.filter(
+                Q(profile__is_premium=True) |
+                Q(profile__premium_mock_test_unlocked=True) |
+                Q(profile__payments__status='approved')
+            ).distinct()
         elif role_param:
             filters_list.append({'param': 'role', 'lookup': 'profile__role'})
 
         premium_param = request.query_params.get('premium', '').strip().lower()
         if premium_param in ('true', '1'):
-            qs = qs.filter(Q(profile__is_premium=True) | Q(profile__premium_mock_test_unlocked=True))
+            qs = qs.filter(
+                Q(profile__is_premium=True) |
+                Q(profile__premium_mock_test_unlocked=True) |
+                Q(profile__payments__status='approved')
+            ).distinct()
         elif premium_param in ('false', '0'):
-            qs = qs.filter(profile__is_premium=False, profile__premium_mock_test_unlocked=False)
+            qs = qs.filter(profile__is_premium=False, profile__premium_mock_test_unlocked=False).exclude(profile__payments__status='approved')
 
         return list_response(
             request, queryset=qs,
