@@ -56,10 +56,18 @@ type HardQuestion = {
   text: string;
   options_text?: string;
   subject: string;
+  subject_slug?: string;
   topic: string | null;
   total_answered: number;
   correct_pct: number;
   error_pct: number;
+  post_text?: string;
+};
+
+type MarketingSubjectOption = {
+  id: string | number;
+  slug: string;
+  name: string;
 };
 
 type WeakTopic = {
@@ -133,6 +141,8 @@ type MarketingData = {
       hardest_question: string;
       weekly_leaderboard: string;
     };
+    subjects?: MarketingSubjectOption[];
+    hardest_by_subject?: Record<string, HardQuestion[]>;
     stats_preview: {
       active_students: number;
       questions_solved: number;
@@ -159,6 +169,8 @@ export default function MarketingPage() {
 
   // Viral Post Generator state
   const [activeTemplate, setActiveTemplate] = useState<'daily_digest' | 'hardest_question' | 'weekly_leaderboard'>('daily_digest');
+  const [selectedSubjectSlug, setSelectedSubjectSlug] = useState<string>('all');
+  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
   const [postText, setPostText] = useState('');
   const [targetChannel, setTargetChannel] = useState('');
   const [copied, setCopied] = useState(false);
@@ -172,7 +184,18 @@ export default function MarketingPage() {
       const res = await apiFetch<MarketingData>(url);
       setData(res);
       if ((!postText || isRefresh) && res.viral_generator?.templates) {
-        setPostText(res.viral_generator.templates[activeTemplate]);
+        if (activeTemplate === 'hardest_question') {
+          const list = res.viral_generator?.hardest_by_subject?.[selectedSubjectSlug] || res.viral_generator?.hardest_by_subject?.['all'] || [];
+          const currentQ = (selectedQuestionId ? list.find(q => q.id === selectedQuestionId) : null) || list[0];
+          if (currentQ?.post_text) {
+            setPostText(currentQ.post_text);
+            setSelectedQuestionId(currentQ.id);
+          } else {
+            setPostText(res.viral_generator.templates.hardest_question);
+          }
+        } else {
+          setPostText(res.viral_generator.templates[activeTemplate]);
+        }
       }
       if (!targetChannel && res.viral_generator?.default_channel) {
         setTargetChannel(res.viral_generator.default_channel);
@@ -189,9 +212,39 @@ export default function MarketingPage() {
     loadData();
   }, []);
 
+  function handleSelectSubject(slug: string) {
+    setSelectedSubjectSlug(slug);
+    const questionsList = data?.viral_generator?.hardest_by_subject?.[slug] || [];
+    const firstQ = questionsList[0];
+    if (firstQ) {
+      setSelectedQuestionId(firstQ.id);
+      if (firstQ.post_text) {
+        setPostText(firstQ.post_text);
+      }
+    }
+  }
+
+  function handleSelectQuestion(qId: number) {
+    setSelectedQuestionId(qId);
+    const questionsList = data?.viral_generator?.hardest_by_subject?.[selectedSubjectSlug] || data?.viral_generator?.hardest_by_subject?.['all'] || [];
+    const found = questionsList.find((q) => q.id === qId);
+    if (found?.post_text) {
+      setPostText(found.post_text);
+    }
+  }
+
   // When switching templates, update post text
   function handleSelectTemplate(tmpl: 'daily_digest' | 'hardest_question' | 'weekly_leaderboard') {
     setActiveTemplate(tmpl);
+    if (tmpl === 'hardest_question') {
+      const questionsList = data?.viral_generator?.hardest_by_subject?.[selectedSubjectSlug] || data?.viral_generator?.hardest_by_subject?.['all'] || [];
+      const currentQ = (selectedQuestionId ? questionsList.find(q => q.id === selectedQuestionId) : null) || questionsList[0];
+      if (currentQ?.post_text) {
+        setPostText(currentQ.post_text);
+        setSelectedQuestionId(currentQ.id);
+        return;
+      }
+    }
     if (data?.viral_generator?.templates[tmpl]) {
       setPostText(data.viral_generator.templates[tmpl]);
     }
@@ -942,6 +995,118 @@ export default function MarketingPage() {
                     </Button>
                   </div>
 
+                  {/* 2. Kunning Eng Qiyin Savoli bo'lsa: Fan va Savol tanlash filtri */}
+                  {activeTemplate === 'hardest_question' && (
+                    <div className="p-4 bg-muted/40 rounded-xl border border-rose-500/30 space-y-3.5 transition-all">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/50 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 text-xs font-bold gap-1">
+                            <BookOpen className="size-3 text-rose-500" /> Fanlar bo&apos;yicha qiyin savollar
+                          </Badge>
+                          <span className="text-xs text-muted-foreground hidden sm:inline">
+                            Istalgan fan yoki barcha fanlardan eng qiyin savolni tanlang
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-muted-foreground">
+                          Avtomatik to&apos;liq matn va variantlar bilan shakllanadi
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {/* Fan tanlash */}
+                        <div>
+                          <label className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-1.5">
+                            <BookOpen className="size-3.5 text-rose-500" /> Fanni tanlang:
+                          </label>
+                          <select
+                            value={selectedSubjectSlug}
+                            onChange={(e) => handleSelectSubject(e.target.value)}
+                            className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-xs sm:text-sm font-medium shadow-xs transition-colors focus:border-rose-500 focus:outline-none cursor-pointer"
+                          >
+                            {(data?.viral_generator?.subjects || [{ id: 'all', slug: 'all', name: "Barcha fanlar" }]).map((s) => {
+                              const count = data?.viral_generator?.hardest_by_subject?.[s.slug]?.length || 0;
+                              return (
+                                <option key={s.slug} value={s.slug}>
+                                  {s.name} {count > 0 ? `(${count} ta savol)` : ''}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+
+                        {/* Savolni tanlash */}
+                        <div>
+                          <label className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-1.5">
+                            <HelpCircle className="size-3.5 text-rose-500" /> Savolni tanlang:
+                          </label>
+                          {(() => {
+                            const qList = data?.viral_generator?.hardest_by_subject?.[selectedSubjectSlug] || data?.viral_generator?.hardest_by_subject?.['all'] || [];
+                            if (qList.length === 0) {
+                              return (
+                                <div className="h-9 flex items-center px-3 text-xs text-muted-foreground border border-dashed rounded-lg bg-background">
+                                  Ushbu fanda hozircha savol mavjud emas
+                                </div>
+                              );
+                            }
+                            return (
+                              <select
+                                value={selectedQuestionId ?? qList[0]?.id ?? ''}
+                                onChange={(e) => handleSelectQuestion(Number(e.target.value))}
+                                className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-xs sm:text-sm font-medium shadow-xs transition-colors focus:border-rose-500 focus:outline-none truncate cursor-pointer"
+                              >
+                                {qList.map((q, idx) => (
+                                  <option key={q.id} value={q.id}>
+                                    #{idx + 1}: {q.text.slice(0, 50)}... ({q.error_pct}% xato, {q.total_answered} ta javob)
+                                  </option>
+                                ))}
+                              </select>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      {/* Tanlangan savol to'liq matni va variantlari preview kartasi */}
+                      {(() => {
+                        const qList = data?.viral_generator?.hardest_by_subject?.[selectedSubjectSlug] || data?.viral_generator?.hardest_by_subject?.['all'] || [];
+                        const activeQ = qList.find(q => q.id === selectedQuestionId) || qList[0];
+                        if (!activeQ) return null;
+                        return (
+                          <div className="pt-2.5 border-t border-border/50 space-y-2">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Badge variant="outline" className="text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20">
+                                  {activeQ.error_pct}% xato ({activeQ.total_answered} ta o&apos;quvchi ishlagan)
+                                </Badge>
+                                <Badge variant="secondary" className="text-[10px] font-semibold">
+                                  Fan: #{activeQ.subject}
+                                </Badge>
+                                {activeQ.topic && (
+                                  <span className="text-[11px] text-muted-foreground truncate max-w-[250px]">
+                                    Mavzu: {activeQ.topic}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[11px] text-muted-foreground">
+                                Savol ID: #{activeQ.id}
+                              </span>
+                            </div>
+
+                            <div className="bg-background/90 p-3 rounded-lg border border-border/70 text-xs space-y-2">
+                              <p className="font-semibold text-foreground leading-relaxed whitespace-pre-wrap">
+                                ❓ {activeQ.text}
+                              </p>
+                              {activeQ.options_text && (
+                                <div className="p-2.5 bg-muted/50 rounded-md border border-border/50 font-mono text-[11px] text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                                  {activeQ.options_text}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
                   {/* Interaktiv Tahrirlovchi Matn */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -950,6 +1115,15 @@ export default function MarketingPage() {
                         <button
                           type="button"
                           onClick={() => {
+                            if (activeTemplate === 'hardest_question') {
+                              const qList = data?.viral_generator?.hardest_by_subject?.[selectedSubjectSlug] || data?.viral_generator?.hardest_by_subject?.['all'] || [];
+                              const activeQ = qList.find(q => q.id === selectedQuestionId) || qList[0];
+                              if (activeQ?.post_text) {
+                                setPostText(activeQ.post_text);
+                                toast.info("Savol shabloni yangilandi");
+                                return;
+                              }
+                            }
                             if (data?.viral_generator?.templates[activeTemplate]) {
                               setPostText(data.viral_generator.templates[activeTemplate]);
                               toast.info("Shablon dastlabki holatiga qaytarildi");

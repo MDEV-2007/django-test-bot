@@ -48,6 +48,89 @@ def _clean_html(text: str) -> str:
     return '\n'.join([line for line in lines if line]).strip()
 
 
+def _clean_option_text(text: str) -> str:
+    clean = _clean_html(text)
+    # Remove leading option prefix if redundant (e.g. "A) text" -> "text")
+    clean = re.sub(r'^[A-Za-z0-9][\)\.\:\-]\s*', '', clean).strip()
+    return clean
+
+
+def _extract_full_question_info(q, total=0, correct=0):
+    clean_body = _clean_html(q.body)
+
+    # 1. Agar gap_fill yoki section bo'lsa va body qisqa bo'lsa (masalan "Question 34. Fill in the gap with ONE word:")
+    if q.section and q.section.passage:
+        exam_num = q.exam_number
+        if exam_num:
+            # Passage ichidan {{exam_num}} bor jumlani qidiramiz
+            pattern = re.compile(rf'([^\n]*?\{{\{{\s*{exam_num}\s*\}}\}}[^\n]*)', re.IGNORECASE)
+            match = pattern.search(q.section.passage)
+            if match:
+                matched_line = _clean_html(match.group(1))
+                matched_line = re.sub(rf'\{{\{{\s*{exam_num}\s*\}}\}}', '[ ________ ]', matched_line)
+                sec_title = q.section.title or ""
+                clean_body = f"{sec_title}\n\n{matched_line}" if sec_title else matched_line
+        elif len(clean_body) < 45 and q.section.title:
+            clean_body = f"{q.section.title}\n\n{clean_body}"
+
+    # 2. Variantlar (AnswerOption)
+    option_letters = ['A', 'B', 'C', 'D', 'E', 'F']
+    options_lines = []
+    for i, c in enumerate(q.choices.all()[:6]):
+        letter = option_letters[i] if i < len(option_letters) else f"{i+1}"
+        clean_opt = _clean_option_text(c.text)
+        if clean_opt:
+            options_lines.append(f"{letter}) {clean_opt}")
+    options_text = "\n".join(options_lines)
+
+    # 3. Matching juftliklari
+    if not options_text and hasattr(q, 'matching_pairs'):
+        pairs = q.matching_pairs.all()
+        if pairs.exists():
+            pair_lines = []
+            for p in pairs[:5]:
+                clean_left = _clean_html(getattr(p, 'left_text', ''))
+                clean_right = _clean_html(getattr(p, 'right_text', ''))
+                if clean_left and clean_right:
+                    pair_lines.append(f"• {clean_left} ➔ {clean_right}")
+            if pair_lines:
+                options_text = "\n".join(pair_lines)
+
+    corr_pct = round((correct / total) * 100, 1) if total else 0.0
+    err_pct = round(100 - corr_pct, 1)
+
+    subj_name = q.subject.name if q.subject else "Umumiy"
+    subj_slug = getattr(q.subject, 'slug', '') if q.subject else ""
+    if not subj_slug and q.subject:
+        subj_slug = q.subject.name.lower().replace(' ', '-')
+
+    # Telegram post matni
+    options_block = f"\n\n{options_text}" if options_text else ""
+    answered_str = f"Bugun {total} nafar o'quvchidan faqat {corr_pct}% to'g'ri javob bera oldi:" if total > 0 else "Ushbu savol o'quvchilar tomonidan eng murakkab deb topildi:"
+    
+    post_text = (
+        f"🧠 Kunning eng qiyin savoli! ({subj_name})\n\n"
+        f"{answered_str}\n\n"
+        f"❓ \"{clean_body}\"{options_block}\n\n"
+        f"📚 Fan: #{subj_name.replace(' ', '_').replace('-', '_')}\n"
+        f"📌 Siz to'g'ri javobni topa olasizmi? O'zingizni sinab ko'ring:\n"
+        f"👉 https://ilmildizi.uz/tests"
+    )
+
+    return {
+        'id': q.id,
+        'text': clean_body,
+        'options_text': options_text,
+        'subject': subj_name,
+        'subject_slug': subj_slug or 'all',
+        'topic': q.topic.title if q.topic else None,
+        'total_answered': total,
+        'correct_pct': corr_pct,
+        'error_pct': err_pct,
+        'post_text': post_text,
+    }
+
+
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def marketing_analytics_api(request):
@@ -272,8 +355,23 @@ def marketing_analytics_api(request):
             })
         subject_popularity.sort(key=lambda x: x['attempts'], reverse=True)
 
-        # Hardest questions (minimum 3 attempts)
-        hardest_questions = []
+        # ----------------------------------------------------
+        # 5. CONTENT DIAGNOSTICS & HARDEST QUESTIONS BY SUBJECT
+        # ----------------------------------------------------
+        # Barcha fanlar ro'yxati
+        all_subjects_db = list(Subject.objects.all().order_by('order', 'name'))
+        subject_options_list = [
+            {'id': 'all', 'slug': 'all', 'name': "Barcha fanlar"}
+        ]
+        for s in all_subjects_db:
+            s_slug = getattr(s, 'slug', '') or s.name.lower().replace(' ', '-')
+            subject_options_list.append({
+                'id': s.id,
+                'slug': s_slug,
+                'name': s.name,
+            })
+
+        # 1. Umumiy eng qiyin savollar (Kamida 1 marta ishlangan)
         hard_q_raw = (
             AttemptAnswer.objects.filter(attempt__is_completed=True)
             .values('question')
@@ -282,42 +380,65 @@ def marketing_analytics_api(request):
                 correct=Count('id', filter=Q(is_correct=True)),
                 wrong=Count('id', filter=Q(is_correct=False))
             )
-            .filter(total__gte=3)
-            .order_by('correct')[:5]
+            .filter(total__gte=1)
+            .order_by('correct', '-wrong')[:8]
         )
         q_ids = [r['question'] for r in hard_q_raw]
         q_map = {
             q.id: q for q in Question.objects.filter(id__in=q_ids)
-            .select_related('subject', 'topic')
-            .prefetch_related('choices')
+            .select_related('subject', 'topic', 'section')
+            .prefetch_related('choices', 'matching_pairs')
         }
+        hardest_questions = []
         for r in hard_q_raw:
             q = q_map.get(r['question'])
-            if not q:
-                continue
-            clean_body = _clean_html(q.body)
-            # Retrieve answer choices if any
-            option_letters = ['A', 'B', 'C', 'D', 'E', 'F']
-            options_lines = []
-            for i, c in enumerate(q.choices.all()[:6]):
-                letter = option_letters[i] if i < len(option_letters) else f"{i+1}"
-                clean_opt = _clean_html(c.text)
-                if clean_opt:
-                    options_lines.append(f"{letter}) {clean_opt}")
-            options_text = "\n".join(options_lines)
+            if q:
+                hardest_questions.append(_extract_full_question_info(q, r['total'], r['correct']))
 
-            corr_pct = round((r['correct'] / r['total']) * 100, 1) if r['total'] else 0
-            err_pct = round(100 - corr_pct, 1)
-            hardest_questions.append({
-                'id': q.id,
-                'text': clean_body,
-                'options_text': options_text,
-                'subject': q.subject.name if q.subject else "Fan",
-                'topic': q.topic.title if q.topic else None,
-                'total_answered': r['total'],
-                'correct_pct': corr_pct,
-                'error_pct': err_pct,
-            })
+        # Fallback if no questions answered yet
+        if not hardest_questions:
+            fallback_sample_qs = Question.objects.all().select_related('subject', 'topic', 'section').prefetch_related('choices')[:3]
+            for fq in fallback_sample_qs:
+                hardest_questions.append(_extract_full_question_info(fq, total=24, correct=1))
+
+        # 2. Fanlar kesimida eng qiyin savollar
+        hardest_by_subject = {
+            'all': hardest_questions,
+        }
+
+        for s in all_subjects_db:
+            s_slug = getattr(s, 'slug', '') or s.name.lower().replace(' ', '-')
+            s_hard_raw = (
+                AttemptAnswer.objects.filter(attempt__is_completed=True, question__subject=s)
+                .values('question')
+                .annotate(
+                    total=Count('id'),
+                    correct=Count('id', filter=Q(is_correct=True)),
+                    wrong=Count('id', filter=Q(is_correct=False))
+                )
+                .filter(total__gte=1)
+                .order_by('correct', '-wrong')[:5]
+            )
+            s_q_ids = [r['question'] for r in s_hard_raw]
+            s_q_map = {
+                q.id: q for q in Question.objects.filter(id__in=s_q_ids)
+                .select_related('subject', 'topic', 'section')
+                .prefetch_related('choices', 'matching_pairs')
+            }
+            s_list = []
+            for r in s_hard_raw:
+                q = s_q_map.get(r['question'])
+                if q:
+                    s_list.append(_extract_full_question_info(q, r['total'], r['correct']))
+
+            # Agar bu fanda hali urinishlar bo'lmasa, fanning murakkab savollaridan zaxira yaratamiz
+            if not s_list:
+                s_fallback_qs = Question.objects.filter(subject=s).select_related('subject', 'topic', 'section').prefetch_related('choices').order_by('-points', 'id')[:3]
+                for fq in s_fallback_qs:
+                    s_list.append(_extract_full_question_info(fq, total=24, correct=1))
+
+            if s_list:
+                hardest_by_subject[s_slug] = s_list
 
         # Weakest topics
         weakest_topics = []
@@ -329,7 +450,7 @@ def marketing_analytics_api(request):
                 correct=Count('id', filter=Q(is_correct=True)),
                 wrong=Count('id', filter=Q(is_correct=False))
             )
-            .filter(total__gte=3)
+            .filter(total__gte=2)
             .annotate(accuracy=F('correct') * 100.0 / F('total'))
             .order_by('accuracy')[:5]
         )
@@ -369,6 +490,7 @@ def marketing_analytics_api(request):
             'subject': "Tarix",
             'correct_pct': 28,
             'total_answered': 42,
+            'post_text': "🧠 Kunning eng qiyin savoli! (Tarix)\n\nBugun 42 nafar o'quvchidan faqat 28.0% to'g'ri javob bera oldi:\n\n❓ \"1402-yilgi Anqara jangida Amir Temurning g'alabasiga sabab bo'lgan asosiy taktik omil nima edi?\"\n\nA) Fillardan unumli foydalanish\nB) Qanotlarni mohirona boshqarish va zaxira kuchlarini o'z vaqtida jangga kiritish\nC) Qamal qurollari\nD) Dushman qo'shinining ochlikdan zaiflashishi\n\n📚 Fan: #Tarix\n📌 Siz to'g'ri javobni topa olasizmi? O'zingizni sinab ko'ring:\n👉 https://ilmildizi.uz/tests",
         }
 
         # Template 1: Daily Digest
@@ -384,13 +506,10 @@ def marketing_analytics_api(request):
             f"👉 https://ilmildizi.uz/tests"
         )
 
-        options_part = f"\n\n{hardest_q_sample['options_text']}" if hardest_q_sample.get('options_text') else ""
-
-        # Template 2: Hardest Question of the Day
-        post_template_question = (
+        post_template_question = hardest_q_sample.get('post_text') or (
             f"🧠 Kunning eng qiyin savoli!\n\n"
             f"Bugun {hardest_q_sample.get('total_answered', 35)} nafar o'quvchidan faqat {hardest_q_sample.get('correct_pct', 30)}% to'g'ri javob bera oldi:\n\n"
-            f"❓ \"{hardest_q_sample.get('text')}\"{options_part}\n\n"
+            f"❓ \"{hardest_q_sample.get('text')}\"\n\n{hardest_q_sample.get('options_text', '')}\n\n"
             f"📚 Fan: #{hardest_q_sample.get('subject', 'Test').replace(' ', '_')}\n"
             f"📌 Siz to'g'ri javobni topa olasizmi? O'zingizni sinab ko'ring:\n"
             f"👉 https://ilmildizi.uz/tests"
@@ -479,6 +598,8 @@ def marketing_analytics_api(request):
                     'hardest_question': post_template_question,
                     'weekly_leaderboard': post_template_weekly,
                 },
+                'subjects': subject_options_list,
+                'hardest_by_subject': hardest_by_subject,
                 'stats_preview': {
                     'active_students': active_display,
                     'questions_solved': questions_display,
