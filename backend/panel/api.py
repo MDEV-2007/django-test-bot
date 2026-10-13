@@ -373,18 +373,26 @@ def dashboard_api(request):
 
 
 # ============================================================ USERS
-def _role_tone(role):
+def _role_tone(role, is_premium=False):
+    if is_premium and role == 'student':
+        return 'amber'
     return {'superadmin': 'rose', 'teacher': 'blue', 'student': 'slate'}.get(role, 'slate')
 
 
 def _user_row(u):
     profile = getattr(u, 'profile', None)
+    is_premium = bool(profile and (profile.is_premium or profile.premium_mock_test_unlocked))
+    role_display = profile.get_role_display() if profile else ''
+    if is_premium and profile and profile.role == 'student':
+        role_display = "Premium ⭐"
+    role_tone = _role_tone(profile.role if profile else 'student', is_premium)
     return {
         'id': u.id, 'username': u.username, 'full_name': u.get_full_name() or u.username,
         'telegram_username': profile.telegram_username if profile else '',
         'role': profile.role if profile else None,
-        'role_display': profile.get_role_display() if profile else '',
-        'role_tone': _role_tone(profile.role) if profile else 'slate',
+        'role_display': role_display,
+        'role_tone': role_tone,
+        'is_premium': is_premium,
         'is_active': u.is_active, 'date_joined': u.date_joined,
     }
 
@@ -394,15 +402,28 @@ def _user_row(u):
 def users_api(request):
     qs = User.objects.select_related('profile').all()
     if request.method == 'GET':
+        role_param = request.query_params.get('role', '').strip()
+        filters_list = [
+            {'param': 'active', 'lookup': 'is_active'},
+            {'param': 'tg', 'lookup': 'profile__telegram_id__isnull'},
+        ]
+
+        if role_param == 'premium':
+            qs = qs.filter(Q(profile__is_premium=True) | Q(profile__premium_mock_test_unlocked=True))
+        elif role_param:
+            filters_list.append({'param': 'role', 'lookup': 'profile__role'})
+
+        premium_param = request.query_params.get('premium', '').strip().lower()
+        if premium_param in ('true', '1'):
+            qs = qs.filter(Q(profile__is_premium=True) | Q(profile__premium_mock_test_unlocked=True))
+        elif premium_param in ('false', '0'):
+            qs = qs.filter(profile__is_premium=False, profile__premium_mock_test_unlocked=False)
+
         return list_response(
             request, queryset=qs,
             search_fields=['username', 'first_name', 'last_name', 'email',
                             'profile__telegram_username', 'profile__telegram_id'],
-            filters=[
-                {'param': 'role', 'lookup': 'profile__role'},
-                {'param': 'active', 'lookup': 'is_active'},
-                {'param': 'tg', 'lookup': 'profile__telegram_id__isnull'},
-            ],
+            filters=filters_list,
             sortable_fields=['username', 'date_joined'], default_order='-date_joined',
             row_fn=_user_row,
         )

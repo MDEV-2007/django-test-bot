@@ -13,7 +13,10 @@ import { Button } from '@/components/ui/button';
 const FILTERS: FilterConfig[] = [
   {
     param: 'role', label: 'Rol', options: [
-      { value: 'superadmin', label: 'Super Admin' }, { value: 'teacher', label: "O'qituvchi" }, { value: 'student', label: "O'quvchi" },
+      { value: 'superadmin', label: 'Super Admin' },
+      { value: 'teacher', label: "O'qituvchi" },
+      { value: 'student', label: "O'quvchi" },
+      { value: 'premium', label: "Premium ⭐" },
     ]
   },
   { param: 'active', label: 'Holat', options: [{ value: 'True', label: 'Faol' }, { value: 'False', label: 'Bloklangan' }] },
@@ -22,7 +25,7 @@ const FILTERS: FilterConfig[] = [
 
 type UserRow = {
   id: number; username: string; full_name: string; telegram_username: string;
-  role_display: string; role_tone: string; is_active: boolean; date_joined: string;
+  role_display: string; role_tone: string; is_premium?: boolean; is_active: boolean; date_joined: string;
 };
 
 export default function PanelUsersPage() {
@@ -55,7 +58,20 @@ export default function PanelUsersPage() {
   }
 
   const columns: Column<UserRow>[] = [
-    { key: 'name', label: 'Foydalanuvchi', render: (u) => u.full_name },
+    {
+      key: 'name',
+      label: 'Foydalanuvchi',
+      render: (u) => (
+        <span className="inline-flex items-center gap-1.5 font-medium">
+          <span>{u.full_name}</span>
+          {u.is_premium && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              PRO
+            </span>
+          )}
+        </span>
+      ),
+    },
     {
       key: 'username',
       label: 'Username',
