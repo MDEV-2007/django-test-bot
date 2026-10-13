@@ -89,6 +89,7 @@ urlpatterns = [
     path('system/anti-cheat/', api.anti_cheat_report_api, name='anti_cheat_report'),
     path('system/backup/', api.database_backup_api, name='database_backup'),
     path('system/backups/', api.backup_list_api, name='backup_list'),
+    path('system/backups/download/<str:filename>/', api.backup_download_api, name='backup_download'),
     path('system/ai-usage/', api.ai_usage_api, name='ai_usage'),
 
     path('certificate/<int:attempt_pk>/', api.generate_certificate_api, name='generate_certificate'),

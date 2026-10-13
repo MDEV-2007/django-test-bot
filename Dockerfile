@@ -13,7 +13,9 @@ WORKDIR /app
 # DejaVu shriftlari — Telegram Story natija rasmi uchun (tests_app/story.py). Ularsiz
 # Pillow o'zining ichki bitmap shriftiga tushadi va butun rasm o'qib bo'lmas darajada
 # mayda chiqadi. `fonts-dejavu-core` ~3 MB, boshqa hech narsa tortmaydi.
-RUN apt-get update     && apt-get install -y --no-install-recommends fonts-dejavu-core     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends fonts-dejavu-core postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies first so this layer is cached until requirements change.
 # psycopg[binary] and Pillow ship prebuilt wheels, so no compiler/system libs are needed.

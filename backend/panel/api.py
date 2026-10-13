@@ -24,7 +24,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import connection, transaction
 from django.db.models import Avg, Count, F, Max, Q, Sum
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
@@ -3193,11 +3193,30 @@ def generate_certificate_api(request, attempt_pk):
 
 
 # ============================================================ DATABASE BACKUP
+def _backup_via_dumpdata(backup_dir, now_str):
+    """pg_dump mavjud bo'lmaganda Django dumpdata orqali to'liq bazani zaxiralash."""
+    import gzip
+    from django.core.management import call_command
+    filename = f"backup_data_{now_str}.json.gz"
+    filepath = os.path.join(backup_dir, filename)
+    with gzip.open(filepath, 'wt', encoding='utf-8') as f:
+        call_command(
+            'dumpdata',
+            '--natural-foreign',
+            '--natural-primary',
+            '-e', 'contenttypes',
+            '-e', 'auth.Permission',
+            stdout=f
+        )
+    return filename, filepath
+
+
 @api_view(['POST'])
 @permission_classes([IsSuperAdmin])
 def database_backup_api(request):
-    """Ma'lumotlar bazasini zaxiralash (pg_dump yoki sqlite3 dump)."""
+    """Ma'lumotlar bazasini zaxiralash (pg_dump yoki django dumpdata yoki sqlite3 dump)."""
     try:
+        import shutil
         db_settings = settings.DATABASES.get('default', {})
         engine = db_settings.get('ENGINE', '')
         backup_dir = os.path.join(settings.BASE_DIR, 'media', 'backups')
@@ -3206,23 +3225,31 @@ def database_backup_api(request):
         now_str = timezone.now().strftime('%Y%m%d_%H%M%S')
 
         if 'postgresql' in engine or 'psycopg' in engine:
-            filename = f"backup_pg_{now_str}.sql"
-            filepath = os.path.join(backup_dir, filename)
-            db_name = db_settings.get('NAME', '')
-            db_user = db_settings.get('USER', '')
-            db_host = db_settings.get('HOST', 'localhost')
-            db_port = db_settings.get('PORT', '5432')
-            env = os.environ.copy()
-            if db_settings.get('PASSWORD'):
-                env['PGPASSWORD'] = db_settings['PASSWORD']
-            cmd = ['pg_dump', '-h', db_host, '-p', str(db_port), '-U', db_user, '-Fc', '-f', filepath, db_name]
-            result = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=120)
-            if result.returncode != 0:
-                return Response({
-                    'error': f"pg_dump xatosi: {result.stderr[:300]}",
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            pg_dump_bin = shutil.which('pg_dump')
+            if pg_dump_bin:
+                filename = f"backup_pg_{now_str}.sql"
+                filepath = os.path.join(backup_dir, filename)
+                db_name = db_settings.get('NAME', '')
+                db_user = db_settings.get('USER', '')
+                db_host = db_settings.get('HOST', 'localhost')
+                db_port = db_settings.get('PORT', '5432')
+                env = os.environ.copy()
+                if db_settings.get('PASSWORD'):
+                    env['PGPASSWORD'] = db_settings['PASSWORD']
+                cmd = [pg_dump_bin, '-h', db_host, '-p', str(db_port), '-U', db_user, '-Fc', '-f', filepath, db_name]
+                try:
+                    result = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=180)
+                    if result.returncode != 0:
+                        logger.warning("pg_dump returncode %s: %s. dumpdata ga o'tilmoqda.", result.returncode, result.stderr[:200])
+                        filename, filepath = _backup_via_dumpdata(backup_dir, now_str)
+                except Exception as pg_err:
+                    logger.warning("pg_dump bajarilmadi (%s), dumpdata ga o'tilmoqda", pg_err)
+                    filename, filepath = _backup_via_dumpdata(backup_dir, now_str)
+            else:
+                # pg_dump o'rnatilmagan bo'lsa (yoki container hali yangilanmagan bo'lsa),
+                # to'g'ridan-to'g'ri Django dumpdata orqali muammosiz zaxiralash
+                filename, filepath = _backup_via_dumpdata(backup_dir, now_str)
         elif 'sqlite' in engine:
-            import shutil
             filename = f"backup_sqlite_{now_str}.db"
             filepath = os.path.join(backup_dir, filename)
             db_path = db_settings.get('NAME', '')
@@ -3258,7 +3285,7 @@ def backup_list_api(request):
             return Response({'backups': []})
 
         backups = []
-        for f in sorted(os.listdir(backup_dir), reverse=True)[:20]:
+        for f in sorted(os.listdir(backup_dir), reverse=True)[:30]:
             fpath = os.path.join(backup_dir, f)
             if os.path.isfile(fpath):
                 size = os.path.getsize(fpath)
@@ -3267,11 +3294,28 @@ def backup_list_api(request):
                     'size_bytes': size,
                     'size_display': f"{size / (1024*1024):.1f} MB" if size > 1024*1024 else f"{size / 1024:.0f} KB",
                     'created_at': os.path.getmtime(fpath),
+                    'download_url': f"/api/panel/system/backups/download/{f}/",
                 })
         return Response({'backups': backups})
     except Exception as e:
         logger.exception("backup_list_api error: %s", e)
         return Response({'backups': [], 'error': str(e)})
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def backup_download_api(request, filename):
+    """Zaxira faylini serverdan yuklab olish (superadmin)."""
+    if not re.match(r'^[a-zA-Z0-9_\-\.]+$', filename):
+        return HttpResponse("Yaroqsiz fayl nomi", status=400)
+
+    backup_dir = os.path.abspath(os.path.join(settings.BASE_DIR, 'media', 'backups'))
+    filepath = os.path.abspath(os.path.join(backup_dir, filename))
+
+    if not filepath.startswith(backup_dir) or not os.path.exists(filepath):
+        return HttpResponse("Zaxira fayli topilmadi", status=404)
+
+    return FileResponse(open(filepath, 'rb'), as_attachment=True, filename=filename)
 
 
 # ============================================================ AI TOKEN & USAGE MONITOR

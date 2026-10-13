@@ -70,6 +70,7 @@ type BackupFile = {
   size_bytes: number;
   size_display: string;
   created_at: number;
+  download_url?: string;
 };
 
 type AIUsageData = {
@@ -192,6 +193,28 @@ function SystemHealthContent() {
       toast.error(e instanceof Error ? e.message : "Zaxiralashda xatolik yuz berdi");
     } finally {
       setCreatingBackup(false);
+    }
+  }
+
+  async function handleDownloadBackup(filename: string) {
+    try {
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('access') || '') : '';
+      const res = await fetch(`/api/panel/system/backups/download/${encodeURIComponent(filename)}/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("Faylni yuklab bo'lmadi");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success(`${filename} muvaffaqiyatli yuklab olindi!`);
+    } catch (err: any) {
+      toast.error(err.message || "Yuklab olishda xatolik yuz berdi");
     }
   }
 
@@ -742,9 +765,19 @@ function SystemHealthContent() {
                             {new Date(b.created_at * 1000).toLocaleString('uz-UZ')}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-xs">
-                              ✓ Xavfsiz saqlangan
-                            </Badge>
+                            <div className="flex items-center justify-end gap-2">
+                              <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-xs hidden sm:inline-flex">
+                                ✓ Xavfsiz saqlangan
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadBackup(b.filename)}
+                                className="h-7 px-2.5 text-xs font-semibold gap-1.5 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200"
+                              >
+                                <Download className="size-3" /> Yuklab olish
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))
