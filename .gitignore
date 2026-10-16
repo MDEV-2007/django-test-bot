@@ -23,6 +23,8 @@ test.db
 test.sqlite3
 data.sqlite3
 media/
+!media/tests/
+!backend/media/tests/
 staticfiles/
 backups/
 
