@@ -307,7 +307,7 @@ function QuestionCard({ question, saving, onPick, onSaveWritten }: {
 
         {question.image_url && (
           <Image
-            src={question.image_url}
+            src={question.image_url.startsWith('http') || question.image_url.startsWith('/') ? question.image_url : `/${question.image_url}`}
             alt="Savol rasmi"
             width={900}
             height={600}

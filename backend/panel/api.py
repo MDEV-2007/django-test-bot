@@ -953,13 +953,18 @@ def testset_toggle_publish_api(request, pk):
 def _review_question(question):
     """One question as the review screen needs it, including whether it still needs a
     decision - which is what the reviewer filters on."""
+    raw_image = question.image.url if question.image else question.image_url
+    if raw_image and not raw_image.startswith(('http://', 'https://', '/')):
+        raw_image = f'/{raw_image}'
+
     data = {
         'id': question.id,
         'question_type': question.question_type,
         'body': question.body,
-        'image_url': question.image.url if question.image else question.image_url,
+        'image_url': raw_image,
         'choices': [], 'group': None, 'sub_questions': [], 'reference_answer': '',
     }
+
 
     if question.question_type == 'grouped_item':
         group = question.group

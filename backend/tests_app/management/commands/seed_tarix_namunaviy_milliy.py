@@ -1,4 +1,4 @@
-﻿"""Django management command: Tarix fanidan namunaviy test topshiriqlari (Milliy Sertifikat & Attestatsiya).
+"""Django management command: Tarix fanidan namunaviy test topshiriqlari (Milliy Sertifikat & Attestatsiya).
 
 Mualliflar: Zaxiriddin Jumanazarov; Bahrom Hikmatov; Husanboy Xoldorov.
 Telegram kanallar: @Tarixdan_tomchi, @Tarixdan_testlar_BH, @Tarix_tilsimi.
@@ -762,9 +762,12 @@ class Command(BaseCommand):
         ]
 
         for i, item in enumerate(mcq_data, start=1):
+            img_val = item.get("image", None)
+            img_url = f"/media/{img_val}" if img_val else None
             q = Question.objects.create(
                 body=item["body"],
-                image=item.get("image", None),
+                image=img_val,
+                image_url=img_url,
                 question_type="single_choice",
                 category="certificate",
                 difficulty="hard",
