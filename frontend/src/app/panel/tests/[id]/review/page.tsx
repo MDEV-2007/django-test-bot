@@ -13,7 +13,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import {
-  Check, ChevronLeft, ChevronRight, Eye, Loader2, Save, TriangleAlert,
+  Check, ChevronLeft, ChevronRight, Eye, Loader2, Save, TriangleAlert, Pencil,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -243,6 +243,7 @@ export default function PanelTestReviewPage() {
 
             <QuestionCard
               key={current.id}
+              testId={id}
               question={current}
               saving={saving}
               onPick={(position) => pick(current, position)}
@@ -255,7 +256,8 @@ export default function PanelTestReviewPage() {
   );
 }
 
-function QuestionCard({ question, saving, onPick, onSaveWritten }: {
+function QuestionCard({ testId, question, saving, onPick, onSaveWritten }: {
+  testId: string;
   question: ReviewQuestion;
   saving: boolean;
   onPick: (position: number) => void;
@@ -276,13 +278,20 @@ function QuestionCard({ question, saving, onPick, onSaveWritten }: {
   return (
     <Card>
       <CardContent className="space-y-4 py-5">
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">{QUESTION_TYPE[question.question_type] ?? question.question_type}</Badge>
-          {question.needs_review && (
-            <Badge variant="outline" className="gap-1 bg-[var(--warning-soft)] text-[var(--warning-text)] border-[var(--warning)]/25">
-              <TriangleAlert className="size-3" /> Javob belgilanmagan
-            </Badge>
-          )}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">{QUESTION_TYPE[question.question_type] ?? question.question_type}</Badge>
+            {question.needs_review && (
+              <Badge variant="outline" className="gap-1 bg-[var(--warning-soft)] text-[var(--warning-text)] border-[var(--warning)]/25">
+                <TriangleAlert className="size-3" /> Javob belgilanmagan
+              </Badge>
+            )}
+          </div>
+          <Button variant="ghost" size="sm" asChild className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-[var(--text-primary)]">
+            <Link href={`/teacher/tests/${testId}/build`}>
+              <Pencil className="size-3.5" /> Tahrirlash
+            </Link>
+          </Button>
         </div>
 
         {question.group?.instruction && (

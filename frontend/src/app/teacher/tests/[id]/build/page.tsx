@@ -21,6 +21,7 @@ import Reveal from '@/components/motion/Reveal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type QuestionRow = { id: number; question_type: string; body: string };
 type BuildData = {
@@ -198,7 +199,7 @@ export default function TestBuildPage() {
             </Reveal>
           ))}
 
-          {data.questions.length === 0 && !showForm && (
+          {data.questions.length === 0 && (
             <Card>
               <CardContent className="py-12 text-center">
                 <HelpCircle className="mx-auto mb-2 size-8 text-muted-foreground/50" />
@@ -210,36 +211,59 @@ export default function TestBuildPage() {
           )}
         </div>
 
-        {!showForm && (
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              variant="outline"
-              className="h-14 flex-1 border-dashed"
-              onClick={() => { setShowForm(true); setEditingId(null); setEditingFull(null); }}
-            >
-              <Plus className="size-4" /> Savol qo&apos;shish
-            </Button>
-            <Button
-              variant="outline"
-              className="h-14 flex-1 border-dashed border-[var(--accent-border)] bg-[var(--accent)]/5 hover:bg-[var(--accent)]/10 text-[var(--accent-text)]"
-              onClick={() => setShowBulkModal(true)}
-            >
-              <Sparkles className="size-4" /> Matndan tezkor import
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="outline"
+            className="h-14 flex-1 border-dashed"
+            onClick={() => { setShowForm(true); setEditingId(null); setEditingFull(null); }}
+          >
+            <Plus className="size-4" /> Savol qo&apos;shish
+          </Button>
+          <Button
+            variant="outline"
+            className="h-14 flex-1 border-dashed border-[var(--accent-border)] bg-[var(--accent)]/5 hover:bg-[var(--accent)]/10 text-[var(--accent-text)]"
+            onClick={() => setShowBulkModal(true)}
+          >
+            <Sparkles className="size-4" /> Matndan tezkor import
+          </Button>
+        </div>
 
-        {showForm && (
-          <QuestionForm
-            key={editingId ?? 'new'}
-            testId={Number(id)}
-            initial={editingFull ?? undefined}
-            isCefr={isCefr}
-            sections={(sectionData?.sections ?? []) as SectionOption[]}
-            banks={sectionData?.banks ?? []}
-            onSaved={() => { setShowForm(false); setEditingFull(null); setEditingId(null); load(); }}
-          />
-        )}
+        <Dialog open={showForm} onOpenChange={(open) => {
+          setShowForm(open);
+          if (!open) {
+            setEditingFull(null);
+            setEditingId(null);
+          }
+        }}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingId ? "Savolni tahrirlash" : "Yangi savol qo'shish"}
+              </DialogTitle>
+            </DialogHeader>
+            <QuestionForm
+              key={editingId ?? 'new'}
+              testId={Number(id)}
+              initial={editingFull ?? undefined}
+              isCefr={isCefr}
+              sections={(sectionData?.sections ?? []) as SectionOption[]}
+              banks={sectionData?.banks ?? []}
+              onSaved={() => {
+                setShowForm(false);
+                setEditingFull(null);
+                setEditingId(null);
+                load();
+                toast.success(editingId ? "Savol muvaffaqiyatli yangilandi!" : "Yangi savol qo'shildi!");
+              }}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingFull(null);
+                setEditingId(null);
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+
 
         <ShareTestModal
           open={showShareModal}

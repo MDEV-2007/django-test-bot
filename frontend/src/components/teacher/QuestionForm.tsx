@@ -11,6 +11,7 @@ export type QuestionData = {
   difficulty: string;
   points: number;
   explanation: string;
+  image?: string | null;
   image_position: string;
   options: { text: string; is_correct: boolean }[];
   pairs: { left_key: string; left_text: string; right_key: string; right_text: string }[];
@@ -37,6 +38,7 @@ const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
 const EMPTY: QuestionData = {
   question_type: 'single_choice', body: '', difficulty: 'medium', points: 1, explanation: '',
+  image: null,
   image_position: 'after_body',
   options: [
     { text: '', is_correct: true },
@@ -56,17 +58,19 @@ const TEXT_TYPES = ['gap_fill', 'tfng'];
 const SINGLE_TYPES = ['single_choice', 'image_based', 'table_based'];
 
 export default function QuestionForm({
-  testId, initial, onSaved, sections = [], banks = [], isCefr = false,
+  testId, initial, onSaved, onCancel, sections = [], banks = [], isCefr = false,
 }: {
   testId: number;
   initial?: QuestionData;
   onSaved: () => void;
+  onCancel?: () => void;
   /* CEFR testida savolni partga bog'lash uchun; oddiy testda bo'sh bo'ladi va
      tegishli maydonlar umuman ko'rinmaydi. */
   sections?: SectionOption[];
   banks?: BankOption[];
   isCefr?: boolean;
 }) {
+
   const [q, setQ] = useState<QuestionData>(initial || EMPTY);
   const [correctIndex, setCorrectIndex] = useState(
     initial ? initial.options.findIndex((o) => o.is_correct) : 0,
@@ -207,10 +211,63 @@ export default function QuestionForm({
         placeholder="Javob izohi (ixtiyoriy, natija sahifasida ko'rsatiladi)"
         className="w-full rounded-lg border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-sm text-[var(--text-primary)]" />
 
-      {(q.question_type === 'image_based' || q.question_type === 'table_based') && (
-        <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files?.[0] || null)}
-          className="w-full text-sm text-[var(--text-primary)]" />
-      )}
+      {/* Rasm yuklash (Xarita, Venn diagrammasi, sxema yoki ilova rasm) */}
+      <div className="space-y-2 rounded-xl border border-[var(--border-card)] bg-[var(--surface-input)] p-3.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-semibold text-[var(--text-secondary)]">
+            Savol rasmi (xarita, diagramma yoki sxema)
+          </label>
+          <span className="text-[11px] text-muted-foreground">JPG, PNG, WebP</span>
+        </div>
+
+        {/* Agar avvaldan rasm bo'lsa yoki yangi tanlangan bo'lsa */}
+        {(image || q.image) && (
+          <div className="relative flex items-center gap-3 rounded-lg border border-[var(--border-card)] bg-[var(--surface-card)] p-2">
+            <img
+              src={image ? URL.createObjectURL(image) : (q.image?.startsWith('/') || q.image?.startsWith('http') ? q.image : `/${q.image}`)}
+              alt="Savol rasmi"
+              className="size-16 rounded-md object-contain border bg-white/5"
+            />
+            <div className="min-w-0 flex-1 text-xs">
+              <p className="font-medium text-[var(--text-primary)] truncate">
+                {image ? image.name : "Joriy savol rasmi"}
+              </p>
+              <p className="text-muted-foreground">
+                {image ? `${(image.size / 1024).toFixed(1)} KB (yangi tanlandi)` : "Saqlangan"}
+              </p>
+            </div>
+            {image && (
+              <button
+                type="button"
+                onClick={() => setImage(null)}
+                className="text-xs text-[var(--danger-text)] hover:underline shrink-0"
+              >
+                Bekor qilish
+              </button>
+            )}
+          </div>
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImage(e.target.files?.[0] || null)}
+          className="w-full text-xs text-[var(--text-secondary)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--accent)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:opacity-90 cursor-pointer"
+        />
+
+        <div className="flex items-center gap-2 pt-1">
+          <label className="text-xs text-[var(--text-secondary)]">Rasm joylashuvi:</label>
+          <select
+            value={q.image_position || 'after_body'}
+            onChange={(e) => setQ({ ...q, image_position: e.target.value })}
+            className="rounded-md border border-[var(--border-card)] bg-[var(--surface-card)] px-2 py-1 text-xs text-[var(--text-primary)]"
+          >
+            <option value="after_body">Savol matnidan keyin (standart)</option>
+            <option value="before_body">Savol matnidan oldin</option>
+          </select>
+        </div>
+      </div>
+
 
       {/* Bo'shliqli savol: bir nechta maqbul javob yozish mumkin. */}
       {q.question_type === 'gap_fill' && (
@@ -446,10 +503,26 @@ export default function QuestionForm({
         </div>
       )}
 
-      <button onClick={submit} disabled={saving}
-        className="w-full rounded-xl bg-[var(--accent)] py-3 font-semibold text-[var(--on-accent)] disabled:opacity-60">
-        {saving ? 'Saqlanmoqda...' : 'Savolni saqlash'}
-      </button>
+      <div className="flex gap-2.5 pt-2">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={saving}
+            className="flex-1 rounded-xl border border-[var(--border-card)] bg-[var(--surface-input)] py-3 font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] disabled:opacity-60"
+          >
+            Bekor qilish
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={submit}
+          disabled={saving}
+          className="flex-1 rounded-xl bg-[var(--accent)] py-3 font-semibold text-[var(--on-accent)] hover:opacity-95 disabled:opacity-60"
+        >
+          {saving ? 'Saqlanmoqda...' : 'Savolni saqlash'}
+        </button>
+      </div>
     </div>
   );
 }

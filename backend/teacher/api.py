@@ -161,7 +161,7 @@ def _question_payload(q):
         'difficulty': q.difficulty,
         'points': q.points,
         'explanation': q.explanation,
-        'image': q.image.url if q.image else None,
+        'image': q.image.url if q.image else (f'/{q.image_url}' if q.image_url else None),
         'image_position': q.image_position,
         'options': [{'text': c.text, 'is_correct': c.is_correct} for c in q.choices.all()],
         'pairs': [{'left_key': p.left_key, 'left_text': p.left_text,
@@ -355,6 +355,8 @@ def question_add_api(request, pk):
     rejected = _reject_foreign_section(question, test)
     if rejected:
         return rejected
+    if 'image' in request.FILES and question.image:
+        question.image_url = question.image.url
     question.save()
     _apply_type_data_json(question, test, _type_data(request))
 
@@ -464,6 +466,8 @@ def question_detail_api(request, pk, qid):
     rejected = _reject_foreign_section(question, test)
     if rejected:
         return rejected
+    if 'image' in request.FILES and question.image:
+        question.image_url = question.image.url
     question.save()
     _apply_type_data_json(question, test, _type_data(request))
     return Response({'ok': True})
