@@ -1,7 +1,6 @@
 """Django management command: Tarix fanidan namunaviy test topshiriqlari (Milliy Sertifikat & Attestatsiya).
 
-Mualliflar: Zaxiriddin Jumanazarov; Bahrom Hikmatov; Husanboy Xoldorov.
-Telegram kanallar: @Tarixdan_tomchi, @Tarixdan_testlar_BH, @Tarix_tilsimi.
+Muallif: Sodiqov Shohjahon.
 
 Tarkibi:
 - 35 ta Variantli test (A, B, C, D) — xaritalar, diagrammalar, jadvallar birga-bir kiritilgan.
@@ -32,7 +31,7 @@ MOCK_TITLE = "Tarix fanidan namunaviy test topshiriqlari (Milliy Sertifikat & At
 MOCK_DESC = (
     "Tarix fanidan namunaviy test topshiriqlari. "
     "35 ta variantli test (A, B, C, D) va 10 ta yozma (ochiq) savol. Jami 45 ta topshiriq. "
-    "Mualliflar: Zaxiriddin Jumanazarov, Bahrom Hikmatov, Husanboy Xoldorov."
+    "Muallif: Sodiqov Shohjahon."
 )
 
 
@@ -74,31 +73,29 @@ class Command(BaseCommand):
             )
         self.stdout.write(f"Fan tanlandi: '{subject.name}' (slug={subject.slug})")
 
-        # ── 2. Teacher: zaxiriddin yoki shohjahon ─────────────────────────────
-        teacher_user = User.objects.filter(username__iexact="zaxiriddin").first()
+        # ── 2. Teacher: Shohjahon Sodiqov ─────────────────────────────
+        teacher_user = User.objects.filter(username__iexact="shohjahon").first()
         if not teacher_user:
-            teacher_user = User.objects.filter(username__iexact="shohjahon").first()
-        if not teacher_user:
-            teacher_user = User.objects.filter(is_superuser=True).first()
+            teacher_user = User.objects.filter(first_name__icontains="shohjahon").first()
         if not teacher_user:
             teacher_user = User.objects.create(
-                username="zaxiriddin",
-                first_name="Zaxiriddin",
-                last_name="Jumanazarov",
-                email="zaxiriddin@ilmildizi.uz",
+                username="shohjahon",
+                first_name="Shohjahon",
+                last_name="Sodiqov",
+                email="shohjahon@ilmildizi.uz",
             )
             teacher_user.set_unusable_password()
             teacher_user.save()
             prof = ensure_profile_for_user(teacher_user)
             prof.role = "teacher"
             prof.save()
-            self.stdout.write(self.style.SUCCESS(f"Yangi muallif yaratildi: @{teacher_user.username}"))
+            self.stdout.write(self.style.SUCCESS(f"Yangi muallif yaratildi: @{teacher_user.username} (Shohjahon Sodiqov)"))
         else:
             prof = ensure_profile_for_user(teacher_user)
             if prof.role != "teacher" and not teacher_user.is_superuser:
                 prof.role = "teacher"
                 prof.save(update_fields=["role"])
-            self.stdout.write(f"Muallif topildi: @{teacher_user.username} (ID: {teacher_user.id})")
+            self.stdout.write(f"Muallif tanlandi: @{teacher_user.username} ({teacher_user.get_full_name()})")
 
         # ── 3. Mavjud test tekshiruvi ───────────────────────────────────────
         existing = TestSet.objects.filter(title=MOCK_TITLE).first()
@@ -112,13 +109,17 @@ class Command(BaseCommand):
                 else:
                     existing.delete()
             else:
+                existing.description = MOCK_DESC
+                existing.created_by = teacher_user
+                existing.save(update_fields=["description", "created_by"])
                 self.stdout.write(
-                    self.style.WARNING(
-                        f"'{MOCK_TITLE}' allaqachon mavjud (ID: {existing.id}).\n"
-                        f"Qayta yuklash uchun: python manage.py seed_tarix_namunaviy_milliy --force"
+                    self.style.SUCCESS(
+                        f"Mavjud test (#{existing.id}) muallifi va tavsifi 'Sodiqov Shohjahon' ga yangilandi!\n"
+                        f"Savollarni to'liq qayta yuklash uchun: python manage.py seed_tarix_namunaviy_milliy --force"
                     )
                 )
                 return
+
 
         # ── 4. TestSet yaratish (is_published=False) ────────────────────────
         test_set = TestSet.objects.create(
