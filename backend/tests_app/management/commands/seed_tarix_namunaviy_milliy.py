@@ -53,13 +53,15 @@ class Command(BaseCommand):
         # ── 0. Ensure embedded images (map & diagram) are saved to MEDIA_ROOT ──
         maps_dir = os.path.join(settings.MEDIA_ROOT, "tests", "maps")
         os.makedirs(maps_dir, exist_ok=True)
-        balkan_path = os.path.join(maps_dir, "balkan_map_q17.jpg")
-        venn_path = os.path.join(maps_dir, "venn_diagram_q20.jpg")
-        with open(balkan_path, "wb") as f:
-            f.write(base64.b64decode(BALKAN_MAP_B64))
-        with open(venn_path, "wb") as f:
+        balkan_bytes = base64.b64decode(BALKAN_MAP_B64)
+        with open(os.path.join(maps_dir, "balkan_map_q17.jpg"), "wb") as f:
+            f.write(balkan_bytes)
+        with open(os.path.join(maps_dir, "balkan_map_q17_numbered.jpg"), "wb") as f:
+            f.write(balkan_bytes)
+        with open(os.path.join(maps_dir, "venn_diagram_q20.jpg"), "wb") as f:
             f.write(base64.b64decode(VENN_DIAGRAM_B64))
         self.stdout.write(f"Xarita va diagramma rasmlari saqlandi: {maps_dir}")
+
 
         # ── 1. Subject: Tarix ───────────────────────────────────────────────
         subject = Subject.objects.filter(slug="tarix").first()
@@ -408,9 +410,10 @@ class Command(BaseCommand):
                 "body": (
                     "<p>1911-yili Italiya bilan bo’lgan urushda Usmonli davlatining yengilishidan foydalanib «Bolqon ittifoqi»ni tuzgan davlatlar xaritada qaysi raqamlar ostida berilgan?</p>"
                 ),
-                "image": "tests/maps/balkan_map_q17.jpg",
+                "image": "tests/maps/balkan_map_q17_numbered.jpg",
                 "explanation": "Bolqon ittifoqi (1912): Bolgariya (1), Serbiya (4), Chernogoriya (6), Gretsiya (7). Javob: 1, 4, 6, 7.",
                 "options": [
+
                     ("A", "1, 3, 5, 6", False),
                     ("B", "1, 4, 5, 6", False),
                     ("C", "2, 4, 5, 6", False),
