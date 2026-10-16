@@ -14,12 +14,18 @@ Foydalanish:
     python manage.py seed_tarix_namunaviy_milliy
     python manage.py seed_tarix_namunaviy_milliy --force
 """
+import base64
+import os
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.contrib.auth.models import User
 
 from accounts.models import Profile, ensure_profile_for_user
 from tests_app.models import Subject, TestSet, Question, AnswerOption, SubQuestion
+from ._embedded_images import BALKAN_MAP_B64, VENN_DIAGRAM_B64
+
 
 
 MOCK_TITLE = "Tarix fanidan namunaviy test topshiriqlari (Milliy Sertifikat & Attestatsiya)"
@@ -43,6 +49,17 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         force = options.get("force", False)
+
+        # ── 0. Ensure embedded images (map & diagram) are saved to MEDIA_ROOT ──
+        maps_dir = os.path.join(settings.MEDIA_ROOT, "tests", "maps")
+        os.makedirs(maps_dir, exist_ok=True)
+        balkan_path = os.path.join(maps_dir, "balkan_map_q17.jpg")
+        venn_path = os.path.join(maps_dir, "venn_diagram_q20.jpg")
+        with open(balkan_path, "wb") as f:
+            f.write(base64.b64decode(BALKAN_MAP_B64))
+        with open(venn_path, "wb") as f:
+            f.write(base64.b64decode(VENN_DIAGRAM_B64))
+        self.stdout.write(f"Xarita va diagramma rasmlari saqlandi: {maps_dir}")
 
         # ── 1. Subject: Tarix ───────────────────────────────────────────────
         subject = Subject.objects.filter(slug="tarix").first()
@@ -390,9 +407,6 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>1911-yili Italiya bilan bo’lgan urushda Usmonli davlatining yengilishidan foydalanib «Bolqon ittifoqi»ni tuzgan davlatlar xaritada qaysi raqamlar ostida berilgan?</p>"
-                    "<div style='text-align:center;margin:12px 0;'>"
-                    "<img src='/media/tests/maps/balkan_map_q17.jpg' alt='Bolqon ittifoqi xaritasi' style='max-width:100%;max-height:480px;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.06);display:inline-block;'/>"
-                    "</div>"
                 ),
                 "image": "tests/maps/balkan_map_q17.jpg",
                 "explanation": "Bolqon ittifoqi (1912): Bolgariya (1), Serbiya (4), Chernogoriya (6), Gretsiya (7). Javob: 1, 4, 6, 7.",
@@ -461,9 +475,6 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyida berilgan ma’lumotlarni tahlil qilib Eyler-Venn diagrammasiga mos keladigan javoblarni aniqlang.</p>"
-                    "<div style='text-align:center;margin:12px 0;'>"
-                    "<img src='/media/tests/maps/venn_diagram_q20.jpg' alt='Eyler-Venn diagrammasi' style='max-width:100%;max-height:200px;border-radius:10px;border:1px solid #e2e8f0;display:inline-block;'/>"
-                    "</div>"
                     "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:10px 0;font-size:13px;line-height:1.7;'>"
                     "<b>a)</b> mamlakatda musulmon bo’lmagan aholining o’z kiyimiga sariq belgi taqib yurishi haqida dekret qabul qilindi<br/>"
                     "<b>b)</b> 2001-yil Nyu-Yorkda amalga oshirilgan terrorchilik aktidan so’ng AQSH bu davlatni “xalqaro terrorizmning sherigi” deb atadi<br/>"
