@@ -914,5 +914,53 @@ textarea::placeholder,
   opacity: 1;
 }
 
+/* ── Accessible Contrast for Test Questions with Inline Styles ── */
+.dark [style*='background:#f8fafc'],
+.dark [style*='background: #f8fafc'],
+.dark [style*='background:#ffffff'],
+.dark [style*='background: #ffffff'],
+.dark [style*='background:#fff;'],
+.dark [style*='background: #fff;'],
+.dark [style*='background: white'],
+.dark [style*='background:#f1f5f9'],
+.dark [style*='background: #f1f5f9'],
+[data-theme='dark'] [style*='background:#f8fafc'],
+[data-theme='dark'] [style*='background: #f8fafc'],
+[data-theme='dark'] [style*='background:#ffffff'],
+[data-theme='dark'] [style*='background: #ffffff'],
+[data-theme='dark'] [style*='background:#fff;'],
+[data-theme='dark'] [style*='background: #fff;'],
+[data-theme='dark'] [style*='background: white'],
+[data-theme='dark'] [style*='background:#f1f5f9'],
+[data-theme='dark'] [style*='background: #f1f5f9'] {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
 
+.dark [style*='background:#f8fafc'] *,
+.dark [style*='background: #f8fafc'] *,
+.dark [style*='background:#ffffff'] *,
+.dark [style*='background: #ffffff'] *,
+.dark [style*='background:#fff;'] *,
+.dark [style*='background: #fff;'] *,
+.dark [style*='background: white'] *,
+.dark [style*='background:#f1f5f9'] *,
+.dark [style*='background: #f1f5f9'] *,
+[data-theme='dark'] [style*='background:#f8fafc'] *,
+[data-theme='dark'] [style*='background: #f8fafc'] *,
+[data-theme='dark'] [style*='background:#ffffff'] *,
+[data-theme='dark'] [style*='background: #ffffff'] *,
+[data-theme='dark'] [style*='background:#fff;'] *,
+[data-theme='dark'] [style*='background: #fff;'] *,
+[data-theme='dark'] [style*='background: white'] *,
+[data-theme='dark'] [style*='background:#f1f5f9'] *,
+[data-theme='dark'] [style*='background: #f1f5f9'] * {
+  color: var(--text-primary) !important;
+}
+
+.dark [style*='color:#2563eb'],
+[data-theme='dark'] [style*='color:#2563eb'] {
+  color: var(--accent) !important;
+}
 

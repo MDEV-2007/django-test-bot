@@ -1,4 +1,4 @@
-"""Django management command: Tarix fanidan namunaviy test topshiriqlari (Milliy Sertifikat & Attestatsiya).
+﻿"""Django management command: Tarix fanidan namunaviy test topshiriqlari (Milliy Sertifikat & Attestatsiya).
 
 Mualliflar: Zaxiriddin Jumanazarov; Bahrom Hikmatov; Husanboy Xoldorov.
 Telegram kanallar: @Tarixdan_tomchi, @Tarixdan_testlar_BH, @Tarix_tilsimi.
@@ -150,7 +150,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi shaxslarga oid to’g’ri ta’rifni aniqlang.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "<b>1)</b> Skunxa; <b>2)</b> Bess; <b>3)</b> Diodot; <b>4)</b> Miltiad.<br/>"
                     "<b>a)</b> Makedoniyalik Aleksandr bosqini davrida Baqtriya satrapi;<br/>"
                     "<b>b)</b> Marafon jangida yunon qo’shinlari sarkardasi;<br/>"
@@ -181,7 +181,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi tarixiy voqealar (ma’lumotlar) to‘g‘ri xronologik ketma-ketlikda ko‘rsatilgan javobni toping.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Emiliano Sapata o’z agrar dasturini e’lon qildi;<br/>"
                     "2) Fransiyada kasaba uyushmalarining erkin faoliyatiga hamda ish tashlashga ruxsat etuvchi qonun qabul qilindi;<br/>"
                     "3) Britaniya o’z qirolichasi Viktoriyani Hindistonning imperatori deb e’lon qildi;<br/>"
@@ -202,7 +202,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyida berilgan atamalar va ularning izohi to’g‘ri moslashtirilgan javobni toping.</p>"
-                    "<div style='display:grid;grid-template-columns:1fr 2fr;gap:14px;background:#f8fafc;padding:14px 18px;border-radius:12px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.6;font-size:13.5px;'>"
+                    "<div style='display:grid;grid-template-columns:1fr 2fr;gap:14px;background:rgba(148,163,184,0.08);color:inherit;padding:14px 18px;border-radius:12px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.6;font-size:13.5px;'>"
                     "<div><b>Atamalar:</b><br/>"
                     "<b>I.</b> Panturkizm<br/>"
                     "<b>II.</b> Rezidensiya<br/>"
@@ -229,7 +229,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyida berilgan atamalar va ularning izohi to’g‘ri moslashtirilgan javobni toping.</p>"
-                    "<div style='display:grid;grid-template-columns:1fr 2fr;gap:14px;background:#f8fafc;padding:14px 18px;border-radius:12px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.6;font-size:13.5px;'>"
+                    "<div style='display:grid;grid-template-columns:1fr 2fr;gap:14px;background:rgba(148,163,184,0.08);color:inherit;padding:14px 18px;border-radius:12px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.6;font-size:13.5px;'>"
                     "<div><b>Atamalar:</b><br/>"
                     "<b>I.</b> Avtonomiya<br/>"
                     "<b>II.</b> Federatsiya<br/>"
@@ -312,7 +312,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>XIX asr o‘rtalarida Qo‘qonda alohida ajralib turgan, har birida 38 tadan 100 tagacha hujrasi bo‘lgan madrasalarni aniqlang.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Rahmonqul Inoq; 2) Hokimoyim; 3) Madalixon; 4) Sulton Murodbek; 5) Mingoyim; 6) Mo‘yi muborak; 7) Jome; 8) Muhammad Aminxon; 9) Hoja dodxoh; 10) Norbo‘tabiy."
                     "</div>"
                 ),
@@ -339,7 +339,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Sobiq Ittifoq davrida qaysi shaharlar mahalliy hokimiyatga bo’ysunmagan va “yopiq shaharlar” deb atalgan?</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Navoiy; 2) Bekobod; 3) Uchquduq; 4) Chirchiq; 5) Zarafshon; 6) Olmaliq."
                     "</div>"
                 ),
@@ -366,7 +366,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi inshootlar qaysi me’moriy uslubda barpo etilgan?</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Avliyo Mark ibodatxonasi;<br/>"
                     "2) Laax monastiri;<br/>"
                     "3) Shartr ibodatxonasi;<br/>"
@@ -386,7 +386,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi tarixiy voqealar (ma’lumotlar) to‘g‘ri xronologik ketma-ketlikda ko‘rsatilgan javobni toping.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Olimxon hukmronligi davrida Toshkent Qo‘qon xonligi tarkibiga qo‘shib olindi;<br/>"
                     "2) Qoraqalpoqlar Sirdaryoning quyi etagiga ko‘chib keldilar va qozoqlarning Kichik Juz xonligi tarkibiga kiradi;<br/>"
                     "3) Xivaga Eron va qozoqlarning O‘rta juz xonligidan elchilar kelishdi;<br/>"
@@ -422,16 +422,16 @@ class Command(BaseCommand):
                 "body": (
                     "<p>Tarixiy voqea va uning natijasi o‘zaro mos berilgan qatorlarni aniqlang.</p>"
                     "<div style='overflow-x:auto;margin:12px 0;'>"
-                    "<table style='width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;background:#ffffff;'>"
-                    "<thead><tr style='background:#f1f5f9;border-bottom:2px solid #cbd5e1;text-align:left;'>"
+                    "<table style='width:100%;border-collapse:collapse;font-size:13px;border:1px solid rgba(148,163,184,0.2);background:transparent;'>"
+                    "<thead><tr style='background:rgba(148,163,184,0.12);border-bottom:2px solid rgba(148,163,184,0.25);text-align:left;'>"
                     "<th style='padding:8px 12px;width:35px;'>№</th><th style='padding:8px 12px;width:48%;'>Voqea</th><th style='padding:8px 12px;'>Natija</th></tr></thead>"
                     "<tbody>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 12px;font-weight:bold;'>1.</td><td style='padding:8px 12px;'>Xitoyda 1351-yil boshlangan dehqonlar qo’zg’oloni</td><td style='padding:8px 12px;'>Yuan sulolasiga asos solinishi</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;background:#f8fafc;'><td style='padding:8px 12px;font-weight:bold;'>2.</td><td style='padding:8px 12px;'>XVII asrdagi Angliyadagi burjua inqilobi</td><td style='padding:8px 12px;'>Angliya qishloq xo’jaligida kapitalistlik munosabatlarning tez rivojlanishi va sanoat to’ntarishining boshlanishi</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 12px;font-weight:bold;'>3.</td><td style='padding:8px 12px;'>1917-yil Rossiyadagi fevral inqilobi</td><td style='padding:8px 12px;'>Xiva xoni Asfandiyorxon islohotlar o’tkazish to’g’risidagi manifestga imzo chekdi</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;background:#f8fafc;'><td style='padding:8px 12px;font-weight:bold;'>4.</td><td style='padding:8px 12px;'>2003-yil “Atirgullar inqilobi”</td><td style='padding:8px 12px;'>Gruziyada “yangi demokratlar”ning hokimiyatga kelishi</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 12px;font-weight:bold;'>5.</td><td style='padding:8px 12px;'>Giksoslarning tor-mor etilishi va fir'avn Yaxmos tomonidan ularning Misrdan quvib chiqilishi</td><td style='padding:8px 12px;'>Misrda O’rta podsholikka asos solinishi</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;background:#f8fafc;'><td style='padding:8px 12px;font-weight:bold;'>6.</td><td style='padding:8px 12px;'>Vilgelm II ning Germaniya taxtiga kelishi</td><td style='padding:8px 12px;'>Germaniyada ikkinchi imperiyaning boshlanishi</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);'><td style='padding:8px 12px;font-weight:bold;'>1.</td><td style='padding:8px 12px;'>Xitoyda 1351-yil boshlangan dehqonlar qo’zg’oloni</td><td style='padding:8px 12px;'>Yuan sulolasiga asos solinishi</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);background:rgba(148,163,184,0.08);color:inherit;'><td style='padding:8px 12px;font-weight:bold;'>2.</td><td style='padding:8px 12px;'>XVII asrdagi Angliyadagi burjua inqilobi</td><td style='padding:8px 12px;'>Angliya qishloq xo’jaligida kapitalistlik munosabatlarning tez rivojlanishi va sanoat to’ntarishining boshlanishi</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);'><td style='padding:8px 12px;font-weight:bold;'>3.</td><td style='padding:8px 12px;'>1917-yil Rossiyadagi fevral inqilobi</td><td style='padding:8px 12px;'>Xiva xoni Asfandiyorxon islohotlar o’tkazish to’g’risidagi manifestga imzo chekdi</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);background:rgba(148,163,184,0.08);color:inherit;'><td style='padding:8px 12px;font-weight:bold;'>4.</td><td style='padding:8px 12px;'>2003-yil “Atirgullar inqilobi”</td><td style='padding:8px 12px;'>Gruziyada “yangi demokratlar”ning hokimiyatga kelishi</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);'><td style='padding:8px 12px;font-weight:bold;'>5.</td><td style='padding:8px 12px;'>Giksoslarning tor-mor etilishi va fir'avn Yaxmos tomonidan ularning Misrdan quvib chiqilishi</td><td style='padding:8px 12px;'>Misrda O’rta podsholikka asos solinishi</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);background:rgba(148,163,184,0.08);color:inherit;'><td style='padding:8px 12px;font-weight:bold;'>6.</td><td style='padding:8px 12px;'>Vilgelm II ning Germaniya taxtiga kelishi</td><td style='padding:8px 12px;'>Germaniyada ikkinchi imperiyaning boshlanishi</td></tr>"
                     "<tr><td style='padding:8px 12px;font-weight:bold;'>7.</td><td style='padding:8px 12px;'>IV-VI asrlardagi xalqlarning buyuk ko’chishlari</td><td style='padding:8px 12px;'>German qabilalari tomonidan G’arbiy Rim imperiyasining bosib olinishi</td></tr>"
                     "</tbody></table></div>"
                 ),
@@ -448,18 +448,18 @@ class Command(BaseCommand):
                 "body": (
                     "<p>Jadvalda harflar bilan belgilangan kataklarga quyida berilgan ma’lumotlardan moslarini qo‘yib to‘g‘ri javobni toping.</p>"
                     "<div style='overflow-x:auto;margin:12px 0;'>"
-                    "<table style='width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;background:#ffffff;'>"
-                    "<thead><tr style='background:#f1f5f9;border-bottom:2px solid #cbd5e1;text-align:left;'>"
+                    "<table style='width:100%;border-collapse:collapse;font-size:13px;border:1px solid rgba(148,163,184,0.2);background:transparent;'>"
+                    "<thead><tr style='background:rgba(148,163,184,0.12);border-bottom:2px solid rgba(148,163,184,0.25);text-align:left;'>"
                     "<th style='padding:8px 12px;width:70px;'>Asr</th><th style='padding:8px 12px;width:45%;'>O‘zbekiston tarixidagi voqea</th><th style='padding:8px 12px;'>Jahon tarixidagi voqea</th></tr></thead>"
                     "<tbody>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>a</td><td style='padding:8px 12px;'>Xoqoniya rivoj topib kuchaygach, u “Qarluq-Qoraxoniylar” davlati nomini olgan.</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>b</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;background:#f8fafc;'><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>c</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>d</td><td style='padding:8px 12px;'>Yaponiyada xristian dinining tarqalishi taqiqlandi</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 12px;font-weight:bold;'>XIX</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>e</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>f</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;background:#f8fafc;'><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>g</td><td style='padding:8px 12px;'>Islom Karimov Amerika jamoatchiligi tomonidan “Xalqaro miqyosda lider” mukofoti bilan taqdirlandi</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>h</td></tr>"
-                    "<tr style='border-bottom:1px solid #e2e8f0;'><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>i</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>j</td><td style='padding:8px 12px;'>Qul savdosida yetakchilikni gollandlar o’z qo’liga oldi</td></tr>"
-                    "<tr><td style='padding:8px 12px;font-weight:bold;'>IV</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>k</td><td style='padding:8px 12px;font-weight:bold;color:#2563eb;'>l</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);'><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>a</td><td style='padding:8px 12px;'>Xoqoniya rivoj topib kuchaygach, u “Qarluq-Qoraxoniylar” davlati nomini olgan.</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>b</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);background:rgba(148,163,184,0.08);color:inherit;'><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>c</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>d</td><td style='padding:8px 12px;'>Yaponiyada xristian dinining tarqalishi taqiqlandi</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);'><td style='padding:8px 12px;font-weight:bold;'>XIX</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>e</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>f</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);background:rgba(148,163,184,0.08);color:inherit;'><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>g</td><td style='padding:8px 12px;'>Islom Karimov Amerika jamoatchiligi tomonidan “Xalqaro miqyosda lider” mukofoti bilan taqdirlandi</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>h</td></tr>"
+                    "<tr style='border-bottom:1px solid rgba(148,163,184,0.15);'><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>i</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>j</td><td style='padding:8px 12px;'>Qul savdosida yetakchilikni gollandlar o’z qo’liga oldi</td></tr>"
+                    "<tr><td style='padding:8px 12px;font-weight:bold;'>IV</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>k</td><td style='padding:8px 12px;font-weight:bold;color:#3b82f6;'>l</td></tr>"
                     "</tbody></table></div>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:10px 0;font-size:12px;line-height:1.6;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:10px 0;font-size:12px;line-height:1.6;'>"
                     "<b>Ma’lumotlar:</b> 1) Qoraqum eshon madrasasi qurildi; 2) 2002-yil; 3) Subxonqulixon Balxni egallaydi; 4) XI-XII asrlar; 5) Imperializm atamasi keng iste’molga aylandi; 6) Xiva xonligi ikki marta Buxoro xonligi tomonidan bosib olingan; 7) XVI asr; 8) Malta Yevroittifoqqa a’zo bo’ldi; 9) XVII asr; 10) Yaponiyada yer egaligi munosabatlari o’rnatildi; 11) Rim imperiyasi ikki qismga bo’linib ketdi; 12) XVI asr; 13) Buxoro, Karki, Termiz, Kogonda Rossiya firmalarining idora va omborxonalari ochildi; 14) Xorazmda Afrig’iylar sulolasi poytaxtni Kat shahriga ko’chiradi; 15) XIV asr; 16) Toshkent bekligi tashkil topdi; 17) XVII asr; 18) Hindistonning shimoliy hududlarida turk va afg’on qabilalarining joylashuvi kuchaydi; 19) AQSH Gavayi orollarini anneksiya qilib, Filippinni bosib oldi."
                     "</div>"
                 ),
@@ -475,7 +475,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyida berilgan ma’lumotlarni tahlil qilib Eyler-Venn diagrammasiga mos keladigan javoblarni aniqlang.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:10px 0;font-size:13px;line-height:1.7;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:10px 0;font-size:13px;line-height:1.7;'>"
                     "<b>a)</b> mamlakatda musulmon bo’lmagan aholining o’z kiyimiga sariq belgi taqib yurishi haqida dekret qabul qilindi<br/>"
                     "<b>b)</b> 2001-yil Nyu-Yorkda amalga oshirilgan terrorchilik aktidan so’ng AQSH bu davlatni “xalqaro terrorizmning sherigi” deb atadi<br/>"
                     "<b>c)</b> mamlakat hududidan SSSR qo’shinlari olib chiqib ketildi<br/>"
@@ -497,7 +497,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Ma’lumki, XIII asr boshlarida Xorazm juda keng maydonni egallagan buyuk davlatga aylangan edi. Uning chegaralari to’g’ri moslashtirilgan javobni aniqlang.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) janubiy sharqda; 2) shimoli sharqda; 3) shimoli g’arbiy va g’arbida; 4) janubi g’arbda.<br/>"
                     "<b>a)</b> G’azna viloyati; <b>b)</b> Iroq; <b>c)</b> Orol va Kaspiy dengizi; <b>d)</b> Yettisuv va Dashti Qipchoq."
                     "</div>"
@@ -536,7 +536,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyida sanab o’tilganlardan qaysilar Yaponiya tashqi siyosatining 1870-1918-yillar tarixiga aloqadar?</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) AQSH bilan Yaponiya o’rtasida “Tinchlik va do’stlik to’g’risida”gi Shartnomaning imzolanishi;<br/>"
                     "2) Veyxayvey portining bosib olinishi;<br/>"
                     "3) Koreya yarim orolini harbiy kuch bilan o’ziga qo’shib olishi;<br/>"
@@ -557,7 +557,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Saljuqiylar davlati XII asr boshlaridayoq Sharqiy va G’arbiy qismlarga bo’linib ketgan edi. Quyidagilar orasidan G’arbiy Saljuqiylar tarkibiga kirgan hududlarni aniqlang.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Xorazm; 2) Iroq; 3) Xuroson; 4) Eron; 5) Ozarbayjon; 6) Afg’oniston."
                     "</div>"
                 ),
@@ -573,7 +573,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>XIX asrning 60-90-yillarida Amerika madaniyati rivojlanishining ikkita bosqichi bo’lib, bu davrda tasviriy san’atda kimlar faoliyat olib borgan?</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Uolt Uitmen; 2) Tomas Ikins; 3) Mark Tven; 4) Jeyms Uistler; 5) Uinslou Homer."
                     "</div>"
                 ),
@@ -589,7 +589,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>O’zaro muvofiqlik <b>SAQLANMAGAN</b> javobni toping.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "<b>I.</b> Qadimgi Misr; <b>II.</b> Qadimgi Yunoniston; <b>III.</b> Mesopotamiya; <b>IV.</b> Qadimgi Rim.<br/>"
                     "<b>a)</b> Tot; <b>b)</b> Apollon; <b>c)</b> Ishtar; <b>d)</b> Yupiter; <b>e)</b> Maat; <b>f)</b> Fortuna.<br/>"
                     "1) oy xudosi; 2) momaqaldiroq va yashin podshosi; 3) musiqa va she'riyat xudosi; 4) donishmandlik xudosi; 5) urush va g'alaba xudosi; 6) yorug'lik xudosi; 7) chaqmoq xudosi; 8) tabobat xudosi; 9) hosildorlik xudosi; 10) adolat xudosi; 11) taqdir ilohasi."
@@ -629,7 +629,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Asarlar va ularning mualliflari to’g’ri moslashtirilgan javobni toping.</p>"
-                    "<div style='display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#f8fafc;padding:14px 18px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='display:grid;grid-template-columns:1fr 1fr;gap:14px;background:rgba(148,163,184,0.08);color:inherit;padding:14px 18px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "<div><b>Asarlar:</b><br/>"
                     "1. “Girdob”<br/>"
                     "2. “Mobi dik”<br/>"
@@ -655,7 +655,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Chizmada nomi keltirilgan shaxslar va ularga tegishli ma’lumotlar to‘g‘ri moslashtirilgan javobni toping.</p>"
-                    "<div style='display:grid;grid-template-columns:1fr 2fr;gap:14px;background:#f8fafc;padding:14px 18px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='display:grid;grid-template-columns:1fr 2fr;gap:14px;background:rgba(148,163,184,0.08);color:inherit;padding:14px 18px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "<div><b>Olimlar:</b><br/>"
                     "1. F.Lyofler<br/>"
                     "2. J.Tomson<br/>"
@@ -681,7 +681,7 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyida berilganlar orasidan Sovuq Urush davri ixtirolarini aniqlang.</p>"
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin:12px 0;line-height:1.7;font-size:13.5px;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin:12px 0;line-height:1.7;font-size:13.5px;'>"
                     "1) Plastmassa; 2) Internet; 3) Penitsilin; 4) Kosmonavtika; 5) “Motorola”; 6) Plastik; 7) Atom texnologiyalari (AES); 8) Lazer; 9) Poloniy; 10) Rentgen nurlari."
                     "</div>"
                 ),
@@ -696,7 +696,7 @@ class Command(BaseCommand):
             # 33 (MATRIX A-F QUESTION 1)
             {
                 "body": (
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:12px;font-size:13px;line-height:1.6;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin-bottom:12px;font-size:13px;line-height:1.6;'>"
                     "<b>33–35-test topshiriqlariga mos keluvchi javoblarni (A–F) variantlaridan tanlang:</b><br/>"
                     "A) Simonoseki sulhi imzolandi (1895)<br/>"
                     "B) Nyu-York fond birjasidagi inqiroz (1929)<br/>"
@@ -718,7 +718,7 @@ class Command(BaseCommand):
             # 34 (MATRIX A-F QUESTION 2)
             {
                 "body": (
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:12px;font-size:13px;line-height:1.6;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin-bottom:12px;font-size:13px;line-height:1.6;'>"
                     "<b>33–35-test topshiriqlariga mos keluvchi javoblarni (A–F) variantlaridan tanlang:</b><br/>"
                     "A) Simonoseki sulhi imzolandi (1895)<br/>"
                     "B) Nyu-York fond birjasidagi inqiroz (1929)<br/>"
@@ -740,7 +740,7 @@ class Command(BaseCommand):
             # 35 (MATRIX A-F QUESTION 3)
             {
                 "body": (
-                    "<div style='background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:12px;font-size:13px;line-height:1.6;'>"
+                    "<div style='background:rgba(148,163,184,0.08);color:inherit;padding:12px 16px;border-radius:10px;border:1px solid rgba(148,163,184,0.2);margin-bottom:12px;font-size:13px;line-height:1.6;'>"
                     "<b>33–35-test topshiriqlariga mos keluvchi javoblarni (A–F) variantlaridan tanlang:</b><br/>"
                     "A) Simonoseki sulhi imzolandi (1895)<br/>"
                     "B) Nyu-York fond birjasidagi inqiroz (1929)<br/>"
