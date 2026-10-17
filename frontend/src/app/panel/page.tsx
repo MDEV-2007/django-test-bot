@@ -146,7 +146,7 @@ function fmt(v: number | string | undefined | null) {
 }
 
 export default function PanelDashboard() {
-  const { access } = useAuthStore();
+  const { access, authReady } = useAuthStore();
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -165,8 +165,13 @@ export default function PanelDashboard() {
   }
 
   useEffect(() => {
+    if (!authReady) return;
+    if (!access) {
+      setLoading(false);
+      return;
+    }
     loadDashboard();
-  }, [access]);
+  }, [access, authReady]);
 
   const series = (data?.chart_labels ?? []).map((label, i) => ({
     label,

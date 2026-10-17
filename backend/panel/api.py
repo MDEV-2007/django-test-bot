@@ -81,6 +81,7 @@ def dashboard_api(request):
             premium_users = Profile.objects.filter(
                 Q(is_premium=True) | Q(premium_mock_test_unlocked=True) | Q(payments__status='approved')
             ).distinct().count()
+            active_today = Attempt.objects.filter(started_at__date=today).values('profile').distinct().count()
 
             # Asosiy urinishlar statistikasi va voronka
             total_started_attempts = Attempt.objects.count()
@@ -342,7 +343,7 @@ def dashboard_api(request):
                 'peak_hours': peak_hours,
                 'hardest_questions': hardest_questions,
                 'recent_logs': [{
-                    'id': log.id, 'summary': log.summary_uz, 'action': log.action, 'timestamp': log.timestamp,
+                    'id': log.id, 'summary': log.summary_uz, 'action': log.action, 'timestamp': log.timestamp.isoformat() if log.timestamp else None,
                 } for log in AuditLog.objects.select_related('user')[:12]],
             }
             cache.set(DASHBOARD_CACHE_KEY, ctx, 60)
@@ -350,6 +351,7 @@ def dashboard_api(request):
             logger.exception("Error calculating dashboard stats: %s", e)
             today = timezone.localdate()
             completed_cnt = Attempt.objects.filter(is_completed=True).count()
+            total_attempts_cnt = Attempt.objects.count()
             ctx = {
                 'stats': {
                     'users': User.objects.count(),
@@ -366,8 +368,42 @@ def dashboard_api(request):
                     'premium_users': Profile.objects.filter(
                         Q(is_premium=True) | Q(premium_mock_test_unlocked=True) | Q(payments__status='approved')
                     ).distinct().count(),
+                    'completion_rate': round((completed_cnt / total_attempts_cnt * 100), 1) if total_attempts_cnt else 0.0,
+                    'avg_score': 0.0,
+                    'max_score': 0.0,
+                    'pass_rate': 0.0,
+                    'tg_connected': Profile.objects.filter(telegram_id__isnull=False).exclude(telegram_id='').exclude(telegram_id='0').count(),
+                    'tg_username_count': Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count(),
+                    'email_count': User.objects.filter(email__isnull=False).exclude(email='').count(),
+                    'tg_pct': 0.0,
                 },
                 'chart_labels': [], 'chart_reg': [], 'chart_attempts': [],
+                'score_distribution': {
+                    'gold': {'count': 0, 'pct': 0.0},
+                    'silver': {'count': 0, 'pct': 0.0},
+                    'bronze': {'count': 0, 'pct': 0.0},
+                    'fail': {'count': 0, 'pct': 0.0},
+                },
+                'answers_anatomy': {
+                    'correct': 0, 'wrong': 0, 'skipped': 0, 'total': 0,
+                    'correct_pct': 0.0, 'wrong_pct': 0.0, 'skipped_pct': 0.0,
+                },
+                'user_retention': {
+                    'one_attempt': 0, 'two_to_five': 0, 'six_plus': 0,
+                    'active_learners': 0, 'avg_attempts_per_user': 0.0,
+                },
+                'subject_stats': [],
+                'mock_analytics': {
+                    'total_attempts': 0, 'completed_count': 0, 'avg_score': 0.0, 'max_score': 0.0, 'gold_count': 0,
+                },
+                'upcoming_mock_info': None,
+                'top_students': [],
+                'peak_hours': {
+                    'morning': {'label': 'Ertalab (06:00 - 12:00)', 'count': 0, 'pct': 0.0},
+                    'afternoon': {'label': 'Tushdan keyin (12:00 - 18:00)', 'count': 0, 'pct': 0.0},
+                    'evening': {'label': 'Kechki pik vaqt (18:00 - 23:00)', 'count': 0, 'pct': 0.0},
+                    'night': {'label': 'Tun (23:00 - 06:00)', 'count': 0, 'pct': 0.0},
+                },
                 'hardest_questions': [],
                 'recent_logs': [],
             }
