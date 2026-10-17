@@ -25,6 +25,7 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart';
 import { cn } from '@/lib/utils';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 
 type HardQuestion = { id: number; text: string; subject_name?: string; rate: number; total: number };
 type AuditRow = { id: number; summary: string; action: string; timestamp: string };
@@ -126,19 +127,19 @@ type Dashboard = {
   recent_logs: AuditRow[];
 };
 
-const STAT_CARDS: { key: string; label: string; icon: typeof Users; tone: string; href: string }[] = [
-  { key: 'users', label: 'Foydalanuvchilar', icon: Users, tone: 'text-emerald-400', href: '/panel/users' },
-  { key: 'teachers', label: "O'qituvchilar", icon: GraduationCap, tone: 'text-sky-400', href: '/panel/users?role=teacher' },
-  { key: 'students', label: "O'quvchilar", icon: UserRound, tone: 'text-indigo-400', href: '/panel/users?role=student' },
-  { key: 'testsets', label: 'Testlar', icon: FileCheck2, tone: 'text-teal-400', href: '/panel/tests' },
-  { key: 'lessons', label: 'Darslar', icon: BookOpen, tone: 'text-sky-400', href: '/panel/lessons' },
-  { key: 'games', label: "O'yinlar", icon: Gamepad2, tone: 'text-purple-400', href: '/panel/games' },
-  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'text-emerald-400', href: '/panel/results' },
-  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'text-emerald-400', href: '/panel/results' },
-  { key: 'pending_payments', label: "Kutayotgan to'lovlar", icon: CreditCard, tone: 'text-amber-400', href: '/panel/payments?status=pending' },
-  { key: 'total_revenue', label: 'Tushum', icon: Wallet, tone: 'text-amber-400', href: '/panel/payments' },
-  { key: 'active_today', label: 'Bugun faol', icon: Radio, tone: 'text-emerald-400', href: '/panel/users' },
-  { key: 'premium_users', label: 'Premium', icon: Crown, tone: 'text-amber-400', href: '/panel/users?role=premium' },
+const STAT_CARDS: { key: string; label: string; icon: typeof Users; tone: PremiumIconTone; href: string }[] = [
+  { key: 'users', label: 'Foydalanuvchilar', icon: Users, tone: 'emerald', href: '/panel/users' },
+  { key: 'teachers', label: "O'qituvchilar", icon: GraduationCap, tone: 'sky', href: '/panel/users?role=teacher' },
+  { key: 'students', label: "O'quvchilar", icon: UserRound, tone: 'indigo', href: '/panel/users?role=student' },
+  { key: 'testsets', label: 'Testlar', icon: FileCheck2, tone: 'cyan', href: '/panel/tests' },
+  { key: 'lessons', label: 'Darslar', icon: BookOpen, tone: 'sky', href: '/panel/lessons' },
+  { key: 'games', label: "O'yinlar", icon: Gamepad2, tone: 'purple', href: '/panel/games' },
+  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'emerald', href: '/panel/results' },
+  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'emerald', href: '/panel/results' },
+  { key: 'pending_payments', label: "Kutayotgan to'lovlar", icon: CreditCard, tone: 'amber', href: '/panel/payments?status=pending' },
+  { key: 'total_revenue', label: 'Tushum', icon: Wallet, tone: 'gold', href: '/panel/payments' },
+  { key: 'active_today', label: 'Bugun faol', icon: Radio, tone: 'emerald', href: '/panel/users' },
+  { key: 'premium_users', label: 'Premium', icon: Crown, tone: 'gold', href: '/panel/users?role=premium' },
 ];
 
 const ACTION_TONE: Record<string, string> = {
@@ -257,9 +258,7 @@ export default function PanelDashboard() {
             href="/panel/marketing"
             className="flex items-center gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-3.5 transition-all hover:bg-rose-500/15 hover:border-rose-500/50 group shadow-xs"
           >
-            <div className="flex size-10 items-center justify-center rounded-xl bg-rose-500/20 text-rose-300 shrink-0">
-              <Flame className="size-5" />
-            </div>
+            <PremiumIcon icon={Flame} tone="rose" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-rose-200">🚀 Marketing &amp; Voronka</p>
               <p className="text-[11px] text-rose-300/80 truncate">Acquisition, Voronka &amp; Viral Loop</p>
@@ -270,9 +269,7 @@ export default function PanelDashboard() {
             href="/panel/system?tab=anticheat"
             className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 transition-all hover:bg-amber-500/15 hover:border-amber-500/50 group shadow-xs"
           >
-            <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
-              <ShieldAlert className="size-5" />
-            </div>
+            <PremiumIcon icon={ShieldAlert} tone="amber" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-amber-200">🛡️ Anti-Cheat Nazorati</p>
               <p className="text-[11px] text-amber-300/80 truncate">Tab almashtirish &amp; tezkor topshirish</p>
@@ -283,9 +280,7 @@ export default function PanelDashboard() {
             href="/panel/system?tab=backup"
             className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 transition-all hover:bg-emerald-500/15 hover:border-emerald-500/50 group shadow-xs"
           >
-            <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-300 shrink-0">
-              <HardDrive className="size-5" />
-            </div>
+            <PremiumIcon icon={HardDrive} tone="emerald" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-emerald-200">💾 Baza Zaxirasi (Backup)</p>
               <p className="text-[11px] text-emerald-300/80 truncate">One-Click SQL zaxirasini olish</p>
@@ -296,9 +291,7 @@ export default function PanelDashboard() {
             href="/panel/system?tab=ai"
             className="flex items-center gap-3 rounded-2xl border border-purple-500/30 bg-purple-500/10 p-3.5 transition-all hover:bg-purple-500/15 hover:border-purple-500/50 group shadow-xs"
           >
-            <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/20 text-purple-300 shrink-0">
-              <Bot className="size-5" />
-            </div>
+            <PremiumIcon icon={Bot} tone="purple" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-purple-200">🤖 AI Token Monitor</p>
               <p className="text-[11px] text-purple-300/80 truncate">Groq token sarfi va xarajatlar</p>
@@ -309,9 +302,7 @@ export default function PanelDashboard() {
             href="/panel/broadcast"
             className="flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3.5 transition-all hover:bg-sky-500/15 hover:border-sky-500/50 group shadow-xs"
           >
-            <div className="flex size-10 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300 shrink-0">
-              <Megaphone className="size-5" />
-            </div>
+            <PremiumIcon icon={Megaphone} tone="sky" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-sky-200">📅 Rejali Xabarlar</p>
               <p className="text-[11px] text-sky-300/80 truncate">Kelajak vaqtga avtomatik rejalashtirish</p>
@@ -332,8 +323,8 @@ export default function PanelDashboard() {
                 href={c.href}
                 className="group relative overflow-hidden rounded-2xl border border-[#1e2330] bg-[#11141c]/95 p-4 shadow-sm transition-all hover:border-slate-700 hover:bg-[#151923] block"
               >
-                <div className="flex items-center gap-2">
-                  <Icon className={`size-4 shrink-0 ${c.tone}`} />
+                <div className="flex items-center gap-2.5">
+                  <PremiumIcon icon={c.icon} tone={c.tone} size="xs" glow />
                   <p className="truncate text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">{c.label}</p>
                 </div>
                 {loading ? (
@@ -539,9 +530,7 @@ export default function PanelDashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">Tugatish ko&apos;rsatkichi</span>
-                  <div className="size-8 rounded-lg bg-blue-500/15 text-blue-500 flex items-center justify-center">
-                    <Target className="size-4" />
-                  </div>
+                  <PremiumIcon icon={Target} tone="sky" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-2xl font-black text-foreground">
@@ -560,9 +549,7 @@ export default function PanelDashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">O&apos;rtacha ko&apos;rsatkich</span>
-                  <div className="size-8 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
-                    <Flame className="size-4" />
-                  </div>
+                  <PremiumIcon icon={Flame} tone="emerald" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-2xl font-black text-foreground">
@@ -583,9 +570,7 @@ export default function PanelDashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">O&apos;tish ko&apos;rsatkichi (60%+)</span>
-                  <div className="size-8 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
-                    <CheckCircle2 className="size-4" />
-                  </div>
+                  <PremiumIcon icon={CheckCircle2} tone="amber" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-2xl font-black text-foreground">
@@ -604,9 +589,7 @@ export default function PanelDashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">Telegram bot faolligi</span>
-                  <div className="size-8 rounded-lg bg-purple-500/15 text-purple-500 flex items-center justify-center">
-                    <Send className="size-4" />
-                  </div>
+                  <PremiumIcon icon={Send} tone="purple" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-2xl font-black text-foreground">

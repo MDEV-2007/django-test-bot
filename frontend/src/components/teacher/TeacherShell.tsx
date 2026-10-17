@@ -13,32 +13,34 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
+
 /* O'qituvchi panelining karkasi — Super Admin paneldagi `PanelShell` bilan bir xil
    tuzilish: chapda sobit sidebar, tepada breadcrumb, mobilda off-canvas menyu.
 
    Ilgari o'qituvchi sahifalari o'quvchi `NavBar` ini ishlatardi: 10 ta o'quvchi havolasi
    ustiga bitta "O'qituvchi" havolasi qo'shilgan tekis qator. Natijada o'qituvchi qaysi
    bo'limda turganini bilmasdi va sahifalar orasida ko'chish uzoq edi. */
-type NavItem = { href: string; label: string; icon: typeof LayoutDashboard };
+type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; tone?: PremiumIconTone };
 
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Umumiy',
-    items: [{ href: '/teacher', label: 'Dashboard', icon: LayoutDashboard }],
+    items: [{ href: '/teacher', label: 'Dashboard', icon: LayoutDashboard, tone: 'indigo' }],
   },
   {
     label: 'Kontent',
     items: [
-      { href: '/teacher/tests', label: 'Testlar', icon: FileCheck2 },
-      { href: '/teacher/lessons', label: 'Darslar', icon: BookOpen },
-      { href: '/teacher/games', label: "O'yinlar", icon: Gamepad2 },
+      { href: '/teacher/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald' },
+      { href: '/teacher/lessons', label: 'Darslar', icon: BookOpen, tone: 'sky' },
+      { href: '/teacher/games', label: "O'yinlar", icon: Gamepad2, tone: 'amber' },
     ],
   },
   {
     label: 'Tahlil va Natijalar',
     items: [
-      { href: '/teacher/surveys', label: 'Sharh va Baholar', icon: MessageSquareQuote },
-      { href: '/teacher/class', label: 'Mening sinfim', icon: Users },
+      { href: '/teacher/surveys', label: 'Sharh va Baholar', icon: MessageSquareQuote, tone: 'rose' },
+      { href: '/teacher/class', label: 'Mening sinfim', icon: Users, tone: 'purple' },
     ],
   },
 ];
@@ -58,9 +60,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex size-9 items-center justify-center rounded-xl bg-primary/15 text-[var(--accent-text)]">
-          <GraduationCap className="size-5" />
-        </div>
+        <PremiumIcon icon={GraduationCap} tone="emerald" size="sm" glow />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground">O&apos;qituvchi</p>
           <p className="truncate text-xs text-muted-foreground">Kontent va sinf boshqaruvi</p>
@@ -90,7 +90,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                   )}
                 >
-                  <Icon className="size-4 shrink-0" />
+                  <PremiumIcon
+                    icon={Icon}
+                    tone={item.tone || 'primary'}
+                    size="xs"
+                    glow={active}
+                  />
                   <span className="truncate">{item.label}</span>
                 </Link>
               );

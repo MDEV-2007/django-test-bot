@@ -6,6 +6,7 @@ import { Menu, Flame, Coins, Swords, Bell, Search, Sun, Moon } from 'lucide-reac
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import PremiumIcon from '@/components/ui/premium-icon';
 
 interface ModernTopbarProps {
   onMenuClick: () => void;
@@ -70,9 +71,9 @@ export default function ModernTopbar({
                 <button
                   type="button"
                   onClick={onStreakClick}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 active:scale-95 transition cursor-pointer"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 pl-1 pr-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 active:scale-95 transition cursor-pointer"
                 >
-                  <Flame className="size-3.5 fill-current text-amber-500" />
+                  <PremiumIcon icon={Flame} tone="amber" size="xs" glow />
                   <span className="font-mono">{user.streak || 0}</span>
                   <span className="hidden sm:inline text-[10px] font-medium opacity-80">kun</span>
                 </button>
@@ -87,9 +88,9 @@ export default function ModernTopbar({
               <TooltipTrigger asChild>
                 <Link
                   href="/shop"
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/70 px-2.5 text-xs font-semibold text-foreground active:scale-95 transition cursor-pointer"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/70 pl-1 pr-2.5 text-xs font-semibold text-foreground active:scale-95 transition cursor-pointer"
                 >
-                  <Coins className="size-3.5 text-amber-500 fill-amber-500" />
+                  <PremiumIcon icon={Coins} tone="gold" size="xs" glow />
                   <span className="font-mono">{(user.coins || 0).toLocaleString()}</span>
                 </Link>
               </TooltipTrigger>
@@ -103,9 +104,9 @@ export default function ModernTopbar({
               <TooltipTrigger asChild>
                 <Link
                   href="/battles"
-                  className="hidden sm:flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/70 px-2.5 text-xs font-semibold text-foreground active:scale-95 transition cursor-pointer"
+                  className="hidden sm:flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/70 pl-1 pr-2.5 text-xs font-semibold text-foreground active:scale-95 transition cursor-pointer"
                 >
-                  <Swords className="size-3.5 text-primary" />
+                  <PremiumIcon icon={Swords} tone="rose" size="xs" />
                   <span className="font-mono">{user.elo_rating || 1200}</span>
                   <span className="text-[10px] text-muted-foreground font-normal">ELO</span>
                 </Link>

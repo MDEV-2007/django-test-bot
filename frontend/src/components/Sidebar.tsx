@@ -31,6 +31,7 @@ import VerifiedBadge from '@/components/ui/verified-badge';
 import { BrandMark } from '@/components/BrandMark';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 
 interface SidebarProps {
   mobileOpen?: boolean;
@@ -44,6 +45,7 @@ interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  tone?: PremiumIconTone;
   badge: string | null;
   matchPrefixes?: string[];
   featureKey?: string;
@@ -62,30 +64,30 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Asosiy',
     items: [
-      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, api: '/api/dashboard/home/' },
-      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: 'Yangi', matchPrefixes: ['/library'], api: '/api/learning/library/' },
-      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: null, featureKey: 'study' },
-      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: null, featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
-      { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, featureKey: 'ai_mentor' },
+      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'indigo', api: '/api/dashboard/home/' },
+      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: 'Yangi', tone: 'sky', matchPrefixes: ['/library'], api: '/api/learning/library/' },
+      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: null, tone: 'purple', featureKey: 'study' },
+      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: null, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+      { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, tone: 'cyan', featureKey: 'ai_mentor' },
     ],
   },
 
   {
     label: 'Amaliyot & Bellashuv',
     items: [
-      { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'LIVE', glow: true, featureKey: 'battles', matchPrefixes: ['/games'] },
-      { href: '/reels', label: 'Bilim Reels', icon: Sparkles, badge: 'Yangi', featureKey: 'reels', api: '/api/learning/reels/' },
-      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, featureKey: 'flashcards', api: '/api/learning/flashcards/' },
-      { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, matchPrefixes: ['/feed', '/leaderboard'] },
+      { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'LIVE', glow: true, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
+      { href: '/reels', label: 'Bilim Reels', icon: Sparkles, badge: 'Yangi', tone: 'rose', featureKey: 'reels', api: '/api/learning/reels/' },
+      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
+      { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/feed', '/leaderboard'] },
     ],
   },
   {
     label: 'Kabinet',
     items: [
-      { href: '/profile', label: 'Profilim', icon: User, badge: null, matchPrefixes: ['/profile'] },
-      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, api: '/api/analytics/' },
-      { href: '/shop', label: "Artefakt Do'koni", icon: ShoppingBag, badge: null, featureKey: 'shop', matchPrefixes: ['/shop'] },
-      { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'PRO', vip: true },
+      { href: '/profile', label: 'Profilim', icon: User, badge: null, tone: 'primary', matchPrefixes: ['/profile'] },
+      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, tone: 'indigo', api: '/api/analytics/' },
+      { href: '/shop', label: "Artefakt Do'koni", icon: ShoppingBag, badge: null, tone: 'purple', featureKey: 'shop', matchPrefixes: ['/shop'] },
+      { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'PRO', tone: 'gold', vip: true },
     ],
   },
 ];
@@ -209,11 +211,11 @@ export default function Sidebar({
                         )}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <Icon
-                            className={cn(
-                              'size-4 shrink-0 transition-colors',
-                              active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-                            )}
+                          <PremiumIcon
+                            icon={Icon as any}
+                            tone={item.tone || 'primary'}
+                            size="xs"
+                            glow={active}
                           />
                           <span className="truncate">{item.label}</span>
                         </div>

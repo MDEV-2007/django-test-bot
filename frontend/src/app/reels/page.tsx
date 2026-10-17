@@ -657,8 +657,8 @@ function ReelsInner() {
             {/* Sound & XP indicators, +Savol & Combo */}
             <div className="flex items-center gap-1.5 shrink-0 pl-2">
               {comboStreak >= 2 && (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold shadow-xs">
-                  <Flame className="size-3 fill-current" />
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold shadow-xs">
+                  <PremiumIcon icon={Flame} tone="amber" size="xs" glow />
                   <span>{comboStreak}x</span>
                 </div>
               )}
@@ -673,13 +673,13 @@ function ReelsInner() {
               </button>
               <button
                 onClick={() => { tgHaptic('light'); setSoundEnabled(!soundEnabled); }}
-                className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="transition-transform active:scale-95 cursor-pointer"
                 title={soundEnabled ? "Ovozsiz qilish" : "Ovozni yoqish"}
               >
-                {soundEnabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4 text-destructive" />}
+                <PremiumIcon icon={soundEnabled ? Volume2 : VolumeX} tone={soundEnabled ? "sky" : "rose"} size="xs" />
               </button>
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-semibold font-mono">
-                <Zap className="size-3 fill-amber-500 text-amber-500" />
+                <PremiumIcon icon={Zap} tone="amber" size="xs" glow />
                 <span>+{todayXpEarned}</span>
               </div>
             </div>
@@ -736,7 +736,7 @@ function ReelsInner() {
                       {/* Author badge if question was submitted by a user */}
                       {reel.author && (
                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-300 text-[11px] font-bold w-fit shadow-xs">
-                          <Sparkles className="size-3.5 text-blue-500" />
+                          <PremiumIcon icon={Sparkles} tone="sky" size="xs" glow />
                           <span>Muallif: @{reel.author.username || reel.author.name}</span>
                           <span className="text-[10px] bg-blue-200 dark:bg-blue-900/60 px-1.5 py-0.5 rounded-md font-extrabold text-blue-800 dark:text-blue-200">
                             Hamjamiyat
@@ -746,9 +746,7 @@ function ReelsInner() {
 
                       {/* Pale Yellow / Amber Warning Card */}
                       <div className="bg-[#fffbeb] dark:bg-amber-950/30 border border-[#fef3c7] dark:border-amber-800/40 rounded-2xl p-3 sm:p-3.5 flex items-start gap-3 shadow-sm">
-                        <div className="size-8 rounded-full bg-[#fef3c7] dark:bg-amber-900/60 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
-                          <AlertTriangle className="size-4 stroke-[2.5]" />
-                        </div>
+                        <PremiumIcon icon={AlertTriangle} tone="amber" size="sm" glow className="mt-0.5" />
                         <div className="space-y-0.5 flex-1 min-w-0">
                           <h4 className="text-[11px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-400">
                             MURAKKAB SAVOL
@@ -766,8 +764,8 @@ function ReelsInner() {
                             <span className="size-2 rounded-full bg-indigo-600 shrink-0" />
                             <span>{index + 1}-savol / {reels.length}</span>
                           </div>
-                          <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold text-xs sm:text-sm">
-                            <Clock className="size-3.5" />
+                          <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-bold text-xs sm:text-sm">
+                            <PremiumIcon icon={Clock} tone="indigo" size="xs" />
                             <span>{hasAnswered ? "Yechildi" : `${timeLeft}s`}</span>
                           </div>
                         </div>
@@ -927,24 +925,35 @@ function ReelsInner() {
 
                     {/* ── BOTTOM ENGAGEMENT BAR (Matches Screenshot) ── */}
                     <div className="pt-3 pb-1 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-slate-500 dark:text-zinc-400 text-xs sm:text-sm font-medium shrink-0">
-                      <div className="flex items-center gap-4 sm:gap-5">
+                      <div className="flex items-center gap-3 sm:gap-4">
                         {/* Heart / Like */}
                         <button
                           onClick={(e) => handleLike(reel.id, e)}
                           className="flex items-center gap-1.5 hover:text-rose-500 transition-colors cursor-pointer group"
                           title="Yoqdi"
                         >
-                          <Heart className={cn("size-4.5 transition-all", isLiked ? "fill-rose-500 text-rose-500 scale-110" : "group-hover:scale-110")} />
-                          <span className="font-semibold text-xs sm:text-sm">{likes}</span>
+                          <PremiumIcon
+                            icon={Heart}
+                            tone={isLiked ? "rose" : "zinc"}
+                            size="xs"
+                            glow={isLiked}
+                            className={cn("transition-transform", isLiked && "scale-110", "group-hover:scale-110")}
+                          />
+                          <span className={cn("font-semibold text-xs sm:text-sm", isLiked && "text-rose-500 font-bold")}>{likes}</span>
                         </button>
 
                         {/* Comment */}
                         <button
                           onClick={() => { tgHaptic('light'); handleOpenComments(reel); }}
-                          className="flex items-center gap-1.5 hover:text-blue-500 transition-colors cursor-pointer group"
+                          className="flex items-center gap-1.5 hover:text-sky-500 transition-colors cursor-pointer group"
                           title="Izohlar"
                         >
-                          <MessageCircle className="size-4.5 group-hover:scale-110 transition-all" />
+                          <PremiumIcon
+                            icon={MessageCircle}
+                            tone="sky"
+                            size="xs"
+                            className="group-hover:scale-110"
+                          />
                           <span className="font-semibold text-xs sm:text-sm">{commentCounts[reel.id] ?? reel.comments_count ?? 0}</span>
                         </button>
 
@@ -954,8 +963,14 @@ function ReelsInner() {
                           className="flex items-center gap-1.5 hover:text-amber-500 transition-colors cursor-pointer group"
                           title="Xatcho'pga saqlash"
                         >
-                          <Bookmark className={cn("size-4.5 transition-all", isSaved ? "fill-amber-500 text-amber-500 scale-110" : "group-hover:scale-110")} />
-                          <span className="font-semibold text-xs sm:text-sm">{savedCount}</span>
+                          <PremiumIcon
+                            icon={Bookmark}
+                            tone={isSaved ? "amber" : "zinc"}
+                            size="xs"
+                            glow={isSaved}
+                            className={cn("transition-transform", isSaved && "scale-110", "group-hover:scale-110")}
+                          />
+                          <span className={cn("font-semibold text-xs sm:text-sm", isSaved && "text-amber-500 font-bold")}>{savedCount}</span>
                         </button>
                       </div>
 
@@ -963,10 +978,10 @@ function ReelsInner() {
                       <div className="flex items-center gap-2 sm:gap-2.5">
                         <button
                           onClick={() => handleChallengeFriend(reel)}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 transition-all cursor-pointer font-bold text-xs group active:scale-95"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/25 transition-all cursor-pointer font-bold text-xs group active:scale-95 shadow-xs"
                           title="Do'stga Telegram chaqiriq yuborish"
                         >
-                          <Swords className="size-3.5 group-hover:rotate-12 transition-transform text-amber-600 dark:text-amber-400" />
+                          <PremiumIcon icon={Swords} tone="amber" size="xs" glow className="group-hover:rotate-12 transition-transform" />
                           <span>Chaqiriq ⚔️</span>
                         </button>
 
@@ -976,7 +991,7 @@ function ReelsInner() {
                           className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-pointer font-semibold group"
                           title="Telegram'ga ulashish"
                         >
-                          <Share2 className="size-4.5 group-hover:scale-110 transition-all" />
+                          <PremiumIcon icon={Share2} tone="indigo" size="xs" className="group-hover:scale-110" />
                           <span className="hidden xs:inline">Ulashish</span>
                         </button>
                       </div>
@@ -1037,8 +1052,8 @@ function ReelsInner() {
 
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <div className="flex items-center gap-2.5">
+                  <PremiumIcon icon={MessageCircle} tone="indigo" size="sm" glow />
                   <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
                     Izohlar ({commentCounts[activeCommentReel.id] ?? comments.length})
                   </h3>
@@ -1181,10 +1196,8 @@ function ReelsInner() {
 
               {/* Modal Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
-                <div className="flex items-center gap-2">
-                  <div className="size-8 rounded-xl bg-blue-100 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                    <Sparkles className="size-4" />
-                  </div>
+                <div className="flex items-center gap-2.5">
+                  <PremiumIcon icon={Sparkles} tone="primary" size="md" glow />
                   <div>
                     <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
                       Mening qiyin savolim (Reels)
@@ -1311,8 +1324,8 @@ function ReelsInner() {
 
                 {/* Reward Banner */}
                 <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-medium">
-                    <Zap className="size-4 text-amber-500 fill-amber-500 shrink-0" />
+                  <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300 font-medium">
+                    <PremiumIcon icon={Zap} tone="amber" size="xs" glow />
                     <span>Tasdiqlanganda darhol hisobingizga mukofot:</span>
                   </div>
                   <span className="font-black text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/60 px-2.5 py-1 rounded-xl text-xs">

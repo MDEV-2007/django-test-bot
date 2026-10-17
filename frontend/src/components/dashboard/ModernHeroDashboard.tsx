@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import PremiumIcon from '@/components/ui/premium-icon';
 
 export interface HeroDashboardProps {
   user: {
@@ -162,9 +163,7 @@ export function DailyGoalCard({
     <Card className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-card">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-500">
-            <Flame className="size-4 fill-current" />
-          </div>
+          <PremiumIcon icon={Flame} tone="amber" size="sm" glow />
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
               Kunlik Marra &amp; Streak
@@ -275,9 +274,7 @@ export function BattleArenaCard({
     <Card className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-card">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-            <Swords className="size-4" />
-          </div>
+          <PremiumIcon icon={Swords} tone="rose" size="sm" glow />
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
               1v1 Jonli Bellashuv
