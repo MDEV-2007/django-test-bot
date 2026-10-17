@@ -24,6 +24,7 @@ import {
   ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
+import { cn } from '@/lib/utils';
 
 type HardQuestion = { id: number; text: string; subject_name?: string; rate: number; total: number };
 type AuditRow = { id: number; summary: string; action: string; timestamp: string };
@@ -96,8 +97,20 @@ type PeakHour = {
   pct: number;
 };
 
+type ChartPeriod = 'daily' | 'monthly' | 'yearly';
+type ChartPeriodData = {
+  labels: string[];
+  reg: number[];
+  attempts: number[];
+};
+
 type Dashboard = {
   stats: Record<string, number | string>;
+  charts?: {
+    daily: ChartPeriodData;
+    monthly: ChartPeriodData;
+    yearly: ChartPeriodData;
+  };
   chart_labels: string[];
   chart_reg: number[];
   chart_attempts: number[];
@@ -149,6 +162,7 @@ export default function PanelDashboard() {
   const { access, authReady } = useAuthStore();
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('daily');
 
   function loadDashboard() {
     if (!access) return;
@@ -173,11 +187,20 @@ export default function PanelDashboard() {
     loadDashboard();
   }, [access, authReady]);
 
-  const series = (data?.chart_labels ?? []).map((label, i) => ({
+  const currentChart = data?.charts?.[chartPeriod] ?? {
+    labels: data?.chart_labels ?? [],
+    reg: data?.chart_reg ?? [],
+    attempts: data?.chart_attempts ?? [],
+  };
+
+  const series = currentChart.labels.map((label, i) => ({
     label,
-    reg: data?.chart_reg?.[i] ?? 0,
-    attempts: data?.chart_attempts?.[i] ?? 0,
+    reg: currentChart.reg[i] ?? 0,
+    attempts: currentChart.attempts[i] ?? 0,
   }));
+
+  const totalPeriodAttempts = series.reduce((sum, item) => sum + item.attempts, 0);
+  const totalPeriodReg = series.reduce((sum, item) => sum + item.reg, 0);
 
   const stats = data?.stats || {};
   const mockAnalytics = data?.mock_analytics;
@@ -326,12 +349,65 @@ export default function PanelDashboard() {
         </div>
 
         {/* ============================================================ */}
-        {/* 3. O'SISH DINAMIKASI GRAFIGI (RASMDAGI KABI) */}
+        {/* 3. O'SISH DINAMIKASI GRAFIGI (KUNLIK / OYLIK / YILLIK FILTER) */}
         {/* ============================================================ */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">O&apos;sish dinamikasi</CardTitle>
-            <CardDescription>Kunlik ro&apos;yxatdan o&apos;tish va test urinishlari</CardDescription>
+        <Card className="border border-border/70 shadow-xs">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">O&apos;sish dinamikasi</CardTitle>
+                {!loading && series.length > 0 && (
+                  <Badge variant="outline" className="text-[11px] font-normal text-muted-foreground border-border/70 hidden sm:inline-flex">
+                    Davr jami: <span className="font-semibold text-amber-400 mx-1">{fmt(totalPeriodAttempts)}</span> urinish &bull; <span className="font-semibold text-emerald-400 mx-1">{fmt(totalPeriodReg)}</span> a&apos;zo
+                  </Badge>
+                )}
+              </div>
+              <CardDescription className="mt-1">
+                {chartPeriod === 'daily' && "Kunlik ro'yxatdan o'tish va test urinishlari (oxirgi 7 kun)"}
+                {chartPeriod === 'monthly' && "Oylik o'sish va urinishlar dinamikasi (oxirgi 12 oy)"}
+                {chartPeriod === 'yearly' && "Yillik umumiy ko'rsatkichlar (yillar kesimida)"}
+              </CardDescription>
+            </div>
+
+            {/* Filter tugmalari: Kunlik | Oylik | Yillik */}
+            <div className="flex items-center p-1 rounded-xl bg-muted/60 border border-border/60 self-start sm:self-auto shrink-0 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setChartPeriod('daily')}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer",
+                  chartPeriod === 'daily'
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/40"
+                )}
+              >
+                Kunlik
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartPeriod('monthly')}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer",
+                  chartPeriod === 'monthly'
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/40"
+                )}
+              >
+                Oylik
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartPeriod('yearly')}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer",
+                  chartPeriod === 'yearly'
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/40"
+                )}
+              >
+                Yillik
+              </button>
+            </div>
           </CardHeader>
           <CardContent>
             {loading && <Skeleton className="h-56 w-full" />}

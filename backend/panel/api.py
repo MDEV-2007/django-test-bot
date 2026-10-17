@@ -70,12 +70,42 @@ def dashboard_api(request):
     if ctx is None:
         try:
             today = timezone.localdate()
-            days = [today - timedelta(days=i) for i in range(6, -1, -1)]
-            reg_series, attempt_series, labels = [], [], []
-            for d in days:
-                labels.append(d.strftime('%d.%m'))
-                reg_series.append(User.objects.filter(date_joined__date=d).count())
-                attempt_series.append(Attempt.objects.filter(started_at__date=d).count())
+
+            # 1. Kunlik dinamika (oxirgi 7 kun)
+            daily_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+            daily_labels, daily_reg, daily_attempts = [], [], []
+            for d in daily_days:
+                daily_labels.append(d.strftime('%d.%m'))
+                daily_reg.append(User.objects.filter(date_joined__date=d).count())
+                daily_attempts.append(Attempt.objects.filter(started_at__date=d).count())
+
+            # 2. Oylik dinamika (oxirgi 12 oy)
+            month_names_uz = {
+                1: 'Yan', 2: 'Fev', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Iyun',
+                7: 'Iyul', 8: 'Avg', 9: 'Sen', 10: 'Okt', 11: 'Noy', 12: 'Dek'
+            }
+            monthly_labels, monthly_reg, monthly_attempts = [], [], []
+            for offset in range(11, -1, -1):
+                m = today.month - offset
+                y = today.year
+                while m <= 0:
+                    m += 12
+                    y -= 1
+                monthly_labels.append(f"{month_names_uz[m]} '{str(y)[2:]}")
+                monthly_reg.append(User.objects.filter(date_joined__year=y, date_joined__month=m).count())
+                monthly_attempts.append(Attempt.objects.filter(started_at__year=y, started_at__month=m).count())
+
+            # 3. Yillik dinamika (yillar kesimi)
+            curr_year = today.year
+            start_year = max(curr_year - 4, 2023)
+            years = list(range(start_year, curr_year + 1))
+            if len(years) < 3:
+                years = list(range(curr_year - 2, curr_year + 1))
+            yearly_labels, yearly_reg, yearly_attempts = [], [], []
+            for y in years:
+                yearly_labels.append(str(y))
+                yearly_reg.append(User.objects.filter(date_joined__year=y).count())
+                yearly_attempts.append(Attempt.objects.filter(started_at__year=y).count())
 
             total_revenue = Payment.objects.filter(status='approved').aggregate(s=Sum('amount'))['s'] or 0
             premium_users = Profile.objects.filter(
@@ -332,7 +362,24 @@ def dashboard_api(request):
                     'email_count': email_count,
                     'tg_pct': round(tg_connected / (total_profiles or 1) * 100, 1),
                 },
-                'chart_labels': labels, 'chart_reg': reg_series, 'chart_attempts': attempt_series,
+                'charts': {
+                    'daily': {
+                        'labels': daily_labels,
+                        'reg': daily_reg,
+                        'attempts': daily_attempts,
+                    },
+                    'monthly': {
+                        'labels': monthly_labels,
+                        'reg': monthly_reg,
+                        'attempts': monthly_attempts,
+                    },
+                    'yearly': {
+                        'labels': yearly_labels,
+                        'reg': yearly_reg,
+                        'attempts': yearly_attempts,
+                    },
+                },
+                'chart_labels': daily_labels, 'chart_reg': daily_reg, 'chart_attempts': daily_attempts,
                 'score_distribution': score_distribution,
                 'answers_anatomy': answers_anatomy,
                 'user_retention': user_retention,
@@ -376,6 +423,11 @@ def dashboard_api(request):
                     'tg_username_count': Profile.objects.filter(telegram_username__isnull=False).exclude(telegram_username='').count(),
                     'email_count': User.objects.filter(email__isnull=False).exclude(email='').count(),
                     'tg_pct': 0.0,
+                },
+                'charts': {
+                    'daily': {'labels': [], 'reg': [], 'attempts': []},
+                    'monthly': {'labels': [], 'reg': [], 'attempts': []},
+                    'yearly': {'labels': [], 'reg': [], 'attempts': []},
                 },
                 'chart_labels': [], 'chart_reg': [], 'chart_attempts': [],
                 'score_distribution': {
