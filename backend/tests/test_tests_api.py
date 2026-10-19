@@ -76,3 +76,27 @@ class TestsApiFlowTests(TestCase):
         data = response.json()
         self.assertIn('podium', data)
         self.assertIn('rankings', data)
+
+    def test_open_written_deterministic_grading_rules(self):
+        from tests_app.services.grading import is_deterministic_match
+
+        # 1. Phonetic matching: x <-> h
+        self.assertTrue(is_deterministic_match("hun", "xun"))
+        self.assertTrue(is_deterministic_match("xun", "hun"))
+        self.assertTrue(is_deterministic_match("buhoro", "buxoro"))
+        self.assertTrue(is_deterministic_match("Hoshim", "Xoshim"))
+
+        # 2. 70% threshold and small typo tolerance
+        self.assertTrue(is_deterministic_match("Karl Martel", "Karl Martell"))
+        self.assertTrue(is_deterministic_match("Oleg", "Knyaz Oleg"))
+        self.assertTrue(is_deterministic_match("Tariq ibn Ziyod", "Toriq ibn Sayid (Tariq ibn Ziyod)"))
+
+        # 3. Year formats: 882 vs 882-yil
+        self.assertTrue(is_deterministic_match("882", "882-yil (882)"))
+        self.assertTrue(is_deterministic_match("882-yil", "882"))
+        self.assertTrue(is_deterministic_match("988 yil", "988-yil"))
+
+        # 4. Quotes and punctuation
+        self.assertTrue(is_deterministic_match("Rus haqiqati", '"Rus haqiqati"'))
+        self.assertTrue(is_deterministic_match('"Grek olovi"', "Grek olovi"))
+
