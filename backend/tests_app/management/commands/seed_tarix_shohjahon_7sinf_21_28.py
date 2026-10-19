@@ -215,10 +215,10 @@ class Command(BaseCommand):
                     "<p>Quyida berilgan atamalar va ularning izohi to’g’ri moslashtirilgan javobni toping.</p>"
                     "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;margin:14px 0;'>"
                     "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>"
-                    "<b>I.</b> Domen<br/>
-<b>II.</b> Dvoryanlar<br/>
-<b>III.</b> Parlament<br/>
-<b>IV.</b> Sherif"
+                    "<b>I.</b> Domen<br/>"
+                    "<b>II.</b> Dvoryanlar<br/>"
+                    "<b>III.</b> Parlament<br/>"
+                    "<b>IV.</b> Sherif"
                     "</div>"
                     "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>"
                     "<b>a)</b> Qirol va feodallarning shaxsiy yer-mulklari<br/>"
@@ -284,14 +284,14 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi janglardan qaysilari Yuz yillik urushga tegishli?</p>"
-                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>
-1) Kresi jangi<br/>
-2) Puate jangi<br/>
-3) Azenkur jangi<br/>
-4) Gastings jangi<br/>
-5) Bosvort jangi<br/>
-6) Kann jangi
-</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>"
+                    "1) Kresi jangi<br/>"
+                    "2) Puate jangi<br/>"
+                    "3) Azenkur jangi<br/>"
+                    "4) Gastings jangi<br/>"
+                    "5) Bosvort jangi<br/>"
+                    "6) Kann jangi"
+                    "</div>"
                 ),
                 "explanation": "Kresi (1346), Puate (1356), Azenkur (1415) Yuz yillik urushga tegishli. Gastings (1066), Bosvort (1485) boshqa davrlarga, Kann jangi Rim davriga oid.",
                 "options": [
@@ -327,14 +327,14 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi qo’zg’olonlardan qaysilari o’rta asr Yevropasiga tegishli?</p>"
-                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>
-1) Jakeriya<br/>
-2) Uot Tayler qo’zg’oloni<br/>
-3) Abu Muslim qo’zg’oloni<br/>
-4) Muqanna qo’zg’oloni<br/>
-5) Bobak qo’zg’oloni<br/>
-6) Spartak qo’zg’oloni
-</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>"
+                    "1) Jakeriya<br/>"
+                    "2) Uot Tayler qo’zg’oloni<br/>"
+                    "3) Abu Muslim qo’zg’oloni<br/>"
+                    "4) Muqanna qo’zg’oloni<br/>"
+                    "5) Bobak qo’zg’oloni<br/>"
+                    "6) Spartak qo’zg’oloni"
+                    "</div>"
                 ),
                 "explanation": "Jakeriya (Fransiya) va Uot Tayler (Angliya) o'rta asr Yevropasiga tegishli. Qolganlari arab xalifaligi yoki Rim davriga oid.",
                 "options": [
@@ -359,14 +359,14 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi voqealar to’g’ri xronologik ketma-ketlikda ko’rsatilgan javobni toping.</p>"
-                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>
-1) Gastings jangi (1066)<br/>
-2) ”Buyuk ozodlik xartiyasi” (1215)<br/>
-3) Angliyada birinchi parlament (1265)<br/>
-4) Yuz yillik urush boshlandi (1337)<br/>
-5) Uot Tayler qo’zg’oloni (1381)<br/>
-6) ”Qizil va oq gullar” urushi (1455)
-</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>"
+                    "1) Gastings jangi (1066)<br/>"
+                    "2) ”Buyuk ozodlik xartiyasi” (1215)<br/>"
+                    "3) Angliyada birinchi parlament (1265)<br/>"
+                    "4) Yuz yillik urush boshlandi (1337)<br/>"
+                    "5) Uot Tayler qo’zg’oloni (1381)<br/>"
+                    "6) ”Qizil va oq gullar” urushi (1455)"
+                    "</div>"
                 ),
                 "explanation": "Xronologik ketma-ketlik: 1066 -> 1215 -> 1265 -> 1337 -> 1381 -> 1455.",
                 "options": [
@@ -411,11 +411,11 @@ class Command(BaseCommand):
                     "<p>Tarixiy voqea va uning natijasi o’zaro to’g’ri mos berilgan qatorlarni aniqlang.</p>"
                     "<table style='width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;'>"
                     "<thead>"
-                    "<tr style='background:rgba(100,116,139,0.1);border-bottom:2px solid #cbd5e1;'>
-<th style='padding:8px;border:1px solid #cbd5e1;text-align:center;width:40px;'>№</th>
-<th style='padding:8px;border:1px solid #cbd5e1;text-align:left;'>Voqea</th>
-<th style='padding:8px;border:1px solid #cbd5e1;text-align:left;'>Natija</th>
-</tr>"
+                    "<tr style='background:rgba(100,116,139,0.1);border-bottom:2px solid #cbd5e1;'>"
+                    "<th style='padding:8px;border:1px solid #cbd5e1;text-align:center;width:40px;'>№</th>"
+                    "<th style='padding:8px;border:1px solid #cbd5e1;text-align:left;'>Voqea</th>"
+                    "<th style='padding:8px;border:1px solid #cbd5e1;text-align:left;'>Natija</th>"
+                    "</tr>"
                     "</thead>"
                     "<tbody>"
                     "<tr><td style='padding:6px;border:1px solid #cbd5e1;text-align:center;'>1</td><td style='padding:6px;border:1px solid #cbd5e1;'>Filipp IVning General shtatlarni chaqirishi (1302)</td><td style='padding:6px;border:1px solid #cbd5e1;'>Fransiyada toifaviy monarxiya shakllandi</td></tr>"
@@ -441,11 +441,11 @@ class Command(BaseCommand):
                     "<p>Jadvalda harflar bilan belgilangan o’rinlarga mos keluvchi ma’lumotni toping.</p>"
                     "<table style='width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;'>"
                     "<thead>"
-                    "<tr style='background:rgba(100,116,139,0.1);border-bottom:2px solid #cbd5e1;'>
-<th style='padding:8px;border:1px solid #cbd5e1;text-align:center;width:90px;'>Asr</th>
-<th style='padding:8px;border:1px solid #cbd5e1;'>Fransiya voqeasi</th>
-<th style='padding:8px;border:1px solid #cbd5e1;'>Angliya voqeasi</th>
-</tr>"
+                    "<tr style='background:rgba(100,116,139,0.1);border-bottom:2px solid #cbd5e1;'>"
+                    "<th style='padding:8px;border:1px solid #cbd5e1;text-align:center;width:90px;'>Asr</th>"
+                    "<th style='padding:8px;border:1px solid #cbd5e1;'>Fransiya voqeasi</th>"
+                    "<th style='padding:8px;border:1px solid #cbd5e1;'>Angliya voqeasi</th>"
+                    "</tr>"
                     "</thead>"
                     "<tbody>"
                     "<tr><td style='padding:8px;border:1px solid #cbd5e1;text-align:center;font-weight:bold;'>XIII asr</td><td style='padding:8px;border:1px solid #cbd5e1;text-align:center;font-weight:bold;color:#2563eb;'>a</td><td style='padding:8px;border:1px solid #cbd5e1;'>Birinchi parlament chaqirildi (1265)</td></tr>"
@@ -547,14 +547,14 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi shaharlardan qaysilari Germaniyaning yirik hunarmandchilik-savdo markazlari bo’lgan?</p>"
-                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>
-1) Kyoln<br/>
-2) Nyurnberg<br/>
-3) Augsburg<br/>
-4) Parij<br/>
-5) London<br/>
-6) Rim
-</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>"
+                    "1) Kyoln<br/>"
+                    "2) Nyurnberg<br/>"
+                    "3) Augsburg<br/>"
+                    "4) Parij<br/>"
+                    "5) London<br/>"
+                    "6) Rim"
+                    "</div>"
                 ),
                 "explanation": "Kyoln, Nyurnberg va Augsburg Germaniyaning yirik savdo-hunarmandchilik markazlari bo'lgan.",
                 "options": [
@@ -612,11 +612,11 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyida berilgan ma’lumotlarga mos yakuniy xulosalar (to’g’ri/noto’g’ri) keltirilgan javobni aniqlang.</p>"
-                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>
-<b>I.</b> Yuz yillik urush yakunida Angliya ixtiyorida faqat Kale porti qoldi.<br/>
-<b>II.</b> Jakeriya qo’zg’oloni g’alaba bilan yakunlanib, dehqonlar butunlay ozod bo’ldi.<br/>
-<b>III.</b> Buyuk ozodlik xartiyasi 63 moddadan iborat edi.
-</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>"
+                    "<b>I.</b> Yuz yillik urush yakunida Angliya ixtiyorida faqat Kale porti qoldi.<br/>"
+                    "<b>II.</b> Jakeriya qo’zg’oloni g’alaba bilan yakunlanib, dehqonlar butunlay ozod bo’ldi.<br/>"
+                    "<b>III.</b> Buyuk ozodlik xartiyasi 63 moddadan iborat edi."
+                    "</div>"
                 ),
                 "explanation": "I to’g’ri. II noto’g’ri — qo’zg’olon mag’lubiyatga uchradi, Gilyom Kal boshchiligidagi qo’zg’olonchilar bostirildi. III to’g’ri (63 modda).",
                 "options": [
@@ -630,18 +630,18 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Shaxslar va ularning ishlari to’g’ri moslashtirilgan javobni toping.</p>"
-                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin:14px 0;'>
-<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>
-<b>1)</b> Uot Tayler<br/>
-<b>2)</b> Jon Boll<br/>
-<b>3)</b> Robin Gud
-</div>
-<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>
-<b>a)</b> 1381-yilgi qo’zg’olon rahbari<br/>
-<b>b)</b> Qo’zg’olon g’oyachisi<br/>
-<b>c)</b> Afsonaviy xalq qahramoni
-</div>
-</div>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>"
+                    "<b>1)</b> Uot Tayler<br/>"
+                    "<b>2)</b> Jon Boll<br/>"
+                    "<b>3)</b> Robin Gud"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>"
+                    "<b>a)</b> 1381-yilgi qo’zg’olon rahbari<br/>"
+                    "<b>b)</b> Qo’zg’olon g’oyachisi<br/>"
+                    "<b>c)</b> Afsonaviy xalq qahramoni"
+                    "</div>"
+                    "</div>"
                 ),
                 "explanation": "1-a (Uot Tayler — qo'zg'olon rahbari), 2-b (Jon Boll — g'oyachi ruhoniy), 3-c (Robin Gud — afsonaviy mergan qahramon).",
                 "options": [
@@ -655,18 +655,18 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Voqealar va ularning sanalarini to’g’ri moslashtiring.</p>"
-                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin:14px 0;'>
-<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>
-<b>1)</b> Kresi jangi<br/>
-<b>2)</b> Azenkur jangi<br/>
-<b>3)</b> Bosvort jangi
-</div>
-<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>
-<b>a)</b> 1346-yil<br/>
-<b>b)</b> 1415-yil<br/>
-<b>c)</b> 1485-yil
-</div>
-</div>"
+                    "<div style='display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin:14px 0;'>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>"
+                    "<b>1)</b> Kresi jangi<br/>"
+                    "<b>2)</b> Azenkur jangi<br/>"
+                    "<b>3)</b> Bosvort jangi"
+                    "</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;'>"
+                    "<b>a)</b> 1346-yil<br/>"
+                    "<b>b)</b> 1415-yil<br/>"
+                    "<b>c)</b> 1485-yil"
+                    "</div>"
+                    "</div>"
                 ),
                 "explanation": "1-a (Kresi — 1346), 2-b (Azenkur — 1415), 3-c (Bosvort — 1485).",
                 "options": [
@@ -680,14 +680,14 @@ class Command(BaseCommand):
             {
                 "body": (
                     "<p>Quyidagi hujjatlardan qaysilari o’rta asr Angliyasiga tegishli?</p>"
-                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>
-1) ”Buyuk ozodlik xartiyasi”<br/>
-2) ”Mayl End” dasturi<br/>
-3) ”Dahshatli sud kitobi”<br/>
-4) ”Rus haqiqati”<br/>
-5) ”Sali haqiqati”<br/>
-6) ”Hidoya”
-</div>"
+                    "<div style='border:1px solid #cbd5e1;border-radius:8px;padding:12px;background:rgba(100,116,139,0.05);font-size:13.5px;line-height:1.8;margin:12px 0;'>"
+                    "1) ”Buyuk ozodlik xartiyasi”<br/>"
+                    "2) ”Mayl End” dasturi<br/>"
+                    "3) ”Dahshatli sud kitobi”<br/>"
+                    "4) ”Rus haqiqati”<br/>"
+                    "5) ”Sali haqiqati”<br/>"
+                    "6) ”Hidoya”"
+                    "</div>"
                 ),
                 "explanation": "Buyuk ozodlik xartiyasi, Mayl End dasturi, Dahshatli sud kitobi Angliyaga tegishli.",
                 "options": [
@@ -700,16 +700,16 @@ class Command(BaseCommand):
             # 33 (BANK)
             {
                 "body": (
-                    "<div style='border:1px solid #3b82f6;border-radius:10px;padding:12px;background:rgba(59,130,246,0.05);margin-bottom:14px;font-size:13px;line-height:1.7;'>
-<b>33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:</b><br/>
-<b>A)</b> General shtatlar birinchi chaqirilishi (1302)<br/>
-<b>B)</b> Gastings jangi (1066)<br/>
-<b>C)</b> ”Buyuk ozodlik xartiyasi” imzolanishi (1215)<br/>
-<b>D)</b> Yuz yillik urush yakunlanishi (1453)<br/>
-<b>E)</b> Bosvort jangi (1485)<br/>
-<b>F)</b> Uot Tayler qo’zg’oloni (1381)
-</div>
-<p><b>Berilgan voqealardan qaysi biri eng avval sodir bo’lgan?</b></p>"
+                    "<div style='border:1px solid #3b82f6;border-radius:10px;padding:12px;background:rgba(59,130,246,0.05);margin-bottom:14px;font-size:13px;line-height:1.7;'>"
+                    "<b>33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:</b><br/>"
+                    "<b>A)</b> General shtatlar birinchi chaqirilishi (1302)<br/>"
+                    "<b>B)</b> Gastings jangi (1066)<br/>"
+                    "<b>C)</b> ”Buyuk ozodlik xartiyasi” imzolanishi (1215)<br/>"
+                    "<b>D)</b> Yuz yillik urush yakunlanishi (1453)<br/>"
+                    "<b>E)</b> Bosvort jangi (1485)<br/>"
+                    "<b>F)</b> Uot Tayler qo’zg’oloni (1381)"
+                    "</div>"
+                    "<p><b>Berilgan voqealardan qaysi biri eng avval sodir bo’lgan?</b></p>"
                 ),
                 "explanation": "1066-yil — ro’yxatdagi eng qadimgi sana (Gastings jangi).",
                 "options": [
@@ -724,16 +724,16 @@ class Command(BaseCommand):
             # 34 (BANK)
             {
                 "body": (
-                    "<div style='border:1px solid #3b82f6;border-radius:10px;padding:12px;background:rgba(59,130,246,0.05);margin-bottom:14px;font-size:13px;line-height:1.7;'>
-<b>33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:</b><br/>
-<b>A)</b> General shtatlar birinchi chaqirilishi (1302)<br/>
-<b>B)</b> Gastings jangi (1066)<br/>
-<b>C)</b> ”Buyuk ozodlik xartiyasi” imzolanishi (1215)<br/>
-<b>D)</b> Yuz yillik urush yakunlanishi (1453)<br/>
-<b>E)</b> Bosvort jangi (1485)<br/>
-<b>F)</b> Uot Tayler qo’zg’oloni (1381)
-</div>
-<p><b>Angliyada qirol hokimiyatini birinchi bo’lib huquqiy jihatdan cheklagan voqeani aniqlang.</b></p>"
+                    "<div style='border:1px solid #3b82f6;border-radius:10px;padding:12px;background:rgba(59,130,246,0.05);margin-bottom:14px;font-size:13px;line-height:1.7;'>"
+                    "<b>33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:</b><br/>"
+                    "<b>A)</b> General shtatlar birinchi chaqirilishi (1302)<br/>"
+                    "<b>B)</b> Gastings jangi (1066)<br/>"
+                    "<b>C)</b> ”Buyuk ozodlik xartiyasi” imzolanishi (1215)<br/>"
+                    "<b>D)</b> Yuz yillik urush yakunlanishi (1453)<br/>"
+                    "<b>E)</b> Bosvort jangi (1485)<br/>"
+                    "<b>F)</b> Uot Tayler qo’zg’oloni (1381)"
+                    "</div>"
+                    "<p><b>Angliyada qirol hokimiyatini birinchi bo’lib huquqiy jihatdan cheklagan voqeani aniqlang.</b></p>"
                 ),
                 "explanation": "”Buyuk ozodlik xartiyasi” 1215-yilda qirol hokimiyatini birinchi bo'lib qonuniy jihatdan cheklagan.",
                 "options": [
@@ -748,16 +748,16 @@ class Command(BaseCommand):
             # 35 (BANK)
             {
                 "body": (
-                    "<div style='border:1px solid #3b82f6;border-radius:10px;padding:12px;background:rgba(59,130,246,0.05);margin-bottom:14px;font-size:13px;line-height:1.7;'>
-<b>33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:</b><br/>
-<b>A)</b> General shtatlar birinchi chaqirilishi (1302)<br/>
-<b>B)</b> Gastings jangi (1066)<br/>
-<b>C)</b> ”Buyuk ozodlik xartiyasi” imzolanishi (1215)<br/>
-<b>D)</b> Yuz yillik urush yakunlanishi (1453)<br/>
-<b>E)</b> Bosvort jangi (1485)<br/>
-<b>F)</b> Uot Tayler qo’zg’oloni (1381)
-</div>
-<p><b>Berilgan voqealardan qaysi biri eng keyin sodir bo’lgan?</b></p>"
+                    "<div style='border:1px solid #3b82f6;border-radius:10px;padding:12px;background:rgba(59,130,246,0.05);margin-bottom:14px;font-size:13px;line-height:1.7;'>"
+                    "<b>33–35-topshiriqlarga mos javoblarni quyidagi banklardan (A–F) tanlang:</b><br/>"
+                    "<b>A)</b> General shtatlar birinchi chaqirilishi (1302)<br/>"
+                    "<b>B)</b> Gastings jangi (1066)<br/>"
+                    "<b>C)</b> ”Buyuk ozodlik xartiyasi” imzolanishi (1215)<br/>"
+                    "<b>D)</b> Yuz yillik urush yakunlanishi (1453)<br/>"
+                    "<b>E)</b> Bosvort jangi (1485)<br/>"
+                    "<b>F)</b> Uot Tayler qo’zg’oloni (1381)"
+                    "</div>"
+                    "<p><b>Berilgan voqealardan qaysi biri eng keyin sodir bo’lgan?</b></p>"
                 ),
                 "explanation": "1485-yil — ro’yxatdagi eng so’nggi sana (Bosvort jangi).",
                 "options": [
