@@ -165,7 +165,7 @@ def execute_telegram_broadcast(
     telegram_ids: list,
     caption: str,
     image_path: str | None = None,
-    on_progress: callable | None = None,
+    on_progress=None,
 ) -> dict:
     """Send broadcast to multiple Telegram users efficiently with Keep-Alive connection reuse,
     automatic file_id caching, rate-limit retry, and blocked user skipping.
