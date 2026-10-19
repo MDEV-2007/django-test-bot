@@ -65,20 +65,19 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'indigo', api: '/api/dashboard/home/' },
-      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: 'Yangi', tone: 'sky', matchPrefixes: ['/library'], api: '/api/learning/library/' },
-      { href: '/study', label: 'Fokus Xonasi', icon: Headphones, badge: null, tone: 'purple', featureKey: 'study' },
-      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: null, tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'Milliy / BBA', tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+      { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'] },
+      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'sky', matchPrefixes: ['/library'], api: '/api/learning/library/' },
       { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, tone: 'cyan', featureKey: 'ai_mentor' },
     ],
   },
 
   {
-    label: 'Amaliyot & Bellashuv',
+    label: 'Bellashuv & Amaliyot',
     items: [
-      { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'LIVE', glow: true, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
-      { href: '/reels', label: 'Bilim Reels', icon: Sparkles, badge: 'Yangi', tone: 'rose', featureKey: 'reels', api: '/api/learning/reels/' },
-      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
+      { href: '/battles', label: '1v1 Arena (Jang)', icon: Swords, badge: 'LIVE', glow: true, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
       { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/feed', '/leaderboard'] },
+      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
     ],
   },
   {
@@ -86,7 +85,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/profile', label: 'Profilim', icon: User, badge: null, tone: 'primary', matchPrefixes: ['/profile'] },
       { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, tone: 'indigo', api: '/api/analytics/' },
-      { href: '/shop', label: "Artefakt Do'koni", icon: ShoppingBag, badge: null, tone: 'purple', featureKey: 'shop', matchPrefixes: ['/shop'] },
       { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'PRO', tone: 'gold', vip: true },
     ],
   },

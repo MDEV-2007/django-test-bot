@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
   AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
-  CheckCircle2, HelpCircle, Trophy, Gift,
+  CheckCircle2, HelpCircle, Trophy, Gift, Swords,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
@@ -66,22 +66,25 @@ function StoryShareButton({ attemptId }: { attemptId: string }) {
   const inTelegram = useIsTelegram();
   const [busy, setBusy] = useState(false);
 
-  // Tugma faqat Story'ni qo'llab-quvvatlaydigan Telegram mijozida ko'rinadi
-  // (Bot API 7.8+); saytda yoki eski ilovada umuman chizilmaydi.
-  if (!inTelegram || !canShareToStory()) return null;
-
   async function share() {
     setBusy(true);
     try {
       const res = await apiFetch<{ media_url: string; text: string }>(
         `/api/tests/attempts/${attemptId}/story-link/`,
       );
-      const ok = shareToStory(res.media_url, {
-        text: res.text,
-        widget_link: { url: 'https://t.me/ilmildiziuz_bot', name: 'IlmIldizi' },
-      });
-      if (ok) tgHaptic('success');
-      else toast.error('Telegramning bu versiyasi Story ulashishni qo`llamaydi.');
+      if (inTelegram && canShareToStory()) {
+        const ok = shareToStory(res.media_url, {
+          text: res.text,
+          widget_link: { url: 'https://t.me/ilmildiziuz_bot', name: 'IlmIldizi' },
+        });
+        if (ok) {
+          tgHaptic('success');
+          return;
+        }
+      }
+      // Web brauzerda yoki eski Telegramda: rasmni to'g'ridan-to'g'ri ochish / saqlash
+      window.open(res.media_url, '_blank');
+      toast.success("Story kartasi ochildi! Uni saqlab olib, Telegram/Instagram Story'ga qo'yishingiz mumkin.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Xatolik');
     } finally {
@@ -90,7 +93,13 @@ function StoryShareButton({ attemptId }: { attemptId: string }) {
   }
 
   return (
-    <Button size="sm" onClick={share} disabled={busy}>
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={share}
+      disabled={busy}
+      className="border-sky-500/40 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 font-medium"
+    >
       <Share2 className="size-4" /> {busy ? 'Tayyorlanmoqda...' : 'Storyga qo`yish'}
     </Button>
   );
@@ -191,6 +200,16 @@ export default function FeedbackPage() {
     );
   }
 
+  function handleChallengeFriend() {
+    const title = data?.attempt?.test_title || 'Milliy sertifikat sinov testi';
+    const score = Math.round(a?.score || 0);
+    const text = `🎯 Men "${title}" testidan ${score}% to'pladim!\n\nSen mendan ko'proq ball ola olasanmi? Qani, o'zingni sinab ko'rchi! 👇`;
+    const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/tests` : 'https://ilmildizi.uz/tests';
+    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`;
+    window.open(tgUrl, '_blank');
+    tgHaptic('success');
+  }
+
   const a = data.attempt!;
   return (
     <>
@@ -210,6 +229,13 @@ export default function FeedbackPage() {
               <Award className="size-4" /> Sertifikat
             </Button>
             <StoryShareButton attemptId={attemptId} />
+            <Button
+              size="sm"
+              onClick={handleChallengeFriend}
+              className="border-rose-500/50 bg-gradient-to-r from-rose-600 to-amber-600 text-white font-bold hover:from-rose-500 hover:to-amber-500 gap-1.5 shadow-sm"
+            >
+              <Swords className="size-4" /> Do&apos;stni duelga chaqirish ⚔️
+            </Button>
             <Button
               size="sm"
               variant="outline"

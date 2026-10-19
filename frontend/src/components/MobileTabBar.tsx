@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileCheck2, Film, Users, User, BookOpen } from 'lucide-react';
+import { LayoutDashboard, FileCheck2, Swords, GraduationCap, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,9 +23,9 @@ type TabItem = {
 const TABS: TabItem[] = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
   { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
-  { href: '/library', label: 'Kutubxona', icon: BookOpen, tone: 'amber', matchPrefixes: ['/library'], api: '/api/learning/library/' },
-  { href: '/reels', label: 'Reels', icon: Film, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
-  { href: '/feed', label: 'Lenta & Liga', icon: Users, tone: 'purple', matchPrefixes: ['/feed', '/leaderboard'], api: '/api/learning/feed/' },
+  { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/battles', '/games'] },
+  { href: '/teacher', label: 'Sinfxona', icon: GraduationCap, tone: 'amber', matchPrefixes: ['/teacher'] },
+  { href: '/profile', label: 'Profilim', icon: User, tone: 'purple', matchPrefixes: ['/profile'] },
 ];
 
 
