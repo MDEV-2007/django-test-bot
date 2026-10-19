@@ -53,6 +53,7 @@ interface NavItem {
   glow?: boolean;
   vip?: boolean;
   highlight?: boolean;
+  teacherOrAdminOnly?: boolean;
 }
 
 interface NavGroup {
@@ -66,7 +67,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'indigo', api: '/api/dashboard/home/' },
       { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'Milliy / BBA', tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
-      { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'] },
+      { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'], teacherOrAdminOnly: true },
       { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'sky', matchPrefixes: ['/library'], api: '/api/learning/library/' },
       { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, tone: 'cyan', featureKey: 'ai_mentor' },
     ],
@@ -181,7 +182,16 @@ export default function Sidebar({
         {/* 2. NAVIGATION GROUPS */}
         <nav className="space-y-5">
           {NAV_GROUPS.map((group, gIdx) => {
-            const visibleItems = group.items.filter((it) => !it.featureKey || isEnabled(it.featureKey));
+            const isTeacherOrAdmin = Boolean(
+              user?.is_teacher ||
+              user?.is_superadmin ||
+              user?.role === 'teacher' ||
+              user?.role === 'superadmin'
+            );
+            const visibleItems = group.items.filter((it) => {
+              if (it.teacherOrAdminOnly && !isTeacherOrAdmin) return false;
+              return !it.featureKey || isEnabled(it.featureKey);
+            });
             if (visibleItems.length === 0) return null;
 
             return (

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileCheck2, Swords, GraduationCap, User } from 'lucide-react';
+import { LayoutDashboard, FileCheck2, Swords, GraduationCap, User, BookOpen } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,15 +19,6 @@ type TabItem = {
   matchPrefixes?: string[];
   api?: string;
 };
-
-const TABS: TabItem[] = [
-  { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
-  { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
-  { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/battles', '/games'] },
-  { href: '/teacher', label: 'Sinfxona', icon: GraduationCap, tone: 'amber', matchPrefixes: ['/teacher'] },
-  { href: '/profile', label: 'Profilim', icon: User, tone: 'purple', matchPrefixes: ['/profile'] },
-];
-
 
 const TONE_ACTIVE_MAP: Record<string, { text: string; indicator: string }> = {
   emerald: { text: 'text-emerald-600', indicator: 'bg-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.5)]' },
@@ -50,6 +41,22 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 
+  const isTeacherOrAdmin = Boolean(
+    user?.is_teacher ||
+    user?.is_superadmin ||
+    user?.role === 'teacher' ||
+    user?.role === 'superadmin'
+  );
+
+  const tabs: TabItem[] = [
+    { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
+    { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
+    { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/battles', '/games'] },
+    isTeacherOrAdmin
+      ? { href: '/teacher', label: 'Sinfxona', icon: GraduationCap, tone: 'amber', matchPrefixes: ['/teacher'] }
+      : { href: '/library', label: 'Kutubxona', icon: BookOpen, tone: 'amber', matchPrefixes: ['/library'], api: '/api/learning/library/' },
+  ];
+
   const isActive = (href: string, prefixes?: string[]) =>
     pathname === href || (prefixes?.some((p) => pathname.startsWith(p)) ?? false);
 
@@ -64,7 +71,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
           : 'fixed bottom-0 left-0 right-0 border-t border-slate-800/80 bg-slate-950/85 px-1 pt-1.5 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] border-t border-white/10 shadow-2xl'
       )}
     >
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const Icon = tab.icon;
         const active = isActive(tab.href, tab.matchPrefixes);
         const toneStyle = TONE_ACTIVE_MAP[tab.tone] || TONE_ACTIVE_MAP.emerald;
