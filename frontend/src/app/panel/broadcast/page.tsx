@@ -64,6 +64,16 @@ export default function PanelBroadcastPage() {
     .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   useEffect(() => { if (access) load(); }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Jarayondagi (fonda yuborilayotgan) xabarlar bo'lsa, har 2.5 soniyada yangilab turish
+  useEffect(() => {
+    const hasActiveSending = data?.history.some((b) => !b.is_sent && !b.scheduled_at);
+    if (!hasActiveSending) return;
+    const timer = setInterval(() => {
+      load();
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [data?.history]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const recipients = data?.audience_counts[audience];
 
   async function handleSendOrSchedule() {
@@ -91,11 +101,25 @@ export default function PanelBroadcastPage() {
         const res = await apiUpload<{ id: number; message: string }>('/api/panel/broadcast/schedule/', form);
         toast.success(res.message || "Xabar belgilangan vaqtga rejalashtirildi!");
       } else {
-        const res = await apiUpload<{ recipients_count: number; telegram_sent_count: number; photo_failed_count: number }>('/api/panel/broadcast/', form);
-        toast.success(
-          `${res.recipients_count} foydalanuvchiga yuborildi`,
-          viaTelegram ? { description: `${res.telegram_sent_count} tasiga Telegram orqali yetkazildi.` } : undefined,
-        );
+        const res = await apiUpload<{
+          recipients_count: number;
+          telegram_sent_count: number;
+          photo_failed_count: number;
+          is_background?: boolean;
+          telegram_total?: number;
+        }>('/api/panel/broadcast/', form);
+
+        if (res.is_background) {
+          toast.success(
+            `${res.recipients_count} ta o'quvchiga sayt bildirishnomasi saqlandi`,
+            viaTelegram ? { description: `Telegram orqali ${res.telegram_total || ''} ta foydalanuvchiga fonda tezkor yuborilmoqda...` } : undefined,
+          );
+        } else {
+          toast.success(
+            `${res.recipients_count} foydalanuvchiga yuborildi`,
+            viaTelegram ? { description: `${res.telegram_sent_count} tasiga Telegram orqali yetkazildi.` } : undefined,
+          );
+        }
         if (res.photo_failed_count > 0) {
           toast.warning(`${res.photo_failed_count} ta yuborishda rasm o'tmadi — xabar matn holida ketdi.`);
         }
@@ -269,6 +293,7 @@ export default function PanelBroadcastPage() {
             )}
             {data?.history.map((b, i) => {
               const isPendingSchedule = b.scheduled_at && !b.is_sent;
+              const isSending = !b.scheduled_at && !b.is_sent;
               return (
                 <div key={b.id}>
                   {i > 0 && <Separator />}
@@ -286,6 +311,10 @@ export default function PanelBroadcastPage() {
                         {isPendingSchedule ? (
                           <Badge variant="outline" className="border-amber-500/40 text-amber-400 bg-amber-500/10 text-[10px] px-1.5 py-0">
                             🕒 Rejalashtirilgan: {new Date(b.scheduled_at!).toLocaleString('uz-UZ')}
+                          </Badge>
+                        ) : isSending ? (
+                          <Badge variant="outline" className="border-sky-500/40 text-sky-400 bg-sky-500/10 text-[10px] px-1.5 py-0 animate-pulse">
+                            ⚡️ Telegramga yuborilmoqda... {b.telegram_sent_count > 0 ? `(${b.telegram_sent_count})` : ''}
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-[10px] px-1.5 py-0">

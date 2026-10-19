@@ -4,7 +4,7 @@ from django.utils import timezone
 from panel.models import Broadcast
 from panel.api import _audience_profiles
 from core.models import Notification
-from accounts.utils import send_telegram_message, send_telegram_photo
+from accounts.utils import execute_telegram_broadcast
 
 logger = logging.getLogger(__name__)
 
@@ -37,27 +37,20 @@ class Command(BaseCommand):
                 bc.recipients_count = len(profiles)
 
                 if bc.via_telegram:
-                    sent = 0
                     caption = f"{bc.title}\n\n{bc.message}"
-                    has_image = bool(bc.image)
-                    image_path = bc.image.path if has_image else None
-                    file_id = ''
-                    for p in profiles:
-                        if not p.telegram_id:
-                            continue
-                        try:
-                            if has_image:
-                                result = send_telegram_photo(p.telegram_id, image_path, caption, file_id=file_id)
-                                if isinstance(result, str):
-                                    file_id = result
-                                ok = bool(result)
-                            else:
-                                ok = send_telegram_message(p.telegram_id, caption)
-                            if ok:
-                                sent += 1
-                        except Exception as tg_err:
-                            logger.warning("Telegram send failed for %s: %s", p.telegram_id, tg_err)
-                    bc.telegram_sent_count = sent
+                    image_path = bc.image.path if (bc.image and bc.image.storage.exists(bc.image.name)) else None
+                    tg_ids = [p.telegram_id for p in profiles if p.telegram_id and str(p.telegram_id).strip() not in ('', '0')]
+
+                    def _progress(sent, total):
+                        Broadcast.objects.filter(id=bc.id).update(telegram_sent_count=sent)
+
+                    res = execute_telegram_broadcast(
+                        telegram_ids=tg_ids,
+                        caption=caption,
+                        image_path=image_path,
+                        on_progress=_progress,
+                    )
+                    bc.telegram_sent_count = res['sent_count']
 
                 bc.is_sent = True
                 bc.sent_at = timezone.now()

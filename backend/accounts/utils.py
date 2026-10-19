@@ -114,54 +114,212 @@ def send_telegram_message(chat_id: str, text: str) -> bool:
 
 def send_telegram_photo(chat_id: str, image_path: str, caption: str, file_id: str = '') -> str | bool:
     """Send a photo with caption to a Telegram user via sendPhoto.
-
-    Returns Telegram's `file_id` for the uploaded photo on success (a non-empty string,
-    so the result stays truthy for callers that only check success), or False if even the
-    text fallback failed.
-
-    `file_id` lets a broadcast upload the image ONCE and then reference Telegram's own
-    copy for everyone else. Re-uploading the same file per recipient made a broadcast to
-    a few hundred students hundreds of multipart uploads — slow, and every one of them a
-    fresh chance to hit a timeout and silently degrade to a text-only message.
-
-    Never raises.
-    """
+    Returns file_id on success, or False if failed."""
     if not chat_id:
         return False
     token = settings.TELEGRAM_BOT_TOKEN
     if not token:
         return False
+
+    from telegrambot.client import SESSION, api_url
+
     data = {
         "chat_id": chat_id,
-        # Telegram caption limit is 1024 characters
         "caption": caption[:1024],
     }
     try:
         if file_id:
-            resp = requests.post(f"https://api.telegram.org/bot{token}/sendPhoto",
-                                 data={**data, "photo": file_id}, timeout=15)
+            resp = SESSION.post(api_url("sendPhoto"), data={**data, "photo": file_id}, timeout=(5, 15))
         else:
             with open(image_path, 'rb') as f:
-                resp = requests.post(f"https://api.telegram.org/bot{token}/sendPhoto",
-                                     data=data, files={"photo": f}, timeout=15)
+                resp = SESSION.post(api_url("sendPhoto"), data=data, files={"photo": f}, timeout=(5, 20))
+
         if resp.ok:
-            # Eng yirik o'lchamdagi nusxaning file_id'si — keyingi qabul qiluvchilar uchun.
             try:
-                sizes = resp.json()['result']['photo']
-                return max(sizes, key=lambda ph: ph.get('file_size', 0))['file_id']
+                sizes = resp.json().get('result', {}).get('photo', [])
+                if sizes:
+                    return max(sizes, key=lambda ph: ph.get('file_size', 0))['file_id']
+                return 'sent'
             except (ValueError, KeyError, IndexError):
-                return True
+                return 'sent'
         else:
-            # Telegram sababni javob tanasida yozadi ("PHOTO_INVALID_DIMENSIONS",
-            # "file must be non-empty" va h.k.); status kodning o'zi buni aytmaydi.
+            # Agar foydalanuvchi botni bloklagan bo'lsa (403/400), matn yuborishga urinish ma'nosiz
+            try:
+                desc = resp.json().get('description', '').lower()
+                if resp.status_code in (400, 403) and ('blocked' in desc or 'deactivated' in desc or 'not found' in desc):
+                    logger.info("Telegram user %s blocked bot/not found, skipping text fallback.", chat_id)
+                    return False
+            except Exception:
+                pass
             logger.warning("Telegram sendPhoto returned not ok: %s %s. Falling back to text.",
                            resp.status_code, resp.text)
     except FileNotFoundError:
         logger.warning("Broadcast image not found at %s — falling back to text", image_path)
     except Exception as e:
-        logger.warning("Failed to send Telegram photo to %s due to exception: %s. Falling back to text.", chat_id, str(e), exc_info=True)
+        logger.warning("Failed to send Telegram photo to %s: %s. Falling back to text.", chat_id, str(e), exc_info=True)
 
     return send_telegram_message(chat_id, caption)
+
+
+def execute_telegram_broadcast(
+    telegram_ids: list,
+    caption: str,
+    image_path: str | None = None,
+    on_progress: callable | None = None,
+) -> dict:
+    """Send broadcast to multiple Telegram users efficiently with Keep-Alive connection reuse,
+    automatic file_id caching, rate-limit retry, and blocked user skipping.
+
+    Returns dict:
+        {
+            'total': int,
+            'sent_count': int,
+            'photo_failed_count': int,
+            'blocked_count': int,
+            'failed_count': int,
+        }
+    """
+    token = settings.TELEGRAM_BOT_TOKEN
+    if not token or not telegram_ids:
+        return {'total': 0, 'sent_count': 0, 'photo_failed_count': 0, 'blocked_count': 0, 'failed_count': 0}
+
+    import os
+    import time
+    from telegrambot.client import SESSION, api_url
+
+    unique_ids = list(dict.fromkeys([str(tid).strip() for tid in telegram_ids if str(tid).strip() and str(tid).strip() != '0']))
+    total = len(unique_ids)
+
+    has_image = bool(image_path and os.path.exists(image_path))
+    image_bytes = None
+    image_name = ''
+    if has_image:
+        try:
+            with open(image_path, 'rb') as f:
+                image_bytes = f.read()
+            image_name = os.path.basename(image_path)
+        except Exception:
+            has_image = False
+
+    photo_caption = caption[:1024]
+    text_content = caption[:4096]
+
+    file_id = ''
+    sent_count = 0
+    photo_failed_count = 0
+    blocked_count = 0
+    failed_count = 0
+
+    for idx, chat_id in enumerate(unique_ids, start=1):
+        try:
+            if has_image:
+                if file_id:
+                    resp = SESSION.post(
+                        api_url('sendPhoto'),
+                        data={"chat_id": chat_id, "caption": photo_caption, "photo": file_id},
+                        timeout=(5, 15),
+                    )
+                else:
+                    resp = SESSION.post(
+                        api_url('sendPhoto'),
+                        data={"chat_id": chat_id, "caption": photo_caption},
+                        files={"photo": (image_name, image_bytes)},
+                        timeout=(5, 20),
+                    )
+
+                # 429 Too Many Requests (Flood control)
+                if resp.status_code == 429:
+                    retry_sec = resp.json().get('parameters', {}).get('retry_after', 2)
+                    time.sleep(min(retry_sec, 5))
+                    if file_id:
+                        resp = SESSION.post(
+                            api_url('sendPhoto'),
+                            data={"chat_id": chat_id, "caption": photo_caption, "photo": file_id},
+                            timeout=(5, 15),
+                        )
+                    else:
+                        resp = SESSION.post(
+                            api_url('sendPhoto'),
+                            data={"chat_id": chat_id, "caption": photo_caption},
+                            files={"photo": (image_name, image_bytes)},
+                            timeout=(5, 20),
+                        )
+
+                if resp.ok:
+                    sent_count += 1
+                    if not file_id:
+                        try:
+                            sizes = resp.json().get('result', {}).get('photo', [])
+                            if sizes:
+                                file_id = max(sizes, key=lambda ph: ph.get('file_size', 0))['file_id']
+                        except Exception:
+                            pass
+                else:
+                    is_blocked = False
+                    try:
+                        err_data = resp.json()
+                        desc = err_data.get('description', '').lower()
+                        if resp.status_code in (400, 403) and ('blocked' in desc or 'deactivated' in desc or 'not found' in desc):
+                            is_blocked = True
+                    except Exception:
+                        pass
+
+                    if is_blocked:
+                        blocked_count += 1
+                    else:
+                        # Rasm o'tmaganda matn yuborib ko'rish
+                        msg_resp = SESSION.post(
+                            api_url('sendMessage'),
+                            data={"chat_id": chat_id, "text": text_content},
+                            timeout=(5, 10),
+                        )
+                        if msg_resp.ok:
+                            sent_count += 1
+                            photo_failed_count += 1
+                        else:
+                            failed_count += 1
+            else:
+                resp = SESSION.post(
+                    api_url('sendMessage'),
+                    data={"chat_id": chat_id, "text": text_content},
+                    timeout=(5, 10),
+                )
+                if resp.status_code == 429:
+                    retry_sec = resp.json().get('parameters', {}).get('retry_after', 2)
+                    time.sleep(min(retry_sec, 5))
+                    resp = SESSION.post(
+                        api_url('sendMessage'),
+                        data={"chat_id": chat_id, "text": text_content},
+                        timeout=(5, 10),
+                    )
+
+                if resp.ok:
+                    sent_count += 1
+                elif resp.status_code in (400, 403):
+                    blocked_count += 1
+                else:
+                    failed_count += 1
+
+        except Exception as e:
+            logger.warning("Error broadcasting to %s: %s", chat_id, e)
+            failed_count += 1
+
+        # Telegram limitlaridan oshmaslik uchun xavfsiz oraliq (25 xabar/soniya)
+        time.sleep(0.04)
+
+        if on_progress and (idx % 15 == 0 or idx == total):
+            try:
+                on_progress(sent_count, total)
+            except Exception:
+                pass
+
+    return {
+        'total': total,
+        'sent_count': sent_count,
+        'photo_failed_count': photo_failed_count,
+        'blocked_count': blocked_count,
+        'failed_count': failed_count,
+    }
 
 
 def sync_telegram_avatar(tg_id: str) -> str | None:
