@@ -40,12 +40,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz'),
   title: {
-    default: "IlmIldizi — Milliy sertifikat va BBA'ga tayyorgarlik",
+    default: "DTM Test Yechish Onlayn & Milliy Sertifikat Testlari 2026 — IlmIldizi",
     template: '%s · IlmIldizi',
   },
-  description: "Rasmiy formatdagi mock testlar, AI mentor va zaif mavzular tahlili.",
+  description: "DTM (BMB) testlarini bepul onlayn yechish va Milliy sertifikat rasmiy formati bo'yicha mock imtihonlar. Tarix, Ona tili, Matematika fanlaridan Rasch modeli va 24/7 AI mentor bilan tayyorlaning.",
+  keywords: [
+    'DTM test', 'DTM test yechish', 'DTM testlari onlayn', 'milliy sertifikat',
+    'milliy sertifikat testlari', 'BMB testlar', 'bepul mock test', 'tarix test',
+    'ona tili milliy sertifikat', 'rasch modeli', 'onlayn test yechish', 'abituriyent 2026', 'IlmIldizi',
+  ],
   applicationName: 'IlmIldizi',
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
   // Havola ulashilganda (Telegram, ijtimoiy tarmoq) ko'rinadigan oldi rasm. `icon.png`
   // va `apple-icon.png` ni Next.js app/ ichidan o'zi topadi, og:image esa aniq
   // ko'rsatilishi kerak.
