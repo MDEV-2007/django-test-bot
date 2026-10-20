@@ -22,6 +22,7 @@ import {
   GraduationCap,
   ShieldCheck,
   BookOpen,
+  Film,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -76,6 +77,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Bellashuv & Amaliyot',
     items: [
+      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: '60s 🔥', glow: true, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
       { href: '/battles', label: '1v1 Arena (Jang)', icon: Swords, badge: 'LIVE', glow: true, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
       { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/feed', '/leaderboard'] },
       { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },

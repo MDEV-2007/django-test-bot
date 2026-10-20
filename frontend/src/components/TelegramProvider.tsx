@@ -50,20 +50,36 @@ export default function TelegramProvider() {
       wa.onEvent('viewportChanged', applyViewport);
       cleanups.push(() => wa.offEvent('viewportChanged', applyViewport));
 
-      /* Tema: Telegram Web App'da barcha sahifalar qat'iy yorug' (light) rejimda bo'lishi kerak.
-         Telegram mijozi qorong'i (dark) rejimda bo'lsa ham (wa.colorScheme === 'dark'),
-         veb-ilova qat'iy yorug' (light) rejimda ishlaydi. */
+      /* Tema: Telegram WebApp temasi (dark yoki light).
+         Agar foydalanuvchi qo'lda tanlagan bo'lsa (ilm_theme_v2) — o'shani qo'llaydi.
+         Aks holda Telegram mijozining o'z temasi (wa.colorScheme === 'dark') bilan to'liq sinxronlashadi. */
       const applyTheme = () => {
-        document.documentElement.dataset.theme = 'light';
+        let isDark = false;
         try {
-          localStorage.setItem('ilm_theme', 'light');
-          localStorage.setItem('ilm_theme_v2', 'light');
-        } catch { /* noop */ }
+          const manual = localStorage.getItem('ilm_theme_v2') || localStorage.getItem('ilm_theme');
+          if (manual === 'dark') isDark = true;
+          else if (manual === 'light') isDark = false;
+          else isDark = (wa.colorScheme === 'dark');
+        } catch {
+          isDark = (wa.colorScheme === 'dark');
+        }
 
-        // Telegram sarlavhasi (header) va foni och rangda bo'lsin (#ffffff / #F8FAFC)
+        const theme = isDark ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+
         try {
-          wa.setHeaderColor?.('#ffffff');
-          wa.setBackgroundColor?.('#F8FAFC');
+          if (isDark) {
+            wa.setHeaderColor?.('#0f172a');
+            wa.setBackgroundColor?.('#0f172a');
+          } else {
+            wa.setHeaderColor?.('#ffffff');
+            wa.setBackgroundColor?.('#F8FAFC');
+          }
         } catch { /* eski versiya */ }
       };
       applyTheme();

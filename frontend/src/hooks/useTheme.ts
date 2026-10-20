@@ -6,12 +6,13 @@ export type AppTheme = 'light' | 'dark';
 
 export function getInitialTheme(): AppTheme {
   if (typeof document === 'undefined') return 'light';
-  if (document.documentElement.dataset.tg === 'on') return 'light';
   const current = document.documentElement.dataset.theme;
   if (current === 'dark' || current === 'light') return current;
+  if (document.documentElement.classList.contains('dark')) return 'dark';
   try {
     const saved = localStorage.getItem('ilm_theme_v2') || localStorage.getItem('ilm_theme');
     if (saved === 'dark') return 'dark';
+    if (saved === 'light') return 'light';
   } catch {}
   return 'light';
 }
@@ -29,7 +30,7 @@ export function useTheme(): {
     if (typeof document === 'undefined') return;
 
     const syncTheme = () => {
-      const active = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      const active = (document.documentElement.dataset.theme === 'dark' || document.documentElement.classList.contains('dark')) ? 'dark' : 'light';
       setLocalTheme(active);
     };
 
@@ -41,7 +42,7 @@ export function useTheme(): {
 
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['data-theme'],
+      attributeFilter: ['data-theme', 'class'],
     });
 
     return () => observer.disconnect();
@@ -59,6 +60,20 @@ export function useTheme(): {
       localStorage.setItem('ilm_theme', next);
       localStorage.setItem('ilm_theme_v2', next);
     } catch {}
+
+    try {
+      const wa = (window as any).Telegram?.WebApp;
+      if (wa) {
+        if (next === 'dark') {
+          wa.setHeaderColor?.('#0f172a');
+          wa.setBackgroundColor?.('#0f172a');
+        } else {
+          wa.setHeaderColor?.('#ffffff');
+          wa.setBackgroundColor?.('#F8FAFC');
+        }
+      }
+    } catch {}
+
     setLocalTheme(next);
   };
 

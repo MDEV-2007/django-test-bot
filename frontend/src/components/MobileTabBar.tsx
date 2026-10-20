@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileCheck2, Swords, GraduationCap, User, BookOpen } from 'lucide-react';
+import { LayoutDashboard, FileCheck2, Swords, GraduationCap, User, BookOpen, Film } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { prefetchApi } from '@/lib/api-cache';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -50,6 +50,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   const tabs: TabItem[] = [
     { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, tone: 'emerald', api: '/api/dashboard/home/' },
+    { href: '/reels', label: 'Reels', icon: Film, tone: 'purple', matchPrefixes: ['/reels'] },
     { href: '/tests', label: 'Testlar', icon: FileCheck2, tone: 'sky', matchPrefixes: ['/tests'], api: '/api/tests/' },
     { href: '/battles', label: '1v1 Arena', icon: Swords, tone: 'rose', matchPrefixes: ['/battles', '/games'] },
     isTeacherOrAdmin
