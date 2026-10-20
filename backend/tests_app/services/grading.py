@@ -65,6 +65,8 @@ def normalize_phonetic(text: str) -> str:
     """O'zbek tilidagi qattiq/yumshoq 'x'/'h', tutuq belgilari va harf farqlarini tekislash.
     BBA va Milliy sertifikat qoidasiga ko'ra 'xun' va 'hun', 'buxoro' va 'buhoro' bir xil hisoblanadi."""
     s = normalize_text(text)
+    # Tarixiy va xalqaro nomlar (Budda / Buddha, Siddhartha / Siddharta)
+    s = s.replace('buddha', 'budda').replace('siddhartha', 'siddharta').replace('gautama', 'gautama')
     # Qattiq va yumshoq x/h ni unifikatsiya qilish
     s = s.replace('x', 'h')
     # Tutuq va o'/g' belgilarini tekislash
@@ -129,17 +131,25 @@ def is_deterministic_match(student_text: str, reference_text: str) -> bool:
     # Agar barcha muhim kalit so'zlar o'quvchi javobida mavjud bo'lsa
     stop_words = {'va', 'hamda', 'yoki', 'davlati', 'shahri', 'kitobi', 'dini', 'odam', 'yili', 'yozuvi',
                   'sulolasi', 'podshosi', 'podsholigi', 'ilohasi', 'xudosi', 'qabilasi', 'guruhi', 'qozgoloni',
-                  'jangi', 'daryosi', 'qo`zg`oloni', 'hukmdori', 'sarkardasi'}
+                  'jangi', 'daryosi', 'qo`zg`oloni', 'hukmdori', 'sarkardasi', 'javob', 'teng'}
     content_r_words = {w for w in r_phon_words if w not in stop_words}
     if content_r_words and content_r_words.issubset(s_phon_words):
         return True
 
-    # 6. Yillar va raqamlarni aniq solishtirish (masalan: "552-yil" va "552", "715" va "715-yil")
-    s_digits = re.findall(r'\d+', s_clean)
-    r_digits = re.findall(r'\d+', r_clean)
-    if s_digits and r_digits and any(d in r_digits for d in s_digits):
-        # Agar asosiy yil mos kelsa (masalan 552 yoki 715 yoki 892)
+    # 6. Matematik raqamlar, kasrlar va yillarni moslashtirish (masalan: "24", "-5", "2.5", "1/2")
+    # Kasrlar ekvivalentligi:
+    fractions_map = {'1/2': '0.5', '1/4': '0.25', '3/4': '0.75', '0,5': '0.5', '0,25': '0.25', '0,75': '0.75'}
+    s_frac = fractions_map.get(s_clean, s_clean)
+    r_frac = fractions_map.get(r_clean, r_clean)
+    if s_frac == r_frac:
         return True
+
+    s_digits = re.findall(r'[-+]?\d*\.?\d+', s_clean.replace(',', '.'))
+    r_digits = re.findall(r'[-+]?\d*\.?\d+', r_clean.replace(',', '.'))
+    if s_digits and r_digits:
+        # Barcha raqamlar to'g'ri kelgan bo'lsa
+        if any(d in r_digits for d in s_digits if d not in ('', '.', '-')):
+            return True
 
     # 7. Rim raqamli hukmdorlar (masalan "Kir II" -> "kir 2" yoki "kir ii", "Doro I" -> "doro 1" yoki "doro i")
     roman_map = {'1': 'i', '2': 'ii', '3': 'iii', '4': 'iv', '5': 'v'}

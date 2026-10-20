@@ -41,7 +41,7 @@ def analyze_mock_items(test_id: int) -> Dict[str, Any]:
     # Savollar bo'yicha javoblarni yig'amiz
     answers = AttemptAnswer.objects.filter(
         attempt_id__in=attempt_ids
-    ).values('question_id', 'attempt_id', 'is_correct', 'open_grading')
+    ).values('question_id', 'attempt_id', 'is_correct', 'open_grading', 'ai_score', 'text_answer', 'question__question_type')
 
     item_stats = defaultdict(lambda: {
         'total': 0, 'correct_weight': 0.0,
@@ -53,10 +53,22 @@ def analyze_mock_items(test_id: int) -> Dict[str, Any]:
         att_id = ans['attempt_id']
 
         weight = 0.0
-        if ans.get('open_grading'):
+        qtype = ans.get('question__question_type')
+        if ans.get('is_correct'):
+            weight = 1.0
+        elif ans.get('open_grading'):
             parts = ans['open_grading'].values()
-            if parts:
-                weight = sum(1.0 for p in parts if p.get('is_correct')) / len(parts)
+            dict_parts = [p for p in parts if isinstance(p, dict)]
+            if dict_parts:
+                weight = sum(1.0 for p in dict_parts if p.get('is_correct')) / len(dict_parts)
+            elif ans.get('ai_score') is not None:
+                weight = max(0.0, min(1.0, float(ans['ai_score']) / 5.0))
+        elif ans.get('ai_score') is not None:
+            weight = max(0.0, min(1.0, float(ans['ai_score']) / 5.0))
+        elif qtype == 'writing_task' and (ans.get('text_answer') or '').strip():
+            words_len = len((ans.get('text_answer') or '').split())
+            if words_len >= 30:
+                weight = 0.7  # Yozilgan, topshirilgan esse
         elif ans.get('is_correct'):
             weight = 1.0
 

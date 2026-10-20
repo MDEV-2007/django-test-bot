@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
   AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
-  CheckCircle2, HelpCircle, Trophy, Gift, Swords,
+  CheckCircle2, HelpCircle, Trophy, Gift, Swords, Film, BookOpen, Send, Gamepad2, Lock,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
@@ -203,8 +203,11 @@ export default function FeedbackPage() {
   function handleChallengeFriend() {
     const title = data?.attempt?.test_title || 'Milliy sertifikat sinov testi';
     const score = Math.round(a?.score || 0);
-    const text = `🎯 Men "${title}" testidan ${score}% to'pladim!\n\nSen mendan ko'proq ball ola olasanmi? Qani, o'zingni sinab ko'rchi! 👇`;
-    const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/tests` : 'https://ilmildizi.uz/tests';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ilmildizi.uz';
+    const shareUrl = user?.username
+      ? `${origin}/register?ref=${encodeURIComponent(user.username)}`
+      : `${origin}/battles`;
+    const text = `⚔️ Men "${title}" testidan ${score}% to'pladim!\n\nDo'stim, mendan ko'proq ball to'play olasanmi? Qani, 1v1 Battle Arena'da kuch sinashamiz! 👇`;
     const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`;
     window.open(tgUrl, '_blank');
     tgHaptic('success');
@@ -476,6 +479,44 @@ export default function FeedbackPage() {
           );
         })()}
 
+        {/* 1v1 DUELGA CHORLASH & VIRAL REFERRAL HERO CARD */}
+        <div className="relative overflow-hidden rounded-3xl border-2 border-rose-500/40 bg-gradient-to-br from-rose-500/15 via-amber-500/10 to-orange-500/15 p-6 sm:p-7 shadow-xl">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/20 px-3 py-1 text-xs font-black uppercase text-rose-500 dark:text-rose-300">
+                <Swords className="size-3.5" /> 1v1 Battle Arena · Yangi Duel
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-foreground">
+                Do&apos;stingiz bu testda sizdan ko&apos;p ball to&apos;play oladimi? ⚔️
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Siz ushbu sinovdan <strong className="text-foreground">{Math.round(a.score || 0)}%</strong> to&apos;pladingiz!
+                Do&apos;stingizga xuddi shu savollar bo&apos;yicha duel taklifini yuboring. Har bir taklif qilingan do&apos;st uchun 
+                <strong className="text-amber-500"> +15 Tanga</strong> va Katta Mock imtihoniga bepul chipta beriladi!
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+              <Button
+                onClick={handleChallengeFriend}
+                size="lg"
+                className="h-12 px-6 rounded-2xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-black shadow-lg shadow-rose-500/20 gap-2 active:scale-95 transition-all"
+              >
+                <Send className="size-5" /> Do&apos;stni Telegram orqali Duelga chorlash
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-12 px-5 rounded-2xl border-white/20 bg-background/50 hover:bg-background/80 font-bold"
+              >
+                <Link href="/battles">
+                  <Gamepad2 className="size-4 mr-2" /> Arenaga o&apos;tish
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Kundalik Sirli Sandiq (Variable Reward) Chaqiruvi */}
         {data.daily_chest?.can_claim && (
           <div
@@ -559,6 +600,70 @@ export default function FeedbackPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* BILIM REELS & DARSLAR: Xatolar ustida ishlash bo'limi */}
+        {(Boolean(data.weak_topics?.length) || (a.wrong_answers || 0) > 0) && (
+          <div className="relative overflow-hidden rounded-3xl border border-sky-500/30 bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 p-5 sm:p-6 shadow-lg">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+              <div className="space-y-2 max-w-xl">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/15 px-3 py-0.5 text-xs font-bold text-sky-400">
+                  <Film className="size-3.5" /> 1 daqiqada tushunish · Bilim Reels &amp; Darslar
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-foreground">
+                  Qiyin mavzularni oson o&apos;rganing va ballingizni tiklang!
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Testda qiynalgan mavzularingiz bo&apos;yicha maxsus 60 soniyalik qisqa videolarni ko&apos;ring yoki
+                  xatolar ustida qayta test ishlab o&apos;z darajangizni oshiring.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <Button asChild size="sm" className="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl shadow-md">
+                  <Link href="/reels">
+                    <Film className="size-4 mr-1.5" /> Bilim Reels (Videolar)
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 font-bold rounded-xl">
+                  <Link href="/learning">
+                    <BookOpen className="size-4 mr-1.5" /> Darslar &amp; Konspekt
+                  </Link>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={startMistakesTest}
+                  className="border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 font-bold rounded-xl"
+                >
+                  <RotateCcw className="size-4 mr-1.5" /> Xatolardan qayta test
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MICRO-PAYWALL: AI Tahlil va Chuqur Yechimlar Teaseri */}
+        {!user?.is_premium && (a.wrong_answers || 0) > 0 && (
+          <div className="relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-yellow-500/10 p-5 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-500">
+                  <Lock className="size-3.5" /> Shaxsiy AI Tahlil va Har Bir Savol Yechimi
+                </div>
+                <h4 className="text-sm sm:text-base font-black text-foreground">
+                  Xatolar formulasini chuqur tushunmoqchimisiz?
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  Bor-yo&apos;g&apos;i <b>3,000 so&apos;m</b> evaziga (yoki VIP obuna bilan) har bir savolning batafsil yechimi, qoidalari va AI shaxsiy mentor tavsiyalarini oching!
+                </p>
+              </div>
+              <Button asChild size="sm" className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl shadow shrink-0">
+                <Link href="/shop">
+                  <Sparkles className="size-4 mr-1.5" /> Tahlilni Ochish (3,000 so&apos;m)
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
 
         {!!data.detailed_mistakes?.length && (
           <Card>

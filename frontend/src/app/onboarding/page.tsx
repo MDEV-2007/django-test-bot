@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, ArrowRight, Sprout, Swords, type LucideIcon } from 'lucide-react';
+import { Check, ArrowRight, Sprout, Swords, Target, Sparkles, type LucideIcon } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,18 @@ const STEPS: { badge: string; icon: LucideIcon; title: string; description: stri
       'Imtihon topshirish uchun eng aniq prognoz sertifikat balli',
     ],
   },
+  {
+    badge: '3 DAQIQALIK ILK SINOV',
+    icon: Target,
+    title: 'Darajangizni aniqlash uchun 5 ta tezkor savol',
+    description:
+      "Hech qanday murakkabliksiz — hoziroq 3 daqiqalik ekspress sinovdan o'ting, bilim darajangizni aniqlang va +50 Tanga bonusga ega bo'ling!",
+    points: [
+      "Bor-yo'g'i 5 ta qiziqarli savol",
+      'Ilk olovingiz (Streak 🔥) va +50 Tanga bonus',
+      'Kuchli va zaif mavzularingizning lahzalik tahlili',
+    ],
+  },
 ];
 
 export default function OnboardingPage() {
@@ -40,7 +52,7 @@ export default function OnboardingPage() {
 
   async function complete() {
     await apiFetch('/api/auth/onboarding-complete/', { method: 'POST' }).catch(() => {});
-    router.push('/dashboard');
+    router.push('/tests');
   }
 
   function handleNext() {
@@ -88,8 +100,8 @@ export default function OnboardingPage() {
             ))}
           </div>
 
-          <Button onClick={handleNext} size="lg" className="w-full">
-            {currentStep === STEPS.length - 1 ? "O'qishni boshlash" : 'Keyingisi'}
+          <Button onClick={handleNext} size="lg" className="w-full font-bold">
+            {currentStep === STEPS.length - 1 ? "🚀 3 daqiqalik testni boshlash (+50 Tanga)" : 'Keyingisi'}
             <ArrowRight className="size-4" />
           </Button>
         </CardContent>
