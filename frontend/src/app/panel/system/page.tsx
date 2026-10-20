@@ -198,11 +198,18 @@ function SystemHealthContent() {
 
   async function handleDownloadBackup(filename: string) {
     try {
-      const token = typeof window !== 'undefined' ? (localStorage.getItem('access') || '') : '';
-      const res = await fetch(`/api/panel/system/backups/download/${encodeURIComponent(filename)}/`, {
+      const state = useAuthStore.getState();
+      const token = state.access || (typeof window !== 'undefined' ? (localStorage.getItem('ilmildizi_access') || '') : '');
+      const downloadPath = `/api/panel/system/backups/download/${encodeURIComponent(filename)}/`;
+      const urlWithToken = token ? `${downloadPath}?token=${encodeURIComponent(token)}` : downloadPath;
+
+      const res = await fetch(urlWithToken, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error("Faylni yuklab bo'lmadi");
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(errText || "Faylni yuklab bo'lmadi");
+      }
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');

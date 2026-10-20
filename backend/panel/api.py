@@ -3440,9 +3440,24 @@ def backup_list_api(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsSuperAdmin])
+@permission_classes([AllowAny])
 def backup_download_api(request, filename):
     """Zaxira faylini serverdan yuklab olish (superadmin)."""
+    user = request.user
+    if not (user and user.is_authenticated and (user.is_superuser or getattr(getattr(user, 'profile', None), 'role', None) == 'superadmin')):
+        token_str = request.GET.get('token')
+        if token_str:
+            try:
+                from rest_framework_simplejwt.authentication import JWTAuthentication
+                jwt_auth = JWTAuthentication()
+                validated_token = jwt_auth.get_validated_token(token_str)
+                user = jwt_auth.get_user(validated_token)
+            except Exception:
+                user = None
+
+    if not (user and user.is_authenticated and (user.is_superuser or getattr(getattr(user, 'profile', None), 'role', None) == 'superadmin')):
+        return HttpResponse("Ruxsat berilmagan (Superadmin talab qilinadi)", status=403)
+
     if not re.match(r'^[a-zA-Z0-9_\-\.]+$', filename):
         return HttpResponse("Yaroqsiz fayl nomi", status=400)
 
