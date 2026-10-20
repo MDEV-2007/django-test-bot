@@ -159,15 +159,24 @@ def handle_start(chat_id, tg_user, referral_code=None):
             send_message(chat_id, welcome_text, reply_markup=mock_keyboard)
             return
 
+    base_url = url.rstrip('/')
     if url.startswith('https://'):
-        open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'web_app': {'url': url}}
+        open_app_button = {'text': "🚀 3 daqiqalik ekspress test", 'web_app': {'url': f"{base_url}/tests"}}
+        battle_button = {'text': "⚔️ 1v1 Battle Arena (Jang)", 'web_app': {'url': f"{base_url}/battles"}}
+        home_button = {'text': "🎓 Bosh sahifa", 'web_app': {'url': base_url}}
     else:
-        open_app_button = {'text': "\U0001F393 Ilm Ildizi'ni ochish", 'url': url}
+        open_app_button = {'text': "🚀 3 daqiqalik ekspress test", 'url': f"{base_url}/tests"}
+        battle_button = {'text': "⚔️ 1v1 Battle Arena (Jang)", 'url': f"{base_url}/battles"}
+        home_button = {'text': "🎓 Bosh sahifa", 'url': base_url}
 
     keyboard = {'inline_keyboard': [
         [open_app_button],
-        [{'text': "\U0001F381 Do'stlarni taklif qil", 'callback_data': 'referral_info'}],
-        [{'text': "\U0001F48E Premium sotib olish", 'callback_data': 'premium_menu'}],
+        [battle_button],
+        [
+            home_button,
+            {'text': "🎁 Do'stni taklif qilish", 'callback_data': 'referral_info'}
+        ],
+        [{'text': "💎 VIP & Premium", 'callback_data': 'premium_menu'}],
     ]}
 
     if is_pdf_gift:
@@ -184,8 +193,12 @@ def handle_start(chat_id, tg_user, referral_code=None):
         )
     else:
         welcome_text = (
-            "Assalomu alaykum! IlmIldizi botiga xush kelibsiz.\n\n"
-            "Pastdagi tugma orqali ilovani oching yoki premium imkoniyatlarni ko'ring."
+            "Assalomu alaykum! <b>IlmIldizi</b> ta'lim platformasiga xush kelibsiz. 🎓\n\n"
+            "Bu yerda siz:\n"
+            "• 🎯 <b>Milliy Sertifikat & BBA</b> formatidagi yangi testlarni topshirishingiz\n"
+            "• ⚔️ Do'stlaringiz bilan <b>1v1 jonli intellektual janglarda</b> bellashishingiz\n"
+            "• 🤖 <b>AI Xatolar tahlili</b> orqali kamchiliklaringizni to'g'rilashingiz mumkin.\n\n"
+            "Bilimingizni sinab ko'rish uchun quyidagi tugmalardan birini tanlang 👇"
         )
 
     result = send_message(
@@ -199,23 +212,36 @@ def handle_start(chat_id, tg_user, referral_code=None):
 
 
 def handle_referral_info(chat_id, tg_user):
+    import urllib.parse
     from accounts.referrals import get_referral_link, get_telegram_deep_link, referral_stats
 
     profile = get_or_create_profile(tg_user)
-    # Sharing FROM the bot itself should hand friends a t.me deep link — clicking a website
-    # link from a Telegram chat just opens a browser instead of continuing inside Telegram.
-    # Falls back to the website link only if TELEGRAM_BOT_USERNAME isn't configured.
     link = get_telegram_deep_link(profile) or get_referral_link(profile)
     stats = referral_stats(profile)
+
+    share_text = (
+        "🎯 Milliy sertifikat va BBA imtihonlariga eng zamonaviy formatda tayyorlanamiz!\n\n"
+        "Ochiq savollar, 1v1 jonli janglar va AI tahlil bilan bilimingni oshir. "
+        "Havola orqali kiring va 20 ta bepul tanga oling 👇"
+    )
+    share_url = f"https://t.me/share/url?url={urllib.parse.quote(link)}&text={urllib.parse.quote(share_text)}"
+
+    rows = [
+        [{'text': "📤 Do'stlarga yuborish (1-klik)", 'url': share_url}],
+        [{'text': "🔙 Asosiy menyu", 'callback_data': 'main_menu'}],
+    ]
+
     send_message(
         chat_id,
-        "🎁 Do'stlaringizni taklif qiling!\n\n"
-        "Havolangiz orqali ro'yxatdan o'tgan har bir do'st uchun — ikkalangiz ham "
-        "+10 tanga olasiz.\n\n"
-        f"🔗 Sizning havolangiz:\n{link}\n\n"
-        f"👥 Taklif qilganlaringiz: {stats['referral_count']}\n"
-        f"🪙 Ulardan olingan tanga: {stats['coins_earned']}\n\n"
-        "100 tanga to'plasangiz, Do'kondan Premium Test unlockni tekinga olishingiz mumkin!",
+        "🎁 <b>Do'stlaringizni taklif qiling va bepul imtihon yuting!</b>\n\n"
+        "✨ <b>Qoidalar juda oddiy:</b>\n"
+        "• Havolangiz orqali ro'yxatdan o'tgan har bir do'st uchun — ikkalangiz ham <b>+15 tanga</b> olasiz.\n"
+        "• <b>3 ta do'stingizni taklif qilsangiz</b> — Yakshanba kungi Katta Respublika Mock Imtihoniga <b>100% BEPUL chipta</b> olasiz!\n\n"
+        f"🔗 <b>Sizning shaxsiy havolangiz:</b>\n<code>{link}</code>\n\n"
+        f"👥 Taklif qilganlaringiz: <b>{stats['referral_count']} nafar</b>\n"
+        f"🪙 Ishlangan tangalar: <b>{stats['coins_earned']} ta</b>",
+        reply_markup={'inline_keyboard': rows},
+        parse_mode='HTML',
     )
 
 
@@ -319,6 +345,8 @@ def process_update(update):
             handle_premium_menu(chat_id)
         elif data == 'referral_info':
             handle_referral_info(chat_id, cq['from'])
+        elif data == 'main_menu':
+            handle_start(chat_id, cq['from'])
         elif data.startswith('buy_plan_'):
             handle_buy_plan(chat_id, cq['from'], int(data.replace('buy_plan_', '')))
         return

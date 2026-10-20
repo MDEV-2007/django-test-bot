@@ -427,6 +427,32 @@ export default function DashboardPage() {
         <div className="lg:col-span-8 space-y-6">
           {activeMode === 'study' ? (
             <>
+              {/* ACTIVATION HOOK: Agar foydalanuvchi hali bitta ham test tugatmagan bo'lsa */}
+              {data.recent_attempts.length === 0 && (
+                <div className="relative overflow-hidden rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-card to-amber-500/10 p-5 sm:p-7 shadow-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-2 max-w-xl">
+                      <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/15 px-3 py-0.5 text-xs font-bold text-primary">
+                        <Sparkles className="size-3.5 text-amber-500" /> Boshlang&apos;ich Qadam · 50 Tanga Bonus
+                      </div>
+                      <h2 className="text-xl sm:text-2xl font-black text-foreground">
+                        🎯 3 daqiqalik ekspress sinov — Darajangizni aniqlang!
+                      </h2>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        Bor-yo&apos;g&apos;i 5 ta qiziqarli savol. Testni yakunlashingiz bilan haqiqiy darajangiz (A+, B+, C), 
+                        zaif mavzular tahlili va <strong className="text-foreground">+50 Tanga hamda ilk olovingiz (Streak 🔥)</strong> faollashadi!
+                      </p>
+                    </div>
+                    <Link
+                      href="/tests"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-blue-600 px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md hover:opacity-95 transition-all shrink-0 active:scale-95"
+                    >
+                      <Play className="size-4 fill-white" /> Hozir boshlash (3 daqiqa)
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               {/* 1. SINGLE COMMANDING PRIMARY HERO CTA */}
               <HeroFocusBanner
                 user={{
