@@ -725,13 +725,22 @@ def finish_api(request, attempt_id):
         if elapsed < allowed * 0.20:
             attempt.is_speed_flagged = True
 
-    # Tab switch countni requestdan olish (frontend yuboradi)
-    tab_switches = request.data.get('tab_switch_count')
     if tab_switches is not None:
         try:
             attempt.tab_switch_count = max(0, int(tab_switches))
         except (ValueError, TypeError):
             pass
+
+    # ─── Rasch Modeli (IRT) Hisoblash ─────────────────────────────────
+    rasch_metrics = None
+    try:
+        from tests_app.services.rasch import evaluate_attempt_rasch
+        rasch_metrics = evaluate_attempt_rasch(attempt)
+        if not isinstance(attempt.annotations, dict):
+            attempt.annotations = {}
+        attempt.annotations['rasch'] = rasch_metrics
+    except Exception as e:
+        logger.warning(f"Rasch baholashda xatolik: {e}")
 
     attempt.save()
 
@@ -838,6 +847,7 @@ def finish_api(request, attempt_id):
         'coins_awarded': coins_awarded,
         'streak': profile.streak,
         'lucky_bonus': lucky_bonus,
+        'rasch': rasch_metrics,
     })
 
 
@@ -851,6 +861,19 @@ def feedback_api(request, attempt_id):
     if not ai_feedback:
         _dispatch_ai_feedback(attempt.id)
         return Response({'status': 'pending'})
+
+    # Rasch model ma'lumotlarini olish / hisoblash
+    rasch_data = (attempt.annotations or {}).get('rasch') if isinstance(attempt.annotations, dict) else None
+    if not rasch_data:
+        try:
+            from tests_app.services.rasch import evaluate_attempt_rasch
+            rasch_data = evaluate_attempt_rasch(attempt)
+            if not isinstance(attempt.annotations, dict):
+                attempt.annotations = {}
+            attempt.annotations['rasch'] = rasch_data
+            attempt.save(update_fields=['annotations'])
+        except Exception as e:
+            logger.warning(f"Rasch feedback hisoblashda xatolik: {e}")
 
     # Savollar imtihon raqami bo'yicha tartiblanadi (CEFR uchun 1-35), raqami yo'q
     # savollar esa eski tartibda — id bo'yicha.
@@ -885,7 +908,9 @@ def feedback_api(request, attempt_id):
             'skipped_answers': attempt.skipped_answers,
             'test_title': attempt.test.title if attempt.test else 'Rasmiy Formatdagi Sinov Testi',
             'completed_at': attempt.completed_at.isoformat() if attempt.completed_at else None,
+            'rasch': rasch_data,
         },
+        'rasch': rasch_data,
         'overall_analysis': ai_feedback.overall_analysis,
         'weak_topics': [t.strip() for t in ai_feedback.weak_topics.split(',') if t.strip()],
         'strong_topics': [t.strip() for t in ai_feedback.strong_topics.split(',') if t.strip()],

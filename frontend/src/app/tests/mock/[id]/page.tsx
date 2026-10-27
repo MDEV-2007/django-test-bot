@@ -53,13 +53,13 @@ type GradingItem = {
 };
 
 const MILLIY_GRADING_SCALE: GradingItem[] = [
-  { score: '86 – 100 ball', percent: '86 – 100%', grade: 'A+', label: "Oltin (Maksimal)", tone: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
-  { score: '70 – 85.9 ball', percent: '70 – 85.9%', grade: 'A', label: "A'lo daraja", tone: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400' },
-  { score: '60 – 69.9 ball', percent: '60 – 69.9%', grade: 'B+', label: 'Juda yaxshi', tone: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400' },
-  { score: '50 – 59.9 ball', percent: '50 – 59.9%', grade: 'B', label: 'Yaxshi natija', tone: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-  { score: '46 – 49.9 ball', percent: '46 – 49.9%', grade: 'C+', label: "Qoniqarli", tone: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400' },
-  { score: '40 – 45.9 ball', percent: '40 – 45.9%', grade: 'C', label: "O'tish darajasi", tone: 'border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
-  { score: '0 – 39.9 ball', percent: '0 – 39.9%', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
+  { score: '65 – 70 ball', percent: '93 – 100%', grade: 'A+', label: "Oltin (100% OTM Imtiyozi)", tone: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  { score: '60 – 64.9 ball', percent: '86 – 92.9%', grade: 'A', label: "A'lo daraja", tone: 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400' },
+  { score: '55 – 59.9 ball', percent: '78 – 85.9%', grade: 'B+', label: 'Juda yaxshi', tone: 'border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400' },
+  { score: '50 – 54.9 ball', percent: '71 – 77.9%', grade: 'B', label: 'Yaxshi natija', tone: 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+  { score: '46 – 49.9 ball', percent: '65 – 70.9%', grade: 'C+', label: "Qoniqarli", tone: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400' },
+  { score: '42 – 45.9 ball', percent: '60 – 64.9%', grade: 'C', label: "O'tish darajasi", tone: 'border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
+  { score: '0 – 41.9 ball', percent: '0 – 59.9%', grade: '—', label: 'Sertifikatsiz', tone: 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400' },
 ];
 
 const CEFR_GRADING_SCALE: GradingItem[] = [
@@ -690,6 +690,18 @@ export default function MockLobbyPage() {
                       </div>
                     ))}
                   </div>
+
+                  {!isCefr && (
+                    <div className="border-t border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3.5 space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                        <Sparkles className="size-3.5 text-emerald-400" />
+                        <span>Rasch Modeli (BMB / DTM Standarti)</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        Ushbu imtihon Bilim va malakalarni baholash agentligi (BMB) ning rasmiy Rasch (Item Response Theory) modeli: <code className="text-emerald-400 font-mono">P = e^(θ - b) / (1 + e^(θ - b))</code> bo&apos;yicha hisoblanadi. Savollar qiyinligi <code className="text-emerald-400 font-mono">b = ln((N - R)/R)</code> bo&apos;yicha aniqlanib, natija 70 ballik shkalaga o&apos;tkaziladi.
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </Reveal>

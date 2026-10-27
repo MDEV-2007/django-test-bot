@@ -319,6 +319,19 @@ def generate_ai_feedback(attempt_id):
         final_weak_topics = weak_topics
         final_strong_topics = strong_topics
 
+    # Rasch model tahlili
+    predicted_score = _grade_band(score)
+    rasch_data = (attempt.annotations or {}).get('rasch') if isinstance(attempt.annotations, dict) else None
+    if not rasch_data:
+        try:
+            from tests_app.services.rasch import evaluate_attempt_rasch
+            rasch_data = evaluate_attempt_rasch(attempt)
+        except Exception:
+            rasch_data = None
+
+    if rasch_data and rasch_data.get('grade'):
+        predicted_score = f"{rasch_data['grade']} ({rasch_data['scaled_score']} ball)"
+
     try:
         AIFeedback.objects.create(
             attempt=attempt,
@@ -326,7 +339,7 @@ def generate_ai_feedback(attempt_id):
             weak_topics=", ".join(final_weak_topics) if final_weak_topics else "Yo'q (barcha mavzular o'zlashtirildi)",
             strong_topics=", ".join(final_strong_topics) if final_strong_topics else "Hozircha yo'q",
             recommendations=recommendations,
-            predicted_score=_grade_band(score),
+            predicted_score=predicted_score,
             roadmap=roadmap,
             ai_motivation=ai_motivation,
             detailed_mistakes=detailed_mistakes,
@@ -335,10 +348,11 @@ def generate_ai_feedback(attempt_id):
         return  # another worker won the race; its feedback is already stored
 
     test_title = attempt.test.title if attempt.test else "Test"
+    notif_score_str = f"{rasch_data['scaled_score']} ball ({rasch_data['grade']})" if (rasch_data and rasch_data.get('grade')) else f"{score:.0f}%"
     Notification.objects.create(
         profile=attempt.profile,
         title="Imtihon yakunlandi",
-        message=f"'{test_title}' testi yuzasidan AI tahlili tayyor bo'ldi. Natijangiz: {score:.0f}%",
+        message=f"'{test_title}' testi Rasch modeli bo'yicha baholandi. Natijangiz: {notif_score_str}",
         type='system',
     )
 

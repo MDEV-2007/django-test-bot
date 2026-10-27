@@ -1705,13 +1705,33 @@ def _safe_datetime_diff_seconds(started_at, completed_at):
 
 
 def _calculate_grade(score, correct=None):
-    """UzBMB (DTM) rasmiy Milliy Sertifikat 100 ballik baholash shkalasi."""
+    """UzBMB (DTM) rasmiy Milliy Sertifikat baholash shkalasi.
+    70 ballik Rasch shkalasi va 100 foizlik shkalani birdek aniq hisoblaydi.
+    """
     if score is None:
         return '—', 'slate'
     try:
         score_f = float(score)
     except (ValueError, TypeError):
         return '—', 'slate'
+
+    # Agar 70 ballik Rasch shkalasida bo'lsa (yoki ball <= 70)
+    if score_f <= 70.0 and correct is not None and correct <= 45:
+        if score_f >= 65.0:
+            return 'A+', 'emerald'
+        if score_f >= 60.0:
+            return 'A', 'teal'
+        if score_f >= 55.0:
+            return 'B+', 'sky'
+        if score_f >= 50.0:
+            return 'B', 'amber'
+        if score_f >= 46.0:
+            return 'C+', 'orange'
+        if score_f >= 42.0:
+            return 'C', 'yellow'
+        return '—', 'rose'
+
+    # 100 foizlik shkala bo'yicha
     if score_f >= 86.0:
         return 'A+', 'emerald'
     if score_f >= 70.0:
@@ -3062,7 +3082,7 @@ def trigger_mock_reminder_api(request, pk):
         f"🔔 <b>DIQQAT: Jonli Mock Imtihon boshlanmoqda!</b>\n\n"
         f"📚 <b>Test:</b> {test.title}\n"
         f"🎯 <b>Fan:</b> {test.subject.name if test.subject else 'Asosiy'}\n"
-        f"⏱ <b>Davomiyligi:</b> {test.time_limit} daqiqa\n\n"
+        f"⏱ <b>Davomiyligi:</b> {getattr(test, 'duration_minutes', 60)} daqiqa\n\n"
         f"Imtihonni topshirish uchun platformaga kiring va o'z bilimingizni sinang!\n"
         f"👉 https://ilmildizi.uz"
     )
@@ -3175,7 +3195,7 @@ def anti_cheat_report_api(request):
 
 # ============================================================ PDF CERTIFICATE GENERATOR
 @api_view(['GET'])
-@permission_classes([IsSuperAdmin])
+@permission_classes([IsAuthenticated])
 def generate_certificate_api(request, attempt_pk):
     """Mock test natijasi uchun rasmiy PDF sertifikat yaratish."""
     try:
@@ -3191,6 +3211,11 @@ def generate_certificate_api(request, attempt_pk):
             Attempt.objects.select_related('profile__user', 'test', 'test__subject'),
             pk=attempt_pk, is_completed=True
         )
+
+        req_profile = getattr(request.user, 'profile', None)
+        if not (request.user.is_staff or (req_profile and (req_profile.id == a.profile_id or req_profile.is_teacher))):
+            return HttpResponse("Ruxsat berilmagan.", status=403, content_type="text/plain; charset=utf-8")
+
         profile = a.profile
         u = profile.user
         user_full = f"{u.first_name} {u.last_name}".strip() or u.username
@@ -3198,8 +3223,13 @@ def generate_certificate_api(request, attempt_pk):
         test_title = a.test.title if a.test else "Test"
         subject_name = a.test.subject.name if (a.test and a.test.subject) else "Asosiy"
 
-        grade, grade_tone = _calculate_grade(a.score, a.correct_answers)
-        score_str = f"{float(a.score):.1f}%" if a.score is not None else "0%"
+        rasch_meta = (a.annotations or {}).get('rasch') if isinstance(a.annotations, dict) else None
+        if rasch_meta:
+            grade = rasch_meta.get('grade') or '—'
+            score_str = f"{rasch_meta.get('scaled_score', 0)} / 70 ball ({float(a.score):.1f}%)"
+        else:
+            grade, grade_tone = _calculate_grade(a.score, a.correct_answers)
+            score_str = f"{float(a.score):.1f}%" if a.score is not None else "0%"
 
         tz = timezone.get_current_timezone()
         completed_str = ""
