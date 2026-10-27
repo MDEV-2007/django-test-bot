@@ -128,8 +128,8 @@ class Command(BaseCommand):
                 "options": [
                     ("A", "Kiaksar - Midiya davlati podshosi", False),
                     ("B", "Artakserks - Fors davlati hukmdori", False),
-                    ("C", "Diomed - Yunon-Baqtriya davlati podshosi", False),
-                    ("D", "Nin - Ossuriya davlati podshosi", True),
+                    ("C", "Diomed (Diadot)- Yunon-Baqtriya davlati podshosi", True),
+                    ("D", "Nin - Ossuriya davlati podshosi", False),
                 ],
             },
             # 2
@@ -365,8 +365,8 @@ class Command(BaseCommand):
                 "diff": "hard",
                 "options": [
                     ("A", "1, 3, 5", False),
-                    ("B", "2, 3, 4", True),
-                    ("C", "2, 4, 5", False),
+                    ("B", "2, 3, 4", False),
+                    ("C", "2, 4, 5", True),
                     ("D", "1, 4, 6", False),
                 ],
             },
@@ -675,9 +675,9 @@ class Command(BaseCommand):
                 ),
                 "diff": "medium",
                 "options": [
-                    ("A", "Yaponiya xalqining imperator atrofida jipslashuvi", True),
+                    ("A", "Yaponiya xalqining imperator atrofida jipslashuvi", False),
                     ("B", "Chet davlatlarga Yaponiyani yopiq deb e’lon qilinishi", False),
-                    ("C", "Ishlab chiqarishni sanoatlashtirish", False),
+                    ("C", "Ishlab chiqarishni sanoatlashtirish", True),
                     ("D", "Xristian dinini tarqalishini taqiqlash", False),
                 ],
             },
@@ -723,10 +723,10 @@ class Command(BaseCommand):
                 ),
                 "diff": "medium",
                 "options": [
-                    ("A", "1-b; 2-a; 3-d", False),
+                    ("A", "1-b; 2-a; 3-d", True),
                     ("B", "1-e; 2-f; 3-c", False),
                     ("C", "1-e; 2-c; 3-d", False),
-                    ("D", "1-b; 2-d; 3-a", True),
+                    ("D", "1-b; 2-d; 3-a", False),
                 ],
             },
             # 31
@@ -863,8 +863,8 @@ class Command(BaseCommand):
                 "num": 38,
                 "context": "Ikkinchi jahon urushidan keyin Lotin Amerikasi mamlakatlari jamiyatni modernizatsiya qilishning optimal variantini izladilar.",
                 "sub": [
-                    ("a", "Ushbu davrda sanoat mahsulotlarining umumiy hajmi bo‘yicha Lotin Amerikasida birinchi o‘ringa chiqqan davlatni yozing.", "Braziliya"),
-                    ("b", "Hindu aholisiga nisbatan olib borilgan adolatsiz siyosat natijasida mintaqaning qaysi davlatlarida hindularning tartibsiz chiqishlari bo‘lib o‘tgan (3 ta davlat nomini yozing)?", "Boliviya, Peru, Ekvador"),
+                    ("a", "Ushbu davrda sanoat mahsulotlarining umumiy hajmi bo‘yicha Lotin Amerikasida birinchi o‘ringa chiqqan davlatni yozing.", "Meksika"),
+                    ("b", "Hindu aholisiga nisbatan olib borilgan adolatsiz siyosat natijasida mintaqaning qaysi davlatlarida hindularning tartibsiz chiqishlari bo‘lib o‘tgan (3 ta davlat nomini yozing)?", "Ekvador, Boliviya, Peru"),
                 ],
             },
             # 39
@@ -876,7 +876,7 @@ class Command(BaseCommand):
                 ),
                 "sub": [
                     ("a", "Ushbu hukumatga boshchilik qilgan shaxsni aniqlang.", "Ryutaro Xasimoto"),
-                    ("b", "Ushbu shaxs tashqi siyosatda qanday g‘oyani targ‘ib qilishga harakat qilgan?", "Yevroosiyo diplomatiyasi"),
+                    ("b", "Ushbu shaxs tashqi siyosatda qanday g‘oyani targ‘ib qilishga harakat qilgan?", "Yevroosiyochilik konsepsiyasi"),
                 ],
             },
             # 40
@@ -884,8 +884,8 @@ class Command(BaseCommand):
                 "num": 40,
                 "context": "Turon hududida «o‘rta asrlar» davri IV asr oxirlari hamda V asr o‘rtalaridan boshlangan.",
                 "sub": [
-                    ("a", "Ushbu davrda xalq qo‘zg‘olonlari natijasida arablarga qaram bo‘lib, o‘z mustaqilligini qo‘ldan boy bergan hududni yozing.", "Sug'd"),
-                    ("b", "Ushbu hududda saljuqiylar hokimiyati o‘rnatilgunga qadar qaysi sulola hokimiyat tepasida bo‘lgan?", "Qoraxoniylar"),
+                    ("a", "Ushbu davrda xalq qo‘zg‘olonlari natijasida arablarga qaram bo‘lib, o‘z mustaqilligini qo‘ldan boy bergan hududni yozing.", "Xorazm"),
+                    ("b", "Ushbu hududda saljuqiylar hokimiyati o‘rnatilgunga qadar qaysi sulola hokimiyat tepasida bo‘lgan?", "Oltintoshiylar sulolasi"),
                 ],
             },
             # 41
@@ -896,8 +896,8 @@ class Command(BaseCommand):
                     "Bosh qo‘mondon – … (a) sulolaning eng ishonchli vakili yoki shu xonadon a’zosi hisoblangan. Mahmud G‘aznaviyning davrida ushbu mansabni … (b) egallagan."
                 ),
                 "sub": [
-                    ("a", "Nuqtalar o‘rniga mos keluvchi birinchi javobni (mansab nomini) yozing.", "Hojib ul-hujjob"),
-                    ("b", "Nuqtalar o‘rniga mos keluvchi ikkinchi javobni (shaxs nomini) yozing.", "Oltuntosh"),
+                    ("a", "Nuqtalar o‘rniga mos keluvchi birinchi javobni (mansab nomini) yozing.", "Sipohsolor"),
+                    ("b", "Nuqtalar o‘rniga mos keluvchi ikkinchi javobni (shaxs nomini) yozing.", "Muhammad Yusuf"),
                 ],
             },
             # 42
@@ -905,8 +905,8 @@ class Command(BaseCommand):
                 "num": 42,
                 "context": "Turkiston Muxtoriyati qizil askarlar tomonidan tor-mor etilishi natijasida Qo‘qon shahri butkul vayronaga aylantirildi.",
                 "sub": [
-                    ("a", "Ushbu shaharni obod qilish ishlarini boshlagan Minglar sulolasi vakilini yozing.", "Norbo'tabiy"),
-                    ("b", "Ushbu shaxs davlatni qanday unvon bilan boshqargan?", "Biy"),
+                    ("a", "Ushbu shaharni obod qilish ishlarini boshlagan Minglar sulolasi vakilini yozing.", "Shohruxbiy"),
+                    ("b", "Ushbu shaxs davlatni qanday unvon bilan boshqargan?", "Otaliq"),
                 ],
             },
             # 43
@@ -914,8 +914,8 @@ class Command(BaseCommand):
                 "num": 43,
                 "context": "Rus hukumati Xiva xonligiga qarshi olib boriladigan harbiy yurishga besh yil tayyorgarlik ko‘rdi.",
                 "sub": [
-                    ("a", "Xonlikka qilingan dastlabki hujumga kim boshchilik qilgan?", "Bekovich-Cherkasskiy"),
-                    ("b", "Qaysi shartnomaga binoan, Xiva xonligining mustaqilligi rus hukumati tomonidan tan olingan?", "1842-yilgi shartnoma"),
+                    ("a", "Xonlikka qilingan dastlabki hujumga kim boshchilik qilgan?", "Bekovich Cherkaskiy"),
+                    ("b", "Qaysi shartnomaga binoan, Xiva xonligining mustaqilligi rus hukumati tomonidan tan olingan?", "Taxta shartnomasi"),
                 ],
             },
             # 44
@@ -927,7 +927,7 @@ class Command(BaseCommand):
                 ),
                 "sub": [
                     ("a", "Markaz kommunistlari tomonidan kimning fikri inkor etilib, uni «panturkizm», «panislomizm», «burjua millatchiligi va o‘ng og‘machiligi» deb baholadi?", "Turor Risqulov"),
-                    ("b", "Turkiston yagona va butun, uning yaxlitligini buzish maqsadga muvofiq emas, deb ta’kidlagan shaxs kim edi?", "Turor Risqulov"),
+                    ("b", "Turkiston yagona va butun, uning yaxlitligini buzish maqsadga muvofiq emas, deb ta’kidlagan shaxs kim edi?", "Sultonbek Xo'janov"),
                 ],
             },
             # 45
@@ -935,8 +935,8 @@ class Command(BaseCommand):
                 "num": 45,
                 "context": "Qo‘qon xonligida barcha yerlar davlat mulki edi.",
                 "sub": [
-                    ("a", "Xonlikda xususiy kishilarga sotish orqali vujudga keltirilgan yer egaligi shaklini yozing.", "Xarojiy yerlar"),
-                    ("b", "Xonlikdagi harbiylarga berilgan yerlar qanday nom bilan atalgan?", "Tanko yerlari"),
+                    ("a", "Xonlikda xususiy kishilarga sotish orqali vujudga keltirilgan yer egaligi shaklini yozing.", "mulki hur xolis"),
+                    ("b", "Xonlikdagi harbiylarga berilgan yerlar qanday nom bilan atalgan?", "tanho yerlari"),
                 ],
             },
         ]
