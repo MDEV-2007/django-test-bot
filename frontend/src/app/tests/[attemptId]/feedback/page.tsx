@@ -508,140 +508,135 @@ export default function FeedbackPage() {
           );
         })()}
 
-        {/* ─── RASCH MODELI & MILLIY SERTIFIKAT STANDARTI HERO CARD ─── */}
+        {/* ─── MILLIY SERTIFIKAT NATIJALARI (BMB / DTM STANDARTI) ─── */}
         {(() => {
           const rasch = data?.rasch || data?.attempt?.rasch;
           const thetaVal = rasch?.theta ?? 0;
           const scaledScore = rasch?.scaled_score ?? Math.min(70, Math.round(((a.score || 0) / 100) * 70 * 10) / 10);
+          const isPassed = scaledScore >= 42;
           const gradeText = rasch?.grade || (scaledScore >= 65 ? 'A+' : scaledScore >= 60 ? 'A' : scaledScore >= 55 ? 'B+' : scaledScore >= 50 ? 'B' : scaledScore >= 46 ? 'C+' : scaledScore >= 42 ? 'C' : '—');
-          const gradeLabel = rasch?.grade_label || (scaledScore >= 65 ? "A+ Daraja (100% OTM Imtiyozi)" : scaledScore >= 60 ? "A Daraja (A'lo Sertifikat)" : scaledScore >= 55 ? "B+ Daraja (Juda yaxshi)" : scaledScore >= 50 ? "B Daraja (Yaxshi natija)" : scaledScore >= 46 ? "C+ Daraja (Qoniqarli)" : scaledScore >= 42 ? "C Daraja (O'tish darajasi)" : "Sinovdan o'tmadi");
+          const gradeLabel = rasch?.grade_label || (scaledScore >= 65 ? "A+ Daraja (100% OTM Imtiyozi)" : scaledScore >= 60 ? "A Daraja (A'lo Sertifikat)" : scaledScore >= 55 ? "B+ Daraja (Juda yaxshi)" : scaledScore >= 50 ? "B Daraja (Yaxshi natija)" : scaledScore >= 46 ? "C+ Daraja (Qoniqarli)" : scaledScore >= 42 ? "C Daraja (O'tish darajasi)" : "Sinovdan o'tmadi (Minimal 42 ball)");
           const breakdown = rasch?.difficulty_breakdown;
+          const pctVal = `${((scaledScore / 70) * 100).toFixed(1)}%`;
+
+          let abilityText = "Boshlang'ich";
+          let abilityDesc = "Mavzularni mustahkamlash zarur 💡";
+          let abilityColor = "text-rose-400";
+          if (thetaVal >= 1.5 || scaledScore >= 60) {
+            abilityText = "Mukammal";
+            abilityDesc = "Juda yuqori bilim darajasi 🚀";
+            abilityColor = "text-emerald-400";
+          } else if (thetaVal >= 0.5 || scaledScore >= 50) {
+            abilityText = "Yuqori";
+            abilityDesc = "Yaxshi o'zlashtirilgan daraja 🎯";
+            abilityColor = "text-emerald-300";
+          } else if (thetaVal >= -0.5 || scaledScore >= 42) {
+            abilityText = "O'rtacha";
+            abilityDesc = "Yetarli o'tish darajasi ⚖️";
+            abilityColor = "text-sky-300";
+          } else {
+            abilityText = "Kuchaytirish zarur";
+            abilityDesc = "Ko'proq amaliyot talab etiladi 💡";
+            abilityColor = "text-amber-400";
+          }
 
           return (
-            <div className="relative overflow-hidden rounded-3xl border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.08] via-slate-900/60 to-teal-500/[0.08] p-6 sm:p-8 shadow-2xl backdrop-blur-md">
-              {/* Dynamic top badge & Certificate button */}
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3.5 py-1 text-xs font-bold text-emerald-400">
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-6 sm:p-8 shadow-2xl text-white">
+              {/* Orqa fon uchun nozik nur effektlari */}
+              <div className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-emerald-500/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -right-24 size-72 rounded-full bg-sky-500/10 blur-3xl" />
+
+              {/* Yuqori sarlavha va Sertifikat tugmasi */}
+              <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-3.5 py-1 text-xs font-bold text-emerald-300 shadow-xs">
                   <Sparkles className="size-3.5 text-emerald-400 animate-pulse" />
-                  <span>Rasch Modeli (Item Response Theory) · BMB / DTM Rasmiy Standarti</span>
+                  <span>Milliy Sertifikat Standarti (BMB / DTM)</span>
                 </div>
                 <Button
                   size="sm"
                   onClick={() => setCertOpen(true)}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-md shadow-emerald-500/20 gap-2 active:scale-95 transition-all text-xs"
+                  className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/25 gap-2 active:scale-95 transition-all text-xs border border-emerald-400/30 cursor-pointer"
                 >
                   <Award className="size-4" /> Rasmiy PDF Sertifikatni ochish
                 </Button>
               </div>
 
-              {/* 3 ta Rasch KPI Card */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* 1. Talabgor Qobiliyati θ */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col items-center justify-center text-center">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-1">
-                    <TrendingUp className="size-3.5 text-emerald-400" />
-                    Talabgor Qobiliyati (θ)
+              {/* 3 ta Asosiy KPI Card */}
+              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* 1. To'plangan Ball */}
+                <div className="rounded-2xl border border-emerald-500/40 bg-gradient-to-b from-emerald-950/60 to-slate-900/80 p-5 flex flex-col items-center justify-center text-center shadow-lg shadow-emerald-950/40">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 mb-1.5">
+                    <Trophy className="size-4 text-emerald-400" />
+                    To&apos;plangan Ball
                   </span>
-                  <span className="font-mono text-3xl font-black text-foreground">
-                    {thetaVal > 0 ? `+${thetaVal.toFixed(2)}` : thetaVal.toFixed(2)} <span className="text-sm font-sans font-medium text-muted-foreground">logit</span>
-                  </span>
-                  <span className="text-[11px] text-muted-foreground mt-1">
-                    {thetaVal >= 1.5 ? "Juda yuqori bilim darajasi 🚀" :
-                     thetaVal >= 0.5 ? "Yuqori bilim darajasi 🎯" :
-                     thetaVal >= -0.5 ? "O'rtacha bilim darajasi ⚖️" : "Kuchaytirish zarur bo'lgan daraja 💡"}
-                  </span>
-                </div>
-
-                {/* 2. Milliy Sertifikat Balli (70-shkala) */}
-                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex flex-col items-center justify-center text-center shadow-inner">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 mb-1">
-                    <Trophy className="size-3.5 text-emerald-400" />
-                    Milliy Sertifikat Balli
-                  </span>
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-mono text-3xl sm:text-4xl font-black text-emerald-400">
+                  <div className="flex items-baseline gap-1.5 my-0.5">
+                    <span className="font-mono text-4xl sm:text-5xl font-black text-emerald-300 drop-shadow-xs">
                       {scaledScore.toFixed(1)}
                     </span>
-                    <span className="text-sm font-bold text-muted-foreground">/ 70 ball</span>
+                    <span className="text-sm font-bold text-emerald-200/60">/ 70 ball</span>
                   </div>
-                  <span className="text-[11px] font-medium text-emerald-400/80 mt-1">
-                    Chiziqli transformatsiya: Ball = 48 + 7.33 × θ
+                  <span className="text-xs font-semibold text-emerald-300/80 mt-1">
+                    {isPassed ? `✅ Natija: ${pctVal}` : `Minimal o'tish balli: 42 ball`}
                   </span>
                 </div>
 
-                {/* 3. Sertifikat Darajasi */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col items-center justify-center text-center">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-1">
-                    <Crown className="size-3.5 text-amber-400" />
+                {/* 2. Rasmiy Daraja */}
+                <div className="rounded-2xl border border-slate-700/80 bg-slate-800/60 p-5 flex flex-col items-center justify-center text-center shadow-md">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5 mb-1.5">
+                    <Crown className="size-4 text-amber-400" />
                     Rasmiy Daraja
                   </span>
-                  <span className="font-mono text-3xl font-black text-amber-400">
+                  <span className={`font-mono text-4xl sm:text-5xl font-black my-0.5 ${isPassed ? 'text-amber-400' : 'text-slate-400'}`}>
                     {gradeText}
                   </span>
-                  <span className="text-[11px] font-bold text-muted-foreground mt-1 line-clamp-1">
-                    {gradeLabel}
+                  <span className={`text-xs font-bold mt-1 px-3 py-0.5 rounded-full ${isPassed ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'}`}>
+                    {isPassed ? gradeLabel : "Sinovdan o'tmadi"}
+                  </span>
+                </div>
+
+                {/* 3. Bilim Darajasi */}
+                <div className="rounded-2xl border border-slate-700/80 bg-slate-800/60 p-5 flex flex-col items-center justify-center text-center shadow-md">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 mb-1.5">
+                    <TrendingUp className="size-4 text-sky-400" />
+                    Bilim Darajasi
+                  </span>
+                  <span className={`font-sans text-2xl sm:text-3xl font-black my-1.5 ${abilityColor}`}>
+                    {abilityText}
+                  </span>
+                  <span className="text-xs text-slate-300 font-medium">
+                    {abilityDesc}
                   </span>
                 </div>
               </div>
 
-              {/* Rasch Formulalari va Mantiqi (BMB Standarti) */}
-              <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                  <BookOpen className="size-4 text-emerald-400" />
-                  <span>Rasch formulasi va baholash mantiqi:</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-muted-foreground">
-                  <div className="rounded-xl border border-white/5 bg-white/5 p-3 space-y-1">
-                    <p className="font-mono font-bold text-foreground text-[13px]">
-                      P = e^(θ - b) / (1 + e^(θ - b))
-                    </p>
-                    <p className="text-[11px] leading-relaxed">
-                      • <b>θ = b</b> bo&apos;lsa: bilim savol qiyinligiga teng, <b>P = 50%</b> ehtimol.<br />
-                      • <b>θ &gt; b</b> bo&apos;lsa: to&apos;g&apos;ri yechish ehtimoli 50% dan ortadi.<br />
-                      • <b>θ &lt; b</b> bo&apos;lsa: to&apos;g&apos;ri yechish ehtimoli 50% dan kamayadi.
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-white/5 bg-white/5 p-3 space-y-1">
-                    <p className="font-mono font-bold text-foreground text-[13px]">
-                      b = ln((N - R) / R)
-                    </p>
-                    <p className="text-[11px] leading-relaxed">
-                      • <b>N</b> — jami talabgorlar, <b>R</b> — to&apos;g&apos;ri javoblar soni.<br />
-                      • Kam odam yechgan savolning <b>b qiymati katta (qiyin)</b> bo&apos;ladi.<br />
-                      • <b>To&apos;g&apos;ri javoblar = Σ P(θ, b_i)</b> orqali talabgorning eng ehtimolli θ qobiliyati topildi.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Savollar Qiyinlik Taqsimoti */}
-                {breakdown && (breakdown.easy_total > 0 || breakdown.medium_total > 0 || breakdown.hard_total > 0) && (
-                  <div className="pt-2 border-t border-white/5">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
-                      Savollar qiyinligi (b) bo&apos;yicha yechilgan javoblar taqsimoti:
-                    </span>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 text-center">
-                        <span className="text-[10px] font-bold text-emerald-400 block">Oson (b &lt; -0.4)</span>
-                        <span className="font-mono text-base font-bold text-foreground">
-                          {breakdown.easy_correct} / {breakdown.easy_total}
-                        </span>
-                      </div>
-                      <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-2.5 text-center">
-                        <span className="text-[10px] font-bold text-sky-400 block">O&apos;rtacha (-0.4...0.4)</span>
-                        <span className="font-mono text-base font-bold text-foreground">
-                          {breakdown.medium_correct} / {breakdown.medium_total}
-                        </span>
-                      </div>
-                      <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-2.5 text-center">
-                        <span className="text-[10px] font-bold text-rose-400 block">Qiyin (b &gt; 0.4)</span>
-                        <span className="font-mono text-base font-bold text-foreground">
-                          {breakdown.hard_correct} / {breakdown.hard_total}
-                        </span>
-                      </div>
+              {/* Savollar Qiyinligi Taqsimoti (O'quvchi uchun foydali tahlil) */}
+              {breakdown && (breakdown.easy_total > 0 || breakdown.medium_total > 0 || breakdown.hard_total > 0) && (
+                <div className="relative z-10 mt-6 pt-5 border-t border-slate-800">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300 block mb-3 text-center sm:text-left">
+                    Savollarning qiyinlik darajasi bo&apos;yicha yechilgan javoblar:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-3 text-center">
+                      <span className="text-xs font-bold text-emerald-400 block mb-1">Oson savollar</span>
+                      <span className="font-mono text-xl font-black text-white">
+                        {breakdown.easy_correct} <span className="text-xs font-normal text-emerald-300/70">/ {breakdown.easy_total} ta to&apos;g&apos;ri</span>
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-sky-500/30 bg-sky-950/40 p-3 text-center">
+                      <span className="text-xs font-bold text-sky-400 block mb-1">O&apos;rtacha savollar</span>
+                      <span className="font-mono text-xl font-black text-white">
+                        {breakdown.medium_correct} <span className="text-xs font-normal text-sky-300/70">/ {breakdown.medium_total} ta to&apos;g&apos;ri</span>
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-rose-500/30 bg-rose-950/40 p-3 text-center">
+                      <span className="text-xs font-bold text-rose-400 block mb-1">Qiyin savollar</span>
+                      <span className="font-mono text-xl font-black text-white">
+                        {breakdown.hard_correct} <span className="text-xs font-normal text-rose-300/70">/ {breakdown.hard_total} ta to&apos;g&apos;ri</span>
+                      </span>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           );
         })()}
