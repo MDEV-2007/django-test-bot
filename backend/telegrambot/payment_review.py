@@ -10,19 +10,41 @@ O'quvchi saytda yoki botda to'lov cheki (skrinshot) yuklaganda, bu modul:
 3. "❌ Rad etish" bosilganda rad etiladi.
 """
 import logging
+import os
 from django.conf import settings
 from django.utils import timezone
-from .client import send_photo, send_message, edit_message_caption, answer_callback
+from .client import (
+    send_photo,
+    send_message,
+    edit_message_caption,
+    edit_message_text,
+    answer_callback,
+)
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_PAYMENT_CHANNEL_ID = '-1004317888253'
+
+
+def get_payment_channel_id():
+    """To'lov cheklari yuboriladigan kanal ID sini aniqlash."""
+    raw = getattr(settings, 'PAYMENT_CHANNEL_ID', '') or getattr(settings, 'ADMIN_TELEGRAM_CHAT_ID', '') or ''
+    cid = str(raw).strip()
+    return cid if cid else DEFAULT_PAYMENT_CHANNEL_ID
+
+
+def update_channel_message(chat_id, message_id, text, reply_markup=None):
+    """Xabar rasm bo'lsa caption ni, matn bo'lsa text ni yangilaydi."""
+    res = edit_message_caption(chat_id, message_id, text, reply_markup=reply_markup)
+    if not res.get('ok'):
+        res = edit_message_text(chat_id, message_id, text, reply_markup=reply_markup)
+    return res
 
 
 def send_payment_review_notification(payment):
     """To'lov chekini yashirin Telegram kanaliga inline tasdiqlash tugmalari bilan yuborish."""
-    channel_id = getattr(settings, 'PAYMENT_CHANNEL_ID', '') or getattr(settings, 'ADMIN_TELEGRAM_CHAT_ID', '')
-    if not channel_id:
-        logger.warning("PAYMENT_CHANNEL_ID / ADMIN_TELEGRAM_CHAT_ID sozlanmagan, to'lov xabari yuborilmadi.")
-        return False
+    channel_id = get_payment_channel_id()
+    logger.info("send_payment_review_notification boshlandi: payment_id=%s, channel_id=%s", payment.id, channel_id)
 
     profile = payment.profile
     user = profile.user
@@ -57,21 +79,39 @@ def send_payment_review_notification(payment):
     }
 
     # Skrinshot faylini tekshirish va yuborish
+    res = {'ok': False}
     try:
-        if payment.screenshot and hasattr(payment.screenshot, 'path'):
-            res = send_photo(channel_id, payment.screenshot.path, caption=caption, reply_markup=reply_markup)
-        elif payment.screenshot:
-            res = send_photo(channel_id, payment.screenshot, caption=caption, reply_markup=reply_markup)
-        else:
-            # Agar skrinshotsiz bo'lsa, oddiy xabar
+        if payment.screenshot:
+            try:
+                file_path = None
+                try:
+                    if hasattr(payment.screenshot, 'path'):
+                        file_path = payment.screenshot.path
+                except Exception:
+                    file_path = None
+
+                if file_path and os.path.exists(file_path):
+                    res = send_photo(channel_id, file_path, caption=caption, reply_markup=reply_markup)
+                else:
+                    payment.screenshot.open('rb')
+                    photo_bytes = payment.screenshot.read()
+                    res = send_photo(channel_id, photo_bytes, caption=caption, reply_markup=reply_markup)
+            except Exception as photo_err:
+                logger.warning("send_photo xatosi: %s", photo_err)
+
+        # Agar rasm orqali yuborilmagan bo'lsa (yoki xato bersa), albatta matnli xabarni yuboramiz
+        if not res.get('ok'):
+            logger.info("Rasm yuborilmadi yoki xato berdi, send_message orqali yuborilmoqda...")
             res = send_message(channel_id, caption, reply_markup=reply_markup)
 
         if not res.get('ok'):
-            logger.warning("To'lov chekini yuborishda xatolik: %s", res)
+            logger.warning("To'lov xabarini Telegram kanalga yuborishda xatolik: %s", res)
             return False
+
+        logger.info("To'lov xabari kanalga muvaffaqiyatli yuborildi: payment_id=%s, result=%s", payment.id, res)
         return True
     except Exception:
-        logger.exception("send_payment_review_notification pochtada xatolik yuz berdi")
+        logger.exception("send_payment_review_notification da kutilmagan xatolik yuz berdi")
         return False
 
 
@@ -131,7 +171,7 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
             f"⏰ <b>Tasdiqlangan vaqt:</b> {now_time}\n\n"
             f"🔓 <b>O'quvchiga test muvaffaqiyatli ochildi!</b>"
         )
-        edit_message_caption(chat_id, message_id, approved_caption, reply_markup={'inline_keyboard': []})
+        update_channel_message(chat_id, message_id, approved_caption, reply_markup={'inline_keyboard': []})
 
         # O'quvchiga Telegram bot orqali xushxabar yuborish
         if payment.profile.telegram_id:
@@ -162,7 +202,7 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
             f"⏰ <b>Vaqt:</b> {now_time}\n\n"
             f"<i>Chek rad etildi, test ochilmadi.</i>"
         )
-        edit_message_caption(chat_id, message_id, rejected_caption, reply_markup={'inline_keyboard': []})
+        update_channel_message(chat_id, message_id, rejected_caption, reply_markup={'inline_keyboard': []})
 
         if payment.profile.telegram_id:
             student_reject_msg = (

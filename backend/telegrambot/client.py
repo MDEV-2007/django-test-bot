@@ -139,6 +139,11 @@ def send_photo(chat_id, photo, caption=None, reply_markup=None, parse_mode='HTML
             else:
                 data['photo'] = photo
         elif hasattr(photo, 'read'):
+            if hasattr(photo, 'open'):
+                try:
+                    photo.open('rb')
+                except Exception:
+                    pass
             if hasattr(photo, 'seek'):
                 try:
                     photo.seek(0)
@@ -183,3 +188,17 @@ def edit_message_caption(chat_id, message_id, caption, reply_markup=None, parse_
     if reply_markup is not None:
         kwargs['reply_markup'] = json.dumps(reply_markup) if isinstance(reply_markup, dict) else reply_markup
     return api_call('editMessageCaption', **kwargs)
+
+
+def edit_message_text(chat_id, message_id, text, reply_markup=None, parse_mode='HTML'):
+    kwargs = {
+        'chat_id': chat_id,
+        'message_id': message_id,
+        'text': text,
+    }
+    if parse_mode:
+        kwargs['parse_mode'] = parse_mode
+    if reply_markup is not None:
+        kwargs['reply_markup'] = json.dumps(reply_markup) if isinstance(reply_markup, dict) else reply_markup
+    return api_call('editMessageText', **kwargs)
+

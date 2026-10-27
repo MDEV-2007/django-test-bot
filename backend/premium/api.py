@@ -2,6 +2,7 @@
 the overall JWT-API pattern. payment_screenshot_api additionally accepts the JWT as a
 `?token=` query param (see config/ws_auth.py for the same pattern on WebSockets) because a
 plain <img src="..."> request from the browser can't attach an Authorization header."""
+import logging
 import time
 
 from django.conf import settings
@@ -18,6 +19,8 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from accounts.models import ensure_profile_for_user
 from .models import Payment, SubscriptionPlan
 from .services import ALLOWED_IMAGE_FORMATS, seed_plans_if_needed, validate_screenshot
+
+logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
@@ -85,8 +88,8 @@ class CheckoutAPI(APIView):
         try:
             from telegrambot.payment_review import send_payment_review_notification
             send_payment_review_notification(payment)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception("send_payment_review_notification xatosi: %s", e)
         return Response({'payment_id': payment.id})
 
     @staticmethod
