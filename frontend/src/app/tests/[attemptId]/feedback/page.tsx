@@ -646,6 +646,136 @@ export default function FeedbackPage() {
           );
         })()}
 
+        {/* ─── RASMIY SARIQ-OQ SERTIFIKAT PREVIEW KARTASI ─── */}
+        {(() => {
+          const rasch = data?.rasch || data?.attempt?.rasch;
+          const scaledScore = rasch?.scaled_score ?? Math.min(70, Math.round(((a.score || 0) / 100) * 70 * 10) / 10);
+          const scaledScoreStr = scaledScore.toFixed(1);
+          const scaledScoreComma = scaledScoreStr.replace('.', ',');
+          const pctVal = rasch?.percentage !== undefined ? `${rasch.percentage.toFixed(2)} %` : `${Math.round(a.score || 0)} %`;
+          const certGrade = rasch?.grade || (scaledScore >= 65 ? 'A+' : scaledScore >= 60 ? 'A' : scaledScore >= 55 ? 'B+' : scaledScore >= 50 ? 'B' : scaledScore >= 46 ? 'C+' : scaledScore >= 42 ? 'C' : '—');
+          const cleanAttemptId = String(attemptId || '13770');
+          const personalCode = cleanAttemptId.slice(-5).padStart(5, '0');
+          const certNumber = `DJ26 0607${cleanAttemptId.slice(-7).padStart(7, '0')}`;
+          
+          const fullName = `${user?.first_name || user?.username || "O'quvchi"} ${user?.last_name || ''}`.trim().toUpperCase();
+          const qrUrl = typeof window !== 'undefined' ? `${window.location.origin}/tests/${cleanAttemptId}/feedback` : `https://ilmildizi.uz/tests/${cleanAttemptId}/feedback`;
+          const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrUrl)}&color=0f172a&bgcolor=fefcf6`;
+
+          return (
+            <div className="relative overflow-hidden rounded-3xl border-2 border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-amber-100/5 to-amber-500/10 p-5 sm:p-7 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-amber-300/30">
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                    <Award className="size-3.5" /> Rasmiy Milliy Sertifikat
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-foreground">
+                    Sizning sinov natijangiz bo&apos;yicha sertifikat tayyor! 📜
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Ushbu sertifikat rasmiy BMB (DTM) standarti bo&apos;yicha sariq-oq rangda va QR-kod bilan taqdim etiladi.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setCertOpen(true)}
+                  className="rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold shadow-lg shadow-amber-500/20 gap-2 shrink-0 h-11 px-5"
+                >
+                  <Award className="size-4" /> To&apos;liq ochish va yuklab olish (PNG/PDF)
+                </Button>
+              </div>
+
+              {/* Sertifikatning o'zi (Sariq-oq rang, tilla hoshiya, QR kod) */}
+              <div 
+                onClick={() => setCertOpen(true)}
+                className="cursor-pointer group relative mx-auto w-full max-w-[580px] bg-[#fefcf6] border-[3px] border-[#c59b27] p-2.5 sm:p-3.5 shadow-xl rounded-sm transition-all hover:scale-[1.01] hover:shadow-2xl"
+              >
+                <div className="border border-[#d4af37] p-4 sm:p-6 bg-[#fdfbf7] flex flex-col items-center text-[#0f172a]">
+                  
+                  {/* Top Emblem */}
+                  <div className="size-14 rounded-full border-2 border-[#c59b27] bg-white flex flex-col items-center justify-center p-1 mb-1.5 shadow-xs">
+                    <span className="text-[8px] font-bold text-rose-700 leading-none">★ DIPLOMAT ★</span>
+                    <span className="text-xs font-black text-[#1e3a8a] leading-tight">TEAM</span>
+                  </div>
+                  <p className="text-[10px] sm:text-xs font-bold text-[#1e3a8a] uppercase tracking-wide">
+                    DIPLOMAT JAMOASI HUZURIDAGI
+                  </p>
+                  <p className="text-[10px] sm:text-xs font-extrabold text-[#1e3a8a] uppercase tracking-wide mb-2">
+                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI
+                  </p>
+
+                  {/* Title */}
+                  <h4 className="font-serif text-sm sm:text-base font-black text-[#0f172a] uppercase tracking-wide text-center leading-snug">
+                    UMUMTA&apos;LIM FANINI BILISH DARAJASI<br />TO&apos;G&apos;RISIDA SERTIFIKAT
+                  </h4>
+
+                  {/* Data Rows */}
+                  <div className="w-full mt-3 space-y-2 text-[11px] sm:text-xs">
+                    <div className="space-y-1 pb-1.5 border-b border-[#e5c158]">
+                      <div className="flex justify-between">
+                        <span className="font-bold text-[#1e3a8a]">Sertifikat raqami:</span>
+                        <span className="font-mono font-bold">{certNumber}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-bold text-[#1e3a8a]">Talabgor kodi:</span>
+                        <span className="font-mono font-bold">{personalCode}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-bold">Talabgor:</span>
+                        <span className="font-bold tracking-wide">{fullName}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 pb-1.5 border-b border-[#e5c158]">
+                      <div className="flex justify-between">
+                        <span className="font-bold">Fan:</span>
+                        <span className="font-bold">{data?.attempt?.test_title || "Tarix Milliy Sertifikat"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-bold">Umumiy to&apos;plagan bali:</span>
+                        <span className="font-mono font-black text-sm">{scaledScoreStr} / 70</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-bold">Foiz ko&apos;rsatkichi:</span>
+                        <span className="font-mono font-bold">{pctVal}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-bold">Sertifikat darajasi:</span>
+                        <span className="font-black text-amber-700 text-sm">{certGrade}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between pb-1.5 border-b border-[#e5c158]">
+                      <span className="font-bold">Test sinovi natijasi:</span>
+                      <span className="font-mono font-black">{scaledScoreComma}</span>
+                    </div>
+                  </div>
+
+                  {/* Bottom: Direktor, QR, Imzo */}
+                  <div className="w-full flex items-center justify-between gap-2 mt-4 pt-2">
+                    <div className="flex-1 text-center font-serif text-[11px] font-bold">
+                      Direktor<br /><span className="text-[10px] font-sans text-muted-foreground">_________</span>
+                    </div>
+
+                    <div className="shrink-0 p-1 border border-[#c59b27] bg-white rounded flex flex-col items-center shadow-xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={qrImgUrl} alt="QR Kod" className="size-14 sm:size-16 object-contain" />
+                      <span className="text-[7px] font-bold text-[#1e3a8a] mt-0.5">QR VERIFIED</span>
+                    </div>
+
+                    <div className="flex-1 text-center font-serif text-[11px] font-bold">
+                      Mag&apos;rurbek Zaripov<br /><span className="text-[10px] font-sans text-muted-foreground">_________</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 text-[10px] text-amber-700 font-bold group-hover:underline flex items-center gap-1">
+                    Bosing: Sertifikatni to&apos;liq ochish va yuklab olish &rarr;
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* 1v1 DUELGA CHORLASH & VIRAL REFERRAL HERO CARD */}
         <div className="relative overflow-hidden rounded-3xl border-2 border-rose-500/40 bg-gradient-to-br from-rose-500/15 via-amber-500/10 to-orange-500/15 p-6 sm:p-7 shadow-xl">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -1015,6 +1145,8 @@ export default function FeedbackPage() {
               totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
               date={data?.attempt?.completed_at}
               attemptId={attemptId}
+              percentage={data?.rasch?.percentage}
+              grade={data?.rasch?.grade}
             />
             <ShareToCommunityModal
               open={communityModalOpen}

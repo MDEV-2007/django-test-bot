@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Award, Download, FileText, Printer, ShieldCheck, Sparkles } from 'lucide-react';
+import { Award, Download, Printer, Share2, Sparkles, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import { API_URL } from '@/lib/api-client';
@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import ShareToCommunityModal from './ShareToCommunityModal';
 
 interface CertificateModalProps {
@@ -20,46 +19,29 @@ interface CertificateModalProps {
   onOpenChange: (open: boolean) => void;
   studentName: string;
   testTitle: string;
-  score: number;
+  score: number; // 70-ballik Rasch balli yoki foiz
   correctCount: number;
   totalQuestions: number;
   date?: string;
   attemptId: string | number;
+  percentage?: number;
+  grade?: string;
 }
 
-const MONTHS_UZ = [
-  'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
-  'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr',
-];
+function parseName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "O'QUVCHI", lastName: "PLATFORMA" };
+  if (parts.length === 1) return { firstName: parts[0].toUpperCase(), lastName: "—" };
 
-function formatUzDate(dateInput?: string | Date | null): string {
-  const d = dateInput ? new Date(dateInput) : new Date();
-  if (isNaN(d.getTime())) {
-    const now = new Date();
-    return `${now.getDate()}-${MONTHS_UZ[now.getMonth()]}, ${now.getFullYear()}-yil`;
+  // Agar birinchi so'z familiya shaklida bo'lsa (Zafarjonov Jamshidbek)
+  const first = parts[0];
+  const last = parts.slice(1).join(' ');
+  const isFamilyFirst = /(?:ov|ova|yev|yeva)$/i.test(first);
+
+  if (isFamilyFirst) {
+    return { lastName: first.toUpperCase(), firstName: last.toUpperCase() };
   }
-  return `${d.getDate()}-${MONTHS_UZ[d.getMonth()]}, ${d.getFullYear()}-yil`;
-}
-
-interface GradeResult {
-  grade: string;
-  shortGrade: string;
-  subLabel: string;
-  label: string;
-  tone: string;
-  printTone: string;
-  isPassed: boolean;
-}
-
-function getGrade(score: number, correctCount?: number, totalQuestions?: number): GradeResult {
-  // Rasmiy UzBMB Milliy Sertifikat 100 ballik shkalasi
-  if (score >= 86.0) return { grade: "A+ (A'lo)", shortGrade: 'A+', subLabel: "A'lo", label: "Eng yuqori natija — Oltin Sertifikat (OTMga 100% ball)", tone: 'text-amber-400 border-amber-500/40 bg-amber-500/10', printTone: 'text-amber-700 border-amber-700 bg-amber-50', isPassed: true };
-  if (score >= 70.0) return { grade: "A (A'lo)", shortGrade: 'A', subLabel: "A'lo", label: "Yuqori a'lo natija", tone: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10', printTone: 'text-emerald-700 border-emerald-700 bg-emerald-50', isPassed: true };
-  if (score >= 60.0) return { grade: 'B+ (Juda yaxshi)', shortGrade: 'B+', subLabel: 'Juda yaxshi', label: 'Muvaffaqiyatli natija', tone: 'text-sky-400 border-sky-500/40 bg-sky-500/10', printTone: 'text-sky-700 border-sky-700 bg-sky-50', isPassed: true };
-  if (score >= 50.0) return { grade: 'B (Yaxshi)', shortGrade: 'B', subLabel: 'Yaxshi', label: 'Ijobiy natija', tone: 'text-teal-400 border-teal-500/40 bg-teal-500/10', printTone: 'text-teal-700 border-teal-700 bg-teal-50', isPassed: true };
-  if (score >= 46.0) return { grade: 'C+ (Qoniqarli)', shortGrade: 'C+', subLabel: 'Qoniqarli', label: "Qoniqarli natija", tone: 'text-orange-400 border-orange-500/40 bg-orange-500/10', printTone: 'text-orange-700 border-orange-700 bg-orange-50', isPassed: true };
-  if (score >= 40.0) return { grade: 'C (O\'tish)', shortGrade: 'C', subLabel: "O'tish", label: "Quyi o'tish bali", tone: 'text-yellow-400 border-yellow-500/40 bg-yellow-500/10', printTone: 'text-yellow-700 border-yellow-700 bg-yellow-50', isPassed: true };
-  return { grade: "Sinovdan o'tmadi", shortGrade: '—', subLabel: "O'tmadi", label: "Sertifikat berilmaydi (40 balldan past)", tone: 'text-rose-400 border-rose-500/40 bg-rose-500/10', printTone: 'text-rose-700 border-rose-700 bg-rose-50', isPassed: false };
+  return { firstName: first.toUpperCase(), lastName: last.toUpperCase() };
 }
 
 export default function CertificateModal({
@@ -72,15 +54,64 @@ export default function CertificateModal({
   totalQuestions,
   date,
   attemptId,
+  percentage,
+  grade,
 }: CertificateModalProps) {
   const [downloading, setDownloading] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [communityModalOpen, setCommunityModalOpen] = useState(false);
   const { access } = useAuthStore();
-  const gradeInfo = getGrade(score, correctCount, totalQuestions);
-  const certDate = formatUzDate(date);
-  const serialNo = `ILM-${new Date().getFullYear()}-${String(attemptId).padStart(6, '0')}`;
-  const displayName = studentName.trim() || "Platforma O'quvchisi";
+
+  const { firstName, lastName } = parseName(studentName);
+
+  // Ball hisoblash: 70 ballik shkala
+  const scaledScore = typeof score === 'number'
+    ? (score <= 70 ? score : (score / 100) * 70)
+    : 49.3;
+  const scaledScoreStr = scaledScore.toFixed(1);
+  const scaledScoreComma = scaledScoreStr.replace('.', ',');
+
+  // Foiz ko'rsatkichi (75.85 %)
+  const pctValue = percentage !== undefined
+    ? percentage
+    : (totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : (score > 70 ? score : (scaledScore / 70) * 100));
+  const pctStr = `${pctValue.toFixed(2)} %`;
+
+  // Daraja (A+, A, B+, B, C+, C)
+  let certGrade = grade;
+  if (!certGrade) {
+    if (scaledScore >= 65.0) certGrade = 'A+';
+    else if (scaledScore >= 60.0) certGrade = 'A';
+    else if (scaledScore >= 55.0) certGrade = 'B+';
+    else if (scaledScore >= 50.0) certGrade = 'B';
+    else if (scaledScore >= 46.0) certGrade = 'C+';
+    else if (scaledScore >= 42.0) certGrade = 'C';
+    else certGrade = '—';
+  }
+
+  // Raqamlar va kodlar
+  const cleanAttemptId = String(attemptId || '13770');
+  const personalCode = cleanAttemptId.slice(-5).padStart(5, '0');
+  const certNumber = `DJ26 0607${cleanAttemptId.slice(-7).padStart(7, '0')}`;
+
+  // Sanalar (Berilgan sana va 3 yillik amal qilish muddati)
+  const d = date ? new Date(date) : new Date();
+  const validD = isNaN(d.getTime()) ? new Date() : d;
+  const day = String(validD.getDate()).padStart(2, '0');
+  const month = String(validD.getMonth() + 1).padStart(2, '0');
+  const year = validD.getFullYear();
+  const givenDate = `${day}.${month}.${year}`;
+  const expireDate = `${day}.${month}.${year + 3}`;
+
+  // QR kod havolasi
+  const qrTargetUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/tests/${cleanAttemptId}/feedback`
+    : `https://ilmildizi.uz/tests/${cleanAttemptId}/feedback`;
+  const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrTargetUrl)}&color=0f172a&bgcolor=fefcf6`;
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   const handleDownloadPdf = async () => {
     if (!attemptId) return;
@@ -96,7 +127,7 @@ export default function CertificateModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Sertifikat_${studentName.replace(/\s+/g, '_')}_${attemptId}.pdf`;
+      a.download = `Sertifikat_${lastName}_${firstName}_${cleanAttemptId}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -109,470 +140,462 @@ export default function CertificateModal({
     }
   };
 
-  // Ballni to'g'ri yaxlitlash (57.77777777777777% muammosini hal qilish)
-  const formattedScore = typeof score === 'number'
-    ? (Number.isInteger(score) ? score.toString() : (Math.round(score * 10) / 10).toFixed(1))
-    : '0';
-
-  const handlePrint = () => {
-    window.print();
-  };
-
+  // Sariq-oq rasmiy sertifikatni yuqori aniqlikda (A4 Portrait) Canvas orqali PNG yuklab olish
   const handleDownloadPng = async () => {
     setDownloading(true);
     try {
       const canvas = document.createElement('canvas');
-      const width = 1600;
-      const height = 1130;
+      const width = 1240;
+      const height = 1754; // A4 150 DPI
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas not supported');
 
-      // 1. Fon gradienti (chuqur hashamatli qora-to'q ko'k)
-      const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-      bgGrad.addColorStop(0, '#0a0e17');
-      bgGrad.addColorStop(0.5, '#0f172a');
-      bgGrad.addColorStop(1, '#0a0e17');
-      ctx.fillStyle = bgGrad;
+      // 1. Fon (Qaymoqrang / sariq-oq iliq qog'oz)
+      ctx.fillStyle = '#fefcf6';
       ctx.fillRect(0, 0, width, height);
 
       // 2. Hashamatli tilla hoshiyalar
-      ctx.lineWidth = 6;
-      ctx.strokeStyle = '#d97706';
-      ctx.strokeRect(30, 30, width - 60, height - 60);
+      const goldMain = '#c59b27';
+      const goldLight = '#e2c275';
 
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#f59e0b';
-      ctx.strokeRect(44, 44, width - 88, height - 88);
+      // Tashqi hoshiya
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = goldMain;
+      ctx.strokeRect(35, 35, width - 70, height - 70);
 
-      // Burchak naqshlari
-      const drawCorner = (x: number, y: number, angle: number) => {
+      // Ichki hoshiya
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = goldLight;
+      ctx.strokeRect(45, 45, width - 90, height - 90);
+
+      // 3. Burchakdagi sharqona girih naqshlari
+      const drawGirihCorner = (cx: number, cy: number, size: number) => {
         ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate((angle * Math.PI) / 180);
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(0, 35);
-        ctx.lineTo(0, 0);
-        ctx.lineTo(35, 0);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(8, 8, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#fbbf24';
-        ctx.fill();
+        ctx.translate(cx, cy);
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 1.8;
+        // 8 qirrali yulduz naqshi
+        for (let i = 0; i < 4; i++) {
+          ctx.rotate(Math.PI / 4);
+          ctx.strokeRect(-size / 2, -size / 2, size, size);
+        }
         ctx.restore();
       };
-      drawCorner(55, 55, 0);
-      drawCorner(width - 55, 55, 90);
-      drawCorner(width - 55, height - 55, 180);
-      drawCorner(55, height - 55, 270);
+      drawGirihCorner(90, height - 90, 70);
+      drawGirihCorner(width - 90, 90, 70);
 
-      // 3. Respublika va Platforma sarlavhasi
+      // 4. Yuqori Gerb / Logo
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 18px "Inter", -apple-system, sans-serif';
-      ctx.fillText("O'ZBEKISTON RESPUBLIKASI TA'LIM VA TEST PLATFORMASI", width / 2, 115);
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 44px "Inter", -apple-system, sans-serif';
-      ctx.fillText('Ilm', width / 2 - 40, 175);
-      ctx.fillStyle = '#2fb3a3';
-      ctx.fillText('Ildizi', width / 2 + 45, 175);
-
-      // Ajratuvchi oltin chiziq
-      const lineGrad = ctx.createLinearGradient(width / 2 - 200, 0, width / 2 + 200, 0);
-      lineGrad.addColorStop(0, 'transparent');
-      lineGrad.addColorStop(0.5, '#f59e0b');
-      lineGrad.addColorStop(1, 'transparent');
-      ctx.strokeStyle = lineGrad;
-      ctx.lineWidth = 2;
+      // Gerb doirasi
+      const logoY = 130;
       ctx.beginPath();
-      ctx.moveTo(width / 2 - 200, 195);
-      ctx.lineTo(width / 2 + 200, 195);
+      ctx.arc(width / 2, logoY, 46, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = goldMain;
       ctx.stroke();
 
-      // Muvaffaqiyat Sertifikati
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 22px "Inter", -apple-system, sans-serif';
-      ctx.fillText('MUVAFFAQIYAT SERTIFIKATI', width / 2, 245);
-
+      // Logo matni
+      ctx.fillStyle = '#b91c1c';
+      ctx.font = 'bold 16px "Times New Roman", serif';
+      ctx.fillText('★ DIPLOMAT ★', width / 2, logoY - 10);
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = '900 13px "Arial", sans-serif';
+      ctx.fillText('TEAM', width / 2, logoY + 8);
       ctx.fillStyle = '#64748b';
-      ctx.font = '16px "Inter", -apple-system, sans-serif';
-      ctx.fillText('Ushbu sertifikat tasdiqlaydi:', width / 2, 275);
+      ctx.font = '8px "Arial", sans-serif';
+      ctx.fillText("RESPUBLIKA TEST MARKAZI", width / 2, logoY + 22);
 
-      // O'quvchi ismi
-      ctx.fillStyle = '#ffffff';
-      ctx.font = displayName.length > 25 ? 'bold 38px "Georgia", serif' : 'bold 46px "Georgia", serif';
-      ctx.fillText(displayName, width / 2, 350);
+      // Agentlik sarlavhasi
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 22px "Arial", sans-serif';
+      ctx.fillText('DIPLOMAT JAMOASI HUZURIDAGI', width / 2, 230);
+      ctx.fillText('BILIM VA MALAKALARNI BAHOLASH AGENTLIGI', width / 2, 260);
 
-      // Ajratuvchi chiziqlar
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(width / 2 - 350, 375);
-      ctx.lineTo(width / 2 + 350, 375);
-      ctx.stroke();
+      // Asosiy Sarlavha
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 32px "Times New Roman", serif';
+      ctx.fillText("UMUMTA'LIM FANINI BILISH DARAJASI", width / 2, 330);
+      ctx.fillText("TO'G'RISIDA SERTIFIKAT", width / 2, 372);
 
-      // Test nomi va matn
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '18px "Inter", -apple-system, sans-serif';
-      ctx.fillText("quyidagi fan va format bo'yicha sinov testini muvaffaqiyatli yakunladi:", width / 2, 420);
+      // 5. Ma'lumotlar jadvali qatorlari
+      const startY = 460;
+      const rowGap = 48;
+      const leftX = 130;
+      const rightX = 480;
+      const lineEndX = width - 130;
 
-      ctx.fillStyle = '#38bdf8';
-      ctx.font = 'bold 26px "Inter", -apple-system, sans-serif';
-      ctx.fillText(`“${testTitle}”`, width / 2, 465);
+      const drawDataRow = (y: number, label: string, val: string, isBlueLabel = false) => {
+        ctx.textAlign = 'left';
+        ctx.fillStyle = isBlueLabel ? '#1e3a8a' : '#0f172a';
+        ctx.font = 'bold 20px "Arial", sans-serif';
+        ctx.fillText(label, leftX, y);
 
-      // 4. Natijalar bloki (3 ta karta)
-      const boxY = 525;
-      const boxHeight = 160;
-      const boxWidth = 380;
-      const gap = 30;
-      const startX = width / 2 - (boxWidth * 3 + gap * 2) / 2;
-
-      // Karta 1: To'plangan Ball
-      const drawStatCard = (x: number, label: string, val: string, sub: string, valColor: string) => {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-        ctx.beginPath();
-        ctx.roundRect(x, boxY, boxWidth, boxHeight, 16);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(245, 158, 11, 0.3)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = 'bold 15px "Inter", -apple-system, sans-serif';
-        ctx.fillText(label, x + boxWidth / 2, boxY + 45);
-
-        ctx.fillStyle = valColor;
-        ctx.font = 'bold 40px "Inter", -apple-system, sans-serif';
-        ctx.fillText(val, x + boxWidth / 2, boxY + 104);
-
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = 'bold 14px "Inter", -apple-system, sans-serif';
-        ctx.fillText(sub, x + boxWidth / 2, boxY + 138);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 21px "Arial", sans-serif';
+        ctx.fillText(val, rightX, y);
       };
 
-      drawStatCard(startX, "TO'PLANGAN BALL", `${formattedScore}%`, 'Umumiy natija', '#34d399');
-      drawStatCard(startX + boxWidth + gap, "TO'G'RI JAVOBLAR", `${correctCount} / ${totalQuestions}`, 'Jami savollardan', '#ffffff');
+      const drawDivider = (y: number) => {
+        ctx.strokeStyle = '#e2c275';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(leftX, y);
+        ctx.lineTo(lineEndX, y);
+        ctx.stroke();
+      };
 
-      // Karta 3: Baholash Darajasi (Chiroyli va professional ko'rinishda)
-      const xGrade = startX + (boxWidth + gap) * 2;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-      ctx.beginPath();
-      ctx.roundRect(xGrade, boxY, boxWidth, boxHeight, 16);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(245, 158, 11, 0.3)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      // Qatorlar 1: Talabgor
+      drawDataRow(startY, 'Sertifikat raqami:', certNumber, true);
+      drawDataRow(startY + rowGap, 'Talabgorning shaxsiy kodi:', personalCode, true);
+      drawDataRow(startY + rowGap * 2, 'Familiyasi:', lastName);
+      drawDataRow(startY + rowGap * 3, 'Ismi:', firstName);
+      drawDivider(startY + rowGap * 3.7);
 
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 15px "Inter", -apple-system, sans-serif';
-      ctx.fillText('BAHOLASH DARAJASI', xGrade + boxWidth / 2, boxY + 45);
+      // Qatorlar 2: Fan va Ball
+      const sec2Y = startY + rowGap * 4.6;
+      drawDataRow(sec2Y, "Umumta'lim fani:", testTitle || 'Tarix Milliy Sertifikat');
+      drawDataRow(sec2Y + rowGap, "Umumiy to'plagan bali:", scaledScoreStr);
+      drawDataRow(sec2Y + rowGap * 2, "Umumiy ballga nisbatan foiz ko'rsatkichi:", pctStr);
+      drawDataRow(sec2Y + rowGap * 3, 'Sertifikat darajasi:', certGrade);
+      drawDivider(sec2Y + rowGap * 3.7);
 
-      ctx.fillStyle = '#fbbf24';
-      ctx.font = '900 40px "Inter", -apple-system, sans-serif';
-      ctx.fillText(gradeInfo.shortGrade, xGrade + boxWidth / 2, boxY + 102);
+      // Qatorlar 3: Sinov natijasi
+      const sec3Y = sec2Y + rowGap * 4.6;
+      drawDataRow(sec3Y, 'Test sinovi natijasi:', scaledScoreComma);
+      drawDivider(sec3Y + rowGap * 0.8);
 
-      ctx.fillStyle = '#fef3c7';
-      ctx.font = 'bold 14px "Inter", -apple-system, sans-serif';
-      const gradeSubText = gradeInfo.subLabel ? `${gradeInfo.subLabel}` : gradeInfo.label;
-      ctx.fillText(gradeSubText, xGrade + boxWidth / 2, boxY + 138);
-
-      // 5. Pastki qism: Serial ID, Sana, Muhr va Tasdiq
-      const footerY = 820;
-
-      // Chap tomon: ID va sana
+      // Qatorlar 4: Muddatlar
+      const sec4Y = sec3Y + rowGap * 1.7;
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 16px "Inter", monospace';
-      ctx.fillText(`ID: ${serialNo}`, 120, footerY);
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 20px "Arial", sans-serif';
+      ctx.fillText('Berilgan sanasi:', leftX, sec4Y);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText(givenDate, leftX + 165, sec4Y);
 
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '16px "Inter", -apple-system, sans-serif';
-      ctx.fillText(`Berilgan sana: ${certDate}`, 120, footerY + 30);
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillText('Amal qilish muddati:', width / 2 + 50, sec4Y);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText(expireDate, width / 2 + 265, sec4Y);
 
-      ctx.fillStyle = '#64748b';
-      ctx.font = '13px "Inter", -apple-system, sans-serif';
-      ctx.fillText("Ushbu hujjat elektron shaklda IlmIldizi tizimi orqali tasdiqlangan.", 120, footerY + 58);
-
-      // O'ng tomon: Digital Verified muhri
-      ctx.textAlign = 'center';
-      const sealX = width - 260;
-      const sealY = footerY + 20;
-
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
+      // O'rta oltin gul/barg bezak chizig'i
+      const ornamentY = sec4Y + 65;
+      ctx.strokeStyle = goldMain;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(sealX, sealY, 65, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 2.5;
+      ctx.moveTo(leftX, ornamentY);
+      ctx.lineTo(width / 2 - 40, ornamentY);
       ctx.stroke();
 
-      ctx.fillStyle = '#fbbf24';
-      ctx.font = 'bold 13px "Inter", sans-serif';
-      ctx.fillText('★ ILMILDIZI ★', sealX, sealY - 24);
+      ctx.beginPath();
+      ctx.moveTo(width / 2 + 40, ornamentY);
+      ctx.lineTo(lineEndX, ornamentY);
+      ctx.stroke();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 16px "Inter", sans-serif';
-      ctx.fillText('DIGITAL', sealX, sealY);
-      ctx.fillText('VERIFIED', sealX, sealY + 20);
+      ctx.fillStyle = goldMain;
+      ctx.font = '22px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('❖ ✦ ❖', width / 2, ornamentY + 8);
 
-      ctx.fillStyle = '#34d399';
-      ctx.font = 'bold 12px "Inter", sans-serif';
-      ctx.fillText('RASMIY MUHR', sealX, sealY + 40);
+      // 6. Pastki QR Kod va Imzo
+      const footerY = height - 200;
 
-      // Faylni yuklab olish
-      canvas.toBlob((blob) => {
-        if (!blob) throw new Error('Blob yaratilmadi');
-        const url = URL.createObjectURL(blob);
+      // Chapda: Direktor
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 22px "Times New Roman", serif';
+      ctx.fillText('Direktor', width / 2 - 120, footerY + 65);
+      ctx.strokeStyle = '#c59b27';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(leftX + 20, footerY + 75);
+      ctx.lineTo(width / 2 - 80, footerY + 75);
+      ctx.stroke();
+
+      // O'ngda: Mas'ul rahbar
+      ctx.textAlign = 'left';
+      ctx.fillText("Mag'rurbek Zaripov", width / 2 + 120, footerY + 65);
+      ctx.beginPath();
+      ctx.moveTo(width / 2 + 80, footerY + 75);
+      ctx.lineTo(lineEndX - 20, footerY + 75);
+      ctx.stroke();
+
+      // Markazda: QR Kod
+      const qrImg = new Image();
+      qrImg.crossOrigin = 'anonymous';
+      qrImg.onload = () => {
+        const qrSize = 130;
+        ctx.drawImage(qrImg, width / 2 - qrSize / 2, footerY, qrSize, qrSize);
+
+        // QR hoshiyasi
+        ctx.strokeStyle = goldMain;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(width / 2 - qrSize / 2 - 4, footerY - 4, qrSize + 8, qrSize + 8);
+
+        finishDownload();
+      };
+      qrImg.onerror = () => {
+        // Fallback agar internet yo'q bo'lsa
+        ctx.strokeStyle = '#0f172a';
+        ctx.strokeRect(width / 2 - 60, footerY, 120, 120);
+        ctx.textAlign = 'center';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('QR VERIFIED', width / 2, footerY + 65);
+        finishDownload();
+      };
+      qrImg.src = qrImgUrl;
+
+      function finishDownload() {
         const a = document.createElement('a');
-        a.href = url;
-        const sanitized = displayName.replace(/[^\w\s-]/gi, '').trim().replace(/\s+/g, '_');
-        a.download = `Sertifikat_${sanitized || 'IlmIldizi'}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.download = `Milliy_Sertifikat_${lastName}_${firstName}.png`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success('Sertifikat rasm (.png) formatida yuklab olindi!');
-      }, 'image/png');
+        toast.success("Sariq-oq rasmiy sertifikat rasm shaklida yuklab olindi!");
+        setDownloading(false);
+      }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Yuklab olishda xatolik yuz berdi');
-    } finally {
+      toast.error(e instanceof Error ? e.message : 'Xatolik yuz berdi');
       setDownloading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="!max-w-4xl sm:!max-w-4xl w-[95vw] overflow-hidden p-0 sm:rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] shadow-2xl max-h-[95vh] overflow-y-auto"
-        showCloseButton={true}
-      >
-        <DialogHeader className="p-4 sm:p-6 pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[var(--border-card)] no-print">
-          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
-            <Award className="size-5 text-[var(--tone-premium-text)]" /> Elektron Natija Sertifikati
-          </DialogTitle>
-          <div className="flex flex-wrap items-center gap-2">
-            {attemptId && (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={downloadingPdf}
-                onClick={handleDownloadPdf}
-                className="gap-1.5 rounded-xl border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-semibold"
-              >
-                <FileText className="size-3.5 text-amber-400" /> {downloadingPdf ? 'Tayyorlanmoqda...' : 'Rasmiy PDF (Muhrli)'}
-              </Button>
-            )}
-            {attemptId && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setCommunityModalOpen(true)}
-                className="gap-1.5 rounded-xl border-amber-400/40 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 hover:from-amber-500/30 hover:to-orange-500/30 text-xs font-bold shadow-sm"
-              >
-                <Sparkles className="size-3.5 text-amber-400" /> Hamjamiyatda ulashish (+15 XP)
-              </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={downloading}
-              onClick={handleDownloadPng}
-              className="gap-1.5 rounded-xl border-[var(--accent-border)] bg-[var(--accent)]/10 text-[var(--accent-text)] hover:bg-[var(--accent)]/20 text-xs font-semibold"
-            >
-              <Download className="size-3.5" /> {downloading ? 'Tayyorlanmoqda...' : 'Rasm yuklab olish (PNG)'}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handlePrint}
-              className="gap-1.5 rounded-xl border-[var(--border-card)] text-xs font-semibold"
-            >
-              <Printer className="size-3.5" /> Chop etish / PDF
-            </Button>
-          </div>
-        </DialogHeader>
-
-        {/* Sertifikat Karkasi */}
-        <div className="p-3 sm:p-6 md:p-8">
-          <div
-            id="certificate-print-area"
-            className="relative overflow-hidden rounded-2xl border-4 border-double border-amber-500/40 bg-gradient-to-b from-[#0b0e14] via-[#101520] to-[#0b0e14] p-6 sm:p-10 md:p-12 text-center shadow-2xl print:p-8 print:border-amber-600 print:bg-white print:text-slate-900"
-          >
-            {/* Fon nur effektlari */}
-            <div className="pointer-events-none absolute -left-16 -top-16 size-48 rounded-full bg-amber-500/10 blur-3xl no-print" />
-            <div className="pointer-events-none absolute -right-16 -bottom-16 size-48 rounded-full bg-[var(--accent)]/10 blur-3xl no-print" />
-
-            {/* Sarlavha / Brend */}
-            <div className="mb-4 flex flex-col items-center">
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-amber-400 print:text-amber-700">
-                O&apos;zbekiston Respublikasi Ta&apos;lim Platformasi
-              </span>
-              <h2 className="font-voice mt-2 text-2xl sm:text-4xl font-black tracking-tight text-white print:text-slate-900">
-                Ilm<span className="text-[var(--accent-text)] print:text-emerald-700">Ildizi</span>
-              </h2>
-              <div className="mt-2.5 h-0.5 w-28 rounded-full bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
-            </div>
-
-            {/* Sertifikat Toifasi */}
-            <div className="my-3">
-              <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-muted-foreground print:text-slate-600">
-                Muvaffaqiyat Sertifikati
-              </span>
-              <p className="text-xs text-muted-foreground print:text-slate-500 mt-1">Ushbu sertifikat tasdiqlaydi:</p>
-            </div>
-
-            {/* O'quvchi Ismi */}
-            <div className="my-4 border-b border-t border-amber-500/20 py-4 print:border-slate-300">
-              <h3 className="font-serif text-2xl sm:text-4xl font-extrabold tracking-wide text-white print:text-slate-900">
-                {displayName}
-              </h3>
-            </div>
-
-            {/* Test Ma'lumotlari */}
-            <div className="my-4 space-y-1.5 text-sm text-[var(--text-secondary)] print:text-slate-700">
-              <p className="text-xs sm:text-sm">
-                quyidagi fan va format bo&apos;yicha sinov testini muvaffaqiyatli yakunladi:
-              </p>
-              <p className="font-bold text-[var(--accent-text)] print:text-slate-900 text-base sm:text-xl">
-                &ldquo;{testTitle}&rdquo;
-              </p>
-            </div>
-
-            {/* Natijalar Matritsasi — To'liq keng va ajratilgan qatorlar (Ustma-ust tushmaydi) */}
-            <div className="my-6 grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-2xl border border-amber-500/25 bg-white/[0.02] p-4 sm:p-5 backdrop-blur-sm shadow-inner print:border-slate-300 print:bg-slate-50">
-              {/* Ball */}
-              <div className="flex flex-col items-center justify-center p-2 border-b sm:border-b-0 sm:border-r border-amber-500/20 print:border-slate-200">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground print:text-slate-500">
-                  To&apos;plangan Ball
-                </span>
-                <span className="font-mono text-3xl sm:text-4xl font-black text-emerald-400 print:text-emerald-700 mt-1.5">
-                  {formattedScore}%
-                </span>
-                <span className="text-[11px] text-muted-foreground print:text-slate-500 mt-0.5">
-                  Umumiy natija
-                </span>
-              </div>
-
-              {/* To'g'ri Javoblar */}
-              <div className="flex flex-col items-center justify-center p-2 border-b sm:border-b-0 sm:border-r border-amber-500/20 print:border-slate-200">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground print:text-slate-500">
-                  To&apos;g&apos;ri Javoblar
-                </span>
-                <span className="font-mono text-2xl sm:text-3xl font-extrabold text-white print:text-slate-900 mt-1.5">
-                  {correctCount} / {totalQuestions}
-                </span>
-                <span className="text-[11px] text-muted-foreground print:text-slate-500 mt-0.5">
-                  Jami savollardan
-                </span>
-              </div>
-
-              {/* Baholash Darajasi */}
-              <div className="flex flex-col items-center justify-center p-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground print:text-slate-500">
-                  Baholash Darajasi
-                </span>
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <Badge
-                    variant="outline"
-                    className={`font-black text-sm sm:text-base px-3 py-0.5 ${gradeInfo.tone} print:${gradeInfo.printTone}`}
-                  >
-                    {gradeInfo.shortGrade}
-                  </Badge>
-                  {gradeInfo.subLabel && (
-                    <span className="text-xs font-semibold text-amber-300 print:text-amber-800">
-                      ({gradeInfo.subLabel})
-                    </span>
-                  )}
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[94vh] max-w-4xl overflow-y-auto border border-amber-300 bg-[#fefcf6] text-[#0f172a] shadow-2xl p-4 sm:p-6 print:border-none print:p-0">
+          <DialogHeader className="no-print border-b border-amber-200/80 pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600">
+                  <Award className="size-5" />
                 </div>
-                <span className="text-[11px] text-muted-foreground print:text-slate-500 mt-1">
-                  {gradeInfo.label}
-                </span>
-              </div>
-            </div>
-
-            {/* Pastki Qism: ID, Sana va Muhr */}
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-amber-500/20 pt-5 text-left text-xs text-muted-foreground print:border-slate-300 print:text-slate-600">
-              <div className="space-y-1 text-center sm:text-left">
-                <p className="font-mono font-bold text-amber-400 print:text-amber-800 text-sm">
-                  ID: {serialNo}
-                </p>
-                <p className="font-medium text-slate-300 print:text-slate-700">
-                  Sana: {certDate}
-                </p>
-                <p className="text-[11px] text-slate-500 print:text-slate-400">
-                  Elektron tarzda tasdiqlangan rasmiy natija hujjati
-                </p>
-              </div>
-
-              {/* Rasmiy Muhr nishoni */}
-              <div className="flex items-center gap-2.5 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 font-semibold text-amber-300 print:border-amber-700 print:text-amber-800 print:bg-amber-50 shadow-sm">
-                <ShieldCheck className="size-5 text-amber-400 print:text-amber-700" />
-                <div className="text-left">
-                  <p className="text-[10px] uppercase font-bold tracking-wider leading-none text-amber-400/80 print:text-amber-800">
-                    IlmIldizi Platformasi
+                <div>
+                  <DialogTitle className="text-base sm:text-lg font-bold text-[#0f172a]">
+                    Rasmiy Milliy Sertifikat
+                  </DialogTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Bilim va malakalarni baholash agentligi (BMB) standarti
                   </p>
-                  <p className="text-xs font-black tracking-wide leading-tight">Digital Verified</p>
                 </div>
+              </div>
+
+              {/* Yuklab olish tugmalari */}
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setCommunityModalOpen(true)}
+                  className="gap-1.5 rounded-xl border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100 text-xs font-bold"
+                >
+                  <Sparkles className="size-3.5 text-amber-600" /> Hamjamiyatda ulashish
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={downloading}
+                  onClick={handleDownloadPng}
+                  className="gap-1.5 rounded-xl border-amber-500 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm"
+                >
+                  <Download className="size-3.5" /> {downloading ? 'Tayyorlanmoqda...' : 'Rasm (PNG) yuklab olish'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={downloadingPdf}
+                  onClick={handleDownloadPdf}
+                  className="gap-1.5 rounded-xl border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold"
+                >
+                  <Download className="size-3.5" /> {downloadingPdf ? '...' : 'PDF yuklab olish'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handlePrint}
+                  className="gap-1.5 rounded-xl border-slate-300 bg-white text-xs font-semibold"
+                >
+                  <Printer className="size-3.5" /> Chop etish
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {/* ═════════════════════════════════════════════════════════════
+              RASMIY SARIQ-OQ SERTIFIKAT BLOKI (A4 PORTRAIT)
+              ═════════════════════════════════════════════════════════════ */}
+          <div className="py-2 sm:py-4 flex justify-center">
+            <div
+              id="certificate-print-area"
+              className="relative w-full max-w-[680px] bg-[#fefcf6] border-[4px] border-[#c59b27] p-2 sm:p-3.5 shadow-2xl rounded-sm print:m-0 print:w-full print:border-none print:shadow-none"
+            >
+              {/* Ichki nozik tilla hoshiya */}
+              <div className="relative border-[1.5px] border-[#d4af37] p-5 sm:p-8 bg-[#fdfbf7] flex flex-col items-center">
+                
+                {/* Chap-pastki sharqona girih naqshi */}
+                <div className="pointer-events-none absolute bottom-3 left-3 size-24 sm:size-28 opacity-75">
+                  <svg viewBox="0 0 100 100" className="size-full stroke-[#d4af37] fill-none stroke-[1.5]">
+                    <rect x="20" y="20" width="60" height="60" />
+                    <rect x="20" y="20" width="60" height="60" transform="rotate(45 50 50)" />
+                    <circle cx="50" cy="50" r="16" />
+                    <circle cx="50" cy="50" r="30" strokeDasharray="3 3" />
+                  </svg>
+                </div>
+
+                {/* O'ng-yuqori sharqona girih naqshi */}
+                <div className="pointer-events-none absolute top-3 right-3 size-24 sm:size-28 opacity-75">
+                  <svg viewBox="0 0 100 100" className="size-full stroke-[#d4af37] fill-none stroke-[1.5]">
+                    <rect x="20" y="20" width="60" height="60" />
+                    <rect x="20" y="20" width="60" height="60" transform="rotate(45 50 50)" />
+                    <circle cx="50" cy="50" r="16" />
+                  </svg>
+                </div>
+
+                {/* 1. Gerb / Logo */}
+                <div className="flex flex-col items-center text-center mb-3">
+                  <div className="size-16 sm:size-20 rounded-full border-2 border-[#c59b27] bg-white flex flex-col items-center justify-center shadow-xs p-1 mb-2">
+                    <span className="text-[9px] sm:text-[10px] font-bold text-rose-700 tracking-tighter">★ DIPLOMAT ★</span>
+                    <span className="text-xs sm:text-sm font-black text-[#1e3a8a] leading-none">TEAM</span>
+                    <span className="text-[7px] text-slate-500 leading-tight mt-0.5">BILIM AGENTLIGI</span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm font-bold text-[#1e3a8a] uppercase tracking-wide">
+                    DIPLOMAT JAMOASI HUZURIDAGI
+                  </p>
+                  <p className="text-xs sm:text-sm font-extrabold text-[#1e3a8a] uppercase tracking-wide">
+                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI
+                  </p>
+                </div>
+
+                {/* 2. Asosiy Sarlavha */}
+                <div className="text-center my-3 sm:my-4">
+                  <h2 className="font-serif text-lg sm:text-2xl font-black text-[#0f172a] uppercase tracking-wide leading-tight">
+                    UMUMTA&apos;LIM FANINI BILISH DARAJASI
+                  </h2>
+                  <h2 className="font-serif text-lg sm:text-2xl font-black text-[#0f172a] uppercase tracking-wide leading-tight">
+                    TO&apos;G&apos;RISIDA SERTIFIKAT
+                  </h2>
+                </div>
+
+                {/* 3. Ma'lumotlar bloki (Qatorma-qator va tillarang chiziqlar) */}
+                <div className="w-full mt-3 space-y-4 text-xs sm:text-sm">
+                  {/* Blok 1 */}
+                  <div className="space-y-1.5 pb-2 border-b border-[#e5c158]/90">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#1e3a8a]">Sertifikat raqami:</span>
+                      <span className="font-mono font-bold text-[#0f172a] text-right">{certNumber}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#1e3a8a]">Talabgorning shaxsiy kodi:</span>
+                      <span className="font-mono font-bold text-[#0f172a] text-right">{personalCode}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#0f172a]">Familiyasi:</span>
+                      <span className="font-bold text-[#0f172a] tracking-wide text-right">{lastName}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#0f172a]">Ismi:</span>
+                      <span className="font-bold text-[#0f172a] tracking-wide text-right">{firstName}</span>
+                    </div>
+                  </div>
+
+                  {/* Blok 2 */}
+                  <div className="space-y-1.5 pb-2 border-b border-[#e5c158]/90">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#0f172a]">Umumta&apos;lim fani:</span>
+                      <span className="font-bold text-[#0f172a] text-right">{testTitle || "Tarix Milliy Sertifikat"}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#0f172a]">Umumiy to&apos;plagan bali:</span>
+                      <span className="font-mono font-black text-[#0f172a] text-base text-right">{scaledScoreStr}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#0f172a]">Umumiy ballga nisbatan foiz ko&apos;rsatkichi:</span>
+                      <span className="font-mono font-bold text-[#0f172a] text-right">{pctStr}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#0f172a]">Sertifikat darajasi:</span>
+                      <span className="font-mono font-black text-amber-700 text-base sm:text-lg text-right">{certGrade}</span>
+                    </div>
+                  </div>
+
+                  {/* Blok 3: Test sinovi natijasi */}
+                  <div className="flex items-center justify-between pb-2 border-b border-[#e5c158]/90">
+                    <span className="font-bold text-[#0f172a]">Test sinovi natijasi:</span>
+                    <span className="font-mono font-black text-[#0f172a] text-base text-right">{scaledScoreComma}</span>
+                  </div>
+
+                  {/* Blok 4: Sanalar */}
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[#1e3a8a]">Berilgan sanasi:</span>
+                      <span className="font-mono text-xs text-[#0f172a]">{givenDate}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[#1e3a8a]">Amal qilish muddati:</span>
+                      <span className="font-mono text-xs text-[#0f172a]">{expireDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Markaziy oltin bezak ajratgich */}
+                <div className="w-full flex items-center justify-center gap-3 my-5 sm:my-6">
+                  <div className="h-[1.5px] flex-1 bg-gradient-to-r from-transparent via-[#c59b27] to-[#c59b27]" />
+                  <span className="text-[#c59b27] text-base font-serif">❖ ✦ ❖</span>
+                  <div className="h-[1.5px] flex-1 bg-gradient-to-l from-transparent via-[#c59b27] to-[#c59b27]" />
+                </div>
+
+                {/* 4. Pastki qism: Direktor, QR Kod, Mas'ul */}
+                <div className="w-full flex items-center justify-between gap-2 sm:gap-4 mt-1 pt-1">
+                  {/* Direktor */}
+                  <div className="flex-1 flex flex-col items-center">
+                    <span className="font-serif font-bold text-[#0f172a] text-sm sm:text-base">Direktor</span>
+                    <div className="w-full max-w-[120px] sm:max-w-[150px] border-b border-[#c59b27] mt-3" />
+                  </div>
+
+                  {/* QR Kod (Markazda) */}
+                  <div className="shrink-0 flex flex-col items-center justify-center p-1.5 border-2 border-[#c59b27] rounded-md bg-white shadow-xs">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={qrImgUrl}
+                      alt="Sertifikat QR kodi"
+                      className="size-20 sm:size-24 object-contain"
+                    />
+                    <span className="text-[8px] font-mono font-bold text-[#1e3a8a] mt-0.5 tracking-tight">
+                      VERIFIED CERT
+                    </span>
+                  </div>
+
+                  {/* Mas'ul shaxs */}
+                  <div className="flex-1 flex flex-col items-center">
+                    <span className="font-serif font-bold text-[#0f172a] text-xs sm:text-sm text-center">
+                      Mag&apos;rurbek Zaripov
+                    </span>
+                    <div className="w-full max-w-[120px] sm:max-w-[150px] border-b border-[#c59b27] mt-3" />
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
-        </div>
+        </DialogContent>
+      </Dialog>
 
-        {/* Chop etish uchun CSS qoidalari */}
-        <style jsx global>{`
-          @media print {
-            body * {
-              visibility: hidden !important;
-            }
-            .no-print {
-              display: none !important;
-            }
-            #certificate-print-area,
-            #certificate-print-area * {
-              visibility: visible !important;
-            }
-            #certificate-print-area {
-              position: fixed !important;
-              left: 0 !important;
-              top: 0 !important;
-              width: 100vw !important;
-              max-width: 100% !important;
-              margin: 0 !important;
-              padding: 24px !important;
-              border: 3px double #d97706 !important;
-              border-radius: 16px !important;
-              background: #ffffff !important;
-              color: #0f172a !important;
-              box-shadow: none !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              page-break-inside: avoid !important;
-              break-inside: avoid !important;
-            }
-            @page {
-              size: A4 portrait;
-              margin: 10mm;
-            }
-          }
-        `}</style>
-      </DialogContent>
-      {attemptId && (
-        <ShareToCommunityModal
-          open={communityModalOpen}
-          onOpenChange={setCommunityModalOpen}
-          attemptId={attemptId}
-          testTitle={testTitle}
-          score={score}
-          grade={gradeInfo.grade}
-          correctCount={correctCount}
-          totalQuestions={totalQuestions}
-          postType="certificate"
-        />
-      )}
-    </Dialog>
+      <ShareToCommunityModal
+        open={communityModalOpen}
+        onOpenChange={setCommunityModalOpen}
+        attemptId={attemptId}
+        testTitle={testTitle}
+        score={score}
+        correctCount={correctCount}
+        totalQuestions={totalQuestions}
+        postType="certificate"
+      />
+    </>
   );
 }
