@@ -301,6 +301,10 @@ class TestSet(models.Model):
     )
     is_random = models.BooleanField(default=False, help_text="One-off test generated for a single random-quiz attempt; hidden from the browsable catalog.")
     is_premium = models.BooleanField(default=True, help_text="Mock test tizimi uchun bir martalik xarid qilganlargagina ochiq. Tasodifiy test har doim bepul.")
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Test narxi (so'mda). Bo'sh bo'lsa, umumiy mock test obuna rejasi narxi ishlatiladi.",
+    )
     is_published = models.BooleanField(
         default=False,
         help_text="Qoralama (draft) yoki nashr etilgan. Faqat nashr etilgan testlar o'quvchilar "

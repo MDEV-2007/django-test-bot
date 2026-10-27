@@ -39,6 +39,7 @@ export type TestAuthor = {
 type TestItem = {
   id: number; title: string; description: string; category: string;
   subject: string | null; duration_minutes: number; questions_count: number; is_premium: boolean;
+  price?: number | null;
   is_unlocked: boolean;
   is_live_mock?: boolean;
   scheduled_at?: string | null;
@@ -851,8 +852,8 @@ export default function TestsPage() {
                       <Link href={buyHref}>
                         <Lock className="size-3.5" />
                         {data.mock_plan
-                          ? `${Number(data.mock_plan.price).toLocaleString('uz-UZ')} so'mga ochish`
-                          : 'Mock test tarifi bilan ochiladi'}
+                          ? `${Number(t.price ?? data.mock_plan.price).toLocaleString('uz-UZ')} so'mga ochish`
+                          : (t.price ? `${Number(t.price).toLocaleString('uz-UZ')} so'mga ochish` : 'Mock test tarifi bilan ochiladi')}
                         <ArrowRight className="size-4" />
                       </Link>
                     </Button>

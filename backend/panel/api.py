@@ -937,6 +937,8 @@ def testset_detail_api(request, pk):
         'id': ts.id, 'title': ts.title, 'description': ts.description,
         'subject': ts.subject.name if ts.subject else None,
         'category': ts.category,
+        'is_premium': ts.is_premium,
+        'price': float(ts.price) if ts.price is not None else None,
         'author': (ts.created_by.get_full_name() or ts.created_by.username) if ts.created_by else '—',
         'status': _testset_status(ts), 'attempt_count': ts.attempts.count(),
         'listening_audio': ts.listening_audio.url if ts.listening_audio else None,
@@ -953,7 +955,9 @@ def testset_edit_api(request, pk):
             'id': ts.id, 'title': ts.title, 'subject_id': ts.subject_id,
             'description': ts.description, 'category': ts.category,
             'duration_minutes': ts.duration_minutes, 'created_by_id': ts.created_by_id,
-            'is_premium': ts.is_premium, 'is_published': ts.is_published, 'is_archived': ts.is_archived,
+            'is_premium': ts.is_premium,
+            'price': float(ts.price) if ts.price is not None else None,
+            'is_published': ts.is_published, 'is_archived': ts.is_archived,
             'is_live_mock': ts.is_live_mock,
             'scheduled_at': (ts.scheduled_at.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%dT%H:%M') if timezone.is_aware(ts.scheduled_at) else ts.scheduled_at.strftime('%Y-%m-%dT%H:%M')) if ts.scheduled_at else '',
             'notify_all': ts.notify_all,
@@ -975,6 +979,8 @@ def testset_edit_api(request, pk):
     data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
     if 'scheduled_at' in data and not data['scheduled_at']:
         data['scheduled_at'] = None
+    if 'price' in data and (data['price'] is None or data['price'] == ''):
+        data['price'] = None
     form = TestSetForm(data, instance=ts)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)

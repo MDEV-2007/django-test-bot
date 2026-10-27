@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 type TestSetDetail = {
   id: number; title: string; description: string; subject: string | null; author: string;
   category?: string; listening_audio?: string | null;
+  is_premium?: boolean; price?: number | null;
   status: { display: string; tone: string }; attempt_count: number;
   questions: { id: number; body: string; question_type: string }[];
 };
@@ -87,7 +88,16 @@ export default function PanelTestDetailPage() {
           backHref="/panel/tests"
           title={data.title}
           description={[data.subject, data.author, `${data.attempt_count} urinish`].filter(Boolean).join(' · ')}
-          actions={<Badge variant="outline" className={TONE[data.status.tone] ?? ''}>{data.status.display}</Badge>}
+          actions={
+            <div className="flex items-center gap-2">
+              {data.is_premium && (
+                <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 font-semibold">
+                  PRO {data.price ? `(${Number(data.price).toLocaleString('uz-UZ')} so'm)` : '(10 000 so\'m)'}
+                </Badge>
+              )}
+              <Badge variant="outline" className={TONE[data.status.tone] ?? ''}>{data.status.display}</Badge>
+            </div>
+          }
         />
 
         <div className="flex flex-wrap gap-2">

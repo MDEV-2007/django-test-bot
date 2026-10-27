@@ -81,9 +81,11 @@ class CheckoutAPI(APIView):
             return Response({'error': error}, status=400)
 
         screenshot.name = f"payment_{profile.id}_{int(time.time())}.{safe_ext}"
+        target_test = self._target_test(plan, request.data.get('test'))
+        amount = target_test.price if (target_test and target_test.price is not None) else plan.price
         payment = Payment.objects.create(
-            profile=profile, plan=plan, amount=plan.price, status='pending', source='web',
-            screenshot=screenshot, test=self._target_test(plan, request.data.get('test')),
+            profile=profile, plan=plan, amount=amount, status='pending', source='web',
+            screenshot=screenshot, test=target_test,
         )
         try:
             from telegrambot.payment_review import send_payment_review_notification
@@ -107,10 +109,11 @@ class CheckoutAPI(APIView):
         except SubscriptionPlan.DoesNotExist:
             return Response({'error': 'Reja topilmadi.'}, status=404)
         target = self._target_test(plan, request.GET.get('test'))
+        amount = target.price if (target and target.price is not None) else plan.price
         return Response({
-            'plan': {'id': plan.id, 'name': plan.name, 'price': str(plan.price)},
+            'plan': {'id': plan.id, 'name': plan.name, 'price': str(amount)},
             # Mock test tarifida qaysi test sotib olinayotgani aniq ko'rsatiladi.
-            'test': {'id': target.id, 'title': target.title} if target else None,
+            'test': {'id': target.id, 'title': target.title, 'price': str(amount)} if target else None,
             'card_number': settings.PREMIUM_CARD_NUMBER,
             'card_holder': settings.PREMIUM_CARD_HOLDER,
         })

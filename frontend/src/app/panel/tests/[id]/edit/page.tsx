@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, Save, Trash2, Flame, Send, CheckCircle2, Headphones, Music, Upload } from 'lucide-react';
+import { Loader2, Save, Trash2, Flame, Send, CheckCircle2, Headphones, Music, Upload, Coins } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, apiUpload } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -29,7 +29,7 @@ type Option = { value: string | number; label: string };
 type TestSetEdit = {
   id: number; title: string; subject_id: number | null; description: string; category: string;
   duration_minutes: number; created_by_id: number | null;
-  is_premium: boolean; is_published: boolean; is_archived: boolean;
+  is_premium: boolean; price?: number | null; is_published: boolean; is_archived: boolean;
   is_live_mock?: boolean; scheduled_at?: string;
   notify_all?: boolean; notified_at?: string | null;
   listening_audio?: string | null;
@@ -73,7 +73,9 @@ export default function PanelTestSetEditPage() {
         body: JSON.stringify({
           title: ts.title, subject: ts.subject_id, description: ts.description, category: ts.category,
           duration_minutes: ts.duration_minutes, created_by: ts.created_by_id,
-          is_premium: ts.is_premium, is_published: ts.is_published, is_archived: ts.is_archived,
+          is_premium: ts.is_premium,
+          price: ts.price !== undefined && ts.price !== null && String(ts.price).trim() !== '' ? Number(ts.price) : null,
+          is_published: ts.is_published, is_archived: ts.is_archived,
           is_live_mock: Boolean(ts.is_live_mock),
           scheduled_at: ts.scheduled_at || null,
           notify_all: ts.notify_all !== false,
@@ -443,12 +445,12 @@ export default function PanelTestSetEditPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Holat</CardTitle></CardHeader>
-          <CardContent>
+          <CardHeader><CardTitle className="text-base">Holat va Narx</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
             {TOGGLES.map((t, i) => (
               <div key={t.key}>
-                {i > 0 && <Separator />}
-                <div className="flex items-center justify-between gap-4 py-3">
+                {i > 0 && <Separator className="my-2" />}
+                <div className="flex items-center justify-between gap-4 py-2">
                   <div className="space-y-0.5">
                     <Label htmlFor={t.key} className="text-sm font-medium">{t.label}</Label>
                     <p className="text-xs text-muted-foreground">{t.hint}</p>
@@ -457,6 +459,27 @@ export default function PanelTestSetEditPage() {
                 </div>
               </div>
             ))}
+
+            {ts.is_premium && (
+              <div className="pt-3 border-t border-border/60 space-y-2">
+                <Label htmlFor="ts-price" className="text-xs font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                  <Coins className="size-4" />
+                  Ushbu testning maxsus narxi (so&apos;mda)
+                </Label>
+                <Input
+                  id="ts-price"
+                  type="number"
+                  min={0}
+                  step={1000}
+                  placeholder="Masalan: 15000 (bo'sh qolsa umumiy reja narxi ishlatiladi)"
+                  value={ts.price ?? ''}
+                  onChange={(e) => setTs({ ...ts, price: e.target.value === '' ? null : Number(e.target.value) })}
+                />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  O&apos;quvchi aynan shu testni xarid qilayotganda to&apos;laydigan summa. Agar bo&apos;sh qoldirsangiz, tizimning standart mock narxi (10 000 so&apos;m) olinadi.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

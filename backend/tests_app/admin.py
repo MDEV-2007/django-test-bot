@@ -218,7 +218,7 @@ class ExamSectionInline(admin.TabularInline):
 
 @admin.register(TestSet)
 class TestSetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'subject', 'category', 'duration_minutes', 'is_live_mock', 'is_published', 'created_at')
+    list_display = ('title', 'subject', 'category', 'duration_minutes', 'is_live_mock', 'is_published', 'is_premium', 'price', 'created_at')
     list_filter = ('category', 'subject', 'is_live_mock', 'is_published', 'is_premium')
     search_fields = ('title', 'description')
     filter_horizontal = ('questions', 'remind_users')
@@ -228,7 +228,7 @@ class TestSetAdmin(admin.ModelAdmin):
             'fields': ('title', 'description', 'subject', 'category', 'duration_minutes', 'created_by')
         }),
         ("Jonli Mock va Sozlamalar", {
-            'fields': ('is_live_mock', 'scheduled_at', 'is_published', 'is_premium', 'notify_all')
+            'fields': ('is_live_mock', 'scheduled_at', 'is_published', 'is_premium', 'price', 'notify_all')
         }),
         ("CEFR Audio (Super Admin)", {
             'fields': ('listening_audio',),

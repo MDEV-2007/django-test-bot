@@ -120,8 +120,8 @@ GOOGLE_OAUTH_CLIENT_ID = os.environ.get(
 )
 
 # Card shown to students for premium payments. Set in .env.
-PREMIUM_CARD_NUMBER = os.environ.get('PREMIUM_CARD_NUMBER', '0000 0000 0000 0000')
-PREMIUM_CARD_HOLDER = os.environ.get('PREMIUM_CARD_HOLDER', "Ism Familiya (kartani .env faylida kiriting)")
+PREMIUM_CARD_NUMBER = os.environ.get('PREMIUM_CARD_NUMBER', '4198 1300 0131 6933')
+PREMIUM_CARD_HOLDER = os.environ.get('PREMIUM_CARD_HOLDER', 'Ismoilov Murodulla')
 
 # Groq Cloud API key (https://console.groq.com) used for the AI Mentor chat and the
 # post-test AI feedback. Set in .env; when empty, both features fall back to their

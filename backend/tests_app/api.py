@@ -104,6 +104,7 @@ def _test_payload(t, social=None, unlocked=False):
         # hisoblanadi, chunki o'quvchi baribir tayyor javoblardan tanlaydi.
         'answer_mode': _answer_mode(t),
         'is_premium': t.is_premium,
+        'price': float(t.price) if getattr(t, 'price', None) is not None else None,
         'is_live_mock': getattr(t, 'is_live_mock', False),
         'scheduled_at': _iso_scheduled_at(getattr(t, 'scheduled_at', None)),
         # `is_unlocked` — shu O'QUVCHI uchun: global mock-test kirishi yoki aynan shu
