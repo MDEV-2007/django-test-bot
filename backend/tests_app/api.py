@@ -725,6 +725,7 @@ def finish_api(request, attempt_id):
         if elapsed < allowed * 0.20:
             attempt.is_speed_flagged = True
 
+    tab_switches = request.data.get('tab_switches') if (hasattr(request, 'data') and isinstance(request.data, dict)) else None
     if tab_switches is not None:
         try:
             attempt.tab_switch_count = max(0, int(tab_switches))
