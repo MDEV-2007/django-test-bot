@@ -301,11 +301,19 @@ def handle_photo(chat_id, tg_user, photo_sizes):
     payment.save()
 
     send_message(chat_id, "Skrinshotingiz qabul qilindi! "
-                          "Admin tekshirib chiqqach, premium avtomatik faollashadi.")
-    notify_admins(
-        f"Yangi to'lov: {profile.user.username} — {payment.plan.name} "
-        f"({payment.amount:.0f} so'm). Ko'rib chiqish uchun admin panelga o'ting."
-    )
+                          "Admin tekshirib chiqqach, test / premium avtomatik ochiladi.")
+    try:
+        from .payment_review import send_payment_review_notification
+        if not send_payment_review_notification(payment):
+            notify_admins(
+                f"Yangi to'lov: {profile.user.username} — {payment.plan.name} "
+                f"({payment.amount:.0f} so'm). Ko'rib chiqish uchun admin panelga o'ting."
+            )
+    except Exception:
+        notify_admins(
+            f"Yangi to'lov: {profile.user.username} — {payment.plan.name} "
+            f"({payment.amount:.0f} so'm). Ko'rib chiqish uchun admin panelga o'ting."
+        )
 
 
 def notify_admins(text):
@@ -335,6 +343,19 @@ def process_update(update):
         cq = update['callback_query']
         chat_id = cq['message']['chat']['id']
         data = cq.get('data', '')
+
+        # Yashirin kanaldan to'lovni tasdiqlash yoki rad etish
+        if data.startswith('pay_approve_') or data.startswith('pay_reject_'):
+            from .payment_review import handle_payment_callback
+            handle_payment_callback(
+                chat_id=chat_id,
+                message_id=cq['message']['message_id'],
+                callback_query_id=cq['id'],
+                admin_user=cq.get('from', {}),
+                callback_data=data,
+            )
+            return
+
         if data == 'check_subscription':
             handle_check_subscription(chat_id, cq['from'], cq['id'])
             return

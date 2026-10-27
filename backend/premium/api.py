@@ -82,6 +82,11 @@ class CheckoutAPI(APIView):
             profile=profile, plan=plan, amount=plan.price, status='pending', source='web',
             screenshot=screenshot, test=self._target_test(plan, request.data.get('test')),
         )
+        try:
+            from telegrambot.payment_review import send_payment_review_notification
+            send_payment_review_notification(payment)
+        except Exception:
+            pass
         return Response({'payment_id': payment.id})
 
     @staticmethod

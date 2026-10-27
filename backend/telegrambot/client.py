@@ -105,3 +105,81 @@ def download_file(file_id):
         logger.exception("Failed downloading Telegram file %s", file_id)
         return None
     return resp.content, file_path.split('/')[-1]
+
+
+def send_photo(chat_id, photo, caption=None, reply_markup=None, parse_mode='HTML'):
+    """Send photo with caption and inline keyboard to a chat or channel."""
+    if not settings.TELEGRAM_BOT_TOKEN:
+        logger.warning("TELEGRAM_BOT_TOKEN is not set; skipping sendPhoto")
+        return {'ok': False}
+
+    import os
+    from django.core.cache import cache
+    if cache.get(_DOWN_KEY):
+        return {'ok': False, 'description': 'telegram api unreachable'}
+
+    data = {'chat_id': str(chat_id)}
+    if caption:
+        data['caption'] = caption
+    if parse_mode:
+        data['parse_mode'] = parse_mode
+    if reply_markup:
+        data['reply_markup'] = json.dumps(reply_markup) if isinstance(reply_markup, dict) else reply_markup
+
+    files = None
+    close_file = False
+    file_obj = None
+
+    try:
+        if isinstance(photo, str):
+            if os.path.exists(photo):
+                file_obj = open(photo, 'rb')
+                close_file = True
+                files = {'photo': (os.path.basename(photo), file_obj, 'image/jpeg')}
+            else:
+                data['photo'] = photo
+        elif hasattr(photo, 'read'):
+            if hasattr(photo, 'seek'):
+                try:
+                    photo.seek(0)
+                except Exception:
+                    pass
+            fname = getattr(photo, 'name', 'screenshot.jpg')
+            if fname:
+                fname = os.path.basename(fname)
+            files = {'photo': (fname or 'screenshot.jpg', photo.read(), 'image/jpeg')}
+        elif isinstance(photo, bytes):
+            files = {'photo': ('screenshot.jpg', photo, 'image/jpeg')}
+
+        url = api_url('sendPhoto')
+        if files:
+            resp = SESSION.post(url, data=data, files=files, timeout=(10, 35))
+        else:
+            resp = SESSION.post(url, data=data, timeout=(10, 35))
+
+        data_resp = resp.json()
+        if not data_resp.get('ok'):
+            logger.warning("Telegram sendPhoto failed: %s", data_resp)
+        return data_resp
+    except Exception:
+        logger.exception("Telegram sendPhoto exception")
+        return {'ok': False}
+    finally:
+        if close_file and file_obj:
+            try:
+                file_obj.close()
+            except Exception:
+                pass
+
+
+def edit_message_caption(chat_id, message_id, caption, reply_markup=None, parse_mode='HTML'):
+    kwargs = {
+        'chat_id': chat_id,
+        'message_id': message_id,
+        'caption': caption,
+    }
+    if parse_mode:
+        kwargs['parse_mode'] = parse_mode
+    if reply_markup is not None:
+        kwargs['reply_markup'] = json.dumps(reply_markup) if isinstance(reply_markup, dict) else reply_markup
+    return api_call('editMessageCaption', **kwargs)

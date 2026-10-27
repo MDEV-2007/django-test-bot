@@ -90,8 +90,9 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 TELEGRAM_WEBHOOK_SECRET = os.environ.get('TELEGRAM_WEBHOOK_SECRET', '')
 TELEGRAM_WEBHOOK_MAX_CONNECTIONS = int(os.environ.get('TELEGRAM_WEBHOOK_MAX_CONNECTIONS', '40'))
 
-# Chat that receives new-payment notifications (optional; must be a numeric chat id).
-ADMIN_TELEGRAM_CHAT_ID = os.environ.get('ADMIN_TELEGRAM_CHAT_ID', '')
+# Chat or Channel that receives new-payment notifications with cheque photo & approve/reject buttons.
+ADMIN_TELEGRAM_CHAT_ID = os.environ.get('ADMIN_TELEGRAM_CHAT_ID', '-1004317888253')
+PAYMENT_CHANNEL_ID = os.environ.get('PAYMENT_CHANNEL_ID', os.environ.get('ADMIN_TELEGRAM_CHAT_ID', '-1004317888253'))
 
 # Channel the bot posts the daily "qiyin savol" to (numeric id, e.g. -100123456789, or
 # @channelusername for a public channel). The bot must be an admin of this channel.
