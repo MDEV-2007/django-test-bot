@@ -3266,39 +3266,80 @@ def generate_certificate_api(request, attempt_pk):
         if font_bold_file:
             page.insert_font(fontname="FBold", fontfile=font_bold_file)
 
-        # Sariq-oq rasmiy ranglar palitrasi
+        # Shablonga 100% mos ranglar palitrasi
         c_bg = (254/255, 252/255, 246/255)
-        c_gold_main = (197/255, 155/255, 39/255)
-        c_gold_light = (226/255, 194/255, 117/255)
-        c_blue = (30/255, 58/255, 138/255)
+        c_gold_main = (205/255, 155/255, 45/255)
+        c_gold_light = (228/255, 196/255, 120/255)
+        c_blue = (28/255, 60/255, 135/255)
         c_dark = (15/255, 23/255, 42/255)
+        c_red = (185/255, 28/255, 28/255)
 
         # 1. Fon
         page.draw_rect(pymupdf.Rect(0, 0, page_w, page_h), color=c_bg, fill=c_bg)
 
         # 2. Qo'shaloq tilla hoshiyalar
-        page.draw_rect(pymupdf.Rect(20, 20, page_w - 20, page_h - 20), color=c_gold_main, width=2.5)
-        page.draw_rect(pymupdf.Rect(26, 26, page_w - 26, page_h - 26), color=c_gold_light, width=1.0)
+        margin_out = 18
+        margin_in = 24
+        page.draw_rect(pymupdf.Rect(margin_out, margin_out, page_w - margin_out, page_h - margin_out), color=c_gold_main, width=2.5)
+        page.draw_rect(pymupdf.Rect(margin_in, margin_in, page_w - margin_in, page_h - margin_in), color=c_gold_light, width=1.0)
 
-        # 3. Yuqori logo / matnlar
-        page.draw_circle(pymupdf.Point(page_w / 2, 72), 26, color=c_gold_main, fill=(1, 1, 1), width=1.5)
-        page.insert_textbox(pymupdf.Rect(page_w / 2 - 30, 56, page_w / 2 + 30, 68), "DIPLOMAT", fontsize=7, fontname=font_bold, color=(185/255, 28/255, 28/255), align=1)
-        page.insert_textbox(pymupdf.Rect(page_w / 2 - 30, 67, page_w / 2 + 30, 80), "TEAM", fontsize=10, fontname=font_bold, color=c_blue, align=1)
+        # Sharqona girih naqshlari (Top-Right va Bottom-Left burchaklarda)
+        def draw_girih_corner(cx, cy, size=46):
+            half = size / 2
+            page.draw_rect(pymupdf.Rect(cx - half, cy - half, cx + half, cy + half), color=c_gold_main, width=1.0)
+            p1 = pymupdf.Point(cx, cy - half)
+            p2 = pymupdf.Point(cx + half, cy)
+            p3 = pymupdf.Point(cx, cy + half)
+            p4 = pymupdf.Point(cx - half, cy)
+            page.draw_polyline([p1, p2, p3, p4, p1], color=c_gold_main, width=1.0)
+            page.draw_circle(pymupdf.Point(cx, cy), size * 0.32, color=c_gold_main, width=0.9)
+            ihalf = size * 0.22
+            ip1 = pymupdf.Point(cx, cy - ihalf)
+            ip2 = pymupdf.Point(cx + ihalf, cy)
+            ip3 = pymupdf.Point(cx, cy + ihalf)
+            ip4 = pymupdf.Point(cx - ihalf, cy)
+            page.draw_polyline([ip1, ip2, ip3, ip4, ip1], color=c_gold_light, width=0.8)
 
-        page.insert_textbox(pymupdf.Rect(40, 108, page_w - 40, 122), "DIPLOMAT JAMOASI HUZURIDAGI", fontsize=11, fontname=font_bold, color=c_blue, align=1)
-        page.insert_textbox(pymupdf.Rect(40, 122, page_w - 40, 138), "BILIM VA MALAKALARNI BAHOLASH AGENTLIGI", fontsize=11, fontname=font_bold, color=c_blue, align=1)
+        draw_girih_corner(page_w - 52, 52, size=46)
+        draw_girih_corner(52, page_h - 52, size=46)
 
-        # Asosiy sarlavha
-        page.insert_textbox(pymupdf.Rect(40, 160, page_w - 40, 195), "UMUMTA'LIM FANINI BILISH DARAJASI\nTO'G'RISIDA SERTIFIKAT", fontsize=17, fontname=font_bold, color=c_dark, align=1)
+        # 3. Yuqori Emblem / Logo Badge
+        badge_cx = page_w / 2
+        badge_cy = 76
+        page.draw_circle(pymupdf.Point(badge_cx, badge_cy), 36, color=c_gold_main, fill=(1, 1, 1), width=2.0)
+        page.draw_circle(pymupdf.Point(badge_cx, badge_cy), 32, color=c_gold_light, width=0.8)
+
+        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy - 24, badge_cx + 34, badge_cy - 8), "★ ILMILDIZI ★", fontsize=7.5, fontname=font_bold, color=c_red, align=1)
+        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy - 10, badge_cx + 34, badge_cy + 8), "TARIX MILLIY", fontsize=9.5, fontname=font_bold, color=c_blue, align=1)
+        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy + 7, badge_cx + 34, badge_cy + 20), "CERTIFICATE", fontsize=7.5, fontname=font_bold, color=c_gold_main, align=1)
+        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy + 19, badge_cx + 34, badge_cy + 30), "TEST MARKAZI", fontsize=5.5, fontname=font_reg, color=(100/255, 116/255, 139/255), align=1)
+
+        # Agentlik nomi
+        page.insert_textbox(
+            pymupdf.Rect(30, 122, page_w - 30, 160),
+            "ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI\nBILIM VA MALAKALARNI BAHOLASH AGENTLIGI",
+            fontsize=11.5, fontname=font_bold, color=c_blue, align=1
+        )
+
+        # 4. Asosiy Sarlavha
+        page.insert_textbox(
+            pymupdf.Rect(30, 168, page_w - 30, 225),
+            "UMUMTA'LIM FANINI BILISH DARAJASI\nTO'G'RISIDA SERTIFIKAT",
+            fontsize=18, fontname=font_bold, color=c_dark, align=1
+        )
 
         # Ma'lumotlarni hisoblash
-        u_parts = user_full.split()
-        if len(u_parts) >= 2:
-            first_name = u_parts[0].upper()
-            last_name = " ".join(u_parts[1:]).upper()
+        if u.first_name and u.last_name:
+            first_name = u.first_name.upper()
+            last_name = u.last_name.upper()
         else:
-            first_name = user_full.upper()
-            last_name = "—"
+            u_parts = user_full.split()
+            if len(u_parts) >= 2:
+                last_name = u_parts[-1].upper()
+                first_name = " ".join(u_parts[:-1]).upper()
+            else:
+                first_name = user_full.upper()
+                last_name = "—"
 
         scaled_score = rasch_meta.get('scaled_score', round((float(a.score or 0) / 100) * 70, 1)) if rasch_meta else round((float(a.score or 0) / 100) * 70, 1)
         scaled_str = f"{scaled_score:.1f}"
@@ -3306,86 +3347,99 @@ def generate_certificate_api(request, attempt_pk):
         pct_str = f"{float(a.score or 0):.2f} %"
         cert_grade = rasch_meta.get('grade', grade) if rasch_meta else grade
         personal_code = f"{a.id:05d}"[-5:]
-        cert_no = f"DJ26 0607{a.id:07d}"[-15:]
+        cert_no = f"DJ26 0607{a.id:07d}"
 
         given_date = completed_str or timezone.now().strftime('%d.%m.%Y')
         expire_year = timezone.now().year + 3
         expire_date = given_date[:-4] + str(expire_year)
 
         # Ma'lumot qatorlari
-        row_y = 230
-        line_gap = 24
-        lx = 55
-        rx = 260
-        r_end = page_w - 55
+        row_y = 246
+        line_gap = 25
+        lx = 50
+        rx_val = 260
+        rx_end = page_w - 50
 
-        def draw_row(y, label, val, is_blue=False):
-            page.insert_text(pymupdf.Point(lx, y), label, fontsize=10.5, fontname=font_bold, color=c_blue if is_blue else c_dark)
-            page.insert_text(pymupdf.Point(rx, y), str(val), fontsize=10.5, fontname=font_bold, color=c_dark)
+        def draw_row(y, label, val, right_align=False):
+            page.insert_text(pymupdf.Point(lx, y), label, fontsize=10.5, fontname=font_bold, color=c_blue)
+            val_str = str(val)
+            if right_align:
+                page.insert_textbox(pymupdf.Rect(rx_end - 140, y - 12, rx_end, y + 14), val_str, fontsize=10.5, fontname=font_bold, color=c_dark, align=2)
+            else:
+                fsize = 10.5 if len(val_str) <= 35 else 9.0
+                page.insert_textbox(pymupdf.Rect(rx_val, y - 12, rx_end, y + 26), val_str, fontsize=fsize, fontname=font_bold, color=c_dark, align=0)
 
         def draw_divider(y):
-            page.draw_line(pymupdf.Point(lx, y), pymupdf.Point(r_end, y), color=c_gold_light, width=0.8)
+            page.draw_line(pymupdf.Point(lx, y), pymupdf.Point(rx_end, y), color=c_gold_light, width=0.8)
 
         # 1-blok: Talabgor
-        draw_row(row_y, "Sertifikat raqami:", cert_no, is_blue=True)
-        draw_row(row_y + line_gap, "Talabgorning shaxsiy kodi:", personal_code, is_blue=True)
+        draw_row(row_y, "Sertifikat raqami:", cert_no)
+        draw_row(row_y + line_gap, "Talabgorning shaxsiy kodi:", personal_code)
         draw_row(row_y + line_gap * 2, "Familiyasi:", last_name)
         draw_row(row_y + line_gap * 3, "Ismi:", first_name)
-        draw_divider(row_y + line_gap * 3 + 10)
+        draw_divider(row_y + line_gap * 3 + 14)
 
-        # 2-blok: Fan va natija
-        b2_y = row_y + line_gap * 4 + 10
+        # 2-blok: Fan va Ball
+        b2_y = row_y + line_gap * 4 + 14
         draw_row(b2_y, "Umumta'lim fani:", test_title or "Tarix Milliy Sertifikat")
         draw_row(b2_y + line_gap, "Umumiy to'plagan bali:", scaled_str)
-        draw_row(b2_y + line_gap * 2, "Umumiy ballga nisbatan foiz ko'rsatkichi:", pct_str)
+        draw_row(b2_y + line_gap * 2, "Umumiy ballga nisbatan foiz ko'rsatkichi:", pct_str, right_align=True)
         draw_row(b2_y + line_gap * 3, "Sertifikat darajasi:", cert_grade)
-        draw_divider(b2_y + line_gap * 3 + 10)
+        draw_divider(b2_y + line_gap * 3 + 14)
 
         # 3-blok: Test sinovi natijasi
-        b3_y = b2_y + line_gap * 4 + 10
-        draw_row(b3_y, "Test sinovi natijasi:", scaled_comma)
-        draw_divider(b3_y + 12)
+        b3_y = b2_y + line_gap * 4 + 14
+        draw_row(b3_y, "Test sinovi natijasi:", scaled_comma, right_align=True)
+        draw_divider(b3_y + 14)
 
         # 4-blok: Sanalar
-        b4_y = b3_y + 36
+        b4_y = b3_y + 38
         page.insert_text(pymupdf.Point(lx, b4_y), "Berilgan sanasi:", fontsize=10.5, fontname=font_bold, color=c_blue)
-        page.insert_text(pymupdf.Point(lx + 90, b4_y), given_date, fontsize=10, fontname=font_reg, color=c_dark)
-        page.insert_text(pymupdf.Point(310, b4_y), "Amal qilish muddati:", fontsize=10.5, fontname=font_bold, color=c_blue)
-        page.insert_text(pymupdf.Point(435, b4_y), expire_date, fontsize=10, fontname=font_reg, color=c_dark)
+        page.insert_text(pymupdf.Point(lx + 115, b4_y), given_date, fontsize=10, fontname=font_reg, color=c_dark)
+        page.insert_text(pymupdf.Point(335, b4_y), "Amal qilish muddati:", fontsize=10.5, fontname=font_bold, color=c_blue)
+        page.insert_text(pymupdf.Point(475, b4_y), expire_date, fontsize=10, fontname=font_reg, color=c_dark)
 
-        # O'rta bezak chizig'i
+        # O'rta bezak chizig'i va markaziy rombik
         orn_y = b4_y + 30
-        page.draw_line(pymupdf.Point(lx, orn_y), pymupdf.Point(page_w / 2 - 25, orn_y), color=c_gold_main, width=1.0)
-        page.draw_line(pymupdf.Point(page_w / 2 + 25, orn_y), pymupdf.Point(r_end, orn_y), color=c_gold_main, width=1.0)
-        page.insert_textbox(pymupdf.Rect(page_w / 2 - 25, orn_y - 8, page_w / 2 + 25, orn_y + 12), "* + *", fontsize=10, fontname=font_bold, color=c_gold_main, align=1)
+        page.draw_line(pymupdf.Point(lx, orn_y), pymupdf.Point(page_w / 2 - 24, orn_y), color=c_gold_main, width=1.0)
+        page.draw_line(pymupdf.Point(page_w / 2 + 24, orn_y), pymupdf.Point(rx_end, orn_y), color=c_gold_main, width=1.0)
+        r_cx, r_cy = page_w / 2, orn_y
+        page.draw_polyline([
+            pymupdf.Point(r_cx, r_cy - 6),
+            pymupdf.Point(r_cx + 7, r_cy),
+            pymupdf.Point(r_cx, r_cy + 6),
+            pymupdf.Point(r_cx - 7, r_cy),
+            pymupdf.Point(r_cx, r_cy - 6),
+        ], color=c_gold_main, fill=c_gold_main)
 
-        # 5-blok: QR Kod va Imzolar
-        footer_y = page_h - 170
+        # 5-blok: Imzolar va QR Kod
+        footer_y = page_h - 165
 
         # Direktor
-        page.insert_textbox(pymupdf.Rect(lx, footer_y + 40, lx + 120, footer_y + 58), "Direktor", fontsize=12, fontname=font_bold, color=c_dark, align=1)
-        page.draw_line(pymupdf.Point(lx, footer_y + 60), pymupdf.Point(lx + 120, footer_y + 60), color=c_gold_main, width=1)
+        page.insert_text(pymupdf.Point(lx + 25, footer_y + 45), "Direktor", fontsize=12, fontname=font_bold, color=c_dark)
+        page.draw_line(pymupdf.Point(lx, footer_y + 55), pymupdf.Point(lx + 130, footer_y + 55), color=c_gold_main, width=1.2)
 
         # Mas'ul rahbar
-        page.insert_textbox(pymupdf.Rect(r_end - 140, footer_y + 40, r_end, footer_y + 58), "Mag'rurbek Zaripov", fontsize=11, fontname=font_bold, color=c_dark, align=1)
-        page.draw_line(pymupdf.Point(r_end - 140, footer_y + 60), pymupdf.Point(r_end, footer_y + 60), color=c_gold_main, width=1)
+        page.insert_text(pymupdf.Point(rx_end - 130, footer_y + 45), "Mag'rurbek Zaripov", fontsize=11, fontname=font_bold, color=c_dark)
+        page.draw_line(pymupdf.Point(rx_end - 145, footer_y + 55), pymupdf.Point(rx_end, footer_y + 55), color=c_gold_main, width=1.2)
 
         # QR kod markazda
-        qr_rect = pymupdf.Rect(page_w / 2 - 40, footer_y + 10, page_w / 2 + 40, footer_y + 90)
+        qr_size = 76
+        qr_rect = pymupdf.Rect(page_w / 2 - qr_size / 2, footer_y + 5, page_w / 2 + qr_size / 2, footer_y + 5 + qr_size)
         try:
-            import requests
-            qr_api_url = f"https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ilmildizi.uz/tests/{a.id}/feedback&color=0f172a&bgcolor=fefcf6"
-            resp = requests.get(qr_api_url, timeout=3)
-            if resp.status_code == 200:
-                page.insert_image(qr_rect, stream=resp.content)
-            else:
-                page.draw_rect(qr_rect, color=c_gold_main, width=1)
-                page.insert_textbox(qr_rect, "QR CODE", fontsize=8, fontname=font_reg, color=c_dark, align=1)
+            import qrcode
+            qr = qrcode.QRCode(box_size=4, border=1)
+            qr.add_data(f"https://ilmildizi.uz/tests/{a.id}/feedback")
+            qr.make(fit=True)
+            qr_img = qr.make_image(fill_color="#0f172a", back_color="#fefcf6")
+            qr_buf = BytesIO()
+            qr_img.save(qr_buf, format="PNG")
+            page.insert_image(qr_rect, stream=qr_buf.getvalue())
         except Exception:
             page.draw_rect(qr_rect, color=c_gold_main, width=1)
             page.insert_textbox(qr_rect, "QR CODE", fontsize=8, fontname=font_reg, color=c_dark, align=1)
 
-        page.draw_rect(pymupdf.Rect(qr_rect.x0 - 2, qr_rect.y0 - 2, qr_rect.x1 + 2, qr_rect.y1 + 2), color=c_gold_main, width=1.2)
+        page.draw_rect(pymupdf.Rect(qr_rect.x0 - 2, qr_rect.y0 - 2, qr_rect.x1 + 2, qr_rect.y1 + 2), color=c_gold_main, width=1.0)
 
         pdf_bytes = doc.tobytes()
         doc.close()

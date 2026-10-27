@@ -692,14 +692,16 @@ export default function FeedbackPage() {
                 <div className="border border-[#d4af37] p-4 sm:p-6 bg-[#fdfbf7] flex flex-col items-center text-[#0f172a]">
                   
                   {/* Top Emblem */}
-                  <div className="size-14 rounded-full border-2 border-[#c59b27] bg-white flex flex-col items-center justify-center p-1 mb-1.5 shadow-xs">
-                    <span className="text-[8px] font-bold text-rose-700 leading-none">★ DIPLOMAT ★</span>
-                    <span className="text-xs font-black text-[#1e3a8a] leading-tight">TEAM</span>
+                  <div className="size-16 rounded-full border-2 border-[#c59b27] bg-white flex flex-col items-center justify-center p-1 mb-1.5 shadow-xs">
+                    <span className="text-[7.5px] font-bold text-rose-700 leading-none">★ ILMILDIZI ★</span>
+                    <span className="text-[9.5px] font-black text-[#1c3c87] leading-tight">TARIX MILLIY</span>
+                    <span className="text-[7.5px] font-bold text-[#c59b27] leading-none">CERTIFICATE</span>
+                    <span className="text-[6px] text-slate-500 leading-tight mt-0.5">TEST MARKAZI</span>
                   </div>
-                  <p className="text-[10px] sm:text-xs font-bold text-[#1e3a8a] uppercase tracking-wide">
-                    DIPLOMAT JAMOASI HUZURIDAGI
+                  <p className="text-[10px] sm:text-xs font-bold text-[#1c3c87] uppercase tracking-wide">
+                    ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI
                   </p>
-                  <p className="text-[10px] sm:text-xs font-extrabold text-[#1e3a8a] uppercase tracking-wide mb-2">
+                  <p className="text-[10px] sm:text-xs font-extrabold text-[#1c3c87] uppercase tracking-wide mb-2">
                     BILIM VA MALAKALARNI BAHOLASH AGENTLIGI
                   </p>
 
@@ -712,40 +714,40 @@ export default function FeedbackPage() {
                   <div className="w-full mt-3 space-y-2 text-[11px] sm:text-xs">
                     <div className="space-y-1 pb-1.5 border-b border-[#e5c158]">
                       <div className="flex justify-between">
-                        <span className="font-bold text-[#1e3a8a]">Sertifikat raqami:</span>
+                        <span className="font-bold text-[#1c3c87]">Sertifikat raqami:</span>
                         <span className="font-mono font-bold">{certNumber}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold text-[#1e3a8a]">Talabgor kodi:</span>
+                        <span className="font-bold text-[#1c3c87]">Talabgor kodi:</span>
                         <span className="font-mono font-bold">{personalCode}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold">Talabgor:</span>
+                        <span className="font-bold text-[#1c3c87]">Talabgor:</span>
                         <span className="font-bold tracking-wide">{fullName}</span>
                       </div>
                     </div>
 
                     <div className="space-y-1 pb-1.5 border-b border-[#e5c158]">
                       <div className="flex justify-between">
-                        <span className="font-bold">Fan:</span>
+                        <span className="font-bold text-[#1c3c87]">Umumta&apos;lim fani:</span>
                         <span className="font-bold">{data?.attempt?.test_title || "Tarix Milliy Sertifikat"}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold">Umumiy to&apos;plagan bali:</span>
-                        <span className="font-mono font-black text-sm">{scaledScoreStr} / 70</span>
+                        <span className="font-bold text-[#1c3c87]">Umumiy to&apos;plagan bali:</span>
+                        <span className="font-mono font-black text-sm">{scaledScoreStr}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold">Foiz ko&apos;rsatkichi:</span>
+                        <span className="font-bold text-[#1c3c87]">Umumiy ballga nisbatan foiz ko&apos;rsatkichi:</span>
                         <span className="font-mono font-bold">{pctVal}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold">Sertifikat darajasi:</span>
+                        <span className="font-bold text-[#1c3c87]">Sertifikat darajasi:</span>
                         <span className="font-black text-amber-700 text-sm">{certGrade}</span>
                       </div>
                     </div>
 
                     <div className="flex justify-between pb-1.5 border-b border-[#e5c158]">
-                      <span className="font-bold">Test sinovi natijasi:</span>
+                      <span className="font-bold text-[#1c3c87]">Test sinovi natijasi:</span>
                       <span className="font-mono font-black">{scaledScoreComma}</span>
                     </div>
                   </div>

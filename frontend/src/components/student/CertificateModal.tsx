@@ -192,29 +192,38 @@ export default function CertificateModal({
       // Gerb doirasi
       const logoY = 130;
       ctx.beginPath();
-      ctx.arc(width / 2, logoY, 46, 0, Math.PI * 2);
+      ctx.arc(width / 2, logoY, 48, 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff';
       ctx.fill();
       ctx.lineWidth = 2.5;
       ctx.strokeStyle = goldMain;
       ctx.stroke();
 
+      ctx.beginPath();
+      ctx.arc(width / 2, logoY, 43, 0, Math.PI * 2);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = goldLight;
+      ctx.stroke();
+
       // Logo matni
       ctx.fillStyle = '#b91c1c';
-      ctx.font = 'bold 16px "Times New Roman", serif';
-      ctx.fillText('★ DIPLOMAT ★', width / 2, logoY - 10);
-      ctx.fillStyle = '#1e3a8a';
-      ctx.font = '900 13px "Arial", sans-serif';
-      ctx.fillText('TEAM', width / 2, logoY + 8);
+      ctx.font = 'bold 11px "Times New Roman", serif';
+      ctx.fillText('★ ILMILDIZI ★', width / 2, logoY - 14);
+      ctx.fillStyle = '#1c3c87';
+      ctx.font = '900 14px "Arial", sans-serif';
+      ctx.fillText('TARIX MILLIY', width / 2, logoY + 3);
+      ctx.fillStyle = '#cd9b2d';
+      ctx.font = 'bold 10px "Arial", sans-serif';
+      ctx.fillText('CERTIFICATE', width / 2, logoY + 17);
       ctx.fillStyle = '#64748b';
       ctx.font = '8px "Arial", sans-serif';
-      ctx.fillText("RESPUBLIKA TEST MARKAZI", width / 2, logoY + 22);
+      ctx.fillText("TEST MARKAZI", width / 2, logoY + 29);
 
       // Agentlik sarlavhasi
-      ctx.fillStyle = '#1e3a8a';
-      ctx.font = 'bold 22px "Arial", sans-serif';
-      ctx.fillText('DIPLOMAT JAMOASI HUZURIDAGI', width / 2, 230);
-      ctx.fillText('BILIM VA MALAKALARNI BAHOLASH AGENTLIGI', width / 2, 260);
+      ctx.fillStyle = '#1c3c87';
+      ctx.font = 'bold 20px "Arial", sans-serif';
+      ctx.fillText('ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI', width / 2, 226);
+      ctx.fillText('BILIM VA MALAKALARNI BAHOLASH AGENTLIGI', width / 2, 256);
 
       // Asosiy Sarlavha
       ctx.fillStyle = '#0f172a';
@@ -229,15 +238,21 @@ export default function CertificateModal({
       const rightX = 480;
       const lineEndX = width - 130;
 
-      const drawDataRow = (y: number, label: string, val: string, isBlueLabel = false) => {
+      const drawDataRow = (y: number, label: string, val: string, isBlueLabel = true, rightAlign = false) => {
         ctx.textAlign = 'left';
-        ctx.fillStyle = isBlueLabel ? '#1e3a8a' : '#0f172a';
+        ctx.fillStyle = isBlueLabel ? '#1c3c87' : '#0f172a';
         ctx.font = 'bold 20px "Arial", sans-serif';
         ctx.fillText(label, leftX, y);
 
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 21px "Arial", sans-serif';
-        ctx.fillText(val, rightX, y);
+        ctx.font = 'bold 20px "Arial", sans-serif';
+        if (rightAlign) {
+          ctx.textAlign = 'right';
+          ctx.fillText(val, lineEndX, y);
+        } else {
+          ctx.textAlign = 'left';
+          ctx.fillText(val, rightX, y);
+        }
       };
 
       const drawDivider = (y: number) => {
@@ -250,8 +265,8 @@ export default function CertificateModal({
       };
 
       // Qatorlar 1: Talabgor
-      drawDataRow(startY, 'Sertifikat raqami:', certNumber, true);
-      drawDataRow(startY + rowGap, 'Talabgorning shaxsiy kodi:', personalCode, true);
+      drawDataRow(startY, 'Sertifikat raqami:', certNumber);
+      drawDataRow(startY + rowGap, 'Talabgorning shaxsiy kodi:', personalCode);
       drawDataRow(startY + rowGap * 2, 'Familiyasi:', lastName);
       drawDataRow(startY + rowGap * 3, 'Ismi:', firstName);
       drawDivider(startY + rowGap * 3.7);
@@ -260,13 +275,13 @@ export default function CertificateModal({
       const sec2Y = startY + rowGap * 4.6;
       drawDataRow(sec2Y, "Umumta'lim fani:", testTitle || 'Tarix Milliy Sertifikat');
       drawDataRow(sec2Y + rowGap, "Umumiy to'plagan bali:", scaledScoreStr);
-      drawDataRow(sec2Y + rowGap * 2, "Umumiy ballga nisbatan foiz ko'rsatkichi:", pctStr);
+      drawDataRow(sec2Y + rowGap * 2, "Umumiy ballga nisbatan foiz ko'rsatkichi:", pctStr, true, true);
       drawDataRow(sec2Y + rowGap * 3, 'Sertifikat darajasi:', certGrade);
       drawDivider(sec2Y + rowGap * 3.7);
 
       // Qatorlar 3: Sinov natijasi
       const sec3Y = sec2Y + rowGap * 4.6;
-      drawDataRow(sec3Y, 'Test sinovi natijasi:', scaledScoreComma);
+      drawDataRow(sec3Y, 'Test sinovi natijasi:', scaledScoreComma, true, true);
       drawDivider(sec3Y + rowGap * 0.8);
 
       // Qatorlar 4: Muddatlar
@@ -459,15 +474,16 @@ export default function CertificateModal({
                 {/* 1. Gerb / Logo */}
                 <div className="flex flex-col items-center text-center mb-3">
                   <div className="size-16 sm:size-20 rounded-full border-2 border-[#c59b27] bg-white flex flex-col items-center justify-center shadow-xs p-1 mb-2">
-                    <span className="text-[9px] sm:text-[10px] font-bold text-rose-700 tracking-tighter">★ DIPLOMAT ★</span>
-                    <span className="text-xs sm:text-sm font-black text-[#1e3a8a] leading-none">TEAM</span>
-                    <span className="text-[7px] text-slate-500 leading-tight mt-0.5">BILIM AGENTLIGI</span>
+                    <span className="text-[8px] sm:text-[9px] font-bold text-rose-700 tracking-tighter leading-none">★ ILMILDIZI ★</span>
+                    <span className="text-[10px] sm:text-xs font-black text-[#1c3c87] leading-tight">TARIX MILLIY</span>
+                    <span className="text-[8px] sm:text-[9px] font-bold text-[#c59b27] leading-none">CERTIFICATE</span>
+                    <span className="text-[6.5px] text-slate-500 leading-tight mt-0.5">TEST MARKAZI</span>
                   </div>
 
-                  <p className="text-xs sm:text-sm font-bold text-[#1e3a8a] uppercase tracking-wide">
-                    DIPLOMAT JAMOASI HUZURIDAGI
+                  <p className="text-xs sm:text-sm font-bold text-[#1c3c87] uppercase tracking-wide">
+                    ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI
                   </p>
-                  <p className="text-xs sm:text-sm font-extrabold text-[#1e3a8a] uppercase tracking-wide">
+                  <p className="text-xs sm:text-sm font-extrabold text-[#1c3c87] uppercase tracking-wide">
                     BILIM VA MALAKALARNI BAHOLASH AGENTLIGI
                   </p>
                 </div>
@@ -487,19 +503,19 @@ export default function CertificateModal({
                   {/* Blok 1 */}
                   <div className="space-y-1.5 pb-2 border-b border-[#e5c158]/90">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1e3a8a]">Sertifikat raqami:</span>
+                      <span className="font-bold text-[#1c3c87]">Sertifikat raqami:</span>
                       <span className="font-mono font-bold text-[#0f172a] text-right">{certNumber}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1e3a8a]">Talabgorning shaxsiy kodi:</span>
+                      <span className="font-bold text-[#1c3c87]">Talabgorning shaxsiy kodi:</span>
                       <span className="font-mono font-bold text-[#0f172a] text-right">{personalCode}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#0f172a]">Familiyasi:</span>
+                      <span className="font-bold text-[#1c3c87]">Familiyasi:</span>
                       <span className="font-bold text-[#0f172a] tracking-wide text-right">{lastName}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#0f172a]">Ismi:</span>
+                      <span className="font-bold text-[#1c3c87]">Ismi:</span>
                       <span className="font-bold text-[#0f172a] tracking-wide text-right">{firstName}</span>
                     </div>
                   </div>
@@ -507,26 +523,26 @@ export default function CertificateModal({
                   {/* Blok 2 */}
                   <div className="space-y-1.5 pb-2 border-b border-[#e5c158]/90">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#0f172a]">Umumta&apos;lim fani:</span>
+                      <span className="font-bold text-[#1c3c87]">Umumta&apos;lim fani:</span>
                       <span className="font-bold text-[#0f172a] text-right">{testTitle || "Tarix Milliy Sertifikat"}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#0f172a]">Umumiy to&apos;plagan bali:</span>
+                      <span className="font-bold text-[#1c3c87]">Umumiy to&apos;plagan bali:</span>
                       <span className="font-mono font-black text-[#0f172a] text-base text-right">{scaledScoreStr}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#0f172a]">Umumiy ballga nisbatan foiz ko&apos;rsatkichi:</span>
+                      <span className="font-bold text-[#1c3c87]">Umumiy ballga nisbatan foiz ko&apos;rsatkichi:</span>
                       <span className="font-mono font-bold text-[#0f172a] text-right">{pctStr}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#0f172a]">Sertifikat darajasi:</span>
+                      <span className="font-bold text-[#1c3c87]">Sertifikat darajasi:</span>
                       <span className="font-mono font-black text-amber-700 text-base sm:text-lg text-right">{certGrade}</span>
                     </div>
                   </div>
 
                   {/* Blok 3: Test sinovi natijasi */}
                   <div className="flex items-center justify-between pb-2 border-b border-[#e5c158]/90">
-                    <span className="font-bold text-[#0f172a]">Test sinovi natijasi:</span>
+                    <span className="font-bold text-[#1c3c87]">Test sinovi natijasi:</span>
                     <span className="font-mono font-black text-[#0f172a] text-base text-right">{scaledScoreComma}</span>
                   </div>
 
