@@ -22,6 +22,7 @@ import ProductWorkflow from '@/components/landing/ProductWorkflow';
 import WeeklyLeaderboardSection from '@/components/landing/WeeklyLeaderboardSection';
 import TelegramBannerCta from '@/components/landing/TelegramBannerCta';
 import { AuthRedirect } from '@/components/landing/AuthRedirect';
+import { BrandMark } from '@/components/BrandMark';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
@@ -422,9 +423,9 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                <Sprout className="size-4.5" />
-              </span>
+              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-xl overflow-hidden border border-slate-200/80 bg-white shadow-xs">
+                <BrandMark size={28} rounded="rounded-lg" />
+              </div>
               <span className="text-base font-black text-slate-900">
                 Ilm<span className="text-emerald-600">Ildizi</span>
               </span>

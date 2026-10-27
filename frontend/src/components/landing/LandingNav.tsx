@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, ArrowRight, Sprout } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
+import { BrandMark } from '@/components/BrandMark';
 
 const LINKS = [
   { href: '#imkoniyatlar', label: 'Imkoniyatlar' },
@@ -38,8 +39,8 @@ export default function LandingNav() {
         
         {/* Logo */}
         <Link href={loggedIn ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
-          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-md shadow-emerald-600/20 transition-transform duration-200 group-hover:scale-105">
-            <Sprout className="size-5" />
+          <div className="relative flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl overflow-hidden border border-slate-200/80 bg-white shadow-xs transition-transform duration-200 group-hover:scale-105">
+            <BrandMark size={36} rounded="rounded-xl" />
           </div>
           <div className="flex flex-col">
             <span className="text-base sm:text-lg font-black tracking-tight text-slate-900 leading-none">
