@@ -43,44 +43,45 @@ def update_channel_message(chat_id, message_id, text, reply_markup=None):
 
 def send_payment_review_notification(payment):
     """To'lov chekini yashirin Telegram kanaliga inline tasdiqlash tugmalari bilan yuborish."""
-    channel_id = get_payment_channel_id()
-    logger.info("send_payment_review_notification boshlandi: payment_id=%s, channel_id=%s", payment.id, channel_id)
-
-    profile = payment.profile
-    user = profile.user
-    full_name = f"{user.first_name} {user.last_name}".strip() or user.username
-    tg_user = f"@{profile.telegram_username}" if profile.telegram_username else "Bog'lanmagan"
-    phone = profile.phone or "Kiritilmagan"
-    
-    test_title = payment.test.title if payment.test else (payment.plan.name if payment.plan else "Mock Test")
-    amount_str = f"{payment.amount:,.0f}".replace(",", " ")
-    source_str = "Veb-sayt" if payment.source == 'web' else "Telegram Bot"
-    created_time = timezone.localtime(payment.created_at).strftime("%Y-%m-%d %H:%M")
-
-    caption = (
-        f"🧾 <b>YANGI TO'LOV CHEKI #{payment.id}</b>\n\n"
-        f"👤 <b>O'quvchi:</b> {full_name}\n"
-        f"💬 <b>Telegram:</b> {tg_user}\n"
-        f"📱 <b>Telefon/Profil:</b> {phone} (ID: {profile.id})\n"
-        f"🎯 <b>Mock Test / Reja:</b> {test_title}\n"
-        f"💰 <b>To'lov summasi:</b> <b>{amount_str} so'm</b>\n"
-        f"🌐 <b>Manba:</b> {source_str}\n"
-        f"⏰ <b>Vaqt:</b> {created_time}\n\n"
-        f"<i>Testni ochish yoki rad etish uchun quyidagi tugmani bosing:</i>"
-    )
-
-    reply_markup = {
-        'inline_keyboard': [
-            [
-                {'text': "✅ Qabul qilish (Testni ochish)", 'callback_data': f"pay_approve_{payment.id}"},
-                {'text': "❌ Rad etish", 'callback_data': f"pay_reject_{payment.id}"},
-            ]
-        ]
-    }
-
-    # Skrinshot faylini tekshirish va yuborish
-    res = {'ok': False}
     try:
+        channel_id = get_payment_channel_id()
+        logger.info("send_payment_review_notification boshlandi: payment_id=%s, channel_id=%s", payment.id, channel_id)
+
+        profile = payment.profile
+        user = profile.user
+        full_name = f"{user.first_name} {user.last_name}".strip() or user.username
+        username = getattr(user, 'username', '')
+        tg_user = f"@{profile.telegram_username}" if getattr(profile, 'telegram_username', None) else "Bog'lanmagan"
+        email_str = getattr(user, 'email', '') or "Kiritilmagan"
+        
+        test_title = payment.test.title if payment.test else (payment.plan.name if payment.plan else "Mock Test")
+        amount_str = f"{payment.amount:,.0f}".replace(",", " ")
+        source_str = "Veb-sayt" if payment.source == 'web' else "Telegram Bot"
+        created_time = timezone.localtime(payment.created_at).strftime("%Y-%m-%d %H:%M")
+
+        caption = (
+            f"🧾 <b>YANGI TO'LOV CHEKI #{payment.id}</b>\n\n"
+            f"👤 <b>O'quvchi:</b> {full_name} (@{username})\n"
+            f"💬 <b>Telegram:</b> {tg_user}\n"
+            f"📧 <b>Email / ID:</b> {email_str} (Profil ID: {profile.id})\n"
+            f"🎯 <b>Mock Test / Reja:</b> {test_title}\n"
+            f"💰 <b>To'lov summasi:</b> <b>{amount_str} so'm</b>\n"
+            f"🌐 <b>Manba:</b> {source_str}\n"
+            f"⏰ <b>Vaqt:</b> {created_time}\n\n"
+            f"<i>Testni ochish yoki rad etish uchun quyidagi tugmani bosing:</i>"
+        )
+
+        reply_markup = {
+            'inline_keyboard': [
+                [
+                    {'text': "✅ Qabul qilish (Testni ochish)", 'callback_data': f"pay_approve_{payment.id}"},
+                    {'text': "❌ Rad etish", 'callback_data': f"pay_reject_{payment.id}"},
+                ]
+            ]
+        }
+
+        # Skrinshot faylini tekshirish va yuborish
+        res = {'ok': False}
         if payment.screenshot:
             try:
                 file_path = None
