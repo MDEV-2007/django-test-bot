@@ -116,7 +116,9 @@ type LeaderboardRow = {
 };
 
 type LeaderboardData = {
-  top: LeaderboardRow[];
+  podium?: LeaderboardRow[];
+  rankings?: LeaderboardRow[];
+  top?: LeaderboardRow[];
   my_group: (LeaderboardRow & { rank: number; is_me: boolean })[];
   my_rank: number;
 };
@@ -325,13 +327,21 @@ export default function DashboardPage() {
     p.streak >= 7,
   ];
 
-  const topList = lbData?.top?.slice(0, 5) || [
-    { profile_id: 1, first_name: 'Shaxzoda', last_name: 'Farxodova', username: 'shaxzoda', avatar_url: '', xp: 4250, level: 12 },
-    { profile_id: 2, first_name: 'Jasur', last_name: 'Bekov', username: 'jasur', avatar_url: '', xp: 3820, level: 11 },
-    { profile_id: 3, first_name: 'Madina', last_name: 'Karimova', username: 'madina', avatar_url: '', xp: 3100, level: 9 },
-    { profile_id: 4, first_name: 'Otabek', last_name: 'Nazarov', username: 'otabek', avatar_url: '', xp: 2750, level: 8 },
-    { profile_id: 5, first_name: 'Sardor', last_name: 'Alimov', username: 'sardor', avatar_url: '', xp: 2400, level: 7 },
+  const combinedLb = [
+    ...(lbData?.podium || []),
+    ...(lbData?.rankings || []),
+    ...(lbData?.top || []),
   ];
+  const topList =
+    combinedLb.length > 0
+      ? combinedLb.slice(0, 8)
+      : [
+          { profile_id: 1, first_name: 'Shaxzoda', last_name: 'Farxodova', username: 'shaxzoda', avatar_url: '', xp: 4250, level: 12 },
+          { profile_id: 2, first_name: 'Jasur', last_name: 'Bekov', username: 'jasur', avatar_url: '', xp: 3820, level: 11 },
+          { profile_id: 3, first_name: 'Madina', last_name: 'Karimova', username: 'madina', avatar_url: '', xp: 3100, level: 9 },
+          { profile_id: 4, first_name: 'Otabek', last_name: 'Nazarov', username: 'otabek', avatar_url: '', xp: 2750, level: 8 },
+          { profile_id: 5, first_name: 'Sardor', last_name: 'Alimov', username: 'sardor', avatar_url: '', xp: 2400, level: 7 },
+        ];
 
   return (
     <ModernAppLayout
@@ -664,134 +674,167 @@ export default function DashboardPage() {
                 theme={isDark ? 'dark' : 'light'}
               />
 
-              {/* iOS GAME CENTER WEEKLY LEADERBOARD & PODIUM */}
-              <div className="ios-card relative overflow-hidden rounded-[28px] space-y-5 p-5 sm:p-6">
+              {/* iOS 18 GAME CENTER WEEKLY LEADERBOARD & PODIUM */}
+              <div className="ios-card relative overflow-hidden rounded-[28px] space-y-5 p-4 sm:p-6">
                 <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#FF9500]/10 blur-3xl" />
 
                 {/* Header */}
-                <div className="relative flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="relative flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <PremiumIcon icon={Trophy} tone="amber" size="md" solid />
-                    <div>
-                      <h3 className="text-sm font-extrabold text-foreground tracking-tight">
-                        Haftalik Liga &amp; Podest
-                      </h3>
-                      <p className="text-[11px] font-medium text-muted-foreground">
-                        Oltin Liga yetakchilari va joriy musobaqa jadvali
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight">
+                          Haftalik Liga &amp; Podest
+                        </h3>
+                        {lbData?.my_rank ? (
+                          <span className="rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#C93400] dark:text-[#FF9F0A]">
+                            O&apos;rningiz #{lbData.my_rank}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="text-[11px] font-medium text-muted-foreground truncate">
+                        Oltin Liga yetakchilari va jonli musobaqa jadvali
                       </p>
                     </div>
                   </div>
-                  <Link
-                    href="/leaderboard"
-                    className="ios-spring flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-3.5 py-1.5 rounded-full"
-                  >
-                    Barchasi <ArrowRight className="size-3.5" />
-                  </Link>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href="/feed"
+                      className="ios-spring flex items-center gap-1.5 text-xs font-semibold text-[#34C759] bg-[#34C759]/12 hover:bg-[#34C759]/18 px-3 py-1.5 rounded-full"
+                    >
+                      <Sparkles className="size-3.5" />
+                      <span>Hamjamiyat</span>
+                    </Link>
+                    <Link
+                      href="/leaderboard"
+                      className="ios-spring flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/15 px-3.5 py-1.5 rounded-full"
+                    >
+                      <span>Barchasi</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </div>
                 </div>
 
-                {/* Top 3 Podium */}
-                <div className="relative grid grid-cols-3 gap-2.5 pt-2 pb-2 items-end">
+                {/* iOS 18 Top 3 Podium (Clean internal badges, no clipped top pills) */}
+                <div className="relative grid grid-cols-3 gap-2 sm:gap-3.5 items-stretch">
                   {/* 2nd Place */}
                   {topList[1] && (
-                    <div className="flex flex-col items-center rounded-[22px] border border-border bg-muted/40 p-3 text-center relative">
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#8E8E93] px-2.5 py-0.5 text-[9px] font-bold text-white whitespace-nowrap">
-                        #2 KUMUSH
+                    <div className="flex flex-col items-center justify-between rounded-[22px] border border-border bg-muted/45 p-3 sm:p-4 text-center">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#8E8E93]/18 px-2.5 py-0.5 text-[9.5px] font-extrabold text-foreground/80">
+                        🥈 #2 KUMUSH
                       </span>
-                      <span className="text-base mt-2">🥈</span>
-                      <Avatar className="size-10 border-2 border-[#8E8E93] my-1.5">
+                      <Avatar className="size-11 sm:size-13 ring-2 ring-[#8E8E93]/60 my-2.5 shadow-xs">
                         <AvatarImage src={topList[1].avatar_url} />
-                        <AvatarFallback className="text-[10px] font-bold bg-card text-foreground">
-                          {topList[1].username.slice(0, 2).toUpperCase()}
+                        <AvatarFallback className="text-xs font-extrabold bg-card text-foreground">
+                          {(topList[1].first_name || topList[1].username).slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-[11px] font-bold text-foreground truncate w-full">
-                        {topList[1].first_name || topList[1].username}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold text-muted-foreground mt-0.5">
-                        {topList[1].xp.toLocaleString('uz-UZ')} XP
-                      </span>
+                      <div className="w-full min-w-0">
+                        <span className="block text-xs font-bold text-foreground truncate">
+                          {topList[1].first_name || topList[1].username}
+                        </span>
+                        <span className="mt-1 inline-block rounded-full bg-card px-2 py-0.5 text-[10px] font-mono font-bold text-muted-foreground border border-border">
+                          {topList[1].xp.toLocaleString('uz-UZ')} XP
+                        </span>
+                      </div>
                     </div>
                   )}
 
                   {/* 1st Place */}
                   {topList[0] && (
-                    <div className="flex flex-col items-center rounded-[24px] border-2 border-[#FF9500] bg-card p-3.5 text-center shadow-[0_8px_24px_rgba(255,149,0,0.2)] relative -translate-y-2">
-                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FFCC00] px-2.5 py-0.5 text-[9px] font-black text-slate-950 shadow-2xs whitespace-nowrap">
-                        #1 CHEMPION
+                    <div className="flex flex-col items-center justify-between rounded-[24px] border-2 border-[#FF9500]/75 bg-gradient-to-b from-[#FF9500]/12 via-card to-card p-3 sm:p-4 text-center shadow-[0_10px_28px_-8px_rgba(255,149,0,0.28)]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FFCC00] px-2.5 py-0.5 text-[9.5px] font-black text-slate-950 shadow-2xs">
+                        👑 #1 CHEMPION
                       </span>
-                      <span className="text-xl mt-2">👑</span>
-                      <Avatar className="size-12 border-2 border-[#FF9500] my-1.5">
+                      <Avatar className="size-13 sm:size-15 ring-2 ring-[#FF9500] my-2.5 shadow-md">
                         <AvatarImage src={topList[0].avatar_url} />
                         <AvatarFallback className="text-sm font-black bg-[#FF9500] text-white">
-                          {topList[0].username.slice(0, 2).toUpperCase()}
+                          {(topList[0].first_name || topList[0].username).slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs font-extrabold text-foreground truncate w-full">
-                        {topList[0].first_name || topList[0].username}
-                      </span>
-                      <span className="text-[11px] font-mono font-black text-[#FF9500] mt-0.5">
-                        {topList[0].xp.toLocaleString('uz-UZ')} XP
-                      </span>
+                      <div className="w-full min-w-0">
+                        <span className="block text-xs sm:text-[13px] font-extrabold text-foreground truncate">
+                          {topList[0].first_name || topList[0].username}
+                        </span>
+                        <span className="mt-1 inline-block rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 text-[10.5px] font-mono font-black text-[#C93400] dark:text-[#FF9F0A]">
+                          {topList[0].xp.toLocaleString('uz-UZ')} XP
+                        </span>
+                      </div>
                     </div>
                   )}
 
                   {/* 3rd Place */}
                   {topList[2] && (
-                    <div className="flex flex-col items-center rounded-[22px] border border-border bg-muted/40 p-3 text-center relative">
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#C93400] px-2.5 py-0.5 text-[9px] font-bold text-white whitespace-nowrap">
-                        #3 BRONZA
+                    <div className="flex flex-col items-center justify-between rounded-[22px] border border-border bg-muted/45 p-3 sm:p-4 text-center">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#C93400]/15 px-2.5 py-0.5 text-[9.5px] font-extrabold text-[#C93400] dark:text-[#FF9F0A]">
+                        🥉 #3 BRONZA
                       </span>
-                      <span className="text-base mt-2">🥉</span>
-                      <Avatar className="size-10 border-2 border-[#C93400] my-1.5">
+                      <Avatar className="size-11 sm:size-13 ring-2 ring-[#C93400]/60 my-2.5 shadow-xs">
                         <AvatarImage src={topList[2].avatar_url} />
-                        <AvatarFallback className="text-[10px] font-bold bg-card text-foreground">
-                          {topList[2].username.slice(0, 2).toUpperCase()}
+                        <AvatarFallback className="text-xs font-extrabold bg-card text-foreground">
+                          {(topList[2].first_name || topList[2].username).slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-[11px] font-bold text-foreground truncate w-full">
-                        {topList[2].first_name || topList[2].username}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold text-[#C93400] dark:text-[#FF9F0A] mt-0.5">
-                        {topList[2].xp.toLocaleString('uz-UZ')} XP
-                      </span>
+                      <div className="w-full min-w-0">
+                        <span className="block text-xs font-bold text-foreground truncate">
+                          {topList[2].first_name || topList[2].username}
+                        </span>
+                        <span className="mt-1 inline-block rounded-full bg-card px-2 py-0.5 text-[10px] font-mono font-bold text-[#C93400] dark:text-[#FF9F0A] border border-border">
+                          {topList[2].xp.toLocaleString('uz-UZ')} XP
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
 
                 {/* iOS Inset Grouped Leaderboard Rows */}
-                <div className="divide-y divide-border rounded-[22px] border border-border bg-muted/30 overflow-hidden">
-                  {topList.map((item, idx) => {
+                <div className="divide-y divide-border rounded-[22px] border border-border bg-muted/25 overflow-hidden">
+                  {(topList.length > 3 ? topList.slice(3, 8) : topList).map((item, i) => {
+                    const rankNum = topList.length > 3 ? i + 4 : i + 1;
                     const isCurrentUser = item.username === p.username;
                     const itemFullName = `${item.first_name || item.username} ${item.last_name || ''}`.trim();
 
                     return (
                       <div
-                        key={idx}
+                        key={item.profile_id || i}
                         className={cn(
                           'flex items-center justify-between px-4 py-3 transition-colors',
-                          isCurrentUser ? 'bg-primary/10' : 'hover:bg-muted/60'
+                          isCurrentUser ? 'bg-primary/10' : 'hover:bg-muted/50'
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <span
                             className={cn(
-                              'font-mono text-xs font-bold w-5 text-center shrink-0',
-                              isCurrentUser ? 'text-primary' : idx === 0 ? 'text-[#FF9500]' : 'text-muted-foreground'
+                              'flex size-6.5 items-center justify-center rounded-[8px] font-mono text-[11px] font-bold shrink-0',
+                              isCurrentUser
+                                ? 'bg-primary text-white'
+                                : 'bg-card border border-border text-muted-foreground'
                             )}
                           >
-                            #{idx + 1}
+                            #{rankNum}
                           </span>
-                          <Avatar className="size-7 shrink-0 border border-border">
+                          <Avatar className="size-8 shrink-0 border border-border">
                             <AvatarImage src={item.avatar_url} />
-                            <AvatarFallback className="text-[9px] font-bold bg-card text-muted-foreground">
-                              {item.username.slice(0, 2).toUpperCase()}
+                            <AvatarFallback className="text-[10px] font-bold bg-card text-foreground">
+                              {(item.first_name || item.username).slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <span className={cn('text-xs font-semibold truncate', isCurrentUser ? 'text-primary font-bold' : 'text-foreground')}>
-                            {isCurrentUser ? `${itemFullName} (Siz)` : itemFullName}
-                          </span>
+                          <div className="min-w-0">
+                            <span
+                              className={cn(
+                                'block text-xs font-semibold truncate',
+                                isCurrentUser ? 'text-primary font-bold' : 'text-foreground'
+                              )}
+                            >
+                              {isCurrentUser ? `${itemFullName} (Siz)` : itemFullName}
+                            </span>
+                            <span className="font-mono text-[10px] text-muted-foreground">
+                              Level {item.level || 1}
+                            </span>
+                          </div>
                         </div>
-                        <span className="font-mono text-xs font-bold text-primary shrink-0 pl-2">
+                        <span className="font-mono text-xs font-extrabold text-primary shrink-0 pl-2">
                           {item.xp.toLocaleString('uz-UZ')} XP
                         </span>
                       </div>
@@ -800,10 +843,10 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Reward Strip */}
-                <div className="flex items-center justify-between rounded-[18px] bg-[#FF9500]/12 px-4 py-3 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-[18px] bg-[#FF9500]/12 border border-[#FF9500]/20 px-4 py-3 text-xs">
                   <span className="flex items-center gap-2 text-foreground font-medium">
                     <Zap className="size-3.5 text-[#FF9500] fill-[#FF9500]" />
-                    G&apos;alaba: <strong className="text-[#C93400] dark:text-[#FF9F0A] font-bold">+50 XP</strong> va{' '}
+                    Duel g&apos;alabasi: <strong className="text-[#C93400] dark:text-[#FF9F0A] font-bold">+50 XP</strong> va{' '}
                     <strong className="text-[#C93400] dark:text-[#FF9F0A] font-bold">+25 tanga</strong>
                   </span>
                   <span className="font-bold text-[#C93400] dark:text-[#FF9F0A] bg-[#FF9500]/15 px-2.5 py-0.5 rounded-full text-[10px]">
