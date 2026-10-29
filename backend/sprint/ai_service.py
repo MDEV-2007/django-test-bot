@@ -8,16 +8,15 @@ logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """Sen O'zbekistondagi DTM (BBA) va Milliy Sertifikat imtihonlariga tayyorlovchi eng professional AI Mentorsan.
 Talabgor test savolida XATO variantni tanladi.
-Sening vazifang kitobiy uzun ma'ruza o'qish EMAS! Maksimal 3 qatorli, miyani chaqnatuvchi (Aha! Moment) va xotirada bir umrga muhrlanuvchi 2 ta narsani taqdim et:
+Sening vazifang kitobiy quruq ma'ruza o'qish EMAS! Maksimal 2-3 qatorli, miyani chaqnatuvchi (Aha! Moment) va xotirada bir umrga muhrlanuvchi 2 ta narsani O'ZBEK TILIDA taqdim et:
 
 1. why_wrong (Nega adashdingiz?):
-   Talabgor tanlagan xato javob aslida nimani anglatishi, qaysi voqea/atamaga oidligi yoki nima sababdan noto'g'riligi. Aniq 1 jumla (10-16 so'z).
+   Talabgor tanlagan xato javob aslida nimani anglatishi, qaysi voqea/davr/atamaga oidligi yoki nima sababdan noto'g'riligini aniq 1 ta lo'nda jumlada tushuntir (masalan: "Xolchayon — Kushonlar davri yodgorligi, Oks ibodatxonasi esa Taxiti Sangin yodgorligida topilgan").
 2. memory_hack (Eslab qolish kodi):
-   To'g'ri javobni bir umr eslab qolish uchun formula, mnemonika, assotsiatsiya yoki qisqa mantiqiy zanjir (masalan: "1370-yil = Balx quladi -> Samarqand poytaxt" yoki "Sifat + Fe'l = Ravish").
+   To'g'ri javobni bir umr eslab qolish uchun o'zbek tilida formula, mnemonika, assotsiatsiya yoki qiyosiy zanjir ber (masalan: "Oks ibodatxonasi = Taxiti Sangin (Oks daryosi - Toshli Taxt)").
 
 QAT'IY TALAB:
 - Javobni FAQAT valid JSON formatida qaytar.
-- Hech qanday markdown (```json) yoki so'z boshi/oxirida ortiqcha belgi qo'shma.
 - JSON formati:
 {
   "why_wrong": "...",
@@ -88,6 +87,7 @@ Iltimos, talabgorga nima uchun aynan shu xato variantni tanlaganini tushuntiruvc
                 return {
                     'why_wrong': parsed['why_wrong'].strip(),
                     'memory_hack': parsed['memory_hack'].strip(),
+                    'is_fallback': False,
                 }
     except Exception as e:
         logger.warning(f"Sprint AI Layfxak generatsiyasida xatolik: {e}")
@@ -98,5 +98,6 @@ Iltimos, talabgorga nima uchun aynan shu xato variantni tanlaganini tushuntiruvc
     return {
         'why_wrong': f"Siz tanlagan \"{fallback_opt}\" bu savol mantiqiga to'g'ri kelmaydi.",
         'memory_hack': f"Kalit bog'liqlik: savol mohiyatini \"{fallback_correct}\" bilan mustahkamlang.",
+        'is_fallback': True,
     }
 

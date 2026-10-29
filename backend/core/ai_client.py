@@ -128,8 +128,15 @@ def _log_ai_usage(provider, model_name, endpoint, prompt_tokens, completion_toke
 
 def _clean_groq_model(model):
     m = (model or '').strip()
-    if not m or 'openai' in m.lower():
-        return 'llama-3.3-70b-versatile'
+    deprecated = [
+        'llama-3.3-70b-versatile',
+        'llama-3.1-70b-versatile',
+        'llama3-70b-8192',
+        'llama3-8b-8192',
+        'mixtral-8x7b-32768',
+    ]
+    if not m or m in deprecated:
+        return 'qwen/qwen3.8-27b'
     return m
 
 
@@ -187,6 +194,22 @@ def _ask_groq(messages, temperature, response_format, timeout, on_error=None):
         body = (exc.response.text or '')[:300] if exc.response is not None else ''
         _log_ai_usage('groq', model_name, 'ask_groq', 0, 0, 0, 0, elapsed_ms, False, f"{status}: {body}")
         logger.error("Groq API %s: %s", status, body)
+        # 404 bo'lsa (model topilmadi/eskirgan), zaxira qwen/qwen3.8-27b bilan 1 marta qayta urinish
+        if status == 404 and model_name != 'qwen/qwen3.8-27b':
+            try:
+                logger.info("Groq 404 qaytardi, qwen/qwen3.8-27b bilan qayta urinilmoqda...")
+                retry_payload = dict(payload)
+                retry_payload['model'] = 'qwen/qwen3.8-27b'
+                retry_resp = requests.post(
+                    GROQ_API_URL,
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json=retry_payload,
+                    timeout=(CONNECT_TIMEOUT, timeout),
+                )
+                retry_resp.raise_for_status()
+                return _strip_think(retry_resp.json()["choices"][0]["message"]["content"])
+            except Exception as retry_err:
+                logger.error("Groq zaxira modeli ham xato berdi: %s", retry_err)
         if on_error:
             on_error('groq', status, body)
         return None

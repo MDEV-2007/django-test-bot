@@ -49,6 +49,11 @@ class ExplainMistakeAPIView(APIView):
             selected_option_id=selected_option_id
         ).first()
 
+        # Agar keshdagi yozuv eski xato fallback bo'lsa, uni o'chirib haqiqiy AI bilan yangilaymiz!
+        if cached_entry and ("bu savol mantiqiga to'g'ri kelmaydi" in (cached_entry.why_wrong or '') or "bilan mustahkamlang" in (cached_entry.memory_hack or '')):
+            cached_entry.delete()
+            cached_entry = None
+
         if cached_entry:
             # Hit countni yangilash
             MistakeExplanationCache.objects.filter(pk=cached_entry.pk).update(hit_count=F('hit_count') + 1)
@@ -108,22 +113,26 @@ class ExplainMistakeAPIView(APIView):
         why_wrong = ai_result.get('why_wrong', '')
         memory_hack = ai_result.get('memory_hack', '')
 
-        # ─── 4-QADAM: Bazaga saqlash (Keyingi 10,000 talabgor uchun kesh) ───
-        try:
-            created_cache, _ = MistakeExplanationCache.objects.get_or_create(
-                question_id=question_id,
-                selected_option_id=selected_option_id,
-                defaults={
-                    'selected_option_text': selected_option_text[:500],
-                    'why_wrong': why_wrong,
-                    'memory_hack': memory_hack,
-                    'hit_count': 1,
-                    'model_name': "groq/llama-3.3-70b-versatile",
-                }
-            )
-        except Exception as e:
-            logger.error(f"MistakeExplanationCache saqlashda xatolik: {e}")
-            created_cache = None
+        is_fallback = ai_result.get('is_fallback', False)
+
+        # ─── 4-QADAM: Bazaga saqlash (FAQAT haqiqiy AI yaratgan bo'lsa keshlaymiz) ───
+        if not is_fallback:
+            try:
+                created_cache, _ = MistakeExplanationCache.objects.update_or_create(
+                    question_id=question_id,
+                    selected_option_id=selected_option_id,
+                    defaults={
+                        'selected_option_text': (selected_option_text or '')[:500],
+                        'why_wrong': why_wrong,
+                        'memory_hack': memory_hack,
+                        'hit_count': 1,
+                        'model_name': getattr(settings, 'GROQ_MODEL', 'qwen/qwen3.8-27b'),
+                        'is_ai_generated': True,
+                    }
+                )
+            except Exception as e:
+                logger.error(f"MistakeExplanationCache saqlashda xatolik: {e}")
+                created_cache = None
 
         # Foydalanuvchi xatolar daftariga qayd etish
         if request.user.is_authenticated:
