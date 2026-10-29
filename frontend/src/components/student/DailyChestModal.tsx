@@ -1,18 +1,24 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Gift, Sparkles, Flame, CheckCircle2, 
-  Coins, Zap, ShieldAlert, Trophy, X, ArrowRight, Clock
+import { motion } from 'motion/react';
+import {
+  Gift,
+  Sparkles,
+  Flame,
+  Coins,
+  Zap,
+  ShieldCheck,
+  Trophy,
+  X,
+  Clock,
 } from 'lucide-react';
 import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 export interface DailyChestClaimData {
@@ -51,10 +57,8 @@ export default function DailyChestModal({
   const [loading, setLoading] = useState(false);
   const [opening, setOpening] = useState(false);
   const [openedReward, setOpenedReward] = useState<DailyChestClaimData | null>(null);
-
   const [countdown, setCountdown] = useState<number>(0);
 
-  // Statusni yuklash
   useEffect(() => {
     if (isOpen) {
       if (!initialStatus) {
@@ -71,7 +75,6 @@ export default function DailyChestModal({
     }
   }, [isOpen, initialStatus]);
 
-  // Taymer
   useEffect(() => {
     if (countdown <= 0) return;
     const timer = setInterval(() => {
@@ -95,7 +98,6 @@ export default function DailyChestModal({
     tgHaptic('medium');
 
     try {
-      // 1.2 soniya qiziqarli tebranish animatsiyasidan keyin natija ochiladi
       const res = await apiFetch<{
         success: boolean;
         claim: {
@@ -122,15 +124,13 @@ export default function DailyChestModal({
           if (res.user_stats && onClaimSuccess) {
             onClaimSuccess(res.user_stats);
           }
-          // Statusni yangilaymiz
-          setStatus((prev) => prev ? { ...prev, can_claim: false, today_claim: res.claim } : null);
+          setStatus((prev) => (prev ? { ...prev, can_claim: false, today_claim: res.claim } : null));
         }
-      }, 1200);
-
+      }, 1100);
     } catch (err: unknown) {
       setOpening(false);
       setLoading(false);
-      const msg = err instanceof Error ? err.message : "Sandiqni ochishda xatolik yuz berdi";
+      const msg = err instanceof Error ? err.message : 'Sandiqni ochishda xatolik yuz berdi';
       toast.error(msg);
     }
   };
@@ -144,31 +144,31 @@ export default function DailyChestModal({
     switch (rarity) {
       case 'legendary':
         return {
-          label: "Afsonaviy Jack-pot! 🏆",
-          badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-lg shadow-amber-500/20",
-          glowClass: "from-amber-500/30 via-orange-500/20 to-yellow-500/30",
-          textColor: "text-amber-300",
+          label: 'Afsonaviy Jackpot! 🏆',
+          pillClass: 'bg-[#FF9500]/15 text-[#C93400] dark:text-[#FFD60A] border-[#FF9500]/30',
+          titleClass: 'text-[#FF9500]',
+          tone: 'amber' as const,
         };
       case 'epic':
         return {
-          label: "Epik Yutuq! 🔮",
-          badgeClass: "bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-lg shadow-purple-500/20",
-          glowClass: "from-purple-500/30 via-indigo-500/20 to-fuchsia-500/30",
-          textColor: "text-purple-300",
+          label: 'Epik Yutuq! 🔮',
+          pillClass: 'bg-[#AF52DE]/15 text-[#AF52DE] border-[#AF52DE]/30',
+          titleClass: 'text-[#AF52DE]',
+          tone: 'purple' as const,
         };
       case 'rare':
         return {
           label: "Noyob Sovg'a! 💎",
-          badgeClass: "bg-sky-500/20 text-sky-300 border-sky-500/40 shadow-lg shadow-sky-500/20",
-          glowClass: "from-sky-500/30 via-blue-500/20 to-cyan-500/30",
-          textColor: "text-sky-300",
+          pillClass: 'bg-[#007AFF]/15 text-[#007AFF] border-[#007AFF]/30',
+          titleClass: 'text-[#007AFF]',
+          tone: 'sky' as const,
         };
       default:
         return {
-          label: "Ajoyib Yutuq! ✨",
-          badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-md",
-          glowClass: "from-emerald-500/20 via-teal-500/20 to-green-500/20",
-          textColor: "text-emerald-300",
+          label: 'Ajoyib Yutuq! ✨',
+          pillClass: 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] border-[#34C759]/30',
+          titleClass: 'text-[#34C759]',
+          tone: 'emerald' as const,
         };
     }
   };
@@ -176,181 +176,201 @@ export default function DailyChestModal({
   const rarityInfo = getRarityConfig(currentClaim?.rarity);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/55 backdrop-blur-md"
+    >
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-md overflow-hidden rounded-3xl border border-slate-700/80 bg-gradient-to-b from-slate-900/95 via-slate-900/90 to-slate-950 p-6 sm:p-8 text-center text-white shadow-2xl"
+        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+        className="relative w-full max-w-[400px] overflow-hidden rounded-[32px] border border-border bg-card p-6 sm:p-7 text-center text-card-foreground shadow-[0_24px_64px_rgba(0,0,0,0.28)]"
       >
-        {/* Ambient background glow */}
-        <div className={cn(
-          "absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-gradient-to-br blur-3xl pointer-events-none transition-all duration-700",
-          rarityInfo.glowClass
-        )} />
+        {/* Subtle Apple Ambient Aura */}
+        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-64 rounded-full bg-[#FF9500]/15 blur-3xl" />
 
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
+          className="absolute top-4 right-4 z-20 flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
+          aria-label="Yopish"
         >
-          <X className="size-5" />
+          <X className="size-4" />
         </button>
 
-        {/* HEADER */}
-        <div className="relative z-10 mb-6">
-          <Badge className="mb-2 bg-amber-500/10 text-amber-300 border-amber-500/30 px-3 py-1 font-semibold text-xs tracking-wide">
-            <Gift className="size-3.5 mr-1.5 inline" /> KUNDALIK SIRLI SANDIQ
-          </Badge>
-          <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
-            {isAlreadyClaimed ? "Bugungi Mukofotingiz" : "Sirli Sandiqni Ochish"}
+        {/* 1. HEADER */}
+        <div className="relative z-10 space-y-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#C93400] dark:text-[#FF9F0A]">
+            <PremiumIcon icon={Gift} tone="amber" size="2xs" />
+            <span>Kundalik Sirli Sandiq</span>
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-[-0.025em] text-foreground pt-1">
+            {isAlreadyClaimed ? 'Bugungi Mukofotingiz' : 'Sirli Sandiqni Ochish'}
           </h2>
-          <p className="mt-1 text-xs sm:text-sm text-slate-400">
+          <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-xs mx-auto">
             {isAlreadyClaimed
-              ? "Siz bugungi sirli sandiqni ochib bo'ldingiz."
+              ? "Siz bugungi sirli sandiqni muvaffaqiyatli ochib bo'ldingiz."
               : "Har kuni kiring, sandiqni oching va tasodifiy mukofotlarga ega bo'ling!"}
           </p>
         </div>
 
-        {/* CONTENT */}
-        <div className="relative z-10 my-4 flex flex-col items-center justify-center">
-          {/* CHEST ANIMATION / ICON AREA */}
-          <div className="relative my-2 flex items-center justify-center">
-            {/* Pulsing rings */}
-            <div className="absolute size-36 rounded-full bg-amber-500/10 blur-xl animate-pulse" />
-
-            {!isAlreadyClaimed ? (
-              <motion.div
-                animate={opening ? {
-                  scale: [1, 1.15, 0.95, 1.2, 1],
-                  rotate: [0, -10, 10, -15, 15, 0],
-                  filter: ["brightness(1)", "brightness(1.8)", "brightness(1.2)"],
-                } : {
-                  y: [0, -6, 0],
-                }}
-                transition={opening ? { duration: 1.2, ease: "easeInOut" } : { repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                className="relative cursor-pointer select-none"
-                onClick={handleOpenChest}
-              >
-                <div className="size-28 sm:size-32 rounded-3xl bg-gradient-to-tr from-amber-600 via-yellow-500 to-amber-300 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.35)] flex items-center justify-center">
-                  <div className="size-full rounded-[22px] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center border border-amber-400/30">
-                    <Gift className="size-14 text-amber-300 drop-shadow-[0_0_15px_rgba(252,211,77,0.8)]" />
-                    <span className="mt-1 text-[10px] font-black uppercase tracking-wider text-amber-200">
-                      {opening ? "Ochilmoqda..." : "Bosib oching"}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="flex flex-col items-center justify-center"
-              >
-                <div className="size-28 sm:size-32 rounded-3xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 p-0.5 shadow-[0_0_40px_rgba(16,185,129,0.35)] flex items-center justify-center">
-                  <div className="size-full rounded-[22px] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center border border-emerald-400/30">
-                    {currentClaim.reward_type === 'coins' ? (
-                      <Coins className="size-14 text-amber-300 drop-shadow-[0_0_15px_rgba(252,211,77,0.8)]" />
-                    ) : currentClaim.reward_type === 'streak_freeze' ? (
-                      <ShieldAlert className="size-14 text-cyan-300 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]" />
-                    ) : (
-                      <Zap className="size-14 text-emerald-300 drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]" />
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-
-          {/* REWARD DETAILS / STREAK INCENTIVE */}
-          <div className="mt-6 w-full space-y-3">
-            {isAlreadyClaimed && currentClaim ? (
-              <div className="space-y-3">
-                <Badge className={cn("px-3 py-1 font-bold text-xs uppercase", rarityInfo.badgeClass)}>
-                  {rarityInfo.label}
-                </Badge>
-                <div className={cn("text-3xl font-black tracking-tight", rarityInfo.textColor)}>
-                  {currentClaim.reward_title}
-                </div>
-                {currentClaim.extra_note && (
-                  <p className="text-xs text-slate-300 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/50">
-                    {currentClaim.extra_note}
-                  </p>
-                )}
-                {currentClaim.streak_bonus_pct > 0 && (
-                  <div className="inline-flex items-center gap-1.5 text-xs text-orange-400 font-bold bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
-                    <Flame className="size-3.5 fill-orange-500" />
-                    +{currentClaim.streak_bonus_pct}% streak bonusi hisobga olindi
-                  </div>
-                )}
-
-                {/* Countdown to next chest */}
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-center gap-2 text-xs text-slate-400">
-                  <Clock className="size-3.5 text-amber-400" />
-                  <span>Keyingi sirli sandiq:</span>
-                  <span className="font-mono font-bold text-white bg-slate-800 px-2 py-0.5 rounded">
-                    {formatCountdown(countdown)}
-                  </span>
-                </div>
+        {/* 2. 3D APPLE SQUIRCLE CHEST STAGE */}
+        <div className="relative z-10 my-6 flex flex-col items-center justify-center">
+          {!isAlreadyClaimed ? (
+            <motion.button
+              type="button"
+              animate={
+                opening
+                  ? {
+                      scale: [1, 1.12, 0.96, 1.16, 1],
+                      rotate: [0, -8, 8, -12, 12, 0],
+                    }
+                  : {
+                      y: [0, -5, 0],
+                    }
+              }
+              transition={
+                opening
+                  ? { duration: 1.1, ease: 'easeInOut' }
+                  : { repeat: Infinity, duration: 2.6, ease: 'easeInOut' }
+              }
+              onClick={handleOpenChest}
+              className="group relative flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none"
+            >
+              <div className="absolute -inset-3 rounded-[36px] bg-gradient-to-tr from-[#FF9500]/30 to-[#FFCC00]/25 blur-xl group-hover:opacity-100 opacity-80 transition-opacity" />
+              <div className="relative flex size-28 sm:size-30 flex-col items-center justify-center gap-2 rounded-[30px] bg-gradient-to-b from-[#FFCC00] via-[#FF9500] to-[#E07A00] text-white shadow-[0_14px_34px_-6px_rgba(255,149,0,0.5),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25 active:scale-95 transition-transform">
+                <Gift className="size-12 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] stroke-[2.2]" />
+                <span className="rounded-full bg-black/20 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">
+                  {opening ? 'Ochilmoqda...' : 'Bosib oching'}
+                </span>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {/* Streak Multiplier Notice */}
-                {status && (
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-left">
-                    <div className="flex items-center gap-2.5">
-                      <div className="size-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
-                        <Flame className="size-4 text-orange-400 fill-orange-400" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">
-                          {status.streak} kunlik olov (Streak)
-                        </div>
-                        <div className="text-[11px] text-slate-400">
-                          {status.streak_bonus_pct > 0
-                            ? `Mukofotga +${status.streak_bonus_pct}% bonus qo'shiladi!`
-                            : "Streakni uzmasangiz mukofotlar ko'payadi"}
-                        </div>
-                      </div>
-                    </div>
-                    {status.streak_bonus_pct > 0 && (
-                      <span className="text-xs font-mono font-extrabold text-orange-400 bg-orange-500/10 px-2 py-1 rounded-lg border border-orange-500/20">
-                        +{status.streak_bonus_pct}%
-                      </span>
-                    )}
-                  </div>
+            </motion.button>
+          ) : (
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="relative flex flex-col items-center justify-center"
+            >
+              <div className="relative flex size-26 sm:size-28 flex-col items-center justify-center rounded-[28px] bg-gradient-to-b from-[#34C759] to-[#248A3D] text-white shadow-[0_14px_34px_-6px_rgba(52,199,89,0.45),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25">
+                {currentClaim?.reward_type === 'coins' ? (
+                  <Coins className="size-12 text-white stroke-[2.2]" />
+                ) : currentClaim?.reward_type === 'streak_freeze' ? (
+                  <ShieldCheck className="size-12 text-white stroke-[2.2]" />
+                ) : (
+                  <Zap className="size-12 text-white stroke-[2.2]" />
                 )}
-
-                <div className="text-[11px] text-slate-400 flex items-center justify-center gap-3">
-                  <span>🎁 500 XP gacha</span>
-                  <span>•</span>
-                  <span>🪙 Oltin tangalar</span>
-                  <span>•</span>
-                  <span>🛡 Streak Freeze</span>
-                </div>
               </div>
-            )}
-          </div>
+            </motion.div>
+          )}
         </div>
 
-        {/* FOOTER ACTIONS */}
-        <div className="relative z-10 mt-6 pt-4 border-t border-slate-800 flex items-center justify-center">
+        {/* 3. REWARD DETAILS OR STREAK + PRIZE POOL */}
+        <div className="relative z-10 space-y-3">
+          {isAlreadyClaimed && currentClaim ? (
+            <div className="space-y-3">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-extrabold uppercase',
+                  rarityInfo.pillClass
+                )}
+              >
+                {rarityInfo.label}
+              </span>
+
+              <div className={cn('text-2xl sm:text-3xl font-black tracking-tight', rarityInfo.titleClass)}>
+                {currentClaim.reward_title}
+              </div>
+
+              {currentClaim.extra_note && (
+                <p className="text-xs text-muted-foreground bg-muted/60 p-3 rounded-[16px] border border-border">
+                  {currentClaim.extra_note}
+                </p>
+              )}
+
+              {currentClaim.streak_bonus_pct > 0 && (
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] bg-[#FF9500]/12 px-3 py-1 rounded-full border border-[#FF9500]/25">
+                  <PremiumIcon icon={Flame} tone="amber" size="2xs" />
+                  <span>+{currentClaim.streak_bonus_pct}% streak bonusi qo&apos;shildi</span>
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-border flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <Clock className="size-3.5 text-[#FF9500]" />
+                <span>Keyingi sandiq:</span>
+                <span className="font-mono font-bold text-foreground bg-muted px-2.5 py-0.5 rounded-full border border-border">
+                  {formatCountdown(countdown)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Streak Multiplier Row */}
+              {status && (
+                <div className="flex items-center justify-between gap-2.5 p-3 rounded-[20px] bg-muted/55 border border-border text-left">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <PremiumIcon icon={Flame} tone="amber" size="sm" solid />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-[13px] font-bold text-foreground truncate">
+                        {status.streak} kunlik olov (Streak)
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {status.streak_bonus_pct > 0
+                          ? `Mukofotga +${status.streak_bonus_pct}% bonus qo'shiladi!`
+                          : "Streakni uzmasangiz mukofotlar ko'payadi"}
+                      </p>
+                    </div>
+                  </div>
+                  {status.streak_bonus_pct > 0 && (
+                    <span className="shrink-0 text-xs font-mono font-extrabold text-[#C93400] dark:text-[#FF9F0A] bg-[#FF9500]/14 px-2.5 py-1 rounded-full border border-[#FF9500]/25">
+                      +{status.streak_bonus_pct}%
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* 3 Compact iOS Reward Tiles */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
+                  <PremiumIcon icon={Zap} tone="emerald" size="2xs" />
+                  <span className="text-[11px] font-bold text-foreground leading-tight">500 XP gacha</span>
+                </div>
+                <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
+                  <PremiumIcon icon={Coins} tone="amber" size="2xs" />
+                  <span className="text-[11px] font-bold text-foreground leading-tight">Oltin tangalar</span>
+                </div>
+                <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
+                  <PremiumIcon icon={ShieldCheck} tone="sky" size="2xs" />
+                  <span className="text-[11px] font-bold text-foreground leading-tight">Streak Freeze</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 4. PRIMARY ACTION BUTTON */}
+        <div className="relative z-10 mt-5 pt-4 border-t border-border">
           {!isAlreadyClaimed ? (
-            <Button
+            <button
+              type="button"
               onClick={handleOpenChest}
               disabled={loading || opening}
-              className="w-full h-12 text-base font-black rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all cursor-pointer"
+              className="ios-spring w-full h-12 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF7A00] text-white font-extrabold text-sm sm:text-[15px] shadow-[0_8px_22px_rgba(255,149,0,0.38)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
-              <Sparkles className="size-5 mr-2" />
-              {opening ? "Sandiq ochilmoqda..." : "Sandiqni Ochish (100% Bepul)"}
-            </Button>
+              <Sparkles className="size-4 fill-white" />
+              <span>{opening ? 'Sandiq ochilmoqda...' : 'Sandiqni Ochish (100% Bepul)'}</span>
+            </button>
           ) : (
-            <Button
+            <button
+              type="button"
               onClick={onClose}
-              className="w-full h-11 text-sm font-bold rounded-2xl bg-slate-800 hover:bg-slate-700 text-white transition"
+              className="ios-spring w-full h-11 rounded-full bg-muted hover:bg-muted/80 text-foreground font-bold text-sm transition cursor-pointer"
             >
               Yopish
-            </Button>
+            </button>
           )}
         </div>
       </motion.div>

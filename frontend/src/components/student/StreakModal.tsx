@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Flame, Snowflake, Check, ShoppingBag, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Flame, Snowflake, ShoppingBag, ArrowRight, Check } from 'lucide-react';
 import type { Profile } from '@/lib/auth-store';
 import {
   Dialog,
@@ -9,9 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import PremiumIcon from '@/components/ui/premium-icon';
+import { cn } from '@/lib/utils';
 
 interface StreakModalProps {
   open: boolean;
@@ -35,66 +34,62 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
   const streak = user.streak || 0;
   const freezeCount = user.freeze_count || 0;
 
-  // Hafta kunini hisoblash (0: Dushanba ... 6: Yakshanba)
   const now = new Date();
-  const dayOfWeek = (now.getDay() + 6) % 7; // Dushanbani 0 qilish
-
-  // Bugun faol bo'lganmi? (agar last_active_date bugun bo'lsa)
+  const dayOfWeek = (now.getDay() + 6) % 7;
   const todayStr = now.toISOString().split('T')[0];
   const isDoneToday = user.last_active_date === todayStr;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md overflow-hidden p-6 border border-[var(--border-card)] bg-[var(--surface-card-soft)] sm:rounded-3xl">
-        <DialogHeader className="flex flex-col items-center text-center">
-          {/* Animated Flame Icon Container */}
-          <div className="relative mb-3 flex size-20 items-center justify-center rounded-3xl border border-[var(--tone-streak)]/30 bg-[var(--tone-streak-soft)] shadow-lg shadow-[var(--tone-streak)]/20">
-            <Flame className="size-10 text-[var(--tone-streak-text)] animate-flame-pulse" />
-            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[var(--tone-streak)]/10 blur-xl" />
+      <DialogContent className="w-[calc(100%-1.5rem)] max-w-[400px] overflow-hidden rounded-[32px] border border-border bg-card p-6 text-card-foreground shadow-[0_24px_64px_rgba(0,0,0,0.28)]">
+        <DialogHeader className="flex flex-col items-center text-center space-y-2">
+          <div className="mb-1">
+            <PremiumIcon icon={Flame} tone="amber" size="xl" solid />
           </div>
 
-          <DialogTitle className="font-voice text-3xl font-black text-[var(--text-primary)]">
-            {streak} kunlik <span className="text-[var(--tone-streak-text)]">Olov!</span>
+          <DialogTitle className="text-2xl sm:text-3xl font-extrabold tracking-[-0.025em] text-foreground">
+            {streak} kunlik <span className="text-[#FF9500]">Olov!</span>
           </DialogTitle>
 
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-xs">
             {isDoneToday
-              ? "Bugungi vazifangiz bajarildi! Olovingiz xavfsiz holatda saqlandi."
+              ? 'Bugungi vazifangiz bajarildi! Olovingiz xavfsiz holatda saqlandi.'
               : "Bugun hali mashq qilmadingiz. Olovingiz o'chib qolmasligi uchun 1 ta test yeching!"}
           </p>
         </DialogHeader>
 
         {/* 7 Kunlik Haftalik Taqvim */}
-        <div className="my-5 space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground px-1">
+        <div className="my-4 space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-muted-foreground px-1">
             <span>Haftalik davomat</span>
-            <span>{isDoneToday ? 'Bugun: Bajarildi' : 'Bugun: Kutilmoqda'}</span>
+            <span className={isDoneToday ? 'text-[#34C759]' : 'text-[#FF9500]'}>
+              {isDoneToday ? 'Bugun: Bajarildi ✓' : 'Bugun: Kutilmoqda'}
+            </span>
           </div>
 
-          <div className="grid grid-cols-7 gap-1.5 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-input)] p-2.5 text-center">
+          <div className="grid grid-cols-7 gap-1.5 rounded-[22px] border border-border bg-muted/45 p-2.5 text-center">
             {WEEKDAYS.map((day, idx) => {
               const isPast = idx < dayOfWeek;
               const isToday = idx === dayOfWeek;
-              const isFuture = idx > dayOfWeek;
-
-              const active = (isPast && streak > (dayOfWeek - idx)) || (isToday && isDoneToday);
+              const active = (isPast && streak > dayOfWeek - idx) || (isToday && isDoneToday);
 
               return (
                 <div key={day.key} className="flex flex-col items-center gap-1.5">
                   <span className="text-[11px] font-bold text-muted-foreground">{day.label}</span>
                   <div
-                    className={`flex size-9 items-center justify-center rounded-xl text-xs font-bold transition-all ${
+                    className={cn(
+                      'flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all',
                       active
-                        ? 'border border-[var(--tone-streak)]/40 bg-[var(--tone-streak-soft)] text-[var(--tone-streak-text)] shadow-sm'
+                        ? 'bg-gradient-to-b from-[#FF9F0A] to-[#FF9500] text-white shadow-[0_4px_10px_rgba(255,149,0,0.3)]'
                         : isToday
-                        ? 'border-2 border-dashed border-[var(--tone-streak)]/60 bg-[var(--surface-hover)] text-[var(--tone-streak-text)] animate-pulse'
-                        : 'border border-[var(--border-soft)] bg-[var(--surface-hover)] text-muted-foreground/40'
-                    }`}
+                        ? 'border-2 border-dashed border-[#FF9500] bg-[#FF9500]/10 text-[#FF9500]'
+                        : 'border border-border bg-card text-muted-foreground/40'
+                    )}
                   >
                     {active ? (
-                      <Flame className="size-4 fill-current" />
+                      <Check className="size-4 stroke-[2.6]" />
                     ) : isToday ? (
-                      <span className="text-[11px]">Bugun</span>
+                      <Flame className="size-4" />
                     ) : (
                       <span className="size-1.5 rounded-full bg-muted-foreground/30" />
                     )}
@@ -106,60 +101,51 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
         </div>
 
         {/* Streak Muzlatish (Freeze) Bloki */}
-        <Card className="border-sky-500/25 bg-sky-500/[0.06] shadow-none">
-          <CardContent className="flex items-center justify-between gap-3 p-3.5">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-300">
-                <Snowflake className="size-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-[var(--text-primary)]">
-                  {freezeCount > 0 ? `${freezeCount} ta muzlatish mavjud` : 'Muzlatish mavjud emas'}
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  {freezeCount > 0
-                    ? "Kira olmagan kuningizda olov avtomatik saqlanadi."
-                    : "Streak uzilishidan himoya qilish uchun oling."}
-                </p>
-              </div>
+        <div className="flex items-center justify-between gap-3 rounded-[22px] border border-primary/20 bg-primary/8 p-3.5">
+          <div className="flex items-center gap-3 min-w-0">
+            <PremiumIcon icon={Snowflake} tone="sky" size="sm" solid />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-foreground truncate">
+                {freezeCount > 0 ? `${freezeCount} ta muzlatish mavjud` : 'Muzlatish mavjud emas'}
+              </p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                {freezeCount > 0
+                  ? 'Kira olmagan kuningizda olov avtomatik saqlanadi.'
+                  : 'Streak uzilishidan himoya qilish uchun oling.'}
+              </p>
             </div>
+          </div>
 
-            <Button
-              asChild
-              size="sm"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="shrink-0 h-8 rounded-lg border-sky-500/30 text-xs font-semibold text-sky-600 dark:text-sky-300 hover:bg-sky-500/15"
-            >
-              <Link href="/shop/inventory">
-                <ShoppingBag className="size-3.5" /> Olish
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+          <Link
+            href="/shop/inventory"
+            onClick={() => onOpenChange(false)}
+            className="ios-spring shrink-0 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-white shadow-2xs"
+          >
+            <ShoppingBag className="size-3.5" />
+            <span>Olish</span>
+          </Link>
+        </div>
 
         {/* CTA Button */}
-        <div className="mt-5">
+        <div className="mt-4">
           {!isDoneToday ? (
-            <Button
-              asChild
-              size="lg"
+            <Link
+              href="/tests"
               onClick={() => onOpenChange(false)}
-              className="w-full rounded-2xl bg-gradient-to-r from-[var(--tone-streak)] to-orange-500 font-bold text-white shadow-lg shadow-orange-500/25 hover:from-orange-600 hover:to-orange-500"
+              className="ios-spring w-full h-12 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF7A00] font-extrabold text-sm text-white shadow-[0_8px_22px_rgba(255,149,0,0.35)] flex items-center justify-center gap-2"
             >
-              <Link href="/tests" className="flex items-center justify-center gap-2">
-                <Flame className="size-4" /> Bugungi testni yechish <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+              <Flame className="size-4 fill-white" />
+              <span>Bugungi testni yechish</span>
+              <ArrowRight className="size-4" />
+            </Link>
           ) : (
-            <Button
-              size="lg"
-              variant="outline"
+            <button
+              type="button"
               onClick={() => onOpenChange(false)}
-              className="w-full rounded-2xl border-[var(--border-card)] font-bold text-muted-foreground"
+              className="ios-spring w-full h-11 rounded-full bg-muted hover:bg-muted/80 font-bold text-sm text-foreground cursor-pointer"
             >
               Yopish
-            </Button>
+            </button>
           )}
         </div>
       </DialogContent>
