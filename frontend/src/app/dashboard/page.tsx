@@ -39,6 +39,7 @@ import {
   HeroFocusBanner,
   DailyGoalCard,
   BattleArenaCard,
+  LiveActivityTicker,
 } from '@/components/dashboard/ModernHeroDashboard';
 import ModernTestCenter from '@/components/dashboard/ModernTestCenter';
 import PomodoroTimerCard from '@/components/dashboard/PomodoroTimerCard';
@@ -417,6 +418,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* JONLI FAOLIYAT MIKRO-TIKERI (Multiplayer Live Ribbon) */}
+      <LiveActivityTicker />
+
       {/* ============================================================ */}
       {/* 2. iOS 18 HOME SCREEN GLANCEABLE WIDGETS ROW                 */}
       {/* ============================================================ */}
@@ -508,25 +512,71 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* 1. HERO FOCUS BANNER */}
-              <HeroFocusBanner
-                user={{
-                  first_name: firstName,
-                  username: p.username,
-                  streak: p.streak,
-                  coins: p.coins,
-                  elo_rating: p.elo_rating,
-                }}
-                recommendedSprint={{
-                  title: continueTitle,
-                  topic: '15-daqiqalik Fokus Sprinti',
-                  durationMinutes: 15,
-                  progressPct: lastAttempt?.score || 65,
-                  subjectName: activeSubject,
-                  actionUrl: '/tests',
-                }}
-                theme={isDark ? 'dark' : 'light'}
-              />
+              {/* 1. BUGUNGI AI MARAFON (3 BOSQICHLI AVTOPILOT ZANJIRI) */}
+              {(() => {
+                const step1Done = (data?.recent_attempts && data.recent_attempts.length > 0) || false;
+                const mistakesCount = mistakesSummary?.total_mistakes ?? 0;
+                const step2Done = mistakesSummary ? mistakesSummary.total_mistakes === 0 : false;
+                const step3Done = (currentGoals >= 2) || ((p as any)?.recent_battles && (p as any).recent_battles.length > 0) || false;
+                const completedSteps = (step1Done ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
+
+                const lastScore = lastAttempt?.score ?? 65;
+                const scaledScore = Number(((lastScore / 100) * 70).toFixed(1));
+                let predictedGrade = 'B';
+                let nextGrade = 'B+';
+                let gapToNext = 1.6;
+                if (scaledScore >= 65) {
+                  predictedGrade = 'A+'; nextGrade = 'A+'; gapToNext = 0;
+                } else if (scaledScore >= 60) {
+                  predictedGrade = 'A'; nextGrade = 'A+'; gapToNext = Number((65.0 - scaledScore).toFixed(1));
+                } else if (scaledScore >= 55) {
+                  predictedGrade = 'B+'; nextGrade = 'A'; gapToNext = Number((60.0 - scaledScore).toFixed(1));
+                } else if (scaledScore >= 50) {
+                  predictedGrade = 'B'; nextGrade = 'B+'; gapToNext = Number((55.0 - scaledScore).toFixed(1));
+                } else if (scaledScore >= 46) {
+                  predictedGrade = 'C+'; nextGrade = 'B'; gapToNext = Number((50.0 - scaledScore).toFixed(1));
+                } else if (scaledScore >= 42) {
+                  predictedGrade = 'C'; nextGrade = 'C+'; gapToNext = Number((46.0 - scaledScore).toFixed(1));
+                } else {
+                  predictedGrade = '—'; nextGrade = 'C'; gapToNext = Number((42.0 - scaledScore).toFixed(1));
+                }
+
+                return (
+                  <HeroFocusBanner
+                    user={{
+                      first_name: firstName,
+                      username: p.username,
+                      streak: p.streak,
+                      coins: p.coins,
+                      elo_rating: p.elo_rating,
+                    }}
+                    recommendedSprint={{
+                      title: continueTitle,
+                      topic: '15-daqiqalik Fokus Sprinti',
+                      durationMinutes: 15,
+                      progressPct: lastAttempt?.score || 65,
+                      subjectName: activeSubject,
+                      actionUrl: '/tests',
+                    }}
+                    predictedScore={{
+                      scaledScore,
+                      grade: predictedGrade,
+                      nextGrade,
+                      gapToNext,
+                    }}
+                    marathon={{
+                      step1Done,
+                      step2Done,
+                      step3Done,
+                      mistakesCount,
+                      onStartMistakes: handleStartMistakesTest,
+                      onOpenChest: () => setChestModalOpen(true),
+                    }}
+                    comboMultiplier={completedSteps >= 2 ? 2.0 : (completedSteps >= 1 ? 1.5 : 1.0)}
+                    theme={isDark ? 'dark' : 'light'}
+                  />
+                );
+              })()}
 
               {/* 2. POMODORO TIMER CARD */}
               <PomodoroTimerCard />
@@ -872,60 +922,80 @@ export default function DashboardPage() {
             theme={isDark ? 'dark' : 'light'}
           />
 
-          {/* 2. KUNDALIK SIRLI SANDIQ (Apple Arcade Style Reward Card) */}
-          <div
-            onClick={() => setChestModalOpen(true)}
-            className={cn(
-              'ios-card ios-card-interactive group relative overflow-hidden rounded-[26px] p-5 cursor-pointer select-none',
-              chestStatus?.can_claim !== false &&
-                'border-[#FF9500]/50 bg-gradient-to-br from-[#FF9500]/12 via-card to-[#FFCC00]/10'
-            )}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <PremiumIcon icon={Gift} tone="amber" size="lg" solid />
-                <div className="min-w-0 space-y-0.5">
-                  <div className="flex items-center gap-1.5 flex-wrap">
+          {/* 2. KUNDALIK SIRLI SANDIQ (Apple Arcade Style Reward Card - Marafon Zanjiriga Bog'langan) */}
+          {(() => {
+            const step1Done = (data?.recent_attempts && data.recent_attempts.length > 0) || false;
+            const step2Done = mistakesSummary ? mistakesSummary.total_mistakes === 0 : false;
+            const step3Done = (currentGoals >= 2) || ((p as any)?.recent_battles && (p as any).recent_battles.length > 0) || false;
+            const completedSteps = (step1Done ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
+            const isMarathonComplete = completedSteps >= 3;
+            const isClaimable = chestStatus?.can_claim !== false;
+
+            return (
+              <div
+                onClick={() => setChestModalOpen(true)}
+                className={cn(
+                  'ios-card ios-card-interactive group relative overflow-hidden rounded-[26px] p-5 cursor-pointer select-none transition-all duration-300',
+                  (isMarathonComplete && isClaimable)
+                    ? 'border-amber-500/60 bg-gradient-to-br from-amber-500/20 via-card to-emerald-500/15 shadow-lg shadow-amber-500/25 ring-2 ring-amber-500/30'
+                    : 'border-border/80'
+                )}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <PremiumIcon icon={Gift} tone="amber" size="lg" solid className={cn((isMarathonComplete && isClaimable) && 'animate-bounce')} />
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span
+                          className={cn(
+                            'rounded-full text-[9px] font-bold px-2.5 py-0.5 uppercase tracking-wider',
+                            (isMarathonComplete && isClaimable)
+                              ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300 font-extrabold animate-pulse'
+                              : !isClaimable
+                              ? 'bg-muted text-muted-foreground'
+                              : 'bg-primary/15 text-primary font-bold'
+                          )}
+                        >
+                          {!isClaimable
+                            ? '✅ Bugun ochildi'
+                            : isMarathonComplete
+                            ? '🎁 3/3 TAYYOR — Ochish!'
+                            : `🔒 Marafon: ${completedSteps}/3 bajarildi`}
+                        </span>
+                        {chestStatus?.streak_bonus_pct ? (
+                          <span className="text-[10px] font-bold text-amber-500">
+                            +{chestStatus.streak_bonus_pct}% bonus
+                          </span>
+                        ) : null}
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-bold text-foreground leading-snug truncate">
+                        Kundalik Sirli Sandiq
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {!isClaimable
+                          ? 'Ertaga yangi kutilmagan mukofot kutmoqda'
+                          : isMarathonComplete
+                          ? '500 XP gacha, tangalar yoki Freeze!'
+                          : `Ochish uchun bugungi marafonni tugating (${completedSteps}/3)`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="shrink-0">
                     <span
                       className={cn(
-                        'rounded-full text-[9px] font-bold px-2.5 py-0.5 uppercase tracking-wider',
-                        chestStatus?.can_claim !== false
-                          ? 'bg-[#FF9500]/15 text-[#C93400] dark:text-[#FFD60A]'
+                        'inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-bold transition-all',
+                        (isMarathonComplete && isClaimable)
+                          ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-white shadow-[0_4px_14px_rgba(255,149,0,0.4)] animate-pulse'
                           : 'bg-muted text-muted-foreground'
                       )}
                     >
-                      {chestStatus?.can_claim !== false ? '🎁 Ochishga tayyor!' : '✅ Bugun ochildi'}
+                      {!isClaimable ? 'Yopiq' : isMarathonComplete ? 'Ochish' : `${completedSteps}/3`}
                     </span>
-                    {chestStatus?.streak_bonus_pct ? (
-                      <span className="text-[10px] font-bold text-[#FF9500]">
-                        +{chestStatus.streak_bonus_pct}% bonus
-                      </span>
-                    ) : null}
                   </div>
-                  <h4 className="text-xs sm:text-sm font-bold text-foreground leading-snug truncate">
-                    Kundalik Sirli Sandiq
-                  </h4>
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    {chestStatus?.can_claim !== false
-                      ? '500 XP gacha, tangalar yoki Freeze!'
-                      : 'Ertaga yangi kutilmagan mukofot kutmoqda'}
-                  </p>
                 </div>
               </div>
-              <div className="shrink-0">
-                <span
-                  className={cn(
-                    'inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-bold',
-                    chestStatus?.can_claim !== false
-                      ? 'bg-[#FF9500] text-white shadow-[0_4px_12px_rgba(255,149,0,0.3)]'
-                      : 'bg-muted text-foreground'
-                  )}
-                >
-                  {chestStatus?.can_claim !== false ? 'Ochish' : "Ko'rish"}
-                </span>
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* 3. BONUS QUEST BOX */}
           <Card className="rounded-[26px] border border-border bg-card p-5 shadow-card space-y-3">

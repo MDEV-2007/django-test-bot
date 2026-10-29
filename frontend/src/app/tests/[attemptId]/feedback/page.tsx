@@ -7,7 +7,7 @@ import {
   Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
   AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
   CheckCircle2, HelpCircle, Trophy, Gift, Swords, Film, BookOpen, Send, Gamepad2, Lock,
-  TrendingUp,
+  TrendingUp, ArrowRight,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
@@ -502,6 +502,50 @@ export default function FeedbackPage() {
                       <span>Prognoz Sertifikat: <b>{((a.correct_answers || 0) === 0 || (a.score || 0) === 0) ? "— (0.0 ball)" : data.predicted_score}</b></span>
                     </div>
                   )}
+                </div>
+
+                {/* ─── ZERO DEAD-ENDS / AUTOPLAY KONVEYER BLOKI ─── */}
+                <div className="w-full max-w-xl mt-6 p-4.5 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-amber-500/10 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
+                  <div className="space-y-1 min-w-0">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                      <Sparkles className="size-3 text-amber-500 animate-pulse" />
+                      Keyingi Qadam · Konveyer Oqimi
+                    </span>
+                    <h4 className="text-xs sm:text-sm font-extrabold text-foreground">
+                      {(a.wrong_answers || 0) > 0
+                        ? `🔥 ${a.wrong_answers} ta xatoingiz aniqlandi: Hoziroq 2 daqiqada ularni yanchib tashlang!`
+                        : `🏆 Ajoyib natija! 1v1 Arenada tengdoshingiz bilan kuch sinashing!`}
+                    </h4>
+                    <p className="text-[11px] text-muted-foreground">
+                      {(a.wrong_answers || 0) > 0
+                        ? `Xatolarni tozalab, +40 XP oling va marafon zanjirini davom ettiring.`
+                        : `Ketma-ket g'alaba seriyasi uchun +50 Tanga va 2x Bonus.`}
+                    </p>
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-2 w-full sm:w-auto">
+                    {(a.wrong_answers || 0) > 0 ? (
+                      <Button
+                        onClick={startMistakesTest}
+                        className="w-full sm:w-auto rounded-full bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs px-5 shadow-md shadow-rose-500/25 gap-1.5 cursor-pointer"
+                      >
+                        <RotateCcw className="size-3.5" />
+                        <span>Xatolarni Yanchish (+40 XP)</span>
+                        <ArrowRight className="size-3.5" />
+                      </Button>
+                    ) : (
+                      <Button
+                        asChild
+                        className="w-full sm:w-auto rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-600 hover:to-emerald-600 text-white font-bold text-xs px-5 shadow-md shadow-amber-500/25 gap-1.5 cursor-pointer"
+                      >
+                        <Link href="/battles">
+                          <Swords className="size-3.5" />
+                          <span>1v1 Arenaga Kirish (+50 Tanga)</span>
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
