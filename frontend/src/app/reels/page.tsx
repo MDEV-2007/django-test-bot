@@ -18,6 +18,7 @@ import { useFeatureFlags } from '@/lib/features';
 import { tgHaptic, openTelegramLink } from '@/lib/telegram';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
 import VerifiedBadge from '@/components/ui/verified-badge';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 function cleanOptionText(text: string): string {
@@ -246,7 +247,11 @@ function ReelsInner() {
         setCurrentIndex(targetIndex);
         if (targetIndex > 0) {
           setTimeout(() => {
-            reelRefs.current[targetIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const container = containerRef.current;
+            const targetEl = reelRefs.current[targetIndex];
+            if (container && targetEl) {
+              container.scrollTo({ top: targetEl.offsetTop, behavior: 'smooth' });
+            }
           }, 300);
         }
       } else {
@@ -291,7 +296,11 @@ function ReelsInner() {
 
   const scrollToReel = (index: number) => {
     if (index < 0 || index >= reels.length) return;
-    reelRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const container = containerRef.current;
+    const targetEl = reelRefs.current[index];
+    if (container && targetEl) {
+      container.scrollTo({ top: targetEl.offsetTop, behavior: 'smooth' });
+    }
     setCurrentIndex(index);
   };
 
@@ -510,7 +519,7 @@ function ReelsInner() {
           setSaveCounts((prev) => ({ ...prev, [res.reel.id]: 0 }));
           setCurrentIndex(0);
           setTimeout(() => {
-            reelRefs.current[0]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
           }, 150);
         }
 
@@ -618,10 +627,10 @@ function ReelsInner() {
 
   return (
     <>
-      <AppShell />
-      <main className="page-shell flex-1 w-full flex items-center justify-center !p-0 sm:!p-4 !pb-[4.75rem] md:!pb-4 select-none font-sans min-h-0 bg-[#F2F2F7] dark:bg-[#000000]">
+      <AppShell hideTopbarOnMobile />
+      <main className="page-shell flex-1 w-full h-[var(--tg-viewport,100dvh)] lg:h-[calc(100dvh-3.75rem)] overflow-hidden flex items-stretch lg:items-center justify-center !p-0 sm:!p-3 !pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] lg:!pb-4 select-none font-sans min-h-0 bg-[#F2F2F7] dark:bg-[#000000]">
         {/* Main iOS 18 Device Frame Container */}
-        <div className="w-full h-[calc(var(--tg-viewport,100dvh)-8.25rem)] md:h-[88vh] sm:max-w-[490px] md:max-w-[510px] relative rounded-none sm:rounded-[34px] overflow-hidden border-0 sm:border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white flex flex-col my-auto transition-all">
+        <div className="w-full h-full lg:h-[86vh] sm:max-w-[490px] md:max-w-[510px] relative rounded-none sm:rounded-[34px] overflow-hidden border-0 sm:border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white flex flex-col lg:my-auto transition-all">
           
           {/* ── TOP HORIZONTAL iOS NAVIGATION & CAPSULES ── */}
           <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/[0.08]">
@@ -691,9 +700,7 @@ function ReelsInner() {
             </div>
           ) : reels.length === 0 ? (
             <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center space-y-3">
-              <div className="flex size-14 items-center justify-center rounded-[18px] bg-[#007AFF]/12 text-[#007AFF]">
-                <BookOpen className="size-7" />
-              </div>
+              <PremiumIcon icon={BookOpen} tone="sky" size="xl" />
               <h3 className="font-bold text-[17px] text-slate-900 dark:text-white">Reels mavjud emas</h3>
               <p className="text-[13px] text-[#8E8E93] max-w-xs">
                 Ushbu fan bo&apos;yicha tezkor savollar tez orada qo&apos;shiladi.
@@ -730,10 +737,10 @@ function ReelsInner() {
                     className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between p-4 sm:p-5 overflow-y-auto no-scrollbar select-none bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white"
                   >
                     {/* ── TOP SECTION: iOS Callout Card & Dynamic Island Timer ── */}
-                    <div className="space-y-3 shrink-0">
+                    <div className="space-y-2.5 shrink-0">
                       {reel.author && (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#007AFF]/10 border border-[#007AFF]/20 text-[#007AFF] text-[11px] font-bold w-fit">
-                          <Sparkles className="size-3.5" />
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#007AFF]/10 border border-[#007AFF]/20 text-[#007AFF] text-[11px] font-bold w-fit">
+                          <PremiumIcon icon={Sparkles} tone="sky" size="2xs" />
                           <span>Muallif: @{reel.author.username || reel.author.name}</span>
                           <span className="text-[10px] bg-[#007AFF]/15 px-1.5 py-0.5 rounded-full font-extrabold">
                             Hamjamiyat
@@ -743,9 +750,7 @@ function ReelsInner() {
 
                       {/* iOS Amber Callout Banner */}
                       <div className="rounded-[20px] bg-[#FF9500]/[0.10] border border-[#FF9500]/25 p-3 sm:p-3.5 flex items-start gap-3">
-                        <div className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-[#FF9500] text-white shadow-xs mt-0.5">
-                          <AlertTriangle className="size-4" />
-                        </div>
+                        <PremiumIcon icon={AlertTriangle} tone="amber" size="xs" className="mt-0.5" />
                         <div className="space-y-0.5 flex-1 min-w-0">
                           <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-[#FF9500]">
                             MURAKKAB SAVOL · {reel.subject_name}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Menu, Flame, Coins, Swords, Bell, Search, Sun, Moon } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
@@ -9,6 +9,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { apiFetch, fetchMe } from '@/lib/api-client';
 import { decodeJwtPayload } from '@/lib/jwt';
 import { soundFX } from '@/lib/soundFX';
+import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import CosmeticTheme from '@/components/student/CosmeticTheme';
 import StreakModal from '@/components/student/StreakModal';
@@ -17,8 +18,14 @@ import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
 import { BrandMark } from './BrandMark';
 
-export default function AppShell() {
+export default function AppShell({
+  hideTopbarOnMobile = false,
+}: {
+  hideTopbarOnMobile?: boolean;
+} = {}) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isImmersiveMobile = hideTopbarOnMobile || Boolean(pathname?.startsWith('/reels'));
   const { user, access } = useAuthStore();
   const { isDark, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -64,7 +71,12 @@ export default function AppShell() {
       />
 
       {/* iOS Translucent Topbar */}
-      <header className="ilm-topbar sticky top-0 z-20 flex h-15 w-full items-center justify-between border-b border-border bg-background/78 text-foreground ios-glass px-4 sm:px-6 lg:pl-[calc(16rem+1.5rem)] lg:pr-6 transition-colors">
+      <header
+        className={cn(
+          'ilm-topbar sticky top-0 z-20 h-15 w-full items-center justify-between border-b border-border bg-background/78 text-foreground ios-glass px-4 sm:px-6 lg:pl-[calc(16rem+1.5rem)] lg:pr-6 transition-colors',
+          isImmersiveMobile ? 'hidden lg:flex' : 'flex'
+        )}
+      >
         <div className="flex items-center gap-2.5">
           <button
             type="button"
