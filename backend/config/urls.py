@@ -34,6 +34,8 @@ urlpatterns = [
     path('api/auth/', include('accounts.api_urls')),
     path('api/dashboard/', include('dashboard.api_urls')),
     path('api/tests/', include('tests_app.api_urls')),
+    path('api/v1/sprint/', include('sprint.urls')),
+    path('api/sprint/', include('sprint.urls')),
     path('api/leaderboard/', include('leaderboard.api_urls')),
     path('api/battles/', include('battles.api_urls')),
     path('api/shop/', include('shop.api_urls')),

@@ -173,6 +173,7 @@ INSTALLED_APPS = [
     'teacher.apps.TeacherConfig',
     'telegrambot.apps.TelegramBotConfig',
     'tests_app.apps.Tests_appConfig',
+    'sprint',
 ]
 
 MIDDLEWARE = [
