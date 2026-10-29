@@ -17,9 +17,50 @@ from .serializers import (
     UserMistakeNotebookSerializer,
 )
 from .ai_service import generate_mistake_explanation
-from tests_app.models import Question
+from tests_app.models import Question, Subject
 
 logger = logging.getLogger(__name__)
+
+
+class SprintSubjectsAPIView(APIView):
+    """GET /api/v1/sprint/subjects/
+    Fokus sprinti uchun barcha fanlar va mavjud savollar sonini qaytaradi.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        subjects = Subject.objects.all().order_by('id')
+        total_questions = Question.objects.filter(
+            question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
+        ).count()
+
+        result = [
+            {
+                'id': 0,
+                'name': 'Barcha fanlar (Aralash)',
+                'slug': 'all',
+                'questions_count': total_questions,
+                'is_available': total_questions >= 5,
+            }
+        ]
+
+        for s in subjects:
+            count = Question.objects.filter(
+                subject=s,
+                question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
+            ).count()
+            result.append({
+                'id': s.id,
+                'name': s.name,
+                'slug': s.slug,
+                'questions_count': count,
+                'is_available': count >= 5,
+            })
+
+        return Response({
+            'ok': True,
+            'subjects': result,
+        })
 
 
 class ExplainMistakeAPIView(APIView):
@@ -215,23 +256,30 @@ class ResolveRevengeMistakeAPIView(APIView):
 
 
 class SprintQuestionsAPIView(APIView):
-    """GET /api/v1/sprint/questions/?count=10
-    Fokus Sprinti uchun bazadan tasodifiy 10-15 ta variantli savollarni yuklaydi.
+    """GET /api/v1/sprint/questions/?count=10&subject_id=1
+    Fokus Sprinti uchun bazadan tasodifiy 10-30 ta variantli savollarni yuklaydi.
     """
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         count = min(30, max(5, int(request.query_params.get('count', 10))))
-        subject_id = request.query_params.get('subject_id')
+        raw_subject_id = request.query_params.get('subject_id')
+
+        try:
+            subject_id = int(raw_subject_id) if raw_subject_id else 0
+        except (ValueError, TypeError):
+            subject_id = 0
 
         qs = Question.objects.select_related('topic', 'subject').prefetch_related('choices').filter(
             question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
         )
-        if subject_id:
+        if subject_id > 0:
             qs = qs.filter(subject_id=subject_id)
 
         total_available = qs.count()
-        if total_available == 0 and subject_id:
+        # Agar tanlangan fanda kam savol bo'lsa ham qolganlarini qaytaramiz
+        if total_available == 0 and subject_id > 0:
+            # Agar tanlangan fanda umuman test bo'lmasa, aralashdan olamiz
             qs = Question.objects.select_related('topic', 'subject').prefetch_related('choices').filter(
                 question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
             )

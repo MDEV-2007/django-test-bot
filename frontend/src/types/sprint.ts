@@ -80,6 +80,14 @@ export interface LiveScorePredictor {
   topicName: string;
 }
 
+export interface SprintSubject {
+  id: number;
+  name: string;
+  slug: string;
+  questions_count: number;
+  is_available: boolean;
+}
+
 export interface SprintSessionSummary {
   totalAnswered: number;
   correctCount: number;

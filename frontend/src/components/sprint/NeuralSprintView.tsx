@@ -201,15 +201,24 @@ export default function NeuralSprintView({
               </Button>
             )}
 
-            {/* Ikkilamchi Xira Tugma */}
-            <div className="pt-2 text-center">
+            {/* Ikkilamchi Tugmalar */}
+            <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onExit}
+                className="text-xs gap-1.5 rounded-xl cursor-pointer"
+              >
+                <BookOpen className="size-3.5" />
+                <span>Boshqa fanni tanlash</span>
+              </Button>
               <Button
                 asChild
                 variant="ghost"
                 size="sm"
-                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer rounded-xl"
               >
-                <Link href="/dashboard">Bosh sahifaga qaytish</Link>
+                <Link href="/dashboard">Dashboardga qaytish</Link>
               </Button>
             </div>
           </div>
