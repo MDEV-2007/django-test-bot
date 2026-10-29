@@ -94,7 +94,12 @@ export default function ShopPage() {
       /* Tanga balansi, avatar va ramka butun qobiqda (sidebar, tab-bar) ko'rinadi —
          sotib olish yoki taqishdan keyin ular darhol yangilanishi kerak, aks holda
          o'zgarish faqat sahifa qayta yuklanganda sezilardi. */
-      useAuthStore.setState({ user: await fetchMe() });
+      if (res && 'profile' in res && res.profile) {
+        useAuthStore.getState().setUser(res.profile as any);
+      } else {
+        const me = await fetchMe();
+        useAuthStore.getState().setUser(me);
+      }
       invalidateApi();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Xatolik');

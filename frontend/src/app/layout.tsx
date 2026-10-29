@@ -9,6 +9,7 @@ import Script from "next/script";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TelegramProvider from "@/components/TelegramProvider";
 import SubscriptionGate from "@/components/SubscriptionGate";
+import CosmeticTheme from "@/components/student/CosmeticTheme";
 
 const sans = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext"], variable: "--font-sans", display: "swap" });
 const display = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable: "--font-voice", display: "swap" });
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
             <AuthProvider>
+              <CosmeticTheme />
               {children}
               <SubscriptionGate />
             </AuthProvider>

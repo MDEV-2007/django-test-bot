@@ -47,13 +47,20 @@ def inventory_api(request):
     history = Purchase.objects.filter(profile=profile)[:30]
     freeze_logs = StreakFreezeLog.objects.filter(profile=profile)[:15]
 
+    from accounts.serializers import ProfileSerializer
     return Response({
         'coins': profile.coins,
         'freeze_count': services.available_freezes(profile),
+        'profile': ProfileSerializer(profile).data,
         'items': [{
             'id': inv.item.id, 'slug': inv.item.slug, 'name': inv.item.name,
-            'category': inv.item.category, 'quantity': inv.quantity, 'equipped': inv.is_equipped,
+            'category': inv.item.category, 'category_display': inv.item.get_category_display(),
+            'quantity': inv.quantity, 'equipped': inv.is_equipped,
             'is_equippable': inv.item.is_equippable,
+            'rarity': inv.item.rarity,
+            'payload': inv.item.payload,
+            'description': inv.item.description,
+            'icon_name': inv.item.icon_name,
         } for inv in items],
         'history': [{
             'item_name': p.item_name, 'coins_spent': p.coins_spent, 'quantity': p.quantity, 'created_at': p.created_at,
@@ -69,8 +76,10 @@ def purchase_api(request, slug):
         profile, inv = services.purchase_item(request.user.profile, item)
     except services.ShopError as e:
         return Response({'ok': False, 'error': str(e)}, status=400)
+    from accounts.serializers import ProfileSerializer
     return Response({'ok': True, 'coins': profile.coins, 'owned': True, 'quantity': inv.quantity,
-                      'equippable': item.is_equippable})
+                      'equippable': item.is_equippable, 'equipped': inv.is_equipped,
+                      'profile': ProfileSerializer(profile).data})
 
 
 @api_view(['POST'])
@@ -80,11 +89,15 @@ def equip_api(request, slug):
         services.equip_item(request.user.profile, item)
     except services.ShopError as e:
         return Response({'ok': False, 'error': str(e)}, status=400)
-    return Response({'ok': True, 'category': item.category, 'equipped': True})
+    from accounts.serializers import ProfileSerializer
+    return Response({'ok': True, 'category': item.category, 'equipped': True,
+                      'profile': ProfileSerializer(request.user.profile).data})
 
 
 @api_view(['POST'])
 def unequip_api(request, slug):
     item = get_object_or_404(ShopItem, slug=slug)
     services.unequip_item(request.user.profile, item)
-    return Response({'ok': True, 'category': item.category, 'equipped': False})
+    from accounts.serializers import ProfileSerializer
+    return Response({'ok': True, 'category': item.category, 'equipped': False,
+                      'profile': ProfileSerializer(request.user.profile).data})

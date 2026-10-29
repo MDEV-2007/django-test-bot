@@ -6,10 +6,8 @@ import { cn } from '@/lib/utils';
 
 /* Do'kondan olingan bezaklar bilan avatar.
  *
- * Ilgari do'kondagi kosmetika (avatar, ramka) hech qayerda ko'rinmasdi: server ularni
- * saqlardi, lekin API javobida umuman qaytarmasdi — ya'ni sotib olish va "taqish"
- * tanga sarflashdan boshqa hech narsani o'zgartirmasdi. Endi avatar rasmi server
- * tomonda almashtiriladi, ramka esa shu komponentda halqa sifatida chiziladi. */
+ * Ramka taqilganda (oltin, kumush, olmos) avatar atrofida yorqin va jozibali
+ * gradientli halqa (glowing ring frame) chiziladi. */
 export default function CosmeticAvatar({
   src,
   name,
@@ -26,14 +24,26 @@ export default function CosmeticAvatar({
   const ring = cosmetics?.frame?.payload?.ring;
   const initials = (name || '?').slice(0, 2).toUpperCase();
 
+  if (ring) {
+    return (
+      <div
+        className="relative inline-flex shrink-0 items-center justify-center rounded-full p-[3px] transition-all duration-300 select-none"
+        style={{
+          background: `linear-gradient(135deg, ${ring}, #ffffff 48%, ${ring})`,
+          boxShadow: `0 0 16px ${ring}88, 0 0 6px ${ring}`,
+        }}
+      >
+        <Avatar className={cn(className, 'border-0 after:hidden ring-0 shadow-none')}>
+          <AvatarImage src={src || undefined} alt={name || ''} className="object-cover" />
+          <AvatarFallback className={fallbackClassName}>{initials}</AvatarFallback>
+        </Avatar>
+      </div>
+    );
+  }
+
   return (
-    <Avatar
-      className={cn(className)}
-      // Ramka rangi mahsulot ma'lumotidan keladi (masalan oltin uchun #f7c948), shuning
-      // uchun u Tailwind klassi emas, inline uslub bo'lishi shart.
-      style={ring ? { boxShadow: `0 0 0 2px ${ring}, 0 0 12px -2px ${ring}` } : undefined}
-    >
-      <AvatarImage src={src || undefined} alt="" />
+    <Avatar className={cn(className)}>
+      <AvatarImage src={src || undefined} alt={name || ''} className="object-cover" />
       <AvatarFallback className={fallbackClassName}>{initials}</AvatarFallback>
     </Avatar>
   );

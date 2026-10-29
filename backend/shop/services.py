@@ -64,7 +64,15 @@ def purchase_item(profile, item):
         inv.quantity += 1
         inv.save(update_fields=['quantity', 'updated_at'])
     else:
-        inv = InventoryItem.objects.create(profile=locked, item=item, quantity=1)
+        # Bezak xarid qilinganda darhol avtomatik taqilsin
+        should_equip = item.is_equippable
+        if should_equip:
+            InventoryItem.objects.filter(
+                profile=locked, item__category=item.category, is_equipped=True
+            ).update(is_equipped=False)
+        inv = InventoryItem.objects.create(profile=locked, item=item, quantity=1, is_equipped=should_equip)
+        if should_equip:
+            _bust_equipped_cache(locked.pk)
 
     Purchase.objects.create(
         profile=locked, item=item, item_name=item.name,

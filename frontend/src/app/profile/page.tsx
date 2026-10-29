@@ -5,13 +5,14 @@ import Link from 'next/link';
 import {
   Gift, Copy, Check, Award, Crown, Swords, FileCheck2,
   Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout,
-  Pencil, Camera, Trash2, Loader2, ChevronRight, type LucideIcon,
+  Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, type LucideIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiUpload } from '@/lib/api-client';
-import { useApiQuery } from '@/lib/api-cache';
+import { apiUpload, apiFetch, fetchMe } from '@/lib/api-client';
+import { useApiQuery, invalidateApi } from '@/lib/api-cache';
 import { useAuthStore, type Profile } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
+import { cn } from '@/lib/utils';
 import KnowledgeTree from '@/components/student/KnowledgeTree';
 import { AudioToggle, ThemeToggle } from '@/components/SettingsToggles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -68,6 +69,62 @@ export default function ProfilePage() {
   const [origin, setOrigin] = useState('');
   const [copied, setCopied] = useState(false);
   const { data, refresh } = useApiQuery<ProfileData>('/api/auth/profile/');
+
+  type InventoryItemData = {
+    id: number;
+    slug: string;
+    name: string;
+    category: string;
+    category_display: string;
+    quantity: number;
+    equipped: boolean;
+    is_equippable: boolean;
+    rarity: string;
+    payload: Record<string, any>;
+    description?: string;
+    icon_name?: string;
+  };
+
+  type InventoryResponse = {
+    coins: number;
+    freeze_count: number;
+    items: InventoryItemData[];
+  };
+
+  const { data: invData, refresh: refreshInventory } = useApiQuery<InventoryResponse>('/api/shop/inventory/');
+  const [equipBusy, setEquipBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (data?.profile) {
+      useAuthStore.getState().setUser(data.profile as any);
+    }
+  }, [data]);
+
+  async function handleToggleEquip(slug: string, currentlyEquipped: boolean, name: string) {
+    setEquipBusy(slug);
+    try {
+      const action = currentlyEquipped ? 'unequip' : 'equip';
+      const res = await apiFetch<{ ok: boolean; profile?: Profile; error?: string }>(`/api/shop/${action}/${slug}/`, { method: 'POST' });
+      if (res?.ok === false) {
+        toast.error(res.error || 'Xatolik yuz berdi');
+        return;
+      }
+      if (res?.profile) {
+        useAuthStore.getState().setUser(res.profile);
+      } else {
+        const me = await fetchMe();
+        useAuthStore.getState().setUser(me);
+      }
+      toast.success(currentlyEquipped ? `${name} yechildi` : `${name} taqildi!`);
+      invalidateApi();
+      await refresh();
+      await refreshInventory();
+    } catch (e: any) {
+      toast.error(e?.message || 'Xatolik yuz berdi');
+    } finally {
+      setEquipBusy(null);
+    }
+  }
 
   const [editOpen, setEditOpen] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -188,17 +245,17 @@ export default function ProfilePage() {
             <div className="relative shrink-0 group">
               <div
                 onClick={handleOpenEdit}
-                className="cursor-pointer relative rounded-full overflow-hidden transition-transform hover:scale-105"
+                className="cursor-pointer relative rounded-full transition-transform hover:scale-105"
                 title="Profilni tahrirlash"
               >
                 <CosmeticAvatar
-                  className="size-22 border-2 border-[#007AFF]/40 shadow-[0_8px_24px_rgba(0,122,255,0.2)] sm:size-24"
+                  className="size-22 sm:size-24"
                   src={p.avatar_url}
                   name={p.first_name || p.username}
                   cosmetics={p.cosmetics}
-                  fallbackClassName="text-xl"
+                  fallbackClassName="text-xl font-bold"
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white pointer-events-none">
                   <Camera className="size-5" />
                 </div>
               </div>
@@ -231,7 +288,19 @@ export default function ProfilePage() {
                 </span>
                 {p.cosmetics?.title?.payload?.title && (
                   <span className="rounded-full bg-[#FF9500]/12 px-2.5 py-0.5 text-[11px] font-bold text-[#FF9500]">
-                    {p.cosmetics.title.payload.title}
+                    👑 {p.cosmetics.title.payload.title}
+                  </span>
+                )}
+                {p.cosmetics?.frame?.name && (
+                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <span className="size-1.5 rounded-full bg-amber-500 inline-block animate-pulse" />
+                    {p.cosmetics.frame.name}
+                  </span>
+                )}
+                {p.cosmetics?.theme?.name && (
+                  <span className="rounded-full bg-emerald-500/12 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <span className="size-1.5 rounded-full inline-block" style={{ backgroundColor: p.cosmetics.theme.payload.accent || '#10b981' }} />
+                    {p.cosmetics.theme.name}
                   </span>
                 )}
               </div>
@@ -562,13 +631,136 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Game Center Achievements Grid */}
+        {/* Inventar & Do'kondan sotib olingan bezaklar */}
+        <Card className="overflow-hidden border border-border">
+          <CardHeader className="pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <PremiumIcon icon={ShoppingBag} tone="amber" size="xs" solid />
+                <span>Mening buyumlarim & Inventar</span>
+              </CardTitle>
+              <Button asChild variant="outline" size="sm" className="rounded-full gap-1.5 text-xs">
+                <Link href="/shop">
+                  <Coins className="size-3.5 text-yellow-500" />
+                  <span>Do&apos;konga o&apos;tish</span>
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {(!invData?.items || invData.items.length === 0) ? (
+              <div className="rounded-[20px] border border-dashed border-border bg-muted/40 p-6 text-center space-y-2.5">
+                <p className="text-sm font-semibold text-foreground">Sizda hali do&apos;kondan olingan buyumlar yo&apos;q</p>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  Do&apos;kondan tangalaringiz evaziga oltin ramka, maxsus zumrad mavzu, bilimdon unvoni yoki avatarlar xarid qilishingiz mumkin.
+                </p>
+                <Button asChild size="sm" className="rounded-full mt-2">
+                  <Link href="/shop">Do&apos;kondan tanlash</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {invData.items.map((item) => {
+                  const isBusy = equipBusy === item.slug;
+                  const ring = item.payload?.ring;
+                  const accent = item.payload?.accent;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={cn(
+                        'relative flex flex-col justify-between rounded-[20px] border p-4 transition-all',
+                        item.equipped
+                          ? 'border-primary/40 bg-primary/5 shadow-xs'
+                          : 'border-border bg-card hover:bg-muted/40'
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="shrink-0">
+                          {item.category === 'frame' ? (
+                            <div
+                              className="size-11 rounded-full p-[2.5px] flex items-center justify-center shadow-xs"
+                              style={{
+                                background: `linear-gradient(135deg, ${ring || '#f7c948'}, #ffffff 50%, ${ring || '#f7c948'})`,
+                                boxShadow: `0 0 10px ${ring || '#f7c948'}66`,
+                              }}
+                            >
+                              <div className="size-full rounded-full bg-background flex items-center justify-center text-[10px] font-bold text-foreground">
+                                🖼
+                              </div>
+                            </div>
+                          ) : item.category === 'theme' ? (
+                            <div
+                              className="size-11 rounded-full flex items-center justify-center shadow-xs ring-2 ring-white/20"
+                              style={{ backgroundColor: accent || '#10b981' }}
+                            >
+                              <Palette className="size-5 text-white" />
+                            </div>
+                          ) : item.category === 'avatar' && item.payload?.avatar_url ? (
+                            <img
+                              src={item.payload.avatar_url}
+                              alt=""
+                              className="size-11 rounded-full object-cover border border-border"
+                            />
+                          ) : (
+                            <div className="size-11 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                              <Crown className="size-5" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-sm text-foreground truncate">{item.name}</span>
+                            {item.equipped && (
+                              <Badge className="bg-[#34C759] text-white text-[10px] px-1.5 py-0 rounded-full font-bold">
+                                Taqilgan
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground line-clamp-1">
+                            {item.category_display} • {item.description || item.rarity}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-end gap-2">
+                        {item.is_equippable && (
+                          <Button
+                            size="sm"
+                            variant={item.equipped ? 'outline' : 'default'}
+                            disabled={isBusy}
+                            onClick={() => handleToggleEquip(item.slug, item.equipped, item.name)}
+                            className={cn(
+                              'h-7.5 px-3 rounded-full text-xs font-semibold cursor-pointer',
+                              item.equipped && 'text-muted-foreground hover:text-destructive hover:border-destructive/30'
+                            )}
+                          >
+                            {isBusy ? (
+                              <Loader2 className="size-3.5 animate-spin" />
+                            ) : item.equipped ? (
+                              'Yechish'
+                            ) : (
+                              'Taqish'
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Platforma Yutuqlari & Nishonlar */}
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
                 <PremiumIcon icon={Award} tone="amber" size="xs" solid />
-                <span>Game Center Yutuqlari</span>
+                <span>Platforma Yutuqlari & Nishonlar</span>
               </CardTitle>
               <span className="font-mono text-xs font-semibold text-[#8E8E93]">
                 {data.badges.length} / {data.total_badges} ochilgan
