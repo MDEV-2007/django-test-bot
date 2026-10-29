@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { BrandMark } from '@/components/BrandMark';
-import { ChevronLeft, ShieldCheck, Sparkles, CheckCircle2, type LucideIcon } from 'lucide-react';
+import { ChevronLeft, ShieldCheck, type LucideIcon } from 'lucide-react';
 import AuthBackground from './AuthBackground';
 import { dur, easeOut } from '@/lib/motion';
 
@@ -101,27 +101,7 @@ export default function AuthShell({
             })}
           </div>
 
-          {/* Mini iOS Live Activity Preview Card */}
-          <div className="flex items-center justify-between gap-4 rounded-[22px] bg-[#1C1C1E] p-4 text-white shadow-lg border border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-[12px] bg-[#34C759]/20 text-[#34C759]">
-                <Sparkles className="size-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[12px] font-bold text-white">Milliy Sertifikat A+ prognozi</span>
-                  <CheckCircle2 className="size-3.5 text-[#34C759]" />
-                </div>
-                <p className="text-[11px] text-[#8E8E93]">
-                  4,300+ abituriyent har kuni test yechmoqda
-                </p>
-              </div>
-            </div>
-            <div className="text-right shrink-0">
-              <span className="font-mono text-[18px] font-black text-[#34C759]">181.5</span>
-              <span className="block text-[10px] text-[#8E8E93] font-mono">/ 189 ball</span>
-            </div>
-          </div>
+
         </motion.div>
 
         {/* Right Column — Apple ID Sign-In Card */}
