@@ -30,7 +30,6 @@ import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
 import { apiFetch } from '@/lib/api-client';
 import { getRankInfo } from '@/lib/rank';
-import PresenceRow from '@/components/student/PresenceRow';
 import Celebration from '@/components/student/Celebration';
 import DailyChestModal, { DailyChestStatus } from '@/components/student/DailyChestModal';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
@@ -572,73 +571,7 @@ export default function DashboardPage() {
                 theme={isDark ? 'dark' : 'light'}
               />
 
-              {/* 4. SMART MISTAKES NOTEBOOK WIDGET (Apple Health Diagnostic Style) */}
-              <div className="ios-card relative overflow-hidden rounded-[28px] p-5 sm:p-6">
-                <div className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#FF3B30]/10 blur-2xl" />
-
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <PremiumIcon icon={Target} tone="rose" size="lg" solid />
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight">
-                          Aqlli Xatolar Daftari
-                        </h3>
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#FF3B30]/12 text-[#D70015] dark:text-[#FF6961] text-[10px] font-bold uppercase tracking-wider">
-                          AI Tahlil &amp; Mashq
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-snug max-w-xl">
-                        Avvalgi testlarda yo&apos;l qo&apos;ygan xatolaringiz sun&apos;iy intellekt tomonidan saralandi. Qayta ishlab, bilimingizni mustahkamlang!
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleStartMistakesTest}
-                    disabled={startingMistakesTest || mistakesSummary?.total_mistakes === 0}
-                    className="ios-spring shrink-0 bg-[#FF3B30] hover:bg-[#D70015] text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-full shadow-[0_6px_18px_rgba(255,59,48,0.28)] flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                  >
-                    {startingMistakesTest ? (
-                      <span>Yuklanmoqda...</span>
-                    ) : (
-                      <>
-                        <span>Xatolar ustida ishlash</span>
-                        <ArrowRight className="size-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {/* Mistakes breakdown pills */}
-                <div className="mt-4 pt-3.5 border-t border-border flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF3B30]/10 text-xs font-bold text-[#D70015] dark:text-[#FF6961]">
-                    <span className="size-2 rounded-full bg-[#FF3B30]" />
-                    <span>Jami xatolar: {mistakesSummary?.total_mistakes ?? 0} ta</span>
-                  </div>
-                  {mistakesSummary?.subject_counts && mistakesSummary.subject_counts.length > 0 ? (
-                    mistakesSummary.subject_counts.map((sc) => (
-                      <div
-                        key={sc.name}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-semibold text-foreground"
-                      >
-                        <span>{sc.name}:</span>
-                        <span className="font-mono font-bold text-[#FF3B30]">{sc.count}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <span className="text-xs text-muted-foreground">
-                      {!mistakesSummary
-                        ? 'Xatolar tahlili yuklanmoqda...'
-                        : mistakesSummary.total_mistakes === 0
-                        ? "Hozircha xato javoblaringiz yo'q, ajoyib natija! 🎯"
-                        : 'Xatolar tahlili tayyorlanmoqda...'}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* 5. iOS CONTROL CENTER QUICK STUDY MODULES */}
+              {/* 4. iOS CONTROL CENTER QUICK STUDY MODULES */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -1055,15 +988,6 @@ export default function DashboardPage() {
               </div>
             </Card>
           )}
-
-          {/* 5. ONLINE COMMUNITY PRESENCE */}
-          <div className="rounded-[26px] border border-border bg-card p-4 shadow-card">
-            <PresenceRow
-              count={data.online_count}
-              peers={data.online_peers ?? []}
-              solvedToday={data.solved_today ?? 0}
-            />
-          </div>
         </div>
       </div>
 
