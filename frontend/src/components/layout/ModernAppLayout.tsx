@@ -41,9 +41,9 @@ export default function ModernAppLayout({
         onLogout={handleLogout}
       />
 
-      <div className="relative flex min-h-screen">
-        {/* Main Content Column with generous whitespace */}
-        <div className="flex flex-1 flex-col min-w-0 lg:pl-64 pb-20 sm:pb-8">
+      <div className="relative flex min-h-[var(--tg-viewport,100dvh)]">
+        {/* Main Content Column with safe-area bottom spacing for MobileTabBar */}
+        <div className="flex flex-1 flex-col min-w-0 lg:pl-64 pb-24 sm:pb-24 md:pb-8">
           {/* Topbar */}
           <ModernTopbar
             onMenuClick={() => setMobileMenuOpen(true)}
@@ -57,7 +57,7 @@ export default function ModernAppLayout({
           />
 
           {/* Page Main Content Area */}
-          <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
+          <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 py-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 min-w-0">
             {children}
           </main>
         </div>

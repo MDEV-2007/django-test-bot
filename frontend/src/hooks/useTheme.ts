@@ -65,11 +65,13 @@ export function useTheme(): {
       const wa = (window as any).Telegram?.WebApp;
       if (wa) {
         if (next === 'dark') {
-          wa.setHeaderColor?.('#0f172a');
-          wa.setBackgroundColor?.('#0f172a');
+          wa.setHeaderColor?.('#000000');
+          wa.setBackgroundColor?.('#000000');
+          wa.setBottomBarColor?.('#000000');
         } else {
-          wa.setHeaderColor?.('#ffffff');
-          wa.setBackgroundColor?.('#F8FAFC');
+          wa.setHeaderColor?.('#F2F2F7');
+          wa.setBackgroundColor?.('#F2F2F7');
+          wa.setBottomBarColor?.('#F2F2F7');
         }
       }
     } catch {}

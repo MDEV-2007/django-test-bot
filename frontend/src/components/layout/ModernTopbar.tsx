@@ -34,24 +34,34 @@ export default function ModernTopbar({
   const { isDark, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-20 flex h-15 w-full items-center justify-between border-b border-border bg-background/78 px-4 sm:px-6 ios-glass transition-colors">
+    <header className="sticky top-0 z-20 flex h-14 sm:h-15 w-full items-center justify-between border-b border-border bg-background/78 px-3 sm:px-6 ios-glass transition-colors">
       {/* Left: Mobile Hamburger + Brand + iOS Spotlight Search Pill */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2 min-w-0">
         <button
           type="button"
           onClick={onMenuClick}
-          className="lg:hidden ios-spring flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground cursor-pointer shadow-2xs"
+          className="lg:hidden ios-spring flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground cursor-pointer shadow-2xs"
           aria-label="Menyu ochish"
         >
           <Menu className="size-4" />
         </button>
 
-        <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
-          <BrandMark size={28} rounded="rounded-[9px]" />
-          <span className="font-extrabold text-sm tracking-tight text-foreground">
+        <Link href="/dashboard" className="lg:hidden flex items-center gap-1.5 min-w-0">
+          <BrandMark size={26} rounded="rounded-[8px]" />
+          <span className="hidden xs:inline font-extrabold text-sm tracking-tight text-foreground truncate">
             Ilm<span className="text-primary">Ildizi</span>
           </span>
         </Link>
+
+        {/* Mobile Search Button */}
+        <button
+          type="button"
+          onClick={onSearchClick}
+          className="md:hidden ios-spring flex size-8.5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
+          aria-label="Qidirish"
+        >
+          <Search className="size-3.5" />
+        </button>
 
         {/* iOS Spotlight Search Trigger (⌘K / Ctrl+K) */}
         <button
@@ -68,7 +78,7 @@ export default function ModernTopbar({
       </div>
 
       {/* Right: iOS Dynamic Island Style Status Pills & Actions */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {user && (
           <>
             {/* 1. STREAK PILL */}
@@ -77,10 +87,10 @@ export default function ModernTopbar({
                 <button
                   type="button"
                   onClick={onStreakClick}
-                  className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 px-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
+                  className="ios-spring flex h-8.5 items-center gap-1 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 px-2.5 sm:px-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
                 >
-                  <Flame className="size-3.5 fill-[#FF9500] text-[#FF9500]" />
-                  <span className="font-mono">{user.streak || 0}</span>
+                  <Flame className="size-3.5 fill-[#FF9500] text-[#FF9500] shrink-0" />
+                  <span className="font-mono text-[11px] sm:text-xs">{user.streak || 0}</span>
                   <span className="hidden sm:inline text-[10px] font-semibold opacity-80">kun</span>
                 </button>
               </TooltipTrigger>
@@ -94,10 +104,10 @@ export default function ModernTopbar({
               <TooltipTrigger asChild>
                 <Link
                   href="/shop"
-                  className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 px-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
+                  className="ios-spring flex h-8.5 items-center gap-1 rounded-full border border-border bg-card hover:bg-muted/70 px-2.5 sm:px-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                 >
-                  <Coins className="size-3.5 text-[#FF9500] fill-[#FFCC00]" />
-                  <span className="font-mono">{(user.coins || 0).toLocaleString()}</span>
+                  <Coins className="size-3.5 text-[#FF9500] fill-[#FFCC00] shrink-0" />
+                  <span className="font-mono text-[11px] sm:text-xs">{(user.coins || 0).toLocaleString()}</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent className="text-xs font-medium">

@@ -6,18 +6,7 @@ import {
   getWebApp, isTelegramEnv, loadTelegramSdk, markTelegramReady, useTelegramBackButton,
 } from '@/lib/telegram';
 
-/* Telegram Mini App qobig'i.
- *
- * Oddiy brauzerda bu komponent BIRINCHI shartdayoq to'xtaydi: SDK yuklanmaydi, DOM
- * o'zgarmaydi — ya'ni saytga hech qanday ta'siri yo'q.
- *
- * Telegram ichida esa:
- *   1. `ready()` — Telegram yuklanish indikatorini olib tashlaydi;
- *   2. `expand()` — ilova yarim ekranda emas, to'liq balandlikda ochiladi;
- *   3. viewport balandligi CSS o'zgaruvchisiga yoziladi (Telegram'da `100svh` noto'g'ri);
- *   4. tema Telegram temasi bilan moslanadi (agar foydalanuvchi o'zi tanlamagan bo'lsa);
- *   5. "orqaga" tugmasi butun ilova bo'ylab ishlaydi.
- */
+/* Telegram Mini App qobig'i (Apple iOS 18 Light #F2F2F7 & Dark #000000 sinxronizatsiyasi bilan). */
 export default function TelegramProvider() {
   const router = useRouter();
   const pathname = usePathname();
@@ -35,13 +24,9 @@ export default function TelegramProvider() {
       wa.ready();
       wa.expand();
 
-      // Sahifadagi uslublar Telegram ekanini bilishi uchun.
       document.documentElement.dataset.tg = 'on';
       document.documentElement.dataset.tgPlatform = wa.platform;
 
-      /* Balandlik: Telegram'da oyna balandligi tortish paytida o'zgaradi.
-         `viewportStableHeight` — panel to'liq ochilgandagi barqaror balandlik;
-         sobit (fixed) elementlar aynan shunga tayanishi kerak. */
       const applyViewport = () => {
         const stable = wa.viewportStableHeight || wa.viewportHeight;
         if (stable) document.documentElement.style.setProperty('--tg-viewport', `${stable}px`);
@@ -50,9 +35,6 @@ export default function TelegramProvider() {
       wa.onEvent('viewportChanged', applyViewport);
       cleanups.push(() => wa.offEvent('viewportChanged', applyViewport));
 
-      /* Tema: Telegram WebApp temasi (dark yoki light).
-         Agar foydalanuvchi qo'lda tanlagan bo'lsa (ilm_theme_v2) — o'shani qo'llaydi.
-         Aks holda Telegram mijozining o'z temasi (wa.colorScheme === 'dark') bilan to'liq sinxronlashadi. */
       const applyTheme = () => {
         let isDark = false;
         try {
@@ -74,11 +56,13 @@ export default function TelegramProvider() {
 
         try {
           if (isDark) {
-            wa.setHeaderColor?.('#0f172a');
-            wa.setBackgroundColor?.('#0f172a');
+            wa.setHeaderColor?.('#000000');
+            wa.setBackgroundColor?.('#000000');
+            (wa as unknown as { setBottomBarColor?: (c: string) => void }).setBottomBarColor?.('#000000');
           } else {
-            wa.setHeaderColor?.('#ffffff');
-            wa.setBackgroundColor?.('#F8FAFC');
+            wa.setHeaderColor?.('#F2F2F7');
+            wa.setBackgroundColor?.('#F2F2F7');
+            (wa as unknown as { setBottomBarColor?: (c: string) => void }).setBottomBarColor?.('#F2F2F7');
           }
         } catch { /* eski versiya */ }
       };
@@ -86,9 +70,6 @@ export default function TelegramProvider() {
       wa.onEvent('themeChanged', applyTheme);
       cleanups.push(() => wa.offEvent('themeChanged', applyTheme));
 
-      /* Vertikal svayp bilan ilova tasodifan yopilib ketmasin — uzun ro'yxatlarni
-         (testlar, liderlar ligasi) skroll qilishda eng ko'p uchraydigan muammo.
-         Bu usul Bot API 7.7 dan mavjud. */
       if (wa.isVersionAtLeast('7.7')) {
         try { wa.disableVerticalSwipes?.(); } catch { /* noop */ }
       }
@@ -103,8 +84,6 @@ export default function TelegramProvider() {
     };
   }, []);
 
-  /* Umumiy "orqaga": bosh sahifada tugma kerak emas. Alohida ekranlar (masalan,
-     imtihon) `useTelegramBackButton` bilan o'z ishlov beruvchisini ustiga qo'yadi. */
   const goBack = useCallback(() => {
     if (window.history.length > 1) router.back();
     else router.push('/dashboard');

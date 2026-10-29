@@ -652,49 +652,39 @@ nav.ilm-mobile-tabbar {
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
-/* ── Telegram Mini App ──────────────────────────────────────────────────────── */
-html[data-tg='on'],
-html[data-tg='on'] body {
-  color-scheme: light !important;
-  background-color: #F2F2F7 !important;
+/* ── Telegram Mini App (iOS 18 Light & Dark Native Synchronization) ─────────── */
+html[data-tg='on'] {
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
-html[data-tg='on'],
-html[data-tg='on'][data-theme='dark'] {
-  --bg-page: #F2F2F7 !important;
-  --bg-surface: #FFFFFF !important;
-  --surface-base: #FFFFFF !important;
-  --surface-card: #FFFFFF !important;
-  --surface-card-soft: #FFFFFF !important;
-  --surface-card-medium: #FFFFFF !important;
-  --surface-card-strong: #FFFFFF !important;
-  --border-card: rgba(60, 60, 67, 0.12) !important;
-  --border-soft: rgba(60, 60, 67, 0.08) !important;
-  --border-strong: rgba(60, 60, 67, 0.22) !important;
-  --text-primary: #1C1C1E !important;
-  --text-secondary: #3A3A3C !important;
-  --text-muted: #6C6C70 !important;
-  --text-subtitle: #6C6C70 !important;
-  --text-faint: #8E8E93 !important;
-  --foreground: #1C1C1E !important;
-  --background: #F2F2F7 !important;
-  --card: #FFFFFF !important;
-  --card-foreground: #1C1C1E !important;
-  --popover: #FFFFFF !important;
-  --popover-foreground: #1C1C1E !important;
-  --primary: #007AFF !important;
-  --primary-foreground: #FFFFFF !important;
-  --muted: rgba(118, 118, 128, 0.12) !important;
-  --muted-foreground: #6C6C70 !important;
-  --border: rgba(60, 60, 67, 0.12) !important;
-  --input: rgba(60, 60, 67, 0.12) !important;
-  --accent: #007AFF !important;
-  --accent-text: #0062CC !important;
+html[data-tg='on']:not(.dark):not([data-theme='dark']),
+html[data-tg='on']:not(.dark):not([data-theme='dark']) body {
+  color-scheme: light;
+  background-color: #F2F2F7;
+  color: #1C1C1E;
+}
+
+html[data-tg='on'].dark,
+html[data-tg='on'][data-theme='dark'],
+html[data-tg='on'].dark body,
+html[data-tg='on'][data-theme='dark'] body {
+  color-scheme: dark;
+  background-color: #000000;
+  color: #FFFFFF;
 }
 
 html[data-tg='on'] body {
+  min-height: var(--tg-viewport, 100dvh);
+  overflow-x: clip;
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+html[data-tg='on'] header.sticky {
+  height: 3.35rem;
+  padding-inline: 0.75rem;
 }
 
 html[data-tg='on'] .ilm-topbar {
@@ -708,6 +698,18 @@ html[data-tg='on'] .ilm-topbar .font-voice {
 
 html[data-tg='on'] .min-h-screen-safe {
   min-height: var(--tg-viewport, 100svh);
+}
+
+html[data-tg='on'] .page-shell {
+  padding-top: 0.875rem;
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
 }
 
 /* ── Super Admin Panel & Teacher Panel — Qat'iy Qorong'i (Dark Mode) ────────── */

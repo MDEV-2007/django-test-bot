@@ -619,9 +619,9 @@ function ReelsInner() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-4 select-none font-sans min-h-0 bg-[#F2F2F7] dark:bg-[#000000]">
+      <main className="page-shell flex-1 w-full flex items-center justify-center !p-0 sm:!p-4 !pb-[4.75rem] md:!pb-4 select-none font-sans min-h-0 bg-[#F2F2F7] dark:bg-[#000000]">
         {/* Main iOS 18 Device Frame Container */}
-        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[490px] md:max-w-[510px] relative rounded-none sm:rounded-[34px] overflow-hidden border-0 sm:border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white flex flex-col my-auto transition-all">
+        <div className="w-full h-[calc(var(--tg-viewport,100dvh)-8.25rem)] md:h-[88vh] sm:max-w-[490px] md:max-w-[510px] relative rounded-none sm:rounded-[34px] overflow-hidden border-0 sm:border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white flex flex-col my-auto transition-all">
           
           {/* ── TOP HORIZONTAL iOS NAVIGATION & CAPSULES ── */}
           <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/[0.08]">
