@@ -100,24 +100,24 @@ export default function LeaderboardPage() {
           {/* 1. iOS 18 Segmented Switcher + Quick Arena Link */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="ios-segmented inline-flex items-center">
-              <div className="ios-segmented-thumb flex items-center gap-2 px-4 sm:px-5 py-2 text-xs sm:text-[13px] font-bold select-none">
-                <Trophy className="size-3.5 text-[#FF9500]" />
+              <div className="ios-segmented-thumb flex items-center gap-2 px-4 sm:px-5 py-1.5 text-xs sm:text-[13px] font-bold select-none">
+                <PremiumIcon icon={Trophy} tone="amber" size="2xs" />
                 <span>Liderlar Ligasi</span>
               </div>
               <Link
                 href="/feed"
-                className="flex items-center gap-2 px-4 sm:px-5 py-2 text-xs sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 px-4 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Sparkles className="size-3.5 text-[#34C759]" />
+                <PremiumIcon icon={Sparkles} tone="emerald" size="2xs" />
                 <span>Hamjamiyat Lentasi</span>
               </Link>
             </div>
 
             <Link
               href="/battles"
-              className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3.5 py-2 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A]"
+              className="ios-spring inline-flex items-center gap-2 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3.5 py-1.5 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A]"
             >
-              <Swords className="size-3.5" />
+              <PremiumIcon icon={Swords} tone="amber" size="2xs" />
               <span>1v1 Arena (+50 XP)</span>
             </Link>
           </div>
@@ -365,7 +365,7 @@ export default function LeaderboardPage() {
 
               {data.rankings.length === 0 ? (
                 <div className="py-10 text-center rounded-[22px] border border-dashed border-border bg-muted/20">
-                  <Users className="mx-auto mb-2 size-8 text-muted-foreground/50" />
+                  <PremiumIcon icon={Users} tone="zinc" size="lg" className="mx-auto mb-2.5" />
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Bu bo&apos;limda qo&apos;shimcha ishtirokchilar hali yo&apos;q.
                   </p>

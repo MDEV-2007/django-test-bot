@@ -494,15 +494,15 @@ export default function CommunityFeedPage() {
           {/* 1. iOS 18 Top Segmented Bar & Action Button */}
           <div className="flex flex-wrap items-center justify-between gap-2.5">
             <div className="ios-segmented inline-flex items-center">
-              <div className="ios-segmented-thumb flex items-center gap-1.5 px-3.5 sm:px-5 py-2 text-xs sm:text-[13px] font-bold select-none">
-                <Sparkles className="size-3.5 text-[#34C759]" />
+              <div className="ios-segmented-thumb flex items-center gap-2 px-3.5 sm:px-5 py-1.5 text-xs sm:text-[13px] font-bold select-none">
+                <PremiumIcon icon={Sparkles} tone="emerald" size="2xs" />
                 <span>Hamjamiyat</span>
               </div>
               <Link
                 href="/leaderboard"
-                className="flex items-center gap-1.5 px-3.5 sm:px-5 py-2 text-xs sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 px-3.5 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Trophy className="size-3.5 text-[#FF9500]" />
+                <PremiumIcon icon={Trophy} tone="amber" size="2xs" />
                 <span>Liderlar Ligasi</span>
               </Link>
             </div>
@@ -510,9 +510,9 @@ export default function CommunityFeedPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/tests/history"
-                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-bold text-foreground shadow-2xs hover:bg-muted/70"
+                className="ios-spring hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground shadow-2xs hover:bg-muted/70"
               >
-                <Award className="size-3.5 text-[#FF9500]" />
+                <PremiumIcon icon={Award} tone="amber" size="2xs" />
                 <span>Natijalarim</span>
               </Link>
               <button
@@ -564,9 +564,9 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('result');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring inline-flex items-center gap-1 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3 py-1.5 text-[11px] font-bold text-[#C93400] dark:text-[#FF9F0A] cursor-pointer"
+                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3 py-1.5 text-[11px] font-bold text-[#C93400] dark:text-[#FF9F0A] cursor-pointer"
               >
-                <Award className="size-3.5 text-[#FF9500]" />
+                <PremiumIcon icon={Award} tone="amber" size="2xs" />
                 <span>Natija</span>
               </button>
               <button
@@ -576,9 +576,9 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('custom');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring hidden sm:inline-flex items-center gap-1 rounded-full bg-[#34C759]/14 border border-[#34C759]/25 px-3 py-1.5 text-[11px] font-bold text-[#248A3D] dark:text-[#30D158] cursor-pointer"
+                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#34C759]/14 border border-[#34C759]/25 px-3 py-1.5 text-[11px] font-bold text-[#248A3D] dark:text-[#30D158] cursor-pointer"
               >
-                <Camera className="size-3.5" />
+                <PremiumIcon icon={Camera} tone="emerald" size="2xs" />
                 <span>Rasm</span>
               </button>
             </div>
@@ -635,9 +635,7 @@ export default function CommunityFeedPage() {
             ) : posts.length === 0 ? (
               <Reveal>
                 <div className="ios-card rounded-[28px] py-14 px-5 text-center space-y-4">
-                  <div className="mx-auto flex size-14 items-center justify-center rounded-[18px] bg-[#FF9500]/14 text-[#FF9500]">
-                    <Trophy className="size-7" />
-                  </div>
+                  <PremiumIcon icon={Trophy} tone="amber" size="xl" className="mx-auto" />
                   <div className="space-y-1">
                     <h3 className="text-base sm:text-lg font-extrabold text-foreground">
                       Hozircha postlar mavjud emas
@@ -1061,26 +1059,26 @@ export default function CommunityFeedPage() {
                 type="button"
                 onClick={() => setActiveModalTab('result')}
                 className={cn(
-                  'py-2 px-3 rounded-[10px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  'py-2 px-3 rounded-[10px] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
                   activeModalTab === 'result'
                     ? 'bg-card text-foreground shadow-2xs'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Award className="size-3.5 text-[#FF9500]" />
+                <PremiumIcon icon={Award} tone="amber" size="2xs" />
                 <span>Natijani Ulashish</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveModalTab('custom')}
                 className={cn(
-                  'py-2 px-3 rounded-[10px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  'py-2 px-3 rounded-[10px] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
                   activeModalTab === 'custom'
                     ? 'bg-card text-foreground shadow-2xs'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <UploadCloud className="size-3.5 text-[#34C759]" />
+                <PremiumIcon icon={UploadCloud} tone="emerald" size="2xs" />
                 <span>Erkin Post &amp; Rasm</span>
               </button>
             </div>

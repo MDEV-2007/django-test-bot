@@ -16,7 +16,7 @@ export type PremiumIconTone =
   | 'gold'
   | 'primary';
 
-export type PremiumIconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type PremiumIconSize = '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 const TONE_STYLES: Record<
   PremiumIconTone,
@@ -108,6 +108,11 @@ const SIZE_STYLES: Record<
     rounded: string;
   }
 > = {
+  '2xs': {
+    box: 'size-5.5',
+    icon: 'size-3',
+    rounded: 'rounded-[7px]',
+  },
   xs: {
     box: 'size-6.5',
     icon: 'size-3.5',
@@ -150,7 +155,7 @@ export default function PremiumIcon({
   tone = 'primary',
   size = 'sm',
   glow = false,
-  solid = false,
+  solid = true,
   className,
   iconClassName,
 }: PremiumIconProps) {

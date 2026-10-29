@@ -22,6 +22,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PremiumIcon from '@/components/ui/premium-icon';
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
 } from '@/components/ui/chart';
@@ -81,10 +82,10 @@ export default function AnalyticsPage() {
   }));
 
   const stats = data ? [
-    { label: 'Jami testlar', value: `${data.total_tests} ta`, icon: FileCheck2, bg: 'bg-[#007AFF]', tone: 'text-foreground' },
-    { label: "O'rtacha aniqlik", value: `${data.accuracy}%`, icon: Target, bg: 'bg-[#34C759]', tone: 'text-[#34C759]' },
-    { label: 'Sarf etilgan vaqt', value: `${data.time_minutes} daq`, icon: Clock, bg: 'bg-[#FF9500]', tone: 'text-[#FF9500]' },
-    { label: "O'rtacha ball", value: `${data.avg_score}%`, icon: Percent, bg: 'bg-[#5856D6]', tone: 'text-[#5856D6]' },
+    { label: 'Jami testlar', value: `${data.total_tests} ta`, icon: FileCheck2, iconTone: 'sky' as const, tone: 'text-foreground' },
+    { label: "O'rtacha aniqlik", value: `${data.accuracy}%`, icon: Target, iconTone: 'emerald' as const, tone: 'text-[#34C759]' },
+    { label: 'Sarf etilgan vaqt', value: `${data.time_minutes} daq`, icon: Clock, iconTone: 'amber' as const, tone: 'text-[#FF9500]' },
+    { label: "O'rtacha ball", value: `${data.avg_score}%`, icon: Percent, iconTone: 'indigo' as const, tone: 'text-[#5856D6]' },
   ] : [];
 
   return (
@@ -126,19 +127,19 @@ export default function AnalyticsPage() {
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="w-full overflow-x-auto no-scrollbar">
             <TabsList className="h-11 p-1 rounded-[14px]">
-              <TabsTrigger value="overview" className="px-4 py-2 rounded-[10px] gap-2">
-                <TrendingUp className="size-4 text-[#007AFF]" />
+              <TabsTrigger value="overview" className="px-4 py-1.5 rounded-[10px] gap-2">
+                <PremiumIcon icon={TrendingUp} tone="sky" size="2xs" />
                 <span>Umumiy Tahlil</span>
               </TabsTrigger>
-              <TabsTrigger value="admission" className="px-4 py-2 rounded-[10px] gap-2">
-                <GraduationCap className="size-4 text-[#34C759]" />
+              <TabsTrigger value="admission" className="px-4 py-1.5 rounded-[10px] gap-2">
+                <PremiumIcon icon={GraduationCap} tone="emerald" size="2xs" />
                 <span>OTM Bashorati</span>
                 <span className="rounded-full bg-[#34C759]/15 px-2 py-0.5 text-[10px] font-bold text-[#34C759]">
                   2026
                 </span>
               </TabsTrigger>
-              <TabsTrigger value="topics" className="px-4 py-2 rounded-[10px] gap-2">
-                <BarChart2 className="size-4 text-[#FF9500]" />
+              <TabsTrigger value="topics" className="px-4 py-1.5 rounded-[10px] gap-2">
+                <PremiumIcon icon={BarChart2} tone="amber" size="2xs" />
                 <span>Fanlar va Mavzular</span>
               </TabsTrigger>
             </TabsList>
@@ -160,9 +161,7 @@ export default function AnalyticsPage() {
             {data && data.total_tests === 0 && (
               <Card>
                 <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
-                  <div className="flex size-14 items-center justify-center rounded-[18px] bg-[#007AFF] text-white shadow-md">
-                    <TrendingUp className="size-7" />
-                  </div>
+                  <PremiumIcon icon={TrendingUp} tone="sky" size="xl" />
                   <div className="space-y-1.5">
                     <h2 className="text-[18px] font-bold text-foreground">Tahlil hali bo&apos;sh</h2>
                     <p className="mx-auto max-w-md text-[13.5px] leading-relaxed text-[#8E8E93]">
@@ -181,22 +180,17 @@ export default function AnalyticsPage() {
               <>
                 {/* 4 Apple Health Summary Widgets */}
                 <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-                  {stats.map((s) => {
-                    const Icon = s.icon;
-                    return (
-                      <div key={s.label} className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3">
-                        <div className="flex items-center justify-between">
-                          <span className={`flex size-8 items-center justify-center rounded-[9px] ${s.bg} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]`}>
-                            <Icon className="size-4" />
-                          </span>
-                          <span className="text-[11px] font-semibold text-[#8E8E93]">{s.label}</span>
-                        </div>
-                        <p className={`font-mono text-[24px] font-black tracking-tight tabular-nums ${s.tone}`}>
-                          {s.value}
-                        </p>
+                  {stats.map((s) => (
+                    <div key={s.label} className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3">
+                      <div className="flex items-center justify-between">
+                        <PremiumIcon icon={s.icon} tone={s.iconTone} size="xs" />
+                        <span className="text-[11px] font-semibold text-[#8E8E93]">{s.label}</span>
                       </div>
-                    );
-                  })}
+                      <p className={`font-mono text-[24px] font-black tracking-tight tabular-nums ${s.tone}`}>
+                        {s.value}
+                      </p>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Javoblar taqsimoti */}
@@ -264,7 +258,7 @@ export default function AnalyticsPage() {
                   <Card className="border-[#34C759]/25 bg-[#34C759]/[0.04]">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-[14px] text-[#34C759]">
-                        <ThumbsUp className="size-4" /> Kuchli mavzularingiz
+                        <PremiumIcon icon={ThumbsUp} tone="emerald" size="2xs" /> Kuchli mavzularingiz
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
@@ -281,7 +275,7 @@ export default function AnalyticsPage() {
                   <Card className="border-[#FF3B30]/25 bg-[#FF3B30]/[0.04]">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-[14px] text-[#FF3B30]">
-                        <AlertTriangle className="size-4" /> Diqqat talab etuvchi mavzular
+                        <PremiumIcon icon={AlertTriangle} tone="rose" size="2xs" /> Diqqat talab etuvchi mavzular
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
@@ -394,7 +388,7 @@ export default function AnalyticsPage() {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <RadarIcon className="size-4 text-[#007AFF]" /> Mavzular xaritasi (Radar)
+                        <PremiumIcon icon={RadarIcon} tone="sky" size="2xs" /> Mavzular xaritasi (Radar)
                       </CardTitle>
                       <CardDescription>
                         Eng ko&apos;p yechilgan {radarData.length} ta mavzu bo&apos;yicha aniqlik

@@ -74,8 +74,8 @@ export function HeroFocusBanner({
       <div className="relative z-10 flex flex-col gap-5 min-w-0 max-w-full">
         <div className="space-y-4 min-w-0 max-w-full">
           {/* iOS Dynamic Island Style Compass Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary">
-            <Sparkles className="size-3.5 text-primary" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <PremiumIcon icon={Sparkles} tone="sky" size="2xs" />
             <span>AI Study Compass · {recommendedSprint.subjectName}</span>
             <ChevronRight className="size-3.5 text-primary/70" />
           </div>

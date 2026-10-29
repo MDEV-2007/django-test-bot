@@ -365,26 +365,26 @@ export default function DashboardPage() {
             type="button"
             onClick={() => setActiveMode('study')}
             className={cn(
-              'flex items-center gap-2 px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
+              'flex items-center gap-2 px-4 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
               activeMode === 'study'
                 ? 'ios-segmented-thumb font-bold'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <BookOpen className="size-3.5 text-primary" />
+            <PremiumIcon icon={BookOpen} tone="sky" size="2xs" />
             <span>O&apos;quv Markazi</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveMode('arena')}
             className={cn(
-              'flex items-center gap-2 px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
+              'flex items-center gap-2 px-4 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
               activeMode === 'arena'
                 ? 'ios-segmented-thumb font-bold'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <Swords className="size-3.5 text-[#FF9500]" />
+            <PremiumIcon icon={Swords} tone="amber" size="2xs" />
             <span>Arena &amp; Reyting</span>
             <span className="relative flex size-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#FF9500] opacity-75" />
@@ -703,7 +703,7 @@ export default function DashboardPage() {
                       href="/feed"
                       className="ios-spring flex items-center gap-1.5 text-xs font-semibold text-[#34C759] bg-[#34C759]/12 hover:bg-[#34C759]/18 px-3 py-1.5 rounded-full"
                     >
-                      <Sparkles className="size-3.5" />
+                      <PremiumIcon icon={Sparkles} tone="emerald" size="2xs" />
                       <span>Hamjamiyat</span>
                     </Link>
                     <Link
@@ -1024,7 +1024,7 @@ export default function DashboardPage() {
           <div className="fixed right-4 sm:right-8 top-18 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-[28px] border border-border bg-card/90 ios-glass-heavy shadow-2xl z-50 overflow-hidden animate-scaleIn text-card-foreground">
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
               <div className="flex items-center gap-2">
-                <Bell className="size-4 text-primary" />
+                <PremiumIcon icon={Bell} tone="sky" size="2xs" />
                 <h3 className="text-sm font-bold text-foreground">Bildirishnomalar</h3>
                 {unreadCount > 0 && (
                   <Badge className="text-[10px] px-2 py-0 h-4.5 rounded-full bg-primary/12 text-primary font-bold border-0">
@@ -1062,10 +1062,8 @@ export default function DashboardPage() {
                   <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
                 </div>
               ) : notifications.length === 0 ? (
-                <div className="p-8 text-center space-y-2">
-                  <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground mx-auto">
-                    <Bell className="size-6 opacity-40" />
-                  </div>
+                <div className="p-8 text-center space-y-2.5">
+                  <PremiumIcon icon={Bell} tone="zinc" size="lg" className="mx-auto" />
                   <p className="text-sm font-bold text-foreground">Yangi bildirishnoma yo&apos;q</p>
                   <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
                     Hamjamiyatda post yozing, darslarni bajaring yoki bellashuvlarda qatnashing!
