@@ -282,8 +282,11 @@ export function useNeuralSprint({
       const selectedOpt = currentQuestion.options.find((o: QuestionOption) => o.id === optionId);
       const correctOpt = currentQuestion.options.find((o: QuestionOption) => o.id === currentQuestion.correctOptionId);
 
+      // Haqiqiy database savol ID si (Qasos savoli bo'lsa, originalQuestionId olinadi)
+      const realQuestionId = currentQuestion.originalQuestionId ?? currentQuestion.id;
+
       const payload = {
-        question_id: currentQuestion.id,
+        question_id: realQuestionId,
         question_body: currentQuestion.body,
         selected_option_id: optionId,
         selected_option_text: selectedOpt?.text || '',
@@ -303,7 +306,7 @@ export function useNeuralSprint({
           const json = await res.json();
           if (json.ok && json.data) {
             const expData: MistakeExplanationCache = {
-              questionId: json.data.question_id || currentQuestion.id,
+              questionId: json.data.question_id || realQuestionId,
               selectedOptionId: json.data.selected_option_id || optionId,
               whyWrong: json.data.why_wrong,
               memoryHack: json.data.memory_hack,
@@ -312,10 +315,33 @@ export function useNeuralSprint({
             };
             setActiveExplanation(expData);
             onAnswerWrong?.(currentQuestion, expData);
+          } else {
+            setActiveExplanation({
+              questionId: realQuestionId,
+              selectedOptionId: optionId,
+              whyWrong: `Siz tanlagan "${selectedOpt?.text || 'variant'}" to'g'ri javob emas.`,
+              memoryHack: `To'g'ri javob: "${correctOpt?.text || "to'g'ri javob"}".`,
+              cached: false,
+            });
           }
+        } else {
+          setActiveExplanation({
+            questionId: realQuestionId,
+            selectedOptionId: optionId,
+            whyWrong: `Siz tanlagan "${selectedOpt?.text || 'variant'}" to'g'ri javob emas.`,
+            memoryHack: `To'g'ri javob: "${correctOpt?.text || "to'g'ri javob"}".`,
+            cached: false,
+          });
         }
       } catch (err) {
         console.error("Sprint explain mistake error:", err);
+        setActiveExplanation({
+          questionId: realQuestionId,
+          selectedOptionId: optionId,
+          whyWrong: `Siz tanlagan "${selectedOpt?.text || 'variant'}" to'g'ri javob emas.`,
+          memoryHack: `To'g'ri javob: "${correctOpt?.text || "to'g'ri javob"}".`,
+          cached: false,
+        });
       } finally {
         setIsExplainingLoading(false);
       }

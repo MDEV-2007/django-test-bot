@@ -325,9 +325,10 @@ export default function NeuralSprintView({
               className="space-y-4"
             >
               <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 shadow-sm">
-                <p className="text-base sm:text-lg font-bold text-foreground leading-relaxed">
-                  {currentQuestion.body}
-                </p>
+                <div
+                  className="text-base sm:text-lg font-bold text-foreground leading-relaxed prose dark:prose-invert max-w-none [&_p]:my-0"
+                  dangerouslySetInnerHTML={{ __html: currentQuestion.body }}
+                />
               </div>
 
               {/* Variantlar Ro'yxati (A, B, C, D) */}
@@ -371,7 +372,10 @@ export default function NeuralSprintView({
                         )}>
                           {OPTION_LABELS[idx] || (idx + 1)}
                         </span>
-                        <span className="leading-snug break-words">{opt.text}</span>
+                        <span
+                          className="leading-snug break-words"
+                          dangerouslySetInnerHTML={{ __html: opt.text }}
+                        />
                       </div>
 
                       {/* Icon */}
@@ -436,7 +440,12 @@ export default function NeuralSprintView({
                     <p className="font-semibold leading-relaxed">{activeExplanation.memoryHack}</p>
                   </div>
                 </div>
-              ) : null}
+              ) : (
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs space-y-1">
+                  <p className="font-bold text-[11px] uppercase tracking-wider">💡 Eslatma:</p>
+                  <p className="leading-relaxed">Savol javobini yaxshilab eslab qoling va qasos savolida to'g'ri variantni belgilang!</p>
+                </div>
+              )}
 
               {/* Tushundim tugmasi */}
               <Button

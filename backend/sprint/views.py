@@ -1,6 +1,9 @@
-import logging
 import time
+import logging
+import random
+from django.conf import settings
 from django.utils import timezone
+from django.db import models
 from django.db.models import F
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,10 +13,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import MistakeExplanationCache, UserMistakeNotebook
 from .serializers import (
     ExplainMistakeInputSerializer,
-    MistakeExplanationCacheSerializer,
+    QuestionSprintSerializer,
+    UserMistakeNotebookSerializer,
 )
 from .ai_service import generate_mistake_explanation
-from tests_app.models import Question, AnswerOption
+from tests_app.models import Question
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +25,7 @@ logger = logging.getLogger(__name__)
 class ExplainMistakeAPIView(APIView):
     """POST /api/v1/sprint/explain-mistake/
 
-    Zero-Effort Lazy AI Caching Endpoint:
+    Fokus Sprintida xato qilinganda Zero-Effort Lazy AI Caching arxitekturasi:
     - 1-qadam (Cache Check): PostgreSQL jadvalida (question_id, selected_option_id) bormi?
     - 2-qadam (Cache Hit): 0.01 soniyada (0 so'm xarajat bilan) tayyor JSON qaytadi.
     - 3-qadam (Cache Miss): LLM orqali yaratilib, bazaga saqlanadi va qaytariladi.
@@ -32,6 +36,7 @@ class ExplainMistakeAPIView(APIView):
         start_time = time.time()
         serializer = ExplainMistakeInputSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.warning("ExplainMistake validation error: %s", serializer.errors)
             return Response({'ok': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
@@ -44,15 +49,17 @@ class ExplainMistakeAPIView(APIView):
         topic_title = data.get('topic_title') or ''
 
         # ─── 1-QADAM: Cache Check (PostgreSQL) ────────────────────────
-        cached_entry = MistakeExplanationCache.objects.filter(
-            question_id=question_id,
-            selected_option_id=selected_option_id
-        ).first()
+        cached_entry = None
+        if question_id > 0:
+            cached_entry = MistakeExplanationCache.objects.filter(
+                question_id=question_id,
+                selected_option_id=selected_option_id
+            ).first()
 
-        # Agar keshdagi yozuv eski xato fallback bo'lsa, uni o'chirib haqiqiy AI bilan yangilaymiz!
-        if cached_entry and ("bu savol mantiqiga to'g'ri kelmaydi" in (cached_entry.why_wrong or '') or "bilan mustahkamlang" in (cached_entry.memory_hack or '')):
-            cached_entry.delete()
-            cached_entry = None
+            # Agar keshdagi yozuv eski xato fallback bo'lsa, uni o'chirib haqiqiy AI bilan yangilaymiz!
+            if cached_entry and ("bu savol mantiqiga to'g'ri kelmaydi" in (cached_entry.why_wrong or '') or "bilan mustahkamlang" in (cached_entry.memory_hack or '')):
+                cached_entry.delete()
+                cached_entry = None
 
         if cached_entry:
             # Hit countni yangilash
@@ -60,7 +67,7 @@ class ExplainMistakeAPIView(APIView):
             cached_entry.refresh_from_db(fields=['hit_count'])
 
             # Agar foydalanuvchi tizimga kirgan bo'lsa, Xatolar Daftarchasiga yozish
-            if request.user.is_authenticated:
+            if request.user.is_authenticated and question_id > 0:
                 self._record_user_mistake(request.user, question_id, selected_option_id)
 
             latency_ms = int((time.time() - start_time) * 1000)
@@ -79,21 +86,21 @@ class ExplainMistakeAPIView(APIView):
             })
 
         # ─── 2-QADAM: Cache Miss -> Bazadan savol va to'g'ri variantni to'ldirish ───
-        if not question_body or not correct_option_text:
+        if (not question_body or not correct_option_text) and question_id > 0:
             try:
-                q_obj = Question.objects.select_related('topic', 'test').prefetch_related('options').get(pk=question_id)
+                q_obj = Question.objects.select_related('topic', 'subject').prefetch_related('choices').get(pk=question_id)
                 if not question_body:
                     question_body = q_obj.body
                 if not topic_title:
-                    topic_title = q_obj.topic.title if q_obj.topic else (q_obj.test.title if q_obj.test else "")
+                    topic_title = q_obj.topic.title if q_obj.topic else (q_obj.subject.name if q_obj.subject else "")
 
                 if not selected_option_text:
-                    sel_opt = q_obj.options.filter(pk=selected_option_id).first()
+                    sel_opt = q_obj.choices.filter(pk=selected_option_id).first()
                     if sel_opt:
                         selected_option_text = sel_opt.text
 
                 if not correct_option_text:
-                    corr_opt = q_obj.options.filter(is_correct=True).first()
+                    corr_opt = q_obj.choices.filter(is_correct=True).first()
                     if corr_opt:
                         correct_option_id = corr_opt.id
                         correct_option_text = corr_opt.text
@@ -112,11 +119,10 @@ class ExplainMistakeAPIView(APIView):
 
         why_wrong = ai_result.get('why_wrong', '')
         memory_hack = ai_result.get('memory_hack', '')
-
         is_fallback = ai_result.get('is_fallback', False)
 
-        # ─── 4-QADAM: Bazaga saqlash (FAQAT haqiqiy AI yaratgan bo'lsa keshlaymiz) ───
-        if not is_fallback:
+        # ─── 4-QADAM: Bazaga saqlash (FAQAT haqiqiy AI yaratgan va ID haqiqiy bo'lsa keshlaymiz) ───
+        if not is_fallback and question_id > 0:
             try:
                 created_cache, _ = MistakeExplanationCache.objects.update_or_create(
                     question_id=question_id,
@@ -132,10 +138,9 @@ class ExplainMistakeAPIView(APIView):
                 )
             except Exception as e:
                 logger.error(f"MistakeExplanationCache saqlashda xatolik: {e}")
-                created_cache = None
 
         # Foydalanuvchi xatolar daftariga qayd etish
-        if request.user.is_authenticated:
+        if request.user.is_authenticated and question_id > 0:
             self._record_user_mistake(request.user, question_id, selected_option_id)
 
         latency_ms = int((time.time() - start_time) * 1000)
@@ -149,7 +154,7 @@ class ExplainMistakeAPIView(APIView):
                 'why_wrong': why_wrong,
                 'memory_hack': memory_hack,
                 'hit_count': 1,
-                'model_name': "groq/llama-3.3-70b-versatile",
+                'model_name': getattr(settings, 'GROQ_MODEL', 'qwen/qwen3.8-27b'),
             }
         })
 
@@ -176,48 +181,64 @@ class ResolveRevengeMistakeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        question_id = request.data.get('question_id')
-        if not question_id:
+        raw_id = request.data.get('question_id')
+        if not raw_id:
             return Response({'ok': False, 'error': 'question_id kiritilishi shart'}, status=400)
 
-        updated_count = UserMistakeNotebook.objects.filter(
-            user=request.user,
-            question_id=question_id
-        ).update(
-            is_resolved=True,
-            resolved_at=timezone.now(),
-            revenge_attempts_count=F('revenge_attempts_count') + 1
-        )
+        val_str = str(raw_id).strip()
+        if val_str.startswith('revenge_'):
+            parts = val_str.split('_')
+            if len(parts) >= 2 and parts[1].isdigit():
+                val_str = parts[1]
+
+        try:
+            target_id = int(val_str)
+        except (ValueError, TypeError):
+            target_id = 0
+
+        updated_count = 0
+        if target_id > 0:
+            updated_count = UserMistakeNotebook.objects.filter(
+                user=request.user,
+                question_id=target_id
+            ).update(
+                is_resolved=True,
+                resolved_at=timezone.now(),
+                revenge_attempts_count=F('revenge_attempts_count') + 1
+            )
 
         return Response({
             'ok': True,
             'resolved': updated_count > 0,
-            'question_id': question_id,
+            'question_id': target_id,
         })
 
 
 class SprintQuestionsAPIView(APIView):
     """GET /api/v1/sprint/questions/?count=10
-    Fokus Sprinti uchun 10-15 ta yuqori sifatli savollarni yuklaydi.
+    Fokus Sprinti uchun bazadan tasodifiy 10-15 ta variantli savollarni yuklaydi.
     """
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
-        import random
         count = min(30, max(5, int(request.query_params.get('count', 10))))
         subject_id = request.query_params.get('subject_id')
 
-        qs = Question.objects.select_related('topic', 'test').prefetch_related('options')
+        qs = Question.objects.select_related('topic', 'subject').prefetch_related('choices').filter(
+            question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
+        )
         if subject_id:
             qs = qs.filter(subject_id=subject_id)
 
         total_available = qs.count()
-        if total_available == 0:
-            qs = Question.objects.select_related('topic', 'test').prefetch_related('options')
+        if total_available == 0 and subject_id:
+            qs = Question.objects.select_related('topic', 'subject').prefetch_related('choices').filter(
+                question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
+            )
             total_available = qs.count()
 
         if total_available == 0:
-            return Response({'ok': True, 'questions': []})
+            return Response({'ok': True, 'count': 0, 'questions': []})
 
         all_ids = list(qs.values_list('id', flat=True))
         selected_ids = random.sample(all_ids, min(count, len(all_ids)))
@@ -225,20 +246,20 @@ class SprintQuestionsAPIView(APIView):
         questions = qs.filter(id__in=selected_ids)
         result = []
         for q in questions:
-            opts = list(q.options.all().order_by('order', 'id'))
-            if len(opts) < 2:
+            choices = list(q.choices.all().order_by('id'))
+            if len(choices) < 2:
                 continue
-            corr = next((o for o in opts if o.is_correct), None)
+            corr = next((c for c in choices if c.is_correct), None)
             if not corr:
                 continue
-            topic_str = q.topic.title if q.topic else (q.test.title if q.test else "Umumiy Tayyorgarlik")
+            topic_str = q.topic.title if q.topic else (q.subject.name if q.subject else "Umumiy Tayyorgarlik")
             result.append({
                 'id': q.id,
                 'body': q.body,
                 'topic_title': topic_str,
                 'correct_option_id': corr.id,
                 'difficulty': q.difficulty,
-                'options': [{'id': o.id, 'text': o.text} for o in opts],
+                'options': [{'id': c.id, 'text': c.text} for c in choices],
             })
 
         return Response({
@@ -246,4 +267,3 @@ class SprintQuestionsAPIView(APIView):
             'count': len(result),
             'questions': result,
         })
-
