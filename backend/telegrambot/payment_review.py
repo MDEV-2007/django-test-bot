@@ -1,14 +1,15 @@
 """Avtomatlashtirilgan to'lov cheki tahlili va tasdiqlash tizimi.
 
-O'quvchi saytda yoki botda to'lov cheki (skrinshot) yuklaganda, bu modul:
-1. To'lov cheki rasmini yashirin Telegram kanaliga inline tugmalar bilan yuboradi.
-2. Admin kanalda "✅ Qabul qilish (Testni ochish)" tugmasini bosganda:
+O'quvchi saytda, Telegram Mini App'da yoki botda to'lov cheki (skrinshot) yuklaganda, bu modul:
+1. To'lov cheki rasmini yashirin Telegram kanaliga (-1004317888253) inline tugmalar bilan yuboradi.
+2. Admin kanalda "✅ Qabul qilish" tugmasini bosganda:
    - Payment holatini 'approved' qiladi
-   - apply_to_profile() chaqirilib, o'sha o'quvchiga aynan sotib olingan mock test ochiladi
-   - O'quvchiga bot orqali "To'lovingiz tasdiqlandi, test ochildi!" xabari yuboriladi
+   - apply_to_profile() chaqirilib, o'sha o'quvchiga PRO obuna yoki sotib olingan mock test ochiladi
+   - O'quvchiga bot orqali tasdiqlanganlik haqida xabar yuboriladi
    - Kanaldagi post "✅ TASDIQLANDI" deb yangilanadi
 3. "❌ Rad etish" bosilganda rad etiladi.
 """
+import html
 import logging
 import os
 from django.conf import settings
@@ -26,11 +27,21 @@ logger = logging.getLogger(__name__)
 DEFAULT_PAYMENT_CHANNEL_ID = '-1004317888253'
 
 
-def get_payment_channel_id():
-    """To'lov cheklari yuboriladigan kanal ID sini aniqlash."""
-    raw = getattr(settings, 'PAYMENT_CHANNEL_ID', '') or getattr(settings, 'ADMIN_TELEGRAM_CHAT_ID', '') or ''
+def get_payment_channel_ids():
+    """To'lov cheklari yuboriladigan kanal ID larini aniqlash.
+    Har doim asosiy to'lov kanali (-1004317888253) ro'yxatda bo'lishini kafolatlaydi.
+    """
+    targets = [DEFAULT_PAYMENT_CHANNEL_ID]
+    raw = getattr(settings, 'PAYMENT_CHANNEL_ID', '') or ''
     cid = str(raw).strip()
-    return cid if cid else DEFAULT_PAYMENT_CHANNEL_ID
+    if cid and cid.lstrip('-').isdigit() and cid not in targets:
+        targets.insert(0, cid)
+    return targets
+
+
+def get_payment_channel_id():
+    """Asosiy to'lov kanali ID si."""
+    return get_payment_channel_ids()[0]
 
 
 def update_channel_message(chat_id, message_id, text, reply_markup=None):
@@ -41,76 +52,131 @@ def update_channel_message(chat_id, message_id, text, reply_markup=None):
     return res
 
 
+def _read_screenshot_bytes(payment):
+    """Skrinshot faylidan baytlarni xavfsiz o'qib olish."""
+    if not payment.screenshot:
+        return None
+    try:
+        if hasattr(payment.screenshot, 'path'):
+            file_path = payment.screenshot.path
+            if file_path and os.path.exists(file_path):
+                with open(file_path, 'rb') as f:
+                    data = f.read()
+                if data:
+                    return data
+    except Exception:
+        pass
+
+    try:
+        payment.screenshot.open('rb')
+        if hasattr(payment.screenshot, 'seek'):
+            payment.screenshot.seek(0)
+        data = payment.screenshot.read()
+        if hasattr(payment.screenshot, 'seek'):
+            payment.screenshot.seek(0)
+        if data:
+            return data
+    except Exception as exc:
+        logger.warning("Skrinshot faylini o'qishda xatolik (payment_id=%s): %s", payment.id, exc)
+    return None
+
+
 def send_payment_review_notification(payment):
     """To'lov chekini yashirin Telegram kanaliga inline tasdiqlash tugmalari bilan yuborish."""
     try:
-        channel_id = get_payment_channel_id()
-        logger.info("send_payment_review_notification boshlandi: payment_id=%s, channel_id=%s", payment.id, channel_id)
+        channel_ids = get_payment_channel_ids()
+        logger.info(
+            "send_payment_review_notification boshlandi: payment_id=%s, channels=%s",
+            payment.id, channel_ids,
+        )
 
         profile = payment.profile
         user = profile.user
-        full_name = f"{user.first_name} {user.last_name}".strip() or user.username
-        username = getattr(user, 'username', '')
-        tg_user = f"@{profile.telegram_username}" if getattr(profile, 'telegram_username', None) else "Bog'lanmagan"
-        email_str = getattr(user, 'email', '') or "Kiritilmagan"
-        
-        test_title = payment.test.title if payment.test else (payment.plan.name if payment.plan else "Mock Test")
+        raw_full_name = f"{user.first_name} {user.last_name}".strip() or user.username or f"User#{user.id}"
+        full_name = html.escape(raw_full_name)
+        username = html.escape(getattr(user, 'username', '') or '')
+        tg_username = getattr(profile, 'telegram_username', None)
+        tg_id = getattr(profile, 'telegram_id', None)
+        if tg_username:
+            tg_user_str = f"@{html.escape(str(tg_username))}"
+        elif tg_id:
+            tg_user_str = f"ID: <code>{html.escape(str(tg_id))}</code>"
+        else:
+            tg_user_str = "Bog'lanmagan"
+
+        email_str = html.escape(getattr(user, 'email', '') or "Kiritilmagan")
+
+        is_course_or_pro = bool(payment.plan and payment.plan.plan_type == 'lessons' and not payment.test_id)
+        raw_title = (
+            payment.test.title
+            if payment.test
+            else (payment.plan.name if payment.plan else "PRO Kurs / Mock Test")
+        )
+        item_title = html.escape(str(raw_title))
+        item_type_label = "Kurs / PRO Obuna" if is_course_or_pro else "Mock Test / Tarif"
+
         amount_str = f"{payment.amount:,.0f}".replace(",", " ")
-        source_str = "Veb-sayt" if payment.source == 'web' else "Telegram Bot"
+        source_str = "Veb-sayt / Mini App" if payment.source == 'web' else "Telegram Bot"
         created_time = timezone.localtime(payment.created_at).strftime("%Y-%m-%d %H:%M")
 
         caption = (
             f"🧾 <b>YANGI TO'LOV CHEKI #{payment.id}</b>\n\n"
             f"👤 <b>O'quvchi:</b> {full_name} (@{username})\n"
-            f"💬 <b>Telegram:</b> {tg_user}\n"
+            f"💬 <b>Telegram:</b> {tg_user_str}\n"
             f"📧 <b>Email / ID:</b> {email_str} (Profil ID: {profile.id})\n"
-            f"🎯 <b>Mock Test / Reja:</b> {test_title}\n"
+            f"🎯 <b>{item_type_label}:</b> {item_title}\n"
             f"💰 <b>To'lov summasi:</b> <b>{amount_str} so'm</b>\n"
             f"🌐 <b>Manba:</b> {source_str}\n"
             f"⏰ <b>Vaqt:</b> {created_time}\n\n"
-            f"<i>Testni ochish yoki rad etish uchun quyidagi tugmani bosing:</i>"
+            f"<i>Tasdiqlash yoki rad etish uchun quyidagi tugmani bosing:</i>"
         )
 
+        approve_btn_text = "✅ Qabul qilish (Obunani ochish)" if is_course_or_pro else "✅ Qabul qilish (Testni ochish)"
         reply_markup = {
             'inline_keyboard': [
                 [
-                    {'text': "✅ Qabul qilish (Testni ochish)", 'callback_data': f"pay_approve_{payment.id}"},
+                    {'text': approve_btn_text, 'callback_data': f"pay_approve_{payment.id}"},
                     {'text': "❌ Rad etish", 'callback_data': f"pay_reject_{payment.id}"},
                 ]
             ]
         }
 
-        # Skrinshot faylini tekshirish va yuborish
-        res = {'ok': False}
-        if payment.screenshot:
-            try:
-                file_path = None
+        photo_bytes = _read_screenshot_bytes(payment)
+        any_sent = False
+
+        for channel_id in channel_ids:
+            res = {'ok': False}
+            if photo_bytes:
                 try:
-                    if hasattr(payment.screenshot, 'path'):
-                        file_path = payment.screenshot.path
-                except Exception:
-                    file_path = None
+                    res = send_photo(
+                        channel_id,
+                        photo_bytes,
+                        caption=caption,
+                        reply_markup=reply_markup,
+                    )
+                except Exception as photo_err:
+                    logger.warning("send_photo xatosi (channel=%s): %s", channel_id, photo_err)
 
-                if file_path and os.path.exists(file_path):
-                    res = send_photo(channel_id, file_path, caption=caption, reply_markup=reply_markup)
-                else:
-                    payment.screenshot.open('rb')
-                    photo_bytes = payment.screenshot.read()
-                    res = send_photo(channel_id, photo_bytes, caption=caption, reply_markup=reply_markup)
-            except Exception as photo_err:
-                logger.warning("send_photo xatosi: %s", photo_err)
+            if not res.get('ok'):
+                logger.info(
+                    "Rasm yuborilmadi yoki xato berdi (channel=%s), send_message orqali yuborilmoqda...",
+                    channel_id,
+                )
+                res = send_message(channel_id, caption, reply_markup=reply_markup)
 
-        # Agar rasm orqali yuborilmagan bo'lsa (yoki xato bersa), albatta matnli xabarni yuboramiz
-        if not res.get('ok'):
-            logger.info("Rasm yuborilmadi yoki xato berdi, send_message orqali yuborilmoqda...")
-            res = send_message(channel_id, caption, reply_markup=reply_markup)
+            if res.get('ok'):
+                any_sent = True
+                logger.info(
+                    "To'lov xabari kanalga muvaffaqiyatli yuborildi: payment_id=%s, channel=%s",
+                    payment.id, channel_id,
+                )
+            else:
+                logger.warning(
+                    "To'lov xabarini Telegram kanalga yuborishda xatolik (channel=%s): %s",
+                    channel_id, res,
+                )
 
-        if not res.get('ok'):
-            logger.warning("To'lov xabarini Telegram kanalga yuborishda xatolik: %s", res)
-            return False
-
-        logger.info("To'lov xabari kanalga muvaffaqiyatli yuborildi: payment_id=%s, result=%s", payment.id, res)
-        return True
+        return any_sent
     except Exception:
         logger.exception("send_payment_review_notification da kutilmagan xatolik yuz berdi")
         return False
@@ -139,7 +205,8 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
         return
 
     admin_username = admin_user.get('username')
-    admin_name = f"@{admin_username}" if admin_username else (admin_user.get('first_name') or 'Admin')
+    raw_admin_name = f"@{admin_username}" if admin_username else (admin_user.get('first_name') or 'Admin')
+    admin_name = html.escape(str(raw_admin_name))
 
     if payment.status == 'approved':
         answer_callback(callback_query_id, "⚠️ Bu to'lov allaqachon tasdiqlangan!")
@@ -148,48 +215,73 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
         answer_callback(callback_query_id, "⚠️ Bu to'lov allaqachon rad etilgan!")
         return
 
-    test_title = payment.test.title if payment.test else (payment.plan.name if payment.plan else "Mock Test")
+    is_course_or_pro = bool(payment.plan and payment.plan.plan_type == 'lessons' and not payment.test_id)
+    raw_test_title = (
+        payment.test.title
+        if payment.test
+        else (payment.plan.name if payment.plan else "PRO Kurs / Mock Test")
+    )
+    test_title = html.escape(str(raw_test_title))
     amount_str = f"{payment.amount:,.0f}".replace(",", " ")
-    user_full_name = f"{payment.profile.user.first_name} {payment.profile.user.last_name}".strip() or payment.profile.user.username
+    raw_user_name = (
+        f"{payment.profile.user.first_name} {payment.profile.user.last_name}".strip()
+        or payment.profile.user.username
+    )
+    user_full_name = html.escape(str(raw_user_name))
     now_time = timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M")
 
     if action_type == 'approve':
         payment.status = 'approved'
         payment.reviewed_at = timezone.now()
-        payment.admin_note = f"Telegram kanalida {admin_name} tomonidan tasdiqlandi."
+        payment.admin_note = f"Telegram kanalida {raw_admin_name} tomonidan tasdiqlandi."
         payment.apply_to_profile()
         payment.save()
 
-        answer_callback(callback_query_id, f"✅ To'lov #{payment.id} tasdiqlandi! Test ochildi.")
+        answer_callback(callback_query_id, f"✅ To'lov #{payment.id} tasdiqlandi!")
 
-        # Kanaldagi xabarni yangilash (tugmalarni olib tashlash)
+        unlocked_note = (
+            "🔓 <b>O'quvchiga PRO obuna va barcha dars/testlar muvaffaqiyatli ochildi!</b>"
+            if is_course_or_pro
+            else "🔓 <b>O'quvchiga mock test muvaffaqiyatli ochildi!</b>"
+        )
         approved_caption = (
             f"🧾 <b>TO'LOV #{payment.id} — TASDIQLANDI ✅</b>\n\n"
             f"👤 <b>O'quvchi:</b> {user_full_name}\n"
-            f"🎯 <b>Test / Reja:</b> {test_title}\n"
+            f"🎯 <b>Kurs / Reja:</b> {test_title}\n"
             f"💰 <b>Summa:</b> {amount_str} so'm\n"
             f"✅ <b>Tasdiqlagan admin:</b> {admin_name}\n"
             f"⏰ <b>Tasdiqlangan vaqt:</b> {now_time}\n\n"
-            f"🔓 <b>O'quvchiga test muvaffaqiyatli ochildi!</b>"
+            f"{unlocked_note}"
         )
         update_channel_message(chat_id, message_id, approved_caption, reply_markup={'inline_keyboard': []})
 
         # O'quvchiga Telegram bot orqali xushxabar yuborish
         if payment.profile.telegram_id:
-            test_url = f"https://ilmildizi.uz/tests/{payment.test_id}" if payment.test_id else "https://ilmildizi.uz/tests"
-            student_msg = (
-                f"🎉 <b>Tabriklaymiz, to'lovingiz tasdiqlandi!</b>\n\n"
-                f"Sizga <b>«{test_title}»</b> mock testi muvaffaqiyatli ochildi.\n\n"
-                f"Hoziroq kirib testni boshlashingiz mumkin:\n"
-                f"👉 <a href='{test_url}'>{test_url}</a>\n\n"
-                f"Omad tilaymiz! 🚀"
-            )
+            if is_course_or_pro:
+                target_url = "https://ilmildizi.uz/dashboard"
+                student_msg = (
+                    f"🎉 <b>Tabriklaymiz, to'lovingiz tasdiqlandi!</b>\n\n"
+                    f"Sizning <b>«{test_title}»</b> obunangiz muvaffaqiyatli faollashtirildi. "
+                    f"Barcha PRO darslar, kurslar va mock testlar siz uchun ochildi!\n\n"
+                    f"Hoziroq kirib o'qishni boshlashingiz mumkin:\n"
+                    f"👉 <a href='{target_url}'>{target_url}</a>\n\n"
+                    f"Omad tilaymiz! 🚀"
+                )
+            else:
+                test_url = f"https://ilmildizi.uz/tests/{payment.test_id}" if payment.test_id else "https://ilmildizi.uz/tests"
+                student_msg = (
+                    f"🎉 <b>Tabriklaymiz, to'lovingiz tasdiqlandi!</b>\n\n"
+                    f"Sizga <b>«{test_title}»</b> muvaffaqiyatli ochildi.\n\n"
+                    f"Hoziroq kirib testni boshlashingiz mumkin:\n"
+                    f"👉 <a href='{test_url}'>{test_url}</a>\n\n"
+                    f"Omad tilaymiz! 🚀"
+                )
             send_message(payment.profile.telegram_id, student_msg)
 
     elif action_type == 'reject':
         payment.status = 'rejected'
         payment.reviewed_at = timezone.now()
-        payment.admin_note = f"Telegram kanalida {admin_name} tomonidan rad etildi."
+        payment.admin_note = f"Telegram kanalida {raw_admin_name} tomonidan rad etildi."
         payment.save()
 
         answer_callback(callback_query_id, f"❌ To'lov #{payment.id} rad etildi.")
@@ -197,11 +289,11 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
         rejected_caption = (
             f"🧾 <b>TO'LOV #{payment.id} — RAD ETILDI ❌</b>\n\n"
             f"👤 <b>O'quvchi:</b> {user_full_name}\n"
-            f"🎯 <b>Test / Reja:</b> {test_title}\n"
+            f"🎯 <b>Kurs / Reja:</b> {test_title}\n"
             f"💰 <b>Summa:</b> {amount_str} so'm\n"
             f"❌ <b>Rad etgan admin:</b> {admin_name}\n"
             f"⏰ <b>Vaqt:</b> {now_time}\n\n"
-            f"<i>Chek rad etildi, test ochilmadi.</i>"
+            f"<i>Chek rad etildi, ruxsat ochilmadi.</i>"
         )
         update_channel_message(chat_id, message_id, rejected_caption, reply_markup={'inline_keyboard': []})
 

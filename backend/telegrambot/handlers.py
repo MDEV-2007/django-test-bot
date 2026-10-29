@@ -247,13 +247,18 @@ def handle_referral_info(chat_id, tg_user):
 
 def handle_premium_menu(chat_id):
     from premium.models import SubscriptionPlan
-    from premium.views import seed_plans_if_needed
+    from premium.services import seed_plans_if_needed
 
     seed_plans_if_needed()
     plans = SubscriptionPlan.objects.filter(is_active=True)
-    buttons = [[{'text': f"{plan.name} — {plan.price:.0f} so'm",
+    buttons = [[{'text': f"💎 {plan.name} — {plan.price:,.0f} so'm".replace(',', ' '),
                  'callback_data': f"buy_plan_{plan.id}"}] for plan in plans]
-    send_message(chat_id, "Qaysi rejani xohlaysiz?", reply_markup={'inline_keyboard': buttons})
+    send_message(
+        chat_id,
+        "💎 <b>PRO Kurslar va Mock Testlar tariflari:</b>\n\n"
+        "O'zingizga mos rejani tanlang va to'lov cheki skrinshotini shu yerga yuboring:",
+        reply_markup={'inline_keyboard': buttons},
+    )
 
 
 def handle_buy_plan(chat_id, tg_user, plan_id):
@@ -269,28 +274,48 @@ def handle_buy_plan(chat_id, tg_user, plan_id):
                            status='awaiting_screenshot', source='bot')
     send_message(
         chat_id,
-        f"Reja: {plan.name}\nSumma: {plan.price:.0f} so'm\n\n"
-        f"Karta raqami: {settings.PREMIUM_CARD_NUMBER}\n"
-        f"Karta egasi: {settings.PREMIUM_CARD_HOLDER}\n\n"
-        "To'lovni amalga oshirib, to'lov skrinshotini shu chatga rasm qilib yuboring. "
-        "Admin tekshirib chiqqach, premium avtomatik ochiladi.",
+        f"🎯 <b>Tanlangan reja:</b> {plan.name}\n"
+        f"💰 <b>To'lov summasi:</b> {plan.price:,.0f} so'm\n\n"
+        f"💳 <b>Karta raqami:</b> <code>{settings.PREMIUM_CARD_NUMBER}</code>\n"
+        f"👤 <b>Karta egasi:</b> {settings.PREMIUM_CARD_HOLDER}\n\n"
+        "📸 To'lovni amalga oshirib, <b>to'lov cheki (skrinshot) rasmini</b> shu chatga yuboring. "
+        "Admin tekshirib chiqqach, kurs / premium obunangiz avtomatik ochiladi.",
     )
 
 
-def handle_photo(chat_id, tg_user, photo_sizes):
-    from premium.models import Payment
+def handle_photo(chat_id, tg_user, photo_sizes, file_id_override=None):
+    from premium.models import Payment, SubscriptionPlan
+    from premium.services import seed_plans_if_needed
 
     profile = get_or_create_profile(tg_user)
     payment = (Payment.objects
                .filter(profile=profile, status='awaiting_screenshot')
                .order_by('-created_at').first())
     if not payment:
-        send_message(chat_id, "Hozircha kutilayotgan to'lov topilmadi. "
-                              "Avval /start orqali premium sotib olishni boshlang.")
+        # Agar o'quvchi saytda kartani ko'rib, to'g'ridan-to'g'ri botga chek rasm yuborgan bo'lsa,
+        # uni rad etmasdan avtomatik Payment yaratib kanalga yuboramiz.
+        seed_plans_if_needed()
+        default_plan = (
+            SubscriptionPlan.objects.filter(is_active=True, plan_type='lessons').order_by('price').first()
+            or SubscriptionPlan.objects.filter(is_active=True).first()
+        )
+        if not default_plan:
+            send_message(chat_id, "Hozircha faol tarif topilmadi. /start buyrug'ini bosing.")
+            return
+        payment = Payment.objects.create(
+            profile=profile,
+            plan=default_plan,
+            amount=default_plan.price,
+            status='awaiting_screenshot',
+            source='bot',
+        )
+
+    target_file_id = file_id_override or (photo_sizes[-1]['file_id'] if photo_sizes else None)
+    if not target_file_id:
+        send_message(chat_id, "Rasmni o'qib bo'lmadi, qaytadan yuboring.")
         return
 
-    largest = photo_sizes[-1]  # Telegram sends smallest -> largest
-    result = download_file(largest['file_id'])
+    result = download_file(target_file_id)
     if not result:
         send_message(chat_id, "Rasmni yuklab bo'lmadi, qaytadan urinib ko'ring.")
         return
@@ -300,8 +325,12 @@ def handle_photo(chat_id, tg_user, photo_sizes):
     payment.status = 'pending'
     payment.save()
 
-    send_message(chat_id, "Skrinshotingiz qabul qilindi! "
-                          "Admin tekshirib chiqqach, test / premium avtomatik ochiladi.")
+    send_message(
+        chat_id,
+        "✅ <b>To'lov chekingiz qabul qilindi!</b>\n\n"
+        "Moderatorlarimiz 5–15 daqiqa ichida tekshirib tasdiqlaydi va "
+        "PRO kurs / test ruxsatingiz avtomatik ochiladi.",
+    )
     try:
         from .payment_review import send_payment_review_notification
         if not send_payment_review_notification(payment):
@@ -365,7 +394,7 @@ def process_update(update):
         if data == 'premium_menu':
             handle_premium_menu(chat_id)
         elif data == 'referral_info':
-            handle_referral_info(chat_id, cq['from'])
+            handle_referral_info(chat_id, tg_user=cq['from'])
         elif data == 'main_menu':
             handle_start(chat_id, cq['from'])
         elif data.startswith('buy_plan_'):
@@ -376,9 +405,16 @@ def process_update(update):
     if not msg:
         return
     chat_id = msg['chat']['id']
-    tg_user = msg['from']
-
+    chat_type = msg.get('chat', {}).get('type', 'private')
+    tg_user = msg.get('from') or {}
     text = msg.get('text', '')
+
+    # Guruh va kanallardagi oddiy yozishmalarga bot javob bermasligi kerak
+    if chat_type != 'private':
+        if text.startswith('/myid'):
+            send_message(chat_id, f"Ushbu guruh/kanal ID raqami: <code>{chat_id}</code>")
+        return
+
     # /start ning o'zi gate'ni ichida bajaradi (profil + referal avval yaratilishi kerak);
     # qolgan hamma narsa shu yerda to'xtatiladi.
     if not text.startswith('/start') and gate_blocks(chat_id, tg_user):
@@ -387,6 +423,14 @@ def process_update(update):
     if 'photo' in msg:
         handle_photo(chat_id, tg_user, msg['photo'])
         return
+
+    if 'document' in msg:
+        doc = msg['document']
+        mime = (doc.get('mime_type') or '').lower()
+        fname = (doc.get('file_name') or '').lower()
+        if mime.startswith('image/') or fname.endswith(('.jpg', '.jpeg', '.png', '.webp', '.heic')):
+            handle_photo(chat_id, tg_user, [], file_id_override=doc.get('file_id'))
+            return
 
     if text.startswith('/start'):
         # Deep link: t.me/<bot>?start=CODE arrives as the literal text "/start CODE".

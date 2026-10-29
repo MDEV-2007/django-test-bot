@@ -11,8 +11,13 @@ from PIL import Image, UnidentifiedImageError
 # straight to admin-account compromise. Confirmed exploitable in a security review before
 # this fix (an evil.svg with content_type spoofed to image/jpeg sailed through and was later
 # served back as Content-Type: image/svg+xml, inline, script intact).
-MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024  # 5 MB
-ALLOWED_IMAGE_FORMATS = {'JPEG': ('jpg', 'image/jpeg'), 'PNG': ('png', 'image/png'), 'WEBP': ('webp', 'image/webp')}
+MAX_SCREENSHOT_BYTES = 15 * 1024 * 1024  # 15 MB
+ALLOWED_IMAGE_FORMATS = {
+    'JPEG': ('jpg', 'image/jpeg'),
+    'MPO': ('jpg', 'image/jpeg'),
+    'PNG': ('png', 'image/png'),
+    'WEBP': ('webp', 'image/webp'),
+}
 
 
 def validate_screenshot(screenshot):
@@ -22,7 +27,7 @@ def validate_screenshot(screenshot):
     never trusts the client-supplied Content-Type or the uploaded filename's extension.
     """
     if screenshot.size > MAX_SCREENSHOT_BYTES:
-        return "Rasm hajmi juda katta (maksimal 5 MB). Kichikroq skrinshot yuklang.", None
+        return "Rasm hajmi juda katta (maksimal 15 MB). Kichikroq skrinshot yuklang.", None
     try:
         screenshot.seek(0)
         with Image.open(screenshot) as img:

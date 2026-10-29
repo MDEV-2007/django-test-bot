@@ -81,7 +81,11 @@ def send_message(chat_id, text, reply_markup=None, parse_mode='HTML'):
         kwargs['parse_mode'] = parse_mode
     if reply_markup:
         kwargs['reply_markup'] = json.dumps(reply_markup) if isinstance(reply_markup, dict) else reply_markup
-    return api_call('sendMessage', **kwargs)
+    res = api_call('sendMessage', **kwargs)
+    if not res.get('ok') and parse_mode and 'parse' in str(res.get('description', '')).lower():
+        kwargs.pop('parse_mode', None)
+        res = api_call('sendMessage', **kwargs)
+    return res
 
 
 def answer_callback(callback_query_id, text=None):
@@ -114,9 +118,6 @@ def send_photo(chat_id, photo, caption=None, reply_markup=None, parse_mode='HTML
         return {'ok': False}
 
     import os
-    from django.core.cache import cache
-    if cache.get(_DOWN_KEY):
-        return {'ok': False, 'description': 'telegram api unreachable'}
 
     data = {'chat_id': str(chat_id)}
     if caption:
