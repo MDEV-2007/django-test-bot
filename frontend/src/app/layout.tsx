@@ -10,33 +10,17 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import TelegramProvider from "@/components/TelegramProvider";
 import SubscriptionGate from "@/components/SubscriptionGate";
 
-/* Uch shriftli tizim (UI_UX_ANALIZ_VA_REJA.md, 2.1-bo'lim):
-   - Plus Jakarta Sans — butun interfeys matni. Inter'ga nisbatan x-height'i baland,
-     shuning uchun mayda o'lchamda ham aniq o'qiladi.
-   - Bricolage Grotesque — sarlavhalar ("brend ovozi"). Ilgari serif Newsreader edi,
-     u qisqa qalin sarlavhalarda bo'shashib ko'rinardi.
-   - Geist Mono — raqamlar (XP, ball, taymer, ELO).
-   `latin-ext` subset MAJBURIY: o'zbek lotinidagi ʻ / ʼ / ō belgilari shu subsetda. */
 const sans = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext"], variable: "--font-sans", display: "swap" });
 const display = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable: "--font-voice", display: "swap" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
-/* Telegram Mini App / mobil: `viewport-fit=cover` bo'lmasa `env(safe-area-inset-*)`
-   qiymatlari doim 0 qaytadi va pastki tab-bar telefonning "home indicator" chizig'i
-   ostida qolib ketadi. `maximumScale` cheklanmaydi — bu qulaylikni buzadi. */
 export const viewport: Viewport = {
-  themeColor: '#F8FAFC',
+  themeColor: '#F2F2F7',
   viewportFit: 'cover',
   width: 'device-width',
   initialScale: 1,
 };
 
-/* `metadataBase` bo'lmasa Next nisbiy og'zaki (canonical, og:image) manzillarni to'liq
-   URL'ga aylantira olmaydi va ogohlantirish beradi.
-
-   Sukut bo'yicha NOINDEX: saytning deyarli barcha sahifasi login ortida va robot u yerda
-   faqat bo'sh qobiqni ko'radi. Ochiq sahifalar (landing) o'z `metadata` sida indekslashni
-   ochiq yoqadi. */
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz'),
   title: {
@@ -51,9 +35,6 @@ export const metadata: Metadata = {
   ],
   applicationName: 'IlmIldizi',
   robots: { index: true, follow: true },
-  // Havola ulashilganda (Telegram, ijtimoiy tarmoq) ko'rinadigan oldi rasm. `icon.png`
-  // va `apple-icon.png` ni Next.js app/ ichidan o'zi topadi, og:image esa aniq
-  // ko'rsatilishi kerak.
   openGraph: {
     type: 'website',
     siteName: 'IlmIldizi',
@@ -67,23 +48,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="uz" suppressHydrationWarning className={`h-full antialiased ${sans.variable} ${display.variable} ${mono.variable}`}>
       <body className="min-h-full flex flex-col">
-        {/* Tema birinchi bo'yoqdan oldin qo'llanadi: login/register/telegram barcha
-            sahifalarda sukut bo'yicha yorug' (light) rejimda chiziladi. */}
         <Script id="ilm-theme" strategy="beforeInteractive">
-          {`(function(){try{var h=window.location.hash||'';var isTg=(h.indexOf('tgWebAppData')!==-1||h.indexOf('tgWebAppPlatform')!==-1||window.TelegramWebviewProxy);if(isTg){document.documentElement.dataset.tg='on';}var saved=localStorage.getItem('ilm_theme_v2')||localStorage.getItem('ilm_theme');var isDark=false;if(saved==='dark'){isDark=true;}else if(saved==='light'){isDark=false;}else if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.colorScheme==='dark'){isDark=true;}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){isDark=true;}var theme=isDark?'dark':'light';document.documentElement.dataset.theme=theme;if(isDark){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`}
+          {`(function(){try{var h=window.location.hash||'';var s=window.location.search||'';var isTg=(h.indexOf('tgWebAppData')!==-1||h.indexOf('tgWebAppPlatform')!==-1||h.indexOf('tgWebAppThemeParams')!==-1||s.indexOf('tgWebAppData')!==-1||window.TelegramWebviewProxy||window.TelegramWebview||sessionStorage.getItem('ilm_tg_env')==='1');if(isTg){document.documentElement.dataset.tg='on';sessionStorage.setItem('ilm_tg_env','1');}var saved=localStorage.getItem('ilm_theme_v3');var isDark=false;if(saved==='dark'){isDark=true;}else if(saved==='light'){isDark=false;}else if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.colorScheme){isDark=(window.Telegram.WebApp.colorScheme==='dark');}else if(h.indexOf('tgWebAppThemeParams')!==-1){try{var m=h.match(/tgWebAppThemeParams=([^&]+)/);if(m&&m[1]){var p=JSON.parse(decodeURIComponent(m[1]));if(p&&p.bg_color){var hex=p.bg_color.replace('#','');if(hex.length===6){var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);if((r*0.299+g*0.587+b*0.114)<128){isDark=true;}}}}}catch(e){}}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){isDark=true;}var theme=isDark?'dark':'light';document.documentElement.dataset.theme=theme;if(isDark){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');if(document.body){document.body.classList.add('dark');}}else{document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');if(document.body){document.body.classList.remove('dark');}}}catch(e){}})();`}
         </Script>
         <ServiceWorkerRegister />
-        {/* Telegram Mini App qobig'i. Oddiy brauzerda hech narsa qilmaydi —
-            SDK ham yuklanmaydi (qarang: lib/telegram.ts). */}
         <TelegramProvider />
-        {/* shadcn'ning Tooltip'i o'z provayderini o'ramaydi — Radix uni yuqorida talab
-            qiladi, shuning uchun bir marta shu yerda o'rnatiladi. */}
         <MotionProvider>
           <TooltipProvider delayDuration={200}>
             <AuthProvider>
               {children}
-              {/* Majburiy kanal obunasi — kirgan foydalanuvchi obuna bo'lmagan
-                  bo'lsagina butun ekranni yopadi (qarang: SubscriptionGate). */}
               <SubscriptionGate />
             </AuthProvider>
           </TooltipProvider>

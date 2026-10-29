@@ -21,8 +21,12 @@ import {
   BookOpen,
   Film,
   ChevronRight,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
+import { useTheme } from '@/hooks/useTheme';
+import { tgHaptic } from '@/lib/telegram';
 import { useFeatureFlags } from '@/lib/features';
 import { prefetchApi } from '@/lib/api-cache';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
@@ -98,6 +102,7 @@ export default function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { user: storeUser, logout } = useAuthStore();
+  const { isDark, toggleTheme } = useTheme();
   const user = propUser || storeUser;
   const handleLogout = propLogout || logout;
   const { isEnabled, refresh } = useFeatureFlags();
@@ -263,8 +268,44 @@ export default function Sidebar({
       </div>
 
       {/* 3. APPLE ID / ICLOUD STYLE USER PROFILE FOOTER */}
+      <div className="pt-3 border-t border-border mt-4 space-y-2.5">
+        {/* iOS Control Center Quick Theme Switch inside Sidebar / Mobile Drawer */}
+        <button
+          type="button"
+          onClick={() => {
+            tgHaptic('select');
+            toggleTheme();
+          }}
+          className="ios-spring flex w-full items-center justify-between rounded-[16px] border border-border bg-background/60 px-3 py-2.5 text-left transition-colors hover:bg-muted/70 cursor-pointer"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-[9px] bg-[#5856D6] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
+              {isDark ? <Sun className="size-4 text-[#FFD60A]" /> : <Moon className="size-4" />}
+            </span>
+            <div>
+              <p className="text-xs font-bold text-foreground">Tungi rejim (Dark Mode)</p>
+              <p className="text-[10px] font-medium text-muted-foreground">
+                {isDark ? 'iOS Dark OLED faol' : "iOS Light faol"}
+              </p>
+            </div>
+          </div>
+          <span
+            className={cn(
+              'relative inline-flex h-[24px] w-[42px] shrink-0 items-center rounded-full p-[2px] transition-colors duration-200',
+              isDark ? 'bg-[#34C759]' : 'bg-[#E5E5EA] dark:bg-[#39393D]'
+            )}
+          >
+            <span
+              className={cn(
+                'size-[20px] rounded-full bg-white shadow-xs transition-transform duration-200',
+                isDark ? 'translate-x-[18px]' : 'translate-x-0'
+              )}
+            />
+          </span>
+        </button>
+
       {user && (
-        <div className="pt-4 border-t border-border mt-4">
+        <div>
           <div className="rounded-[20px] border border-border bg-background/60 p-3 space-y-2.5 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <div
@@ -339,6 +380,7 @@ export default function Sidebar({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 

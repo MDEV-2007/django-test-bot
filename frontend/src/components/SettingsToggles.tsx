@@ -4,20 +4,20 @@ import { useEffect, useState } from 'react';
 import { Moon, Volume2 } from 'lucide-react';
 import { isAudioEnabled, setAudioEnabled, soundFX } from '@/lib/soundFX';
 import { useTheme } from '@/hooks/useTheme';
+import { tgHaptic } from '@/lib/telegram';
 import { cn } from '@/lib/utils';
 
-/* Authentic iOS Settings Inset Grouped Switch Rows */
+/* Authentic iOS Settings Inset Grouped Switch Rows — works in both Web & Telegram Mini App */
 export function ThemeToggle() {
   const { isDark, toggleTheme } = useTheme();
-
-  if (typeof document !== 'undefined' && document.documentElement.dataset.tg === 'on') {
-    return null;
-  }
 
   return (
     <button
       type="button"
-      onClick={toggleTheme}
+      onClick={() => {
+        tgHaptic('select');
+        toggleTheme();
+      }}
       className="flex min-h-[52px] w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer"
     >
       <div className="flex items-center gap-3">
@@ -27,7 +27,7 @@ export function ThemeToggle() {
         <div>
           <p className="text-[14px] font-semibold text-foreground">Tungi rejim (Dark Mode)</p>
           <p className="text-[11.5px] text-[#8E8E93]">
-            {isDark ? 'OLED qora mavzu faol' : 'iOS yorug\' mavzu faol'}
+            {isDark ? 'OLED qora mavzu faol' : "iOS yorug' mavzu faol"}
           </p>
         </div>
       </div>
@@ -61,6 +61,7 @@ export function AudioToggle() {
     const next = !enabled;
     setEnabled(next);
     setAudioEnabled(next);
+    tgHaptic('select');
     if (next) soundFX.click();
   }
 

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   getWebApp, isTelegramEnv, loadTelegramSdk, markTelegramReady, useTelegramBackButton,
 } from '@/lib/telegram';
+import { applyDomTheme, THEME_STORAGE_KEY, type AppTheme } from '@/hooks/useTheme';
 
 /* Telegram Mini App qobig'i (Apple iOS 18 Light #F2F2F7 & Dark #000000 sinxronizatsiyasi bilan). */
 export default function TelegramProvider() {
@@ -35,40 +36,31 @@ export default function TelegramProvider() {
       wa.onEvent('viewportChanged', applyViewport);
       cleanups.push(() => wa.offEvent('viewportChanged', applyViewport));
 
-      const applyTheme = () => {
-        let isDark = false;
-        try {
-          const manual = localStorage.getItem('ilm_theme_v2') || localStorage.getItem('ilm_theme');
-          if (manual === 'dark') isDark = true;
-          else if (manual === 'light') isDark = false;
-          else isDark = (wa.colorScheme === 'dark');
-        } catch {
-          isDark = (wa.colorScheme === 'dark');
-        }
-
-        const theme = isDark ? 'dark' : 'light';
-        document.documentElement.dataset.theme = theme;
-        if (isDark) {
-          document.documentElement.classList.add('dark');
+      /* Mavzu sinxronizatsiyasi:
+         1. Agar foydalanuvchi yangi `ilm_theme_v3` kaliti orqali o'zi mavzuni tanlagan bo'lsa, o'shani oladi.
+         2. Aks holda Telegram'ning o'z mavzusi (`wa.colorScheme === 'dark'`) bilan avtomatik moslashadi. */
+      const resolveAndApplyTheme = (fromTelegramEvent = false) => {
+        let target: AppTheme = wa.colorScheme === 'dark' ? 'dark' : 'light';
+        if (!fromTelegramEvent) {
+          try {
+            const manual = localStorage.getItem(THEME_STORAGE_KEY);
+            if (manual === 'dark' || manual === 'light') {
+              target = manual;
+            }
+          } catch {}
         } else {
-          document.documentElement.classList.remove('dark');
+          // Foydalanuvchi Telegram ilovasining o'zida mavzuni almashtirganda darhol moslashamiz
+          try {
+            localStorage.setItem(THEME_STORAGE_KEY, target);
+          } catch {}
         }
-
-        try {
-          if (isDark) {
-            wa.setHeaderColor?.('#000000');
-            wa.setBackgroundColor?.('#000000');
-            (wa as unknown as { setBottomBarColor?: (c: string) => void }).setBottomBarColor?.('#000000');
-          } else {
-            wa.setHeaderColor?.('#F2F2F7');
-            wa.setBackgroundColor?.('#F2F2F7');
-            (wa as unknown as { setBottomBarColor?: (c: string) => void }).setBottomBarColor?.('#F2F2F7');
-          }
-        } catch { /* eski versiya */ }
+        applyDomTheme(target);
       };
-      applyTheme();
-      wa.onEvent('themeChanged', applyTheme);
-      cleanups.push(() => wa.offEvent('themeChanged', applyTheme));
+
+      resolveAndApplyTheme(false);
+      const onThemeChanged = () => resolveAndApplyTheme(true);
+      wa.onEvent('themeChanged', onThemeChanged);
+      cleanups.push(() => wa.offEvent('themeChanged', onThemeChanged));
 
       if (wa.isVersionAtLeast('7.7')) {
         try { wa.disableVerticalSwipes?.(); } catch { /* noop */ }

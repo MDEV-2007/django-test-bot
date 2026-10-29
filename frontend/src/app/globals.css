@@ -670,9 +670,31 @@ html[data-tg='on'].dark,
 html[data-tg='on'][data-theme='dark'],
 html[data-tg='on'].dark body,
 html[data-tg='on'][data-theme='dark'] body {
-  color-scheme: dark;
-  background-color: #000000;
-  color: #FFFFFF;
+  color-scheme: dark !important;
+  background-color: #000000 !important;
+  color: #F5F5F7 !important;
+  --bg-page: #000000 !important;
+  --background: #000000 !important;
+  --foreground: #F5F5F7 !important;
+  --card: #1C1C1E !important;
+  --card-foreground: #F5F5F7 !important;
+  --popover: #1C1C1E !important;
+  --popover-foreground: #F5F5F7 !important;
+  --surface-card: #1C1C1E !important;
+  --surface-card-soft: #1C1C1E !important;
+  --surface-card-medium: #2C2C2E !important;
+  --surface-card-strong: #2C2C2E !important;
+  --surface-input: rgba(118, 118, 128, 0.24) !important;
+  --surface-hover: rgba(118, 118, 128, 0.16) !important;
+  --muted: rgba(118, 118, 128, 0.24) !important;
+  --muted-foreground: #8E8E93 !important;
+  --border: rgba(84, 84, 88, 0.36) !important;
+  --border-card: rgba(84, 84, 88, 0.36) !important;
+  --border-soft: rgba(84, 84, 88, 0.28) !important;
+  --border-strong: rgba(84, 84, 88, 0.55) !important;
+  --text-primary: #F5F5F7 !important;
+  --text-secondary: #D1D1D6 !important;
+  --text-muted: #8E8E93 !important;
 }
 
 html[data-tg='on'] body {
