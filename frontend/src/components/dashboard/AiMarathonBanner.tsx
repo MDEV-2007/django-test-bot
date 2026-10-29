@@ -73,7 +73,7 @@ export default function AiMarathonBanner({
       title: 'Xatolarni Tozalash',
       subtitle: "Aqlli daftarchadagi xatolarni yanchish",
       rewardText: '+30 XP',
-      href: '/tests/mistakes',
+      href: '/tests/revision',
       isCompleted: step2Done,
       actionText: "Xatolarni Yopish",
     },
@@ -157,7 +157,7 @@ export default function AiMarathonBanner({
             </span>
           </div>
           <Button asChild size="sm" variant="outline" className="rounded-xl h-7 px-3 text-xs font-bold border-rose-500/40 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 shrink-0">
-            <Link href="/tests/mistakes">Tozalash</Link>
+            <Link href="/tests/revision">Tozalash</Link>
           </Button>
         </motion.div>
       )}
