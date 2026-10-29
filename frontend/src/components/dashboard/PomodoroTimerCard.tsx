@@ -8,6 +8,9 @@ import {
   RotateCcw,
   Clock,
   ArrowRight,
+  CloudRain,
+  BookOpen,
+  Flame,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -205,9 +208,9 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
           <span className="text-xs font-semibold text-muted-foreground">Fon tovushi:</span>
           <div className="flex items-center gap-1.5">
             {[
-              { id: 'rain', label: "Yomg'ir", icon: '🌧️' },
-              { id: 'library', label: 'Kutubxona', icon: '📚' },
-              { id: 'fire', label: 'Olov', icon: '🔥' },
+              { id: 'rain', label: "Yomg'ir", icon: CloudRain, tone: 'sky' as const },
+              { id: 'library', label: 'Kutubxona', icon: BookOpen, tone: 'indigo' as const },
+              { id: 'fire', label: 'Olov', icon: Flame, tone: 'amber' as const },
             ].map((snd) => {
               const isSelected = activeSound === snd.id && !soundMuted;
               return (
@@ -219,14 +222,14 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                     setSoundMuted(false);
                   }}
                   className={cn(
-                    'ios-spring px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5',
+                    'ios-spring pl-1.5 pr-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5',
                     isSelected
                       ? 'bg-primary text-primary-foreground shadow-2xs'
                       : 'bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground'
                   )}
                   title={`${snd.label} fon tovushini yoqish`}
                 >
-                  <span className="text-sm">{snd.icon}</span>
+                  <PremiumIcon icon={snd.icon} tone={snd.tone} size="2xs" solid />
                   <span>{snd.label}</span>
                 </button>
               );

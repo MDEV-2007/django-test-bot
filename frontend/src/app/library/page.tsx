@@ -23,6 +23,7 @@ import AppShell from '@/components/AppShell';
 import { useApiQuery } from '@/lib/api-cache';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -175,9 +176,7 @@ export default function LibraryPage() {
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="max-w-2xl space-y-2.5">
               <div className="inline-flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#FF9500] text-white shadow-xs">
-                  <BookOpen className="size-3.5" />
-                </span>
+                <PremiumIcon icon={BookOpen} tone="amber" size="xs" solid />
                 <span className="text-[12px] font-bold uppercase tracking-wider text-[#FF9500]">
                   Apple Books uslubidagi Raqamli Kutubxona
                 </span>
@@ -360,9 +359,7 @@ export default function LibraryPage() {
           </div>
         ) : books.length === 0 ? (
           <div className="text-center py-16 rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] space-y-3">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-[18px] bg-[#007AFF]/12 text-[#007AFF]">
-              <BookOpen className="size-7" />
-            </div>
+            <PremiumIcon icon={BookOpen} tone="sky" size="xl" solid className="mx-auto" />
             <h3 className="text-[18px] font-bold text-slate-900 dark:text-white">
               Hech qanday kitob topilmadi
             </h3>

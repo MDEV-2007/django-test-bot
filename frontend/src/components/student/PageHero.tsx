@@ -1,6 +1,7 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 /* iOS 18 Large Title & Smart Stack Header Widget */
@@ -82,14 +83,12 @@ export default function PageHero({
           {eyebrow && (
             <div className="inline-flex items-center gap-2">
               {EyebrowIcon && (
-                <span
-                  className={cn(
-                    'flex size-6 items-center justify-center rounded-[7px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]',
-                    t.iconBg
-                  )}
-                >
-                  <EyebrowIcon className="size-3.5 stroke-[2.2]" />
-                </span>
+                <PremiumIcon
+                  icon={EyebrowIcon}
+                  tone={(tone === 'accent' ? 'sky' : tone) as PremiumIconTone}
+                  size="xs"
+                  solid
+                />
               )}
               <span
                 className={cn(

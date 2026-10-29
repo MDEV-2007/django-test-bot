@@ -15,6 +15,7 @@ import CardMotif, { type MotifKey } from '@/components/student/CardMotif';
 import Reveal from '@/components/motion/Reveal';
 import StatNumber from '@/components/motion/StatNumber';
 import PageHero from '@/components/student/PageHero';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -124,12 +125,10 @@ export default function ShopPage() {
           actions={data && (
             <Card className="gap-0 border-yellow-500/25 py-3">
               <CardContent className="flex items-center gap-3 px-4">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-yellow-500/12 text-yellow-400">
-                  <Coins className="size-5" />
-                </div>
+                <PremiumIcon icon={Coins} tone="gold" size="md" solid />
                 <div>
                   <p className="font-mono text-xs uppercase text-muted-foreground">Sizdagi tangalar</p>
-                  <p className="font-mono text-xl font-black tabular-nums text-yellow-400"><StatNumber value={data.coins} /></p>
+                  <p className="font-mono text-xl font-black tabular-nums text-[#FF9500]"><StatNumber value={data.coins} /></p>
                 </div>
               </CardContent>
             </Card>
@@ -171,10 +170,10 @@ export default function ShopPage() {
                   key={cat}
                   size="sm"
                   variant="outline"
-                  className={cn('shrink-0 rounded-full', activeTab === cat && 'chip-active')}
+                  className={cn('shrink-0 rounded-full gap-2 pl-1.5 pr-3.5', activeTab === cat && 'chip-active')}
                   onClick={() => setActiveTab(cat)}
                 >
-                  <Icon className="size-3.5" /> {cat}
+                  <PremiumIcon icon={Icon} tone="amber" size="2xs" solid /> {cat}
                 </Button>
               );
             })}
@@ -271,7 +270,7 @@ export default function ShopPage() {
         {data && items.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
-              <PackageOpen className="mx-auto mb-2 size-8 text-muted-foreground/50" />
+              <PremiumIcon icon={PackageOpen} tone="zinc" size="lg" className="mx-auto mb-2.5" />
               <p className="text-sm text-muted-foreground">Bu bo&apos;limda hozircha mahsulot yo&apos;q.</p>
             </CardContent>
           </Card>

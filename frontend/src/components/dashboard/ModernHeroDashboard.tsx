@@ -201,8 +201,8 @@ export function DailyGoalCard({
               fill="transparent"
             />
           </svg>
-          <div className="absolute flex flex-col items-center justify-center text-center select-none">
-            <span className="text-[10px]">🔥</span>
+          <div className="absolute flex flex-col items-center justify-center text-center select-none gap-0.5">
+            <Flame className="size-3.5 text-[#FF9500] fill-[#FF9500]" />
             <span className="text-xs font-extrabold font-mono text-foreground leading-none">
               {dailyGoals.current}/{dailyGoals.target}
             </span>

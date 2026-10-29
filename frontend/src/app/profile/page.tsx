@@ -24,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import CosmeticBadge from '@/components/student/CosmeticBadge';
 import VerifiedBadge from '@/components/ui/verified-badge';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import type { Cosmetics } from '@/lib/auth-store';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -54,11 +55,11 @@ type ProfileData = {
 };
 
 const RARITY_ICON: Record<string, LucideIcon> = { legendary: Crown, epic: Medal, rare: Flame, common: ScrollText };
-const RARITY_TONE: Record<string, string> = {
-  legendary: 'bg-[#FF9500] text-white shadow-[0_4px_12px_rgba(255,149,0,0.3)]',
-  epic: 'bg-[#AF52DE] text-white shadow-[0_4px_12px_rgba(175,82,222,0.3)]',
-  rare: 'bg-[#007AFF] text-white shadow-[0_4px_12px_rgba(0,122,255,0.3)]',
-  common: 'bg-[#34C759] text-white shadow-[0_4px_12px_rgba(52,199,89,0.25)]',
+const RARITY_TONE_KEY: Record<string, PremiumIconTone> = {
+  legendary: 'amber',
+  epic: 'purple',
+  rare: 'sky',
+  common: 'emerald',
 };
 
 const SHARE_TEXT = "IlmIldizi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!";
@@ -430,9 +431,7 @@ export default function ProfilePage() {
         {/* iOS Share Sheet Style Referral Card */}
         <div className="ios-card rounded-[24px] p-5 sm:p-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-3.5 text-center sm:text-left">
-            <span className="hidden sm:flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
-              <Gift className="size-5" />
-            </span>
+            <PremiumIcon icon={Gift} tone="sky" size="md" solid className="hidden sm:inline-flex" />
             <div>
               <h3 className="text-[15px] font-bold text-foreground">
                 Do&apos;stlarni taklif qiling va bonus tanga oling
@@ -466,9 +465,7 @@ export default function ProfilePage() {
         <div className="ios-card overflow-hidden rounded-[28px] p-6 sm:p-7 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-[12px] bg-[#34C759] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
-                <Sprout className="size-5" />
-              </span>
+              <PremiumIcon icon={Sprout} tone="emerald" size="md" solid />
               <div>
                 <h2 className="text-[18px] font-bold text-foreground leading-tight">
                   Shaxsiy Bilim Ildizingiz
@@ -502,7 +499,7 @@ export default function ProfilePage() {
                 <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 p-4 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[12px] font-semibold text-[#8E8E93]">Daraxt kuchi</span>
-                    <span className="text-sm">🌳</span>
+                    <PremiumIcon icon={Sprout} tone="emerald" size="2xs" solid />
                   </div>
                   <p className="text-[16px] font-bold text-foreground">
                     {p.level} ta mustahkam shox
@@ -515,7 +512,7 @@ export default function ProfilePage() {
                 <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 p-4 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[12px] font-semibold text-[#8E8E93]">Barglar zichligi</span>
-                    <span className="text-sm">🔥</span>
+                    <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
                   </div>
                   <p className="text-[16px] font-bold text-foreground">
                     {p.streak} kunlik yashillik
@@ -528,7 +525,7 @@ export default function ProfilePage() {
                 <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 p-4 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[12px] font-semibold text-[#8E8E93]">Tojdagi mevalar</span>
-                    <span className="text-sm">🍎</span>
+                    <PremiumIcon icon={Award} tone="rose" size="2xs" solid />
                   </div>
                   <p className="text-[16px] font-bold text-foreground">
                     {data.badges.length} ta oltin meva
@@ -556,7 +553,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="rounded-[18px] bg-[#34C759]/[0.08] border border-[#34C759]/20 p-3.5 text-[12.5px] text-foreground leading-relaxed flex items-start gap-2.5">
-                <span className="text-base leading-none pt-0.5">🌱</span>
+                <PremiumIcon icon={Sprout} tone="emerald" size="2xs" solid className="mt-0.5" />
                 <span>
                   <strong>Har bir yechilgan test</strong>, ko&apos;rilgan dars va tuzatilgan xato bu daraxt ildizini chuqurlashtirib, unga yangi shoxlar qo&apos;shadi.
                 </span>
@@ -570,9 +567,7 @@ export default function ProfilePage() {
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#FF9500] text-white">
-                  <Award className="size-4" />
-                </span>
+                <PremiumIcon icon={Award} tone="amber" size="xs" solid />
                 <span>Game Center Yutuqlari</span>
               </CardTitle>
               <span className="font-mono text-xs font-semibold text-[#8E8E93]">
@@ -589,9 +584,13 @@ export default function ProfilePage() {
                   <Tooltip key={idx}>
                     <TooltipTrigger asChild>
                       <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/60 p-4 text-center space-y-2.5 transition-all hover:scale-[1.02]">
-                        <div className={`mx-auto flex size-12 items-center justify-center rounded-[15px] ${RARITY_TONE[b.rarity] || RARITY_TONE.common}`}>
-                          <Icon className="size-6" />
-                        </div>
+                        <PremiumIcon
+                          icon={Icon}
+                          tone={RARITY_TONE_KEY[b.rarity] || 'emerald'}
+                          size="lg"
+                          solid
+                          className="mx-auto"
+                        />
                         <p className="text-[12.5px] font-bold text-foreground leading-tight">{b.name}</p>
                       </div>
                     </TooltipTrigger>
@@ -603,9 +602,7 @@ export default function ProfilePage() {
                 <Tooltip key={`locked-${b.name}`}>
                   <TooltipTrigger asChild>
                     <div className="rounded-[20px] border border-dashed border-black/[0.1] dark:border-white/[0.1] p-4 text-center space-y-2 opacity-65">
-                      <div className="mx-auto flex size-12 items-center justify-center rounded-[15px] bg-black/[0.05] dark:bg-white/[0.06] text-[#8E8E93]">
-                        <Lock className="size-5" />
-                      </div>
+                      <PremiumIcon icon={Lock} tone="zinc" size="lg" className="mx-auto" />
                       <p className="text-[12px] font-bold leading-tight text-[#8E8E93]">{b.name}</p>
                       <p className="line-clamp-2 text-[11px] leading-snug text-[#8E8E93]">{b.description}</p>
                     </div>
@@ -622,9 +619,7 @@ export default function ProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#007AFF] text-white">
-                  <FileCheck2 className="size-4" />
-                </span>
+                <PremiumIcon icon={FileCheck2} tone="sky" size="xs" solid />
                 <span>So&apos;nggi test natijalari</span>
               </CardTitle>
             </CardHeader>
@@ -660,9 +655,7 @@ export default function ProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#FF3B30] text-white">
-                  <Swords className="size-4" />
-                </span>
+                <PremiumIcon icon={Swords} tone="rose" size="xs" solid />
                 <span>So&apos;nggi Arena duellari</span>
               </CardTitle>
             </CardHeader>

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 export interface UniversityMajor {
@@ -140,16 +141,17 @@ export default function StudentAdmissionMatcher() {
     <div className="ios-card relative overflow-hidden rounded-[28px] p-5 sm:p-7 space-y-5 w-full">
       <div className="space-y-1.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Badge variant="outline" className="border-[#34C759]/30 bg-[#34C759]/10 text-[#34C759]">
-            <Sparkles className="size-3" /> OTM Qabul Kalkulyatori (2026)
-          </Badge>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#34C759]/30 bg-[#34C759]/10 px-2.5 py-1 text-xs font-bold text-[#34C759]">
+            <PremiumIcon icon={Sparkles} tone="emerald" size="2xs" />
+            <span>OTM Qabul Kalkulyatori (2026)</span>
+          </div>
 
           {realPredictedScore !== null && (
             <button
               onClick={handleApplyRealScore}
               className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#007AFF] hover:underline cursor-pointer"
             >
-              <Target className="size-3.5 shrink-0" />
+              <PremiumIcon icon={Target} tone="sky" size="2xs" />
               <span>
                 Sizning prognoz ballingiz: <strong className="font-mono">{realPredictedScore.toFixed(1)}</strong> (Qo&apos;llash)
               </span>

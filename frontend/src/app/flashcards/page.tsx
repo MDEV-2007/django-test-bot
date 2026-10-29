@@ -19,6 +19,7 @@ import { useFeatureFlags } from '@/lib/features';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 type FlashcardItem = {
@@ -251,9 +252,7 @@ export default function FlashcardsPage() {
             {/* ============================================================ */}
             {isCompleted ? (
               <div className="rounded-[32px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-6 sm:p-10 text-center space-y-6 shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
-                <div className="mx-auto flex size-16 items-center justify-center rounded-[20px] bg-gradient-to-b from-[#FF9500] to-[#FF7A00] text-white shadow-[0_8px_24px_rgba(255,149,0,0.3)]">
-                  <Trophy className="size-8" />
-                </div>
+                <PremiumIcon icon={Trophy} tone="amber" size="xl" solid className="mx-auto" />
 
                 <div className="space-y-1.5">
                   <h3 className="text-[22px] sm:text-[26px] font-extrabold tracking-[-0.025em] text-slate-900 dark:text-white">
@@ -452,10 +451,8 @@ export default function FlashcardsPage() {
                 ))}
               </div>
             ) : filteredDecks.length === 0 ? (
-              <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-12 text-center space-y-2">
-                <div className="mx-auto flex size-12 items-center justify-center rounded-[14px] bg-[#5856D6]/12 text-[#5856D6]">
-                  <Brain className="size-6" />
-                </div>
+              <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-12 text-center space-y-2.5">
+                <PremiumIcon icon={Brain} tone="indigo" size="lg" solid className="mx-auto" />
                 <p className="text-[16px] font-bold text-slate-900 dark:text-white">Bu fanda hozircha to&apos;plamlar yo&apos;q</p>
                 <p className="text-[13px] text-[#8E8E93]">Yuqoridan boshqa fanni tanlab ko&apos;ring.</p>
               </div>
@@ -510,9 +507,7 @@ export default function FlashcardsPage() {
             {/* iOS Smart Banner */}
             <div className="rounded-[24px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3.5 max-w-xl">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[#FF9500] text-white shadow-xs">
-                  <Flame className="size-5 fill-white" />
-                </div>
+                <PremiumIcon icon={Flame} tone="amber" size="md" solid />
                 <div className="space-y-0.5">
                   <p className="text-[15px] font-bold text-slate-900 dark:text-white">
                     Ilmiy qoida: Har kuni 5 daqiqa Flashcard!

@@ -17,6 +17,7 @@ import Sidebar from './Sidebar';
 import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
 import { BrandMark } from './BrandMark';
+import PremiumIcon from '@/components/ui/premium-icon';
 
 export default function AppShell({
   hideTopbarOnMobile = false,
@@ -129,9 +130,9 @@ export default function AppShell({
                       soundFX.click();
                       setStreakModalOpen(true);
                     }}
-                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 px-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
+                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 pl-1.5 pr-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
                   >
-                    <Flame className="size-3.5 fill-[#FF9500] text-[#FF9500]" />
+                    <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
                     <span className="font-mono">{user.streak || 0}</span>
                     <span className="hidden sm:inline text-[10px] font-semibold opacity-80">kun</span>
                   </button>
@@ -145,9 +146,9 @@ export default function AppShell({
                 <TooltipTrigger asChild>
                   <Link
                     href="/shop"
-                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 px-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
+                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                   >
-                    <Coins className="size-3.5 text-[#FF9500] fill-[#FFCC00]" />
+                    <PremiumIcon icon={Coins} tone="gold" size="2xs" solid />
                     <span className="font-mono">{(user.coins || 0).toLocaleString()}</span>
                   </Link>
                 </TooltipTrigger>
@@ -160,9 +161,9 @@ export default function AppShell({
                 <TooltipTrigger asChild>
                   <Link
                     href="/battles"
-                    className="ios-spring hidden sm:flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 px-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
+                    className="ios-spring hidden sm:flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                   >
-                    <Swords className="size-3.5 text-primary" />
+                    <PremiumIcon icon={Swords} tone="sky" size="2xs" solid />
                     <span className="font-mono">{user.elo_rating || 1200}</span>
                     <span className="text-[10px] text-muted-foreground font-semibold">ELO</span>
                   </Link>

@@ -145,8 +145,8 @@ export default function ModernTestCenter({
                 <span className="rounded-full bg-primary/12 px-3 py-0.5 text-[11px] font-bold text-primary">
                   {test.level}
                 </span>
-                <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-                  {test.isPriority && <Sparkles className="size-3.5 text-[#FF9500]" />}
+                <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                  {test.isPriority && <PremiumIcon icon={Sparkles} tone="amber" size="2xs" />}
                   <span>{test.tag}</span>
                 </span>
               </div>

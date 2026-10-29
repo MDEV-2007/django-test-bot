@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VerifiedBadge from '@/components/ui/verified-badge';
+import PremiumIcon from '@/components/ui/premium-icon';
 
 type AnswerMode = 'open' | 'closed' | 'mixed' | null;
 
@@ -409,9 +410,7 @@ export default function TestsPage() {
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#34C759] text-white shadow-[0_4px_12px_rgba(52,199,89,0.28)] transition-transform group-hover:scale-105">
-                <Shuffle className="size-5" />
-              </div>
+              <PremiumIcon icon={Shuffle} tone="emerald" size="md" solid />
               <div className="min-w-0">
                 <h3 className="text-[16px] sm:text-[17px] font-bold tracking-[-0.015em] text-slate-900 dark:text-white group-hover:text-[#34C759] transition-colors">
                   Tezkor Blits Test
@@ -731,8 +730,8 @@ export default function TestsPage() {
         </div>
 
         {data?.tests.length === 0 && (
-          <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] py-14 text-center space-y-2">
-            <FileCheck2 className="mx-auto mb-2 size-9 text-[#8E8E93]" />
+          <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] py-14 text-center space-y-2.5">
+            <PremiumIcon icon={FileCheck2} tone="zinc" size="lg" className="mx-auto" />
             <p className="text-[14px] font-semibold text-[#8E8E93]">
               {search ? `"${search}" bo'yicha test topilmadi.` : "Bu bo'limda hozircha test yo'q."}
             </p>

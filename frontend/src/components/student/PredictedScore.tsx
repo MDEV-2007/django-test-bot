@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 type Prediction = {
@@ -49,9 +50,7 @@ export default function PredictedScore() {
     return (
       <div className="ios-card rounded-[24px] p-5 sm:p-6 space-y-3.5">
         <div className="flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
-            <Target className="size-4" />
-          </span>
+          <PremiumIcon icon={Target} tone="sky" size="xs" solid />
           <p className="text-[15px] font-bold text-foreground">DTM ball bashorati</p>
         </div>
         <p className="text-[13.5px] text-[#8E8E93] leading-relaxed">
@@ -82,9 +81,7 @@ export default function PredictedScore() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
-              <Target className="size-4" />
-            </span>
+            <PremiumIcon icon={Target} tone="sky" size="xs" solid />
             <span className="text-[13px] font-bold uppercase tracking-wider text-[#8E8E93]">
               Taxminiy DTM balli
             </span>
@@ -118,8 +115,8 @@ export default function PredictedScore() {
 
       {weak.length > 0 && (
         <div className="space-y-2 border-t border-black/[0.06] dark:border-white/[0.08] pt-3.5">
-          <p className="flex items-center gap-1.5 text-[12px] font-bold text-[#FF3B30]">
-            <TrendingDown className="size-3.5" /> Ballni pasaytirayotgan mavzular
+          <p className="flex items-center gap-2 text-[12px] font-bold text-[#FF3B30]">
+            <PremiumIcon icon={TrendingDown} tone="rose" size="2xs" solid /> Ballni pasaytirayotgan mavzular
           </p>
           <div className="grid gap-1.5">
             {weak.map((t) => (

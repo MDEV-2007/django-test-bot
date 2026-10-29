@@ -5,6 +5,7 @@ import { Moon, Volume2 } from 'lucide-react';
 import { isAudioEnabled, setAudioEnabled, soundFX } from '@/lib/soundFX';
 import { useTheme } from '@/hooks/useTheme';
 import { tgHaptic } from '@/lib/telegram';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 /* Authentic iOS Settings Inset Grouped Switch Rows — works in both Web & Telegram Mini App */
@@ -21,9 +22,7 @@ export function ThemeToggle() {
       className="flex min-h-[52px] w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer"
     >
       <div className="flex items-center gap-3">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-[#5856D6] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
-          <Moon className="size-4 stroke-[2.2]" />
-        </span>
+        <PremiumIcon icon={Moon} tone="indigo" size="xs" solid />
         <div>
           <p className="text-[14px] font-semibold text-foreground">Tungi rejim (Dark Mode)</p>
           <p className="text-[11.5px] text-[#8E8E93]">
@@ -72,9 +71,7 @@ export function AudioToggle() {
       className="flex min-h-[52px] w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer"
     >
       <div className="flex items-center gap-3">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-[#FF2D55] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
-          <Volume2 className="size-4 stroke-[2.2]" />
-        </span>
+        <PremiumIcon icon={Volume2} tone="rose" size="xs" solid />
         <div>
           <p className="text-[14px] font-semibold text-foreground">Ovozli effektlar</p>
           <p className="text-[11.5px] text-[#8E8E93]">

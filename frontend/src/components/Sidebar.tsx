@@ -165,7 +165,7 @@ export default function Sidebar({
                 className="ios-spring flex items-center justify-between rounded-[14px] border border-primary/20 bg-primary/8 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/14"
               >
                 <span className="flex items-center gap-2 truncate">
-                  <GraduationCap className="size-4 shrink-0" />
+                  <PremiumIcon icon={GraduationCap} tone="sky" size="2xs" solid />
                   <span className="truncate">O&apos;qituvchi paneli</span>
                 </span>
                 <ChevronRight className="size-3.5 opacity-70" />
@@ -178,7 +178,7 @@ export default function Sidebar({
                 className="ios-spring flex items-center justify-between rounded-[14px] border border-destructive/20 bg-destructive/8 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/14"
               >
                 <span className="flex items-center gap-2 truncate">
-                  <ShieldCheck className="size-4 shrink-0" />
+                  <PremiumIcon icon={ShieldCheck} tone="rose" size="2xs" solid />
                   <span className="truncate">Super Admin paneli</span>
                 </span>
                 <ChevronRight className="size-3.5 opacity-70" />
@@ -231,10 +231,7 @@ export default function Sidebar({
                             icon={Icon as any}
                             tone={item.tone || 'primary'}
                             size="xs"
-                            solid={!active}
-                            className={cn(
-                              active && 'bg-white/20 border-white/30 text-white shadow-none'
-                            )}
+                            solid
                           />
                           <span className="truncate tracking-[-0.01em]">{item.label}</span>
                         </div>
@@ -279,9 +276,7 @@ export default function Sidebar({
           className="ios-spring flex w-full items-center justify-between rounded-[16px] border border-border bg-background/60 px-3 py-2.5 text-left transition-colors hover:bg-muted/70 cursor-pointer"
         >
           <div className="flex items-center gap-2.5">
-            <span className="flex size-7.5 shrink-0 items-center justify-center rounded-[9px] bg-[#5856D6] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">
-              {isDark ? <Sun className="size-4 text-[#FFD60A]" /> : <Moon className="size-4" />}
-            </span>
+            <PremiumIcon icon={isDark ? Sun : Moon} tone={isDark ? 'amber' : 'indigo'} size="xs" solid />
             <div>
               <p className="text-xs font-bold text-foreground">Tungi rejim (Dark Mode)</p>
               <p className="text-[10px] font-medium text-muted-foreground">

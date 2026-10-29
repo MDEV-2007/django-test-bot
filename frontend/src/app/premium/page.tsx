@@ -16,6 +16,7 @@ import PageHero from '@/components/student/PageHero';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 type Plan = {
@@ -144,9 +145,7 @@ export default function PremiumPage() {
         <div className="ios-card relative overflow-hidden rounded-[24px] p-4 sm:p-5 border border-[#FF9500]/25 bg-gradient-to-r from-[#FF9500]/[0.08] via-transparent to-[#FF3B30]/[0.06]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row items-center gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#FF9500] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(255,149,0,0.3)]">
-                <Flame className="size-5 fill-current" />
-              </div>
+              <PremiumIcon icon={Flame} tone="amber" size="md" solid />
               <div>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <span className="font-bold text-[13px] text-[#FF9500] uppercase tracking-wider">
@@ -198,27 +197,22 @@ export default function PremiumPage() {
         {/* 4 iOS Widget Trust Tiles */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
           {[
-            { icon: ShieldCheck, bg: 'bg-[#34C759]', title: '100% Rasmiy Format', sub: 'Milliy Sertifikat va BBA' },
-            { icon: Users, bg: 'bg-[#FF9500]', title: '4,300+ Abituriyent', sub: 'Faol tayyorlanmoqda' },
-            { icon: Zap, bg: 'bg-[#007AFF]', title: 'Tezkor Faollashuv', sub: 'To\'lovdan so\'ng 5 daqiqada' },
-            { icon: Award, bg: 'bg-[#5856D6]', title: 'QR Sertifikat', sub: 'Tasdiqlangan natija hujjati' },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.title}
-                className="ios-card flex items-center gap-3.5 rounded-[22px] p-4"
-              >
-                <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-[12px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]', item.bg)}>
-                  <Icon className="size-5 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[13px] font-bold text-foreground truncate">{item.title}</p>
-                  <p className="text-[11.5px] text-[#8E8E93] truncate">{item.sub}</p>
-                </div>
+            { icon: ShieldCheck, tone: 'emerald' as const, title: '100% Rasmiy Format', sub: 'Milliy Sertifikat va BBA' },
+            { icon: Users, tone: 'amber' as const, title: '4,300+ Abituriyent', sub: 'Faol tayyorlanmoqda' },
+            { icon: Zap, tone: 'sky' as const, title: 'Tezkor Faollashuv', sub: 'To\'lovdan so\'ng 5 daqiqada' },
+            { icon: Award, tone: 'indigo' as const, title: 'QR Sertifikat', sub: 'Tasdiqlangan natija hujjati' },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="ios-card flex items-center gap-3.5 rounded-[22px] p-4"
+            >
+              <PremiumIcon icon={item.icon} tone={item.tone} size="md" solid />
+              <div className="min-w-0">
+                <p className="text-[13px] font-bold text-foreground truncate">{item.title}</p>
+                <p className="text-[11.5px] text-[#8E8E93] truncate">{item.sub}</p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
         {/* Active Subscription Status Cards */}
@@ -551,10 +545,10 @@ export default function PremiumPage() {
             ].map((faq, i) => (
               <div key={i} className="p-5 space-y-1.5">
                 <p className="text-[14px] font-bold text-foreground flex items-center gap-2">
-                  <HelpCircle className="size-4 text-[#007AFF] shrink-0" />
+                  <PremiumIcon icon={HelpCircle} tone="sky" size="2xs" solid />
                   <span>{faq.q}</span>
                 </p>
-                <p className="text-[13px] text-[#8E8E93] leading-relaxed pl-6">
+                <p className="text-[13px] text-[#8E8E93] leading-relaxed pl-7">
                   {faq.a}
                 </p>
               </div>
