@@ -186,3 +186,55 @@ class ResolveRevengeMistakeAPIView(APIView):
             'question_id': question_id,
         })
 
+
+class SprintQuestionsAPIView(APIView):
+    """GET /api/v1/sprint/questions/?count=10
+    Fokus Sprinti uchun 10-15 ta yuqori sifatli savollarni yuklaydi.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        import random
+        count = min(30, max(5, int(request.query_params.get('count', 10))))
+        subject_id = request.query_params.get('subject_id')
+
+        qs = Question.objects.select_related('topic', 'test').prefetch_related('options')
+        if subject_id:
+            qs = qs.filter(subject_id=subject_id)
+
+        total_available = qs.count()
+        if total_available == 0:
+            qs = Question.objects.select_related('topic', 'test').prefetch_related('options')
+            total_available = qs.count()
+
+        if total_available == 0:
+            return Response({'ok': True, 'questions': []})
+
+        all_ids = list(qs.values_list('id', flat=True))
+        selected_ids = random.sample(all_ids, min(count, len(all_ids)))
+
+        questions = qs.filter(id__in=selected_ids)
+        result = []
+        for q in questions:
+            opts = list(q.options.all().order_by('order', 'id'))
+            if len(opts) < 2:
+                continue
+            corr = next((o for o in opts if o.is_correct), None)
+            if not corr:
+                continue
+            topic_str = q.topic.title if q.topic else (q.test.title if q.test else "Umumiy Tayyorgarlik")
+            result.append({
+                'id': q.id,
+                'body': q.body,
+                'topic_title': topic_str,
+                'correct_option_id': corr.id,
+                'difficulty': q.difficulty,
+                'options': [{'id': o.id, 'text': o.text} for o in opts],
+            })
+
+        return Response({
+            'ok': True,
+            'count': len(result),
+            'questions': result,
+        })
+
