@@ -607,7 +607,7 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
 :root[data-theme='light'] .text-orange-400 { color: var(--warning-text); }
 
 nav.ilm-mobile-tabbar {
-  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
 }
 
 @media (max-width: 639px) {
@@ -649,7 +649,7 @@ nav.ilm-mobile-tabbar {
 }
 
 .ilm-mobile-tabbar {
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
 }
 
 /* ── Telegram Mini App (iOS 18 Light & Dark Native Synchronization) ─────────── */
