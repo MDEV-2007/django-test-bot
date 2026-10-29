@@ -50,9 +50,29 @@ def _clean_html(text: str) -> str:
 
 def _clean_option_text(text: str) -> str:
     clean = _clean_html(text)
-    # Remove leading option prefix if redundant (e.g. "A) text" -> "text")
-    clean = re.sub(r'^[A-Za-z0-9][\)\.\:\-]\s*', '', clean).strip()
+    # Remove leading option prefix if redundant (e.g. "A) A) text" -> "text")
+    clean = re.sub(r'^(?:[A-Za-z0-9][\)\.\:\-]\s*)+', '', clean).strip()
     return clean
+
+
+_VISUAL_DEP_RE = re.compile(
+    r'(xarita\w*|rasm\w*|sxema\w*|chizma\w*|diagramma\w*|jadval\w*|tasvir\w*|'
+    r'raqamlar\s+ostida|raqam\s+bilan\s+belgilangan|harflar\s+bilan\s+belgilangan|'
+    r'kontur\s+xarita|<table|<img)',
+    re.IGNORECASE,
+)
+
+
+def _is_text_self_contained(q) -> bool:
+    raw = q.body or ''
+    if '<table' in raw.lower() or '<img' in raw.lower():
+        return False
+    if getattr(q, 'question_type', '') in ('image_based', 'table_based'):
+        return False
+    clean = _clean_html(raw)
+    if len(clean) < 15 or _VISUAL_DEP_RE.search(clean):
+        return False
+    return True
 
 
 def _extract_full_question_info(q, total=0, correct=0):
@@ -381,7 +401,7 @@ def marketing_analytics_api(request):
                 wrong=Count('id', filter=Q(is_correct=False))
             )
             .filter(total__gte=1)
-            .order_by('correct', '-wrong')[:8]
+            .order_by('correct', '-wrong')[:30]
         )
         q_ids = [r['question'] for r in hard_q_raw]
         q_map = {
@@ -392,14 +412,19 @@ def marketing_analytics_api(request):
         hardest_questions = []
         for r in hard_q_raw:
             q = q_map.get(r['question'])
-            if q:
+            if q and _is_text_self_contained(q):
                 hardest_questions.append(_extract_full_question_info(q, r['total'], r['correct']))
+                if len(hardest_questions) >= 8:
+                    break
 
         # Fallback if no questions answered yet
         if not hardest_questions:
-            fallback_sample_qs = Question.objects.all().select_related('subject', 'topic', 'section').prefetch_related('choices')[:3]
+            fallback_sample_qs = Question.objects.filter(question_type='single_choice').select_related('subject', 'topic', 'section').prefetch_related('choices')[:25]
             for fq in fallback_sample_qs:
-                hardest_questions.append(_extract_full_question_info(fq, total=24, correct=1))
+                if _is_text_self_contained(fq):
+                    hardest_questions.append(_extract_full_question_info(fq, total=24, correct=1))
+                    if len(hardest_questions) >= 5:
+                        break
 
         # 2. Fanlar kesimida eng qiyin savollar
         hardest_by_subject = {
@@ -484,14 +509,16 @@ def marketing_analytics_api(request):
 
         top_subj_name = subject_popularity[0]['name'] if subject_popularity else "Tarix"
         weak_topic_name = weakest_topics[0]['title'] if weakest_topics else "Temuriylar davlati harbiy san'ati"
-        hardest_q_sample = hardest_questions[0] if hardest_questions else {
+        hardest_q_sample = (
+            hardest_questions[today.toordinal() % len(hardest_questions)]
+            if hardest_questions else {
             'text': "1402-yilgi Anqara jangida Amir Temurning g'alabasiga sabab bo'lgan asosiy taktik omil nima edi?",
             'options_text': "A) Fillardan unumli foydalanish\nB) Qanotlarni mohirona boshqarish va zaxira kuchlarini o'z vaqtida jangga kiritish\nC) Qamal qurollari\nD) Dushman qo'shinining ochlikdan zaiflashishi",
             'subject': "Tarix",
             'correct_pct': 28,
             'total_answered': 42,
             'post_text': "🧠 Kunning eng qiyin savoli! (Tarix)\n\nBugun 42 nafar o'quvchidan faqat 28.0% to'g'ri javob bera oldi:\n\n❓ \"1402-yilgi Anqara jangida Amir Temurning g'alabasiga sabab bo'lgan asosiy taktik omil nima edi?\"\n\nA) Fillardan unumli foydalanish\nB) Qanotlarni mohirona boshqarish va zaxira kuchlarini o'z vaqtida jangga kiritish\nC) Qamal qurollari\nD) Dushman qo'shinining ochlikdan zaiflashishi\n\n📚 Fan: #Tarix\n📌 Siz to'g'ri javobni topa olasizmi? O'zingizni sinab ko'ring:\n👉 https://ilmildizi.uz/tests",
-        }
+        })
 
         # Template 1: Daily Digest
         post_template_digest = (
