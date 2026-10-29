@@ -727,6 +727,43 @@ html[data-tg='on'] .page-shell {
   padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
 }
 
+/* ── Hardware Acceleration & Mobile / Telegram Performance ──────────────── */
+@media (max-width: 768px), (pointer: coarse) {
+  .ios-glass {
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    transform: translateZ(0);
+  }
+  .ios-glass-heavy {
+    backdrop-filter: saturate(150%) blur(16px);
+    -webkit-backdrop-filter: saturate(150%) blur(16px);
+    transform: translateZ(0);
+  }
+}
+
+html[data-tg='on'] .ios-glass {
+  backdrop-filter: saturate(130%) blur(10px) !important;
+  -webkit-backdrop-filter: saturate(130%) blur(10px) !important;
+  transform: translateZ(0);
+}
+
+html[data-tg='on'] .ios-glass-heavy {
+  backdrop-filter: saturate(140%) blur(12px) !important;
+  -webkit-backdrop-filter: saturate(140%) blur(12px) !important;
+  transform: translateZ(0);
+}
+
+/* Telegram Mini App GPU yengilligi: katta blur doiralarini optimallashtirish */
+html[data-tg='on'] .blur-3xl,
+html[data-tg='on'] [class*="blur-[7"],
+html[data-tg='on'] [class*="blur-[8"],
+html[data-tg='on'] [class*="blur-[9"],
+html[data-tg='on'] [class*="blur-[10"] {
+  filter: blur(24px) !important;
+  opacity: 0.35 !important;
+  will-change: auto !important;
+}
+
 @media (max-width: 767px) {
   html,
   body {

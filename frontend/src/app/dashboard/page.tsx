@@ -166,10 +166,9 @@ export default function DashboardPage() {
   const { access, authReady } = useAuthStore();
   const { isDark } = useTheme();
 
-  const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
-  const { data: lbData } = useApiQuery<LeaderboardData>('/api/leaderboard/');
-
   const [activeMode, setActiveMode] = useState<'study' | 'arena'>('study');
+  const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
+  const { data: lbData } = useApiQuery<LeaderboardData>(activeMode === 'arena' ? '/api/leaderboard/' : null);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);

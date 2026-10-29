@@ -24,12 +24,14 @@ type FeaturesStore = {
   features: Record<string, FeatureItem>;
   loaded: boolean;
   loading: boolean;
-  fetchFeatures: () => Promise<void>;
+  fetchFeatures: (force?: boolean) => Promise<void>;
   isFeatureEnabled: (key: string) => boolean;
   getFeature: (key: string) => FeatureItem | undefined;
 };
 
 const FEATURES_CACHE_KEY = 'ilmildizi_features_cache_v2';
+const FEATURES_TTL_MS = 5 * 60 * 1000; // 5 daqiqa
+let lastFeaturesFetchTime = 0;
 
 // Standart zaxira holat
 const DEFAULT_FEATURES: Record<string, FeatureItem> = {
@@ -68,11 +70,16 @@ export const useFeaturesStore = create<FeaturesStore>((set, get) => ({
   loaded: initial.loaded,
   loading: false,
 
-  fetchFeatures: async () => {
+  fetchFeatures: async (force = false) => {
+    const now = Date.now();
+    if (!force && get().loaded && (now - lastFeaturesFetchTime < FEATURES_TTL_MS)) {
+      return;
+    }
     if (get().loading) return;
     set({ loading: true });
     try {
       const data = await apiFetch<FeaturesResponse>('/api/panel/features/public/');
+      lastFeaturesFetchTime = Date.now();
       if (data && data.features) {
         // Barcha yangi va mavjud modullarni birlashtirish
         const merged = { ...DEFAULT_FEATURES, ...data.features };

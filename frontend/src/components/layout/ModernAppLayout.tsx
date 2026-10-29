@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import ModernSidebar from './ModernSidebar';
+import Sidebar from '@/components/Sidebar';
 import ModernTopbar from './ModernTopbar';
 import MobileTabBar from '@/components/MobileTabBar';
 import StreakModal from '@/components/student/StreakModal';
@@ -33,8 +33,8 @@ export default function ModernAppLayout({
     <div className="min-h-screen w-full bg-background text-foreground transition-colors duration-200">
       <CosmeticTheme />
 
-      {/* Modern Minimalist Sidebar (Desktop fixed + Mobile drawer) */}
-      <ModernSidebar
+      {/* Minimalist Sidebar (Desktop fixed + Mobile drawer) */}
+      <Sidebar
         mobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
         user={user}

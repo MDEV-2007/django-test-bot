@@ -81,12 +81,7 @@ const MARKETING_CONFIG: Record<
   },
 };
 
-export default function PremiumPage() {
-  const router = useRouter();
-  const { access, authReady } = useAuthStore();
-  const [data, setData] = useState<PlansData | null>(null);
-  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
-
+function DiscountCountdownPill() {
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
     hours: 8,
     minutes: 42,
@@ -104,6 +99,29 @@ export default function PremiumPage() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  return (
+    <div className="flex items-center gap-2 rounded-full bg-[#1C1C1E] px-4 py-2 text-white shadow-md shrink-0 border border-white/10">
+      <Clock className="size-4 text-[#FF9500]" />
+      <div className="flex items-center gap-1 font-mono text-[14px] font-bold tabular-nums">
+        <span>{String(timeLeft.hours).padStart(2, '0')}</span>
+        <span className="text-white/40">:</span>
+        <span>{String(timeLeft.minutes).padStart(2, '0')}</span>
+        <span className="text-white/40">:</span>
+        <span className="text-[#FF9500]">{String(timeLeft.seconds).padStart(2, '0')}</span>
+      </div>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
+        qoldi
+      </span>
+    </div>
+  );
+}
+
+export default function PremiumPage() {
+  const router = useRouter();
+  const { access, authReady } = useAuthStore();
+  const [data, setData] = useState<PlansData | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
 
   useEffect(() => {
     if (authReady && !access) {
@@ -161,20 +179,8 @@ export default function PremiumPage() {
               </div>
             </div>
 
-            {/* Dynamic Island Countdown Pill */}
-            <div className="flex items-center gap-2 rounded-full bg-[#1C1C1E] px-4 py-2 text-white shadow-md shrink-0 border border-white/10">
-              <Clock className="size-4 text-[#FF9500]" />
-              <div className="flex items-center gap-1 font-mono text-[14px] font-bold tabular-nums">
-                <span>{String(timeLeft.hours).padStart(2, '0')}</span>
-                <span className="text-white/40">:</span>
-                <span>{String(timeLeft.minutes).padStart(2, '0')}</span>
-                <span className="text-white/40">:</span>
-                <span className="text-[#FF9500]">{String(timeLeft.seconds).padStart(2, '0')}</span>
-              </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
-                qoldi
-              </span>
-            </div>
+            {/* Dynamic Island Countdown Pill (izolyatsiya qilingan komponent) */}
+            <DiscountCountdownPill />
           </div>
         </div>
 

@@ -19,6 +19,10 @@ import CommandPalette from './CommandPalette';
 import { BrandMark } from './BrandMark';
 import PremiumIcon from '@/components/ui/premium-icon';
 
+let cachedUnreadCount = 0;
+let lastNotifsFetch = 0;
+const NOTIFS_CACHE_MS = 60_000; // 60 soniya xotira keshi
+
 export default function AppShell({
   hideTopbarOnMobile = false,
 }: {
@@ -31,7 +35,7 @@ export default function AppShell({
   const { isDark, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(cachedUnreadCount);
 
   const impersonating = access ? decodeJwtPayload(access)?.impersonator_id : null;
 
@@ -45,9 +49,16 @@ export default function AppShell({
 
   useEffect(() => {
     if (!access) return;
+    const now = Date.now();
+    if (now - lastNotifsFetch < NOTIFS_CACHE_MS) {
+      setUnreadCount(cachedUnreadCount);
+      return;
+    }
     apiFetch<{ unread_count: number }>('/api/dashboard/notifications/')
       .then((res) => {
         if (res && typeof res.unread_count === 'number') {
+          cachedUnreadCount = res.unread_count;
+          lastNotifsFetch = Date.now();
           setUnreadCount(res.unread_count);
         }
       })

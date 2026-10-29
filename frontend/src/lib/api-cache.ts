@@ -8,8 +8,9 @@
  * Telegram Mini App'da (sekin mobil tarmoq + tunnel) bu ayniqsa sezilarli edi.
  *
  * Yechim: oxirgi muvaffaqiyatli javob yo'l (path) bo'yicha saqlanadi va sahifa OCHILISHI
- * bilanoq ko'rsatiladi; yangi so'rov fonda ketadi va kelganda ma'lumot yangilanadi. Ya'ni
- * navigatsiya "bir zumda" ko'rinadi, lekin ma'lumot eskirib qolmaydi.
+ * bilanoq ko'rsatiladi; agar kesh eskirgan bo'lsa, yangi so'rov fonda ketadi va kelganda
+ * ma'lumot yangilanadi. FRESH_WINDOW_MS (30s) ichida navigatsiya 0ms va ortiqcha
+ * tarmoq/re-renderlarsiz bir zumda ishlaydi.
  *
  * Bir vaqtda bir xil yo'lni so'ragan komponentlar bitta so'rovni bo'lishadi (dedupe).
  */
@@ -19,6 +20,9 @@ import { apiFetch } from './api-client';
 import { useAuthStore } from './auth-store';
 
 type Entry = { data: unknown; at: number };
+
+// 30 soniya ichida keshdagi ma'lumot to'liq yangi hisoblanadi.
+const FRESH_WINDOW_MS = 30_000;
 
 const cache = new Map<string, Entry>();
 const inflight = new Map<string, Promise<unknown>>();
@@ -70,7 +74,7 @@ export type ApiQuery<T> = {
 
 /**
  * `path` null bo'lsa so'rov yuborilmaydi (shartli so'rovlar uchun).
- * Sahifa avval keshdagi ma'lumotni ko'rsatadi, keyin uni jimgina yangilaydi.
+ * Sahifa avval keshdagi ma'lumotni ko'rsatadi, agar eskirgan bo'lsa fonda yangilaydi.
  */
 export function useApiQuery<T>(path: string | null): ApiQuery<T> {
   const access = useAuthStore((s) => s.access);
@@ -79,7 +83,6 @@ export function useApiQuery<T>(path: string | null): ApiQuery<T> {
   const [data, setData] = useState<T | null>(cached ?? null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  // `data` null bo'lsayu so'rov ketayotgan bo'lsa — bu birinchi yuklanish.
   const [loading, setLoading] = useState(cached === undefined);
   const mounted = useRef(true);
 
@@ -88,9 +91,16 @@ export function useApiQuery<T>(path: string | null): ApiQuery<T> {
     return () => { mounted.current = false; };
   }, []);
 
-  const run = useCallback(async () => {
+  const run = useCallback(async (force = false) => {
     if (!path) return;
-    const hasCached = cache.has(path);
+    const hit = cache.get(path);
+    const isFresh = hit && (Date.now() - hit.at < FRESH_WINDOW_MS);
+    if (isFresh && !force) {
+      // Kesh yetarlicha yangi — ortiqcha so'rov yuborib qayta render qilish shart emas
+      return;
+    }
+
+    const hasCached = !!hit;
     if (hasCached) setRefreshing(true);
     else setLoading(true);
 
@@ -109,15 +119,14 @@ export function useApiQuery<T>(path: string | null): ApiQuery<T> {
 
   useEffect(() => {
     if (!path) return;
-    // Keshdagi ma'lumot darhol ekranga chiqadi, so'ng fonda yangilanadi.
     const hit = cache.get(path);
     if (hit) setData(hit.data as T);
-    if (access) run();
+    if (access) run(false);
   }, [path, access, run]);
 
   const refresh = useCallback(async () => {
     if (path) cache.delete(path);
-    await run();
+    await run(true);
   }, [path, run]);
 
   return { data, error, loading, refreshing, refresh };

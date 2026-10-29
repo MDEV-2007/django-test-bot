@@ -1,10 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import NumberFlow, { type Format } from '@number-flow/react';
+import { isTelegramEnv } from '@/lib/telegram';
 
-/* Raqam o'zgarganda "aylanib" yangilanadi (XP, tanga, ELO, ball). Gamifikatsiyada
-   bu eng arzon va eng kuchli mikro-mukofot: o'quvchi o'z natijasi o'sganini KO'RADI,
-   shunchaki yangi raqamni o'qimaydi. */
+/* Raqam o'zgarganda "aylanib" yangilanadi (XP, tanga, ELO, ball).
+   Telegram Mini App muhitida yoki sekin mobil qurilmalarda ortiqcha shadow DOM
+   hisoblashlari CPU ni band qilmasligi uchun optimallashtirilgan. */
 export default function StatNumber({
   value,
   suffix,
@@ -18,6 +20,23 @@ export default function StatNumber({
   className?: string;
   format?: Format;
 }) {
+  const [inTelegram, setInTelegram] = useState(false);
+
+  useEffect(() => {
+    if (isTelegramEnv()) {
+      setInTelegram(true);
+    }
+  }, []);
+
+  if (inTelegram) {
+    const formatted = typeof value === 'number' ? value.toLocaleString('uz-UZ') : value;
+    return (
+      <span className={className}>
+        {prefix}{formatted}{suffix}
+      </span>
+    );
+  }
+
   return (
     <NumberFlow
       value={value}
@@ -26,10 +45,9 @@ export default function StatNumber({
       className={className}
       locales="uz-UZ"
       format={format}
-      /* Uzun ro'yxatlarda bir vaqtda o'nlab raqam aylanmasligi uchun qisqa davomiylik. */
-      transformTiming={{ duration: 450, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
-      spinTiming={{ duration: 600, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
-      opacityTiming={{ duration: 180, easing: 'ease-out' }}
+      transformTiming={{ duration: 320, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+      spinTiming={{ duration: 400, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+      opacityTiming={{ duration: 150, easing: 'ease-out' }}
     />
   );
 }
