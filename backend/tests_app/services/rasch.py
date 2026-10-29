@@ -192,18 +192,30 @@ def estimate_theta(item_difficulties: List[float], correct_count: float, total_q
     return round(theta, 3)
 
 
-def theta_to_scaled_score(theta: float, max_scale: float = 70.0) -> float:
+def theta_to_scaled_score(theta: float, max_scale: float = 70.0, correct_count: float = None) -> float:
     """Rasch logitini (θ) rasmiy Milliy Sertifikat 70 ballik shkalasiga o'tkazadi.
 
-    Formula: Ball = A + B * θ
-    A = 48.0, B = 7.333
-    θ = 0.0 bo'lganda (o'rtacha bilim) -> 48.0 ball (C+/B chegarasi)
-    θ = +3.0 bo'lganda (a'lo) -> 70.0 ball (A+)
-    θ = -3.0 bo'lganda -> 26.0 ball
+    Shkala kalibratsiyasi:
+    - 0 ta to'g'ri javob yoki ekstremal past logit (θ <= -3.8) -> qat'iy 0.0 ball
+    - θ = 0.0 bo'lganda (o'rtacha bilim) -> 48.0 ball (C+/B chegarasi)
+    - θ >= +3.0 bo'lganda (a'lo) -> 70.0 ball (A+)
+    - 0 < θ < 3.0: 48.0 dan 70.0 gacha
+    - -3.8 < θ < 0: 0.0 dan 48.0 gacha silliq chiziqli proportsiya
     """
-    a = 48.0
-    b = 7.3333333333
-    raw_ball = a + (b * theta)
+    if correct_count is not None and correct_count <= 0.001:
+        return 0.0
+
+    if theta <= -3.8:
+        return 0.0
+
+    if theta >= 3.0:
+        return float(max_scale)
+
+    if theta >= 0.0:
+        raw_ball = 48.0 + (22.0 / 3.0) * theta
+    else:
+        raw_ball = 48.0 + (48.0 / 3.8) * theta
+
     clamped = max(0.0, min(max_scale, raw_ball))
     return round(clamped, 1)
 
@@ -219,24 +231,30 @@ def get_certificate_grade(scaled_score: float) -> Tuple[str, str, str]:
 def evaluate_attempt_rasch(attempt) -> Dict[str, Any]:
     """Urinish natijasini Rasch modeli asosida to'liq tahlil qiladi."""
     test = attempt.test
+    correct_cnt = float(attempt.correct_answers or 0.0)
+
     if not test:
         score_pct = float(attempt.score or 0.0)
-        scaled = round((score_pct / 100.0) * 70.0, 1)
+        scaled = round((score_pct / 100.0) * 70.0, 1) if correct_cnt > 0.001 else 0.0
         grade, label, tone = get_certificate_grade(scaled)
         return {
-            'theta': 0.0,
+            'theta': 0.0 if correct_cnt > 0.001 else -4.0,
             'scaled_score': scaled,
             'max_scale': 70.0,
-            'percentage': score_pct,
+            'percentage': score_pct if correct_cnt > 0.001 else 0.0,
+            'correct_count': int(correct_cnt),
+            'total_questions': int(
+                (attempt.correct_answers or 0) + (attempt.wrong_answers or 0) + (attempt.skipped_answers or 0)
+            ),
             'grade': grade,
             'grade_label': label,
             'tone': tone,
-            'difficulty_breakdown': {'easy': 0, 'medium': 0, 'hard': 0},
+            'difficulty_breakdown': {'easy_total': 0, 'easy_correct': 0, 'medium_total': 0, 'medium_correct': 0, 'hard_total': 0, 'hard_correct': 0},
         }
 
     difficulties_map = calculate_item_difficulties(test)
     questions = list(test.questions.all().order_by('exam_number', 'id'))
-    total_q = len(questions) or max(1, (attempt.correct_answers + attempt.wrong_answers + attempt.skipped_answers))
+    total_q = len(questions) or max(1, (attempt.correct_answers or 0) + (attempt.wrong_answers or 0) + (attempt.skipped_answers or 0))
 
     # Savollar bo'yicha qiyinlik logitlari ro'yxati
     item_betas = []
@@ -244,18 +262,7 @@ def evaluate_attempt_rasch(attempt) -> Dict[str, Any]:
         beta = difficulties_map.get(q.id, 0.0)
         item_betas.append(beta)
 
-    correct_cnt = float(attempt.correct_answers)
-
-    # 1. Talabgor qobiliyati θ
-    theta = estimate_theta(item_betas, correct_cnt, total_q)
-
-    # 2. 70 ballik rasmiy shkalaga o'tkazish
-    scaled_score = theta_to_scaled_score(theta, max_scale=70.0)
-
-    # 3. Sertifikat darajasi
-    grade, label, tone = get_certificate_grade(scaled_score)
-
-    # 4. Qiyinlik toifalari bo'yicha yechilgan savollar
+    # 4. Qiyinlik toifalari bo'yicha savollar va yechilgan javoblar taqsimoti
     # Oson: b < -0.4, O'rtacha: -0.4 <= b <= 0.4, Qiyin: b > 0.4
     breakdown = {
         'easy_total': 0, 'easy_correct': 0,
@@ -263,7 +270,6 @@ def evaluate_attempt_rasch(attempt) -> Dict[str, Any]:
         'hard_total': 0, 'hard_correct': 0,
     }
 
-    # Urinish javoblarini xaritalash
     answers_map = {ans.question_id: ans for ans in attempt.answers.all()}
     for q in questions:
         b = difficulties_map.get(q.id, 0.0)
@@ -283,7 +289,28 @@ def evaluate_attempt_rasch(attempt) -> Dict[str, Any]:
             if is_corr:
                 breakdown['medium_correct'] += 1
 
-    pct = round((correct_cnt / float(total_q)) * 100.0, 1) if total_q else 0.0
+    # Agar o'quvchi birorta ham to'g'ri javob topmagan bo'lsa (0 to'g'ri) -> qat'iy 0.0 ball
+    if correct_cnt <= 0.001:
+        theta = -4.0
+        scaled_score = 0.0
+        grade, label, tone = get_certificate_grade(0.0)
+        pct = 0.0
+        meaning = "Talabgor testda birorta ham to'g'ri javob qayd etmadi (0.0 ball)."
+    else:
+        # 1. Talabgor qobiliyati θ
+        theta = estimate_theta(item_betas, correct_cnt, total_q)
+
+        # 2. 70 ballik rasmiy shkalaga o'tkazish
+        scaled_score = theta_to_scaled_score(theta, max_scale=70.0, correct_count=correct_cnt)
+
+        # 3. Sertifikat darajasi
+        grade, label, tone = get_certificate_grade(scaled_score)
+
+        pct = round((correct_cnt / float(total_q)) * 100.0, 1) if total_q else 0.0
+        meaning = (
+            f"Talabgorning qobiliyati θ = {theta:+.2f} logit deb baholandi. "
+            f"Qiyinlik darajasi b < {theta:.2f} bo'lgan savollarni yechish ehtimoli 50% dan yuqori bo'ldi."
+        )
 
     return {
         'theta': theta,
@@ -299,10 +326,7 @@ def evaluate_attempt_rasch(attempt) -> Dict[str, Any]:
         'formula_info': {
             'formula': 'P = e^(θ - b) / (1 + e^(θ - b))',
             'b_formula': 'b = ln((N - R) / R)',
-            'scale_formula': 'Ball = 48.0 + 7.33 * θ',
-            'meaning': (
-                f"Talabgorning qobiliyati θ = {theta:+.2f} logit deb baholandi. "
-                f"Qiyinlik darajasi b < {theta:.2f} bo'lgan savollarni yechish ehtimoli 50% dan yuqori bo'ldi."
-            )
+            'scale_formula': 'Ball = 48.0 + 7.33 * θ (Nol tozalangan)',
+            'meaning': meaning,
         }
     }

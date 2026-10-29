@@ -3341,7 +3341,11 @@ def generate_certificate_api(request, attempt_pk):
                 first_name = user_full.upper()
                 last_name = "—"
 
-        scaled_score = rasch_meta.get('scaled_score', round((float(a.score or 0) / 100) * 70, 1)) if rasch_meta else round((float(a.score or 0) / 100) * 70, 1)
+        if (a.correct_answers or 0) == 0:
+            scaled_score = 0.0
+            cert_grade = '—'
+        else:
+            scaled_score = rasch_meta.get('scaled_score', round((float(a.score or 0) / 100) * 70, 1)) if rasch_meta else round((float(a.score or 0) / 100) * 70, 1)
         scaled_str = f"{scaled_score:.1f}"
         scaled_comma = scaled_str.replace('.', ',')
         pct_str = f"{float(a.score or 0):.2f} %"

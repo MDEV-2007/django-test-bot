@@ -499,7 +499,7 @@ export default function FeedbackPage() {
                   {data.predicted_score && (
                     <div className="flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-500 dark:text-amber-300 shadow-xs">
                       <Crown className="size-4 text-amber-400 shrink-0 animate-pulse" />
-                      <span>Prognoz Sertifikat: <b>{data.predicted_score}</b></span>
+                      <span>Prognoz Sertifikat: <b>{((a.correct_answers || 0) === 0 || (a.score || 0) === 0) ? "— (0.0 ball)" : data.predicted_score}</b></span>
                     </div>
                   )}
                 </div>
@@ -511,8 +511,9 @@ export default function FeedbackPage() {
         {/* ─── MILLIY SERTIFIKAT NATIJALARI (BMB / DTM STANDARTI) ─── */}
         {(() => {
           const rasch = data?.rasch || data?.attempt?.rasch;
+          const isZeroCorrect = (a.correct_answers || 0) === 0 || (a.score || 0) === 0;
           const thetaVal = rasch?.theta ?? 0;
-          const scaledScore = rasch?.scaled_score ?? Math.min(70, Math.round(((a.score || 0) / 100) * 70 * 10) / 10);
+          const scaledScore = isZeroCorrect ? 0 : (rasch?.scaled_score ?? Math.min(70, Math.round(((a.score || 0) / 100) * 70 * 10) / 10));
           const isPassed = scaledScore >= 42;
           const gradeText = rasch?.grade || (scaledScore >= 65 ? 'A+' : scaledScore >= 60 ? 'A' : scaledScore >= 55 ? 'B+' : scaledScore >= 50 ? 'B' : scaledScore >= 46 ? 'C+' : scaledScore >= 42 ? 'C' : '—');
           const gradeLabel = rasch?.grade_label || (scaledScore >= 65 ? "A+ Daraja (100% OTM Imtiyozi)" : scaledScore >= 60 ? "A Daraja (A'lo Sertifikat)" : scaledScore >= 55 ? "B+ Daraja (Juda yaxshi)" : scaledScore >= 50 ? "B Daraja (Yaxshi natija)" : scaledScore >= 46 ? "C+ Daraja (Qoniqarli)" : scaledScore >= 42 ? "C Daraja (O'tish darajasi)" : "Sinovdan o'tmadi (Minimal 42 ball)");
@@ -644,11 +645,12 @@ export default function FeedbackPage() {
         {/* ─── RASMIY SARIQ-OQ SERTIFIKAT PREVIEW KARTASI ─── */}
         {(() => {
           const rasch = data?.rasch || data?.attempt?.rasch;
-          const scaledScore = rasch?.scaled_score ?? Math.min(70, Math.round(((a.score || 0) / 100) * 70 * 10) / 10);
+          const isZeroCorrect = (a.correct_answers || 0) === 0 || (a.score || 0) === 0;
+          const scaledScore = isZeroCorrect ? 0 : (rasch?.scaled_score ?? Math.min(70, Math.round(((a.score || 0) / 100) * 70 * 10) / 10));
           const scaledScoreStr = scaledScore.toFixed(1);
           const scaledScoreComma = scaledScoreStr.replace('.', ',');
-          const pctVal = rasch?.percentage !== undefined ? `${rasch.percentage.toFixed(2)} %` : `${Math.round(a.score || 0)} %`;
-          const certGrade = rasch?.grade || (scaledScore >= 65 ? 'A+' : scaledScore >= 60 ? 'A' : scaledScore >= 55 ? 'B+' : scaledScore >= 50 ? 'B' : scaledScore >= 46 ? 'C+' : scaledScore >= 42 ? 'C' : '—');
+          const pctVal = isZeroCorrect ? '0.00 %' : (rasch?.percentage !== undefined ? `${rasch.percentage.toFixed(2)} %` : `${Math.round(a.score || 0)} %`);
+          const certGrade = isZeroCorrect ? '—' : (rasch?.grade || (scaledScore >= 65 ? 'A+' : scaledScore >= 60 ? 'A' : scaledScore >= 55 ? 'B+' : scaledScore >= 50 ? 'B' : scaledScore >= 46 ? 'C+' : scaledScore >= 42 ? 'C' : '—'));
           const cleanAttemptId = String(attemptId || '13770');
           const personalCode = cleanAttemptId.slice(-5).padStart(5, '0');
           const certNumber = `DJ26 0607${cleanAttemptId.slice(-7).padStart(7, '0')}`;

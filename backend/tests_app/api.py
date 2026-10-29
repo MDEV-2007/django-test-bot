@@ -866,6 +866,9 @@ def feedback_api(request, attempt_id):
 
     # Rasch model ma'lumotlarini olish / hisoblash
     rasch_data = (attempt.annotations or {}).get('rasch') if isinstance(attempt.annotations, dict) else None
+    if rasch_data and (attempt.correct_answers or 0) == 0 and rasch_data.get('scaled_score', 0) > 0:
+        rasch_data = None  # Eski xatolik bilan keshlangan rasch ma'lumotini yangilash
+
     if not rasch_data:
         try:
             from tests_app.services.rasch import evaluate_attempt_rasch
@@ -917,7 +920,10 @@ def feedback_api(request, attempt_id):
         'weak_topics': [t.strip() for t in ai_feedback.weak_topics.split(',') if t.strip()],
         'strong_topics': [t.strip() for t in ai_feedback.strong_topics.split(',') if t.strip()],
         'recommendations': ai_feedback.recommendations,
-        'predicted_score': ai_feedback.predicted_score,
+        'predicted_score': (
+            "— (0.0 ball)" if (attempt.correct_answers or 0) == 0
+            else (f"{rasch_data['grade']} ({rasch_data['scaled_score']} ball)" if (rasch_data and rasch_data.get('grade')) else ai_feedback.predicted_score)
+        ),
         'roadmap': ai_feedback.roadmap,
         'ai_motivation': ai_feedback.ai_motivation,
         'detailed_mistakes': ai_feedback.detailed_mistakes,

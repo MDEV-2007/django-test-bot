@@ -322,6 +322,9 @@ def generate_ai_feedback(attempt_id):
     # Rasch model tahlili
     predicted_score = _grade_band(score)
     rasch_data = (attempt.annotations or {}).get('rasch') if isinstance(attempt.annotations, dict) else None
+    if rasch_data and (attempt.correct_answers or 0) == 0 and rasch_data.get('scaled_score', 0) > 0:
+        rasch_data = None  # Eski xatolik bilan keshlangan ma'lumotni tozalash
+
     if not rasch_data:
         try:
             from tests_app.services.rasch import evaluate_attempt_rasch
@@ -329,7 +332,9 @@ def generate_ai_feedback(attempt_id):
         except Exception:
             rasch_data = None
 
-    if rasch_data and rasch_data.get('grade'):
+    if (attempt.correct_answers or 0) == 0:
+        predicted_score = "— (0.0 ball)"
+    elif rasch_data and rasch_data.get('grade'):
         predicted_score = f"{rasch_data['grade']} ({rasch_data['scaled_score']} ball)"
 
     try:
