@@ -21,44 +21,37 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
 
   return (
     <section id="savollar" className="mx-auto max-w-4xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8">
-      
-      {/* Header — No pill badge */}
       <div className="text-center">
-        <div className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+        <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
           Savol-Javoblar
         </div>
-        <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl">
           Ko&apos;p so&apos;raladigan savollar
         </h2>
-        <p className="mt-3 text-sm text-slate-600 max-w-xl mx-auto">
+        <p className="mt-3 text-sm text-[#6C6C70] max-w-xl mx-auto">
           Platforma, rasmiy mock imtihonlar, baholash va to&apos;lovlar bo&apos;yicha eng muhim ma&apos;lumotlar.
         </p>
       </div>
 
-      {/* Accordion List */}
-      <div className="mt-12 space-y-3">
+      {/* iOS Inset Grouped Accordion List */}
+      <div className="mt-10 overflow-hidden rounded-[28px] border border-black/[0.07] bg-white divide-y divide-black/[0.06] shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
         {items.map((item, index) => {
           const isOpen = openIndex === index;
 
           return (
-            <div
-              key={item.q}
-              className={`overflow-hidden rounded-2xl border transition-all duration-200 ${
-                isOpen
-                  ? 'border-emerald-300 bg-white shadow-md ring-1 ring-emerald-100'
-                  : 'border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-xs'
-              }`}
-            >
+            <div key={item.q} className="transition-colors">
               <button
                 type="button"
                 onClick={() => toggle(index)}
                 aria-expanded={isOpen}
-                className="flex w-full items-center justify-between gap-4 p-5 text-left text-sm sm:text-base font-bold text-slate-900 cursor-pointer"
+                className="flex w-full items-center justify-between gap-4 p-5 sm:px-6 text-left text-sm sm:text-[15px] font-bold text-[#1C1C1E] hover:bg-[#F2F2F7]/50 transition-colors cursor-pointer"
               >
                 <span>{item.q}</span>
                 <span
-                  className={`flex size-8 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition-transform duration-200 ${
-                    isOpen ? 'rotate-180 bg-emerald-50 text-emerald-700 border-emerald-200' : ''
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
+                    isOpen
+                      ? 'rotate-180 bg-[#007AFF] text-white'
+                      : 'bg-[#F2F2F7] text-[#6C6C70]'
                   }`}
                 >
                   <ChevronDown className="size-4" />
@@ -66,7 +59,7 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
               </button>
 
               {isOpen && (
-                <div className="border-t border-slate-100 px-5 pb-5 pt-3 text-xs sm:text-sm leading-relaxed text-slate-600">
+                <div className="px-5 sm:px-6 pb-5 pt-1 text-xs sm:text-sm leading-relaxed text-[#6C6C70]">
                   {item.a}
                 </div>
               )}
@@ -74,7 +67,6 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
           );
         })}
       </div>
-
     </section>
   );
 }

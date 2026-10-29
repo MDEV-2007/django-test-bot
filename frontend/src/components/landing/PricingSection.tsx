@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Check, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/lib/auth-store';
+import { Check, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export type PlanCard = {
   name: string;
@@ -26,7 +24,7 @@ export const FREE_PLAN: PlanCard = {
   text: "Kundalik mashq testlari, 1v1 arena, mini o'yinlar, reyting va asosiy diagnostika.",
   features: [
     'Kunlik 10 ta bepul mashq testi',
-    '1v1 Arena va do\'stlar bilan bellashuv',
+    "1v1 Arena va do'stlar bilan bellashuv",
     'AI Mentor: kuniga 5 ta savol',
     'Kunlik streak va reyting',
     'Asosiy xatolar tahlili',
@@ -45,11 +43,11 @@ export const FALLBACK_PLANS: PlanCard[] = [
     perDay: "≈ 833 so'm / kun",
     text: "Barcha mock testlar va kengaytirilgan AI Mentor. Istalgan vaqtda to'xtatasiz.",
     features: [
-      'Barcha to\'liq mock testlar (cheklovsiz)',
+      "Barcha to'liq mock testlar (cheklovsiz)",
       'AI Mentor: kuniga 50 ta savol tahlili',
       'Mavzular kesimidagi chuqur tahlil',
       'Ovozli va darslik havolali izohlar',
-      '30 kun to\'liq foydalanish',
+      "30 kun to'liq foydalanish",
     ],
     cta: 'Obunani boshlash',
     href: '/premium',
@@ -63,11 +61,11 @@ export const FALLBACK_PLANS: PlanCard[] = [
     ribbon: 'TAVSIYA ETILADI',
     text: "Milliy sertifikat va DTM imtihoniga to'liq 6 oylik tayyorgarlik kursi.",
     features: [
-      'Barcha to\'liq mock testlar (cheklovsiz)',
+      "Barcha to'liq mock testlar (cheklovsiz)",
       'AI Mentor: kuniga 50 ta savol tahlili',
       'Kutilayotgan DTM ball tahlili',
-      '15 000 so\'m/oy — 40% tejamkorlik',
-      'Shaxsiy o\'qish rejasi va diagnostika',
+      "15 000 so'm/oy — 40% tejamkorlik",
+      "Shaxsiy o'qish rejasi va diagnostika",
     ],
     cta: 'Obunani boshlash',
     href: '/premium',
@@ -81,11 +79,11 @@ export const FALLBACK_PLANS: PlanCard[] = [
     ribbon: 'ENG FOYDALI NARX',
     text: "Eng past oylik narx. Butun o'quv yili davomida cheklovsiz tayyorgarlik.",
     features: [
-      'Barcha to\'liq mock testlar (cheklovsiz)',
+      "Barcha to'liq mock testlar (cheklovsiz)",
       'AI Mentor: kuniga 50 ta savol tahlili',
       'Kutilayotgan DTM ball tahlili',
-      '12 500 so\'m/oy — eng arzon narx',
-      '365 kun to\'liq foydalanish',
+      "12 500 so'm/oy — eng arzon narx",
+      "365 kun to'liq foydalanish",
     ],
     cta: 'Obunani boshlash',
     href: '/premium',
@@ -113,7 +111,6 @@ interface PricingSectionProps {
 }
 
 export default function PricingSection({ plans }: PricingSectionProps) {
-  const { access, authReady } = useAuthStore();
   const [filter, setFilter] = useState<'all' | 'subscription' | 'one_time'>('all');
 
   const safePlans = plans && plans.length > 0 ? plans : FALLBACK_PLANS;
@@ -127,51 +124,40 @@ export default function PricingSection({ plans }: PricingSectionProps) {
 
   return (
     <section id="narxlar" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8">
-      
-      {/* Header — No pill badge */}
+      {/* Header */}
       <div className="mx-auto max-w-3xl text-center">
-        <div className="text-xs font-bold uppercase tracking-widest text-emerald-700">
-          Shaffof va Ochiq Narxlar
+        <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
+          Apple One Usulida Shaffof Tariflar
         </div>
-        <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
-          Natijaga mos, <span className="text-emerald-600">hamyonbop tariflar</span>
+        <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
+          Natijaga mos,{' '}
+          <span className="bg-gradient-to-r from-[#007AFF] to-[#34C759] bg-clip-text text-transparent">
+            hamyonbop obuna
+          </span>
         </h2>
-        <p className="mt-4 text-sm text-slate-600 sm:text-base leading-relaxed">
+        <p className="mt-4 text-sm text-[#6C6C70] sm:text-base leading-relaxed">
           Kundalik mashqlar, arena va diagnostika mutlaqo bepul. Rasmiy to&apos;liq mock testlar va cheklovsiz AI Mentor uchun qulay tarifni tanlang.
         </p>
 
-        {/* Filter Tab */}
-        <div className="mt-8 inline-flex items-center rounded-xl border border-slate-200 bg-slate-100/80 p-1">
-          <button
-            onClick={() => setFilter('all')}
-            className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-              filter === 'all'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Barchasi
-          </button>
-          <button
-            onClick={() => setFilter('subscription')}
-            className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-              filter === 'subscription'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Obuna (1, 6 va 12 oylik)
-          </button>
-          <button
-            onClick={() => setFilter('one_time')}
-            className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-              filter === 'one_time'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Bir martalik
-          </button>
+        {/* Authentic iOS UISegmentedControl */}
+        <div className="mt-8 inline-flex items-center rounded-[14px] bg-[#767680]/12 p-1">
+          {[
+            { id: 'all', label: 'Barchasi' },
+            { id: 'subscription', label: 'Obuna (1, 6 va 12 oylik)' },
+            { id: 'one_time', label: 'Bir martalik' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id as any)}
+              className={`rounded-[10px] px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                filter === tab.id
+                  ? 'bg-white text-[#1C1C1E] shadow-[0_3px_8px_rgba(0,0,0,0.12),0_3px_1px_rgba(0,0,0,0.04)]'
+                  : 'text-[#3A3A3C] hover:text-[#1C1C1E]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -183,81 +169,75 @@ export default function PricingSection({ plans }: PricingSectionProps) {
           return (
             <div
               key={plan.name}
-              className={`relative flex flex-col justify-between rounded-2xl border p-6 transition-all duration-200 ${
+              className={`relative flex flex-col justify-between rounded-[30px] border p-6 sm:p-7 transition-all duration-200 ${
                 isPro
-                  ? 'border-emerald-600 bg-white shadow-xl ring-2 ring-emerald-600/20 lg:-translate-y-2'
-                  : 'border-slate-200/90 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.04)] hover:border-slate-300 hover:shadow-lg'
+                  ? 'border-[#007AFF] bg-white shadow-[0_20px_50px_-10px_rgba(0,122,255,0.18)] ring-2 ring-[#007AFF]/20 lg:-translate-y-2'
+                  : 'border-black/[0.07] bg-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_14px_34px_-6px_rgba(0,0,0,0.08)]'
               }`}
             >
-              {/* Ribbon */}
               {plan.ribbon && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-sm">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#007AFF] px-3.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-[0_4px_10px_rgba(0,122,255,0.3)] whitespace-nowrap">
                   {plan.ribbon}
                 </div>
               )}
 
               <div>
-                {/* Plan Name & Tag */}
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-slate-900">{plan.name}</h3>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-base font-bold text-[#1C1C1E]">{plan.name}</h3>
                   {plan.perDay && (
-                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-mono font-bold text-emerald-700">
+                    <span className="rounded-full bg-[#34C759]/12 px-2.5 py-0.5 text-[11px] font-mono font-bold text-[#248A3D]">
                       {plan.perDay}
                     </span>
                   )}
                 </div>
 
-                <p className="mt-2 text-xs leading-relaxed text-slate-500 min-h-[36px]">
+                <p className="mt-2 text-xs leading-relaxed text-[#6C6C70] min-h-[36px]">
                   {plan.text}
                 </p>
 
-                {/* Price Display */}
-                <div className="mt-4 border-y border-slate-100 py-4">
+                <div className="mt-4 border-y border-black/[0.06] py-4">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-3xl font-black tracking-tight text-slate-900">
+                    <span className="font-mono text-3xl font-black tracking-tight text-[#1C1C1E]">
                       {plan.price}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">{plan.unit}</span>
+                    <span className="text-xs text-[#6C6C70] font-medium">{plan.unit}</span>
                   </div>
                 </div>
 
-                {/* Features List */}
-                <ul className="mt-5 space-y-2.5 text-xs text-slate-600">
+                <ul className="mt-5 space-y-2.5 text-xs text-[#3A3A3C]">
                   {plan.features.map((feat) => (
                     <li key={feat} className="flex items-start gap-2.5">
-                      <Check className="size-4 shrink-0 text-emerald-600 mt-0.5" />
+                      <span className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-[#34C759]/15 text-[#248A3D] mt-0.5">
+                        <Check className="size-3 stroke-[2.5]" />
+                      </span>
                       <span className="leading-snug">{feat}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Action Button */}
               <div className="mt-8 pt-2">
-                <Button
-                  asChild
-                  className={`w-full rounded-xl font-bold text-xs h-11 transition-all ${
+                <Link
+                  href={plan.href}
+                  className={`ios-spring flex w-full items-center justify-center gap-1.5 rounded-full font-semibold text-xs h-11 ${
                     isPro
-                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/25'
-                      : 'bg-slate-900 hover:bg-slate-800 text-white'
+                      ? 'bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-[0_6px_18px_rgba(0,122,255,0.32)]'
+                      : 'bg-[#1C1C1E] hover:bg-[#2C2C2E] text-white'
                   }`}
                 >
-                  <Link href={plan.href}>
-                    {plan.cta} <ArrowRight className="size-3.5 ml-1.5" />
-                  </Link>
-                </Button>
+                  <span>{plan.cta}</span>
+                  <ArrowRight className="size-3.5" />
+                </Link>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Trust Guarantee Note */}
-      <div className="mt-12 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-        <ShieldCheck className="size-4 text-emerald-600" />
+      <div className="mt-12 text-center text-xs text-[#6C6C70] flex items-center justify-center gap-2">
+        <ShieldCheck className="size-4 text-[#34C759]" />
         <span>100% xavfsiz to&apos;lov (Payme, Click va Uzum orqali). Yashirin to&apos;lovlar yo&apos;q.</span>
       </div>
-
     </section>
   );
 }

@@ -4,11 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  CheckCircle2, XCircle, Sparkles, Clock, ArrowRight,
-  RotateCcw, BookOpen, Bot, TrendingUp, Zap
+  CheckCircle2, XCircle, Clock, ArrowRight,
+  RotateCcw, BookOpen, Bot, TrendingUp, Zap, Sparkles
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { Button } from '@/components/ui/button';
 
 interface Option {
   id: string;
@@ -18,9 +17,9 @@ interface Option {
 }
 
 const QUESTION = {
-  subject: 'O\'zbekiston Tarixi',
+  subject: "O'zbekiston Tarixi",
   examType: 'Milliy Sertifikat',
-  difficulty: 'O\'rta',
+  difficulty: "O'rta",
   text: "Amir Temur markazlashgan davlat tuzish jarayonida qaysi shaharni poytaxt etib belgilagan va bu voqea qaysi yili yuz bergan?",
   options: [
     { id: 'A', label: 'A', text: 'Buxoro — 1365-yil (Loy jangi davri)', isCorrect: false },
@@ -52,10 +51,10 @@ export default function HeroInteractiveQuiz() {
       setScoreIncrement(3.1);
       try {
         confetti({
-          particleCount: 50,
-          spread: 70,
+          particleCount: 45,
+          spread: 65,
           origin: { y: 0.6 },
-          colors: ['#059669', '#10b981', '#3b82f6', '#f59e0b'],
+          colors: ['#34C759', '#007AFF', '#5856D6', '#FF9500'],
         });
       } catch {
         // ignore
@@ -73,79 +72,100 @@ export default function HeroInteractiveQuiz() {
 
   return (
     <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
-      {/* Ambient Glow */}
-      <div className="absolute -inset-2.5 rounded-[32px] bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-indigo-500/20 opacity-70 blur-2xl pointer-events-none" />
+      {/* Soft Apple Intelligence Ambient Aura */}
+      <div className="absolute -inset-3 rounded-[40px] bg-gradient-to-tr from-[#007AFF]/16 via-[#34C759]/12 to-[#5856D6]/16 opacity-80 blur-2xl pointer-events-none" />
 
-      {/* Main Interactive Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+      {/* iOS 18 / iPadOS Floating Window Card */}
+      <div className="relative overflow-hidden rounded-[32px] border border-black/[0.08] bg-white/92 ios-glass p-5 sm:p-7 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.10),0_4px_16px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.95)]">
         
-        {/* Card Header Bar */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-2">
-            <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+        {/* Top Window Bar + Dynamic Island Live Activity Pill */}
+        <div className="flex items-center justify-between pb-4 border-b border-black/[0.06]">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full bg-[#FF5F57] border border-black/10" />
+              <span className="size-3 rounded-full bg-[#FEBC2E] border border-black/10" />
+              <span className="size-3 rounded-full bg-[#28C840] border border-black/10" />
+            </div>
+            <span className="ml-1 text-xs font-bold tracking-tight text-[#1C1C1E]">
               {QUESTION.subject}
             </span>
-            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200/60">
+            <span className="rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#007AFF]">
               {QUESTION.examType}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 font-mono text-xs font-semibold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200/60">
-            <Clock className="size-3.5 text-emerald-600" />
-            <span>00:35</span>
+          {/* Dynamic Island Timer Pill */}
+          <div className="flex items-center gap-1.5 rounded-full bg-[#1C1C1E] px-3 py-1 text-white shadow-xs">
+            <span className="size-1.5 rounded-full bg-[#30D158] animate-pulse" />
+            <Clock className="size-3 text-[#30D158]" />
+            <span className="font-mono text-[11px] font-semibold tracking-tight">00:35</span>
           </div>
         </div>
 
-        {/* Live Score Bar (Dynamic Increment) */}
-        <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50/90 p-3 border border-slate-100 text-xs">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="size-4 text-emerald-600" />
-            <span className="text-slate-600 font-medium">Kutilayotgan DTM ball:</span>
-            <strong className="font-mono text-slate-900 font-bold">
-              {hasAnswered && isCorrect ? '181.5' : '178.4'}
-            </strong>
+        {/* Apple Health-Style Live DTM Score Widget */}
+        <div className="mt-4 flex items-center justify-between rounded-[18px] bg-[#F2F2F7] px-4 py-3 border border-black/[0.04]">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-8 items-center justify-center rounded-[10px] bg-gradient-to-b from-[#34C759] to-[#28A745] text-white shadow-xs">
+              <TrendingUp className="size-4" />
+            </div>
+            <div>
+              <span className="text-[11px] text-[#6C6C70] font-medium block leading-none">
+                Kutilayotgan DTM ball
+              </span>
+              <strong className="font-mono text-base font-extrabold text-[#1C1C1E] tracking-tight">
+                {hasAnswered && isCorrect ? '181.5' : '178.4'}{' '}
+                <span className="text-[11px] font-normal text-[#8E8E93]">/ 189.0</span>
+              </strong>
+            </div>
           </div>
 
-          {hasAnswered && isCorrect && (
+          {hasAnswered && isCorrect ? (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-1 font-bold text-emerald-600 bg-emerald-100/80 px-2 py-0.5 rounded-md text-[11px]"
+              className="flex items-center gap-1 font-bold text-white bg-[#34C759] px-3 py-1 rounded-full text-[11px] shadow-[0_2px_8px_rgba(52,199,89,0.35)]"
             >
-              <Zap className="size-3" /> +{scoreIncrement} ball
+              <Zap className="size-3 fill-white" /> +{scoreIncrement} ball
             </motion.div>
-          )}
-
-          {!hasAnswered && (
-            <span className="text-[11px] text-slate-400">Variantni tanlang</span>
+          ) : (
+            <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#6C6C70] shadow-2xs border border-black/[0.05]">
+              Interaktiv sinov
+            </span>
           )}
         </div>
 
-        {/* Question Body */}
+        {/* Question Prompt */}
         <div className="mt-5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Savol 1 / 45</span>
-          <h3 className="mt-1 text-base sm:text-lg font-bold leading-snug text-slate-900">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+              Savol 1 / 45 · Rasmiy format
+            </span>
+            <span className="text-[11px] font-semibold text-[#007AFF]">+3.1 ball</span>
+          </div>
+          <h3 className="mt-1.5 text-[15px] sm:text-[17px] font-bold leading-snug text-[#1C1C1E] tracking-[-0.01em]">
             {QUESTION.text}
           </h3>
         </div>
 
-        {/* Options List */}
-        <div className="mt-5 space-y-2.5">
+        {/* iOS Inset Grouped Option Rows */}
+        <div className="mt-4 space-y-2">
           {QUESTION.options.map((option) => {
             const isSelected = selectedId === option.id;
-            let containerStyles = 'border-slate-200 hover:border-slate-300 bg-white text-slate-800';
-            let badgeStyles = 'border-slate-200 bg-slate-100 text-slate-700';
+            let containerStyles =
+              'border-black/[0.07] bg-[#F2F2F7]/65 hover:bg-[#F2F2F7] text-[#1C1C1E]';
+            let badgeStyles = 'bg-white text-[#1C1C1E] border-black/[0.08] shadow-2xs';
 
             if (hasAnswered) {
               if (option.isCorrect) {
-                containerStyles = 'border-emerald-500 bg-emerald-50/70 text-emerald-950 ring-1 ring-emerald-500';
-                badgeStyles = 'border-emerald-500 bg-emerald-500 text-white';
+                containerStyles =
+                  'border-[#34C759] bg-[#34C759]/12 text-[#1C1C1E] ring-1 ring-[#34C759]/50';
+                badgeStyles = 'bg-[#34C759] text-white border-transparent';
               } else if (isSelected && !option.isCorrect) {
-                containerStyles = 'border-rose-400 bg-rose-50/70 text-rose-950 ring-1 ring-rose-400';
-                badgeStyles = 'border-rose-400 bg-rose-500 text-white';
+                containerStyles =
+                  'border-[#FF3B30] bg-[#FF3B30]/10 text-[#1C1C1E] ring-1 ring-[#FF3B30]/40';
+                badgeStyles = 'bg-[#FF3B30] text-white border-transparent';
               } else {
-                containerStyles = 'border-slate-100 bg-slate-50/40 text-slate-400 opacity-60';
+                containerStyles = 'border-black/[0.04] bg-[#F2F2F7]/40 text-[#8E8E93] opacity-60';
               }
             }
 
@@ -155,9 +175,13 @@ export default function HeroInteractiveQuiz() {
                 type="button"
                 disabled={hasAnswered}
                 onClick={() => handleSelect(option)}
-                className={`group relative flex w-full items-center gap-3 rounded-2xl border p-3 sm:p-3.5 text-left text-xs sm:text-sm font-medium transition-all ${containerStyles} ${!hasAnswered ? 'hover:-translate-y-0.5 hover:shadow-sm cursor-pointer' : 'cursor-default'}`}
+                className={`ios-spring group relative flex w-full items-center gap-3 rounded-[18px] border p-3 sm:p-3.5 text-left text-xs sm:text-[13.5px] font-semibold ${containerStyles} ${
+                  !hasAnswered ? 'cursor-pointer' : 'cursor-default'
+                }`}
               >
-                <span className={`flex size-7 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition-all ${badgeStyles}`}>
+                <span
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-[10px] border text-xs font-bold transition-all ${badgeStyles}`}
+                >
                   {hasAnswered && option.isCorrect ? (
                     <CheckCircle2 className="size-4" />
                   ) : hasAnswered && isSelected && !option.isCorrect ? (
@@ -172,53 +196,53 @@ export default function HeroInteractiveQuiz() {
           })}
         </div>
 
-        {/* AI Mentor Explanation Box */}
+        {/* Apple Intelligence / Siri Style AI Mentor Sheet */}
         <AnimatePresence>
           {hasAnswered && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-5 rounded-2xl border border-emerald-500/30 bg-emerald-50/50 p-4 space-y-2.5"
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-4 rounded-[22px] border border-[#007AFF]/20 bg-gradient-to-br from-[#007AFF]/[0.06] via-white to-[#5856D6]/[0.06] p-4 space-y-2.5 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
-                  <Bot className="size-4 text-emerald-600" />
-                  <span>AI Mentor Tahlili</span>
+              <div className="flex items-center justify-between flex-wrap gap-1.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1C1C1E]">
+                  <span className="flex size-6 items-center justify-center rounded-[8px] bg-gradient-to-b from-[#5856D6] to-[#007AFF] text-white">
+                    <Sparkles className="size-3.5" />
+                  </span>
+                  <span>Apple Intelligence · AI Mentor</span>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-700">
-                  <BookOpen className="size-3.5" />
+                <div className="flex items-center gap-1 rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#007AFF]">
+                  <BookOpen className="size-3" />
                   <span>{QUESTION.explanation.citation}</span>
                 </div>
               </div>
 
-              <p className="text-xs leading-relaxed text-slate-700">
+              <p className="text-xs leading-relaxed text-[#3A3A3C]">
                 {isCorrect ? QUESTION.explanation.correct : QUESTION.explanation.incorrect}
               </p>
 
-              <div className="flex items-center justify-between pt-1 border-t border-emerald-200/60 text-xs">
+              <div className="flex items-center justify-between pt-2 border-t border-black/[0.06] text-xs">
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-900 font-semibold cursor-pointer"
+                  className="ios-spring inline-flex items-center gap-1.5 text-[#6C6C70] hover:text-[#1C1C1E] font-semibold cursor-pointer"
                 >
                   <RotateCcw className="size-3.5" /> Qaytadan yechish
                 </button>
 
-                <Button
-                  size="sm"
-                  asChild
-                  className="rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                <Link
+                  href="/register"
+                  className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#007AFF] hover:bg-[#0062CC] px-4 py-1.5 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,122,255,0.3)]"
                 >
-                  <Link href="/register">
-                    To&apos;liq testni yechish <ArrowRight className="size-3.5 ml-1" />
-                  </Link>
-                </Button>
+                  <span>To&apos;liq testni yechish</span>
+                  <ArrowRight className="size-3.5" />
+                </Link>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-
       </div>
     </div>
   );

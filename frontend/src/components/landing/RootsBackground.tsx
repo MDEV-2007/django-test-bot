@@ -2,19 +2,19 @@
 
 export default function RootsBackground() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#f8fafc]">
-      {/* 1. Yuqori markaziy mayin zumrad tuman nuri */}
-      <div className="absolute left-1/2 top-[-10%] -translate-x-1/2 size-[54rem] rounded-full bg-gradient-to-b from-emerald-100/70 via-teal-50/40 to-transparent blur-[140px]" />
-      
-      {/* 2. Nozik ikkilamchi osmon/safir rang yorug'lik chuqurligi */}
-      <div className="absolute -left-20 top-[20%] size-[40rem] rounded-full bg-sky-100/40 blur-[150px]" />
-      <div className="absolute -right-20 top-[40%] size-[36rem] rounded-full bg-emerald-100/40 blur-[150px]" />
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#F2F2F7]">
+      {/* 1. Apple iOS 18 Top Mesh Aura (Soft System Blue & System Green) */}
+      <div className="absolute left-1/2 top-[-14%] -translate-x-1/2 w-[68rem] h-[42rem] rounded-full bg-gradient-to-b from-[#007AFF]/12 via-[#34C759]/10 to-transparent blur-[130px]" />
 
-      {/* 3. Zamonaviy nozik mikro-nuqtali grid (Dot matrix) — oq fon uchun */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_15%,#000_60%,transparent_100%)] opacity-80" />
+      {/* 2. Subtle Secondary Ambient Orbs */}
+      <div className="absolute -left-24 top-[22%] size-[38rem] rounded-full bg-[#34C759]/8 blur-[140px]" />
+      <div className="absolute -right-24 top-[38%] size-[38rem] rounded-full bg-[#5856D6]/8 blur-[140px]" />
 
-      {/* 4. Pastki qismga o'tish */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#f8fafc]/30 to-[#f8fafc]" />
+      {/* 3. Ultra-fine Apple Keynote Grid Overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(28,28,30,0.05)_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_75%_50%_at_50%_12%,#000_50%,transparent_100%)] opacity-75" />
+
+      {/* 4. Smooth vertical fade into iOS systemGroupedBackground */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-[#F2F2F7]" />
     </div>
   );
 }

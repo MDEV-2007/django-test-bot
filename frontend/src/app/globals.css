@@ -6,147 +6,144 @@
    shadcn'ning `dark:` variantini ham shunga moslaymiz. */
 @custom-variant dark (&:is([data-theme="dark"] *, .dark, .dark *));
 
-/* Same "Grafit neytral" design tokens as the Django templates (templates/base.html) —
-   copied verbatim so pages built here match the existing app instead of drifting into a
-   second visual language. Edit templates/base.html's :root block first if the palette
-   changes, then mirror it here. */
+/* Apple iOS 18 / iPadOS HIG System Grouped Design Tokens */
 :root, :root[data-theme="light"] {
   color-scheme: light;
-  /* ── Clean & Minimalist Palette (Modern Blue & Slate) ────────────────── */
-  --bg-page: #F8FAFC;
-  --accent: #2563EB;              /* Modern Vibrant Blue */
-  --accent-hover: #1D4ED8;
-  --accent-soft: #EFF6FF;
-  --accent-border: rgba(37, 99, 235, 0.25);
-  --accent-text: #1D4ED8;
+  /* ── Apple iOS 18 Light System Grouped Palette ────────────────── */
+  --bg-page: #F2F2F7;             /* Apple systemGroupedBackground */
+  --accent: #007AFF;              /* iOS System Blue */
+  --accent-hover: #0062CC;
+  --accent-soft: rgba(0, 122, 255, 0.10);
+  --accent-border: rgba(0, 122, 255, 0.22);
+  --accent-text: #0066CC;
   --on-accent: #ffffff;
 
-  --success: #10B981;
-  --success-soft: #D1FAE5;
-  --success-text: #059669;
-  --danger: #EF4444;
-  --danger-soft: #FEE2E2;
-  --danger-text: #DC2626;
-  --warning: #F59E0B;
-  --warning-soft: #FEF3C7;
-  --warning-text: #D97706;
+  --success: #34C759;             /* iOS System Green */
+  --success-soft: rgba(52, 199, 89, 0.12);
+  --success-text: #248A3D;
+  --danger: #FF3B30;              /* iOS System Red */
+  --danger-soft: rgba(255, 59, 48, 0.12);
+  --danger-text: #D70015;
+  --warning: #FF9500;             /* iOS System Orange */
+  --warning-soft: rgba(255, 149, 0, 0.14);
+  --warning-text: #C93400;
 
-  --text-primary: #0F172A;
-  --text-secondary: #334155;
-  --text-muted: #64748B;
-  --text-subtitle: #64748B;
-  --text-faint: #94A3B8;
+  --text-primary: #1C1C1E;        /* Apple label */
+  --text-secondary: #3A3A3C;      /* Apple secondaryLabel */
+  --text-muted: #6C6C70;          /* Apple tertiaryLabel */
+  --text-subtitle: #6C6C70;
+  --text-faint: #8E8E93;          /* Apple systemGray */
 
-  --border-soft: #E2E8F0;
-  --border-card: #E2E8F0;
-  --border-strong: #CBD5E1;
+  --border-soft: rgba(60, 60, 67, 0.08);
+  --border-card: rgba(60, 60, 67, 0.11);
+  --border-strong: rgba(60, 60, 67, 0.20);
 
-  --surface-hover: rgba(15, 23, 42, 0.04);
-  --surface-hover-strong: rgba(15, 23, 42, 0.08);
-  --surface-card: #ffffff;
-  --surface-card-soft: #ffffff;
-  --surface-card-medium: #ffffff;
-  --surface-card-strong: #ffffff;
-  --surface-input: #F8FAFC;
+  --surface-hover: rgba(118, 118, 128, 0.08);
+  --surface-hover-strong: rgba(118, 118, 128, 0.14);
+  --surface-card: #FFFFFF;        /* Apple secondarySystemGroupedBackground */
+  --surface-card-soft: #FFFFFF;
+  --surface-card-medium: #FFFFFF;
+  --surface-card-strong: #FFFFFF;
+  --surface-input: rgba(118, 118, 128, 0.12); /* Apple tertiarySystemFill */
   --surface-bg: var(--bg-page);
 
   --tone-growth: var(--accent);
   --tone-growth-text: var(--accent-text);
   --tone-growth-soft: var(--accent-soft);
 
-  --tone-streak: #F59E0B;
-  --tone-streak-text: #D97706;
-  --tone-streak-soft: #FEF3C7;
+  --tone-streak: #FF9500;
+  --tone-streak-text: #C93400;
+  --tone-streak-soft: rgba(255, 149, 0, 0.14);
 
-  --tone-premium: #D97706;
-  --tone-premium-text: #B45309;
-  --tone-premium-soft: #FEF9C3;
+  --tone-premium: #FF9500;
+  --tone-premium-text: #B25000;
+  --tone-premium-soft: rgba(255, 204, 0, 0.18);
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
   --tone-danger-soft: var(--danger-soft);
 
-  --tone-lesson: #2563EB;
-  --tone-lesson-text: #1D4ED8;
-  --tone-lesson-soft: #EFF6FF;
+  --tone-lesson: #007AFF;
+  --tone-lesson-text: #0066CC;
+  --tone-lesson-soft: rgba(0, 122, 255, 0.10);
 
-  --tone-ai: #6366F1;
-  --tone-ai-text: #4F46E5;
-  --tone-ai-soft: #EEF2FF;
+  --tone-ai: #5856D6;             /* iOS System Indigo */
+  --tone-ai-text: #3634A3;
+  --tone-ai-soft: rgba(88, 86, 214, 0.12);
 
-  --border-highlight: transparent;
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  --shadow-float: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --border-highlight: rgba(255, 255, 255, 0.85);
+  --shadow-card: 0 2px 14px -2px rgba(0, 0, 0, 0.045), 0 1px 3px 0 rgba(0, 0, 0, 0.025);
+  --shadow-float: 0 14px 36px -6px rgba(0, 0, 0, 0.09), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
   --glow-accent: none;
 }
 
 :root[data-theme="dark"], :root.dark, html.dark, .dark {
   color-scheme: dark;
-  /* ── Clean Dark Palette (Soft Slate-950, no harsh pure black) ──────── */
-  --bg-page: #0B0F19;
-  --accent: #3B82F6;              /* Modern Blue for dark mode */
-  --accent-hover: #60A5FA;
-  --accent-soft: rgba(59, 130, 246, 0.15);
-  --accent-border: rgba(59, 130, 246, 0.3);
-  --accent-text: #93C5FD;
+  /* ── Apple iOS 18 Dark System Grouped Palette (Elevated OLED) ──────── */
+  --bg-page: #000000;             /* Apple Dark systemGroupedBackground */
+  --accent: #0A84FF;              /* iOS Dark System Blue */
+  --accent-hover: #409CFF;
+  --accent-soft: rgba(10, 132, 255, 0.16);
+  --accent-border: rgba(10, 132, 255, 0.32);
+  --accent-text: #64D2FF;
   --on-accent: #FFFFFF;
 
-  --success: #34D399;
-  --success-soft: rgba(52, 211, 153, 0.15);
-  --success-text: #6EE7B7;
-  --danger: #F87171;
-  --danger-soft: rgba(248, 113, 113, 0.15);
-  --danger-text: #FCA5A5;
-  --warning: #FBBF24;
-  --warning-soft: rgba(251, 191, 36, 0.15);
-  --warning-text: #FDE68A;
+  --success: #30D158;             /* iOS Dark System Green */
+  --success-soft: rgba(48, 209, 88, 0.16);
+  --success-text: #63E6BE;
+  --danger: #FF453A;              /* iOS Dark System Red */
+  --danger-soft: rgba(255, 69, 58, 0.16);
+  --danger-text: #FF6961;
+  --warning: #FF9F0A;             /* iOS Dark System Orange */
+  --warning-soft: rgba(255, 159, 10, 0.16);
+  --warning-text: #FFD60A;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #CBD5E1;
-  --text-muted: #94A3B8;
-  --text-subtitle: #94A3B8;
-  --text-faint: #64748B;
+  --text-primary: #F5F5F7;
+  --text-secondary: #D1D1D6;
+  --text-muted: #8E8E93;
+  --text-subtitle: #8E8E93;
+  --text-faint: #636366;
 
-  --border-soft: #1E293B;
-  --border-card: #232E47;
-  --border-strong: #334155;
-  --border-highlight: transparent;
+  --border-soft: rgba(84, 84, 88, 0.28);
+  --border-card: rgba(84, 84, 88, 0.36);
+  --border-strong: rgba(84, 84, 88, 0.55);
+  --border-highlight: rgba(255, 255, 255, 0.08);
 
-  --surface-hover: rgba(255, 255, 255, 0.04);
-  --surface-hover-strong: rgba(255, 255, 255, 0.08);
-  --surface-card: #131B2E;
-  --surface-card-soft: #131B2E;
-  --surface-card-medium: #182238;
-  --surface-card-strong: #182238;
-  --surface-input: #1E293B;
+  --surface-hover: rgba(118, 118, 128, 0.16);
+  --surface-hover-strong: rgba(118, 118, 128, 0.24);
+  --surface-card: #1C1C1E;        /* Apple Dark secondarySystemGroupedBackground */
+  --surface-card-soft: #1C1C1E;
+  --surface-card-medium: #2C2C2E; /* Apple Dark tertiarySystemGroupedBackground */
+  --surface-card-strong: #2C2C2E;
+  --surface-input: rgba(118, 118, 128, 0.24);
   --surface-bg: var(--bg-page);
 
   --tone-growth: var(--accent);
   --tone-growth-text: var(--accent-text);
   --tone-growth-soft: var(--accent-soft);
 
-  --tone-streak: #F59E0B;
-  --tone-streak-text: #FBBF24;
-  --tone-streak-soft: rgba(245, 158, 11, 0.15);
+  --tone-streak: #FF9F0A;
+  --tone-streak-text: #FFD60A;
+  --tone-streak-soft: rgba(255, 159, 10, 0.16);
 
-  --tone-premium: #F59E0B;
-  --tone-premium-text: #FBBF24;
-  --tone-premium-soft: rgba(245, 158, 11, 0.15);
+  --tone-premium: #FF9F0A;
+  --tone-premium-text: #FFD60A;
+  --tone-premium-soft: rgba(255, 159, 10, 0.16);
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
   --tone-danger-soft: var(--danger-soft);
 
-  --tone-lesson: #3B82F6;
-  --tone-lesson-text: #93C5FD;
-  --tone-lesson-soft: rgba(59, 130, 246, 0.15);
+  --tone-lesson: #0A84FF;
+  --tone-lesson-text: #64D2FF;
+  --tone-lesson-soft: rgba(10, 132, 255, 0.16);
 
-  --tone-ai: #818CF8;
-  --tone-ai-text: #C7D2FE;
-  --tone-ai-soft: rgba(129, 140, 248, 0.15);
+  --tone-ai: #5E5CE6;
+  --tone-ai-text: #BF5AF2;
+  --tone-ai-soft: rgba(94, 92, 230, 0.18);
 
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
-  --shadow-float: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-float: 0 16px 40px -6px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.09);
   --glow-accent: none;
 }
 
@@ -157,14 +154,6 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
-  /* ── Tipografik shkala v2 ──────────────────────────────────────────────────
-     Ilgari butun interfeys Tailwind default'larida edi va asosiy matn `text-xs`
-     (12px) ga tushib qolgandi — 300+ joyda. Bu yerda Tailwind'ning o'z pog'onalari
-     qayta ta'riflanadi, shuning uchun har bir faylni tahrirlamasdan butun sayt
-     o'qish uchun qulay o'lchamga ko'tariladi.
-       xs 12→13, sm 14→15, base 16, lg 18, xl 22, 2xl 28, 3xl 36
-     Sarlavhalarda `letter-spacing` manfiy — katta o'lchamda harflar yoyilib
-     ketmasligi uchun. */
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.45;
   --text-sm: 0.9375rem;
@@ -205,8 +194,6 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
-  /* shadcn'ning `bg-accent` (hover sirti) — brend `--accent` zumradiga EMAS,
-     yumshoq sirt rangiga bog'lanadi, aks holda har bir hover yorqin yashil bo'lardi. */
   --color-accent: var(--surface-hover);
   --color-brand: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -231,44 +218,99 @@
 body {
   background: var(--bg-page);
   color: var(--text-primary);
-  font-family: var(--font-sans), 'Segoe UI', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, var(--font-sans), 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
   font-feature-settings: 'ss01', 'cv01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Sarlavha ovozi — Bricolage Grotesque. Sinf nomi tarixiy sabab bilan `font-voice`
-   bo'lib qoldi (ilgari serif edi), butun saytda ishlatilgani uchun saqlanmoqda. */
 .font-voice {
-  font-family: var(--font-voice), var(--font-sans), sans-serif;
-  letter-spacing: -0.02em;
+  font-family: -apple-system, BlinkMacSystemFont, var(--font-voice), var(--font-sans), sans-serif;
+  letter-spacing: -0.025em;
 }
 
+/* ── Apple iOS 18 Glass & Surface Utilities ───────────────────────────────── */
+.ios-glass {
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
 
+.ios-glass-heavy {
+  backdrop-filter: saturate(200%) blur(32px);
+  -webkit-backdrop-filter: saturate(200%) blur(32px);
+}
 
-/* Yagona sahifa konteyneri. Har bir sahifa o'z max-w-* ini tanlagani uchun kengliklar
-   2xl dan 6xl gacha tarqalib ketgan edi — natijada sidebar yonida katta bo'sh maydon
-   qolardi. Endi barcha o'quvchi sahifalari shu ikki sinfdan birini ishlatadi. */
+.ios-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease;
+}
+
+.ios-card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-float);
+  border-color: var(--border-strong);
+}
+
+.ios-card-interactive:active {
+  transform: scale(0.985);
+}
+
+.ios-segmented {
+  background-color: rgba(118, 118, 128, 0.12);
+  padding: 4px;
+  border-radius: 14px;
+}
+
+:root[data-theme="dark"] .ios-segmented,
+.dark .ios-segmented {
+  background-color: rgba(118, 118, 128, 0.24);
+}
+
+.ios-segmented-thumb {
+  background-color: #FFFFFF;
+  color: #1C1C1E;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+}
+
+:root[data-theme="dark"] .ios-segmented-thumb,
+.dark .ios-segmented-thumb {
+  background-color: #636366;
+  color: #FFFFFF;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.ios-squircle {
+  border-radius: 28%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.ios-spring {
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ios-spring:active {
+  transform: scale(0.96);
+}
+
 .page-shell {
   width: 100%;
   max-width: 1180px;
   margin-inline: auto;
 }
-/* Bitta vazifaga qaratilgan, o'qish uchun mo'ljallangan ekranlar (test yechish, mini-o'yin) —
-   satr uzunligi qulay qolishi uchun to'liq kenglikdan torroq. */
 .page-shell-focus {
   width: 100%;
   max-width: 900px;
   margin-inline: auto;
 }
-/* Faqat bitta ishga qaratilgan oqimlar uchun (to'lov, chek yuborish, holat sahifasi). */
 .page-shell-narrow {
   width: 100%;
   max-width: 640px;
   margin-inline: auto;
 }
 
-/* Gorizontal scroll qatorlarida (chip/tab) kesilgan kontent borligini bildiruvchi o'ng
-   chekka fade — foydalanuvchi scroll borligini sezmay qolmasligi uchun. Mask orqali
-   qilinadi: qo'shimcha o'rovchi element kerak emas, qatorning o'ziga qo'shiladi. */
 .scroll-fade {
   -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
   mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
@@ -279,7 +321,6 @@ body {
 }
 .scroll-row::-webkit-scrollbar { display: none; }
 
-/* Bo'lim sarlavhalari — butun saytda bitta uslub (ALL CAPS + tracking). */
 .section-title {
   font-size: 0.75rem;
   font-weight: 700;
@@ -288,17 +329,16 @@ body {
   color: var(--text-muted);
 }
 
-/* Clean Minimalist Karta — asosiy konteyner birligi butun saytda */
 .glass-card,
 .bento-card {
   background-color: var(--surface-card);
   border: 1px solid var(--border-card);
-  border-radius: 16px;
+  border-radius: 22px;
   box-shadow: var(--shadow-card);
 }
 
 .bento-card {
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .bento-card:hover {
   border-color: var(--border-strong);
@@ -322,10 +362,10 @@ body {
 }
 
 .tactile-btn {
-  transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease, border-color 0.15s ease;
 }
 .tactile-btn:active {
-  transform: scale(0.975);
+  transform: scale(0.965);
 }
 
 @keyframes flame-pulse {
@@ -343,41 +383,25 @@ body {
 }
 .animate-scaleIn { animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-/* App shell offset — Sidebar/MobileTabBar are `position:fixed` siblings rendered by
-   AppShell before <main> in every authenticated page. Sibling selectors let every page's
-   <main> get the correct offset without editing each page file individually. */
 @media (min-width: 1024px) {
-  aside.ilm-sidebar ~ main { padding-left: 16rem; }
-
-  /* Sidebar offseti `main` ning padding-i bo'lgani uchun u max-width ICHIDAN joy oladi:
-     max-width:1180px + padding-left:256px = kontentga atigi ~900px qolardi (kartalar
-     siqilib ketardi). Sidebar bor sahifalarda max-width shu offsetga kengaytiriladi —
-     natijada kontent to'liq belgilangan enini oladi va bo'sh maydonda markazda turadi. */
-  aside.ilm-sidebar ~ main.page-shell { max-width: calc(1180px + 16rem); }
-  aside.ilm-sidebar ~ main.page-shell-focus { max-width: calc(900px + 16rem); }
-  aside.ilm-sidebar ~ main.page-shell-narrow { max-width: calc(640px + 16rem); }
+  aside.ilm-sidebar ~ main { padding-left: 16.5rem; }
+  aside.ilm-sidebar ~ main.page-shell { max-width: calc(1180px + 16.5rem); }
+  aside.ilm-sidebar ~ main.page-shell-focus { max-width: calc(900px + 16.5rem); }
+  aside.ilm-sidebar ~ main.page-shell-narrow { max-width: calc(640px + 16.5rem); }
 }
 @media (max-width: 1023px) {
-  /* Pastki tab-bar balandligi + telefon "home indicator" zonasi (Telegram Mini App
-     to'liq ekranda ochilganda pastda tizim chizig'i bor). */
   nav.ilm-mobile-tabbar ~ main {
-    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
-/* --- Zen Mode ---------------------------------------------------------------------
-   Imtihon boshlanganda <html data-zen="on"> qo'yiladi: sidebar, yuqori panel va mobil
-   tab-bar yig'iladi, <main> ning ular uchun ajratilgan bo'shlig'i ham olib tashlanadi.
-   Shu tariqa butun ekran faqat savolga qaratiladi va tasodifiy chiqib ketish yo'llari
-   (menyu havolalari) ko'rinmaydi — chiqish faqat tasdiqlash modali orqali. */
+/* --- Zen Mode --------------------------------------------------------------------- */
 html[data-zen='on'] aside.ilm-sidebar,
 html[data-zen='on'] header.ilm-topbar,
 html[data-zen='on'] nav.ilm-mobile-tabbar {
   display: none;
 }
 @media (min-width: 1024px) {
-  /* Zen rejimida sidebar yo'q — offset ham, uni qoplagan max-width qo'shimchasi ham
-     bekor qilinadi, aks holda kontent sidebar kengligicha kengayib ketardi. */
   html[data-zen='on'] aside.ilm-sidebar ~ main { padding-left: 0; }
   html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell { max-width: 1180px; }
   html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell-focus { max-width: 900px; }
@@ -385,12 +409,10 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
 }
 @media (max-width: 1023px) {
   html[data-zen='on'] nav.ilm-mobile-tabbar ~ main {
-    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
-/* O'qish qulayligi: savol/matn kengligi 65–75 belgi (optimal "measure") va nafas oladigan
-   qator oralig'i. Shrift o'lchamini o'quvchi A- / A / A+ orqali o'zgartiradi. */
 .reading-block {
   max-width: 70ch;
   font-size: var(--reading-size, 1rem);
@@ -398,9 +420,6 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
 }
 .reading-scale { font-size: var(--reading-size, 1rem); }
 
-/* PDF dan import qilingan savollar bir nechta blokdan iborat: savol matni, keyin har
-   bandi alohida qatorda ("1) ...", "a) ..."), moslashtirish va jadvalli savollarda esa
-   jadval. Bitta xatboshidan iborat eski savollarga bu qoidalar umuman tegmaydi. */
 .reading-block > p { margin: 0; }
 .reading-block > p + p { margin-top: 0.35em; font-weight: 400; }
 .reading-block table {
@@ -422,18 +441,8 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
 }
 .reading-block th { background: var(--surface-hover); font-weight: 600; }
 
-/* ── shadcn/ui semantik tokenlari ───────────────────────────────────────────────
-   shadcn init o'zining oklch palitrasini (och tema) qo'shgan edi — u bizning obsidian
-   temamizdan KEYIN turgani uchun fonni oqartirib yuborardi, ustiga `.dark` klassini
-   kutardi, biz esa `[data-theme]` atributidan foydalanamiz.
-   Shuning uchun shadcn tokenlari mavjud palitradan HOSILA qilib qayta yozildi: bitta
-   manba (yuqoridagi :root) — ikkala tizim ham o'shani o'qiydi, drift bo'lmaydi.
-
-   Diqqat: shadcn'da `--primary` = asosiy brend rangi, `--accent` esa yumshoq hover foni.
-   Bizda `--accent` brend zumradi. Shuning uchun brend rangi `--primary` ga bog'lanadi,
-   shadcn'ning `--accent` i esa hover sirtiga — semantikasi to'g'ri qolishi uchun. */
 :root {
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 
   --background: var(--bg-page);
   --foreground: var(--text-primary);
@@ -450,9 +459,6 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   --muted: var(--surface-input);
   --muted-foreground: var(--text-muted);
 
-  /* shadcn'ning `accent` i (yumshoq hover foni) bu yerda ATAYLAB aniqlanmagan:
-     `--accent` bizda brend zumradi va uni qayta yozish butun saytni buzardi.
-     O'rniga quyidagi @theme inline blokida `--color-accent` sirt rangiga bog'langan. */
   --accent-foreground: var(--text-primary);
 
   --destructive: var(--danger);
@@ -462,11 +468,11 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   --input: var(--border-card);
   --ring: var(--accent-border);
 
-  --chart-1: #2fb3a3;
-  --chart-2: #d99a38;
-  --chart-3: #52a86b;
-  --chart-4: #6a8cff;
-  --chart-5: #b06ad9;
+  --chart-1: #007AFF;
+  --chart-2: #FF9500;
+  --chart-3: #34C759;
+  --chart-4: #5856D6;
+  --chart-5: #AF52DE;
 
   --sidebar: var(--surface-card-strong);
   --sidebar-foreground: var(--text-secondary);
@@ -477,7 +483,6 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   --sidebar-border: var(--border-card);
   --sidebar-ring: var(--accent-border);
 }
-
 
 @layer base {
   * {
@@ -490,29 +495,19 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
     @apply font-sans;
   }
 
-  /* ── Karta sirti v2 ───────────────────────────────────────────────────────
-     Uch qatlam: (1) yuqoridan pastga nozik yorug'lik gradienti, (2) tashqi soya,
-     (3) yuqori chetdagi 1px ichki yorug'lik. Uchalasi birgalikda kartani fondan
-     ajratadi — ilgari karta bilan fon orasida ko'z ilg'aydigan farq yo'q edi.
-
-     Qoida `@layer base` ichida: shu tufayli `bg-amber-500/10` kabi utility'lar
-     (ular `@layer utilities` da, ya'ni keyinroq) o'z rangini saqlaydi va faqat
-     gradient + soya qo'shiladi. */
   [data-slot='card'] {
-    border-radius: 16px;
+    border-radius: 22px;
     --card-spacing: 1.25rem;
     box-shadow: var(--shadow-card);
   }
   [data-slot='card'] [data-slot='card'] {
-    border-radius: 12px;
+    border-radius: 16px;
   }
 
-  /* Progress chizig'i qiymat o'zgarganda "to'ladi" (sakramaydi). */
   [data-slot='progress-indicator'] {
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Reduced motion — tizim sozlamasi hurmat qilinadi. */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -528,16 +523,12 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
     box-shadow: var(--shadow-float), inset 0 1px 0 var(--border-highlight);
   }
 
-  /* Raqamlar doim mono + tabular — ustunlarda "sakramaydi". */
   .font-mono, code, kbd, samp {
     font-family: var(--font-mono), ui-monospace, monospace;
     font-variant-numeric: tabular-nums;
   }
 }
-/* Tanlov "chip"lari (fan/mavzu filtrlari). Ilgari faol chip to'liq zumrad fon bilan
-   chizilardi va sahifadagi HAQIQIY asosiy harakat (masalan "Testni boshlash") bilan
-   vizual jihatdan raqobatlashardi. Qoida: bir ekranda bitta to'q zumrad tugma bo'ladi;
-   tanlov holati esa yumshoq fon + zumrad chegara va matn bilan ko'rsatiladi. */
+
 .chip-active {
   background-color: var(--accent-soft);
   border-color: var(--accent-border);
@@ -548,9 +539,6 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   color: var(--accent-text);
 }
 
-/* Skeleton shimmer — yuklanish holatining "tirik" ko'rinishi. Yorug'lik to'lqini
-   1.6s da chapdan o'ngga yuguradi; `background-size` 200% bo'lgani uchun faqat
-   `background-position` animatsiya qilinadi (layout qayta hisoblanmaydi). */
 @keyframes skeleton-shimmer {
   0% { background-position: -150% 0; }
   100% { background-position: 250% 0; }
@@ -571,46 +559,31 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }
 
-/* ── Yorug' temadagi tugmalar ──────────────────────────────────────────────────
-   Muammo: `outline` tugma foni `--background` (sahifa foni #e8ebee) edi — oq karta
-   ustida u "iflos kulrang" bo'lib ko'rinardi. Yorug' temada u OQ bo'ladi va faqat
-   chegara bilan ajraladi; hover'da yumshoq kulrangga o'tadi.
-   Asosiy (zumrad) tugmaga esa yengil soya beriladi — yorug' fonda "yassi rangli
-   to'rtburchak" emas, ko'tarilgan element bo'lib ko'rinsin. */
 :root[data-theme='light'] [data-slot='button'][data-variant='outline'] {
   background-color: #ffffff;
 }
 :root[data-theme='light'] [data-slot='button'][data-variant='outline']:hover {
-  background-color: #f2f5f7;
+  background-color: #f2f2f7;
 }
 :root[data-theme='light'] [data-slot='button'][data-variant='default'] {
-  box-shadow: 0 1px 2px rgba(16, 20, 26, 0.12), 0 6px 16px -8px rgba(22, 119, 106, 0.55);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 6px 16px -6px rgba(0, 122, 255, 0.45);
 }
 :root[data-theme='light'] [data-slot='button'][data-variant='default']:hover {
-  box-shadow: 0 2px 4px rgba(16, 20, 26, 0.14), 0 10px 22px -10px rgba(22, 119, 106, 0.6);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 10px 22px -8px rgba(0, 122, 255, 0.55);
 }
 
-/* Yorug' temada input/select ham oq karta ustida ko'rinishi uchun chegarasi kuchliroq. */
 :root[data-theme='light'] [data-slot='input'],
 :root[data-theme='light'] [data-slot='select-trigger'],
 :root[data-theme='light'] [data-slot='textarea'] {
   background-color: #ffffff;
-  border-color: rgba(18, 20, 24, 0.18);
+  border-color: rgba(60, 60, 67, 0.16);
 }
 
-/* Yorug' temada kartaning ichki "shisha" yorug'ligi kerak emas — o'rniga aniq chegara
-   va yumshoq soya ishlaydi (aks holda oq ustiga oq chiziq ko'rinmaydi). */
 :root[data-theme='light'] [data-slot='card'] {
   background-image: none;
   box-shadow: var(--shadow-card);
 }
 
-/* ── Yorug' temada "och" Tailwind matn ranglari ────────────────────────────────
-   Interfeysda ~120 joyda `text-amber-300`, `text-rose-300`, `text-sky-300` kabi
-   sinflar bor — ular QORONG'I fon uchun tanlangan va oq karta ustida deyarli
-   o'qilmaydi. Har bir faylni tahrirlash o'rniga yorug' temada shu sinflar semantik
-   `--*-text` tokenlariga qayta bog'lanadi (ranglar ma'nosi saqlanadi, kontrast esa
-   AA darajasiga chiqadi). */
 :root[data-theme='light'] .text-rose-200,
 :root[data-theme='light'] .text-rose-300,
 :root[data-theme='light'] .text-rose-400 { color: var(--danger-text); }
@@ -630,37 +603,23 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
 
 :root[data-theme='light'] .text-emerald-400 { color: var(--success-text); }
 
-/* Podium lentalari va shunga o'xshash "to'q fon + oq yozuv" elementlari yorug'
-   temada ham o'z kontrastini saqlaydi — ularning rangi utility emas, gradient. */
-
-/* Yuqori paneldagi "streak" va "tanga" chiplari `text-orange-400` / `text-amber-400`
-   ishlatadi — yorug' temada ular oq fon ustida deyarli ko'rinmasdi (1.7:1). */
 :root[data-theme='light'] .text-orange-300,
 :root[data-theme='light'] .text-orange-400 { color: var(--warning-text); }
 
-/* ── Mobil / Telegram Mini App uchun xavfsiz zonalar ──────────────────────────
-   Telegram WebApp to'liq ekranda ochilganda pastda "home indicator", ba'zi
-   qurilmalarda esa yuqorida "notch" bo'ladi. Sobit (fixed) elementlar shu
-   zonalarni hisobga olmasa, tugmalar barmoq yetmaydigan joyda qolib ketadi. */
 nav.ilm-mobile-tabbar {
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 }
 
-/* Test ekranidagi pastki navigatsiya paneli ham xuddi shunday. */
 @media (max-width: 639px) {
   .exam-bottom-bar {
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
-/* Mobil brauzerlarda 100vh manzil qatori ostiga kirib ketadi — svh ishonchli. */
 .min-h-screen-safe {
   min-height: 100svh;
 }
 
-/* Mobil (sensorli) ekranlarda kichik tugmalar barmoq uchun juda past bo'lib qoladi:
-   `sm` (32px) va `xs` (28px) sichqoncha uchun mos, barmoq uchun emas. Faqat kichik
-   ekranda minimal balandlik ko'tariladi — desktopda o'lchamlar o'zgarmaydi. */
 @media (max-width: 1023px) {
   [data-slot='button'][data-size='sm'],
   [data-slot='button'][data-size='icon-sm'] { min-height: 2.5rem; }
@@ -669,86 +628,68 @@ nav.ilm-mobile-tabbar {
   [data-slot='button'][data-size='icon-xs'] { min-height: 2.25rem; min-width: 2.25rem; }
 }
 
-/* Tab tugmalari ham sensorli ekranda balandroq bo'lsin. */
 @media (max-width: 1023px) {
   [data-slot='tabs-list'] { height: auto; }
   [data-slot='tabs-trigger'] { min-height: 2.25rem; }
 }
 
-/* Panel jadvallaridagi belgilash katakchalari mobil ekranda 16px — barmoq uchun kichik. */
 @media (max-width: 1023px) {
   [data-slot='checkbox'] { width: 1.25rem; height: 1.25rem; }
 }
 
-/* ── Mobil tipografika va zichlik ─────────────────────────────────────────────
-   Tipografik shkala desktop uchun kalibrlangan (asosiy matn 15px, sarlavha 36px).
-   375px ekranda o'sha o'lchamlar "kattalashib" ketadi: sarlavha ikki-uch qatorga
-   bo'linadi, karta ichidagi 20px bo'shliq bilan birga ekranga juda kam ma'lumot
-   sig'adi.
-
-   Yechim: ildiz shrift o'lchami 16px → 15px (barcha `rem` o'lchamlari — matn,
-   padding, gap, radius — bir tekis ~6% kichrayadi), ustiga eng katta sarlavhalar
-   alohida qisqartiriladi. Barmoq nishonlari 44px dan pastga tushmaydi:
-   `min-h-12` = 3rem = 45px. */
 @media (max-width: 640px) {
   html { font-size: 93.75%; }
 
-  /* Sarlavhalar mobil ekranda nomutanosib katta edi — alohida pasaytiriladi. */
   .text-4xl { font-size: 2rem; line-height: 1.1; }
   .text-3xl { font-size: 1.75rem; line-height: 1.15; }
   .text-2xl { font-size: 1.5rem; line-height: 1.2; }
   .text-xl { font-size: 1.25rem; line-height: 1.3; }
 
-  /* Kartalar ham zichroq: 20px ichki bo'shliq telefonda ko'p joy yeydi. */
-  [data-slot='card'] { --card-spacing: 1rem; border-radius: 16px; }
+  [data-slot='card'] { --card-spacing: 1rem; border-radius: 20px; }
 }
 
-/* ── Mobil tab-bar safe-area ────────────────────────────────────────────────── */
 .ilm-mobile-tabbar {
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
-/* ── Telegram Mini App ────────────────────────────────────────────────────────
-   Bu qoidalar FAQAT <html data-tg="on"> bo'lganda, ya'ni sahifa Telegram ichida
-   ochilganda kuchga kiradi (atributni `TelegramProvider` qo'yadi).
-   Telegram Web App'da barcha sahifalar qat'iy yorug' (light) rejimda ishlaydi. */
+/* ── Telegram Mini App ──────────────────────────────────────────────────────── */
 html[data-tg='on'],
 html[data-tg='on'] body {
   color-scheme: light !important;
-  background-color: #F8FAFC !important;
+  background-color: #F2F2F7 !important;
 }
 
 html[data-tg='on'],
 html[data-tg='on'][data-theme='dark'] {
-  --bg-page: #F8FAFC !important;
+  --bg-page: #F2F2F7 !important;
   --bg-surface: #FFFFFF !important;
   --surface-base: #FFFFFF !important;
   --surface-card: #FFFFFF !important;
   --surface-card-soft: #FFFFFF !important;
   --surface-card-medium: #FFFFFF !important;
   --surface-card-strong: #FFFFFF !important;
-  --border-card: rgba(18, 20, 24, 0.14) !important;
-  --border-soft: rgba(18, 20, 24, 0.09) !important;
-  --border-strong: rgba(18, 20, 24, 0.26) !important;
-  --text-primary: #16181a !important;
-  --text-secondary: #43474c !important;
-  --text-muted: #5c6067 !important;
-  --text-subtitle: #5c6067 !important;
-  --text-faint: #6f747b !important;
-  --foreground: #16181a !important;
-  --background: #F8FAFC !important;
+  --border-card: rgba(60, 60, 67, 0.12) !important;
+  --border-soft: rgba(60, 60, 67, 0.08) !important;
+  --border-strong: rgba(60, 60, 67, 0.22) !important;
+  --text-primary: #1C1C1E !important;
+  --text-secondary: #3A3A3C !important;
+  --text-muted: #6C6C70 !important;
+  --text-subtitle: #6C6C70 !important;
+  --text-faint: #8E8E93 !important;
+  --foreground: #1C1C1E !important;
+  --background: #F2F2F7 !important;
   --card: #FFFFFF !important;
-  --card-foreground: #16181a !important;
+  --card-foreground: #1C1C1E !important;
   --popover: #FFFFFF !important;
-  --popover-foreground: #16181a !important;
-  --primary: #2563EB !important;
+  --popover-foreground: #1C1C1E !important;
+  --primary: #007AFF !important;
   --primary-foreground: #FFFFFF !important;
-  --muted: #F1F5F9 !important;
-  --muted-foreground: #64748B !important;
-  --border: #E2E8F0 !important;
-  --input: #E2E8F0 !important;
-  --accent: #16776a !important;
-  --accent-text: #0f5c52 !important;
+  --muted: rgba(118, 118, 128, 0.12) !important;
+  --muted-foreground: #6C6C70 !important;
+  --border: rgba(60, 60, 67, 0.12) !important;
+  --input: rgba(60, 60, 67, 0.12) !important;
+  --accent: #007AFF !important;
+  --accent-text: #0062CC !important;
 }
 
 html[data-tg='on'] body {
@@ -761,8 +702,6 @@ html[data-tg='on'] .ilm-topbar {
   padding-inline: 0.75rem;
 }
 
-/* Telegram o'zining tepasidagi sarlavhasida "IlmIldizi" yoki bot nomini ko'rsatadi —
-   shuning uchun AppShell'dagi ikkinchi IlmIldizi logosini yashirib, ekranni tejaymiz. */
 html[data-tg='on'] .ilm-topbar .font-voice {
   display: none !important;
 }
@@ -834,37 +773,37 @@ html[data-tg='on'] .min-h-screen-safe {
   color: #f0f1f3 !important;
 }
 
-/* ── Toast (Sonner) Premium Design ─────────────────────────────────────────── */
+/* ── Toast (Sonner) iOS Banner Design ──────────────────────────────────────── */
 .cn-toast {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 16px !important;
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border-radius: 22px !important;
   font-family: inherit;
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-  color: #f0f6fc !important;
-  background-color: rgba(22, 27, 34, 0.94) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 14px 36px -8px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  color: #f5f5f7 !important;
+  background-color: rgba(28, 28, 30, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 .cn-toast [data-title],
 .cn-toast [data-description] {
-  color: #f0f6fc !important;
+  color: #f5f5f7 !important;
   opacity: 1 !important;
 }
 
 [data-theme='light'] .cn-toast,
 .light .cn-toast {
-  background-color: rgba(255, 255, 255, 0.96) !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-  color: #1a202c !important;
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12) !important;
+  background-color: rgba(255, 255, 255, 0.90) !important;
+  border-color: rgba(60, 60, 67, 0.12) !important;
+  color: #1c1c1e !important;
+  box-shadow: 0 14px 34px -6px rgba(0, 0, 0, 0.12) !important;
 }
 
 [data-theme='light'] .cn-toast [data-title],
 [data-theme='light'] .cn-toast [data-description],
 .light .cn-toast [data-title],
 .light .cn-toast [data-description] {
-  color: #1a202c !important;
+  color: #1c1c1e !important;
 }
 
 /* ── Continuous Marquee Ticker (Landing Page Results) ───────── */
@@ -903,14 +842,14 @@ html[data-tg='on'] .min-h-screen-safe {
 input::placeholder,
 textarea::placeholder,
 ::placeholder {
-  color: #71717a !important;
+  color: #8e8e93 !important;
   opacity: 1;
 }
 
 [data-theme='dark'] input::placeholder,
 [data-theme='dark'] textarea::placeholder,
 [data-theme='dark'] ::placeholder {
-  color: #a1a1aa !important;
+  color: #8e8e93 !important;
   opacity: 1;
 }
 
@@ -963,4 +902,3 @@ textarea::placeholder,
 [data-theme='dark'] [style*='color:#2563eb'] {
   color: var(--accent) !important;
 }
-

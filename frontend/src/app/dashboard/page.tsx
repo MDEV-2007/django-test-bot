@@ -20,8 +20,10 @@ import {
   Zap,
   Target,
   ArrowRight,
-  TrendingUp,
   Gift,
+  Flame,
+  Coins,
+  CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
@@ -123,35 +125,35 @@ function getNotifIcon(type: string, title: string) {
   const t = (type || '').toLowerCase();
   const lowerTitle = (title || '').toLowerCase();
   if (lowerTitle.includes('reaksiya') || lowerTitle.includes('like') || lowerTitle.includes('yurak')) {
-    return <PremiumIcon icon={Heart} tone="rose" size="sm" glow />;
+    return <PremiumIcon icon={Heart} tone="rose" size="sm" solid />;
   }
   if (lowerTitle.includes('izoh') || lowerTitle.includes('fikr') || lowerTitle.includes('comment')) {
-    return <PremiumIcon icon={MessageCircle} tone="sky" size="sm" glow />;
+    return <PremiumIcon icon={MessageCircle} tone="sky" size="sm" solid />;
   }
   if (t === 'battle') {
-    return <PremiumIcon icon={Swords} tone="purple" size="sm" glow />;
+    return <PremiumIcon icon={Swords} tone="purple" size="sm" solid />;
   }
   if (t === 'achievement') {
-    return <PremiumIcon icon={Trophy} tone="gold" size="sm" glow />;
+    return <PremiumIcon icon={Trophy} tone="gold" size="sm" solid />;
   }
   if (t === 'mission') {
-    return <PremiumIcon icon={Sparkles} tone="emerald" size="sm" glow />;
+    return <PremiumIcon icon={Sparkles} tone="emerald" size="sm" solid />;
   }
-  return <PremiumIcon icon={Bell} tone="sky" size="sm" glow />;
+  return <PremiumIcon icon={Bell} tone="sky" size="sm" solid />;
 }
 
 function DashboardSkeleton() {
   return (
     <div className="min-h-screen bg-[var(--bg-page)] p-4 sm:p-8 space-y-6">
-      <Skeleton className="h-64 w-full rounded-3xl bg-slate-200/70" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Skeleton className="h-44 w-full rounded-3xl bg-slate-200/70" />
-        <Skeleton className="h-44 w-full rounded-3xl bg-slate-200/70" />
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 rounded-3xl bg-slate-200/70" />
+          <Skeleton key={i} className="h-24 rounded-[24px] bg-muted" />
         ))}
+      </div>
+      <Skeleton className="h-64 w-full rounded-[28px] bg-muted" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Skeleton className="h-44 w-full rounded-[28px] bg-muted" />
+        <Skeleton className="h-44 w-full rounded-[28px] bg-muted" />
       </div>
     </div>
   );
@@ -160,12 +162,11 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const router = useRouter();
   const { access, authReady } = useAuthStore();
-  const { isDark, isLight } = useTheme();
+  const { isDark } = useTheme();
 
   const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
   const { data: lbData } = useApiQuery<LeaderboardData>('/api/leaderboard/');
 
-  // Mode Tabs: 'study' (Akademik O'quv) or 'arena' (Gamifikatsiya & Reyting)
   const [activeMode, setActiveMode] = useState<'study' | 'arena'>('study');
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -173,11 +174,9 @@ export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
 
-  // Daily Mystery Chest (Variable Reward)
   const [chestModalOpen, setChestModalOpen] = useState(false);
   const [chestStatus, setChestStatus] = useState<DailyChestStatus | null>(null);
 
-  // Smart Mistakes Notebook query (Aqlli Xatolar Daftari)
   type MistakesSummaryData = {
     total_mistakes: number;
     subject_counts: { name: string; count: number }[];
@@ -198,7 +197,7 @@ export default function DashboardPage() {
         body: JSON.stringify({}),
       });
       if (res && res.attempt_id) {
-        toast.success("Xatolar ustida ishlash testi boshlandi!");
+        toast.success('Xatolar ustida ishlash testi boshlandi!');
         refreshMistakes();
         router.push(`/tests/${res.attempt_id}`);
       } else if (res?.error) {
@@ -215,7 +214,6 @@ export default function DashboardPage() {
     if (data?.daily_chest) {
       setChestStatus(data.daily_chest);
     }
-    // Telegram bildirishnomasidan (?open_chest=1) kirganda avtomatik ochiladi
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('open_chest') === '1') {
@@ -294,7 +292,7 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-[var(--bg-page)] p-6 flex items-center justify-center">
-        <Card className="border-rose-200 bg-rose-50/80 p-6 text-rose-800 text-sm max-w-md rounded-3xl backdrop-blur-xl shadow-sm">
+        <Card className="border-destructive/30 bg-destructive/10 p-6 text-destructive text-sm max-w-md rounded-[28px] ios-glass shadow-sm">
           {error}
         </Card>
       </div>
@@ -312,13 +310,11 @@ export default function DashboardPage() {
   const lastAttempt = data.recent_attempts[0] || null;
   const continueTitle = lastAttempt
     ? lastAttempt.test_title
-    : (data.suggested_topic?.title || `${activeSubject} — Asosiy mavzulashtirilgan test`);
+    : data.suggested_topic?.title || `${activeSubject} — Asosiy mavzulashtirilgan test`;
 
-  // Daily Goal progress
   const targetGoals = 3;
   const currentGoals = Math.min(targetGoals, data.solved_today || (doneMissions > 0 ? doneMissions : 1));
 
-  // 7 Days of Week Dots
   const weekDays = [
     p.streak >= 1,
     p.streak >= 2,
@@ -329,7 +325,6 @@ export default function DashboardPage() {
     p.streak >= 7,
   ];
 
-  // Leaderboard rows
   const topList = lbData?.top?.slice(0, 5) || [
     { profile_id: 1, first_name: 'Shaxzoda', last_name: 'Farxodova', username: 'shaxzoda', avatar_url: '', xp: 4250, level: 12 },
     { profile_id: 2, first_name: 'Jasur', last_name: 'Bekov', username: 'jasur', avatar_url: '', xp: 3820, level: 11 },
@@ -351,109 +346,160 @@ export default function DashboardPage() {
       />
 
       {/* ============================================================ */}
-      {/* 1. TOP MODE SWITCHER TABS (O'QUV vs ARENA)                   */}
-      {/* Separates Academic learning from Gamification & Esports     */}
+      {/* 1. iOS SEGMENTED CONTROL + LIVE ACTIVITY ONLINE PEERS PILL   */}
       {/* ============================================================ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-        {/* Segmented Mode Pills with Theme Awareness */}
-        <div className="inline-flex p-1.5 rounded-2xl bg-card border border-border shadow-xs backdrop-blur-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Authentic iOS UISegmentedControl */}
+        <div className="ios-segmented inline-flex items-center self-start">
           <button
             type="button"
             onClick={() => setActiveMode('study')}
             className={cn(
-              'flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer select-none',
+              'flex items-center gap-2 px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
               activeMode === 'study'
-                ? 'bg-blue-600 text-white shadow-[0_2px_12px_rgba(37,99,235,0.35)]'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ? 'ios-segmented-thumb font-bold'
+                : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <BookOpen className="size-4" />
+            <BookOpen className="size-3.5 text-primary" />
             <span>O&apos;quv Markazi</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveMode('arena')}
             className={cn(
-              'flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer select-none',
+              'flex items-center gap-2 px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
               activeMode === 'arena'
-                ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-[0_2px_12px_rgba(249,115,22,0.35)]'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ? 'ios-segmented-thumb font-bold'
+                : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <Swords className="size-4" />
+            <Swords className="size-3.5 text-[#FF9500]" />
             <span>Arena &amp; Reyting</span>
             <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-orange-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#FF9500] opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-[#FF9500]" />
             </span>
           </button>
         </div>
 
-        {/* Online Users Widget */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-card border border-border shadow-xs backdrop-blur-xl">
-          {/* Pulsing green dot */}
+        {/* iOS Dynamic Island Style Online Users Pill */}
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card border border-border shadow-2xs self-start sm:self-auto">
           <span className="relative flex size-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-[#34C759]" />
           </span>
-          {/* Avatar stack */}
           {data.online_peers && data.online_peers.length > 0 && (
             <div className="flex -space-x-2">
               {data.online_peers.slice(0, 5).map((peer, i) => (
                 <Avatar key={i} className="size-6 ring-2 ring-card shrink-0">
                   <AvatarImage src={peer.avatar_url || ''} />
-                  <AvatarFallback className="bg-blue-100 text-blue-700 text-[9px] font-black">
+                  <AvatarFallback className="bg-primary/12 text-primary text-[9px] font-bold">
                     {peer.name?.slice(0, 2).toUpperCase() || '??'}
                   </AvatarFallback>
                 </Avatar>
               ))}
             </div>
           )}
-          <span className="text-xs font-bold text-foreground">
-            <strong className="text-emerald-500 font-black">{data.online_count || 0}</strong>
+          <span className="text-xs font-semibold text-foreground">
+            <strong className="text-[#34C759] font-extrabold font-mono">{data.online_count || 0}</strong>
             <span className="text-muted-foreground font-medium"> ta onlayn</span>
           </span>
         </div>
       </div>
 
       {/* ============================================================ */}
-      {/* 2. DESKTOP 2-COLUMN STRUCTURE: MAIN COLUMN + COMPANION SIDEBAR */}
-      {/* Responsive Architecture: Desktop 8/4 grid, Mobile 1-column  */}
+      {/* 2. iOS 18 HOME SCREEN GLANCEABLE WIDGETS ROW                 */}
+      {/* ============================================================ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
+          <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" solid />
+          <div className="min-w-0">
+            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              Bugun yechildi
+            </span>
+            <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+              {data.solved_today || 0} <span className="text-xs font-normal text-muted-foreground">test</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
+          <PremiumIcon icon={Flame} tone="amber" size="md" solid />
+          <div className="min-w-0">
+            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              Uzluksiz Streak
+            </span>
+            <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+              {p.streak || 0} <span className="text-xs font-normal text-muted-foreground">kun 🔥</span>
+            </p>
+          </div>
+        </div>
+
+        <Link href="/shop" className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3">
+          <PremiumIcon icon={Coins} tone="gold" size="md" solid />
+          <div className="min-w-0">
+            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              Tanga balansi
+            </span>
+            <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+              {(p.coins || 0).toLocaleString()}
+            </p>
+          </div>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => setActiveMode('arena')}
+          className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3 text-left cursor-pointer"
+        >
+          <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
+          <div className="min-w-0">
+            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              {rankInfo.title}
+            </span>
+            <p className="text-base sm:text-lg font-extrabold font-mono text-primary leading-tight">
+              {p.elo_rating || 1200} <span className="text-[11px] font-normal text-muted-foreground">ELO</span>
+            </p>
+          </div>
+        </button>
+      </div>
+
+      {/* ============================================================ */}
+      {/* 3. iPadOS SPLIT VIEW: MAIN COLUMN (8) + SMART STACK (4)      */}
       {/* ============================================================ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ========================================================== */}
-        {/* MAIN COLUMN (lg:col-span-8): ACADEMIC OR ARENA FOCUS       */}
-        {/* ========================================================== */}
         <div className="lg:col-span-8 space-y-6">
           {activeMode === 'study' ? (
             <>
-              {/* ACTIVATION HOOK: Agar foydalanuvchi hali bitta ham test tugatmagan bo'lsa */}
+              {/* ACTIVATION HOOK (0 attempts) */}
               {data.recent_attempts.length === 0 && (
-                <div className="relative overflow-hidden rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-card to-amber-500/10 p-5 sm:p-7 shadow-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="relative overflow-hidden rounded-[28px] border border-primary/25 bg-card p-5 sm:p-7 shadow-card">
+                  <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-primary/10 blur-2xl" />
+                  <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-2 max-w-xl">
-                      <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/15 px-3 py-0.5 text-xs font-bold text-primary">
-                        <Sparkles className="size-3.5 text-amber-500" /> Boshlang&apos;ich Qadam · 50 Tanga Bonus
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-3 py-0.5 text-xs font-bold text-primary">
+                        <Sparkles className="size-3.5 text-[#FF9500]" /> Boshlang&apos;ich Qadam · +50 Tanga Bonus
                       </div>
-                      <h2 className="text-xl sm:text-2xl font-black text-foreground">
+                      <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
                         🎯 3 daqiqalik ekspress sinov — Darajangizni aniqlang!
                       </h2>
                       <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                        Bor-yo&apos;g&apos;i 5 ta qiziqarli savol. Testni yakunlashingiz bilan haqiqiy darajangiz (A+, B+, C), 
+                        Bor-yo&apos;g&apos;i 5 ta qiziqarli savol. Testni yakunlashingiz bilan haqiqiy darajangiz (A+, B+, C),
                         zaif mavzular tahlili va <strong className="text-foreground">+50 Tanga hamda ilk olovingiz (Streak 🔥)</strong> faollashadi!
                       </p>
                     </div>
                     <Link
                       href="/tests"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-blue-600 px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-md hover:opacity-95 transition-all shrink-0 active:scale-95"
+                      className="ios-spring inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs sm:text-sm font-semibold text-primary-foreground shadow-[0_6px_18px_rgba(0,122,255,0.32)] shrink-0"
                     >
-                      <Play className="size-4 fill-white" /> Hozir boshlash (3 daqiqa)
+                      <Play className="size-4 fill-current" /> Hozir boshlash
                     </Link>
                   </div>
                 </div>
               )}
 
-              {/* 1. SINGLE COMMANDING PRIMARY HERO CTA */}
+              {/* 1. HERO FOCUS BANNER */}
               <HeroFocusBanner
                 user={{
                   first_name: firstName,
@@ -473,32 +519,29 @@ export default function DashboardPage() {
                 theme={isDark ? 'dark' : 'light'}
               />
 
-              {/* 2. CLEAN 25-MINUTE POMODORO TIMER CARD */}
+              {/* 2. POMODORO TIMER CARD */}
               <PomodoroTimerCard />
 
-              {/* 3. CURATED TESTS (PROGRESSIVE DISCLOSURE - ONLY 2 TESTS) */}
+              {/* 3. CURATED TESTS */}
               <ModernTestCenter
                 activeSubject={activeSubject}
                 weakReviewTopic={data.weak_review?.topic_title || null}
                 theme={isDark ? 'dark' : 'light'}
               />
 
-              {/* 4. SMART MISTAKES NOTEBOOK WIDGET (AQLLI XATOLAR DAFTARI) */}
-              <div className="relative overflow-hidden rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-gradient-to-br from-rose-50/70 via-card to-amber-50/30 dark:from-rose-950/20 dark:via-card dark:to-amber-950/20 p-5 sm:p-6 shadow-xs">
-                {/* Ambient background glow */}
-                <div className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-rose-400/10 blur-2xl" />
+              {/* 4. SMART MISTAKES NOTEBOOK WIDGET (Apple Health Diagnostic Style) */}
+              <div className="ios-card relative overflow-hidden rounded-[28px] p-5 sm:p-6">
+                <div className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-[#FF3B30]/10 blur-2xl" />
 
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-3.5">
-                    <div className="size-11 rounded-2xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-[0_4px_14px_rgba(244,63,94,0.3)] shrink-0">
-                      <Target className="size-5.5 stroke-[2.5]" />
-                    </div>
+                    <PremiumIcon icon={Target} tone="rose" size="lg" solid />
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm sm:text-base font-black text-foreground tracking-tight">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight">
                           Aqlli Xatolar Daftari
                         </h3>
-                        <span className="px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-wider">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#FF3B30]/12 text-[#D70015] dark:text-[#FF6961] text-[10px] font-bold uppercase tracking-wider">
                           AI Tahlil &amp; Mashq
                         </span>
                       </div>
@@ -508,11 +551,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* CTA Button */}
                   <Button
                     onClick={handleStartMistakesTest}
-                    disabled={startingMistakesTest || (mistakesSummary?.total_mistakes === 0)}
-                    className="shrink-0 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm px-5 py-2.5 rounded-2xl shadow-md shadow-rose-500/25 flex items-center gap-2 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+                    disabled={startingMistakesTest || mistakesSummary?.total_mistakes === 0}
+                    className="ios-spring shrink-0 bg-[#FF3B30] hover:bg-[#D70015] text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-full shadow-[0_6px_18px_rgba(255,59,48,0.28)] flex items-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {startingMistakesTest ? (
                       <span>Yuklanmoqda...</span>
@@ -525,39 +567,39 @@ export default function DashboardPage() {
                   </Button>
                 </div>
 
-                {/* Mistakes breakdown badges */}
+                {/* Mistakes breakdown pills */}
                 <div className="mt-4 pt-3.5 border-t border-border flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-card border border-rose-500/30 text-xs font-bold text-rose-600 dark:text-rose-400 shadow-xs">
-                    <span className="size-2 rounded-full bg-rose-500" />
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF3B30]/10 text-xs font-bold text-[#D70015] dark:text-[#FF6961]">
+                    <span className="size-2 rounded-full bg-[#FF3B30]" />
                     <span>Jami xatolar: {mistakesSummary?.total_mistakes ?? 0} ta</span>
                   </div>
                   {mistakesSummary?.subject_counts && mistakesSummary.subject_counts.length > 0 ? (
                     mistakesSummary.subject_counts.map((sc) => (
                       <div
                         key={sc.name}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-muted border border-border text-xs font-semibold text-foreground"
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-semibold text-foreground"
                       >
                         <span>{sc.name}:</span>
-                        <span className="font-bold text-rose-500">{sc.count}</span>
+                        <span className="font-mono font-bold text-[#FF3B30]">{sc.count}</span>
                       </div>
                     ))
                   ) : (
-                    <span className="text-xs text-muted-foreground italic">
+                    <span className="text-xs text-muted-foreground">
                       {!mistakesSummary
-                        ? "Xatolar tahlili yuklanmoqda..."
+                        ? 'Xatolar tahlili yuklanmoqda...'
                         : mistakesSummary.total_mistakes === 0
                         ? "Hozircha xato javoblaringiz yo'q, ajoyib natija! 🎯"
-                        : "Xatolar tahlili tayyorlanmoqda..."}
+                        : 'Xatolar tahlili tayyorlanmoqda...'}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* 5. TEZKOR O'QUV ASBOBLARI */}
+              {/* 5. iOS CONTROL CENTER QUICK STUDY MODULES */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-black text-foreground uppercase tracking-wider">
-                    O&apos;quv Qurollari
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    O&apos;quv Qurollari · Control Center
                   </h3>
                   <span className="text-xs font-medium text-muted-foreground">Fokus va xotira mashqlari</span>
                 </div>
@@ -565,47 +607,47 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                   <Link
                     href="/study"
-                    className="group rounded-2xl border border-border bg-card hover:border-primary/40 p-4 shadow-card hover:shadow-md transition-all hover:-translate-y-0.5"
+                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
                   >
-                    <div className="size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2.5 group-hover:scale-110 transition-transform">
-                      <Clock className="size-4" />
+                    <PremiumIcon icon={Clock} tone="sky" size="md" solid className="mb-3 group-hover:scale-105" />
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                        Fokus Xonasi
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                        Pomodoro &amp; Ambient tovushlar
+                      </p>
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-blue-600 transition-colors">
-                      Fokus Xonasi
-                    </h4>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                      Pomodoro &amp; Ambient tovushlar
-                    </p>
                   </Link>
 
                   <Link
                     href="/flashcards"
-                    className="group rounded-2xl border border-border bg-card hover:border-primary/40 p-4 shadow-card hover:shadow-md transition-all hover:-translate-y-0.5"
+                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
                   >
-                    <div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-2.5 group-hover:scale-110 transition-transform">
-                      <Layers className="size-4" />
+                    <PremiumIcon icon={Layers} tone="purple" size="md" solid className="mb-3 group-hover:scale-105" />
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-[#AF52DE] transition-colors">
+                        Flashcards
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                        Interval takrorlash &amp; lug&apos;at
+                      </p>
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-purple-600 transition-colors">
-                      Flashcards
-                    </h4>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                      Interval takrorlash &amp; lug&apos;at
-                    </p>
                   </Link>
 
                   <Link
                     href="/reels"
-                    className="group rounded-2xl border border-border bg-card hover:border-primary/40 p-4 shadow-card hover:shadow-md transition-all hover:-translate-y-0.5"
+                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
                   >
-                    <div className="size-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-600 dark:text-orange-400 mb-2.5 group-hover:scale-110 transition-transform">
-                      <Play className="size-4" />
+                    <PremiumIcon icon={Play} tone="rose" size="md" solid className="mb-3 group-hover:scale-105" />
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-[#FF2D55] transition-colors">
+                        Bilim Reels
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                        15-sekundlik tezkor savollar
+                      </p>
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-orange-600 transition-colors">
-                      Bilim Reels
-                    </h4>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                      15-sekundlik tezkor savollar
-                    </p>
                   </Link>
                 </div>
               </div>
@@ -622,20 +664,16 @@ export default function DashboardPage() {
                 theme={isDark ? 'dark' : 'light'}
               />
 
-              {/* EXPANDED WEEKLY LEADERBOARD & PODIUM IN ARENA */}
-              <div className="relative overflow-hidden rounded-3xl border border-amber-400/40 dark:border-amber-500/20 bg-gradient-to-b from-amber-500/10 via-card to-card shadow-card space-y-5 p-5 sm:p-6">
-                {/* Ambient glow */}
-                <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-amber-400/10 blur-3xl" />
-                <div className="pointer-events-none absolute -left-16 bottom-0 size-48 rounded-full bg-blue-500/6 blur-3xl" />
+              {/* iOS GAME CENTER WEEKLY LEADERBOARD & PODIUM */}
+              <div className="ios-card relative overflow-hidden rounded-[28px] space-y-5 p-5 sm:p-6">
+                <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#FF9500]/10 blur-3xl" />
 
                 {/* Header */}
                 <div className="relative flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-[0_4px_12px_rgba(251,191,36,0.4)]">
-                      <Trophy className="size-4 text-white" />
-                    </div>
+                    <PremiumIcon icon={Trophy} tone="amber" size="md" solid />
                     <div>
-                      <h3 className="text-sm font-black text-foreground tracking-tight">
+                      <h3 className="text-sm font-extrabold text-foreground tracking-tight">
                         Haftalik Liga &amp; Podest
                       </h3>
                       <p className="text-[11px] font-medium text-muted-foreground">
@@ -645,22 +683,24 @@ export default function DashboardPage() {
                   </div>
                   <Link
                     href="/leaderboard"
-                    className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 transition bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl hover:bg-amber-500/20 active:scale-95"
+                    className="ios-spring flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-3.5 py-1.5 rounded-full"
                   >
-                    Barchasi <ArrowRight className="size-3" />
+                    Barchasi <ArrowRight className="size-3.5" />
                   </Link>
                 </div>
 
                 {/* Top 3 Podium */}
-                <div className="relative grid grid-cols-3 gap-2 pt-1 pb-2 items-end">
-                  {/* 2nd Place — Silver */}
+                <div className="relative grid grid-cols-3 gap-2.5 pt-2 pb-2 items-end">
+                  {/* 2nd Place */}
                   {topList[1] && (
-                    <div className="flex flex-col items-center rounded-2xl border border-border bg-card p-3 text-center shadow-xs relative">
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-slate-500 px-2 py-0.5 text-[9px] font-black text-white shadow-xs whitespace-nowrap">#2 KUMUSH</span>
+                    <div className="flex flex-col items-center rounded-[22px] border border-border bg-muted/40 p-3 text-center relative">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#8E8E93] px-2.5 py-0.5 text-[9px] font-bold text-white whitespace-nowrap">
+                        #2 KUMUSH
+                      </span>
                       <span className="text-base mt-2">🥈</span>
-                      <Avatar className="size-10 border-2 border-slate-400 my-1.5 shadow-xs">
+                      <Avatar className="size-10 border-2 border-[#8E8E93] my-1.5">
                         <AvatarImage src={topList[1].avatar_url} />
-                        <AvatarFallback className="text-[10px] font-black bg-muted text-muted-foreground">
+                        <AvatarFallback className="text-[10px] font-bold bg-card text-foreground">
                           {topList[1].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -673,92 +713,85 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* 1st Place — Gold Champion */}
+                  {/* 1st Place */}
                   {topList[0] && (
-                    <div className="flex flex-col items-center rounded-2xl border-2 border-amber-500 bg-card p-3.5 text-center shadow-[0_8px_24px_rgba(251,191,36,0.25)] relative -translate-y-2">
-                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[9px] font-black text-white shadow-md whitespace-nowrap">#1 CHEMPION</span>
+                    <div className="flex flex-col items-center rounded-[24px] border-2 border-[#FF9500] bg-card p-3.5 text-center shadow-[0_8px_24px_rgba(255,149,0,0.2)] relative -translate-y-2">
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FFCC00] px-2.5 py-0.5 text-[9px] font-black text-slate-950 shadow-2xs whitespace-nowrap">
+                        #1 CHEMPION
+                      </span>
                       <span className="text-xl mt-2">👑</span>
-                      <Avatar className="size-12 border-2 border-amber-400 my-1.5 shadow-[0_4px_12px_rgba(251,191,36,0.3)]">
+                      <Avatar className="size-12 border-2 border-[#FF9500] my-1.5">
                         <AvatarImage src={topList[0].avatar_url} />
-                        <AvatarFallback className="text-sm font-black bg-gradient-to-br from-amber-400 to-orange-500 text-white">
+                        <AvatarFallback className="text-sm font-black bg-[#FF9500] text-white">
                           {topList[0].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs font-black text-foreground truncate w-full">
+                      <span className="text-xs font-extrabold text-foreground truncate w-full">
                         {topList[0].first_name || topList[0].username}
                       </span>
-                      <span className="text-[11px] font-mono font-black text-amber-500 mt-0.5">
+                      <span className="text-[11px] font-mono font-black text-[#FF9500] mt-0.5">
                         {topList[0].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
                   )}
 
-                  {/* 3rd Place — Bronze */}
+                  {/* 3rd Place */}
                   {topList[2] && (
-                    <div className="flex flex-col items-center rounded-2xl border border-border bg-card p-3 text-center shadow-xs relative">
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-orange-600 px-2 py-0.5 text-[9px] font-black text-white shadow-xs whitespace-nowrap">#3 BRONZA</span>
+                    <div className="flex flex-col items-center rounded-[22px] border border-border bg-muted/40 p-3 text-center relative">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#C93400] px-2.5 py-0.5 text-[9px] font-bold text-white whitespace-nowrap">
+                        #3 BRONZA
+                      </span>
                       <span className="text-base mt-2">🥉</span>
-                      <Avatar className="size-10 border-2 border-orange-400 my-1.5 shadow-xs">
+                      <Avatar className="size-10 border-2 border-[#C93400] my-1.5">
                         <AvatarImage src={topList[2].avatar_url} />
-                        <AvatarFallback className="text-[10px] font-black bg-muted text-muted-foreground">
+                        <AvatarFallback className="text-[10px] font-bold bg-card text-foreground">
                           {topList[2].username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-[11px] font-bold text-foreground truncate w-full">
                         {topList[2].first_name || topList[2].username}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-orange-500 mt-0.5">
+                      <span className="text-[10px] font-mono font-bold text-[#C93400] dark:text-[#FF9F0A] mt-0.5">
                         {topList[2].xp.toLocaleString('uz-UZ')} XP
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* Ranked List — theme-aware rows */}
-                <div className="space-y-1.5 relative">
+                {/* iOS Inset Grouped Leaderboard Rows */}
+                <div className="divide-y divide-border rounded-[22px] border border-border bg-muted/30 overflow-hidden">
                   {topList.map((item, idx) => {
                     const isCurrentUser = item.username === p.username;
                     const itemFullName = `${item.first_name || item.username} ${item.last_name || ''}`.trim();
-                    const rankColors = ['text-amber-500', 'text-slate-400', 'text-orange-500'];
-                    const rankBg = [
-                      'bg-amber-500/10 border-amber-500/30',
-                      'bg-muted/80 border-border',
-                      'bg-orange-500/10 border-orange-500/30',
-                    ];
 
                     return (
                       <div
                         key={idx}
                         className={cn(
-                          'flex items-center justify-between px-3.5 py-2.5 rounded-2xl border transition-all',
-                          isCurrentUser
-                            ? 'bg-blue-500/15 border-blue-500/40 shadow-xs'
-                            : idx < 3
-                              ? rankBg[idx]
-                              : 'border-border bg-card/60 hover:bg-muted/50'
+                          'flex items-center justify-between px-4 py-3 transition-colors',
+                          isCurrentUser ? 'bg-primary/10' : 'hover:bg-muted/60'
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className={cn(
-                            'font-mono text-[11px] font-black w-5 text-center shrink-0',
-                            isCurrentUser ? 'text-blue-500' : idx < 3 ? rankColors[idx] : 'text-muted-foreground'
-                          )}>
+                          <span
+                            className={cn(
+                              'font-mono text-xs font-bold w-5 text-center shrink-0',
+                              isCurrentUser ? 'text-primary' : idx === 0 ? 'text-[#FF9500]' : 'text-muted-foreground'
+                            )}
+                          >
                             #{idx + 1}
                           </span>
-                          <Avatar className={cn('size-7 shrink-0 border', idx === 0 ? 'border-amber-400' : idx === 1 ? 'border-border' : idx === 2 ? 'border-orange-400' : 'border-border')}>
+                          <Avatar className="size-7 shrink-0 border border-border">
                             <AvatarImage src={item.avatar_url} />
-                            <AvatarFallback className="text-[9px] font-black bg-muted text-muted-foreground">
+                            <AvatarFallback className="text-[9px] font-bold bg-card text-muted-foreground">
                               {item.username.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <span className={cn('text-xs font-bold truncate', isCurrentUser ? 'text-primary' : 'text-foreground')}>
+                          <span className={cn('text-xs font-semibold truncate', isCurrentUser ? 'text-primary font-bold' : 'text-foreground')}>
                             {isCurrentUser ? `${itemFullName} (Siz)` : itemFullName}
                           </span>
                         </div>
-                        <span className={cn(
-                          'font-mono text-[11px] font-black shrink-0 pl-2',
-                          isCurrentUser ? 'text-primary' : idx === 0 ? 'text-amber-500' : 'text-muted-foreground'
-                        )}>
+                        <span className="font-mono text-xs font-bold text-primary shrink-0 pl-2">
                           {item.xp.toLocaleString('uz-UZ')} XP
                         </span>
                       </div>
@@ -766,14 +799,15 @@ export default function DashboardPage() {
                   })}
                 </div>
 
-                {/* Reward strip */}
-                <div className="flex items-center justify-between rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs">
+                {/* Reward Strip */}
+                <div className="flex items-center justify-between rounded-[18px] bg-[#FF9500]/12 px-4 py-3 text-xs">
                   <span className="flex items-center gap-2 text-foreground font-medium">
-                    <Zap className="size-3.5 text-orange-500 fill-orange-500" />
-                    G&apos;alaba: <strong className="text-orange-500 font-black">+50 XP</strong> va <strong className="text-amber-500 font-black">+25 tanga</strong>
+                    <Zap className="size-3.5 text-[#FF9500] fill-[#FF9500]" />
+                    G&apos;alaba: <strong className="text-[#C93400] dark:text-[#FF9F0A] font-bold">+50 XP</strong> va{' '}
+                    <strong className="text-[#C93400] dark:text-[#FF9F0A] font-bold">+25 tanga</strong>
                   </span>
-                  <span className="font-black text-amber-600 dark:text-amber-400 bg-amber-500/20 border border-amber-500/40 px-2.5 py-1 rounded-xl text-[10px]">
-                    🏆 Oltin Liga: Top 10
+                  <span className="font-bold text-[#C93400] dark:text-[#FF9F0A] bg-[#FF9500]/15 px-2.5 py-0.5 rounded-full text-[10px]">
+                    🏆 Oltin Liga
                   </span>
                 </div>
               </div>
@@ -782,7 +816,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ========================================================== */}
-        {/* COMPANION SIDEBAR (lg:col-span-4): GAMIFICATION & SOCIAL   */}
+        {/* COMPANION SMART STACK SIDEBAR (lg:col-span-4)              */}
         {/* ========================================================== */}
         <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-20">
           {/* 1. DAILY GOAL & STREAK WIDGET */}
@@ -796,142 +830,128 @@ export default function DashboardPage() {
             theme={isDark ? 'dark' : 'light'}
           />
 
-          {/* 2. KUNDALIK SIRLI SANDIQ */}
+          {/* 2. KUNDALIK SIRLI SANDIQ (Apple Arcade Style Reward Card) */}
           <div
             onClick={() => setChestModalOpen(true)}
             className={cn(
-              "group relative overflow-hidden rounded-3xl p-5 border transition-all duration-300 cursor-pointer select-none",
-              chestStatus?.can_claim !== false
-                ? "border-amber-400/90 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-500/15 shadow-[0_4px_25px_rgba(245,158,11,0.15)] hover:shadow-[0_6px_30px_rgba(245,158,11,0.25)] hover:scale-[1.01]"
-                : "border-border bg-card hover:border-border/80 shadow-card"
+              'ios-card ios-card-interactive group relative overflow-hidden rounded-[26px] p-5 cursor-pointer select-none',
+              chestStatus?.can_claim !== false &&
+                'border-[#FF9500]/50 bg-gradient-to-br from-[#FF9500]/12 via-card to-[#FFCC00]/10'
             )}
           >
-            {/* Shimmer light effect if claimable */}
-            {chestStatus?.can_claim !== false && (
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-            )}
-
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3.5 min-w-0">
-                <div className={cn(
-                  "size-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110",
-                  chestStatus?.can_claim !== false
-                    ? "bg-gradient-to-br from-amber-400 to-yellow-500 border-amber-300 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-bounce"
-                    : "bg-muted border-border text-muted-foreground"
-                )}>
-                  <Gift className="size-6" />
-                </div>
+                <PremiumIcon icon={Gift} tone="amber" size="lg" solid />
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <Badge className={cn(
-                      "text-[9px] font-black px-2 py-0.2 uppercase tracking-wider",
-                      chestStatus?.can_claim !== false
-                        ? "bg-amber-100 text-amber-800 border-amber-300"
-                        : "bg-muted text-muted-foreground border-border"
-                    )}>
-                      {chestStatus?.can_claim !== false ? "🎁 Ochishga tayyor!" : "✅ Bugun ochildi"}
-                    </Badge>
+                    <span
+                      className={cn(
+                        'rounded-full text-[9px] font-bold px-2.5 py-0.5 uppercase tracking-wider',
+                        chestStatus?.can_claim !== false
+                          ? 'bg-[#FF9500]/15 text-[#C93400] dark:text-[#FFD60A]'
+                          : 'bg-muted text-muted-foreground'
+                      )}
+                    >
+                      {chestStatus?.can_claim !== false ? '🎁 Ochishga tayyor!' : '✅ Bugun ochildi'}
+                    </span>
                     {chestStatus?.streak_bonus_pct ? (
-                      <span className="text-[10px] font-bold text-orange-500">
+                      <span className="text-[10px] font-bold text-[#FF9500]">
                         +{chestStatus.streak_bonus_pct}% bonus
                       </span>
                     ) : null}
                   </div>
-                  <h4 className="text-xs sm:text-sm font-black text-foreground leading-snug truncate">
+                  <h4 className="text-xs sm:text-sm font-bold text-foreground leading-snug truncate">
                     Kundalik Sirli Sandiq
                   </h4>
                   <p className="text-[11px] text-muted-foreground truncate">
                     {chestStatus?.can_claim !== false
-                      ? "500 XP gacha, tangalar yoki Freeze!"
-                      : "Ertaga yangi kutilmagan mukofot kutmoqda"}
+                      ? '500 XP gacha, tangalar yoki Freeze!'
+                      : 'Ertaga yangi kutilmagan mukofot kutmoqda'}
                   </p>
                 </div>
               </div>
               <div className="shrink-0">
-                <Button
-                  size="sm"
+                <span
                   className={cn(
-                    "rounded-xl text-xs font-black shadow-xs",
+                    'inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-bold',
                     chestStatus?.can_claim !== false
-                      ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:from-amber-400 hover:to-yellow-400"
-                      : "bg-muted text-foreground hover:bg-muted/80"
+                      ? 'bg-[#FF9500] text-white shadow-[0_4px_12px_rgba(255,149,0,0.3)]'
+                      : 'bg-muted text-foreground'
                   )}
                 >
-                  {chestStatus?.can_claim !== false ? "Ochish" : "Ko'rish"}
-                </Button>
+                  {chestStatus?.can_claim !== false ? 'Ochish' : "Ko'rish"}
+                </span>
               </div>
             </div>
           </div>
 
           {/* 3. BONUS QUEST BOX */}
-          <Card className="rounded-3xl border border-border bg-card p-5 shadow-card space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="size-12 shrink-0 rounded-2xl overflow-hidden shadow-xs border border-border ring-2 ring-orange-500/10">
+          <Card className="rounded-[26px] border border-border bg-card p-5 shadow-card space-y-3">
+            <div className="flex items-center gap-3.5">
+              <div className="size-12 shrink-0 rounded-[14px] overflow-hidden shadow-2xs border border-border">
                 <img src="/images/gift-box.jpg" alt="Gift" className="size-full object-cover" />
               </div>
               <div className="min-w-0 space-y-0.5">
-                <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 text-[9px] font-black px-2 py-0.2">
+                <span className="inline-block rounded-full bg-[#FF9500]/14 text-[#C93400] dark:text-[#FF9F0A] text-[9px] font-bold px-2.5 py-0.5">
                   KUNLIK BONUS KVEST
-                </Badge>
-                <p className="text-xs sm:text-sm font-black text-foreground leading-snug">
+                </span>
+                <p className="text-xs sm:text-sm font-bold text-foreground leading-snug">
                   Yana 2 ta test yeching va 200 tanga oling! 🎁
                 </p>
                 <p className="text-[10px] text-muted-foreground font-mono font-semibold">Progress: 3 / 5 test</p>
               </div>
             </div>
 
-            <div className="space-y-1 pt-1">
+            <div className="pt-1">
               <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.4)]"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: '60%' }}
                 />
               </div>
             </div>
           </Card>
 
-          {/* 4. MINI LEADERBOARD */}
+          {/* 4. MINI LEADERBOARD (iOS Inset Grouped List) */}
           {activeMode === 'study' && (
-            <Card className="rounded-3xl border border-border bg-card p-5 shadow-card space-y-3.5">
+            <Card className="rounded-[26px] border border-border bg-card p-5 shadow-card space-y-3.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex size-6 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500">
-                    <Trophy className="size-3.5" />
-                  </div>
-                  <h3 className="text-xs font-black text-foreground uppercase tracking-wider">
+                <div className="flex items-center gap-2.5">
+                  <PremiumIcon icon={Trophy} tone="amber" size="xs" solid />
+                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
                     Haftalik Reyting
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveMode('arena')}
-                  className="text-[11px] font-bold text-primary hover:underline transition cursor-pointer"
+                  className="text-xs font-semibold text-primary hover:underline transition cursor-pointer"
                 >
                   To&apos;liq →
                 </button>
               </div>
 
-              <div className="space-y-2 pt-0.5">
+              <div className="divide-y divide-border rounded-[18px] bg-muted/40 border border-border overflow-hidden">
                 {topList.slice(0, 3).map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2 rounded-xl border border-border bg-muted/40 text-xs shadow-xs"
+                    className="flex items-center justify-between px-3.5 py-2.5 text-xs"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-mono font-bold text-muted-foreground w-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-[10px] font-mono font-bold text-muted-foreground w-4">
                         #{idx + 1}
                       </span>
                       <Avatar className="size-6 border border-border shrink-0">
                         <AvatarImage src={item.avatar_url} />
-                        <AvatarFallback className="text-[9px] font-bold bg-muted text-muted-foreground">
+                        <AvatarFallback className="text-[9px] font-bold bg-card text-muted-foreground">
                           {item.username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-bold text-foreground truncate max-w-[120px]">
+                      <span className="font-semibold text-foreground truncate max-w-[120px]">
                         {item.first_name || item.username}
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] font-black text-primary">
+                    <span className="font-mono text-[11px] font-bold text-primary">
                       {item.xp.toLocaleString('uz-UZ')} XP
                     </span>
                   </div>
@@ -941,7 +961,7 @@ export default function DashboardPage() {
           )}
 
           {/* 5. ONLINE COMMUNITY PRESENCE */}
-          <div className="rounded-3xl border border-border bg-card p-4 shadow-card">
+          <div className="rounded-[26px] border border-border bg-card p-4 shadow-card">
             <PresenceRow
               count={data.online_count}
               peers={data.online_peers ?? []}
@@ -951,21 +971,20 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* NOTIFICATION POPOVER MODAL (WHEN BELL CLICKED) */}
+      {/* iOS NOTIFICATION CENTER SHEET POPOVER */}
       {showNotifications && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs"
+            className="fixed inset-0 z-40 bg-black/35 backdrop-blur-xs"
             onClick={() => setShowNotifications(false)}
           />
-          <div className="fixed right-4 sm:right-8 top-20 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-3xl border border-border bg-card/95 backdrop-blur-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95 text-card-foreground">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3.5 border-b border-border bg-muted/50">
+          <div className="fixed right-4 sm:right-8 top-18 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-[28px] border border-border bg-card/90 ios-glass-heavy shadow-2xl z-50 overflow-hidden animate-scaleIn text-card-foreground">
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
               <div className="flex items-center gap-2">
                 <Bell className="size-4 text-primary" />
                 <h3 className="text-sm font-bold text-foreground">Bildirishnomalar</h3>
                 {unreadCount > 0 && (
-                  <Badge className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary font-bold border border-primary/20">
+                  <Badge className="text-[10px] px-2 py-0 h-4.5 rounded-full bg-primary/12 text-primary font-bold border-0">
                     {unreadCount} yangi
                   </Badge>
                 )}
@@ -979,25 +998,23 @@ export default function DashboardPage() {
                     title="Barchasini o'qilgan deb belgilash"
                   >
                     <CheckCheck className="size-3.5" />
-                    <span>Barchasi o&apos;qildi</span>
+                    <span>O&apos;qildi</span>
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={() => setShowNotifications(false)}
-                  className="size-7 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                  className="size-7 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                   aria-label="Yopish"
                 >
-                  <X className="size-4" />
+                  <X className="size-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Body */}
             <div className="max-h-[380px] overflow-y-auto divide-y divide-border">
               {loadingNotifs && notifications.length === 0 ? (
                 <div className="p-6 space-y-3">
-                  <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
                   <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
                   <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
                 </div>
@@ -1018,7 +1035,7 @@ export default function DashboardPage() {
                     onClick={() => !n.is_read && handleMarkSingleRead(n.id)}
                     className={cn(
                       'flex items-start gap-3 p-3.5 transition-colors cursor-pointer',
-                      n.is_read ? 'hover:bg-muted/50' : 'bg-primary/5 hover:bg-primary/10'
+                      n.is_read ? 'hover:bg-muted/50' : 'bg-primary/6 hover:bg-primary/10'
                     )}
                   >
                     <div className="shrink-0 pt-0.5">
@@ -1026,7 +1043,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <p className={cn('text-xs font-bold truncate', n.is_read ? 'text-foreground' : 'text-primary font-black')}>
+                        <p className={cn('text-xs font-bold truncate', n.is_read ? 'text-foreground' : 'text-primary')}>
                           {n.title}
                         </p>
                         {!n.is_read && (
@@ -1047,15 +1064,14 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Footer */}
-            <div className="p-3 border-t border-border bg-muted/50 text-center">
+            <div className="p-3 border-t border-border bg-muted/40 text-center">
               <Link
                 href="/feed"
                 onClick={() => setShowNotifications(false)}
-                className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
+                className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
               >
                 <span>Hamjamiyat muhokamalariga o&apos;tish</span>
-                <ChevronRight className="size-3" />
+                <ChevronRight className="size-3.5" />
               </Link>
             </div>
           </div>
@@ -1067,8 +1083,8 @@ export default function DashboardPage() {
         isOpen={chestModalOpen}
         onClose={() => setChestModalOpen(false)}
         initialStatus={chestStatus}
-        onClaimSuccess={(newStats) => {
-          setChestStatus((prev) => prev ? { ...prev, can_claim: false } : null);
+        onClaimSuccess={() => {
+          setChestStatus((prev) => (prev ? { ...prev, can_claim: false } : null));
         }}
       />
     </ModernAppLayout>

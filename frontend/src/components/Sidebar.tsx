@@ -6,16 +6,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
-  Headphones,
   FileCheck2,
   Bot,
-  Sparkles,
   Layers,
   Swords,
   Trophy,
   User,
   BarChart3,
-  ShoppingBag,
   Crown,
   LogOut,
   X,
@@ -23,6 +20,7 @@ import {
   ShieldCheck,
   BookOpen,
   Film,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -31,7 +29,6 @@ import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import { BrandMark } from '@/components/BrandMark';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/hooks/useTheme';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 
 interface SidebarProps {
@@ -66,28 +63,27 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Asosiy',
     items: [
-      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'indigo', api: '/api/dashboard/home/' },
-      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'Milliy / BBA', tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
+      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
+      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'BMB', tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
       { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'], teacherOrAdminOnly: true },
-      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'sky', matchPrefixes: ['/library'], api: '/api/learning/library/' },
-      { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, tone: 'cyan', featureKey: 'ai_mentor' },
+      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'indigo', matchPrefixes: ['/library'], api: '/api/learning/library/' },
+      { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, tone: 'purple', featureKey: 'ai_mentor' },
     ],
   },
-
   {
     label: 'Bellashuv & Amaliyot',
     items: [
-      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: '60s 🔥', glow: true, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
-      { href: '/battles', label: '1v1 Arena (Jang)', icon: Swords, badge: 'LIVE', glow: true, tone: 'rose', featureKey: 'battles', matchPrefixes: ['/games'] },
+      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: '60s', glow: true, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
+      { href: '/battles', label: '1v1 Arena (Jang)', icon: Swords, badge: 'LIVE', glow: true, tone: 'amber', featureKey: 'battles', matchPrefixes: ['/games'] },
       { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/feed', '/leaderboard'] },
-      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'amber', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
+      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'cyan', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
     ],
   },
   {
     label: 'Kabinet',
     items: [
-      { href: '/profile', label: 'Profilim', icon: User, badge: null, tone: 'primary', matchPrefixes: ['/profile'] },
-      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, tone: 'indigo', api: '/api/analytics/' },
+      { href: '/profile', label: 'Profilim', icon: User, badge: null, tone: 'sky', matchPrefixes: ['/profile'] },
+      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, tone: 'emerald', api: '/api/analytics/' },
       { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'PRO', tone: 'gold', vip: true },
     ],
   },
@@ -113,41 +109,40 @@ export default function Sidebar({
   const isTeacher = pathname.startsWith('/teacher');
   const isAdmin = pathname.startsWith('/panel');
 
-  if (isTeacher || isAdmin) return null; // Teacher & Admin panellari o'z layoutiga ega
+  if (isTeacher || isAdmin) return null;
 
   const isActive = (item: NavItem) =>
     pathname === item.href || (item.matchPrefixes?.some((p) => pathname.startsWith(p)) ?? false);
 
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between overflow-y-auto scrollbar-none px-4 py-5 select-none bg-card text-card-foreground">
-      {/* 1. BRAND HEADER */}
+    <div className="flex h-full flex-col justify-between overflow-y-auto scrollbar-none px-3.5 py-5 select-none bg-card/85 ios-glass text-card-foreground">
+      {/* 1. iPadOS BRAND HEADER */}
       <div className="space-y-5">
         <div className="flex items-center justify-between px-2">
           <Link href="/dashboard" onClick={onMobileClose} className="group flex items-center gap-2.5">
-            <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl overflow-hidden border border-border bg-background transition-transform group-hover:scale-105">
-              <BrandMark size={36} rounded="rounded-xl" />
+            <div className="relative flex size-9.5 shrink-0 items-center justify-center rounded-[12px] overflow-hidden border border-border bg-background shadow-2xs transition-transform group-hover:scale-105">
+              <BrandMark size={36} rounded="rounded-[11px]" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-bold tracking-tight text-foreground">
+                <span className="text-[15px] font-extrabold tracking-[-0.02em] text-foreground">
                   Ilm<span className="text-primary">Ildizi</span>
                 </span>
-                <span className="rounded-md border border-border bg-muted/60 px-1.5 py-0.2 text-[9px] font-semibold text-muted-foreground uppercase">
-                  v2.0
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary uppercase">
+                  iOS
                 </span>
               </div>
               <p className="text-[11px] font-medium text-muted-foreground truncate">
-                Ta&apos;lim Platformasi
+                Intellektual Ta&apos;lim
               </p>
             </div>
           </Link>
 
-          {/* Mobil yopish tugmasi */}
           {onMobileClose && (
             <button
               type="button"
               onClick={onMobileClose}
-              className="lg:hidden flex size-8 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground hover:text-foreground transition cursor-pointer"
+              className="lg:hidden ios-spring flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
               aria-label="Yopish"
             >
               <X className="size-4" />
@@ -162,26 +157,32 @@ export default function Sidebar({
               <Link
                 href="/teacher"
                 onClick={onMobileClose}
-                className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+                className="ios-spring flex items-center justify-between rounded-[14px] border border-primary/20 bg-primary/8 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/14"
               >
-                <GraduationCap className="size-4 shrink-0" />
-                <span className="truncate">O&apos;qituvchi paneli</span>
+                <span className="flex items-center gap-2 truncate">
+                  <GraduationCap className="size-4 shrink-0" />
+                  <span className="truncate">O&apos;qituvchi paneli</span>
+                </span>
+                <ChevronRight className="size-3.5 opacity-70" />
               </Link>
             )}
             {user.is_superadmin && (
               <Link
                 href="/panel"
                 onClick={onMobileClose}
-                className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-2.5 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                className="ios-spring flex items-center justify-between rounded-[14px] border border-destructive/20 bg-destructive/8 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/14"
               >
-                <ShieldCheck className="size-4 shrink-0" />
-                <span className="truncate">Super Admin paneli</span>
+                <span className="flex items-center gap-2 truncate">
+                  <ShieldCheck className="size-4 shrink-0" />
+                  <span className="truncate">Super Admin paneli</span>
+                </span>
+                <ChevronRight className="size-3.5 opacity-70" />
               </Link>
             )}
           </div>
         )}
 
-        {/* 2. NAVIGATION GROUPS */}
+        {/* 2. iOS SETTINGS-STYLE NAVIGATION GROUPS */}
         <nav className="space-y-5">
           {NAV_GROUPS.map((group, gIdx) => {
             const isTeacherOrAdmin = Boolean(
@@ -197,8 +198,8 @@ export default function Sidebar({
             if (visibleItems.length === 0) return null;
 
             return (
-              <div key={gIdx} className="space-y-1">
-                <span className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div key={gIdx} className="space-y-1.5">
+                <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   {group.label}
                 </span>
                 <div className="space-y-0.5">
@@ -214,10 +215,10 @@ export default function Sidebar({
                         onMouseEnter={() => item.api && prefetchApi(item.api)}
                         onTouchStart={() => item.api && prefetchApi(item.api)}
                         className={cn(
-                          'group relative flex min-h-[38px] items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors duration-150',
+                          'ios-spring group relative flex min-h-[42px] items-center justify-between rounded-[14px] px-2.5 py-1.5 text-[13px] transition-all',
                           active
-                            ? 'bg-primary/10 text-primary font-semibold'
-                            : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground font-medium'
+                            ? 'bg-primary text-white font-semibold shadow-[0_4px_14px_rgba(0,122,255,0.28)]'
+                            : 'text-foreground/85 hover:bg-muted/70 hover:text-foreground font-medium'
                         )}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
@@ -225,23 +226,27 @@ export default function Sidebar({
                             icon={Icon as any}
                             tone={item.tone || 'primary'}
                             size="xs"
-                            glow={active}
+                            solid={!active}
+                            className={cn(
+                              active && 'bg-white/20 border-white/30 text-white shadow-none'
+                            )}
                           />
-                          <span className="truncate">{item.label}</span>
+                          <span className="truncate tracking-[-0.01em]">{item.label}</span>
                         </div>
 
-                        {/* Monoxrom / Minimalist Badges */}
                         {item.badge && (
                           <span
                             className={cn(
-                              'rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-tight shrink-0 transition-all select-none border',
-                              item.glow
-                                ? 'bg-destructive/10 text-destructive border-destructive/20'
+                              'rounded-full px-2 py-0.5 text-[9px] font-bold tracking-tight shrink-0 select-none',
+                              active
+                                ? 'bg-white/20 text-white'
+                                : item.glow
+                                ? 'bg-[#FF3B30]/12 text-[#FF3B30]'
                                 : item.vip
-                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                ? 'bg-[#FF9500]/15 text-[#C93400] dark:text-[#FFD60A]'
                                 : item.highlight
-                                ? 'bg-primary/10 text-primary border-primary/20'
-                                : 'bg-muted text-muted-foreground border-border'
+                                ? 'bg-primary/12 text-primary'
+                                : 'bg-muted text-muted-foreground'
                             )}
                           >
                             {item.badge}
@@ -257,35 +262,41 @@ export default function Sidebar({
         </nav>
       </div>
 
-      {/* 3. USER PROFILE FOOTER */}
+      {/* 3. APPLE ID / ICLOUD STYLE USER PROFILE FOOTER */}
       {user && (
         <div className="pt-4 border-t border-border mt-4">
-          <div className="rounded-xl border border-border bg-card p-3 space-y-2.5">
+          <div className="rounded-[20px] border border-border bg-background/60 p-3 space-y-2.5 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <div
-                onClick={() => { onMobileClose?.(); router.push('/profile'); }}
+                onClick={() => {
+                  onMobileClose?.();
+                  router.push('/profile');
+                }}
                 className="relative shrink-0 cursor-pointer"
               >
                 <CosmeticAvatar
-                  className="size-8 border border-border"
+                  className="size-9 border border-border shadow-2xs"
                   src={user.avatar_url}
                   name={user.first_name || user.username}
                   cosmetics={user.cosmetics}
-                  fallbackClassName="text-xs font-semibold text-primary"
+                  fallbackClassName="text-xs font-bold text-primary"
                 />
                 {user.is_premium && (
-                  <span className="absolute -top-1 -right-1 size-3.5 rounded-full bg-amber-500 flex items-center justify-center text-[7px] text-slate-950 font-black">
+                  <span className="absolute -top-1 -right-1 size-4 rounded-full bg-[#FF9500] flex items-center justify-center text-[8px] text-white font-black shadow-2xs">
                     ★
                   </span>
                 )}
               </div>
 
               <div
-                onClick={() => { onMobileClose?.(); router.push('/profile'); }}
+                onClick={() => {
+                  onMobileClose?.();
+                  router.push('/profile');
+                }}
                 className="min-w-0 flex-1 cursor-pointer"
               >
                 <div className="flex items-center gap-1">
-                  <p className="text-xs font-semibold truncate text-foreground hover:text-primary transition-colors">
+                  <p className="text-xs font-bold truncate text-foreground hover:text-primary transition-colors">
                     {user.first_name || user.username}
                   </p>
                   <VerifiedBadge role={user.role} isSuperadmin={user.is_superadmin} isTeacher={user.is_teacher} size="xs" />
@@ -303,7 +314,7 @@ export default function Sidebar({
                   handleLogout();
                   router.push('/login');
                 }}
-                className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30 transition cursor-pointer"
+                className="ios-spring flex size-7.5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-destructive hover:bg-destructive/12 transition cursor-pointer"
                 title="Tizimdan chiqish"
               >
                 <LogOut className="size-3.5" />
@@ -313,8 +324,8 @@ export default function Sidebar({
             {/* Level XP Progress Bar */}
             <div className="space-y-1">
               <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
-                <span>Daraja</span>
-                <span className="font-semibold text-primary">
+                <span>Keyingi daraja</span>
+                <span className="font-bold text-primary">
                   {Math.min(100, Math.round(((user.xp || 0) % 1000) / 10))}%
                 </span>
               </div>
@@ -333,12 +344,12 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Desktop Fixed Sidebar */}
-      <aside className="ilm-sidebar fixed left-0 top-0 z-40 hidden h-screen w-64 select-none flex-col border-r border-border bg-card text-card-foreground lg:flex">
+      {/* Desktop Fixed iPadOS Sidebar */}
+      <aside className="ilm-sidebar fixed left-0 top-0 z-40 hidden h-screen w-64 select-none flex-col border-r border-border bg-card/85 ios-glass text-card-foreground lg:flex">
         {sidebarContent}
       </aside>
 
-      {/* Mobile Drawer with Framer Motion */}
+      {/* Mobile Drawer with Spring Physics */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -347,14 +358,14 @@ export default function Sidebar({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onMobileClose}
-              className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-xs lg:hidden"
+              className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm lg:hidden"
             />
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed inset-y-0 left-0 z-[80] w-72 max-w-[85vw] border-r border-border bg-card shadow-lg lg:hidden"
+              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+              className="fixed inset-y-0 left-0 z-[80] w-72 max-w-[85vw] border-r border-border bg-card shadow-2xl lg:hidden"
             >
               {sidebarContent}
             </motion.div>

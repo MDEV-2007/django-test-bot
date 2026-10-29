@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { RotateCw, Star } from 'lucide-react';
+import { RotateCw, Star, Trophy } from 'lucide-react';
 
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=leaderboard';
 
@@ -75,7 +75,7 @@ const FALLBACK_REVIEWS: ReviewItem[] = [
     rating: 5,
     tag: 'Ona tili A+ (92 ball)',
     quote:
-      "\"Ilm Ildizi botidagi qat'iy vaqt hisoblagichi va xatolar tahlili bo'lmaganida bunchalik yuqori ololmasdim. Ayniqsa matnli savollarda vaqtni to'g'ri taqsimlashni shu bot orqali o'rgandim.\"",
+      "Ilm Ildizi platformasidagi qat'iy vaqt hisoblagichi va xatolar tahlili bo'lmaganida bunchalik yuqori ololmasdim. Ayniqsa matnli savollarda vaqtni to'g'ri taqsimlashni shu yerda o'rgandim.",
     author: 'Mubina Karimova',
     role: 'Toshkent Davlat Yuridik Universiteti talabasi',
     avatarLetter: 'M',
@@ -84,7 +84,7 @@ const FALLBACK_REVIEWS: ReviewItem[] = [
     rating: 5,
     tag: 'DTM: 184.2 Ball (Grant)',
     quote:
-      "\"Avval repetitorga borib qog'ozda test yechardik, tekshirishga 2 kun ketardi. Ilm Ildizi botida esa tugatishingiz bilanoq qaysi mavzudan oqsayotganingizni ko'rsatib beradi. Tavsiya qilaman!\"",
+      "Avval repetitorga borib qog'ozda test yechardik, tekshirishga 2 kun ketardi. Ilm Ildizi ilovasida esa tugatishingiz bilanoq qaysi mavzudan oqsayotganingizni ko'rsatib beradi.",
     author: 'Davronbek Qodirov',
     role: "O'zMU Matematika fakulteti 1-kurs",
     avatarLetter: 'D',
@@ -131,7 +131,7 @@ export default function WeeklyLeaderboardSection() {
         );
       }
     } catch {
-      // Fallback ma'lumotlar saqlanadi
+      // Fallback
     } finally {
       setIsRefreshing(false);
     }
@@ -139,7 +139,6 @@ export default function WeeklyLeaderboardSection() {
 
   useEffect(() => {
     fetchData();
-    // Har 15 daqiqada yangilanadi (15 * 60 * 1000 ms)
     const interval = setInterval(fetchData, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, [fetchData]);
@@ -149,103 +148,93 @@ export default function WeeklyLeaderboardSection() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          {/* Badge */}
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/80 px-3.5 py-1 text-xs font-bold tracking-wider text-emerald-800 uppercase">
-            JONLI PESHTOQ
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 px-3.5 py-1 text-xs font-bold tracking-wider text-[#C93400] uppercase">
+            <Trophy className="size-3.5 text-[#FF9500]" />
+            <span>Game Center Peshqadamlari</span>
           </div>
-          {/* Title */}
-          <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+          <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl lg:text-5xl">
             Haftalik Yetakchilar Reytingi
           </h2>
-          {/* Subtitle */}
-          <p className="mt-2 text-sm sm:text-base text-slate-500 font-normal">
+          <p className="mt-2 text-sm sm:text-base text-[#6C6C70] font-normal">
             Har hafta eng ko&apos;p test yechgan va yuqori foiz qayd etgan top o&apos;quvchilar
           </p>
         </div>
 
-        {/* Refresh Badge */}
+        {/* Refresh Pill */}
         <button
           onClick={fetchData}
           title="Reytingni yangilash"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/60 rounded-full px-3.5 py-1.5 self-start md:self-end transition-all active:scale-95 cursor-pointer"
+          className="ios-spring inline-flex items-center gap-2 text-xs font-semibold text-[#007AFF] bg-white border border-black/[0.08] rounded-full px-4 py-2 self-start md:self-end shadow-2xs cursor-pointer"
         >
-          <RotateCw className={`size-3.5 text-emerald-600 ${isRefreshing ? 'animate-spin' : 'animate-[spin_8s_linear_infinite]'}`} />
-          <span>Har 15 daqiqada yangilanadi</span>
+          <RotateCw className={`size-3.5 text-[#007AFF] ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span>Jonli yangilanadi</span>
         </button>
       </div>
 
-      {/* Main Grid: Left = Leaderboard, Right = Reviews */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
-        {/* Left Column: Leaderboard Card */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-[0_4px_25px_rgba(15,23,42,0.04)]">
-          {/* Table Header */}
-          <div className="grid grid-cols-12 pb-3.5 border-b border-slate-100 text-[11px] sm:text-xs font-bold tracking-wider uppercase text-slate-400">
+      {/* Main Grid: Left = iOS Inset Grouped Leaderboard, Right = App Store Reviews */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+        <div className="lg:col-span-7 rounded-[30px] border border-black/[0.07] bg-white p-5 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
+          <div className="grid grid-cols-12 pb-3 border-b border-black/[0.06] text-[11px] font-bold tracking-wider uppercase text-[#8E8E93]">
             <span className="col-span-7">O&apos;QUVCHI &amp; VILOYAT</span>
-            <span className="col-span-3 text-right">TO&apos;G&apos;RI / JAMI</span>
+            <span className="col-span-3 text-right">NATIJA</span>
             <span className="col-span-2 text-right">XP BALL</span>
           </div>
 
-          {/* Table Rows */}
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-black/[0.06]">
             {leaderboard.map((row) => (
               <div
                 key={row.rank}
-                className="grid grid-cols-12 items-center py-4 hover:bg-slate-50/80 rounded-2xl px-2 sm:px-3 -mx-2 sm:-mx-3 transition-colors group"
+                className="grid grid-cols-12 items-center py-3.5 hover:bg-[#F2F2F7]/70 rounded-[18px] px-2.5 -mx-2.5 transition-colors group"
               >
-                {/* Left: Rank + Info */}
                 <div className="col-span-7 flex items-center gap-3">
-                  {/* Rank Badge */}
-                  <div className="flex-shrink-0 size-8 sm:size-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
+                  <div className="shrink-0 size-9 rounded-full flex items-center justify-center font-bold text-xs">
                     {row.badgeType === 'gold' && (
-                      <span className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-amber-100/80 text-amber-700 shadow-2xs text-base">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#FFCC00]/20 text-base">
                         🥇
                       </span>
                     )}
                     {row.badgeType === 'silver' && (
-                      <span className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 shadow-2xs text-base">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#8E8E93]/15 text-base">
                         🥈
                       </span>
                     )}
                     {row.badgeType === 'bronze' && (
-                      <span className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-amber-200/50 text-amber-800 shadow-2xs text-base">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#FF9500]/18 text-base">
                         🥉
                       </span>
                     )}
                     {row.badgeType === 'number' && (
-                      <span className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-slate-100 text-slate-700 font-bold">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#F2F2F7] text-[#3A3A3C] font-mono font-bold">
                         {row.rank}
                       </span>
                     )}
                   </div>
 
-                  {/* Name + Subject */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-bold text-slate-900 text-xs sm:text-sm truncate group-hover:text-emerald-700 transition-colors">
+                      <span className="font-bold text-[#1C1C1E] text-xs sm:text-sm truncate group-hover:text-[#007AFF] transition-colors">
                         {row.name}
                       </span>
                       {row.gradeBadge && (
-                        <span className="inline-flex items-center rounded-md bg-[#e6f7ef] px-1.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold text-[#059669]">
+                        <span className="inline-flex items-center rounded-full bg-[#34C759]/14 px-2 py-0.5 text-[10px] font-bold text-[#248A3D]">
                           {row.gradeBadge}
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] sm:text-xs text-slate-500 font-medium truncate mt-0.5">
+                    <p className="text-[11px] text-[#6C6C70] font-medium truncate mt-0.5">
                       {row.regionAndSubject}
                     </p>
                   </div>
                 </div>
 
-                {/* Score */}
                 <div className="col-span-3 text-right">
-                  <span className="text-xs sm:text-sm font-semibold text-slate-700">
+                  <span className="text-xs sm:text-sm font-mono font-semibold text-[#3A3A3C]">
                     {row.score}
                   </span>
                 </div>
 
-                {/* XP */}
                 <div className="col-span-2 text-right">
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900">
+                  <span className="text-xs sm:text-sm font-mono font-bold text-[#007AFF]">
                     {row.xp}
                   </span>
                 </div>
@@ -253,59 +242,55 @@ export default function WeeklyLeaderboardSection() {
             ))}
           </div>
 
-          {/* Footer Link */}
-          <div className="pt-5 border-t border-slate-100 text-center">
+          <div className="pt-4 border-t border-black/[0.06] text-center">
             <a
               href={BOT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-700 hover:text-emerald-600 transition-colors group"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#007AFF] hover:underline group"
             >
-              <span>O&apos;z o&apos;rningizni botdagi to&apos;liq reytingda ko&apos;ring</span>
-              <span className="transition-transform group-hover:translate-x-1">→</span>
+              <span>O&apos;z o&apos;rningizni to&apos;liq reytingda ko&apos;ring</span>
+              <span className="transition-transform group-hover:translate-x-0.5">→</span>
             </a>
           </div>
         </div>
 
-        {/* Right Column: Review Cards */}
+        {/* Right Column: App Store Style Review Cards */}
         <div className="lg:col-span-5 flex flex-col gap-5">
           {reviews.slice(0, 2).map((review, i) => (
             <div
               key={i}
-              className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-[0_4px_25px_rgba(15,23,42,0.04)] flex flex-col justify-between transition-all hover:border-emerald-300 hover:shadow-md"
+              className="rounded-[30px] border border-black/[0.07] bg-white p-6 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between transition-all hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.07)]"
             >
               <div>
-                {/* Top: Stars + Badge */}
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     {Array.from({ length: review.rating }).map((_, starIdx) => (
                       <Star
                         key={starIdx}
-                        className="size-4 fill-amber-400 text-amber-400"
+                        className="size-4 fill-[#FF9500] text-[#FF9500]"
                       />
                     ))}
                   </div>
-                  <span className="inline-flex items-center rounded-full bg-[#dcfce7] px-3 py-1 text-xs font-bold text-[#15803d]">
+                  <span className="inline-flex items-center rounded-full bg-[#34C759]/14 px-3 py-1 text-xs font-bold text-[#248A3D]">
                     {review.tag}
                   </span>
                 </div>
 
-                {/* Quote */}
-                <p className="mt-4 text-xs sm:text-sm text-slate-700 leading-relaxed italic font-normal">
+                <p className="mt-4 text-xs sm:text-sm text-[#3A3A3C] leading-relaxed font-normal">
                   &ldquo;{review.quote}&rdquo;
                 </p>
               </div>
 
-              {/* Author */}
-              <div className="mt-5 flex items-center gap-3 pt-3 border-t border-slate-100">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#064e3b] text-white font-extrabold text-sm shadow-xs">
+              <div className="mt-5 flex items-center gap-3 pt-3.5 border-t border-black/[0.06]">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#007AFF] to-[#5856D6] text-white font-bold text-sm shadow-2xs">
                   {review.avatarLetter}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-bold text-slate-900 text-xs sm:text-sm">
+                  <h4 className="font-bold text-[#1C1C1E] text-xs sm:text-sm">
                     {review.author}
                   </h4>
-                  <p className="text-[11px] sm:text-xs text-slate-500 truncate">
+                  <p className="text-[11px] sm:text-xs text-[#6C6C70] truncate">
                     {review.role}
                   </p>
                 </div>

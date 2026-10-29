@@ -1,22 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Play,
   Pause,
   RotateCcw,
-  Volume2,
-  VolumeX,
-  Sparkles,
+  Clock,
   ArrowRight,
-  Flame,
-  Coffee,
-  CheckCircle2,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import PremiumIcon from '@/components/ui/premium-icon';
 
 interface PomodoroTimerCardProps {
   onSessionComplete?: () => void;
@@ -29,7 +24,6 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [activeSound, setActiveSound] = useState<string | null>('rain');
   const [soundMuted, setSoundMuted] = useState<boolean>(true);
-  const [completedSessions, setCompletedSessions] = useState<number>(2);
 
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
@@ -41,7 +35,6 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
   const seconds = timeLeft % 60;
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-  // Countdown timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isRunning && timeLeft > 0) {
@@ -50,7 +43,6 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
       }, 1000);
     } else if (timeLeft === 0 && isRunning) {
       setIsRunning(false);
-      setCompletedSessions((c) => c + 1);
       onSessionComplete?.();
     }
     return () => {
@@ -72,46 +64,42 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
   return (
     <Card
       className={cn(
-        'rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-card transition-all duration-300',
+        'rounded-[28px] border border-border bg-card p-5 sm:p-6 shadow-card transition-all duration-300',
         className
       )}
     >
-      {/* Header */}
+      {/* iOS Widget Header */}
       <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
-            <Sparkles className="size-4" />
-          </div>
+        <div className="flex items-center gap-2.5">
+          <PremiumIcon icon={Clock} tone="amber" size="sm" solid />
           <div>
-            <h3 className="text-sm font-black text-foreground uppercase tracking-wider">
-              Pomodoro Taymeri
+            <h3 className="text-sm font-bold text-foreground tracking-tight">
+              Fokus Taymeri (Pomodoro)
             </h3>
-            <p className="text-[11px] font-semibold text-muted-foreground">
-              Ilmiy 25-daqiqalik chuqur fokus rejim
+            <p className="text-[11px] font-medium text-muted-foreground">
+              iOS Standby uslubidagi 25-daqiqalik chuqur diqqat
             </p>
           </div>
         </div>
 
-        <Badge
-          variant="outline"
+        <span
           className={cn(
-            'px-2.5 py-0.5 text-xs font-bold rounded-full border transition-colors',
+            'px-3 py-1 text-xs font-semibold rounded-full transition-colors',
             isRunning
-              ? 'border-blue-400 bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse font-black'
-              : 'border-border bg-muted/60 text-muted-foreground'
+              ? 'bg-[#34C759]/14 text-[#248A3D] dark:text-[#30D158] animate-pulse font-bold'
+              : 'bg-muted text-muted-foreground'
           )}
         >
-          {isRunning ? '● Fokus Jarayoni' : 'Kutish rejimida'}
-        </Badge>
+          {isRunning ? '● Fokus faol' : 'Tayyor'}
+        </span>
       </div>
 
-      {/* Center Layout: Circular Ring + Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center py-2">
+      {/* Center Layout: Apple Watch Ring + iOS Segmented Controls */}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center py-1">
         {/* SVG Circular Progress Ring */}
         <div className="sm:col-span-5 flex flex-col items-center justify-center">
           <div className="relative flex size-32 items-center justify-center">
             <svg className="size-full -rotate-90" viewBox="0 0 100 100">
-              {/* Background Track */}
               <circle
                 cx="50"
                 cy="50"
@@ -120,7 +108,6 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                 strokeWidth="7"
                 fill="transparent"
               />
-              {/* Dynamic Electric Blue Progress Arc */}
               <circle
                 cx="50"
                 cy="50"
@@ -131,11 +118,9 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
                 fill="transparent"
-                style={{ filter: 'drop-shadow(0 2px 8px rgba(37,99,235,0.25))' }}
               />
             </svg>
 
-            {/* Time Display Inside Circle */}
             <div className="absolute flex flex-col items-center justify-center text-center select-none">
               <span className="text-2xl font-black font-mono tracking-tight text-foreground leading-none">
                 {formattedTime}
@@ -147,14 +132,14 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
           </div>
         </div>
 
-        {/* Controls & Quick Presets */}
+        {/* Controls & iOS UISegmentedControl Presets */}
         <div className="sm:col-span-7 space-y-4">
-          {/* Duration Presets */}
           <div className="space-y-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Vaqtni tanlash
             </span>
-            <div className="grid grid-cols-3 gap-2">
+            {/* Authentic iOS Segmented Control */}
+            <div className="ios-segmented grid grid-cols-3 gap-1">
               {[15, 25, 50].map((mins) => {
                 const isCurrent = durationMinutes === mins;
                 return (
@@ -163,10 +148,10 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                     type="button"
                     onClick={() => handleSelectDuration(mins)}
                     className={cn(
-                      'min-h-[44px] rounded-xl border text-xs font-black transition-all cursor-pointer select-none active:scale-95',
+                      'min-h-[36px] text-xs font-semibold transition-all cursor-pointer select-none',
                       isCurrent
-                        ? 'border-primary bg-primary text-primary-foreground shadow-[0_2px_10px_rgba(37,99,235,0.3)]'
-                        : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                        ? 'ios-segmented-thumb font-bold'
+                        : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     {mins} daq
@@ -176,21 +161,21 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
             </div>
           </div>
 
-          {/* Action Buttons: Play/Pause & Reset */}
+          {/* Action Pill Buttons */}
           <div className="flex items-center gap-2.5 pt-1">
             <button
               type="button"
               onClick={() => setIsRunning(!isRunning)}
               className={cn(
-                'flex-1 min-h-[48px] rounded-2xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm transition-all cursor-pointer select-none active:scale-95 shadow-md',
+                'ios-spring flex-1 min-h-[44px] rounded-full flex items-center justify-center gap-2 font-semibold text-xs sm:text-sm cursor-pointer select-none',
                 isRunning
-                  ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-[0_4px_16px_rgba(245,158,11,0.3)]'
-                  : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_4px_16px_rgba(37,99,235,0.35)]'
+                  ? 'bg-[#FF9500] text-white shadow-[0_6px_18px_rgba(255,149,0,0.32)]'
+                  : 'bg-primary text-primary-foreground shadow-[0_6px_18px_rgba(0,122,255,0.32)]'
               )}
             >
               {isRunning ? (
                 <>
-                  <Pause className="size-4 fill-slate-950" />
+                  <Pause className="size-4 fill-current" />
                   <span>Pauza</span>
                 </>
               ) : (
@@ -204,7 +189,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
             <button
               type="button"
               onClick={handleReset}
-              className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer active:scale-95"
+              className="ios-spring flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
               title="Qayta boshlash"
               aria-label="Qayta boshlash"
             >
@@ -214,13 +199,13 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
         </div>
       </div>
 
-      {/* Ambient Sound Mini Selector Strip */}
+      {/* iOS Control Center Ambient Sound Strip */}
       <div className="mt-4 pt-3.5 border-t border-border flex items-center justify-between gap-3 text-xs flex-wrap">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="text-xs font-bold text-muted-foreground">Fon tovushi:</span>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-semibold text-muted-foreground">Fon tovushi:</span>
+          <div className="flex items-center gap-1.5">
             {[
-              { id: 'rain', label: 'Yomg\'ir', icon: '🌧️' },
+              { id: 'rain', label: "Yomg'ir", icon: '🌧️' },
               { id: 'library', label: 'Kutubxona', icon: '📚' },
               { id: 'fire', label: 'Olov', icon: '🔥' },
             ].map((snd) => {
@@ -234,10 +219,10 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
                     setSoundMuted(false);
                   }}
                   className={cn(
-                    'px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all duration-150 cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-xs',
+                    'ios-spring px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5',
                     isSelected
-                      ? 'border-primary bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/20'
-                      : 'border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground'
+                      ? 'bg-primary text-primary-foreground shadow-2xs'
+                      : 'bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground'
                   )}
                   title={`${snd.label} fon tovushini yoqish`}
                 >
@@ -251,10 +236,10 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
 
         <Link
           href="/study"
-          className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline shrink-0"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0"
         >
           <span>Fokus xonasi</span>
-          <ArrowRight className="size-3" />
+          <ArrowRight className="size-3.5" />
         </Link>
       </div>
     </Card>

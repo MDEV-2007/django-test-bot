@@ -22,70 +22,81 @@ const TONE_STYLES: Record<
   PremiumIconTone,
   {
     bg: string;
+    solidBg: string;
     border: string;
     text: string;
     glow: string;
   }
 > = {
   emerald: {
-    bg: 'bg-emerald-500/12 dark:bg-emerald-500/18',
-    border: 'border-emerald-500/25',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(16,185,129,0.35)]',
+    bg: 'bg-[#34C759]/14 dark:bg-[#30D158]/20',
+    solidBg: 'bg-gradient-to-b from-[#34C759] to-[#28A745] text-white border-transparent',
+    border: 'border-[#34C759]/25',
+    text: 'text-[#248A3D] dark:text-[#30D158]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(52,199,89,0.4)]',
   },
   indigo: {
-    bg: 'bg-indigo-500/12 dark:bg-indigo-500/18',
-    border: 'border-indigo-500/25',
-    text: 'text-indigo-600 dark:text-indigo-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(99,102,241,0.35)]',
+    bg: 'bg-[#5856D6]/14 dark:bg-[#5E5CE6]/20',
+    solidBg: 'bg-gradient-to-b from-[#5856D6] to-[#4644B5] text-white border-transparent',
+    border: 'border-[#5856D6]/25',
+    text: 'text-[#5856D6] dark:text-[#7D7AFF]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(88,86,214,0.4)]',
   },
   amber: {
-    bg: 'bg-amber-500/12 dark:bg-amber-500/18',
-    border: 'border-amber-500/25',
-    text: 'text-amber-600 dark:text-amber-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(245,158,11,0.35)]',
+    bg: 'bg-[#FF9500]/14 dark:bg-[#FF9F0A]/20',
+    solidBg: 'bg-gradient-to-b from-[#FF9500] to-[#E68600] text-white border-transparent',
+    border: 'border-[#FF9500]/25',
+    text: 'text-[#C93400] dark:text-[#FF9F0A]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(255,149,0,0.4)]',
   },
   rose: {
-    bg: 'bg-rose-500/12 dark:bg-rose-500/18',
-    border: 'border-rose-500/25',
-    text: 'text-rose-600 dark:text-rose-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(244,63,94,0.35)]',
+    bg: 'bg-[#FF2D55]/14 dark:bg-[#FF375F]/20',
+    solidBg: 'bg-gradient-to-b from-[#FF2D55] to-[#E01E45] text-white border-transparent',
+    border: 'border-[#FF2D55]/25',
+    text: 'text-[#D70015] dark:text-[#FF375F]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(255,45,85,0.4)]',
   },
   sky: {
-    bg: 'bg-sky-500/12 dark:bg-sky-500/18',
-    border: 'border-sky-500/25',
-    text: 'text-sky-600 dark:text-sky-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(14,165,233,0.35)]',
+    bg: 'bg-[#007AFF]/14 dark:bg-[#0A84FF]/20',
+    solidBg: 'bg-gradient-to-b from-[#007AFF] to-[#0062CC] text-white border-transparent',
+    border: 'border-[#007AFF]/25',
+    text: 'text-[#007AFF] dark:text-[#0A84FF]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(0,122,255,0.4)]',
   },
   purple: {
-    bg: 'bg-purple-500/12 dark:bg-purple-500/18',
-    border: 'border-purple-500/25',
-    text: 'text-purple-600 dark:text-purple-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(168,85,247,0.35)]',
+    bg: 'bg-[#AF52DE]/14 dark:bg-[#BF5AF2]/20',
+    solidBg: 'bg-gradient-to-b from-[#AF52DE] to-[#8E3CBE] text-white border-transparent',
+    border: 'border-[#AF52DE]/25',
+    text: 'text-[#8944AB] dark:text-[#BF5AF2]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(175,82,222,0.4)]',
   },
   cyan: {
-    bg: 'bg-cyan-500/12 dark:bg-cyan-500/18',
-    border: 'border-cyan-500/25',
-    text: 'text-cyan-600 dark:text-cyan-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(6,182,212,0.35)]',
+    bg: 'bg-[#32ADE6]/14 dark:bg-[#64D2FF]/20',
+    solidBg: 'bg-gradient-to-b from-[#32ADE6] to-[#1D8FC4] text-white border-transparent',
+    border: 'border-[#32ADE6]/25',
+    text: 'text-[#0071A4] dark:text-[#64D2FF]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(50,173,230,0.4)]',
   },
   zinc: {
-    bg: 'bg-zinc-500/12 dark:bg-zinc-500/18',
-    border: 'border-zinc-500/25',
-    text: 'text-zinc-600 dark:text-zinc-400',
-    glow: 'shadow-[0_0_12px_-2px_rgba(113,113,122,0.25)]',
+    bg: 'bg-[#8E8E93]/14 dark:bg-[#8E8E93]/20',
+    solidBg: 'bg-gradient-to-b from-[#8E8E93] to-[#636366] text-white border-transparent',
+    border: 'border-[#8E8E93]/25',
+    text: 'text-[#636366] dark:text-[#AEAEB2]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(142,142,147,0.3)]',
   },
   gold: {
-    bg: 'bg-gradient-to-br from-amber-500/25 via-yellow-500/20 to-orange-500/20',
-    border: 'border-amber-400/40',
-    text: 'text-amber-500 dark:text-amber-300',
-    glow: 'shadow-[0_0_16px_-2px_rgba(245,158,11,0.5)] ring-1 ring-amber-400/30',
+    bg: 'bg-gradient-to-br from-[#FFCC00]/22 via-[#FF9500]/18 to-[#FF9500]/22',
+    solidBg: 'bg-gradient-to-b from-[#FFCC00] to-[#FF9500] text-slate-950 border-transparent',
+    border: 'border-[#FF9500]/35',
+    text: 'text-[#B25000] dark:text-[#FFD60A]',
+    glow: 'shadow-[0_4px_14px_-2px_rgba(255,149,0,0.45)]',
   },
   primary: {
-    bg: 'bg-primary/15 dark:bg-primary/20',
-    border: 'border-primary/30',
-    text: 'text-primary',
-    glow: 'shadow-[0_0_12px_-2px_rgba(45,108,255,0.35)]',
+    bg: 'bg-[#007AFF]/14 dark:bg-[#0A84FF]/20',
+    solidBg: 'bg-gradient-to-b from-[#007AFF] to-[#0062CC] text-white border-transparent',
+    border: 'border-[#007AFF]/25',
+    text: 'text-[#007AFF] dark:text-[#0A84FF]',
+    glow: 'shadow-[0_4px_12px_-2px_rgba(0,122,255,0.4)]',
   },
 };
 
@@ -98,29 +109,29 @@ const SIZE_STYLES: Record<
   }
 > = {
   xs: {
-    box: 'size-6',
+    box: 'size-6.5',
     icon: 'size-3.5',
-    rounded: 'rounded-md',
+    rounded: 'rounded-[8px]',
   },
   sm: {
-    box: 'size-7',
+    box: 'size-8',
     icon: 'size-4',
-    rounded: 'rounded-lg',
+    rounded: 'rounded-[10px]',
   },
   md: {
-    box: 'size-9',
+    box: 'size-9.5',
     icon: 'size-4.5',
-    rounded: 'rounded-xl',
+    rounded: 'rounded-[12px]',
   },
   lg: {
     box: 'size-11',
     icon: 'size-5.5',
-    rounded: 'rounded-2xl',
+    rounded: 'rounded-[14px]',
   },
   xl: {
     box: 'size-14',
     icon: 'size-7',
-    rounded: 'rounded-2xl',
+    rounded: 'rounded-[18px]',
   },
 };
 
@@ -129,6 +140,7 @@ export interface PremiumIconProps {
   tone?: PremiumIconTone;
   size?: PremiumIconSize;
   glow?: boolean;
+  solid?: boolean;
   className?: string;
   iconClassName?: string;
 }
@@ -138,6 +150,7 @@ export default function PremiumIcon({
   tone = 'primary',
   size = 'sm',
   glow = false,
+  solid = false,
   className,
   iconClassName,
 }: PremiumIconProps) {
@@ -147,17 +160,16 @@ export default function PremiumIcon({
   return (
     <div
       className={cn(
-        'relative shrink-0 flex items-center justify-center border transition-all duration-300',
+        'relative shrink-0 flex items-center justify-center border transition-all duration-200',
         sizeStyle.box,
         sizeStyle.rounded,
-        toneStyle.bg,
-        toneStyle.border,
-        toneStyle.text,
-        glow && toneStyle.glow,
+        solid || glow
+          ? cn(toneStyle.solidBg, 'shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]', toneStyle.glow)
+          : cn(toneStyle.bg, toneStyle.border, toneStyle.text),
         className
       )}
     >
-      <Icon className={cn(sizeStyle.icon, 'transition-transform duration-200', iconClassName)} />
+      <Icon className={cn(sizeStyle.icon, 'transition-transform duration-200 stroke-[2.2]', iconClassName)} />
     </div>
   );
 }

@@ -3,10 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { Menu, Flame, Coins, Swords, Bell, Search, Sun, Moon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import PremiumIcon from '@/components/ui/premium-icon';
+import { BrandMark } from '@/components/BrandMark';
 
 interface ModernTopbarProps {
   onMenuClick: () => void;
@@ -35,47 +34,54 @@ export default function ModernTopbar({
   const { isDark, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 px-4 sm:px-6 backdrop-blur-md transition-colors">
-      {/* Left: Mobile Hamburger & Search Trigger */}
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-20 flex h-15 w-full items-center justify-between border-b border-border bg-background/78 px-4 sm:px-6 ios-glass transition-colors">
+      {/* Left: Mobile Hamburger + Brand + iOS Spotlight Search Pill */}
+      <div className="flex items-center gap-2.5">
         <button
           type="button"
           onClick={onMenuClick}
-          className="lg:hidden flex size-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground active:scale-95 transition cursor-pointer"
+          className="lg:hidden ios-spring flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground cursor-pointer shadow-2xs"
           aria-label="Menyu ochish"
         >
           <Menu className="size-4" />
         </button>
 
-        {/* Global Search Bar (Ctrl+K trigger) */}
+        <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
+          <BrandMark size={28} rounded="rounded-[9px]" />
+          <span className="font-extrabold text-sm tracking-tight text-foreground">
+            Ilm<span className="text-primary">Ildizi</span>
+          </span>
+        </Link>
+
+        {/* iOS Spotlight Search Trigger (⌘K / Ctrl+K) */}
         <button
           type="button"
           onClick={onSearchClick}
-          className="hidden md:flex items-center gap-2.5 rounded-lg border border-border bg-card/60 hover:bg-card px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition cursor-pointer font-medium"
+          className="ios-spring hidden md:flex items-center gap-2.5 rounded-full bg-muted/80 hover:bg-muted px-3.5 py-1.5 text-xs text-muted-foreground hover:text-foreground transition cursor-pointer font-medium"
         >
           <Search className="size-3.5 text-muted-foreground" />
           <span>Kurslar, testlar va mavzularni qidirish...</span>
-          <kbd className="ml-4 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground font-semibold">
-            Ctrl K
+          <kbd className="ml-3 rounded-full bg-card px-2 py-0.5 font-mono text-[10px] text-muted-foreground font-semibold shadow-2xs border border-border">
+            ⌘K
           </kbd>
         </button>
       </div>
 
-      {/* Right: Gamification Status Pills & Actions */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
+      {/* Right: iOS Dynamic Island Style Status Pills & Actions */}
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {user && (
           <>
-            {/* 1. STREAK PILL (Amber / Gold Flame) */}
+            {/* 1. STREAK PILL */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   type="button"
                   onClick={onStreakClick}
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 pl-1 pr-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 active:scale-95 transition cursor-pointer"
+                  className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 px-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
                 >
-                  <PremiumIcon icon={Flame} tone="amber" size="xs" glow />
+                  <Flame className="size-3.5 fill-[#FF9500] text-[#FF9500]" />
                   <span className="font-mono">{user.streak || 0}</span>
-                  <span className="hidden sm:inline text-[10px] font-medium opacity-80">kun</span>
+                  <span className="hidden sm:inline text-[10px] font-semibold opacity-80">kun</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent className="text-xs font-medium">
@@ -88,9 +94,9 @@ export default function ModernTopbar({
               <TooltipTrigger asChild>
                 <Link
                   href="/shop"
-                  className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/70 pl-1 pr-2.5 text-xs font-semibold text-foreground active:scale-95 transition cursor-pointer"
+                  className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 px-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                 >
-                  <PremiumIcon icon={Coins} tone="gold" size="xs" glow />
+                  <Coins className="size-3.5 text-[#FF9500] fill-[#FFCC00]" />
                   <span className="font-mono">{(user.coins || 0).toLocaleString()}</span>
                 </Link>
               </TooltipTrigger>
@@ -104,11 +110,11 @@ export default function ModernTopbar({
               <TooltipTrigger asChild>
                 <Link
                   href="/battles"
-                  className="hidden sm:flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card hover:bg-muted/70 pl-1 pr-2.5 text-xs font-semibold text-foreground active:scale-95 transition cursor-pointer"
+                  className="ios-spring hidden sm:flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 px-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                 >
-                  <PremiumIcon icon={Swords} tone="rose" size="xs" />
+                  <Swords className="size-3.5 text-primary" />
                   <span className="font-mono">{user.elo_rating || 1200}</span>
-                  <span className="text-[10px] text-muted-foreground font-normal">ELO</span>
+                  <span className="text-[10px] text-muted-foreground font-semibold">ELO</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent className="text-xs font-medium">
@@ -122,12 +128,12 @@ export default function ModernTopbar({
                 <button
                   type="button"
                   onClick={onNotificationsClick}
-                  className="relative flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted/70 active:scale-95 transition cursor-pointer"
+                  className="ios-spring relative flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
                   aria-label="Bildirishnomalar"
                 >
                   <Bell className="size-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-rose-600 text-[9px] font-black !text-white shadow-xs leading-none ring-2 ring-background">
+                    <span className="absolute -top-0.5 -right-0.5 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-[#FF3B30] text-[9px] font-black !text-white shadow-2xs leading-none ring-2 ring-background">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
@@ -146,18 +152,18 @@ export default function ModernTopbar({
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted/70 active:scale-95 transition cursor-pointer"
+              className="ios-spring flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
               aria-label={isDark ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish"}
             >
               {isDark ? (
-                <Sun className="size-4 text-amber-400 transition-transform hover:rotate-45" />
+                <Sun className="size-4 text-[#FFD60A] transition-transform hover:rotate-45" />
               ) : (
-                <Moon className="size-4 text-slate-600 transition-transform hover:-rotate-12" />
+                <Moon className="size-4 text-[#5856D6] transition-transform hover:-rotate-12" />
               )}
             </button>
           </TooltipTrigger>
           <TooltipContent className="text-xs font-medium">
-            {isDark ? "Yorug' rejim (Light)" : "Qorong'i rejim (Dark)"}
+            {isDark ? "Yorug' rejim (iOS Light)" : "Qorong'i rejim (iOS Dark)"}
           </TooltipContent>
         </Tooltip>
       </div>
