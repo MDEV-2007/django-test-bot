@@ -3,20 +3,16 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Gift, AlertCircle, Sparkles, TrendingUp, Users, ArrowRight, Loader2 } from 'lucide-react';
+import { Gift, AlertCircle, Sparkles, TrendingUp, Users, ArrowRight, Loader2, User, Lock, AtSign } from 'lucide-react';
 import { register, ApiError } from '@/lib/api-client';
 import SocialLogin from '@/components/SocialLogin';
 import AuthShell from '@/components/auth/AuthShell';
 import type { Profile } from '@/lib/auth-store';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 
 const POINTS = [
-  { icon: Sparkles, text: 'Bepul boshlang — birinchi testdan keyin tahlil ochiladi' },
-  { icon: TrendingUp, text: "Har kuni o'sishingiz daraxt bo'lib ko'rinadi" },
-  { icon: Users, text: "Minglab abituriyent bilan bir xil maqsad sari" },
+  { icon: Sparkles, text: 'Bepul diagnostika — birinchi testdanoq A+/A/B darajangiz aniqlanadi' },
+  { icon: TrendingUp, text: "Har kuni o'sishingiz shaxsiy Bilim Ildizi daraxtida aks etadi" },
+  { icon: Users, text: "4,300+ abituriyent bilan Jonli Mock imtihonlar va 1v1 Arena" },
 ];
 
 export default function RegisterPage() {
@@ -61,74 +57,126 @@ function RegisterPageInner() {
 
   return (
     <AuthShell
-      title="Ro'yxatdan o'tish"
-      description="Bir daqiqada hisob oching va birinchi testni yeching."
+      title="Yangi IlmIldizi ID"
+      description="30 soniyada bepul hisob oching va birinchi testni boshlang"
       points={POINTS}
       footer={
         <>
           Hisobingiz bormi?{' '}
           <Link
             href={targetNext ? `/login?next=${encodeURIComponent(targetNext)}` : '/login'}
-            className="font-semibold text-[var(--accent-text)] hover:underline"
+            className="font-semibold text-[#007AFF] hover:underline"
           >
-            Hisobim bor
+            Hisobga kirish →
           </Link>
         </>
       }
     >
       <div className="space-y-5">
         {refCode && (
-          <p className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm leading-snug text-amber-300">
-            <Gift className="mt-0.5 size-4 shrink-0 text-amber-400" />
+          <div className="flex items-start gap-2.5 rounded-[16px] border border-[#FF9500]/30 bg-[#FF9500]/10 p-3.5 text-[13px] leading-snug text-foreground">
+            <Gift className="mt-0.5 size-4 shrink-0 text-[#FF9500]" />
             <span>
-              <strong>Taklif bonusi:</strong> sizga va do&apos;stingizga ro&apos;yxatdan o&apos;tishda{' '}
-              <strong>bonus tanga</strong> beriladi.
+              <strong className="text-[#FF9500]">Taklif bonusi:</strong> sizga va do&apos;stingizga ro&apos;yxatdan o&apos;tishda{' '}
+              <strong>bonus tanga</strong> taqdim etiladi.
             </span>
-          </p>
+          </div>
         )}
 
         {error && (
-          <p className="flex items-center gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 p-3 text-sm text-rose-300">
-            <AlertCircle className="size-4 shrink-0" /> {error}
-          </p>
+          <div className="flex items-center gap-2.5 rounded-[16px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3.5 text-[13px] font-medium text-[#FF3B30]">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>{error}</span>
+          </div>
         )}
 
         <SocialLogin refCode={refCode} onSuccess={handleSocialSuccess} />
 
-        <div className="relative flex items-center justify-center">
-          <Separator className="absolute inset-x-0" />
-          <span className="relative bg-card px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="relative flex items-center justify-center py-1">
+          <div className="h-px w-full bg-black/[0.06] dark:bg-white/[0.08]" />
+          <span className="absolute bg-white dark:bg-[#1C1C1E] px-3 text-[11px] font-semibold uppercase tracking-wider text-[#8E8E93]">
             yoki ma&apos;lumotlar bilan
           </span>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="first_name">Ism</Label>
-              <Input id="first_name" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Azizbek" autoComplete="given-name" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="last_name">Familiya</Label>
-              <Input id="last_name" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Qodirov" autoComplete="family-name" required />
-            </div>
+          {/* iOS Settings Inset Grouped Form */}
+          <div className="overflow-hidden rounded-[18px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.06] dark:divide-white/[0.08]">
+            <label htmlFor="first_name" className="flex items-center gap-3 px-4 py-3 cursor-text">
+              <User className="size-4 shrink-0 text-[#8E8E93]" />
+              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+                Ism
+              </span>
+              <input
+                id="first_name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Azizbek"
+                autoComplete="given-name"
+                required
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+              />
+            </label>
+
+            <label htmlFor="last_name" className="flex items-center gap-3 px-4 py-3 cursor-text">
+              <User className="size-4 shrink-0 text-[#8E8E93]" />
+              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+                Familiya
+              </span>
+              <input
+                id="last_name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Qodirov"
+                autoComplete="family-name"
+                required
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+              />
+            </label>
+
+            <label htmlFor="username" className="flex items-center gap-3 px-4 py-3 cursor-text">
+              <AtSign className="size-4 shrink-0 text-[#8E8E93]" />
+              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+                Login
+              </span>
+              <input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="azizbek_dtm"
+                autoComplete="username"
+                required
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+              />
+            </label>
+
+            <label htmlFor="password" className="flex items-center gap-3 px-4 py-3 cursor-text">
+              <Lock className="size-4 shrink-0 text-[#8E8E93]" />
+              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+                Parol
+              </span>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Kamida 6 belgi"
+                autoComplete="new-password"
+                required
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+              />
+            </label>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="username">Foydalanuvchi nomi</Label>
-            <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="dilshod_bba" autoComplete="username" required />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Parol</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Kamida 6 belgi" autoComplete="new-password" required />
-          </div>
-
-          <Button type="submit" size="lg" disabled={loading} className="w-full">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#007AFF] px-6 text-[15px] font-semibold text-white shadow-[0_8px_20px_-4px_rgba(0,122,255,0.45)] hover:bg-[#0071EB] active:scale-[0.98] disabled:opacity-50 transition-all cursor-pointer"
+          >
             {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-            {loading ? 'Yaratilmoqda...' : "Ro'yxatdan o'tish"}
+            <span>{loading ? 'Yaratilmoqda...' : "Bepul ro'yxatdan o'tish"}</span>
             {!loading && <ArrowRight className="size-4" />}
-          </Button>
+          </button>
         </form>
       </div>
     </AuthShell>

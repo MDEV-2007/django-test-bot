@@ -4,7 +4,8 @@ import {
   Target, Swords, Bot, CheckCircle, ArrowRight,
   BookOpen, AlertTriangle,
   Flame, ShieldCheck, Users,
-  Film, Play, Heart, MessageCircle, Award, Sparkles
+  Film, Play, Heart, MessageCircle, Award, Sparkles,
+  Layers, Headphones, Library
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,7 +15,7 @@ export default function BentoGrid() {
       {/* Apple Keynote Section Header */}
       <div className="mx-auto max-w-3xl text-center">
         <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
-          Mukammal Ekotizim
+          Mukammal iOS 18 Ta&apos;lim Ekotizimi
         </div>
         <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
           Oddiy test emas,{' '}
@@ -24,7 +25,7 @@ export default function BentoGrid() {
           texnologiya.
         </h2>
         <p className="mt-4 text-sm text-[#6C6C70] sm:text-base leading-relaxed">
-          Har bir imkoniyat sizni imtihondagi eng yuqori ball va Davlat Grantiga yaqinlashtirish uchun yagona iOS uslubidagi ekotizimga birlashtirilgan.
+          Har bir modul sizni imtihondagi eng yuqori ball, A+ Milliy sertifikat va Davlat Grantiga yaqinlashtirish uchun yagona Cupertino uslubidagi ekotizimga birlashtirilgan.
         </p>
       </div>
 
@@ -45,10 +46,10 @@ export default function BentoGrid() {
                 </span>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#248A3D]">
-                    Apple Health Usulida Tahlil
+                    Apple Health Usulida Analitika
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
-                    DTM va Milliy Sertifikat Ball Bashorati
+                    DTM 189 Ball va OTM 2026 Qabul Bashorati
                   </h3>
                 </div>
               </div>
@@ -58,7 +59,7 @@ export default function BentoGrid() {
             </div>
 
             <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#6C6C70]">
-              Yechilgan har bir mock test natijasidan kelib chiqib, qaysi OTMga grant yoki kontraktga kirish imkoniyatingiz yuqoriligini hisoblab beradi.
+              Yechilgan har bir mock test natijasidan kelib chiqib, O&apos;zbekistondagi OTM yo&apos;nalishlariga Davlat Granti yoki Kontrakt asosida kirish imkoniyatingizni avtomatik hisoblab beradi.
             </p>
 
             {/* iOS Inset Grouped Score Widget */}
@@ -71,7 +72,7 @@ export default function BentoGrid() {
                 </div>
                 <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-[#248A3D]">
                   <CheckCircle className="size-3.5 shrink-0 text-[#34C759]" />
-                  <span>Davlat Granti kvotasi</span>
+                  <span>TDYU · Davlat Granti</span>
                 </div>
               </div>
 
@@ -110,9 +111,9 @@ export default function BentoGrid() {
           </div>
 
           <div className="mt-5 pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-xs">
-            <span className="text-[#8E8E93] font-medium">Rasch modeli va DTM algoritmi</span>
-            <Link href="/register" className="font-bold text-[#007AFF] hover:underline flex items-center gap-1">
-              O&apos;z ballingizni hisoblash <ArrowRight className="size-3.5" />
+            <span className="text-[#8E8E93] font-medium">Rasch modeli va OTM 2026 kvotalari</span>
+            <Link href="/analytics" className="font-bold text-[#007AFF] hover:underline flex items-center gap-1">
+              OTM kalkulyatorini ko&apos;rish <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </div>
@@ -248,14 +249,14 @@ export default function BentoGrid() {
 
           <div className="mt-5 pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-xs">
             <span className="text-[#8E8E93] font-medium">Jonli intellektual duel</span>
-            <Link href="/register" className="font-bold text-[#C93400] hover:underline flex items-center gap-1">
+            <Link href="/battles" className="font-bold text-[#C93400] hover:underline flex items-center gap-1">
               Jangga kirish <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </div>
 
         {/* =========================================================
-            TILE 4: LIVE DIAGNOSTIC HEATMAP (7 Cols)
+            TILE 4: LIVE DIAGNOSTIC HEATMAP & REVISION (7 Cols)
             ========================================================= */}
         <div className="group relative col-span-1 md:col-span-7 overflow-hidden rounded-[30px] border border-black/[0.07] bg-white p-6 sm:p-8 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-6px_rgba(0,0,0,0.08)] flex flex-col justify-between">
           <div>
@@ -266,20 +267,20 @@ export default function BentoGrid() {
                 </span>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#007AFF]">
-                    Syllabus Diagnostikasi
+                    Syllabus Diagnostikasi & Spaced Repetition
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
-                    Mavzular Kesimidagi Diagnostik Heatmap
+                    Aqlli Xatolar Daftari va Diagnostik Heatmap
                   </h3>
                 </div>
               </div>
               <span className="rounded-full bg-[#007AFF]/10 px-3 py-1 font-mono text-[11px] font-bold text-[#007AFF]">
-                Jonli
+                Avto-tahlil
               </span>
             </div>
 
             <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#6C6C70]">
-              Qaysi asr yoki mavzuda xato qilganingizni aniq ko&apos;rsatadi. Vaqtingizni barcha kitobni boshidan o&apos;qishga emas, aynan zaif nuqtangizga yo&apos;naltirasiz.
+              Imtihonlarda adashgan savollaringiz avtomatik &quot;Xatolar ustida ishlash&quot; dastasiga tushadi va siz ularni 100% o&apos;zlashtirmaguningizcha interval bilan takrorlatadi.
             </p>
 
             {/* Diagnostic Heatmap Bars */}
@@ -320,9 +321,9 @@ export default function BentoGrid() {
           </div>
 
           <div className="mt-5 pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-xs">
-            <span className="text-[#8E8E93] font-medium">AI 15 daqiqalik ekspress mashq tuzdi</span>
-            <Link href="/register" className="font-bold text-[#007AFF] hover:underline flex items-center gap-1">
-              Mashqni boshlash <ArrowRight className="size-3.5" />
+            <span className="text-[#8E8E93] font-medium">Xatolarni ildizidan tozalash algoritmi</span>
+            <Link href="/tests/revision" className="font-bold text-[#007AFF] hover:underline flex items-center gap-1">
+              Xatolar ustida ishlash <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </div>
@@ -339,20 +340,20 @@ export default function BentoGrid() {
                 </span>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#D70015]">
-                    Qisqa Video Format
+                    15 Soniyalik Blits Viktorina
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
-                    Bilim Reels: 30 Soniyalik Darslar
+                    Bilim Reels: Qiyin Savollar Lentasi
                   </h3>
                 </div>
               </div>
               <span className="rounded-full bg-[#FF2D55]/10 px-3 py-1 font-mono text-[11px] font-bold text-[#D70015]">
-                Reels
+                Reels 2.0
               </span>
             </div>
 
             <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#6C6C70]">
-              Qisqa video-darslarni ko&apos;ring va videodan keyin darhol tezkor mini-testni yechib, bilimingizni mustahkamlang va XP ishlang.
+              Vertikal lentada eng ko&apos;p abituriyent yiqiladigan qiyin savollarni 15 soniya ichida yeching, do&apos;stlaringizga Telegram orqali chaqiriq yuboring va Combo XP to&apos;plang.
             </p>
 
             {/* iOS Media Player Card */}
@@ -360,10 +361,10 @@ export default function BentoGrid() {
               <div className="flex items-center justify-between text-xs border-b border-white/10 pb-2.5">
                 <div className="flex items-center gap-2">
                   <span className="flex size-2 rounded-full bg-[#FF375F] animate-pulse" />
-                  <span className="font-semibold text-[#E5E5EA]">Tarix: 6-sinf · Mil.avv. VI asr</span>
+                  <span className="font-semibold text-[#E5E5EA]">Tarix · 68% abituriyent adashgan savol</span>
                 </div>
                 <span className="font-mono text-[11px] text-[#FF375F] font-bold bg-[#FF375F]/15 px-2.5 py-0.5 rounded-full">
-                  00:24
+                  15s
                 </span>
               </div>
 
@@ -384,7 +385,7 @@ export default function BentoGrid() {
 
               <div className="space-y-1.5 pt-0.5">
                 <p className="text-[11px] font-semibold text-[#D1D1D6]">
-                  ❓ Videodan savol: Kir II qaysi jangda halok bo&apos;lgan?
+                  ❓ Savol: Kir II qaysi jangda halok bo&apos;lgan?
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="p-2 rounded-[12px] bg-[#30D158]/20 border border-[#30D158]/40 text-[#30D158] font-bold flex items-center justify-between">
@@ -400,7 +401,7 @@ export default function BentoGrid() {
           </div>
 
           <div className="mt-5 pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-xs">
-            <span className="text-[#8E8E93] font-medium">100+ saralangan darslik videolari</span>
+            <span className="text-[#8E8E93] font-medium">O&apos;z qiyin savolingizni qo&apos;shib +20 XP oling</span>
             <Link href="/reels" className="font-bold text-[#D70015] hover:underline flex items-center gap-1">
               Reelslarni ko&apos;rish <ArrowRight className="size-3.5" />
             </Link>
@@ -486,7 +487,85 @@ export default function BentoGrid() {
         </div>
 
         {/* =========================================================
-            TILE 7: TEACHER & COHORT MONITORING (Full 12 Cols)
+            TILE 7, 8, 9: iOS SMART STACK (FLASHCARDS, KUTUBXONA, FOKUS XONASI)
+            ========================================================= */}
+        <div className="col-span-1 md:col-span-4 rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="flex size-11 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#5856D6] to-[#4644B5] text-white shadow-[0_4px_12px_rgba(88,86,214,0.28)]">
+                <Layers className="size-5.5" />
+              </span>
+              <span className="rounded-full bg-[#5856D6]/10 px-2.5 py-0.5 text-[11px] font-bold text-[#5856D6]">
+                3D Xotira Kartalari
+              </span>
+            </div>
+            <h3 className="text-[17px] font-bold text-[#1C1C1E]">
+              Smart Flashcardlar
+            </h3>
+            <p className="text-xs leading-relaxed text-[#6C6C70]">
+              Tarixiy sanalar, ona tili qoidalari, matematik formulalar va biologik atamalarni Anki & Quizlet uslubidagi 3D kartalar bilan 3 barobar tezroq yodlang.
+            </p>
+          </div>
+          <div className="pt-4 mt-4 border-t border-black/[0.06] flex items-center justify-between text-xs">
+            <span className="text-[#8E8E93] font-medium">Spaced Repetition</span>
+            <Link href="/flashcards" className="font-bold text-[#5856D6] hover:underline flex items-center gap-1">
+              Kartalarni ochish <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="col-span-1 md:col-span-4 rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="flex size-11 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#FF9500] to-[#E08600] text-white shadow-[0_4px_12px_rgba(255,149,0,0.28)]">
+                <Library className="size-5.5" />
+              </span>
+              <span className="rounded-full bg-[#FF9500]/12 px-2.5 py-0.5 text-[11px] font-bold text-[#C93400]">
+                Apple Books uslubi
+              </span>
+            </div>
+            <h3 className="text-[17px] font-bold text-[#1C1C1E]">
+              5–11-sinf Elektron Kutubxona
+            </h3>
+            <p className="text-xs leading-relaxed text-[#6C6C70]">
+              Rasmiy maktab darsliklari, Milliy sertifikat qo&apos;llanmalari va xronologik spravochniklarni bevosita sayt ichida o&apos;qing yoki yuklab oling.
+            </p>
+          </div>
+          <div className="pt-4 mt-4 border-t border-black/[0.06] flex items-center justify-between text-xs">
+            <span className="text-[#8E8E93] font-medium">120+ darslik va manba</span>
+            <Link href="/library" className="font-bold text-[#C93400] hover:underline flex items-center gap-1">
+              Kutubxonaga kirish <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="col-span-1 md:col-span-4 rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="flex size-11 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#30B0C7] to-[#2492A6] text-white shadow-[0_4px_12px_rgba(48,176,199,0.28)]">
+                <Headphones className="size-5.5" />
+              </span>
+              <span className="rounded-full bg-[#30B0C7]/12 px-2.5 py-0.5 text-[11px] font-bold text-[#1E7C8D]">
+                Pomodoro & Ambient
+              </span>
+            </div>
+            <h3 className="text-[17px] font-bold text-[#1C1C1E]">
+              Virtual Fokus Xonasi
+            </h3>
+            <p className="text-xs leading-relaxed text-[#6C6C70]">
+              Yomg&apos;ir, kutubxona yoki gulxan sokin ovozlari ostida 25 daqiqalik Pomodoro taymeri bilan chalg&apos;imasdan dars qiling va kunlik missiyalarni bajaring.
+            </p>
+          </div>
+          <div className="pt-4 mt-4 border-t border-black/[0.06] flex items-center justify-between text-xs">
+            <span className="text-[#8E8E93] font-medium">Zen o&apos;qish muhiti</span>
+            <Link href="/study" className="font-bold text-[#1E7C8D] hover:underline flex items-center gap-1">
+              Fokus xonasiga kirish <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* =========================================================
+            TILE 10: TEACHER & COHORT MONITORING (Full 12 Cols)
             ========================================================= */}
         <div className="group relative col-span-1 md:col-span-12 overflow-hidden rounded-[32px] border border-white/12 bg-[#1C1C1E] p-6 sm:p-9 text-white shadow-[0_20px_50px_rgba(0,0,0,0.14)] flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">

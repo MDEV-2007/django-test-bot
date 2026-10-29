@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback, Suspense } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import AppShell from '@/components/AppShell';
 import {
-  ArrowLeft, Heart, Send, Volume2, VolumeX, ChevronDown, ChevronUp,
-  CheckCircle2, XCircle, Sparkles, Flame, Award, Zap, BookOpen,
-  Swords, Dna, Globe, MessageCircle, X, Play, Pause, CornerDownRight, Video,
-  Bookmark, Music, Plus, Check, Share2, AlertTriangle, Clock
+  Heart, Send, Volume2, VolumeX, ChevronDown, ChevronUp,
+  CheckCircle2, XCircle, Sparkles, Flame, Zap, BookOpen,
+  Swords, MessageCircle, X, CornerDownRight,
+  Bookmark, Plus, Share2, AlertTriangle, Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -18,7 +17,6 @@ import { soundFX } from '@/lib/soundFX';
 import { useFeatureFlags } from '@/lib/features';
 import { tgHaptic, openTelegramLink } from '@/lib/telegram';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
-import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import { cn } from '@/lib/utils';
 
@@ -39,12 +37,10 @@ function formatQuestionText(text: string): FormattedQuestion {
 
   let t = text;
 
-  // 1. Separate Roman numerals (I, II, III, IV, V...):
   t = t.replace(/([a-z0-9"”»\.\:\;])\s*(I{1,3}|IV|V|VI{1,3}|IX|X)[\.\:\)]/gi, '$1\n$2. ');
   t = t.replace(/([a-z"”»])\s*(II|III|IV|V|VI|VII|VIII|IX|X)([A-Z"“«\s])/g, '$1\n$2. $3');
   t = t.replace(/(I{1,3}|IV|V|VI{1,3}|IX|X)\.\s*([A-Z"“«])/g, '$1. $2');
 
-  // 2. Separate lowercase letter definitions (a, b, c, d, e, f, g...):
   t = t.replace(/([a-z0-9"”»\.\,\'\’])([a-h])([A-Z0-9"“«])/g, '$1\n$2) $3');
   t = t.replace(/([a-h][\)\.])\s*([A-Z0-9"“«])/g, '$1 $2');
 
@@ -137,7 +133,6 @@ type QuizResult = {
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
 function ReelsInner() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const deepLinkReelId = searchParams?.get('reel') || searchParams?.get('challenge');
   const { isEnabled } = useFeatureFlags();
@@ -168,7 +163,6 @@ function ReelsInner() {
   const [likeCounts, setLikeCounts] = useState<Record<number, number>>({});
   const [savedReels, setSavedReels] = useState<Record<number, boolean>>({});
   const [saveCounts, setSaveCounts] = useState<Record<number, number>>({});
-  const [followedSubjects, setFollowedSubjects] = useState<Record<string, boolean>>({});
   const [answeredQuizzes, setAnsweredQuizzes] = useState<
     Record<number, { selectedIndex: number; isCorrect: boolean; correctIndex: number; explanation: string }>
   >({});
@@ -314,7 +308,7 @@ function ReelsInner() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, reels.length]);
+  }, [currentIndex, reels.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle Like
   const handleLike = (reelId: number, e?: React.MouseEvent) => {
@@ -353,7 +347,7 @@ function ReelsInner() {
     openTelegramLink(tgUrl);
   };
 
-  // Handle Telegram Challenge to friend (Deep-linked challenge)
+  // Handle Telegram Challenge to friend
   const handleChallengeFriend = (reel: ReelItem) => {
     if (soundEnabled) soundFX.click();
     tgHaptic('medium');
@@ -437,7 +431,6 @@ function ReelsInner() {
         }
       }
     } catch {
-      // Offline fallback
       const targetReel = reels.find((r) => r.id === reelId);
       const correctIdx = typeof targetReel?.quiz.correct_index === 'number' ? targetReel.quiz.correct_index : 0;
       const isCorrect = optionIndex === correctIdx;
@@ -521,7 +514,6 @@ function ReelsInner() {
           }, 150);
         }
 
-        // Reset form
         setCreateQuestion('');
         setCreateOptions(['', '', '', '']);
         setCreateCorrectIndex(0);
@@ -589,7 +581,6 @@ function ReelsInner() {
     }
   };
 
-  // Prepare categories list matching user UI: Barchasi, Tarix, Ona tili va adabiyot, Biologiya, Matematika, etc.
   const displayCategories = (() => {
     const defaultList = [
       { slug: 'all', name: 'Barchasi' },
@@ -614,7 +605,7 @@ function ReelsInner() {
 
   if (!isEnabled('reels')) {
     return (
-      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 bg-[#F2F2F7] dark:bg-[#000000] flex flex-col items-center justify-center p-4">
         <ComingSoonFeature
           featureKey="reels"
           title="Bilim Reels"
@@ -628,13 +619,13 @@ function ReelsInner() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-4 select-none font-sans min-h-0 bg-background">
-        {/* Main Phone Card Container */}
-        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[480px] md:max-w-[500px] relative rounded-none sm:rounded-2xl overflow-hidden border-0 sm:border border-border shadow-card bg-card text-card-foreground flex flex-col my-auto transition-all">
+      <main className="page-shell flex-1 w-full flex items-center justify-center p-0 sm:p-4 select-none font-sans min-h-0 bg-[#F2F2F7] dark:bg-[#000000]">
+        {/* Main iOS 18 Device Frame Container */}
+        <div className="w-full h-[calc(100dvh-3.25rem-4.1rem)] sm:h-[88vh] sm:max-w-[490px] md:max-w-[510px] relative rounded-none sm:rounded-[34px] overflow-hidden border-0 sm:border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white flex flex-col my-auto transition-all">
           
-          {/* ── TOP HORIZONTAL CATEGORY BAR ── */}
-          <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-card border-b border-border">
-            <div className="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+          {/* ── TOP HORIZONTAL iOS NAVIGATION & CAPSULES ── */}
+          <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/[0.08]">
+            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
               {displayCategories.map((subj) => {
                 const isSel = selectedSubject === subj.slug;
                 return (
@@ -642,10 +633,10 @@ function ReelsInner() {
                     key={subj.slug}
                     onClick={() => { tgHaptic('select'); setSelectedSubject(subj.slug); }}
                     className={cn(
-                      "text-xs sm:text-sm px-3.5 py-1.5 rounded-full transition-colors shrink-0 cursor-pointer",
+                      "text-[12px] sm:text-[13px] px-3.5 py-1.5 rounded-full transition-all shrink-0 cursor-pointer active:scale-95",
                       isSel
-                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground font-medium"
+                        ? "bg-[#007AFF] text-white font-semibold shadow-[0_2px_10px_rgba(0,122,255,0.28)]"
+                        : "bg-[#767680]/[0.08] dark:bg-[#767680]/[0.20] text-[#8E8E93] hover:text-slate-900 dark:hover:text-white font-medium"
                     )}
                   >
                     {subj.name}
@@ -657,29 +648,34 @@ function ReelsInner() {
             {/* Sound & XP indicators, +Savol & Combo */}
             <div className="flex items-center gap-1.5 shrink-0 pl-2">
               {comboStreak >= 2 && (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold shadow-xs">
-                  <PremiumIcon icon={Flame} tone="amber" size="xs" glow />
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FF9500]/15 border border-[#FF9500]/30 text-[#FF9500] text-[11px] font-bold">
+                  <Flame className="size-3.5 fill-[#FF9500]" />
                   <span>{comboStreak}x</span>
                 </div>
               )}
               <button
                 onClick={() => { tgHaptic('medium'); setIsCreateModalOpen(true); }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary hover:bg-primary/90 active:scale-95 text-primary-foreground text-[11px] font-semibold shadow-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#007AFF] hover:bg-[#0066D6] active:scale-95 text-white text-[11px] font-bold shadow-[0_2px_8px_rgba(0,122,255,0.25)] transition-all cursor-pointer"
                 title="O'z qiyin savolingizni qo'shing va +20 XP oling"
               >
-                <Plus className="size-3" />
+                <Plus className="size-3.5 stroke-[2.5]" />
                 <span className="hidden sm:inline">Savol qo&apos;shish</span>
                 <span className="sm:hidden">+Savol</span>
               </button>
               <button
                 onClick={() => { tgHaptic('light'); setSoundEnabled(!soundEnabled); }}
-                className="transition-transform active:scale-95 cursor-pointer"
+                className={cn(
+                  "flex size-7 items-center justify-center rounded-full transition-all active:scale-90 cursor-pointer",
+                  soundEnabled
+                    ? "bg-[#007AFF]/12 text-[#007AFF]"
+                    : "bg-[#FF3B30]/12 text-[#FF3B30]"
+                )}
                 title={soundEnabled ? "Ovozsiz qilish" : "Ovozni yoqish"}
               >
-                <PremiumIcon icon={soundEnabled ? Volume2 : VolumeX} tone={soundEnabled ? "sky" : "rose"} size="xs" />
+                {soundEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
               </button>
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-semibold font-mono">
-                <PremiumIcon icon={Zap} tone="amber" size="xs" glow />
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FF9500]/12 border border-[#FF9500]/25 text-[#FF9500] text-[11px] font-bold font-mono">
+                <Zap className="size-3 fill-[#FF9500]" />
                 <span>+{todayXpEarned}</span>
               </div>
             </div>
@@ -688,21 +684,23 @@ function ReelsInner() {
           {/* ── CARD CONTENT / REELS LIST ── */}
           {loading ? (
             <div className="w-full flex-1 flex flex-col items-center justify-center p-6 space-y-4 animate-pulse text-center">
-              <div className="size-14 rounded-full bg-slate-200 dark:bg-zinc-800 mx-auto" />
-              <div className="h-5 w-44 bg-slate-200 dark:bg-zinc-800 rounded-full mx-auto" />
-              <div className="h-20 w-full bg-slate-100 dark:bg-zinc-800/60 rounded-2xl" />
-              <div className="h-32 w-full bg-slate-100 dark:bg-zinc-800/60 rounded-2xl" />
+              <div className="size-14 rounded-[18px] bg-[#767680]/[0.12] mx-auto" />
+              <div className="h-5 w-44 bg-[#767680]/[0.12] rounded-full mx-auto" />
+              <div className="h-20 w-full bg-[#767680]/[0.08] rounded-[22px]" />
+              <div className="h-36 w-full bg-[#767680]/[0.08] rounded-[22px]" />
             </div>
           ) : reels.length === 0 ? (
             <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center space-y-3">
-              <BookOpen className="size-12 text-slate-300 dark:text-zinc-600 mb-1" />
-              <h3 className="font-bold text-base text-slate-800 dark:text-zinc-200">Reels mavjud emas</h3>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-xs">
+              <div className="flex size-14 items-center justify-center rounded-[18px] bg-[#007AFF]/12 text-[#007AFF]">
+                <BookOpen className="size-7" />
+              </div>
+              <h3 className="font-bold text-[17px] text-slate-900 dark:text-white">Reels mavjud emas</h3>
+              <p className="text-[13px] text-[#8E8E93] max-w-xs">
                 Ushbu fan bo&apos;yicha tezkor savollar tez orada qo&apos;shiladi.
               </p>
               <button
                 onClick={() => setSelectedSubject('all')}
-                className="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-semibold shadow cursor-pointer hover:bg-blue-700 transition-colors"
+                className="px-5 py-2.5 rounded-full bg-[#007AFF] text-white text-[13px] font-bold shadow-[0_4px_14px_rgba(0,122,255,0.28)] cursor-pointer hover:bg-[#0066D6] transition-all active:scale-95"
               >
                 Barchasini ko&apos;rish
               </button>
@@ -729,57 +727,65 @@ function ReelsInner() {
                     key={reel.id}
                     ref={(el) => { reelRefs.current[index] = el; }}
                     data-index={index}
-                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between p-4 sm:p-5 overflow-y-auto no-scrollbar select-none bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
+                    className="h-full w-full snap-start snap-always shrink-0 relative flex flex-col justify-between p-4 sm:p-5 overflow-y-auto no-scrollbar select-none bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white"
                   >
-                    {/* ── TOP SECTION: Warning Box & Progress Bar ── */}
+                    {/* ── TOP SECTION: iOS Callout Card & Dynamic Island Timer ── */}
                     <div className="space-y-3 shrink-0">
-                      {/* Author badge if question was submitted by a user */}
                       {reel.author && (
-                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 text-blue-700 dark:text-blue-300 text-[11px] font-bold w-fit shadow-xs">
-                          <PremiumIcon icon={Sparkles} tone="sky" size="xs" glow />
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#007AFF]/10 border border-[#007AFF]/20 text-[#007AFF] text-[11px] font-bold w-fit">
+                          <Sparkles className="size-3.5" />
                           <span>Muallif: @{reel.author.username || reel.author.name}</span>
-                          <span className="text-[10px] bg-blue-200 dark:bg-blue-900/60 px-1.5 py-0.5 rounded-md font-extrabold text-blue-800 dark:text-blue-200">
+                          <span className="text-[10px] bg-[#007AFF]/15 px-1.5 py-0.5 rounded-full font-extrabold">
                             Hamjamiyat
                           </span>
                         </div>
                       )}
 
-                      {/* Pale Yellow / Amber Warning Card */}
-                      <div className="bg-[#fffbeb] dark:bg-amber-950/30 border border-[#fef3c7] dark:border-amber-800/40 rounded-2xl p-3 sm:p-3.5 flex items-start gap-3 shadow-sm">
-                        <PremiumIcon icon={AlertTriangle} tone="amber" size="sm" glow className="mt-0.5" />
+                      {/* iOS Amber Callout Banner */}
+                      <div className="rounded-[20px] bg-[#FF9500]/[0.10] border border-[#FF9500]/25 p-3 sm:p-3.5 flex items-start gap-3">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-[#FF9500] text-white shadow-xs mt-0.5">
+                          <AlertTriangle className="size-4" />
+                        </div>
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <h4 className="text-[11px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-400">
-                            MURAKKAB SAVOL
+                          <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-[#FF9500]">
+                            MURAKKAB SAVOL · {reel.subject_name}
                           </h4>
-                          <p className="text-xs text-slate-600 dark:text-amber-200/90 leading-snug">
-                            O&apos;quvchilarning {failRate}% i bu savolda yiqilgan. Diqqat bilan belgilang!
+                          <p className="text-[12px] text-slate-700 dark:text-slate-200 leading-snug">
+                            O&apos;quvchilarning <strong>{failRate}%</strong> i bu savolda yiqilgan. Diqqat bilan belgilang!
                           </p>
                         </div>
                       </div>
 
-                      {/* Question Counter & Progress Timer Row */}
+                      {/* Question Counter & Dynamic Island Timer Row */}
                       <div className="space-y-1.5 pt-0.5">
-                        <div className="flex items-center justify-between text-xs sm:text-sm font-semibold">
-                          <div className="flex items-center gap-2 text-slate-700 dark:text-zinc-300">
-                            <span className="size-2 rounded-full bg-indigo-600 shrink-0" />
+                        <div className="flex items-center justify-between text-[12px] sm:text-[13px] font-semibold">
+                          <div className="flex items-center gap-2 text-[#8E8E93]">
+                            <span className="size-2 rounded-full bg-[#007AFF] shrink-0" />
                             <span>{index + 1}-savol / {reels.length}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-bold text-xs sm:text-sm">
-                            <PremiumIcon icon={Clock} tone="indigo" size="xs" />
+                          <div className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-[12px] font-bold",
+                            hasAnswered
+                              ? "bg-[#34C759]/12 text-[#34C759]"
+                              : timeLeft <= 4
+                              ? "bg-[#FF3B30]/15 text-[#FF3B30] animate-pulse"
+                              : "bg-[#5856D6]/12 text-[#5856D6]"
+                          )}>
+                            <Clock className="size-3.5" />
                             <span>{hasAnswered ? "Yechildi" : `${timeLeft}s`}</span>
                           </div>
                         </div>
 
-                        {/* Indigo Progress Bar */}
-                        <div className="h-1.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        {/* iOS Progress Bar */}
+                        <div className="h-1.5 w-full bg-[#767680]/[0.12] rounded-full overflow-hidden">
                           <div
                             className={cn(
                               "h-full rounded-full transition-all duration-1000 ease-linear",
                               hasAnswered
-                                ? "bg-emerald-500"
+                                ? "bg-[#34C759]"
                                 : timeLeft <= 4
-                                ? "bg-rose-500 animate-pulse"
-                                : "bg-indigo-600"
+                                ? "bg-[#FF3B30]"
+                                : "bg-[#007AFF]"
                             )}
                             style={{ width: `${hasAnswered ? 100 : Math.max(5, (timeLeft / 15) * 100)}%` }}
                           />
@@ -787,11 +793,10 @@ function ReelsInner() {
                       </div>
                     </div>
 
-                    {/* ── MIDDLE SECTION: Question & Option Cards (Smooth Adaptability for Long Questions) ── */}
+                    {/* ── MIDDLE SECTION: Question & iOS Option Rows ── */}
                     <div className="flex-1 flex flex-col justify-center py-2.5 sm:py-3 min-h-0 space-y-3 overflow-hidden">
-                      {/* Optional Video / Media Attachment if present */}
                       {reel.media_type === 'video' && reel.video_url && (
-                        <div className="w-full h-36 rounded-2xl overflow-hidden bg-black shrink-0 relative">
+                        <div className="w-full h-36 rounded-[20px] overflow-hidden bg-black shrink-0 relative">
                           <video
                             src={reel.video_url}
                             className="w-full h-full object-cover"
@@ -803,29 +808,28 @@ function ReelsInner() {
                         </div>
                       )}
 
-                      {/* Question Content (Auto-fits long prompts, matching questions, reading passages) */}
                       {formattedQ.isMatching ? (
-                        <div className="space-y-2 max-h-[28vh] overflow-y-auto no-scrollbar p-3 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60">
-                          <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-snug">
+                        <div className="space-y-2 max-h-[28vh] overflow-y-auto no-scrollbar p-3.5 rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.05] dark:border-white/[0.07]">
+                          <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-900 dark:text-white leading-snug">
                             {formattedQ.prompt}
                           </h2>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1.5 border-t border-slate-200/60 dark:border-zinc-700/50">
-                            <div className="space-y-1 bg-white dark:bg-zinc-900/60 p-2 rounded-xl border border-slate-200/50 dark:border-zinc-800">
-                              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase block mb-1">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+                            <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-[14px] border border-black/[0.05] dark:border-white/[0.07]">
+                              <span className="text-[10px] font-extrabold text-[#FF9500] uppercase block mb-1">
                                 📌 Atamalar:
                               </span>
                               {formattedQ.romanItems.map((item, idx) => (
-                                <div key={idx} className="text-slate-800 dark:text-zinc-200 font-medium leading-snug">
+                                <div key={idx} className="text-slate-800 dark:text-slate-200 font-medium leading-snug">
                                   {item}
                                 </div>
                               ))}
                             </div>
-                            <div className="space-y-1 bg-white dark:bg-zinc-900/60 p-2 rounded-xl border border-slate-200/50 dark:border-zinc-800">
-                              <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase block mb-1">
+                            <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-[14px] border border-black/[0.05] dark:border-white/[0.07]">
+                              <span className="text-[10px] font-extrabold text-[#007AFF] uppercase block mb-1">
                                 📝 Izohlar:
                               </span>
                               {formattedQ.letterItems.map((item, idx) => (
-                                <div key={idx} className="text-slate-700 dark:text-zinc-300 leading-snug">
+                                <div key={idx} className="text-slate-700 dark:text-slate-300 leading-snug">
                                   {item}
                                 </div>
                               ))}
@@ -838,19 +842,19 @@ function ReelsInner() {
                           isLongQuestion ? "max-h-[26vh] sm:max-h-[30vh]" : "max-h-[22vh]"
                         )}>
                           <h2 className={cn(
-                            "font-extrabold text-slate-900 dark:text-white leading-snug",
+                            "font-extrabold tracking-[-0.015em] text-slate-900 dark:text-white leading-snug",
                             (formattedQ.prompt?.length || 0) > 180
-                              ? "text-xs sm:text-sm"
+                              ? "text-[13px] sm:text-[14px]"
                               : (formattedQ.prompt?.length || 0) > 90
-                              ? "text-sm sm:text-base"
-                              : "text-base sm:text-lg md:text-xl"
+                              ? "text-[15px] sm:text-[16px]"
+                              : "text-[17px] sm:text-[19px]"
                           )}>
                             {formattedQ.prompt}
                           </h2>
                         </div>
                       )}
 
-                      {/* Option Cards (A, B, C, D with Letter Badge Boxes) */}
+                      {/* Option Cards (A, B, C, D with iOS Squircle Letter Badges) */}
                       <div className="space-y-2 sm:space-y-2.5 w-full shrink-0">
                         {reel.quiz.options.map((opt, optIdx) => {
                           const cleanOpt = cleanOptionText(opt);
@@ -858,19 +862,19 @@ function ReelsInner() {
                           const isSelected = quizAnswer?.selectedIndex === optIdx;
                           const isCorrectOption = quizAnswer?.correctIndex === optIdx;
 
-                          let cardStyle = "border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-slate-300 dark:hover:border-zinc-700 text-slate-800 dark:text-zinc-100";
-                          let badgeStyle = "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300";
+                          let cardStyle = "border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/75 dark:bg-[#2C2C2E] hover:border-[#007AFF]/50 text-slate-900 dark:text-white";
+                          let badgeStyle = "bg-white dark:bg-[#1C1C1E] text-slate-800 dark:text-slate-200 shadow-xs";
 
                           if (hasAnswered) {
                             if (isCorrectOption) {
-                              cardStyle = "border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100 ring-1 ring-emerald-500 shadow-sm";
-                              badgeStyle = "bg-emerald-500 text-white";
+                              cardStyle = "border-2 border-[#34C759] bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]";
+                              badgeStyle = "bg-[#34C759] text-white";
                             } else if (isSelected && !quizAnswer.isCorrect) {
-                              cardStyle = "border-rose-500 bg-rose-50/70 dark:bg-rose-950/40 text-rose-900 dark:text-rose-100 ring-1 ring-rose-500 shadow-sm";
-                              badgeStyle = "bg-rose-500 text-white";
+                              cardStyle = "border-2 border-[#FF3B30] bg-[#FF3B30]/12 text-[#D70015] dark:text-[#FF453A]";
+                              badgeStyle = "bg-[#FF3B30] text-white";
                             } else {
-                              cardStyle = "border-slate-200/50 dark:border-zinc-800/50 bg-slate-50/40 dark:bg-zinc-900/30 text-slate-400 dark:text-zinc-500 opacity-60";
-                              badgeStyle = "bg-slate-100/50 dark:bg-zinc-800/50 text-slate-400 dark:text-zinc-500";
+                              cardStyle = "border-black/[0.04] dark:border-white/[0.04] bg-[#F2F2F7]/40 dark:bg-[#2C2C2E]/40 text-[#8E8E93] opacity-60";
+                              badgeStyle = "bg-white/60 dark:bg-[#1C1C1E]/60 text-[#8E8E93]";
                             }
                           }
 
@@ -880,118 +884,106 @@ function ReelsInner() {
                               disabled={hasAnswered}
                               onClick={() => handleAnswerQuiz(reel.id, optIdx)}
                               className={cn(
-                                "w-full p-3 sm:p-3.5 rounded-2xl border text-left flex items-center gap-3 sm:gap-3.5 transition-all shadow-sm cursor-pointer group active:scale-[0.99]",
+                                "w-full p-3 sm:p-3.5 rounded-[18px] border text-left flex items-center gap-3 transition-all cursor-pointer group active:scale-[0.985]",
                                 cardStyle
                               )}
                             >
-                              <div className={cn("size-8 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 transition-colors", badgeStyle)}>
+                              <div className={cn("size-8 rounded-[10px] flex items-center justify-center font-mono font-bold text-[13px] shrink-0 transition-colors", badgeStyle)}>
                                 {letter}
                               </div>
-                              <span className="text-xs sm:text-sm font-semibold flex-1 leading-snug break-words">
+                              <span className="text-[13px] sm:text-[14px] font-semibold flex-1 leading-snug break-words">
                                 {cleanOpt}
                               </span>
                               {hasAnswered && isCorrectOption && (
-                                <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                <CheckCircle2 className="size-5 text-[#34C759] shrink-0" />
                               )}
                               {hasAnswered && isSelected && !quizAnswer.isCorrect && (
-                                <XCircle className="size-5 text-rose-600 dark:text-rose-400 shrink-0" />
+                                <XCircle className="size-5 text-[#FF3B30] shrink-0" />
                               )}
                             </button>
                           );
                         })}
                       </div>
 
-                      {/* Explanation Drawer when Answered */}
+                      {/* Explanation Card when Answered */}
                       {quizAnswer && (
-                        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/60 space-y-1.5 animate-in fade-in duration-300 shrink-0">
-                          <div className="flex items-center justify-between text-xs font-bold">
-                            <span className={quizAnswer.isCorrect ? "text-emerald-600 dark:text-emerald-400 flex items-center gap-1" : "text-rose-600 dark:text-rose-400 flex items-center gap-1"}>
+                        <div className="p-3.5 rounded-[18px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] space-y-1.5 animate-in fade-in duration-300 shrink-0">
+                          <div className="flex items-center justify-between text-[12px] font-bold">
+                            <span className={quizAnswer.isCorrect ? "text-[#34C759] flex items-center gap-1" : "text-[#FF3B30] flex items-center gap-1"}>
                               {quizAnswer.isCorrect ? "✅ To'g'ri javob! (+5 XP)" : "❌ Noto'g'ri javob"}
                             </span>
                             <button
                               onClick={() => { tgHaptic('light'); scrollToReel(index + 1); }}
                               disabled={index === reels.length - 1}
-                              className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-bold cursor-pointer disabled:opacity-30"
+                              className="text-[12px] text-[#007AFF] hover:underline flex items-center gap-1 font-bold cursor-pointer disabled:opacity-30"
                             >
                               Keyingi savol &darr;
                             </button>
                           </div>
-                          <p className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed">
+                          <p className="text-[12px] text-slate-700 dark:text-slate-200 leading-relaxed">
                             💡 <span className="font-medium">{quizAnswer.explanation}</span>
                           </p>
                         </div>
                       )}
                     </div>
 
-                    {/* ── BOTTOM ENGAGEMENT BAR (Matches Screenshot) ── */}
-                    <div className="pt-3 pb-1 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-slate-500 dark:text-zinc-400 text-xs sm:text-sm font-medium shrink-0">
-                      <div className="flex items-center gap-3 sm:gap-4">
+                    {/* ── BOTTOM iOS ENGAGEMENT BAR ── */}
+                    <div className="pt-3 pb-1 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between text-[#8E8E93] text-[12px] sm:text-[13px] font-semibold shrink-0">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
                         {/* Heart / Like */}
                         <button
                           onClick={(e) => handleLike(reel.id, e)}
-                          className="flex items-center gap-1.5 hover:text-rose-500 transition-colors cursor-pointer group"
+                          className={cn(
+                            "flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all cursor-pointer active:scale-95",
+                            isLiked ? "bg-[#FF2D55]/12 text-[#FF2D55]" : "hover:bg-[#767680]/[0.08]"
+                          )}
                           title="Yoqdi"
                         >
-                          <PremiumIcon
-                            icon={Heart}
-                            tone={isLiked ? "rose" : "zinc"}
-                            size="xs"
-                            glow={isLiked}
-                            className={cn("transition-transform", isLiked && "scale-110", "group-hover:scale-110")}
-                          />
-                          <span className={cn("font-semibold text-xs sm:text-sm", isLiked && "text-rose-500 font-bold")}>{likes}</span>
+                          <Heart className={cn("size-4", isLiked && "fill-[#FF2D55]")} />
+                          <span className="font-mono font-bold text-[12px]">{likes}</span>
                         </button>
 
                         {/* Comment */}
                         <button
                           onClick={() => { tgHaptic('light'); handleOpenComments(reel); }}
-                          className="flex items-center gap-1.5 hover:text-sky-500 transition-colors cursor-pointer group"
+                          className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 hover:bg-[#767680]/[0.08] hover:text-[#007AFF] transition-all cursor-pointer active:scale-95"
                           title="Izohlar"
                         >
-                          <PremiumIcon
-                            icon={MessageCircle}
-                            tone="sky"
-                            size="xs"
-                            className="group-hover:scale-110"
-                          />
-                          <span className="font-semibold text-xs sm:text-sm">{commentCounts[reel.id] ?? reel.comments_count ?? 0}</span>
+                          <MessageCircle className="size-4 text-[#007AFF]" />
+                          <span className="font-mono font-bold text-[12px]">{commentCounts[reel.id] ?? reel.comments_count ?? 0}</span>
                         </button>
 
                         {/* Bookmark / Save */}
                         <button
                           onClick={() => handleSave(reel.id)}
-                          className="flex items-center gap-1.5 hover:text-amber-500 transition-colors cursor-pointer group"
+                          className={cn(
+                            "flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all cursor-pointer active:scale-95",
+                            isSaved ? "bg-[#FF9500]/12 text-[#FF9500]" : "hover:bg-[#767680]/[0.08]"
+                          )}
                           title="Xatcho'pga saqlash"
                         >
-                          <PremiumIcon
-                            icon={Bookmark}
-                            tone={isSaved ? "amber" : "zinc"}
-                            size="xs"
-                            glow={isSaved}
-                            className={cn("transition-transform", isSaved && "scale-110", "group-hover:scale-110")}
-                          />
-                          <span className={cn("font-semibold text-xs sm:text-sm", isSaved && "text-amber-500 font-bold")}>{savedCount}</span>
+                          <Bookmark className={cn("size-4", isSaved && "fill-[#FF9500]")} />
+                          <span className="font-mono font-bold text-[12px]">{savedCount}</span>
                         </button>
                       </div>
 
                       {/* Action buttons: Challenge & Share */}
-                      <div className="flex items-center gap-2 sm:gap-2.5">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleChallengeFriend(reel)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/25 transition-all cursor-pointer font-bold text-xs group active:scale-95 shadow-xs"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF9500]/12 hover:bg-[#FF9500]/20 text-[#FF9500] border border-[#FF9500]/25 transition-all cursor-pointer font-bold text-[12px] active:scale-95"
                           title="Do'stga Telegram chaqiriq yuborish"
                         >
-                          <PremiumIcon icon={Swords} tone="amber" size="xs" glow className="group-hover:rotate-12 transition-transform" />
+                          <Swords className="size-3.5" />
                           <span>Chaqiriq ⚔️</span>
                         </button>
 
-                        {/* Share / Ulashish */}
                         <button
                           onClick={() => handleShare(reel)}
-                          className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors cursor-pointer font-semibold group"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#007AFF]/12 hover:bg-[#007AFF]/20 text-[#007AFF] transition-all cursor-pointer font-bold text-[12px] active:scale-95"
                           title="Telegram'ga ulashish"
                         >
-                          <PremiumIcon icon={Share2} tone="indigo" size="xs" className="group-hover:scale-110" />
+                          <Share2 className="size-3.5" />
                           <span className="hidden xs:inline">Ulashish</span>
                         </button>
                       </div>
@@ -1007,109 +999,110 @@ function ReelsInner() {
         {floatingHearts.map((heart) => (
           <div
             key={heart.id}
-            className="fixed pointer-events-none z-50 text-rose-500 text-2xl animate-ping"
+            className="fixed pointer-events-none z-50 text-[#FF2D55] text-2xl animate-ping"
             style={{ left: heart.x, top: heart.y }}
           >
             ❤️
           </div>
         ))}
 
-        {/* Desktop Navigation Floating Dock beside the card */}
-        <div className="hidden lg:flex flex-col items-center gap-2 fixed right-4 xl:right-10 top-1/2 -translate-y-1/2 z-30 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-slate-200 dark:border-zinc-800 p-2 rounded-2xl shadow-xl">
+        {/* Desktop Navigation Floating iOS Pill Dock beside the card */}
+        <div className="hidden lg:flex flex-col items-center gap-2 fixed right-4 xl:right-10 top-1/2 -translate-y-1/2 z-30 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.10] p-2 rounded-[22px] shadow-[0_12px_36px_rgba(0,0,0,0.08)]">
           <button
             onClick={() => scrollToReel(currentIndex - 1)}
             disabled={currentIndex === 0}
-            className="size-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 flex items-center justify-center disabled:opacity-20 shadow-sm transition-all active:scale-95 cursor-pointer"
+            className="size-10 rounded-[14px] bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-slate-800 dark:text-white flex items-center justify-center disabled:opacity-25 transition-all active:scale-95 cursor-pointer"
             title="Oldingi savol (Klaviatura ↑)"
           >
             <ChevronUp className="size-5" />
           </button>
-          <div className="text-[11px] font-mono font-bold text-slate-500 dark:text-zinc-400 py-0.5">
+          <div className="text-[11px] font-mono font-bold text-[#8E8E93] py-0.5">
             {currentIndex + 1} / {reels.length}
           </div>
           <button
             onClick={() => scrollToReel(currentIndex + 1)}
             disabled={currentIndex >= reels.length - 1}
-            className="size-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 flex items-center justify-center disabled:opacity-20 shadow-sm transition-all active:scale-95 cursor-pointer"
+            className="size-10 rounded-[14px] bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-slate-800 dark:text-white flex items-center justify-center disabled:opacity-25 transition-all active:scale-95 cursor-pointer"
             title="Keyingi savol (Klaviatura ↓)"
           >
             <ChevronDown className="size-5" />
           </button>
         </div>
 
-        {/* ── COMMENTS BOTTOM DRAWER MODAL ── */}
+        {/* ── COMMENTS iOS BOTTOM SHEET MODAL ── */}
         {activeCommentReel && (
           <div
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setActiveCommentReel(null)}
           >
             <div
-              className="w-full sm:max-w-lg bg-white dark:bg-zinc-950 border-t sm:border border-slate-200 dark:border-zinc-800 rounded-t-[2.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col h-[75vh] sm:h-[580px] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
+              className="w-full sm:max-w-lg bg-white dark:bg-[#1C1C1E] border-t sm:border border-black/[0.08] dark:border-white/[0.10] rounded-t-[32px] sm:rounded-[32px] p-5 sm:p-6 flex flex-col h-[75vh] sm:h-[580px] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Drawer Drag handle for mobile */}
-              <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mb-3 sm:hidden" />
+              <div className="w-10 h-1.5 bg-[#8E8E93]/30 rounded-full mx-auto mb-3 sm:hidden" />
 
               {/* Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+              <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
-                  <PremiumIcon icon={MessageCircle} tone="indigo" size="sm" glow />
-                  <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                  <div className="flex size-8 items-center justify-center rounded-[10px] bg-[#007AFF] text-white">
+                    <MessageCircle className="size-4" />
+                  </div>
+                  <h3 className="font-bold text-[16px] text-slate-900 dark:text-white">
                     Izohlar ({commentCounts[activeCommentReel.id] ?? comments.length})
                   </h3>
                 </div>
                 <button
                   onClick={() => setActiveCommentReel(null)}
-                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center text-slate-600 dark:text-zinc-400 transition-all active:scale-95 cursor-pointer"
+                  className="size-8 rounded-full bg-[#767680]/[0.12] hover:bg-[#767680]/[0.20] flex items-center justify-center text-[#8E8E93] transition-all active:scale-95 cursor-pointer"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="size-4" />
                 </button>
               </div>
 
               {/* Comments List */}
-              <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-3.5">
+              <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-3">
                 {commentsLoading ? (
                   <div className="space-y-3 py-6 animate-pulse">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex gap-3 items-start">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-zinc-800 shrink-0" />
+                        <div className="size-8 rounded-full bg-[#767680]/[0.12] shrink-0" />
                         <div className="space-y-1.5 flex-1">
-                          <div className="h-3 w-28 bg-slate-200 dark:bg-zinc-800 rounded" />
-                          <div className="h-4 w-full bg-slate-100 dark:bg-zinc-800/60 rounded" />
+                          <div className="h-3 w-28 bg-[#767680]/[0.12] rounded" />
+                          <div className="h-4 w-full bg-[#767680]/[0.08] rounded" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : comments.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-400 dark:text-zinc-500">
-                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-400 dark:text-zinc-500 mb-1">
-                      <MessageCircle className="w-6 h-6" />
+                  <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-[#8E8E93]">
+                    <div className="size-12 rounded-full bg-[#767680]/[0.10] flex items-center justify-center mb-1">
+                      <MessageCircle className="size-6" />
                     </div>
-                    <p className="font-semibold text-sm text-slate-700 dark:text-zinc-300">Hozircha izohlar yo&apos;q</p>
-                    <p className="text-xs text-slate-400 dark:text-zinc-500">Birinchi bo&apos;lib fikr bildiring va muhokamani boshlang!</p>
+                    <p className="font-bold text-[15px] text-slate-900 dark:text-white">Hozircha izohlar yo&apos;q</p>
+                    <p className="text-[12px]">Birinchi bo&apos;lib fikr bildiring va muhokamani boshlang!</p>
                   </div>
                 ) : (
                   comments.map((c) => {
                     const isReply = Boolean(c.parent_id);
                     return (
-                      <div key={c.id} className={cn("flex gap-2.5 items-start group", isReply && "ml-5 pl-2 border-l-2 border-indigo-500/40")}>
-                        {isReply && <CornerDownRight className="w-3 h-3 text-indigo-500 mt-2 shrink-0" />}
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 flex items-center justify-center text-white font-extrabold text-[10px] shrink-0 shadow-sm overflow-hidden mt-0.5">
+                      <div key={c.id} className={cn("flex gap-2.5 items-start group", isReply && "ml-5 pl-2 border-l-2 border-[#007AFF]/40")}>
+                        {isReply && <CornerDownRight className="size-3 text-[#007AFF] mt-2 shrink-0" />}
+                        <div className="size-7 rounded-full bg-gradient-to-tr from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white font-extrabold text-[10px] shrink-0 shadow-xs overflow-hidden mt-0.5">
                           {c.user_avatar ? (
                             <img src={c.user_avatar} alt={c.user_name} className="w-full h-full object-cover" />
                           ) : (
                             c.user_name.charAt(0).toUpperCase()
                           )}
                         </div>
-                        <div className="flex-1 bg-slate-50 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-2.5 space-y-1">
+                        <div className="flex-1 bg-[#F2F2F7] dark:bg-[#2C2C2E] rounded-[18px] p-3 space-y-1">
                           <div className="flex items-center justify-between text-xs">
                             <div className="flex items-center gap-1 min-w-0">
-                              <span className="font-bold text-slate-900 dark:text-zinc-100 truncate">{c.user_name}</span>
+                              <span className="font-bold text-slate-900 dark:text-white truncate">{c.user_name}</span>
                               <VerifiedBadge role={c.role} isSuperadmin={c.is_superadmin} isTeacher={c.is_teacher} size="xs" />
                             </div>
-                            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono shrink-0">{c.created_at}</span>
+                            <span className="text-[10px] text-[#8E8E93] font-mono shrink-0">{c.created_at}</span>
                           </div>
-                          <p className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed break-words">{c.text}</p>
+                          <p className="text-[13px] text-slate-700 dark:text-slate-200 leading-relaxed break-words">{c.text}</p>
                           <div className="pt-0.5">
                             <button
                               type="button"
@@ -1117,7 +1110,7 @@ function ReelsInner() {
                                 setReplyingTo({ id: c.id, userName: c.user_name });
                                 setNewCommentText(`@${c.user_name} `);
                               }}
-                              className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                              className="text-[11px] font-bold text-[#007AFF] hover:underline cursor-pointer"
                             >
                               Javob berish
                             </button>
@@ -1130,30 +1123,29 @@ function ReelsInner() {
               </div>
 
               {/* Quick Meme Stickers */}
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 border-t border-slate-100 dark:border-zinc-800">
-                <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold shrink-0">Stiker:</span>
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1.5 border-t border-black/[0.06] dark:border-white/[0.08]">
+                <span className="text-[10px] text-[#8E8E93] font-bold shrink-0">Stiker:</span>
                 {REELS_STUDY_MEMES.map((m, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => setNewCommentText((prev) => (prev ? prev + ' ' : '') + m.text)}
-                    className="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 shrink-0 transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#767680]/[0.10] hover:bg-[#767680]/[0.18] text-slate-800 dark:text-slate-200 shrink-0 transition-colors cursor-pointer"
                   >
                     {m.label}
                   </button>
                 ))}
               </div>
 
-              {/* Replying To Banner */}
               {replyingTo && (
-                <div className="flex items-center justify-between text-xs px-3 py-1 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-indigo-700 dark:text-indigo-300">
+                <div className="flex items-center justify-between text-xs px-3 py-1.5 bg-[#007AFF]/10 border border-[#007AFF]/20 rounded-[12px] text-[#007AFF]">
                   <span className="truncate">💬 <b>@{replyingTo.userName}</b> ga javob berilmoqda</span>
                   <button
                     type="button"
                     onClick={() => setReplyingTo(null)}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-white ml-2 cursor-pointer"
+                    className="text-[#8E8E93] hover:text-slate-900 dark:hover:text-white ml-2 cursor-pointer"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="size-3.5" />
                   </button>
                 </div>
               )}
@@ -1166,43 +1158,44 @@ function ReelsInner() {
                   onChange={(e) => setNewCommentText(e.target.value)}
                   placeholder="Fikr, javob yoki stiker yozing..."
                   maxLength={500}
-                  className="flex-1 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:border-indigo-500 rounded-full px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none transition-all"
+                  className="flex-1 bg-[#767680]/[0.10] dark:bg-[#2C2C2E] border border-transparent focus:border-[#007AFF] rounded-full px-4 py-2.5 text-[13px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none transition-all"
                 />
                 <button
                   type="submit"
                   disabled={!newCommentText.trim() || submittingComment}
-                  className="px-4 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all shrink-0 cursor-pointer"
+                  className="px-4 py-2.5 rounded-full bg-[#007AFF] hover:bg-[#0066D6] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-[12px] flex items-center gap-1.5 shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   <span>Yuborish</span>
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="size-3.5" />
                 </button>
               </form>
             </div>
           </div>
         )}
 
-        {/* ── STUDENT QUESTION CREATION MODAL ("Mening qiyin savolim") ── */}
+        {/* ── STUDENT QUESTION CREATION iOS BOTTOM SHEET ("Mening qiyin savolim") ── */}
         {isCreateModalOpen && (
           <div
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setIsCreateModalOpen(false)}
           >
             <div
-              className="w-full sm:max-w-xl bg-white dark:bg-zinc-950 border-t sm:border border-slate-200 dark:border-zinc-800 rounded-t-[2.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col max-h-[90vh] sm:max-h-[85vh] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
+              className="w-full sm:max-w-xl bg-white dark:bg-[#1C1C1E] border-t sm:border border-black/[0.08] dark:border-white/[0.10] rounded-t-[32px] sm:rounded-[32px] p-5 sm:p-6 flex flex-col max-h-[90vh] sm:max-h-[85vh] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Drawer Drag handle for mobile */}
-              <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mb-3 sm:hidden" />
+              <div className="w-10 h-1.5 bg-[#8E8E93]/30 rounded-full mx-auto mb-3 sm:hidden" />
 
               {/* Modal Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
+              <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
-                  <PremiumIcon icon={Sparkles} tone="primary" size="md" glow />
+                  <div className="flex size-9 items-center justify-center rounded-[12px] bg-[#007AFF] text-white shadow-xs">
+                    <Sparkles className="size-4.5" />
+                  </div>
                   <div>
-                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                    <h3 className="font-bold text-[16px] text-slate-900 dark:text-white">
                       Mening qiyin savolim (Reels)
                     </h3>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                    <p className="text-[12px] text-[#8E8E93]">
                       O&apos;quvchilarni sinovdan o&apos;tkazing va +20 XP oling!
                     </p>
                   </div>
@@ -1210,23 +1203,22 @@ function ReelsInner() {
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 flex items-center justify-center text-slate-600 dark:text-zinc-400 transition-all active:scale-95 cursor-pointer"
+                  className="size-8 rounded-full bg-[#767680]/[0.12] hover:bg-[#767680]/[0.20] flex items-center justify-center text-[#8E8E93] transition-all active:scale-95 cursor-pointer"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="size-4" />
                 </button>
               </div>
 
               {/* Form Content */}
-              <form onSubmit={handleCreateQuestionSubmit} className="flex-1 overflow-y-auto no-scrollbar py-3.5 space-y-4">
-                {/* Subject Selector */}
+              <form onSubmit={handleCreateQuestionSubmit} className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  <label className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider">
                     Fan:
                   </label>
                   <select
                     value={createSubject}
                     onChange={(e) => setCreateSubject(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3.5 py-2.5 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-[#007AFF]"
                   >
                     <option value="tarix">Tarix</option>
                     <option value="ona-tili">Ona tili va adabiyot</option>
@@ -1236,9 +1228,8 @@ function ReelsInner() {
                   </select>
                 </div>
 
-                {/* Question Input */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  <label className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider">
                     Savol matni:
                   </label>
                   <textarea
@@ -1248,15 +1239,14 @@ function ReelsInner() {
                     placeholder="Masalan: Qaysi sulola davrida Mirzo Ulug'bek madrasasi qurilgan?.."
                     required
                     maxLength={500}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none focus:border-[#007AFF] resize-none"
                   />
                 </div>
 
-                {/* 4 Options with Radio Selector for Correct Answer */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center justify-between">
+                  <label className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider flex items-center justify-between">
                     <span>Variantlar (To&apos;g&apos;ri javobni tanlang):</span>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <span className="text-[12px] text-[#34C759] font-bold normal-case">
                       To&apos;g&apos;ri javob: {OPTION_LETTERS[createCorrectIndex]}
                     </span>
                   </label>
@@ -1268,20 +1258,20 @@ function ReelsInner() {
                         <div
                           key={idx}
                           className={cn(
-                            "flex items-center gap-2 p-1.5 rounded-xl border transition-all",
+                            "flex items-center gap-2 p-2 rounded-[14px] border transition-all",
                             isCorrect
-                              ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30"
-                              : "border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                              ? "border-[#34C759] bg-[#34C759]/10"
+                              : "border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E]"
                           )}
                         >
                           <button
                             type="button"
                             onClick={() => { tgHaptic('select'); setCreateCorrectIndex(idx); }}
                             className={cn(
-                              "size-7 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 transition-colors cursor-pointer",
+                              "size-7 rounded-[9px] font-mono font-bold text-[12px] flex items-center justify-center shrink-0 transition-colors cursor-pointer",
                               isCorrect
-                                ? "bg-emerald-600 text-white"
-                                : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200"
+                                ? "bg-[#34C759] text-white"
+                                : "bg-white dark:bg-[#1C1C1E] text-slate-700 dark:text-slate-200"
                             )}
                             title={`${letter} variantini to'g'ri deb belgilash`}
                           >
@@ -1298,7 +1288,7 @@ function ReelsInner() {
                             placeholder={`${letter} varianti matni...`}
                             required
                             maxLength={200}
-                            className="flex-1 bg-transparent border-0 px-2 py-1 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
+                            className="flex-1 bg-transparent border-0 px-2 py-1 text-[13px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none"
                           />
                         </div>
                       );
@@ -1306,9 +1296,8 @@ function ReelsInner() {
                   </div>
                 </div>
 
-                {/* Explanation Input */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  <label className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider">
                     To&apos;g&apos;ri javob izohi / tushuntirish:
                   </label>
                   <textarea
@@ -1318,40 +1307,38 @@ function ReelsInner() {
                     placeholder="Nima uchun bu javob to'g'ri ekanligini qisqacha izohlang..."
                     required
                     maxLength={350}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none focus:border-[#007AFF] resize-none"
                   />
                 </div>
 
-                {/* Reward Banner */}
-                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300 font-medium">
-                    <PremiumIcon icon={Zap} tone="amber" size="xs" glow />
+                <div className="p-3.5 rounded-[16px] bg-[#FF9500]/10 border border-[#FF9500]/25 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-[#FF9500] font-semibold">
+                    <Zap className="size-4 fill-[#FF9500]" />
                     <span>Tasdiqlanganda darhol hisobingizga mukofot:</span>
                   </div>
-                  <span className="font-black text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/60 px-2.5 py-1 rounded-xl text-xs">
+                  <span className="font-mono font-bold text-[#FF9500] bg-[#FF9500]/15 px-2.5 py-1 rounded-full text-xs">
                     +20 XP 🔥
                   </span>
                 </div>
 
-                {/* Footer Buttons */}
                 <div className="pt-2 flex items-center justify-end gap-2.5">
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs cursor-pointer transition-colors"
+                    className="px-4 py-2.5 rounded-full bg-[#767680]/[0.12] hover:bg-[#767680]/[0.20] text-slate-800 dark:text-white font-semibold text-[13px] cursor-pointer transition-colors"
                   >
                     Bekor qilish
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingQuestion}
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-500/25 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
+                    className="px-5 py-2.5 rounded-full bg-[#007AFF] hover:bg-[#0066D6] text-white font-bold text-[13px] flex items-center gap-2 shadow-[0_4px_14px_rgba(0,122,255,0.28)] cursor-pointer disabled:opacity-50 transition-all active:scale-95"
                   >
                     {isSubmittingQuestion ? (
                       <span>Yuklanmoqda...</span>
                     ) : (
                       <>
-                        <Sparkles className="size-3.5" />
+                        <Sparkles className="size-4" />
                         <span>Reels&apos;ga joylash (+20 XP)</span>
                       </>
                     )}
@@ -1370,8 +1357,8 @@ export default function ReelsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-100 dark:bg-zinc-950 flex items-center justify-center p-4">
-          <div className="w-10 h-10 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
+        <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#000000] flex items-center justify-center p-4">
+          <div className="size-10 rounded-full border-3 border-[#007AFF] border-t-transparent animate-spin" />
         </div>
       }
     >

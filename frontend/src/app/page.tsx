@@ -264,9 +264,9 @@ export default async function LandingPage() {
                 {[
                   { icon: FileCheck2, label: 'Mock Testlar', href: '/tests', color: 'from-[#34C759] to-[#28A745]' },
                   { icon: Bot, label: '24/7 AI Mentor', href: '#imkoniyatlar', color: 'from-[#5856D6] to-[#4644B5]' },
-                  { icon: BarChart3, label: 'Zaiflik Tahlili', href: '#imkoniyatlar', color: 'from-[#007AFF] to-[#0062CC]' },
+                  { icon: BarChart3, label: 'OTM Bashorati', href: '/analytics', color: 'from-[#007AFF] to-[#0062CC]' },
                   { icon: Film, label: 'Bilim Reels', href: '/reels', color: 'from-[#FF2D55] to-[#D70015]' },
-                  { icon: Sparkles, label: 'Hamjamiyat', href: '/feed', color: 'from-[#AF52DE] to-[#8E3CBE]' },
+                  { icon: Sparkles, label: 'Kutubxona 5–11', href: '/library', color: 'from-[#AF52DE] to-[#8E3CBE]' },
                   { icon: Swords, label: '1v1 Arena', href: '/battles', color: 'from-[#FF9500] to-[#E08600]' },
                 ].map((item) => (
                   <Link

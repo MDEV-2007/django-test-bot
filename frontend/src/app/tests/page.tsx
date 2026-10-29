@@ -3,26 +3,23 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2, FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles, Bell, CheckCircle2 } from 'lucide-react';
+import {
+  Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2,
+  FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles, Bell, CheckCircle2
+} from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
-import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 import AppShell from '@/components/AppShell';
-import CardMotif from '@/components/student/CardMotif';
 import { cn } from '@/lib/utils';
-import { cardArtwork, subjectIndex } from '@/lib/subjectTheme';
 import Reveal from '@/components/motion/Reveal';
 import PageHero from '@/components/student/PageHero';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VerifiedBadge from '@/components/ui/verified-badge';
-import PremiumIcon from '@/components/ui/premium-icon';
 
 type AnswerMode = 'open' | 'closed' | 'mixed' | null;
 
@@ -53,8 +50,6 @@ type TestItem = {
 function formatScheduledTime(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   try {
-    // Devor soati (Toshkent vaqti) satrda yozilgan (masalan 2026-09-10T21:30).
-    // Brauzer timezone offsetlari sababli 5 soat qo'shib (02:30) yubormasligi uchun to'g'ridan-to'g'ri ajratamiz:
     const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
     let year: number, month: number, day: number, hour: number, minute: number;
 
@@ -83,12 +78,9 @@ function formatScheduledTime(dateStr: string | null | undefined): string {
 
     const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 
-    if (isToday) {
-      return `Bugun, ${timeStr}`;
-    }
-    if (isTomorrow) {
-      return `Ertaga, ${timeStr}`;
-    }
+    if (isToday) return `Bugun, ${timeStr}`;
+    if (isTomorrow) return `Ertaga, ${timeStr}`;
+
     const d = new Date(year, month, day, hour, minute);
     const dateFormatted = d.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
     return `${dateFormatted}, ${timeStr}`;
@@ -118,7 +110,6 @@ type CenterData = {
   subjects: { id: number; name: string; slug: string; color?: string; icon_name?: string }[];
   selected_subject: string | null;
   selected_category: string;
-  /* Shu fanda mavjud imtihon turlari — filtr shundan quriladi (tests_app/api.py). */
   available_categories: string[];
   selected_answer_mode: string;
   search_query: string;
@@ -145,9 +136,6 @@ type CenterData = {
   } | null;
 };
 
-/* Imtihon turlari — backenddagi `Question.CATEGORY_CHOICES` bilan mos bo'lishi shart.
-   U yerga yangi tur qo'shsangiz, bu yerga ham qo'shing (aks holda test katalogda
-   filtrlanmaydi va nishonsiz qoladi). */
 const CATEGORIES = [
   { value: 'all', label: 'Barchasi' },
   { value: 'certificate', label: 'Milliy Sertifikat' },
@@ -157,8 +145,11 @@ const CATEGORIES = [
 ];
 
 const CATEGORY_BADGE: Record<string, string> = {
-  certificate: 'Rasmiy Format', history: 'Mavzulashtirilgan', bba: 'DTB Formati',
-  cefr: 'Ingliz tili', all: 'Test',
+  certificate: 'Rasmiy Format',
+  history: 'Mavzulashtirilgan',
+  bba: 'DTB Formati',
+  cefr: 'Ingliz tili',
+  all: 'Test',
 };
 
 const ANSWER_MODES = [
@@ -168,172 +159,64 @@ const ANSWER_MODES = [
   { value: 'mixed', label: 'Aralash' },
 ];
 
-// Karta ustidagi kichik yorliq: variantli/yozma javob turi. `null` — savol yo'q (bo'sh
-// test), yorliq ko'rsatilmaydi.
 const ANSWER_MODE_BADGE: Record<string, { label: string; className: string }> = {
-  closed: { label: 'Yopiq test', className: 'border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300' },
-  open: { label: 'Ochiq test', className: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300' },
-  mixed: { label: 'Aralash test', className: 'border-[var(--border-strong)] bg-[var(--surface-hover)] text-[var(--text-secondary)]' },
+  closed: { label: 'Yopiq test', className: 'border-[#007AFF]/25 bg-[#007AFF]/10 text-[#007AFF]' },
+  open: { label: 'Ochiq test', className: 'border-[#5856D6]/25 bg-[#5856D6]/10 text-[#5856D6]' },
+  mixed: { label: 'Aralash test', className: 'border-[#FF9500]/25 bg-[#FF9500]/10 text-[#FF9500]' },
 };
 
-const MOCK_THEMES: Record<string, {
-  card: string;
-  iconBox: string;
-  badge: string;
-  subjectBadge: string;
-  timeBadge: string;
+const SUBJECT_IOS_THEME: Record<string, {
+  squircle: string;
+  pill: string;
+  accentText: string;
   button: string;
-  liveCardBorder: string;
-  liveCardBg: string;
-  liveCardGlow: string;
-  liveTopLine: string;
-  liveBadge: string;
-  liveTimeBadge: string;
-  liveHoverText: string;
-  liveIconColor: string;
-  liveSubjectBadge: string;
-  liveButton: string;
-  primaryButton: string;
 }> = {
   'ona-tili': {
-    card: 'border-emerald-500/40 bg-gradient-to-r from-emerald-500/[0.12] via-[var(--surface-card)] to-teal-500/[0.08]',
-    iconBox: 'bg-emerald-500/20 text-emerald-500 ring-emerald-500/10',
-    badge: 'bg-emerald-600 text-white',
-    subjectBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    timeBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
-    button: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700',
-    liveCardBorder: 'border-2 border-emerald-500/50 hover:border-emerald-400',
-    liveCardBg: 'bg-gradient-to-br from-emerald-500/[0.08] via-[var(--surface-card)] to-teal-500/[0.04]',
-    liveCardGlow: 'shadow-lg shadow-emerald-500/5 hover:shadow-xl hover:shadow-emerald-500/10',
-    liveTopLine: 'from-transparent via-emerald-500 to-transparent',
-    liveBadge: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white',
-    liveTimeBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
-    liveHoverText: 'group-hover:text-emerald-500',
-    liveIconColor: 'text-emerald-500',
-    liveSubjectBadge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium',
-    liveButton: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20',
-    primaryButton: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+    squircle: 'bg-[#34C759]',
+    pill: 'border-[#34C759]/25 bg-[#34C759]/10 text-[#248A3D] dark:text-[#30D158]',
+    accentText: 'text-[#34C759]',
+    button: 'bg-[#34C759] hover:bg-[#2DB84E] text-white shadow-[0_4px_14px_rgba(52,199,89,0.28)]',
   },
   'matematika': {
-    card: 'border-blue-500/40 bg-gradient-to-r from-blue-500/[0.14] via-[var(--surface-card)] to-indigo-500/[0.08]',
-    iconBox: 'bg-blue-500/20 text-blue-500 ring-blue-500/10',
-    badge: 'bg-blue-600 text-white',
-    subjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    timeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
-    button: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700',
-    liveCardBorder: 'border-2 border-blue-500/50 hover:border-blue-400',
-    liveCardBg: 'bg-gradient-to-br from-blue-500/[0.08] via-[var(--surface-card)] to-indigo-500/[0.04]',
-    liveCardGlow: 'shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10',
-    liveTopLine: 'from-transparent via-blue-500 to-transparent',
-    liveBadge: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
-    liveTimeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
-    liveHoverText: 'group-hover:text-blue-500',
-    liveIconColor: 'text-blue-500',
-    liveSubjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium',
-    liveButton: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20',
-    primaryButton: 'bg-blue-600 hover:bg-blue-700 text-white',
+    squircle: 'bg-[#007AFF]',
+    pill: 'border-[#007AFF]/25 bg-[#007AFF]/10 text-[#007AFF]',
+    accentText: 'text-[#007AFF]',
+    button: 'bg-[#007AFF] hover:bg-[#0066D6] text-white shadow-[0_4px_14px_rgba(0,122,255,0.28)]',
   },
   'math': {
-    card: 'border-blue-500/40 bg-gradient-to-r from-blue-500/[0.14] via-[var(--surface-card)] to-indigo-500/[0.08]',
-    iconBox: 'bg-blue-500/20 text-blue-500 ring-blue-500/10',
-    badge: 'bg-blue-600 text-white',
-    subjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    timeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
-    button: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700',
-    liveCardBorder: 'border-2 border-blue-500/50 hover:border-blue-400',
-    liveCardBg: 'bg-gradient-to-br from-blue-500/[0.08] via-[var(--surface-card)] to-indigo-500/[0.04]',
-    liveCardGlow: 'shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10',
-    liveTopLine: 'from-transparent via-blue-500 to-transparent',
-    liveBadge: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
-    liveTimeBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-500',
-    liveHoverText: 'group-hover:text-blue-500',
-    liveIconColor: 'text-blue-500',
-    liveSubjectBadge: 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium',
-    liveButton: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20',
-    primaryButton: 'bg-blue-600 hover:bg-blue-700 text-white',
+    squircle: 'bg-[#007AFF]',
+    pill: 'border-[#007AFF]/25 bg-[#007AFF]/10 text-[#007AFF]',
+    accentText: 'text-[#007AFF]',
+    button: 'bg-[#007AFF] hover:bg-[#0066D6] text-white shadow-[0_4px_14px_rgba(0,122,255,0.28)]',
   },
   'tarix': {
-    card: 'border-amber-500/40 bg-gradient-to-r from-amber-500/[0.12] via-[var(--surface-card)] to-orange-500/[0.08]',
-    iconBox: 'bg-amber-500/20 text-amber-500 ring-amber-500/10',
-    badge: 'bg-amber-500 text-white',
-    subjectBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    timeBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-500',
-    button: 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700',
-    liveCardBorder: 'border-2 border-amber-500/50 hover:border-amber-400',
-    liveCardBg: 'bg-gradient-to-br from-amber-500/[0.08] via-[var(--surface-card)] to-orange-500/[0.04]',
-    liveCardGlow: 'shadow-lg shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10',
-    liveTopLine: 'from-transparent via-amber-500 to-transparent',
-    liveBadge: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white',
-    liveTimeBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-500',
-    liveHoverText: 'group-hover:text-amber-500',
-    liveIconColor: 'text-amber-500',
-    liveSubjectBadge: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium',
-    liveButton: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md shadow-amber-500/20',
-    primaryButton: 'bg-amber-600 hover:bg-amber-700 text-white',
+    squircle: 'bg-[#FF9500]',
+    pill: 'border-[#FF9500]/25 bg-[#FF9500]/10 text-[#FF9500]',
+    accentText: 'text-[#FF9500]',
+    button: 'bg-[#FF9500] hover:bg-[#E68600] text-white shadow-[0_4px_14px_rgba(255,149,0,0.28)]',
   },
   'biologiya': {
-    card: 'border-green-500/40 bg-gradient-to-r from-green-500/[0.12] via-[var(--surface-card)] to-emerald-500/[0.08]',
-    iconBox: 'bg-green-500/20 text-green-500 ring-green-500/10',
-    badge: 'bg-green-600 text-white',
-    subjectBadge: 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400',
-    timeBadge: 'border-green-500/30 bg-green-500/10 text-green-500',
-    button: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700',
-    liveCardBorder: 'border-2 border-green-500/50 hover:border-green-400',
-    liveCardBg: 'bg-gradient-to-br from-green-500/[0.08] via-[var(--surface-card)] to-emerald-500/[0.04]',
-    liveCardGlow: 'shadow-lg shadow-green-500/5 hover:shadow-xl hover:shadow-green-500/10',
-    liveTopLine: 'from-transparent via-green-500 to-transparent',
-    liveBadge: 'bg-gradient-to-r from-green-600 to-emerald-600 text-white',
-    liveTimeBadge: 'border-green-500/30 bg-green-500/10 text-green-500',
-    liveHoverText: 'group-hover:text-green-500',
-    liveIconColor: 'text-green-500',
-    liveSubjectBadge: 'border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400 font-medium',
-    liveButton: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-md shadow-green-500/20',
-    primaryButton: 'bg-green-600 hover:bg-green-700 text-white',
+    squircle: 'bg-[#30B0C7]',
+    pill: 'border-[#30B0C7]/25 bg-[#30B0C7]/10 text-[#30B0C7]',
+    accentText: 'text-[#30B0C7]',
+    button: 'bg-[#30B0C7] hover:bg-[#289CB0] text-white shadow-[0_4px_14px_rgba(48,176,199,0.28)]',
   },
   'cefr': {
-    card: 'border-violet-500/40 bg-gradient-to-r from-violet-500/[0.12] via-[var(--surface-card)] to-purple-500/[0.08]',
-    iconBox: 'bg-violet-500/20 text-violet-500 ring-violet-500/10',
-    badge: 'bg-violet-600 text-white',
-    subjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    timeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
-    button: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700',
-    liveCardBorder: 'border-2 border-violet-500/50 hover:border-violet-400',
-    liveCardBg: 'bg-gradient-to-br from-violet-500/[0.08] via-[var(--surface-card)] to-purple-500/[0.04]',
-    liveCardGlow: 'shadow-lg shadow-violet-500/5 hover:shadow-xl hover:shadow-violet-500/10',
-    liveTopLine: 'from-transparent via-violet-500 to-transparent',
-    liveBadge: 'bg-gradient-to-r from-violet-600 to-purple-600 text-white',
-    liveTimeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
-    liveHoverText: 'group-hover:text-violet-500',
-    liveIconColor: 'text-violet-500',
-    liveSubjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-medium',
-    liveButton: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20',
-    primaryButton: 'bg-violet-600 hover:bg-violet-700 text-white',
+    squircle: 'bg-[#5856D6]',
+    pill: 'border-[#5856D6]/25 bg-[#5856D6]/10 text-[#5856D6]',
+    accentText: 'text-[#5856D6]',
+    button: 'bg-[#5856D6] hover:bg-[#4A48C4] text-white shadow-[0_4px_14px_rgba(88,86,214,0.28)]',
   },
   'ingliz-tili': {
-    card: 'border-violet-500/40 bg-gradient-to-r from-violet-500/[0.12] via-[var(--surface-card)] to-purple-500/[0.08]',
-    iconBox: 'bg-violet-500/20 text-violet-500 ring-violet-500/10',
-    badge: 'bg-violet-600 text-white',
-    subjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    timeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
-    button: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700',
-    liveCardBorder: 'border-2 border-violet-500/50 hover:border-violet-400',
-    liveCardBg: 'bg-gradient-to-br from-violet-500/[0.08] via-[var(--surface-card)] to-purple-500/[0.04]',
-    liveCardGlow: 'shadow-lg shadow-violet-500/5 hover:shadow-xl hover:shadow-violet-500/10',
-    liveTopLine: 'from-transparent via-violet-500 to-transparent',
-    liveBadge: 'bg-gradient-to-r from-violet-600 to-purple-600 text-white',
-    liveTimeBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-500',
-    liveHoverText: 'group-hover:text-violet-500',
-    liveIconColor: 'text-violet-500',
-    liveSubjectBadge: 'border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-medium',
-    liveButton: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20',
-    primaryButton: 'bg-violet-600 hover:bg-violet-700 text-white',
+    squircle: 'bg-[#5856D6]',
+    pill: 'border-[#5856D6]/25 bg-[#5856D6]/10 text-[#5856D6]',
+    accentText: 'text-[#5856D6]',
+    button: 'bg-[#5856D6] hover:bg-[#4A48C4] text-white shadow-[0_4px_14px_rgba(88,86,214,0.28)]',
   },
 };
 
 export default function TestsPage() {
   const router = useRouter();
-  const { access } = useAuthStore();
-  // `startError` faqat test boshlashdagi xatolar uchun; yuklash xatosi keshdan keladi.
   const [startError, setStartError] = useState<{ message: string; testId?: number; scheduledAt?: string | null } | null>(null);
   const [starting, setStarting] = useState<number | null>(null);
   const [subject, setSubject] = useState<string | null>(null);
@@ -341,8 +224,6 @@ export default function TestsPage() {
   const [answerMode, setAnswerMode] = useState('all');
   const [search, setSearch] = useState('');
 
-  /* Qidiruv har harfda so'rov yubormasligi uchun 300 ms kutiladi; so'rov yo'li shu
-     "sekinlashtirilgan" qiymatdan quriladi va kesh orqali o'tadi. */
   const [debouncedSearch, setDebouncedSearch] = useState('');
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -359,18 +240,15 @@ export default function TestsPage() {
   const { data, error: loadError } = useApiQuery<CenterData>(`/api/tests/${query}`);
   const errorMessage = startError?.message ?? loadError;
 
-  // Server tanlangan fanni o'zi qaytaradi — birinchi javobdan keyin uni eslab qolamiz.
   useEffect(() => {
     if (data?.selected_subject) setSubject((prev) => prev ?? data.selected_subject);
-  }, [data?.selected_subject]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [data?.selected_subject]);
 
   async function start(testId: number) {
     setStarting(testId);
     setStartError(null);
     try {
       const res = await apiFetch<{ attempt_id: number; mode?: string }>(`/api/tests/${testId}/start/`, { method: 'POST' });
-      // Partlarga bo'lingan CEFR testi o'z ekranida ochiladi: matn/audio va butun part
-      // bir varaqda. Qolgan testlar eski "bitta savol — bitta ekran" oqimida qoladi.
       router.push(res.mode === 'cefr' ? `/tests/${res.attempt_id}/exam` : `/tests/${res.attempt_id}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Xatolik yuz berdi';
@@ -419,22 +297,11 @@ export default function TestsPage() {
     }
   }
 
-  // Karta rangini fan belgilaydi, test esa faqat fanning `slug`ini biladi — shu jadval
-  // ikkalasini bog'laydi.
-  const subjects = subjectIndex(data?.subjects);
-
-  /* Shu fanda haqiqatan mavjud imtihon turlari. Server `available_categories`ni
-     tanlangan fan bo'yicha hisoblaydi, ya'ni CEFR faqat ingliz tilida, "Tarix" faqat
-     tarixda chiqadi. Ma'lumot hali kelmagan bo'lsa — hech narsa ko'rsatmaymiz. */
   const availableCategories = data?.available_categories;
   const visibleCategories = availableCategories
     ? CATEGORIES.filter((c) => c.value === 'all' || availableCategories.includes(c.value))
     : [];
 
-  /* Fan almashtirilganda eski kategoriya filtri qolib ketardi: masalan Tarixda
-     "Tarix"ni tanlab, Ona tiliga o'tsangiz filtr o'sha holicha qolib, ro'yxat doim
-     bo'sh chiqardi ("0 ta test topildi"). Tanlangan tur yangi fanda bo'lmasa —
-     "Barchasi"ga qaytariladi. */
   useEffect(() => {
     if (!availableCategories) return;
     if (category !== 'all' && !availableCategories.includes(category)) setCategory('all');
@@ -443,49 +310,51 @@ export default function TestsPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+      <main className="page-shell flex-1 space-y-6 bg-[#F2F2F7] dark:bg-[#000000] p-4 pb-20 sm:p-6">
         <PageHero
-          eyebrow="BBA & Milliy Sertifikat"
+          eyebrow="BBA & Milliy Sertifikat · Rasmiy Simulyator"
           eyebrowIcon={GraduationCap}
           title="Test va Imtihonlar Markazi"
           description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
         />
 
-        {/* Pinned Katta Mock Imtihon Banner */}
+        {/* iOS Live Activity Pinned Mock Imtihon Banner */}
         {data?.pinned_mock && (() => {
-          const theme = MOCK_THEMES[data.pinned_mock.subject_slug] || MOCK_THEMES['tarix'];
+          const theme = SUBJECT_IOS_THEME[data.pinned_mock.subject_slug] || SUBJECT_IOS_THEME['tarix'];
+          const isReminded = pinnedReminded ?? data.pinned_mock.is_reminded;
           return (
             <Reveal>
-              <Card className={`relative overflow-hidden border-2 shadow-lg ${theme.card}`}>
-                <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
-                  <div className="flex min-w-0 items-center gap-4">
-                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ring-4 ${theme.iconBox}`}>
-                      <Flame className="size-6 animate-pulse" />
+              <div className="relative overflow-hidden rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex min-w-0 items-start sm:items-center gap-4">
+                    <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-[15px] text-white shadow-xs", theme.squircle)}>
+                      <Flame className="size-6 fill-white" />
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <Badge className={`text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 ${theme.badge}`}>
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white", theme.squircle)}>
+                          <span className="size-1.5 rounded-full bg-white animate-ping" />
                           Katta Mock Imtihon
-                        </Badge>
-                        <Badge variant="outline" className={`text-xs font-semibold ${theme.subjectBadge}`}>
+                        </span>
+                        <Badge variant="outline" className={cn("text-[11px] font-bold", theme.pill)}>
                           {data.pinned_mock.subject}
                         </Badge>
                         {data.pinned_mock.scheduled_at && (
-                          <Badge variant="outline" className={`font-mono text-xs gap-1 font-semibold ${theme.timeBadge}`}>
-                            <Clock className="size-3" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
+                          <Badge variant="outline" className="font-mono text-[11px] gap-1 font-bold border-black/[0.08] dark:border-white/[0.12] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-slate-800 dark:text-slate-200">
+                            <Clock className="size-3 text-[#007AFF]" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
                           </Badge>
                         )}
-                        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 font-semibold text-xs gap-1">
+                        <Badge variant="outline" className="border-[#34C759]/25 bg-[#34C759]/10 text-[#248A3D] dark:text-[#30D158] font-bold text-[11px] gap-1">
                           <Users className="size-3" /> {data.pinned_mock.waiting_participants_count || 32}+ abituriyent
                         </Badge>
                       </div>
-                      <h3 className="text-base sm:text-lg font-extrabold text-foreground truncate">
+                      <h3 className="text-[17px] sm:text-[19px] font-extrabold tracking-[-0.02em] text-slate-900 dark:text-white truncate">
                         {data.pinned_mock.title}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground mt-0.5">
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] sm:text-[13px] text-[#8E8E93]">
                         <span>{data.pinned_mock.questions_count || 45} ta savol · {data.pinned_mock.duration_minutes || 90} daqiqa · Milliy Sertifikat Formati</span>
                         {data.pinned_mock.author && (
-                          <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                          <span className="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200">
                             <span>· {data.pinned_mock.author.name}</span>
                             <VerifiedBadge role={data.pinned_mock.author.role} isSuperadmin={data.pinned_mock.author.is_superadmin} isTeacher={data.pinned_mock.author.is_teacher} size="xs" />
                           </span>
@@ -495,109 +364,107 @@ export default function TestsPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <Button
+                    <button
                       type="button"
-                      variant="outline"
-                      size="lg"
                       disabled={togglingPinnedReminder}
                       onClick={(e) => togglePinnedReminder(e, data.pinned_mock!.id)}
                       className={cn(
-                        "rounded-xl font-bold text-xs sm:text-sm border-2 transition-all backdrop-blur-md",
-                        (pinnedReminded ?? data.pinned_mock.is_reminded)
-                          ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                          : "border-amber-500/40 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25"
+                        "inline-flex h-11 items-center gap-1.5 rounded-full px-4 text-[13px] font-bold border transition-all active:scale-95",
+                        isReminded
+                          ? "border-[#34C759]/30 bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]"
+                          : "border-[#FF9500]/30 bg-[#FF9500]/12 text-[#FF9500]"
                       )}
                     >
-                      {(pinnedReminded ?? data.pinned_mock.is_reminded) ? (
-                        <span className="flex items-center gap-1.5">
-                          <CheckCircle2 className="size-4 text-emerald-400" />
+                      {isReminded ? (
+                        <>
+                          <CheckCircle2 className="size-4 text-[#34C759]" />
                           <span>Eslatma yoqilgan</span>
-                        </span>
+                        </>
                       ) : (
-                        <span className="flex items-center gap-1.5">
-                          <Bell className="size-4 text-amber-400 animate-wiggle" />
+                        <>
+                          <Bell className="size-4 text-[#FF9500]" />
                           <span>Menga eslatish</span>
-                        </span>
+                        </>
                       )}
-                    </Button>
+                    </button>
 
-                    <Button asChild size="lg" className={`rounded-xl font-bold text-white shadow-md ${theme.button}`}>
-                      <Link href={`/tests/mock/${data.pinned_mock.id}`}>
-                        Kutish zaliga kirish <ArrowRight className="ml-1.5 size-4" />
-                      </Link>
-                    </Button>
+                    <Link
+                      href={`/tests/mock/${data.pinned_mock.id}`}
+                      className={cn("inline-flex h-11 items-center gap-1.5 rounded-full px-5 text-[13px] font-bold transition-all active:scale-95", theme.button)}
+                    >
+                      <span>Kutish zaliga kirish</span>
+                      <ArrowRight className="size-4" />
+                    </Link>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </Reveal>
           );
         })()}
 
-        {/* Tezkor test — sahifaning ASOSIY harakati.
-            Nega: katalogdagi testlar 30-45 savoldan iborat va telefonda ularni
-            oxirigacha yechish kam uchraydi (javoblarning katta qismi "o'tkazib
-            yuborilgan" bo'lib qolyapti). 10 savollik format bir o'tirishda
-            tugatiladi — ya'ni o'quvchi natija KO'RADI, natija esa qaytib kelish
-            sababi. Ilgari bu tugma sarlavha yonida kichik "Tasodifiy test" bo'lib
-            turardi va nima taklif qilinayotgani (necha savol, qancha vaqt)
-            umuman ko'rinmasdi. */}
-        <Card
+        {/* Apple Shortcuts Style Quick Test Card */}
+        <div
           onClick={() => starting === null && startRandom()}
-          className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
+          className="group cursor-pointer rounded-[26px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] hover:border-[#34C759]/50 p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all active:scale-[0.99]"
         >
-          <CardMotif shape="quick" className="text-[var(--accent)]" />
-          <CardContent className="relative flex flex-wrap items-center justify-between gap-4 pt-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3.5">
-              <PremiumIcon icon={Shuffle} tone="emerald" size="lg" glow className="transition-transform group-hover:scale-110" />
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-[#34C759] text-white shadow-[0_4px_12px_rgba(52,199,89,0.28)] transition-transform group-hover:scale-105">
+                <Shuffle className="size-5" />
+              </div>
               <div className="min-w-0">
-                <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">
-                  Tezkor test
+                <h3 className="text-[16px] sm:text-[17px] font-bold tracking-[-0.015em] text-slate-900 dark:text-white group-hover:text-[#34C759] transition-colors">
+                  Tezkor Blits Test
                 </h3>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  10 savol · 10 daqiqa · bepul — bir o&apos;tirishda tugatasiz
+                <p className="mt-0.5 text-[13px] text-[#8E8E93]">
+                  10 ta savol · 10 daqiqa · bepul — bir o&apos;tirishda bilimingizni tekshiring
                 </p>
               </div>
             </div>
-            <Button disabled={starting !== null} onClick={(e) => { e.stopPropagation(); startRandom(); }}>
+            <Button
+              disabled={starting !== null}
+              onClick={(e) => { e.stopPropagation(); startRandom(); }}
+              className="rounded-full px-5 bg-[#34C759] hover:bg-[#2DB84E] shadow-[0_4px_14px_rgba(52,199,89,0.28)]"
+            >
               {starting === -1 ? <Loader2 className="size-4 animate-spin" /> : null}
-              Boshlash
+              BOSHLASH
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {errorMessage && (
           <Reveal>
             <div
               className={cn(
-                'relative overflow-hidden rounded-2xl border p-4 sm:p-5 shadow-lg backdrop-blur-sm transition-all',
+                'relative overflow-hidden rounded-[24px] border p-4 sm:p-5 transition-all',
                 (startError?.scheduledAt || errorMessage.includes('boshlanmadi'))
-                  ? 'border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[var(--surface-card)] to-amber-500/5 text-foreground'
-                  : 'border-destructive/30 bg-destructive/10 text-destructive dark:border-destructive/40 dark:bg-destructive/15'
+                  ? 'border-[#FF9500]/30 bg-[#FF9500]/10 text-slate-900 dark:text-white'
+                  : 'border-[#FF3B30]/30 bg-[#FF3B30]/10 text-[#D70015] dark:text-[#FF453A]'
               )}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3.5">
                   <div
                     className={cn(
-                      'flex size-10 shrink-0 items-center justify-center rounded-xl ring-1',
+                      'flex size-10 shrink-0 items-center justify-center rounded-[12px] text-white',
                       (startError?.scheduledAt || errorMessage.includes('boshlanmadi'))
-                        ? 'bg-amber-500/20 text-amber-500 ring-amber-500/30'
-                        : 'bg-destructive/20 text-destructive ring-destructive/30'
+                        ? 'bg-[#FF9500]'
+                        : 'bg-[#FF3B30]'
                     )}
                   >
                     {(startError?.scheduledAt || errorMessage.includes('boshlanmadi')) ? (
-                      <Clock className="size-5 animate-pulse" />
+                      <Clock className="size-5" />
                     ) : (
                       <AlertCircle className="size-5" />
                     )}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-foreground sm:text-base">
+                    <h4 className="text-[15px] font-bold text-slate-900 dark:text-white">
                       {(startError?.scheduledAt || errorMessage.includes('boshlanmadi'))
                         ? 'Imtihon hali boshlanmadi'
                         : 'Xatolik yuz berdi'}
                     </h4>
-                    <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                    <p className="mt-0.5 text-[13px] text-[#8E8E93]">
                       {errorMessage}
                     </p>
                     {(startError?.scheduledAt || errorMessage.includes('boshlanmadi')) && (startError?.testId || data?.pinned_mock?.id) && (
@@ -605,7 +472,7 @@ export default function TestsPage() {
                         <Button
                           asChild
                           size="sm"
-                          className="h-8 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-semibold shadow-sm"
+                          className="rounded-full bg-[#FF9500] hover:bg-[#E68600] text-white"
                         >
                           <Link href={`/tests/mock/${startError?.testId || data?.pinned_mock?.id}`}>
                             Kutish zaliga kirish (Lobby) <ArrowRight className="ml-1 size-3.5" />
@@ -618,7 +485,7 @@ export default function TestsPage() {
                 <button
                   type="button"
                   onClick={() => setStartError(null)}
-                  className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  className="rounded-full p-1.5 text-[#8E8E93] hover:bg-black/5 dark:hover:bg-white/10"
                   aria-label="Yopish"
                 >
                   <X className="size-4" />
@@ -628,41 +495,37 @@ export default function TestsPage() {
           </Reveal>
         )}
 
-        {/* Ilgari bu yerda "sizda darslar obunasi bor, lekin mock testlar alohida
-            sotib olinadi" ogohlantirishi turardi. Endi PRO obuna barcha mock
-            testlarni ochadi (tests_app/api.py), ya'ni o'sha holat ham, o'sha matn
-            ham mavjud emas. */}
-
+        {/* Subject Capsule Filter */}
         {data && data.subjects.length > 0 && (
-          <div className="scroll-row flex items-center gap-2 overflow-x-auto py-1 px-1 pr-12 no-scrollbar">
-            {data.subjects.map((s) => (
-              <Button
-                key={s.slug}
-                size="sm"
-                variant="outline"
-                className={cn(
-                  'shrink-0 rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all',
-                  subject === s.slug ? 'chip-active shadow-sm' : 'hover:bg-muted/60'
-                )}
-                onClick={() => setSubject(s.slug)}
-              >
-                {s.name}
-              </Button>
-            ))}
+          <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
+            {data.subjects.map((s) => {
+              const active = subject === s.slug;
+              return (
+                <button
+                  key={s.slug}
+                  type="button"
+                  onClick={() => setSubject(s.slug)}
+                  className={cn(
+                    'shrink-0 rounded-full px-4 py-2 text-[13px] font-semibold transition-all border active:scale-95',
+                    active
+                      ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-[0_4px_12px_rgba(0,122,255,0.28)]'
+                      : 'bg-white dark:bg-[#1C1C1E] text-slate-700 dark:text-slate-200 border-black/[0.06] dark:border-white/[0.08] hover:border-[#007AFF]/40'
+                  )}
+                >
+                  {s.name}
+                </button>
+              );
+            })}
           </div>
         )}
 
+        {/* iOS Segmented Controls & Spotlight Search */}
         <div className="flex flex-col gap-3">
-          {/* Faqat SHU FANDA mavjud imtihon turlari ko'rsatiladi */}
           {visibleCategories.length > 1 && (
             <Tabs value={category} onValueChange={setCategory}>
-              <TabsList className="inline-flex h-auto w-auto items-center gap-1 rounded-xl bg-card/80 border border-border/70 p-1">
+              <TabsList>
                 {visibleCategories.map((c) => (
-                  <TabsTrigger
-                    key={c.value}
-                    value={c.value}
-                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  >
+                  <TabsTrigger key={c.value} value={c.value}>
                     {c.label}
                   </TabsTrigger>
                 ))}
@@ -672,13 +535,9 @@ export default function TestsPage() {
 
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <Tabs value={answerMode} onValueChange={setAnswerMode}>
-              <TabsList className="inline-flex h-auto w-auto items-center gap-1 rounded-xl bg-card/80 border border-border/70 p-1">
+              <TabsList>
                 {ANSWER_MODES.map((m) => (
-                  <TabsTrigger
-                    key={m.value}
-                    value={m.value}
-                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  >
+                  <TabsTrigger key={m.value} value={m.value}>
                     {m.label}
                   </TabsTrigger>
                 ))}
@@ -686,37 +545,35 @@ export default function TestsPage() {
             </Tabs>
 
             <div className="relative w-full sm:w-72">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#8E8E93]" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Test nomi bo'yicha qidirish..."
-                className="pl-9"
+                className="pl-10 rounded-full bg-white dark:bg-[#1C1C1E]"
               />
             </div>
           </div>
         </div>
 
         {data && (
-          <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[12px] font-medium text-[#8E8E93]">
             <span>
-              Jami urinishlar: <strong className="font-mono text-foreground">{data.total_attempts}</strong>
-              {' · '}O&apos;rtacha: <strong className="font-mono text-[var(--accent-text)]">{data.avg_score.toFixed(0)}%</strong>
+              Jami urinishlar: <strong className="font-mono font-bold text-slate-900 dark:text-white">{data.total_attempts}</strong>
+              {' · '}O&apos;rtacha natija: <strong className="font-mono font-bold text-[#007AFF]">{data.avg_score.toFixed(0)}%</strong>
             </span>
-            <span>{data.tests.length} ta test topildi</span>
+            <span className="font-mono font-semibold">{data.tests.length} ta test topildi</span>
           </div>
         )}
 
         {!data && !errorMessage && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 w-full" />)}
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 w-full rounded-[26px]" />)}
           </div>
         )}
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {data?.tests.map((t, tIdx) => {
-            // Mock test tarifi BITTA testni ochadi — shuning uchun qulf har bir karta
-            // uchun alohida: `is_unlocked` serverdan shu o'quvchi bo'yicha keladi.
             const locked = t.is_premium && !t.is_unlocked;
             const isLiveMock = Boolean(t.is_live_mock);
             const examDate = parseExamDate(t.scheduled_at);
@@ -728,179 +585,158 @@ export default function TestsPage() {
             const buyHref = data.mock_plan
               ? `/premium/checkout/${data.mock_plan.id}?test=${t.id}`
               : '/premium';
-            /* Kartaning fonini fan belgilaydi (rang bazadan, motiv `subjectTheme.ts`
-               dan), aniq ko'rinishini esa test `id` si — shu tufayli bitta fandagi
-               o'nlab test bir-biriga o'xshab ketmaydi. */
-            const art = cardArtwork(t.subject ? subjects[t.subject] : null, t.id);
             const cardSubjectSlug = t.subject || data.pinned_mock?.subject_slug || subject || 'tarix';
-            const cTheme = MOCK_THEMES[cardSubjectSlug] || MOCK_THEMES['tarix'];
+            const cTheme = SUBJECT_IOS_THEME[cardSubjectSlug] || SUBJECT_IOS_THEME['tarix'];
+
             return (
               <Reveal key={t.id} index={tIdx} className="h-full">
-              <Card
-                style={art.style}
-                className={cn(
-                  "group relative flex h-full flex-col justify-between transition-all duration-300",
-                  isLiveMock
-                    ? cn("border-2", cTheme.liveCardBorder, cTheme.liveCardBg, cTheme.liveCardGlow)
-                    : isNew
-                    ? "border-amber-500/40 hover:border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:shadow-[0_0_28px_rgba(245,158,11,0.18)]"
-                    : "transition-colors hover:border-[var(--accent-border)]"
-                )}
-              >
-                {isLiveMock && (
-                  <div className={cn("absolute -top-px left-8 right-8 h-[2px] opacity-80 bg-gradient-to-r", cTheme.liveTopLine)} />
-                )}
-                {!isLiveMock && isNew && (
-                  <div className="absolute -top-px left-8 right-8 h-[2px] opacity-80 bg-gradient-to-r from-transparent via-amber-500 to-transparent pointer-events-none" />
-                )}
-                <CardContent className="flex flex-1 flex-col pt-6">
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {isNew && (
-                        <Badge className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white font-black text-[10px] tracking-wider uppercase px-2.5 py-0.5 gap-1.5 shadow-md shadow-orange-500/25 border-0 hover:from-amber-600 hover:to-rose-600">
-                          <span className="relative flex size-1.5">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-200 opacity-80" />
-                            <span className="relative inline-flex size-1.5 rounded-full bg-white" />
+                <div
+                  className={cn(
+                    "group relative flex h-full flex-col justify-between rounded-[26px] bg-white dark:bg-[#1C1C1E] p-5 sm:p-6 transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,122,255,0.08)]",
+                    isLiveMock
+                      ? "border-2 border-[#007AFF]/45"
+                      : isNew
+                      ? "border border-[#FF9500]/45"
+                      : "border border-black/[0.06] dark:border-white/[0.08] hover:border-[#007AFF]/40"
+                  )}
+                >
+                  <div className="flex flex-1 flex-col">
+                    {/* Top Badges & Duration */}
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {isNew && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#FF9500] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                            <Sparkles className="size-2.5 fill-white" /> Yangi
                           </span>
-                          <Sparkles className="size-2.5 text-amber-200 fill-amber-200" />
-                          Yangi
-                        </Badge>
-                      )}
-                      {isLiveMock ? (
-                        <>
-                          <Badge className={cn("text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 gap-1.5 shadow-sm border-0", cTheme.liveBadge)}>
-                            <span className="relative flex size-1.5">
-                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-80" />
-                              <span className="relative inline-flex size-1.5 rounded-full bg-white" />
-                            </span>
+                        )}
+                        {isLiveMock ? (
+                          <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white", cTheme.squircle)}>
+                            <span className="size-1.5 rounded-full bg-white animate-ping" />
                             Jonli Mock
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-[#767680]/[0.10] px-2.5 py-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-200">
+                            {CATEGORY_BADGE[t.category] || t.category}
+                          </span>
+                        )}
+                        {t.answer_mode && ANSWER_MODE_BADGE[t.answer_mode] && (
+                          <Badge variant="outline" className={cn("text-[10px] font-bold", ANSWER_MODE_BADGE[t.answer_mode].className)}>
+                            {ANSWER_MODE_BADGE[t.answer_mode].label}
                           </Badge>
-                          <Badge variant="outline" className={cn("text-xs font-semibold", cTheme.subjectBadge)}>
-                            {CATEGORY_BADGE[t.category] || 'Rasmiy Format'}
-                          </Badge>
-                        </>
+                        )}
+                      </div>
+
+                      {isLiveMock && t.scheduled_at ? (
+                        <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-bold", cTheme.pill)}>
+                          <Clock className="size-3" /> {formatScheduledTime(t.scheduled_at)}
+                        </span>
                       ) : (
-                        <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]">
-                          {CATEGORY_BADGE[t.category] || t.category}
-                        </Badge>
-                      )}
-                      {t.answer_mode && ANSWER_MODE_BADGE[t.answer_mode] && (
-                        <Badge variant="outline" className={ANSWER_MODE_BADGE[t.answer_mode].className}>
-                          {ANSWER_MODE_BADGE[t.answer_mode].label}
-                        </Badge>
+                        <span className="flex items-center gap-1 font-mono text-[12px] font-semibold text-[#8E8E93]">
+                          <Clock className="size-3.5" /> {t.duration_minutes} daq
+                        </span>
                       )}
                     </div>
-                    {isLiveMock && t.scheduled_at ? (
-                      <Badge variant="outline" className={cn("font-mono text-xs gap-1 font-semibold", cTheme.liveTimeBadge)}>
-                        <Clock className="size-3" /> {formatScheduledTime(t.scheduled_at)}
-                      </Badge>
-                    ) : (
-                      <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                        <Clock className="size-3.5" /> {t.duration_minutes} daq
-                      </span>
-                    )}
-                  </div>
 
-                  <h3 className={cn(
-                    "font-voice text-base font-bold leading-snug transition-colors",
-                    isLiveMock ? cn("text-foreground", cTheme.liveHoverText) : "group-hover:text-[var(--accent-text)]"
-                  )}>
-                    {t.title}
-                  </h3>
-                  <p className="mt-1.5 line-clamp-2 flex-1 text-xs leading-relaxed text-muted-foreground">{t.description}</p>
-
-                  <Separator className="my-3" />
-
-                  {t.author && (
-                    <div className="mb-2.5 flex items-center gap-1.5 text-xs">
-                      {t.author.avatar ? (
-                        <img src={t.author.avatar} alt="" className="size-4 rounded-full object-cover" />
-                      ) : (
-                        <div className="flex size-4 items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-500">
-                          {t.author.name[0] || 'O'}
-                        </div>
-                      )}
-                      <span className="font-medium text-foreground truncate max-w-[180px]">{t.author.name}</span>
-                      <VerifiedBadge role={t.author.role} isSuperadmin={t.author.is_superadmin} isTeacher={t.author.is_teacher} size="xs" />
-                    </div>
-                  )}
-
-                  <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1 font-mono">
-                      <HelpCircle className={cn("size-3.5", isLiveMock ? cTheme.liveIconColor : "text-[var(--accent-text)]")} /> {t.questions_count} ta savol
-                    </span>
-                    {t.subject && (
-                      <Badge variant={isLiveMock ? "outline" : "secondary"} className={isLiveMock ? cTheme.liveSubjectBadge : ""}>
-                        {t.subject}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Ijtimoiy dalil — raqobat emas, "bu yo'ldan boshqalar ham o'tgan" signali.
-                      Ma'lumot bo'lmasa (hech kim yechmagan) umuman ko'rsatilmaydi. */}
-                  {t.recent_solvers > 0 && (
-                    <p className="mb-3 flex items-center gap-1.5 text-xs text-[var(--text-faint)]">
-                      <Users className="size-3.5" />
-                      So&apos;nggi 7 kunda <strong className="text-[var(--text-secondary)]">{t.recent_solvers}</strong> kishi yechdi
-                      {t.recent_avg_score !== null && <> · o&apos;rtacha <strong className="text-[var(--text-secondary)]">{Math.round(t.recent_avg_score)}%</strong></>}
+                    <h3 className="text-[17px] font-bold leading-snug tracking-[-0.015em] text-slate-900 dark:text-white group-hover:text-[#007AFF] transition-colors">
+                      {t.title}
+                    </h3>
+                    <p className="mt-1.5 line-clamp-2 flex-1 text-[13px] leading-relaxed text-[#8E8E93]">
+                      {t.description}
                     </p>
-                  )}
 
-                  {locked ? (
-                    /* Bitta aniq signal: qulflangan kartada yagona harakat — tariflar sahifasi. */
-                    <Button asChild variant="outline" className={cn("w-full", isLiveMock ? cTheme.liveTimeBadge : "border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:text-amber-200")}>
-                      <Link href={buyHref}>
+                    <div className="my-3.5 h-px bg-black/[0.05] dark:bg-white/[0.07]" />
+
+                    {t.author && (
+                      <div className="mb-2.5 flex items-center gap-1.5 text-[12px]">
+                        {t.author.avatar ? (
+                          <img src={t.author.avatar} alt="" className="size-4.5 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex size-4.5 items-center justify-center rounded-full bg-[#007AFF]/15 text-[10px] font-bold text-[#007AFF]">
+                            {t.author.name[0] || 'O'}
+                          </div>
+                        )}
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[180px]">{t.author.name}</span>
+                        <VerifiedBadge role={t.author.role} isSuperadmin={t.author.is_superadmin} isTeacher={t.author.is_teacher} size="xs" />
+                      </div>
+                    )}
+
+                    <div className="mb-3 flex items-center justify-between text-[12px] text-[#8E8E93]">
+                      <span className="flex items-center gap-1 font-mono font-semibold">
+                        <HelpCircle className={cn("size-3.5", cTheme.accentText)} /> {t.questions_count} ta savol
+                      </span>
+                      {t.subject && (
+                        <span className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-bold", cTheme.pill)}>
+                          {t.subject}
+                        </span>
+                      )}
+                    </div>
+
+                    {t.recent_solvers > 0 && (
+                      <p className="mb-3.5 flex items-center gap-1.5 text-[12px] text-[#8E8E93]">
+                        <Users className="size-3.5 text-[#007AFF]" />
+                        So&apos;nggi 7 kunda <strong className="font-bold text-slate-800 dark:text-slate-200">{t.recent_solvers}</strong> kishi yechdi
+                        {t.recent_avg_score !== null && <> · o&apos;rtacha <strong className="font-bold text-[#34C759]">{Math.round(t.recent_avg_score)}%</strong></>}
+                      </p>
+                    )}
+
+                    {locked ? (
+                      <Link
+                        href={buyHref}
+                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-[#FF9500]/30 bg-[#FF9500]/12 px-4 text-[13px] font-bold text-[#FF9500] hover:bg-[#FF9500]/20 transition-all active:scale-[0.98]"
+                      >
                         <Lock className="size-3.5" />
-                        {data.mock_plan
-                          ? `${Number(t.price ?? data.mock_plan.price).toLocaleString('uz-UZ')} so'mga ochish`
-                          : (t.price ? `${Number(t.price).toLocaleString('uz-UZ')} so'mga ochish` : 'Mock test tarifi bilan ochiladi')}
+                        <span>
+                          {data.mock_plan
+                            ? `${Number(t.price ?? data.mock_plan.price).toLocaleString('uz-UZ')} so'mga ochish`
+                            : (t.price ? `${Number(t.price).toLocaleString('uz-UZ')} so'mga ochish` : 'PRO obuna bilan ochiladi')}
+                        </span>
                         <ArrowRight className="size-4" />
                       </Link>
-                    </Button>
-                  ) : isLiveMock && isScheduledFuture ? (
-                    <Button asChild className={cn("w-full font-bold text-white shadow-md transition-all hover:scale-[1.01]", cTheme.liveButton)}>
-                      <Link href={`/tests/mock/${t.id}`}>
-                        Kutish zaliga kirish (Lobby) <ArrowRight className="ml-1.5 size-4" />
+                    ) : isLiveMock && isScheduledFuture ? (
+                      <Link
+                        href={`/tests/mock/${t.id}`}
+                        className={cn("inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] px-4 text-[13px] font-bold transition-all active:scale-[0.98]", cTheme.button)}
+                      >
+                        <span>Kutish zaliga kirish (Lobby)</span>
+                        <ArrowRight className="size-4" />
                       </Link>
-                    </Button>
-                  ) : isLiveMock ? (
-                    <Button
-                      className={cn("w-full font-bold text-white shadow-md animate-pulse", cTheme.liveButton)}
-                      onClick={() => start(t.id)}
-                      disabled={starting !== null}
-                    >
-                      {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
-                      {starting === t.id ? 'Boshlanmoqda...' : 'Jonli imtihonga kirish 🚀'}
-                      {starting !== t.id && <ArrowRight className="size-4" />}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className="w-full group-hover:border-transparent group-hover:bg-primary group-hover:text-[var(--on-accent)]"
-                      onClick={() => start(t.id)}
-                      disabled={starting !== null}
-                    >
-                      {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
-                      {starting === t.id ? 'Boshlanmoqda...' : 'Testni boshlash'}
-                      {starting !== t.id && <ArrowRight className="size-4" />}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+                    ) : isLiveMock ? (
+                      <button
+                        type="button"
+                        className={cn("inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] px-4 text-[13px] font-bold transition-all active:scale-[0.98]", cTheme.button)}
+                        onClick={() => start(t.id)}
+                        disabled={starting !== null}
+                      >
+                        {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
+                        <span>{starting === t.id ? 'Boshlanmoqda...' : 'Jonli imtihonga kirish 🚀'}</span>
+                        {starting !== t.id && <ArrowRight className="size-4" />}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] bg-[#007AFF]/10 group-hover:bg-[#007AFF] px-4 text-[13px] font-bold text-[#007AFF] group-hover:text-white transition-all active:scale-[0.98]"
+                        onClick={() => start(t.id)}
+                        disabled={starting !== null}
+                      >
+                        {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
+                        <span>{starting === t.id ? 'Boshlanmoqda...' : 'Testni boshlash'}</span>
+                        {starting !== t.id && <ArrowRight className="size-4" />}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </Reveal>
             );
           })}
         </div>
 
         {data?.tests.length === 0 && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <FileCheck2 className="mx-auto mb-2 size-8 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">
-                {search ? `"${search}" bo'yicha test topilmadi.` : "Bu bo'limda hozircha test yo'q."}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] py-14 text-center space-y-2">
+            <FileCheck2 className="mx-auto mb-2 size-9 text-[#8E8E93]" />
+            <p className="text-[14px] font-semibold text-[#8E8E93]">
+              {search ? `"${search}" bo'yicha test topilmadi.` : "Bu bo'limda hozircha test yo'q."}
+            </p>
+          </div>
         )}
       </main>
     </>

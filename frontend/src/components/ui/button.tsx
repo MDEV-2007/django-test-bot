@@ -5,36 +5,32 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-[14px] border border-transparent bg-clip-padding text-[14px] font-semibold tracking-tight whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-[#007AFF]/35 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        default:
+          "bg-[#007AFF] text-white hover:bg-[#0071EB] shadow-[0_4px_14px_-2px_rgba(0,122,255,0.35)]",
         outline:
-          "border border-slate-300 dark:border-slate-700 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800/80 text-foreground shadow-2xs active:scale-95 transition-all",
+          "border border-black/[0.08] dark:border-white/[0.12] bg-white/80 dark:bg-[#2C2C2E]/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] text-foreground backdrop-blur-md shadow-2xs",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-[#767680]/[0.12] dark:bg-[#767680]/[0.24] text-foreground hover:bg-[#767680]/[0.18] dark:hover:bg-[#767680]/[0.32]",
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground",
         destructive:
-          "bg-rose-600 text-white hover:bg-rose-700 shadow-xs focus-visible:border-rose-500 focus-visible:ring-rose-500/30 active:scale-95 transition-all font-semibold dark:bg-rose-600 dark:hover:bg-rose-700 dark:text-white",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-[#FF3B30] text-white hover:bg-[#E0352B] shadow-[0_4px_14px_-2px_rgba(255,59,48,0.35)] font-semibold",
+        link: "text-[#007AFF] underline-offset-4 hover:underline",
       },
-      /* O'lchamlar v2: shadcn standarti (default h-8 = 32px) barmoq uchun juda kichik
-         edi va interfeysni siqilgan ko'rsatardi. Asosiy tugma endi 40px, `lg` — 48px
-         (mobil uchun tavsiya etilgan minimal 44px dan yuqori). */
       size: {
         default:
-          "h-10 gap-2 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
-        xs: "h-7 gap-1 rounded-[min(var(--radius-md),10px)] px-2.5 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1.5 rounded-[min(var(--radius-md),12px)] px-3 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-12 gap-2 px-6 text-base has-data-[icon=inline-end]:pr-5 has-data-[icon=inline-start]:pl-5",
-        icon: "size-10",
-        "icon-xs":
-          "size-7 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm":
-          "size-8 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        "icon-lg": "size-12",
+          "h-10 gap-2 px-4 has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5",
+        xs: "h-7 gap-1 rounded-[10px] px-2.5 text-xs [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-9 gap-1.5 rounded-[12px] px-3.5 text-[13px] [&_svg:not([class*='size-'])]:size-3.5",
+        lg: "h-12 gap-2 rounded-[16px] px-6 text-[15px]",
+        icon: "size-10 rounded-[13px]",
+        "icon-xs": "size-7 rounded-[9px] [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 rounded-[11px]",
+        "icon-lg": "size-12 rounded-[16px]",
       },
     },
     defaultVariants: {

@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Target, Info, TrendingDown } from 'lucide-react';
+import { Target, Info, TrendingDown, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import StatNumber from '@/components/motion/StatNumber';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,18 +26,12 @@ type Prediction = {
 };
 
 const CONFIDENCE_UZ: Record<string, { label: string; tone: string }> = {
-  low: { label: 'Past ishonch', tone: 'border-[var(--danger)]/25 bg-[var(--danger-soft)] text-[var(--danger-text)]' },
-  medium: { label: "O'rtacha ishonch", tone: 'border-amber-500/25 bg-amber-500/12 text-amber-300' },
-  high: { label: 'Yuqori ishonch', tone: 'border-[var(--success)]/25 bg-[var(--success-soft)] text-[var(--success-text)]' },
+  low: { label: 'Past ishonch', tone: 'border-[#FF3B30]/25 bg-[#FF3B30]/10 text-[#FF3B30]' },
+  medium: { label: "O'rtacha ishonch", tone: 'border-[#FF9500]/25 bg-[#FF9500]/12 text-[#FF9500]' },
+  high: { label: 'Yuqori ishonch', tone: 'border-[#34C759]/25 bg-[#34C759]/12 text-[#34C759]' },
 };
 
-/* DTM ball bashorati (Feature 2).
-
-   Ikkita qoida:
-   1. Yetarli ma'lumot bo'lmasa — RAQAM KO'RSATILMAYDI. Noto'g'ri bashorat ishonchni
-      yo'qotadi, shuning uchun o'rniga "yana N ta savol" progress bari chiqadi.
-   2. Raqam yonida doim ishonch darajasi turadi va "taxminiy" deb yoziladi — bu
-      kafolatlangan ball emas. */
+/* Apple Health Style DTM Score Prediction Card */
 export default function PredictedScore() {
   const { access } = useAuthStore();
   const [data, setData] = useState<Prediction | null>(null);
@@ -49,29 +41,36 @@ export default function PredictedScore() {
     apiFetch<Prediction>('/api/analytics/predicted-score/').then(setData).catch(() => setData(null));
   }, [access]);
 
-  if (!data) return <Skeleton className="h-36 w-full" />;
+  if (!data) return <Skeleton className="h-36 w-full rounded-[24px]" />;
 
   if (!data.ready) {
     const pct = Math.min(100, Math.round((data.sample_size / data.needed) * 100));
     const left = Math.max(0, data.needed - data.sample_size);
     return (
-      <Card>
-        <CardContent className="space-y-3 pt-6">
-          <p className="flex items-center gap-2 text-sm font-semibold">
-            <Target className="size-4 text-[var(--accent-text)]" /> DTM ball bashorati
-          </p>
-          <p className="text-sm text-[var(--text-secondary)]">
-            Bashorat uchun yetarli ma&apos;lumot yo&apos;q. Yana{' '}
-            <strong className="text-foreground">{left} ta savol</strong> yeching — shundan so&apos;ng
-            tizim taxminiy ballingizni hisoblaydi.
-          </p>
-          <Progress value={pct} className="h-2" />
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span className="font-mono">{data.sample_size} / {data.needed} javob</span>
-            <Button asChild size="sm" variant="outline"><Link href="/tests">Test yechish</Link></Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="ios-card rounded-[24px] p-5 sm:p-6 space-y-3.5">
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
+            <Target className="size-4" />
+          </span>
+          <p className="text-[15px] font-bold text-foreground">DTM ball bashorati</p>
+        </div>
+        <p className="text-[13.5px] text-[#8E8E93] leading-relaxed">
+          Aniq bashorat uchun yana{' '}
+          <strong className="text-foreground font-semibold">{left} ta savol</strong> yeching — shundan so&apos;ng
+          AI tizimi real imtihondagi taxminiy ballingizni hisoblab beradi.
+        </p>
+        <Progress value={pct} className="h-2" />
+        <div className="flex items-center justify-between pt-1 text-[12px] text-[#8E8E93]">
+          <span className="font-mono font-semibold">{data.sample_size} / {data.needed} javob</span>
+          <Link
+            href="/tests"
+            className="inline-flex items-center gap-1 rounded-full bg-[#007AFF] px-3.5 py-1.5 text-[12px] font-semibold text-white hover:bg-[#0071EB] transition-all"
+          >
+            <span>Test yechish</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      </div>
     );
   }
 
@@ -79,56 +78,59 @@ export default function PredictedScore() {
   const weak = data.topic_breakdown.filter((t) => t.score < 60).slice(0, 3);
 
   return (
-    <Card className="border-[var(--accent-border)] bg-primary/[0.04]">
-      <CardContent className="space-y-4 pt-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="flex items-center gap-2 text-sm font-semibold">
-              <Target className="size-4 text-[var(--accent-text)]" /> Taxminiy DTM balli
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-help text-muted-foreground"><Info className="size-3.5" /></span>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-64">
-                  {data.sample_size} ta javob, {data.topics_covered} ta mavzu asosida hisoblangan.
-                  Qiyin savollar ko&apos;proq og&apos;irlikka ega, mavzular teng hisobga olinadi.
-                  Bu kafolatlangan natija emas — o&apos;sishni kuzatish uchun mo&apos;ljallangan.
-                </TooltipContent>
-              </Tooltip>
-            </p>
-            <p className="mt-1 flex items-baseline gap-2">
-              <span className="font-mono text-4xl font-black text-[var(--accent-text)]">
-                <StatNumber value={data.predicted_dtm ?? 0} />
-              </span>
-              <span className="text-sm text-muted-foreground">/ {data.dtm_max ?? 189} ball</span>
-            </p>
-            <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-              o&apos;zlashtirish: {data.predicted_percent}%
-            </p>
+    <div className="ios-card rounded-[26px] p-5 sm:p-6 space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
+              <Target className="size-4" />
+            </span>
+            <span className="text-[13px] font-bold uppercase tracking-wider text-[#8E8E93]">
+              Taxminiy DTM balli
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-help text-[#8E8E93]"><Info className="size-3.5" /></span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-64">
+                {data.sample_size} ta javob va {data.topics_covered} ta mavzu asosida hisoblangan.
+              </TooltipContent>
+            </Tooltip>
           </div>
-
-          <div className="space-y-1.5 text-right">
-            <Badge variant="outline" className={cn('font-medium', conf.tone)}>{conf.label}</Badge>
-            <p className="font-mono text-xs text-muted-foreground">
-              {Math.round((data.confidence ?? 0) * 100)}% · {data.sample_size} javob
-            </p>
-          </div>
+          <p className="mt-2 flex items-baseline gap-2">
+            <span className="font-mono text-[38px] font-black tracking-tight text-[#007AFF] leading-none">
+              <StatNumber value={data.predicted_dtm ?? 0} />
+            </span>
+            <span className="text-[14px] font-semibold text-[#8E8E93]">/ {data.dtm_max ?? 189} ball</span>
+          </p>
+          <p className="mt-1 font-mono text-[12px] font-medium text-[#34C759]">
+            O&apos;zlashtirish ko&apos;rsatkichi: {data.predicted_percent}%
+          </p>
         </div>
 
-        {weak.length > 0 && (
-          <div className="space-y-1.5 border-t pt-3">
-            <p className="flex items-center gap-1.5 text-xs font-semibold text-[var(--danger-text)]">
-              <TrendingDown className="size-3.5" /> Ballni eng ko&apos;p pasaytirayotgan mavzular
-            </p>
+        <div className="space-y-1.5 text-right">
+          <Badge variant="outline" className={cn('font-semibold', conf.tone)}>{conf.label}</Badge>
+          <p className="font-mono text-[11.5px] text-[#8E8E93]">
+            {Math.round((data.confidence ?? 0) * 100)}% aniqlik · {data.sample_size} javob
+          </p>
+        </div>
+      </div>
+
+      {weak.length > 0 && (
+        <div className="space-y-2 border-t border-black/[0.06] dark:border-white/[0.08] pt-3.5">
+          <p className="flex items-center gap-1.5 text-[12px] font-bold text-[#FF3B30]">
+            <TrendingDown className="size-3.5" /> Ballni pasaytirayotgan mavzular
+          </p>
+          <div className="grid gap-1.5">
             {weak.map((t) => (
-              <div key={t.title} className="flex items-center justify-between gap-3 text-xs">
-                <span className="min-w-0 truncate">{t.title}</span>
-                <span className="shrink-0 font-mono text-[var(--danger-text)]">{t.score}%</span>
+              <div key={t.title} className="flex items-center justify-between gap-3 rounded-[12px] bg-[#FF3B30]/[0.05] px-3 py-1.5 text-[12.5px]">
+                <span className="min-w-0 truncate font-medium text-foreground">{t.title}</span>
+                <span className="shrink-0 font-mono font-bold text-[#FF3B30]">{t.score}%</span>
               </div>
             ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }

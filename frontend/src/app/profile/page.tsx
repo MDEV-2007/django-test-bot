@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Gift, Copy, Check, Award, Crown, Swords, FileCheck2,
   Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout,
-  Pencil, Camera, Trash2, Loader2, type LucideIcon,
+  Pencil, Camera, Trash2, Loader2, ChevronRight, type LucideIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUpload } from '@/lib/api-client';
@@ -20,9 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import CosmeticBadge from '@/components/student/CosmeticBadge';
 import VerifiedBadge from '@/components/ui/verified-badge';
@@ -57,16 +55,15 @@ type ProfileData = {
 
 const RARITY_ICON: Record<string, LucideIcon> = { legendary: Crown, epic: Medal, rare: Flame, common: ScrollText };
 const RARITY_TONE: Record<string, string> = {
-  legendary: 'border-amber-500/30 bg-amber-500/12 text-amber-600 dark:text-amber-300',
-  epic: 'border-purple-500/30 bg-purple-500/12 text-purple-600 dark:text-purple-300',
-  rare: 'border-sky-500/30 bg-sky-500/12 text-sky-600 dark:text-sky-300',
-  common: 'border-[var(--border-card)] bg-[var(--surface-hover)] text-[var(--text-secondary)]',
+  legendary: 'bg-[#FF9500] text-white shadow-[0_4px_12px_rgba(255,149,0,0.3)]',
+  epic: 'bg-[#AF52DE] text-white shadow-[0_4px_12px_rgba(175,82,222,0.3)]',
+  rare: 'bg-[#007AFF] text-white shadow-[0_4px_12px_rgba(0,122,255,0.3)]',
+  common: 'bg-[#34C759] text-white shadow-[0_4px_12px_rgba(52,199,89,0.25)]',
 };
 
 const SHARE_TEXT = "IlmIldizi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!";
 
 export default function ProfilePage() {
-  const { access } = useAuthStore();
   const [origin, setOrigin] = useState('');
   const [copied, setCopied] = useState(false);
   const { data, refresh } = useApiQuery<ProfileData>('/api/auth/profile/');
@@ -151,27 +148,22 @@ export default function ProfilePage() {
     return (
       <>
         <AppShell />
-        <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-          <Skeleton className="h-36 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-52 w-full" />
+        <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+          <Skeleton className="h-40 w-full rounded-[28px]" />
+          <Skeleton className="h-28 w-full rounded-[24px]" />
+          <Skeleton className="h-64 w-full rounded-[28px]" />
         </main>
       </>
     );
   }
 
   const p = data.profile;
-  /* Joriy darajadagi o'sish foizi — daraxtning bo'yi shunga bog'liq. `next_level_xp`
-     keyingi daraja chegarasi, shuning uchun foiz to'g'ridan-to'g'ri nisbat sifatida
-     hisoblanadi va 0–100 oralig'ida cheklanadi. */
   const xpProgress = p.next_level_xp > 0
     ? Math.min(100, Math.max(0, Math.round((p.xp / p.next_level_xp) * 100)))
     : 0;
   const fullName = `${p.first_name || p.username} ${p.last_name || ''}`.trim();
   const referralUrl = `${origin}/register?ref=${data.referral_code}`;
 
-  /* Mini App ichida bo'lsak bot deep link'i ulashiladi (odam Telegramda qoladi va
-     /start referralni qo'llaydi), aks holda oddiy veb-havola. */
   const shareUrl = data.telegram_deep_link || referralUrl;
   const telegramShareHref =
     `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(SHARE_TEXT)}`;
@@ -184,20 +176,14 @@ export default function ProfilePage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const chips = [
-    { icon: Flame, tone: 'text-[var(--tone-streak-text)]', label: `${p.streak} kunlik streak` },
-    { icon: Coins, tone: 'text-[var(--tone-premium-text)]', label: `${p.coins.toLocaleString('uz-UZ')} tanga` },
-    { icon: Zap, tone: 'text-[var(--accent-text)]', label: `${p.xp.toLocaleString('uz-UZ')} XP` },
-  ];
-
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-        {/* Profil sarlavhasi */}
-        <Card className="relative overflow-hidden">
-          <div className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-primary/10 blur-3xl" />
-          <CardContent className="relative flex flex-col items-center gap-5 pt-6 text-center sm:flex-row sm:text-left">
+      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-20 sm:p-6">
+        {/* iOS Settings -> Apple ID Profile Card */}
+        <div className="ios-card relative overflow-hidden rounded-[28px] p-6 sm:p-7">
+          <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-[#007AFF]/[0.08] blur-[70px]" />
+          <div className="relative flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
             <div className="relative shrink-0 group">
               <div
                 onClick={handleOpenEdit}
@@ -205,19 +191,19 @@ export default function ProfilePage() {
                 title="Profilni tahrirlash"
               >
                 <CosmeticAvatar
-                  className="size-20 border-2 border-[var(--accent)] shadow-lg shadow-[var(--accent)]/20 sm:size-24"
+                  className="size-22 border-2 border-[#007AFF]/40 shadow-[0_8px_24px_rgba(0,122,255,0.2)] sm:size-24"
                   src={p.avatar_url}
                   name={p.first_name || p.username}
                   cosmetics={p.cosmetics}
-                  fallbackClassName="text-lg"
+                  fallbackClassName="text-xl"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                   <Camera className="size-5" />
                 </div>
               </div>
               {p.is_premium ? (
-                <span className="absolute -bottom-1.5 -right-1.5 rounded-xl bg-amber-500 p-1.5 text-black shadow-md">
-                  <Crown className="size-4" />
+                <span className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-[#FF9500] text-white shadow-md ring-2 ring-white dark:ring-[#1C1C1E]">
+                  <Crown className="size-4 fill-current" />
                 </span>
               ) : (
                 <button
@@ -225,40 +211,42 @@ export default function ProfilePage() {
                   onClick={handleOpenEdit}
                   title="Rasmni o'zgartirish"
                   aria-label="Rasmni o'zgartirish"
-                  className="absolute -bottom-1 -right-1 size-7 rounded-full bg-[var(--accent)] text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                  className="absolute -bottom-1 -right-1 size-7 rounded-full bg-[#007AFF] text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform ring-2 ring-white dark:ring-[#1C1C1E]"
                 >
                   <Camera className="size-3.5" />
                 </button>
               )}
             </div>
 
-            <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="min-w-0 flex-1 space-y-2">
               <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <h1 className="font-voice text-xl font-bold sm:text-2xl flex items-center gap-2 flex-wrap">
+                <h1 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-foreground flex items-center gap-2 flex-wrap">
                   <span>{fullName}</span>
                   <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
                 </h1>
                 <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
-                <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 font-mono text-[var(--accent-text)]">
+                <span className="rounded-full bg-[#007AFF]/12 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#007AFF]">
                   Daraja {p.level}
-                </Badge>
-                {/* Do'kondan olingan unvon — sotib olingan bezak ekranda ko'rinishi kerak. */}
+                </span>
                 {p.cosmetics?.title?.payload?.title && (
-                  <Badge variant="outline" className="border-[var(--tone-streak-border,var(--border-strong))] text-[var(--tone-streak-text)]">
+                  <span className="rounded-full bg-[#FF9500]/12 px-2.5 py-0.5 text-[11px] font-bold text-[#FF9500]">
                     {p.cosmetics.title.payload.title}
-                  </Badge>
+                  </span>
                 )}
               </div>
-              <p className="font-mono text-xs text-muted-foreground">@{p.username}</p>
-              <div className="flex flex-wrap items-center justify-center gap-4 pt-1 font-mono text-xs sm:justify-start">
-                {chips.map((c) => {
-                  const Icon = c.icon;
-                  return (
-                    <span key={c.label} className={`flex items-center gap-1 font-bold ${c.tone}`}>
-                      <Icon className="size-3.5" /> {c.label}
-                    </span>
-                  );
-                })}
+              <p className="font-mono text-[13px] text-[#8E8E93]">@{p.username} • IlmIldizi ID</p>
+
+              {/* iOS Dynamic Island Metric Pills */}
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 sm:justify-start">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/12 px-3 py-1 text-[12px] font-bold text-[#FF9500]">
+                  <Flame className="size-3.5 fill-current" /> {p.streak} kun streak
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#34C759]/12 px-3 py-1 text-[12px] font-bold text-[#34C759]">
+                  <Coins className="size-3.5" /> {p.coins.toLocaleString('uz-UZ')} tanga
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#007AFF]/12 px-3 py-1 text-[12px] font-bold text-[#007AFF]">
+                  <Zap className="size-3.5 fill-current" /> {p.xp.toLocaleString('uz-UZ')} XP
+                </span>
               </div>
             </div>
 
@@ -267,47 +255,47 @@ export default function ProfilePage() {
                 variant="outline"
                 size="sm"
                 onClick={handleOpenEdit}
-                className="h-9 gap-1.5 border-[var(--border-strong)] hover:bg-[var(--surface-hover)] shadow-sm font-medium"
+                className="rounded-full gap-1.5"
               >
-                <Pencil className="size-3.5 text-[var(--accent-text)]" />
+                <Pencil className="size-3.5 text-[#007AFF]" />
                 Tahrirlash
               </Button>
-              <Button asChild className="h-9 shrink-0 bg-gradient-to-r from-amber-500 to-amber-600 text-black hover:from-amber-500/90 hover:to-amber-600/90 shadow-sm font-medium">
-                <Link href="/premium">
-                  {p.is_premium ? <Crown className="size-4" /> : <Lock className="size-4" />}
-                  {p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}
-                </Link>
-              </Button>
+              <Link
+                href="/premium"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[#FF9500] px-4 text-[13px] font-semibold text-white shadow-[0_4px_12px_rgba(255,149,0,0.3)] hover:opacity-95 active:scale-95 transition-all"
+              >
+                {p.is_premium ? <Crown className="size-4 fill-current" /> : <Lock className="size-3.5" />}
+                <span>{p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}</span>
+              </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Profilni tahrirlash modali */}
         <Dialog open={editOpen} onOpenChange={(open) => { if (!saving) setEditOpen(open); }}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md rounded-[28px]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-                <Pencil className="size-5 text-[var(--accent-text)]" />
+                <Pencil className="size-5 text-[#007AFF]" />
                 Profilni tahrirlash
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
+              <DialogDescription className="text-xs text-[#8E8E93]">
                 Ism, familiya va profilingiz rasmini o&apos;zgartirishingiz mumkin.
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSaveProfile} className="space-y-5 py-2">
-              {/* Avatar yuklash qismi */}
               <div className="flex flex-col items-center gap-3">
                 <div className="relative group">
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="relative size-24 sm:size-28 rounded-full overflow-hidden border-2 border-[var(--accent)] shadow-md cursor-pointer bg-[var(--surface-hover)] flex items-center justify-center transition-all hover:opacity-90"
+                    className="relative size-24 sm:size-28 rounded-full overflow-hidden border-2 border-[#007AFF] shadow-md cursor-pointer bg-[#F2F2F7] dark:bg-[#2C2C2E] flex items-center justify-center transition-all hover:opacity-90"
                     title="Rasmni o'zgartirish"
                   >
                     {avatarPreview ? (
                       <img src={avatarPreview} alt="Preview" className="size-full object-cover" />
                     ) : removeAvatar ? (
-                      <div className="size-full flex items-center justify-center font-voice text-2xl font-bold text-[var(--accent-text)] bg-primary/10">
+                      <div className="size-full flex items-center justify-center text-2xl font-bold text-[#007AFF] bg-[#007AFF]/10">
                         {(firstName[0] || p.username[0] || '?').toUpperCase()}
                       </div>
                     ) : (
@@ -330,7 +318,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Rasmni yangilash"
-                    className="absolute -bottom-1 -right-1 size-8 rounded-full bg-[var(--accent)] text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                    className="absolute -bottom-1 -right-1 size-8 rounded-full bg-[#007AFF] text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
                   >
                     <Camera className="size-4" />
                   </button>
@@ -350,7 +338,7 @@ export default function ProfilePage() {
                     variant="outline"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-8 text-xs gap-1.5"
+                    className="h-8 rounded-full text-xs gap-1.5"
                   >
                     <Camera className="size-3.5" />
                     Rasm yuklash
@@ -361,17 +349,16 @@ export default function ProfilePage() {
                       variant="ghost"
                       size="sm"
                       onClick={handleRemoveAvatar}
-                      className="h-8 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 gap-1.5"
+                      className="h-8 rounded-full text-xs text-[#FF3B30] hover:bg-[#FF3B30]/10 gap-1.5"
                     >
                       <Trash2 className="size-3.5" />
                       O&apos;chirish
                     </Button>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground">PNG, JPG yoki WebP (maks. 10 MB)</p>
+                <p className="text-[11px] text-[#8E8E93]">PNG, JPG yoki WebP (maks. 10 MB)</p>
               </div>
 
-              {/* Ism va Familiya maydonlari */}
               <div className="space-y-3.5">
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-first-name" className="text-xs font-semibold">
@@ -383,7 +370,6 @@ export default function ProfilePage() {
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Ismingizni kiriting"
                     maxLength={50}
-                    className="h-9 text-sm"
                   />
                 </div>
 
@@ -397,18 +383,17 @@ export default function ProfilePage() {
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Familiyangizni kiriting"
                     maxLength={50}
-                    className="h-9 text-sm"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-muted-foreground">
+                  <Label className="text-xs font-semibold text-[#8E8E93]">
                     Foydalanuvchi nomi
                   </Label>
                   <Input
                     disabled
                     value={`@${p.username}`}
-                    className="h-9 text-sm bg-muted/40 cursor-not-allowed opacity-75 font-mono"
+                    className="font-mono opacity-75"
                   />
                 </div>
               </div>
@@ -419,13 +404,14 @@ export default function ProfilePage() {
                   variant="outline"
                   disabled={saving}
                   onClick={() => setEditOpen(false)}
+                  className="rounded-full"
                 >
                   Bekor qilish
                 </Button>
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
+                  className="rounded-full"
                 >
                   {saving ? (
                     <>
@@ -441,65 +427,67 @@ export default function ProfilePage() {
           </DialogContent>
         </Dialog>
 
-
-        {/* Referral */}
-        <Card className="border-[var(--accent-border)]">
-          <CardContent className="flex flex-col items-center justify-between gap-4 pt-6 sm:flex-row">
-            <div className="space-y-1 text-center sm:text-left">
-              <h3 className="flex items-center justify-center gap-2 text-sm font-semibold text-[var(--accent-text)] sm:justify-start">
-                <Gift className="size-4" /> Do&apos;stlarni taklif qiling
+        {/* iOS Share Sheet Style Referral Card */}
+        <div className="ios-card rounded-[24px] p-5 sm:p-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex items-center gap-3.5 text-center sm:text-left">
+            <span className="hidden sm:flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
+              <Gift className="size-5" />
+            </span>
+            <div>
+              <h3 className="text-[15px] font-bold text-foreground">
+                Do&apos;stlarni taklif qiling va bonus tanga oling
               </h3>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[12.5px] text-[#8E8E93] mt-0.5">
                 {data.referral_stats.referral_count} ta do&apos;st taklif qildingiz ·{' '}
-                <strong className="text-foreground">{data.referral_stats.coins_earned} tanga</strong> ishladingiz
+                <strong className="text-[#34C759] font-semibold">{data.referral_stats.coins_earned} tanga</strong> ishladingiz
               </p>
             </div>
+          </div>
 
-            <div className="flex w-full items-center gap-2 sm:w-auto">
-              <Input readOnly value={referralUrl} className="flex-1 font-mono text-xs sm:w-56" />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={handleCopy} aria-label="Havolani nusxalash">
-                    {copied ? <Check className="size-4 text-[var(--success-text)]" /> : <Copy className="size-4" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{copied ? 'Nusxalandi!' : 'Havolani nusxalash'}</TooltipContent>
-              </Tooltip>
-              <Button asChild>
-                <a href={telegramShareHref} target="_blank" rel="noopener noreferrer">
-                  <Send className="size-4" /> Telegram
-                </a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <Input readOnly value={referralUrl} className="flex-1 font-mono text-xs sm:w-56 h-10" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={handleCopy} aria-label="Havolani nusxalash">
+                  {copied ? <Check className="size-4 text-[#34C759]" /> : <Copy className="size-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{copied ? 'Nusxalandi!' : 'Havolani nusxalash'}</TooltipContent>
+            </Tooltip>
+            <Button asChild className="rounded-full px-4">
+              <a href={telegramShareHref} target="_blank" rel="noopener noreferrer">
+                <Send className="size-4" /> Ulashish
+              </a>
+            </Button>
+          </div>
+        </div>
 
-        {/* Bilim Ildizi — brend metaforasi. Daraxt to'liq real ma'lumotdan quriladi:
-            daraja (shoxlar), joriy darajadagi XP (bo'y), streak (barglar), yutuqlar (mevalar). */}
-        <Card className="overflow-hidden border border-emerald-500/20 bg-gradient-to-br from-emerald-950/15 via-background to-background shadow-xl">
-          <CardHeader className="pb-2">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="space-y-0.5">
-                <CardTitle className="flex items-center gap-2 text-base font-black">
-                  <span className="flex size-7 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                    <Sprout className="size-4" />
-                  </span>
-                  <span>Bilim Ildizingiz</span>
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  Sizning dars faolligingiz va muvaffaqiyatlaringizdan unib o&apos;suvchi tirik daraxt
+        {/* Bilim Ildizi — Apple Health / Home Ecological Widget */}
+        <div className="ios-card overflow-hidden rounded-[28px] p-6 sm:p-7 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-[12px] bg-[#34C759] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
+                <Sprout className="size-5" />
+              </span>
+              <div>
+                <h2 className="text-[18px] font-bold text-foreground leading-tight">
+                  Shaxsiy Bilim Ildizingiz
+                </h2>
+                <p className="text-[12.5px] text-[#8E8E93]">
+                  Dars faolligingiz va muvaffaqiyatlaringizdan unib o&apos;suvchi jonli daraxt
                 </p>
               </div>
-
-              <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-bold gap-1.5 py-1 px-3">
-                <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>Faol Ekologiya</span>
-              </Badge>
             </div>
-          </CardHeader>
-          <CardContent className="grid gap-6 lg:grid-cols-12 items-center pt-2">
-            {/* Chap tomon: Tirik Organik Daraxt */}
-            <div className="lg:col-span-5 flex items-center justify-center rounded-3xl border border-emerald-500/20 bg-emerald-50/40 p-4 backdrop-blur-md shadow-inner">
+
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#34C759]/12 px-3 py-1 text-[11px] font-bold text-[#34C759]">
+              <span className="size-2 rounded-full bg-[#34C759] animate-ping" />
+              Faol o&apos;sishda
+            </span>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-12 items-center">
+            {/* Left: Organic Tree */}
+            <div className="lg:col-span-5 flex items-center justify-center rounded-[24px] border border-[#34C759]/20 bg-[#34C759]/[0.05] p-4">
               <KnowledgeTree
                 level={p.level}
                 xpProgress={xpProgress}
@@ -508,92 +496,90 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* O'ng tomon: 4 ta Gamifikatsiyalangan Metrika Kartochkalari */}
+            {/* Right: 4 Apple Health Sub-cards */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* 1. Shoxlar (Daraja) */}
-                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 space-y-1 transition-all hover:border-emerald-500/40">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 p-4 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground">Daraxt kuchi</span>
-                    <span className="text-xs">🌳</span>
+                    <span className="text-[12px] font-semibold text-[#8E8E93]">Daraxt kuchi</span>
+                    <span className="text-sm">🌳</span>
                   </div>
-                  <p className="text-sm sm:text-base font-black text-foreground">
+                  <p className="text-[16px] font-bold text-foreground">
                     {p.level} ta mustahkam shox
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[11.5px] text-[#8E8E93]">
                     Erishilgan intellektual darajangiz
                   </p>
                 </div>
 
-                {/* 2. Barglar toji (Streak) */}
-                <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3.5 space-y-1 transition-all hover:border-orange-500/40">
+                <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 p-4 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground">Barglar zichligi</span>
-                    <span className="text-xs">🔥</span>
+                    <span className="text-[12px] font-semibold text-[#8E8E93]">Barglar zichligi</span>
+                    <span className="text-sm">🔥</span>
                   </div>
-                  <p className="text-sm sm:text-base font-black text-foreground">
+                  <p className="text-[16px] font-bold text-foreground">
                     {p.streak} kunlik yashillik
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Uzluksiz dars seriyasi va hayotiylik
+                  <p className="text-[11.5px] text-[#8E8E93]">
+                    Uzluksiz dars seriyasi
                   </p>
                 </div>
 
-                {/* 3. Oltin mevalar (Yutuqlar) */}
-                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3.5 space-y-1 transition-all hover:border-amber-500/40">
+                <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 p-4 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground">Tojdagi mevalar</span>
-                    <span className="text-xs">🍎</span>
+                    <span className="text-[12px] font-semibold text-[#8E8E93]">Tojdagi mevalar</span>
+                    <span className="text-sm">🍎</span>
                   </div>
-                  <p className="text-sm sm:text-base font-black text-foreground">
+                  <p className="text-[16px] font-bold text-foreground">
                     {data.badges.length} ta oltin meva
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Ochilgan maxsus yutuqlar va nishonlar
+                  <p className="text-[11.5px] text-[#8E8E93]">
+                    Ochilgan maxsus yutuqlar
                   </p>
                 </div>
 
-                {/* 4. O'sish progressi */}
-                <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-3.5 space-y-1.5 transition-all hover:border-blue-500/40">
+                <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground">O&apos;sish sur&apos;ati</span>
-                    <span className="font-mono text-xs font-black text-blue-400">{xpProgress}%</span>
+                    <span className="text-[12px] font-semibold text-[#8E8E93]">O&apos;sish sur&apos;ati</span>
+                    <span className="font-mono text-[12px] font-bold text-[#007AFF]">{xpProgress}%</span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                  <div className="h-2 w-full rounded-full bg-black/[0.08] dark:bg-white/[0.1] overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                      className="h-full bg-gradient-to-r from-[#007AFF] to-[#34C759] rounded-full transition-all duration-700"
                       style={{ width: `${Math.max(4, Math.min(100, xpProgress))}%` }}
                     />
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Keyingi shox nish urishigacha progress
+                  <p className="text-[11.5px] text-[#8E8E93]">
+                    Keyingi darajagacha progress
                   </p>
                 </div>
               </div>
 
-              {/* Motivatsion Iqtibos */}
-              <div className="rounded-2xl border border-border/80 bg-muted/40 p-3.5 text-xs text-muted-foreground leading-relaxed flex items-start gap-2.5">
+              <div className="rounded-[18px] bg-[#34C759]/[0.08] border border-[#34C759]/20 p-3.5 text-[12.5px] text-foreground leading-relaxed flex items-start gap-2.5">
                 <span className="text-base leading-none pt-0.5">🌱</span>
                 <span>
-                  <strong className="text-foreground font-semibold">Har bir yechilgan test</strong>, ko&apos;rilgan dars va takrorlangan xato bu daraxt ildizini chuqurlashtirib, unga yangi yashil shoxlar baxsh etadi.
+                  <strong>Har bir yechilgan test</strong>, ko&apos;rilgan dars va tuzatilgan xato bu daraxt ildizini chuqurlashtirib, unga yangi shoxlar qo&apos;shadi.
                 </span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Yutuqlar */}
+        {/* Game Center Achievements Grid */}
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Award className="size-4 text-amber-400" /> Erishilgan yutuqlar
+              <CardTitle className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#FF9500] text-white">
+                  <Award className="size-4" />
+                </span>
+                <span>Game Center Yutuqlari</span>
               </CardTitle>
-              <span className="font-mono text-xs text-muted-foreground">
+              <span className="font-mono text-xs font-semibold text-[#8E8E93]">
                 {data.badges.length} / {data.total_badges} ochilgan
               </span>
             </div>
-            <Progress value={badgePct} className="mt-2 h-1.5" />
+            <Progress value={badgePct} className="mt-2 h-2" />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
@@ -602,33 +588,27 @@ export default function ProfilePage() {
                 return (
                   <Tooltip key={idx}>
                     <TooltipTrigger asChild>
-                      <Card className="gap-0 py-4 text-center transition-colors hover:border-[var(--accent-border)]">
-                        <CardContent className="space-y-2 px-3">
-                          <div className={`mx-auto flex size-12 items-center justify-center rounded-2xl border ${RARITY_TONE[b.rarity] || RARITY_TONE.common}`}>
-                            <Icon className="size-6" />
-                          </div>
-                          <p className="text-xs font-bold leading-tight">{b.name}</p>
-                        </CardContent>
-                      </Card>
+                      <div className="rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/60 p-4 text-center space-y-2.5 transition-all hover:scale-[1.02]">
+                        <div className={`mx-auto flex size-12 items-center justify-center rounded-[15px] ${RARITY_TONE[b.rarity] || RARITY_TONE.common}`}>
+                          <Icon className="size-6" />
+                        </div>
+                        <p className="text-[12.5px] font-bold text-foreground leading-tight">{b.name}</p>
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-56">{b.description}</TooltipContent>
                   </Tooltip>
                 );
               })}
-              {/* Qulflangan yutuq ham nomi va sharti bilan ko'rsatiladi — bir xil
-                  "Qulflangan" kataklar hech qanday maqsad bermas edi. */}
               {(data.locked_badges ?? []).map((b) => (
                 <Tooltip key={`locked-${b.name}`}>
                   <TooltipTrigger asChild>
-                    <Card className="gap-0 border-dashed py-4 text-center transition-colors hover:border-[var(--border-strong)]">
-                      <CardContent className="space-y-2 px-3">
-                        <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-dashed text-muted-foreground">
-                          <Lock className="size-5" />
-                        </div>
-                        <p className="text-xs font-bold leading-tight text-muted-foreground">{b.name}</p>
-                        <p className="line-clamp-2 text-xs leading-snug text-[var(--text-faint)]">{b.description}</p>
-                      </CardContent>
-                    </Card>
+                    <div className="rounded-[20px] border border-dashed border-black/[0.1] dark:border-white/[0.1] p-4 text-center space-y-2 opacity-65">
+                      <div className="mx-auto flex size-12 items-center justify-center rounded-[15px] bg-black/[0.05] dark:bg-white/[0.06] text-[#8E8E93]">
+                        <Lock className="size-5" />
+                      </div>
+                      <p className="text-[12px] font-bold leading-tight text-[#8E8E93]">{b.name}</p>
+                      <p className="line-clamp-2 text-[11px] leading-snug text-[#8E8E93]">{b.description}</p>
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-56">Hali ochilmagan — {b.description}</TooltipContent>
                 </Tooltip>
@@ -637,74 +617,93 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        {/* iOS Inset Grouped Recent Attempts & Arena Battles */}
+        <div className="grid gap-5 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <FileCheck2 className="size-4 text-[var(--accent-text)]" /> So&apos;nggi test natijalari
+              <CardTitle className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#007AFF] text-white">
+                  <FileCheck2 className="size-4" />
+                </span>
+                <span>So&apos;nggi test natijalari</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {data.recent_attempts.length === 0 && <p className="py-4 text-sm text-muted-foreground">Hali test yechilmagan.</p>}
-              {data.recent_attempts.map((t, i) => (
-                <div key={t.id}>
-                  {i > 0 && <Separator />}
-                  <Link href={`/tests/${t.id}/feedback`} className="flex items-center justify-between gap-3 py-2.5 transition-colors hover:text-[var(--accent-text)]">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{t.test_title}</p>
-                      <span className="text-xs text-muted-foreground">{new Date(t.started_at).toLocaleDateString('uz-UZ')}</span>
-                    </div>
-                    <span className="shrink-0 font-mono text-sm font-bold text-[var(--accent-text)]">
+            <CardContent className="divide-y divide-black/[0.06] dark:divide-white/[0.08]">
+              {data.recent_attempts.length === 0 && (
+                <p className="py-4 text-[13px] text-[#8E8E93]">Hali test yechilmagan.</p>
+              )}
+              {data.recent_attempts.map((t) => (
+                <Link
+                  key={t.id}
+                  href={`/tests/${t.id}/feedback`}
+                  className="flex items-center justify-between gap-3 py-3 transition-colors hover:text-[#007AFF] group"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-[13.5px] font-semibold text-foreground group-hover:text-[#007AFF]">
+                      {t.test_title}
+                    </p>
+                    <span className="text-[11.5px] text-[#8E8E93]">
+                      {new Date(t.started_at).toLocaleDateString('uz-UZ')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 font-mono text-[12.5px] font-bold text-[#007AFF]">
                       {t.score !== null ? `${t.score.toFixed(0)}%` : '—'}
                     </span>
-                  </Link>
-                </div>
+                    <ChevronRight className="size-4 text-[#C7C7CC]" />
+                  </div>
+                </Link>
               ))}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Swords className="size-4 text-rose-400" /> So&apos;nggi arena duellari
+              <CardTitle className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#FF3B30] text-white">
+                  <Swords className="size-4" />
+                </span>
+                <span>So&apos;nggi Arena duellari</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {data.recent_battles.length === 0 && <p className="py-4 text-sm text-muted-foreground">Hali arena jangi yo&apos;q.</p>}
-              {data.recent_battles.map((b, i) => (
-                <div key={b.id}>
-                  {i > 0 && <Separator />}
-                  <div className="flex items-center justify-between gap-3 py-2.5">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">vs {b.opponent}</p>
-                      <span className="text-xs text-muted-foreground">{new Date(b.created_at).toLocaleDateString('uz-UZ')}</span>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={b.won
-                        ? 'border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success-text)]'
-                        : 'border-rose-500/30 bg-rose-500/12 text-rose-300'}
-                    >
-                      {b.won ? "G'alaba" : "Mag'lubiyat"}
-                    </Badge>
+            <CardContent className="divide-y divide-black/[0.06] dark:divide-white/[0.08]">
+              {data.recent_battles.length === 0 && (
+                <p className="py-4 text-[13px] text-[#8E8E93]">Hali arena jangi yo&apos;q.</p>
+              )}
+              {data.recent_battles.map((b) => (
+                <div key={b.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-[13.5px] font-semibold text-foreground">vs {b.opponent}</p>
+                    <span className="text-[11.5px] text-[#8E8E93]">
+                      {new Date(b.created_at).toLocaleDateString('uz-UZ')}
+                    </span>
                   </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      b.won
+                        ? 'border-[#34C759]/30 bg-[#34C759]/12 text-[#34C759]'
+                        : 'border-[#FF3B30]/30 bg-[#FF3B30]/12 text-[#FF3B30]'
+                    }
+                  >
+                    {b.won ? "G'alaba" : "Mag'lubiyat"}
+                  </Badge>
                 </div>
               ))}
             </CardContent>
           </Card>
         </div>
 
-        {/* Sozlamalar — kunlik ishlatilmaydigan narsalar (ovoz, tema) shu yerda,
-            har sahifaning tepa panelida emas. */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Sozlamalar</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
+        {/* iOS Settings Inset Grouped Preferences Table */}
+        <div className="space-y-2">
+          <p className="px-2 text-[12px] font-bold uppercase tracking-wider text-[#8E8E93]">
+            Ilova sozlamalari
+          </p>
+          <div className="ios-card overflow-hidden rounded-[22px] divide-y divide-black/[0.06] dark:divide-white/[0.08]">
             <AudioToggle />
             <ThemeToggle />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </main>
     </>
   );

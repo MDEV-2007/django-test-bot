@@ -42,42 +42,26 @@ export default function SocialLogin({ refCode, onSuccess }: { refCode?: string; 
     async function autoLogin() {
       const wa = getWebApp();
       if (!wa?.initData) return;
-      /* Foydalanuvchi o'zi chiqqan bo'lsa — avtomatik kirmaymiz. Aks holda "chiqish"
-         tugmasi hech qachon ishlamaydi: sahifa /login ga o'tadi va shu zahoti qayta
-         kiritadi. Tugma qoladi — xohlasa bir bosishda qaytadi. */
       try {
         if (sessionStorage.getItem(TG_MANUAL_LOGOUT_KEY) === '1') return;
-      } catch { /* private mode — avtomatik kirish davom etadi */ }
+      } catch { /* private mode */ }
       try {
         const user = await loginWithTelegram(wa.initData, refCode || wa.initDataUnsafe?.start_param);
         if (!cancelled) onSuccess(user);
       } catch {
-        /* tugma orqali qo'lda urinib ko'rish mumkin */
+        /* manual fallback */
       }
     }
 
-    /* Telegram BIRINCHI va Google'dan MUSTAQIL ishlaydi.
-
-       Ilgari ikkalasi bitta ketma-ketlikda edi: avval `fetchAuthConfig()`, keyin
-       Google skripti, keyin Telegram. Telegram'ning ichki brauzerida
-       accounts.google.com ko'pincha yuklanmaydi — o'sha yerda `return` bo'lib,
-       Telegram tugmasi umuman ko'rinmay qolardi. Endi biri ishlamasa ikkinchisiga
-       ta'sir qilmaydi. */
     (async () => {
       if (!isTelegramEnv()) return;
       const wa = await loadTelegramSdk();
       if (cancelled) return;
       if (!wa?.initData) {
-        // Mini App ichidamiz, lekin Telegram foydalanuvchi ma'lumotini bermadi —
-        // sukut saqlash o'rniga sababini aytamiz, aks holda ekran "bo'sh" ko'rinadi.
         setError("Telegram ma'lumotlari kelmadi. Ilovani bot menyusidagi tugma orqali oching.");
         return;
       }
       setShowTelegram(true);
-
-      /* Mini App'da foydalanuvchi allaqachon Telegram hisobidan kirgan — undan
-         yana "kirish" tugmasini bosishni so'rash ortiqcha qadam. Jimgina kiritamiz;
-         xatolik bo'lsa tugma qo'lda bosish uchun ochiq qoladi. */
       autoLogin();
     })();
 
@@ -98,27 +82,12 @@ export default function SocialLogin({ refCode, onSuccess }: { refCode?: string; 
           }
         },
       });
-      /* Tugma ko'rinishi qo'lda sozlanadi — Google faqat shu bir nechta parametrni
-         beradi, qolgani iframe ichida va CSS bilan o'zgartirib bo'lmaydi.
-
-         `filled_black` — qorong'i mavzuga mos (ilgari `outline` edi: qop-qora
-         kartada oppoq tugma bo'lib ajralib turardi).
-         Eni konteynerdan o'lchanadi, 400px — Google qo'yган yuqori chegara. Ilgari
-         qattiq 320px yozilgan edi va tugma matn maydonlaridan tor bo'lib, qatorlar
-         tekislanmay turardi.
-         Burchaklar o'ramning `rounded-xl` + `overflow-hidden` klasslari bilan
-         kesiladi (pastdagi JSX), shunda u forma tugmalari bilan bir xil bo'ladi. */
-      const width = Math.min(400, Math.round(googleBtnRef.current.offsetWidth) || 400);
+      const width = Math.min(400, Math.round(googleBtnRef.current.offsetWidth) || 360);
       window.google.accounts.id.renderButton(googleBtnRef.current, {
-        theme: 'filled_black',
+        theme: 'outline',
         size: 'large',
-        shape: 'rectangular',
+        shape: 'pill',
         text: 'continue_with',
-        /* Logotip chap chetda. Google uni har doim OQ kvadrat ustida chizadi (brend
-           talabi) va buni tashqaridan o'zgartirib bo'lmaydi — tugma iframe ichida.
-           `center` bilan sinab ko'rildi: u holda oq kvadrat tugma O'RTASIDA qolib,
-           yanada g'alati ko'rinadi. Chap chetda esa u standart Google tugmasidek
-           o'qiladi. */
         logo_alignment: 'left',
         width,
       });
@@ -133,8 +102,6 @@ export default function SocialLogin({ refCode, onSuccess }: { refCode?: string; 
     const wa = getWebApp();
     if (!wa?.initData) return;
     try {
-      /* Bot havolasidagi `?start=<kod>` Telegram tomonidan `start_param` sifatida
-         uzatiladi — Mini App'da taklif kodi shu yerdan keladi. */
       const user = await loginWithTelegram(wa.initData, refCode || wa.initDataUnsafe?.start_param);
       onSuccess(user);
     } catch (err) {
@@ -145,23 +112,20 @@ export default function SocialLogin({ refCode, onSuccess }: { refCode?: string; 
   return (
     <div className="space-y-2.5">
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 p-3 text-xs text-rose-300">
+        <div className="flex items-center gap-2 rounded-[14px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3 text-xs font-medium text-[#FF3B30]">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
-      {/* Google tugmasi iframe ichida chiziladi — uning burchagini o'zgartirib
-          bo'lmaydi, shuning uchun o'ram `rounded-xl` bilan kesib qo'yadi. Shu tariqa
-          u formadagi boshqa tugmalar bilan bir xil ko'rinadi. */}
-      <div ref={googleBtnRef} className="flex justify-center overflow-hidden rounded-xl" />
+      <div ref={googleBtnRef} className="flex justify-center overflow-hidden rounded-full" />
       {showTelegram && (
         <button
           type="button"
           onClick={handleTelegram}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2AABEE] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#2297d3]"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#007AFF] px-4 text-[14px] font-semibold text-white shadow-[0_4px_14px_rgba(0,122,255,0.3)] transition-all hover:bg-[#0071EB] active:scale-[0.98]"
         >
           <Send className="h-4 w-4" />
-          <span>Telegram orqali kirish</span>
+          <span>Telegram orqali davom etish</span>
         </button>
       )}
     </div>

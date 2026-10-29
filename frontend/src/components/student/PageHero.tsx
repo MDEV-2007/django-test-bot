@@ -1,14 +1,17 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-/* O'quvchi sahifalarining yagona sarlavha bloki. Ilgari har bir sahifa shu gradient
-   karta + badge + h1 + tavsif kombinatsiyasini o'zicha qayta yozardi — endi bitta manba. */
+/* iOS 18 Large Title & Smart Stack Header Widget */
 export default function PageHero({
-  eyebrow, eyebrowIcon: EyebrowIcon, title, description, actions, tone = 'accent', className,
+  eyebrow,
+  eyebrowIcon: EyebrowIcon,
+  title,
+  description,
+  actions,
+  tone = 'accent',
+  className,
 }: {
   eyebrow?: string;
   eyebrowIcon?: LucideIcon;
@@ -18,38 +21,102 @@ export default function PageHero({
   tone?: 'accent' | 'amber' | 'rose' | 'indigo' | 'sky' | 'emerald';
   className?: string;
 }) {
-  const TONE: Record<string, { border: string; badge: string; glow: string }> = {
-    accent: { border: 'border-[var(--accent-border)]', badge: 'border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]', glow: 'bg-primary/10' },
-    amber: { border: 'border-amber-500/25', badge: 'border-amber-500/30 bg-amber-500/12 text-amber-600 dark:text-amber-300', glow: 'bg-amber-500/10' },
-    rose: { border: 'border-rose-500/25', badge: 'border-rose-500/30 bg-rose-500/12 text-rose-600 dark:text-rose-300', glow: 'bg-rose-500/10' },
-    indigo: { border: 'border-indigo-500/25', badge: 'border-indigo-500/30 bg-indigo-500/12 text-indigo-600 dark:text-indigo-300', glow: 'bg-indigo-500/10' },
-    sky: { border: 'border-sky-500/25', badge: 'border-sky-500/30 bg-sky-500/12 text-sky-600 dark:text-sky-300', glow: 'bg-sky-500/10' },
-    emerald: { border: 'border-emerald-500/25', badge: 'border-emerald-500/30 bg-emerald-500/12 text-emerald-600 dark:text-emerald-300', glow: 'bg-emerald-500/10' },
+  const TONE: Record<
+    string,
+    { iconBg: string; badgeBg: string; badgeText: string; aura: string }
+  > = {
+    accent: {
+      iconBg: 'bg-[#007AFF]',
+      badgeBg: 'bg-[#007AFF]/10 border-[#007AFF]/20',
+      badgeText: 'text-[#007AFF]',
+      aura: 'bg-[#007AFF]/[0.08]',
+    },
+    sky: {
+      iconBg: 'bg-[#007AFF]',
+      badgeBg: 'bg-[#007AFF]/10 border-[#007AFF]/20',
+      badgeText: 'text-[#007AFF]',
+      aura: 'bg-[#007AFF]/[0.08]',
+    },
+    amber: {
+      iconBg: 'bg-[#FF9500]',
+      badgeBg: 'bg-[#FF9500]/12 border-[#FF9500]/25',
+      badgeText: 'text-[#FF9500]',
+      aura: 'bg-[#FF9500]/[0.08]',
+    },
+    rose: {
+      iconBg: 'bg-[#FF3B30]',
+      badgeBg: 'bg-[#FF3B30]/10 border-[#FF3B30]/20',
+      badgeText: 'text-[#FF3B30]',
+      aura: 'bg-[#FF3B30]/[0.08]',
+    },
+    indigo: {
+      iconBg: 'bg-[#5856D6]',
+      badgeBg: 'bg-[#5856D6]/10 border-[#5856D6]/20',
+      badgeText: 'text-[#5856D6]',
+      aura: 'bg-[#5856D6]/[0.08]',
+    },
+    emerald: {
+      iconBg: 'bg-[#34C759]',
+      badgeBg: 'bg-[#34C759]/10 border-[#34C759]/20',
+      badgeText: 'text-[#34C759]',
+      aura: 'bg-[#34C759]/[0.08]',
+    },
   };
   const t = TONE[tone] ?? TONE.accent;
 
-  /* Bu blok — sahifaning yagona "Primary" darajasi: kattaroq ichki bo'shliq (32px),
-     kattaroq sarlavha va kuchliroq yorug'lik. Qolgan kartalar "Secondary" bo'lib
-     qoladi — shu tariqa ko'z birinchi qayerga tushishi aniq bo'ladi. */
   return (
-    <Card className={cn('relative overflow-hidden', t.border, className)}>
-      <div className={cn('pointer-events-none absolute -right-24 -top-32 size-80 rounded-full blur-3xl', t.glow)} />
-      <div className={cn('pointer-events-none absolute -bottom-28 -left-20 size-64 rounded-full opacity-60 blur-3xl', t.glow)} />
-      <CardContent className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-        <div className="min-w-0">
+    <div
+      className={cn(
+        'ios-card relative overflow-hidden rounded-[28px] p-6 sm:p-7',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          'pointer-events-none absolute -right-20 -top-24 size-72 rounded-full blur-[70px]',
+          t.aura
+        )}
+      />
+      <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 space-y-2">
           {eyebrow && (
-            <Badge variant="outline" className={cn('mb-3', t.badge)}>
-              {EyebrowIcon && <EyebrowIcon className="size-3.5" />}
-              {eyebrow}
-            </Badge>
+            <div className="inline-flex items-center gap-2">
+              {EyebrowIcon && (
+                <span
+                  className={cn(
+                    'flex size-6 items-center justify-center rounded-[7px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]',
+                    t.iconBg
+                  )}
+                >
+                  <EyebrowIcon className="size-3.5 stroke-[2.2]" />
+                </span>
+              )}
+              <span
+                className={cn(
+                  'rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider',
+                  t.badgeBg,
+                  t.badgeText
+                )}
+              >
+                {eyebrow}
+              </span>
+            </div>
           )}
-          <h1 className="font-voice text-2xl font-bold sm:text-3xl">{title}</h1>
+          <h1 className="text-[24px] sm:text-[30px] font-bold tracking-[-0.03em] text-foreground leading-tight">
+            {title}
+          </h1>
           {description && (
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--text-secondary)]">{description}</p>
+            <p className="max-w-2xl text-[14px] leading-relaxed text-[#8E8E93]">
+              {description}
+            </p>
           )}
         </div>
-        {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
-      </CardContent>
-    </Card>
+        {actions && (
+          <div className="flex shrink-0 flex-wrap items-center gap-2.5">
+            {actions}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

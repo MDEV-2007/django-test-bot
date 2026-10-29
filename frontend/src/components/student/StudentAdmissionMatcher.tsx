@@ -2,16 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  GraduationCap, Target, Sparkles, CheckCircle2, 
-  ArrowRight, Search, RotateCcw, Building2, TrendingUp, AlertCircle
+import {
+  Target, Sparkles, ArrowRight, Search, Building2
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
+import { cn } from '@/lib/utils';
 
 export interface UniversityMajor {
   id: string;
@@ -70,7 +69,6 @@ export default function StudentAdmissionMatcher() {
   const [searchQuery, setSearchQuery] = useState('');
   const [realPredictedScore, setRealPredictedScore] = useState<number | null>(null);
 
-  // Load saved preferences or fetch real predicted DTM score
   useEffect(() => {
     try {
       const savedScore = localStorage.getItem('ilm_user_target_score');
@@ -112,26 +110,25 @@ export default function StudentAdmissionMatcher() {
 
   const currentScore = parseFloat(scoreInput.replace(',', '.')) || 0;
 
-  // Flatten or select items
   const allItems: UniversityMajor[] = selectedBlock === 'all'
     ? Object.values(UNIVERSITIES_DB).flat()
     : UNIVERSITIES_DB[selectedBlock] || UNIVERSITIES_DB['tarix,ona-tili'];
 
-  // Filter items
   const filteredItems = allItems.filter((item) => {
-    // Search query filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const matchSearch = item.uni.toLowerCase().includes(q) || 
-                          item.major.toLowerCase().includes(q) || 
-                          item.city.toLowerCase().includes(q);
+      const matchSearch =
+        item.uni.toLowerCase().includes(q) ||
+        item.major.toLowerCase().includes(q) ||
+        item.city.toLowerCase().includes(q);
       if (!matchSearch) return false;
     }
 
-    // Status filter
     const isGrant = currentScore >= item.grantBall;
     const isKontrakt = currentScore >= item.kontraktBall && !isGrant;
-    const isClose = currentScore < item.grantBall && (item.grantBall - currentScore <= 15 || item.kontraktBall - currentScore <= 10);
+    const isClose =
+      currentScore < item.grantBall &&
+      (item.grantBall - currentScore <= 15 || item.kontraktBall - currentScore <= 10);
 
     if (filterType === 'grant') return isGrant;
     if (filterType === 'kontrakt') return isKontrakt;
@@ -140,209 +137,185 @@ export default function StudentAdmissionMatcher() {
   });
 
   return (
-    <Card className="relative overflow-hidden border-[var(--border-card)] bg-[var(--surface-card-medium)] shadow-sm w-full max-w-full">
-      <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-emerald-500/10 blur-3xl" />
-
-      <CardHeader className="relative p-4 sm:p-6 pb-3 sm:pb-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <Sparkles className="size-3" /> OTM Qabul Bashorati (2025/2026)
+    <div className="ios-card relative overflow-hidden rounded-[28px] p-5 sm:p-7 space-y-5 w-full">
+      <div className="space-y-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Badge variant="outline" className="border-[#34C759]/30 bg-[#34C759]/10 text-[#34C759]">
+            <Sparkles className="size-3" /> OTM Qabul Kalkulyatori (2026)
           </Badge>
 
           {realPredictedScore !== null && (
             <button
               onClick={handleApplyRealScore}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline"
+              className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#007AFF] hover:underline cursor-pointer"
             >
               <Target className="size-3.5 shrink-0" />
-              <span>Sizning real DTM ballingiz: <strong className="font-mono">{realPredictedScore.toFixed(1)}</strong> (Qo&apos;yish)</span>
+              <span>
+                Sizning prognoz ballingiz: <strong className="font-mono">{realPredictedScore.toFixed(1)}</strong> (Qo&apos;llash)
+              </span>
             </button>
           )}
         </div>
 
-        <CardTitle className="font-voice text-lg sm:text-2xl font-bold tracking-tight">
+        <h3 className="text-[20px] sm:text-[24px] font-bold tracking-tight text-foreground">
           Ballingiz qaysi universitetga yetadi?
-        </CardTitle>
-        <CardDescription className="text-xs sm:text-sm leading-relaxed">
-          O&apos;tgan yilgi rasmiy davlat qabul mezonlari asosida hisoblanadi. Real vaqtda o&apos;zgartiring va mos yo&apos;nalishlarni solishtiring.
-        </CardDescription>
-      </CardHeader>
+        </h3>
+        <p className="text-[13px] text-[#8E8E93] leading-relaxed">
+          Rasmiy davlat qabul kvotalari va o&apos;tish ballari asosida grant hamda kontrakt imkoniyatingizni tekshiring.
+        </p>
+      </div>
 
-      <CardContent className="relative p-4 sm:p-6 pt-0 sm:pt-0 space-y-5 overflow-hidden">
-        {/* Controls Row */}
-        <div className="grid gap-3 sm:grid-cols-12 items-end">
-          <div className="sm:col-span-4 min-w-0">
-            <label className="block text-xs font-bold text-foreground mb-1">
-              DTM / Mock ballingiz (0 — 189)
-            </label>
-            <div className="relative">
-              <Input
-                type="text"
-                inputMode="decimal"
-                value={scoreInput}
-                onChange={(e) => handleScoreChange(e.target.value)}
-                placeholder="164.5"
-                className="font-mono text-base sm:text-lg font-black bg-[var(--surface-input)] border-[var(--border-card)] focus-visible:ring-emerald-500 pr-12"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground pointer-events-none">
-                ball
-              </span>
-            </div>
-          </div>
-
-          <div className="sm:col-span-5 min-w-0">
-            <label className="block text-xs font-bold text-foreground mb-1">
-              Fanlar bloki
-            </label>
-            <select
-              value={selectedBlock}
-              onChange={(e) => handleBlockChange(e.target.value)}
-              className="w-full max-w-full truncate min-w-0 h-10 rounded-md border border-[var(--border-card)] bg-[var(--surface-input)] px-3 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              <option value="tarix,ona-tili">Tarix + Ona tili (Gumanitar & Yuridik)</option>
-              <option value="matematika,fizika">Matematika + Fizika (AT & Muhandislik)</option>
-              <option value="biologiya,kimyo">Biologiya + Kimyo (Tibbiyot & Farmatsevtika)</option>
-              <option value="matematika,english">Matematika + Ingliz tili (Iqtisodiyot & Moliya)</option>
-              <option value="ona-tili,english">Ona tili + Ingliz tili (Xalqaro munosabatlar)</option>
-              <option value="all">Barcha yo&apos;nalishlar</option>
-            </select>
-          </div>
-
-          <div className="sm:col-span-3 min-w-0">
-            <Button asChild className="w-full h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm">
-              <Link href="/mock">
-                Mock test ishlash <ArrowRight className="size-3.5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Filter bar & Search */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-[var(--border-card)] pt-3.5 text-xs">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            <button
-              onClick={() => setFilterType('all')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                filterType === 'all'
-                  ? 'bg-primary text-primary-foreground font-bold shadow-xs'
-                  : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Barchasi ({allItems.length})
-            </button>
-            <button
-              onClick={() => setFilterType('grant')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                filterType === 'grant'
-                  ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                  : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Faqat Grant
-            </button>
-            <button
-              onClick={() => setFilterType('kontrakt')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                filterType === 'kontrakt'
-                  ? 'bg-sky-600 text-white font-bold shadow-xs'
-                  : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Faqat Kontrakt
-            </button>
-            <button
-              onClick={() => setFilterType('close')}
-              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                filterType === 'close'
-                  ? 'bg-amber-600 text-white font-bold shadow-xs'
-                  : 'bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Yaqin ballar
-            </button>
-          </div>
-
-          <div className="relative w-full sm:w-56 shrink-0">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-            <input
+      {/* Controls Row */}
+      <div className="grid gap-3.5 sm:grid-cols-12 items-end">
+        <div className="sm:col-span-4 min-w-0">
+          <label className="block text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider mb-1.5">
+            DTM / Mock ball (0 — 189)
+          </label>
+          <div className="relative">
+            <Input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="OTM yoki yo'nalish..."
-              className="w-full h-8 rounded-lg border border-[var(--border-card)] bg-[var(--surface-input)] pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              inputMode="decimal"
+              value={scoreInput}
+              onChange={(e) => handleScoreChange(e.target.value)}
+              placeholder="164.5"
+              className="font-mono text-[17px] font-black pr-12"
             />
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] font-bold text-[#8E8E93] pointer-events-none">
+              ball
+            </span>
           </div>
         </div>
 
-        {/* Matching Cards Grid */}
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full">
-          {filteredItems.length === 0 ? (
-            <div className="col-span-full py-8 text-center text-xs text-muted-foreground">
-              Mos keluvchi OTM yo&apos;nalishlari topilmadi. Qidiruv so&apos;zini yoki filtrni o&apos;zgartirib ko&apos;ring.
-            </div>
-          ) : (
-            filteredItems.map((item) => {
-              const isGrant = currentScore >= item.grantBall;
-              const isKontrakt = currentScore >= item.kontraktBall && !isGrant;
-              const diffGrant = currentScore - item.grantBall;
+        <div className="sm:col-span-5 min-w-0">
+          <label className="block text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider mb-1.5">
+            Fanlar bloki
+          </label>
+          <select
+            value={selectedBlock}
+            onChange={(e) => handleBlockChange(e.target.value)}
+            className="w-full h-11 rounded-[13px] border border-black/[0.08] dark:border-white/[0.1] bg-[#767680]/[0.08] dark:bg-[#767680]/[0.18] px-3.5 text-[13.5px] font-semibold text-foreground focus:outline-none focus:border-[#007AFF]"
+          >
+            <option value="tarix,ona-tili">Tarix + Ona tili (Gumanitar & Yuridik)</option>
+            <option value="matematika,fizika">Matematika + Fizika (IT & Muhandislik)</option>
+            <option value="biologiya,kimyo">Biologiya + Kimyo (Tibbiyot & Farmatsevtika)</option>
+            <option value="matematika,english">Matematika + Ingliz tili (Iqtisodiyot & Moliya)</option>
+            <option value="ona-tili,english">Ona tili + Ingliz tili (Xalqaro munosabatlar)</option>
+            <option value="all">Barcha yo&apos;nalishlar</option>
+          </select>
+        </div>
 
-              return (
-                <div
-                  key={item.id}
-                  className="flex flex-col justify-between rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-3.5 sm:p-4 hover:border-emerald-500/40 hover:shadow-md transition-all w-full min-w-0 overflow-hidden"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center justify-between gap-2 min-w-0">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground truncate flex-1 min-w-0">
-                        {item.faculty}
-                      </span>
-                      <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
-                        isGrant 
-                          ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' 
+        <div className="sm:col-span-3 min-w-0">
+          <Button asChild className="w-full h-11 rounded-full">
+            <Link href="/tests">
+              Sinov test yechish <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* iOS Segmented Filter & Spotlight Search */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-black/[0.06] dark:border-white/[0.08] pt-4">
+        <div className="ios-segmented overflow-x-auto no-scrollbar">
+          {[
+            { id: 'all', label: `Barchasi (${allItems.length})` },
+            { id: 'grant', label: 'Grant' },
+            { id: 'kontrakt', label: 'Kontrakt' },
+            { id: 'close', label: 'Yaqin ballar' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setFilterType(tab.id as any)}
+              className={cn(
+                'px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-all cursor-pointer',
+                filterType === tab.id
+                  ? 'ios-segmented-thumb text-foreground'
+                  : 'text-[#8E8E93] hover:text-foreground'
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full sm:w-60 shrink-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#8E8E93] pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="OTM yoki yo'nalish..."
+            className="w-full h-9 rounded-full border border-black/[0.08] dark:border-white/[0.1] bg-[#767680]/[0.08] dark:bg-[#767680]/[0.18] pl-9 pr-3.5 text-[12.5px] text-foreground placeholder:text-[#8E8E93] focus:outline-none focus:border-[#007AFF]"
+          />
+        </div>
+      </div>
+
+      {/* Matching Cards Grid */}
+      <div className="grid gap-3.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredItems.length === 0 ? (
+          <div className="col-span-full py-10 text-center text-[13px] text-[#8E8E93]">
+            Mos keluvchi OTM yo&apos;nalishlari topilmadi.
+          </div>
+        ) : (
+          filteredItems.map((item) => {
+            const isGrant = currentScore >= item.grantBall;
+            const isKontrakt = currentScore >= item.kontraktBall && !isGrant;
+            const diffGrant = currentScore - item.grantBall;
+
+            return (
+              <div
+                key={item.id}
+                className="flex flex-col justify-between rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/65 dark:bg-[#2C2C2E]/60 p-4 transition-all hover:border-[#007AFF]/40"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93] truncate">
+                      {item.faculty}
+                    </span>
+                    <span
+                      className={cn(
+                        'shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase',
+                        isGrant
+                          ? 'bg-[#34C759]/15 text-[#34C759]'
                           : isKontrakt
-                          ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30'
-                          : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
-                      }`}>
-                        {isGrant ? "Grant" : isKontrakt ? "Kontrakt" : "Harakat qiling"}
-                      </span>
-                    </div>
-
-                    <h4 className="mt-1.5 text-sm font-bold text-foreground leading-snug line-clamp-2">
-                      {item.major}
-                    </h4>
-                    <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1 min-w-0">
-                      <Building2 className="size-3 shrink-0" />
-                      <span className="truncate flex-1 min-w-0">{item.uni} ({item.city})</span>
-                    </p>
+                          ? 'bg-[#007AFF]/15 text-[#007AFF]'
+                          : 'bg-[#FF9500]/15 text-[#FF9500]'
+                      )}
+                    >
+                      {isGrant ? 'Grant' : isKontrakt ? 'Kontrakt' : 'Yaqin'}
+                    </span>
                   </div>
 
-                  <div className="mt-3.5 pt-2.5 border-t border-[var(--border-card)]/60 grid grid-cols-3 gap-1 text-xs font-mono">
-                    <div className="min-w-0">
-                      <span className="text-muted-foreground block text-[10px]">Grant</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400 block truncate">{item.grantBall}</span>
-                    </div>
-                    <div className="min-w-0 text-center sm:text-left">
-                      <span className="text-muted-foreground block text-[10px]">Kontrakt</span>
-                      <span className="font-bold text-sky-600 dark:text-sky-400 block truncate">{item.kontraktBall}</span>
-                    </div>
-                    <div className="text-right min-w-0">
-                      <span className="text-muted-foreground block text-[10px]">Farq</span>
-                      <span className={`font-bold block truncate ${diffGrant >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--danger-text)]'}`}>
-                        {diffGrant >= 0 ? `+${diffGrant.toFixed(1)}` : diffGrant.toFixed(1)}
-                      </span>
-                    </div>
+                  <h4 className="mt-1.5 text-[14px] font-bold text-foreground leading-snug line-clamp-2">
+                    {item.major}
+                  </h4>
+                  <p className="mt-1 text-[12px] text-[#8E8E93] flex items-center gap-1.5">
+                    <Building2 className="size-3.5 shrink-0 text-[#007AFF]" />
+                    <span className="truncate">{item.uni} ({item.city})</span>
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/[0.08] grid grid-cols-3 gap-2 text-[12px] font-mono">
+                  <div>
+                    <span className="text-[#8E8E93] block text-[10px] font-sans">Grant</span>
+                    <span className="font-bold text-[#34C759]">{item.grantBall}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#8E8E93] block text-[10px] font-sans">Kontrakt</span>
+                    <span className="font-bold text-[#007AFF]">{item.kontraktBall}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[#8E8E93] block text-[10px] font-sans">Farq</span>
+                    <span className={cn('font-bold', diffGrant >= 0 ? 'text-[#34C759]' : 'text-[#FF3B30]')}>
+                      {diffGrant >= 0 ? `+${diffGrant.toFixed(1)}` : diffGrant.toFixed(1)}
+                    </span>
                   </div>
                 </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Footer Note */}
-        <div className="pt-1 text-center text-[11px] text-muted-foreground">
-          O&apos;tgan yilgi rasmiy qabul natijalari asosida hisoblangan. Yangi imtihonda yuqoriroq natija olish uchun zaif mavzular ustida ishlang.
-        </div>
-      </CardContent>
-    </Card>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
   );
 }

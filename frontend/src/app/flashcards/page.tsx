@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Layers, ArrowLeft, ArrowRight, RotateCw, Check, X, Sparkles, Trophy,
-  Flame, BookOpen, Crown, Zap, RefreshCcw, Volume2, HelpCircle, CheckCircle2,
-  ChevronRight, Brain, Swords, Dna
+  Flame, BookOpen, Zap, RefreshCcw, HelpCircle,
+  ChevronRight, Brain, Swords
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,14 +15,10 @@ import { soundFX } from '@/lib/soundFX';
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
-import PremiumIcon from '@/components/ui/premium-icon';
 import { useFeatureFlags } from '@/lib/features';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 type FlashcardItem = {
@@ -47,6 +43,14 @@ type Deck = {
 
 type DeckDetail = Deck & {
   cards: FlashcardItem[];
+};
+
+const SUBJECT_ACCENT: Record<string, { bg: string; text: string; badge: string }> = {
+  'tarix': { bg: 'bg-[#FF9500]', text: 'text-[#FF9500]', badge: 'bg-[#FF9500]/12 text-[#FF9500] border-[#FF9500]/20' },
+  'ona-tili': { bg: 'bg-[#34C759]', text: 'text-[#34C759]', badge: 'bg-[#34C759]/12 text-[#34C759] border-[#34C759]/20' },
+  'matematika': { bg: 'bg-[#007AFF]', text: 'text-[#007AFF]', badge: 'bg-[#007AFF]/12 text-[#007AFF] border-[#007AFF]/20' },
+  'biologiya': { bg: 'bg-[#30B0C7]', text: 'text-[#30B0C7]', badge: 'bg-[#30B0C7]/12 text-[#30B0C7] border-[#30B0C7]/20' },
+  'ingliz-tili': { bg: 'bg-[#5856D6]', text: 'text-[#5856D6]', badge: 'bg-[#5856D6]/12 text-[#5856D6] border-[#5856D6]/20' },
 };
 
 export default function FlashcardsPage() {
@@ -94,7 +98,7 @@ export default function FlashcardsPage() {
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeDeck, isCompleted, isFlipped, currentIndex]);
+  }, [activeDeck, isCompleted, isFlipped, currentIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function startDeck(deckId: number) {
     setLoadingDeck(true);
@@ -138,7 +142,6 @@ export default function FlashcardsPage() {
       setShowHint(false);
       setCurrentIndex((prev) => prev + 1);
     } else {
-      // Completed all cards in the deck!
       setIsCompleted(true);
       celebrate();
       soundFX.correct();
@@ -157,7 +160,6 @@ export default function FlashcardsPage() {
         setEarnedReward({ xp: res.xp_earned, coins: res.coins_earned });
         toast.success(res.message);
       } catch {
-        // Fallback local display
         setEarnedReward({ xp: 25, coins: 10 });
       }
     }
@@ -189,139 +191,166 @@ export default function FlashcardsPage() {
   }
 
   const currentCard = activeDeck?.cards[currentIndex];
+  const progressPct = activeDeck
+    ? Math.round(((currentIndex + (isCompleted ? 1 : 0)) / Math.max(1, activeDeck.cards.length)) * 100)
+    : 0;
 
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+      <main className="page-shell flex-1 space-y-6 bg-[#F2F2F7] dark:bg-[#000000] p-4 pb-20 sm:p-6">
         
         {/* ============================================================ */}
-        {/* REJIM 1: FOCUS STUDY SESSION (DARS / YODLASH JARAYONI)       */}
+        {/* REJIM 1: FOCUS STUDY SESSION (iOS 18 WALLET / FLIP CARD)     */}
         {/* ============================================================ */}
         {activeDeck ? (
-          <div className="max-w-2xl mx-auto space-y-5">
+          <div className="max-w-2xl mx-auto space-y-6">
             
-            {/* Navigatsiya boshqaruvi */}
+            {/* iOS Navigation Bar */}
             <div className="flex items-center justify-between">
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => setActiveDeck(null)}
-                className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] px-3.5 py-2 text-[13px] font-semibold text-[#007AFF] shadow-xs transition-all active:scale-95"
               >
                 <ArrowLeft className="size-4" /> Barcha to&apos;plamlar
-              </Button>
-              <Badge variant="outline" className="text-xs font-semibold px-2.5 py-0.5">
+              </button>
+              <Badge variant="outline" className="bg-[#5856D6]/12 text-[#5856D6] border-[#5856D6]/20 text-[12px] font-bold px-3 py-1">
                 {activeDeck.subject}
               </Badge>
             </div>
 
-            {/* Sarlavha & Progress */}
-            <div className="space-y-2 text-center">
-              <h2 className="text-lg sm:text-xl font-bold text-foreground">{activeDeck.title}</h2>
-              <div className="flex items-center justify-between text-xs text-muted-foreground max-w-md mx-auto">
-                <span>Karta: <strong>{currentIndex + 1}</strong> / {activeDeck.cards.length}</span>
-                <span>Bilganlaringiz: <strong className="text-emerald-500">{masteredIds.length}</strong></span>
+            {/* Deck Header & iOS Progress Bar */}
+            <div className="rounded-[24px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-[18px] sm:text-[20px] font-bold tracking-[-0.02em] text-slate-900 dark:text-white truncate">
+                  {activeDeck.title}
+                </h2>
+                <span className="shrink-0 rounded-full bg-[#767680]/[0.12] px-3 py-1 font-mono text-[12px] font-bold text-slate-700 dark:text-slate-200">
+                  {currentIndex + 1} / {activeDeck.cards.length}
+                </span>
               </div>
-              <Progress
-                value={((currentIndex + (isCompleted ? 1 : 0)) / activeDeck.cards.length) * 100}
-                className="h-2 max-w-md mx-auto"
-              />
+
+              <div className="flex items-center justify-between text-[12px] font-medium text-[#8E8E93]">
+                <span>Yodlash jarayoni ({progressPct}%)</span>
+                <span>
+                  Bilganlaringiz: <strong className="font-mono font-bold text-[#34C759]">{masteredIds.length} ta</strong>
+                </span>
+              </div>
+
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[#767680]/[0.12]">
+                <div
+                  className="h-full rounded-full bg-[#007AFF] transition-all duration-300"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
             </div>
 
             {/* ============================================================ */}
-            {/* NATIJA VA YAKUNLASH EKRANI                                  */}
+            {/* NATIJA VA YAKUNLASH EKRANI (iOS Achievement Sheet)           */}
             {/* ============================================================ */}
             {isCompleted ? (
-              <Card className="border border-border bg-card shadow-card p-6 sm:p-8 text-center space-y-6">
-                <div className="size-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mx-auto">
-                  <Trophy className="size-6 text-amber-500" />
+              <div className="rounded-[32px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-6 sm:p-10 text-center space-y-6 shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
+                <div className="mx-auto flex size-16 items-center justify-center rounded-[20px] bg-gradient-to-b from-[#FF9500] to-[#FF7A00] text-white shadow-[0_8px_24px_rgba(255,149,0,0.3)]">
+                  <Trophy className="size-8" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                  <h3 className="text-[22px] sm:text-[26px] font-extrabold tracking-[-0.025em] text-slate-900 dark:text-white">
                     Ajoyib Natija! To&apos;plam Yakunlandi!
                   </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
+                  <p className="text-[14px] text-[#8E8E93] max-w-md mx-auto">
                     Siz ushbu mavzu bo&apos;yicha barcha muhim savol va sanalarni to&apos;liq takrorladingiz.
                   </p>
                 </div>
 
                 {earnedReward && (
                   <div className="flex items-center justify-center gap-3">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs font-mono">
-                      <Zap className="size-3.5 fill-amber-500" /> +{earnedReward.xp} XP
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/12 border border-[#FF9500]/25 px-4 py-1.5 font-mono text-[13px] font-bold text-[#FF9500]">
+                      <Zap className="size-4 fill-[#FF9500]" /> +{earnedReward.xp} XP
                     </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary font-bold text-xs font-mono">
-                      <Sparkles className="size-3.5" /> +{earnedReward.coins} Tanga
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-[#007AFF]/12 border border-[#007AFF]/25 px-4 py-1.5 font-mono text-[13px] font-bold text-[#007AFF]">
+                      <Sparkles className="size-4" /> +{earnedReward.coins} Tanga
                     </div>
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto text-xs">
-                  <div className="p-3 bg-muted/40 rounded-xl border border-border">
-                    <span className="text-muted-foreground">Xotirada mustahkamlandi</span>
-                    <p className="text-lg font-bold text-emerald-500 mt-0.5">{masteredIds.length} ta</p>
+                <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                  <div className="rounded-[20px] bg-[#34C759]/[0.08] border border-[#34C759]/20 p-4">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#34C759]">Mustahkamlandi</span>
+                    <p className="mt-1 font-mono text-[22px] font-extrabold text-[#34C759]">{masteredIds.length} ta</p>
                   </div>
-                  <div className="p-3 bg-muted/40 rounded-xl border border-border">
-                    <span className="text-muted-foreground">Qayta takrorlanadi</span>
-                    <p className="text-lg font-bold text-destructive mt-0.5">{reviewIds.length} ta</p>
+                  <div className="rounded-[20px] bg-[#FF3B30]/[0.08] border border-[#FF3B30]/20 p-4">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#FF3B30]">Takrorlanadi</span>
+                    <p className="mt-1 font-mono text-[22px] font-extrabold text-[#FF3B30]">{reviewIds.length} ta</p>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <Button
                     onClick={restartDeck}
-                    variant="outline"
-                    className="w-full sm:w-auto rounded-lg gap-2 font-medium"
+                    variant="secondary"
+                    size="lg"
+                    className="w-full sm:w-auto rounded-full gap-2"
                   >
-                    <RefreshCcw className="size-3.5" /> Qaytadan boshlash
+                    <RefreshCcw className="size-4" /> Qaytadan boshlash
                   </Button>
                   <Button
                     onClick={() => setActiveDeck(null)}
-                    className="w-full sm:w-auto rounded-lg gap-2 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs"
+                    size="lg"
+                    className="w-full sm:w-auto rounded-full gap-2"
                   >
-                    Keyingi to&apos;plamga o&apos;tish <ArrowRight className="size-3.5" />
+                    Keyingi to&apos;plamga o&apos;tish <ArrowRight className="size-4" />
                   </Button>
                 </div>
-              </Card>
+              </div>
             ) : (
               /* ============================================================ */
-              /* 3D INTERAKTIV FLIP CARD                                      */
+              /* 3D INTERAKTIV iOS WALLET FLIP CARD                           */
               /* ============================================================ */
-              <div className="space-y-6">
-                {/* 3D Flip Flashcard */}
+              <div className="space-y-5">
                 <div
-                  onClick={() => setIsFlipped(!isFlipped)}
-                  className="relative min-h-[18rem] sm:min-h-[22rem] w-full cursor-pointer select-none rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-border bg-card hover:border-primary/50 transition-colors shadow-card group active:scale-[0.99]"
+                  onClick={handleFlip}
+                  className={cn(
+                    "relative min-h-[20rem] sm:min-h-[23rem] w-full cursor-pointer select-none rounded-[32px] p-6 sm:p-9 flex flex-col justify-between border transition-all duration-300 group active:scale-[0.985]",
+                    isFlipped
+                      ? "bg-gradient-to-br from-[#007AFF]/[0.08] via-white to-[#5856D6]/[0.06] dark:from-[#007AFF]/[0.16] dark:via-[#1C1C1E] dark:to-[#5856D6]/[0.12] border-[#007AFF]/40 shadow-[0_14px_40px_rgba(0,122,255,0.12)]"
+                      : "bg-white dark:bg-[#1C1C1E] border-black/[0.06] dark:border-white/[0.08] hover:border-[#007AFF]/35 shadow-[0_12px_36px_rgba(0,0,0,0.05)]"
+                  )}
                 >
-                  <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                    <span className="flex items-center gap-1.5 uppercase font-mono tracking-wider text-[11px] text-primary">
+                  <div className="flex items-center justify-between">
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider",
+                      isFlipped
+                        ? "bg-[#34C759]/12 text-[#34C759]"
+                        : "bg-[#007AFF]/12 text-[#007AFF]"
+                    )}>
                       <Sparkles className="size-3.5" />
                       {isFlipped ? 'Javob / Izoh' : 'Savol / Fakt'}
                     </span>
-                    <span className="flex items-center gap-1 text-[11px] bg-muted px-2.5 py-1 rounded-md text-muted-foreground">
-                      <RotateCw className="size-3 group-hover:rotate-180 transition-transform duration-500" />
-                      Aylantirish uchun bosing
+
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#767680]/[0.08] px-3 py-1 text-[12px] font-semibold text-[#8E8E93]">
+                      <RotateCw className="size-3.5 group-hover:rotate-180 transition-transform duration-500 text-[#007AFF]" />
+                      Aylantirish (Space)
                     </span>
                   </div>
 
-                  <div className="my-auto py-4 text-center space-y-3">
+                  <div className="my-auto py-6 text-center space-y-4">
                     <p className={cn(
-                      "text-xl sm:text-2xl font-bold leading-snug tracking-tight text-foreground transition-colors",
-                      isFlipped && "text-primary"
+                      "text-[20px] sm:text-[26px] font-extrabold leading-snug tracking-[-0.02em] transition-colors",
+                      isFlipped ? "text-[#007AFF] dark:text-[#5AC8FA]" : "text-slate-900 dark:text-white"
                     )}>
                       {isFlipped ? currentCard?.back : currentCard?.front}
                     </p>
 
                     {showHint && currentCard?.hint && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 italic bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg max-w-md mx-auto">
+                      <div className="rounded-[16px] bg-[#FF9500]/10 border border-[#FF9500]/25 px-4 py-2.5 text-[13px] font-medium text-[#FF9500] max-w-md mx-auto">
                         💡 Maslahat: {currentCard.hint}
-                      </p>
+                      </div>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-border text-xs">
+                  <div className="flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.07] text-[12px]">
                     {currentCard?.hint && !showHint ? (
                       <button
                         type="button"
@@ -329,33 +358,36 @@ export default function FlashcardsPage() {
                           e.stopPropagation();
                           setShowHint(true);
                         }}
-                        className="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-medium"
+                        className="inline-flex items-center gap-1.5 font-semibold text-[#FF9500] hover:underline"
                       >
-                        <HelpCircle className="size-3.5" /> Maslahatni ko&apos;rish
+                        <HelpCircle className="size-4" /> Maslahatni ko&apos;rish
                       </button>
                     ) : <div />}
 
-                    <span className="text-muted-foreground text-[11px] font-mono">
-                      {isFlipped ? 'To\'g\'ri bildingizmi?' : 'O\'ylab ko\'ring'}
+                    <span className="font-mono text-[11px] font-semibold text-[#8E8E93]">
+                      {isFlipped ? "To'g'ri bildingizmi?" : "Javobni ko'rish uchun kartani bosing"}
                     </span>
                   </div>
                 </div>
 
-                {/* Javob berish tugmalari */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <Button
-                    variant="outline"
+                {/* iOS Action Pill Buttons */}
+                <div className="grid grid-cols-2 gap-3.5">
+                  <button
+                    type="button"
                     onClick={() => handleAnswer(false)}
-                    className="h-11 border-border hover:bg-destructive/10 text-destructive font-semibold gap-2 text-xs sm:text-sm rounded-lg"
+                    className="flex h-13 items-center justify-center gap-2 rounded-[18px] bg-[#FF3B30]/12 hover:bg-[#FF3B30]/18 border border-[#FF3B30]/25 text-[#FF3B30] font-bold text-[14px] transition-all active:scale-[0.97]"
                   >
-                    <X className="size-4" /> Qaytarish kerak (Qiyin)
-                  </Button>
-                  <Button
+                    <X className="size-4.5 stroke-[2.5]" />
+                    <span>Qaytarish kerak</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleAnswer(true)}
-                    className="h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 text-xs sm:text-sm rounded-lg shadow-xs"
+                    className="flex h-13 items-center justify-center gap-2 rounded-[18px] bg-[#34C759] hover:bg-[#2DB84E] text-white font-bold text-[14px] shadow-[0_6px_20px_rgba(52,199,89,0.28)] transition-all active:scale-[0.97]"
                   >
-                    <Check className="size-4" /> Yaxshi bilaman (Oson)
-                  </Button>
+                    <Check className="size-4.5 stroke-[2.5]" />
+                    <span>Yaxshi bilaman</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -363,132 +395,141 @@ export default function FlashcardsPage() {
           </div>
         ) : (
           /* ============================================================ */
-          /* REJIM 2: BARCHA TO'PLAMLAR RO'YXATI (DECK SELECTION)         */
+          /* REJIM 2: BARCHA TO'PLAMLAR RO'YXATI (APPLE WALLET DECKS)      */
           /* ============================================================ */
-          <>
-            {/* HERO BLOKI */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs font-semibold gap-1.5 rounded-md">
-                    <Brain className="size-3.5" />
-                    <span>Smart Flashcards</span>
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs font-normal">Anki & Quizlet uslubi</Badge>
+          <div className="max-w-7xl mx-auto space-y-6">
+            <PageHero
+              tone="indigo"
+              eyebrow="Smart Flashcards · Spaced Repetition"
+              eyebrowIcon={Brain}
+              title="Xotira Kartalari bilan Dars Qilish"
+              description="Test yechishdan oldin sanalar, atamalar, imlo qoidalari va faktlarni 3 daqiqalik interaktiv 3D kartalar yordamida mustahkamlab oling."
+              actions={
+                <div className="flex items-center gap-2.5">
+                  <Button asChild variant="secondary" size="sm" className="rounded-full px-4">
+                    <Link href="/battles">
+                      <Swords className="size-3.5 text-[#FF9500]" /> 1v1 Arena
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="rounded-full px-4">
+                    <Link href="/tests">
+                      <BookOpen className="size-3.5" /> Testlarga o&apos;tish
+                    </Link>
+                  </Button>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-1.5">
-                  Xotira Kartalari bilan Dars Qilish
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl">
-                  Test yechishdan oldin sanalar, atamalar, imlo qoidalari va faktlarni 3 daqiqalik interaktiv kartalar yordamida mustahkamlab oling.
-                </p>
-              </div>
+              }
+            />
 
-              <div className="flex items-center gap-2 shrink-0">
-                <Link href="/battles">
-                  <Button variant="outline" size="sm" className="gap-1.5 text-xs font-medium rounded-lg">
-                    <Swords className="size-3.5 text-primary" /> 1v1 Arena
-                  </Button>
-                </Link>
-                <Link href="/tests">
-                  <Button size="sm" className="gap-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-xs">
-                    <BookOpen className="size-3.5" /> Testlarga o&apos;tish
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* FANLAR BO'YICHA FILTR TABLARI */}
-            <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1">
-              <Tabs value={selectedSubject} onValueChange={setSelectedSubject}>
-                <TabsList className="bg-muted/50 p-1 border border-border rounded-lg">
-                  {subjects.map((s) => (
-                    <TabsTrigger key={s.slug} value={s.slug} className="text-xs font-medium rounded-md">
+            {/* iOS Segmented Subject Filter */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <div className="inline-flex items-center gap-1 rounded-[14px] bg-[#767680]/[0.12] dark:bg-[#767680]/[0.24] p-1">
+                {subjects.map((s) => {
+                  const active = selectedSubject === s.slug;
+                  return (
+                    <button
+                      key={s.slug}
+                      type="button"
+                      onClick={() => setSelectedSubject(s.slug)}
+                      className={cn(
+                        "rounded-[10px] px-4 py-1.5 text-[13px] font-semibold transition-all whitespace-nowrap",
+                        active
+                          ? "bg-white dark:bg-[#2C2C2E] text-slate-900 dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                          : "text-[#8E8E93] hover:text-slate-900 dark:hover:text-white"
+                      )}
+                    >
                       {s.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* TO'PLAMLAR RO'YXATI (DECKS GRID) */}
             {loading ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-44 rounded-xl w-full" />
+                  <Skeleton key={i} className="h-48 rounded-[24px] w-full" />
                 ))}
               </div>
             ) : filteredDecks.length === 0 ? (
-              <Card className="p-8 text-center border-dashed border-border rounded-xl">
-                <Brain className="size-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm font-semibold text-foreground">Bu fanda hozircha to&apos;plamlar yo&apos;q</p>
-                <p className="text-xs text-muted-foreground mt-1">Boshqa fanni tanlab ko&apos;ring.</p>
-              </Card>
+              <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-12 text-center space-y-2">
+                <div className="mx-auto flex size-12 items-center justify-center rounded-[14px] bg-[#5856D6]/12 text-[#5856D6]">
+                  <Brain className="size-6" />
+                </div>
+                <p className="text-[16px] font-bold text-slate-900 dark:text-white">Bu fanda hozircha to&apos;plamlar yo&apos;q</p>
+                <p className="text-[13px] text-[#8E8E93]">Yuqoridan boshqa fanni tanlab ko&apos;ring.</p>
+              </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredDecks.map((deck) => {
+                  const accent = SUBJECT_ACCENT[deck.subject_slug] || SUBJECT_ACCENT['matematika'];
                   return (
-                    <Card
+                    <div
                       key={deck.id}
                       onClick={() => startDeck(deck.id)}
-                      className="cursor-pointer border border-border hover:border-primary/50 transition-colors bg-card rounded-xl p-5 flex flex-col justify-between shadow-card group"
+                      className="group cursor-pointer rounded-[26px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] hover:border-[#007AFF]/40 p-5 sm:p-6 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,122,255,0.08)] transition-all duration-200 active:scale-[0.985]"
                     >
-                      <div className="space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <Badge variant="outline" className="text-[11px] font-medium border-border">
-                            <span>{deck.subject}</span>
-                          </Badge>
-                          <span className="text-[11px] text-amber-500 font-semibold flex items-center gap-1 font-mono">
-                            <Zap className="size-3 fill-amber-500" /> +{deck.xp_reward} XP
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className={cn("flex size-9 items-center justify-center rounded-[11px] text-white shadow-xs", accent.bg)}>
+                              <Layers className="size-4.5" />
+                            </div>
+                            <span className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-bold", accent.badge)}>
+                              {deck.subject}
+                            </span>
+                          </div>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#FF9500]/12 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#FF9500]">
+                            <Zap className="size-3 fill-[#FF9500]" /> +{deck.xp_reward} XP
                           </span>
                         </div>
 
-                        <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
+                        <h3 className="text-[17px] font-bold tracking-[-0.015em] text-slate-900 dark:text-white group-hover:text-[#007AFF] transition-colors leading-snug">
                           {deck.title}
                         </h3>
 
-                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                        <p className="text-[13px] text-[#8E8E93] line-clamp-2 leading-relaxed">
                           {deck.description}
                         </p>
                       </div>
 
-                      <div className="pt-4 mt-2 border-t border-border flex items-center justify-between text-xs">
-                        <span className="font-mono font-medium text-muted-foreground">
-                          {deck.total_cards} ta karta
+                      <div className="pt-4 mt-4 border-t border-black/[0.05] dark:border-white/[0.07] flex items-center justify-between">
+                        <span className="font-mono text-[12px] font-semibold text-[#8E8E93]">
+                          {deck.total_cards} ta xotira kartasi
                         </span>
-                        <Button
-                          size="sm"
-                          disabled={loadingDeck}
-                          className="h-8 text-xs font-semibold gap-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg shadow-xs"
-                        >
-                          Yodlash <ChevronRight className="size-3" />
-                        </Button>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#007AFF]/12 group-hover:bg-[#007AFF] px-3.5 py-1.5 text-[12px] font-bold text-[#007AFF] group-hover:text-white transition-all">
+                          BOSHLASH <ChevronRight className="size-3.5" />
+                        </span>
                       </div>
-                    </Card>
+                    </div>
                   );
                 })}
               </div>
             )}
 
-            {/* MOTIVATSION BANNER */}
-            <div className="p-4 sm:p-5 rounded-xl bg-card border border-border shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="space-y-1 max-w-xl">
-                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Flame className="size-4 text-amber-500 fill-amber-500" />
-                  <span>Ilmiy Qoidalar: Har kuni 5 daqiqa flashcard!</span>
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Tadqiqotlarga ko&apos;ra, interval takrorlash (Spaced Repetition) orqali sanalar va atamalar xotirada 3 barobar uzoqroq saqlanib qoladi.
-                </p>
+            {/* iOS Smart Banner */}
+            <div className="rounded-[24px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5 max-w-xl">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[#FF9500] text-white shadow-xs">
+                  <Flame className="size-5 fill-white" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-[15px] font-bold text-slate-900 dark:text-white">
+                    Ilmiy qoida: Har kuni 5 daqiqa Flashcard!
+                  </p>
+                  <p className="text-[13px] text-[#8E8E93] leading-relaxed">
+                    Interval takrorlash (Spaced Repetition) orqali sanalar, formulalar va qoidalar xotirada 3 barobar uzoqroq saqlanadi.
+                  </p>
+                </div>
               </div>
-              <Link href="/battles">
-                <Button size="sm" className="gap-1.5 text-xs font-semibold shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-xs">
-                  <Swords className="size-3.5" /> 1v1 Arenada Do&apos;st bilan Bellashuv
-                </Button>
-              </Link>
+              <Button asChild size="sm" className="rounded-full px-4 shrink-0">
+                <Link href="/battles">
+                  <Swords className="size-3.5" /> 1v1 Arenada Bellashuv
+                </Link>
+              </Button>
             </div>
 
-          </>
+          </div>
         )}
       </main>
     </>
