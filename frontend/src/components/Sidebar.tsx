@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Moon,
   Sun,
+  Zap,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useTheme } from '@/hooks/useTheme';
@@ -68,6 +69,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
+      { href: '/sprint', label: 'Jonli Sprint', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', matchPrefixes: ['/sprint'] },
       { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'BMB', tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
       { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'], teacherOrAdminOnly: true },
       { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'indigo', matchPrefixes: ['/library'], api: '/api/learning/library/' },

@@ -41,6 +41,7 @@ import {
   BattleArenaCard,
   LiveActivityTicker,
 } from '@/components/dashboard/ModernHeroDashboard';
+import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
 import ModernTestCenter from '@/components/dashboard/ModernTestCenter';
 import PomodoroTimerCard from '@/components/dashboard/PomodoroTimerCard';
 import PremiumIcon from '@/components/ui/premium-icon';
@@ -168,7 +169,7 @@ export default function DashboardPage() {
   const { isDark } = useTheme();
 
   const [activeMode, setActiveMode] = useState<'study' | 'arena'>('study');
-  const { data, error } = useApiQuery<DashboardData>('/api/dashboard/home/');
+  const { data, error, refresh: refreshDashboard } = useApiQuery<DashboardData>('/api/dashboard/home/');
   const { data: lbData } = useApiQuery<LeaderboardData>(activeMode === 'arena' ? '/api/leaderboard/' : null);
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -542,38 +543,21 @@ export default function DashboardPage() {
                 }
 
                 return (
-                  <HeroFocusBanner
-                    user={{
-                      first_name: firstName,
-                      username: p.username,
-                      streak: p.streak,
-                      coins: p.coins,
-                      elo_rating: p.elo_rating,
+                  <AiMarathonBanner
+                    userName={firstName}
+                    userLevel={p.level}
+                    userStreak={p.streak}
+                    dtmScore={178.4}
+                    maxDtmScore={189.0}
+                    predictedGrade={`${predictedGrade} (${scaledScore} ball)`}
+                    unresolvedMistakesCount={mistakesCount}
+                    step1Done={step1Done}
+                    step2Done={step2Done}
+                    step3Done={step3Done}
+                    chestStatus={chestStatus}
+                    onClaimSuccess={() => {
+                      if (refreshDashboard) refreshDashboard();
                     }}
-                    recommendedSprint={{
-                      title: continueTitle,
-                      topic: '15-daqiqalik Fokus Sprinti',
-                      durationMinutes: 15,
-                      progressPct: lastAttempt?.score || 65,
-                      subjectName: activeSubject,
-                      actionUrl: '/tests',
-                    }}
-                    predictedScore={{
-                      scaledScore,
-                      grade: predictedGrade,
-                      nextGrade,
-                      gapToNext,
-                    }}
-                    marathon={{
-                      step1Done,
-                      step2Done,
-                      step3Done,
-                      mistakesCount,
-                      onStartMistakes: handleStartMistakesTest,
-                      onOpenChest: () => setChestModalOpen(true),
-                    }}
-                    comboMultiplier={completedSteps >= 2 ? 2.0 : (completedSteps >= 1 ? 1.5 : 1.0)}
-                    theme={isDark ? 'dark' : 'light'}
                   />
                 );
               })()}
