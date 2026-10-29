@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Gift, Copy, Check, Award, Crown, Swords, FileCheck2,
   Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout,
-  Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, type LucideIcon,
+  Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, Sparkles, type LucideIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUpload, apiFetch, fetchMe } from '@/lib/api-client';
@@ -93,6 +93,7 @@ export default function ProfilePage() {
 
   const { data: invData, refresh: refreshInventory } = useApiQuery<InventoryResponse>('/api/shop/inventory/');
   const [equipBusy, setEquipBusy] = useState<string | null>(null);
+  const [inventoryTab, setInventoryTab] = useState<string>('all');
 
   useEffect(() => {
     if (data?.profile) {
@@ -632,127 +633,296 @@ export default function ProfilePage() {
         </div>
 
         {/* Inventar & Do'kondan sotib olingan bezaklar */}
-        <Card className="overflow-hidden border border-border">
-          <CardHeader className="pb-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <PremiumIcon icon={ShoppingBag} tone="amber" size="xs" solid />
-                <span>Mening buyumlarim & Inventar</span>
-              </CardTitle>
-              <Button asChild variant="outline" size="sm" className="rounded-full gap-1.5 text-xs">
-                <Link href="/shop">
-                  <Coins className="size-3.5 text-yellow-500" />
-                  <span>Do&apos;konga o&apos;tish</span>
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {(!invData?.items || invData.items.length === 0) ? (
-              <div className="rounded-[20px] border border-dashed border-border bg-muted/40 p-6 text-center space-y-2.5">
-                <p className="text-sm font-semibold text-foreground">Sizda hali do&apos;kondan olingan buyumlar yo&apos;q</p>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  Do&apos;kondan tangalaringiz evaziga oltin ramka, maxsus zumrad mavzu, bilimdon unvoni yoki avatarlar xarid qilishingiz mumkin.
-                </p>
-                <Button asChild size="sm" className="rounded-full mt-2">
-                  <Link href="/shop">Do&apos;kondan tanlash</Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {invData.items.map((item) => {
-                  const isBusy = equipBusy === item.slug;
-                  const ring = item.payload?.ring;
-                  const accent = item.payload?.accent;
+        {(() => {
+          const allItems = invData?.items || [];
+          const availableCategories = Array.from(new Set(allItems.map((i) => i.category)));
 
-                  return (
-                    <div
-                      key={item.id}
+          const categoryLabels: Record<string, string> = {
+            frame: 'Ramkalar',
+            theme: 'Mavzular',
+            title: 'Unvonlar',
+            consumable: 'Himoyalar',
+            avatar: 'Avatarlar',
+            badge: 'Nishonlar',
+          };
+
+          const getItemSubtitle = (item: InventoryItemData): string => {
+            if (item.slug === 'streak_freeze') return 'Dars qoldirilganda seriyani avtomatik asraydi';
+            if (item.slug === 'premium_test_unlock') return 'Barcha premium mock testlarga to\'liq kirish';
+            if (item.slug === 'frame_gold') return 'Avataringiz atrofida yaltiroq oltin ramka';
+            if (item.slug === 'frame_silver') return 'Avataringiz atrofida nafis kumush ramka';
+            if (item.slug === 'frame_diamond') return 'Avataringiz atrofida porloq olmos ramka';
+            if (item.slug === 'theme_emerald') return 'Ilova urg\'u rangini zumradga o\'zgartiradi';
+            if (item.slug === 'theme_sunset') return 'Iliq to\'q sariq shafaq mavzusi';
+            if (item.slug === 'title_bilimdon') return 'Profil va reytingda ko\'rinuvchi unvon';
+            if (item.slug === 'title_tarix_ustasi') return 'Tarix fani peshqadamlari unvoni';
+            if (item.slug === 'title_afsona') return 'Faqat eng kuchli talabgorlar unvoni';
+            if (item.description && item.description.trim() && item.description !== '.') {
+              return item.description;
+            }
+            if (item.category === 'frame') return 'Profil rasmi bezak ramkasi';
+            if (item.category === 'theme') return 'Ilova dizayni uchun mavzu';
+            if (item.category === 'title') return 'Profil rasmiy unvoni';
+            if (item.category === 'consumable') return 'Foydali kuchaytirgich';
+            return 'Maxsus xarid qilingan buyum';
+          };
+
+          const getCategoryTag = (item: InventoryItemData): string => {
+            if (item.category === 'frame') return 'Ramka';
+            if (item.category === 'theme') return 'Mavzu';
+            if (item.category === 'title') return 'Unvon';
+            if (item.category === 'consumable') return item.slug === 'streak_freeze' ? 'Seriya himoyasi' : 'Kuchaytirgich';
+            if (item.category === 'avatar') return 'Avatar';
+            return item.category_display || 'Buyum';
+          };
+
+          const filteredItems = inventoryTab === 'all'
+            ? allItems
+            : allItems.filter((i) => i.category === inventoryTab);
+
+          return (
+            <Card className="overflow-hidden border border-border shadow-xs">
+              <CardHeader className="pb-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <PremiumIcon icon={ShoppingBag} tone="amber" size="xs" solid />
+                    <div>
+                      <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                        <span>Mening buyumlarim & Inventar</span>
+                        {allItems.length > 0 && (
+                          <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">
+                            {allItems.length}
+                          </span>
+                        )}
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground">
+                        Do&apos;kondan xarid qilgan barcha ramkalar, mavzular va seriya himoyalaringiz
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button asChild variant="outline" size="sm" className="rounded-xl gap-1.5 text-xs font-semibold shadow-2xs hover:bg-muted">
+                      <Link href="/shop">
+                        <Coins className="size-3.5 text-amber-500" />
+                        <span>Do&apos;konga o&apos;tish</span>
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Kategoriya filtri (agar 1 tadan ortiq toifa bo'lsa) */}
+                {availableCategories.length > 1 && (
+                  <div className="flex items-center gap-1.5 pt-3 overflow-x-auto no-scrollbar">
+                    <button
+                      type="button"
+                      onClick={() => setInventoryTab('all')}
                       className={cn(
-                        'relative flex flex-col justify-between rounded-[20px] border p-4 transition-all',
-                        item.equipped
-                          ? 'border-primary/40 bg-primary/5 shadow-xs'
-                          : 'border-border bg-card hover:bg-muted/40'
+                        'rounded-xl px-3 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
+                        inventoryTab === 'all'
+                          ? 'bg-primary text-primary-foreground shadow-2xs'
+                          : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
                       )}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="shrink-0">
-                          {item.category === 'frame' ? (
-                            <div
-                              className="size-11 rounded-full p-[2.5px] flex items-center justify-center shadow-xs"
-                              style={{
-                                background: `linear-gradient(135deg, ${ring || '#f7c948'}, #ffffff 50%, ${ring || '#f7c948'})`,
-                                boxShadow: `0 0 10px ${ring || '#f7c948'}66`,
-                              }}
-                            >
-                              <div className="size-full rounded-full bg-background flex items-center justify-center text-[10px] font-bold text-foreground">
-                                🖼
-                              </div>
-                            </div>
-                          ) : item.category === 'theme' ? (
-                            <div
-                              className="size-11 rounded-full flex items-center justify-center shadow-xs ring-2 ring-white/20"
-                              style={{ backgroundColor: accent || '#10b981' }}
-                            >
-                              <Palette className="size-5 text-white" />
-                            </div>
-                          ) : item.category === 'avatar' && item.payload?.avatar_url ? (
-                            <img
-                              src={item.payload.avatar_url}
-                              alt=""
-                              className="size-11 rounded-full object-cover border border-border"
-                            />
-                          ) : (
-                            <div className="size-11 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                              <Crown className="size-5" />
-                            </div>
+                      Barchasi ({allItems.length})
+                    </button>
+                    {availableCategories.map((cat) => {
+                      const count = allItems.filter((i) => i.category === cat).length;
+                      const label = categoryLabels[cat] || cat;
+                      const active = inventoryTab === cat;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setInventoryTab(cat)}
+                          className={cn(
+                            'rounded-xl px-3 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
+                            active
+                              ? 'bg-primary text-primary-foreground shadow-2xs'
+                              : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
                           )}
-                        </div>
+                        >
+                          {label} ({count})
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardHeader>
 
-                        <div className="min-w-0 flex-1 space-y-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-bold text-sm text-foreground truncate">{item.name}</span>
-                            {item.equipped && (
-                              <Badge className="bg-[#34C759] text-white text-[10px] px-1.5 py-0 rounded-full font-bold">
-                                Taqilgan
-                              </Badge>
+              <CardContent className="pt-1">
+                {allItems.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center space-y-3">
+                    <div className="size-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+                      <ShoppingBag className="size-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-foreground">Sizda hali xarid qilingan buyumlar yo&apos;q</p>
+                      <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                        Do&apos;kondan tangalaringiz evaziga oltin ramka, maxsus zumrad mavzu, bilimdon unvoni yoki seriya himoyasini sotib olishingiz mumkin.
+                      </p>
+                    </div>
+                    <Button asChild size="sm" className="rounded-xl mt-1 font-semibold">
+                      <Link href="/shop">Do&apos;kondan tanlash</Link>
+                    </Button>
+                  </div>
+                ) : filteredItems.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+                    Ushbu toifada buyumlar mavjud emas.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {filteredItems.map((item) => {
+                      const isBusy = equipBusy === item.slug;
+                      const ring = item.payload?.ring;
+                      const accent = item.payload?.accent;
+                      const isEquipped = !!item.equipped;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={cn(
+                            'group relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 shadow-2xs',
+                            isEquipped
+                              ? 'border-emerald-500/40 bg-gradient-to-b from-emerald-500/[0.08] via-emerald-500/[0.02] to-transparent dark:from-emerald-950/30'
+                              : 'border-border/80 bg-card hover:border-border hover:bg-muted/20'
+                          )}
+                        >
+                          {/* Yuqori qator: Icon + Matnlar */}
+                          <div className="flex items-start gap-3">
+                            {/* Icon / Preview */}
+                            <div className="shrink-0 pt-0.5">
+                              {item.category === 'frame' ? (
+                                <div className="relative size-12 flex items-center justify-center">
+                                  <div
+                                    className="size-11 rounded-full p-[2.5px] flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
+                                    style={{
+                                      background: `linear-gradient(135deg, ${ring || '#f59e0b'}, #ffffff 50%, ${ring || '#f59e0b'})`,
+                                      boxShadow: `0 0 12px ${ring || '#f59e0b'}55`,
+                                    }}
+                                  >
+                                    <div className="size-full rounded-full bg-slate-900 dark:bg-slate-950 flex items-center justify-center text-amber-400">
+                                      <Award className="size-5" />
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : item.category === 'theme' ? (
+                                <div
+                                  className="size-11 rounded-2xl flex items-center justify-center text-white shadow-xs transition-transform group-hover:scale-105"
+                                  style={{
+                                    background: `linear-gradient(135deg, ${accent || '#10b981'}, ${accent || '#10b981'}dd)`,
+                                    boxShadow: `0 4px 12px ${accent || '#10b981'}40`,
+                                  }}
+                                >
+                                  <Palette className="size-5" />
+                                </div>
+                              ) : item.category === 'title' ? (
+                                <div className="size-11 rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-purple-500/20 border border-amber-500/30 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-xs transition-transform group-hover:scale-105">
+                                  <Crown className="size-5" />
+                                </div>
+                              ) : item.category === 'consumable' ? (
+                                <div className="size-11 rounded-2xl bg-gradient-to-br from-sky-500/20 via-sky-500/10 to-blue-500/20 border border-sky-500/30 flex items-center justify-center text-sky-500 dark:text-sky-400 shadow-xs transition-transform group-hover:scale-105">
+                                  <Shield className="size-5" />
+                                </div>
+                              ) : item.category === 'avatar' && item.payload?.avatar_url ? (
+                                <img
+                                  src={item.payload.avatar_url}
+                                  alt=""
+                                  className="size-11 rounded-2xl object-cover border border-border shadow-xs transition-transform group-hover:scale-105"
+                                />
+                              ) : (
+                                <div className="size-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
+                                  <Sparkles className="size-5" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Matn qismi */}
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-sm text-foreground truncate">
+                                  {item.name}
+                                </span>
+                                {isEquipped && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.2 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                    <Check className="size-2.5 stroke-[2.5]" />
+                                    Taqilgan
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                <span className="font-semibold text-foreground/70">
+                                  {getCategoryTag(item)}
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                                {getItemSubtitle(item)}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Pastki qator: Holat & Tugma */}
+                          <div className="mt-3.5 pt-3 border-t border-border/50 flex items-center justify-between gap-2 text-xs">
+                            {item.is_equippable ? (
+                              <>
+                                <div className="flex items-center gap-1.5 text-xs">
+                                  {isEquipped ? (
+                                    <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
+                                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                      Faol profilga ulangan
+                                    </span>
+                                  ) : (
+                                    <span className="text-[11px] text-muted-foreground">
+                                      Inventarda mavjud
+                                    </span>
+                                  )}
+                                </div>
+
+                                <Button
+                                  size="sm"
+                                  variant={isEquipped ? 'outline' : 'default'}
+                                  disabled={isBusy}
+                                  onClick={() => handleToggleEquip(item.slug, isEquipped, item.name)}
+                                  className={cn(
+                                    'h-8 px-3.5 rounded-xl text-xs font-semibold cursor-pointer transition-all',
+                                    isEquipped
+                                      ? 'text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/10'
+                                      : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs active:scale-95'
+                                  )}
+                                >
+                                  {isBusy ? (
+                                    <Loader2 className="size-3.5 animate-spin" />
+                                  ) : isEquipped ? (
+                                    'Yechish'
+                                  ) : (
+                                    'Taqish'
+                                  )}
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-600 dark:text-sky-400">
+                                  <Shield className="size-3.5" />
+                                  Avtomatik amal qiladi
+                                </span>
+
+                                <span className="px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-bold font-mono">
+                                  {item.quantity ? `${item.quantity} ta zaxirada` : '1 ta faol'}
+                                </span>
+                              </>
                             )}
                           </div>
-                          <p className="text-[11px] text-muted-foreground line-clamp-1">
-                            {item.category_display} • {item.description || item.rarity}
-                          </p>
                         </div>
-                      </div>
-
-                      <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-end gap-2">
-                        {item.is_equippable && (
-                          <Button
-                            size="sm"
-                            variant={item.equipped ? 'outline' : 'default'}
-                            disabled={isBusy}
-                            onClick={() => handleToggleEquip(item.slug, item.equipped, item.name)}
-                            className={cn(
-                              'h-7.5 px-3 rounded-full text-xs font-semibold cursor-pointer',
-                              item.equipped && 'text-muted-foreground hover:text-destructive hover:border-destructive/30'
-                            )}
-                          >
-                            {isBusy ? (
-                              <Loader2 className="size-3.5 animate-spin" />
-                            ) : item.equipped ? (
-                              'Yechish'
-                            ) : (
-                              'Taqish'
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Platforma Yutuqlari & Nishonlar */}
         <Card>
