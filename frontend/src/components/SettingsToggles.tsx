@@ -26,7 +26,7 @@ export function ThemeToggle() {
         <div>
           <p className="text-[14px] font-semibold text-foreground">Tungi rejim (Dark Mode)</p>
           <p className="text-[11.5px] text-[#8E8E93]">
-            {isDark ? 'OLED qora mavzu faol' : "iOS yorug' mavzu faol"}
+            {isDark ? 'Qorong‘i mavzu faol' : "Yorug‘ mavzu faol"}
           </p>
         </div>
       </div>

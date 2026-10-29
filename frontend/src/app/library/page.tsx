@@ -178,7 +178,7 @@ export default function LibraryPage() {
               <div className="inline-flex items-center gap-2">
                 <PremiumIcon icon={BookOpen} tone="amber" size="xs" solid />
                 <span className="text-[12px] font-bold uppercase tracking-wider text-[#FF9500]">
-                  Apple Books uslubidagi Raqamli Kutubxona
+                  Raqamli Kutubxona & Konspektlar
                 </span>
               </div>
               <h1 className="text-[24px] sm:text-[32px] font-extrabold tracking-[-0.025em] text-slate-900 dark:text-white leading-tight">

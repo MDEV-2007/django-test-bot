@@ -134,7 +134,7 @@ export default function Sidebar({
                   Ilm<span className="text-primary">Ildizi</span>
                 </span>
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary uppercase">
-                  iOS
+                  PRO
                 </span>
               </div>
               <p className="text-[11px] font-medium text-muted-foreground truncate">
@@ -280,7 +280,7 @@ export default function Sidebar({
             <div>
               <p className="text-xs font-bold text-foreground">Tungi rejim (Dark Mode)</p>
               <p className="text-[10px] font-medium text-muted-foreground">
-                {isDark ? 'iOS Dark OLED faol' : "iOS Light faol"}
+                {isDark ? 'Qorong‘i mavzu faol' : "Yorug‘ mavzu faol"}
               </p>
             </div>
           </div>

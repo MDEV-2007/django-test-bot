@@ -127,7 +127,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
       {/* Header */}
       <div className="mx-auto max-w-3xl text-center">
         <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
-          Apple One Usulida Shaffof Tariflar
+          Oddiy va Shaffof Tariflar
         </div>
         <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
           Natijaga mos,{' '}

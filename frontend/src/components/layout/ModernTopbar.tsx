@@ -174,7 +174,7 @@ export default function ModernTopbar({
             </button>
           </TooltipTrigger>
           <TooltipContent className="text-xs font-medium">
-            {isDark ? "Yorug' rejim (iOS Light)" : "Qorong'i rejim (iOS Dark)"}
+            {isDark ? "Yorug' rejim" : "Qorong'i rejim"}
           </TooltipContent>
         </Tooltip>
       </div>

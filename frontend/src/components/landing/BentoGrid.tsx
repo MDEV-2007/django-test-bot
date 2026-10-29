@@ -15,7 +15,7 @@ export default function BentoGrid() {
       {/* Apple Keynote Section Header */}
       <div className="mx-auto max-w-3xl text-center">
         <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
-          Mukammal iOS 18 Ta&apos;lim Ekotizimi
+          Mukammal Ta&apos;lim Ekotizimi
         </div>
         <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
           Oddiy test emas,{' '}
@@ -46,7 +46,7 @@ export default function BentoGrid() {
                 </span>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#248A3D]">
-                    Apple Health Usulida Analitika
+                    Intellektual Natijalar Analitikasi
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
                     DTM 189 Ball va OTM 2026 Qabul Bashorati
@@ -487,7 +487,7 @@ export default function BentoGrid() {
         </div>
 
         {/* =========================================================
-            TILE 7, 8, 9: iOS SMART STACK (FLASHCARDS, KUTUBXONA, FOKUS XONASI)
+            TILE 7, 8, 9: SMART STACK (FLASHCARDS, KUTUBXONA, FOKUS XONASI)
             ========================================================= */}
         <div className="col-span-1 md:col-span-4 rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:-translate-y-0.5 transition-all">
           <div className="space-y-3">
@@ -521,7 +521,7 @@ export default function BentoGrid() {
                 <Library className="size-5.5" />
               </span>
               <span className="rounded-full bg-[#FF9500]/12 px-2.5 py-0.5 text-[11px] font-bold text-[#C93400]">
-                Apple Books uslubi
+                Elektron qo&apos;llanmalar
               </span>
             </div>
             <h3 className="text-[17px] font-bold text-[#1C1C1E]">

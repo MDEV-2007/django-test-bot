@@ -69,7 +69,7 @@ const SUBJECTS = [
     title: '5–11-sinf Elektron Kutubxona',
     shortName: 'Kutubxona',
     count: '120+ darslik',
-    badge: 'Apple Books uslubi',
+    badge: 'Raqamli darslik',
     syllabus: 'PDF & Online',
     desc: "Maktab darsliklari, Milliy sertifikat qo'llanmalari, xronologiya jadvallari va spravochniklar jamlanmasi.",
     squircle: 'from-[#FF2D55] to-[#D70015] shadow-[0_6px_16px_rgba(255,45,85,0.32)]',

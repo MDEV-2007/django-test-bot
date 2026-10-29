@@ -30,9 +30,9 @@ export default function LandingNav() {
   const loggedIn = authReady && !!access;
 
   return (
-    <header className="sticky top-0 z-50 w-full px-3 sm:px-6 pt-2.5 sm:pt-3.5 transition-all duration-300">
+    <header className="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 pt-2.5 sm:pt-4 transition-all duration-300">
       <div
-        className={`mx-auto flex max-w-6xl items-center justify-between rounded-full px-3.5 sm:px-5 h-14 sm:h-15 transition-all duration-300 ios-glass ${
+        className={`mx-auto flex max-w-7xl items-center justify-between rounded-full px-4 sm:px-6 h-14 sm:h-16 transition-all duration-300 ios-glass ${
           scrolled
             ? 'bg-white/85 border border-black/[0.08] shadow-[0_10px_34px_-6px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]'
             : 'bg-white/72 border border-black/[0.06] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]'
@@ -48,7 +48,7 @@ export default function LandingNav() {
               Ilm<span className="text-[#007AFF]">Ildizi</span>
             </span>
             <span className="text-[9px] font-semibold text-[#8E8E93] tracking-wider uppercase mt-0.5">
-              iOS EdTech
+              Smart EdTech
             </span>
           </div>
         </Link>
@@ -108,7 +108,7 @@ export default function LandingNav() {
 
       {/* iOS Inset Grouped Sheet Dropdown for Mobile */}
       {open && (
-        <div className="mx-auto mt-2 max-w-6xl rounded-[26px] border border-black/[0.08] bg-white/92 p-3 ios-glass shadow-[0_20px_50px_rgba(0,0,0,0.14)] md:hidden animate-scaleIn">
+        <div className="mx-auto mt-2 max-w-7xl rounded-[26px] border border-black/[0.08] bg-white/92 p-3 ios-glass shadow-[0_20px_50px_rgba(0,0,0,0.14)] md:hidden animate-scaleIn">
           <div className="divide-y divide-black/[0.06] rounded-[18px] bg-[#F2F2F7]/80 px-3">
             {LINKS.map((l) => (
               <a

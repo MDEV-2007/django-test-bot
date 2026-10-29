@@ -175,9 +175,9 @@ export default async function LandingPage() {
       <main className="relative z-10 flex-1">
         
         {/* =========================================================
-            HERO SECTION (Apple iOS 18 Keynote Style + Interactive Widget)
+            HERO SECTION (Hero Section & Interactive Widget)
             ========================================================= */}
-        <section className="relative mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 sm:pb-20 sm:pt-12 lg:pt-14">
+        <section className="relative mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 sm:pb-20 sm:pt-12 lg:pt-14">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
             
             {/* Left: Apple Editorial Value Proposition */}
@@ -247,7 +247,7 @@ export default async function LandingPage() {
                   <div className="flex items-center gap-1 ml-1 text-[#1C1C1E] font-bold">
                     <Star className="size-3.5 fill-[#FF9500] text-[#FF9500]" />
                     <span>4.9 / 5</span>
-                    <span className="text-[#8E8E93] font-normal">(App Store darajasidagi tajriba)</span>
+                    <span className="text-[#8E8E93] font-normal">(O'quvchilar e'tirofi)</span>
                   </div>
                 </div>
 
@@ -298,14 +298,14 @@ export default async function LandingPage() {
         <ResultsTicker />
 
         {/* =========================================================
-            FANLAR VITRINASI (App Store Today Cards)
+            FANLAR VITRINASI (Fanlar Vitrinasi)
             ========================================================= */}
         <RevealOnScroll>
           <SubjectsShowcase />
         </RevealOnScroll>
 
         {/* =========================================================
-            BENTO GRID (Apple Keynote Feature Bento)
+            BENTO GRID (Bento Grid)
             ========================================================= */}
         <RevealOnScroll>
           <BentoGrid />
@@ -347,21 +347,21 @@ export default async function LandingPage() {
         </RevealOnScroll>
 
         {/* =========================================================
-            NARXLAR BO'LIMI (Apple One Style Subscriptions)
+            NARXLAR BO'LIMI (Tariflar Bo'limi)
             ========================================================= */}
         <PricingSection plans={plans} />
 
         {/* =========================================================
-            SAVOLLAR (iOS Inset Grouped FAQ)
+            SAVOLLAR (Savollar & Javoblar)
             ========================================================= */}
         <RevealOnScroll>
           <FaqAccordion items={FAQ} />
         </RevealOnScroll>
 
         {/* =========================================================
-            YAKUNIY CHAQIRIQ (Apple Pro Dark Titanium Showcase Card)
+            YAKUNIY CHAQIRIQ (Yakuniy Chaqiriq Kartasi)
             ========================================================= */}
-        <section className="relative mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+        <section className="relative mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
           <RevealOnScroll>
             <div className="relative overflow-hidden rounded-[36px] border border-white/12 bg-[#1C1C1E] p-8 text-center shadow-[0_24px_60px_rgba(0,0,0,0.18)] sm:p-14 text-white">
               {/* Apple Intelligence Ambient Glows */}
@@ -419,10 +419,10 @@ export default async function LandingPage() {
       </main>
 
       {/* =========================================================
-          FOOTER (Apple Cupertino Minimalist Footer)
+          FOOTER (Sayt Yakuniy Footer)
           ========================================================= */}
       <footer className="border-t border-black/[0.06] bg-white/80 ios-glass py-12">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2.5">
               <div className="relative flex size-8 shrink-0 items-center justify-center rounded-[10px] overflow-hidden border border-black/[0.08] bg-white shadow-2xs">

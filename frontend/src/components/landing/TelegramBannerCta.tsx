@@ -17,7 +17,7 @@ export default function TelegramBannerCta() {
           <div className="lg:col-span-8 space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3.5 py-1.5 text-xs font-semibold text-[#64D2FF] backdrop-blur-md">
               <Send className="size-3.5 -rotate-12 text-[#64D2FF]" />
-              <span>Telegram Mini App · iOS &amp; Android</span>
+              <span>Telegram Mini App · Barcha qurilmalarda</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-[-0.03em] leading-[1.12]">

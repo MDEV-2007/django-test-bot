@@ -168,7 +168,7 @@ export function DailyGoalCard({
               Kunlik Marra &amp; Streak
             </h3>
             <p className="text-[11px] text-muted-foreground font-normal">
-              Apple Fitness uslubidagi halqa
+              Kunlik maqsad rivojlanish halqasi
             </p>
           </div>
         </div>

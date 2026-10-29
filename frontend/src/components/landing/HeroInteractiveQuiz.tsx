@@ -211,7 +211,7 @@ export default function HeroInteractiveQuiz() {
                   <span className="flex size-6 items-center justify-center rounded-[8px] bg-gradient-to-b from-[#5856D6] to-[#007AFF] text-white">
                     <Sparkles className="size-3.5" />
                   </span>
-                  <span>Apple Intelligence · AI Mentor</span>
+                  <span>IlmIldizi Intelligence · AI Mentor</span>
                 </div>
                 <div className="flex items-center gap-1 rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#007AFF]">
                   <BookOpen className="size-3" />

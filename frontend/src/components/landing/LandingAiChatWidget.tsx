@@ -185,7 +185,7 @@ export default function LandingAiChatWidget() {
             {/* iMessage Conversation Stream */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 text-[13px] bg-white">
               <div className="text-center text-[11px] font-medium text-[#8E8E93] pb-1">
-                Bugun • Apple Intelligence
+                Bugun • AI Mentor
               </div>
               {messages.map((m) => (
                 <div

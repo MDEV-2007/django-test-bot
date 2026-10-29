@@ -16,7 +16,7 @@ export default function LeadMagnetBanner() {
           <div className="max-w-2xl text-center lg:text-left">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-[#007AFF]/10 px-3 py-1 text-xs font-bold text-[#007AFF]">
               <BookOpen className="size-3.5" />
-              <span>Apple Books uslubidagi maxsus qo&apos;llanma</span>
+              <span>Maxsus raqamli qo&apos;llanma</span>
             </div>
 
             <h3 className="mt-3 text-xl font-extrabold tracking-[-0.02em] text-[#1C1C1E] sm:text-2xl lg:text-3xl">

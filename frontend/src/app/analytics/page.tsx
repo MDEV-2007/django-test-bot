@@ -94,7 +94,7 @@ export default function AnalyticsPage() {
       <main className="page-shell flex-1 space-y-6 sm:space-y-7 bg-[var(--bg-page)] p-4 sm:p-6 pb-24 sm:pb-14 max-w-full overflow-x-hidden">
         <PageHero
           tone="sky"
-          eyebrow="Apple Health uslubidagi tahlil"
+          eyebrow="Chuqurlashtirilgan bilim tahlili"
           eyebrowIcon={TrendingUp}
           title="Akademik O'sish va Natijalar"
           description="Mavzular bo'yicha o'zlashtirish ko'rsatkichlari, kunlik faollik va OTM qabul bashorati."

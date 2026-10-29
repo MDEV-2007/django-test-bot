@@ -80,7 +80,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
               Fokus Taymeri (Pomodoro)
             </h3>
             <p className="text-[11px] font-medium text-muted-foreground">
-              iOS Standby uslubidagi 25-daqiqalik chuqur diqqat
+              25-daqiqalik chuqur diqqat va fokus rejimi
             </p>
           </div>
         </div>
