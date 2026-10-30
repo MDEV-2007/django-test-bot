@@ -174,6 +174,7 @@ INSTALLED_APPS = [
     'telegrambot.apps.TelegramBotConfig',
     'tests_app.apps.Tests_appConfig',
     'sprint',
+    'growth',
 ]
 
 MIDDLEWARE = [
