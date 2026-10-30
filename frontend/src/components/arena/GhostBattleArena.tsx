@@ -4,27 +4,25 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Swords,
-  Shield,
   Zap,
-  Clock,
   Flame,
   Trophy,
-  Share2,
   Sparkles,
   CheckCircle2,
   XCircle,
   ArrowRight,
   RotateCcw,
   Users,
+  Shield,
+  Clock,
+  Send,
+  Radio,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { celebrate } from '@/lib/confetti';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -52,28 +50,28 @@ interface OpponentData {
   id: number;
   name: string;
   avatar_url: string;
+  region?: string;
   elo_rating: number;
   is_ghost: boolean;
 }
 
-interface GhostBattleArenaProps {
+export interface GhostBattleArenaProps {
   subjectSlug?: string;
   incomingDuelToken?: string | null;
   onExit?: () => void;
+  onOpenViralDuel?: (userScore: number, opponentScore: number) => void;
 }
 
 export default function GhostBattleArena({
   subjectSlug = 'tarix',
   incomingDuelToken = null,
   onExit,
+  onOpenViralDuel,
 }: GhostBattleArenaProps) {
   const { user } = useAuthStore();
 
-  // State phases: 'searching' | 'countdown' | 'battle' | 'result'
-  const [phase, setPhase] = useState<'searching' | 'countdown' | 'battle' | 'result'>('searching');
-  const [countdown, setCountdown] = useState<number>(3);
-
-  // Match info
+  // State phases: 'searching' | 'match_found' | 'battle' | 'result'
+  const [phase, setPhase] = useState<'searching' | 'match_found' | 'battle' | 'result'>('searching');
   const [matchId, setMatchId] = useState<string>('');
   const [opponent, setOpponent] = useState<OpponentData | null>(null);
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
@@ -87,13 +85,12 @@ export default function GhostBattleArena({
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [userCombo, setUserCombo] = useState<number>(0);
 
+  // Micro-toast for opponent action
+  const [opponentToast, setOpponentToast] = useState<string | null>(null);
+
   // User player moves log to save for future Ghost replays & duels
   const userMovesLogRef = useRef<GhostMove[]>([]);
   const qStartTimeRef = useRef<number>(Date.now());
-
-  // Share state
-  const [createdDuelToken, setCreatedDuelToken] = useState<string | null>(null);
-  const [isGeneratingDuel, setIsGeneratingDuel] = useState<boolean>(false);
 
   // 1. MATCHMAKING: 3 soniyada jonli raqib qidirish, topilmasa Ghost Replay
   const startMatchmaking = useCallback(async () => {
@@ -103,6 +100,7 @@ export default function GhostBattleArena({
     setUserScore(0);
     setOpponentScore(0);
     setCurrentQIndex(0);
+    setOpponentToast(null);
     userMovesLogRef.current = [];
 
     try {
@@ -123,16 +121,18 @@ export default function GhostBattleArena({
 
         if (duelRes && duelRes.ok) {
           setMatchId(`duel_${incomingDuelToken}`);
-          setOpponent({
+          const opp: OpponentData = {
             id: 9999,
             name: duelRes.duel.creator_name,
-            avatar_url: duelRes.duel.creator_avatar,
-            elo_rating: 1100,
+            avatar_url: duelRes.duel.creator_avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=challenger',
+            region: "Do'st Dueli",
+            elo_rating: 1240,
             is_ghost: true,
-          });
+          };
+          setOpponent(opp);
           setQuestions(duelRes.questions);
           setGhostMoves(duelRes.opponent_moves);
-          startCountdown();
+          triggerMatchFound(opp);
           return;
         }
       }
@@ -151,53 +151,109 @@ export default function GhostBattleArena({
 
       if (res && res.ok) {
         setMatchId(res.match_id);
-        setOpponent(res.opponent);
+        const opp: OpponentData = {
+          ...res.opponent,
+          region: res.opponent.region || 'Toshkent sh., 1-litsey',
+        };
+        setOpponent(opp);
         setQuestions(res.questions);
         setGhostMoves(res.ghost_moves);
-        startCountdown();
+        triggerMatchFound(opp);
       }
-    } catch (e) {
-      toast.error("Raqib topishda xatolik yuz berdi. Qayta urinib ko'ring.");
+    } catch {
+      // Fallback opponent agar server offline bo'lsa
+      setTimeout(() => {
+        const fallbackOpp: OpponentData = {
+          id: 8888,
+          name: 'Javohir Aliyev',
+          avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Javohir',
+          region: 'Samarqand sh., 42-maktab',
+          elo_rating: 1240,
+          is_ghost: true,
+        };
+        setOpponent(fallbackOpp);
+        setQuestions([
+          {
+            id: 1,
+            body: "Amir Temur qaysi yili Balx shahrida buyuk amir deb e'lon qilingan?",
+            choices: [
+              { id: 1, text: '1365-yil', is_correct: false },
+              { id: 2, text: '1370-yil', is_correct: true },
+              { id: 3, text: '1385-yil', is_correct: false },
+              { id: 4, text: '1391-yil', is_correct: false },
+            ],
+          },
+          {
+            id: 2,
+            body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi yodgorlikdan topilgan?",
+            choices: [
+              { id: 5, text: 'Dalvarzintepa', is_correct: false },
+              { id: 6, text: 'Taxiti Sangin', is_correct: true },
+              { id: 7, text: 'Xolchayon', is_correct: false },
+              { id: 8, text: 'Qoratepa', is_correct: false },
+            ],
+          },
+          {
+            id: 3,
+            body: 'Qadimgi Turon xalqlari qaysi din ta\'limotiga e\'tiqod qilgan?',
+            choices: [
+              { id: 9, text: 'Zardushtiylik', is_correct: true },
+              { id: 10, text: 'Buddizm', is_correct: false },
+              { id: 11, text: 'Monaviylik', is_correct: false },
+              { id: 12, text: 'Xristianlik', is_correct: false },
+            ],
+          },
+        ]);
+        setGhostMoves([
+          { question_id: 1, selected_option_id: 2, is_correct: true, time_taken_ms: 3200, score: 10 },
+          { question_id: 2, selected_option_id: 6, is_correct: true, time_taken_ms: 2800, score: 10 },
+          { question_id: 3, selected_option_id: 9, is_correct: true, time_taken_ms: 3500, score: 10 },
+        ]);
+        triggerMatchFound(fallbackOpp);
+      }, 3000);
     }
   }, [incomingDuelToken, subjectSlug]);
 
-  const startCountdown = () => {
-    setPhase('countdown');
+  const triggerMatchFound = (_opp: OpponentData) => {
+    setPhase('match_found');
+    tgHaptic('medium');
     soundFX.click();
-    let count = 3;
-    setCountdown(3);
-    const interval = setInterval(() => {
-      count -= 1;
-      setCountdown(count);
-      soundFX.click();
-      if (count <= 0) {
-        clearInterval(interval);
-        setPhase('battle');
-        qStartTimeRef.current = Date.now();
-      }
-    }, 1000);
+
+    setTimeout(() => {
+      setPhase('battle');
+      qStartTimeRef.current = Date.now();
+    }, 1800);
   };
 
   useEffect(() => {
     startMatchmaking();
   }, [startMatchmaking]);
 
-  // 2. GHOST OPPONENT SIMULATOR (Vaqt bo'yicha harakatlanish)
+  // 2. GHOST OPPONENT SIMULATOR (Vaqt bo'yicha harakatlanish va mikro-toast)
   useEffect(() => {
     if (phase !== 'battle' || currentQIndex >= questions.length) return;
 
     const ghostMove = ghostMoves[currentQIndex];
     if (!ghostMove) return;
 
-    // Raqib o'zining yozib olingan vaqtida javob beradi
-    const opponentTimer = setTimeout(() => {
+    const delay = Math.min(Math.max(ghostMove.time_taken_ms, 1800), 5000);
+    const timer = setTimeout(() => {
       if (ghostMove.is_correct) {
         setOpponentScore((prev) => prev + 10);
+        const sec = (delay / 1000).toFixed(1);
+        setOpponentToast(`⚡ ${opponent?.name || 'Raqib'} ${currentQIndex + 1}-savolga ${sec}s da to'g'ri javob berdi!`);
       }
-    }, Math.min(ghostMove.time_taken_ms, 5000));
+    }, delay);
 
-    return () => clearTimeout(opponentTimer);
-  }, [phase, currentQIndex, questions.length, ghostMoves]);
+    return () => clearTimeout(timer);
+  }, [phase, currentQIndex, questions.length, ghostMoves, opponent?.name]);
+
+  // Toastni 2.5s dan keyin tozalash
+  useEffect(() => {
+    if (!opponentToast) return;
+    const t = setTimeout(() => setOpponentToast(null), 2500);
+    return () => clearTimeout(t);
+  }, [opponentToast]);
 
   // 3. FOYDALANUVCHI JAVOBINI QABUL QILISH
   const handleSelectChoice = (choice: Choice) => {
@@ -212,7 +268,7 @@ export default function GhostBattleArena({
       soundFX.correct();
       tgHaptic('success');
       setUserCombo((prev) => prev + 1);
-      const points = 10 + (userCombo > 1 ? 5 : 0);
+      const points = 10 + (userCombo >= 2 ? 5 : 0);
       setUserScore((prev) => prev + points);
     } else {
       soundFX.incorrect();
@@ -220,7 +276,6 @@ export default function GhostBattleArena({
       setUserCombo(0);
     }
 
-    // Harakatni logga saqlash
     userMovesLogRef.current.push({
       question_id: questions[currentQIndex]?.id,
       selected_option_id: choice.id,
@@ -229,7 +284,6 @@ export default function GhostBattleArena({
       score: isCorrect ? 10 : 0,
     });
 
-    // 1.5 soniyadan so'ng keyingi savolga o'tish
     setTimeout(() => {
       if (currentQIndex + 1 < questions.length) {
         setCurrentQIndex((prev) => prev + 1);
@@ -239,16 +293,19 @@ export default function GhostBattleArena({
       } else {
         finishBattle();
       }
-    }, 1400);
+    }, 1300);
   };
 
-  // 4. JANGNI YAKUNLASH VA REPLAY SAQLASH
+  // 4. JANGNI YAKUNLASH
   const finishBattle = async () => {
     setPhase('result');
-    celebrate();
-    soundFX.fanfare();
+    if (userScore >= opponentScore) {
+      celebrate();
+      soundFX.success();
+    } else {
+      soundFX.incorrect();
+    }
 
-    // Replayni bazaga yozib qo'yish (kelajakdagi o'yinchilar uchun Ghost sifatida)
     try {
       await apiFetch('/api/growth/arena/record-replay/', {
         method: 'POST',
@@ -258,135 +315,148 @@ export default function GhostBattleArena({
         }),
       });
 
-      // Agar bu do'stining dueli bo'lsa, natijani serverga yuborish
       if (incomingDuelToken) {
         await apiFetch(`/api/growth/arena/duel/${incomingDuelToken}/submit/`, {
           method: 'POST',
           body: JSON.stringify({ score: userScore }),
         });
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   };
 
-  // 5. VIRAL DUEL ULASHISH (1-Click Telegram Native Share)
-  const handleCreateAndShareDuel = async () => {
-    setIsGeneratingDuel(true);
-    try {
-      const res = await apiFetch<{
-        ok: boolean;
-        duel_token: string;
-        share_url: string;
-        telegram_share_link: string;
-        share_text: string;
-      }>('/api/growth/arena/create-duel/', {
-        method: 'POST',
-        body: JSON.stringify({ score: userScore }),
-      });
-
-      if (res && res.ok) {
-        setCreatedDuelToken(res.duel_token);
-        toast.success("Duel havolasi tayyor! Telegram orqali yuboring.");
-
-        // Telegram WebApp ichida bo'lsa, to'g'ridan-to'g'ri share oynasini ochish
-        if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.openTelegramLink) {
-          (window as any).Telegram.WebApp.openTelegramLink(res.telegram_share_link);
-        } else {
-          window.open(res.telegram_share_link, '_blank');
-        }
-      }
-    } catch {
-      toast.error("Duel havolasini yaratishda xatolik");
-    } finally {
-      setIsGeneratingDuel(false);
-    }
-  };
-
   const currentQ = questions[currentQIndex];
+  const totalQuestions = questions.length || 1;
+  const userProgressPercent = Math.min(((currentQIndex + (isAnswered ? 1 : 0)) / totalQuestions) * 100, 100);
+  const opponentProgressPercent = Math.min(((currentQIndex + 1) / totalQuestions) * 100, 100);
   const isWinner = userScore >= opponentScore;
 
   return (
-    <div className="relative w-full max-w-xl mx-auto min-h-[580px] flex flex-col justify-between p-4 sm:p-6 bg-card rounded-[32px] border border-border shadow-2xl overflow-hidden select-none">
-      {/* ─── A. MATCHMAKING SCANNER EKRANI ─── */}
+    <div className="relative w-full max-w-xl mx-auto min-h-[580px] flex flex-col justify-between p-4 sm:p-5 bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-white/[0.07] shadow-2xl select-none overflow-hidden">
+      {/* ─────────────────────────────────────────────────────────────
+          A. 3-SONIYALIK MATCHMAKING RADAR (Kutish ekrani)
+         ───────────────────────────────────────────────────────────── */}
       <AnimatePresence mode="wait">
         {phase === 'searching' && (
           <motion.div
             key="searching"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="my-auto flex flex-col items-center justify-center text-center space-y-6 py-12"
+            exit={{ opacity: 0, scale: 0.96 }}
+            className="my-auto flex flex-col items-center justify-center text-center space-y-6 py-10"
           >
-            {/* Radar Pulsatsiyasi */}
-            <div className="relative flex items-center justify-center size-36">
-              <span className="absolute size-full rounded-full bg-rose-500/20 animate-ping" />
-              <span className="absolute size-28 rounded-full bg-rose-500/30 animate-pulse" />
-              <div className="relative size-20 rounded-full bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-white shadow-xl shadow-rose-500/30">
-                <Swords className="size-10 animate-bounce" />
+            {/* 2 Ta Karta: Siz VS Radar Raqib */}
+            <div className="flex items-center justify-center gap-4 sm:gap-6 w-full max-w-sm">
+              {/* Siz */}
+              <div className="flex-1 flex flex-col items-center p-3.5 rounded-xl bg-zinc-950/60 border border-blue-500/30 shadow-[0_0_20px_-5px_rgba(59,130,246,0.25)]">
+                <div className="relative">
+                  <img
+                    src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'}
+                    alt="Siz"
+                    className="size-14 rounded-full border-2 border-blue-500 bg-zinc-900 object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 border-2 border-zinc-900" />
+                </div>
+                <p className="mt-2 text-xs font-bold text-white truncate max-w-[100px]">{user?.first_name || user?.username || 'Siz'}</p>
+                <span className="text-[10px] font-mono text-blue-400 font-semibold">{user?.elo_rating || 1200} ELO</span>
+              </div>
+
+              {/* VS Chaqmoq */}
+              <div className="flex flex-col items-center shrink-0">
+                <div className="size-10 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse">
+                  <Zap className="size-5 fill-white" />
+                </div>
+                <span className="mt-1 text-[10px] font-black italic tracking-wider text-orange-400">VS</span>
+              </div>
+
+              {/* Radar: Raqib qidirilmoqda */}
+              <div className="flex-1 flex flex-col items-center p-3.5 rounded-xl bg-zinc-950/60 border border-white/10 relative overflow-hidden">
+                <div className="relative flex items-center justify-center size-14">
+                  <span className="absolute inset-0 rounded-full bg-rose-500/20 animate-ping" />
+                  <span className="absolute inset-2 rounded-full bg-rose-500/30 animate-pulse" />
+                  <div className="relative size-12 rounded-full bg-zinc-800 border border-dashed border-rose-500/50 flex items-center justify-center text-rose-400">
+                    <Swords className="size-6 animate-spin text-rose-400" />
+                  </div>
+                </div>
+                <p className="mt-2 text-xs font-bold text-zinc-300">Raqib...</p>
+                <span className="text-[10px] font-mono text-zinc-500">Qidirilmoqda</span>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-foreground">Jonli Raqib Qidirilmoqda...</h3>
-              <p className="text-xs text-muted-foreground max-w-xs">
-                Sizning ELO ballingizga ({user?.elo_rating || 1000}) mos kuchli raqib tanlanmoqda
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-bold text-white">Jonli Raqib Qidirilmoqda...</h3>
+              <p className="text-xs text-zinc-400 max-w-xs">
+                Sizning ELO ballingizga yaqin kuchli raqib tanlanmoqda
               </p>
             </div>
 
-            <Badge variant="outline" className="text-xs font-mono py-1 px-3 border-rose-500/30 text-rose-500">
-              ⚡️ Maksimal qidiruv: 3 soniya
-            </Badge>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.15)]">
+              <Radio className="size-3.5 animate-pulse text-rose-400" />
+              <span>Tezkor Matchmaking (3 soniya)</span>
+            </div>
           </motion.div>
         )}
 
-        {/* ─── B. 3-2-1 START COUNTDOWN ─── */}
-        {phase === 'countdown' && (
+        {/* ─────────────────────────────────────────────────────────────
+            B. MATCH FOUND (3-Soniyada Raqib Topildi Chaqnashi)
+           ───────────────────────────────────────────────────────────── */}
+        {phase === 'match_found' && opponent && (
           <motion.div
-            key="countdown"
-            initial={{ scale: 0.5, opacity: 0 }}
+            key="match_found"
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.5, opacity: 0 }}
-            className="my-auto flex flex-col items-center justify-center py-16 space-y-6"
+            exit={{ scale: 1.05, opacity: 0 }}
+            className="my-auto flex flex-col items-center justify-center py-10 space-y-6 text-center"
           >
-            <div className="flex items-center gap-6">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.3)] animate-bounce">
+              <Sparkles className="size-3.5" />
+              <span>Raqib Topildi!</span>
+            </div>
+
+            <div className="flex items-center justify-center gap-6 w-full max-w-sm">
               {/* Siz */}
-              <div className="flex flex-col items-center space-y-1">
+              <div className="flex flex-col items-center space-y-1.5">
                 <img
                   src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'}
                   alt="Siz"
-                  className="size-16 rounded-full border-2 border-emerald-500 bg-background shadow-md"
+                  className="size-16 rounded-full border-2 border-blue-500 bg-zinc-900 object-cover shadow-[0_0_15px_rgba(59,130,246,0.4)]"
                 />
-                <span className="text-xs font-bold text-foreground">Siz</span>
+                <span className="text-xs font-bold text-white">{user?.first_name || user?.username || 'Siz'}</span>
+                <span className="text-[10px] font-mono text-blue-400">{user?.elo_rating || 1200} ELO</span>
               </div>
 
-              <span className="text-3xl font-black text-rose-500 italic">VS</span>
+              <div className="text-2xl font-black italic text-orange-400 animate-pulse">VS</div>
 
-              {/* Raqib */}
-              <div className="flex flex-col items-center space-y-1">
-                <img
-                  src={opponent?.avatar_url}
-                  alt={opponent?.name}
-                  className="size-16 rounded-full border-2 border-rose-500 bg-background shadow-md"
-                />
-                <span className="text-xs font-bold text-foreground truncate max-w-[90px]">{opponent?.name}</span>
-                <span className="text-[10px] text-muted-foreground font-mono">ELO {opponent?.elo_rating}</span>
-              </div>
+              {/* Raqib: scale-105 chaqnash */}
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1.05 }}
+                className="flex flex-col items-center space-y-1.5 p-3 rounded-xl bg-zinc-950/80 border border-rose-500/40 shadow-[0_0_25px_rgba(244,63,94,0.4)]"
+              >
+                <div className="relative">
+                  <img
+                    src={opponent.avatar_url}
+                    alt={opponent.name}
+                    className="size-16 rounded-full border-2 border-rose-500 bg-zinc-900 object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 border-2 border-zinc-900" />
+                </div>
+                <span className="text-xs font-bold text-white truncate max-w-[110px]">{opponent.name}</span>
+                <span className="text-[10px] text-zinc-400 truncate max-w-[110px]">{opponent.region}</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                  {opponent.elo_rating} ELO
+                </span>
+              </motion.div>
             </div>
 
-            <motion.div
-              key={countdown}
-              initial={{ scale: 2, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', damping: 12 }}
-              className="text-7xl font-black text-primary font-mono"
-            >
-              {countdown}
-            </motion.div>
+            <p className="text-xs font-mono text-zinc-400 tracking-wider">Jang boshlanmoqda...</p>
           </motion.div>
         )}
 
-        {/* ─── C. JONLI JANG MAYDONI (BATTLE) ─── */}
+        {/* ─────────────────────────────────────────────────────────────
+            C. DUAL SPLIT-PROGRESS HUD & JANG MAYDONI
+           ───────────────────────────────────────────────────────────── */}
         {phase === 'battle' && currentQ && (
           <motion.div
             key="battle"
@@ -394,105 +464,118 @@ export default function GhostBattleArena({
             animate={{ opacity: 1 }}
             className="flex-1 flex flex-col justify-between space-y-4"
           >
-            {/* Header: Scoreboard & Progress */}
-            <div className="space-y-3 pb-3 border-b border-border">
-              <div className="flex items-center justify-between">
-                {/* O'yinchi */}
-                <div className="flex items-center gap-2">
-                  <div className="size-9 rounded-full overflow-hidden border-2 border-emerald-500">
-                    <img src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'} alt="Siz" className="size-full object-cover" />
+            {/* Dual Split-Progress HUD (2 qatorli Tug-of-War progress bar) */}
+            <div className="space-y-2 p-3 rounded-xl bg-zinc-950/70 border border-white/[0.07]">
+              {/* 1-qator: Siz */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <img
+                      src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'}
+                      alt="Siz"
+                      className="size-5 rounded-full border border-blue-400"
+                    />
+                    <span className="font-bold text-white text-[11px] truncate max-w-[100px]">{user?.first_name || user?.username || 'Siz'}</span>
+                    {userCombo > 1 && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                        🔥 {userCombo}x Combo
+                      </span>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-xs font-bold leading-tight">Siz</p>
-                    <p className="text-base font-black text-emerald-500 font-mono leading-none">{userScore}</p>
-                  </div>
+                  <span className="font-mono font-extrabold text-blue-400 text-xs">{userScore} ball</span>
                 </div>
-
-                {/* Markaziy indikator & Savol sanog'i */}
-                <div className="flex flex-col items-center">
-                  <Badge variant="outline" className="text-[10px] font-mono border-border">
-                    Savol: {currentQIndex + 1} / {questions.length}
-                  </Badge>
-                  {userCombo >= 2 && (
-                    <span className="text-[10px] font-black text-amber-500 animate-pulse flex items-center gap-0.5 mt-0.5">
-                      <Flame className="size-3 fill-current" /> {userCombo}x Combo
-                    </span>
-                  )}
+                {/* Ko'k progress bar */}
+                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300"
+                    style={{ width: `${userProgressPercent}%` }}
+                  />
                 </div>
+              </div>
 
-                {/* Raqib */}
-                <div className="flex items-center gap-2 flex-row-reverse text-right">
-                  <div className="size-9 rounded-full overflow-hidden border-2 border-rose-500">
-                    <img src={opponent?.avatar_url} alt="Raqib" className="size-full object-cover" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1 justify-end">
-                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <p className="text-xs font-bold leading-tight truncate max-w-[80px]">{opponent?.name}</p>
+              {/* 2-qator: Raqib */}
+              <div className="space-y-1 pt-1 border-t border-white/5">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative">
+                      <img
+                        src={opponent?.avatar_url}
+                        alt={opponent?.name}
+                        className="size-5 rounded-full border border-rose-500"
+                      />
+                      <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-emerald-400 animate-ping" />
                     </div>
-                    <p className="text-base font-black text-rose-500 font-mono leading-none">{opponentScore}</p>
+                    <span className="font-bold text-zinc-300 text-[11px] truncate max-w-[100px]">{opponent?.name}</span>
+                    <span className="text-[9.5px] font-medium text-emerald-400 flex items-center gap-0.5">
+                      <span className="size-1.5 rounded-full bg-emerald-400" /> Jonli
+                    </span>
                   </div>
+                  <span className="font-mono font-extrabold text-rose-400 text-xs">{opponentScore} ball</span>
+                </div>
+                {/* Olovrang progress bar */}
+                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] transition-all duration-500"
+                    style={{ width: `${opponentProgressPercent}%` }}
+                  />
                 </div>
               </div>
 
-              {/* Ikki tomonlama nisbiy progress bar */}
-              <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-muted">
-                <div
-                  className="bg-emerald-500 transition-all duration-300"
-                  style={{ width: `${Math.max(10, (userScore / Math.max(1, userScore + opponentScore)) * 100)}%` }}
-                />
-                <div
-                  className="bg-rose-500 transition-all duration-300"
-                  style={{ width: `${Math.max(10, (opponentScore / Math.max(1, userScore + opponentScore)) * 100)}%` }}
-                />
-              </div>
+              {/* Raqib Harakati Mikro-Toasti */}
+              <AnimatePresence>
+                {opponentToast && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="text-[10px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-md px-2 py-0.5 text-center truncate"
+                  >
+                    {opponentToast}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Savol matni */}
-            <div className="my-auto py-2">
-              <div className="rounded-2xl border border-border/80 bg-muted/30 p-4 shadow-sm">
-                <div
-                  className="text-base sm:text-lg font-bold text-foreground leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: currentQ.body }}
-                />
-              </div>
+            {/* Savol Matni */}
+            <div className="py-2 space-y-1">
+              <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                Savol {currentQIndex + 1} / {totalQuestions}
+              </span>
+              <p className="text-sm sm:text-base font-semibold text-white leading-relaxed">
+                {currentQ.body}
+              </p>
             </div>
 
             {/* Variantlar */}
-            <div className="space-y-2.5">
-              {currentQ.choices.map((choice, cIdx) => {
+            <div className="space-y-2 pt-1">
+              {currentQ.choices.map((choice) => {
                 const isSelected = selectedChoiceId === choice.id;
-                let btnStyle = 'border-border/70 hover:border-primary/50 bg-card';
+                let choiceStyle = 'border-white/10 bg-zinc-950/60 hover:bg-zinc-800/70 hover:border-white/20 text-zinc-200';
 
                 if (isAnswered) {
                   if (choice.is_correct) {
-                    btnStyle = 'border-emerald-500 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold';
-                  } else if (isSelected) {
-                    btnStyle = 'border-rose-500 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold';
+                    choiceStyle = 'border-emerald-500 bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+                  } else if (isSelected && !choice.is_correct) {
+                    choiceStyle = 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.3)]';
                   } else {
-                    btnStyle = 'opacity-40 border-border/40';
+                    choiceStyle = 'opacity-40 border-white/5 bg-zinc-950/30 text-zinc-500';
                   }
                 }
 
                 return (
                   <button
                     key={choice.id}
+                    type="button"
                     disabled={isAnswered}
                     onClick={() => handleSelectChoice(choice)}
                     className={cn(
-                      'w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between cursor-pointer active:scale-98',
-                      btnStyle
+                      'w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all duration-150 flex items-center justify-between cursor-pointer disabled:cursor-default',
+                      choiceStyle
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="size-7 rounded-xl bg-muted flex items-center justify-center font-bold text-xs shrink-0">
-                        {String.fromCharCode(65 + cIdx)}
-                      </span>
-                      <span className="text-xs sm:text-sm font-medium leading-snug">{choice.text}</span>
-                    </div>
-
-                    {isAnswered && choice.is_correct && <CheckCircle2 className="size-5 text-emerald-500 shrink-0" />}
-                    {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-5 text-rose-500 shrink-0" />}
+                    <span>{choice.text}</span>
+                    {isAnswered && choice.is_correct && <CheckCircle2 className="size-4 text-emerald-400 shrink-0 ml-2" />}
+                    {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-4 text-rose-400 shrink-0 ml-2" />}
                   </button>
                 );
               })}
@@ -500,78 +583,107 @@ export default function GhostBattleArena({
           </motion.div>
         )}
 
-        {/* ─── D. G'ALABA / MAG'LUBIYAT & VIRAL SHARE EKRANI ─── */}
+        {/* ─────────────────────────────────────────────────────────────
+            D. NATIJA EKRANI (G'oliblik & Duel Share)
+           ───────────────────────────────────────────────────────────── */}
         {phase === 'result' && (
           <motion.div
             key="result"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="my-auto flex flex-col items-center justify-center text-center space-y-6 py-4"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="my-auto flex flex-col items-center justify-center space-y-5 py-6 text-center"
           >
-            {/* G'oliblik statusi */}
             <div className="relative">
               <div
                 className={cn(
-                  'size-24 rounded-full flex items-center justify-center text-white shadow-2xl',
-                  isWinner ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 shadow-amber-500/40' : 'bg-gradient-to-tr from-slate-600 to-slate-500'
+                  'size-20 rounded-2xl flex items-center justify-center text-white shadow-2xl',
+                  isWinner
+                    ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 shadow-amber-500/40'
+                    : 'bg-zinc-800 border border-white/10'
                 )}
               >
-                {isWinner ? <Trophy className="size-12 animate-bounce" /> : <Shield className="size-12" />}
+                {isWinner ? <Trophy className="size-10 fill-white" /> : <Shield className="size-10 text-zinc-400" />}
               </div>
+              {isWinner && (
+                <span className="absolute -top-1.5 -right-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-500 text-white shadow">
+                  G&apos;alaba!
+                </span>
+              )}
             </div>
 
             <div className="space-y-1">
-              <h2 className="text-2xl font-black tracking-tight">
-                {isWinner ? "G'alaba qozondingiz! 🏆" : "Bu safar raqib ustun keldi!"}
+              <h2 className="text-xl sm:text-2xl font-extrabold text-white">
+                {isWinner ? "G'alaba Qozondingiz!" : "Bu Gal Raqib Qo'li Baland Keldi"}
               </h2>
-              <p className="text-xs text-muted-foreground">
-                Siz: <b className="text-foreground">{userScore} ball</b> vs {opponent?.name}: <b className="text-foreground">{opponentScore} ball</b>
+              <p className="text-xs text-zinc-400">
+                Yakuniy hisob: <span className="font-mono font-bold text-white">{userScore}</span> —{' '}
+                <span className="font-mono font-bold text-zinc-400">{opponentScore}</span>
               </p>
             </div>
 
-            {/* Mukofotlar */}
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold py-1 px-3">
-                🪙 +25 Tanga
-              </Badge>
-              <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary font-bold py-1 px-3">
-                ⚡️ +50 XP
-              </Badge>
-              <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 font-bold py-1 px-3">
-                📈 +18 ELO
-              </Badge>
+            {/* Mukofotlar bloki */}
+            <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
+              <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
+                <span className="text-[10px] text-zinc-400 uppercase font-semibold">Tajriba</span>
+                <p className="text-xs font-mono font-bold text-blue-400 mt-0.5">+50 XP</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
+                <span className="text-[10px] text-zinc-400 uppercase font-semibold">Tanga</span>
+                <p className="text-xs font-mono font-bold text-amber-400 mt-0.5">+25 🪙</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
+                <span className="text-[10px] text-zinc-400 uppercase font-semibold">Reyting</span>
+                <p className="text-xs font-mono font-bold text-emerald-400 mt-0.5">
+                  {isWinner ? '+18 ELO' : '-10 ELO'}
+                </p>
+              </div>
             </div>
 
-            {/* 1-CLICK TELEGRAM EGO VIRAL DUEL TUGMASI */}
-            <div className="w-full space-y-3 pt-2">
-              <Button
-                disabled={isGeneratingDuel}
-                onClick={handleCreateAndShareDuel}
-                className="w-full h-12 rounded-2xl bg-gradient-to-r from-rose-600 via-amber-600 to-rose-600 hover:from-rose-500 hover:to-amber-500 text-white font-extrabold text-sm shadow-xl shadow-rose-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
-              >
-                <Share2 className="size-4.5" />
-                <span>⚔️ Sinfdoshingizni shu savollarda duelga chorlang! (+100 Tanga)</span>
-              </Button>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={startMatchmaking}
-                  className="flex-1 rounded-xl text-xs font-bold gap-1.5 h-10 cursor-pointer"
-                >
-                  <RotateCcw className="size-3.5" />
-                  <span>Yana bir jang</span>
-                </Button>
-                {onExit && (
-                  <Button
-                    variant="ghost"
-                    onClick={onExit}
-                    className="flex-1 rounded-xl text-xs text-muted-foreground hover:text-foreground h-10 cursor-pointer"
-                  >
-                    Chiqish
-                  </Button>
-                )}
+            {/* Viral Duel Ticket UI */}
+            <div className="w-full max-w-sm p-3.5 rounded-xl bg-gradient-to-r from-blue-950/40 via-zinc-950 to-indigo-950/40 border border-blue-500/25 space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="text-left">
+                  <span className="text-[10px] text-zinc-400 uppercase">Sizning Natijangiz</span>
+                  <p className="font-bold text-white">{userScore} ball</p>
+                </div>
+                <div className="size-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
+                  VS
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-zinc-400 uppercase">Do&apos;stingiz</span>
+                  <p className="font-bold text-zinc-500">? / 10</p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => onOpenViralDuel?.(userScore, opponentScore)}
+                className="w-full h-10 rounded-lg bg-[#2AABEE] hover:bg-[#229ED9] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(42,171,238,0.4)] transition-all active:scale-[0.98] cursor-pointer"
+              >
+                <Send className="size-3.5 fill-white" />
+                <span>Do&apos;stni Telegramda Duelga Chorlash (+100 🪙)</span>
+              </button>
+            </div>
+
+            {/* Qayta o'ynash / Chiqish */}
+            <div className="flex items-center gap-2.5 w-full max-w-sm pt-1">
+              <button
+                type="button"
+                onClick={startMatchmaking}
+                className="flex-1 h-11 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>Yana O&apos;ynash</span>
+              </button>
+              {onExit && (
+                <button
+                  type="button"
+                  onClick={onExit}
+                  className="px-4 h-11 rounded-xl bg-zinc-950 border border-white/10 hover:border-white/20 text-zinc-300 text-xs font-semibold cursor-pointer"
+                >
+                  Chiqish
+                </button>
+              )}
             </div>
           </motion.div>
         )}
