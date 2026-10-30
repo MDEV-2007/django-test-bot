@@ -41,6 +41,7 @@ import {
   LiveActivityTicker,
 } from '@/components/dashboard/ModernHeroDashboard';
 import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
+import LiveRepublicBanner from '@/components/growth/LiveRepublicBanner';
 import ModernTestCenter from '@/components/dashboard/ModernTestCenter';
 import PomodoroTimerCard from '@/components/dashboard/PomodoroTimerCard';
 import PremiumIcon from '@/components/ui/premium-icon';
@@ -503,7 +504,7 @@ export default function DashboardPage() {
                       </p>
                     </div>
                     <Link
-                      href="/tests"
+                      href="/onboarding?mode=blitz"
                       className="ios-spring inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs sm:text-sm font-semibold text-primary-foreground shadow-[0_6px_18px_rgba(0,122,255,0.32)] shrink-0"
                     >
                       <Play className="size-4 fill-current" /> Hozir boshlash
@@ -542,7 +543,13 @@ export default function DashboardPage() {
                 }
 
                 return (
-                  <AiMarathonBanner
+                  <>
+                    <div className="mb-4">
+                      <LiveRepublicBanner
+                        onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
+                      />
+                    </div>
+                    <AiMarathonBanner
                     userName={firstName}
                     userLevel={p.level}
                     userStreak={p.streak}
@@ -558,6 +565,7 @@ export default function DashboardPage() {
                       if (refreshDashboard) refreshDashboard();
                     }}
                   />
+                  </>
                 );
               })()}
 

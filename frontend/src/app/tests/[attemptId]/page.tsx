@@ -425,9 +425,9 @@ export default function TestScreenPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell-focus flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-24 sm:p-6 sm:pb-12">
-        {/* Sticky boshqaruv paneli */}
-        <Card className="sticky top-2 z-20 gap-0 border-[var(--border-card)] bg-[var(--surface-card-strong)]/95 py-0 shadow-lg backdrop-blur-xl">
+      <main className="page-shell-focus flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-24 sm:p-6 sm:pb-12">
+        {/* Sticky boshqaruv paneli - mobilda ustiga chiqib qolmasligi uchun toza qattiq fon va to'liq kenglik */}
+        <Card className="sticky top-0 z-30 -mx-4 -mt-4 sm:mx-0 sm:mt-0 rounded-none sm:rounded-2xl border-x-0 border-t-0 sm:border border-b border-[var(--border-card)] bg-[#0B0F17] sm:bg-[var(--surface-card-strong)] py-0 shadow-md">
           <CardContent className="space-y-2 p-3 sm:p-4">
             <div className="flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
@@ -477,7 +477,7 @@ export default function TestScreenPage() {
                 </div>
               )}
 
-              <span className="hidden font-mono text-xs text-[var(--text-faint)] xl:inline">A-D tanlash · → keyingi · ← oldingi</span>
+              <span className="hidden font-mono text-xs text-[var(--text-faint)] xl:inline">A-D tanlash • Keyingi: Enter / O'ng strelka</span>
 
               {/* O'ng tomon: Matn o'lchami va Taymer */}
               <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
@@ -560,7 +560,14 @@ export default function TestScreenPage() {
         <Card>
           <CardContent className="space-y-6 p-5 sm:p-8">
             <div className="flex items-center justify-between gap-3">
-              <Badge variant="secondary">Savol {data.q_idx}</Badge>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary">Savol {data.q_idx}</Badge>
+                {data.q_idx >= 36 && (
+                  <Badge variant="outline" className="border-amber-500/40 bg-amber-500/15 text-amber-400 text-[11px] font-bold">
+                    ⚡ AI BMB Ekspert tekshiruvi
+                  </Badge>
+                )}
+              </div>
               <Badge variant="outline" className={DIFFICULTY_TONE[q.difficulty] || DIFFICULTY_TONE.medium}>
                 {DIFFICULTY_LABEL[q.difficulty] || q.difficulty}
               </Badge>

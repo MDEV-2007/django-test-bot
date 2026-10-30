@@ -1,5 +1,7 @@
 'use client';
 
+import AiEssayPaywall from '@/components/exam/AiEssayPaywall';
+
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -1004,6 +1006,24 @@ export default function FeedbackPage() {
             </div>
           </div>
         )}
+
+        {/* 36-45-TOPSHIRIQLAR: AI BMB EKSPERT & ESSE TEKSHIRUVI (FREEMIUM / VIP PAYWALL) */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-500/40 bg-purple-500/15 px-3 py-0.5 text-xs font-bold text-purple-400">
+                <Sparkles className="size-3.5" /> 36–45-topshiriqlar · BMB Rasmiy Mezon
+              </div>
+              <h3 className="text-lg font-black text-foreground">
+                AI BMB Ekspert & Esse Baholash
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Ochiq savollar va Esse matningizni rasmiy 75 ballik BMB rubrikasi va AI ekspert orqali tahlil qiling.
+              </p>
+            </div>
+          </div>
+          <AiEssayPaywall initialQuestionType="essay" />
+        </div>
 
         {!!data.detailed_mistakes?.length && (
           <Card>

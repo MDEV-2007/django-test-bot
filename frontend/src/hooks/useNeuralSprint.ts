@@ -236,9 +236,8 @@ export function useNeuralSprint({
         comboProgress: 0,
       }));
 
-      const lossDelta = -0.1;
-      setDtmScore((prev) => Math.max(0, Math.round((prev + lossDelta) * 10) / 10));
-      setScoreDelta(lossDelta);
+      // SPRINT REJIMI: Xato qilinganda DTM bali kamaytirilmaydi (0.1 ayirish bekor qilindi, faqat streak tiklanadi)
+      setScoreDelta(null);
 
       setStats((prev) => ({
         ...prev,

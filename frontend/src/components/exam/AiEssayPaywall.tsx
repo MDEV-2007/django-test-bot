@@ -102,26 +102,28 @@ export default function AiEssayPaywall({
     try {
       const res = await apiFetch<{
         ok: boolean;
-        is_correct: boolean;
-        similarity_score: number;
-        feedback: string;
-      }>('/api/growth/ai/grade-open-question/', {
+        data?: {
+          is_correct: boolean;
+          score_pct: number;
+          feedback: string;
+        };
+      }>('/api/growth/open-question/evaluate/', {
         method: 'POST',
         body: JSON.stringify({
           question_id: 36,
-          user_answer: openAnswer,
-          expected_answer: 'Taxiti Sangin yodgorligi',
+          student_answer: openAnswer,
+          reference_answer: 'Taxiti Sangin yodgorligi',
         }),
       });
 
-      if (res && res.ok) {
+      if (res && res.ok && res.data) {
         setOpenResult({
           user_answer: openAnswer,
-          is_correct: res.is_correct,
-          similarity_score: res.similarity_score,
-          ai_feedback: res.feedback,
+          is_correct: res.data.is_correct,
+          similarity_score: res.data.score_pct,
+          ai_feedback: res.data.feedback,
         });
-        if (res.is_correct) {
+        if (res.data.is_correct) {
           soundFX.correct();
           tgHaptic('success');
         } else {
@@ -156,12 +158,15 @@ export default function AiEssayPaywall({
     soundFX.click();
 
     try {
-      const res = await apiFetch<{ ok: boolean; evaluation: EssayEvaluation }>('/api/growth/ai/grade-essay/', {
+      const res = await apiFetch<{ ok: boolean; evaluation: EssayEvaluation }>('/api/growth/essay/evaluate/', {
         method: 'POST',
-        body: JSON.stringify({ essay_text: essayText }),
+        body: JSON.stringify({
+          essay_text: essayText,
+          prompt_text: "Tabiat va insoniyat o'rtasidagi uyg'unlik",
+        }),
       });
 
-      if (res && res.ok) {
+      if (res && res.ok && res.evaluation) {
         setEssayResult(res.evaluation);
         soundFX.fanfare();
         tgHaptic('medium');

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, ArrowRight, Sprout, Swords, Target, Sparkles, type LucideIcon } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import DopamineOnboarding from '@/components/growth/DopamineOnboarding';
 
 const STEPS: { badge: string; icon: LucideIcon; title: string; description: string; points: string[] }[] = [
   {
@@ -35,12 +36,12 @@ const STEPS: { badge: string; icon: LucideIcon; title: string; description: stri
   {
     badge: '3 DAQIQALIK ILK SINOV',
     icon: Target,
-    title: 'Darajangizni aniqlash uchun 5 ta tezkor savol',
+    title: 'Darajangizni aniqlang va B+ potensialini kashf qiling',
     description:
-      "Hech qanday murakkabliksiz — hoziroq 3 daqiqalik ekspress sinovdan o'ting, bilim darajangizni aniqlang va +50 Tanga bonusga ega bo'ling!",
+      "Hech qanday murakkabliksiz — hoziroq 7 ta savollik ekspress diagnostikadan o'ting, bilim darajangizni aniqlang va +100 Tanga bonusga ega bo'ling!",
     points: [
-      "Bor-yo'g'i 5 ta qiziqarli savol",
-      'Ilk olovingiz (Streak 🔥) va +50 Tanga bonus',
+      "7 ta adaptiv savol (Oson -> O'rtacha -> Qiyin)",
+      'B+ Milliy Sertifikat daraja potensiali nishoni',
       'Kuchli va zaif mavzularingizning lahzalik tahlili',
     ],
   },
@@ -48,16 +49,41 @@ const STEPS: { badge: string; icon: LucideIcon; title: string; description: stri
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(0);
+  const [showBlitz, setShowBlitz] = useState(() => searchParams.get('mode') === 'blitz');
+
+  useEffect(() => {
+    if (searchParams.get('mode') === 'blitz') {
+      setShowBlitz(true);
+    }
+  }, [searchParams]);
 
   async function complete() {
     await apiFetch('/api/auth/onboarding-complete/', { method: 'POST' }).catch(() => {});
-    router.push('/tests');
+    router.push('/dashboard');
   }
 
   function handleNext() {
-    if (currentStep < STEPS.length - 1) setCurrentStep(currentStep + 1);
-    else complete();
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setShowBlitz(true);
+    }
+  }
+
+  // 7-Savollik Dofamin Onboarding
+  if (showBlitz) {
+    return (
+      <div className="relative flex min-h-[85vh] flex-1 flex-col items-center justify-center p-4">
+        <DopamineOnboarding
+          onComplete={async () => {
+            await apiFetch('/api/auth/onboarding-complete/', { method: 'POST' }).catch(() => {});
+            router.push('/sprint?subject=tarix&count=10');
+          }}
+        />
+      </div>
+    );
   }
 
   const step = STEPS[currentStep];
@@ -69,11 +95,16 @@ export default function OnboardingPage() {
           {STEPS.map((_, idx) => (
             <div
               key={idx}
-              className={cn('h-2 rounded-full transition-all duration-300', idx === currentStep ? 'w-8 bg-primary' : 'w-2 bg-[var(--border-strong)]')}
+              className={cn(
+                'h-2 rounded-full transition-all duration-300',
+                idx === currentStep ? 'w-8 bg-primary' : 'w-2 bg-[var(--border-strong)]'
+              )}
             />
           ))}
         </div>
-        <Button variant="ghost" size="sm" onClick={complete}>O&apos;tkazib yuborish</Button>
+        <Button variant="ghost" size="sm" onClick={complete}>
+          O&apos;tkazib yuborish
+        </Button>
       </div>
 
       <Card className="w-full max-w-lg shadow-2xl">
@@ -82,12 +113,19 @@ export default function OnboardingPage() {
             <step.icon className="size-10" />
           </div>
 
-          <Badge variant="outline" className="mb-3 border-[var(--accent-border)] bg-[var(--accent-soft)] uppercase tracking-widest text-[var(--accent-text)]">
+          <Badge
+            variant="outline"
+            className="mb-3 border-[var(--accent-border)] bg-[var(--accent-soft)] uppercase tracking-widest text-[var(--accent-text)]"
+          >
             {step.badge}
           </Badge>
 
-          <h1 className="font-voice mb-3 text-2xl font-bold leading-snug tracking-tight sm:text-3xl">{step.title}</h1>
-          <p className="mb-6 max-w-md text-sm leading-relaxed text-[var(--text-secondary)]">{step.description}</p>
+          <h1 className="font-voice mb-3 text-2xl font-bold leading-snug tracking-tight sm:text-3xl">
+            {step.title}
+          </h1>
+          <p className="mb-6 max-w-md text-sm leading-relaxed text-[var(--text-secondary)]">
+            {step.description}
+          </p>
 
           <div className="mb-8 w-full space-y-2 text-left">
             {step.points.map((pt, i) => (
@@ -100,8 +138,8 @@ export default function OnboardingPage() {
             ))}
           </div>
 
-          <Button onClick={handleNext} size="lg" className="w-full font-bold">
-            {currentStep === STEPS.length - 1 ? "🚀 3 daqiqalik testni boshlash (+50 Tanga)" : 'Keyingisi'}
+          <Button onClick={handleNext} size="lg" className="w-full font-bold cursor-pointer">
+            {currentStep === STEPS.length - 1 ? '🚀 7 ta savollik Dofamin Blitsni boshlash' : 'Keyingisi'}
             <ArrowRight className="size-4" />
           </Button>
         </CardContent>

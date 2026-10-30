@@ -26,6 +26,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import GhostBattleArena from '@/components/arena/GhostBattleArena';
+import ViralDuelModal from '@/components/growth/ViralDuelModal';
 
 type ArenaData = {
   total_battles: number; wins: number; losses: number; draws: number; elo_rating: number;
@@ -34,7 +36,7 @@ type ArenaData = {
 
 type Question = { round_number: number; question_id: number; text: string; choices: { id: number; text: string }[] };
 
-type Mode = 'idle' | 'ai' | 'live-searching' | 'live' | 'result';
+type Mode = 'idle' | 'ai' | 'live-searching' | 'live' | 'result' | 'ghost';
 
 type OnlineUser = { id: number; name: string; avatar: string; elo: number };
 type IncomingChallenge = { battle_id: number; from: { name: string; id?: number } };
@@ -55,6 +57,10 @@ export default function BattlesPage() {
   const [correctChoiceId, setCorrectChoiceId] = useState<number | null>(null);
   const [resultMsg, setResultMsg] = useState('');
   const [waitingOpponent, setWaitingOpponent] = useState(false);
+  const [showViralDuel, setShowViralDuel] = useState(false);
+  const [isChallengerMode, setIsChallengerMode] = useState(false);
+  const [duelToken, setDuelToken] = useState<string | null>(null);
+  const [duelUserScore, setDuelUserScore] = useState(80);
   /* Jangdan OLDINGI ELO — natija ekranida o'zgarishni ko'rsatish uchun. Server yangi
      qiymatni qaytargach, raqam eskidan yangisiga "aylanib" o'tadi. */
   const [prevElo, setPrevElo] = useState<number | null>(null);
@@ -73,7 +79,21 @@ export default function BattlesPage() {
   useEffect(() => {
     if (!access) return;
     loadArena();
-  }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [access]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const token =
+      urlParams.get('duel') ||
+      (window as unknown as { Telegram?: { WebApp?: { initDataUnsafe?: { start_param?: string } } } })?.Telegram?.WebApp?.initDataUnsafe?.start_param?.replace('duel_', '') ||
+      null;
+    if (token) {
+      setDuelToken(token);
+      setIsChallengerMode(true);
+      setShowViralDuel(true);
+    }
+  }, []);
+ // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => () => { wsRef.current?.close(); mmRef.current?.close(); lobbyRef.current?.close(); }, []);
 
@@ -198,6 +218,8 @@ export default function BattlesPage() {
   }
 
   function startLiveMatch() {
+    setMode('ghost');
+    return;
     setMode('live-searching');
     const subject = selectedSubject || '';
     const mm = openSocket('/ws/battles/matchmaking/', subject ? { subject } : {});
@@ -280,26 +302,13 @@ export default function BattlesPage() {
 
   function inviteFriend() {
     soundFX.click();
-    const shareText = "Men bilan IlmIldizi 1v1 Battle Arenasida bilimingizni sinab ko'ring! Qani, kim ko'proq savolga to'g'ri javob topadi? âš”ï¸ðŸ”¥";
-    const shareUrl = `https://t.me/ilmildiziuz_bot?start=arena_${user?.id || 'duel'}`;
-    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
-
-    if (typeof window !== 'undefined' && (window as unknown as { Telegram?: { WebApp?: { openTelegramLink: (url: string) => void } } })?.Telegram?.WebApp?.openTelegramLink) {
-      (window as unknown as { Telegram: { WebApp: { openTelegramLink: (url: string) => void } } }).Telegram.WebApp.openTelegramLink(tgShareUrl);
-    } else {
-      window.open(tgShareUrl, '_blank');
-    }
+    setShowViralDuel(true);
   }
 
   function copyInviteLink(e: React.MouseEvent) {
     e.stopPropagation();
     soundFX.click();
-    const shareUrl = `https://t.me/ilmildiziuz_bot?start=arena_${user?.id || 'duel'}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      toast.success("Do'stni jangga chaqirish havolasi nusxalandi!");
-    }).catch(() => {
-      toast.info(`Havola: ${shareUrl}`);
-    });
+    setShowViralDuel(true);
   }
 
   const currentQ = questions[roundIdx];
@@ -319,6 +328,21 @@ export default function BattlesPage() {
     <>
       <AppShell />
       <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+                {mode === 'ghost' && (
+          <GhostBattleArena
+            subjectSlug={selectedSubject || 'tarix'}
+            incomingDuelToken={duelToken}
+            onExit={() => {
+              setMode('idle');
+              setDuelToken(null);
+            }}
+            onOpenViralDuel={(score) => {
+              setDuelUserScore(score);
+              setShowViralDuel(true);
+            }}
+          />
+        )}
+
         {mode === 'idle' && (
           <div className="space-y-6">
             <PageHero
@@ -398,7 +422,7 @@ export default function BattlesPage() {
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, bilimlarni mustahkamlang.
                   </p>
-                  <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) →</span>
+                  <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) <ArrowRight className="size-3.5 inline ml-1" /></span>
                 </CardContent>
               </Card>
 
@@ -413,7 +437,7 @@ export default function BattlesPage() {
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
                   </p>
-                  <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish →</span>
+                  <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish <ArrowRight className="size-3.5 inline ml-1" /></span>
                 </CardContent>
               </Card>
 
@@ -429,7 +453,7 @@ export default function BattlesPage() {
                     Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.
                   </p>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-400">Telegramda ulashish →</span>
+                    <span className="text-xs font-bold text-amber-400">Telegramda ulashish <ArrowRight className="size-3.5 inline ml-1" /></span>
                     <button
                       onClick={copyInviteLink}
                       title="Nusxa olish"
@@ -475,7 +499,7 @@ export default function BattlesPage() {
                       </div>
 
                       <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+25 XP · +10 tanga</span>
+                        <span className="text-[11px] font-bold text-amber-400">+25 XP • +10 tanga</span>
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
                           O&apos;ynash <ArrowRight className="size-3.5" />
                         </span>
@@ -504,7 +528,7 @@ export default function BattlesPage() {
                       </div>
 
                       <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+20 XP · +10 tanga</span>
+                        <span className="text-[11px] font-bold text-amber-400">+20 XP • +10 tanga</span>
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
                           O&apos;ynash <ArrowRight className="size-3.5" />
                         </span>
@@ -533,7 +557,7 @@ export default function BattlesPage() {
                       </div>
 
                       <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+30 XP · +15 tanga</span>
+                        <span className="text-[11px] font-bold text-amber-400">+30 XP • +15 tanga</span>
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
                           O&apos;ynash <ArrowRight className="size-3.5" />
                         </span>
@@ -755,6 +779,17 @@ export default function BattlesPage() {
           </DialogContent>
         </Dialog>
       </main>
+      <ViralDuelModal
+        isOpen={showViralDuel}
+        onClose={() => setShowViralDuel(false)}
+        userScore={duelUserScore}
+        isChallengerMode={isChallengerMode}
+        duelToken={duelToken || undefined}
+        onAcceptDuel={() => {
+          setShowViralDuel(false);
+          setMode('ghost');
+        }}
+      />
     </>
   );
 }

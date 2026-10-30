@@ -333,7 +333,7 @@ export default function NeuralSprintView({
               transition={{ duration: 0.25 }}
               className="space-y-4"
             >
-              <div className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 shadow-sm">
+              <div className="rounded-xl border border-white/10 bg-zinc-900/70 p-4 sm:p-5 shadow-sm">
                 <div
                   className="text-base sm:text-lg font-bold text-foreground leading-relaxed prose dark:prose-invert max-w-none [&_p]:my-0"
                   dangerouslySetInnerHTML={{ __html: currentQuestion.body }}
@@ -411,9 +411,9 @@ export default function NeuralSprintView({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 z-50 p-4 sm:p-6 bg-gradient-to-t from-background via-background/95 to-transparent backdrop-blur-lg flex justify-center"
+            className="fixed inset-0 z-50 p-3 sm:p-4 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center"
           >
-            <div className="w-full max-w-xl rounded-3xl border-2 border-rose-500/40 bg-card p-5 shadow-2xl shadow-rose-950/20 space-y-4">
+            <div className="w-full max-w-xl rounded-2xl border border-rose-500/40 bg-zinc-950 p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[85vh] overflow-y-auto">
               {/* Sarlavha */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-wider">

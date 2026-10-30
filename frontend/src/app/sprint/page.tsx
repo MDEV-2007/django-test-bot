@@ -79,6 +79,17 @@ export default function SprintPage() {
     fetchSubjects();
   }, []);
 
+  // Avtomatik boshlash (Turnir / Jonli Banner havolasidan kelganda)
+  useEffect(() => {
+    if (searchParams.get('autostart') === 'true') {
+      const p = searchParams.get('subject');
+      const subjId = p === 'all' ? 0 : (parseInt(p || '0', 10) || 0);
+      const c = searchParams.get('count');
+      const count = c ? parseInt(c, 10) || 10 : 10;
+      startSprint(subjId, count);
+    }
+  }, [searchParams]);
+
   // Tanlangan fan bo'yicha sprintni boshlash
   const startSprint = async (subjectId = selectedSubjectId, count = questionCount) => {
     setLoadingQuestions(true);

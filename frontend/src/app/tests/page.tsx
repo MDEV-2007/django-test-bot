@@ -319,6 +319,31 @@ export default function TestsPage() {
           description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
         />
 
+        {/* 7-SAVOLLIK DOFAMiN BLITS DIAGNOSTIKA BANNERI */}
+        <Reveal>
+          <div className="relative overflow-hidden rounded-[24px] bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-4 sm:p-5 text-white shadow-lg">
+            <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-white/10 rounded-full blur-2xl" />
+            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1.5 max-w-xl">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-0.5 text-xs font-bold text-white">
+                  <Sparkles className="size-3.5 text-amber-300" /> Ilk Sinov · 3 Daqiqalik Dofamin Blits
+                </div>
+                <h3 className="text-lg sm:text-xl font-black">
+                  Qaysi darajadasiz? 7 ta savolda B+ potensialini aniqlang!
+                </h3>
+                <p className="text-xs sm:text-sm text-blue-100 leading-relaxed">
+                  45 ta savollik to&apos;liq testga kirishdan oldin 7 ta adaptiv savoldan o&apos;ting, kuchli va zaif mavzularingizni ko&apos;ring hamda <strong>+100 Tanga bonus</strong> oling!
+                </p>
+              </div>
+              <Button asChild size="lg" className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-black shadow-md shrink-0 h-11 px-6">
+                <Link href="/onboarding?mode=blitz">
+                  Sinovdan o&apos;tish <ArrowRight className="size-4 ml-1.5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </Reveal>
+
         {/* iOS Live Activity Pinned Mock Imtihon Banner */}
         {data?.pinned_mock && (() => {
           const theme = SUBJECT_IOS_THEME[data.pinned_mock.subject_slug] || SUBJECT_IOS_THEME['tarix'];
