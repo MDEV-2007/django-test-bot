@@ -40,6 +40,8 @@ const DEFAULT_FEATURES: Record<string, FeatureItem> = {
   flashcards: { key: 'flashcards', name: 'Smart Flashcardlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: '2.0 Beta', target_route: '/flashcards', icon_name: 'Layers' },
   battles: { key: 'battles', name: '1v1 Battle Arena', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Live', target_route: '/battles', icon_name: 'Swords' },
   learning: { key: 'learning', name: 'Darslar & Konspektlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Audio', target_route: '/learning', icon_name: 'BookOpen' },
+  library: { key: 'library', name: 'Kutubxona & Darsliklar', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'PDF', target_route: '/library', icon_name: 'BookOpen' },
+  sprint: { key: 'sprint', name: 'Jonli Fokus Sprinti', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'HOT', target_route: '/sprint', icon_name: 'Zap' },
   games: { key: 'games', name: "Tarixiy Mini O'yinlar", is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Bonus XP', target_route: '/games/timeline', icon_name: 'Gamepad2' },
   ai_mentor: { key: 'ai_mentor', name: 'AI Shaxsiy Mentor', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'AI', target_route: '/tests', icon_name: 'Bot' },
   otm_predictor: { key: 'otm_predictor', name: 'OTM Qabul Bashorati', is_enabled: true, admin_only: false, is_beta: false, badge_text: '2025/2026', target_route: '/analytics', icon_name: 'GraduationCap' },

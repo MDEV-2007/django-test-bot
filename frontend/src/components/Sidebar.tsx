@@ -66,10 +66,10 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
-      { href: '/sprint', label: 'Jonli Sprint', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', matchPrefixes: ['/sprint'] },
+      { href: '/sprint', label: 'Jonli Sprint', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
       { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'BMB', tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
       { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'], teacherOrAdminOnly: true },
-      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'indigo', matchPrefixes: ['/library'], api: '/api/learning/library/' },
+      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'indigo', featureKey: 'library', matchPrefixes: ['/library'], api: '/api/learning/library/' },
       { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, tone: 'purple', featureKey: 'ai_mentor' },
     ],
   },

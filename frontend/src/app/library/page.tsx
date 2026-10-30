@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AppShell from '@/components/AppShell';
+import ComingSoonFeature from '@/components/ui/coming-soon-feature';
+import { useFeatureFlags } from '@/lib/features';
 import { useApiQuery } from '@/lib/api-cache';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -87,6 +89,7 @@ interface LibraryResponse {
 
 export default function LibraryPage() {
   const { user } = useAuthStore();
+  const { isEnabled } = useFeatureFlags();
 
   // Filters state
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
@@ -161,6 +164,17 @@ export default function LibraryPage() {
     setActiveBook(book);
     apiFetch(`/api/learning/library/${book.id}/`).catch(() => {});
   };
+
+  if (!isEnabled('library')) {
+    return (
+      <>
+        <AppShell />
+        <main className="page-shell flex-1 p-4 sm:p-6 bg-[#F2F2F7] dark:bg-[#000000]">
+          <ComingSoonFeature featureKey="library" />
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
