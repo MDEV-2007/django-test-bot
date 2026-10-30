@@ -14,7 +14,7 @@ If backend changes were made:
 ```bash
 cd /opt/ilmildizi && \
 git pull origin main && \
-docker compose up -d --build --no-deps backend && \
+docker compose up -d --build --no-deps web && \
 docker compose exec nginx nginx -s reload
 ```
 
@@ -22,7 +22,7 @@ If both frontend and backend changes were made:
 ```bash
 cd /opt/ilmildizi && \
 git pull origin main && \
-docker compose up -d --build --no-deps backend frontend && \
+docker compose up -d --build --no-deps web frontend && \
 docker compose exec nginx nginx -s reload
 ```
 
