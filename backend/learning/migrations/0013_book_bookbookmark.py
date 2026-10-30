@@ -8,8 +8,7 @@ from django.db import migrations, models
 def safe_create_models(apps, schema_editor):
     """PostgreSQL'da agar learning_book jadvali mavjud bo'lsa xatolik bermasdan o'tkazib yuboradi,
     agar learning_bookbookmark yo'q bo'lsa uni xavfsiz yaratadi."""
-    Book = apps.get_model('learning', 'Book')
-    BookBookmark = apps.get_model('learning', 'BookBookmark')
+    from learning.models import Book, BookBookmark
     existing_tables = schema_editor.connection.introspection.table_names()
 
     if Book._meta.db_table not in existing_tables:
