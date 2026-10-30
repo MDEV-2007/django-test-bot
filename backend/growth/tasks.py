@@ -89,3 +89,4 @@ def broadcast_2030_republic_arena(stage: str = "15m"):
 
     logger.info(f"Republic Arena {stage} broadcast sent to {sent_count} students.")
     return sent_count
+

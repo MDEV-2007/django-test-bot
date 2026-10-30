@@ -242,3 +242,4 @@ class UserGrowthStatusAPIView(APIView):
             'quota': quota_data,
             'live_event': event_data
         })
+

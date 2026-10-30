@@ -2,11 +2,11 @@
 
 /* Telegram Mini App integratsiyasi.
  *
- * MUHIM: bu modul oddiy brauzerda TO'LIQ passiv bo'lishi kerak â€” hech qanday tashqi
+ * MUHIM: bu modul oddiy brauzerda TO'LIQ passiv bo'lishi kerak — hech qanday tashqi
  * so'rov yubormaydi, DOM'ga tegmaydi, hech narsani o'zgartirmaydi. Shuning uchun SDK
  * skripti faqat Telegram muhiti ANIQLANGANDAN keyin yuklanadi: Telegram ilova ochganda
  * URL'ga `#tgWebAppData=...` fragmentini qo'shadi (web/desktop) yoki mobil webview'da
- * `window.TelegramWebviewProxy` obyektini beradi. Ikkalasi ham yo'q bo'lsa â€” bu oddiy
+ * `window.TelegramWebviewProxy` obyektini beradi. Ikkalasi ham yo'q bo'lsa — bu oddiy
  * sayt va bu yerdagi barcha funksiya no-op qaytaradi.
  */
 
@@ -78,7 +78,7 @@ declare global {
 const SDK_URL = 'https://telegram.org/js/telegram-web-app.js';
 const ENV_FLAG = 'ilm_tg_env';
 
-/** Telegram ichida ochilganmi? Natija sessiyaga yoziladi â€” ichki navigatsiyada
+/** Telegram ichida ochilganmi? Natija sessiyaga yoziladi — ichki navigatsiyada
  *  `#tgWebApp...` fragmenti yo'qoladi, lekin muhit o'zgarmaydi. */
 export function isTelegramEnv(): boolean {
   if (typeof window === 'undefined') return false;
@@ -122,11 +122,11 @@ export function getWebApp(): TelegramWebApp | null {
   return window.Telegram?.WebApp ?? null;
 }
 
-/* â”€â”€ Haptika â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Haptika ────────────────────────────────────────────────────────────────── */
 
 export type HapticKind = 'select' | 'light' | 'medium' | 'success' | 'error' | 'warning';
 
-/** Tebranish. Telegramdan tashqarida â€” no-op. Eski mijozlarda `HapticFeedback`
+/** Tebranish. Telegramdan tashqarida — no-op. Eski mijozlarda `HapticFeedback`
  *  bo'lmasligi mumkin, shuning uchun barchasi try/catch ichida. */
 export function tgHaptic(kind: HapticKind = 'select') {
   const haptic = getWebApp()?.HapticFeedback;
@@ -136,11 +136,11 @@ export function tgHaptic(kind: HapticKind = 'select') {
     else if (kind === 'light' || kind === 'medium') haptic.impactOccurred(kind);
     else haptic.notificationOccurred(kind);
   } catch {
-    /* eski Telegram versiyasi â€” e'tiborsiz qoldiriladi */
+    /* eski Telegram versiyasi — e'tiborsiz qoldiriladi */
   }
 }
 
-/* â”€â”€ Orqaga tugmasi â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Orqaga tugmasi ─────────────────────────────────────────────────────────── */
 
 /* Telegram'da faqat BITTA BackButton bor, ekranlar esa ichma-ich (masalan, imtihon
    sahifasi umumiy "orqaga"ni o'z tasdiqlash modali bilan almashtiradi). Shuning uchun
@@ -164,7 +164,7 @@ function syncBackButton() {
 }
 
 /** `handler` berilsa Telegram'ning "orqaga" tugmasi ko'rsatiladi va bosilganda shu
- *  funksiya chaqiriladi. `null` â€” bu ekran tugmani talab qilmaydi. */
+ *  funksiya chaqiriladi. `null` — bu ekran tugmani talab qilmaydi. */
 export function useTelegramBackButton(handler: (() => void) | null) {
   const ref = useRef(handler);
   ref.current = handler;
@@ -183,7 +183,7 @@ export function useTelegramBackButton(handler: (() => void) | null) {
   }, [enabled]);
 }
 
-/* â”€â”€ Asosiy tugma â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Asosiy tugma ───────────────────────────────────────────────────────────── */
 
 /** Telegram'ning pastki nativ tugmasi. `label` null bo'lsa tugma yashiriladi. */
 export function useTelegramMainButton(
@@ -221,9 +221,9 @@ export function useTelegramMainButton(
   }, [label, loading, disabled]);
 }
 
-/* â”€â”€ Yopishni tasdiqlash â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Yopishni tasdiqlash ────────────────────────────────────────────────────── */
 
-/** Yoqilganda foydalanuvchi Mini App'ni yopmoqchi bo'lsa Telegram so'raydi â€”
+/** Yoqilganda foydalanuvchi Mini App'ni yopmoqchi bo'lsa Telegram so'raydi —
  *  imtihon davomida tasodifiy yopilish javoblarni yo'qotmasligi uchun. */
 export function useTelegramClosingConfirmation(enabled: boolean) {
   useEffect(() => {
@@ -234,14 +234,14 @@ export function useTelegramClosingConfirmation(enabled: boolean) {
   }, [enabled]);
 }
 
-/* â”€â”€ Story ulashish â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Story ulashish ─────────────────────────────────────────────────────────── */
 
 /** Telegram Story'ga rasm qo'yish (Bot API 7.8+).
  *
- *  Diqqat: `mediaUrl` OCHIQ manzil bo'lishi shart â€” rasmni foydalanuvchining telefoni
+ *  Diqqat: `mediaUrl` OCHIQ manzil bo'lishi shart — rasmni foydalanuvchining telefoni
  *  emas, Telegram serverlari yuklab oladi va ular hech qanday token yubormaydi.
  *
- *  Qaytadi: `false` â€” muhit yoki mijoz versiyasi qo'llab-quvvatlamaydi (chaqiruvchi
+ *  Qaytadi: `false` — muhit yoki mijoz versiyasi qo'llab-quvvatlamaydi (chaqiruvchi
  *  o'shanda tugmani ko'rsatmasligi yoki boshqa ulashish usulini taklif qilishi mumkin). */
 export function shareToStory(
   mediaUrl: string,
@@ -263,7 +263,7 @@ export function canShareToStory(): boolean {
   return !!wa?.shareToStory && wa.isVersionAtLeast('7.8');
 }
 
-/* â”€â”€ Tayyorlik holati â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Tayyorlik holati ───────────────────────────────────────────────────────── */
 
 /* SDK asinxron yuklanadi, komponentlar esa undan oldin chiziladi. Shuning uchun
    "Telegram ichidamizmi" savoliga javob obuna bo'linadigan qilib saqlanadi: SDK
@@ -291,10 +291,10 @@ export function useIsTelegram(): boolean {
   return inTelegram;
 }
 
-/* â”€â”€ Telegram havolasini ochish â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Telegram havolasini ochish ────────────────────────────────── */
 
 /** t.me havolasini Telegram ILOVASI ichida ochadi. Mini App ichidan oddiy `window.open`
- *  brauzerni ochadi â€” foydalanuvchi kanalga obuna bo'lish uchun ilovani tark etadi va
+ *  brauzerni ochadi — foydalanuvchi kanalga obuna bo'lish uchun ilovani tark etadi va
  *  ko'pincha qaytmaydi. `openTelegramLink` esa ilova ichida kanal sahifasiga o'tkazadi.
  *  Telegramdan tashqarida yangi tabda ochiladi. */
 export function openTelegramLink(url: string) {

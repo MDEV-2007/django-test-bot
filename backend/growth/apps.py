@@ -5,3 +5,4 @@ class GrowthConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'growth'
     verbose_name = 'Growth, Monetizatsiya va Gamifikatsiya'
+

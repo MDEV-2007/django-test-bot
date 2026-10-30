@@ -182,3 +182,4 @@ class ViralDuelChallenge(models.Model):
 
     def __str__(self):
         return f"Duel {self.duel_token} by {self.creator.user.username} ({self.creator_score} ball)"
+

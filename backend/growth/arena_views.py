@@ -325,3 +325,4 @@ class SubmitDuelResultAPIView(APIView):
             'is_winner': challenger_score > duel.creator_score,
             'reward_received': "+50 XP, +25 Tanga"
         })
+

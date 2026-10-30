@@ -55,7 +55,7 @@ export default function BattlesPage() {
   const [correctChoiceId, setCorrectChoiceId] = useState<number | null>(null);
   const [resultMsg, setResultMsg] = useState('');
   const [waitingOpponent, setWaitingOpponent] = useState(false);
-  /* Jangdan OLDINGI ELO â€” natija ekranida o'zgarishni ko'rsatish uchun. Server yangi
+  /* Jangdan OLDINGI ELO — natija ekranida o'zgarishni ko'rsatish uchun. Server yangi
      qiymatni qaytargach, raqam eskidan yangisiga "aylanib" o'tadi. */
   const [prevElo, setPrevElo] = useState<number | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
@@ -81,7 +81,7 @@ export default function BattlesPage() {
     apiFetch<{ users: OnlineUser[] }>('/api/battles/online/').then((d) => setOnlineUsers(d.users)).catch(() => {});
   }, []);
 
-  /* Lobby socket â€” butun sahifa hayoti davomida ulanib turadi, chunki qarshi tomon
+  /* Lobby socket — butun sahifa hayoti davomida ulanib turadi, chunki qarshi tomon
      har qanday holatda (idle, jang o'rtasida) chaqiruv yuborishi mumkin. */
   useEffect(() => {
     if (!access) return;
@@ -115,7 +115,7 @@ export default function BattlesPage() {
     return () => ws.close();
   }, [access]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* Faqat "idle" holatda ro'yxatni yangilab turamiz â€” jang jarayonida keraksiz. */
+  /* Faqat "idle" holatda ro'yxatni yangilab turamiz — jang jarayonida keraksiz. */
   useEffect(() => {
     if (!access || mode !== 'idle') return;
     loadOnlineUsers();
@@ -224,7 +224,7 @@ export default function BattlesPage() {
   }
 
   /* Savolsiz jangga KIRMAYMIZ. Ilgari bo'sh ro'yxat kelsa ham rejim 'live'ga o'tar,
-     lekin ko'rsatadigan savol bo'lmagani uchun ekran butunlay bo'sh (qora) qolardi â€”
+     lekin ko'rsatadigan savol bo'lmagani uchun ekran butunlay bo'sh (qora) qolardi —
      ikkala o'yinchida ham. Server endi bunday jangni yaratmaydi; bu esa eski
      serverga qarshi ham himoya. */
   function ensurePlayable(qs: Question[] | undefined): qs is Question[] {
@@ -253,7 +253,7 @@ export default function BattlesPage() {
       } else if (msg.event === 'battle_finished') {
         const myId = String(useAuthStore.getState().user?.id);
         const result = msg.results[myId];
-        setResultMsg(`Natija: ${result.result} Â· +${result.xp_gained} XP, +${result.coins_gained} tanga`);
+        setResultMsg(`Natija: ${result.result} · +${result.xp_gained} XP, +${result.coins_gained} tanga`);
         setMode('result');
         if (String(result.result).toLowerCase().includes('win')) {
           soundFX.fanfare();
@@ -330,7 +330,7 @@ export default function BattlesPage() {
             />
 
             {/* Hali jang qilmagan o'yinchi uchun 5 ta nol to'la qator asosiy harakatdan
-                diqqatni tortadi â€” o'rniga bitta boshlang'ich ELO kartasi ko'rsatiladi. */}
+                diqqatni tortadi — o'rniga bitta boshlang'ich ELO kartasi ko'rsatiladi. */}
             {arena && arena.total_battles === 0 && (
               <Card className="border-blue-500/25 bg-blue-500/[0.05]">
                 <CardContent className="flex items-center gap-4 pt-6">
@@ -343,7 +343,7 @@ export default function BattlesPage() {
                       <span className="ml-1.5 text-xs font-semibold text-muted-foreground">({arenaRankTitle(arena.elo_rating)})</span>
                     </p>
                     <p className="mt-0.5 text-sm text-muted-foreground">
-                      Birinchi jangingizni boshlang â€” g&apos;alaba ELO, XP va tanga olib keladi.
+                      Birinchi jangingizni boshlang — g&apos;alaba ELO, XP va tanga olib keladi.
                     </p>
                   </div>
                 </CardContent>
@@ -398,7 +398,7 @@ export default function BattlesPage() {
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, bilimlarni mustahkamlang.
                   </p>
-                  <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) â†’</span>
+                  <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) →</span>
                 </CardContent>
               </Card>
 
@@ -413,7 +413,7 @@ export default function BattlesPage() {
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
                   </p>
-                  <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish â†’</span>
+                  <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish →</span>
                 </CardContent>
               </Card>
 
@@ -429,7 +429,7 @@ export default function BattlesPage() {
                     Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.
                   </p>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-400">Telegramda ulashish â†’</span>
+                    <span className="text-xs font-bold text-amber-400">Telegramda ulashish →</span>
                     <button
                       onClick={copyInviteLink}
                       title="Nusxa olish"
@@ -475,7 +475,7 @@ export default function BattlesPage() {
                       </div>
 
                       <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+25 XP Â· +10 tanga</span>
+                        <span className="text-[11px] font-bold text-amber-400">+25 XP · +10 tanga</span>
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
                           O&apos;ynash <ArrowRight className="size-3.5" />
                         </span>
@@ -504,7 +504,7 @@ export default function BattlesPage() {
                       </div>
 
                       <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+20 XP Â· +10 tanga</span>
+                        <span className="text-[11px] font-bold text-amber-400">+20 XP · +10 tanga</span>
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
                           O&apos;ynash <ArrowRight className="size-3.5" />
                         </span>
@@ -533,7 +533,7 @@ export default function BattlesPage() {
                       </div>
 
                       <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+30 XP Â· +15 tanga</span>
+                        <span className="text-[11px] font-bold text-amber-400">+30 XP · +15 tanga</span>
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
                           O&apos;ynash <ArrowRight className="size-3.5" />
                         </span>
@@ -708,10 +708,10 @@ export default function BattlesPage() {
               </div>
               <h2 className="font-voice text-2xl font-bold">{resultMsg}</h2>
               <p className="font-mono text-sm text-muted-foreground">
-                Yakuniy hisob: <strong className="text-foreground">{myScore} â€” {oppScore}</strong>
+                Yakuniy hisob: <strong className="text-foreground">{myScore} — {oppScore}</strong>
               </p>
 
-              {/* ELO o'zgarishi â€” raqam eski qiymatdan yangisiga aylanib o'tadi. */}
+              {/* ELO o'zgarishi — raqam eski qiymatdan yangisiga aylanib o'tadi. */}
               {arena && (
                 <div className="w-full rounded-2xl border bg-[var(--surface-input)] px-4 py-3">
                   <p className="font-mono text-xs uppercase text-muted-foreground">Arena reytingi</p>

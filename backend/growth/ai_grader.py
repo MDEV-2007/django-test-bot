@@ -265,3 +265,4 @@ Iltimos, ushbu esseni BMB mezonida tekshirib, xatolar ro'yxati va ballarini hiso
         'is_locked': not is_vip,
         'paywall_message': "🔒 Xatolar tahlilini ko'rish uchun VIP rejimni faollashtiring." if not is_vip else ""
     }
+

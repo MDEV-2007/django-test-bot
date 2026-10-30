@@ -27,3 +27,4 @@ urlpatterns = [
     path('arena/duel/<str:duel_token>/', GetDuelChallengeAPIView.as_view(), name='growth-arena-get-duel'),
     path('arena/duel/<str:duel_token>/submit/', SubmitDuelResultAPIView.as_view(), name='growth-arena-submit-duel'),
 ]
+
