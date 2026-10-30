@@ -136,7 +136,22 @@ export default function FeaturesManagementPage() {
         );
 
         // Sidebar va ilova menyularini bir zumda yangilash
-        useFeaturesStore.getState().fetchFeatures();
+        useFeaturesStore.setState((state) => {
+          const updated = {
+            ...state.features,
+            [key]: {
+              ...(state.features[key] || {}),
+              ...res.feature,
+            },
+          };
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('ilmildizi_features_cache_v2', JSON.stringify(updated));
+            } catch {}
+          }
+          return { features: updated };
+        });
+        useFeaturesStore.getState().fetchFeatures(true);
       }
     } catch {
       toast.error("Holatni o'zgartirishda xatolik yuz berdi");
@@ -163,7 +178,7 @@ export default function FeaturesManagementPage() {
       });
       toast.success(res.message || 'Muvaffaqiyatli bajarildi');
       await loadFeatures();
-      useFeaturesStore.getState().fetchFeatures();
+      useFeaturesStore.getState().fetchFeatures(true);
     } catch {
       toast.error('Amalni bajarishda xatolik');
       setLoading(false);

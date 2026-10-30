@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -12,8 +12,10 @@ import {
   User,
   BookOpen,
   Film,
+  Zap,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
+import { useFeatureFlags } from '@/lib/features';
 import { prefetchApi } from '@/lib/api-cache';
 import { tgHaptic } from '@/lib/telegram';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -31,6 +33,7 @@ type TabItem = {
   inactiveIconText: string;
   activeLabelText: string;
   badge?: string;
+  featureKey?: string;
 };
 
 interface MobileTabBarProps {
@@ -42,6 +45,11 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const { user } = useAuthStore();
   const { isDark: systemIsDark } = useTheme();
   const isDark = propTheme !== undefined ? propTheme === 'dark' : systemIsDark;
+  const { isEnabled, refresh } = useFeatureFlags();
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 
@@ -64,11 +72,24 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       activeLabelText: 'text-[#007AFF] dark:text-[#409CFF]',
     },
     {
+      href: '/sprint',
+      label: 'Sprint',
+      icon: Zap,
+      matchPrefixes: ['/sprint'],
+      featureKey: 'sprint',
+      activeBg: 'bg-gradient-to-b from-[#FF9500] to-[#FF3B30]',
+      activeShadow: 'shadow-[0_4px_12px_rgba(255,149,0,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+      inactiveIconText: 'text-[#FF9500]',
+      activeLabelText: 'text-[#FF9500] dark:text-[#FF9F0A]',
+      badge: 'HOT',
+    },
+    {
       href: '/tests',
       label: 'Testlar',
       icon: FileCheck2,
       matchPrefixes: ['/tests'],
       api: '/api/tests/',
+      featureKey: 'tests',
       activeBg: 'bg-gradient-to-b from-[#4CD964] to-[#34C759]',
       activeShadow: 'shadow-[0_4px_12px_rgba(52,199,89,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
       inactiveIconText: 'text-[#34C759]',
@@ -80,6 +101,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       icon: Film,
       matchPrefixes: ['/reels'],
       api: '/api/learning/reels/',
+      featureKey: 'reels',
       activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
       inactiveIconText: 'text-[#FF2D55]',
@@ -90,35 +112,43 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       label: 'Arena',
       icon: Swords,
       matchPrefixes: ['/battles', '/games'],
+      featureKey: 'battles',
       activeBg: 'bg-gradient-to-b from-[#FFB340] to-[#FF9500]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,149,0,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
       inactiveIconText: 'text-[#FF9500]',
       activeLabelText: 'text-[#C93400] dark:text-[#FF9F0A]',
       badge: 'LIVE',
     },
-    isTeacherOrAdmin
-      ? {
-          href: '/teacher',
-          label: 'Sinfxona',
-          icon: GraduationCap,
-          matchPrefixes: ['/teacher'],
-          activeBg: 'bg-gradient-to-b from-[#7D7AFF] to-[#5856D6]',
-          activeShadow: 'shadow-[0_4px_12px_rgba(88,86,214,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-          inactiveIconText: 'text-[#5856D6]',
-          activeLabelText: 'text-[#5856D6] dark:text-[#7D7AFF]',
-        }
-      : {
-          href: '/library',
-          label: 'Kutubxona',
-          icon: BookOpen,
-          matchPrefixes: ['/library'],
-          api: '/api/learning/library/',
-          activeBg: 'bg-gradient-to-b from-[#7D7AFF] to-[#5856D6]',
-          activeShadow: 'shadow-[0_4px_12px_rgba(88,86,214,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-          inactiveIconText: 'text-[#5856D6]',
-          activeLabelText: 'text-[#5856D6] dark:text-[#7D7AFF]',
-        },
+    ...(isTeacherOrAdmin
+      ? [
+          {
+            href: '/teacher',
+            label: 'Sinfxona',
+            icon: GraduationCap,
+            matchPrefixes: ['/teacher'],
+            activeBg: 'bg-gradient-to-b from-[#7D7AFF] to-[#5856D6]',
+            activeShadow: 'shadow-[0_4px_12px_rgba(88,86,214,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+            inactiveIconText: 'text-[#5856D6]',
+            activeLabelText: 'text-[#5856D6] dark:text-[#7D7AFF]',
+          },
+        ]
+      : [
+          {
+            href: '/library',
+            label: 'Kutubxona',
+            icon: BookOpen,
+            matchPrefixes: ['/library'],
+            api: '/api/learning/library/',
+            featureKey: 'library',
+            activeBg: 'bg-gradient-to-b from-[#7D7AFF] to-[#5856D6]',
+            activeShadow: 'shadow-[0_4px_12px_rgba(88,86,214,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+            inactiveIconText: 'text-[#5856D6]',
+            activeLabelText: 'text-[#5856D6] dark:text-[#7D7AFF]',
+          },
+        ]),
   ];
+
+  const visibleTabs = tabs.filter((t) => !t.featureKey || isEnabled(t.featureKey));
 
   const isActive = (href: string, prefixes?: string[]) =>
     pathname === href || (prefixes?.some((p) => pathname.startsWith(p)) ?? false);
@@ -136,7 +166,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
             : 'border border-black/[0.08] bg-white/86 shadow-[0_14px_38px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.95)]'
         )}
       >
-        {tabs.map((tab) => {
+        {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const active = isActive(tab.href, tab.matchPrefixes);
 

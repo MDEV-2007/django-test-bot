@@ -30,7 +30,7 @@ type FeaturesStore = {
 };
 
 const FEATURES_CACHE_KEY = 'ilmildizi_features_cache_v2';
-const FEATURES_TTL_MS = 5 * 60 * 1000; // 5 daqiqa
+const FEATURES_TTL_MS = 30 * 1000; // 30 soniya (avval 5 daqiqa edi)
 let lastFeaturesFetchTime = 0;
 
 // Standart zaxira holat
@@ -132,6 +132,20 @@ if (typeof window !== 'undefined') {
           useFeaturesStore.setState({ features: { ...DEFAULT_FEATURES, ...parsed }, loaded: true });
         }
       } catch {}
+    }
+  });
+
+  const handleActiveRefresh = () => {
+    const now = Date.now();
+    if (now - lastFeaturesFetchTime > 15 * 1000) {
+      useFeaturesStore.getState().fetchFeatures(true);
+    }
+  };
+
+  window.addEventListener('focus', handleActiveRefresh);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      handleActiveRefresh();
     }
   });
 }
