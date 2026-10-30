@@ -148,7 +148,7 @@ export default function LiveRepublicBanner({
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              Respublika bo&apos;yicha bir vaqtda start • 1,000,000 so&apos;mlik sovrin jamg&apos;armasi
+              Respublika bo&apos;yicha bir vaqtda jonli start • ELO va Reyting bellashuvi
             </p>
           </div>
         </div>
