@@ -69,9 +69,9 @@ export default function BmbStressLaunchModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-2 border-rose-500/40 bg-card">
+      <DialogContent className="sm:max-w-xl max-h-[92vh] flex flex-col p-0 overflow-hidden border-2 border-rose-500/40 bg-card">
         {/* Exciting Stress Header */}
-        <div className="p-6 bg-gradient-to-br from-rose-950 via-slate-900 to-amber-950 text-white space-y-2 relative overflow-hidden">
+        <div className="p-4 sm:p-6 bg-gradient-to-br from-rose-950 via-slate-900 to-amber-950 text-white space-y-2 relative overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
             <Flame className="size-48 text-rose-500" />
           </div>
@@ -93,8 +93,8 @@ export default function BmbStressLaunchModal({
           </DialogDescription>
         </div>
 
-        {/* 3 Main Hardcore Features */}
-        <div className="p-5 sm:p-6 space-y-5">
+        {/* 3 Main Hardcore Features & Subject Selector (Scrollable) */}
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="p-3 rounded-xl border border-rose-500/20 bg-rose-500/5 space-y-1">
               <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-bold text-xs">
@@ -175,8 +175,8 @@ export default function BmbStressLaunchModal({
           </div>
         </div>
 
-        {/* Modal Footer */}
-        <DialogFooter className="p-4 sm:p-6 bg-muted/30 border-t border-border flex items-center justify-between sm:justify-between gap-3">
+        {/* Modal Footer (Pinned at bottom) */}
+        <DialogFooter className="p-3 sm:p-4 bg-muted/40 border-t border-border flex items-center justify-between sm:justify-between gap-3 shrink-0">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}

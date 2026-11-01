@@ -460,8 +460,8 @@ export default function TestsPage() {
         {/* IMTIHON REJIMLARI TAB SWITCHER (Standart | Blits | BMB Stress) */}
         {/* ========================================================================= */}
         <div className="space-y-3.5">
-          {/* Segmented Mode Switcher */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-muted/70 border border-border/80 shadow-xs max-w-xl overflow-x-auto no-scrollbar">
+          {/* Segmented Mode Switcher (Fully responsive grid) */}
+          <div className="w-full max-w-xl grid grid-cols-3 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
             <button
               type="button"
               onClick={() => {
@@ -470,16 +470,16 @@ export default function TestsPage() {
                 setHeroMode('standard');
               }}
               className={cn(
-                'flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap select-none',
+                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'standard'
-                  ? 'bg-card text-foreground shadow-sm border border-border/50 scale-[1.01]'
+                  ? 'bg-card text-foreground shadow-sm border border-border/60'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
               )}
             >
-              <GraduationCap className={cn('size-4 transition-colors', heroMode === 'standard' ? 'text-primary' : 'text-muted-foreground')} />
-              <span>Standart Testlar</span>
+              <GraduationCap className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'standard' ? 'text-primary' : 'text-muted-foreground')} />
+              <span className="truncate">Standart</span>
               <span className={cn(
-                'px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none',
+                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'standard' ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
               )}>
                 Rasmiy
@@ -494,16 +494,16 @@ export default function TestsPage() {
                 setHeroMode('blitz');
               }}
               className={cn(
-                'flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap select-none',
+                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'blitz'
-                  ? 'bg-card text-foreground shadow-sm border border-border/50 scale-[1.01]'
+                  ? 'bg-card text-foreground shadow-sm border border-border/60'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
               )}
             >
-              <Sparkles className={cn('size-4 transition-colors', heroMode === 'blitz' ? 'text-blue-500' : 'text-muted-foreground')} />
-              <span>7-Savol Blits</span>
+              <Sparkles className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'blitz' ? 'text-blue-500' : 'text-muted-foreground')} />
+              <span className="truncate">7-Blits</span>
               <span className={cn(
-                'px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none',
+                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'blitz' ? 'bg-blue-500/15 text-blue-500' : 'bg-muted text-muted-foreground'
               )}>
                 +100 🪙
@@ -518,16 +518,16 @@ export default function TestsPage() {
                 setHeroMode('stress');
               }}
               className={cn(
-                'flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap select-none',
+                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'stress'
-                  ? 'bg-card text-foreground shadow-sm border border-border/50 scale-[1.01]'
+                  ? 'bg-card text-foreground shadow-sm border border-border/60'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
               )}
             >
-              <Flame className={cn('size-4 transition-colors', heroMode === 'stress' ? 'text-rose-500' : 'text-muted-foreground')} />
-              <span>BMB Stress Zali</span>
+              <Flame className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'stress' ? 'text-rose-500' : 'text-muted-foreground')} />
+              <span className="truncate">Stress Zali</span>
               <span className={cn(
-                'px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none',
+                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'stress' ? 'bg-rose-500/15 text-rose-500' : 'bg-muted text-muted-foreground'
               )}>
                 🔥 DTM
@@ -601,18 +601,18 @@ export default function TestsPage() {
                       <Flame className="size-7 text-rose-400 animate-pulse" />
                     </div>
                     <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge className="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase border-0">
-                          🔥 EKSTREMAL SIMULYATOR
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <Badge className="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase border-0 shrink-0">
+                          🔥 EKSTREMAL
                         </Badge>
-                        <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[11px] font-bold">
-                          🎧 500 Kishi Zali Akustikasi
+                        <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[10px] sm:text-[11px] font-bold shrink-0">
+                          🎧 500 Kishi Zali
                         </Badge>
-                        <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[11px] font-bold">
-                          📝 Titul Varaqasi (Bubble Sheet)
+                        <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[10px] sm:text-[11px] font-bold shrink-0">
+                          📝 Titul Varaqasi
                         </Badge>
-                        <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[11px] font-bold">
-                          ⚡ +50% Bonus XP
+                        <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[10px] sm:text-[11px] font-bold shrink-0">
+                          ⚡ +50% XP
                         </Badge>
                       </div>
                       <h3 className="text-lg sm:text-xl font-black tracking-tight text-white">

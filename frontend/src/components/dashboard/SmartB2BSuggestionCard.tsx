@@ -119,11 +119,10 @@ export default function SmartB2BSuggestionCard() {
 
       {/* 1. Dynamic AI Diagnosis Notice */}
       <div className="rounded-2xl bg-amber-500/12 dark:bg-amber-500/15 border border-amber-500/25 p-3 mb-4">
-        <div className="flex items-start gap-2.5">
-          <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2">
           <p className="text-[12px] font-medium leading-relaxed text-foreground">
-            <strong className="text-amber-600 dark:text-amber-400 font-bold block mb-0.5">
-              🎯 AI Diagnostika:
+            <strong className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1.5 mb-1">
+              <Sparkles className="size-3.5 text-amber-500" /> AI Diagnostika:
             </strong>
             Siz &ldquo;<b>{diagnosis.weakest_topic}</b>&rdquo; mavzusida{' '}
             <span className="text-red-600 dark:text-red-400 font-bold">
@@ -145,11 +144,11 @@ export default function SmartB2BSuggestionCard() {
         </Avatar>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 flex-wrap mb-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-1">
             <span className="text-xs font-bold text-foreground truncate">
               {campaign.center_name}
             </span>
-            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 text-[10px] font-bold px-1.5 py-0.2">
+            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 text-[10px] font-bold px-2 py-0.5 w-fit">
               {campaign.offer_badge}
             </Badge>
           </div>

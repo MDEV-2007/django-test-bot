@@ -276,20 +276,20 @@ export default function AiMarathonBanner({
           </motion.div>
         ) : (
           // Qulflangan holat
-          <div className="rounded-2xl p-4 bg-muted/30 border border-dashed border-border/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-            <div className="flex items-center gap-3">
+          <div className="rounded-2xl p-3.5 sm:p-4 bg-muted/30 border border-dashed border-border/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left">
+            <div className="flex items-center gap-3 min-w-0 flex-1 w-full">
               <div className="size-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shrink-0">
                 <Lock className="size-5" />
               </div>
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-foreground flex items-center gap-1.5 justify-center sm:justify-start">
-                  <span>Kundalik Sirli Sandiq (Qulflangan)</span>
-                  <Badge variant="outline" className="text-[10px] font-mono">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <div className="text-xs font-bold text-foreground flex items-center justify-between sm:justify-start gap-2 flex-wrap">
+                  <span className="truncate">Kundalik Sirli Sandiq (Qulflangan)</span>
+                  <Badge variant="outline" className="text-[10px] font-mono shrink-0">
                     {completedCount} / 3 qadam
                   </Badge>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  Sandiqni ochish uchun yana <b className="text-foreground">{3 - completedCount} ta qadam</b>ni yakunlang.
+                  Sandiqni ochish uchun yana <strong className="text-foreground">{3 - completedCount} ta qadamni</strong> yakunlang.
                 </p>
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function AiMarathonBanner({
               disabled
               variant="outline"
               size="sm"
-              className="rounded-xl text-xs font-bold opacity-60 cursor-not-allowed shrink-0"
+              className="w-full sm:w-auto rounded-xl text-xs font-bold opacity-60 cursor-not-allowed shrink-0 justify-center"
             >
               <Lock className="size-3.5 mr-1.5" />
               3 ta qadam talab etiladi
