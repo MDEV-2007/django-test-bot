@@ -31,6 +31,8 @@ import {
   LiveActivityTicker,
 } from '@/components/dashboard/ModernHeroDashboard';
 import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
+import DashboardStoriesBar from '@/components/dashboard/DashboardStoriesBar';
+import SmartB2BSuggestionCard from '@/components/dashboard/SmartB2BSuggestionCard';
 import LiveRepublicBanner from '@/components/growth/LiveRepublicBanner';
 import ModernTestCenter from '@/components/dashboard/ModernTestCenter';
 import PremiumIcon from '@/components/ui/premium-icon';
@@ -351,6 +353,9 @@ export default function DashboardPage() {
       {/* ============================================================ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
+              {/* 0. HAMJAMIYAT & VIP SPONSORED STORIES BAR */}
+              <DashboardStoriesBar />
+
               {/* 1. BUGUNGI AI MARAFON (3 BOSQICHLI AVTOPILOT ZANJIRI) */}
               {(() => {
                 const step1Done = (data?.recent_attempts && data.recent_attempts.length > 0) || false;
@@ -511,6 +516,9 @@ export default function DashboardPage() {
             }}
             theme={isDark ? 'dark' : 'light'}
           />
+
+          {/* 1.5 NATIVE B2B RECOMMENDATION WIDGET */}
+          <SmartB2BSuggestionCard />
 
           {/* 2. KUNDALIK SIRLI SANDIQ (Apple Arcade Style Reward Card - Marafon Zanjiriga Bog'langan) */}
           {(() => {

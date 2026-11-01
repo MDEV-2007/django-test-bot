@@ -175,6 +175,7 @@ INSTALLED_APPS = [
     'tests_app.apps.Tests_appConfig',
     'sprint',
     'growth',
+    'b2b_ads',
 ]
 
 MIDDLEWARE = [
