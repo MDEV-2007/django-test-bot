@@ -1,26 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Gamepad2, Users, GraduationCap,
-  LogOut, ArrowLeft, Menu, X, ChevronRight, MessageSquareQuote,
+  LogOut, ArrowLeft, Menu, X, ChevronRight, MessageSquareQuote, Sun, Moon,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
+import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 
-/* O'qituvchi panelining karkasi — Super Admin paneldagi `PanelShell` bilan bir xil
-   tuzilish: chapda sobit sidebar, tepada breadcrumb, mobilda off-canvas menyu.
-
-   Ilgari o'qituvchi sahifalari o'quvchi `NavBar` ini ishlatardi: 10 ta o'quvchi havolasi
-   ustiga bitta "O'qituvchi" havolasi qo'shilgan tekis qator. Natijada o'qituvchi qaysi
-   bo'limda turganini bilmasdi va sahifalar orasida ko'chish uzoq edi. */
+/* O'qituvchi panelining karkasi — chapda sobit sidebar, tepada breadcrumb & mavzu tugmasi, mobilda drawer menyu. */
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; tone?: PremiumIconTone };
 
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
@@ -48,7 +43,6 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
 const ALL_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
 
 function isActive(pathname: string, href: string) {
-  // '/teacher' faqat aniq mos kelganda faol — aks holda hamma sahifada yonib turardi.
   return href === '/teacher' ? pathname === '/teacher' : pathname.startsWith(href);
 }
 
@@ -58,7 +52,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuthStore();
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-card text-card-foreground">
       <div className="flex items-center gap-2.5 px-5 py-5">
         <PremiumIcon icon={GraduationCap} tone="emerald" size="sm" glow />
         <div className="min-w-0">
@@ -84,9 +78,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   href={item.href}
                   onClick={onNavigate}
                   className={cn(
-                    'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
+                    'flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors',
                     active
-                      ? 'bg-primary/12 font-medium text-[var(--accent-text)]'
+                      ? 'bg-primary/12 font-medium text-primary shadow-xs'
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                   )}
                 >
@@ -110,13 +104,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <Link
           href="/dashboard"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
           <span>Saytga qaytish</span>
         </Link>
 
-        <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2">
+        <div className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 bg-accent/40">
           <Avatar className="size-8">
             <AvatarImage src={user?.avatar_url ?? undefined} alt="" />
             <AvatarFallback className="text-xs">
@@ -124,7 +118,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-foreground">
+            <p className="truncate text-xs font-semibold text-foreground">
               {user?.first_name || user?.username}
             </p>
             <p className="truncate text-xs text-muted-foreground">@{user?.username}</p>
@@ -132,7 +126,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 text-muted-foreground hover:text-[var(--danger-text)]"
+            className="size-8 text-muted-foreground hover:text-destructive cursor-pointer"
             title="Tizimdan chiqish"
             onClick={() => { logout(); router.push('/login'); }}
           >
@@ -148,56 +142,74 @@ export default function TeacherShell({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const current = ALL_ITEMS.find((i) => isActive(pathname, i.href));
-
-  useEffect(() => {
-    const prevTheme = document.documentElement.dataset.theme;
-    document.documentElement.dataset.theme = 'dark';
-    return () => {
-      document.documentElement.dataset.theme = prevTheme || 'light';
-    };
-  }, []);
+  const { isDark, toggleTheme } = useTheme();
 
   return (
-    <div data-panel="teacher" className="dark flex min-h-screen w-full bg-[#08090c] text-[#f0f1f3]">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r border-white/10 bg-[#0f1117] lg:block">
+    <div data-panel="teacher" className="flex min-h-screen w-full bg-background text-foreground transition-colors duration-200">
+      {/* Desktop Fixed Sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r border-border bg-card lg:block">
         <SidebarContent />
       </aside>
 
+      {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-60 border-r border-white/10 bg-[#0f1117]">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-60 border-r border-border bg-card shadow-2xl">
             <SidebarContent onNavigate={() => setMobileOpen(false)} />
           </aside>
         </div>
       )}
 
+      {/* Main Content Area */}
       <div className="flex min-w-0 flex-1 flex-col lg:pl-60">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/10 bg-[#08090c]/90 px-4 backdrop-blur-md sm:px-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-slate-300 hover:text-white"
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Menyu"
-          >
-            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </Button>
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-muted-foreground hover:text-foreground"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Menyu"
+            >
+              {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </Button>
 
-          <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
-            <Link href="/teacher" className="shrink-0 text-slate-400 hover:text-slate-200">
-              O&apos;qituvchi
-            </Link>
-            {current && current.href !== '/teacher' && (
-              <>
-                <ChevronRight className="size-3.5 shrink-0 text-slate-600" />
-                <span className="truncate font-medium text-slate-200">{current.label}</span>
-              </>
-            )}
-          </nav>
+            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
+              <Link href="/teacher" className="shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+                O&apos;qituvchi
+              </Link>
+              {current && current.href !== '/teacher' && (
+                <>
+                  <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" />
+                  <span className="truncate font-semibold text-foreground">{current.label}</span>
+                </>
+              )}
+            </nav>
+          </div>
+
+          {/* Theme Toggle Sun / Moon Button */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="size-9 rounded-full text-muted-foreground hover:text-foreground cursor-pointer"
+              title={isDark ? "Yorug' rejimga o'tish" : "Qorong'u rejimga o'tish"}
+              aria-label="Mavzuni almashtirish"
+            >
+              {isDark ? (
+                <Sun className="size-4.5 text-amber-400" />
+              ) : (
+                <Moon className="size-4.5 text-slate-700" />
+              )}
+            </Button>
+          </div>
         </header>
 
-        <main className="flex-1 bg-[#08090c] p-4 sm:p-6 text-slate-100">{children}</main>
+        <main className="flex-1 bg-background p-4 sm:p-6 text-foreground min-h-[calc(100vh-3.5rem)]">
+          {children}
+        </main>
       </div>
     </div>
   );
