@@ -349,35 +349,6 @@ export default function DashboardPage() {
         completedAttempts={data.recent_attempts.length}
       />
 
-      {/* ============================================================ */}
-      {/* 1. LIVE ACTIVITY ONLINE PEERS PILL                           */}
-      {/* ============================================================ */}
-      <div className="flex items-center justify-end">
-        {/* iOS Dynamic Island Style Online Users Pill */}
-        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card border border-border shadow-2xs">
-          <span className="relative flex size-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-[#34C759]" />
-          </span>
-          {data.online_peers && data.online_peers.length > 0 && (
-            <div className="flex -space-x-2">
-              {data.online_peers.slice(0, 5).map((peer, i) => (
-                <Avatar key={i} className="size-6 ring-2 ring-card shrink-0">
-                  <AvatarImage src={peer.avatar_url || ''} />
-                  <AvatarFallback className="bg-primary/12 text-primary text-[9px] font-bold">
-                    {peer.name?.slice(0, 2).toUpperCase() || '??'}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-            </div>
-          )}
-          <span className="text-xs font-semibold text-foreground">
-            <strong className="text-[#34C759] font-extrabold font-mono">{data.online_count || 0}</strong>
-            <span className="text-muted-foreground font-medium"> ta onlayn</span>
-          </span>
-        </div>
-      </div>
-
       {/* JONLI FAOLIYAT MIKRO-TIKERI (Multiplayer Live Ribbon) */}
       <LiveActivityTicker />
 
