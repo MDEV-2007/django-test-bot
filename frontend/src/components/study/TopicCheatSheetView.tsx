@@ -250,18 +250,59 @@ export default function TopicCheatSheetView({
         )}
 
         {activeTab === 'chain' && (
-          <div className="p-4 rounded-xl border border-white/[0.06] bg-zinc-900/40 space-y-3">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 overflow-x-auto pb-2">
-              {data.visual_chain.map((step, idx) => (
-                <React.Fragment key={idx}>
-                  <div className="p-2.5 rounded-lg border border-blue-500/30 bg-blue-500/10 text-xs font-semibold text-blue-200 shrink-0 min-w-[140px] text-center">
-                    {step}
+          <div className="rounded-2xl border border-white/[0.08] bg-zinc-900/50 p-4 sm:p-5 backdrop-blur-md space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Clock className="size-4 text-cyan-400" />
+                  <span>Mantiqiy Xronologiya &amp; Zanjir</span>
+                  <Badge variant="outline" className="text-[10px] font-mono border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+                    {data.visual_chain.length} ta bosqich
+                  </Badge>
+                </h4>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Voqea va hodisalarning ketma-ket mantiqiy bog&apos;liqlik xaritasi
+                </p>
+              </div>
+            </div>
+
+            <div className="relative pl-2 sm:pl-3 space-y-4 sm:space-y-5">
+              {data.visual_chain.map((step, idx) => {
+                const isLast = idx === data.visual_chain.length - 1;
+                const parts = step.split(':');
+                const hasPrefix = parts.length > 1;
+                const stageLabel = hasPrefix ? parts[0].trim() : `Bosqich ${idx + 1}`;
+                const stageContent = hasPrefix ? parts.slice(1).join(':').trim() : step;
+
+                return (
+                  <div key={idx} className="relative flex items-start gap-3 sm:gap-4 group">
+                    {/* Connecting Vertical Line */}
+                    {!isLast && (
+                      <div className="absolute left-[15px] sm:left-[17px] top-8 -bottom-5 w-0.5 bg-gradient-to-b from-cyan-500/50 via-blue-500/30 to-zinc-700/40 pointer-events-none" />
+                    )}
+
+                    {/* Step Node Circle */}
+                    <div className="size-8 sm:size-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-md shadow-cyan-500/20 ring-4 ring-zinc-900 z-10 group-hover:scale-105 transition-transform">
+                      {idx + 1}
+                    </div>
+
+                    {/* Step Content Card */}
+                    <div className="flex-1 rounded-2xl border border-white/[0.08] bg-zinc-900/80 hover:bg-zinc-800/80 p-3.5 sm:p-4 transition-all space-y-1.5 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md">
+                          {stageLabel}
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-500">
+                          #{idx + 1}-qadam
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm font-semibold text-zinc-100 leading-relaxed">
+                        {stageContent}
+                      </p>
+                    </div>
                   </div>
-                  {idx < data.visual_chain.length - 1 && (
-                    <span className="text-zinc-600 font-bold hidden sm:inline">➡️</span>
-                  )}
-                </React.Fragment>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
