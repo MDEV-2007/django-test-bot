@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FileCheck2, BookOpen, Gamepad2, ClipboardList, CheckCircle2, Plus, Users } from 'lucide-react';
+import { FileCheck2, BookOpen, Gamepad2, ClipboardList, CheckCircle2, Plus, Users, Swords } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -54,6 +54,11 @@ export default function TeacherDashboard() {
           description="Testlar, darslar, o'yinlar va sinfingiz bir joyda."
           actions={
             <>
+              <Button asChild className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-md">
+                <Link href="/teacher/battles">
+                  <Swords className="size-4" /> Sinf Jangi (PIN)
+                </Link>
+              </Button>
               <Button asChild variant="outline"><Link href="/teacher/class"><Users className="size-4" /> Mening sinfim</Link></Button>
               <Button asChild><Link href="/teacher/tests/new"><Plus className="size-4" /> Yangi test</Link></Button>
             </>
@@ -68,6 +73,28 @@ export default function TeacherDashboard() {
 
         {data && (
           <>
+        {/* Sinf Janglari (Kahoot Live Quiz) Promo Card */}
+        <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-950/40 via-card to-background p-5 sm:p-6 shadow-md">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1.5 max-w-xl">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/25 px-2.5 py-0.5 text-xs font-bold text-amber-500">
+                <Swords className="size-3.5" /> B2B2C Sinf Bellashuvi · Kahoot Uslubida
+              </div>
+              <h3 className="text-lg sm:text-xl font-extrabold text-foreground">
+                🔥 O&apos;quvchilaringiz uchun Jonli Sinf Jangi (6 Xonali PIN)
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Dars oxirida 6 xonali PIN bering: o&apos;quvchilar telefonidan kirib 10 ta savolga bir vaqtda javob berishadi. Doskada jonli peshqadamlar jadvali aks etadi, yakunda esa kim qaysi mavzuda oqsayotgani sizga tayyor hisobot bo&apos;lib tushadi!
+              </p>
+            </div>
+            <Button asChild size="lg" className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black shadow-lg shrink-0">
+              <Link href="/teacher/battles">
+                <Swords className="size-4 mr-2" /> Jang Ochish
+              </Link>
+            </Button>
+          </div>
+        </div>
+
             <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-5">
               {tiles.map((t, i) => {
                 const Icon = t.icon;

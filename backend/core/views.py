@@ -142,6 +142,7 @@ def class_battle_create_api(request):
     title = request.data.get('title') or "Guruh Imtihon Jangi"
     subject_id = request.data.get('subject_id')
     topic_id = request.data.get('topic_id')
+    test_id = request.data.get('test_id')
     question_count = int(request.data.get('question_count', 10))
 
     room = create_class_battle_room(
@@ -149,6 +150,7 @@ def class_battle_create_api(request):
         title=title,
         subject_id=subject_id,
         topic_id=topic_id,
+        test_id=test_id,
         question_count=question_count,
     )
 
@@ -296,6 +298,26 @@ def class_battle_analytics_api(request, room_id):
     room = get_object_or_404(ClassBattleRoom, id=room_id)
     analytics = calculate_class_battle_analytics(room)
     return Response(analytics)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def class_battle_my_rooms_api(request):
+    """O'qituvchining yaratgan barcha sinf janglari ro'yxati."""
+    rooms = ClassBattleRoom.objects.filter(teacher=request.user).order_by('-created_at')[:30]
+    return Response([
+        {
+            'id': r.id,
+            'title': r.title,
+            'pin_code': r.pin_code,
+            'status': r.status,
+            'subject_name': r.subject.name if r.subject else 'Umumiy',
+            'created_at': r.created_at.isoformat(),
+            'participants_count': r.participants.count(),
+            'questions_count': len(r.question_ids),
+        }
+        for r in rooms
+    ])
 
 
 

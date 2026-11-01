@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { openSocket } from '@/lib/ws-client';
+import { tgHaptic } from '@/lib/telegram';
 import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
 import StatNumber from '@/components/motion/StatNumber';
@@ -28,6 +29,7 @@ import {
 import { cn } from '@/lib/utils';
 import GhostBattleArena from '@/components/arena/GhostBattleArena';
 import ViralDuelModal from '@/components/growth/ViralDuelModal';
+import ClassBattleStudentModal from '@/components/arena/ClassBattleStudentModal';
 
 type ArenaData = {
   total_battles: number; wins: number; losses: number; draws: number; elo_rating: number;
@@ -58,6 +60,8 @@ export default function BattlesPage() {
   const [resultMsg, setResultMsg] = useState('');
   const [waitingOpponent, setWaitingOpponent] = useState(false);
   const [showViralDuel, setShowViralDuel] = useState(false);
+  const [showClassBattle, setShowClassBattle] = useState(false);
+  const [classBattlePin, setClassBattlePin] = useState<string | null>(null);
   const [isChallengerMode, setIsChallengerMode] = useState(false);
   const [duelToken, setDuelToken] = useState<string | null>(null);
   const [duelUserScore, setDuelUserScore] = useState(80);
@@ -91,6 +95,11 @@ export default function BattlesPage() {
       setDuelToken(token);
       setIsChallengerMode(true);
       setShowViralDuel(true);
+    }
+    const pinParam = urlParams.get('pin');
+    if (pinParam) {
+      setClassBattlePin(pinParam);
+      setShowClassBattle(true);
     }
   }, []);
  // eslint-disable-line react-hooks/exhaustive-deps
@@ -409,6 +418,41 @@ export default function BattlesPage() {
                 ))}
               </div>
             )}
+
+            {/* 🎓 O'qituvchi Sinf Jangi (Live PIN Arena) Banner */}
+            <Card
+              onClick={() => {
+                soundFX.click();
+                tgHaptic('medium');
+                setShowClassBattle(true);
+              }}
+              className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent hover:border-amber-500 hover:shadow-lg transition-all"
+            >
+              <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="size-11 sm:size-12 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-black shrink-0 shadow-md">
+                    <Swords className="size-5 sm:size-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-amber-500 text-black font-black text-[10px] uppercase tracking-wider">
+                        TEACHER LIVE QUIZ
+                      </Badge>
+                      <span className="text-xs font-bold text-amber-500">6 Xonali PIN</span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-black text-foreground">
+                      O&apos;qituvchi Sinf Jangiga Kirish (PIN)
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Ustozingiz doskaga PIN-kod tashladimi? Shu yerga bosing va sinf doskasidagi jonli jangga qo&apos;shiling!
+                    </p>
+                  </div>
+                </div>
+                <Button className="rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-black text-xs sm:text-sm shrink-0 shadow-md">
+                  PIN Kiritish <ArrowRight className="size-4 ml-1.5" />
+                </Button>
+              </CardContent>
+            </Card>
 
             <div className="grid gap-4 pt-2 md:grid-cols-3">
               <Card
@@ -779,6 +823,13 @@ export default function BattlesPage() {
           </DialogContent>
         </Dialog>
       </main>
+      {/* O'qituvchi Sinf Jangi (PIN-kod) Modali */}
+      <ClassBattleStudentModal
+        open={showClassBattle}
+        onOpenChange={setShowClassBattle}
+        initialPin={classBattlePin}
+      />
+
       <ViralDuelModal
         isOpen={showViralDuel}
         onClose={() => setShowViralDuel(false)}

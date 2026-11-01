@@ -177,7 +177,7 @@ export default function SmartB2BSuggestionCard() {
               >
                 <PhoneCall className="size-4 shrink-0" />
                 <span>
-                  {submitting ? "Yuborilmoqda..." : "📞 1-Bosishda Bepul Darsga Yozilish (+50 🪙)"}
+                  {submitting ? "Yuborilmoqda..." : "1-Bosishda Bepul Darsga Yozilish (+50 🪙)"}
                 </span>
               </Button>
             </motion.div>

@@ -15,6 +15,7 @@ urlpatterns = [
     path('parent-radar/invoice/', views.parent_radar_send_invoice_api, name='parent_radar_send_invoice'),
 
     # 4-MODUL: Sinf Janglari
+    path('class-battles/my/', views.class_battle_my_rooms_api, name='class_battle_my_rooms'),
     path('class-battles/create/', views.class_battle_create_api, name='class_battle_create'),
     path('class-battles/<str:pin_code>/join/', views.class_battle_join_api, name='class_battle_join'),
     path('class-battles/<int:room_id>/state/', views.class_battle_state_api, name='class_battle_state'),

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Gamepad2, Users, GraduationCap,
-  LogOut, ArrowLeft, Menu, X, ChevronRight, MessageSquareQuote, Sun, Moon,
+  LogOut, ArrowLeft, Menu, X, ChevronRight, MessageSquareQuote, Sun, Moon, Swords,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useTheme } from '@/hooks/useTheme';
@@ -32,10 +32,11 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
-    label: 'Tahlil va Natijalar',
+    label: 'Jonli Janglar & Sinf',
     items: [
-      { href: '/teacher/surveys', label: 'Sharh va Baholar', icon: MessageSquareQuote, tone: 'rose' },
+      { href: '/teacher/battles', label: 'Sinf Janglari (Live Quiz)', icon: Swords, tone: 'amber' },
       { href: '/teacher/class', label: 'Mening sinfim', icon: Users, tone: 'purple' },
+      { href: '/teacher/surveys', label: 'Sharh va Baholar', icon: MessageSquareQuote, tone: 'rose' },
     ],
   },
 ];

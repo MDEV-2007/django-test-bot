@@ -246,7 +246,7 @@ def send_parent_vip_invoice(student_profile: Profile, plan_id: int = None):
 
 
 # ─── 4-MODUL: B2B2C Sinf Janglari (Teacher Live Room) ────────────────────────
-def create_class_battle_room(teacher_user: User, title: str, subject_id: int = None, topic_id: int = None, question_count: int = 10):
+def create_class_battle_room(teacher_user: User, title: str, subject_id: int = None, topic_id: int = None, test_id: int = None, question_count: int = 10):
     """O'qituvchi uchun 6 xonali PIN-kodli jonli xona yaratish."""
     # 6 xonali unikal PIN kod yaratish
     pin_code = None
@@ -260,7 +260,14 @@ def create_class_battle_room(teacher_user: User, title: str, subject_id: int = N
 
     # Savollarni tanlash
     qs = Question.objects.all()
-    if topic_id:
+    if test_id:
+        from tests_app.models import TestSet
+        t_obj = TestSet.objects.filter(id=test_id).first()
+        if t_obj:
+            qs = t_obj.questions.all()
+            if not subject_id and t_obj.subject_id:
+                subject_id = t_obj.subject_id
+    elif topic_id:
         qs = qs.filter(topic_id=topic_id)
     elif subject_id:
         qs = qs.filter(subject_id=subject_id)
