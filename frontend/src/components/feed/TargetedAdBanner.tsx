@@ -92,27 +92,28 @@ export default function TargetedAdBanner({
       {/* Native Ad Banner */}
       <div
         className={cn(
-          'relative w-full overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/40 via-zinc-900 to-[#0A0C12] p-5 sm:p-6 shadow-2xl backdrop-blur-xl',
+          'relative w-full overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/40 via-zinc-900 to-[#0A0C12] p-4 sm:p-5 md:p-6 shadow-2xl backdrop-blur-xl',
           className
         )}
       >
         {/* Glow corner */}
         <div className="absolute -top-16 -right-16 size-40 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-2 max-w-xl">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs font-bold uppercase tracking-wide">
-                <Sparkles className="size-3 mr-1" />
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-2.5 min-w-0 flex-1">
+            {/* Header Badges with wrapping */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] sm:text-xs font-bold uppercase tracking-wider shrink-0 px-2.5 py-1 rounded-xl">
+                <Sparkles className="size-3 mr-1 inline" />
                 {offer.badge_text || "Homiylik Taklifi"}
               </Badge>
-              <span className="text-xs text-zinc-400 flex items-center gap-1">
-                <Building2 className="size-3.5 text-zinc-400" />
-                {offer.center_name}
-              </span>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.06] border border-white/[0.08] text-xs font-semibold text-zinc-300 shrink-0">
+                <Building2 className="size-3.5 text-amber-400 shrink-0" />
+                <span>{offer.center_name}</span>
+              </div>
             </div>
 
-            <h3 className="text-lg sm:text-xl font-black text-white leading-tight">
+            <h3 className="text-base sm:text-lg md:text-xl font-black text-white leading-snug">
               {offer.title}
             </h3>
 
@@ -121,14 +122,16 @@ export default function TargetedAdBanner({
             </p>
           </div>
 
-          <Button
-            onClick={handleOpenModal}
-            className="w-full sm:w-auto shrink-0 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold px-5 py-3 rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2"
-          >
-            <PhoneCall className="size-4" />
-            <span>{offer.cta_text || "1-bosishda yozilish"}</span>
-            <ChevronRight className="size-4" />
-          </Button>
+          <div className="w-full md:w-auto shrink-0 pt-1 md:pt-0">
+            <Button
+              onClick={handleOpenModal}
+              className="w-full md:w-auto bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold px-5 py-3.5 rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm"
+            >
+              <PhoneCall className="size-4 shrink-0" />
+              <span>{offer.cta_text || "1-bosishda yozilish"}</span>
+              <ChevronRight className="size-4 shrink-0" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -140,7 +143,7 @@ export default function TargetedAdBanner({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-md rounded-3xl bg-zinc-900 border border-white/15 p-6 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md rounded-3xl bg-zinc-900 border border-white/15 p-5 sm:p-6 shadow-2xl overflow-hidden"
             >
               <button
                 onClick={() => setModalOpen(false)}
@@ -152,7 +155,7 @@ export default function TargetedAdBanner({
               {!submitted ? (
                 <>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="size-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <div className="size-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
                       <Building2 className="size-6" />
                     </div>
                     <div>
