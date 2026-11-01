@@ -351,33 +351,6 @@ export default function DashboardPage() {
       {/* ============================================================ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-              {/* ACTIVATION HOOK (0 attempts) */}
-              {data.recent_attempts.length === 0 && (
-                <div className="relative overflow-hidden rounded-[28px] border border-primary/25 bg-card p-5 sm:p-7 shadow-card">
-                  <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-primary/10 blur-2xl" />
-                  <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-2 max-w-xl">
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-3 py-0.5 text-xs font-bold text-primary">
-                        <Sparkles className="size-3.5 text-[#FF9500]" /> Boshlang&apos;ich Qadam · +50 Tanga Bonus
-                      </div>
-                      <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
-                        🎯 3 daqiqalik ekspress sinov — Darajangizni aniqlang!
-                      </h2>
-                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                        Bor-yo&apos;g&apos;i 5 ta qiziqarli savol. Testni yakunlashingiz bilan haqiqiy darajangiz (A+, B+, C),
-                        zaif mavzular tahlili va <strong className="text-foreground">+50 Tanga hamda ilk olovingiz (Streak 🔥)</strong> faollashadi!
-                      </p>
-                    </div>
-                    <Link
-                      href="/onboarding?mode=blitz"
-                      className="ios-spring inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs sm:text-sm font-semibold text-primary-foreground shadow-[0_6px_18px_rgba(0,122,255,0.32)] shrink-0"
-                    >
-                      <Play className="size-4 fill-current" /> Hozir boshlash
-                    </Link>
-                  </div>
-                </div>
-              )}
-
               {/* 1. BUGUNGI AI MARAFON (3 BOSQICHLI AVTOPILOT ZANJIRI) */}
               {(() => {
                 const step1Done = (data?.recent_attempts && data.recent_attempts.length > 0) || false;
@@ -408,13 +381,7 @@ export default function DashboardPage() {
                 }
 
                 return (
-                  <>
-                    <div className="mb-4">
-                      <LiveRepublicBanner
-                        onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
-                      />
-                    </div>
-                    <AiMarathonBanner
+                  <AiMarathonBanner
                     userName={firstName}
                     userLevel={p.level}
                     userStreak={p.streak}
@@ -430,9 +397,40 @@ export default function DashboardPage() {
                       if (refreshDashboard) refreshDashboard();
                     }}
                   />
-                  </>
                 );
               })()}
+
+              {/* 2. JONLI RESPUBLIKA SPRINTI */}
+              <LiveRepublicBanner
+                onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
+              />
+
+              {/* ACTIVATION HOOK (0 attempts) */}
+              {data.recent_attempts.length === 0 && (
+                <div className="relative overflow-hidden rounded-[28px] border border-primary/25 bg-card p-5 sm:p-7 shadow-card">
+                  <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-primary/10 blur-2xl" />
+                  <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-2 max-w-xl">
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-3 py-0.5 text-xs font-bold text-primary">
+                        <Sparkles className="size-3.5 text-[#FF9500]" /> Boshlang&apos;ich Qadam · +50 Tanga Bonus
+                      </div>
+                      <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
+                        🎯 3 daqiqalik ekspress sinov — Darajangizni aniqlang!
+                      </h2>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        Bor-yo&apos;g&apos;i 5 ta qiziqarli savol. Testni yakunlashingiz bilan haqiqiy darajangiz (A+, B+, C),
+                        zaif mavzular tahlili va <strong className="text-foreground">+50 Tanga hamda ilk olovingiz (Streak 🔥)</strong> faollashadi!
+                      </p>
+                    </div>
+                    <Link
+                      href="/onboarding?mode=blitz"
+                      className="ios-spring inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs sm:text-sm font-semibold text-primary-foreground shadow-[0_6px_18px_rgba(0,122,255,0.32)] shrink-0"
+                    >
+                      <Play className="size-4 fill-current" /> Hozir boshlash
+                    </Link>
+                  </div>
+                </div>
+              )}
 
               {/* 3. CURATED TESTS */}
               <ModernTestCenter
