@@ -890,35 +890,38 @@ export default function TestsPage() {
                   <Reveal key={t.id} index={tIdx} className="h-full">
                     <div
                       className={cn(
-                        "group relative flex h-full flex-col justify-between rounded-[26px] bg-card p-5 sm:p-6 transition-all duration-200 shadow-xs hover:shadow-md border",
+                        "group relative flex h-full flex-col justify-between rounded-[28px] p-5 sm:p-6 transition-all duration-300 shadow-xs hover:shadow-xl border overflow-hidden",
                         isLiveMock
-                          ? "border-primary/50"
+                          ? "border-primary/50 bg-gradient-to-b from-primary/[0.07] via-card to-card hover:border-primary shadow-primary/10"
                           : isNew
-                          ? "border-amber-500/40"
-                          : "border-border hover:border-primary/40"
+                          ? "border-amber-500/40 bg-gradient-to-b from-amber-500/[0.06] via-card to-card hover:border-amber-500/70 shadow-amber-500/10"
+                          : "border-border/80 bg-gradient-to-b from-card via-card to-muted/20 hover:border-primary/50 hover:shadow-primary/10"
                       )}
                     >
+                      {/* Top highlight bar on hover */}
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
                       <div className="flex flex-1 flex-col">
-                        {/* Top Badges & Duration */}
-                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        {/* 1. Top Badges & Duration */}
+                        <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-1.5">
                             {isNew && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-xs">
                                 <Sparkles className="size-2.5 fill-white" /> Yangi
                               </span>
                             )}
                             {isLiveMock ? (
-                              <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white", cTheme.squircle)}>
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-xs">
                                 <span className="size-1.5 rounded-full bg-white animate-ping" />
                                 Jonli Mock
                               </span>
                             ) : (
-                              <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-bold text-foreground">
+                              <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
                                 {CATEGORY_BADGE[t.category] || t.category}
                               </span>
                             )}
                             {t.answer_mode && ANSWER_MODE_BADGE[t.answer_mode] && (
-                              <Badge variant="outline" className={cn("text-[10px] font-bold", ANSWER_MODE_BADGE[t.answer_mode].className)}>
+                              <Badge variant="outline" className={cn("text-[10px] font-bold rounded-full", ANSWER_MODE_BADGE[t.answer_mode].className)}>
                                 {ANSWER_MODE_BADGE[t.answer_mode].label}
                               </Badge>
                             )}
@@ -926,61 +929,61 @@ export default function TestsPage() {
 
                           {isLiveMock && t.scheduled_at ? (
                             <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-bold", cTheme.pill)}>
-                              <Clock className="size-3" /> {formatScheduledTime(t.scheduled_at)}
+                              <Clock className="size-3 text-primary" /> {formatScheduledTime(t.scheduled_at)}
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 font-mono text-[12px] font-semibold text-muted-foreground">
-                              <Clock className="size-3.5" /> {t.duration_minutes} daq
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-muted-foreground bg-muted/60 px-2.5 py-0.5 rounded-full border border-border/70">
+                              <Clock className="size-3 text-primary" /> {t.duration_minutes} daq
                             </span>
                           )}
                         </div>
 
-                        <h3 className="text-[17px] font-bold leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors">
+                        {/* 2. Title & Description */}
+                        <h3 className="text-[17px] sm:text-[18px] font-black leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors">
                           {t.title}
                         </h3>
-                        <p className="mt-1.5 line-clamp-2 flex-1 text-[13px] leading-relaxed text-muted-foreground">
+                        <p className="mt-1.5 line-clamp-2 flex-1 text-[12.5px] sm:text-[13px] leading-relaxed text-muted-foreground">
                           {t.description}
                         </p>
 
                         <div className="my-3.5 h-px bg-border/60" />
 
-                        {t.author && (
-                          <div className="mb-2.5 flex items-center gap-1.5 text-[12px]">
-                            {t.author.avatar ? (
-                              <img src={t.author.avatar} alt="" className="size-4.5 rounded-full object-cover" />
-                            ) : (
-                              <div className="flex size-4.5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
-                                {t.author.name[0] || 'O'}
-                              </div>
-                            )}
-                            <span className="font-semibold text-foreground truncate max-w-[180px]">{t.author.name}</span>
-                            <VerifiedBadge role={t.author.role} isSuperadmin={t.author.is_superadmin} isTeacher={t.author.is_teacher} size="xs" />
-                          </div>
-                        )}
-
-                        <div className="mb-3 flex items-center justify-between text-[12px] text-muted-foreground">
-                          <span className="flex items-center gap-1 font-mono font-semibold">
-                            <HelpCircle className={cn("size-3.5", cTheme.accentText)} /> {t.questions_count} ta savol
-                          </span>
-                          {t.subject && (
-                            <span className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-bold", cTheme.pill)}>
-                              {t.subject}
-                            </span>
+                        {/* 3. Author & Meta Pills */}
+                        <div className="space-y-2.5 mb-4">
+                          {t.author && (
+                            <div className="flex items-center gap-2 text-[12px]">
+                              {t.author.avatar ? (
+                                <img src={t.author.avatar} alt="" className="size-5 rounded-full object-cover ring-1 ring-border" />
+                              ) : (
+                                <div className="flex size-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
+                                  {t.author.name[0] || 'O'}
+                                </div>
+                              )}
+                              <span className="font-bold text-foreground truncate max-w-[190px]">{t.author.name}</span>
+                              <VerifiedBadge role={t.author.role} isSuperadmin={t.author.is_superadmin} isTeacher={t.author.is_teacher} size="xs" />
+                            </div>
                           )}
+
+                          <div className="flex items-center justify-between gap-2 text-[12px]">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-accent/60 text-[11.5px] font-bold text-foreground border border-border/80">
+                              <HelpCircle className="size-3.5 text-primary" />
+                              <span>{t.questions_count} ta savol</span>
+                            </span>
+
+                            {t.subject && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-primary/10 text-[11px] font-bold text-primary border border-primary/20">
+                                <BookOpen className="size-3 text-primary" />
+                                <span>{t.subject}</span>
+                              </span>
+                            )}
+                          </div>
                         </div>
 
-                        {t.recent_solvers > 0 && (
-                          <p className="mb-3.5 flex items-center gap-1.5 text-[12px] text-muted-foreground">
-                            <Users className="size-3.5 text-primary" />
-                            So&apos;nggi 7 kunda <strong className="font-bold text-foreground">{t.recent_solvers}</strong> kishi yechdi
-                            {t.recent_avg_score !== null && <> · o&apos;rtacha <strong className="font-bold text-emerald-500">{Math.round(t.recent_avg_score)}%</strong></>}
-                          </p>
-                        )}
-
+                        {/* 4. Action Button (Vivid, modern gradient button) */}
                         {locked ? (
                           <Link
                             href={buyHref}
-                            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-amber-500/30 bg-amber-500/12 px-4 text-[13px] font-bold text-amber-500 hover:bg-amber-500/20 transition-all active:scale-[0.98]"
+                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/15 px-4 text-[13px] font-bold text-amber-600 dark:text-amber-400 hover:border-amber-500/70 hover:bg-amber-500/20 transition-all active:scale-[0.98] shadow-xs"
                           >
                             <Lock className="size-3.5" />
                             <span>
@@ -988,12 +991,12 @@ export default function TestsPage() {
                                 ? `${Number(t.price ?? data.mock_plan.price).toLocaleString('uz-UZ')} so'mga ochish`
                                 : (t.price ? `${Number(t.price).toLocaleString('uz-UZ')} so'mga ochish` : 'PRO obuna bilan ochiladi')}
                             </span>
-                            <ArrowRight className="size-4" />
+                            <ArrowRight className="size-4 ml-1" />
                           </Link>
                         ) : isLiveMock && isScheduledFuture ? (
                           <Link
                             href={`/tests/mock/${t.id}`}
-                            className={cn("inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] px-4 text-[13px] font-bold transition-all active:scale-[0.98]", cTheme.button)}
+                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-4 text-[13px] font-bold text-white shadow-md shadow-blue-600/25 transition-all active:scale-[0.98]"
                           >
                             <span>Kutish zaliga kirish (Lobby)</span>
                             <ArrowRight className="size-4" />
@@ -1001,7 +1004,7 @@ export default function TestsPage() {
                         ) : isLiveMock ? (
                           <button
                             type="button"
-                            className={cn("inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] px-4 text-[13px] font-bold transition-all active:scale-[0.98] cursor-pointer", cTheme.button)}
+                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:opacity-95 px-4 text-[13px] font-bold text-white shadow-md shadow-blue-600/25 transition-all active:scale-[0.98] cursor-pointer"
                             onClick={() => start(t.id)}
                             disabled={starting !== null}
                           >
@@ -1012,13 +1015,13 @@ export default function TestsPage() {
                         ) : (
                           <button
                             type="button"
-                            className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-[14px] bg-primary/10 hover:bg-primary px-4 text-[13px] font-bold text-primary hover:text-primary-foreground transition-all active:scale-[0.98] cursor-pointer"
+                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 px-4 text-[13px] sm:text-sm font-bold text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
                             onClick={() => start(t.id)}
                             disabled={starting !== null}
                           >
                             {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
                             <span>{starting === t.id ? 'Boshlanmoqda...' : 'Testni boshlash'}</span>
-                            {starting !== t.id && <ArrowRight className="size-4" />}
+                            {starting !== t.id && <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />}
                           </button>
                         )}
                       </div>
