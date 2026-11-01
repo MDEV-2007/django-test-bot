@@ -9,6 +9,8 @@ import { apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
 import { useAuthStore } from '@/lib/auth-store';
+import { Zap, Flame, Sparkles, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 // Zaxira savollar (tarmoq uzilib qolsa)
 const FALLBACK_QUESTIONS: QuestionItem[] = [
@@ -130,16 +132,59 @@ export default function SprintPage() {
   };
 
   const handleExitSprint = () => {
+    if (searchParams.get('from') === 'learning') {
+      router.push('/learning');
+      return;
+    }
     setIsSprintActive(false);
     setQuestions(null);
   };
 
+  const customTopicTitle = searchParams.get('topic_title');
+  const isAutostart = searchParams.get('autostart') === 'true';
+
   // ─────────────────────────────────────────────────────────────
-  // 1. FAOL SPRINT REJIMI (Savol-Javob Ekranı)
+  // 1. TEZKOR YUKLASH HUDI (Shpargalka yoki Turnirdan avto-kirishda)
+  // ─────────────────────────────────────────────────────────────
+  if (loadingQuestions && isAutostart) {
+    const displayTitle = customTopicTitle || "Fokus Sprinti";
+    return (
+      <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center p-6 text-center text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08)_0%,transparent_70%)] pointer-events-none" />
+        
+        <div className="relative size-24 mb-6 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-600 animate-spin blur-md opacity-60" />
+          <div className="relative size-20 rounded-full bg-zinc-950 border border-amber-500/40 flex items-center justify-center shadow-2xl">
+            <Zap className="size-9 text-amber-400 animate-pulse" />
+          </div>
+        </div>
+
+        <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 mb-3 px-3 py-1 font-extrabold text-xs uppercase tracking-wider">
+          ⚡ 3 Daqiqalik Fokus Sprint
+        </Badge>
+
+        <h2 className="text-xl sm:text-2xl font-black text-white max-w-md mb-2 leading-snug">
+          &ldquo;{displayTitle}&rdquo;
+        </h2>
+
+        <p className="text-xs sm:text-sm text-zinc-400 max-w-sm leading-relaxed mb-6">
+          Shpargalkadagi fakt va qopqonlar asosida 10 ta maxsus saralangan savol tayyorlanmoqda...
+        </p>
+
+        <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
+          <Loader2 className="size-3.5 animate-spin text-amber-400" />
+          <span>Neyron savollar saralanmoqda...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 2. FAOL SPRINT REJIMI (Savol-Javob Ekranı)
   // ─────────────────────────────────────────────────────────────
   if (isSprintActive && questions && questions.length > 0) {
     const chosenSubject = subjects.find((s) => s.id === selectedSubjectId);
-    const sprintTitle = chosenSubject?.name || questions[0]?.topicTitle || "Fokus Sprinti";
+    const sprintTitle = customTopicTitle || chosenSubject?.name || questions[0]?.topicTitle || "Fokus Sprinti";
 
     return (
       <div className="min-h-screen bg-background text-foreground">
@@ -156,7 +201,7 @@ export default function SprintPage() {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 2. FANNI TANLASH VA SPRINTNI SOZLASH EKRANI (Bento Cockpit UI)
+  // 3. FANNI TANLASH VA SPRINTNI SOZLASH EKRANI (Bento Cockpit UI)
   // ─────────────────────────────────────────────────────────────
   return (
     <ModernAppLayout user={user}>

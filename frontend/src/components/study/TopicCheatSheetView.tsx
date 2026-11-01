@@ -95,7 +95,8 @@ export default function TopicCheatSheetView({
       setStartingSprint(false);
       return;
     }
-    router.push(`/sprint?autostart=true&topic_id=${topicId}&count=10`);
+    const cleanTitle = data?.topic_title || topicTitle || 'Mavzu';
+    router.push(`/sprint?autostart=true&topic_id=${topicId}&topic_title=${encodeURIComponent(cleanTitle)}&from=learning&count=10`);
     setStartingSprint(false);
   }
 
@@ -308,20 +309,42 @@ export default function TopicCheatSheetView({
         )}
 
         {/* Sprint CTA Connection */}
-        <div className="pt-2">
-          <Button
+        <div className="pt-3">
+          <button
             onClick={handleLaunchSprint}
             disabled={startingSprint}
-            className="w-full h-11 rounded-xl bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-orange-600/20 active:scale-[0.99] transition-all cursor-pointer"
+            className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 p-[1.5px] shadow-xl shadow-orange-500/20 active:scale-[0.99] transition-all cursor-pointer text-left"
           >
-            {startingSprint ? (
-              <Loader2 className="size-4 animate-spin mr-2" />
-            ) : (
-              <Flame className="size-4 mr-2 animate-pulse" />
-            )}
-            Ushbu 10 ta fakt va 3 ta qopqonni hoziroq 3 daqiqalik Sprintda mixlab qo&apos;ying (+50 XP)
-            <ArrowRight className="size-4 ml-1.5" />
-          </Button>
+            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-[15px] bg-zinc-950/95 px-4 py-3 backdrop-blur-md group-hover:bg-zinc-900/90 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="size-11 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-600 flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
+                  {startingSprint ? (
+                    <Loader2 className="size-5 text-white animate-spin" />
+                  ) : (
+                    <Flame className="size-5 text-white fill-current animate-pulse" />
+                  )}
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                      ⚡ 3 Daqiqalik Fokus Sprint
+                    </span>
+                    <span className="text-[10px] font-bold text-zinc-400">
+                      10 ta saralangan savol • +50 XP
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm font-extrabold text-white leading-snug">
+                    Ushbu 10 ta fakt va 3 ta qopqonni hoziroq Sprintda mixlab qo&apos;ying!
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 shrink-0 self-end sm:self-center group-hover:opacity-95 transition-opacity">
+                <span>Mashqni Boshlash</span>
+                <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </button>
         </div>
       </CardContent>
     </Card>
