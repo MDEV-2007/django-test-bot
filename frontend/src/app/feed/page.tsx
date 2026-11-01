@@ -40,7 +40,6 @@ import PremiumIcon from '@/components/ui/premium-icon';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import { cn } from '@/lib/utils';
 import FeedStoriesBar from '@/components/feed/FeedStoriesBar';
-import ExamTrackSwitcher, { type ExamTrackType } from '@/components/feed/ExamTrackSwitcher';
 import SosQuestionCard from '@/components/feed/SosQuestionCard';
 import TargetedAdBanner, { type TargetedOfferData } from '@/components/feed/TargetedAdBanner';
 import AutoShareModal from '@/components/feed/AutoShareModal';
@@ -185,7 +184,7 @@ export default function CommunityFeedPage() {
   const [selectedAttemptId, setSelectedAttemptId] = useState<number | null>(null);
   const [attemptCaption, setAttemptCaption] = useState('');
   const [isSharingAttempt, setIsSharingAttempt] = useState(false);
-  const [examTrack, setExamTrack] = useState<ExamTrackType>('DTM_SERTIFIKAT');
+  const [examTrack, setExamTrack] = useState<string>('DTM_SERTIFIKAT');
   const [targetedOffer, setTargetedOffer] = useState<TargetedOfferData | null>(null);
 
   useEffect(() => {
@@ -525,14 +524,6 @@ export default function CommunityFeedPage() {
           {/* 0. Kunlik Streak & O'quv Markaz Stories */}
           <FeedStoriesBar examTrack={examTrack} />
 
-          {/* 0.1 ExamTrack Smart Hub (Yo'nalish Izolyatsiyasi) */}
-          <ExamTrackSwitcher
-            currentTrack={examTrack}
-            onChange={(track) => {
-              setExamTrack(track);
-              loadFeed(selectedFilter);
-            }}
-          />
 
           {/* 1. iOS 18 Top Segmented Bar & Action Button */}
           <div className="flex flex-wrap items-center justify-between gap-2.5">
