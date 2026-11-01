@@ -117,7 +117,9 @@ def handle_start(chat_id, tg_user, referral_code=None):
     is_landing = (referral_code == 'landing')
     is_pdf_gift = (referral_code == 'pdf_gift')
     is_mock = bool(referral_code and referral_code.startswith('mock_'))
-    actual_ref = None if (is_landing or is_pdf_gift or is_mock) else referral_code
+    is_parent = bool(referral_code and referral_code.startswith('parent_'))
+    is_battle = bool(referral_code and referral_code.startswith('battle_'))
+    actual_ref = None if (is_landing or is_pdf_gift or is_mock or is_parent or is_battle) else referral_code
 
     # Profil gate'dan OLDIN yaratiladi
     get_or_create_profile(tg_user, referral_code=actual_ref)
@@ -133,6 +135,25 @@ def handle_start(chat_id, tg_user, referral_code=None):
             }))
         except Exception:
             pass
+
+    if is_parent:
+        student_id_str = referral_code.replace('parent_', '').strip()
+        from core.services import link_parent_telegram
+        success, msg = link_parent_telegram(student_id_str, chat_id, tg_user)
+        send_message(chat_id, msg)
+        return
+
+    if is_battle:
+        pin_code = referral_code.replace('battle_', '').strip()
+        base_app_url = _webapp_url().rstrip('/')
+        battle_url = f"{base_app_url}/battles/class/{pin_code}"
+        kb = {'inline_keyboard': [[{'text': "⚔️ Jonli Sinf Jangiga Kirish", 'web_app': {'url': battle_url}}]]}
+        send_message(
+            chat_id,
+            f"⚔️ <b>Sinf Jangiga taklif qilindingiz!</b>\n\nPIN-kod: <b>{pin_code}</b>\n\nQuyidagi tugma orqali sinfdoshlaringiz bilan jonli bellashuvga kiring:",
+            reply_markup=kb,
+        )
+        return
 
     if is_mock:
         mock_id_str = referral_code.replace('mock_', '').strip()

@@ -16,6 +16,7 @@ import { apiFetch } from '@/lib/api-client';
 import PremiumIcon, { PremiumIconTone } from '@/components/ui/premium-icon';
 import { toast } from 'sonner';
 import { useFeaturesStore } from '@/lib/features';
+import AdminFeatureFlags from '@/components/admin/AdminFeatureFlags';
 
 type FeatureItem = {
   id: number;
@@ -268,6 +269,9 @@ export default function FeaturesManagementPage() {
             </Card>
           </div>
         )}
+
+        {/* Real-time Dynamic Feature Toggles */}
+        <AdminFeatureFlags />
 
         {/* Eslatma / Info */}
         <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-xs text-muted-foreground">

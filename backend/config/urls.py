@@ -32,6 +32,8 @@ urlpatterns = [
     # JSON API for the Next.js frontend (frontend/). Django endi FAQAT backend:
     # shablonlar va sahifa marshrutlari olib tashlandi, butun UI Next.js tomonida.
     path('api/auth/', include('accounts.api_urls')),
+    path('api/v1/system/', include('core.urls')),
+    path('api/core/', include('core.urls')),
     path('api/dashboard/', include('dashboard.api_urls')),
     path('api/tests/', include('tests_app.api_urls')),
     path('api/v1/sprint/', include('sprint.urls')),
