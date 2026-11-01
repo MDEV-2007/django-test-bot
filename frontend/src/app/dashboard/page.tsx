@@ -13,13 +13,9 @@ import {
   MessageCircle,
   Swords,
   X,
-  BookOpen,
   Clock,
   Layers,
   Play,
-  Zap,
-  Target,
-  ArrowRight,
   Gift,
   Flame,
   Coins,
@@ -35,9 +31,7 @@ import DailyChestModal, { DailyChestStatus } from '@/components/student/DailyChe
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
 import { useTheme } from '@/hooks/useTheme';
 import {
-  HeroFocusBanner,
   DailyGoalCard,
-  BattleArenaCard,
   LiveActivityTicker,
 } from '@/components/dashboard/ModernHeroDashboard';
 import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
@@ -168,9 +162,8 @@ export default function DashboardPage() {
   const { access, authReady } = useAuthStore();
   const { isDark } = useTheme();
 
-  const [activeMode, setActiveMode] = useState<'study' | 'arena'>('study');
   const { data, error, refresh: refreshDashboard } = useApiQuery<DashboardData>('/api/dashboard/home/');
-  const { data: lbData } = useApiQuery<LeaderboardData>(activeMode === 'arena' ? '/api/leaderboard/' : null);
+  const { data: lbData } = useApiQuery<LeaderboardData>(access ? '/api/leaderboard/' : null);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -357,45 +350,11 @@ export default function DashboardPage() {
       />
 
       {/* ============================================================ */}
-      {/* 1. iOS SEGMENTED CONTROL + LIVE ACTIVITY ONLINE PEERS PILL   */}
+      {/* 1. LIVE ACTIVITY ONLINE PEERS PILL                           */}
       {/* ============================================================ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Authentic iOS UISegmentedControl */}
-        <div className="ios-segmented inline-flex items-center self-start">
-          <button
-            type="button"
-            onClick={() => setActiveMode('study')}
-            className={cn(
-              'flex items-center gap-2 px-4 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
-              activeMode === 'study'
-                ? 'ios-segmented-thumb font-bold'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <PremiumIcon icon={BookOpen} tone="sky" size="2xs" />
-            <span>O&apos;quv Markazi</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveMode('arena')}
-            className={cn(
-              'flex items-center gap-2 px-4 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer select-none',
-              activeMode === 'arena'
-                ? 'ios-segmented-thumb font-bold'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <PremiumIcon icon={Swords} tone="amber" size="2xs" />
-            <span>Arena &amp; Reyting</span>
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#FF9500] opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-[#FF9500]" />
-            </span>
-          </button>
-        </div>
-
+      <div className="flex items-center justify-end">
         {/* iOS Dynamic Island Style Online Users Pill */}
-        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card border border-border shadow-2xs self-start sm:self-auto">
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card border border-border shadow-2xs">
           <span className="relative flex size-2 shrink-0">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-[#34C759]" />
@@ -462,9 +421,8 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        <button
-          type="button"
-          onClick={() => setActiveMode('arena')}
+        <Link
+          href="/battles"
           className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3 text-left cursor-pointer"
         >
           <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
@@ -476,7 +434,7 @@ export default function DashboardPage() {
               {p.elo_rating || 1200} <span className="text-[11px] font-normal text-muted-foreground">ELO</span>
             </p>
           </div>
-        </button>
+        </Link>
       </div>
 
       {/* ============================================================ */}
@@ -484,8 +442,6 @@ export default function DashboardPage() {
       {/* ============================================================ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          {activeMode === 'study' ? (
-            <>
               {/* ACTIVATION HOOK (0 attempts) */}
               {data.recent_attempts.length === 0 && (
                 <div className="relative overflow-hidden rounded-[28px] border border-primary/25 bg-card p-5 sm:p-7 shadow-card">
@@ -635,201 +591,6 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </div>
-            </>
-          ) : (
-            <>
-              {/* ARENA MODE: 1V1 DUELS & WEEKLY LEAGUE SHOWCASE */}
-              <BattleArenaCard
-                battleArena={{
-                  onlinePlayers: data.online_count || 42,
-                  currentRank: rankInfo.title,
-                  elo: p.elo_rating || 1200,
-                }}
-                theme={isDark ? 'dark' : 'light'}
-              />
-
-              {/* iOS 18 GAME CENTER WEEKLY LEADERBOARD & PODIUM */}
-              <div className="ios-card relative overflow-hidden rounded-[28px] space-y-5 p-4 sm:p-6">
-                <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#FF9500]/10 blur-3xl" />
-
-                {/* Header */}
-                <div className="relative flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <PremiumIcon icon={Trophy} tone="amber" size="md" solid />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight">
-                          Haftalik Liga &amp; Podest
-                        </h3>
-                        {lbData?.my_rank ? (
-                          <span className="rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#C93400] dark:text-[#FF9F0A]">
-                            O&apos;rningiz #{lbData.my_rank}
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="text-[11px] font-medium text-muted-foreground truncate">
-                        Oltin Liga yetakchilari va jonli musobaqa jadvali
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Link
-                      href="/feed"
-                      className="ios-spring flex items-center gap-1.5 text-xs font-semibold text-[#34C759] bg-[#34C759]/12 hover:bg-[#34C759]/18 px-3 py-1.5 rounded-full"
-                    >
-                      <PremiumIcon icon={Sparkles} tone="emerald" size="2xs" />
-                      <span>Hamjamiyat</span>
-                    </Link>
-                    <Link
-                      href="/leaderboard"
-                      className="ios-spring flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/15 px-3.5 py-1.5 rounded-full"
-                    >
-                      <span>Barchasi</span>
-                      <ArrowRight className="size-3.5" />
-                    </Link>
-                  </div>
-                </div>
-
-                {/* iOS 18 Top 3 Podium (Clean internal badges, no clipped top pills) */}
-                <div className="relative grid grid-cols-3 gap-2 sm:gap-3.5 items-stretch">
-                  {/* 2nd Place */}
-                  {topList[1] && (
-                    <div className="flex flex-col items-center justify-between rounded-[22px] border border-border bg-muted/45 p-3 sm:p-4 text-center">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#8E8E93]/18 px-2.5 py-0.5 text-[9.5px] font-extrabold text-foreground/80">
-                        🥈 #2 KUMUSH
-                      </span>
-                      <Avatar className="size-11 sm:size-13 ring-2 ring-[#8E8E93]/60 my-2.5 shadow-xs">
-                        <AvatarImage src={topList[1].avatar_url} />
-                        <AvatarFallback className="text-xs font-extrabold bg-card text-foreground">
-                          {(topList[1].first_name || topList[1].username).slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="w-full min-w-0">
-                        <span className="block text-xs font-bold text-foreground truncate">
-                          {topList[1].first_name || topList[1].username}
-                        </span>
-                        <span className="mt-1 inline-block rounded-full bg-card px-2 py-0.5 text-[10px] font-mono font-bold text-muted-foreground border border-border">
-                          {topList[1].xp.toLocaleString('uz-UZ')} XP
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 1st Place */}
-                  {topList[0] && (
-                    <div className="flex flex-col items-center justify-between rounded-[24px] border-2 border-[#FF9500]/75 bg-gradient-to-b from-[#FF9500]/12 via-card to-card p-3 sm:p-4 text-center shadow-[0_10px_28px_-8px_rgba(255,149,0,0.28)]">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FFCC00] px-2.5 py-0.5 text-[9.5px] font-black text-slate-950 shadow-2xs">
-                        👑 #1 CHEMPION
-                      </span>
-                      <Avatar className="size-13 sm:size-15 ring-2 ring-[#FF9500] my-2.5 shadow-md">
-                        <AvatarImage src={topList[0].avatar_url} />
-                        <AvatarFallback className="text-sm font-black bg-[#FF9500] text-white">
-                          {(topList[0].first_name || topList[0].username).slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="w-full min-w-0">
-                        <span className="block text-xs sm:text-[13px] font-extrabold text-foreground truncate">
-                          {topList[0].first_name || topList[0].username}
-                        </span>
-                        <span className="mt-1 inline-block rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 text-[10.5px] font-mono font-black text-[#C93400] dark:text-[#FF9F0A]">
-                          {topList[0].xp.toLocaleString('uz-UZ')} XP
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 3rd Place */}
-                  {topList[2] && (
-                    <div className="flex flex-col items-center justify-between rounded-[22px] border border-border bg-muted/45 p-3 sm:p-4 text-center">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#C93400]/15 px-2.5 py-0.5 text-[9.5px] font-extrabold text-[#C93400] dark:text-[#FF9F0A]">
-                        🥉 #3 BRONZA
-                      </span>
-                      <Avatar className="size-11 sm:size-13 ring-2 ring-[#C93400]/60 my-2.5 shadow-xs">
-                        <AvatarImage src={topList[2].avatar_url} />
-                        <AvatarFallback className="text-xs font-extrabold bg-card text-foreground">
-                          {(topList[2].first_name || topList[2].username).slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="w-full min-w-0">
-                        <span className="block text-xs font-bold text-foreground truncate">
-                          {topList[2].first_name || topList[2].username}
-                        </span>
-                        <span className="mt-1 inline-block rounded-full bg-card px-2 py-0.5 text-[10px] font-mono font-bold text-[#C93400] dark:text-[#FF9F0A] border border-border">
-                          {topList[2].xp.toLocaleString('uz-UZ')} XP
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* iOS Inset Grouped Leaderboard Rows */}
-                <div className="divide-y divide-border rounded-[22px] border border-border bg-muted/25 overflow-hidden">
-                  {(topList.length > 3 ? topList.slice(3, 8) : topList).map((item, i) => {
-                    const rankNum = topList.length > 3 ? i + 4 : i + 1;
-                    const isCurrentUser = item.username === p.username;
-                    const itemFullName = `${item.first_name || item.username} ${item.last_name || ''}`.trim();
-
-                    return (
-                      <div
-                        key={item.profile_id || i}
-                        className={cn(
-                          'flex items-center justify-between px-4 py-3 transition-colors',
-                          isCurrentUser ? 'bg-primary/10' : 'hover:bg-muted/50'
-                        )}
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span
-                            className={cn(
-                              'flex size-6.5 items-center justify-center rounded-[8px] font-mono text-[11px] font-bold shrink-0',
-                              isCurrentUser
-                                ? 'bg-primary text-white'
-                                : 'bg-card border border-border text-muted-foreground'
-                            )}
-                          >
-                            #{rankNum}
-                          </span>
-                          <Avatar className="size-8 shrink-0 border border-border">
-                            <AvatarImage src={item.avatar_url} />
-                            <AvatarFallback className="text-[10px] font-bold bg-card text-foreground">
-                              {(item.first_name || item.username).slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <span
-                              className={cn(
-                                'block text-xs font-semibold truncate',
-                                isCurrentUser ? 'text-primary font-bold' : 'text-foreground'
-                              )}
-                            >
-                              {isCurrentUser ? `${itemFullName} (Siz)` : itemFullName}
-                            </span>
-                            <span className="font-mono text-[10px] text-muted-foreground">
-                              Level {item.level || 1}
-                            </span>
-                          </div>
-                        </div>
-                        <span className="font-mono text-xs font-extrabold text-primary shrink-0 pl-2">
-                          {item.xp.toLocaleString('uz-UZ')} XP
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Reward Strip */}
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-[18px] bg-[#FF9500]/12 border border-[#FF9500]/20 px-4 py-3 text-xs">
-                  <span className="flex items-center gap-2 text-foreground font-medium">
-                    <Zap className="size-3.5 text-[#FF9500] fill-[#FF9500]" />
-                    Duel g&apos;alabasi: <strong className="text-[#C93400] dark:text-[#FF9F0A] font-bold">+50 XP</strong> va{' '}
-                    <strong className="text-[#C93400] dark:text-[#FF9F0A] font-bold">+25 tanga</strong>
-                  </span>
-                  <span className="font-bold text-[#C93400] dark:text-[#FF9F0A] bg-[#FF9500]/15 px-2.5 py-0.5 rounded-full text-[10px]">
-                    🏆 Oltin Liga
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
         </div>
 
         {/* ========================================================== */}
@@ -950,23 +711,21 @@ export default function DashboardPage() {
           </Card>
 
           {/* 4. MINI LEADERBOARD (iOS Inset Grouped List) */}
-          {activeMode === 'study' && (
-            <Card className="rounded-[26px] border border-border bg-card p-5 shadow-card space-y-3.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <PremiumIcon icon={Trophy} tone="amber" size="xs" solid />
-                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                    Haftalik Reyting
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveMode('arena')}
-                  className="text-xs font-semibold text-primary hover:underline transition cursor-pointer"
-                >
-                  To&apos;liq →
-                </button>
+          <Card className="rounded-[26px] border border-border bg-card p-5 shadow-card space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <PremiumIcon icon={Trophy} tone="amber" size="xs" solid />
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                  Haftalik Reyting
+                </h3>
               </div>
+              <Link
+                href="/leaderboard"
+                className="text-xs font-semibold text-primary hover:underline transition cursor-pointer"
+              >
+                To&apos;liq →
+              </Link>
+            </div>
 
               <div className="divide-y divide-border rounded-[18px] bg-muted/40 border border-border overflow-hidden">
                 {topList.slice(0, 3).map((item, idx) => (
@@ -995,7 +754,6 @@ export default function DashboardPage() {
                 ))}
               </div>
             </Card>
-          )}
         </div>
       </div>
 
