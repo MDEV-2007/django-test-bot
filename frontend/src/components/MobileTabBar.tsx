@@ -73,7 +73,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/sprint',
-      label: 'Sprint',
+      label: 'Tezkor Test',
       icon: Zap,
       matchPrefixes: ['/sprint'],
       featureKey: 'sprint',

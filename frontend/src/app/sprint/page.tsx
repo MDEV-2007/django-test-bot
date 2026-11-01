@@ -7,6 +7,8 @@ import FocusSprintSetup from '@/components/sprint/FocusSprintSetup';
 import type { QuestionItem, SprintSessionSummary, SprintSubject } from '@/types/sprint';
 import { apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
+import ModernAppLayout from '@/components/layout/ModernAppLayout';
+import { useAuthStore } from '@/lib/auth-store';
 
 // Zaxira savollar (tarmoq uzilib qolsa)
 const FALLBACK_QUESTIONS: QuestionItem[] = [
@@ -48,6 +50,7 @@ const DEFAULT_SUBJECTS: SprintSubject[] = [
 
 export default function SprintPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const searchParams = useSearchParams();
 
   const [subjects, setSubjects] = useState<SprintSubject[]>(DEFAULT_SUBJECTS);
@@ -116,7 +119,7 @@ export default function SprintPage() {
   };
 
   const handleFinish = (summary: SprintSessionSummary) => {
-    toast.success(`Fokus Sprinti yakunlandi! +${summary.totalXpEarned} XP to'plandi`);
+    toast.success(`Tezkor test yakunlandi! +${summary.totalXpEarned} XP to'plandi`);
   };
 
   const handleExitSprint = () => {
@@ -132,7 +135,7 @@ export default function SprintPage() {
     const sprintTitle = chosenSubject?.name || questions[0]?.topicTitle || "Fokus Sprinti";
 
     return (
-      <div className="min-h-screen bg-[#07090E] text-foreground">
+      <div className="min-h-screen bg-background text-foreground">
         <NeuralSprintView
           questions={questions}
           initialDtmScore={178.4}
@@ -149,14 +152,16 @@ export default function SprintPage() {
   // 2. FANNI TANLASH VA SPRINTNI SOZLASH EKRANI (Bento Cockpit UI)
   // ─────────────────────────────────────────────────────────────
   return (
-    <FocusSprintSetup
-      subjects={subjects}
-      selectedSubjectId={selectedSubjectId}
-      onSelectSubject={setSelectedSubjectId}
-      questionCount={questionCount}
-      onSelectCount={setQuestionCount}
-      onStart={(subjId, count) => startSprint(subjId, count)}
-      loading={loadingQuestions}
-    />
+    <ModernAppLayout user={user}>
+      <FocusSprintSetup
+        subjects={subjects}
+        selectedSubjectId={selectedSubjectId}
+        onSelectSubject={setSelectedSubjectId}
+        questionCount={questionCount}
+        onSelectCount={setQuestionCount}
+        onStart={(subjId, count) => startSprint(subjId, count)}
+        loading={loadingQuestions}
+      />
+    </ModernAppLayout>
   );
 }
