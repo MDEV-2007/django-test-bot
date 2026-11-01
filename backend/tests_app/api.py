@@ -290,8 +290,7 @@ def center_api(request):
 
 
 @transaction.atomic
-def _new_attempt(profile, test):
-    is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))
+def _new_attempt(profile, test, is_stress=False):
     attempt = Attempt.objects.create(profile=profile, test=test, is_stress_mode=is_stress)
     q_ids = list(test.questions.values_list('id', flat=True))
     order = test.question_order or []
@@ -342,10 +341,7 @@ def start_test_api(request, test_id):
             and test.id not in _unlocked_ids(profile)):
         return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
     is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))
-    attempt = _new_attempt(profile, test)
-    if is_stress:
-        attempt.is_stress_mode = True
-        attempt.save(update_fields=['is_stress_mode'])
+    attempt = _new_attempt(profile, test, is_stress=is_stress)
     # `mode` — klient qaysi ekranni ochishini aytadi. Partlarga (ExamSection) bo'lingan
     # test CEFR imtihon ekranida ochiladi: matn/audio va butun part bir varaqda. Qolgan
     # hamma test eski "bitta savol — bitta ekran" oqimida qoladi.
@@ -1341,9 +1337,7 @@ def start_stress_test_api(request):
         mode = 'cefr' if test.sections.exists() else 'classic'
         return Response({'attempt_id': active_attempt.id, 'mode': mode, 'is_stress_mode': True})
 
-    attempt = _new_attempt(profile, test)
-    attempt.is_stress_mode = True
-    attempt.save(update_fields=['is_stress_mode'])
+    attempt = _new_attempt(profile, test, is_stress=True)
     mode = 'cefr' if test.sections.exists() else 'classic'
     return Response({'attempt_id': attempt.id, 'mode': mode, 'is_stress_mode': True})
 
