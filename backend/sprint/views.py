@@ -264,22 +264,41 @@ class SprintQuestionsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         count = min(30, max(5, int(request.query_params.get('count', 10))))
         raw_subject_id = request.query_params.get('subject_id')
+        raw_topic_id = request.query_params.get('topic_id')
 
         try:
             subject_id = int(raw_subject_id) if raw_subject_id else 0
         except (ValueError, TypeError):
             subject_id = 0
 
+        try:
+            topic_id = int(raw_topic_id) if raw_topic_id else 0
+        except (ValueError, TypeError):
+            topic_id = 0
+
         qs = Question.objects.select_related('topic', 'subject').prefetch_related('choices').filter(
             question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
         )
-        if subject_id > 0:
+        if topic_id > 0:
+            topic_qs = qs.filter(topic_id=topic_id)
+            if topic_qs.count() >= count:
+                qs = topic_qs
+            else:
+                # Agar shu mavzuda savollar oz bo'lsa, mavzuni to'liq olib, qolganini shu fandan to'ldiramiz
+                from tests_app.models import Topic
+                topic_obj = Topic.objects.filter(id=topic_id).first()
+                if topic_obj and topic_obj.subject_id:
+                    extra_qs = qs.filter(subject_id=topic_obj.subject_id).exclude(topic_id=topic_id)
+                    qs = topic_qs | extra_qs
+                else:
+                    qs = topic_qs or qs
+        elif subject_id > 0:
             qs = qs.filter(subject_id=subject_id)
 
         total_available = qs.count()
         # Agar tanlangan fanda kam savol bo'lsa ham qolganlarini qaytaramiz
-        if total_available == 0 and subject_id > 0:
-            # Agar tanlangan fanda umuman test bo'lmasa, aralashdan olamiz
+        if total_available == 0 and (subject_id > 0 or topic_id > 0):
+            # Agar umuman test bo'lmasa, aralashdan olamiz
             qs = Question.objects.select_related('topic', 'subject').prefetch_related('choices').filter(
                 question_type__in=['single_choice', 'mcq', 'image_based', 'table_based']
             )

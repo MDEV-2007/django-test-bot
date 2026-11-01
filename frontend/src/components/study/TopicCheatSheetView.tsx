@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { tgHaptic } from '@/lib/telegram';
+import { soundFX } from '@/lib/soundFX';
 import { apiFetch } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -86,22 +87,16 @@ export default function TopicCheatSheetView({
 
   async function handleLaunchSprint() {
     setStartingSprint(true);
+    soundFX.fanfare();
     tgHaptic('medium');
+    toast.success("3 daqiqalik Fokus Sprinti boshlanmoqda! Faktlarni mustahkamlang 🔥");
     if (onStartSprint) {
       onStartSprint();
+      setStartingSprint(false);
       return;
     }
-    try {
-      const res = await apiFetch<{ attempt_id: number }>('/api/v1/sprint/start/', {
-        method: 'POST',
-        body: JSON.stringify({ topic_id: topicId, count: 10 }),
-      });
-      router.push(`/sprint?attempt_id=${res.attempt_id}`);
-    } catch {
-      router.push('/sprint');
-    } finally {
-      setStartingSprint(false);
-    }
+    router.push(`/sprint?autostart=true&topic_id=${topicId}&count=10`);
+    setStartingSprint(false);
   }
 
   if (loading) {

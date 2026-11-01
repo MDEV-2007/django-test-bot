@@ -82,22 +82,29 @@ export default function SprintPage() {
     fetchSubjects();
   }, []);
 
-  // Avtomatik boshlash (Turnir / Jonli Banner havolasidan kelganda)
+  // Avtomatik boshlash (Turnir / Jonli Banner / Anti-Darslik Shpargalka havolasidan kelganda)
   useEffect(() => {
     if (searchParams.get('autostart') === 'true') {
       const p = searchParams.get('subject');
       const subjId = p === 'all' ? 0 : (parseInt(p || '0', 10) || 0);
       const c = searchParams.get('count');
       const count = c ? parseInt(c, 10) || 10 : 10;
-      startSprint(subjId, count);
+      const t = searchParams.get('topic_id');
+      const topicId = t ? parseInt(t, 10) || 0 : 0;
+      startSprint(subjId, count, topicId);
     }
   }, [searchParams]);
 
-  // Tanlangan fan bo'yicha sprintni boshlash
-  const startSprint = async (subjectId = selectedSubjectId, count = questionCount) => {
+  // Tanlangan fan/mavzu bo'yicha sprintni boshlash
+  const startSprint = async (subjectId = selectedSubjectId, count = questionCount, topicId = 0) => {
     setLoadingQuestions(true);
     try {
-      const qParam = subjectId > 0 ? `&subject_id=${subjectId}` : '';
+      let qParam = '';
+      if (topicId > 0) {
+        qParam = `&topic_id=${topicId}`;
+      } else if (subjectId > 0) {
+        qParam = `&subject_id=${subjectId}`;
+      }
       const res = await apiFetch<{ ok: boolean; questions: QuestionItem[] }>(
         `/api/v1/sprint/questions/?count=${count}${qParam}`
       );
