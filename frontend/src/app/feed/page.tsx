@@ -102,6 +102,8 @@ type FeedResponse = {
   posts: PostItem[];
   total: number;
   subjects: { slug: string; name: string }[];
+  user_track?: string;
+  user_attempted_slugs?: string[];
 };
 
 const REACTION_EMOJIS: Record<string, { icon: string; label: string; activeClass: string }> = {
@@ -185,6 +187,8 @@ export default function CommunityFeedPage() {
   const [attemptCaption, setAttemptCaption] = useState('');
   const [isSharingAttempt, setIsSharingAttempt] = useState(false);
   const [examTrack, setExamTrack] = useState<string>('DTM_SERTIFIKAT');
+  const [userAttemptedSlugs, setUserAttemptedSlugs] = useState<string[]>([]);
+  const [userTrack, setUserTrack] = useState<string>('DTM_SERTIFIKAT');
   const [targetedOffer, setTargetedOffer] = useState<TargetedOfferData | null>(null);
 
   useEffect(() => {
@@ -275,6 +279,8 @@ export default function CommunityFeedPage() {
       let query = '';
       if (filter === 'certificate') {
         query = '?type=certificate';
+      } else if (filter === 'my_subjects') {
+        query = '?subject=my_subjects';
       } else if (filter !== 'all') {
         query = `?subject=${encodeURIComponent(filter)}`;
       }
@@ -283,6 +289,8 @@ export default function CommunityFeedPage() {
       if (res && res.posts) {
         setPosts(res.posts);
         if (res.subjects) setSubjects(res.subjects);
+        if (res.user_attempted_slugs) setUserAttemptedSlugs(res.user_attempted_slugs);
+        if (res.user_track) setUserTrack(res.user_track);
 
         const initialReactions: Record<
           number,
@@ -618,18 +626,33 @@ export default function CommunityFeedPage() {
             </div>
           </div>
 
-          {/* 3. iOS Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
-            {[
-              { slug: 'all', label: 'Barchasi' },
-              { slug: 'certificate', label: '🏆 Sertifikatlar' },
-              ...subjects
-                .filter((s) => s.slug !== 'all')
-                .map((s) => ({
-                  slug: s.slug,
-                  label: s.name,
-                })),
-            ].map((tab) => {
+          {/* 3. iOS Filter Pills & Smart Hub Isolation */}
+          <div className="space-y-2">
+            {userAttemptedSlugs.length > 0 && (
+              <div className="flex items-center justify-between text-xs px-1 text-muted-foreground">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>
+                    Smart Hub: <strong>{userTrack === 'IELTS_SAT' ? 'IELTS & SAT' : 'Milliy Sertifikat / DTM'}</strong> · Faol yechayotgan fanlaringiz asosida saralandi
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+              {[
+                { slug: 'all', label: 'Barchasi' },
+                ...(userAttemptedSlugs.length > 0
+                  ? [{ slug: 'my_subjects', label: '🎯 Mening fanlarim' }]
+                  : []),
+                { slug: 'certificate', label: '🏆 Sertifikatlar' },
+                ...subjects
+                  .filter((s) => s.slug !== 'all')
+                  .map((s) => ({
+                    slug: s.slug,
+                    label: s.name,
+                  })),
+              ].map((tab) => {
               const isSel = selectedFilter === tab.slug;
               return (
                 <button
@@ -647,6 +670,7 @@ export default function CommunityFeedPage() {
                 </button>
               );
             })}
+            </div>
           </div>
 
           {/* 4. Feed Stream */}

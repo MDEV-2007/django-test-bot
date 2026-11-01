@@ -913,13 +913,29 @@ def reels_create_user_question_api(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def community_feed_api(request):
-    """Platforma o'quvchilarining test natijalari va sertifikatlar lentasi."""
+    """Platforma o'quvchilarining test natijalari va sertifikatlar lentasi.
+    Smart Hub & Yo'nalish Izolyatsiyasi:
+    1. O'quvchining yo'nalishi (exam_track) bo'yicha qat'iy izolyatsiya qilinadi.
+    2. O'quvchi qaysi fanlarda test yechgan bo'lsa, o'sha fanlarga oid postlar birinchi bo'lib chiqadi.
+    """
+    from django.db.models import Q, Case, When, Value, IntegerField
+    from tests_app.models import Attempt
+
     post_type = request.GET.get('type', 'all')
     subject_slug = request.GET.get('subject', 'all')
     mine = request.GET.get('mine')
     author_id = request.GET.get('author_id')
+    track = request.GET.get('track')
+
+    profile = getattr(request.user, 'profile', None) if request.user.is_authenticated else None
+    user_track = getattr(profile, 'exam_track', 'DTM_SERTIFIKAT') if profile else 'DTM_SERTIFIKAT'
+    active_track = track if track and track != 'all' else user_track
 
     qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt').prefetch_related('reactions')
+
+    # 1. Track bo'yicha izolyatsiya (DTM o'quvchisi Koreys yoki Arab tili postlarini ko'rmaydi!)
+    if active_track and active_track != 'all':
+        qs = qs.filter(Q(exam_track=active_track) | Q(exam_track__isnull=True) | Q(exam_track=''))
 
     if mine and request.user.is_authenticated:
         qs = qs.filter(author=request.user)
@@ -929,8 +945,32 @@ def community_feed_api(request):
     if post_type and post_type != 'all':
         qs = qs.filter(post_type=post_type)
 
-    if subject_slug and subject_slug != 'all':
+    # 2. O'quvchining amalda yechgan fanlari ro'yxatini aniqlaymiz
+    user_attempted_slugs = []
+    if profile:
+        user_attempted_slugs = list(
+            Attempt.objects.filter(profile=profile)
+            .exclude(test__subject__slug__isnull=True)
+            .values_list('test__subject__slug', flat=True)
+            .distinct()[:6]
+        )
+
+    # 3. Fanlar bo'yicha saralash / Shaxsiylashtirish
+    if subject_slug == 'my_subjects' and user_attempted_slugs:
+        qs = qs.filter(subject_slug__in=user_attempted_slugs)
+    elif subject_slug and subject_slug != 'all':
         qs = qs.filter(subject_slug=subject_slug)
+    elif user_attempted_slugs:
+        # Standart holatda o'quvchi yechayotgan fanlar postlarini eng yuqoriga chiqaramiz
+        qs = qs.annotate(
+            is_my_subject=Case(
+                When(subject_slug__in=user_attempted_slugs, then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        ).order_by('-is_my_subject', '-id')
+    else:
+        qs = qs.order_by('-id')
 
     total = qs.count()
     posts = qs[:50]
@@ -950,6 +990,8 @@ def community_feed_api(request):
         'posts': posts_list,
         'total': total,
         'subjects': subjects,
+        'user_track': active_track,
+        'user_attempted_slugs': user_attempted_slugs,
     })
 
 
