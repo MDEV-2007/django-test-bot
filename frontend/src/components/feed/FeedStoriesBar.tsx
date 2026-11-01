@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Trophy, Award, Sparkles, X, ChevronRight, ChevronLeft, ExternalLink, PhoneCall, Swords } from 'lucide-react';
@@ -33,6 +34,7 @@ interface FeedStoriesBarProps {
 }
 
 export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTargetModal }: FeedStoriesBarProps) {
+  const router = useRouter();
   const [stories, setStories] = useState<StoryItem[]>([]);
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
@@ -143,18 +145,32 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
 
   function handleActionClick(story: StoryItem) {
     tgHaptic('medium');
-    if (story.story_type === 'promo' && onOpenTargetModal) {
-      setActiveStoryIndex(null);
-      onOpenTargetModal(story.author_name, story.id);
-      return;
+    const wa = (window as any).Telegram?.WebApp;
+
+    if (story.story_type === 'promo') {
+      if (onOpenTargetModal) {
+        setActiveStoryIndex(null);
+        onOpenTargetModal(story.author_name, story.id);
+        return;
+      }
+      if (story.cta_link?.startsWith('http')) {
+        setActiveStoryIndex(null);
+        if (wa?.openLink) { wa.openLink(story.cta_link); } else { window.open(story.cta_link, '_blank'); }
+        return;
+      }
     }
+
     if (story.story_type === 'certificate') {
       toast.success("Do'stingizni tabrikladingiz! (+10 XP) 🎉");
-      setActiveStoryIndex(null);
-      return;
     }
+
+    setActiveStoryIndex(null);
     if (story.cta_link) {
-      window.location.href = story.cta_link;
+      if (story.cta_link.startsWith('http')) {
+        if (wa?.openLink) { wa.openLink(story.cta_link); } else { window.open(story.cta_link, '_blank'); }
+      } else {
+        router.push(story.cta_link);
+      }
     }
   }
 

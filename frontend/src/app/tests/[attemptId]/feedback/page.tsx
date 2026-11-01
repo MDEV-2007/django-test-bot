@@ -114,25 +114,53 @@ function StoryShareButton({ attemptId }: { attemptId: string }) {
 
   async function share() {
     setBusy(true);
+    tgHaptic('medium');
     try {
       const res = await apiFetch<{ media_url: string; text: string }>(
         `/api/tests/attempts/${attemptId}/story-link/`,
       );
+
+      // Mutlaq HTTPS manzilga aylantirish
+      let fullMediaUrl = res.media_url;
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://ilmildizi.uz';
+      if (!fullMediaUrl.startsWith('http')) {
+        fullMediaUrl = `${currentOrigin}${fullMediaUrl.startsWith('/') ? '' : '/'}${fullMediaUrl}`;
+      } else if (fullMediaUrl.includes('localhost') && !currentOrigin.includes('localhost')) {
+        fullMediaUrl = fullMediaUrl.replace(/https?:\/\/localhost(:\d+)?/, currentOrigin);
+      }
+
+      const wa = (window as any).Telegram?.WebApp;
+
+      // 1. Telegram Story API orqali ulashish
       if (inTelegram && canShareToStory()) {
-        const ok = shareToStory(res.media_url, {
-          text: res.text,
-          widget_link: { url: 'https://t.me/ilmildiziuz_bot', name: 'IlmIldizi' },
-        });
-        if (ok) {
-          tgHaptic('success');
-          return;
+        try {
+          const ok = shareToStory(fullMediaUrl, {
+            text: res.text || "IlmIldizi'da yangi test natijam! 🎯",
+            widget_link: {
+              url: `https://t.me/ilmildiziuz_bot?startapp=attempt_${attemptId}`,
+              name: 'Testni sinash',
+            },
+          });
+          if (ok) {
+            tgHaptic('success');
+            toast.success("Telegram Story ochildi! O'z hikoyangizga joylang.");
+            return;
+          }
+        } catch (storyErr) {
+          console.warn('Telegram shareToStory failed, fallback to openLink:', storyErr);
         }
       }
-      // Web brauzerda yoki eski Telegramda: rasmni to'g'ridan-to'g'ri ochish / saqlash
-      window.open(res.media_url, '_blank');
-      toast.success("Story kartasi ochildi! Uni saqlab olib, Telegram/Instagram Story'ga qo'yishingiz mumkin.");
+
+      // 2. Agar Telegram Story ochilmasa yoki Telegram desktop/web bo'lsa:
+      if (wa?.openLink) {
+        wa.openLink(fullMediaUrl);
+        toast.success('Story kartasi ochildi!');
+      } else {
+        window.open(fullMediaUrl, '_blank');
+        toast.success("Story kartasi ochildi! Uni saqlab olib, Story'ga qo'yishingiz mumkin.");
+      }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Xatolik');
+      toast.error(e instanceof Error ? e.message : 'Xatolik yuz berdi');
     } finally {
       setBusy(false);
     }
@@ -144,9 +172,9 @@ function StoryShareButton({ attemptId }: { attemptId: string }) {
       variant="outline"
       onClick={share}
       disabled={busy}
-      className="border-sky-500/40 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 font-medium"
+      className="border-sky-500/40 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 font-bold gap-1.5 shadow-xs cursor-pointer"
     >
-      <Share2 className="size-4" /> {busy ? 'Tayyorlanmoqda...' : 'Storyga qo`yish'}
+      <Share2 className="size-4" /> {busy ? 'Tayyorlanmoqda...' : "Story'ga qo'yish"}
     </Button>
   );
 }

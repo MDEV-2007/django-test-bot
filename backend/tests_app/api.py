@@ -1230,9 +1230,18 @@ def story_link_api(request, attempt_id):
         return Response({'error': 'attempt not finished'}, status=409)
 
     base = (getattr(settings, 'FRONTEND_URL', '') or getattr(settings, 'WEBAPP_URL', '') or '').rstrip('/')
+    if not base or 'localhost' in base or '127.0.0.1' in base:
+        base = request.build_absolute_uri('/').rstrip('/')
+    if 'localhost' in base or '127.0.0.1' in base:
+        base = 'https://ilmildizi.uz'
+
     path = f'/api/tests/attempts/{attempt.id}/story/?sig={sign_attempt(attempt.id)}'
+    media_url = f'{base}{path}'
+    if media_url.startswith('http://') and not ('localhost' in media_url or '127.0.0.1' in media_url):
+        media_url = 'https://' + media_url[7:]
+
     return Response({
-        'media_url': f'{base}{path}' if base else path,
+        'media_url': media_url,
         'text': f"IlmIldizi'da {round(attempt.score or 0)}% natija oldim!",
     })
 

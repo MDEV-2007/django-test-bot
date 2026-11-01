@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Flame, Trophy, Sparkles, X, ChevronRight, CheckCircle2, Building2, Coins, ArrowRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,9 +23,11 @@ export type DashboardStory = {
   storyTitle: string;
   storyBody: string;
   ctaText?: string;
+  ctaLink?: string;
 };
 
 export default function DashboardStoriesBar() {
+  const router = useRouter();
   const [activeStory, setActiveStory] = useState<DashboardStory | null>(null);
   const [progress, setProgress] = useState(0);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -43,6 +46,7 @@ export default function DashboardStoriesBar() {
       storyTitle: "DTM imtihoniga 60 kun qoldi: 1-dars BEPUL!",
       storyBody: "Tarix va Ona tili bo'yicha intensiv kurs. 1-bosishda bepul darsga yoziling va +50 🪙 Ilm Tanga oling!",
       ctaText: "🚀 Bepul Darsga Yozilish (+50 🪙)",
+      ctaLink: "https://t.me/ilmildiziuz_bot?start=registon",
     },
     {
       id: 2,
@@ -53,6 +57,7 @@ export default function DashboardStoriesBar() {
       storyTitle: "DTM Prognozim 181.5 ballga yetdi!",
       storyBody: "IlmIldizi shpargalkalari va 1v1 Arena sabab barcha qopqon testlarni mixlab qo'ydim. Davom etamiz!",
       ctaText: "⚔️ Sardorni Duelga chaqirish",
+      ctaLink: "/battles",
     },
     {
       id: 3,
@@ -63,6 +68,7 @@ export default function DashboardStoriesBar() {
       storyTitle: "14 kunlik uzluksiz seriya! 🌿",
       storyBody: "Daraxtim 3-bosqichga o'tib, barglari yashnab turibdi. Hech qachon zanjirni uzmang!",
       ctaText: "🎉 Tabriklash (+10 XP)",
+      ctaLink: "/feed",
     },
     {
       id: 4,
@@ -72,7 +78,8 @@ export default function DashboardStoriesBar() {
       badge: "⚡ DTM A+",
       storyTitle: "Tarixdan A+ (68.5 ball) oldim!",
       storyBody: "Titul varaqasini bo'yashda 0 ta xato bilan topshirdim. Haqiqiy zal simulyatori juda yordam berdi!",
-      ctaText: "👏 Qarsak chalish",
+      ctaText: "⚡ Tezkor Mashq Boshlash",
+      ctaLink: "/sprint",
     },
   ];
 
@@ -103,8 +110,9 @@ export default function DashboardStoriesBar() {
   }
 
   async function handleStoryAction(story: DashboardStory) {
+    const wa = (window as any).Telegram?.WebApp;
+
     if (story.isVip) {
-      // 1-Click B2B Lead Submission
       setSubmittingLead(true);
       tgHaptic('medium');
       try {
@@ -120,15 +128,41 @@ export default function DashboardStoriesBar() {
         );
         setLeadSuccess(true);
         toast.success(res.message || "Arizangiz qabul qilindi! +50 🪙 berildi.");
+        
+        setTimeout(() => {
+          setActiveStory(null);
+          if (story.ctaLink) {
+            if (story.ctaLink.startsWith('http')) {
+              if (wa?.openLink) { wa.openLink(story.ctaLink); } else { window.open(story.ctaLink, '_blank'); }
+            } else {
+              router.push(story.ctaLink);
+            }
+          }
+        }, 1200);
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Xatolik yuz berdi");
       } finally {
         setSubmittingLead(false);
       }
+      return;
+    }
+
+    tgHaptic('select');
+    if (story.id === 3) {
+      toast.success("Do'stingizni tabrikladingiz! (+10 XP) 🎉");
+    } else if (story.id === 2) {
+      toast.success("1v1 Duel Arenaga yo'naltirilmoqda! ⚔️");
     } else {
-      tgHaptic('select');
-      toast.success("Tabrik va rag'bat yetkazildi! 🎉");
-      setActiveStory(null);
+      toast.success("Tezkor Mashqqa o'tilmoqda! ⚡");
+    }
+
+    setActiveStory(null);
+    if (story.ctaLink) {
+      if (story.ctaLink.startsWith('http')) {
+        if (wa?.openLink) { wa.openLink(story.ctaLink); } else { window.open(story.ctaLink, '_blank'); }
+      } else {
+        router.push(story.ctaLink);
+      }
     }
   }
 
