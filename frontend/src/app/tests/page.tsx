@@ -3,7 +3,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { soundFX } from '@/lib/soundFX';
+import { tgHaptic } from '@/lib/telegram';
 import {
   Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2,
   FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles, Bell, CheckCircle2,
@@ -318,6 +320,14 @@ export default function TestsPage() {
   const [stressModalOpen, setStressModalOpen] = useState(false);
   const [stressPreselectedTest, setStressPreselectedTest] = useState<{ id: number; title: string } | null>(null);
 
+  const urlMode = searchParams.get('mode');
+  const urlStress = searchParams.get('stress');
+  const [heroMode, setHeroMode] = useState<'standard' | 'blitz' | 'stress'>(() => {
+    if (urlMode === 'stress' || urlStress === '1' || urlStress === 'true') return 'stress';
+    if (urlMode === 'blitz') return 'blitz';
+    return 'standard';
+  });
+
   // subject: null bo'lsa boshlang'ich Grid (grid-cols-4 / grid-cols-2) ko'rinadi.
   // subject: 'tarix' bo'lsa shu fanning ichki subkategoriyalari va testlari ko'rinadi.
   const [subject, setSubject] = useState<string | null>(() => {
@@ -446,88 +456,192 @@ export default function TestsPage() {
     <>
       <AppShell />
       <main className="page-shell flex-1 space-y-6 bg-background text-foreground p-4 pb-20 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-        {/* HERO BANNER */}
-        <PageHero
-          eyebrow="BBA & Milliy Sertifikat · Rasmiy Simulyator"
-          eyebrowIcon={GraduationCap}
-          title="Test va Imtihonlar Markazi"
-          description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
-        />
+        {/* ========================================================================= */}
+        {/* IMTIHON REJIMLARI TAB SWITCHER (Standart | Blits | BMB Stress) */}
+        {/* ========================================================================= */}
+        <div className="space-y-3.5">
+          {/* Segmented Mode Switcher */}
+          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-muted/70 border border-border/80 shadow-xs max-w-xl overflow-x-auto no-scrollbar">
+            <button
+              type="button"
+              onClick={() => {
+                tgHaptic('select');
+                soundFX.click();
+                setHeroMode('standard');
+              }}
+              className={cn(
+                'flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap select-none',
+                heroMode === 'standard'
+                  ? 'bg-card text-foreground shadow-sm border border-border/50 scale-[1.01]'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+              )}
+            >
+              <GraduationCap className={cn('size-4 transition-colors', heroMode === 'standard' ? 'text-primary' : 'text-muted-foreground')} />
+              <span>Standart Testlar</span>
+              <span className={cn(
+                'px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none',
+                heroMode === 'standard' ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+              )}>
+                Rasmiy
+              </span>
+            </button>
 
-        {/* 7-SAVOLLIK DOFAMiN BLITS DIAGNOSTIKA BANNERI */}
-        <Reveal>
-          <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-4 sm:p-5.5 text-white shadow-lg">
-            <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-white/10 rounded-full blur-2xl" />
-            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1.5 max-w-xl">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-0.5 text-xs font-bold text-white">
-                  <Sparkles className="size-3.5 text-amber-300" /> Ilk Sinov · 3 Daqiqalik Dofamin Blits
-                </div>
-                <h3 className="text-lg sm:text-xl font-black">
-                  Qaysi darajadasiz? 7 ta savolda B+ potensialini aniqlang!
-                </h3>
-                <p className="text-xs sm:text-sm text-blue-100 leading-relaxed">
-                  45 ta savollik to&apos;liq testga kirishdan oldin 7 ta adaptiv savoldan o&apos;ting, kuchli va zaif mavzularingizni ko&apos;ring hamda <strong>+100 Tanga bonus</strong> oling!
-                </p>
-              </div>
-              <Button asChild size="lg" className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-black shadow-md shrink-0 h-11 px-6 cursor-pointer">
-                <Link href="/onboarding?mode=blitz">
-                  Sinovdan o&apos;tish <ArrowRight className="size-4 ml-1.5" />
-                </Link>
-              </Button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                tgHaptic('select');
+                soundFX.click();
+                setHeroMode('blitz');
+              }}
+              className={cn(
+                'flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap select-none',
+                heroMode === 'blitz'
+                  ? 'bg-card text-foreground shadow-sm border border-border/50 scale-[1.01]'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+              )}
+            >
+              <Sparkles className={cn('size-4 transition-colors', heroMode === 'blitz' ? 'text-blue-500' : 'text-muted-foreground')} />
+              <span>7-Savol Blits</span>
+              <span className={cn(
+                'px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none',
+                heroMode === 'blitz' ? 'bg-blue-500/15 text-blue-500' : 'bg-muted text-muted-foreground'
+              )}>
+                +100 🪙
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                tgHaptic('select');
+                soundFX.click();
+                setHeroMode('stress');
+              }}
+              className={cn(
+                'flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap select-none',
+                heroMode === 'stress'
+                  ? 'bg-card text-foreground shadow-sm border border-border/50 scale-[1.01]'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+              )}
+            >
+              <Flame className={cn('size-4 transition-colors', heroMode === 'stress' ? 'text-rose-500' : 'text-muted-foreground')} />
+              <span>BMB Stress Zali</span>
+              <span className={cn(
+                'px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none',
+                heroMode === 'stress' ? 'bg-rose-500/15 text-rose-500' : 'bg-muted text-muted-foreground'
+              )}>
+                🔥 DTM
+              </span>
+            </button>
           </div>
-        </Reveal>
 
-        {/* REAL BMB IMTIHON ZALI (STRESS MODE) BANNER */}
-        <Reveal>
-          <div className="relative overflow-hidden rounded-[28px] border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-5 sm:p-6 shadow-xl text-white">
-            <div className="absolute top-0 right-0 -mr-12 -mt-12 size-60 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
-            <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
-              <div className="flex min-w-0 items-start sm:items-center gap-4">
-                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-rose-600/30 border border-rose-500/40 shadow-inner">
-                  <Flame className="size-7 text-rose-400 animate-pulse" />
-                </div>
-                <div className="min-w-0 space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge className="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase border-0">
-                      🔥 EKSTREMAL SIMULYATOR
-                    </Badge>
-                    <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[11px] font-bold">
-                      🎧 500 Kishi Zali Akustikasi
-                    </Badge>
-                    <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[11px] font-bold">
-                      📝 Titul Varaqasi (Bubble Sheet)
-                    </Badge>
-                    <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[11px] font-bold">
-                      ⚡ +50% Bonus XP
-                    </Badge>
+          {/* Active Mode Card with Smooth Transition */}
+          <AnimatePresence mode="wait">
+            {heroMode === 'standard' && (
+              <motion.div
+                key="standard"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <PageHero
+                  eyebrow="BBA & Milliy Sertifikat · Rasmiy Simulyator"
+                  eyebrowIcon={GraduationCap}
+                  title="Test va Imtihonlar Markazi"
+                  description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
+                />
+              </motion.div>
+            )}
+
+            {heroMode === 'blitz' && (
+              <motion.div
+                key="blitz"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="relative overflow-hidden rounded-[26px] bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-4 sm:p-5.5 text-white shadow-lg"
+              >
+                <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-white/10 rounded-full blur-2xl" />
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1.5 max-w-xl">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-0.5 text-xs font-bold text-white">
+                      <Sparkles className="size-3.5 text-amber-300" /> Ilk Sinov · 3 Daqiqalik Dofamin Blits
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black">
+                      Qaysi darajadasiz? 7 ta savolda B+ potensialini aniqlang!
+                    </h3>
+                    <p className="text-xs sm:text-sm text-blue-100 leading-relaxed">
+                      45 ta savollik to&apos;liq testga kirishdan oldin 7 ta adaptiv savoldan o&apos;ting, kuchli va zaif mavzularingizni ko&apos;ring hamda <strong>+100 Tanga bonus</strong> oling!
+                    </p>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black tracking-tight text-white">
-                    Real BMB Imtihon Zali (Stress Mode)
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                    Divanda choy ichib 80% olish boshqa, real DTM zalidagi shivir-shivir, parta g&apos;ichirlashi, nazoratchi ovozi va Titul varaqasida qo&apos;l qaltirashi boshqa! Imtihon kuni shokiga tushmaslik uchun hoziroq o&apos;zingizni sinang.
-                  </p>
+                  <Button asChild size="lg" className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-black shadow-md shrink-0 h-11 px-6 cursor-pointer">
+                    <Link href="/onboarding?mode=blitz">
+                      Sinovdan o&apos;tish <ArrowRight className="size-4 ml-1.5" />
+                    </Link>
+                  </Button>
                 </div>
-              </div>
+              </motion.div>
+            )}
 
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={() => {
-                    setStressPreselectedTest(null);
-                    setStressModalOpen(true);
-                  }}
-                  size="lg"
-                  className="rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 cursor-pointer h-11 px-6 text-xs sm:text-sm active:scale-95 transition-all"
-                >
-                  <Flame className="size-4.5 mr-2 animate-pulse" />
-                  Imtihon Zaliga Kirish
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Reveal>
+            {heroMode === 'stress' && (
+              <motion.div
+                key="stress"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="relative overflow-hidden rounded-[28px] border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-5 sm:p-6 shadow-xl text-white"
+              >
+                <div className="absolute top-0 right-0 -mr-12 -mt-12 size-60 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
+                <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+                  <div className="flex min-w-0 items-start sm:items-center gap-4">
+                    <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-rose-600/30 border border-rose-500/40 shadow-inner">
+                      <Flame className="size-7 text-rose-400 animate-pulse" />
+                    </div>
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge className="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase border-0">
+                          🔥 EKSTREMAL SIMULYATOR
+                        </Badge>
+                        <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[11px] font-bold">
+                          🎧 500 Kishi Zali Akustikasi
+                        </Badge>
+                        <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[11px] font-bold">
+                          📝 Titul Varaqasi (Bubble Sheet)
+                        </Badge>
+                        <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[11px] font-bold">
+                          ⚡ +50% Bonus XP
+                        </Badge>
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-black tracking-tight text-white">
+                        Real BMB Imtihon Zali (Stress Mode)
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                        Divanda choy ichib 80% olish boshqa, real DTM zalidagi shivir-shivir, parta g&apos;ichirlashi, nazoratchi ovozi va Titul varaqasida qo&apos;l qaltirashi boshqa! Imtihon kuni shokiga tushmaslik uchun hoziroq o&apos;zingizni sinang.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      onClick={() => {
+                        setStressPreselectedTest(null);
+                        setStressModalOpen(true);
+                      }}
+                      size="lg"
+                      className="rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 cursor-pointer h-11 px-6 text-xs sm:text-sm active:scale-95 transition-all"
+                    >
+                      <Flame className="size-4.5 mr-2 animate-pulse" />
+                      Imtihon Zaliga Kirish
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* LIVE ACTIVITY PINNED MOCK IMTIHON BANNER */}
         {data?.pinned_mock && (() => {
