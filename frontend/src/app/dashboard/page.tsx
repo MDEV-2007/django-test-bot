@@ -33,7 +33,6 @@ import {
 import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
 import LiveRepublicBanner from '@/components/growth/LiveRepublicBanner';
 import ModernTestCenter from '@/components/dashboard/ModernTestCenter';
-import PomodoroTimerCard from '@/components/dashboard/PomodoroTimerCard';
 import PremiumIcon from '@/components/ui/premium-icon';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -434,9 +433,6 @@ export default function DashboardPage() {
                   </>
                 );
               })()}
-
-              {/* 2. POMODORO TIMER CARD */}
-              <PomodoroTimerCard />
 
               {/* 3. CURATED TESTS */}
               <ModernTestCenter
