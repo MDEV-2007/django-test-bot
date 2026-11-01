@@ -17,6 +17,7 @@ import {
   Layers,
   Play,
   Gift,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
@@ -453,7 +454,22 @@ export default function DashboardPage() {
                   <span className="text-xs font-medium text-muted-foreground">Fokus va xotira mashqlari</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  <Link
+                    href="/learning"
+                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between border-amber-500/20 hover:border-amber-500/40"
+                  >
+                    <PremiumIcon icon={Zap} tone="amber" size="md" solid className="mb-3 group-hover:scale-105" />
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-amber-500 transition-colors">
+                        60s Anti-Darslik
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                        BMB Qopqonlari &amp; Oltin Faktlar
+                      </p>
+                    </div>
+                  </Link>
+
                   <Link
                     href="/study"
                     className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"

@@ -73,7 +73,9 @@ Javobing FAQAT va FAQAT toza JSON formatida bo'lsin (hech qanday markdown kod bl
     visual_chain = []
 
     try:
-        response_text = ask_groq(prompt)
+        response_text = ask_groq([{"role": "user", "content": prompt}], temperature=0.3)
+        if not response_text:
+            raise ValueError("Groq returned empty response")
         cleaned = response_text.strip()
         if cleaned.startswith('```'):
             lines = cleaned.splitlines()

@@ -3,7 +3,10 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Star, Volume2, Lock, ChevronRight, Layers, PlayCircle, BookOpen } from 'lucide-react';
+import {
+  Star, Volume2, Lock, ChevronRight, Layers, PlayCircle, BookOpen,
+  Zap, Sparkles, Flame, Clock, ArrowRight, ShieldAlert, CheckCircle2,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
@@ -16,7 +19,9 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import LessonAudioPlayer from '@/components/learning/LessonAudioPlayer';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
+import TopicCheatSheetView from '@/components/study/TopicCheatSheetView';
 import { useFeatureFlags } from '@/lib/features';
+import { tgHaptic } from '@/lib/telegram';
 import { cn } from '@/lib/utils';
 
 type TopicRef = { id: number; title: string; lessons: { id: number; title: string }[] };
@@ -47,8 +52,20 @@ function LearningPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const lessonId = searchParams.get('lesson_id');
+  const urlTopicId = searchParams.get('topic_id');
+  const urlView = searchParams.get('view');
+
   const [subject, setSubject] = useState<string | null>(null);
   const [flipped, setFlipped] = useState<Record<number, boolean>>({});
+
+  // Study Mode: 'cheatsheet' (60s Anti-Darslik) or 'lesson' (To'liq matnli dars)
+  const [studyMode, setStudyMode] = useState<'cheatsheet' | 'lesson'>(
+    urlView === 'lesson' || lessonId ? 'lesson' : 'cheatsheet'
+  );
+  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(
+    urlTopicId ? parseInt(urlTopicId, 10) : null
+  );
+  const [selectedTopicTitle, setSelectedTopicTitle] = useState<string>('');
 
   const params = new URLSearchParams();
   if (lessonId) params.set('lesson_id', lessonId);
@@ -67,11 +84,31 @@ function LearningPageInner() {
     );
   }
 
+  const allTopics = data ? [...data.history_topics, ...data.certificate_topics, ...data.bba_topics] : [];
+  const lesson = data?.lesson;
+
   useEffect(() => {
     if (!data) return;
     setSubject((prev) => prev ?? (data.selected_subject || null));
     setFlipped({});
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Default topic selection on data load
+  useEffect(() => {
+    if (allTopics.length > 0 && selectedTopicId === null) {
+      // Agar lesson mavjud bo'lsa, o'sha mavzuni topish
+      if (lesson?.topic) {
+        const found = allTopics.find((t) => t.title.toLowerCase() === lesson.topic?.toLowerCase());
+        if (found) {
+          setSelectedTopicId(found.id);
+          setSelectedTopicTitle(found.title);
+          return;
+        }
+      }
+      setSelectedTopicId(allTopics[0].id);
+      setSelectedTopicTitle(allTopics[0].title);
+    }
+  }, [allTopics, selectedTopicId, lesson]);
 
   async function toggleBookmark() {
     if (!data?.lesson) return;
@@ -80,13 +117,67 @@ function LearningPageInner() {
     toast.success(res.bookmarked ? 'Dars saqlandi' : 'Saqlanganlardan olib tashlandi');
   }
 
-  const allTopics = data ? [...data.history_topics, ...data.certificate_topics, ...data.bba_topics] : [];
-  const lesson = data?.lesson;
+  function handleSelectTopicCheatSheet(topicId: number, topicTitle: string) {
+    tgHaptic('select');
+    setSelectedTopicId(topicId);
+    setSelectedTopicTitle(topicTitle);
+    setStudyMode('cheatsheet');
+  }
+
+  function handleSelectLesson(lId: number, tId: number, tTitle: string) {
+    tgHaptic('light');
+    setSelectedTopicId(tId);
+    setSelectedTopicTitle(tTitle);
+    setStudyMode('lesson');
+    router.push(`/learning?lesson_id=${lId}&topic_id=${tId}`);
+  }
 
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-20 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        {/* ========================================================================= */}
+        {/* 1. HERO BANNER: 60-SONIYALIK ANTI-DARSLIK */}
+        {/* ========================================================================= */}
+        <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 p-5 sm:p-6 text-white shadow-xl">
+          <div className="pointer-events-none absolute -right-10 -bottom-10 size-48 bg-white/10 rounded-full blur-3xl" />
+          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-0.5 text-xs font-bold text-white">
+                <Zap className="size-3.5 fill-amber-300 text-amber-300" />
+                <span>Anti-Darslik: 60 Soniyalik Shpargalka Xaritasi</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight">
+                800 betlik kitobni o&apos;qishga vaqt sarflamang!
+              </h1>
+              <p className="text-xs sm:text-sm text-amber-100 leading-relaxed">
+                Mavzuni 60 soniyada skaner qiling: faqat imtihonda tushadigan <strong>Oltin Faktlar</strong>, <strong>BMB Qopqonlari</strong> va 3 daqiqalik <strong>Sprint</strong> mashqi bilan mustahkamlang!
+              </p>
+            </div>
+
+            <div className="shrink-0 flex items-center gap-2">
+              <Button
+                onClick={() => {
+                  tgHaptic('select');
+                  setStudyMode('cheatsheet');
+                  if (!selectedTopicId && allTopics.length > 0) {
+                    setSelectedTopicId(allTopics[0].id);
+                    setSelectedTopicTitle(allTopics[0].title);
+                  }
+                }}
+                size="lg"
+                className="rounded-xl bg-white text-orange-700 hover:bg-orange-50 font-black shadow-md h-11 px-5 cursor-pointer text-xs sm:text-sm active:scale-95 transition-all"
+              >
+                <Zap className="size-4 mr-1.5 fill-current" />
+                60s Shpargalkani ko&apos;rish
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* 2. SUBJECTS FILTER PILLS */}
+        {/* ========================================================================= */}
         {data && data.subjects.length > 0 && (
           <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
             {data.subjects.map((s) => (
@@ -94,7 +185,7 @@ function LearningPageInner() {
                 key={s.slug}
                 size="sm"
                 variant="outline"
-                className={cn('shrink-0 rounded-full', subject === s.slug && 'chip-active')}
+                className={cn('shrink-0 rounded-full font-semibold', subject === s.slug && 'chip-active')}
                 onClick={() => setSubject(s.slug)}
               >
                 {s.name}
@@ -121,163 +212,317 @@ function LearningPageInner() {
 
         {!data && (
           <div className="grid gap-6 md:grid-cols-12">
-            <Skeleton className="h-96 md:col-span-4" />
-            <Skeleton className="h-96 md:col-span-8" />
+            <Skeleton className="h-96 md:col-span-4 rounded-3xl" />
+            <Skeleton className="h-96 md:col-span-8 rounded-3xl" />
           </div>
         )}
 
+        {/* ========================================================================= */}
+        {/* 3. MAIN WORKSPACE: LEFT TOPICS + RIGHT CONTENT */}
+        {/* ========================================================================= */}
         {data && (
-          <div className="grid gap-6 md:grid-cols-12">
-            {/* Mavzular ro'yxati */}
+          <div className="grid gap-6 md:grid-cols-12 items-start">
+            {/* ─────────────────────────────────────────────────────────────
+                LEFT: MAVZULAR RO'YXATI (Topics with 1-Click Cheat-Sheet buttons)
+               ───────────────────────────────────────────────────────────── */}
             <div className="space-y-3 md:col-span-4">
-              <h2 className="section-title">Mavzular & darslar</h2>
-              <div className="space-y-4 md:max-h-[70vh] md:overflow-y-auto md:pr-1">
-                {allTopics.map((t) => (
-                  <div key={t.id} className="space-y-1.5">
-                    {/* Mavzu sarlavhasi bosiladigan element emas — darsi yo'q mavzular
-                        "nofaol tugma" ga o'xshamasligi uchun holati aniq yoziladi. */}
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="section-title truncate">{t.title}</p>
-                      <Badge variant="secondary" className="shrink-0">{t.lessons.length}</Badge>
+              <div className="flex items-center justify-between px-1">
+                <h2 className="section-title text-base font-bold flex items-center gap-1.5">
+                  <BookOpen className="size-4 text-primary" />
+                  <span>Mavzular & Darslar</span>
+                </h2>
+                <Badge variant="secondary" className="font-mono text-xs font-bold">
+                  {allTopics.length} ta mavzu
+                </Badge>
+              </div>
+
+              <div className="space-y-3 md:max-h-[75vh] md:overflow-y-auto md:pr-1">
+                {allTopics.map((t) => {
+                  const isTopicActive = selectedTopicId === t.id;
+
+                  return (
+                    <div
+                      key={t.id}
+                      className={cn(
+                        'rounded-2xl border p-3 space-y-2.5 transition-all shadow-2xs',
+                        isTopicActive
+                          ? 'border-amber-500/50 bg-amber-500/[0.04] ring-1 ring-amber-500/30'
+                          : 'border-border/70 bg-card hover:border-border'
+                      )}
+                    >
+                      {/* Topic Header: Clickable to open Cheat-Sheet */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div
+                          onClick={() => handleSelectTopicCheatSheet(t.id, t.title)}
+                          className="min-w-0 flex-1 cursor-pointer group"
+                        >
+                          <h4 className="font-extrabold text-sm text-foreground group-hover:text-amber-500 transition-colors leading-snug">
+                            {t.title}
+                          </h4>
+                          <span className="text-[11px] text-muted-foreground">
+                            {t.lessons.length > 0 ? `${t.lessons.length} ta darslik` : 'Shpargalka tayyor'}
+                          </span>
+                        </div>
+
+                        {/* 1-Click 60s Cheat-Sheet Pill Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleSelectTopicCheatSheet(t.id, t.title)}
+                          className={cn(
+                            'shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-2xs',
+                            isTopicActive && studyMode === 'cheatsheet'
+                              ? 'bg-amber-500 text-black shadow-amber-500/20'
+                              : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
+                          )}
+                          title="60 soniyalik shpargalkani ochish"
+                        >
+                          <Zap className="size-3 fill-current" />
+                          <span>60s</span>
+                        </button>
+                      </div>
+
+                      {/* Lessons list under this topic */}
+                      {t.lessons.length > 0 && (
+                        <div className="space-y-1 pt-1 border-t border-border/40">
+                          {t.lessons.map((l) => (
+                            <button
+                              key={l.id}
+                              onClick={() => handleSelectLesson(l.id, t.id, t.title)}
+                              className={cn(
+                                'tactile-btn flex w-full items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-left text-xs transition-colors cursor-pointer',
+                                lesson?.id === l.id && studyMode === 'lesson'
+                                  ? 'border-transparent bg-primary font-bold text-white'
+                                  : 'border-transparent bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground'
+                              )}
+                            >
+                              <span className="min-w-0 truncate">{l.title}</span>
+                              <ChevronRight className="size-3 shrink-0 opacity-60" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    {t.lessons.length === 0 && (
-                      <p className="px-1 text-xs italic text-muted-foreground">Darslar tayyorlanmoqda</p>
-                    )}
-                    {t.lessons.map((l) => (
-                      <button
-                        key={l.id}
-                        onClick={() => router.push(`/learning?lesson_id=${l.id}`)}
-                        className={cn(
-                          'tactile-btn flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors',
-                          lesson?.id === l.id
-                            ? 'border-transparent bg-primary font-medium text-[var(--on-accent)]'
-                            : 'bg-card text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-foreground',
-                        )}
-                      >
-                        <span className="min-w-0 truncate">{l.title}</span>
-                        <ChevronRight className="size-3.5 shrink-0 opacity-60" />
-                      </button>
-                    ))}
-                  </div>
-                ))}
+                  );
+                })}
+
                 {allTopics.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Bu bo&apos;limda hozircha mavzu yo&apos;q.</p>
+                  <p className="text-sm text-muted-foreground p-4 text-center">Bu bo&apos;limda hozircha mavzu yo&apos;q.</p>
                 )}
               </div>
             </div>
 
-            {/* Dars */}
-            <div className="space-y-5 md:col-span-8">
-              {!lesson && (
-                <Card>
-                  <CardContent className="py-16 text-center">
-                    <BookOpen className="mx-auto mb-2 size-8 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground">Chapdan bir dars tanlang.</p>
-                  </CardContent>
-                </Card>
+            {/* ─────────────────────────────────────────────────────────────
+                RIGHT: CHOSEN VIEW (60s Anti-Darslik Cheat-Sheet OR Full Lesson)
+               ───────────────────────────────────────────────────────────── */}
+            <div className="space-y-4 md:col-span-8">
+              {/* Mode Switcher Tabs */}
+              <div className="flex items-center justify-between gap-3 flex-wrap bg-muted/60 border border-border/70 p-1.5 rounded-2xl shadow-xs">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      tgHaptic('select');
+                      setStudyMode('cheatsheet');
+                    }}
+                    className={cn(
+                      'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
+                      studyMode === 'cheatsheet'
+                        ? 'bg-amber-500 text-black shadow-sm font-black'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
+                    )}
+                  >
+                    <Zap className="size-4 fill-current" />
+                    <span>⚡ 60s Anti-Darslik</span>
+                    <span className="rounded-full bg-black/15 px-1.5 py-0.2 text-[10px] font-mono uppercase">
+                      Tavsiya
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      tgHaptic('select');
+                      setStudyMode('lesson');
+                    }}
+                    className={cn(
+                      'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
+                      studyMode === 'lesson'
+                        ? 'bg-card text-foreground shadow-sm border border-border/50'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
+                    )}
+                  >
+                    <BookOpen className="size-4" />
+                    <span>📖 To&apos;liq Matnli Dars</span>
+                  </button>
+                </div>
+
+                {selectedTopicTitle && (
+                  <span className="text-xs font-semibold text-muted-foreground px-2 truncate max-w-xs hidden lg:inline">
+                    {selectedTopicTitle}
+                  </span>
+                )}
+              </div>
+
+              {/* VIEW 1: 60-SONIYALIK ANTI-DARSLIK (Shpargalka & BMB Qopqonlari) */}
+              {studyMode === 'cheatsheet' && (
+                <div className="space-y-4">
+                  <TopicCheatSheetView
+                    topicId={selectedTopicId || allTopics[0]?.id || 11}
+                    topicTitle={selectedTopicTitle || allTopics[0]?.title || 'Mavzu'}
+                  />
+                </div>
               )}
 
-              {lesson && (
+              {/* VIEW 2: TO'LIQ MATNLI DARS (Konspekt, Audio, Video, Flashcard) */}
+              {studyMode === 'lesson' && (
                 <>
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-3">
-                        {lesson.topic && <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]">{lesson.topic}</Badge>}
+                  {!lesson && (
+                    <Card className="rounded-[28px] border-border/80">
+                      <CardContent className="py-16 text-center space-y-3">
+                        <BookOpen className="mx-auto size-10 text-muted-foreground/40" />
+                        <div className="space-y-1">
+                          <p className="text-base font-bold text-foreground">Dars tanlanmagan</p>
+                          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                            Chapdagi ro&apos;yxatdan mavzu darsini tanlang yoki 60 soniyalik Shpargalkadan foydalaning.
+                          </p>
+                        </div>
                         <Button
-                          variant={lesson.is_bookmarked ? 'default' : 'outline'}
-                          size="icon"
-                          onClick={toggleBookmark}
-                          title="Saqlab qo'yish"
-                          className={lesson.is_bookmarked ? 'bg-primary/20 text-[var(--accent-text)] hover:bg-primary/30' : ''}
+                          onClick={() => setStudyMode('cheatsheet')}
+                          className="rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-black"
                         >
-                          <Star className={cn('size-4', lesson.is_bookmarked && 'fill-[var(--accent)]')} />
+                          <Zap className="size-4 mr-1.5 fill-current" />
+                          60s Shpargalkaga o&apos;tish
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {lesson && (
+                    <>
+                      {/* Quick CTA to Cheat-Sheet */}
+                      <div
+                        onClick={() => setStudyMode('cheatsheet')}
+                        className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.08] p-3.5 flex items-center justify-between gap-3 cursor-pointer hover:bg-amber-500/12 transition-all"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="size-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+                            <Zap className="size-4 fill-current" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                              Matnni o&apos;qishga vaqt yo&apos;qmi? 60 soniyalik Shpargalkani oching!
+                            </p>
+                            <p className="text-[11px] text-muted-foreground truncate">
+                              Faqat imtihonda tushadigan faktlar va BMB qopqonlari
+                            </p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline" className="rounded-xl shrink-0 border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-xs">
+                          Ochish <ArrowRight className="size-3.5 ml-1" />
                         </Button>
                       </div>
-                      <CardTitle className="font-voice text-xl leading-snug sm:text-2xl">{lesson.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Separator />
-                      <div
-                        className="reading-block space-y-3 text-[var(--text-secondary)]"
-                        dangerouslySetInnerHTML={{ __html: lesson.content }}
-                      />
 
-                      {lesson.videos.map((v) => (
-                        <div key={v.id} className="flex items-center justify-between gap-3 rounded-xl border bg-[var(--surface-input)] p-3.5">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/12 text-rose-300">
-                              <PlayCircle className="size-5" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold">{v.title}</p>
-                              <p className="text-xs text-muted-foreground">{v.duration_display}</p>
-                            </div>
-                          </div>
-                          <Button asChild size="sm" className="shrink-0">
-                            <a href={v.video_url} target="_blank" rel="noreferrer">Ko&apos;rish</a>
-                          </Button>
-                        </div>
-                      ))}
-                      {lesson.locked_videos_count > 0 && (
-                        <p className="flex items-center gap-1.5 text-xs text-rose-400">
-                          <Lock className="size-3.5" /> {lesson.locked_videos_count} ta video premium uchun yopiq
-                        </p>
-                      )}
-
-                      {lesson.audios.map((a) => (
-                        <LessonAudioPlayer
-                          key={a.id}
-                          audioUrl={a.audio_url}
-                          title={a.title}
-                          durationDisplay={a.duration_display}
-                        />
-                      ))}
-                      {lesson.locked_audios_count > 0 && (
-                        <p className="flex items-center gap-1.5 text-xs text-rose-400">
-                          <Lock className="size-3.5" /> {lesson.locked_audios_count} ta audio premium uchun yopiq
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {lesson.flashcards.length > 0 && (
-                    <section className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="section-title flex items-center gap-1.5">
-                          <Layers className="size-3.5 text-[var(--accent-text)]" /> Interaktiv flashcardlar
-                        </h3>
-                        <span className="text-xs text-muted-foreground">Kartani bosib javobni tekshiring</span>
-                      </div>
-                      <div className="grid gap-3.5 sm:grid-cols-2">
-                        {lesson.flashcards.map((f, i) => {
-                          const isFlipped = !!flipped[i];
-                          return (
-                            <Card
-                              key={i}
-                              onClick={() => setFlipped({ ...flipped, [i]: !isFlipped })}
-                              className={cn(
-                                'tactile-btn min-h-32 cursor-pointer justify-between transition-colors',
-                                isFlipped ? 'border-[var(--accent)] bg-primary/[0.12]' : 'hover:border-[var(--border-strong)]',
-                              )}
+                      <Card className="rounded-[28px] border-border/80 shadow-md">
+                        <CardHeader>
+                          <div className="flex items-start justify-between gap-3">
+                            {lesson.topic && <Badge variant="outline" className="border-primary/25 bg-primary/10 text-primary font-bold">{lesson.topic}</Badge>}
+                            <Button
+                              variant={lesson.is_bookmarked ? 'default' : 'outline'}
+                              size="icon"
+                              onClick={toggleBookmark}
+                              title="Saqlab qo'yish"
+                              className={lesson.is_bookmarked ? 'bg-primary/20 text-primary hover:bg-primary/30' : ''}
                             >
-                              <CardContent className="flex h-full flex-col justify-between pt-6">
-                                <div>
-                                  <span className="mb-1.5 block font-mono text-xs font-bold uppercase text-muted-foreground">
-                                    {isFlipped ? 'Javob / izoh' : 'Savol'}
-                                  </span>
-                                  <p className={cn('text-sm font-medium leading-relaxed', isFlipped && 'text-[var(--accent-text)]')}>
-                                    {isFlipped ? f.back : f.front}
-                                  </p>
+                              <Star className={cn('size-4', lesson.is_bookmarked && 'fill-current')} />
+                            </Button>
+                          </div>
+                          <CardTitle className="font-voice text-xl leading-snug sm:text-2xl">{lesson.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <Separator />
+                          <div
+                            className="reading-block space-y-3 text-muted-foreground leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: lesson.content }}
+                          />
+
+                          {lesson.videos.map((v) => (
+                            <div key={v.id} className="flex items-center justify-between gap-3 rounded-2xl border bg-muted/40 p-3.5">
+                              <div className="flex min-w-0 items-center gap-3">
+                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-500">
+                                  <PlayCircle className="size-5" />
                                 </div>
-                                <span className="mt-3 text-right text-xs text-muted-foreground">
-                                  {isFlipped ? 'Qaytarish ↺' : "Javobni ko'rish ↷"}
-                                </span>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    </section>
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold">{v.title}</p>
+                                  <p className="text-xs text-muted-foreground">{v.duration_display}</p>
+                                </div>
+                              </div>
+                              <Button asChild size="sm" className="shrink-0 rounded-xl font-bold">
+                                <a href={v.video_url} target="_blank" rel="noreferrer">Ko&apos;rish</a>
+                              </Button>
+                            </div>
+                          ))}
+                          {lesson.locked_videos_count > 0 && (
+                            <p className="flex items-center gap-1.5 text-xs text-rose-400">
+                              <Lock className="size-3.5" /> {lesson.locked_videos_count} ta video premium uchun yopiq
+                            </p>
+                          )}
+
+                          {lesson.audios.map((a) => (
+                            <LessonAudioPlayer
+                              key={a.id}
+                              audioUrl={a.audio_url}
+                              title={a.title}
+                              durationDisplay={a.duration_display}
+                            />
+                          ))}
+                          {lesson.locked_audios_count > 0 && (
+                            <p className="flex items-center gap-1.5 text-xs text-rose-400">
+                              <Lock className="size-3.5" /> {lesson.locked_audios_count} ta audio premium uchun yopiq
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      {lesson.flashcards.length > 0 && (
+                        <section className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="section-title flex items-center gap-1.5 text-sm font-bold">
+                              <Layers className="size-4 text-primary" /> Interaktiv flashcardlar
+                            </h3>
+                            <span className="text-xs text-muted-foreground">Kartani bosib javobni tekshiring</span>
+                          </div>
+                          <div className="grid gap-3.5 sm:grid-cols-2">
+                            {lesson.flashcards.map((f, i) => {
+                              const isFlipped = !!flipped[i];
+                              return (
+                                <Card
+                                  key={i}
+                                  onClick={() => setFlipped({ ...flipped, [i]: !isFlipped })}
+                                  className={cn(
+                                    'tactile-btn min-h-32 cursor-pointer justify-between transition-colors rounded-2xl',
+                                    isFlipped ? 'border-primary/40 bg-primary/[0.08]' : 'hover:border-border',
+                                  )}
+                                >
+                                  <CardContent className="flex h-full flex-col justify-between pt-6">
+                                    <div>
+                                      <span className="mb-1.5 block font-mono text-xs font-bold uppercase text-muted-foreground">
+                                        {isFlipped ? 'Javob / izoh' : 'Savol'}
+                                      </span>
+                                      <p className={cn('text-sm font-medium leading-relaxed', isFlipped && 'text-primary font-bold')}>
+                                        {isFlipped ? f.back : f.front}
+                                      </p>
+                                    </div>
+                                    <span className="mt-3 text-right text-xs text-muted-foreground">
+                                      {isFlipped ? 'Qaytarish ↺' : "Javobni ko'rish ↷"}
+                                    </span>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                        </section>
+                      )}
+                    </>
                   )}
                 </>
               )}
