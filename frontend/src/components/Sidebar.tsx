@@ -65,11 +65,12 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Asosiy Super-App',
+    label: 'Asosiy',
     items: [
-      { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },
+      { href: '/dashboard', label: 'Bosh sahifa (Dashboard)', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
       { href: '/sprint', label: 'Mashq & Fokus', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
       { href: '/tests', label: 'Imtihon Zali', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests'] },
+      { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },
       { href: '/library', label: 'Bazalar & Kitoblar', icon: BookOpen, badge: null, tone: 'emerald', featureKey: 'library', matchPrefixes: ['/library'] },
       { href: '/profile', label: 'Profil & Eco-Daraxt', icon: User, badge: '🌳', tone: 'sky', matchPrefixes: ['/profile'] },
     ],

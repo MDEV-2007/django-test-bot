@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  Flame,
+  LayoutDashboard,
   Zap,
   Landmark,
-  BookOpen,
+  Flame,
   User,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
@@ -51,23 +51,22 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 
-  // Ideal 5-Tugmali Super-App Bottom Navigation:
-  // 1. Lenta (/feed)
+  // 5-Tugmali Super-App Bottom Navigation:
+  // 1. Asosiy (/dashboard)
   // 2. Mashq (/sprint)
   // 3. Imtihon (/tests) - Markaziy Katta Tugma
-  // 4. Bazalar (/library)
+  // 4. Lenta (/feed)
   // 5. Profil (/profile)
   const tabs: TabItem[] = [
     {
-      href: '/feed',
-      label: 'Lenta',
-      icon: Flame,
-      matchPrefixes: ['/feed', '/reels'],
-      api: '/api/learning/feed/',
-      activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
-      activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-      inactiveIconText: 'text-[#FF2D55]',
-      activeLabelText: 'text-[#D70015] dark:text-[#FF375F]',
+      href: '/dashboard',
+      label: 'Asosiy',
+      icon: LayoutDashboard,
+      api: '/api/dashboard/home/',
+      activeBg: 'bg-gradient-to-b from-[#2E96FF] to-[#007AFF]',
+      activeShadow: 'shadow-[0_4px_12px_rgba(0,122,255,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+      inactiveIconText: 'text-[#007AFF]',
+      activeLabelText: 'text-[#007AFF] dark:text-[#409CFF]',
     },
     {
       href: '/sprint',
@@ -96,16 +95,15 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       badge: 'BMB',
     },
     {
-      href: '/library',
-      label: 'Bazalar',
-      icon: BookOpen,
-      matchPrefixes: ['/library'],
-      api: '/api/learning/library/',
-      featureKey: 'library',
-      activeBg: 'bg-gradient-to-b from-[#4CD964] to-[#34C759]',
-      activeShadow: 'shadow-[0_4px_12px_rgba(52,199,89,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-      inactiveIconText: 'text-[#34C759]',
-      activeLabelText: 'text-[#248A3D] dark:text-[#30D158]',
+      href: '/feed',
+      label: 'Lenta',
+      icon: Flame,
+      matchPrefixes: ['/feed', '/reels'],
+      api: '/api/learning/feed/',
+      activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
+      activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+      inactiveIconText: 'text-[#FF2D55]',
+      activeLabelText: 'text-[#D70015] dark:text-[#FF375F]',
     },
   ];
 
