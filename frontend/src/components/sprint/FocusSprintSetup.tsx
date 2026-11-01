@@ -17,9 +17,7 @@ import {
   Check,
   Clock,
   Loader2,
-  TrendingUp,
   Flame,
-  Target,
   HelpCircle,
 } from 'lucide-react';
 import SprintGuideModal from '@/components/sprint/SprintGuideModal';
@@ -302,23 +300,7 @@ export default function FocusSprintSetup({
               <span>Tezkor Test (Fokus Mashq)</span>
             </h1>
 
-            {/* 3 ta Kapsula-Badge (Prognoz, Combo, Qasos) */}
-            <div className="flex flex-wrap items-center gap-2 pt-0.5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                <TrendingUp className="size-3.5" />
-                <span>Jonli DTM Prognoz (+0.2 ball)</span>
-              </div>
 
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                <Flame className="size-3.5" />
-                <span>2.0x Combo & XP</span>
-              </div>
-
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                <Target className="size-3.5" />
-                <span>0.2s AI Layfxak & Qasos savoli</span>
-              </div>
-            </div>
           </div>
         </div>
 

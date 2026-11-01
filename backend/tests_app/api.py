@@ -1302,44 +1302,53 @@ def stress_config_api(request):
 @permission_classes([IsAuthenticated, IsChannelSubscribed])
 def start_stress_test_api(request):
     """Maxsus Real BMB Imtihon Zali (Stress Mode) da testni boshlash."""
-    profile = ensure_profile_for_user(request.user)
-    test_id = request.data.get('test_id')
-    subject_slug = request.data.get('subject_slug')
+    try:
+        profile = ensure_profile_for_user(request.user)
+        test_id = request.data.get('test_id')
+        subject_slug = request.data.get('subject_slug')
 
-    if test_id:
-        test = get_object_or_404(TestSet, id=test_id)
-    else:
-        qs = TestSet.objects.filter(is_published=True, is_archived=False)
-        if subject_slug:
-            qs = qs.filter(subject__slug=subject_slug)
-        test = qs.order_by('?').first() or TestSet.objects.filter(is_published=True, is_archived=False).first()
+        if test_id:
+            test = get_object_or_404(TestSet, id=test_id)
+        else:
+            qs = TestSet.objects.filter(is_published=True, is_archived=False, is_live_mock=False)
+            if subject_slug and subject_slug != 'all':
+                qs = qs.filter(subject__slug=subject_slug)
+            test = qs.order_by('?').first() or TestSet.objects.filter(is_published=True, is_archived=False, is_live_mock=False).first()
 
-    if not test:
-        # Savollardan avtomatik test tuzish
-        questions = list(Question.objects.all()[:30])
-        if not questions:
-            return Response({'error': "Imtihon savollari topilmadi."}, status=404)
-        test = TestSet.objects.create(
-            title="Real BMB Standart Imtihon Testi",
-            description="BMB DTM rasmiy standartiga mos tuzilgan stress testi.",
-            duration_minutes=60,
-            is_random=True,
-            is_premium=False,
-        )
-        test.questions.set(questions)
+        if not test or not test.questions.exists():
+            # Savollardan avtomatik test tuzish
+            q_qs = Question.objects.all()
+            if subject_slug and subject_slug != 'all':
+                sub_q = q_qs.filter(subject__slug=subject_slug)
+                if sub_q.exists():
+                    q_qs = sub_q
+            questions = list(q_qs.order_by('?')[:30])
+            if not questions:
+                return Response({'error': "Imtihon savollari topilmadi."}, status=404)
+            test = TestSet.objects.create(
+                title="Real BMB Standart Imtihon Testi",
+                description="BMB DTM rasmiy standartiga mos tuzilgan stress testi.",
+                duration_minutes=60,
+                is_random=True,
+                is_premium=False,
+            )
+            test.questions.set(questions)
 
-    # Faol urinishni tekshirish
-    active_attempt = Attempt.objects.filter(profile=profile, test=test, is_completed=False).order_by('-started_at').first()
-    if active_attempt:
-        if not active_attempt.is_stress_mode:
-            active_attempt.is_stress_mode = True
-            active_attempt.save(update_fields=['is_stress_mode'])
+        # Faol urinishni tekshirish
+        active_attempt = Attempt.objects.filter(profile=profile, test=test, is_completed=False).order_by('-started_at').first()
+        if active_attempt:
+            if not active_attempt.is_stress_mode:
+                active_attempt.is_stress_mode = True
+                active_attempt.save(update_fields=['is_stress_mode'])
+            mode = 'cefr' if test.sections.exists() else 'classic'
+            return Response({'attempt_id': active_attempt.id, 'mode': mode, 'is_stress_mode': True})
+
+        attempt = _new_attempt(profile, test, is_stress=True)
         mode = 'cefr' if test.sections.exists() else 'classic'
-        return Response({'attempt_id': active_attempt.id, 'mode': mode, 'is_stress_mode': True})
-
-    attempt = _new_attempt(profile, test, is_stress=True)
-    mode = 'cefr' if test.sections.exists() else 'classic'
-    return Response({'attempt_id': attempt.id, 'mode': mode, 'is_stress_mode': True})
+        return Response({'attempt_id': attempt.id, 'mode': mode, 'is_stress_mode': True})
+    except Exception as e:
+        logger.exception("start_stress_test_api error: %s", e)
+        return Response({'error': f"Imtihonni yuklashda xatolik yuz berdi: {str(e)}"}, status=500)
 
 
 @api_view(['POST'])
