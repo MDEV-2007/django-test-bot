@@ -298,10 +298,10 @@ export default function ProfilePage() {
   const totalActivityCount = (data.recent_attempts?.length || 0) + (data.recent_battles?.length || 0);
 
   const TABS = [
-    { id: 'stats', label: 'Statistika', icon: BarChart3, count: null },
-    { id: 'posts', label: 'Postlarim', icon: Newspaper, count: userPosts.length },
-    { id: 'inventory', label: 'Buyumlarim', icon: ShoppingBag, count: allInventoryItems.length },
-    { id: 'activity', label: 'So\'nggi faollik', icon: History, count: totalActivityCount },
+    { id: 'stats', label: 'Statistika', shortLabel: 'Statistika', icon: BarChart3, count: null },
+    { id: 'posts', label: 'Postlarim', shortLabel: 'Postlar', icon: Newspaper, count: userPosts.length },
+    { id: 'inventory', label: 'Buyumlarim', shortLabel: 'Buyumlar', icon: ShoppingBag, count: allInventoryItems.length },
+    { id: 'activity', label: "So'nggi faollik", shortLabel: 'Faollik', icon: History, count: totalActivityCount },
   ] as const;
 
   return (
@@ -470,10 +470,10 @@ export default function ProfilePage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. ULTRA-MODERN SEGMENTED TAB BAR */}
+        {/* 3. ULTRA-MODERN SEGMENTED TAB BAR (4-Col Responsive Grid) */}
         {/* ========================================================================= */}
         <div className="sticky top-16 z-20 -mx-4 px-4 py-2 sm:mx-0 sm:px-0 bg-background/85 backdrop-blur-md transition-all">
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-muted/70 border border-border/70 shadow-xs overflow-x-auto no-scrollbar">
+          <div className="w-full grid grid-cols-4 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
             {TABS.map((tab) => {
               const active = activeTab === tab.id;
               const Icon = tab.icon;
@@ -487,17 +487,27 @@ export default function ProfilePage() {
                     setActiveTab(tab.id);
                   }}
                   className={cn(
-                    'flex-1 min-w-[105px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap select-none',
+                    'flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-2 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                     active
-                      ? 'bg-card text-foreground shadow-sm border border-border/50 scale-[1.01]'
+                      ? 'bg-card text-foreground shadow-sm border border-border/60 scale-[1.01]'
                       : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
                   )}
                 >
-                  <Icon className={cn('size-4 transition-colors', active ? 'text-primary' : 'text-muted-foreground')} />
-                  <span>{tab.label}</span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Icon className={cn('size-3.5 sm:size-4 transition-colors', active ? 'text-primary' : 'text-muted-foreground')} />
+                    {tab.count !== null && tab.count > 0 && (
+                      <span className="sm:hidden px-1 py-0.2 rounded-full text-[9px] font-mono font-bold leading-none bg-primary/15 text-primary">
+                        {tab.count}
+                      </span>
+                    )}
+                  </div>
+                  <span className="truncate max-w-full">
+                    <span className="inline sm:hidden">{tab.shortLabel}</span>
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </span>
                   {tab.count !== null && tab.count > 0 && (
                     <span className={cn(
-                      'px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none',
+                      'hidden sm:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
                       active ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
                     )}>
                       {tab.count}
