@@ -42,6 +42,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/panel/reels', label: 'Bilim Reels & Hamjamiyat', icon: Sparkles, tone: 'rose' },
       { href: '/panel/subjects', label: 'Fanlar', icon: BookMarked, tone: 'purple' },
       { href: '/panel/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald' },
+      { href: '/panel/stress-exam', label: 'BMB Stress Simulyatori', icon: Flame, tone: 'rose' },
       { href: '/panel/lessons', label: 'Darslar', icon: BookOpen, tone: 'sky' },
       { href: '/panel/games', label: "O'yinlar", icon: Gamepad2, tone: 'amber' },
       { href: '/panel/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple' },

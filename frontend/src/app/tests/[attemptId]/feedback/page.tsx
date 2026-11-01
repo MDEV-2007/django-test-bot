@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  Crown, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
+  Crown, Flame, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
   AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
   CheckCircle2, HelpCircle, Trophy, Gift, Swords, Film, BookOpen, Send, Gamepad2, Lock,
   TrendingUp, ArrowRight,
@@ -74,6 +74,20 @@ type FeedbackData = {
     test_title?: string;
     completed_at?: string;
     rasch?: RaschData;
+    is_stress_mode?: boolean;
+    stress_stats?: {
+      is_stress_mode?: boolean;
+      draft_score?: number;
+      titul_score?: number;
+      draft_correct?: number;
+      titul_correct?: number;
+      unfilled_on_titul?: number;
+      misaligned_on_titul?: number;
+      lost_points?: number;
+      dtm_simulated_ball?: number;
+      stress_level?: string;
+    };
+    titul_answers?: Record<string, string>;
   };
   rasch?: RaschData;
   overall_analysis?: string;
@@ -295,6 +309,118 @@ export default function FeedbackPage() {
           <Card className="border-rose-500/25 bg-rose-500/10">
             <CardContent className="pt-6 text-sm text-rose-300">{mistakesError}</CardContent>
           </Card>
+        )}
+
+        {/* REAL BMB STRESS SIMULYATORI NATIJA KARTASI */}
+        {a.is_stress_mode && (
+          <div className="relative overflow-hidden rounded-3xl border-2 border-rose-500/50 bg-gradient-to-br from-rose-950/90 via-slate-900 to-amber-950/80 p-6 sm:p-8 text-white shadow-2xl">
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 size-72 rounded-full bg-rose-500/15 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-rose-600/30 border border-rose-500/40">
+                    <Flame className="size-5 text-rose-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black tracking-wider uppercase text-rose-300">
+                        REAL BMB IMTIHON ZALI
+                      </span>
+                      <Badge className="bg-rose-600 text-white text-[10px] uppercase font-mono font-bold">
+                        STRESS MODE
+                      </Badge>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-white">
+                      Imtihon Bosimi & Titul Varaqasi Tahlili
+                    </h3>
+                  </div>
+                </div>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const score = Math.round(a.score || 0);
+                    const lost = a.stress_stats?.lost_points || 0;
+                    const dtm = a.stress_stats?.dtm_simulated_ball || (score * 1.89).toFixed(1);
+                    const text = `🔥 Men IlmIldizi "Real BMB Imtihon Zali (Stress Mode)"da test yechdim!\n\n🎧 500 kishilik zal shovqini, parta shitirlashi va nazoratchining sovuq ovozi ostida:\n📊 Titul balli: ${score}% (~${dtm} DTM ball)\n${lost > 0 ? `⚠️ Titulga ko'chirishda yo'qotilgan ball: -${lost}%` : "🎯 Birorta ham Titul xatosi qilmadingiz!"}\n\nSen ham o'zingni haqiqiy DTM stressida sinab ko'r! 👇`;
+                    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent('https://ilmildizi.uz/tests')}&text=${encodeURIComponent(text)}`;
+                    window.open(tgUrl, '_blank');
+                  }}
+                  className="rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-600/30 cursor-pointer"
+                >
+                  <Share2 className="size-3.5 mr-1.5" />
+                  Do&apos;stlarga ulashish
+                </Button>
+              </div>
+
+              {/* 4 Ta Asosiy Taqqoslash Ko'rsatkichi */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-1">
+                  <p className="text-xs text-slate-400 font-medium">BMB Kutilayotgan Ball</p>
+                  <p className="text-2xl font-black text-amber-400 font-mono">
+                    ~{a.stress_stats?.dtm_simulated_ball || (a.score * 1.89).toFixed(1)}
+                  </p>
+                  <p className="text-[10px] text-slate-400">189 ballik shkalada</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-1">
+                  <p className="text-xs text-slate-400 font-medium">Qoralamadagi Natija</p>
+                  <p className="text-2xl font-black text-slate-200 font-mono">
+                    {a.stress_stats?.draft_score !== undefined ? `${a.stress_stats.draft_score}%` : `${a.score}%`}
+                  </p>
+                  <p className="text-[10px] text-slate-400">Divanda choy ichib olingan ball</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-1">
+                  <p className="text-xs text-slate-400 font-medium">Titul (Rasmiy) Balli</p>
+                  <p className="text-2xl font-black text-emerald-400 font-mono">
+                    {a.score}%
+                  </p>
+                  <p className="text-[10px] text-slate-400">Javoblar varaqasi bo&apos;yicha</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-1">
+                  <p className="text-xs text-slate-400 font-medium">Titulda Yo&apos;qotilgan Ball</p>
+                  <p className={cn(
+                    "text-2xl font-black font-mono",
+                    (a.stress_stats?.lost_points || 0) > 0 ? "text-rose-400" : "text-emerald-400"
+                  )}>
+                    {(a.stress_stats?.lost_points || 0) > 0 ? `-${a.stress_stats?.lost_points}%` : "0%"}
+                  </p>
+                  <p className="text-[10px] text-slate-400">Ko&apos;chirish xatolari tufayli</p>
+                </div>
+              </div>
+
+              {/* Stress Diagnostikasi Xulosasi */}
+              <div className="p-4 rounded-2xl bg-black/30 border border-white/10 text-xs sm:text-sm text-slate-200 space-y-2">
+                {(a.stress_stats?.unfilled_on_titul || 0) > 0 || (a.stress_stats?.misaligned_on_titul || 0) > 0 ? (
+                  <div className="flex items-start gap-2.5 text-rose-300">
+                    <AlertTriangle className="size-5 shrink-0 mt-0.5 text-rose-400" />
+                    <div>
+                      <p className="font-bold text-white">Titul Varaqasi Tuzog&apos;i Natijasi:</p>
+                      <p className="mt-0.5 text-xs text-slate-300 leading-relaxed">
+                        Siz qoralamada to&apos;g&apos;ri yechgan savollaringizdan{' '}
+                        <strong>{a.stress_stats?.unfilled_on_titul || 0} tasini</strong> Titulga ko&apos;chirishga ulgurmadingiz va{' '}
+                        <strong>{a.stress_stats?.misaligned_on_titul || 0} tasini</strong> ko&apos;chirishda qatoridan adashib boshqa katakka bo&apos;yab qo&apos;ydingiz.
+                        Aynan mana shu narsa haqiqiy BMB imtihonida eng ko&apos;p abituriyentlarni yig&apos;latadi!
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2.5 text-emerald-300">
+                    <CheckCircle2 className="size-5 shrink-0 mt-0.5 text-emerald-400" />
+                    <div>
+                      <p className="font-bold text-white">Sovuqqon DTM Jangchisi! 🎯</p>
+                      <p className="mt-0.5 text-xs text-slate-300 leading-relaxed">
+                        Qoyilmaqom! 500 kishilik zal shovqini va nazoratchi ovozi ostida ham birorta Titul xatosi qilmadingiz. Siz haqiqiy imtihon kuni ham stressga berilmaysiz!
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Natija Hero Card */}

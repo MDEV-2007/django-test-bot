@@ -47,7 +47,7 @@ from premium.models import Payment, PromoCode, SubscriptionPlan
 from shop.models import ShopItem
 from telegrambot.models import RequiredChannel
 from telegrambot.client import api_call as tg_api_call
-from tests_app.models import Attempt, AttemptAnswer, ExamSurvey, Question, Subject, TestSet
+from tests_app.models import Attempt, AttemptAnswer, ExamSurvey, Question, Subject, TestSet, StressExamConfig
 
 from .api_utils import bulk_action, list_response
 from .forms import (
@@ -4550,3 +4550,109 @@ def panel_reels_hardest_questions_api(request):
 
 
 
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsSuperAdmin])
+def stress_exam_admin_api(request):
+    """Super Admin: BMB Real Imtihon Zali (Stress Mode) global sozlamalari va statistikasi."""
+    config = StressExamConfig.load()
+
+    if request.method == 'POST':
+        data = request.data or {}
+        if 'ambient_sound_enabled' in data:
+            config.ambient_sound_enabled = bool(data['ambient_sound_enabled'])
+        if 'ambient_volume' in data:
+            try:
+                config.ambient_volume = max(0.0, min(1.0, float(data['ambient_volume'])))
+            except (ValueError, TypeError):
+                pass
+        if 'supervisor_voice_enabled' in data:
+            config.supervisor_voice_enabled = bool(data['supervisor_voice_enabled'])
+        if 'require_bubble_sheet' in data:
+            config.require_bubble_sheet = bool(data['require_bubble_sheet'])
+        if 'warning_time_minutes' in data:
+            try:
+                config.warning_time_minutes = max(1, min(60, int(data['warning_time_minutes'])))
+            except (ValueError, TypeError):
+                pass
+        if 'bonus_xp_multiplier' in data:
+            try:
+                config.bonus_xp_multiplier = max(1.0, min(5.0, float(data['bonus_xp_multiplier'])))
+            except (ValueError, TypeError):
+                pass
+        if 'supervisor_messages' in data and isinstance(data['supervisor_messages'], list):
+            config.supervisor_messages = data['supervisor_messages']
+
+        config.save()
+        return Response({
+            'success': True,
+            'message': "BMB Stress Simulyatori sozlamalari muvaffaqiyatli saqlandi.",
+            'config': {
+                'ambient_sound_enabled': config.ambient_sound_enabled,
+                'ambient_volume': config.ambient_volume,
+                'supervisor_voice_enabled': config.supervisor_voice_enabled,
+                'require_bubble_sheet': config.require_bubble_sheet,
+                'warning_time_minutes': config.warning_time_minutes,
+                'bonus_xp_multiplier': config.bonus_xp_multiplier,
+                'supervisor_messages': config.supervisor_messages or [],
+                'updated_at': config.updated_at.isoformat() if config.updated_at else None,
+            }
+        })
+
+    # GET: Statistika va oxirgi urinishlar
+    stress_qs = Attempt.objects.filter(is_stress_mode=True, is_completed=True).select_related('profile__user', 'test')
+    total_stress_attempts = stress_qs.count()
+    avg_score = stress_qs.aggregate(avg=Avg('score'))['avg'] or 0.0
+
+    total_unfilled = 0
+    total_misaligned = 0
+    total_lost_points = 0.0
+    recent_attempts_data = []
+
+    for att in stress_qs.order_by('-completed_at')[:40]:
+        stats = att.stress_stats or {}
+        unfilled = stats.get('unfilled_on_titul', 0)
+        misaligned = stats.get('misaligned_on_titul', 0)
+        lost = stats.get('lost_points', 0)
+        total_unfilled += unfilled
+        total_misaligned += misaligned
+        total_lost_points += float(lost)
+
+        user_obj = att.profile.user
+        recent_attempts_data.append({
+            'id': att.id,
+            'user': user_obj.get_full_name() or user_obj.username,
+            'username': user_obj.username,
+            'avatar': att.profile.avatar_url,
+            'test_title': att.test.title if att.test else 'BMB Sinov Testi',
+            'score': att.score,
+            'draft_score': stats.get('draft_score', att.score),
+            'lost_points': lost,
+            'unfilled_count': unfilled,
+            'misaligned_count': misaligned,
+            'dtm_ball': stats.get('dtm_simulated_ball', round((att.score or 0) * 1.89, 1)),
+            'completed_at': att.completed_at.isoformat() if att.completed_at else None,
+            'time_spent': att.time_spent_display,
+        })
+
+    return Response({
+        'config': {
+            'ambient_sound_enabled': config.ambient_sound_enabled,
+            'ambient_volume': config.ambient_volume,
+            'supervisor_voice_enabled': config.supervisor_voice_enabled,
+            'require_bubble_sheet': config.require_bubble_sheet,
+            'warning_time_minutes': config.warning_time_minutes,
+            'bonus_xp_multiplier': config.bonus_xp_multiplier,
+            'supervisor_messages': config.supervisor_messages or [],
+            'updated_at': config.updated_at.isoformat() if config.updated_at else None,
+        },
+        'stats': {
+            'total_attempts': total_stress_attempts,
+            'avg_score': round(avg_score, 1),
+            'total_unfilled_bubbles': total_unfilled,
+            'total_misaligned_bubbles': total_misaligned,
+            'avg_lost_points': round(total_lost_points / max(1, len(recent_attempts_data)), 1) if recent_attempts_data else 0.0,
+        },
+        'recent_attempts': recent_attempts_data,
+    })

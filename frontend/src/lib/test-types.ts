@@ -7,6 +7,10 @@ export type QuestionData = {
   prev_idx: number;
   next_idx: number;
   seconds_left?: number;
+  is_stress_mode?: boolean;
+  titul_answers?: Record<string, string>;
+  test_title?: string;
+  subject_name?: string;
   question: {
     id: number;
     body: string;

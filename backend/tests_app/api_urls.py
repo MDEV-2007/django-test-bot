@@ -34,4 +34,8 @@ urlpatterns = [
     path('revision/', api.revision_api, name='revision'),
     path('revision/<int:item_id>/check/', api.revision_check_api, name='revision_check'),
     path('attempts/<int:attempt_id>/tab-switch/', api.report_tab_switch_api, name='report_tab_switch'),
+    # Real BMB Stress Simulyatori (Hardcore Exam Mode)
+    path('stress-config/', api.stress_config_api, name='stress_config'),
+    path('start-stress/', api.start_stress_test_api, name='start_stress'),
+    path('attempts/<int:attempt_id>/bubble-answer/', api.bubble_answer_api, name='bubble_answer'),
 ]

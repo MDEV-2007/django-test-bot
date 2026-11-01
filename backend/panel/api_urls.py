@@ -120,5 +120,9 @@ urlpatterns = [
     path('community/<int:post_id>/delete', api.panel_community_post_delete_api),
     path('community/<int:post_id>/pin/', api.panel_community_post_pin_api, name='panel_community_post_pin'),
     path('community/<int:post_id>/pin', api.panel_community_post_pin_api),
+
+    # BMB Real Imtihon Zali (Stress Mode) Super Admin
+    path('stress-exam/', api.stress_exam_admin_api, name='stress_exam_admin'),
+    path('stress-exam', api.stress_exam_admin_api),
 ]
 

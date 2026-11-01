@@ -22,7 +22,7 @@ from accounts.models import ensure_profile_for_user
 from accounts.permissions import IsChannelSubscribed
 from .models import (
     AIFeedback, Attempt, AttemptAnswer, Question, RevisionItem, Subject, TestSet,
-    ExamSurvey,
+    ExamSurvey, StressExamConfig,
 )
 from .subject_utils import resolve_subject as _resolve_subject
 from .feedback import _dispatch_ai_feedback, seed_questions_if_needed
@@ -291,7 +291,8 @@ def center_api(request):
 
 @transaction.atomic
 def _new_attempt(profile, test):
-    attempt = Attempt.objects.create(profile=profile, test=test)
+    is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))
+    attempt = Attempt.objects.create(profile=profile, test=test, is_stress_mode=is_stress)
     q_ids = list(test.questions.values_list('id', flat=True))
     order = test.question_order or []
     if order:
@@ -340,7 +341,11 @@ def start_test_api(request, test_id):
             and not profile.premium_mock_test_unlocked
             and test.id not in _unlocked_ids(profile)):
         return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
+    is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))
     attempt = _new_attempt(profile, test)
+    if is_stress:
+        attempt.is_stress_mode = True
+        attempt.save(update_fields=['is_stress_mode'])
     # `mode` — klient qaysi ekranni ochishini aytadi. Partlarga (ExamSection) bo'lingan
     # test CEFR imtihon ekranida ochiladi: matn/audio va butun part bir varaqda. Qolgan
     # hamma test eski "bitta savol — bitta ekran" oqimida qoladi.
@@ -526,6 +531,10 @@ def _question_screen_data(attempt, q_idx, current_answer, total_questions, secon
     question = current_answer.question
     data = {
         'attempt_id': attempt.id,
+        'is_stress_mode': attempt.is_stress_mode,
+        'titul_answers': attempt.titul_answers or {},
+        'test_title': attempt.test.title if attempt.test else "BMB Rasmiy Test",
+        'subject_name': attempt.test.subject.name if (attempt.test and attempt.test.subject) else "BMB Standart",
         'q_idx': q_idx,
         'total_questions': total_questions,
         'has_prev': q_idx > 1,
@@ -726,6 +735,66 @@ def finish_api(request, attempt_id):
     skipped = sum(1 for a in scored if a.is_skipped)
     wrong = max(0, scored_total - correct - skipped)
 
+    # ─── BMB Titul Varaqasi (Bubble Sheet) va Stress Tahlili ────────
+    client_titul = request.data.get('titul_answers') if (hasattr(request, 'data') and isinstance(request.data, dict)) else None
+    if client_titul and isinstance(client_titul, dict):
+        current_titul = attempt.titul_answers or {}
+        current_titul.update({str(k): str(v).upper() for k, v in client_titul.items()})
+        attempt.titul_answers = current_titul
+
+    stress_cfg = StressExamConfig.load()
+    if attempt.is_stress_mode:
+        titul_map = attempt.titul_answers or {}
+        titul_correct = 0
+        draft_correct = correct
+        unfilled_count = 0
+        misaligned_count = 0
+
+        for idx, a in enumerate(scored, 1):
+            s_idx = str(idx)
+            chosen_bubble = titul_map.get(s_idx)
+            qtype = a.question.question_type
+            if qtype in Question.SINGLE_ANSWER_TYPES or qtype == 'single_choice' or qtype == 'mcq':
+                choices_list = list(a.question.choices.all())
+                correct_letter = None
+                draft_letter = None
+                for c_i, c in enumerate(choices_list):
+                    c_letter = chr(65 + c_i)
+                    if c.is_correct:
+                        correct_letter = c_letter
+                    if a.selected_choice_id == c.id:
+                        draft_letter = c_letter
+
+                if not chosen_bubble:
+                    unfilled_count += 1
+                elif draft_letter and chosen_bubble != draft_letter:
+                    misaligned_count += 1
+
+                if chosen_bubble and chosen_bubble == correct_letter:
+                    titul_correct += 1
+            else:
+                if a.is_correct:
+                    titul_correct += 1
+
+        if stress_cfg.require_bubble_sheet and scored_total > 0:
+            score = round((titul_correct / scored_total) * 100, 1)
+            correct = titul_correct
+            wrong = max(0, scored_total - correct - skipped)
+
+        lost_pts = max(0.0, round(((draft_correct - titul_correct) / max(1, scored_total)) * 100, 1))
+        attempt.stress_stats = {
+            'is_stress_mode': True,
+            'draft_score': round((draft_correct / max(1, scored_total)) * 100, 1),
+            'titul_score': score,
+            'draft_correct': draft_correct,
+            'titul_correct': titul_correct,
+            'unfilled_on_titul': unfilled_count,
+            'misaligned_on_titul': misaligned_count,
+            'lost_points': lost_pts,
+            'dtm_simulated_ball': round(correct * 3.1, 1),
+            'stress_level': 'hardcore',
+        }
+
     attempt.correct_answers = correct
     attempt.wrong_answers = wrong
     attempt.skipped_answers = skipped
@@ -763,8 +832,9 @@ def finish_api(request, attempt_id):
     attempt.save()
 
     profile = request.user.profile
-    xp_awarded = 0 if profile.is_privileged else correct * 50
-    coins_awarded = correct * 5
+    multiplier = stress_cfg.bonus_xp_multiplier if (attempt.is_stress_mode and stress_cfg.bonus_xp_multiplier > 1.0) else 1.0
+    xp_awarded = 0 if profile.is_privileged else int(correct * 50 * multiplier)
+    coins_awarded = int(correct * 5 * (1.5 if attempt.is_stress_mode else 1.0))
     profile.add_xp(xp_awarded)
     profile.add_coins(coins_awarded)
     profile.update_streak()
@@ -923,6 +993,9 @@ def feedback_api(request, attempt_id):
         'status': 'ready',
         'attempt': {
             'id': attempt.id,
+            'is_stress_mode': attempt.is_stress_mode,
+            'stress_stats': attempt.stress_stats or {},
+            'titul_answers': attempt.titul_answers or {},
             'score': attempt.score,
             'correct_answers': attempt.correct_answers,
             'wrong_answers': attempt.wrong_answers,
@@ -1211,3 +1284,92 @@ def report_tab_switch_api(request, attempt_id):
     attempt.tab_switch_count = F('tab_switch_count') + 1
     attempt.save(update_fields=['tab_switch_count'])
     return Response({'ok': True})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def stress_config_api(request):
+    """Stress simulyatori umumiy sozlamalarini qaytarish."""
+    config = StressExamConfig.load()
+    return Response({
+        'ambient_sound_enabled': config.ambient_sound_enabled,
+        'ambient_volume': config.ambient_volume,
+        'supervisor_voice_enabled': config.supervisor_voice_enabled,
+        'require_bubble_sheet': config.require_bubble_sheet,
+        'warning_time_minutes': config.warning_time_minutes,
+        'bonus_xp_multiplier': config.bonus_xp_multiplier,
+        'supervisor_messages': config.supervisor_messages or [],
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
+def start_stress_test_api(request):
+    """Maxsus Real BMB Imtihon Zali (Stress Mode) da testni boshlash."""
+    profile = ensure_profile_for_user(request.user)
+    test_id = request.data.get('test_id')
+    subject_slug = request.data.get('subject_slug')
+
+    if test_id:
+        test = get_object_or_404(TestSet, id=test_id)
+    else:
+        qs = TestSet.objects.filter(is_published=True, is_archived=False)
+        if subject_slug:
+            qs = qs.filter(subject__slug=subject_slug)
+        test = qs.order_by('?').first() or TestSet.objects.filter(is_published=True, is_archived=False).first()
+
+    if not test:
+        # Savollardan avtomatik test tuzish
+        questions = list(Question.objects.all()[:30])
+        if not questions:
+            return Response({'error': "Imtihon savollari topilmadi."}, status=404)
+        test = TestSet.objects.create(
+            title="Real BMB Standart Imtihon Testi",
+            description="BMB DTM rasmiy standartiga mos tuzilgan stress testi.",
+            duration_minutes=60,
+            is_random=True,
+            is_premium=False,
+        )
+        test.questions.set(questions)
+
+    # Faol urinishni tekshirish
+    active_attempt = Attempt.objects.filter(profile=profile, test=test, is_completed=False).order_by('-started_at').first()
+    if active_attempt:
+        if not active_attempt.is_stress_mode:
+            active_attempt.is_stress_mode = True
+            active_attempt.save(update_fields=['is_stress_mode'])
+        mode = 'cefr' if test.sections.exists() else 'classic'
+        return Response({'attempt_id': active_attempt.id, 'mode': mode, 'is_stress_mode': True})
+
+    attempt = _new_attempt(profile, test)
+    attempt.is_stress_mode = True
+    attempt.save(update_fields=['is_stress_mode'])
+    mode = 'cefr' if test.sections.exists() else 'classic'
+    return Response({'attempt_id': attempt.id, 'mode': mode, 'is_stress_mode': True})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bubble_answer_api(request, attempt_id):
+    """BMB Titul Varaqasi (Bubble Sheet) katagini to'ldirish/yangilash."""
+    attempt = get_object_or_404(Attempt, id=attempt_id, profile=request.user.profile)
+    if attempt.is_completed:
+        return Response({'error': 'attempt already finished', 'completed': True}, status=409)
+
+    q_idx = request.data.get('q_idx')
+    letter = request.data.get('letter')
+    bulk_answers = request.data.get('answers')
+
+    current_titul = attempt.titul_answers or {}
+    if bulk_answers and isinstance(bulk_answers, dict):
+        current_titul.update({str(k): str(v).upper() for k, v in bulk_answers.items() if v})
+    elif q_idx is not None:
+        s_idx = str(q_idx)
+        if letter:
+            current_titul[s_idx] = str(letter).upper()
+        elif s_idx in current_titul:
+            del current_titul[s_idx]
+
+    attempt.titul_answers = current_titul
+    attempt.save(update_fields=['titul_answers'])
+    return Response({'titul_answers': attempt.titul_answers, 'saved': True})

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { celebrate } from '@/lib/confetti';
-import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut, Wifi, WifiOff, RefreshCw, Check } from 'lucide-react';
+import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut, Wifi, WifiOff, RefreshCw, Check, Flame, FileSpreadsheet, Sparkles } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import {
   tgHaptic, useIsTelegram, useTelegramBackButton, useTelegramClosingConfirmation, useTelegramMainButton,
@@ -16,6 +16,8 @@ import SingleChoiceQuestion from '@/components/questions/SingleChoiceQuestion';
 import MatchingQuestion from '@/components/questions/MatchingQuestion';
 import GroupedItemQuestion from '@/components/questions/GroupedItemQuestion';
 import OpenWrittenQuestion from '@/components/questions/OpenWrittenQuestion';
+import BmbStressBar from '@/components/stress/BmbStressBar';
+import BmbBubbleSheet from '@/components/stress/BmbBubbleSheet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,6 +70,13 @@ export default function TestScreenPage() {
   const [answeredIdxs, setAnsweredIdxs] = useState<Set<number>>(new Set());
   const [fontKey, setFontKey] = useState<FontKey>('md');
   const inTelegram = useIsTelegram();
+
+  // BMB Real Imtihon Zali (Stress Mode) holatlari
+  const [isStressMode, setIsStressMode] = useState(false);
+  const [titulAnswers, setTitulAnswers] = useState<Record<string, string>>({});
+  const [draftAnswersMap, setDraftAnswersMap] = useState<Record<number, string | null>>({});
+  const [showTitulDrawer, setShowTitulDrawer] = useState(false);
+  const [showUncopiedWarningModal, setShowUncopiedWarningModal] = useState(false);
 
   // Offline resilience holatlari
   const [isOnline, setIsOnline] = useState(true);
@@ -226,6 +235,16 @@ export default function TestScreenPage() {
         .then((d) => {
           setData(d);
           setQIdx(d.q_idx);
+          if (d.is_stress_mode) setIsStressMode(true);
+          if (d.titul_answers) {
+            setTitulAnswers((prev) => ({ ...d.titul_answers, ...prev }));
+          }
+          if (d.selected_choice_id && d.choices) {
+            const cIdx = d.choices.findIndex((c) => c.id === d.selected_choice_id);
+            if (cIdx >= 0) {
+              setDraftAnswersMap((prev) => ({ ...prev, [d.q_idx]: String.fromCharCode(65 + cIdx) }));
+            }
+          }
           cacheQuestion(d);
         })
         .catch((e: unknown) => {
@@ -275,6 +294,13 @@ export default function TestScreenPage() {
 
     if (payload.choice_id !== undefined) {
       updatedLocalData.selected_choice_id = payload.choice_id as number;
+      if (data.choices) {
+        const cIdx = data.choices.findIndex((c) => c.id === payload.choice_id);
+        if (cIdx >= 0) {
+          const letter = String.fromCharCode(65 + cIdx);
+          setDraftAnswersMap((prev) => ({ ...prev, [currentQIdx]: letter }));
+        }
+      }
     }
     if (payload.group_option_id !== undefined) {
       updatedLocalData.selected_group_option_id = payload.group_option_id as number;
@@ -327,7 +353,53 @@ export default function TestScreenPage() {
     }
   }
 
-  async function finish() {
+  // BMB Titul Varaqasi (Bubble Sheet) katagini to'ldirish
+  async function handleBubbleSelect(questionIndex: number, letter: string) {
+    const sIdx = String(questionIndex);
+    const updated = { ...titulAnswers };
+    if (letter) {
+      updated[sIdx] = letter;
+    } else {
+      delete updated[sIdx];
+    }
+    setTitulAnswers(updated);
+
+    try {
+      await apiFetch(`/api/tests/attempts/${attemptId}/bubble-answer/`, {
+        method: 'POST',
+        body: JSON.stringify({ q_idx: questionIndex, letter }),
+      });
+    } catch {
+      // offline or silent fallback
+    }
+  }
+
+  // Barcha qoralamadagi javoblarni Titul varaqasiga avtomatik ko'chirish
+  async function syncAllDraftsToTitul() {
+    const updated = { ...titulAnswers };
+    Object.entries(draftAnswersMap).forEach(([idx, letter]) => {
+      if (letter) updated[idx] = letter;
+    });
+    setTitulAnswers(updated);
+    try {
+      await apiFetch(`/api/tests/attempts/${attemptId}/bubble-answer/`, {
+        method: 'POST',
+        body: JSON.stringify({ answers: updated }),
+      });
+    } catch {}
+    toast.success("Barcha qoralamadagi javoblar Titul varaqasiga ko'chirildi!");
+  }
+
+  async function finish(bypassUncopiedWarning = false) {
+    // Agar stress rejimida bo'lsa va titulga ko'chirilmagan javoblar bo'lsa
+    if (isStressMode && !bypassUncopiedWarning) {
+      const uncopied = Object.entries(draftAnswersMap).filter(([k, v]) => v && !titulAnswers[k]).length;
+      if (uncopied > 0) {
+        setShowUncopiedWarningModal(true);
+        return;
+      }
+    }
+
     // Agar oflayn bo'lsa va saqlanmagan javoblar bo'lsa — ogohlantiramiz
     const pending = getPendingQueue();
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
@@ -342,7 +414,10 @@ export default function TestScreenPage() {
 
     setFinishing(true);
     try {
-      await apiFetch(`/api/tests/attempts/${attemptId}/finish/`, { method: 'POST' });
+      await apiFetch(`/api/tests/attempts/${attemptId}/finish/`, {
+        method: 'POST',
+        body: JSON.stringify({ titul_answers: titulAnswers }),
+      });
       soundFX.fanfare();
       tgHaptic('success');
       // Tozalash
@@ -426,6 +501,14 @@ export default function TestScreenPage() {
     <>
       <AppShell />
       <main className="page-shell-focus flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-24 sm:p-6 sm:pb-12">
+        {/* Real BMB Imtihon Zali Audio-bosim boshqaruv paneli */}
+        {isStressMode && (
+          <BmbStressBar
+            secondsLeft={timeLeft ?? null}
+            onOpenBubbleDrawer={() => setShowTitulDrawer(true)}
+            uncopiedCount={Object.entries(draftAnswersMap).filter(([k, v]) => v && !titulAnswers[k]).length}
+          />
+        )}
         {/* Sticky boshqaruv paneli - mobilda ustiga chiqib qolmasligi uchun toza qattiq fon va to'liq kenglik */}
         <Card className="sticky top-0 z-30 -mx-4 -mt-4 sm:mx-0 sm:mt-0 rounded-none sm:rounded-2xl border-x-0 border-t-0 sm:border border-b border-[var(--border-card)] bg-[#0B0F17] sm:bg-[var(--surface-card-strong)] py-0 shadow-md">
           <CardContent className="space-y-2 p-3 sm:p-4">
@@ -557,8 +640,10 @@ export default function TestScreenPage() {
         )}
 
         {/* Savol */}
-        <Card>
-          <CardContent className="space-y-6 p-5 sm:p-8">
+        <div className={cn("space-y-6", isStressMode && "lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0")}>
+          <div className={cn(isStressMode ? "lg:col-span-8 space-y-6" : "space-y-6")}>
+            <Card>
+              <CardContent className="space-y-6 p-5 sm:p-8">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary">Savol {data.q_idx}</Badge>
@@ -630,6 +715,28 @@ export default function TestScreenPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Desktop BMB Titul Varaqasi (Bubble Sheet) ustuni */}
+      {isStressMode && (
+        <div className="hidden lg:block lg:col-span-4">
+          <div className="sticky top-20">
+            <BmbBubbleSheet
+              totalQuestions={data.total_questions}
+              currentQIdx={data.q_idx}
+              titulAnswers={titulAnswers}
+              draftAnswers={draftAnswersMap}
+              onBubbleSelect={handleBubbleSelect}
+              onJumpToQuestion={(idx) => load(idx)}
+              onSyncAllDrafts={syncAllDraftsToTitul}
+              secondsLeft={timeLeft ?? null}
+              subjectName={data.subject_name || data.test_title || 'BMB Rasmiy Blok'}
+              attemptId={attemptId}
+            />
+          </div>
+        </div>
+      )}
+    </div>
 
         {/* Navigatsiya — mobilda pastga yopishtirilgan */}
         <div className="exam-bottom-bar fixed bottom-0 left-0 right-0 z-30 flex items-center justify-between gap-3 border-t bg-[var(--surface-card-strong)]/95 p-3 backdrop-blur-lg sm:static sm:border-t-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
@@ -648,7 +755,7 @@ export default function TestScreenPage() {
           ) : (
             <Button
               size="lg"
-              onClick={finish}
+              onClick={() => finish()}
               disabled={finishing}
               className="animate-pulse bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/35 hover:bg-[var(--success)]/90"
             >
@@ -656,6 +763,76 @@ export default function TestScreenPage() {
             </Button>
           )}
         </div>
+
+        {/* Mobilda BMB Titul Varaqasi Dialogi */}
+        <Dialog open={showTitulDrawer} onOpenChange={setShowTitulDrawer}>
+          <DialogContent className="max-w-md p-2 bg-transparent border-0 shadow-none">
+            <BmbBubbleSheet
+              totalQuestions={data.total_questions}
+              currentQIdx={data.q_idx}
+              titulAnswers={titulAnswers}
+              draftAnswers={draftAnswersMap}
+              onBubbleSelect={handleBubbleSelect}
+              onJumpToQuestion={(idx) => {
+                load(idx);
+                setShowTitulDrawer(false);
+              }}
+              onSyncAllDrafts={syncAllDraftsToTitul}
+              secondsLeft={timeLeft ?? null}
+              subjectName={data.subject_name || data.test_title || 'BMB Rasmiy Blok'}
+              attemptId={attemptId}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Titulga ko'chirilmagan javoblar haqida qat'iy BMB ogohlantirish modali */}
+        <Dialog open={showUncopiedWarningModal} onOpenChange={setShowUncopiedWarningModal}>
+          <DialogContent className="sm:max-w-md border-2 border-rose-500/50 bg-card">
+            <DialogHeader className="space-y-2">
+              <div className="flex items-center gap-2 text-rose-500">
+                <AlertTriangle className="size-6 animate-bounce" />
+                <DialogTitle className="text-lg font-bold text-foreground">
+                  ⚠️ Titulga Ko&apos;chirilmagan Javoblar!
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Sizda <strong>{Object.entries(draftAnswersMap).filter(([k, v]) => v && !titulAnswers[k]).length} ta</strong> savol qoralamada belgilangan, ammo Titul varaqasiga ko&apos;chirilmagan!
+                <br /><br />
+                BMB (DTM) qat&apos;iy qoidalariga ko&apos;ra, Titul varaqasiga bo&apos;yalmagan javoblar optik skaner tomonidan o&apos;qilmaydi va <strong>0 ball</strong> hisoblanadi!
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-col sm:flex-row gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowUncopiedWarningModal(false)}
+                className="text-xs"
+              >
+                Qaytish va tekshirish
+              </Button>
+              <Button
+                onClick={() => {
+                  syncAllDraftsToTitul();
+                  setShowUncopiedWarningModal(false);
+                  setTimeout(() => finish(true), 500);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs"
+              >
+                <Sparkles className="size-3.5 mr-1.5" />
+                Hammasini Titulga ko&apos;chirib topshirish
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowUncopiedWarningModal(false);
+                  finish(true);
+                }}
+                className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+              >
+                Baribir topshirish (0 ballga rozi bo&apos;lish)
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
           <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--surface-card-strong)] p-6 shadow-2xl mx-auto">

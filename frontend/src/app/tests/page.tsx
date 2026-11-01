@@ -23,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import PremiumIcon from '@/components/ui/premium-icon';
+import BmbStressLaunchModal from '@/components/stress/BmbStressLaunchModal';
 
 type AnswerMode = 'open' | 'closed' | 'mixed' | null;
 
@@ -314,6 +315,8 @@ export default function TestsPage() {
 
   const [startError, setStartError] = useState<{ message: string; testId?: number; scheduledAt?: string | null } | null>(null);
   const [starting, setStarting] = useState<number | null>(null);
+  const [stressModalOpen, setStressModalOpen] = useState(false);
+  const [stressPreselectedTest, setStressPreselectedTest] = useState<{ id: number; title: string } | null>(null);
 
   // subject: null bo'lsa boshlang'ich Grid (grid-cols-4 / grid-cols-2) ko'rinadi.
   // subject: 'tarix' bo'lsa shu fanning ichki subkategoriyalari va testlari ko'rinadi.
@@ -472,6 +475,56 @@ export default function TestsPage() {
                   Sinovdan o&apos;tish <ArrowRight className="size-4 ml-1.5" />
                 </Link>
               </Button>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* REAL BMB IMTIHON ZALI (STRESS MODE) BANNER */}
+        <Reveal>
+          <div className="relative overflow-hidden rounded-[28px] border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-5 sm:p-6 shadow-xl text-white">
+            <div className="absolute top-0 right-0 -mr-12 -mt-12 size-60 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
+            <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+              <div className="flex min-w-0 items-start sm:items-center gap-4">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-rose-600/30 border border-rose-500/40 shadow-inner">
+                  <Flame className="size-7 text-rose-400 animate-pulse" />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase border-0">
+                      🔥 EKSTREMAL SIMULYATOR
+                    </Badge>
+                    <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[11px] font-bold">
+                      🎧 500 Kishi Zali Akustikasi
+                    </Badge>
+                    <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[11px] font-bold">
+                      📝 Titul Varaqasi (Bubble Sheet)
+                    </Badge>
+                    <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[11px] font-bold">
+                      ⚡ +50% Bonus XP
+                    </Badge>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black tracking-tight text-white">
+                    Real BMB Imtihon Zali (Stress Mode)
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    Divanda choy ichib 80% olish boshqa, real DTM zalidagi shivir-shivir, parta g&apos;ichirlashi, nazoratchi ovozi va Titul varaqasida qo&apos;l qaltirashi boshqa! Imtihon kuni shokiga tushmaslik uchun hoziroq o&apos;zingizni sinang.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={() => {
+                    setStressPreselectedTest(null);
+                    setStressModalOpen(true);
+                  }}
+                  size="lg"
+                  className="rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 cursor-pointer h-11 px-6 text-xs sm:text-sm active:scale-95 transition-all"
+                >
+                  <Flame className="size-4.5 mr-2 animate-pulse" />
+                  Imtihon Zaliga Kirish
+                </Button>
+              </div>
             </div>
           </div>
         </Reveal>
@@ -1013,16 +1066,30 @@ export default function TestsPage() {
                             {starting !== t.id && <ArrowRight className="size-4" />}
                           </button>
                         ) : (
-                          <button
-                            type="button"
-                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 px-4 text-[13px] sm:text-sm font-bold text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
-                            onClick={() => start(t.id)}
-                            disabled={starting !== null}
-                          >
-                            {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
-                            <span>{starting === t.id ? 'Boshlanmoqda...' : 'Testni boshlash'}</span>
-                            {starting !== t.id && <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              className="inline-flex h-11.5 flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 px-4 text-[13px] sm:text-sm font-bold text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
+                              onClick={() => start(t.id)}
+                              disabled={starting !== null}
+                            >
+                              {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
+                              <span>{starting === t.id ? 'Boshlanmoqda...' : 'Testni boshlash'}</span>
+                              {starting !== t.id && <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />}
+                            </button>
+                            <button
+                              type="button"
+                              title="Ushbu testni Real BMB Stress zali rejimida ishlash"
+                              className="inline-flex h-11.5 items-center justify-center gap-1.5 rounded-2xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-3 text-xs font-bold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer shrink-0"
+                              onClick={() => {
+                                setStressPreselectedTest({ id: t.id, title: t.title });
+                                setStressModalOpen(true);
+                              }}
+                            >
+                              <Flame className="size-4 text-rose-500 animate-pulse" />
+                              <span>Stress</span>
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1062,6 +1129,14 @@ export default function TestsPage() {
             )}
           </div>
         )}
+        {/* Real BMB Stress Mode Launch Modal */}
+        <BmbStressLaunchModal
+          open={stressModalOpen}
+          onOpenChange={setStressModalOpen}
+          subjects={data?.subjects || []}
+          preselectedTestId={stressPreselectedTest?.id}
+          preselectedTitle={stressPreselectedTest?.title}
+        />
       </main>
     </>
   );

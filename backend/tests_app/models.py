@@ -406,6 +406,23 @@ class Attempt(models.Model):
         help_text="Test shubhali tezlikda topshirilgan (masalan 45 savolni 3 daqiqada).",
     )
 
+    # ─── Real BMB Stress Simulyatori (Hardcore Exam Mode) ────────────────
+    is_stress_mode = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Haqiqiy BMB Stress Simulyatori rejimida topshirilgan.",
+    )
+    titul_answers = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="BMB Titul varaqasida (Bubble Sheet) belgilangan javoblar: {'1': 'A', '2': 'B', ...}",
+    )
+    stress_stats = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Stress tahlili: qoralama va titul mosligi, titulga ko'chirilmaganlar soni, vaqt bosimi.",
+    )
+
     # Javob serverga kechikib yetib kelishi mumkin (tarmoq sekin, klient soati boshqa),
     # shuning uchun vaqt tugagach ham qisqa muhlat beriladi.
     SUBMIT_GRACE_SECONDS = 15
@@ -727,3 +744,53 @@ class ExamSurvey(models.Model):
         name = self.author_name or (self.user.username if self.user else "Anonim")
         return f"{name} ({self.platform_rating}★) {'[LANDING]' if self.is_featured else ''}"
 
+
+
+class StressExamConfig(models.Model):
+    """BMB Real Imtihon Zali (Stress Mode) global sozlamalari (Super Admin boshqaradi)."""
+    ambient_sound_enabled = models.BooleanField(
+        default=True,
+        help_text="Imtihon zali foni (parta g'ichirlashi, qog'oz varaqlash, yo'tal, fon shovqini)",
+    )
+    ambient_volume = models.FloatField(
+        default=0.6,
+        help_text="Boshlang'ich audio balandligi (0.0 - 1.0)",
+    )
+    supervisor_voice_enabled = models.BooleanField(
+        default=True,
+        help_text="Nazoratchining sovuq ovozli ogohlantirishlari",
+    )
+    require_bubble_sheet = models.BooleanField(
+        default=True,
+        help_text="Faqat Titul varaqasida belgilangan javoblar rasmiy ball sifatida hisoblansin",
+    )
+    warning_time_minutes = models.IntegerField(
+        default=10,
+        help_text="Titul varaqasiga ko'chirish shoshilinch signali (daqiqa)",
+    )
+    bonus_xp_multiplier = models.FloatField(
+        default=1.5,
+        help_text="Stress rejimida topshirganlarga XP ko'paytiruvchisi (masalan 1.5x)",
+    )
+    supervisor_messages = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Nazoratchi e'lonlari ro'yxati: [{'time_sec': 0, 'title': '...', 'text': '...'}]",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "BMB Stress Simulyatori Sozlamasi"
+
+    @classmethod
+    def load(cls):
+        default_messages = [
+            {"time_sec": -1, "title": "Imtihon boshlandi", "text": "Diqqat, barcha abituriyentlar! Imtihon boshlandi. Begona buyumlar va telefonlar qat'iyan taqiqlanadi. Javoblarni Titul varaqasiga o'z vaqtida ko'chirishni unutmang!"},
+            {"time_sec": 3600, "title": "1 soat qoldi", "text": "Diqqat! Imtihon tugashiga 1 soat qoldi! Qoralamadagi javoblarni Titul varaqasiga ko'chirishni boshlang!"},
+            {"time_sec": 1800, "title": "30 daqiqa qoldi", "text": "Diqqat! Imtihon tugashiga 30 daqiqa qoldi! Shoshiling, vaqt kam qolmoqda!"},
+            {"time_sec": 600, "title": "Oxirgi 10 daqiqa!", "text": "Diqqat, oxirgi 10 daqiqa qoldi! Titul varaqasiga ko'chirilmagan javoblar kuyadi va baholanmaydi!"},
+            {"time_sec": 300, "title": "Oxirgi 5 daqiqa!", "text": "Oxirgi 5 daqiqa! Hech kim o'rnidan turmasin, barcha e'tiborni javoblar varaqasiga qarating!"},
+            {"time_sec": 0, "title": "Vaqt tugadi!", "text": "Imtihon yakunlandi! Ruchkalarni qo'ying! Titul varaqalari yig'ib olinmoqda!"},
+        ]
+        obj, _ = cls.objects.get_or_create(id=1, defaults={'supervisor_messages': default_messages})
+        return obj
