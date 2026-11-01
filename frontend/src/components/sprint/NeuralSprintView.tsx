@@ -10,6 +10,10 @@ import {
   Hourglass, Brain, Coins
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { apiFetch } from '@/lib/api-client';
+import { toast } from 'sonner';
+import { soundFX } from '@/lib/soundFX';
+import { HelpCircle, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -37,6 +41,60 @@ export default function NeuralSprintView({
   onExit,
   onFinish,
 }: NeuralSprintViewProps) {
+  const [isSharingSprint, setIsSharingSprint] = React.useState(false);
+  const [isSendingSos, setIsSendingSos] = React.useState(false);
+
+  const handleShareSprintAchievement = async () => {
+    setIsSharingSprint(true);
+    try {
+      await apiFetch('/api/learning/feed/create-auto/', {
+        method: 'POST',
+        body: JSON.stringify({
+          post_type: 'achievement',
+          title: `⚡ ${topicTitle} Fokus Sprintida ${stats.correct}/${stats.correct + stats.wrong} natija!`,
+          caption: `Bugun ${topicTitle} bo'yicha tezkor mashq qildim. Aniqlik: ${scorePredictor.topicMasteryPercentage}%. Kim 1v1 duelga tayyor? 🔥`,
+          subject_name: topicTitle,
+          subject_slug: topicTitle.toLowerCase().replace(/\s+/g, '-'),
+          score: stats.correct,
+          correct_count: stats.correct,
+          total_questions: stats.correct + stats.wrong,
+        }),
+      });
+      soundFX.fanfare();
+      toast.success("🔥 Natijangiz Hamjamiyat lentasiga avtomatik post bo'lib joylandi! +15 XP");
+    } catch (err: any) {
+      toast.error(err.message || "Lentaga joylashda xatolik yuz berdi");
+    } finally {
+      setIsSharingSprint(false);
+    }
+  };
+
+  const handleAskCommunitySOS = async () => {
+    if (!currentQuestion) return;
+    setIsSendingSos(true);
+    try {
+      await apiFetch('/api/learning/feed/create-auto/', {
+        method: 'POST',
+        body: JSON.stringify({
+          post_type: 'sos_question',
+          subject_name: topicTitle,
+          subject_slug: topicTitle.toLowerCase().replace(/\s+/g, '-'),
+          question_text: currentQuestion.body,
+          options: currentQuestion.options.map(o => o.text),
+          correct_option: currentQuestion.options.find(o => o.id === currentQuestion.correctOptionId)?.text || 'A',
+          explanation: activeExplanation?.memoryHack || activeExplanation?.whyWrong || '',
+        }),
+      });
+      soundFX.fanfare();
+      toast.success("🙋‍♂️ Savol Hamjamiyat lentasiga SOS So'rovnoma bo'lib tushdi! Bilimdonlar javob berishmoqda.");
+      dismissExplanation();
+    } catch (err: any) {
+      toast.error(err.message || "Lentaga so'rov yuborishda xatolik yuz berdi");
+    } finally {
+      setIsSendingSos(false);
+    }
+  };
+
   const {
     currentQuestion,
     currentIndex,
@@ -456,15 +514,28 @@ export default function NeuralSprintView({
                 </div>
               )}
 
-              {/* Tushundim tugmasi */}
-              <Button
-                disabled={isExplainingLoading}
-                onClick={dismissExplanation}
-                className="w-full rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs sm:text-sm h-11 shadow-lg shadow-rose-600/20 gap-2 cursor-pointer"
-              >
-                <span>Tushundim, davom etamiz (+5 XP)</span>
-                <ChevronRight className="size-4" />
-              </Button>
+              {/* Tushundim va SOS tugmalari */}
+              <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isSendingSos}
+                  onClick={handleAskCommunitySOS}
+                  className="w-full sm:w-auto flex-1 rounded-2xl border-amber-500/40 text-amber-500 hover:bg-amber-500/10 font-bold text-xs h-11 gap-1.5 cursor-pointer"
+                >
+                  {isSendingSos ? <Loader2 className="size-4 animate-spin mr-1" /> : <HelpCircle className="size-4 text-amber-500" />}
+                  <span>🙋‍♂️ Hamjamiyatdan yordam so&apos;rash (SOS)</span>
+                </Button>
+
+                <Button
+                  disabled={isExplainingLoading}
+                  onClick={dismissExplanation}
+                  className="w-full sm:w-auto flex-1 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs sm:text-sm h-11 shadow-lg shadow-rose-600/20 gap-2 cursor-pointer"
+                >
+                  <span>Tushundim, davom etamiz (+5 XP)</span>
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}

@@ -30,6 +30,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import VoiceExplanationButton from '@/components/common/VoiceExplanationButton';
+import { soundFX } from '@/lib/soundFX';
 
 type Mistake = {
   mavzu: string; savol_mazmuni: string; bola_javobi: string; togri_javob: string;
@@ -158,6 +159,53 @@ type ReviewItem = {
   section: { skill: string; skill_label: string; part_number: number; title: string } | null;
   writing: ({ reviewed: false } | ({ reviewed: true } & WritingReview)) | null;
 };
+
+function MistakeSosButton({ mistake }: { mistake: Mistake }) {
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSendSos() {
+    if (sent || loading) return;
+    setLoading(true);
+    try {
+      await apiFetch('/api/learning/feed/create-auto/', {
+        method: 'POST',
+        body: JSON.stringify({
+          post_type: 'sos_question',
+          subject_name: mistake.mavzu,
+          subject_slug: 'umumiy',
+          question_text: mistake.savol_mazmuni,
+          options: [mistake.bola_javobi, mistake.togri_javob, 'Boshqa variant'].filter(Boolean),
+          correct_option: mistake.togri_javob,
+          explanation: mistake.nega_muhim || mistake.eslab_qolish || '',
+        }),
+      });
+      soundFX.fanfare();
+      setSent(true);
+      toast.success("🙋‍♂️ Savol Hamjamiyat lentasiga SOS so'rovnoma bo'lib joylandi! +10 XP");
+    } catch (e: any) {
+      toast.error(e.message || "Lentaga yuborishda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={sent || loading}
+      onClick={handleSendSos}
+      className={cn(
+        "h-7 text-[11px] gap-1 rounded-xl shrink-0 font-bold",
+        sent ? "border-emerald-500/40 text-emerald-500 bg-emerald-500/10" : "border-amber-500/40 text-amber-500 hover:bg-amber-500/10"
+      )}
+    >
+      <HelpCircle className="size-3 text-amber-500" />
+      <span>{sent ? "✓ Lentada" : "🙋‍♂️ Hamjamiyatdan so'rash"}</span>
+    </Button>
+  );
+}
 
 export default function FeedbackPage() {
   const { attemptId } = useParams<{ attemptId: string }>();
@@ -1180,13 +1228,16 @@ export default function FeedbackPage() {
                     <p className="text-xs leading-relaxed text-muted-foreground flex-1">
                       {m.nega_muhim ? <><strong>Izoh:</strong> {m.nega_muhim}</> : null}
                     </p>
-                    <VoiceExplanationButton
-                      text={m.nega_muhim || `Mavzu: ${m.mavzu}. Savol: ${m.savol_mazmuni}. To'g'ri javob: ${m.togri_javob}.`}
-                      size="sm"
-                      label="🎙️ Ovozli tushuntirish"
-                      variant="outline"
-                      className="shrink-0 h-7 text-[11px]"
-                    />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <MistakeSosButton mistake={m} />
+                      <VoiceExplanationButton
+                        text={m.nega_muhim || `Mavzu: ${m.mavzu}. Savol: ${m.savol_mazmuni}. To'g'ri javob: ${m.togri_javob}.`}
+                        size="sm"
+                        label="🎙️ Ovozli"
+                        variant="outline"
+                        className="shrink-0 h-7 text-[11px]"
+                      />
+                    </div>
                   </div>
                   {m.eslab_qolish && (
                     <p className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs italic text-amber-300">
