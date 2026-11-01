@@ -122,7 +122,12 @@ def _test_payload(t, social=None, unlocked=False):
 def center_api(request):
     seed_questions_if_needed()
     profile = ensure_profile_for_user(request.user)
-    subject, subjects = _resolve_subject(request)
+    req_subject = request.GET.get('subject')
+    if req_subject == 'all':
+        subject = None
+        subjects = list(Subject.objects.all())
+    else:
+        subject, subjects = _resolve_subject(request)
 
     category = request.GET.get('category', 'all')
     answer_mode = request.GET.get('answer_mode', 'all')
@@ -240,6 +245,13 @@ def center_api(request):
             'author': _author_payload(getattr(pinned_mock, 'created_by', None)),
         }
 
+    subject_counts = dict(
+        TestSet.objects.filter(is_published=True, is_archived=False, is_random=False, subject__isnull=False)
+        .values_list('subject_id')
+        .annotate(cnt=Count('id'))
+        .values_list('subject_id', 'cnt')
+    )
+
     return Response({
         'pinned_mock': pinned_payload,
         'tests': [
@@ -248,11 +260,15 @@ def center_api(request):
                 unlocked=(has_sub or profile.premium_mock_test_unlocked or t.id in unlocked_ids),
             ) for t in tests
         ],
-        # `color` va `icon_name` — test kartasining ko'rinishi shu yerdan boshqariladi:
-        # har bir fan o'z rangida ko'rinadi va admin panelda rangni o'zgartirsa,
-        # katalogdagi kartalar ham darhol o'zgaradi (frontendda qotib qolmagan).
         'subjects': [
-            {'id': s.id, 'name': s.name, 'slug': s.slug, 'color': s.color, 'icon_name': s.icon_name}
+            {
+                'id': s.id,
+                'name': s.name,
+                'slug': s.slug,
+                'color': s.color,
+                'icon_name': s.icon_name,
+                'tests_count': subject_counts.get(s.id, 0),
+            }
             for s in subjects
         ],
         'selected_subject': subject.slug if subject else None,
