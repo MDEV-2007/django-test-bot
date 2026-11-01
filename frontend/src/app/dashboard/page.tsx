@@ -17,15 +17,11 @@ import {
   Layers,
   Play,
   Gift,
-  Flame,
-  Coins,
-  CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
 import { apiFetch } from '@/lib/api-client';
-import { getRankInfo } from '@/lib/rank';
 import Celebration from '@/components/student/Celebration';
 import DailyChestModal, { DailyChestStatus } from '@/components/student/DailyChestModal';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
@@ -298,7 +294,6 @@ export default function DashboardPage() {
   if (!data) return <DashboardSkeleton />;
 
   const p = data.profile;
-  const rankInfo = getRankInfo(p.elo_rating || 0);
   const firstName = p.first_name || p.username;
   const doneMissions = data.missions.filter((m) => m.is_completed).length;
   const activeSubject = data.selected_subject?.name || 'Rus tili';
@@ -351,62 +346,6 @@ export default function DashboardPage() {
 
       {/* JONLI FAOLIYAT MIKRO-TIKERI (Multiplayer Live Ribbon) */}
       <LiveActivityTicker />
-
-      {/* ============================================================ */}
-      {/* 2. iOS 18 HOME SCREEN GLANCEABLE WIDGETS ROW                 */}
-      {/* ============================================================ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
-          <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" solid />
-          <div className="min-w-0">
-            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
-              Bugun yechildi
-            </span>
-            <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
-              {data.solved_today || 0} <span className="text-xs font-normal text-muted-foreground">test</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
-          <PremiumIcon icon={Flame} tone="amber" size="md" solid />
-          <div className="min-w-0">
-            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
-              Uzluksiz Streak
-            </span>
-            <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
-              {p.streak || 0} <span className="text-xs font-normal text-muted-foreground">kun 🔥</span>
-            </p>
-          </div>
-        </div>
-
-        <Link href="/shop" className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3">
-          <PremiumIcon icon={Coins} tone="gold" size="md" solid />
-          <div className="min-w-0">
-            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
-              Tanga balansi
-            </span>
-            <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
-              {(p.coins || 0).toLocaleString()}
-            </p>
-          </div>
-        </Link>
-
-        <Link
-          href="/battles"
-          className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3 text-left cursor-pointer"
-        >
-          <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
-          <div className="min-w-0">
-            <span className="text-[11px] font-semibold text-muted-foreground block truncate">
-              {rankInfo.title}
-            </span>
-            <p className="text-base sm:text-lg font-extrabold font-mono text-primary leading-tight">
-              {p.elo_rating || 1200} <span className="text-[11px] font-normal text-muted-foreground">ELO</span>
-            </p>
-          </div>
-        </Link>
-      </div>
 
       {/* ============================================================ */}
       {/* 3. iPadOS SPLIT VIEW: MAIN COLUMN (8) + SMART STACK (4)      */}

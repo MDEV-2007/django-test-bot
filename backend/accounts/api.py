@@ -371,6 +371,8 @@ def profile_api(request):
         profile.refresh_from_db()
 
     evaluate_badges(profile)
+    today = timezone.localdate()
+    solved_today = profile.attempts.filter(is_completed=True, completed_at__date=today).count()
     recent_attempts = profile.attempts.select_related('test').order_by('-started_at')[:5]
     recent_battles = (Battle.objects.filter(_Q(player1=profile) | _Q(player2=profile))
                        .select_related('player1__user', 'player2__user', 'winner')
@@ -380,6 +382,7 @@ def profile_api(request):
     return Response({
         'ok': True,
         'profile': ProfileSerializer(profile).data,
+        'solved_today': solved_today,
         'referral_code': ensure_referral_code(profile),
         # Telegram Mini App ichidan ulashish uchun: oddiy veb-havola brauzerni ochib,
         # odamni Telegramdan chiqarib yuboradi; deep link esa botning /start handler'ini

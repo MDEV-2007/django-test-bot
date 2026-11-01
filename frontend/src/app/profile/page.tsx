@@ -5,8 +5,9 @@ import Link from 'next/link';
 import {
   Gift, Copy, Check, Award, Crown, Swords, FileCheck2,
   Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout,
-  Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, Sparkles, type LucideIcon,
+  Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, Sparkles, CheckCircle2, type LucideIcon,
 } from 'lucide-react';
+import { getRankInfo } from '@/lib/rank';
 import { toast } from 'sonner';
 import { apiUpload, apiFetch, fetchMe } from '@/lib/api-client';
 import { useApiQuery, invalidateApi } from '@/lib/api-cache';
@@ -45,7 +46,9 @@ type ProfileData = {
     role?: 'superadmin' | 'teacher' | 'student';
     is_superadmin?: boolean;
     is_teacher?: boolean;
+    elo_rating?: number;
   };
+  solved_today?: number;
   referral_code: string; telegram_deep_link: string;
   referral_stats: { referral_count: number; coins_earned: number };
   recent_attempts: { id: number; test_title: string; score: number | null; started_at: string }[];
@@ -217,6 +220,7 @@ export default function ProfilePage() {
   }
 
   const p = data.profile;
+  const rankInfo = getRankInfo(p.elo_rating || 0);
   const xpProgress = p.next_level_xp > 0
     ? Math.min(100, Math.max(0, Math.round((p.xp / p.next_level_xp) * 100)))
     : 0;
@@ -340,6 +344,60 @@ export default function ProfilePage() {
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* iOS 18 Home Screen Glanceable Widgets Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
+            <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" solid />
+            <div className="min-w-0">
+              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+                Bugun yechildi
+              </span>
+              <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+                {data.solved_today || 0} <span className="text-xs font-normal text-muted-foreground">test</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
+            <PremiumIcon icon={Flame} tone="amber" size="md" solid />
+            <div className="min-w-0">
+              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+                Uzluksiz Streak
+              </span>
+              <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+                {p.streak || 0} <span className="text-xs font-normal text-muted-foreground">kun 🔥</span>
+              </p>
+            </div>
+          </div>
+
+          <Link href="/shop" className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3">
+            <PremiumIcon icon={Coins} tone="gold" size="md" solid />
+            <div className="min-w-0">
+              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+                Tanga balansi
+              </span>
+              <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+                {(p.coins || 0).toLocaleString()}
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/battles"
+            className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3 text-left cursor-pointer"
+          >
+            <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
+            <div className="min-w-0">
+              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+                {rankInfo.title}
+              </span>
+              <p className="text-base sm:text-lg font-extrabold font-mono text-primary leading-tight">
+                {p.elo_rating || 1200} <span className="text-[11px] font-normal text-muted-foreground">ELO</span>
+              </p>
+            </div>
+          </Link>
         </div>
 
         {/* Profilni tahrirlash modali */}
