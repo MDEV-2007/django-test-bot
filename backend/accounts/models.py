@@ -54,6 +54,29 @@ class Profile(models.Model):
     biography = models.TextField(blank=True)
     language = models.CharField(max_length=10, default='uz')
 
+    # Smart Hub Exam Track (Yo'nalish Izolyatsiyasi)
+    EXAM_TRACK_CHOICES = [
+        ('DTM_SERTIFIKAT', 'Milliy Sertifikat & DTM'),
+        ('IELTS_SAT', 'IELTS & SAT'),
+        ('TOPIK_KOREAN', 'Koreys tili (TOPIK)'),
+        ('ARABIC_CEFR', 'Arab tili (CEFR)'),
+    ]
+    exam_track = models.CharField(
+        max_length=40,
+        choices=EXAM_TRACK_CHOICES,
+        default='DTM_SERTIFIKAT',
+        db_index=True,
+        help_text="O'quvchining asosiy yo'nalishi (Izolyatsiyalangan lenta va katalog uchun)",
+    )
+    region = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text="Viloyat/shahar (masalan: Farg'ona, Toshkent)",
+    )
+    tree_stage = models.IntegerField(default=1, help_text="Ilm Ildizi Daraxti bosqichi (1-5)")
+    tree_health = models.IntegerField(default=100, help_text="Daraxt holati (3 kun kirmasa sarg'ayadi)")
+
     # Onboarding
     has_seen_onboarding = models.BooleanField(default=False, help_text="Loyiha haqida tanishtiruv splash-ekranlarini ko'rganmi")
 

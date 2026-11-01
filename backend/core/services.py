@@ -373,3 +373,190 @@ def calculate_class_battle_analytics(room: ClassBattleRoom):
         'hardest_questions': hardest_questions_data,
         'struggling_students': struggling[:5],
     }
+
+
+
+# ─── B2B HYPER-TARGET ADS & LEAD SERVICES ────────────────────────────────────
+
+def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float = 0.0, region: str = ""):
+    """O'quvchi testni tugatgan soniyada uning zaif nuqtalari (<50% ball) va hududiga
+    mos tushuvchi O'quv Markazining snayper taklifini (Native Ad) tanlab beradi.
+    """
+    from core.models import TargetedCampaign, EducationCenter
+
+    # Birinchi bo'lib mos tushuvchi aktiv kampaniyalarni qidiramiz
+    user_track = getattr(profile, 'exam_track', 'DTM_SERTIFIKAT')
+    user_region = region or getattr(profile, 'region', '')
+
+    qs = TargetedCampaign.objects.filter(
+        is_active=True,
+        center__is_active=True,
+        max_score_threshold__gte=int(score),
+    ).select_related('center')
+
+    # Yo'nalish bo'yicha filter
+    qs = qs.filter(Q(target_track=user_track) | Q(target_track='ALL'))
+
+    campaign = qs.first()
+
+    # Agar bazada hali o'quv markaz yaratilmagan bo'lsa, avtomatik standart homiy yaratamiz
+    if not campaign:
+        default_center, _ = EducationCenter.objects.get_or_create(
+            name="Registon O'quv Markazi",
+            defaults={
+                'city_or_region': "Toshkent",
+                'phone': "+998 78 113 27 00",
+                'is_verified': True,
+                'sponsorship_tier': 'VIP_SPONSOR',
+            }
+        )
+        campaign, _ = TargetedCampaign.objects.get_or_create(
+            center=default_center,
+            title=f"{subject or 'Imtihon'} fanidan 50% dan o'tolmayapsizmi?",
+            defaults={
+                'description': f"{default_center.name} intensiv kursiga yoziling — IlmIldizi o'quvchilari uchun 1-dars BEPUL va 20% maxsus chegirma!",
+                'cta_text': "📞 1-bosishda ro'yxatdan o'tish (1-dars BEPUL)",
+                'badge_text': "Hamkorlik Taklifi • -20% Chegirma",
+                'max_score_threshold': 60,
+                'target_track': user_track,
+            }
+        )
+
+    # Ko'rishlar sonini oshiramiz
+    campaign.impressions_count += 1
+    campaign.save(update_fields=['impressions_count'])
+
+    return {
+        'id': campaign.id,
+        'center_id': campaign.center.id,
+        'center_name': campaign.center.name,
+        'center_logo': campaign.center.logo_url,
+        'center_phone': campaign.center.phone,
+        'title': campaign.title,
+        'description': campaign.description,
+        'cta_text': campaign.cta_text,
+        'badge_text': campaign.badge_text,
+        'banner_url': campaign.banner_url,
+        'video_url': campaign.video_url,
+        'score_received': score,
+        'subject': subject,
+    }
+
+
+def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str = "", subject: str = "", score: float = 0.0, weak_topics: str = ""):
+    """O'quvchi bitta tugmani bosganda uning ismi, telefon raqami va test analitikasi
+    o'quv markazining CRM yoki Telegram botiga tayyor issiq lid bo'lib tushadi.
+    """
+    from core.models import TargetedCampaign, CenterLead
+
+    campaign = TargetedCampaign.objects.select_related('center').filter(id=campaign_id).first()
+    if not campaign:
+        raise ValueError("Reklama kampaniyasi topilmadi.")
+
+    lead_name = name or profile.user.get_full_name() or profile.user.username
+    lead_phone = phone or "+998 -- --- -- --"
+    lead_subject = subject or "Umumiy test"
+
+    lead = CenterLead.objects.create(
+        center=campaign.center,
+        campaign=campaign,
+        student_profile=profile,
+        student_name=lead_name,
+        student_phone=lead_phone,
+        subject_name=lead_subject,
+        score_percentage=score,
+        weak_topics=weak_topics,
+        region=getattr(profile, 'region', ''),
+        status='NEW',
+    )
+
+    campaign.leads_count += 1
+    campaign.save(update_fields=['leads_count'])
+
+    # O'quvchiga bonus tanga beramiz
+    profile.coins += 20
+    profile.save(update_fields=['coins'])
+
+    # Agar markazning Telegram chat ID si bo'lsa, darhol xabar boradi
+    if campaign.center.telegram_chat_id:
+        tg_text = (
+            f"🔥 <b>YANGI ISSIQ LID (IlmIldizi)!</b>\n\n"
+            f"🏢 <b>Markaz:</b> {campaign.center.name}\n"
+            f"👤 <b>O'quvchi:</b> {lead_name}\n"
+            f"📞 <b>Telefon:</b> {lead_phone}\n"
+            f"📚 <b>Fan:</b> {lead_subject} ({score}% natija)\n"
+            f"⚠️ <b>Zaif mavzulari:</b> {weak_topics or 'Aniqlanmagan'}\n"
+            f"🎯 <b>Taklif:</b> {campaign.title}\n"
+            f"⏰ <b>Vaqt:</b> {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+            f"<i>O'quvchi bilan zudlik bilan bog'lanib, 1-bepul darsga taklif qiling!</i>"
+        )
+        try:
+            send_message(int(campaign.center.telegram_chat_id), tg_text)
+        except Exception as e:
+            logger.warning("Failed to send lead alert to center telegram: %s", e)
+
+    return {
+        'success': True,
+        'message': f"Arizangiz '{campaign.center.name}' ma'muriyatiga muvaffaqiyatli yuborildi! Tez orada siz bilan bog'lanishadi. (+20 🪙 Tanga berildi)",
+        'lead_id': lead.id,
+    }
+
+
+def calculate_student_radar(profile: Profile):
+    """O'quvchining 6 burchakli Spider-Radar analitikasi (FIFA / PUBG uslubida):
+    1. Fan Bilimi (Subject Mastery)
+    2. Mantiq & Tahlil (Logic)
+    3. Tezlik (Speed)
+    4. Aniqlik (Accuracy)
+    5. Esse & Analiz (Writing)
+    6. Barqarorlik (Consistency / Streak)
+    """
+    from tests_app.models import Attempt
+
+    completed_attempts = Attempt.objects.filter(profile=profile, is_completed=True).order_by('-completed_at')[:20]
+
+    if not completed_attempts.exists():
+        # Yangi foydalanuvchi uchun boshlang'ich muvozanatli qiymatlar
+        return {
+            'subject_mastery': 55,
+            'logic': 50,
+            'speed': 60,
+            'accuracy': 52,
+            'writing': 45,
+            'consistency': min(100, max(20, profile.streak * 15)),
+            'overall_power': 52,
+        }
+
+    # 1. Fan Bilimi: o'rtacha ball
+    avg_score = completed_attempts.aggregate(avg=Avg('score'))['avg'] or 50.0
+    subject_mastery = round(min(100, max(20, avg_score)))
+
+    # 2. Aniqlik: to'g'ri javoblar foizi
+    total_correct = sum(getattr(a, 'correct_answers', 0) for a in completed_attempts)
+    total_questions = sum(getattr(a, 'total_questions', 1) for a in completed_attempts)
+    accuracy = round((total_correct / max(1, total_questions)) * 100)
+
+    # 3. Tezlik: o'rtacha ball va vaqt nisbati
+    speed = min(98, max(30, 60 + (profile.level * 2)))
+
+    # 4. Mantiq & Tahlil: ELO ratingga asoslangan
+    elo = getattr(profile, 'elo_rating', 1000)
+    logic = round(min(99, max(35, (elo / 1500) * 100)))
+
+    # 5. Esse & Analiz
+    writing = round(min(95, max(30, 45 + (profile.xp // 100))))
+
+    # 6. Barqarorlik
+    consistency = round(min(100, max(25, profile.streak * 8 + 35)))
+
+    overall = round((subject_mastery + logic + speed + accuracy + writing + consistency) / 6)
+
+    return {
+        'subject_mastery': subject_mastery,
+        'logic': logic,
+        'speed': speed,
+        'accuracy': accuracy,
+        'writing': writing,
+        'consistency': consistency,
+        'overall_power': overall,
+    }

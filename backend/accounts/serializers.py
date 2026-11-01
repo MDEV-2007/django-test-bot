@@ -26,6 +26,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'is_superadmin', 'is_teacher', 'avatar_url', 'xp', 'level', 'coins',
             'streak', 'last_active_date', 'is_premium', 'has_seen_onboarding', 'elo_rating', 'next_level_xp',
             'freeze_count', 'cosmetics', 'base_avatar_url',
+            'exam_track', 'region', 'tree_stage', 'tree_health',
         ]
 
     def get_freeze_count(self, obj):

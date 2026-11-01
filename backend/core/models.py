@@ -319,3 +319,105 @@ class ClassBattleParticipant(models.Model):
 
     def __str__(self):
         return f"{self.nickname} in {self.room.pin_code} ({self.score} pts)"
+
+
+
+# ============================================================
+# B2B HYPER-TARGET ADS & LEAD GEN (O'QUV MARKAZLAR)
+# ============================================================
+
+class EducationCenter(models.Model):
+    """Hamkor o'quv markazlari (Registon, Cambridge LC, Thompson va boshqalar)."""
+    name = models.CharField(max_length=200, help_text="O'quv markaz nomi")
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    logo_url = models.URLField(max_length=500, blank=True)
+    city_or_region = models.CharField(max_length=100, default="Toshkent", help_text="Asosiy faoliyat hududi")
+    phone = models.CharField(max_length=50, blank=True)
+    telegram_username = models.CharField(max_length=100, blank=True)
+    telegram_chat_id = models.CharField(max_length=100, blank=True, help_text="Lidlarni yuborish uchun markaz Telegram ID/guruhi")
+    crm_webhook_url = models.URLField(max_length=500, blank=True)
+    is_verified = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    sponsorship_tier = models.CharField(
+        max_length=30,
+        choices=[
+            ('STANDARD', 'Standart Target'),
+            ('VIP_SPONSOR', 'VIP Homiylik'),
+            ('TOURNAMENT_HEAD', 'Turnir Bosh Homiysi'),
+        ],
+        default='STANDARD',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "O'quv Markazi"
+        verbose_name_plural = "O'quv Markazlari"
+
+    def __str__(self):
+        return f"{self.name} ({self.city_or_region})"
+
+
+class TargetedCampaign(models.Model):
+    """O'quv markazning giper-maqsadli (Snayper) reklama kampaniyasi."""
+    center = models.ForeignKey(EducationCenter, on_delete=models.CASCADE, related_name='campaigns')
+    title = models.CharField(max_length=255, help_text="Diqqatni tortuvchi og'riq sarlavhasi")
+    description = models.TextField(help_text="Taklif matni va chegirma shartlari")
+    cta_text = models.CharField(max_length=100, default="📞 1-bosishda ro'yxatdan o'tish (1-dars BEPUL)")
+    badge_text = models.CharField(max_length=50, default="Homiylik Taklifi • -20% Chegirma")
+    target_track = models.CharField(
+        max_length=40,
+        choices=[
+            ('ALL', "Barcha yo'nalishlar"),
+            ('DTM_SERTIFIKAT', 'Milliy Sertifikat & DTM'),
+            ('IELTS_SAT', 'IELTS & SAT'),
+            ('TOPIK_KOREAN', 'Koreys tili (TOPIK)'),
+            ('ARABIC_CEFR', 'Arab tili (CEFR)'),
+        ],
+        default='ALL',
+    )
+    target_subjects = models.JSONField(default=list, blank=True, help_text="Masalan: ['Tarix', 'Ingliz tili'] yoki bo'sh")
+    target_regions = models.JSONField(default=list, blank=True, help_text="Masalan: ['Farg\'ona', 'Toshkent'] yoki bo'sh")
+    max_score_threshold = models.IntegerField(default=50, help_text="Natijasi shu foizdan past o'quvchilarga ko'rsatiladi")
+    min_score_threshold = models.IntegerField(default=0)
+    banner_url = models.URLField(max_length=500, blank=True)
+    video_url = models.URLField(max_length=500, blank=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    leads_count = models.IntegerField(default=0)
+    impressions_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Target Reklama Kampaniyasi"
+        verbose_name_plural = "Target Reklama Kampaniyalari"
+
+    def __str__(self):
+        return f"[{self.center.name}] {self.title} (<{self.max_score_threshold}%)"
+
+
+class CenterLead(models.Model):
+    """Target reklamadan olingan issiq lid (o'quvchi kontakt va xato analitikasi)."""
+    STATUS_CHOICES = [
+        ('NEW', 'Yangi Lid'),
+        ('CONTACTED', "Bog'lanildi"),
+        ('ENROLLED', 'Kursga Yozildi'),
+        ('CANCELLED', 'Bekor Qilindi'),
+    ]
+    center = models.ForeignKey(EducationCenter, on_delete=models.CASCADE, related_name='leads')
+    campaign = models.ForeignKey(TargetedCampaign, on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
+    student_profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='submitted_leads')
+    student_name = models.CharField(max_length=150)
+    student_phone = models.CharField(max_length=50)
+    subject_name = models.CharField(max_length=100)
+    score_percentage = models.FloatField(default=0.0)
+    weak_topics = models.TextField(blank=True, help_text="O'quvchining aynan shu testdagi zaif mavzulari")
+    region = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NEW', db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "O'quv Markaz Lidi"
+        verbose_name_plural = "O'quv Markaz Lidlari"
+
+    def __str__(self):
+        return f"{self.student_name} ({self.subject_name} {self.score_percentage}%) -> {self.center.name}"

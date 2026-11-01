@@ -15,6 +15,7 @@ import { useAuthStore, type Profile } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import { cn } from '@/lib/utils';
 import KnowledgeTree from '@/components/student/KnowledgeTree';
+import StudentSpiderRadar from '@/components/student/StudentSpiderRadar';
 import { AudioToggle, ThemeToggle } from '@/components/SettingsToggles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -687,6 +688,11 @@ export default function ProfilePage() {
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* 6 burchakli Radar-Analitika (Spider Chart) */}
+          <div className="mt-6 pt-6 border-t border-black/[0.06] dark:border-white/[0.08]">
+            <StudentSpiderRadar />
           </div>
         </div>
 

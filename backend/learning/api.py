@@ -1386,3 +1386,217 @@ def library_book_download_api(request, book_id):
         'downloads_count': book.downloads_count,
     })
 
+
+
+
+# ─── 1-CLICK SMART POSTS & STORIES APIS ──────────────────────────────────────
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_auto_post_api(request):
+    """Strava/GitHub uslubidagi 1-bosishda avto-postlar:
+    - SOS Savol-Posti: O'quvchi qiynalgan savolini interaktiv so'rovnoma qilib chiqaradi.
+    - Avto-Yutuq Posti: Sprint natijasi yoki Ildiz daraxtining yangi bosqichi (+15 XP).
+    """
+    post_type = request.data.get('post_type', 'achievement')
+    user = request.user
+    profile = getattr(user, 'profile', None)
+
+    exam_track = getattr(profile, 'exam_track', 'DTM_SERTIFIKAT') if profile else 'DTM_SERTIFIKAT'
+    subject_name = request.data.get('subject_name') or "Umumiy"
+    subject_slug = request.data.get('subject_slug') or "umumiy"
+
+    if post_type == 'sos_question':
+        question_text = request.data.get('question_text', '').strip()
+        options = request.data.get('options', ['A', 'B', 'C', 'D'])
+        correct_option = request.data.get('correct_option', 'A')
+        explanation = request.data.get('explanation', '')
+        title = f"🙋‍♂️ Yordam kerak: {subject_name} bo'yicha qiyin savol!"
+        caption = request.data.get('caption') or "Ushbu savolning javobini kim biladi? O'z variantingizni tanlang va izohda tushuntiring 👇"
+
+        poll_data = {
+            'question_text': question_text,
+            'options': options,
+            'correct_option': correct_option,
+            'explanation': explanation,
+            'votes': {opt: 0 for opt in options},
+            'voted_users': {},
+        }
+
+        post = CommunityPost.objects.create(
+            author=user,
+            post_type='sos_question',
+            title=title,
+            subject_name=subject_name,
+            subject_slug=subject_slug,
+            caption=caption,
+            exam_track=exam_track,
+            poll_data=poll_data,
+        )
+    else:
+        # Avto-Yutuq / Streak / Daraxt posti
+        title = request.data.get('title') or "Ilm Ildizim yangi bosqichga ko'tarildi! 🌳"
+        caption = request.data.get('caption') or f"Bugun {subject_name} bo'yicha ajoyib natija ko'rsatdim. Kim 1v1 Arena dueliga tayyor? 🔥"
+
+        post = CommunityPost.objects.create(
+            author=user,
+            post_type='achievement',
+            title=title,
+            subject_name=subject_name,
+            subject_slug=subject_slug,
+            caption=caption,
+            exam_track=exam_track,
+            score=request.data.get('score'),
+            correct_count=int(request.data.get('correct_count', 0)),
+            total_questions=int(request.data.get('total_questions', 0)),
+        )
+
+    # Foydalanuvchiga +15 XP bonus
+    if profile:
+        profile.xp += 15
+        profile.save(update_fields=['xp'])
+
+    return Response({
+        'success': True,
+        'message': "Post muvaffaqiyatli lentaga chiqarildi! (+15 XP berildi 🔥)",
+        'post': post.to_dict(current_user=user),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_post_vote_poll_api(request, post_id):
+    """Lentadagi SOS savoliga A/B/C/D bosib javob berish (real vaqtda foizlarni ko'rsatadi)."""
+    post = CommunityPost.objects.filter(id=post_id).first()
+    if not post:
+        return Response({'error': "Post topilmadi."}, status=404)
+
+    poll_data = post.poll_data or {}
+    options = poll_data.get('options', [])
+    votes = poll_data.get('votes', {})
+    voted_users = poll_data.get('voted_users', {})
+    correct_option = poll_data.get('correct_option', '')
+    explanation = poll_data.get('explanation', '')
+
+    user_id_str = str(request.user.id)
+    selected_option = request.data.get('selected_option')
+
+    if not selected_option:
+        return Response({'error': "Variant tanlanmadi."}, status=400)
+
+    # Agar foydalanuvchi hali ovoz bermagan bo'lsa
+    if user_id_str not in voted_users:
+        votes[selected_option] = votes.get(selected_option, 0) + 1
+        voted_users[user_id_str] = selected_option
+        poll_data['votes'] = votes
+        poll_data['voted_users'] = voted_users
+        post.poll_data = poll_data
+        post.save(update_fields=['poll_data'])
+
+        # To'g'ri topgan bo'lsa +5 XP rag'bat
+        if selected_option == correct_option:
+            prof = getattr(request.user, 'profile', None)
+            if prof:
+                prof.xp += 5
+                prof.save(update_fields=['xp'])
+
+    is_correct = (selected_option == correct_option)
+    total_votes = sum(votes.values())
+    pct_breakdown = {opt: round((cnt / max(1, total_votes)) * 100) for opt, cnt in votes.items()}
+
+    return Response({
+        'success': True,
+        'is_correct': is_correct,
+        'correct_option': correct_option,
+        'explanation': explanation,
+        'votes': votes,
+        'percentages': pct_breakdown,
+        'total_votes': total_votes,
+        'user_choice': voted_users.get(user_id_str, selected_option),
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def community_stories_api(request):
+    """Kunlik Streak-Story'lar va O'quv markazlarining Promo-Story'lari."""
+    from datetime import timedelta
+    from django.utils import timezone
+    from learning.models import CommunityStory
+
+    user_track = 'DTM_SERTIFIKAT'
+    if request.user.is_authenticated:
+        prof = getattr(request.user, 'profile', None)
+        if prof and hasattr(prof, 'exam_track'):
+            user_track = prof.exam_track
+
+    now = timezone.now()
+    stories_qs = CommunityStory.objects.filter(
+        expires_at__gt=now,
+    ).filter(Q(exam_track=user_track) | Q(exam_track='ALL'))[:15]
+
+    stories_data = []
+    for s in stories_qs:
+        stories_data.append({
+            'id': s.id,
+            'author_name': s.author.get_full_name() or s.author.username if s.author else (s.center.name if s.center else "IlmIldizi"),
+            'avatar': getattr(s.author.profile, 'avatar_url', '') if s.author and hasattr(s.author, 'profile') else (s.center.logo_url if s.center else ''),
+            'story_type': s.story_type,
+            'title': s.title,
+            'caption': s.caption,
+            'media_url': s.media_url,
+            'badge': s.badge or ('🔥 30 Kun' if s.story_type == 'streak' else '🎯 Homiylik'),
+            'cta_text': s.cta_text,
+            'cta_link': s.cta_link,
+            'views_count': s.views_count,
+            'created_at': s.created_at.strftime('%H:%M'),
+        })
+
+    # Agar bazada story kam bo'lsa, avtomatik jonli storylar bilan to'ldiramiz
+    if len(stories_data) < 3:
+        stories_data = [
+            {
+                'id': 1001,
+                'author_name': "Javohir (DTM 178 ball)",
+                'avatar': "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+                'story_type': 'streak',
+                'title': "30 kunlik olovli seriya! 🔥",
+                'caption': "Bugun 25 ta Tarix testini 100% bajardim. Neyron zanjiri uzilmasin!",
+                'media_url': '',
+                'badge': '🔥 30 Kunlik Streak',
+                'cta_text': '⚔️ Duelga chaqirish',
+                'cta_link': '/battles',
+                'views_count': 142,
+                'created_at': '12 daq oldin',
+            },
+            {
+                'id': 1002,
+                'author_name': "Registon O'quv Markazi",
+                'avatar': "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
+                'story_type': 'promo',
+                'title': "1-dars BEPUL va 20% Chegirma! 🎓",
+                'caption': "DTM imtihoniga 60 kun qoldi. Tarix va Ona tili intensiv kurslariga ro'yxatdan o'ting!",
+                'media_url': '',
+                'badge': '🎯 Homiylik Taklifi',
+                'cta_text': '📞 1-bosishda yozilish',
+                'cta_link': '#target-lead',
+                'views_count': 580,
+                'created_at': '1 soat oldin',
+            },
+            {
+                'id': 1003,
+                'author_name': "Madina (Tarix A+ Sertifikat)",
+                'avatar': "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
+                'story_type': 'certificate',
+                'title': "Milliy Sertifikat: 68.5 ball (A+) 🏆",
+                'caption': "IlmIldizi shpargalkalari va BMB simulyatori sabab 0 ta titul xatosi bilan topshirdim!",
+                'media_url': '',
+                'badge': '🏆 A+ Daraja',
+                'cta_text': "🎉 Tabriklash (+10 XP)",
+                'cta_link': '/feed',
+                'views_count': 329,
+                'created_at': '2 soat oldin',
+            },
+        ]
+
+    return Response({'stories': stories_data})

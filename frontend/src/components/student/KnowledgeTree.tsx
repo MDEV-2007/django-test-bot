@@ -33,6 +33,7 @@ export default function KnowledgeTree({
   const trunkTopY = 160 - trunkGrowth;
 
   // Streak asosida barglar jozibadorligi (0-20 kun)
+  const isWilted = streak === 0;
   const vitality = Math.min(1, Math.max(0.2, streak / 14));
   const foliageScale = 0.85 + Math.min(0.35, (streak / 20) * 0.35); // streak qancha ko'p bo'lsa, toj shunchalik qalin
   const leafCount = Math.min(16, Math.max(6, streak + 4));
@@ -90,25 +91,25 @@ export default function KnowledgeTree({
             <stop offset="100%" stopColor="#10B981" />
           </linearGradient>
 
-          {/* Asosiy barglar toji uchun chuqur smaragd gradient */}
+          {/* Asosiy barglar toji uchun chuqur smaragd yoki sarg'aygan gradient */}
           <radialGradient id="foliageDark" cx="40%" cy="35%" r="65%">
-            <stop offset="0%" stopColor="#10B981" />
-            <stop offset="60%" stopColor="#059669" />
-            <stop offset="100%" stopColor="#047857" />
+            <stop offset="0%" stopColor={isWilted ? "#D97706" : "#10B981"} />
+            <stop offset="60%" stopColor={isWilted ? "#B45309" : "#059669"} />
+            <stop offset="100%" stopColor={isWilted ? "#78350F" : "#047857"} />
           </radialGradient>
 
           {/* O'rta qatlam barglar toji */}
           <radialGradient id="foliageMid" cx="45%" cy="30%" r="65%">
-            <stop offset="0%" stopColor="#34D399" />
-            <stop offset="50%" stopColor="#10B981" />
-            <stop offset="100%" stopColor="#059669" />
+            <stop offset="0%" stopColor={isWilted ? "#FBBF24" : "#34D399"} />
+            <stop offset="50%" stopColor={isWilted ? "#F59E0B" : "#10B981"} />
+            <stop offset="100%" stopColor={isWilted ? "#D97706" : "#059669"} />
           </radialGradient>
 
           {/* Yuqori yorqin quyoshli barglar */}
           <radialGradient id="foliageLight" cx="40%" cy="30%" r="60%">
-            <stop offset="0%" stopColor="#6EE7B7" />
-            <stop offset="60%" stopColor="#34D399" />
-            <stop offset="100%" stopColor="#10B981" />
+            <stop offset="0%" stopColor={isWilted ? "#FDE68A" : "#6EE7B7"} />
+            <stop offset="60%" stopColor={isWilted ? "#FCD34D" : "#34D399"} />
+            <stop offset="100%" stopColor={isWilted ? "#F59E0B" : "#10B981"} />
           </radialGradient>
 
           {/* Oltin meva radial 3D gradienti */}

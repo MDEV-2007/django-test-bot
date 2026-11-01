@@ -18,14 +18,16 @@ urlpatterns = [
     path('reels/<int:reel_id>/comments/', api.reels_comments_api, name='reels_comments'),
     path('feed/', api.community_feed_api, name='community_feed'),
     path('feed/create/', api.community_post_create_api, name='community_post_create'),
+    path('feed/auto-post/', api.community_auto_post_api, name='community_auto_post'),
     path('feed/<int:post_id>/react/', api.community_post_react_api, name='community_post_react'),
     path('feed/<int:post_id>/comments/', api.community_post_comments_api, name='community_post_comments'),
     path('feed/<int:post_id>/delete/', api.community_post_delete_api, name='community_post_delete'),
     path('feed/<int:post_id>/pin/', api.community_post_pin_api, name='community_post_pin'),
+    path('feed/<int:post_id>/vote-poll/', api.community_post_vote_poll_api, name='community_post_vote_poll'),
+    path('stories/', api.community_stories_api, name='community_stories'),
     # Kutubxona (Library)
     path('library/', api.library_books_api, name='library_books'),
     path('library/<int:book_id>/', api.library_book_detail_api, name='library_book_detail'),
     path('library/<int:book_id>/bookmark/', api.library_book_bookmark_api, name='library_book_bookmark'),
     path('library/<int:book_id>/download/', api.library_book_download_api, name='library_book_download'),
 ]
-

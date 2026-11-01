@@ -292,6 +292,8 @@ class CommunityPost(models.Model):
         ('test_result', 'Test Natijasi'),
         ('certificate', 'Milliy Sertifikat'),
         ('achievement', 'Yutuq'),
+        ('sos_question', 'SOS Savol'),
+        ('edu_clip', 'Bilim Klipi'),
     )
 
     author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='community_posts')
@@ -311,6 +313,12 @@ class CommunityPost(models.Model):
     caption = models.TextField(blank=True, max_length=1000)
     image_url = models.CharField(max_length=500, blank=True)
     custom_image = models.ImageField(upload_to='community_posts/', blank=True, null=True)
+
+    exam_track = models.CharField(max_length=40, default='DTM_SERTIFIKAT', db_index=True)
+    poll_data = models.JSONField(default=dict, blank=True, help_text="SOS savol so'rovnoma ma'lumotlari")
+    video_url = models.URLField(max_length=500, blank=True, default='')
+    video_duration = models.IntegerField(default=30)
+    linked_quiz_question_ids = models.JSONField(default=list, blank=True)
 
     likes_count = models.PositiveIntegerField(default=0)
     comments_count = models.PositiveIntegerField(default=0)
@@ -392,6 +400,11 @@ class CommunityPost(models.Model):
             'can_delete': can_delete,
             'reaction_counts': reaction_counts,
             'user_reaction': user_reaction,
+            'exam_track': getattr(self, 'exam_track', 'DTM_SERTIFIKAT'),
+            'poll_data': getattr(self, 'poll_data', {}),
+            'video_url': getattr(self, 'video_url', ''),
+            'video_duration': getattr(self, 'video_duration', 30),
+            'linked_quiz_question_ids': getattr(self, 'linked_quiz_question_ids', []),
             'created_at': self.created_at.strftime('%d.%m.%Y %H:%M') if self.created_at else '',
         }
 
@@ -582,3 +595,33 @@ class BookBookmark(models.Model):
         verbose_name_plural = "Saqlangan kitoblar"
 
 
+
+
+class CommunityStory(models.Model):
+    """Do'stlarning kunlik Streak-Story'lari va O'quv markazlarining Promo-Story'lari."""
+    STORY_TYPES = (
+        ('streak', 'Kunlik Streak Story'),
+        ('certificate', 'Sertifikat Story'),
+        ('promo', "O'quv Markaz Promo Story"),
+    )
+    author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='community_stories', null=True, blank=True)
+    center = models.ForeignKey('core.EducationCenter', on_delete=models.CASCADE, null=True, blank=True, related_name='promo_stories')
+    story_type = models.CharField(max_length=20, choices=STORY_TYPES, default='streak')
+    exam_track = models.CharField(max_length=40, default='DTM_SERTIFIKAT', db_index=True)
+    title = models.CharField(max_length=255)
+    caption = models.TextField(blank=True)
+    media_url = models.CharField(max_length=500, blank=True)
+    badge = models.CharField(max_length=50, blank=True, default='')
+    cta_text = models.CharField(max_length=100, blank=True, default='')
+    cta_link = models.CharField(max_length=300, blank=True, default='')
+    views_count = models.PositiveIntegerField(default=0)
+    expires_at = models.DateTimeField(db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Hamjamiyat Story"
+        verbose_name_plural = "Hamjamiyat Story'lari"
+
+    def __str__(self):
+        return f"{self.title} ({self.story_type})"

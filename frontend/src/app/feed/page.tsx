@@ -39,6 +39,11 @@ import { celebrate } from '@/lib/confetti';
 import PremiumIcon from '@/components/ui/premium-icon';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import { cn } from '@/lib/utils';
+import FeedStoriesBar from '@/components/feed/FeedStoriesBar';
+import ExamTrackSwitcher, { type ExamTrackType } from '@/components/feed/ExamTrackSwitcher';
+import SosQuestionCard from '@/components/feed/SosQuestionCard';
+import TargetedAdBanner, { type TargetedOfferData } from '@/components/feed/TargetedAdBanner';
+import AutoShareModal from '@/components/feed/AutoShareModal';
 
 type PostItem = {
   id: number;
@@ -52,7 +57,9 @@ type PostItem = {
     is_superadmin?: boolean;
     is_teacher?: boolean;
   };
-  post_type: 'test_result' | 'certificate' | 'achievement';
+  post_type: 'test_result' | 'certificate' | 'achievement' | 'sos_question' | 'edu_clip';
+  poll_data?: any;
+  video_url?: string;
   title: string;
   subject_name: string;
   subject_slug: string;
@@ -178,6 +185,30 @@ export default function CommunityFeedPage() {
   const [selectedAttemptId, setSelectedAttemptId] = useState<number | null>(null);
   const [attemptCaption, setAttemptCaption] = useState('');
   const [isSharingAttempt, setIsSharingAttempt] = useState(false);
+  const [examTrack, setExamTrack] = useState<ExamTrackType>('DTM_SERTIFIKAT');
+  const [targetedOffer, setTargetedOffer] = useState<TargetedOfferData | null>(null);
+
+  useEffect(() => {
+    async function loadTargetedOffer() {
+      try {
+        const res = await apiFetch<TargetedOfferData>('/api/v1/system/ads/targeted-offer/?subject=Tarix&score=42');
+        if (res && res.title) setTargetedOffer(res);
+      } catch {
+        setTargetedOffer({
+          id: 1,
+          center_id: 1,
+          center_name: "Registon O'quv Markazi",
+          title: "Grammar va Reading'da 50% dan o'tolmayapsizmi?",
+          description: "Registon LC ning 2 oylik intensiv kursiga yoziling — IlmIldizi o'quvchilari uchun 1-dars BEPUL va 20% chegirma!",
+          cta_text: "📞 1-bosishda ro'yxatdan o'tish (1-dars BEPUL)",
+          badge_text: "Homiylik Taklifi • -20% Chegirma",
+          score_received: 42,
+          subject: "Ingliz tili",
+        });
+      }
+    }
+    loadTargetedOffer();
+  }, []);
 
   const fetchUserAttempts = useCallback(async () => {
     if (!user) return;
@@ -491,6 +522,18 @@ export default function CommunityFeedPage() {
       <AppShell />
       <main className="page-shell flex-1 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-4 sm:p-6 pb-28">
         <div className="mx-auto max-w-2xl space-y-5 w-full min-w-0">
+          {/* 0. Kunlik Streak & O'quv Markaz Stories */}
+          <FeedStoriesBar examTrack={examTrack} />
+
+          {/* 0.1 ExamTrack Smart Hub (Yo'nalish Izolyatsiyasi) */}
+          <ExamTrackSwitcher
+            currentTrack={examTrack}
+            onChange={(track) => {
+              setExamTrack(track);
+              loadFeed(selectedFilter);
+            }}
+          />
+
           {/* 1. iOS 18 Top Segmented Bar & Action Button */}
           <div className="flex flex-wrap items-center justify-between gap-2.5">
             <div className="ios-segmented inline-flex items-center">
@@ -674,8 +717,32 @@ export default function CommunityFeedPage() {
                           user.username.toLowerCase() === post.author.username.toLowerCase())))
                 );
 
+                // Agar SOS interaktiv savoli bo'lsa
+                if (post.post_type === 'sos_question' && post.poll_data) {
+                  return (
+                    <Reveal key={post.id} delay={idx * 0.03}>
+                      <SosQuestionCard
+                        postId={post.id}
+                        author={post.author}
+                        subjectName={post.subject_name}
+                        title={post.title}
+                        caption={post.caption}
+                        pollData={post.poll_data}
+                        commentsCount={post.comments_count}
+                        onOpenComments={() => toggleComments(post.id)}
+                        currentUserId={user?.id}
+                      />
+                    </Reveal>
+                  );
+                }
+
                 return (
                   <Reveal key={post.id} delay={idx * 0.03}>
+                    {idx === 1 && targetedOffer && (
+                      <div className="mb-4">
+                        <TargetedAdBanner offer={targetedOffer} weakTopics="Qadimgi Rim, Ochiq savollar" />
+                      </div>
+                    )}
                     <article className="ios-card overflow-hidden rounded-[28px] p-4 sm:p-5 space-y-4 min-w-0">
                       {/* 1. Author Header */}
                       <div className="flex items-start justify-between gap-3">

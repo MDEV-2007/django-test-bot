@@ -296,3 +296,64 @@ def class_battle_analytics_api(request, room_id):
     room = get_object_or_404(ClassBattleRoom, id=room_id)
     analytics = calculate_class_battle_analytics(room)
     return Response(analytics)
+
+
+
+# ─── B2B HYPER-TARGET ADS & LEAD GEN APIS ───────────────────────────────────
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def targeted_offer_api(request):
+    """Test natijasi va zaifliklarga qarab O'quv Markaz taklifini olish."""
+    from core.services import get_hyper_targeted_offer
+
+    profile = ensure_profile_for_user(request.user) if request.user.is_authenticated else None
+    subject = request.GET.get('subject', '')
+    score = float(request.GET.get('score', 0))
+    region = request.GET.get('region', '')
+
+    offer = get_hyper_targeted_offer(profile, subject=subject, score=score, region=region)
+    return Response(offer)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def lead_submit_api(request):
+    """1-bosishda O'quv Markaziga lid va zaif mavzular tahlilini yuborish."""
+    from core.services import submit_center_lead
+
+    profile = ensure_profile_for_user(request.user)
+    campaign_id = request.data.get('campaign_id')
+    phone = (request.data.get('phone') or '').strip()
+    name = (request.data.get('name') or '').strip()
+    subject = (request.data.get('subject') or '').strip()
+    score = float(request.data.get('score', 0))
+    weak_topics = (request.data.get('weak_topics') or '').strip()
+
+    if not campaign_id:
+        return Response({'error': "campaign_id kiritilishi shart."}, status=400)
+
+    try:
+        res = submit_center_lead(
+            profile=profile,
+            campaign_id=campaign_id,
+            phone=phone,
+            name=name,
+            subject=subject,
+            score=score,
+            weak_topics=weak_topics,
+        )
+        return Response(res)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def student_radar_api(request):
+    """O'quvchining 6 burchakli Spider-Radar analitikasi."""
+    from core.services import calculate_student_radar
+
+    profile = ensure_profile_for_user(request.user)
+    data = calculate_student_radar(profile)
+    return Response(data)

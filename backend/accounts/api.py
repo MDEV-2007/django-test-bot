@@ -316,6 +316,18 @@ def profile_api(request):
         if updated_user_fields:
             user.save(update_fields=updated_user_fields)
 
+        updated_profile_fields = []
+        if 'exam_track' in request.data:
+            track = request.data.get('exam_track')
+            if track in ('DTM_SERTIFIKAT', 'IELTS_SAT', 'TOPIK_KOREAN', 'ARABIC_CEFR'):
+                profile.exam_track = track
+                updated_profile_fields.append('exam_track')
+        if 'region' in request.data:
+            profile.region = str(request.data.get('region', '')).strip()
+            updated_profile_fields.append('region')
+        if updated_profile_fields:
+            profile.save(update_fields=updated_profile_fields)
+
         remove_avatar = request.data.get('remove_avatar')
         if remove_avatar in (True, 'true', '1'):
             if profile.avatar_url and profile.avatar_url.startswith('/media/avatars/'):

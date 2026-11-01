@@ -5,14 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard,
-  FileCheck2,
-  Swords,
-  GraduationCap,
-  User,
-  BookOpen,
-  Film,
+  Flame,
   Zap,
+  Landmark,
+  BookOpen,
+  User,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -34,6 +31,7 @@ type TabItem = {
   activeLabelText: string;
   badge?: string;
   featureKey?: string;
+  isCentral?: boolean;
 };
 
 interface MobileTabBarProps {
@@ -53,29 +51,29 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 
-  const isTeacherOrAdmin = Boolean(
-    user?.is_teacher ||
-      user?.is_superadmin ||
-      user?.role === 'teacher' ||
-      user?.role === 'superadmin'
-  );
-
+  // Ideal 5-Tugmali Super-App Bottom Navigation:
+  // 1. Lenta (/feed)
+  // 2. Mashq (/sprint)
+  // 3. Imtihon (/tests) - Markaziy Katta Tugma
+  // 4. Bazalar (/library)
+  // 5. Profil (/profile)
   const tabs: TabItem[] = [
     {
-      href: '/dashboard',
-      label: 'Asosiy',
-      icon: LayoutDashboard,
-      api: '/api/dashboard/home/',
-      activeBg: 'bg-gradient-to-b from-[#2E96FF] to-[#007AFF]',
-      activeShadow: 'shadow-[0_4px_12px_rgba(0,122,255,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-      inactiveIconText: 'text-[#007AFF]',
-      activeLabelText: 'text-[#007AFF] dark:text-[#409CFF]',
+      href: '/feed',
+      label: 'Lenta',
+      icon: Flame,
+      matchPrefixes: ['/feed', '/reels'],
+      api: '/api/learning/feed/',
+      activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
+      activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+      inactiveIconText: 'text-[#FF2D55]',
+      activeLabelText: 'text-[#D70015] dark:text-[#FF375F]',
     },
     {
       href: '/sprint',
-      label: 'Tezkor Test',
+      label: 'Mashq',
       icon: Zap,
-      matchPrefixes: ['/sprint'],
+      matchPrefixes: ['/sprint', '/battles', '/games'],
       featureKey: 'sprint',
       activeBg: 'bg-gradient-to-b from-[#FF9500] to-[#FF3B30]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,149,0,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
@@ -85,67 +83,30 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/tests',
-      label: 'Testlar',
-      icon: FileCheck2,
-      matchPrefixes: ['/tests'],
+      label: 'Imtihon',
+      icon: Landmark,
+      matchPrefixes: ['/tests', '/dtm-test', '/milliy-sertifikat'],
       api: '/api/tests/',
       featureKey: 'tests',
+      isCentral: true,
+      activeBg: 'bg-gradient-to-b from-[#7D7AFF] to-[#5856D6]',
+      activeShadow: 'shadow-[0_6px_22px_rgba(88,86,214,0.65),inset_0_1px_0_rgba(255,255,255,0.45)]',
+      inactiveIconText: 'text-[#7D7AFF]',
+      activeLabelText: 'text-[#5856D6] dark:text-[#9D9BFF]',
+      badge: 'BMB',
+    },
+    {
+      href: '/library',
+      label: 'Bazalar',
+      icon: BookOpen,
+      matchPrefixes: ['/library'],
+      api: '/api/learning/library/',
+      featureKey: 'library',
       activeBg: 'bg-gradient-to-b from-[#4CD964] to-[#34C759]',
       activeShadow: 'shadow-[0_4px_12px_rgba(52,199,89,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
       inactiveIconText: 'text-[#34C759]',
       activeLabelText: 'text-[#248A3D] dark:text-[#30D158]',
     },
-    {
-      href: '/reels',
-      label: 'Reels',
-      icon: Film,
-      matchPrefixes: ['/reels'],
-      api: '/api/learning/reels/',
-      featureKey: 'reels',
-      activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
-      activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-      inactiveIconText: 'text-[#FF2D55]',
-      activeLabelText: 'text-[#D70015] dark:text-[#FF375F]',
-    },
-    {
-      href: '/battles',
-      label: 'Arena',
-      icon: Swords,
-      matchPrefixes: ['/battles', '/games'],
-      featureKey: 'battles',
-      activeBg: 'bg-gradient-to-b from-[#FFB340] to-[#FF9500]',
-      activeShadow: 'shadow-[0_4px_12px_rgba(255,149,0,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-      inactiveIconText: 'text-[#FF9500]',
-      activeLabelText: 'text-[#C93400] dark:text-[#FF9F0A]',
-      badge: 'LIVE',
-    },
-    ...(isTeacherOrAdmin
-      ? [
-          {
-            href: '/teacher',
-            label: 'Sinfxona',
-            icon: GraduationCap,
-            matchPrefixes: ['/teacher'],
-            activeBg: 'bg-gradient-to-b from-[#7D7AFF] to-[#5856D6]',
-            activeShadow: 'shadow-[0_4px_12px_rgba(88,86,214,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-            inactiveIconText: 'text-[#5856D6]',
-            activeLabelText: 'text-[#5856D6] dark:text-[#7D7AFF]',
-          },
-        ]
-      : [
-          {
-            href: '/library',
-            label: 'Kutubxona',
-            icon: BookOpen,
-            matchPrefixes: ['/library'],
-            api: '/api/learning/library/',
-            featureKey: 'library',
-            activeBg: 'bg-gradient-to-b from-[#7D7AFF] to-[#5856D6]',
-            activeShadow: 'shadow-[0_4px_12px_rgba(88,86,214,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-            inactiveIconText: 'text-[#5856D6]',
-            activeLabelText: 'text-[#5856D6] dark:text-[#7D7AFF]',
-          },
-        ]),
   ];
 
   const visibleTabs = tabs.filter((t) => !t.featureKey || isEnabled(t.featureKey));
@@ -169,6 +130,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
         {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const active = isActive(tab.href, tab.matchPrefixes);
+          const isCentral = Boolean(tab.isCentral);
 
           return (
             <Link
@@ -176,14 +138,17 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
               href={tab.href}
               onClick={() => tgHaptic('select')}
               onTouchStart={() => tab.api && prefetchApi(tab.api)}
-              className="group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-[20px] py-1.5 px-0.5 transition-transform active:scale-92"
+              className={cn(
+                'group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-[20px] py-1 px-0.5 transition-transform active:scale-92',
+                isCentral && '-mt-2'
+              )}
             >
               {active && (
                 <motion.span
                   layoutId="ios-mobile-tab-pill"
                   transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   className={cn(
-                    ' inset-0 absolute rounded-[20px]',
+                    'inset-0 absolute rounded-[20px]',
                     isDark
                       ? 'bg-white/[0.10] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]'
                       : 'bg-[#007AFF]/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'
@@ -191,11 +156,12 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                 />
               )}
 
-              {/* iOS 18 Squircle Icon Container */}
+              {/* Icon Container */}
               <div className="relative z-10 flex items-center justify-center">
                 <div
                   className={cn(
-                    'flex size-7.5 items-center justify-center rounded-[10px] transition-all duration-200',
+                    'flex items-center justify-center rounded-[12px] transition-all duration-200',
+                    isCentral ? 'size-9 shadow-md' : 'size-7.5 rounded-[10px]',
                     active
                       ? cn(tab.activeBg, tab.activeShadow, '!text-white scale-105')
                       : cn(
@@ -207,7 +173,8 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                 >
                   <Icon
                     className={cn(
-                      'size-4 transition-transform duration-200',
+                      'transition-transform duration-200',
+                      isCentral ? 'size-5' : 'size-4',
                       active ? 'stroke-[2.4] !text-white' : 'stroke-[2.1]'
                     )}
                   />
@@ -236,11 +203,11 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
           );
         })}
 
-        {/* Apple ID / Profile Tab */}
+        {/* 5-Tugma: Profil & Eco-Daraxt */}
         <Link
           href="/profile"
           onClick={() => tgHaptic('select')}
-          className="group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-[20px] py-1.5 px-0.5 transition-transform active:scale-92"
+          className="group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-[20px] py-1 px-0.5 transition-transform active:scale-92"
         >
           {isProfileActive && (
             <motion.span
@@ -261,28 +228,30 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                 'flex size-7.5 items-center justify-center rounded-[10px] p-[1.5px] transition-all duration-200',
                 isProfileActive
                   ? 'bg-gradient-to-b from-[#2E96FF] to-[#007AFF] shadow-[0_4px_12px_rgba(0,122,255,0.42)] scale-105'
-                  : isDark
-                  ? 'bg-white/[0.10]'
-                  : 'bg-black/[0.06]'
+                  : cn(isDark ? 'bg-white/[0.06]' : 'bg-black/[0.04]', 'group-hover:scale-105')
               )}
             >
-              <Avatar className="size-full rounded-[8.5px]">
-                <AvatarImage src={user?.avatar_url || ''} className="rounded-[8.5px] object-cover" />
-                <AvatarFallback className="rounded-[8.5px] bg-gradient-to-b from-[#2E96FF] to-[#007AFF] text-[9px] font-extrabold !text-white">
-                  {user?.username ? (
-                    user.username.slice(0, 2).toUpperCase()
-                  ) : (
-                    <User className="size-3.5 !text-white" />
+              <Avatar className="size-full rounded-[8px]">
+                <AvatarImage src={user?.avatar_url || ''} alt={user?.username || 'User'} />
+                <AvatarFallback
+                  className={cn(
+                    'rounded-[8px] text-[10px] font-bold',
+                    isProfileActive
+                      ? 'bg-white text-[#007AFF]'
+                      : isDark
+                      ? 'bg-white/10 text-white'
+                      : 'bg-black/5 text-[#1C1C1E]'
                   )}
+                >
+                  {user?.username ? user.username.slice(0, 2).toUpperCase() : <User className="size-3.5" />}
                 </AvatarFallback>
               </Avatar>
             </div>
 
-            {user?.is_premium && (
-              <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-[#FF9500] text-[7px] font-black text-white shadow-2xs">
-                ★
-              </span>
-            )}
+            {/* Eco-tree status sprout badge */}
+            <span className="absolute -right-1 -top-1 rounded-full bg-emerald-500 px-0.5 py-[1px] text-[8px] leading-none text-white shadow-2xs">
+              🌳
+            </span>
           </div>
 
           <span
@@ -295,7 +264,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                 : 'font-semibold text-[#8E8E93] group-hover:text-[#1C1C1E]'
             )}
           >
-            Profilim
+            Profil
           </span>
         </Link>
       </nav>

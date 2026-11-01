@@ -22,6 +22,8 @@ import {
   Film,
   ChevronRight,
   Zap,
+  Flame,
+  Landmark,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { tgHaptic } from '@/lib/telegram';
@@ -63,30 +65,29 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Asosiy',
+    label: 'Asosiy Super-App',
     items: [
-      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
-      { href: '/sprint', label: 'Tezkor Test', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
-      { href: '/tests', label: 'Sinov Testlari', icon: FileCheck2, badge: 'BMB', tone: 'emerald', featureKey: 'tests', matchPrefixes: ['/tests'], api: '/api/tests/' },
-      { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'], teacherOrAdminOnly: true },
-      { href: '/library', label: 'Kutubxona', icon: BookOpen, badge: null, tone: 'indigo', featureKey: 'library', matchPrefixes: ['/library'], api: '/api/learning/library/' },
-      { href: '/mentor', label: 'AI Mentor', icon: Bot, badge: 'AI', highlight: true, tone: 'purple', featureKey: 'ai_mentor' },
+      { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },
+      { href: '/sprint', label: 'Mashq & Fokus', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
+      { href: '/tests', label: 'Imtihon Zali', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests'] },
+      { href: '/library', label: 'Bazalar & Kitoblar', icon: BookOpen, badge: null, tone: 'emerald', featureKey: 'library', matchPrefixes: ['/library'] },
+      { href: '/profile', label: 'Profil & Eco-Daraxt', icon: User, badge: '🌳', tone: 'sky', matchPrefixes: ['/profile'] },
     ],
   },
   {
-    label: 'Bellashuv & Amaliyot',
+    label: 'Arena & Qo\'shimcha',
     items: [
-      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: '60s', glow: true, tone: 'rose', matchPrefixes: ['/reels'], api: '/api/learning/reels/' },
+      { href: '/mentor', label: 'AI Mentor (24/7)', icon: Bot, badge: 'AI', highlight: true, tone: 'purple', featureKey: 'ai_mentor' },
       { href: '/battles', label: '1v1 Arena (Jang)', icon: Swords, badge: 'LIVE', glow: true, tone: 'amber', featureKey: 'battles', matchPrefixes: ['/games'] },
-      { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/feed', '/leaderboard'] },
-      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'cyan', featureKey: 'flashcards', api: '/api/learning/flashcards/' },
+      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: '60s', glow: true, tone: 'rose', matchPrefixes: ['/reels'] },
+      { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/leaderboard'] },
     ],
   },
   {
-    label: 'Kabinet',
+    label: 'Boshqaruv & Ustoz',
     items: [
-      { href: '/profile', label: 'Profilim', icon: User, badge: null, tone: 'sky', matchPrefixes: ['/profile'] },
-      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, tone: 'emerald', api: '/api/analytics/' },
+      { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'], teacherOrAdminOnly: true },
+      { href: '/panel/features', label: 'Super Admin Paneli', icon: ShieldCheck, badge: 'Flags', tone: 'gold', teacherOrAdminOnly: true },
       { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'PRO', tone: 'gold', vip: true },
     ],
   },

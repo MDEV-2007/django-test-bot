@@ -21,4 +21,9 @@ urlpatterns = [
     path('class-battles/<int:room_id>/start/', views.class_battle_start_api, name='class_battle_start'),
     path('class-battles/<int:room_id>/submit/', views.class_battle_submit_api, name='class_battle_submit'),
     path('class-battles/<int:room_id>/analytics/', views.class_battle_analytics_api, name='class_battle_analytics'),
+
+    # B2B Hyper-Target Ads & Lead Gen
+    path('ads/targeted-offer/', views.targeted_offer_api, name='targeted_offer'),
+    path('ads/lead-submit/', views.lead_submit_api, name='lead_submit'),
+    path('profile/radar/', views.student_radar_api, name='student_radar'),
 ]
