@@ -916,8 +916,15 @@ def community_feed_api(request):
     """Platforma o'quvchilarining test natijalari va sertifikatlar lentasi."""
     post_type = request.GET.get('type', 'all')
     subject_slug = request.GET.get('subject', 'all')
+    mine = request.GET.get('mine')
+    author_id = request.GET.get('author_id')
 
     qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt').prefetch_related('reactions')
+
+    if mine and request.user.is_authenticated:
+        qs = qs.filter(author=request.user)
+    elif author_id:
+        qs = qs.filter(author_id=author_id)
 
     if post_type and post_type != 'all':
         qs = qs.filter(post_type=post_type)
