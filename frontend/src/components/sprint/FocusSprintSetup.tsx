@@ -20,7 +20,9 @@ import {
   TrendingUp,
   Flame,
   Target,
+  HelpCircle,
 } from 'lucide-react';
+import SprintGuideModal from '@/components/sprint/SprintGuideModal';
 import type { SprintSubject } from '@/types/sprint';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
@@ -147,6 +149,19 @@ export default function FocusSprintSetup({
   loading = false,
 }: FocusSprintSetupProps) {
   const router = useRouter();
+  const [guideModalOpen, setGuideModalOpen] = React.useState(false);
+
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem('ilm_sprint_guide_seen_v1');
+      if (!seen) {
+        const timer = setTimeout(() => {
+          setGuideModalOpen(true);
+        }, 350);
+        return () => clearTimeout(timer);
+      }
+    } catch {}
+  }, []);
 
   // "Barcha fanlar (Aralash)" hero obyekti
   const heroSubject = useMemo(() => {
@@ -247,8 +262,8 @@ export default function FocusSprintSetup({
             1. HEADER & COMPACT HERO (3 ta Feature Badge bilan)
            ───────────────────────────────────────────────────────────── */}
         <div className="space-y-3 sm:space-y-4">
-          {/* Yuqori qator: Orqaga qaytish & Flow State Badge */}
-          <div className="flex items-center justify-between">
+          {/* Yuqori qator: Orqaga qaytish & Qo'llanma & Flow State Badge */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <button
               type="button"
               onClick={() => router.push('/dashboard')}
@@ -258,9 +273,23 @@ export default function FocusSprintSetup({
               <span>Dashboardga qaytish</span>
             </button>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shadow-xs">
-              <Zap className="size-3.5 fill-primary text-primary" />
-              <span className="tracking-wide uppercase">15 Daqiqalik Flow State</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  soundFX.click();
+                  setGuideModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-accent hover:bg-accent/80 text-foreground border border-border shadow-2xs transition-colors cursor-pointer"
+              >
+                <HelpCircle className="size-3.5 text-primary" />
+                <span>Qo&apos;llanma</span>
+              </button>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                <Zap className="size-3.5 fill-primary text-primary" />
+                <span className="tracking-wide uppercase">15 Daqiqalik Flow State</span>
+              </div>
             </div>
           </div>
 
@@ -507,6 +536,11 @@ export default function FocusSprintSetup({
           </div>
         </div>
       </div>
+
+      <SprintGuideModal
+        open={guideModalOpen}
+        onOpenChange={setGuideModalOpen}
+      />
     </div>
   );
 }
