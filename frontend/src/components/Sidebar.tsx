@@ -24,6 +24,7 @@ import {
   Zap,
   Flame,
   Landmark,
+  Brain,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { tgHaptic } from '@/lib/telegram';
@@ -68,6 +69,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa (Dashboard)', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
+      { href: '/learning', label: '60s Anti-Darslik', icon: Brain, badge: '60s', glow: true, tone: 'amber', featureKey: 'learning', matchPrefixes: ['/learning'] },
       { href: '/sprint', label: 'Mashq & Fokus', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
       { href: '/tests', label: 'Imtihon Zali', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests'] },
       { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },

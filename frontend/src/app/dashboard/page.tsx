@@ -27,6 +27,7 @@ import Celebration from '@/components/student/Celebration';
 import DailyChestModal, { DailyChestStatus } from '@/components/student/DailyChestModal';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
 import { useTheme } from '@/hooks/useTheme';
+import { useFeatureFlags } from '@/lib/features';
 import {
   DailyGoalCard,
   LiveActivityTicker,
@@ -159,6 +160,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { access, authReady } = useAuthStore();
   const { isDark } = useTheme();
+  const { isEnabled } = useFeatureFlags();
 
   const { data, error, refresh: refreshDashboard } = useApiQuery<DashboardData>('/api/dashboard/home/');
   const { data: lbData } = useApiQuery<LeaderboardData>(access ? '/api/leaderboard/' : null);
@@ -455,65 +457,73 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                  <Link
-                    href="/learning"
-                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between border-amber-500/20 hover:border-amber-500/40"
-                  >
-                    <PremiumIcon icon={Zap} tone="amber" size="md" solid className="mb-3 group-hover:scale-105" />
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-amber-500 transition-colors">
-                        60s Anti-Darslik
-                      </h4>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        BMB Qopqonlari &amp; Oltin Faktlar
-                      </p>
-                    </div>
-                  </Link>
+                  {isEnabled('learning') && (
+                    <Link
+                      href="/learning"
+                      className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between border-amber-500/20 hover:border-amber-500/40"
+                    >
+                      <PremiumIcon icon={Zap} tone="amber" size="md" solid className="mb-3 group-hover:scale-105" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-amber-500 transition-colors">
+                          60s Anti-Darslik
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                          BMB Qopqonlari &amp; Oltin Faktlar
+                        </p>
+                      </div>
+                    </Link>
+                  )}
 
-                  <Link
-                    href="/study"
-                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
-                  >
-                    <PremiumIcon icon={Clock} tone="sky" size="md" solid className="mb-3 group-hover:scale-105" />
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-                        Fokus Xonasi
-                      </h4>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        Pomodoro &amp; Ambient tovushlar
-                      </p>
-                    </div>
-                  </Link>
+                  {isEnabled('study') && (
+                    <Link
+                      href="/study"
+                      className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
+                    >
+                      <PremiumIcon icon={Clock} tone="sky" size="md" solid className="mb-3 group-hover:scale-105" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                          Fokus Xonasi
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                          Pomodoro &amp; Ambient tovushlar
+                        </p>
+                      </div>
+                    </Link>
+                  )}
 
-                  <Link
-                    href="/flashcards"
-                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
-                  >
-                    <PremiumIcon icon={Layers} tone="purple" size="md" solid className="mb-3 group-hover:scale-105" />
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-[#AF52DE] transition-colors">
-                        Flashcards
-                      </h4>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        Interval takrorlash &amp; lug&apos;at
-                      </p>
-                    </div>
-                  </Link>
+                  {isEnabled('flashcards') && (
+                    <Link
+                      href="/flashcards"
+                      className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
+                    >
+                      <PremiumIcon icon={Layers} tone="purple" size="md" solid className="mb-3 group-hover:scale-105" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-[#AF52DE] transition-colors">
+                          Flashcards
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                          Interval takrorlash &amp; lug&apos;at
+                        </p>
+                      </div>
+                    </Link>
+                  )}
 
-                  <Link
-                    href="/reels"
-                    className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
-                  >
-                    <PremiumIcon icon={Play} tone="rose" size="md" solid className="mb-3 group-hover:scale-105" />
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-[#FF2D55] transition-colors">
-                        Bilim Reels
-                      </h4>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        15-sekundlik tezkor savollar
-                      </p>
-                    </div>
-                  </Link>
+                  {isEnabled('reels') && (
+                    <Link
+                      href="/reels"
+                      className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between"
+                    >
+                      <PremiumIcon icon={Play} tone="rose" size="md" solid className="mb-3 group-hover:scale-105" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-[#FF2D55] transition-colors">
+                          Bilim Reels
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                          15-sekundlik tezkor savollar
+                        </p>
+                      </div>
+                    </Link>
+                  )}
                 </div>
               </div>
         </div>

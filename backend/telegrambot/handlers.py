@@ -181,24 +181,43 @@ def handle_start(chat_id, tg_user, referral_code=None):
             return
 
     base_url = url.rstrip('/')
+
+    is_learning_active = True
+    try:
+        from panel.models import FeatureFlag
+        flags = FeatureFlag.get_all_cached()
+        l_flag = flags.get('learning', {})
+        if l_flag:
+            is_learning_active = l_flag.get('is_enabled', True) and not l_flag.get('admin_only', False)
+    except Exception:
+        pass
+
     if url.startswith('https://'):
         open_app_button = {'text': "🚀 3 daqiqalik ekspress test", 'web_app': {'url': f"{base_url}/tests"}}
+        learning_button = {'text': "⚡ 60s Anti-Darslik & Shpargalkalar", 'web_app': {'url': f"{base_url}/learning"}}
         battle_button = {'text': "⚔️ 1v1 Battle Arena (Jang)", 'web_app': {'url': f"{base_url}/battles"}}
         home_button = {'text': "🎓 Bosh sahifa", 'web_app': {'url': base_url}}
     else:
         open_app_button = {'text': "🚀 3 daqiqalik ekspress test", 'url': f"{base_url}/tests"}
+        learning_button = {'text': "⚡ 60s Anti-Darslik & Shpargalkalar", 'url': f"{base_url}/learning"}
         battle_button = {'text': "⚔️ 1v1 Battle Arena (Jang)", 'url': f"{base_url}/battles"}
         home_button = {'text': "🎓 Bosh sahifa", 'url': base_url}
 
-    keyboard = {'inline_keyboard': [
+    inline_rows = [
         [open_app_button],
+    ]
+    if is_learning_active:
+        inline_rows.append([learning_button])
+    inline_rows.extend([
         [battle_button],
         [
             home_button,
             {'text': "🎁 Do'stni taklif qilish", 'callback_data': 'referral_info'}
         ],
         [{'text': "💎 VIP & Premium", 'callback_data': 'premium_menu'}],
-    ]}
+    ])
+
+    keyboard = {'inline_keyboard': inline_rows}
 
     if is_pdf_gift:
         welcome_text = (
@@ -465,5 +484,15 @@ def process_update(update):
                      f"ADMIN_TELEGRAM_CHAT_ID={chat_id} deb yozing.")
     elif text.startswith('/referral') or text.startswith('/invite'):
         handle_referral_info(chat_id, tg_user)
+    elif text.startswith('/learning') or text.startswith('/darslar') or text.startswith('/shpargalka'):
+        url = _webapp_url().rstrip('/')
+        l_btn = {'text': "⚡ 60s Anti-Darslikni ochish", 'web_app': {'url': f"{url}/learning"}} if url.startswith('https://') else {'text': "⚡ 60s Anti-Darslikni ochish", 'url': f"{url}/learning"}
+        send_message(
+            chat_id,
+            "⚡ <b>60-Soniyalik Anti-Darslik & Shpargalkalar</b>\n\n"
+            "Har bir mavzu bo'yicha 10 ta oltin fakt, 3 ta BMB qopqoni va xronologiya.\n\n"
+            "Mavzularni o'rganish uchun pastdagi tugmani bosing 👇",
+            reply_markup={'inline_keyboard': [[l_btn]]}
+        )
     elif text:
         send_message(chat_id, "Buyruqlar uchun /start ni bosing.")

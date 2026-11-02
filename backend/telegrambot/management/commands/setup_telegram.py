@@ -91,6 +91,7 @@ class Command(BaseCommand):
 
         api_call('setMyCommands', commands=json.dumps([
             {'command': 'start', 'description': 'Ilovani ochish'},
+            {'command': 'learning', 'description': '60s Anti-Darslik va Shpargalkalar'},
             {'command': 'referral', 'description': "Do'stlarni taklif qilish"},
             {'command': 'myid', 'description': 'Telegram ID raqamim'},
         ]))
