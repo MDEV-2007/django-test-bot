@@ -68,13 +68,13 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Asosiy',
     items: [
-      { href: '/dashboard', label: 'Bosh sahifa (Dashboard)', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
+      { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
       { href: '/learning', label: '60s Anti-Darslik', icon: Brain, badge: '60s', glow: true, tone: 'amber', featureKey: 'learning', matchPrefixes: ['/learning'] },
       { href: '/sprint', label: 'Mashq & 1v1 Arena', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint', '/battles'] },
       { href: '/tests', label: 'Imtihon Zali', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests'] },
       { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },
       { href: '/library', label: 'Bazalar & Kitoblar', icon: BookOpen, badge: null, tone: 'emerald', featureKey: 'library', matchPrefixes: ['/library'] },
-      { href: '/profile', label: 'Profil & Eco-Daraxt', icon: User, badge: '🌳', tone: 'sky', matchPrefixes: ['/profile'] },
+      { href: '/profile', label: 'Profil', icon: User, badge: '', tone: 'sky', matchPrefixes: ['/profile'] },
     ],
   },
   {

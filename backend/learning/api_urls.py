@@ -18,6 +18,7 @@ urlpatterns = [
     path('reels/<int:reel_id>/comments/', api.reels_comments_api, name='reels_comments'),
     path('feed/', api.community_feed_api, name='community_feed'),
     path('feed/create/', api.community_post_create_api, name='community_post_create'),
+    path('feed/create-auto/', api.community_auto_post_api, name='community_create_auto'),
     path('feed/auto-post/', api.community_auto_post_api, name='community_auto_post'),
     path('feed/<int:post_id>/react/', api.community_post_react_api, name='community_post_react'),
     path('feed/<int:post_id>/comments/', api.community_post_comments_api, name='community_post_comments'),

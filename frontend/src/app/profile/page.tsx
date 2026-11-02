@@ -157,7 +157,7 @@ export default function ProfilePage() {
   const { data, refresh } = useApiQuery<ProfileData>('/api/auth/profile/');
   const { data: invData, refresh: refreshInventory } = useApiQuery<InventoryResponse>('/api/shop/inventory/');
   const { data: postsData, refresh: refreshPosts } = useApiQuery<{ posts: UserPostItem[]; total: number }>(
-    '/api/v1/learning/feed/?mine=1'
+    '/api/learning/feed/?mine=1'
   );
   const { data: analyticsData } = useApiQuery<AnalyticsDashboard>('/api/analytics/');
 
@@ -218,7 +218,7 @@ export default function ProfilePage() {
     setDeletingPostId(postId);
     tgHaptic('medium');
     try {
-      await apiFetch<{ success: boolean; message: string }>(`/api/v1/learning/feed/${postId}/delete/`, {
+      await apiFetch<{ success: boolean; message: string }>(`/api/learning/feed/${postId}/delete/`, {
         method: 'POST',
       });
       
