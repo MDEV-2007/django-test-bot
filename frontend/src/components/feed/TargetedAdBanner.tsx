@@ -99,36 +99,52 @@ export default function TargetedAdBanner({
         {/* Glow corner */}
         <div className="absolute -top-16 -right-16 size-40 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="space-y-2.5 min-w-0 flex-1 w-full">
-            {/* Header Badges */}
+        <div className="relative z-10 space-y-3.5">
+          {/* Header Badges */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] sm:text-xs font-bold uppercase tracking-wider shrink-0 px-2.5 py-1 rounded-xl">
                 <Sparkles className="size-3 mr-1 inline" />
                 {offer.badge_text || "Homiylik Taklifi"}
               </Badge>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.08] border border-white/[0.1] text-xs font-semibold text-zinc-200 shrink-0 whitespace-nowrap">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.08] border border-white/[0.1] text-xs font-semibold text-zinc-200 shrink-0">
                 <Building2 className="size-3.5 text-amber-400 shrink-0" />
                 <span>{offer.center_name}</span>
               </div>
             </div>
+            <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline-flex items-center gap-1">
+              <ShieldCheck className="size-3.5 text-amber-400" />
+              Tasdiqlangan Hamkor
+            </span>
+          </div>
 
-            <h3 className="text-base sm:text-lg md:text-xl font-black text-white leading-snug break-words">
+          {/* Title & Description — Full Width to prevent awkward wrapping */}
+          <div className="space-y-1.5">
+            <h3 className="text-base sm:text-lg md:text-xl font-black text-white leading-snug">
               {offer.title}
             </h3>
-
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed break-words">
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
               {offer.description}
             </p>
           </div>
 
-          <div className="w-full md:w-auto shrink-0 pt-2 md:pt-0">
+          {/* Bottom Action Row: Highlights + Prominent CTA button */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/[0.08]">
+            <div className="flex items-center gap-2 text-[11px] text-amber-300/90 font-medium">
+              <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
+                🎁 1-dars BEPUL
+              </span>
+              <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
+                🏷️ 20% Chegirma
+              </span>
+            </div>
+
             <Button
               onClick={handleOpenModal}
-              className="w-full md:w-auto min-h-[44px] bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold px-5 py-2.5 rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm text-center whitespace-normal sm:whitespace-nowrap cursor-pointer"
+              className="w-full sm:w-auto min-h-[44px] bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold px-6 py-2.5 rounded-2xl shadow-lg shadow-amber-500/20 transition-transform active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer shrink-0"
             >
               <PhoneCall className="size-4 shrink-0" />
-              <span>{(offer.cta_text || "1-bosishda yozilish").replace(/^[📞\s]+/, '').trim()}</span>
+              <span>{(offer.cta_text || "1-bosishda ro'yxatdan o'tish (1-dars BEPUL)").replace(/^[📞\s]+/, '').trim()}</span>
               <ChevronRight className="size-4 shrink-0" />
             </Button>
           </div>
