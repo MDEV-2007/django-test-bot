@@ -152,6 +152,10 @@ class SystemFeatureFlags(models.Model):
         default=False,
         help_text="B2B2C O'qituvchi 'Sinf Janglari' (PIN-kodli Live Quiz)",
     )
+    enable_b2b_ads = models.BooleanField(
+        default=True,
+        help_text="Geo-Targeted O'quv Markaz B2B Reklama va Lidlar",
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

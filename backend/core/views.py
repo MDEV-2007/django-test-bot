@@ -21,13 +21,28 @@ from tests_app.models import Question
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def system_feature_flags_api(request):
-    """Barcha foydalanuvchilar (Frontend) uchun tizimdagi global flaglar."""
+    """Barcha foydalanuvchilar (Frontend) uchun tizimdagi global flaglar (Single Source of Truth)."""
     flags = SystemFeatureFlags.load()
+    
+    # Panel FeatureFlag bilan to'liq sinxronlashtiramiz
+    panel_flags = {}
+    try:
+        from panel.models import FeatureFlag
+        panel_flags = FeatureFlag.get_all_cached()
+    except Exception:
+        pass
+
+    def _resolve(key, fallback):
+        if key in panel_flags:
+            return bool(panel_flags[key].get('is_enabled', fallback))
+        return fallback
+
     return Response({
-        'enable_stress_simulator': flags.enable_stress_simulator,
-        'enable_cheat_sheet_maps': flags.enable_cheat_sheet_maps,
-        'enable_parent_radar': flags.enable_parent_radar,
-        'enable_teacher_class_battles': flags.enable_teacher_class_battles,
+        'enable_stress_simulator': _resolve('stress_simulator', flags.enable_stress_simulator),
+        'enable_cheat_sheet_maps': _resolve('cheat_sheet_maps', flags.enable_cheat_sheet_maps),
+        'enable_parent_radar': _resolve('parent_radar', flags.enable_parent_radar),
+        'enable_teacher_class_battles': _resolve('teacher_class_battles', flags.enable_teacher_class_battles),
+        'enable_b2b_ads': _resolve('b2b_ads', getattr(flags, 'enable_b2b_ads', True)),
         'updated_at': flags.updated_at.isoformat() if flags.updated_at else None,
     })
 

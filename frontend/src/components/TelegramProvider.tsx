@@ -66,6 +66,37 @@ export default function TelegramProvider() {
         try { wa.disableVerticalSwipes?.(); } catch { /* noop */ }
       }
 
+      // ── TELEGRAM WEBAPP AVTO-AUTENTIFIKATSIYA ──
+      // MiniApp ichida ochilganda foydalanuvchini login sahifasida to'xtatmasdan,
+      // initData orqali avtomatik tizimga kiritish va yo'naltirish
+      try {
+        const { useAuthStore } = require('@/lib/auth-store');
+        const state = useAuthStore.getState();
+        if (!state.access && wa.initData) {
+          fetch('/api/auth/telegram/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData: wa.initData }),
+          })
+            .then((r) => r.json())
+            .then((res) => {
+              if (res?.access && res?.user) {
+                state.setAccess(res.access);
+                state.setUser(res.user);
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('ilm_access', res.access);
+                  if (res.refresh) localStorage.setItem('ilm_refresh', res.refresh);
+                }
+                const cur = window.location.pathname;
+                if (cur === '/login' || cur === '/' || cur === '/register') {
+                  router.push(res.user.has_seen_onboarding ? '/dashboard' : '/onboarding');
+                }
+              }
+            })
+            .catch(() => {});
+        }
+      } catch {}
+
       markTelegramReady();
       setActive(true);
     });

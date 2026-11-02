@@ -232,6 +232,73 @@ function LearningPageInner() {
           </div>
         )}
 
+        {/* ── FANGA MOS MAXSUS QUROLLAR (SUBJECT SPECIFIC WORKSPACE) ── */}
+        {subject === 'tarix' && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Link
+              href="/games/timeline"
+              className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.08] hover:bg-emerald-500/15 transition-all flex items-center justify-between"
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase text-emerald-400">Interaktiv O&apos;yin</span>
+                <h4 className="text-sm font-bold text-foreground">Vaqt o&apos;qi (Timeline)</h4>
+                <p className="text-[11px] text-muted-foreground">Tarixiy yillarni xronologik joylang</p>
+              </div>
+              <ArrowRight className="size-4 text-emerald-400" />
+            </Link>
+
+            <Link
+              href="/games/map"
+              className="p-4 rounded-2xl border border-blue-500/30 bg-blue-500/[0.08] hover:bg-blue-500/15 transition-all flex items-center justify-between"
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase text-blue-400">Vizual Xarita</span>
+                <h4 className="text-sm font-bold text-foreground">Tarixiy Xarita O&apos;yini</h4>
+                <p className="text-[11px] text-muted-foreground">Qadimgi davlatlar va jang joylari</p>
+              </div>
+              <ArrowRight className="size-4 text-blue-400" />
+            </Link>
+
+            <Link
+              href="/games/character"
+              className="p-4 rounded-2xl border border-purple-500/30 bg-purple-500/[0.08] hover:bg-purple-500/15 transition-all flex items-center justify-between"
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase text-purple-400">Biografiya</span>
+                <h4 className="text-sm font-bold text-foreground">Tarixiy Shaxslar</h4>
+                <p className="text-[11px] text-muted-foreground">Hukmdorlar va sarkardalar sinovi</p>
+              </div>
+              <ArrowRight className="size-4 text-purple-400" />
+            </Link>
+          </div>
+        )}
+
+        {subject === 'ona-tili' && (
+          <div className="p-4 rounded-2xl border border-rose-500/30 bg-gradient-to-r from-rose-500/10 via-card to-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase text-rose-400">BMB & Milliy Sertifikat Standarti</span>
+              <h4 className="text-sm font-bold text-foreground">45-topshiriq Esse & 36-44 Ochiq Javoblar</h4>
+              <p className="text-xs text-muted-foreground">AI Esse tekshiruvchisi matningizni 75 ballik rasmiy mezonlarda tahlil qiladi</p>
+            </div>
+            <Button asChild size="sm" className="bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl">
+              <Link href="/milliy-sertifikat">Esseni Baholash <ArrowRight className="size-3.5 ml-1" /></Link>
+            </Button>
+          </div>
+        )}
+
+        {(subject === 'ingliz-tili' || subject === 'rus-tili') && (
+          <div className="p-4 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-500/10 via-card to-emerald-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase text-blue-400">CEFR B1 / B2 / C1 Standarti</span>
+              <h4 className="text-sm font-bold text-foreground">Listening, Reading & Writing Bo&apos;limi</h4>
+              <p className="text-xs text-muted-foreground">Haqiqiy audio ma&apos;ruzalar va passage matnlari bo&apos;yicha tayyorgarlik</p>
+            </div>
+            <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl">
+              <Link href="/milliy-sertifikat">CEFR Sinovini Boshlash <ArrowRight className="size-3.5 ml-1" /></Link>
+            </Button>
+          </div>
+        )}
+
         {data && !data.has_lessons_access && (
           <Card className="border-[var(--tone-premium)]/25 bg-[var(--tone-premium-soft)] transition-colors hover:border-[var(--tone-premium)]/45">
             <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">

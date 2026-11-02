@@ -22,7 +22,7 @@ from accounts.models import Profile
 from tests_app.models import SubjectScore
 
 RANKING_TTL = 60 * 7  # 7 minutes
-TOP_N = 15
+TOP_N = 50
 
 
 def _key(view):

@@ -104,7 +104,7 @@ _UNREACHABLE = (
 
 # (connect, read): a blocked proxy or dead host is rejected in seconds instead of
 # burning the whole read-timeout window meant for slow-but-working responses.
-CONNECT_TIMEOUT = 5
+CONNECT_TIMEOUT = 3
 
 
 def _log_ai_usage(provider, model_name, endpoint, prompt_tokens, completion_tokens, total_tokens, cost, response_time_ms, success, error_message=''):
@@ -258,7 +258,7 @@ def _ask_ollama(messages, temperature, response_format, timeout, on_error=None):
         return None
 
 
-def ask_groq(messages, temperature=0.6, response_format=None, timeout=20, on_error=None):
+def ask_groq(messages, temperature=0.6, response_format=None, timeout=8, on_error=None):
     """Public entry point (nomi tarixiy — endi provider zanjiri).
 
     Avval Groq, u ishlamasa lokal Ollama. Ikkalasi ham bo'lmasa None —
@@ -275,7 +275,7 @@ def ask_groq(messages, temperature=0.6, response_format=None, timeout=20, on_err
     return content
 
 
-def ask_groq_stream(messages, temperature=0.6, timeout=20):
+def ask_groq_stream(messages, temperature=0.6, timeout=8):
     """Streaming variant for the AI Mentor chat — yields text deltas as Groq produces
     them, instead of waiting for the whole reply (the AI Mentor feels noticeably
     slower without this, since a 3-6 sentence answer can take several seconds).

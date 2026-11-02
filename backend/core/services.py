@@ -388,96 +388,139 @@ def calculate_class_battle_analytics(room: ClassBattleRoom):
 # ─── B2B HYPER-TARGET ADS & LEAD SERVICES ────────────────────────────────────
 
 def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float = 0.0, region: str = ""):
-    """O'quvchi testni tugatgan soniyada uning zaif nuqtalari (<50% ball) va hududiga
-    mos tushuvchi O'quv Markazining snayper taklifini (Native Ad) tanlab beradi.
+    """Geo + Weak-Topic Snayper Matching:
+    Admin Panelda yaratilgan EduCenterCampaign modellaridan o'quvchining hududi (region)
+    va zaif o'zlashtirgan fani (<65%) bo'yicha yagona manbadan (Single Source of Truth)
+    reklama taklifini tanlab beradi.
     """
-    from core.models import TargetedCampaign, EducationCenter
+    from b2b_ads.models import EduCenterCampaign
+    from django.db.models import Q
 
-    # Birinchi bo'lib mos tushuvchi aktiv kampaniyalarni qidiramiz
-    user_track = getattr(profile, 'exam_track', 'DTM_SERTIFIKAT')
-    user_region = region or getattr(profile, 'region', '')
+    user_region = region or (getattr(profile, 'region', '') if profile else '')
 
-    qs = TargetedCampaign.objects.filter(
-        is_active=True,
-        center__is_active=True,
-        max_score_threshold__gte=int(score),
-    ).select_related('center')
+    # 1. Aktiv kampaniyalarni filtrlaymiz
+    qs = EduCenterCampaign.objects.filter(is_active=True)
 
-    # Yo'nalish bo'yicha filter
-    qs = qs.filter(Q(target_track=user_track) | Q(target_track='ALL'))
+    # Hudud bo'yicha filtr (masalan: Farg'ona, Toshkent yoki Barcha hududlar)
+    if user_region:
+        qs_geo = qs.filter(Q(target_region__iexact=user_region) | Q(target_region__iexact='ALL') | Q(target_region__iexact='Onlayn'))
+        if qs_geo.exists():
+            qs = qs_geo
+
+    # Fan bo'yicha filtr
+    if subject:
+        qs_sub = qs.filter(Q(target_subject__icontains=subject) | Q(target_subject__iexact='ALL'))
+        if qs_sub.exists():
+            qs = qs_sub
+
+    # Ball chegarasi bo'yicha filtr (Agar o'quvchi <65% olgan bo'lsa)
+    if score > 0:
+        qs_score = qs.filter(max_score_threshold__gte=int(score))
+        if qs_score.exists():
+            qs = qs_score
 
     campaign = qs.first()
 
-    # Agar bazada hali o'quv markaz yaratilmagan bo'lsa, avtomatik standart homiy yaratamiz
+    # Agar hali birorta kampaniya kiritilmagan bo'lsa, rasmiy standart Registon LC seed kampaniyasini olamiz
     if not campaign:
-        default_center, _ = EducationCenter.objects.get_or_create(
-            name="Registon O'quv Markazi",
+        campaign, _ = EduCenterCampaign.objects.get_or_create(
+            center_name="Registon O'quv Markazi",
             defaults={
-                'city_or_region': "Toshkent",
-                'phone': "+998 78 113 27 00",
-                'is_verified': True,
-                'sponsorship_tier': 'VIP_SPONSOR',
-            }
-        )
-        campaign, _ = TargetedCampaign.objects.get_or_create(
-            center=default_center,
-            title=f"{subject or 'Imtihon'} fanidan 50% dan o'tolmayapsizmi?",
-            defaults={
-                'description': f"{default_center.name} intensiv kursiga yoziling — IlmIldizi o'quvchilari uchun 1-dars BEPUL va 20% maxsus chegirma!",
-                'cta_text': "📞 1-bosishda ro'yxatdan o'tish (1-dars BEPUL)",
-                'badge_text': "Hamkorlik Taklifi • -20% Chegirma",
-                'max_score_threshold': 60,
-                'target_track': user_track,
+                'title': f"{subject or 'Tarix va Ona tili'} intensiv DTM kursi",
+                'description': "Registon LC da 2 oylik intensiv tayyorgarlik kursi orqali qiyin mavzularda 90%+ natijaga erishing!",
+                'offer_badge': "1-dars BEPUL + 20% chegirma",
+                'target_subject': subject or "Tarix",
+                'target_region': user_region or "Toshkent",
+                'max_score_threshold': 65,
+                'rating': 4.9,
+                'logo': "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
+                'is_active': True,
             }
         )
 
     # Ko'rishlar sonini oshiramiz
-    campaign.impressions_count += 1
-    campaign.save(update_fields=['impressions_count'])
+    EduCenterCampaign.objects.filter(id=campaign.id).update(impressions_count=campaign.impressions_count + 1)
 
     return {
         'id': campaign.id,
-        'center_id': campaign.center.id,
-        'center_name': campaign.center.name,
-        'center_logo': campaign.center.logo_url,
-        'center_phone': campaign.center.phone,
+        'center_id': campaign.id,
+        'center_name': campaign.center_name,
+        'center_logo': campaign.logo or "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
+        'center_phone': "+998 78 113 27 00",
         'title': campaign.title,
         'description': campaign.description,
-        'cta_text': campaign.cta_text,
-        'badge_text': campaign.badge_text,
-        'banner_url': campaign.banner_url,
-        'video_url': campaign.video_url,
+        'cta_text': "📞 1-bosishda ro'yxatdan o'tish (1-dars BEPUL)",
+        'offer_badge': campaign.offer_badge,
+        'badge_text': campaign.offer_badge,
+        'banner_url': campaign.logo,
+        'video_url': campaign.story_video_url,
+        'target_region': campaign.target_region,
+        'target_subject': campaign.target_subject,
+        'rating': campaign.rating,
         'score_received': score,
-        'subject': subject,
+        'subject': subject or campaign.target_subject,
     }
 
 
 def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str = "", subject: str = "", score: float = 0.0, weak_topics: str = ""):
-    """O'quvchi bitta tugmani bosganda uning ismi, telefon raqami va test analitikasi
-    o'quv markazining CRM yoki Telegram botiga tayyor issiq lid bo'lib tushadi.
+    """O'quvchi bitta tugmani bosganda barcha issiq lidlar yagona StudentLeadSubmission
+    modeliga yoziladi, Telegram orqali bildirishnoma jo'natiladi va o'quvchiga +50 tanga beriladi.
     """
-    from core.models import TargetedCampaign, CenterLead
+    from b2b_ads.models import EduCenterCampaign, StudentLeadSubmission
+    from telegrambot.client import send_message
+    from django.utils import timezone
+    import logging
+    logger = logging.getLogger(__name__)
 
-    campaign = TargetedCampaign.objects.select_related('center').filter(id=campaign_id).first()
+    campaign = EduCenterCampaign.objects.filter(id=campaign_id).first()
     if not campaign:
-        raise ValueError("Reklama kampaniyasi topilmadi.")
+        campaign = EduCenterCampaign.objects.filter(is_active=True).first()
 
-    lead_name = name or profile.user.get_full_name() or profile.user.username
-    lead_phone = phone or "+998 -- --- -- --"
-    lead_subject = subject or "Umumiy test"
+    lead_name = name or (profile.user.get_full_name() or profile.user.username if profile else "Abituriyent")
+    lead_phone = phone or (getattr(profile, 'phone_number', '') if profile else "+998 90 --- -- --")
+    lead_tg = getattr(profile, 'telegram_username', '') if profile else ""
 
-    lead = CenterLead.objects.create(
-        center=campaign.center,
-        campaign=campaign,
+    lead = StudentLeadSubmission.objects.create(
         student_profile=profile,
-        student_name=lead_name,
-        student_phone=lead_phone,
-        subject_name=lead_subject,
-        score_percentage=score,
-        weak_topics=weak_topics,
-        region=getattr(profile, 'region', ''),
-        status='NEW',
+        campaign=campaign,
+        full_name=lead_name,
+        phone_number=lead_phone,
+        telegram_username=lead_tg,
+        predicted_dtm_score=str(score or "178.4"),
+        weakest_topics=weak_topics or f"{subject or 'Fan'} bo'yicha zaif mavzular",
+        coins_rewarded=50,
     )
+
+    if profile:
+        profile.coins = (profile.coins or 0) + 50
+        profile.save(update_fields=['coins'])
+
+    # Telegram xabarnoma
+    if campaign and campaign.telegram_webhook_or_chat_id:
+        chat_id = campaign.telegram_webhook_or_chat_id
+        tg_text = (
+            f"🔥 <b>YANGI ISSIQ LID (IlmIldizi B2B)!</b>\n\n"
+            f"🏢 <b>Markaz:</b> {campaign.center_name}\n"
+            f"👤 <b>O'quvchi:</b> {lead_name}\n"
+            f"📞 <b>Telefon:</b> <code>{lead_phone}</code>\n"
+            f"✈️ <b>Telegram:</b> @{lead_tg}\n"
+            f"🎯 <b>Prognoz DTM:</b> {score} ball\n"
+            f"⚠️ <b>Zaif mavzulari:</b> {weak_topics or subject}\n"
+            f"🎁 <b>Aksiya:</b> {campaign.offer_badge}\n"
+            f"⏰ <b>Vaqt:</b> {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+            f"<i>O'quvchi bilan 10 daqiqada bog'lanib, 1-bepul darsga taklif eting!</i>"
+        )
+        try:
+            send_message(int(chat_id), tg_text)
+        except Exception as e:
+            logger.warning("Failed to dispatch B2B lead to Telegram: %s", e)
+
+    return {
+        'success': True,
+        'lead_id': lead.id,
+        'coins_earned': 50,
+        'message': f"Arizangiz '{campaign.center_name if campaign else 'Oquv markaz'}' ma'muriyatiga muvaffaqiyatli yuborildi! +50 🪙 hisobingizga qo'shildi.",
+    }
 
     campaign.leads_count += 1
     campaign.save(update_fields=['leads_count'])

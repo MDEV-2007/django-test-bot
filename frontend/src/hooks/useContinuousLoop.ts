@@ -448,11 +448,15 @@ const DEFAULT_FALLBACK_STAGE_DATA: LoopStageData = {
 };
 
 export function useContinuousLoop() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [loop, setLoop] = useState<LoopState | null>(null);
-  const [topic, setTopic] = useState<LoopTopic | null>(null);
+  const [loop, setLoop] = useState<LoopState>(DEFAULT_FALLBACK_LOOP);
+  const [topic, setTopic] = useState<LoopTopic>({
+    id: 1,
+    title: "O'zbekiston tarixi & DTM Standartlari",
+    subject_name: "Tarix",
+  });
   const [ecoTree, setEcoTree] = useState<EcoTreeState>({
     growth_stage: 1,
     stage_name: 'Nihol',
@@ -460,7 +464,7 @@ export function useContinuousLoop() {
     root_depth_xp: 0,
     needs_water: false,
   });
-  const [stageData, setStageData] = useState<LoopStageData | null>(null);
+  const [stageData, setStageData] = useState<LoopStageData>(DEFAULT_FALLBACK_STAGE_DATA);
 
   // 3-Soniyalik Avtopilot Ko'prigi (Autoplay Transition Bridge)
   const [autoplayActive, setAutoplayActive] = useState(false);
@@ -529,19 +533,15 @@ export function useContinuousLoop() {
         });
 
         if (res?.ok) {
-          setLoop((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  current_stage: res.current_stage,
-                  combo_multiplier: res.combo_multiplier,
-                  dtm_score_delta: res.dtm_score_delta,
-                  session_mistakes_ids: res.session_mistakes_ids,
-                  is_chest_claimed:
-                    res.current_stage === 'STAGE_5_COMPLETED' ? true : prev.is_chest_claimed,
-                }
-              : null
-          );
+          setLoop((prev) => ({
+            ...prev,
+            current_stage: res.current_stage,
+            combo_multiplier: res.combo_multiplier,
+            dtm_score_delta: res.dtm_score_delta,
+            session_mistakes_ids: res.session_mistakes_ids,
+            is_chest_claimed:
+              res.current_stage === 'STAGE_5_COMPLETED' ? true : prev.is_chest_claimed,
+          }));
           setEcoTree(res.eco_tree);
           setStageData(res.stage_data);
           return res;

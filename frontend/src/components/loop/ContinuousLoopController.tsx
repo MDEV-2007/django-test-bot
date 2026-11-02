@@ -54,7 +54,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   const [warmupSecondsLeft, setWarmupSecondsLeft] = useState(90);
 
   // ── STAGE 2 (SPRINT) STATE ──
-  const [sprintQuestions, setSprintQuestions] = useState<SprintQuestion[]>([]);
+  const [sprintQuestions, setSprintQuestions] = useState<SprintQuestion[]>(stageData?.sprint?.questions || []);
   const [sprintIndex, setSprintIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
@@ -69,7 +69,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   const [clearedCount, setClearedCount] = useState(0);
 
   // ── STAGE 4 (1v1 ARENA) STATE ──
-  const [arenaQuestions, setArenaQuestions] = useState<SprintQuestion[]>([]);
+  const [arenaQuestions, setArenaQuestions] = useState<SprintQuestion[]>(stageData?.arena?.questions || []);
   const [arenaIndex, setArenaIndex] = useState(0);
   const [userScore, setUserScore] = useState(0);
   const [ghostScore, setGhostScore] = useState(0);
@@ -78,13 +78,13 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
 
   // Savollarni stageData dan yuklash
   useEffect(() => {
-    if (stageData?.sprint?.questions && sprintQuestions.length === 0) {
+    if (stageData?.sprint?.questions && stageData.sprint.questions.length > 0) {
       setSprintQuestions(stageData.sprint.questions);
     }
-    if (stageData?.arena?.questions && arenaQuestions.length === 0) {
+    if (stageData?.arena?.questions && stageData.arena.questions.length > 0) {
       setArenaQuestions(stageData.arena.questions);
     }
-  }, [stageData, sprintQuestions.length, arenaQuestions.length]);
+  }, [stageData]);
 
   // Stage 1 taymeri
   useEffect(() => {
@@ -679,6 +679,17 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                   router.push('/dtm-test');
                 }}
               />
+            )}
+
+            {/* Fallback: agar noma'lum holat bo'lsa yoki bosqich ma'lumotlari kutilayotgan bo'lsa */}
+            {(!loop || !stageData || !['STAGE_1_WARMUP', 'STAGE_2_SPRINT', 'STAGE_3_CLEANUP', 'STAGE_4_ARENA', 'STAGE_5_COMPLETED'].includes(loop.current_stage)) && (
+              <div className="p-8 text-center space-y-4">
+                <Brain className="size-12 text-orange-400 mx-auto animate-bounce" />
+                <p className="text-zinc-300 font-bold">Avtopilot zanjiri yuklanmoqda...</p>
+                <Button onClick={() => fetchLoop()} variant="outline" className="rounded-xl border-white/10 text-white">
+                  Qayta yuklash
+                </Button>
+              </div>
             )}
           </AnimatePresence>
         )}

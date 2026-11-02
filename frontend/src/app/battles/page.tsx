@@ -65,6 +65,8 @@ export default function BattlesPage() {
   const [isChallengerMode, setIsChallengerMode] = useState(false);
   const [duelToken, setDuelToken] = useState<string | null>(null);
   const [duelUserScore, setDuelUserScore] = useState(80);
+  const [activeBattleTab, setActiveBattleTab] = useState<'1v1' | 'class' | 'leaderboard'>('1v1');
+  const [inGhostArena, setInGhostArena] = useState(false);
   /* Jangdan OLDINGI ELO — natija ekranida o'zgarishni ko'rsatish uchun. Server yangi
      qiymatni qaytargach, raqam eskidan yangisiga "aylanib" o'tadi. */
   const [prevElo, setPrevElo] = useState<number | null>(null);
@@ -419,200 +421,294 @@ export default function BattlesPage() {
               </div>
             )}
 
-            {/* 🎓 O'qituvchi Sinf Jangi (Live PIN Arena) Banner */}
-            <Card
-              onClick={() => {
-                soundFX.click();
-                tgHaptic('medium');
-                setShowClassBattle(true);
-              }}
-              className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent hover:border-amber-500 hover:shadow-lg transition-all"
-            >
-              <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="size-11 sm:size-12 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-black shrink-0 shadow-md">
-                    <Swords className="size-5 sm:size-6" />
-                  </div>
+            {/* 3 ta Segmented Tab: 1v1 Jonli Duel / Sinf Jangi / Liga va Reyting */}
+            <div className="flex items-center justify-center p-1.5 rounded-2xl bg-muted/60 border border-border/70 max-w-xl mx-auto w-full shadow-sm mb-4">
+              <button
+                type="button"
+                onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('1v1'); }}
+                className={cn(
+                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  activeBattleTab === '1v1'
+                    ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Swords className="size-4" />
+                <span>⚔️ 1v1 Jonli Duel</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('class'); }}
+                className={cn(
+                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  activeBattleTab === 'class'
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Sparkles className="size-4" />
+                <span>🎓 Sinf Jangi (PIN)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('leaderboard'); }}
+                className={cn(
+                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  activeBattleTab === 'leaderboard'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Trophy className="size-4" />
+                <span>🏆 Liga & Reyting</span>
+              </button>
+            </div>
+
+            {/* TAB 1: 1v1 JONLI DUEL (Ghost Battle & Fast Matchmaking) */}
+            {activeBattleTab === '1v1' && (
+              <div className="space-y-5">
+                {/* 3 Soniyalik Instant Ghost PvP Banner */}
+                <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-500/15 via-zinc-900 to-rose-500/15 p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-amber-500 text-black font-black text-[10px] uppercase tracking-wider">
-                        TEACHER LIVE QUIZ
+                      <Badge className="bg-gradient-to-r from-orange-500 to-rose-600 text-white font-black text-[10px] uppercase">
+                        Ghost PvP 24/7
                       </Badge>
-                      <span className="text-xs font-bold text-amber-500">6 Xonali PIN</span>
+                      <span className="text-xs font-mono font-bold text-orange-400">⏱ 3 Soniyada Raqib</span>
                     </div>
-                    <h3 className="text-base sm:text-lg font-black text-foreground">
-                      O&apos;qituvchi Sinf Jangiga Kirish (PIN)
+                    <h3 className="text-lg font-black text-white">
+                      Tezkor 1v1 Ghost Duel Arena
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Ustozingiz doskaga PIN-kod tashladimi? Shu yerga bosing va sinf doskasidagi jonli jangga qo&apos;shiling!
+                    <p className="text-xs text-zinc-300 max-w-lg leading-relaxed">
+                      Kutish yo&apos;q! Haqiqiy abituriyentlarning Ghost replikasi yoki tirik onlayn o&apos;quvchi bilan 60 soniyada DTM darajangizni sinang.
                     </p>
                   </div>
+
+                  <Button
+                    onClick={() => {
+                      soundFX.click();
+                      tgHaptic('medium');
+                      setInGhostArena(true);
+                    }}
+                    className="h-12 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-black text-sm shadow-xl shadow-rose-600/30 shrink-0 cursor-pointer"
+                  >
+                    <Swords className="size-4 mr-2" />
+                    <span>Duelni Boshlash (3s)</span>
+                  </Button>
                 </div>
-                <Button className="rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-black text-xs sm:text-sm shrink-0 shadow-md">
-                  PIN Kiritish <ArrowRight className="size-4 ml-1.5" />
-                </Button>
-              </CardContent>
-            </Card>
 
-            <div className="grid gap-4 pt-2 md:grid-cols-3">
-              <Card
-                onClick={startAiBattle}
-                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
-              >
-                <CardMotif shape="bot" className="text-[var(--accent)]" />
-                <CardContent className="relative pt-6">
-                  <PremiumIcon icon={Bot} tone="primary" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
-                  <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">AI bilan mashg&apos;ulot jangi</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, bilimlarni mustahkamlang.
-                  </p>
-                  <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) <ArrowRight className="size-3.5 inline ml-1" /></span>
-                </CardContent>
-              </Card>
+                <div className="grid gap-4 pt-2 md:grid-cols-3">
+                  <Card
+                    onClick={startAiBattle}
+                    className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
+                  >
+                    <CardMotif shape="bot" className="text-[var(--accent)]" />
+                    <CardContent className="relative pt-6">
+                      <PremiumIcon icon={Bot} tone="primary" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
+                      <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">AI bilan mashg&apos;ulot jangi</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, bilimlarni mustahkamlang.
+                      </p>
+                      <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) <ArrowRight className="size-3.5 inline ml-1" /></span>
+                    </CardContent>
+                  </Card>
 
-              <Card
-                onClick={startLiveMatch}
-                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-rose-500/30 transition-colors hover:border-rose-500"
-              >
-                <CardMotif shape="arena" className="text-rose-400" />
-                <CardContent className="relative pt-6">
-                  <PremiumIcon icon={Swords} tone="rose" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
-                  <h3 className="text-base font-bold transition-colors group-hover:text-rose-400">Jonli abituriyent bilan duel</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
-                  </p>
-                  <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish <ArrowRight className="size-3.5 inline ml-1" /></span>
-                </CardContent>
-              </Card>
+                  <Card
+                    onClick={startLiveMatch}
+                    className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-rose-500/30 transition-colors hover:border-rose-500"
+                  >
+                    <CardMotif shape="arena" className="text-rose-400" />
+                    <CardContent className="relative pt-6">
+                      <PremiumIcon icon={Swords} tone="rose" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
+                      <h3 className="text-base font-bold transition-colors group-hover:text-rose-400">Jonli abituriyent bilan duel</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
+                      </p>
+                      <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish <ArrowRight className="size-3.5 inline ml-1" /></span>
+                    </CardContent>
+                  </Card>
 
-              <Card
-                onClick={inviteFriend}
-                className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/30 transition-colors hover:border-amber-500"
-              >
-                <CardMotif shape="arena" className="text-amber-400" />
-                <CardContent className="relative pt-6">
-                  <PremiumIcon icon={Share2} tone="amber" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
-                  <h3 className="text-base font-bold transition-colors group-hover:text-amber-400">Do&apos;stni jangga chorlash</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.
-                  </p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-400">Telegramda ulashish <ArrowRight className="size-3.5 inline ml-1" /></span>
-                    <button
-                      onClick={copyInviteLink}
-                      title="Nusxa olish"
-                      className="rounded-lg p-1 text-muted-foreground transition hover:bg-amber-500/10 hover:text-amber-400"
-                    >
-                      <Copy className="size-4" />
-                    </button>
+                  <Card
+                    onClick={inviteFriend}
+                    className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/30 transition-colors hover:border-amber-500"
+                  >
+                    <CardMotif shape="arena" className="text-amber-400" />
+                    <CardContent className="relative pt-6">
+                      <PremiumIcon icon={Share2} tone="amber" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
+                      <h3 className="text-base font-bold transition-colors group-hover:text-amber-400">Do&apos;stni jangga chorlash</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.
+                      </p>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-xs font-bold text-amber-400">Telegramda ulashish <ArrowRight className="size-3.5 inline ml-1" /></span>
+                        <button
+                          onClick={copyInviteLink}
+                          title="Nusxa olish"
+                          className="rounded-lg p-1 text-muted-foreground transition hover:bg-amber-500/10 hover:text-amber-400"
+                        >
+                          <Copy className="size-4" />
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Maxsus O'yinlar & Mini-Arenalar */}
+                <div className="space-y-3 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <PremiumIcon icon={Sparkles} tone="emerald" size="xs" glow />
+                      <div>
+                        <h3 className="text-base font-black text-foreground">Intellektual O&apos;yinlar &amp; Mini-Gamlar</h3>
+                        <p className="text-xs text-muted-foreground">Xaritalar, tarixiy shaxslar va xronologiya bo&apos;yicha maxsus sinovlar</p>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
 
-            {/* Maxsus O'yinlar & Mini-Arenalar (Xarita, Shaxslar, Xronologiya) */}
-            <div className="space-y-3 pt-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <PremiumIcon icon={Sparkles} tone="emerald" size="xs" glow />
-                  <div>
-                    <h3 className="text-base font-black text-foreground">Intellektual O&apos;yinlar &amp; Mini-Gamlar</h3>
-                    <p className="text-xs text-muted-foreground">Xaritalar, tarixiy shaxslar va xronologiya bo&apos;yicha maxsus sinovlar</p>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <Link href="/games/map" className="group">
+                      <Card className="h-full border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-[var(--surface-card)] to-transparent hover:border-blue-500 hover:shadow-lg transition-all">
+                        <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <PremiumIcon icon={MapPin} tone="sky" size="md" glow className="group-hover:scale-110" />
+                              <Badge variant="outline" className="border-blue-500/40 bg-blue-500/10 text-blue-400 text-[10px] font-black">
+                                XARITA GAME
+                              </Badge>
+                            </div>
+                            <h4 className="text-base font-black text-foreground group-hover:text-blue-400 transition-colors">
+                              Xarita topshirig&apos;i
+                            </h4>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              Tarixiy xaritalardan qadimiy hudud, shahar va davlatlarni aniqlang.
+                            </p>
+                          </div>
+                          <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
+                            <span className="text-[11px] font-bold text-amber-400">+25 XP • +10 tanga</span>
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
+                              O&apos;ynash <ArrowRight className="size-3.5" />
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/games/character" className="group">
+                      <Card className="h-full border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-[var(--surface-card)] to-transparent hover:border-purple-500 hover:shadow-lg transition-all">
+                        <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <PremiumIcon icon={UserCheck} tone="purple" size="md" glow className="group-hover:scale-110" />
+                              <Badge variant="outline" className="border-purple-500/40 bg-purple-500/10 text-purple-400 text-[10px] font-black">
+                                TARIXIY SHAXS
+                              </Badge>
+                            </div>
+                            <h4 className="text-base font-black text-foreground group-hover:text-purple-400 transition-colors">
+                              Tarixiy Shaxslar
+                            </h4>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              Tarixiy shaxslar hayoti va faoliyatini savollarda oching.
+                            </p>
+                          </div>
+                          <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
+                            <span className="text-[11px] font-bold text-amber-400">+25 XP • +10 tanga</span>
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
+                              O&apos;ynash <ArrowRight className="size-3.5" />
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+
+                    <Link href="/games/timeline" className="group">
+                      <Card className="h-full border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-[var(--surface-card)] to-transparent hover:border-emerald-500 hover:shadow-lg transition-all">
+                        <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <PremiumIcon icon={History} tone="emerald" size="md" glow className="group-hover:scale-110" />
+                              <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-black">
+                                XRONOLOGIYA
+                              </Badge>
+                            </div>
+                            <h4 className="text-base font-black text-foreground group-hover:text-emerald-400 transition-colors">
+                              Vaqt o&apos;qi (Timeline)
+                            </h4>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              Voqealar ketma-ketligini xronologik tartibda to&apos;g&apos;ri joylashtiring.
+                            </p>
+                          </div>
+                          <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
+                            <span className="text-[11px] font-bold text-amber-400">+30 XP • +15 tanga</span>
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
+                              O&apos;ynash <ArrowRight className="size-3.5" />
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {/* 1. Xarita Game */}
-                <Link href="/games/map" className="group">
-                  <Card className="h-full border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-[var(--surface-card)] to-transparent hover:border-blue-500 hover:shadow-lg transition-all">
-                    <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <PremiumIcon icon={MapPin} tone="sky" size="md" glow className="group-hover:scale-110" />
-                          <Badge variant="outline" className="border-blue-500/40 bg-blue-500/10 text-blue-400 text-[10px] font-black">
-                            XARITA GAME
+            {/* TAB 2: SINF JANGI (PIN Kiritish) */}
+            {activeBattleTab === 'class' && (
+              <div className="space-y-4">
+                <Card
+                  onClick={() => {
+                    soundFX.click();
+                    tgHaptic('medium');
+                    setShowClassBattle(true);
+                  }}
+                  className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent hover:border-amber-500 hover:shadow-lg transition-all"
+                >
+                  <CardContent className="p-5 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+                    <div className="flex items-center gap-4">
+                      <div className="size-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-black shrink-0 shadow-md">
+                        <Swords className="size-7" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-amber-500 text-black font-black text-[10px] uppercase tracking-wider">
+                            TEACHER LIVE QUIZ
                           </Badge>
+                          <span className="text-xs font-bold text-amber-500">6 Xonali PIN-kod</span>
                         </div>
-                        <h4 className="text-base font-black text-foreground group-hover:text-blue-400 transition-colors">
-                          Xarita topshirig&apos;i
-                        </h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          Tarixiy xaritalardan qadimiy hudud, shahar va davlatlarni aniqlang.
+                        <h3 className="text-lg sm:text-xl font-black text-foreground">
+                          O&apos;qituvchi Sinf Jangiga Kirish (PIN)
+                        </h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground max-w-lg">
+                          Ustozingiz doskaga PIN-kod tashladimi? Shu tugmani bosing va 6 xonali PIN bilan butun sinf doskasidagi jonli jangga qo&apos;shiling!
                         </p>
                       </div>
-
-                      <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+25 XP • +10 tanga</span>
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
-                          O&apos;ynash <ArrowRight className="size-3.5" />
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-
-                {/* 2. Shaxs Game */}
-                <Link href="/games/character" className="group">
-                  <Card className="h-full border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-[var(--surface-card)] to-transparent hover:border-purple-500 hover:shadow-lg transition-all">
-                    <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <PremiumIcon icon={UserCheck} tone="purple" size="md" glow className="group-hover:scale-110" />
-                          <Badge variant="outline" className="border-purple-500/40 bg-purple-500/10 text-purple-400 text-[10px] font-black">
-                            SHAXSLAR
-                          </Badge>
-                        </div>
-                        <h4 className="text-base font-black text-foreground group-hover:text-purple-400 transition-colors">
-                          Tarixiy shaxsni top
-                        </h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          3 ta fakt va maslahat orqali alloma yoki davlat arbobini aniqlang.
-                        </p>
-                      </div>
-
-                      <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+20 XP • +10 tanga</span>
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
-                          O&apos;ynash <ArrowRight className="size-3.5" />
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-
-                {/* 3. Timeline Game */}
-                <Link href="/games/timeline" className="group">
-                  <Card className="h-full border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-[var(--surface-card)] to-transparent hover:border-emerald-500 hover:shadow-lg transition-all">
-                    <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <PremiumIcon icon={History} tone="emerald" size="md" glow className="group-hover:scale-110" />
-                          <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-black">
-                            XRONOLOGIYA
-                          </Badge>
-                        </div>
-                        <h4 className="text-base font-black text-foreground group-hover:text-emerald-400 transition-colors">
-                          Vaqt o&apos;qi (Timeline)
-                        </h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          Voqealar ketma-ketligini xronologik tartibda to&apos;g&apos;ri joylashtiring.
-                        </p>
-                      </div>
-
-                      <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                        <span className="text-[11px] font-bold text-amber-400">+30 XP • +15 tanga</span>
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
-                          O&apos;ynash <ArrowRight className="size-3.5" />
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                    </div>
+                    <Button className="h-12 px-6 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-black text-sm shrink-0 shadow-md cursor-pointer">
+                      PIN Kiritish <ArrowRight className="size-4 ml-1.5" />
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
+            )}
+            
+            {/* TAB 3: LIGA VA REYTING */}
+            {activeBattleTab === 'leaderboard' && (
+              <div className="space-y-4">
+                <div className="rounded-3xl border border-primary/30 bg-primary/10 p-6 text-center space-y-3">
+                  <Trophy className="size-12 text-primary mx-auto animate-bounce" />
+                  <h3 className="text-lg font-black text-foreground">Haftalik ELO Ligasi va Respublika Reytingi</h3>
+                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                    Har bir g&apos;alaba sizga +25 ELO ball beradi. Respublika bo&apos;yicha top-10 o&apos;quvchilar ro&apos;yxatiga kiring va qimmatbaho sovrinlarni yutib oling!
+                  </p>
+                  <Button asChild className="rounded-xl bg-primary font-bold">
+                    <Link href="/leaderboard">To&apos;liq Reyting Jadvalini Ochish <ArrowRight className="size-4 ml-1.5" /></Link>
+                  </Button>
+                </div>
+              </div>
+            )}
 
-            {onlineUsers.length > 0 && (
+            {activeBattleTab === '1v1' && onlineUsers.length > 0 && (
               <div className="space-y-2.5 pt-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-muted-foreground">
                   <Radio className="size-3.5 text-[var(--success-text)]" />
