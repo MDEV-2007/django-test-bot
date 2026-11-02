@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Gift, Copy, Check, Award, Crown, Swords, FileCheck2,
@@ -150,11 +151,13 @@ const RARITY_TONE_KEY: Record<string, PremiumIconTone> = {
 const SHARE_TEXT = "IlmIldizi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!";
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const { access, authReady } = useAuthStore();
   const [origin, setOrigin] = useState('');
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'posts' | 'inventory' | 'activity'>('stats');
 
-  const { data, refresh } = useApiQuery<ProfileData>('/api/auth/profile/');
+  const { data, error, refresh } = useApiQuery<ProfileData>('/api/auth/profile/');
   const { data: invData, refresh: refreshInventory } = useApiQuery<InventoryResponse>('/api/shop/inventory/');
   const { data: postsData, refresh: refreshPosts } = useApiQuery<{ posts: UserPostItem[]; total: number }>(
     '/api/learning/feed/?mine=1'
@@ -180,10 +183,56 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
+    if (authReady && !access) {
+      router.push('/login');
+    }
+  }, [authReady, access, router]);
+
+  useEffect(() => {
     if (data?.profile) {
       useAuthStore.getState().setUser(data.profile as any);
     }
   }, [data]);
+
+  const streak = data?.profile?.streak ?? 0;
+  const radarStats: RadarStats = useMemo(() => {
+    if (!analyticsData) {
+      return {
+        subject_mastery: 78,
+        logic: 72,
+        speed: 85,
+        accuracy: 80,
+        writing: 65,
+        consistency: Math.min(100, Math.max(30, streak * 10)),
+        overall_power: 78,
+      };
+    }
+
+    const subjects = analyticsData.mastery?.subjects || [];
+    const avgSubMastery = subjects.length
+      ? Math.round(subjects.reduce((sum, s) => sum + s.mastery, 0) / subjects.length)
+      : analyticsData.accuracy || 75;
+
+    const consistency = Math.min(100, Math.max(35, streak * 12));
+    const accuracy = analyticsData.accuracy || 70;
+    const logic = analyticsData.avg_score || 72;
+    const speed = analyticsData.time_minutes > 0 ? 85 : 75;
+    const writing = analyticsData.cefr?.writing?.avg_score
+      ? Math.round((analyticsData.cefr.writing.avg_score / 5) * 100)
+      : 65;
+
+    const ovr = Math.round((avgSubMastery + consistency + accuracy + logic + speed + writing) / 6);
+
+    return {
+      subject_mastery: avgSubMastery,
+      logic,
+      speed,
+      accuracy,
+      writing,
+      consistency,
+      overall_power: ovr,
+    };
+  }, [analyticsData, streak]);
 
   async function handleToggleEquip(slug: string, currentlyEquipped: boolean, name: string) {
     setEquipBusy(slug);
@@ -297,12 +346,31 @@ export default function ProfilePage() {
     }
   }
 
+  const referralUrl = origin && data?.referral_code ? `${origin}/register?ref=${data.referral_code}` : '';
+
   function handleCopy() {
+    if (!referralUrl) return;
     navigator.clipboard.writeText(referralUrl);
     setCopied(true);
     tgHaptic('light');
     toast.success("Taklif havolasi nusxalandi!");
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  if (error && !data) {
+    return (
+      <>
+        <AppShell />
+        <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6 flex flex-col items-center justify-center min-h-[50vh]">
+          <div className="text-center space-y-4 max-w-md">
+            <p className="text-red-400 font-medium">{error}</p>
+            <Button onClick={() => refresh()} variant="outline">
+              Qayta urinish
+            </Button>
+          </div>
+        </main>
+      </>
+    );
   }
 
   if (!data) {
@@ -325,7 +393,6 @@ export default function ProfilePage() {
     ? Math.min(100, Math.max(0, Math.round((p.xp / p.next_level_xp) * 100)))
     : 0;
   const fullName = `${p.first_name || p.username} ${p.last_name || ''}`.trim();
-  const referralUrl = `${origin}/register?ref=${data.referral_code}`;
 
   const shareUrl = data.telegram_deep_link || referralUrl;
   const telegramShareHref =
@@ -335,44 +402,6 @@ export default function ProfilePage() {
 
   const allInventoryItems = invData?.items || [];
   const userPosts = postsData?.posts || [];
-  const radarStats: RadarStats = useMemo(() => {
-    if (!analyticsData) {
-      return {
-        subject_mastery: 78,
-        logic: 72,
-        speed: 85,
-        accuracy: 80,
-        writing: 65,
-        consistency: Math.min(100, Math.max(30, (p?.streak || 0) * 10)),
-        overall_power: 78,
-      };
-    }
-
-    const subjects = analyticsData.mastery?.subjects || [];
-    const avgSubMastery = subjects.length
-      ? Math.round(subjects.reduce((sum, s) => sum + s.mastery, 0) / subjects.length)
-      : analyticsData.accuracy || 75;
-
-    const consistency = Math.min(100, Math.max(35, (p?.streak || 0) * 12));
-    const accuracy = analyticsData.accuracy || 70;
-    const logic = analyticsData.avg_score || 72;
-    const speed = analyticsData.time_minutes > 0 ? 85 : 75;
-    const writing = analyticsData.cefr?.writing?.avg_score
-      ? Math.round((analyticsData.cefr.writing.avg_score / 5) * 100)
-      : 65;
-
-    const ovr = Math.round((avgSubMastery + consistency + accuracy + logic + speed + writing) / 6);
-
-    return {
-      subject_mastery: avgSubMastery,
-      logic,
-      speed,
-      accuracy,
-      writing,
-      consistency,
-      overall_power: ovr,
-    };
-  }, [analyticsData, p?.streak]);
 
   const totalActivityCount = (data.recent_attempts?.length || 0) + (data.recent_battles?.length || 0);
 
