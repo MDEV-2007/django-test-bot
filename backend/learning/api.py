@@ -24,6 +24,7 @@ from .models import Bookmark, Lesson, Topic, Reel, ReelComment, CommunityPost, C
 from .services import (
     _build_mentor_context, _greeting_reply, _mentor_ai_allowed, _mentor_rate_limited,
     _mentor_system_prompt, build_mentor_reply, seed_learning_if_needed,
+    ensure_lesson_for_topic,
 )
 
 
@@ -107,6 +108,16 @@ def center_api(request):
     topic_qs = Topic.objects.filter(subject=subject) if subject else Topic.objects.all()
     topics = list(topic_qs.prefetch_related(Prefetch('lessons', queryset=Lesson.objects.filter(is_published=True))))
 
+    # Har bir mavzu uchun darslik mavjudligini ta'minlaymiz (bo'sh qolib ketmasligi uchun)
+    for t in topics:
+        if not t.lessons.all():
+            try:
+                ensure_lesson_for_topic(t)
+            except Exception:
+                pass
+    if topics:
+        topics = list(topic_qs.prefetch_related(Prefetch('lessons', queryset=Lesson.objects.filter(is_published=True))))
+
     def topic_list(category):
         return [{
             'id': t.id, 'title': t.title,
@@ -118,6 +129,7 @@ def center_api(request):
         all_lessons = all_lessons.filter(topic__subject=subject)
 
     lesson_id = request.query_params.get('lesson_id')
+    topic_id = request.query_params.get('topic_id')
     lesson_qs = (
         Lesson.objects.filter(is_published=True)
         .select_related('topic')
@@ -125,11 +137,20 @@ def center_api(request):
     )
     if lesson_id:
         lesson = lesson_qs.filter(id=lesson_id).first()
+    elif topic_id:
+        lesson = lesson_qs.filter(topic_id=topic_id).first()
+        if not lesson:
+            target_topic = topic_qs.filter(id=topic_id).first()
+            if target_topic:
+                lesson = ensure_lesson_for_topic(target_topic)
     else:
-        if subject:
-            lesson = lesson_qs.filter(topic__subject=subject).first()
+        if topics:
+            first_topic = topics[0]
+            lesson = lesson_qs.filter(topic=first_topic).first()
+            if not lesson:
+                lesson = ensure_lesson_for_topic(first_topic)
         else:
-            lesson = lesson_qs.first()
+            lesson = lesson_qs.filter(topic__subject=subject).first() if subject else lesson_qs.first()
 
     has_lessons_access = profile.has_active_premium_lessons
     is_bookmarked = Bookmark.objects.filter(profile=profile, lesson=lesson).exists() if lesson else False

@@ -69,6 +69,7 @@ function LearningPageInner() {
 
   const params = new URLSearchParams();
   if (lessonId) params.set('lesson_id', lessonId);
+  if (selectedTopicId) params.set('topic_id', selectedTopicId.toString());
   if (subject) params.set('subject', subject);
   const query = params.toString() ? `?${params.toString()}` : '';
 
@@ -102,11 +103,11 @@ function LearningPageInner() {
     }
 
     // Tekshiramiz: joriy selectedTopicId yangi fanning mavzulari ichida bormi?
-    const existsInCurrentSubject = selectedTopicId
-      ? allTopics.some((t) => t.id === selectedTopicId)
-      : false;
+    const currentTopic = selectedTopicId
+      ? allTopics.find((t) => t.id === selectedTopicId)
+      : null;
 
-    if (!existsInCurrentSubject) {
+    if (!currentTopic) {
       if (lesson?.topic) {
         const found = allTopics.find((t) => t.title.toLowerCase() === lesson.topic?.toLowerCase());
         if (found) {
@@ -117,8 +118,10 @@ function LearningPageInner() {
       }
       setSelectedTopicId(allTopics[0].id);
       setSelectedTopicTitle(allTopics[0].title);
+    } else if (!selectedTopicTitle) {
+      setSelectedTopicTitle(currentTopic.title);
     }
-  }, [allTopics, selectedTopicId, lesson]);
+  }, [allTopics, selectedTopicId, lesson, selectedTopicTitle]);
 
   function handleSubjectChange(newSlug: string) {
     if (newSlug === subject) return;
@@ -136,11 +139,29 @@ function LearningPageInner() {
     toast.success(res.bookmarked ? 'Dars saqlandi' : 'Saqlanganlardan olib tashlandi');
   }
 
+  function handleSelectTopic(topicId: number, topicTitle: string) {
+    tgHaptic('select');
+    setSelectedTopicId(topicId);
+    setSelectedTopicTitle(topicTitle);
+    const targetTopic = allTopics.find((t) => t.id === topicId);
+    const firstLessonId = targetTopic?.lessons?.[0]?.id;
+    if (studyMode === 'lesson') {
+      if (firstLessonId) {
+        router.push(`/learning?lesson_id=${firstLessonId}&topic_id=${topicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
+      } else {
+        router.push(`/learning?topic_id=${topicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
+      }
+    } else {
+      router.push(`/learning?topic_id=${topicId}&view=cheatsheet${subject ? `&subject=${subject}` : ''}`);
+    }
+  }
+
   function handleSelectTopicCheatSheet(topicId: number, topicTitle: string) {
     tgHaptic('select');
     setSelectedTopicId(topicId);
     setSelectedTopicTitle(topicTitle);
     setStudyMode('cheatsheet');
+    router.push(`/learning?topic_id=${topicId}&view=cheatsheet${subject ? `&subject=${subject}` : ''}`);
   }
 
   function handleSelectLesson(lId: number, tId: number, tTitle: string) {
@@ -148,7 +169,7 @@ function LearningPageInner() {
     setSelectedTopicId(tId);
     setSelectedTopicTitle(tTitle);
     setStudyMode('lesson');
-    router.push(`/learning?lesson_id=${lId}&topic_id=${tId}`);
+    router.push(`/learning?lesson_id=${lId}&topic_id=${tId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
   }
 
   return (
@@ -269,24 +290,27 @@ function LearningPageInner() {
                           : 'border-border/70 bg-card hover:border-border'
                       )}
                     >
-                      {/* Topic Header: Clickable to open Cheat-Sheet */}
+                      {/* Topic Header: Clickable to open Cheat-Sheet or Lesson depending on active mode */}
                       <div className="flex items-start justify-between gap-2">
                         <div
-                          onClick={() => handleSelectTopicCheatSheet(t.id, t.title)}
+                          onClick={() => handleSelectTopic(t.id, t.title)}
                           className="min-w-0 flex-1 cursor-pointer group"
                         >
                           <h4 className="font-extrabold text-sm text-foreground group-hover:text-amber-500 transition-colors leading-snug">
                             {t.title}
                           </h4>
                           <span className="text-[11px] text-muted-foreground">
-                            {t.lessons.length > 0 ? `${t.lessons.length} ta darslik` : 'Shpargalka tayyor'}
+                            {t.lessons.length > 0 ? `${t.lessons.length} ta darslik` : 'Matnli dars & Shpargalka'}
                           </span>
                         </div>
 
                         {/* 1-Click 60s Cheat-Sheet Pill Button */}
                         <button
                           type="button"
-                          onClick={() => handleSelectTopicCheatSheet(t.id, t.title)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectTopicCheatSheet(t.id, t.title);
+                          }}
                           className={cn(
                             'shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-2xs',
                             isTopicActive && studyMode === 'cheatsheet'
@@ -368,6 +392,9 @@ function LearningPageInner() {
                         onClick={() => {
                           tgHaptic('select');
                           setStudyMode('cheatsheet');
+                          if (selectedTopicId) {
+                            router.push(`/learning?topic_id=${selectedTopicId}&view=cheatsheet${subject ? `&subject=${subject}` : ''}`);
+                          }
                         }}
                         className={cn(
                           'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
@@ -388,6 +415,15 @@ function LearningPageInner() {
                         onClick={() => {
                           tgHaptic('select');
                           setStudyMode('lesson');
+                          if (selectedTopicId) {
+                            const targetTopic = allTopics.find((t) => t.id === selectedTopicId);
+                            const firstLessonId = targetTopic?.lessons?.[0]?.id;
+                            if (firstLessonId) {
+                              router.push(`/learning?lesson_id=${firstLessonId}&topic_id=${selectedTopicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
+                            } else {
+                              router.push(`/learning?topic_id=${selectedTopicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
+                            }
+                          }
                         }}
                         className={cn(
                           'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
@@ -426,9 +462,11 @@ function LearningPageInner() {
                       <CardContent className="py-16 text-center space-y-3">
                         <BookOpen className="mx-auto size-10 text-muted-foreground/40" />
                         <div className="space-y-1">
-                          <p className="text-base font-bold text-foreground">Dars tanlanmagan</p>
+                          <p className="text-base font-bold text-foreground">
+                            {selectedTopicTitle ? `${selectedTopicTitle} darsi yuklanmoqda...` : 'Dars tanlanmagan'}
+                          </p>
                           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                            Chapdagi ro&apos;yxatdan mavzu darsini tanlang yoki 60 soniyalik Shpargalkadan foydalaning.
+                            Mavzu bo&apos;yicha to&apos;liq darslik va konspekt tayyorlanmoqda yoki 60 soniyalik Shpargalkadan foydalaning.
                           </p>
                         </div>
                         <Button

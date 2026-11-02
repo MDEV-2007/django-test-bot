@@ -197,6 +197,126 @@ def seed_learning_if_needed():
     AudioLesson.objects.create(lesson=l4, title="Behbudiyning ijtimoiy-siyosiy faoliyati", audio_url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", duration_seconds=890, order=1)
 
 
+def ensure_lesson_for_topic(topic: Topic) -> Lesson:
+    """Mavzu uchun to'liq darslik va konspekt mavjudligini kafolatlaydi.
+    Agar mavzuda darslik bo'lmasa, mavzuning cheat_sheet'i yoki savollari asosida
+    batafsil o'quv konspekti va interaktiv flashcardlar yaratadi.
+    """
+    existing = topic.lessons.filter(is_published=True).first()
+    if existing:
+        return existing
+
+    from core.models import TopicCheatSheet
+    from tests_app.models import Question
+
+    sheet = TopicCheatSheet.objects.filter(topic=topic).first()
+    core_pills = list(sheet.core_pills) if sheet and sheet.core_pills else []
+    exam_traps = list(sheet.exam_traps) if sheet and sheet.exam_traps else []
+    visual_chain = list(sheet.visual_chain) if sheet and sheet.visual_chain else []
+
+    # Agar cheat sheet hali generatsiya qilinmagan bo'lsa, mavzudagi savollar va variantlardan
+    # darhol tezkor va ishonchli konspekt tuzamiz (Groq rate limitga tushmaslik uchun)
+    if not core_pills:
+        questions = list(Question.objects.filter(topic=topic).prefetch_related('choices')[:8])
+        for q in questions:
+            correct_choice = next((c for c in q.choices.all() if c.is_correct), None)
+            answer_text = correct_choice.text if correct_choice else getattr(q, 'reference_answer', '')
+            if answer_text:
+                core_pills.append({
+                    'term': q.body[:50] + ('...' if len(q.body) > 50 else ''),
+                    'definition': answer_text,
+                })
+
+    sections = []
+    sections.append(f"""
+    <div class="space-y-5">
+      <div class="p-4 rounded-2xl bg-amber-500/[0.07] border border-amber-500/20">
+        <h3 class="text-base font-bold text-amber-500 mb-1">📖 Mavzuning Qisqacha Mazmuni</h3>
+        <p class="text-sm leading-relaxed text-foreground">
+          Ushbu mavzu davlat ta'lim standarti va BMB (DTM) hamda Tarix Milliy Sertifikat imtihoni dasturiga kiritilgan bo'lib, unda <strong>{topic.title}</strong> bo'yicha eng muhim tayanch sanalar, tarixiy shaxslar, harbiy-siyosiy voqealar va madaniy meros jamlangan.
+        </p>
+      </div>
+    """)
+
+    if core_pills:
+        pills_html = "".join([
+            f"<li class='flex items-start gap-2 text-sm'><span class='text-amber-500 font-bold shrink-0'>•</span><div><strong class='text-foreground'>{p.get('term')}:</strong> <span class='text-muted-foreground'>{p.get('definition')}</span></div></li>"
+            for p in core_pills
+        ])
+        sections.append(f"""
+      <div class="space-y-2">
+        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>💡</span> Asosiy Tarixiy Sanalar va Tushunchalar
+        </h3>
+        <ul class="space-y-2.5 p-4 rounded-2xl bg-card border border-border/80">
+          {pills_html}
+        </ul>
+      </div>
+        """)
+
+    if exam_traps:
+        traps_html = "".join([
+            f"""<li class='p-3 rounded-xl bg-destructive/10 border border-destructive/20 space-y-1 text-xs sm:text-sm'>
+                <div class='flex items-center gap-1.5 text-rose-500 font-bold'>
+                  <span>❌ Chalg'ituvchi fikr:</span> <span class='line-through text-rose-400'>{t.get('wrong')}</span>
+                </div>
+                <div class='flex items-center gap-1.5 text-emerald-500 font-bold'>
+                  <span>✅ Aslida:</span> <span>{t.get('correct')}</span>
+                </div>
+                {f"<div class='text-xs text-muted-foreground pt-1 italic'>📌 Layfxak: {t.get('explanation')}</div>" if t.get('explanation') else ""}
+            </li>"""
+            for t in exam_traps
+        ])
+        sections.append(f"""
+      <div class="space-y-2">
+        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>⚠️</span> BMB & Milliy Sertifikatda Eng Ko'p Uchraydigan Qopqonlar
+        </h3>
+        <ul class="space-y-2.5">
+          {traps_html}
+        </ul>
+      </div>
+        """)
+
+    if visual_chain:
+        chain_html = "".join([
+            f"<li class='p-2.5 rounded-xl bg-muted/40 border border-border/60 text-xs sm:text-sm font-medium text-foreground flex items-center gap-2'><span class='size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0'>{i}</span><span>{step}</span></li>"
+            for i, step in enumerate(visual_chain, 1)
+        ])
+        sections.append(f"""
+      <div class="space-y-2">
+        <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+          <span>⏱</span> Voqealar Xronologik Zanjiri
+        </h3>
+        <ol class="space-y-2">
+          {chain_html}
+        </ol>
+      </div>
+        """)
+
+    sections.append("</div>")
+    html_content = "\n".join(sections)
+
+    lesson = Lesson.objects.create(
+        topic=topic,
+        title=topic.title,
+        content=html_content,
+        is_published=True,
+        order=1,
+    )
+
+    # Interaktiv Flashcardlar
+    if core_pills:
+        for p in core_pills[:8]:
+            Flashcard.objects.create(
+                lesson=lesson,
+                front=f"{p.get('term')} nima yoki qachon yuz bergan?",
+                back=p.get('definition', ''),
+            )
+
+    return lesson
+
+
 
 
 
