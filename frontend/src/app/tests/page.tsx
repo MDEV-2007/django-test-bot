@@ -631,7 +631,7 @@ export default function TestsPage() {
   return (
     <>
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 bg-background text-foreground p-4 pb-20 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      <main className="page-shell flex-1 space-y-5 sm:space-y-6 bg-background text-foreground p-3.5 sm:p-6 lg:p-8 pb-32 sm:pb-28 max-w-7xl mx-auto w-full">
         {/* ========================================================================= */}
         {/* IMTIHON REJIMLARI TAB SWITCHER (Standart | Blits | BMB Stress) */}
         {/* ========================================================================= */}
@@ -756,16 +756,16 @@ export default function TestsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="relative overflow-hidden rounded-[28px] border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-5 sm:p-6 shadow-xl text-white"
+                className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-4 sm:p-6 shadow-xl text-white"
               >
                 <div className="absolute top-0 right-0 -mr-12 -mt-12 size-60 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
-                <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
-                  <div className="flex min-w-0 items-start sm:items-center gap-4">
-                    <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-rose-600/30 border border-rose-500/40 shadow-inner">
-                      <Flame className="size-7 text-rose-400 animate-pulse" />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                  <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                    <div className="flex size-11 sm:size-14 shrink-0 items-center justify-center rounded-2xl bg-rose-600/30 border border-rose-500/40 shadow-inner">
+                      <Flame className="size-5 sm:size-7 text-rose-400 animate-pulse" />
                     </div>
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <div className="min-w-0 space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <Badge className="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase border-0 shrink-0">
                           🔥 EKSTREMAL
                         </Badge>
@@ -779,7 +779,7 @@ export default function TestsPage() {
                           ⚡ +50% XP
                         </Badge>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-black tracking-tight text-white">
+                      <h3 className="text-base sm:text-xl font-black tracking-tight text-white leading-tight">
                         Real BMB Imtihon Zali (Stress Mode)
                       </h3>
                       <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
@@ -788,16 +788,16 @@ export default function TestsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
                     <Button
                       onClick={() => {
                         setStressPreselectedTest(null);
                         setStressModalOpen(true);
                       }}
                       size="lg"
-                      className="rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 cursor-pointer h-11 px-6 text-xs sm:text-sm active:scale-95 transition-all"
+                      className="w-full sm:w-auto rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 cursor-pointer h-11 px-6 text-xs sm:text-sm active:scale-95 transition-all flex items-center justify-center"
                     >
-                      <Flame className="size-4.5 mr-2 animate-pulse" />
+                      <Flame className="size-4 mr-2 animate-pulse" />
                       Imtihon Zaliga Kirish
                     </Button>
                   </div>
@@ -1119,43 +1119,43 @@ export default function TestsPage() {
           /* BMB STRESS ZALI REJIMI */
           <div className="space-y-6">
             {/* Yuqori Stress Xususiyatlari & Sovrinlar Paneli */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/10 space-y-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+              <div className="p-3 sm:p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-rose-500 font-bold text-xs">
-                  <Headphones className="size-4" />
-                  <span>500 Kishi Akustikasi</span>
+                  <Headphones className="size-4 shrink-0" />
+                  <span className="truncate">500 Kishi Akustikasi</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Haqiqiy DTM zalidagi shivir-shivir va parta tovushlari.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl border border-blue-500/25 bg-blue-500/10 space-y-1">
+              <div className="p-3 sm:p-3.5 rounded-2xl border border-blue-500/25 bg-blue-500/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-blue-500 font-bold text-xs">
-                  <FileCheck2 className="size-4" />
-                  <span>Titul Varaqasi</span>
+                  <FileCheck2 className="size-4 shrink-0" />
+                  <span className="truncate">Titul Varaqasi</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Qora ruchkada doirachalarni bo&apos;yash (Bubble Sheet) mashqi.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/10 space-y-1">
+              <div className="p-3 sm:p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs">
-                  <Flame className="size-4" />
-                  <span>+50% Bonus XP</span>
+                  <Flame className="size-4 shrink-0" />
+                  <span className="truncate">+50% Bonus XP</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Har bir to&apos;g&apos;ri javob uchun 1.5 baravar ko&apos;p tajriba bali.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
+              <div className="p-3 sm:p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs">
-                  <Shield className="size-4" />
-                  <span>Temir Asab</span>
+                  <Shield className="size-4 shrink-0" />
+                  <span className="truncate">Temir Asab</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Stress zalini yenggan abituriyentlarga profil maxsus nishoni.
                 </p>
               </div>

@@ -226,7 +226,7 @@ class Profile(models.Model):
         """
         if self.is_privileged:
             return True
-        if self.has_active_premium_lessons() or self.premium_mock_test_unlocked:
+        if self.has_active_premium_lessons or self.premium_mock_test_unlocked:
             return True
         now = timezone.now()
         try:
@@ -240,7 +240,7 @@ class Profile(models.Model):
         try:
             from growth.models import UserUsageQuota
             quota = UserUsageQuota.objects.filter(profile=self).first()
-            if quota and quota.is_vip():
+            if quota and (quota.is_vip() if callable(quota.is_vip) else bool(quota.is_vip)):
                 return True
         except Exception:
             pass
@@ -254,44 +254,6 @@ class Profile(models.Model):
     def has_active_subscription(self) -> bool:
         return self.is_vip_active
 
-    @property
-    def is_vip_active(self) -> bool:
-        """Yagona VIP/Obuna holati:
-        1. Superadmin / Staff bo'lsa har doim True
-        2. Profile.is_premium va premium_expires_at > now
-        3. Profile.premium_mock_test_unlocked
-        4. classroom.Subscription (status='active' and current_period_end > now)
-        5. UserUsageQuota (growth.models) da is_vip
-        """
-        if self.is_privileged:
-            return True
-        if self.has_active_premium_lessons() or self.premium_mock_test_unlocked:
-            return True
-        now = timezone.now()
-        try:
-            from classroom.models import Subscription as ClassSubscription
-            if ClassSubscription.objects.filter(
-                student=self, status='active', current_period_end__gt=now
-            ).exists():
-                return True
-        except Exception:
-            pass
-        try:
-            from growth.models import UserUsageQuota
-            quota = UserUsageQuota.objects.filter(profile=self).first()
-            if quota and quota.is_vip():
-                return True
-        except Exception:
-            pass
-        return False
-
-    @property
-    def is_vip(self) -> bool:
-        return self.is_vip_active
-
-    @property
-    def has_active_subscription(self) -> bool:
-        return self.is_vip_active
 
     # --- Role helpers -----------------------------------------------------
     # `is_superadmin` deliberately also treats a Django superuser as a super admin,
