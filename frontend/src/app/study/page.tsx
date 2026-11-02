@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
+import TopicCheatSheetView from '@/components/study/TopicCheatSheetView';
+import { Gamepad2, Swords, Compass, MapPin } from 'lucide-react';
 import Reveal from '@/components/motion/Reveal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -131,6 +133,23 @@ export default function StudyRoomPage() {
 
   // Fullscreen / Zen Rejimi
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'cheatsheets' | 'games' | 'library' | 'focus'>('cheatsheets');
+  const [selectedCheatTopic, setSelectedCheatTopic] = useState<{ id: number; title: string } | null>(null);
+  const [studySubject, setStudySubject] = useState<string>('Tarix');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      const tabParam = p.get('tab');
+      if (tabParam === 'games' || tabParam === 'library' || tabParam === 'focus' || tabParam === 'cheatsheets') {
+        setActiveTab(tabParam);
+      }
+      const topId = p.get('topic_id');
+      if (topId) {
+        setSelectedCheatTopic({ id: parseInt(topId, 10), title: 'Tanlangan mavzu' });
+      }
+    }
+  }, []);
 
   // Yakunlash modali holati
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -603,6 +622,245 @@ export default function StudyRoomPage() {
               </div>
             </div>
 
+            {/* ============================================================ */}
+            {/* 🧭 4 TA YADROVIY O'RGANISH TABLARI (Segmented Learning Hub)  */}
+            {/* ============================================================ */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {[
+                { id: 'cheatsheets', label: '🧠 60s Shpargalkalar', badge: '60s' },
+                { id: 'games', label: '🎮 Fan O\'yinlari & Arena', badge: 'XP' },
+                { id: 'library', label: '📚 Audio & Kitoblar', badge: 'PDF' },
+                { id: 'focus', label: '🎧 Fokus Xonasi (Zen)', badge: 'Zen' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id as 'cheatsheets' | 'games' | 'library' | 'focus');
+                    soundFX.click();
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer",
+                    activeTab === tab.id
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                      : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60"
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold",
+                    activeTab === tab.id ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                  )}>
+                    {tab.badge}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* ── 1-TAB: 60s ANTI-DARSLIK VA SHPARGALKALAR ── */}
+            {activeTab === 'cheatsheets' && (
+              <div className="space-y-5">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="space-y-0.5">
+                    <h2 className="text-lg font-bold text-foreground">Anti-Darslik: 60 Soniyalik Shpargalkalar</h2>
+                    <p className="text-xs text-muted-foreground">800 betlik darslikni o'qimasdan, imtihonda tushadigan eng muhim faktlar va formulalar</p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 overflow-x-auto p-1 rounded-xl bg-muted/50 border border-border">
+                    {['Tarix', 'Ona tili', 'Matematika', 'Biologiya', 'Ingliz tili'].map((sub) => (
+                      <button
+                        key={sub}
+                        onClick={() => { setStudySubject(sub); soundFX.click(); }}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer",
+                          studySubject === sub ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {sub}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {[
+                    { id: 1, title: studySubject === 'Tarix' ? "Qadimgi davlatlar va ilk sivilizatsiyalar" : `${studySubject}: Asosiy qoidalar va formulalar`, traps: "Inkor savollari va davrlar chalkashishi", bullets: 3, mins: 1 },
+                    { id: 2, title: studySubject === 'Tarix' ? "Amir Temur va Temuriylar saltanati" : `${studySubject}: Imtihon qopqonlari`, traps: "Yillar va jang maydonlari nozik farqlari", bullets: 4, mins: 1 },
+                    { id: 3, title: studySubject === 'Tarix' ? "O'zbek xonliklari va mustaqillik sari" : `${studySubject}: Test tahlili va formulalar`, traps: "Shaxslar va asarlar mualliflari", bullets: 3, mins: 1 },
+                  ].map((topicItem) => (
+                    <Card key={topicItem.id} className="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-xs hover:border-primary/40 transition">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-[10px] bg-primary/10 border-primary/20 text-primary font-bold">
+                          ⚡ 60s Shpargalka
+                        </Badge>
+                        <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
+                          <Clock className="size-3 text-amber-500" /> {topicItem.mins} daqiqa
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-bold text-foreground line-clamp-1">{topicItem.title}</h3>
+                        <p className="text-xs text-rose-500 font-medium mt-1 line-clamp-1">⚠️ Qopqon: {topicItem.traps}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <Button
+                          size="sm"
+                          onClick={() => setSelectedCheatTopic(topicItem)}
+                          className="flex-1 rounded-xl text-xs font-bold gap-1.5"
+                        >
+                          <Zap className="size-3.5" />
+                          <span>Shpargalkani ko'rish</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          asChild
+                          className="rounded-xl text-xs font-semibold"
+                        >
+                          <Link href="/sprint">
+                            <span>Sprint</span>
+                            <ArrowRight className="size-3 ml-1" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Shpargalka Modali */}
+                {selectedCheatTopic && (
+                  <Dialog open={Boolean(selectedCheatTopic)} onOpenChange={() => setSelectedCheatTopic(null)}>
+                    <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6 rounded-3xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
+                          <Zap className="size-4 text-primary" />
+                          <span>{selectedCheatTopic.title}</span>
+                        </DialogTitle>
+                        <DialogDescription className="text-xs text-muted-foreground">
+                          Imtihonda tushadigan eng muhim formulalar va qopqonlar
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <TopicCheatSheetView
+                        topicId={selectedCheatTopic.id}
+                        topicTitle={selectedCheatTopic.title}
+                        onStartSprint={() => {
+                          setSelectedCheatTopic(null);
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            )}
+
+            {/* ── 2-TAB: FAN O'YINLARI VA 1v1 ARENA ── */}
+            {activeTab === 'games' && (
+              <div className="space-y-4">
+                <div className="space-y-0.5">
+                  <h2 className="text-lg font-bold text-foreground">Interaktiv Fan O'yinlari & Arena</h2>
+                  <p className="text-xs text-muted-foreground">O'yin o'ynab bilimni mustahkamlang, reytingda ko'tariling va bonus XP yutib oling</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { title: "Tarixiy Xronologiya", desc: "Voqealarni to'g'ri vaqt tartibida terish", xp: "+50 XP", coins: "+20 🪙", href: "/games/timeline", icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" },
+                    { title: "Tarixiy Shaxslar", desc: "Hukmdorlar va kashfiyotlar mosligi", xp: "+60 XP", coins: "+25 🪙", href: "/games/character", icon: Gamepad2, color: "text-purple-500", bg: "bg-purple-500/10 border-purple-500/20" },
+                    { title: "Xaritalar & Hududlar", desc: "Davlatlar chegaralari va geografiya", xp: "+45 XP", coins: "+15 🪙", href: "/games/map", icon: MapPin, color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
+                    { title: "1v1 Ghost Battle", desc: "60 soniyada tengdoshlaringiz bilan duel", xp: "+100 XP", coins: "+50 🪙", href: "/battles", icon: Swords, color: "text-rose-500", bg: "bg-rose-500/10 border-rose-500/20" },
+                  ].map((game) => (
+                    <Card key={game.title} className="rounded-2xl border border-border bg-card p-4 flex flex-col justify-between space-y-3 shadow-xs hover:border-primary/40 transition">
+                      <div className="space-y-2">
+                        <div className={cn("size-10 rounded-xl flex items-center justify-center border", game.bg, game.color)}>
+                          <game.icon className="size-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-foreground">{game.title}</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{game.desc}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2.5 pt-2 border-t border-border/60">
+                        <div className="flex items-center justify-between text-[11px] font-mono font-bold">
+                          <span className="text-emerald-500">{game.xp}</span>
+                          <span className="text-amber-500">{game.coins}</span>
+                        </div>
+                        <Button size="sm" asChild className="w-full rounded-xl text-xs font-bold">
+                          <Link href={game.href}>
+                            <span>O'ynash</span>
+                            <ArrowRight className="size-3.5 ml-1" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── 3-TAB: AUDIO, VIDEO VA ELEKTRON KITOB KUTUBXONASI ── */}
+            {activeTab === 'library' && (
+              <div className="space-y-4">
+                <div className="space-y-0.5">
+                  <h2 className="text-lg font-bold text-foreground">Audio Konspektlar & Rasmiy Darsliklar</h2>
+                  <p className="text-xs text-muted-foreground">Kutubxona darsliklari, ekspert audio konspektlar va rasmiy BMB qo'llanmalari</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="rounded-2xl border border-border bg-card p-5 space-y-3">
+                    <div className="size-10 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center">
+                      <BookOpen className="size-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">DTM & BMB Rasmiy Darsliklar</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Maktab darsliklari va test savollariga asos bo'lgan barcha kitoblar PDF shaklida</p>
+                    </div>
+                    <Button size="sm" asChild className="w-full rounded-xl text-xs font-bold">
+                      <Link href="/library">
+                        <span>Kutubxonaga o'tish</span>
+                        <ArrowRight className="size-3.5 ml-1" />
+                      </Link>
+                    </Button>
+                  </Card>
+
+                  <Card className="rounded-2xl border border-border bg-card p-5 space-y-3">
+                    <div className="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 flex items-center justify-center">
+                      <Headphones className="size-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">5 Daqiqalik Audio Konspektlar</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Yo'lda yoki dam olayotganda mavzuni tezda takrorlash uchun audio darsliklar</p>
+                    </div>
+                    <Button size="sm" variant="outline" asChild className="w-full rounded-xl text-xs font-bold">
+                      <Link href="/study?tab=cheatsheets">
+                        <span>Audio darslarni tinglash</span>
+                        <ArrowRight className="size-3.5 ml-1" />
+                      </Link>
+                    </Button>
+                  </Card>
+
+                  <Card className="rounded-2xl border border-border bg-card p-5 space-y-3">
+                    <div className="size-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center">
+                      <Flame className="size-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">Bilim Reels: 60s Video Darslar</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Eng qiyin savollarning 60 soniyalik qisqa video tahlillari va sirlari</p>
+                    </div>
+                    <Button size="sm" variant="outline" asChild className="w-full rounded-xl text-xs font-bold">
+                      <Link href="/reels">
+                        <span>Reels tomosha qilish</span>
+                        <ArrowRight className="size-3.5 ml-1" />
+                      </Link>
+                    </Button>
+                  </Card>
+                </div>
+              </div>
+            )}
+
+            {/* ── 4-TAB: FOKUS XONASI (Faqat 'focus' tab tanlanganda ko'rinadi) ── */}
+            {activeTab === 'focus' && (
+              <div className="space-y-6">
             {/* ============================================================ */}
             {/* 🤖 AI MENTOR: BUGUN SIZ UCHUN TAVSIYA                        */}
             {/* ============================================================ */}
@@ -1102,6 +1360,8 @@ export default function StudyRoomPage() {
                 </Card>
               </div>
             </div>
+              </div>
+            )}
           </>
         )}
       </main>

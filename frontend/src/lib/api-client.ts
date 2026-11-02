@@ -52,41 +52,66 @@ async function refreshAccessToken(): Promise<string | null> {
     try {
       const state = useAuthStore.getState();
       const currentRefresh = state.refresh || (typeof window !== 'undefined' ? localStorage.getItem(REFRESH_KEY) : null);
-      if (!currentRefresh) return null;
 
-      const res = await fetch(`${API_URL}/api/auth/refresh/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh: currentRefresh }),
-      });
+      // 1. Birinchi navbatda Refresh Token orqali yangilab ko'ramiz
+      if (currentRefresh) {
+        try {
+          const res = await fetch(`${API_URL}/api/auth/refresh/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh: currentRefresh }),
+          });
 
-      if (!res.ok) {
-        // MUHIM: Faqat server token yaroqsiz deb 401 yoki 400 qaytargandagina logout qilish kerak!
-        // 500, 502, 503, 504 (server vaqtincha restart bo'layotgan) yoki 429 xatolarida sessiyani O'CHIRMASLIK kerak!
-        if (res.status === 401 || res.status === 400) {
-          useAuthStore.getState().logout();
-        }
-        return null;
-      }
-
-      const data = await res.json();
-      if (data.access) {
-        useAuthStore.getState().setAccess(data.access);
-        if (typeof window !== 'undefined') {
-          try {
-            localStorage.setItem(ACCESS_KEY, data.access);
-            if (data.refresh) {
-              localStorage.setItem(REFRESH_KEY, data.refresh);
-              useAuthStore.setState({ refresh: data.refresh });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.access) {
+              useAuthStore.getState().setAccess(data.access);
+              if (typeof window !== 'undefined') {
+                try {
+                  localStorage.setItem(ACCESS_KEY, data.access);
+                  if (data.refresh) {
+                    localStorage.setItem(REFRESH_KEY, data.refresh);
+                    useAuthStore.setState({ refresh: data.refresh });
+                  }
+                } catch { /* storage */ }
+              }
+              return data.access as string;
             }
-          } catch { /* storage */ }
+          }
+        } catch (err) {
+          console.warn('Token refresh network error:', err);
         }
-        return data.access as string;
       }
+
+      // 2. Agar refresh_token eskirgan yoki mavjud bo'lmasa, Telegram Mini App ichida avtomatik re-auth
+      if (typeof window !== 'undefined' && isTelegramEnv()) {
+        try {
+          const tg = (window as unknown as { Telegram?: { WebApp?: { initData?: string; initDataUnsafe?: { start_param?: string } } } }).Telegram?.WebApp;
+          const initData = tg?.initData;
+          if (initData) {
+            const res = await fetch(`${API_URL}/api/auth/telegram/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...miniAppHeader() },
+              body: JSON.stringify({ initData, start_param: tg?.initDataUnsafe?.start_param }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.access) {
+                useAuthStore.getState().setSession(data.access, data.refresh, data.user);
+                return data.access as string;
+              }
+            }
+          }
+        } catch (tgErr) {
+          console.warn('Telegram auto re-auth error:', tgErr);
+        }
+      }
+
+      // 3. Ikkala yo'l ham natija bermasa va refresh aniq yaroqsiz bo'lsa logout
+      useAuthStore.getState().logout();
       return null;
     } catch (err) {
-      // Tarmoq uzilishi yoki reload paytida so'rov bekor bo'lishi (Abort) — sessiyani o'chirmaslik kerak!
-      console.warn('Token refresh network error:', err);
+      console.warn('Token refresh fatal error:', err);
       return null;
     } finally {
       refreshPromise = null;
@@ -120,8 +145,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   let res: Response;
   try {
     res = await doFetch(access);
-    const hasRefresh = useAuthStore.getState().refresh || (typeof window !== 'undefined' && localStorage.getItem(REFRESH_KEY));
-    if (res.status === 401 && hasRefresh) {
+    if (res.status === 401) {
       access = await refreshAccessToken();
       if (access) {
         res = await doFetch(access);
@@ -160,8 +184,7 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   let res: Response;
   try {
     res = await doFetch(access);
-    const hasRefresh = useAuthStore.getState().refresh || (typeof window !== 'undefined' && localStorage.getItem(REFRESH_KEY));
-    if (res.status === 401 && hasRefresh) {
+    if (res.status === 401) {
       access = await refreshAccessToken();
       if (access) {
         res = await doFetch(access);

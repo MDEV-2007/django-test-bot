@@ -69,7 +69,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
-      { href: '/learning', label: '60s Anti-Darslik', icon: Brain, badge: '60s', glow: true, tone: 'amber', featureKey: 'learning', matchPrefixes: ['/learning'] },
+      { href: '/study', label: "O'rganish & Shpargalkalar", icon: Brain, badge: '60s', glow: true, tone: 'amber', featureKey: 'learning', matchPrefixes: ['/study', '/learning'] },
       { href: '/sprint', label: 'Mashq & 1v1 Arena', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint', '/battles'] },
       { href: '/tests', label: 'Imtihon Zali', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests'] },
       { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },

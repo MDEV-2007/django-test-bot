@@ -65,6 +65,7 @@ export default function TestScreenPage() {
   const [qIdx, setQIdx] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const [finishNetworkError, setFinishNetworkError] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showJumpDrawer, setShowJumpDrawer] = useState(false);
   const [answeredIdxs, setAnsweredIdxs] = useState<Set<number>>(new Set());
@@ -133,6 +134,54 @@ export default function TestScreenPage() {
   // Telegram'ning "orqaga" tugmasi ham xuddi sahifadagi chiqish tugmasi kabi
   // tasdiqlash modalini ochadi, imtihondan to'g'ridan-to'g'ri chiqarib yubormaydi.
   useTelegramBackButton(() => setShowExitModal(true));
+
+  // 45 Daqiqalik Imtihonda Javoblarni Yo'qotmaslik (Local Backup)
+  const backupKey = `ilmildizi_exam_backup_${attemptId}`;
+
+  // Mount paytida xotiradan tiklash
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(backupKey);
+      if (raw) {
+        const b = JSON.parse(raw);
+        let restored = false;
+        if (b.answers && typeof b.answers === 'object' && Object.keys(b.answers).length > 0) {
+          setDraftAnswersMap((prev) => ({ ...b.answers, ...prev }));
+          restored = true;
+        }
+        if (b.bubbleSheet && typeof b.bubbleSheet === 'object' && Object.keys(b.bubbleSheet).length > 0) {
+          setTitulAnswers((prev) => ({ ...b.bubbleSheet, ...prev }));
+          restored = true;
+        }
+        if (Array.isArray(b.answeredIdxs) && b.answeredIdxs.length > 0) {
+          setAnsweredIdxs((prev) => new Set([...prev, ...b.answeredIdxs]));
+          restored = true;
+        }
+        if (restored) {
+          toast.success("✅ Belgilangan javoblaringiz xotiradan tiklandi");
+        }
+      }
+    } catch (e) {
+      console.warn("Backup restore failed:", e);
+    }
+  }, [backupKey]);
+
+  // Har bir javob o'zgarganda avtomatik saqlash
+  useEffect(() => {
+    const hasAny = Object.keys(draftAnswersMap).length > 0 || Object.keys(titulAnswers).length > 0;
+    if (!hasAny) return;
+    try {
+      localStorage.setItem(backupKey, JSON.stringify({
+        answers: draftAnswersMap,
+        openAnswers: {},
+        bubbleSheet: titulAnswers,
+        answeredIdxs: Array.from(answeredIdxs),
+        updatedAt: Date.now(),
+      }));
+    } catch {
+      // quota or private mode fallback
+    }
+  }, [backupKey, draftAnswersMap, titulAnswers, answeredIdxs]);
 
   // Zen Mode: imtihon davomida sidebar/header/tab-bar yashiriladi.
   useEffect(() => {
@@ -413,6 +462,7 @@ export default function TestScreenPage() {
     }
 
     setFinishing(true);
+    setFinishNetworkError(false);
     try {
       await apiFetch(`/api/tests/attempts/${attemptId}/finish/`, {
         method: 'POST',
@@ -420,15 +470,18 @@ export default function TestScreenPage() {
       });
       soundFX.fanfare();
       tgHaptic('success');
-      // Tozalash
+      // Muvaffaqiyatli topshirilgachгина tozalaymiz
       try {
         localStorage.removeItem(pendingKey);
         localStorage.removeItem(cacheKey);
+        localStorage.removeItem(`ilmildizi_exam_backup_${attemptId}`);
       } catch { /* noop */ }
       try { celebrate({ particleCount: 80, spread: 70, origin: { y: 0.6 } }); } catch { /* noop */ }
       router.push(`/tests/${attemptId}/feedback`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Xatolik');
+      setError("Tarmoq xatosi — javoblaringiz xavfsiz saqlandi.");
+      setFinishNetworkError(true);
+      toast.error("🔄 Tarmoq xatosi — javoblaringiz xavfsiz saqlandi. Qayta yuborish tugmasini bosing.");
       tgHaptic('error');
       setFinishing(false);
     }

@@ -12,6 +12,7 @@ import {
   Clock, FileEdit, Headphones, LayoutGrid, Loader2, LogOut, ShieldAlert, Sparkles, X,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import {
   useIsTelegram, useTelegramBackButton, useTelegramClosingConfirmation,
@@ -79,6 +80,7 @@ export default function CefrExamPage() {
   const [showExit, setShowExit] = useState(false);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [finishNetworkError, setFinishNetworkError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
@@ -123,6 +125,48 @@ export default function CefrExamPage() {
     localStorage.setItem(`ilm_flags_${attemptId}`, JSON.stringify([...flagged]));
   }, [attemptId, flagged]);
 
+  // Mahalliy zaxira (45 daqiqalik mehnatingizni yo'qotmaslik uchun)
+  const backupKey = `ilmildizi_exam_backup_${attemptId}`;
+
+  const saveLocalBackup = useCallback((examObj: CefrExam) => {
+    try {
+      const answers: Record<number, { choice_id?: number | null; group_option_id?: number | null; matches?: Record<string, string> }> = {};
+      const openAnswers: Record<number, string> = {};
+
+      const extractQ = (q: CefrQuestion) => {
+        if (q.selected_choice_id != null || q.selected_group_option_id != null || q.matching_rows) {
+          const matchMap: Record<string, string> = {};
+          if (q.matching_rows) {
+            for (const r of q.matching_rows) {
+              if (r.selected_right_key) matchMap[r.left_key] = r.selected_right_key;
+            }
+          }
+          answers[q.id] = {
+            choice_id: q.selected_choice_id,
+            group_option_id: q.selected_group_option_id,
+            matches: Object.keys(matchMap).length > 0 ? matchMap : undefined,
+          };
+        }
+        if (q.text_answer) {
+          openAnswers[q.id] = q.text_answer;
+        }
+      };
+
+      for (const s of examObj.sections) {
+        for (const q of s.questions) extractQ(q);
+      }
+      for (const q of examObj.loose_questions) extractQ(q);
+
+      localStorage.setItem(backupKey, JSON.stringify({
+        answers,
+        openAnswers,
+        updatedAt: Date.now(),
+      }));
+    } catch {
+      // ignore
+    }
+  }, [backupKey]);
+
   // Tugallangan bo'limlarni saqlash va yuklash
   useEffect(() => {
     const saved = localStorage.getItem(`ilm_completed_skills_${attemptId}`);
@@ -151,6 +195,56 @@ export default function CefrExamPage() {
     if (!access) return;
     apiFetch<CefrExam>(`/api/tests/attempts/${attemptId}/exam/`)
       .then((data) => {
+        // Agar xotirada saqlangan javoblar bo'lsa, ularni tiklaymiz
+        try {
+          const rawBackup = localStorage.getItem(`ilmildizi_exam_backup_${attemptId}`);
+          if (rawBackup) {
+            const b = JSON.parse(rawBackup);
+            const savedAns = b?.answers || {};
+            const savedOpen = b?.openAnswers || {};
+            let restoredCount = 0;
+
+            const patchQ = (q: CefrQuestion): CefrQuestion => {
+              const a = savedAns[q.id];
+              const t = savedOpen[q.id];
+              if (!a && t === undefined) return q;
+
+              const next = { ...q };
+              if (a) {
+                if (a.choice_id !== undefined) { next.selected_choice_id = a.choice_id; restoredCount++; }
+                if (a.group_option_id !== undefined) { next.selected_group_option_id = a.group_option_id; restoredCount++; }
+                if (a.matches && next.matching_rows) {
+                  next.matching_rows = next.matching_rows.map((row) => ({
+                    ...row,
+                    selected_right_key: a.matches[row.left_key] || row.selected_right_key,
+                  }));
+                  restoredCount++;
+                }
+              }
+              if (t !== undefined) {
+                next.text_answer = t;
+                restoredCount++;
+              }
+              next.answered = Boolean(
+                next.selected_choice_id ??
+                next.selected_group_option_id ??
+                (String(next.text_answer ?? '').trim().length > 0)
+              );
+              return next;
+            };
+
+            if (Object.keys(savedAns).length > 0 || Object.keys(savedOpen).length > 0) {
+              data.sections = data.sections.map((s) => ({ ...s, questions: s.questions.map(patchQ) }));
+              data.loose_questions = data.loose_questions.map(patchQ);
+              if (restoredCount > 0) {
+                toast.success("✅ Belgilangan javoblaringiz xotiradan tiklandi");
+              }
+            }
+          }
+        } catch (backupErr) {
+          console.warn("Backup restore failed:", backupErr);
+        }
+
         setExam(data);
         setSecondsLeft(data.seconds_left);
         setAnnotations(data.annotations ?? {});
@@ -273,11 +367,13 @@ export default function CefrExamPage() {
             );
         return next;
       };
-      return {
+      const updated: CefrExam = {
         ...prev,
         sections: prev.sections.map((s) => ({ ...s, questions: s.questions.map(patch) })),
         loose_questions: prev.loose_questions.map(patch),
       };
+      saveLocalBackup(updated);
+      return updated;
     });
 
     if (!isText) { void sendAnswer(question.id, payload); return; }
@@ -334,12 +430,20 @@ export default function CefrExamPage() {
 
   async function finish() {
     setFinishing(true);
+    setFinishNetworkError(false);
     try {
       await apiFetch(`/api/tests/attempts/${attemptId}/finish/`, { method: 'POST', body: '{}' });
+      try {
+        localStorage.removeItem(`ilmildizi_exam_backup_${attemptId}`);
+        localStorage.removeItem(`ilm_completed_skills_${attemptId}`);
+        localStorage.removeItem(`ilm_flags_${attemptId}`);
+      } catch { /* storage */ }
       router.push(`/tests/${attemptId}/feedback`);
-    } catch {
+    } catch (err) {
       setFinishing(false);
-      setError('Testni yakunlab bo\'lmadi. Qaytadan urinib ko\'ring.');
+      setFinishNetworkError(true);
+      setError("Tarmoq xatosi — javoblaringiz xavfsiz saqlandi.");
+      toast.error("🔄 Tarmoq xatosi — javoblaringiz xavfsiz saqlandi. Qayta yuborish tugmasini bosing.");
     }
   }
 
@@ -1396,6 +1500,14 @@ export default function CefrExamPage() {
               </p>
             </div>
 
+            {finishNetworkError && (
+              <div className="w-full p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between gap-2">
+                <span>🔄 Tarmoq xatosi — javoblaringiz xavfsiz saqlandi.</span>
+                <Button size="sm" variant="outline" onClick={finish} disabled={finishing} className="shrink-0 border-amber-500/40 text-white hover:bg-amber-500/20">
+                  Qayta yuborish
+                </Button>
+              </div>
+            )}
             <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-3 pt-3">
               <Button
                 variant="outline"
