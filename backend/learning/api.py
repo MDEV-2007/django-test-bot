@@ -389,6 +389,8 @@ CURATED_DECKS = [
     },
 ]
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def flashcards_decks_api(request):
     """Returns all available flashcard decks categorized by subject."""
     # Also incorporate database flashcards from lessons
@@ -447,32 +449,61 @@ def flashcards_deck_detail_api(request, deck_id):
     """Returns details and all cards of a flashcard deck."""
     # Check curated decks first
     for d in CURATED_DECKS:
-        if d['id'] == deck_id:
+        if str(d['id']) == str(deck_id):
             return Response(d)
 
+    # Check database FlashcardDeck
+    if str(deck_id).startswith('deck_'):
+        deck_num = str(deck_id).replace('deck_', '')
+        if deck_num.isdigit():
+            from .models import FlashcardDeck
+            fd = FlashcardDeck.objects.filter(id=int(deck_num)).first()
+            if fd:
+                cards = [
+                    {
+                        'id': c.id,
+                        'front': c.front,
+                        'back': c.back,
+                        'hint': c.mnemonic_tip or c.example_or_context or "Eslab qoling"
+                    }
+                    for c in fd.cards.all()
+                ]
+                return Response({
+                    'id': f"deck_{fd.id}",
+                    'title': fd.title,
+                    'subject': fd.subject.name if fd.subject else "Tarix",
+                    'subject_slug': fd.subject.slug if fd.subject else "tarix",
+                    'icon': fd.icon or "Zap",
+                    'description': f"{fd.title} bo'yicha interaktiv yodlash kartalari.",
+                    'difficulty': fd.level or "O'rta",
+                    'xp_reward': 25,
+                    'cards': cards,
+                })
+
     # Check lesson deck
-    lesson = Lesson.objects.filter(id=deck_id, is_published=True).first()
-    if lesson:
-        cards = [
-            {
-                'id': f.id,
-                'front': f.front,
-                'back': f.back,
-                'hint': "Darslik ma'lumoti"
-            }
-            for f in lesson.flashcards.all()
-        ]
-        return Response({
-            'id': lesson.id,
-            'title': lesson.title,
-            'subject': lesson.topic.subject.name if lesson.topic and lesson.topic.subject else "Tarix",
-            'subject_slug': lesson.topic.subject.slug if lesson.topic and lesson.topic.subject else "tarix",
-            'icon': "Layers",
-            'description': f"{lesson.title} bo'yicha interaktiv yodlash kartalari.",
-            'difficulty': "O'rta",
-            'xp_reward': 20,
-            'cards': cards,
-        })
+    if str(deck_id).isdigit():
+        lesson = Lesson.objects.filter(id=int(deck_id), is_published=True).first()
+        if lesson:
+            cards = [
+                {
+                    'id': f.id,
+                    'front': f.front,
+                    'back': f.back,
+                    'hint': "Darslik ma'lumoti"
+                }
+                for f in lesson.flashcards.all()
+            ]
+            return Response({
+                'id': lesson.id,
+                'title': lesson.title,
+                'subject': lesson.topic.subject.name if lesson.topic and lesson.topic.subject else "Tarix",
+                'subject_slug': lesson.topic.subject.slug if lesson.topic and lesson.topic.subject else "tarix",
+                'icon': "Layers",
+                'description': f"{lesson.title} bo'yicha interaktiv yodlash kartalari.",
+                'difficulty': "O'rta",
+                'xp_reward': 20,
+                'cards': cards,
+            })
 
     return Response({'error': "To'plam topilmadi"}, status=404)
 

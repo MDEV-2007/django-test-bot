@@ -125,7 +125,8 @@ class Flashcard(models.Model):
         return self.back
 
     def __str__(self):
-        return f"Flashcard for {self.lesson.title}"
+        title = self.lesson.title if self.lesson else (self.deck.title if self.deck else (self.front[:30] if self.front else str(self.id)))
+        return f"Flashcard for {title}"
 
 class Bookmark(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='bookmarks')
