@@ -54,6 +54,9 @@ export default function AutoShareModal({
       );
 
       toast.success(res.message);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('stories_updated'));
+      }
       if (onShared) onShared();
       onClose();
     } catch (e) {
@@ -117,7 +120,7 @@ export default function AutoShareModal({
             className="w-full h-12 bg-gradient-to-r from-orange-500 via-red-500 to-amber-500 hover:from-orange-600 hover:to-red-600 text-white font-extrabold rounded-2xl text-sm transition-transform active:scale-95 flex items-center justify-center gap-2"
           >
             <Share2 className="size-4" />
-            <span>{sharing ? "Ulashilmoqda..." : "🔥 Lentaga 1-bosishda ulashish (+15 XP)"}</span>
+            <span>{sharing ? "Ulashilmoqda..." : "🔥 Lenta va Story'ga ulashish (+15 XP)"}</span>
           </Button>
 
           <Button

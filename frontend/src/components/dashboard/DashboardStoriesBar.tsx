@@ -35,33 +35,42 @@ export default function DashboardStoriesBar() {
   const [leadSuccess, setLeadSuccess] = useState(false);
   const [stories, setStories] = useState<DashboardStory[]>([]);
 
-  useEffect(() => {
-    async function loadStories() {
-      try {
-        const res = await apiFetch<{ stories: any[] }>('/api/learning/stories/');
-        if (res?.stories && res.stories.length > 0) {
-          const mapped: DashboardStory[] = res.stories.map((s) => ({
-            id: s.id,
-            name: s.author_name,
-            avatar: s.avatar,
-            tagline: s.badge || "Story",
-            badge: s.badge || "Yutuq",
-            isVip: s.story_type === 'promo',
-            storyTitle: s.title,
-            storyBody: s.caption,
-            ctaText: s.cta_text,
-            ctaLink: s.cta_link,
-          }));
-          setStories(mapped);
-        } else {
-          setStories([]);
-        }
-      } catch (e) {
+  const loadStories = React.useCallback(async () => {
+    try {
+      const res = await apiFetch<{ stories: any[] }>('/api/learning/stories/');
+      if (res?.stories && res.stories.length > 0) {
+        const mapped: DashboardStory[] = res.stories.map((s) => ({
+          id: s.id,
+          name: s.author_name,
+          avatar: s.avatar,
+          tagline: s.badge || "Story",
+          badge: s.badge || "Yutuq",
+          isVip: s.story_type === 'promo',
+          storyTitle: s.title,
+          storyBody: s.caption,
+          ctaText: s.cta_text,
+          ctaLink: s.cta_link,
+        }));
+        setStories(mapped);
+      } else {
         setStories([]);
       }
+    } catch (e) {
+      setStories([]);
     }
-    loadStories();
   }, []);
+
+  useEffect(() => {
+    loadStories();
+
+    const handleStoriesUpdated = () => {
+      loadStories();
+    };
+    window.addEventListener('stories_updated', handleStoriesUpdated);
+    return () => {
+      window.removeEventListener('stories_updated', handleStoriesUpdated);
+    };
+  }, [loadStories]);
 
   // Story timer
   useEffect(() => {
@@ -309,6 +318,9 @@ export default function DashboardStoriesBar() {
       <AutoShareModal
         open={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
+        onShared={() => {
+          loadStories();
+        }}
         title="Bugungi DTM Natijam! 🎯"
         subjectName="Tarix"
         correctCount={28}

@@ -1100,6 +1100,27 @@ def community_post_create_api(request):
         custom_image=custom_img,
     )
 
+    # 24 soatlik Rasmiy CommunityStory ham yaratamiz
+    try:
+        from datetime import timedelta
+        from django.utils import timezone
+        from learning.models import CommunityStory
+
+        story_badge = f"🏆 {grade}" if post_type == 'certificate' else f"🎯 {score}%"
+        CommunityStory.objects.create(
+            author=request.user,
+            story_type='certificate' if post_type == 'certificate' else 'streak',
+            exam_track='ALL',
+            title=f"🏆 {title}" if post_type == 'certificate' else title,
+            caption=caption or f"{subject_name} fanidan {score}% natija qayd etildi!",
+            badge=story_badge,
+            cta_text="Sinovdan o'tish 📝",
+            cta_link=f"/tests/{attempt.test_id}" if attempt.test_id else "/tests",
+            expires_at=timezone.now() + timedelta(hours=24),
+        )
+    except Exception:
+        pass
+
     # O'quvchiga +15 XP bonus beramiz
     profile = request.user.profile
     profile.xp += 15
@@ -1482,10 +1503,33 @@ def community_auto_post_api(request):
             exam_track=exam_track,
             poll_data=poll_data,
         )
+
+        # SOS Story'sini 24 soatga yaratamiz
+        try:
+            from datetime import timedelta
+            from django.utils import timezone
+            from learning.models import CommunityStory
+
+            CommunityStory.objects.create(
+                author=user,
+                story_type='streak',
+                exam_track='ALL',
+                title=title,
+                caption=question_text[:120] if question_text else caption,
+                badge="🙋 SOS Savol",
+                cta_text="Yordam berish ✍️",
+                cta_link="/feed",
+                expires_at=timezone.now() + timedelta(hours=24),
+            )
+        except Exception:
+            pass
     else:
         # Avto-Yutuq / Streak / Daraxt posti
         title = request.data.get('title') or "Ilm Ildizim yangi bosqichga ko'tarildi! 🌳"
         caption = request.data.get('caption') or f"Bugun {subject_name} bo'yicha ajoyib natija ko'rsatdim. Kim 1v1 Arena dueliga tayyor? 🔥"
+        score_val = request.data.get('score')
+        correct_val = int(request.data.get('correct_count', 0))
+        total_val = int(request.data.get('total_questions', 0))
 
         post = CommunityPost.objects.create(
             author=user,
@@ -1495,10 +1539,37 @@ def community_auto_post_api(request):
             subject_slug=subject_slug,
             caption=caption,
             exam_track=exam_track,
-            score=request.data.get('score'),
-            correct_count=int(request.data.get('correct_count', 0)),
-            total_questions=int(request.data.get('total_questions', 0)),
+            score=score_val,
+            correct_count=correct_val,
+            total_questions=total_val,
         )
+
+        # 24 soatlik Rasmiy Avto-Yutuq Story'sini yaratamiz
+        try:
+            from datetime import timedelta
+            from django.utils import timezone
+            from learning.models import CommunityStory
+
+            if total_val > 0:
+                story_badge = f"🎯 {correct_val}/{total_val}"
+            elif score_val:
+                story_badge = f"🔥 {score_val}% Natija"
+            else:
+                story_badge = "⚡ Yangi Yutuq"
+
+            CommunityStory.objects.create(
+                author=user,
+                story_type='streak',
+                exam_track='ALL',
+                title=title,
+                caption=caption,
+                badge=story_badge,
+                cta_text="1v1 Duelga chorlash ⚔️",
+                cta_link="/battles",
+                expires_at=timezone.now() + timedelta(hours=24),
+            )
+        except Exception:
+            pass
 
     # Foydalanuvchiga +15 XP bonus
     if profile:
@@ -1507,7 +1578,7 @@ def community_auto_post_api(request):
 
     return Response({
         'success': True,
-        'message': "Post muvaffaqiyatli lentaga chiqarildi! (+15 XP berildi 🔥)",
+        'message': "Natijangiz Lenta va Story'ga muvaffaqiyatli joylandi! (+15 XP berildi 🔥)",
         'post': post.to_dict(current_user=user),
     })
 
@@ -1572,6 +1643,7 @@ def community_stories_api(request):
     from datetime import timedelta
     from django.utils import timezone
     from learning.models import CommunityStory
+    from django.db.models import Q
 
     user_track = 'DTM_SERTIFIKAT'
     if request.user.is_authenticated:
@@ -1582,23 +1654,80 @@ def community_stories_api(request):
     now = timezone.now()
     stories_qs = CommunityStory.objects.filter(
         expires_at__gt=now,
-    ).filter(Q(exam_track=user_track) | Q(exam_track='ALL'))[:15]
+    ).filter(
+        Q(exam_track='ALL') | Q(exam_track=user_track) | Q(story_type__in=['streak', 'certificate'])
+    ).select_related('author', 'author__profile', 'center').order_by('-created_at')[:25]
 
     stories_data = []
     for s in stories_qs:
+        author_name = s.author.get_full_name() or s.author.username if s.author else (s.center.name if s.center else "IlmIldizi")
+        avatar = ''
+        if s.author:
+            prof = getattr(s.author, 'profile', None)
+            avatar = getattr(prof, 'avatar_url', '') if prof else ''
+            if not avatar:
+                avatar = f"https://api.dicebear.com/7.x/adventurer/svg?seed={s.author.username}"
+        elif s.center:
+            avatar = s.center.logo_url or ''
+
         stories_data.append({
             'id': s.id,
-            'author_name': s.author.get_full_name() or s.author.username if s.author else (s.center.name if s.center else "IlmIldizi"),
-            'avatar': getattr(s.author.profile, 'avatar_url', '') if s.author and hasattr(s.author, 'profile') else (s.center.logo_url if s.center else ''),
+            'author_name': author_name,
+            'avatar': avatar,
             'story_type': s.story_type,
             'title': s.title,
             'caption': s.caption,
             'media_url': s.media_url,
-            'badge': s.badge or ('🔥 30 Kun' if s.story_type == 'streak' else '🎯 Homiylik'),
-            'cta_text': s.cta_text,
-            'cta_link': s.cta_link,
+            'badge': s.badge or ('🔥 30 Kun' if s.story_type == 'streak' else '🎯 Yutuq'),
+            'cta_text': s.cta_text or "1v1 Duelga chorlash ⚔️",
+            'cta_link': s.cta_link or "/battles",
             'views_count': s.views_count,
             'created_at': s.created_at.strftime('%H:%M'),
         })
 
     return Response({'stories': stories_data})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_story_create_api(request):
+    """Foydalanuvchi tomonidan to'g'ridan-to'g'ri yangi 24 soatlik Story joylash."""
+    from datetime import timedelta
+    from django.utils import timezone
+    from learning.models import CommunityStory
+
+    user = request.user
+    title = (request.data.get('title') or "Bugungi Natijam! 🔥").strip()
+    caption = (request.data.get('caption') or "Bilim sinovidan o'tdim. Siz ham o'zingizni sinab ko'ring!").strip()
+    badge = (request.data.get('badge') or "⚡ Yutuq").strip()
+    cta_text = request.data.get('cta_text') or "1v1 Duelga chorlash ⚔️"
+    cta_link = request.data.get('cta_link') or "/battles"
+    story_type = request.data.get('story_type', 'streak')
+
+    story = CommunityStory.objects.create(
+        author=user,
+        story_type=story_type,
+        exam_track='ALL',
+        title=title,
+        caption=caption,
+        badge=badge,
+        cta_text=cta_text,
+        cta_link=cta_link,
+        expires_at=timezone.now() + timedelta(hours=24),
+    )
+
+    profile = getattr(user, 'profile', None)
+    if profile:
+        profile.xp += 15
+        profile.save(update_fields=['xp'])
+
+    return Response({
+        'success': True,
+        'message': "Story muvaffaqiyatli joylandi! (+15 XP berildi 🔥)",
+        'story': {
+            'id': story.id,
+            'title': story.title,
+            'caption': story.caption,
+            'badge': story.badge,
+        }
+    })

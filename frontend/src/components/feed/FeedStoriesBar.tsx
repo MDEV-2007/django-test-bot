@@ -39,21 +39,30 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
   const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    async function loadStories() {
-      try {
-        const res = await apiFetch<{ stories: StoryItem[] }>('/api/learning/stories/');
-        if (res && res.stories) {
-          setStories(res.stories);
-        } else {
-          setStories([]);
-        }
-      } catch (e) {
+  const loadStories = React.useCallback(async () => {
+    try {
+      const res = await apiFetch<{ stories: StoryItem[] }>('/api/learning/stories/');
+      if (res && res.stories) {
+        setStories(res.stories);
+      } else {
         setStories([]);
       }
+    } catch (e) {
+      setStories([]);
     }
+  }, []);
+
+  useEffect(() => {
     loadStories();
-  }, [examTrack]);
+
+    const handleStoriesUpdated = () => {
+      loadStories();
+    };
+    window.addEventListener('stories_updated', handleStoriesUpdated);
+    return () => {
+      window.removeEventListener('stories_updated', handleStoriesUpdated);
+    };
+  }, [examTrack, loadStories]);
 
   // Story progress timer
   useEffect(() => {

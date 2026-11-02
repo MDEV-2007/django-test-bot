@@ -64,7 +64,10 @@ export default function ShareToCommunityModal({
       if (res.success) {
         soundFX.fanfare();
         celebrate();
-        toast.success(res.message || "Natijangiz Hamjamiyat lentasiga joylandi!");
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('stories_updated'));
+        }
+        toast.success(res.message || "Natijangiz Lenta va Story'ga muvaffaqiyatli joylandi! (+15 XP)");
         onOpenChange(false);
         if (onSuccess) onSuccess();
         // Hamjamiyat sahifasiga o'tish taklifi

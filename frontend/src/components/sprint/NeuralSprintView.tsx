@@ -61,7 +61,10 @@ export default function NeuralSprintView({
         }),
       });
       soundFX.fanfare();
-      toast.success("🔥 Natijangiz Hamjamiyat lentasiga avtomatik post bo'lib joylandi! +15 XP");
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('stories_updated'));
+      }
+      toast.success("🔥 Natijangiz Hamjamiyat va Story'ga avtomatik joylandi! +15 XP");
     } catch (err: any) {
       toast.error(err.message || "Lentaga joylashda xatolik yuz berdi");
     } finally {
@@ -86,7 +89,10 @@ export default function NeuralSprintView({
         }),
       });
       soundFX.fanfare();
-      toast.success("🙋‍♂️ Savol Hamjamiyat lentasiga SOS So'rovnoma bo'lib tushdi! Bilimdonlar javob berishmoqda.");
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('stories_updated'));
+      }
+      toast.success("🙋‍♂️ Savol Hamjamiyat va Story'ga SOS bo'lib tushdi! Bilimdonlar javob berishmoqda.");
       dismissExplanation();
     } catch (err: any) {
       toast.error(err.message || "Lentaga so'rov yuborishda xatolik yuz berdi");

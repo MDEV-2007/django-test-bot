@@ -209,8 +209,11 @@ function MistakeSosButton({ mistake }: { mistake: Mistake }) {
         }),
       });
       soundFX.fanfare();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('stories_updated'));
+      }
       setSent(true);
-      toast.success("🙋‍♂️ Savol Hamjamiyat lentasiga SOS so'rovnoma bo'lib joylandi! +10 XP");
+      toast.success("🙋‍♂️ Savol Hamjamiyat lentasi va Story'ga SOS so'rovnoma bo'lib joylandi! +10 XP");
     } catch (e: any) {
       toast.error(e.message || "Lentaga yuborishda xatolik");
     } finally {

@@ -26,6 +26,7 @@ urlpatterns = [
     path('feed/<int:post_id>/pin/', api.community_post_pin_api, name='community_post_pin'),
     path('feed/<int:post_id>/vote-poll/', api.community_post_vote_poll_api, name='community_post_vote_poll'),
     path('stories/', api.community_stories_api, name='community_stories'),
+    path('stories/create/', api.community_story_create_api, name='community_story_create'),
     # Kutubxona (Library)
     path('library/', api.library_books_api, name='library_books'),
     path('library/<int:book_id>/', api.library_book_detail_api, name='library_book_detail'),
