@@ -129,53 +129,57 @@ export default function LiveRepublicBanner({
       <div className="pointer-events-none absolute -top-12 -left-12 size-36 bg-rose-500/15 rounded-full blur-2xl" />
       <div className="pointer-events-none absolute -bottom-12 -right-12 size-36 bg-orange-500/15 rounded-full blur-2xl" />
 
-      <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
-        {/* ── Chapda: Jonli pulsatsiyalanuvchi nuqta va Sarlavha (Kesiq bo'lmaydi) ── */}
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 w-full md:w-auto">
-          <div className="relative flex items-center justify-center size-3.5 shrink-0">
+      <div className="relative flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3.5 sm:gap-4">
+        {/* ── Chapda: Jonli pulsatsiyalanuvchi nuqta va Sarlavha ── */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 w-full xl:w-auto">
+          <div className="relative flex items-center justify-center size-3.5 shrink-0 mt-0.5 sm:mt-0">
             <span className="absolute size-full rounded-full bg-rose-500 animate-ping opacity-75" />
             <span className="relative size-2.5 rounded-full bg-rose-500" />
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-extrabold text-xs sm:text-sm tracking-wide uppercase text-white flex items-center gap-1.5">
-                <span>JONLI RESPUBLIKA SPRINTI</span>
-                <span className="text-orange-400 font-mono font-bold">• 20:30</span>
+              <span className="font-black text-xs sm:text-sm md:text-base tracking-wide uppercase text-white whitespace-nowrap">
+                JONLI RESPUBLIKA SPRINTI
               </span>
-              <span className="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/40 whitespace-nowrap">
+                • 20:30
+              </span>
+              <span className="inline-flex px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-500/25 text-rose-300 border border-rose-500/40 uppercase tracking-wider whitespace-nowrap">
                 Turnir
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-zinc-300 mt-1 leading-snug">
               Respublika bo&apos;yicha bir vaqtda jonli start • ELO va Reyting bellashuvi
             </p>
           </div>
         </div>
 
         {/* ── O'ngda: Avatarlar + Teskari taymer + Harakat tugmasi ── */}
-        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5 sm:gap-3 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
-          {/* Ustma-ust joylashgan avatarlar */}
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-zinc-950/60 border border-white/5">
-            <div className="flex items-center -space-x-2">
-              {PARTICIPANT_AVATARS.slice(0, 3).map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt="Ishtirokchi"
-                  className="size-5 sm:size-6 rounded-full border border-zinc-900 bg-zinc-800 object-cover"
-                />
-              ))}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between xl:justify-end gap-2.5 sm:gap-3 w-full xl:w-auto shrink-0 pt-2.5 xl:pt-0 border-t xl:border-t-0 border-white/10">
+          <div className="flex items-center justify-between sm:justify-start gap-2.5 shrink-0">
+            {/* Ustma-ust joylashgan avatarlar */}
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-zinc-950/70 border border-white/10 shadow-xs">
+              <div className="flex items-center -space-x-2">
+                {PARTICIPANT_AVATARS.slice(0, 3).map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt="Ishtirokchi"
+                    className="size-5 sm:size-6 rounded-full border border-zinc-900 bg-zinc-800 object-cover"
+                  />
+                ))}
+              </div>
+              <span className="text-[11px] font-bold text-zinc-300 whitespace-nowrap">
+                +{registeredCount} kutishda
+              </span>
             </div>
-            <span className="text-[11px] font-semibold text-zinc-300">
-              +{registeredCount} kutishda
-            </span>
-          </div>
 
-          {/* Monospace taymer */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-950/80 border border-white/10 text-xs font-mono font-bold text-orange-400 shrink-0">
-            <Clock className="size-3.5 text-orange-400 animate-pulse" />
-            <span>⏳ {timeLeft}</span>
+            {/* Monospace taymer */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950/80 border border-orange-500/30 text-xs font-mono font-black text-orange-400 shadow-xs whitespace-nowrap">
+              <Clock className="size-3.5 text-orange-400 animate-pulse shrink-0" />
+              <span>⏳ {timeLeft}</span>
+            </div>
           </div>
 
           {/* Tugma: Agar turnir boshlangan bo'lsa 'Turnirga Kirish', bo'lmasa 'Ro'yxatdan o'tish' */}
@@ -183,12 +187,12 @@ export default function LiveRepublicBanner({
             type="button"
             onClick={handleAction}
             className={cn(
-              'h-9 sm:h-10 px-3.5 sm:px-4 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-[0.98] cursor-pointer shrink-0',
+              'w-full sm:w-auto h-10 sm:h-11 px-4 sm:px-5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap',
               isLiveOpen
                 ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-emerald-500/30 animate-pulse'
                 : isRegistered
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                : 'bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white shadow-rose-600/30'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
+                : 'bg-gradient-to-r from-orange-500 via-rose-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white shadow-rose-600/35 hover:shadow-rose-600/50'
             )}
           >
             {isLiveOpen ? (
