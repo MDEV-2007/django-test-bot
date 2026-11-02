@@ -113,11 +113,11 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     topic = loop.topic
     subject = loop.subject or (topic.subject if topic else None)
 
-    # 1. STAGE 1: WARMUP (60s Shpargalka)
+    # 1. STAGE 1: WARMUP (90s Shpargalka)
     warmup_data = {
         'title': topic.title if topic else (subject.name if subject else "Umumiy Tayyorgarlik"),
         'subject_name': subject.name if subject else "DTM Fanlari",
-        'duration_seconds': 60,
+        'duration_seconds': 90,
         'summary_bullets': [
             "BMB/DTM standartidagi eng ko'p tushadigan 3 ta savol mexanizmi.",
             "Asosiy formulalar va kalit atamalar: chalkashuvchi nuqtalar tahlili.",
@@ -129,14 +129,14 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
             "3-Qopqon: Inkor qo'shimchalari ('...emas', '...xato')ga e'tiborsizlik.",
         ],
         'cheat_sheet_content': (
-            f"⚡ 60s ANTI-DARSLIK SHPARGALKA: {topic.title if topic else 'Mavzu'}\n\n"
+            f"⚡ 90s ANTI-DARSLIK SHPARGALKA: {topic.title if topic else 'Mavzu'}\n\n"
             f"Ushbu mavzu bo'yicha DTM imtihonida har yili o'rtacha 2-3 ta asosiy test savoli tushadi. "
             f"Asosiy e'tiborni qoidalar ketma-ketligiga va variantlar orasidagi nozik farqlarga qarating. "
             f"Sprint davomida tezlik va aniqlik yuqori Combo ko'paytirgichini faollashtiradi!"
         )
     }
 
-    # 2. STAGE 2: SPRINT SAVOLLARI (10-12 ta)
+    # 2. STAGE 2: SPRINT SAVOLLARI (15 ta savol + Qasos)
     q_filter = Q()
     if topic:
         q_filter |= Q(topic=topic)
@@ -144,15 +144,15 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
         q_filter |= Q(test__subject=subject)
 
     questions_qs = Question.objects.filter(q_filter).prefetch_related('options').distinct()
-    if questions_qs.count() < 10:
-        questions_qs = Question.objects.all().prefetch_related('options')[:15]
+    if questions_qs.count() < 15:
+        questions_qs = Question.objects.all().prefetch_related('options')[:20]
     else:
-        questions_qs = questions_qs[:15]
+        questions_qs = questions_qs[:20]
 
     sprint_questions = [_format_question_dict(q) for q in questions_qs]
     # Agar savollar kam bo'lsa zaxiradan to'ldiramiz
     if not sprint_questions:
-        all_q = Question.objects.prefetch_related('options')[:10]
+        all_q = Question.objects.prefetch_related('options')[:15]
         sprint_questions = [_format_question_dict(q) for q in all_q]
 
     # 3. STAGE 3: CLEANUP (Flashcards for Session Mistakes)
@@ -207,7 +207,7 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
         'warmup': warmup_data,
         'sprint': {
             'questions': sprint_questions,
-            'target_count': min(10, len(sprint_questions)),
+            'target_count': min(15, len(sprint_questions)),
         },
         'cleanup': {
             'cards': cleanup_cards,
@@ -447,6 +447,7 @@ class RestartCycleView(APIView):
         ).order_by('-cycle_number').first()
 
         new_cycle_number = (last_loop.cycle_number + 1) if last_loop else 1
+        combo = 2.0 if new_cycle_number == 2 else 2.5
 
         # Keyingi yangi mavzuni tanlaymiz
         new_topic = Topic.objects.order_by('?').first()
@@ -458,7 +459,7 @@ class RestartCycleView(APIView):
             topic=new_topic,
             subject=new_topic.subject if new_topic else None,
             current_stage=DailyLearningLoop.STAGE_1_WARMUP,
-            combo_multiplier=2.5,  # Super-Combo faollashadi!
+            combo_multiplier=combo,  # 2-raund 2.0x, 3-raund 2.5x Super-Combo!
             dtm_score_delta=0.4,
         )
 

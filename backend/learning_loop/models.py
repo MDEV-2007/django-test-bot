@@ -168,7 +168,7 @@ class UserEcoTree(models.Model):
         return False
 
     def water(self, amount: int = 35) -> dict:
-        """Daraxtga suv quyish va o'sish dinamikasi."""
+        """Daraxtga suv quyish va o'sish dinamikasi (Multi-cycle 3 raundlik marafon)."""
         self.check_daily_decay()
         prev_stage = self.growth_stage
         self.water_level = min(100, self.water_level + amount)
@@ -178,12 +178,16 @@ class UserEcoTree(models.Model):
 
         leveled_up = False
         if self.water_level >= 100:
-            if self.growth_stage < self.STAGE_GOLDEN_ROOT:
-                self.growth_stage += 1
-                self.water_level = 40  # Keyingi bosqich uchun boshlang'ich suv
+            if self.growth_stage < self.STAGE_GREAT_OAK:
+                self.growth_stage = self.STAGE_GREAT_OAK  # 3-raundda Chinorga aylanadi
                 leveled_up = True
-            else:
-                self.water_level = 100
+            elif self.growth_stage == self.STAGE_GREAT_OAK and self.total_cycles_completed >= 5:
+                self.growth_stage = self.STAGE_GOLDEN_ROOT
+                leveled_up = True
+            self.water_level = 100
+        elif self.water_level >= 70 and self.growth_stage < self.STAGE_SAPLING:
+            self.growth_stage = self.STAGE_SAPLING  # 2-raundda Ko'chat
+            leveled_up = True
 
         self.save()
         return {

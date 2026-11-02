@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain, Zap, Sparkles, Trophy, X, Flame,
@@ -27,6 +28,7 @@ interface ContinuousLoopControllerProps {
 }
 
 export default function ContinuousLoopController({ onClose }: ContinuousLoopControllerProps) {
+  const router = useRouter();
   const {
     loading,
     error,
@@ -48,8 +50,8 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
     handleRequestExit,
   } = useContinuousLoop();
 
-  // ── STAGE 1 (WARMUP) STATE ──
-  const [warmupSecondsLeft, setWarmupSecondsLeft] = useState(60);
+  // ── STAGE 1 (WARMUP) STATE (90s Shpargalka) ──
+  const [warmupSecondsLeft, setWarmupSecondsLeft] = useState(90);
 
   // ── STAGE 2 (SPRINT) STATE ──
   const [sprintQuestions, setSprintQuestions] = useState<SprintQuestion[]>([]);
@@ -255,10 +257,10 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
     return sprintQuestions.slice(sprintIndex + 1).filter((q) => q.isRevenge).length;
   }, [sprintQuestions, sprintIndex]);
 
-  // Stepper qadamlari
+  // Stepper qadamlari (60 daqiqalik marafon: 90s Shpargalka + 15 savollik sprint)
   const STEPS = [
-    { id: 'STAGE_1_WARMUP', label: '1. Shpargalka', icon: Brain },
-    { id: 'STAGE_2_SPRINT', label: '2. Qasos Sprinti', icon: Zap },
+    { id: 'STAGE_1_WARMUP', label: '1. Shpargalka (90s)', icon: Brain },
+    { id: 'STAGE_2_SPRINT', label: '2. Qasos Sprinti (15 savol)', icon: Zap },
     { id: 'STAGE_3_CLEANUP', label: '3. Xatolar Dueli', icon: Swords },
     { id: 'STAGE_4_ARENA', label: '4. 1v1 Arena', icon: Flame },
     { id: 'STAGE_5_COMPLETED', label: '5. Sandiq & Daraxt', icon: Trophy },
@@ -667,10 +669,15 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 dtmScoreDelta={loop.dtm_score_delta}
                 coinsEarned={stageData?.rewards?.coins || 200}
                 xpEarned={stageData?.rewards?.xp || 100}
+                cycleNumber={loop.cycle_number || 1}
                 ecoTree={ecoTree}
                 onShareToFeed={shareToFeed}
                 onRestartCycle={restartCycle}
                 onFinishToDashboard={onClose}
+                onStartBoss={() => {
+                  onClose();
+                  router.push('/dtm-test');
+                }}
               />
             )}
           </AnimatePresence>

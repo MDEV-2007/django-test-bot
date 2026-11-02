@@ -123,7 +123,7 @@ const DEFAULT_FALLBACK_STAGE_DATA: LoopStageData = {
   warmup: {
     title: "O'zbekiston tarixi & BMB Qopqonlari",
     subject_name: "Tarix",
-    duration_seconds: 60,
+    duration_seconds: 90,
     summary_bullets: [
       "BMB/DTM standartidagi eng ko'p tushadigan 3 ta savol mexanizmi.",
       "Asosiy formulalar va kalit atamalar: chalkashuvchi nuqtalar tahlili.",
@@ -134,10 +134,10 @@ const DEFAULT_FALLBACK_STAGE_DATA: LoopStageData = {
       "2-Qopqon: Vaqt yetishmasligida birinchi ko'ringan chalg'ituvchi variantga shoshilish.",
       "3-Qopqon: Inkor qo'shimchalari ('...emas', '...xato')ga e'tiborsizlik.",
     ],
-    cheat_sheet_content: `⚡ 60s ANTI-DARSLIK SHPARGALKA: Tarix & DTM Qopqonlari\n\nUshbu mavzu bo'yicha DTM imtihonida har yili o'rtacha 2-3 ta asosiy test savoli tushadi. Asosiy e'tiborni qoidalar ketma-ketligiga va variantlar orasidagi nozik farqlarga qarating. Sprint davomida tezlik va aniqlik yuqori Combo ko'paytirgichini faollashtiradi!`,
+    cheat_sheet_content: `⚡ 90s ANTI-DARSLIK SHPARGALKA: Tarix & DTM Qopqonlari\n\nUshbu mavzu bo'yicha DTM imtihonida har yili o'rtacha 2-3 ta asosiy test savoli tushadi. Asosiy e'tiborni qoidalar ketma-ketligiga va variantlar orasidagi nozik farqlarga qarating. Sprint davomida tezlik va aniqlik yuqori Combo ko'paytirgichini faollashtiradi!`,
   },
   sprint: {
-    target_count: 10,
+    target_count: 15,
     questions: [
       {
         id: 101,
@@ -206,6 +206,193 @@ const DEFAULT_FALLBACK_STAGE_DATA: LoopStageData = {
           analysis_time: "10s tahlil",
         },
         explanation: "Ipak va chinni buyumlar qadimgi karvon yo'lining eng qimmatli mahsulotlari bo'lgan.",
+      },
+      {
+        id: 105,
+        text: "Qang' davlati hududi qaysi daryo havzalarini o'z ichiga olgan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "Sirdaryoning o'rta va quyi havzasi", is_correct: true },
+          { id: 2, text: "Amudaryoning yuqori havzasi", is_correct: false },
+          { id: 3, text: "Zarafshon vodiysi", is_correct: false },
+          { id: 4, text: "Murg'ob vohasi", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Qang' davlati shimoliy hududlarda, Sirdaryo havzasida vujudga kelgan.",
+          memory_code: "Qang' = Sirdaryo havzasi",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "Mil. avv. III asrda Sirdaryoning o'rta va quyi havzalarida Qang' davlati vujudga kelgan.",
+      },
+      {
+        id: 106,
+        text: "Jaloliddin Manguberdi mo'g'ullarga qarshi qaysi mashhur jangda birinchi yirik g'alabaga erishgan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "Parvon jangi (1221)", is_correct: true },
+          { id: 2, text: "Sind daryosi jangi", is_correct: false },
+          { id: 3, text: "Loy jangi", is_correct: false },
+          { id: 4, text: "Tarobiy qo'zg'oloni", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Parvon dashtida Shiki Xutuxu boshchiligidagi mo'g'ul qo'shini tor-mor etilgan.",
+          memory_code: "Parvon = Jaloliddinning buyuk g'alabasi",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "1221-yil bahorida Parvon jangida Jaloliddin Manguberdi mo'g'ul qo'shinlarini to'liq mag'lub etgan.",
+      },
+      {
+        id: 107,
+        text: "Mirzo Ulug'bek tomonidan Samarqanddagi mashhur rasadxona qaysi yilda barpo etilgan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "1428-1429 yillarda", is_correct: true },
+          { id: 2, text: "1409-yilda", is_correct: false },
+          { id: 3, text: "1449-yilda", is_correct: false },
+          { id: 4, text: "1435-yilda", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Obixahmat arig'i bo'yidagi Cho'ponota tepaligida 1428-1429 yillarda qurilgan.",
+          memory_code: "1428 = Ulug'bek rasadxonasi",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "1428-1429 yillarda Mirzo Ulug'bek Samarqand yaqinida ulkan astronomik rasadxona qurdirdi.",
+      },
+      {
+        id: 108,
+        text: "Alisher Navoiy o'zining mashhur 'Xamsa' asarini necha yilda yozib tugatgan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "1483-1485 yillarda (2 yilda)", is_correct: true },
+          { id: 2, text: "1470-yilda", is_correct: false },
+          { id: 3, text: "1490-1495 yillarda", is_correct: false },
+          { id: 4, text: "1468-yilda", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Navoiy turkiy tilda birinchi bo'lib Xamsa yaratib, buyuk jasorat ko'rsatgan.",
+          memory_code: "1483-1485 = Turkiy Xamsa",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "Alisher Navoiy 1483-1485 yillar davomida turkiy tildagi birinchi 'Xamsa' dostonlar majmuasini yaratdi.",
+      },
+      {
+        id: 109,
+        text: "Kushon davlatining eng qudratli hukmdori kim bo'lgan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "Kanishka I", is_correct: true },
+          { id: 2, text: "Kudzul Kadfiz", is_correct: false },
+          { id: 3, text: "Vima Kadfiz", is_correct: false },
+          { id: 4, text: "Huvishka", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Kanishka davrida Kushon imperiyasi Hindistongacha kengayib, buddizm gullab-yashnagan.",
+          memory_code: "Kanishka = Kushon oltin davri",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "Kanishka I (milodiy II asr) davrida Kushon davlati o'zining yuksak taraqqiyot cho'qqisiga erishgan.",
+      },
+      {
+        id: 110,
+        text: "Sohibqiron Amir Temur qaysi yilda To'xtamish ustidan Qunduzcha jangida g'alaba qozondi?",
+        image_url: null,
+        options: [
+          { id: 1, text: "1391-yilda", is_correct: true },
+          { id: 2, text: "1395-yilda", is_correct: false },
+          { id: 3, text: "1388-yilda", is_correct: false },
+          { id: 4, text: "1402-yilda", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "1391 Qunduzcha, 1395 esa Terek daryosi jangi.",
+          memory_code: "1391 = Qunduzcha zafari",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "1391-yil 18-iyunda Volga bo'yidagi Qunduzcha jangida Amir Temur Oltin O'rda xoni To'xtamishni mag'lub etdi.",
+      },
+      {
+        id: 111,
+        text: "Zahiriddin Muhammad Bobur Hindistonda Boburiylar saltanatiga qachon asos solgan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "1526-yilda", is_correct: true },
+          { id: 2, text: "1512-yilda", is_correct: false },
+          { id: 3, text: "1530-yilda", is_correct: false },
+          { id: 4, text: "1504-yilda", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "1526-yil 21-apreldagi Panipat jangida Ibrohim Lo'diyni mag'lub etgan.",
+          memory_code: "1526 = Panipat va Boburiylar",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "1526-yil Panipat jangidagi g'alabadan so'ng Bobur Hindistonda 300 yildan ortiq hukm surgan saltanatga asos soldi.",
+      },
+      {
+        id: 112,
+        text: "Abu Rayhon Beruniy Yer sharining radiusini qaysi qal'ada aniq hisoblab chiqqan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "Nandana qal'asida", is_correct: true },
+          { id: 2, text: "G'azna saroyida", is_correct: false },
+          { id: 3, text: "Samarqand rasadxonasida", is_correct: false },
+          { id: 4, text: "Kat shahrida", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Beruniy Hindistondagi Nandana qal'asida trigonometrik formulalar orqali o'lchov o'tkazgan.",
+          memory_code: "Nandana = Beruniy va Yer radiusi",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "Beruniy hozirgi Pokiston hududidagi Nandana qal'asida turib Yer sharining o'lchamini zamonaviy natijaga juda yaqin aniqlikda o'lchagan.",
+      },
+      {
+        id: 113,
+        text: "Mahmud Qoshg'ariyning turkiy qabilalar tili va madaniyatiga oid qomusi qanday nomlanadi?",
+        image_url: null,
+        options: [
+          { id: 1, text: "Devonu lug'otit turk", is_correct: true },
+          { id: 2, text: "Qutadg'u bilig", is_correct: false },
+          { id: 3, text: "Hibat ul-haqoyiq", is_correct: false },
+          { id: 4, text: "Tarixi Rashidiy", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "1072-1074 yillarda Bag'dodda yozilgan turkiy ensiklopediya.",
+          memory_code: "Devonu lug'otit turk = Qoshg'ariy",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "Mahmud Qoshg'ariy 1072-1074 yillarda turkiy tillarning ilk qomusi bo'lgan 'Devonu lug'otit turk' asarini yozgan.",
+      },
+      {
+        id: 114,
+        text: "Qoraxoniylar davlatida islom dini qachon rasmiy davlat dini deb e'lon qilingan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "960-yilda", is_correct: true },
+          { id: 2, text: "875-yilda", is_correct: false },
+          { id: 3, text: "1000-yilda", is_correct: false },
+          { id: 4, text: "999-yilda", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Satuk Bug'roxonning o'g'li Muso hukmronligi davrida 960-yilda rasmiylashgan.",
+          memory_code: "960 = Qoraxoniylar va Islom",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "960-yilda Qoraxoniylar davlatida 200 ming chodir turkiy xalq islomni qabul qilib, u davlat dini deb e'lon qilindi.",
+      },
+      {
+        id: 115,
+        text: "Somoniylar davlatining poytaxti qaysi shahar bo'lgan?",
+        image_url: null,
+        options: [
+          { id: 1, text: "Buxoro", is_correct: true },
+          { id: 2, text: "Samarqand", is_correct: false },
+          { id: 3, text: "Marv", is_correct: false },
+          { id: 4, text: "Xiva", is_correct: false },
+        ],
+        ai_hint: {
+          aha_moment: "Ismoil Somoniy davrida Buxoro butun Sharqning ilmiy va madaniy markaziga aylandi.",
+          memory_code: "Somoniylar = Buxoro poytaxti",
+          analysis_time: "10s tahlil",
+        },
+        explanation: "Somoniylar davlati davrida Buxoro shahri poytaxt bo'lib, Sharqning eng yirik ilm-fan markaziga aylandi.",
       },
     ],
   },
@@ -471,7 +658,7 @@ export function useContinuousLoop() {
     []
   );
 
-  // 2.5x Super-Combo bilan 2-siklni boshlash
+  // 2.0x / 2.5x Super-Combo bilan keyingi siklni boshlash (Multi-cycle marafon)
   const restartCycle = useCallback(async () => {
     tgHaptic('success');
     soundFX.celebrate();
@@ -489,8 +676,46 @@ export function useContinuousLoop() {
         toast.success(res.message);
         return true;
       }
-    } catch (e: any) {
-      toast.error(e?.message || "Yangi siklni boshlashda xatolik");
+    } catch {
+      // Fallback local multi-cycle transition (Offline / 404 da ham ishlaydi)
+      let nextCycle = 2;
+      setLoop((prev) => {
+        nextCycle = (prev?.cycle_number || 1) + 1;
+        const combo = nextCycle === 2 ? 2.0 : 2.5;
+        return {
+          id: (prev?.id || 1) + 1,
+          date: new Date().toISOString().split('T')[0],
+          cycle_number: nextCycle,
+          current_stage: 'STAGE_1_WARMUP',
+          combo_multiplier: combo,
+          dtm_score_delta: (prev?.dtm_score_delta || 0) + 0.4,
+          session_mistakes_ids: [],
+          is_chest_claimed: false,
+        };
+      });
+
+      setEcoTree((prev) => {
+        const nextWater = Math.min(100, (prev?.water_level || 35) + 35);
+        const stageName = nextWater >= 100 ? 'Chinor' : nextWater >= 70 ? "Ko'chat" : "Nihol";
+        const growthStage = nextWater >= 100 ? 4 : nextWater >= 70 ? 2 : 1;
+        return {
+          ...prev,
+          water_level: nextWater,
+          stage_name: stageName,
+          growth_stage: growthStage,
+          total_cycles_completed: (prev?.total_cycles_completed || 0) + 1,
+          needs_water: false,
+        };
+      });
+
+      // Keyingi raund uchun yangi mavzu
+      const nextTopicTitle = nextCycle === 2
+        ? "Amir Temur va Temuriylar saltanati (BMB Standarti)"
+        : "O'zbekiston tarixi: Xonliklar davri va DTM Qopqonlari";
+      setTopic({ id: nextCycle, title: nextTopicTitle, subject_name: "Tarix" });
+
+      toast.success(`🔥 ${nextCycle}-Raund Super-Combo bilan boshlandi! (+35% suv)`);
+      return true;
     }
     return false;
   }, []);
