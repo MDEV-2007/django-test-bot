@@ -4674,3 +4674,309 @@ def stress_exam_admin_api(request):
         },
         'recent_attempts': recent_attempts_data,
     })
+
+
+# =====================================================================
+# SUPER ADMIN: COMMUNITY STORIES & B2B ADS (O'QUV MARKAZLARI)
+# =====================================================================
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def panel_community_stories_api(request):
+    """Super Admin uchun barcha 24 soatlik Stories ro'yxati."""
+    from learning.models import CommunityStory
+    from django.utils import timezone
+
+    status_filter = request.GET.get('status', 'all')
+    now = timezone.now()
+
+    qs = CommunityStory.objects.select_related('author', 'author__profile', 'center').order_by('-created_at')
+    if status_filter == 'active':
+        qs = qs.filter(expires_at__gt=now)
+    elif status_filter == 'expired':
+        qs = qs.filter(expires_at__lte=now)
+
+    stories = []
+    for s in qs[:100]:
+        author_name = s.author.get_full_name() or s.author.username if s.author else (s.center.name if s.center else "IlmIldizi")
+        avatar = getattr(s.author.profile, 'avatar_url', '') if s.author and hasattr(s.author, 'profile') else ''
+        if not avatar and s.author:
+            avatar = f"https://api.dicebear.com/7.x/adventurer/svg?seed={s.author.username}"
+
+        stories.append({
+            'id': s.id,
+            'author_name': author_name,
+            'author_username': s.author.username if s.author else None,
+            'avatar': avatar,
+            'story_type': s.story_type,
+            'title': s.title,
+            'caption': s.caption,
+            'badge': s.badge,
+            'media_url': s.media_url,
+            'cta_text': s.cta_text,
+            'cta_link': s.cta_link,
+            'views_count': s.views_count,
+            'expires_at': s.expires_at.isoformat() if s.expires_at else None,
+            'is_expired': s.expires_at <= now if s.expires_at else False,
+            'created_at': s.created_at.strftime('%Y-%m-%d %H:%M'),
+        })
+
+    return Response({
+        'stories': stories,
+        'total': qs.count(),
+        'active_count': CommunityStory.objects.filter(expires_at__gt=now).count(),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_community_story_create_api(request):
+    """Super Admin tomonidan platforma yoki o'quv markaz nomidan yangi Story joylash."""
+    from datetime import timedelta
+    from django.utils import timezone
+    from learning.models import CommunityStory
+
+    title = (request.data.get('title') or '').strip()
+    caption = (request.data.get('caption') or '').strip()
+    badge = (request.data.get('badge') or '🔥 Yangilik').strip()
+    cta_text = request.data.get('cta_text') or "Ko'rish 🚀"
+    cta_link = request.data.get('cta_link') or "/feed"
+    media_url = request.data.get('media_url') or ""
+    story_type = request.data.get('story_type', 'promo')
+    duration_hours = int(request.data.get('duration_hours', 24))
+
+    if not title:
+        return Response({'error': "Story sarlavhasi kiritilishi shart."}, status=400)
+
+    story = CommunityStory.objects.create(
+        author=request.user,
+        story_type=story_type,
+        exam_track='ALL',
+        title=title,
+        caption=caption,
+        badge=badge,
+        media_url=media_url,
+        cta_text=cta_text,
+        cta_link=cta_link,
+        expires_at=timezone.now() + timedelta(hours=duration_hours),
+    )
+
+    return Response({
+        'success': True,
+        'message': "Story muvaffaqiyatli chop etildi!",
+        'story': {
+            'id': story.id,
+            'title': story.title,
+        }
+    })
+
+
+@api_view(['DELETE', 'POST'])
+@permission_classes([IsSuperAdmin])
+def panel_community_story_delete_api(request, story_id):
+    """Super Admin tomonidan storyni o'chirish."""
+    from learning.models import CommunityStory
+    from panel.models import AuditLog
+
+    story = CommunityStory.objects.filter(id=story_id).first()
+    if not story:
+        return Response({'success': True, 'message': "Story topilmadi yoki allaqachon o'chirilgan."})
+
+    title = story.title or ""
+    story.delete()
+
+    try:
+        AuditLog.objects.create(
+            user=request.user,
+            action='delete',
+            model_name='CommunityStory',
+            object_id=str(story_id),
+            object_repr=f"Story o'chirildi: '{title[:150]}'",
+        )
+    except Exception:
+        pass
+
+    return Response({'success': True, 'message': "Story muvaffaqiyatli o'chirildi."})
+
+
+# ─── B2B O'QUV MARKAZLARI REKLAMALARI (EduCenterCampaign) ───────────────────
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def panel_campaigns_api(request):
+    """Super Admin uchun B2B O'quv markazlari reklama kampaniyalari ro'yxati."""
+    from b2b_ads.models import EduCenterCampaign
+    from django.db.models import Count
+
+    campaigns_qs = EduCenterCampaign.objects.annotate(leads_count=Count('leads')).order_by('-created_at')
+
+    campaigns_data = []
+    for c in campaigns_qs:
+        campaigns_data.append({
+            'id': c.id,
+            'center_name': c.center_name,
+            'logo': c.logo,
+            'title': c.title,
+            'description': c.description,
+            'offer_badge': c.offer_badge,
+            'target_subject': c.target_subject,
+            'target_region': c.target_region,
+            'max_score_threshold': c.max_score_threshold,
+            'rating': c.rating,
+            'story_video_url': c.story_video_url,
+            'telegram_webhook_or_chat_id': c.telegram_webhook_or_chat_id,
+            'is_active': c.is_active,
+            'leads_count': c.leads_count,
+            'created_at': c.created_at.strftime('%Y-%m-%d %H:%M'),
+        })
+
+    return Response({
+        'campaigns': campaigns_data,
+        'total': len(campaigns_data),
+        'active_count': sum(1 for c in campaigns_data if c['is_active']),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_campaign_create_api(request):
+    """Yangi B2B o'quv markazi reklama kampaniyasi yaratish."""
+    from b2b_ads.models import EduCenterCampaign
+
+    center_name = (request.data.get('center_name') or '').strip()
+    title = (request.data.get('title') or '').strip()
+    if not center_name or not title:
+        return Response({'error': "Markaz nomi va aksiya sarlavhasi kiritilishi shart."}, status=400)
+
+    campaign = EduCenterCampaign.objects.create(
+        center_name=center_name,
+        logo=request.data.get('logo', ''),
+        title=title,
+        description=request.data.get('description', ''),
+        offer_badge=request.data.get('offer_badge') or "1-dars BEPUL + 20% chegirma",
+        target_subject=request.data.get('target_subject') or "Tarix",
+        target_region=request.data.get('target_region') or "Toshkent",
+        max_score_threshold=int(request.data.get('max_score_threshold', 65)),
+        rating=float(request.data.get('rating', 4.9)),
+        story_video_url=request.data.get('story_video_url', ''),
+        telegram_webhook_or_chat_id=request.data.get('telegram_webhook_or_chat_id', ''),
+        is_active=bool(request.data.get('is_active', True)),
+    )
+
+    return Response({
+        'success': True,
+        'message': f"{campaign.center_name} kampaniyasi muvaffaqiyatli yaratildi!",
+        'campaign': {
+            'id': campaign.id,
+            'center_name': campaign.center_name,
+        }
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_campaign_edit_api(request, campaign_id):
+    """B2B o'quv markazi reklama kampaniyasini tahrirlash."""
+    from b2b_ads.models import EduCenterCampaign
+    from django.shortcuts import get_object_or_404
+
+    campaign = get_object_or_404(EduCenterCampaign, id=campaign_id)
+
+    if 'center_name' in request.data:
+        campaign.center_name = request.data['center_name'].strip()
+    if 'logo' in request.data:
+        campaign.logo = request.data['logo'].strip()
+    if 'title' in request.data:
+        campaign.title = request.data['title'].strip()
+    if 'description' in request.data:
+        campaign.description = request.data['description'].strip()
+    if 'offer_badge' in request.data:
+        campaign.offer_badge = request.data['offer_badge'].strip()
+    if 'target_subject' in request.data:
+        campaign.target_subject = request.data['target_subject'].strip()
+    if 'target_region' in request.data:
+        campaign.target_region = request.data['target_region'].strip()
+    if 'max_score_threshold' in request.data:
+        campaign.max_score_threshold = int(request.data['max_score_threshold'])
+    if 'rating' in request.data:
+        campaign.rating = float(request.data['rating'])
+    if 'story_video_url' in request.data:
+        campaign.story_video_url = request.data['story_video_url'].strip()
+    if 'telegram_webhook_or_chat_id' in request.data:
+        campaign.telegram_webhook_or_chat_id = request.data['telegram_webhook_or_chat_id'].strip()
+    if 'is_active' in request.data:
+        campaign.is_active = bool(request.data['is_active'])
+
+    campaign.save()
+
+    return Response({
+        'success': True,
+        'message': f"{campaign.center_name} ma'lumotlari yangilandi!",
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_campaign_toggle_api(request, campaign_id):
+    """Kampaniyani yoqish/o'chirish."""
+    from b2b_ads.models import EduCenterCampaign
+    from django.shortcuts import get_object_or_404
+
+    campaign = get_object_or_404(EduCenterCampaign, id=campaign_id)
+    campaign.is_active = not campaign.is_active
+    campaign.save(update_fields=['is_active'])
+
+    status_str = "faollashtirildi" if campaign.is_active else "to'xtatildi"
+    return Response({
+        'success': True,
+        'is_active': campaign.is_active,
+        'message': f"{campaign.center_name} kampaniyasi {status_str}!",
+    })
+
+
+@api_view(['DELETE', 'POST'])
+@permission_classes([IsSuperAdmin])
+def panel_campaign_delete_api(request, campaign_id):
+    """Kampaniyani o'chirish."""
+    from b2b_ads.models import EduCenterCampaign
+
+    campaign = EduCenterCampaign.objects.filter(id=campaign_id).first()
+    if not campaign:
+        return Response({'success': True, 'message': "Kampaniya topilmadi."})
+
+    name = campaign.center_name
+    campaign.delete()
+    return Response({'success': True, 'message': f"{name} kampaniyasi o'chirildi."})
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def panel_campaign_leads_api(request):
+    """O'quv markazlariga tushgan o'quvchilar arizalari (Lidlar) ro'yxati."""
+    from b2b_ads.models import StudentLeadSubmission
+
+    campaign_id = request.GET.get('campaign_id')
+    qs = StudentLeadSubmission.objects.select_related('campaign', 'student_profile', 'student_profile__user').order_by('-created_at')
+
+    if campaign_id:
+        qs = qs.filter(campaign_id=campaign_id)
+
+    leads_data = []
+    for l in qs[:150]:
+        leads_data.append({
+            'id': l.id,
+            'full_name': l.full_name,
+            'phone_number': l.phone_number,
+            'telegram_username': l.telegram_username,
+            'predicted_dtm_score': l.predicted_dtm_score,
+            'weakest_topics': l.weakest_topics,
+            'campaign_id': l.campaign_id,
+            'campaign_name': l.campaign.center_name if l.campaign else "Umumiy",
+            'coins_rewarded': l.coins_rewarded,
+            'created_at': l.created_at.strftime('%Y-%m-%d %H:%M'),
+        })
+
+    return Response({
+        'leads': leads_data,
+        'total': qs.count(),
+    })

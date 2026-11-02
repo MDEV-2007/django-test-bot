@@ -39,7 +39,8 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Kontent',
     items: [
-      { href: '/panel/reels', label: 'Bilim Reels & Hamjamiyat', icon: Sparkles, tone: 'rose' },
+      { href: '/panel/community', label: 'Hamjamiyat & Stories', icon: MessageSquareHeart, tone: 'rose' },
+      { href: '/panel/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'purple' },
       { href: '/panel/subjects', label: 'Fanlar', icon: BookMarked, tone: 'purple' },
       { href: '/panel/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald' },
       { href: '/panel/stress-exam', label: 'BMB Stress Simulyatori', icon: Flame, tone: 'rose' },
@@ -51,6 +52,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Operatsiyalar & Moliya',
     items: [
+      { href: '/panel/campaigns', label: "O'quv Markazlari (B2B Ads)", icon: Megaphone, tone: 'amber' },
       { href: '/panel/mocks', label: 'Mock Natijalari', icon: Award, tone: 'gold' },
       { href: '/panel/attempts', label: 'Barcha Natijalar', icon: ClipboardList, tone: 'indigo' },
       { href: '/panel/finance', label: 'Moliya & Tushum', icon: TrendingUp, tone: 'emerald' },

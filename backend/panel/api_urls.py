@@ -121,6 +121,28 @@ urlpatterns = [
     path('community/<int:post_id>/pin/', api.panel_community_post_pin_api, name='panel_community_post_pin'),
     path('community/<int:post_id>/pin', api.panel_community_post_pin_api),
 
+    # 24 soatlik Hikoyalar (Community Stories) Moderatsiyasi
+    path('stories/', api.panel_community_stories_api, name='panel_community_stories'),
+    path('stories', api.panel_community_stories_api),
+    path('stories/create/', api.panel_community_story_create_api, name='panel_community_story_create'),
+    path('stories/create', api.panel_community_story_create_api),
+    path('stories/<int:story_id>/delete/', api.panel_community_story_delete_api, name='panel_community_story_delete'),
+    path('stories/<int:story_id>/delete', api.panel_community_story_delete_api),
+
+    # B2B O'quv Markazlari (EduCenterCampaign & Leads)
+    path('campaigns/', api.panel_campaigns_api, name='panel_campaigns'),
+    path('campaigns', api.panel_campaigns_api),
+    path('campaigns/create/', api.panel_campaign_create_api, name='panel_campaign_create'),
+    path('campaigns/create', api.panel_campaign_create_api),
+    path('campaigns/<int:campaign_id>/edit/', api.panel_campaign_edit_api, name='panel_campaign_edit'),
+    path('campaigns/<int:campaign_id>/edit', api.panel_campaign_edit_api),
+    path('campaigns/<int:campaign_id>/toggle/', api.panel_campaign_toggle_api, name='panel_campaign_toggle'),
+    path('campaigns/<int:campaign_id>/toggle', api.panel_campaign_toggle_api),
+    path('campaigns/<int:campaign_id>/delete/', api.panel_campaign_delete_api, name='panel_campaign_delete'),
+    path('campaigns/<int:campaign_id>/delete', api.panel_campaign_delete_api),
+    path('campaigns/leads/', api.panel_campaign_leads_api, name='panel_campaign_leads'),
+    path('campaigns/leads', api.panel_campaign_leads_api),
+
     # BMB Real Imtihon Zali (Stress Mode) Super Admin
     path('stress-exam/', api.stress_exam_admin_api, name='stress_exam_admin'),
     path('stress-exam', api.stress_exam_admin_api),
