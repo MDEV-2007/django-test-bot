@@ -113,38 +113,57 @@ class Profile(models.Model):
         super().save(*args, **kwargs)
 
     def add_xp(self, amount):
-        """Adds XP and handles leveling up. Privileged users (superadmin, teacher) never gain XP."""
+        """Adds XP and handles leveling up with atomic row locking. Privileged users never gain XP."""
         if self.is_privileged:
             if self.xp != 0 or self.level != 1:
                 self.xp = 0
                 self.level = 1
                 self.save(update_fields=['xp', 'level'])
             return False
-        old_xp = self.xp
-        self.xp += amount
-        leveled_up = False
-        # Simple levelling threshold: 1000 XP per level
-        next_level_threshold = self.level * 1000
-        while self.xp >= next_level_threshold:
-            self.level += 1
-            leveled_up = True
-            next_level_threshold = self.level * 1000
-        self.save()
+        
+        from django.db import transaction
+        from django.db.models import F
 
-        # Leaderboard overtake alerts via Telegram Bot
-        if amount > 0 and self.role == 'student':
-            try:
-                from telegrambot.retention import check_and_send_overtake_alerts
-                check_and_send_overtake_alerts(self, old_xp, self.xp)
-            except Exception:
-                pass
+        with transaction.atomic():
+            locked = Profile.objects.select_for_update().get(pk=self.pk)
+            old_xp = locked.xp
+            if amount != 0:
+                Profile.objects.filter(pk=self.pk).update(xp=F('xp') + amount)
+                locked.refresh_from_db(fields=['xp'])
+                self.xp = locked.xp
 
-        return leveled_up
+            leveled_up = False
+            next_level_threshold = locked.level * 1000
+            while locked.xp >= next_level_threshold:
+                locked.level += 1
+                leveled_up = True
+                next_level_threshold = locked.level * 1000
+            if leveled_up:
+                locked.save(update_fields=['level'])
+                self.level = locked.level
+
+            if amount > 0 and locked.role == 'student':
+                try:
+                    from telegrambot.retention import check_and_send_overtake_alerts
+                    check_and_send_overtake_alerts(locked, old_xp, locked.xp)
+                except Exception:
+                    pass
+
+            return leveled_up
 
     def add_coins(self, amount):
-        """Adds coins."""
-        self.coins += amount
-        self.save()
+        """Atomically adds or subtracts coins without race conditions."""
+        if amount == 0:
+            return
+        from django.db import transaction
+        from django.db.models import F
+        with transaction.atomic():
+            locked = Profile.objects.select_for_update().get(pk=self.pk)
+            if amount < 0 and locked.coins + amount < 0:
+                raise ValueError("Balansda yetarli tanga mavjud emas!")
+            Profile.objects.filter(pk=self.pk).update(coins=F('coins') + amount)
+            locked.refresh_from_db(fields=['coins'])
+            self.coins = locked.coins
 
     def update_streak(self):
         """Updates the activity streak based on calendar days.
@@ -195,6 +214,84 @@ class Profile(models.Model):
         if self.premium_expires_at is None:
             return True
         return self.premium_expires_at > timezone.now()
+
+    @property
+    def is_vip_active(self) -> bool:
+        """Yagona VIP/Obuna holati:
+        1. Superadmin / Staff bo'lsa har doim True
+        2. Profile.is_premium va premium_expires_at > now
+        3. Profile.premium_mock_test_unlocked
+        4. classroom.Subscription (status='active' and current_period_end > now)
+        5. UserUsageQuota (growth.models) da is_vip
+        """
+        if self.is_privileged:
+            return True
+        if self.has_active_premium_lessons() or self.premium_mock_test_unlocked:
+            return True
+        now = timezone.now()
+        try:
+            from classroom.models import Subscription as ClassSubscription
+            if ClassSubscription.objects.filter(
+                student=self, status='active', current_period_end__gt=now
+            ).exists():
+                return True
+        except Exception:
+            pass
+        try:
+            from growth.models import UserUsageQuota
+            quota = UserUsageQuota.objects.filter(profile=self).first()
+            if quota and quota.is_vip():
+                return True
+        except Exception:
+            pass
+        return False
+
+    @property
+    def is_vip(self) -> bool:
+        return self.is_vip_active
+
+    @property
+    def has_active_subscription(self) -> bool:
+        return self.is_vip_active
+
+    @property
+    def is_vip_active(self) -> bool:
+        """Yagona VIP/Obuna holati:
+        1. Superadmin / Staff bo'lsa har doim True
+        2. Profile.is_premium va premium_expires_at > now
+        3. Profile.premium_mock_test_unlocked
+        4. classroom.Subscription (status='active' and current_period_end > now)
+        5. UserUsageQuota (growth.models) da is_vip
+        """
+        if self.is_privileged:
+            return True
+        if self.has_active_premium_lessons() or self.premium_mock_test_unlocked:
+            return True
+        now = timezone.now()
+        try:
+            from classroom.models import Subscription as ClassSubscription
+            if ClassSubscription.objects.filter(
+                student=self, status='active', current_period_end__gt=now
+            ).exists():
+                return True
+        except Exception:
+            pass
+        try:
+            from growth.models import UserUsageQuota
+            quota = UserUsageQuota.objects.filter(profile=self).first()
+            if quota and quota.is_vip():
+                return True
+        except Exception:
+            pass
+        return False
+
+    @property
+    def is_vip(self) -> bool:
+        return self.is_vip_active
+
+    @property
+    def has_active_subscription(self) -> bool:
+        return self.is_vip_active
 
     # --- Role helpers -----------------------------------------------------
     # `is_superadmin` deliberately also treats a Django superuser as a super admin,

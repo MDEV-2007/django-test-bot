@@ -57,12 +57,39 @@ def get_daily_chest_status(profile: Profile) -> dict:
 
 
 @transaction.atomic
+def grant_rewards_atomic(profile_id: int, coins_delta: int = 0, xp_delta: int = 0) -> Profile:
+    """Yagona atomik mukofotlash funksiyasi.
+    with transaction.atomic() va select_for_update() orqali race condition (double-spend) ni yo'q qiladi.
+    """
+    from django.db.models import F
+    from django.core.exceptions import ValidationError
+
+    locked = Profile.objects.select_for_update().get(pk=profile_id)
+    updates = {}
+    if coins_delta != 0:
+        if coins_delta < 0 and locked.coins + coins_delta < 0:
+            raise ValidationError("Balansda yetarli tanga mavjud emas!")
+        updates['coins'] = F('coins') + coins_delta
+
+    if xp_delta != 0 and not locked.is_privileged:
+        updates['xp'] = F('xp') + xp_delta
+
+    if updates:
+        Profile.objects.filter(pk=profile_id).update(**updates)
+        locked.refresh_from_db(fields=list(updates.keys()))
+        if xp_delta > 0:
+            locked.add_xp(0)
+
+    return locked
+
+
+@transaction.atomic
 def open_daily_chest(profile_id: int) -> dict:
     """Foydalanuvchi uchun kunlik sirli sandiqni ochadi va o'zgaruvchan mukofot (Variable Reward) beradi."""
     profile = Profile.objects.select_for_update().get(pk=profile_id)
     today = timezone.localdate()
 
-    existing = DailyChestClaim.objects.filter(profile=profile, date=today).first()
+    existing = DailyChestClaim.objects.select_for_update().filter(profile=profile, date=today).first()
     if existing:
         return {
             'success': False,

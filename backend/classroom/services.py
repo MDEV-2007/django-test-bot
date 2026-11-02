@@ -171,11 +171,13 @@ def reject_payment(payment, reviewer=None, note='', moment=None):
 def has_class_access(student_profile, mock):
     """O'quvchi shu mock'ga kira oladimi.
 
-    Bepul reklama mock'iga hamma kiradi. Qolganiga — faqat SHU o'qituvchiga faol obunasi
-    borlar. Obunaning faolligi har safar qaytadan hisoblanadi (status + muddat), keshdan
-    olinmaydi: muddati kecha tugagan obuna bugun ham ishlab turmasligi kerak.
+    Bepul reklama mock'iga hamma kiradi.
+    Platforma bo'yicha VIP (is_vip_active) bor foydalanuvchilar barcha mocklarga kira oladi.
+    Qolganiga — faqat SHU o'qituvchiga faol obunasi borlar.
     """
     if mock.is_free_preview:
+        return True
+    if getattr(student_profile, 'is_vip_active', False):
         return True
     now = timezone.now()
     return Subscription.objects.filter(

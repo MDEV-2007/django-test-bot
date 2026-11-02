@@ -48,6 +48,17 @@ export default function StudentSpiderRadar({
   const numAxes = 6;
   const angleStep = (Math.PI * 2) / numAxes;
 
+  // Har bir ko'rsatkichni xavfsiz son ekanligini tekshiramiz (NaN dan himoya)
+  const safeStats: RadarStats = {
+    subject_mastery: typeof stats?.subject_mastery === 'number' && !isNaN(stats.subject_mastery) ? stats.subject_mastery : 75,
+    logic: typeof stats?.logic === 'number' && !isNaN(stats.logic) ? stats.logic : 72,
+    speed: typeof stats?.speed === 'number' && !isNaN(stats.speed) ? stats.speed : 75,
+    accuracy: typeof stats?.accuracy === 'number' && !isNaN(stats.accuracy) ? stats.accuracy : 70,
+    writing: typeof stats?.writing === 'number' && !isNaN(stats.writing) ? stats.writing : 65,
+    consistency: typeof stats?.consistency === 'number' && !isNaN(stats.consistency) ? stats.consistency : 80,
+    overall_power: typeof stats?.overall_power === 'number' && !isNaN(stats.overall_power) ? stats.overall_power : undefined,
+  };
+
   // Grid halqalari (25%, 50%, 75%, 100%)
   const levels = [0.25, 0.5, 0.75, 1];
 
@@ -55,19 +66,28 @@ export default function StudentSpiderRadar({
     const angle = index * angleStep - Math.PI / 2;
     const x = center + radius * valueRatio * Math.cos(angle);
     const y = center + radius * valueRatio * Math.sin(angle);
-    return { x, y };
+    return { x: Number(x.toFixed(1)), y: Number(y.toFixed(1)) };
   }
 
   // Polygon nuqtalari
   const polygonPoints = AXES.map((axis, i) => {
-    const val = stats[axis.key as keyof RadarStats] || 50;
-    const ratio = Math.max(0.15, Math.min(1, val / 100));
+    const val = safeStats[axis.key as keyof RadarStats] ?? 50;
+    const numVal = typeof val === 'number' && !isNaN(val) ? val : 50;
+    const ratio = Math.max(0.15, Math.min(1, numVal / 100));
     const { x, y } = getCoordinates(i, ratio);
     return `${x},${y}`;
   }).join(' ');
 
-  const overall = stats.overall_power || Math.round(
-    Object.values(stats).reduce((a, b) => a + b, 0) / 6
+  const statValues = [
+    safeStats.subject_mastery,
+    safeStats.logic,
+    safeStats.speed,
+    safeStats.accuracy,
+    safeStats.writing,
+    safeStats.consistency,
+  ];
+  const overall = safeStats.overall_power || Math.round(
+    statValues.reduce((a, b) => a + b, 0) / 6
   );
 
   return (
@@ -150,15 +170,13 @@ export default function StudentSpiderRadar({
           })}
 
           {/* Student Stats Polygon */}
-          <motion.polygon
+          <polygon
             points={polygonPoints}
             fill="url(#radarFillGrad)"
             stroke="url(#radarStrokeGrad)"
             strokeWidth="2.5"
             strokeLinejoin="round"
-            initial={{ scale: 0.2, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+            className="transition-all duration-700 ease-out"
           />
 
           {/* Nodes at vertices */}

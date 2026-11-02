@@ -88,7 +88,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
 
   // Stage 1 taymeri
   useEffect(() => {
-    if (loop?.current_stage === 'STAGE_1_WARMUP' && warmupSecondsLeft > 0) {
+    if (currentStage === 'STAGE_1_WARMUP' && warmupSecondsLeft > 0) {
       const timer = setInterval(() => {
         setWarmupSecondsLeft((prev) => {
           if (prev <= 1) {
@@ -104,7 +104,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
 
   // Stage 4 (Arena) taymeri
   useEffect(() => {
-    if (loop?.current_stage === 'STAGE_4_ARENA' && arenaTimeLeft > 0) {
+    if (currentStage === 'STAGE_4_ARENA' && arenaTimeLeft > 0) {
       arenaTimerRef.current = setInterval(() => {
         setArenaTimeLeft((prev) => {
           if (prev <= 1) {
@@ -266,7 +266,9 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
     { id: 'STAGE_5_COMPLETED', label: '5. Sandiq & Daraxt', icon: Trophy },
   ];
 
-  const currentStageIndex = STEPS.findIndex((s) => s.id === loop?.current_stage);
+  const currentStage: LoopStage = (loop?.current_stage as LoopStage) || 'STAGE_1_WARMUP';
+  const stageIdx = STEPS.findIndex((s) => s.id === currentStage);
+  const currentStageIndex = stageIdx >= 0 ? stageIdx : 0;
 
   if (loading && !loop) {
     return (
@@ -300,12 +302,12 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
           <div className="flex items-center gap-2 shrink-0">
             <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-900 border border-white/10 text-xs font-mono font-bold text-emerald-400">
               <Trophy className="size-3 text-emerald-400" />
-              <span>+{loop?.dtm_score_delta.toFixed(1) || '0.0'} DTM</span>
+              <span>+{(loop?.dtm_score_delta ?? 0.4).toFixed(1)} DTM</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-orange-500/20 to-rose-500/20 border border-orange-500/40 text-xs font-mono font-black text-orange-400 shadow-sm animate-pulse">
               <Flame className="size-3.5 fill-current" />
-              <span>{loop?.combo_multiplier.toFixed(1)}x</span>
+              <span>{(loop?.combo_multiplier ?? 1.0).toFixed(1)}x</span>
             </div>
 
             <button
@@ -396,7 +398,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
         ) : (
           <AnimatePresence mode="wait">
             {/* ── 1-BOSQICH: 60s ANTI-DARSLIK SHPARGALKA ── */}
-            {loop?.current_stage === 'STAGE_1_WARMUP' && (
+            {currentStage === 'STAGE_1_WARMUP' && (
               <motion.div
                 key="stage_1"
                 initial={{ opacity: 0, y: 15 }}
@@ -463,7 +465,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             )}
 
             {/* ── 2-BOSQICH: JONLI QASOS SPRINTI ── */}
-            {loop?.current_stage === 'STAGE_2_SPRINT' && sprintQuestions[sprintIndex] && (
+            {currentStage === 'STAGE_2_SPRINT' && sprintQuestions[sprintIndex] && (
               <motion.div
                 key={`stage_2_${sprintIndex}`}
                 initial={{ opacity: 0, x: 20 }}
@@ -534,7 +536,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             )}
 
             {/* ── 3-BOSQICH: XATOLAR DUELI (FLASHCARDS) ── */}
-            {loop?.current_stage === 'STAGE_3_CLEANUP' && stageData?.cleanup?.cards && (
+            {currentStage === 'STAGE_3_CLEANUP' && stageData?.cleanup?.cards && (
               <motion.div
                 key="stage_3"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -612,7 +614,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             )}
 
             {/* ── 4-BOSQICH: 1v1 GHOST ARENA DUEL ── */}
-            {loop?.current_stage === 'STAGE_4_ARENA' && stageData?.arena && arenaQuestions[arenaIndex] && (
+            {currentStage === 'STAGE_4_ARENA' && stageData?.arena && arenaQuestions[arenaIndex] && (
               <motion.div
                 key="stage_4"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -679,7 +681,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             )}
 
             {/* ── 5-BOSQICH: SIRLI SANDIQ & ECO-DARAXT KULMINATSIYASI ── */}
-            {loop?.current_stage === 'STAGE_5_COMPLETED' && (
+            {currentStage === 'STAGE_5_COMPLETED' && (
               <Stage5RewardCeremony
                 comboMultiplier={loop.combo_multiplier}
                 dtmScoreDelta={loop.dtm_score_delta}

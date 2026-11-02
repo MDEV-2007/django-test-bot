@@ -2587,14 +2587,27 @@ def finance_analytics_api(request):
         month_start = now.astimezone(tz).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         thirty_days_ago = now - timedelta(days=30)
 
-        # Revenue
+        # Revenue (Yagona moliya: Premium obunalar + Sinfxona to'lovlari)
         all_approved = Payment.objects.filter(status='approved')
-        total_rev = all_approved.aggregate(s=Sum('amount'))['s'] or 0
-        approved_cnt = all_approved.count()
+        total_rev_prem = all_approved.aggregate(s=Sum('amount'))['s'] or 0
+        approved_cnt_prem = all_approved.count()
+        today_rev_prem = all_approved.filter(created_at__gte=today_start).aggregate(s=Sum('amount'))['s'] or 0
+        month_rev_prem = all_approved.filter(created_at__gte=month_start).aggregate(s=Sum('amount'))['s'] or 0
+        pending_cnt_prem = Payment.objects.filter(status='pending').count()
 
-        today_rev = all_approved.filter(created_at__gte=today_start).aggregate(s=Sum('amount'))['s'] or 0
-        month_rev = all_approved.filter(created_at__gte=month_start).aggregate(s=Sum('amount'))['s'] or 0
-        pending_cnt = Payment.objects.filter(status='pending').count()
+        from classroom.models import Payment as ClassPayment
+        all_class_approved = ClassPayment.objects.filter(status='success')
+        total_rev_class = (all_class_approved.aggregate(s=Sum('amount_tiyin'))['s'] or 0) / 100.0
+        approved_cnt_class = all_class_approved.count()
+        today_rev_class = (all_class_approved.filter(created_at__gte=today_start).aggregate(s=Sum('amount_tiyin'))['s'] or 0) / 100.0
+        month_rev_class = (all_class_approved.filter(created_at__gte=month_start).aggregate(s=Sum('amount_tiyin'))['s'] or 0) / 100.0
+        pending_cnt_class = ClassPayment.objects.filter(status='pending').count()
+
+        total_rev = float(total_rev_prem) + float(total_rev_class)
+        today_rev = float(today_rev_prem) + float(today_rev_class)
+        month_rev = float(month_rev_prem) + float(month_rev_class)
+        approved_cnt = approved_cnt_prem + approved_cnt_class
+        pending_cnt = pending_cnt_prem + pending_cnt_class
         avg_check = round(float(total_rev) / (approved_cnt or 1), 0)
 
         summary = {
@@ -2620,6 +2633,13 @@ def finance_analytics_api(request):
             d_str = p.created_at.astimezone(tz).strftime('%d.%m')
             if d_str in daily_map:
                 daily_map[d_str] += float(p.amount)
+                daily_cnt_map[d_str] += 1
+
+        recent_class_approved = all_class_approved.filter(created_at__gte=thirty_days_ago)
+        for cp in recent_class_approved:
+            d_str = cp.created_at.astimezone(tz).strftime('%d.%m')
+            if d_str in daily_map:
+                daily_map[d_str] += float(cp.amount_tiyin / 100.0)
                 daily_cnt_map[d_str] += 1
 
         daily_revenue = [
@@ -2650,6 +2670,28 @@ def finance_analytics_api(request):
                 'plan_type': 'mock_test',
                 'amount': float(mock_amt),
                 'count': mock_cnt,
+            })
+
+        # Sinfxona o'qituvchi obunalari
+        class_cnt = all_class_approved.count()
+        class_amt = float(total_rev_class)
+        if class_cnt > 0 or class_amt > 0:
+            by_plan.append({
+                'name': "Sinfxona O'qituvchi Obunasi",
+                'plan_type': 'classroom',
+                'amount': class_amt,
+                'count': class_cnt,
+            })
+
+        # Sinfxona o'qituvchi obunalari
+        class_cnt = all_class_approved.count()
+        class_amt = float(total_rev_class)
+        if class_cnt > 0 or class_amt > 0:
+            by_plan.append({
+                'name': "Sinfxona O'qituvchi Obunasi",
+                'plan_type': 'classroom',
+                'amount': class_amt,
+                'count': class_cnt,
             })
 
         # By Source: { source: 'web'|'bot', label: '...', amount, count }

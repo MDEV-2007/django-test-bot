@@ -30,3 +30,10 @@ docker-compose*.yml
 # Misc
 *.log
 .DS_Store
+
+
+# Heavy PDF fixtures and imports (must never bloat production Docker images)
+backend/tests.pdf
+tests.pdf
+backend/tests_app/fixtures/pdf_imports/
+*.pdf

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface KnowledgeTreeProps {
   level: number;
@@ -24,7 +24,6 @@ export default function KnowledgeTree({
   streak = 0,
   badges = 0,
 }: KnowledgeTreeProps) {
-  const reduce = useReducedMotion();
 
   // Dinamik hisob-kitoblar
   const safeLevel = Math.max(1, level);

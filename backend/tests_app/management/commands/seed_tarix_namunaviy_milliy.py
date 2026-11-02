@@ -23,7 +23,7 @@ from django.contrib.auth.models import User
 
 from accounts.models import Profile, ensure_profile_for_user
 from tests_app.models import Subject, TestSet, Question, AnswerOption, SubQuestion
-from ._embedded_images import BALKAN_MAP_B64, VENN_DIAGRAM_B64
+from ._embedded_images import BALKAN_MAP_B64, VENN_DIAGRAM_B64, clear_embedded_images_cache
 
 
 
@@ -60,6 +60,7 @@ class Command(BaseCommand):
         with open(os.path.join(maps_dir, "venn_diagram_q20.jpg"), "wb") as f:
             f.write(base64.b64decode(VENN_DIAGRAM_B64))
         self.stdout.write(f"Xarita va diagramma rasmlari saqlandi: {maps_dir}")
+        clear_embedded_images_cache()
 
 
         # ── 1. Subject: Tarix ───────────────────────────────────────────────

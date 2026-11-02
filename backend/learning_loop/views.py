@@ -338,33 +338,43 @@ class AdvanceStageView(APIView):
 
         elif from_stage == DailyLearningLoop.STAGE_4_ARENA:
             # 4-bosqich (1v1 Ghost Duel) yakunlandi -> Sikl to'liq yopildi!
-            arena_won = payload.get('arena_won', True)
-            loop.arena_won = arena_won
-            if arena_won:
-                loop.dtm_score_delta = round(loop.dtm_score_delta + 0.8, 2)
-                loop.combo_multiplier = min(2.5, round(loop.combo_multiplier + 0.5, 1))
+            from core.rewards import grant_rewards_atomic
+            from django.db import transaction
 
-            loop.current_stage = DailyLearningLoop.STAGE_5_COMPLETED
+            with transaction.atomic():
+                locked_loop = DailyLearningLoop.objects.select_for_update().get(pk=loop.pk)
+                arena_won = payload.get('arena_won', True)
+                locked_loop.arena_won = arena_won
+                if arena_won:
+                    locked_loop.dtm_score_delta = round(locked_loop.dtm_score_delta + 0.8, 2)
+                    locked_loop.combo_multiplier = min(2.5, round(locked_loop.combo_multiplier + 0.5, 1))
 
-            # Mukofotlar taqsimoti:
-            # 1. Eco-Daraxtga suv quyiladi (+35%)
-            water_result = eco_tree.water(35)
+                locked_loop.current_stage = DailyLearningLoop.STAGE_5_COMPLETED
 
-            # 2. Foydalanuvchiga tanga va XP
-            coins = int(200 * loop.combo_multiplier)
-            xp = int(100 * loop.combo_multiplier)
-            profile = ensure_profile_for_user(user)
-            profile.coins = (profile.coins or 0) + coins
-            profile.xp = (profile.xp or 0) + xp
-            profile.save(update_fields=['coins', 'xp'])
+                # Agar sandiq ochilmagan bo'lsa mukofot beriladi (Double-spend oldini olish)
+                if not locked_loop.is_chest_claimed:
+                    # 1. Eco-Daraxtga suv quyiladi (+35%)
+                    water_result = eco_tree.water(35)
 
-            # 3. Bepul AI Esse krediti
-            quota, _ = UserUsageQuota.objects.get_or_create(profile=profile)
-            quota.free_essay_credits = (quota.free_essay_credits or 0) + 1
-            quota.save(update_fields=['free_essay_credits'])
+                    # 2. Atomik tanga va XP
+                    coins = int(200 * locked_loop.combo_multiplier)
+                    xp = int(100 * locked_loop.combo_multiplier)
+                    profile = ensure_profile_for_user(user)
+                    grant_rewards_atomic(profile.id, coins_delta=coins, xp_delta=xp)
 
-            loop.is_chest_claimed = True
-            loop.save()
+                    # 3. Bepul AI Esse krediti
+                    quota, _ = UserUsageQuota.objects.get_or_create(profile=profile)
+                    quota.free_essay_credits = (quota.free_essay_credits or 0) + 1
+                    quota.save(update_fields=['free_essay_credits'])
+
+                    locked_loop.is_chest_claimed = True
+                else:
+                    water_result = {'water_level': eco_tree.water_level, 'grew': False}
+                    coins = 0
+                    xp = 0
+
+                locked_loop.save()
+                loop = locked_loop
 
             rewards_awarded = {
                 'coins': coins,

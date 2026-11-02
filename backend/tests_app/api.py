@@ -190,7 +190,7 @@ def center_api(request):
     mock_plan = SubscriptionPlan.objects.filter(plan_type='mock_test', is_active=True).order_by('order').first()
     # Faol PRO obuna barcha mock testlarni ochadi. Ilgari obuna FAQAT darslarni ochardi
     # (ular esa hali yo'q edi) — ya'ni o'quvchi obuna sotib olib ham hech narsa olmasdi.
-    has_sub = profile.has_active_premium_lessons
+    has_sub = profile.is_vip_active
 
     # Pinned Katta Mock Imtihon: tanlangan fan va kategoriya bo'yicha eng yaqin yoki hozir ketayotgan jonli imtihon
     now = timezone.now()
@@ -257,7 +257,7 @@ def center_api(request):
         'tests': [
             _test_payload(
                 t, social_by_test.get(t.id),
-                unlocked=(has_sub or profile.premium_mock_test_unlocked or t.id in unlocked_ids),
+                unlocked=(has_sub or t.id in unlocked_ids),
             ) for t in tests
         ],
         'subjects': [
@@ -279,11 +279,8 @@ def center_api(request):
         'search_query': search_query,
         'total_attempts': stats['total'] or 0,
         'avg_score': stats['avg'] or 0,
-        'has_mock_test_access': has_sub or profile.premium_mock_test_unlocked,
-        # Darslar obunasi va mock test kirishi — IKKI XIL tarif. Frontend shu ikkalasini
-        # ajratib ko'rsatishi uchun ikkalasi ham qaytariladi: "PRO" bo'lgan, lekin mock
-        # testga kirolmayotgan o'quvchi nima uchun qulf turganini bilishi kerak.
-        'has_lessons_access': profile.has_active_premium_lessons,
+        'has_mock_test_access': has_sub,
+        'has_lessons_access': has_sub,
         # Qulflangan kartadan to'g'ridan-to'g'ri to'lovga o'tish uchun.
         'mock_plan': {'id': mock_plan.id, 'price': str(mock_plan.price)} if mock_plan else None,
     })
@@ -336,8 +333,7 @@ def start_test_api(request, test_id):
     # bir xil qoida — ikkalasi ajralib qolsa, katalogda "ochiq" ko'ringan test start'da
     # 403 berardi).
     if (test.is_premium
-            and not profile.has_active_premium_lessons
-            and not profile.premium_mock_test_unlocked
+            and not profile.is_vip_active
             and test.id not in _unlocked_ids(profile)):
         return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
     is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))

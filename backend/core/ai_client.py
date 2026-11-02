@@ -258,7 +258,7 @@ def _ask_ollama(messages, temperature, response_format, timeout, on_error=None):
         return None
 
 
-def ask_groq(messages, temperature=0.6, response_format=None, timeout=8, on_error=None):
+def ask_groq(messages, temperature=0.6, response_format=None, timeout=10.0, on_error=None):
     """Public entry point (nomi tarixiy — endi provider zanjiri).
 
     Avval Groq, u ishlamasa lokal Ollama. Ikkalasi ham bo'lmasa None —
@@ -275,7 +275,26 @@ def ask_groq(messages, temperature=0.6, response_format=None, timeout=8, on_erro
     return content
 
 
-def ask_groq_stream(messages, temperature=0.6, timeout=8):
+def ask_groq_json(messages, temperature=0.3, timeout=10.0, fallback_json=None):
+    """Circuit Breaker bilan himoyalangan xavfsiz JSON AI so'rovi.
+    Provayder ishlamay qolsa yoki xato bo'lsa, hech qachon 500 bermaydi — zaxira fallback_json qaytaradi.
+    """
+    try:
+        raw = ask_groq(
+            messages,
+            temperature=temperature,
+            response_format={"type": "json_object"},
+            timeout=timeout
+        )
+        if raw:
+            return json.loads(raw)
+    except Exception as exc:
+        logger.warning("ask_groq_json fallback triggered: %s", exc)
+
+    return fallback_json if fallback_json is not None else {}
+
+
+def ask_groq_stream(messages, temperature=0.6, timeout=10.0):
     """Streaming variant for the AI Mentor chat — yields text deltas as Groq produces
     them, instead of waiting for the whole reply (the AI Mentor feels noticeably
     slower without this, since a 3-6 sentence answer can take several seconds).

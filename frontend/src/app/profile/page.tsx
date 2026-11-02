@@ -197,9 +197,9 @@ export default function ProfilePage() {
     }
   }, [data]);
 
-  const streak = data?.profile?.streak ?? 0;
+  const streak = typeof data?.profile?.streak === 'number' ? data.profile.streak : 0;
   const radarStats: RadarStats = useMemo(() => {
-    if (!analyticsData) {
+    if (!analyticsData || typeof analyticsData !== 'object') {
       return {
         subject_mastery: 78,
         logic: 72,
@@ -211,18 +211,17 @@ export default function ProfilePage() {
       };
     }
 
-    const subjects = analyticsData.mastery?.subjects || [];
+    const subjects = Array.isArray(analyticsData.mastery?.subjects) ? analyticsData.mastery.subjects : [];
     const avgSubMastery = subjects.length
-      ? Math.round(subjects.reduce((sum, s) => sum + s.mastery, 0) / subjects.length)
-      : analyticsData.accuracy || 75;
+      ? Math.round(subjects.reduce((sum, s) => sum + (Number(s?.mastery) || 0), 0) / subjects.length)
+      : Number(analyticsData.accuracy) || 75;
 
     const consistency = Math.min(100, Math.max(35, streak * 12));
-    const accuracy = analyticsData.accuracy || 70;
-    const logic = analyticsData.avg_score || 72;
-    const speed = analyticsData.time_minutes > 0 ? 85 : 75;
-    const writing = analyticsData.cefr?.writing?.avg_score
-      ? Math.round((analyticsData.cefr.writing.avg_score / 5) * 100)
-      : 65;
+    const accuracy = Number(analyticsData.accuracy) || 70;
+    const logic = Number(analyticsData.avg_score) || 72;
+    const speed = Number(analyticsData.time_minutes) > 0 ? 85 : 75;
+    const writingScore = Number(analyticsData.cefr?.writing?.avg_score);
+    const writing = writingScore > 0 ? Math.round((writingScore / 5) * 100) : 65;
 
     const ovr = Math.round((avgSubMastery + consistency + accuracy + logic + speed + writing) / 6);
 
@@ -362,9 +361,12 @@ export default function ProfilePage() {
 
   if (authReady && !access) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-[var(--bg-page)]">
-        <Loader2 className="size-8 animate-spin text-primary" />
-      </div>
+      <>
+        <AppShell />
+        <div className="flex min-h-[60vh] w-full items-center justify-center bg-[var(--bg-page)]">
+          <Loader2 className="size-8 animate-spin text-primary" />
+        </div>
+      </>
     );
   }
 

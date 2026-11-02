@@ -47,18 +47,20 @@ def purchase_item(profile, item):
         # Already unlocked some other way (a real-money Payment or prior shop buy) —
         # strictly one-time purchase.
         raise ShopError("Premium testlar sizda allaqachon ochiq (bir martalik xarid).")
-    if locked.coins < item.price_coins:
+    if locked.coins < item.price_coins or item.price_coins < 0:
         raise ShopError("Tangangiz yetarli emas.")
 
-    # Row is locked, so a plain decrement is race-safe.
-    locked.coins -= item.price_coins
-    update_fields = ['coins']
+    from django.db.models import F
+    updated_rows = Profile.objects.filter(pk=locked.pk, coins__gte=item.price_coins).update(
+        coins=F('coins') - item.price_coins
+    )
+    if updated_rows == 0:
+        raise ShopError("Tangangiz yetarli emas yoki balans o'zgargan.")
+
+    locked.refresh_from_db(fields=['coins'])
     if item.slug == PREMIUM_TEST_UNLOCK_SLUG:
-        # Reuses the same flag real-money Payment.apply_to_profile() sets — one unlock,
-        # regardless of whether it was bought with coins or a card payment.
         locked.premium_mock_test_unlocked = True
-        update_fields.append('premium_mock_test_unlocked')
-    locked.save(update_fields=update_fields)
+        locked.save(update_fields=['premium_mock_test_unlocked'])
 
     if inv:  # consumable restock
         inv.quantity += 1
