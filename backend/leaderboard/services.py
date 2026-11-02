@@ -29,19 +29,43 @@ def _key(view):
     return f'leaderboard:top:{view}'
 
 
-def get_top_ranking(view):
-    """Cached ordered list of {'profile_id', 'xp'} for a leaderboard view
-    ('all' = overall Profile.xp, otherwise a subject slug = that subject's SubjectScore).
-    Privileged users (superadmin, teacher, staff) are strictly excluded.
+def get_top_ranking(view, timeframe='all'):
+    """Cached ordered list of {'profile_id', 'xp'} for a leaderboard view.
+    QAT'IY QOIDA:
+    1. 1 dona test yechib 100% olgan va 1.5 oydan beri kirmagan o'quvchilar reytingda turmasin!
+       Kamida 3 ta urinish (completed attempts >= 3) yoki faol o'quvchilar tanlanadi.
+    2. Privileged users (superadmin, teacher, staff) qat'iyan chiqarib tashlanadi.
     """
-    key = _key(view)
+    key = f"{_key(view)}:{timeframe}"
     data = cache.get(key)
     if data is not None:
         return data
 
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Count, Sum
+
+    base_profiles = Profile.objects.filter(
+        role='student',
+        user__is_superuser=False,
+        user__is_staff=False,
+        xp__gt=0,
+    ).annotate(
+        completed_tests=Count('attempts', filter=Q(attempts__is_completed=True))
+    ).filter(
+        Q(completed_tests__gte=3) | Q(xp__gte=150)
+    )
+
+    if timeframe == 'weekly':
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        # Oxirgi 7 kunda faol bo'lganlar
+        base_profiles = base_profiles.filter(
+            attempts__completed_at__gte=seven_days_ago,
+            attempts__is_completed=True
+        ).distinct()
+
     if view == 'all':
-        rows = (Profile.objects
-                .filter(role='student', user__is_superuser=False, user__is_staff=False)
+        rows = (base_profiles
                 .order_by('-xp', 'id')
                 .values_list('id', 'xp')[:TOP_N])
     else:
@@ -52,9 +76,11 @@ def get_top_ranking(view):
                     profile__role='student',
                     profile__user__is_superuser=False,
                     profile__user__is_staff=False,
+                    profile__id__in=base_profiles.values_list('id', flat=True)
                 )
                 .order_by('-xp', 'profile_id')
                 .values_list('profile_id', 'xp')[:TOP_N])
+
     data = [{'profile_id': pid, 'xp': xp} for pid, xp in rows]
     cache.set(key, data, RANKING_TTL)
     return data

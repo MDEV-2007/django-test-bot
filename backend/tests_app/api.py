@@ -1281,14 +1281,19 @@ def story_image_api(request, attempt_id):
 # ============================================================ ANTI-CHEAT: TAB SWITCH
 @api_view(['POST'])
 def report_tab_switch_api(request, attempt_id):
-    """Frontend har safar o'quvchi brauzer tabini almashtirganda chaqiradi."""
+    """Frontend har safar o'quvchi brauzer tabini almashtirganda chaqiradi.
+    3 marta yoki undan ko'p tab switch qilinsa, is_cheating_flagged = True bo'ladi."""
     try:
         attempt = Attempt.objects.get(id=attempt_id, profile=request.user.profile, is_completed=False)
     except Attempt.DoesNotExist:
         return Response({'error': 'Urinish topilmadi'}, status=404)
-    attempt.tab_switch_count = F('tab_switch_count') + 1
-    attempt.save(update_fields=['tab_switch_count'])
-    return Response({'ok': True})
+    
+    current_switches = (attempt.tab_switches_count or 0) + 1
+    attempt.tab_switches_count = current_switches
+    if current_switches >= 3:
+        attempt.is_cheating_flagged = True
+    attempt.save(update_fields=['tab_switches_count', 'is_cheating_flagged'])
+    return Response({'ok': True, 'tab_switches': current_switches, 'is_cheating_flagged': attempt.is_cheating_flagged})
 
 
 @api_view(['GET'])

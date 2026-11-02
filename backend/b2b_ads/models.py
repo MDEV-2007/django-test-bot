@@ -35,6 +35,17 @@ class StudentLeadSubmission(models.Model):
     telegram_username = models.CharField(max_length=100, blank=True)
     predicted_dtm_score = models.CharField(max_length=50, blank=True, default="165.4")
     weakest_topics = models.TextField(blank=True, help_text="O'quvchining eng ko'p xato qilgan 3 ta mavzusi")
+    status = models.CharField(
+        max_length=30,
+        default='NEW',
+        choices=[
+            ('NEW', 'Yangi'),
+            ('CONTACTED', "Bog'lanildi"),
+            ('ENROLLED', "Ro'yxatdan o'tdi"),
+            ('REJECTED', 'Rad etildi'),
+        ],
+        db_index=True,
+    )
     coins_rewarded = models.IntegerField(default=50)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -197,183 +197,198 @@ def toggle_bookmark_api(request, lesson_id):
 CURATED_DECKS = [
     {
         'id': 101,
-        'title': "Temuriylar Saltanati: Muhim Janglar va Sanalar",
+        'title': "Temuriylar: Muhim Janglar va Sanalar",
         'subject': "Tarix",
         'subject_slug': "tarix",
         'icon': "Crown",
-        'description': "1370-yildan 1507-yilgacha bo'lgan eng muhim g'alabalar, yurishlar va sanalarni 3 daqiqada eslab qoling.",
+        'description': "1370-yildan 1507-yilgacha bo'lgan eng muhim g'alabalar, yurishlar va sanalarni tezkor eslab qoling.",
         'difficulty': "Asosiy",
         'xp_reward': 25,
         'cards': [
             {
                 'id': 1,
-                'front': "1370-yil 9-aprelda Movarounnahrda qanday tarixiy burilish yuz berdi?",
+                'front': "1370-yil 9-aprelda Movarounnahrda qanday tarixiy voqea yuz berdi?",
                 'back': "Amir Temur Balx qurultoyida Movarounnahrning oliy hukmdori deb e'lon qilindi va Samarqandni poytaxt etib belgiladi.",
                 'hint': "Buyuk davlatning tug'ilishi"
             },
             {
                 'id': 2,
-                'front': "1395-yil Qunduzcha (Terek) daryosi bo'yidagi jang kimlar o'rtasida bo'ldi?",
-                'back': "Amir Temur va Oltin O'rda xoni To'xtamishxon o'rtasida bo'ldi. Temurning g'alabasi Oltin O'rdaning qudratiga yakuniy zarba berdi.",
-                'hint': "Shimoliy dushman bilan to'qnashuv"
+                'front': "1395-yil Qunduzcha (Terek) jangi kimlar o'rtasida bo'ldi?",
+                'back': "Amir Temur va Oltin O'rda xoni To'xtamishxon o'rtasida. Temur g'alaba qozonib, Oltin O'rdani sindirdi.",
+                'hint': "Oltin O'rda poytaxti Saroy Berka yakson bo'lgan"
             },
             {
                 'id': 3,
-                'front': "1402-yil 20-iyuldagi Anqara jangi nima uchun jahon tarixida muhim hisoblanadi?",
-                'back': "Amir Temur Usmonli sultoni Boyazid Yildirimni mag'lub etdi va Yevropani yarim asrga Usmonlilar istilosidan saqlab qoldi.",
-                'hint': "Sharq va G'arb to'qnashuvi"
+                'front': "1402-yil 20-iyuldagi mashhur Anqara jangining ahamiyati nimada?",
+                'back': "Amir Temur Usmonli sultoni Boyazid I Yildirimni mag'lub etib, Yevropani usmonlilar istilosidan saqlab qoldi.",
+                'hint': "Ikki buyuk turkiy sarkarda to'qnashuvi"
             },
             {
                 'id': 4,
-                'front': "Ulug'bek rasadxonasi qachon va qayerda bunyod etilgan?",
-                'back': "1424–1428-yillarda Samarqand yaqinidagi Ko'hak (Cho'ponota) tepaligida qurilgan.",
-                'hint': "Yulduzlar ilmi poydevori"
-            },
-            {
-                'id': 5,
-                'front': "'Temur tuzuklari' asari necha qismdan iborat va unda nimalar bayon qilingan?",
-                'back': "2 qismdan iborat: 1-qism Amir Temurning tarjimayi holi va harbiy yurishlari, 2-qism davlatni boshqarish qonun-qoidalari.",
-                'hint': "Davlat va adolat dasturi"
-            },
-            {
-                'id': 6,
-                'front': "1405-yil 18-fevralda qanday tarixiy voqea yuz berdi?",
-                'back': "Amir Temur Xitoyga yurishi paytida O'tror shahrida 69 yoshida vafot etdi.",
-                'hint': "Buyuk sohibqironning so'nggi manzili"
+                'front': "Mirzo Ulug'bek tomonidan Samarqand rasadxonasi qaysi yillarda qurilgan?",
+                'back': "1428-1429 yillarda Cho'ponota tepaligida qurilgan.",
+                'hint': "1018 ta yulduz jadvali (Zij)"
             }
         ]
     },
     {
         'id': 102,
-        'title': "Ona Tili: Imlo Qoidalari va Morfologiya",
-        'subject': "Ona tili",
-        'subject_slug': "ona-tili",
-        'icon': "BookOpen",
-        'description': "BBA va Milliy Sertifikat imtihonlarida eng ko'p xato qilinadigan imlo va tinish belgilari qoidalari.",
-        'difficulty': "Muhim",
-        'xp_reward': 25,
+        'title': "Family & Society (IELTS / CEFR)",
+        'subject': "Ingliz tili",
+        'subject_slug': "ingliz-tili",
+        'icon': "Users",
+        'description': "Oilaviy munosabatlar, jamiyat va sotsiologiyaga oid C1/B2 darajadagi eng zarur lug'at boyligi.",
+        'difficulty': "IELTS 7.0+",
+        'xp_reward': 30,
         'cards': [
             {
-                'id': 1,
-                'front': "Tutuq belgisi (') unlidan keyin kelganda qanday talaffuz qilinadi?",
-                'back': "Unli tovush cho'ziqroq talaffuz qilinadi. Masalan: ma'no, e'lon, e'tiqod, ta'sir, da'vo.",
-                'hint': "Tovushning cho'zilishi"
+                'id': 201,
+                'front': "Upbringing",
+                'back': "Tarbiyalash, voyaga yetkazish (The treatment and instruction received from parents throughout childhood).",
+                'hint': "Synonym: Parenting"
             },
             {
-                'id': 2,
-                'front': "Tutuq belgisi undoshdan keyin kelganda qanday o'qiladi?",
-                'back': "Undosh keyingi unlidan ajratib, to'xtam bilan aytiladi. Masalan: san'at, jur'at, mas'ul, qat'iy.",
-                'hint': "Ajratish vazifasi"
+                'id': 202,
+                'front': "Sibling rivalry",
+                'back': "Aka-uka yoki opa-singillar o'rtasidagi raqobat va kelishmovchilik.",
+                'hint': "Competition between brothers and sisters"
             },
             {
-                'id': 3,
-                'front': "Qanday so'zlar har doim chiziqcha (-) bilan yoziladi?",
-                'back': "Juft so'zlar (ota-ona, do'st-dushman) va takroriy so'zlar (asta-sekin, ko'pdan-ko'p, qator-qator).",
-                'hint': "Juftlik va takror"
+                'id': 203,
+                'front': "Extended family",
+                'back': "Katta oila (ota-ona, bolalar, bobo-buvilar va qarindoshlar birgalikda).",
+                'hint': "Opposite: Nuclear family"
             },
             {
-                'id': 4,
-                'front': "Son bilan ot birikmasida ot qachon ko'plikda kelishi to'g'ri bo'ladi?",
-                'back': "Faqat noaniq miqdorni bildiruvchi sonlardan keyin (o'nlab talabalar, yuzlab odamlar). Aniq sondan keyin esa ot birlikda keladi (beshta kitob).",
-                'hint': "Aniq va noaniq miqdor"
-            },
-            {
-                'id': 5,
-                'front': "Egalik qo'shimchalari qo'shilganda qaysi undoshlar jaranglilashadi?",
-                'back': "'k' undoshi 'g' ga (yurak -> yuragim), 'q' undoshi 'g'' ga aylanadi (quloq -> qulog'im).",
-                'hint': "Tovush o'zgarishi"
+                'id': 204,
+                'front': "Flesh and blood",
+                'back': "O'z qon-qarindoshi, jigari (Someone from your own family).",
+                'hint': "Idiom about close biological relatives"
             }
         ]
     },
     {
         'id': 103,
-        'title': "Biologiya: Hujayra, DNK va Genetika Atamalari",
-        'subject': "Biologiya",
-        'subject_slug': "biologiya",
-        'icon': "Sparkles",
-        'description': "Mitoz, meyoz, fotosintez va genetika qonunlariga oid eng muhim atamalar to'plami.",
-        'difficulty': "O'rta",
+        'title': "House & Home (IELTS Vocabulary)",
+        'subject': "Ingliz tili",
+        'subject_slug': "ingliz-tili",
+        'icon': "Home",
+        'description': "Uy-joy, arxitektura va mebellar bo'yicha imtihonda ko'p uchraydigan kollokatsiyalar.",
+        'difficulty': "B2",
         'xp_reward': 25,
         'cards': [
             {
-                'id': 1,
-                'front': "Mitoz va Meyoz bo'linishlarining eng asosiy farqi nimada?",
-                'back': "Mitozda bitta hujayradan 2 ta diploid (2n) tana hujayrasi; Meyozda esa 4 ta gaploid (n) jinsiy hujayra (gameta) hosil bo'ladi.",
-                'hint': "Xromosoma to'plami va hujayralar soni"
+                'id': 211,
+                'front': "Spacious and airy",
+                'back': "Keng va havodor, yorug' (Having ample room and fresh air circulation).",
+                'hint': "Positive description of a room"
             },
             {
-                'id': 2,
-                'front': "DNK qo'sh spirali tuzilishini kimlar va qachon kashf qilgan?",
-                'back': "1953-yilda Jeyms Uotson va Frensis Krik kashf qilgan (Nobel mukofoti sohiblari).",
-                'hint': "Molekulyar biologiya inqilobi"
+                'id': 212,
+                'front': "Suburban area",
+                'back': "Shahar atrofi hududi, chekka posyolka (Residential district located on the outskirts).",
+                'hint': "Between rural and downtown"
             },
             {
-                'id': 3,
-                'front': "Fotosintezning yorug'lik bosqichi xloroplastning qayerida sodir bo'ladi?",
-                'back': "Tilakoid membranalarida bo'lib o'tadi. Natijada ATF, NADPH va erkin kislorod (O2) hosil bo'ladi.",
-                'hint': "Quyosh nuri yutiladigan joy"
-            },
-            {
-                'id': 4,
-                'front': "Transkripsiya va Translyatsiya nima?",
-                'back': "Transkripsiya — DNK dan axborot RNK (iRNK) sintezi; Translyatsiya — ribosomada iRNK asosida oqsil sintezlanishi jarayoni.",
-                'hint': "Genetik axborotning amalga oshishi"
-            },
-            {
-                'id': 5,
-                'front': "Mendelning 1-qonuni qanday nomlanadi?",
-                'back': "Birinchi bo'g'in duragaylarining bir xilligi (dominantlik) qonuni.",
-                'hint': "Genetika poydevori"
+                'id': 213,
+                'front': "Affordable housing",
+                'back': "Hamyonbop uy-joy (Dwellings that can be afforded by those on a median household income).",
+                'hint': "Social policy term"
             }
         ]
     },
     {
         'id': 104,
-        'title': "English: High-Yield Collocations & Idioms (B2/C1)",
-        'subject': "Ingliz tili",
-        'subject_slug': "ingliz-tili",
-        'icon': "Zap",
-        'description': "CEFR va IELTS imtihonlarida baland ball (Band 7+) olish uchun zarur bo'lgan iboralar.",
-        'difficulty': "Yuqori",
+        'title': "Ona tili: BMB Imlo Qoidalari & Tuzoqlar",
+        'subject': "Ona tili",
+        'subject_slug': "ona-tili",
+        'icon': "BookOpen",
+        'description': "Tutuq belgisi, qo'sh undoshlar va ko'p xato qilinadigan imlo mezonlari.",
+        'difficulty': "BMB Standart",
         'xp_reward': 25,
         'cards': [
             {
-                'id': 1,
-                'front': "What does the idiom 'Cut corners' mean?",
-                'back': "To do something in the easiest, cheapest, or fastest way, often compromising on quality.",
-                'hint': "Taking shortcuts"
+                'id': 301,
+                'front': "'Mutaassib' so'zi qanday yoziladi va ma'nosi nima?",
+                'back': "Ikkita 'a' bilan yoziladi: 'mutaassib' — o'z fikrida qotib qolgan, fanatik.",
+                'hint': "Arabcha o'zlashma, ikkita 'a'"
             },
             {
-                'id': 2,
-                'front': "What does 'Hit the nail on the head' mean?",
-                'back': "To state or describe a situation or truth with absolute precision and accuracy.",
-                'hint': "Exactly right"
+                'id': 302,
+                'front': "'Muammo' va 'muddao' so'zlaridagi qo'sh undoshlar?",
+                'back': "'Muammo'da ikkita 'm', 'muddao'da ikkita 'd' yoziladi.",
+                'hint': "Imlo qoidasi"
             },
             {
-                'id': 3,
-                'front': "What is the key difference between 'Make' and 'Do'?",
-                'back': "'Make' is for creating or producing something new (make a decision, make progress); 'Do' is for actions, obligations, or tasks (do homework, do business).",
-                'hint': "Creation vs Action"
-            },
-            {
-                'id': 4,
-                'front': "What does 'Take something for granted' mean?",
-                'back': "To fail to properly value or appreciate someone or something because you are overly used to it.",
-                'hint': "Not appreciating worth"
-            },
-            {
-                'id': 5,
-                'front': "What does the phrase 'Every cloud has a silver lining' mean?",
-                'back': "Every bad or difficult situation has some positive or hopeful aspect to it.",
-                'hint': "Optimism in difficulty"
+                'id': 303,
+                'front': "'Tarixiy' so'ziga 'iy' qo'shimchasi qo'shilganda qaysi harf yoziladi?",
+                'back': "Qattiq 'x' bilan: 'Tarixiy'. Chunki o'zagi 'tarix'.",
+                'hint': "x/h farqi"
             }
         ]
-    }
+    },
+    {
+        'id': 105,
+        'title': "Kimyo: Asosiy Formulalar & Valentlik",
+        'subject': "Kimyo",
+        'subject_slug': "kimyo",
+        'icon': "FlaskConical",
+        'description': "Mendeleyev davriy jadvalidagi asosiy elementlar, kislotalar va oksidlar formulalari.",
+        'difficulty': "O'rta",
+        'xp_reward': 30,
+        'cards': [
+            {
+                'id': 401,
+                'front': "Sulfat kislota formulasi va oltingugurt valentligi?",
+                'back': "H2SO4. Oltingugurt (S) ning valentligi VI (oksidlanish darajasi +6).",
+                'hint': "Eng muhim noorganik kislota"
+            },
+            {
+                'id': 402,
+                'front': "Bertolle tuzi formulasi nima?",
+                'back': "KClO3 (Kaliy xlorat). Qizdirilganda kislorod ajratib chiqaradi.",
+                'hint': "Kislorod olish laboratoriya usuli"
+            },
+            {
+                'id': 403,
+                'front': "Avogadro soni qancha?",
+                'back': "6.02 x 10^23 dona zarracha (1 mol modda ichida).",
+                'hint': "N_A doimiysi"
+            }
+        ]
+    },
+    {
+        'id': 106,
+        'title': "Koreys tili: TOPIK I Boshlang'ich Fe'llar",
+        'subject': "Koreys tili",
+        'subject_slug': "koreys-tili",
+        'icon': "Sparkles",
+        'description': "Kundalik eng ko'p ishlatiladigan 10 ta asosiy koreyscha fe'l va tarjimasi.",
+        'difficulty': "TOPIK I",
+        'xp_reward': 20,
+        'cards': [
+            {
+                'id': 501,
+                'front': "가다 (Kada)",
+                'back': "Bormoq, ketmoq (To go).",
+                'hint': "Harakat fe'li"
+            },
+            {
+                'id': 502,
+                'front': "오다 (Oda)",
+                'back': "Kelmoq (To come).",
+                'hint': "Qarama-qarshisi: Kada"
+            },
+            {
+                'id': 503,
+                'front': "먹다 (Mokta)",
+                'back': "Yemoq (To eat).",
+                'hint': "Ovqatlanish fe'li"
+            }
+        ]
+    },
 ]
 
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
 def flashcards_decks_api(request):
     """Returns all available flashcard decks categorized by subject."""
     # Also incorporate database flashcards from lessons

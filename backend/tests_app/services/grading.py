@@ -248,3 +248,115 @@ def grade_open_answers(items):
 
     return [results_by_index[i] for i in range(len(items))]
 
+
+# ============================================================
+# MULTI-TRACK BAHOLASH DVIGATELI (Rasch, Attestatsiya, CEFR)
+# ============================================================
+
+def calculate_rasch_grade(score_pct: float) -> dict:
+    """Milliy Sertifikat va DTM uchun Rasch shkalasi (0 - 75+ ball) va sertifikat darajasi."""
+    pct = max(0.0, min(100.0, float(score_pct or 0.0)))
+    # 75 ballik rasmiy shkalaga proportsiya
+    rasch_score = round((pct / 100.0) * 75.0, 1)
+
+    if rasch_score >= 68.0:
+        grade = 'A+'
+        label = "Eng yuqori (A+) — 100% Imtiyoz"
+    elif rasch_score >= 62.0:
+        grade = 'A'
+        label = "A'lo (A) — Imtiyozli Sertifikat"
+    elif rasch_score >= 56.0:
+        grade = 'B+'
+        label = "Yaxshi (B+) — Sertifikat beriladi"
+    elif rasch_score >= 50.0:
+        grade = 'B'
+        label = "Qoniqarli (B) — Sertifikat beriladi"
+    elif rasch_score >= 46.0:
+        grade = 'C+'
+        label = "Quyi (C+) — Qisman ball"
+    elif rasch_score >= 42.0:
+        grade = 'C'
+        label = "Minimal (C)"
+    else:
+        grade = 'F'
+        label = "Sertifikat berilmaydi"
+
+    return {
+        'rasch_score': rasch_score,
+        'grade': grade,
+        'label': label,
+        'is_passed': rasch_score >= 46.0,
+    }
+
+
+def calculate_teacher_attestation(correct_count: int, total_count: int = 50) -> dict:
+    """O'qituvchilar Attestatsiyasi (Toifa sinovi):
+    40 ta mutaxassislik + 10 ta pedagogik mahorat = 50 ta savol (har biri 2 ball = 100 ball).
+    >= 86 ball: Oliy toifa (70% ustama)
+    70 - 84 ball: 1-toifa (60% ustama)
+    56 - 68 ball: 2-toifa (50% ustama)
+    < 56 ball: Mutaxassis / Toifa berilmaydi
+    """
+    safe_total = max(1, total_count)
+    score_100 = round((float(correct_count) / float(safe_total)) * 100.0, 1)
+
+    if score_100 >= 86.0:
+        category = "Oliy toifa (70% ustama)"
+        tier = 'oliy'
+        salary_bonus = "70% oylik maoshga ustama"
+        passed = True
+    elif score_100 >= 70.0:
+        category = "1-toifa (60% ustama)"
+        tier = '1-toifa'
+        salary_bonus = "60% oylik maoshga ustama"
+        passed = True
+    elif score_100 >= 56.0:
+        category = "2-toifa (50% ustama)"
+        tier = '2-toifa'
+        salary_bonus = "50% oylik maoshga ustama"
+        passed = True
+    else:
+        category = "Yetarli emas (Mutaxassis)"
+        tier = 'mutaxassis'
+        salary_bonus = "Toifa tasdiqlanmadi"
+        passed = False
+
+    return {
+        'score_100': score_100,
+        'category': category,
+        'tier': tier,
+        'salary_bonus': salary_bonus,
+        'is_passed': passed,
+    }
+
+
+def calculate_language_cefr(score_pct: float) -> dict:
+    """Xalqaro til imtihonlari (IELTS, CEFR, TOPIK, SAT) darajasi."""
+    pct = max(0.0, min(100.0, float(score_pct or 0.0)))
+    if pct >= 85.0:
+        level = 'C1'
+        ielts = '7.5 - 8.5'
+        title = 'Advanced / Samarali erkin sohib'
+    elif pct >= 70.0:
+        level = 'B2'
+        ielts = '6.0 - 7.0'
+        title = 'Vantage / Mustaqil foydalanuvchi'
+    elif pct >= 55.0:
+        level = 'B1'
+        ielts = '4.5 - 5.5'
+        title = 'Threshold / Chegaraviy daraja'
+    elif pct >= 40.0:
+        level = 'A2'
+        ielts = '3.5 - 4.0'
+        title = 'Waystage / Boshlang\'ich davomiy'
+    else:
+        level = 'A1'
+        ielts = '< 3.0'
+        title = 'Breakthrough / Yangi boshlovchi'
+
+    return {
+        'level': level,
+        'ielts_estimate': ielts,
+        'title': title,
+        'is_passed': pct >= 55.0,
+    }

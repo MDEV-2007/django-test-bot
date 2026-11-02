@@ -385,10 +385,18 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             secondsLeft={autoplaySecondsLeft}
             onSkip={skipAutoplay}
           />
+        ) : loading ? (
+          <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
+            <RotateCw className="size-9 text-orange-500 animate-spin" />
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-zinc-200">Avtopilot sikli yuklanmoqda...</p>
+              <p className="text-xs text-zinc-400">Kunlik shpargalka va qasos savollari tayyorlanmoqda</p>
+            </div>
+          </div>
         ) : (
           <AnimatePresence mode="wait">
             {/* ── 1-BOSQICH: 60s ANTI-DARSLIK SHPARGALKA ── */}
-            {loop?.current_stage === 'STAGE_1_WARMUP' && stageData?.warmup && (
+            {loop?.current_stage === 'STAGE_1_WARMUP' && (
               <motion.div
                 key="stage_1"
                 initial={{ opacity: 0, y: 15 }}
@@ -399,7 +407,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 <div className="flex items-center justify-between">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase">
                     <Brain className="size-3.5" />
-                    <span>1-Bosqich: 60s Shpargalka</span>
+                    <span>1-Bosqich: 90s Shpargalka</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-white/10 text-xs font-mono font-bold text-amber-400">
@@ -410,10 +418,11 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
 
                 <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-5 sm:p-7 shadow-xl space-y-4">
                   <h2 className="text-xl sm:text-2xl font-black text-white">
-                    {stageData.warmup.title}
+                    {stageData?.warmup?.title || topic?.title || "Oltin Qoidalar & BMB Qopqonlari"}
                   </h2>
                   <p className="text-xs sm:text-sm text-zinc-300 whitespace-pre-line leading-relaxed">
-                    {stageData.warmup.cheat_sheet_content}
+                    {stageData?.warmup?.cheat_sheet_content ||
+                      "1. Savol shartini diqqat bilan o'qing: 'emas', 'noto'g'ri', 'mos kelmaydi' inkor so'zlariga urg'u bering.\n2. Birinchi taassurotga ishonmang: chalg'ituvchi variantlar odatda eng tanish tuyuladi.\n3. Istisno usulini qo'llang: mutlaqo noto'g'ri bo'lgan 2 ta javobni darhol chiqarib tashlang."}
                   </p>
 
                   <div className="space-y-2 pt-2">
@@ -422,7 +431,14 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                       <span>BMB / DTM Qopqonlari:</span>
                     </h3>
                     <div className="grid grid-cols-1 gap-2">
-                      {stageData.warmup.bmb_traps.map((trap, idx) => (
+                      {(stageData?.warmup?.bmb_traps && stageData.warmup.bmb_traps.length > 0
+                        ? stageData.warmup.bmb_traps
+                        : [
+                            "Mavzudagi o'xshash atamalar va yillarni aralashtirib yuborish",
+                            "Savol oxiridagi 'emas' qo'shimchasini e'tibordan chetda qoldirish",
+                            "Tarixiy shaxslar yoki ilmiy tushunchalarning davrini xato tanlash",
+                          ]
+                      ).map((trap, idx) => (
                         <div
                           key={idx}
                           className="p-2.5 rounded-xl bg-zinc-950/80 border border-rose-500/20 text-xs text-rose-300 flex items-start gap-2"

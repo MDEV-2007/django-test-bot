@@ -93,10 +93,36 @@ class AudioLesson(models.Model):
         seconds = self.duration_seconds % 60
         return f"{minutes:02d}:{seconds:02d}"
 
+
+class FlashcardDeck(models.Model):
+    subject = models.ForeignKey('tests_app.Subject', on_delete=models.CASCADE, related_name='flashcard_decks')
+    title = models.CharField(max_length=200, help_text="Masalan: Family & Society, Asosiy Sanalar...")
+    icon = models.CharField(max_length=50, default='zap', help_text="Lucide ikonka")
+    level = models.CharField(max_length=50, default="Boshlang'ich")
+    cards_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.subject.name} - {self.title}"
+
 class Flashcard(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='flashcards')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, blank=True, related_name='flashcards')
+    deck = models.ForeignKey('FlashcardDeck', on_delete=models.CASCADE, null=True, blank=True, related_name='cards')
     front = models.TextField()
     back = models.TextField()
+    example_or_context = models.TextField(blank=True, default='')
+    mnemonic_tip = models.CharField(max_length=255, blank=True, default='')
+
+    @property
+    def front_text(self):
+        return self.front
+
+    @property
+    def back_text(self):
+        return self.back
 
     def __str__(self):
         return f"Flashcard for {self.lesson.title}"

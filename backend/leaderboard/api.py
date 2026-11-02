@@ -18,7 +18,8 @@ def rankings_api(request):
 
     profile = ensure_profile_for_user(request.user)
 
-    top = services.get_top_ranking(view)
+    timeframe = request.GET.get('timeframe', 'all')
+    top = services.get_top_ranking(view, timeframe=timeframe)
     my_rank, neighbors = services.get_rank_and_neighbors(profile, view)
 
     # Ikkala ro'yxat uchun profillar bitta indekslangan so'rovda olinadi.

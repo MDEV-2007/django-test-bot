@@ -17,6 +17,25 @@ class Subject(models.Model):
     icon_name = models.CharField(max_length=50, default='book', help_text="Lucide ikonka nomi (masalan: book, calculator, flask-conical).")
     color = models.CharField(max_length=20, default='#2d6cff', help_text="Fan uchun asosiy rang (hex).")
     order = models.IntegerField(default=0)
+    exam_category = models.CharField(
+        max_length=50,
+        default='MILLIY_RASCH',
+        choices=[
+            ('MILLIY_RASCH', 'Milliy Sertifikat & DTM Rasch'),
+            ('LANGUAGE_MULTI_SKILL', 'Til va Xalqaro (IELTS/CEFR/TOPIK/SAT)'),
+            ('TEACHER_ATTESTATION', 'O\'qituvchilar Attestatsiyasi (Toifa imtihoni)'),
+        ],
+        help_text="Fan yo'nalishi va baholash mexanizmi"
+    )
+    scoring_mode = models.CharField(
+        max_length=50,
+        default='standard',
+        choices=[
+            ('standard', 'Standart (0-100%)'),
+            ('rasch_cefr', 'Rasch / CEFR (0-75+)'),
+            ('attestation_100', 'Attestatsiya (50 savol, 100 ball)'),
+        ]
+    )
 
     class Meta:
         ordering = ['order', 'name']
@@ -389,6 +408,11 @@ class Attempt(models.Model):
                    "Faqat shu urinishga tegishli — baholashga ta'sir qilmaydi.",
     )
 
+    tab_switches_count = models.IntegerField(default=0, help_text="Anti-cheat: brauzer oynasidan chiqishlar soni")
+    is_cheating_flagged = models.BooleanField(default=False, db_index=True, help_text="Anti-cheat tomonidan chetlatilgan")
+    attestation_category = models.CharField(max_length=80, blank=True, null=True, help_text="Oliy toifa, 1-toifa, 2-toifa")
+    rasch_score = models.FloatField(null=True, blank=True)
+    certificate_grade = models.CharField(max_length=10, blank=True, null=True)
     audio_plays = models.JSONField(
         default=dict, blank=True,
         help_text="Listening partlari necha marta eshitilgani: {'12': 2}. Klientda emas, "

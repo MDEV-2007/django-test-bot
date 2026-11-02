@@ -248,6 +248,7 @@ export default function FeedbackPage() {
   const [certOpen, setCertOpen] = useState(false);
   const [communityModalOpen, setCommunityModalOpen] = useState(false);
   const [chestModalOpen, setChestModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'summary' | 'review'>('summary');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -389,6 +390,45 @@ export default function FeedbackPage() {
             <CardContent className="pt-6 text-sm text-rose-300">{mistakesError}</CardContent>
           </Card>
         )}
+
+        {/* 2 TA YADROVIY SEGMENTED TAB */}
+        <div className="flex items-center justify-center p-1.5 rounded-2xl bg-zinc-900/80 border border-white/10 max-w-lg mx-auto w-full shadow-lg">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('summary');
+              tgHaptic('light');
+            }}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer',
+              activeTab === 'summary'
+                ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md shadow-rose-500/20'
+                : 'text-zinc-400 hover:text-white'
+            )}
+          >
+            <Trophy className="size-4" />
+            <span>🏆 Xulosa va Keyingi Qadam</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('review');
+              tgHaptic('light');
+            }}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer',
+              activeTab === 'review'
+                ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md shadow-rose-500/20'
+                : 'text-zinc-400 hover:text-white'
+            )}
+          >
+            <CheckCircle2 className="size-4" />
+            <span>📋 Savollar Tahlili ({data.review_items?.length || 0})</span>
+          </button>
+        </div>
+
+        {activeTab === 'summary' && (
+          <div className="space-y-8">
 
         {/* REAL BMB STRESS SIMULYATORI NATIJA KARTASI */}
         {a.is_stress_mode && (
@@ -1107,7 +1147,10 @@ export default function FeedbackPage() {
         )}
 
         {/* Imtihon taassuroti / Tezkor so'rovnoma */}
-        <ExamSurveyCard attemptId={attemptId} testTitle={data?.attempt?.test_title} />
+        {/* Imtihon taassuroti / Tezkor so'rovnoma - FAQAT 3-urinishda */}
+        {(user as any)?.attempts_count === 3 && (
+          <ExamSurveyCard attemptId={attemptId} testTitle={data?.attempt?.test_title} />
+        )}
 
         {data.overall_analysis && (
           <Card>
@@ -1326,8 +1369,17 @@ export default function FeedbackPage() {
           </Card>
         )}
 
-        {!!data.review_items?.length && (
-          <section className="space-y-2">
+          </div>
+        )}
+
+        {activeTab === 'review' && (
+          <section className="space-y-4">
+            {(!data.review_items || data.review_items.length === 0) ? (
+              <Card className="p-8 text-center border-dashed">
+                <p className="text-sm text-muted-foreground">Bu test uchun savollar tahlili topilmadi.</p>
+              </Card>
+            ) : (
+            <>
             <h2 className="section-title">Savollar tahlili</h2>
             {data.review_items.map((r, index) => {
               // Part sarlavhasi faqat yangi partga o'tilganda chiziladi — CEFR natijasi
@@ -1412,6 +1464,8 @@ export default function FeedbackPage() {
               </div>
               );
             })}
+            </>
+            )}
           </section>
         )}
         {a && (

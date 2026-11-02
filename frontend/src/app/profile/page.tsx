@@ -36,6 +36,7 @@ import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
+import { useLanguageStore } from '@/lib/transliterate';
 import {
   Dialog,
   DialogContent,
@@ -157,12 +158,14 @@ export default function ProfilePage() {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'posts' | 'inventory' | 'activity'>('stats');
 
-  const { data, error, refresh } = useApiQuery<ProfileData>('/api/auth/profile/');
-  const { data: invData, refresh: refreshInventory } = useApiQuery<InventoryResponse>('/api/shop/inventory/');
+  const { script, setScript } = useLanguageStore();
+
+  const { data, error, refresh } = useApiQuery<ProfileData>(access ? '/api/auth/profile/' : null);
+  const { data: invData, refresh: refreshInventory } = useApiQuery<InventoryResponse>(access ? '/api/shop/inventory/' : null);
   const { data: postsData, refresh: refreshPosts } = useApiQuery<{ posts: UserPostItem[]; total: number }>(
-    '/api/learning/feed/?mine=1'
+    access ? '/api/learning/feed/?mine=1' : null
   );
-  const { data: analyticsData } = useApiQuery<AnalyticsDashboard>('/api/analytics/');
+  const { data: analyticsData } = useApiQuery<AnalyticsDashboard>(access ? '/api/analytics/' : null);
 
   const [equipBusy, setEquipBusy] = useState<string | null>(null);
   const [inventoryTab, setInventoryTab] = useState<string>('all');
@@ -355,6 +358,14 @@ export default function ProfilePage() {
     tgHaptic('light');
     toast.success("Taklif havolasi nusxalandi!");
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  if (authReady && !access) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-[var(--bg-page)]">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (error && !data) {
@@ -1686,6 +1697,42 @@ export default function ProfilePage() {
                   Ilova sozlamalari
                 </p>
                 <div className="ios-card overflow-hidden rounded-[22px] divide-y divide-border/60 border border-border/80">
+                  <div className="flex items-center justify-between p-4">
+                    <div className="space-y-0.5">
+                      <div className="text-sm font-semibold text-foreground">Alifbo (Yozuv turi)</div>
+                      <div className="text-xs text-muted-foreground">O&apos;zbek tili: Lotin yoki Kirill yozuvi</div>
+                    </div>
+                    <div className="flex items-center rounded-xl bg-muted/60 p-1 border border-border/40">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScript('latin');
+                          tgHaptic('light');
+                          toast.success("Lotin yozuviga o'tkazildi");
+                        }}
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-bold rounded-lg transition-all',
+                          script === 'latin' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                        )}
+                      >
+                        Lotin
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScript('cyrillic');
+                          tgHaptic('light');
+                          toast.success("Кирилл ёзувига ўтказилди");
+                        }}
+                        className={cn(
+                          'px-3 py-1.5 text-xs font-bold rounded-lg transition-all',
+                          script === 'cyrillic' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                        )}
+                      >
+                        Кирилл
+                      </button>
+                    </div>
+                  </div>
                   <AudioToggle />
                   <ThemeToggle />
                 </div>
