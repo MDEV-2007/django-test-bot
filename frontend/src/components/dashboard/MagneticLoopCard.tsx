@@ -124,7 +124,7 @@ export default function MagneticLoopCard({
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-[28px] border border-orange-500/30 bg-gradient-to-b from-zinc-900/90 via-zinc-950 to-zinc-900/95 p-5 sm:p-7 shadow-2xl backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] border border-orange-500/30 bg-gradient-to-b from-zinc-900/90 via-zinc-950 to-zinc-900/95 p-4 sm:p-6 shadow-2xl backdrop-blur-xl">
         {/* Orqa fon nurlari */}
         <div className="pointer-events-none absolute -top-24 -left-20 size-64 rounded-full bg-orange-500/15 blur-[80px]" />
         <div className="pointer-events-none absolute -bottom-24 -right-20 size-64 rounded-full bg-rose-500/15 blur-[80px]" />
@@ -283,25 +283,27 @@ export default function MagneticLoopCard({
           <Button
             type="button"
             onClick={() => setControllerOpen(true)}
-            className={`w-full h-14 sm:h-16 rounded-2xl bg-gradient-to-r ${ctaGradient} hover:opacity-95 text-white font-black text-sm sm:text-base shadow-xl flex items-center justify-between px-5 sm:px-7 cursor-pointer transition-all active:scale-[0.99] group`}
+            className={`w-full min-h-[58px] sm:min-h-[64px] h-auto py-2.5 sm:py-3 px-3.5 sm:px-6 rounded-2xl bg-gradient-to-r ${ctaGradient} hover:opacity-95 text-white font-black shadow-xl flex items-center justify-between gap-2.5 cursor-pointer transition-all active:scale-[0.99] group whitespace-normal max-w-full overflow-hidden`}
           >
-            <div className="text-left flex items-center gap-3">
-              <div className="size-9 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                <Play className="size-4 fill-current text-amber-200" />
+            <div className="text-left flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+              <div className="size-8 sm:size-9 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+                <Play className="size-3.5 sm:size-4 fill-current text-amber-200" />
               </div>
-              <div>
-                <div className="text-xs sm:text-sm font-black leading-tight tracking-tight">
+              <div className="min-w-0 flex-1">
+                <div className="text-xs sm:text-sm font-black leading-tight tracking-tight line-clamp-1 sm:line-clamp-none">
                   {ctaTitle}
                 </div>
-                <div className="text-[11px] text-white/80 font-normal">
+                <div className="text-[10px] sm:text-[11px] text-white/80 font-normal leading-tight mt-0.5 line-clamp-1 sm:line-clamp-none">
                   {ctaSubtitle}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs font-bold text-white/90 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 text-xs font-bold text-white/90 shrink-0">
               <span className="hidden sm:inline">Boshlash</span>
-              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+              <div className="size-7 sm:size-auto rounded-lg bg-white/15 sm:bg-transparent flex items-center justify-center">
+                <ArrowRight className="size-3.5 sm:size-4 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
           </Button>
         </div>
