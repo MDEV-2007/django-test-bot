@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import ensure_profile_for_user
-from b2b_ads.models import EduCenterCampaign, StudentLeadSubmission
+from b2b_ads.models import EduCenterCampaign, StudentLeadSubmission, existing_lead
 from telegrambot.client import send_message
 from tests_app.models import Attempt, AIFeedback
 
@@ -96,6 +96,16 @@ def submit_lead_api(request):
     predicted_score = str(data.get('predicted_dtm_score') or "178.4")
     weakest_topics = (data.get('weakest_topics') or "XIX asr xonliklari, Xronologiya va Esse tahlili").strip()
 
+    previous = existing_lead(profile, campaign)
+    if previous:
+        return Response({
+            'success': True,
+            'coins_earned': 0,
+            'total_coins': profile.coins,
+            'already_submitted': True,
+            'message': "Arizangiz allaqachon yuborilgan — markaz siz bilan bog'lanadi.",
+        })
+
     # Lidni bazaga saqlaymiz
     lead = StudentLeadSubmission.objects.create(
         student_profile=profile,
@@ -109,8 +119,7 @@ def submit_lead_api(request):
     )
 
     # O'quvchiga darhol +50 Ilm Tanga qo'shamiz
-    profile.coins += 50
-    profile.save(update_fields=['coins'])
+    profile.add_coins(50)
 
     # O'quv markazning Telegram Chat ID siga xabarnoma jo'natamiz
     chat_id = campaign.telegram_webhook_or_chat_id if campaign and campaign.telegram_webhook_or_chat_id else None

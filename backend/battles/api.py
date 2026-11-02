@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from core.missions import advance_missions
 from core.models import Notification
+from core.reward_caps import claim_daily_reward
 from tests_app.models import AnswerOption, Question
 from tests_app.subject_utils import current_subject, resolve_subject
 from .models import Battle, BattlePlayerAnswer, BattleRound
@@ -170,9 +171,18 @@ def finish_battle_api(request):
         result = 'draw'
         xp_gained, coins_gained, elo_change = 50, 5, 0
 
+    # Atomik "egallash": ikki parallel finish so'rovi mukofotni ikki marta bermasin.
+    if not Battle.objects.filter(pk=battle.pk).exclude(status='finished').update(
+            status='finished', finished_at=timezone.now()):
+        return Response({'error': 'Bu jang allaqachon yakunlangan.'}, status=400)
     battle.status = 'finished'
     battle.finished_at = timezone.now()
     battle.save()
+
+    # Bot bilan jang cheksiz boshlanadi — kunlik limitdan keyin XP/tanga berilmaydi
+    # (ELO baribir o'zgaradi).
+    if not claim_daily_reward(profile.id, 'battle_bot'):
+        xp_gained, coins_gained = 0, 0
 
     profile.add_xp(xp_gained)
     profile.add_coins(coins_gained)

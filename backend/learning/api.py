@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 
 from accounts.permissions import IsChannelSubscribed
 from core.ai_client import ask_groq_stream
+from core.reward_caps import claim_daily_reward, claim_once
 from tests_app.models import Subject
 from tests_app.subject_utils import resolve_subject
 
@@ -516,8 +517,7 @@ def flashcards_complete_api(request):
     deck_id = request.data.get('deck_id')
     learned_count = int(request.data.get('learned_count') or 5)
 
-    xp_gain = 25
-    coin_gain = 10
+    xp_gain, coin_gain = (25, 10) if claim_daily_reward(profile.id, 'flashcards') else (0, 0)
 
     leveled_up = profile.add_xp(xp_gain)
     profile.add_coins(coin_gain)
@@ -553,6 +553,8 @@ def study_session_complete_api(request):
     # Har 25 daqiqa dars uchun 25 XP va 10 tanga
     xp_gain = max(10, min(150, int((duration_minutes / 25) * 25) + goals_done * 5))
     coin_gain = max(5, min(50, int((duration_minutes / 25) * 10)))
+    if not claim_daily_reward(profile.id, 'study_session'):
+        xp_gain = coin_gain = 0
 
     leveled_up = profile.add_xp(xp_gain)
     profile.add_coins(coin_gain)
@@ -845,9 +847,10 @@ def reels_quiz_answer_api(request):
         profile = getattr(request.user, 'profile', None)
         if profile:
             if is_correct:
-                xp_earned = 5
-                profile.add_xp(xp_earned)
                 profile.update_streak()
+                if claim_once(profile.id, 'reels_quiz', reel_id) and claim_daily_reward(profile.id, 'reels_quiz'):
+                    xp_earned = 5
+                    profile.add_xp(xp_earned)
             total_xp = profile.xp
             streak_days = profile.streak_days
 

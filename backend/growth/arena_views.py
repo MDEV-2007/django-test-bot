@@ -1,9 +1,13 @@
 import random
+import secrets
 import uuid
+from urllib.parse import quote
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from accounts.models import ensure_profile_for_user
 from tests_app.models import Question, Subject
@@ -78,8 +82,12 @@ def generate_seed_ghost_replay(subject: Subject = None, target_elo: int = 1050) 
 class GhostMatchmakeAPIView(APIView):
     """POST /api/growth/arena/matchmake/
     1v1 Arenaga kirganda 3 soniyalik aqlli qidiruv va Ghost Replay ulab berish.
+
+    Faqat tizimga kirganlar uchun: javob variantlari `is_correct` bilan qaytadi (klient
+    ghost bilan jangni o'zi hisoblaydi), ochiq endpoint esa butun savol bankini
+    javoblari bilan anonim yig'ib olishga imkon berardi.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         subject_slug = request.data.get('subject_slug') or 'tarix'
@@ -201,7 +209,10 @@ class CreateDuelChallengeAPIView(APIView):
         if not replay:
             return Response({'ok': False, 'error': "Duel uchun replay topilmadi"}, status=404)
 
-        token = f"duel_{random.randint(1000, 9999)}_{profile.user.username.lower()}"
+        # Token prefikssiz saqlanadi: havolada `startapp=duel_<token>` bo'ladi, frontend esa
+        # `start_param` dan `duel_` ni olib tashlab shu tokenni so'raydi. Ilgari token
+        # prefiks bilan saqlanardi va do'st havolani ochganda duel hech qachon topilmasdi.
+        token = secrets.token_urlsafe(9)
         duel = ViralDuelChallenge.objects.create(
             duel_token=token,
             creator=profile,
@@ -211,7 +222,7 @@ class CreateDuelChallengeAPIView(APIView):
         )
 
         bot_username = "ilmildiziuz_bot"
-        share_url = f"https://t.me/{bot_username}/app?startapp={token}"
+        share_url = f"https://t.me/{bot_username}/app?startapp=duel_{token}"
         subj_title = replay.subject.name if replay.subject else "Tarix"
         
         share_text = (
@@ -220,7 +231,7 @@ class CreateDuelChallengeAPIView(APIView):
             f"Kuchingni ko'rsat 👇"
         )
 
-        telegram_native_share_link = f"https://t.me/share/url?url={share_url}&text={share_text}"
+        telegram_native_share_link = f"https://t.me/share/url?url={quote(share_url, safe='')}&text={quote(share_text, safe='')}"
 
         return Response({
             'ok': True,
@@ -279,44 +290,54 @@ class SubmitDuelResultAPIView(APIView):
 
     def post(self, request, duel_token, *args, **kwargs):
         challenger_profile = ensure_profile_for_user(request.user)
-        duel = ViralDuelChallenge.objects.select_related('creator').filter(duel_token=duel_token).first()
-        
-        if not duel:
-            return Response({'ok': False, 'error': "Duel topilmadi"}, status=404)
+        try:
+            challenger_score = int(request.data.get('score', 0))
+        except (TypeError, ValueError):
+            challenger_score = 0
 
-        challenger_score = int(request.data.get('score', 0))
-        duel.challenger = challenger_profile
-        duel.challenger_score = challenger_score
-        duel.status = 'completed'
-        duel.completed_at = timezone.now()
+        # Qulf + bir martalik holat: ilgari duelni yaratgan o'quvchining O'ZI uni
+        # topshira olardi va har yangi duel uchun +100 tanga va bepul AI esse krediti
+        # olardi (cheksiz). Takroriy/parallel so'rovlar ham bonusni ikki marta berishi
+        # mumkin edi.
+        with transaction.atomic():
+            duel = (ViralDuelChallenge.objects.select_for_update()
+                    .select_related('creator', 'creator__user').filter(duel_token=duel_token).first())
+            if not duel:
+                return Response({'ok': False, 'error': "Duel topilmadi"}, status=404)
+            if duel.creator_id == challenger_profile.id:
+                return Response({'ok': False, 'error': "O'z duelingizni o'zingiz topshira olmaysiz"}, status=400)
+            if duel.status == 'completed':
+                return Response({'ok': False, 'error': "Bu duel allaqachon yakunlangan"}, status=409)
 
-        # Bonus taqsimoti: taklif qilgan o'quvchiga 100 tanga va 1 ta AI Esse krediti
-        if not duel.bonus_awarded:
-            duel.bonus_awarded = True
-            duel.creator.coins += 100
-            duel.creator.save(update_fields=['coins'])
+            duel.challenger = challenger_profile
+            duel.challenger_score = challenger_score
+            duel.status = 'completed'
+            duel.completed_at = timezone.now()
 
-            quota, _ = UserUsageQuota.objects.get_or_create(profile=duel.creator)
-            quota.free_essay_credits += 1
-            quota.save(update_fields=['free_essay_credits'])
+            award_bonus = not duel.bonus_awarded
+            if award_bonus:
+                duel.bonus_awarded = True
+                duel.creator.add_coins(100)
+                quota, _ = UserUsageQuota.objects.get_or_create(profile=duel.creator)
+                UserUsageQuota.objects.filter(pk=quota.pk).update(free_essay_credits=F('free_essay_credits') + 1)
+            duel.save()
 
-            # Telegram Bot orqali taklifchiga xushxabar yuborish
-            if duel.creator.telegram_id:
-                winner_text = "Siz g'olib bo'ldingiz! 🏆" if duel.creator_score >= challenger_score else f"{challenger_profile.user.username} ustun keldi!"
-                msg = (
-                    f"⚔️ <b>Do'stingiz duelingizni qabul qildi va yakunladi!</b>\n\n"
-                    f"👤 Raqib: <b>{challenger_profile.user.username}</b>\n"
-                    f"📊 Sizning ballingiz: <b>{duel.creator_score}</b>\n"
-                    f"📊 Do'stingiz balli: <b>{challenger_score}</b>\n\n"
-                    f"{winner_text}\n"
-                    f"🎁 <i>Sizga taklif uchun +100 Tanga va 1 ta Bepul AI Esse tekshiruvi berildi!</i>"
-                )
-                try:
-                    send_message(chat_id=duel.creator.telegram_id, text=msg)
-                except Exception:
-                    pass
-
-        duel.save()
+        # Telegram Bot orqali taklifchiga xushxabar yuborish (tranzaksiyadan tashqarida —
+        # tarmoq so'rovi qatorni qulflab turmasin).
+        if award_bonus and duel.creator.telegram_id:
+            winner_text = "Siz g'olib bo'ldingiz! 🏆" if duel.creator_score >= challenger_score else f"{challenger_profile.user.username} ustun keldi!"
+            msg = (
+                f"⚔️ <b>Do'stingiz duelingizni qabul qildi va yakunladi!</b>\n\n"
+                f"👤 Raqib: <b>{challenger_profile.user.username}</b>\n"
+                f"📊 Sizning ballingiz: <b>{duel.creator_score}</b>\n"
+                f"📊 Do'stingiz balli: <b>{challenger_score}</b>\n\n"
+                f"{winner_text}\n"
+                f"🎁 <i>Sizga taklif uchun +100 Tanga va 1 ta Bepul AI Esse tekshiruvi berildi!</i>"
+            )
+            try:
+                send_message(chat_id=duel.creator.telegram_id, text=msg)
+            except Exception:
+                pass
 
         return Response({
             'ok': True,

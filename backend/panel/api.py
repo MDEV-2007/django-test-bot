@@ -1427,11 +1427,12 @@ def payment_detail_api(request, pk):
 @permission_classes([IsSuperAdmin])
 def payment_approve_api(request, pk):
     p = get_object_or_404(Payment, pk=pk)
-    if p.status == 'pending':
-        p.status = 'approved'
-        p.reviewed_by = request.user
-        p.reviewed_at = timezone.now()
-        p.save()
+    # Holatni atomik o'tkazish: ikki admin (yoki ikki marta bosilgan tugma) bir vaqtda
+    # tasdiqlasa, premium muddati ikki marta qo'shilardi.
+    claimed = Payment.objects.filter(pk=p.pk, status='pending').update(
+        status='approved', reviewed_by=request.user, reviewed_at=timezone.now())
+    if claimed:
+        p.refresh_from_db()
         p.apply_to_profile()
         Notification.objects.create(profile=p.profile, title="Premium faollashtirildi",
                                      message=f"To'lovingiz tasdiqlandi! '{p.plan.name if p.plan else 'Tarif'}' faollashtirildi.", type='system')
@@ -3600,7 +3601,10 @@ def database_backup_api(request):
         backup_dir = os.path.join(settings.BASE_DIR, 'media', 'backups')
         os.makedirs(backup_dir, exist_ok=True)
 
-        now_str = timezone.now().strftime('%Y%m%d_%H%M%S')
+        # Tasodifiy qo'shimcha: fayl nomi faqat vaqtdan iborat bo'lsa, uni sekundma-sekund
+        # taxmin qilib topish mumkin edi. nginx /media/backups/ ni allaqachon to'sadi —
+        # bu ikkinchi himoya qatlami.
+        now_str = f"{timezone.now().strftime('%Y%m%d_%H%M%S')}_{secrets.token_hex(8)}"
 
         if 'postgresql' in engine or 'psycopg' in engine:
             pg_dump_bin = shutil.which('pg_dump')

@@ -466,7 +466,7 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
     """O'quvchi bitta tugmani bosganda barcha issiq lidlar yagona StudentLeadSubmission
     modeliga yoziladi, Telegram orqali bildirishnoma jo'natiladi va o'quvchiga +50 tanga beriladi.
     """
-    from b2b_ads.models import EduCenterCampaign, StudentLeadSubmission
+    from b2b_ads.models import EduCenterCampaign, StudentLeadSubmission, existing_lead
     from telegrambot.client import send_message
     from django.utils import timezone
     import logging
@@ -475,6 +475,16 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
     campaign = EduCenterCampaign.objects.filter(id=campaign_id).first()
     if not campaign:
         campaign = EduCenterCampaign.objects.filter(is_active=True).first()
+
+    previous = existing_lead(profile, campaign)
+    if previous:
+        return {
+            'success': True,
+            'lead_id': previous.id,
+            'coins_earned': 0,
+            'already_submitted': True,
+            'message': "Arizangiz allaqachon yuborilgan — markaz siz bilan bog'lanadi.",
+        }
 
     lead_name = name or (profile.user.get_full_name() or profile.user.username if profile else "Abituriyent")
     lead_phone = phone or (getattr(profile, 'phone_number', '') if profile else "+998 90 --- -- --")
@@ -492,8 +502,7 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
     )
 
     if profile:
-        profile.coins = (profile.coins or 0) + 50
-        profile.save(update_fields=['coins'])
+        profile.add_coins(50)
 
     # Telegram xabarnoma
     if campaign and campaign.telegram_webhook_or_chat_id:

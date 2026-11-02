@@ -257,7 +257,7 @@ def center_api(request):
         'tests': [
             _test_payload(
                 t, social_by_test.get(t.id),
-                unlocked=(has_sub or t.id in unlocked_ids),
+                unlocked=(has_sub or profile.premium_mock_test_unlocked or t.id in unlocked_ids),
             ) for t in tests
         ],
         'subjects': [
@@ -279,7 +279,7 @@ def center_api(request):
         'search_query': search_query,
         'total_attempts': stats['total'] or 0,
         'avg_score': stats['avg'] or 0,
-        'has_mock_test_access': has_sub,
+        'has_mock_test_access': has_sub or profile.premium_mock_test_unlocked,
         'has_lessons_access': has_sub,
         # Qulflangan kartadan to'g'ridan-to'g'ri to'lovga o'tish uchun.
         'mock_plan': {'id': mock_plan.id, 'price': str(mock_plan.price)} if mock_plan else None,
@@ -334,6 +334,7 @@ def start_test_api(request, test_id):
     # 403 berardi).
     if (test.is_premium
             and not profile.is_vip_active
+            and not profile.premium_mock_test_unlocked
             and test.id not in _unlocked_ids(profile)):
         return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
     is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))
@@ -821,19 +822,30 @@ def finish_api(request, attempt_id):
     except Exception as e:
         logger.warning(f"Rasch baholashda xatolik: {e}")
 
+    # Yakunlashni atomik "egallash": ikki marta bosilgan tugma yoki parallel so'rov
+    # ikkalasi ham yuqoridagi `is_completed` tekshiruvidan o'tib, XP/tangani ikki marta
+    # berardi. Faqat qatorni birinchi bo'lib False -> True qilgan so'rov davom etadi.
+    if not Attempt.objects.filter(pk=attempt.pk, is_completed=False).update(is_completed=True):
+        return Response({'attempt_id': attempt.id, 'already_completed': True})
     attempt.save()
 
     profile = request.user.profile
+    # Mukofot faqat testni BIRINCHI marta yakunlaganda beriladi. Ilgari bir testni
+    # qayta-qayta topshirib (javoblar natija sahifasida ko'rinadi) cheksiz XP va tanga
+    # yig'ish, reytingni sun'iy ko'tarish mumkin edi.
+    is_repeat = bool(attempt.test_id) and Attempt.objects.filter(
+        profile=profile, test_id=attempt.test_id, is_completed=True,
+    ).exclude(pk=attempt.pk).exists()
     multiplier = stress_cfg.bonus_xp_multiplier if (attempt.is_stress_mode and stress_cfg.bonus_xp_multiplier > 1.0) else 1.0
-    xp_awarded = 0 if profile.is_privileged else int(correct * 50 * multiplier)
-    coins_awarded = int(correct * 5 * (1.5 if attempt.is_stress_mode else 1.0))
+    xp_awarded = 0 if (profile.is_privileged or is_repeat) else int(correct * 50 * multiplier)
+    coins_awarded = 0 if is_repeat else int(correct * 5 * (1.5 if attempt.is_stress_mode else 1.0))
     profile.add_xp(xp_awarded)
     profile.add_coins(coins_awarded)
     profile.update_streak()
 
     # O'zgaruvchan Mukofot (Variable Reward): 25% omadli test bonusi
     lucky_bonus = None
-    if not profile.is_privileged:
+    if not profile.is_privileged and not is_repeat:
         try:
             from core.rewards import roll_test_lucky_bonus
             lucky_bonus = roll_test_lucky_bonus(profile, correct, xp_awarded, coins_awarded)

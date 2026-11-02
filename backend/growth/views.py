@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from accounts.models import ensure_profile_for_user
+from core.reward_caps import claim_daily_reward
 from tests_app.models import Question, Subject
 from .models import EssaySubmission, UserUsageQuota, LiveRepublicEvent
 from .ai_grader import evaluate_open_question, evaluate_essay_bmb
@@ -13,10 +14,16 @@ from .ai_grader import evaluate_open_question, evaluate_essay_bmb
 class EvaluateOpenQuestionAPIView(APIView):
     """POST /api/growth/open-question/evaluate/
     36–44-topshiriqlar (qisqa ochiq javoblar) uchun Fuzzy + AI semantik baholagich.
+
+    Har chaqiruv pullik Groq so'rovi — shuning uchun faqat tizimga kirganlar va kunlik
+    limit bilan (ilgari anonim skript AI hisobini cheksiz yoqishi mumkin edi).
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        if not claim_daily_reward(request.user.id, 'open_question_ai'):
+            return Response({'ok': False, 'error': "Bugungi AI baholash limiti tugadi. Ertaga qayta urinib ko'ring."},
+                            status=status.HTTP_429_TOO_MANY_REQUESTS)
         question_id = request.data.get('question_id')
         student_answer = (request.data.get('student_answer') or '').strip()
         reference_answer = (request.data.get('reference_answer') or '').strip()

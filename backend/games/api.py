@@ -11,6 +11,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from core.models import Notification
+from core.reward_caps import claim_daily_reward
 from tests_app.subject_utils import resolve_subject
 
 from .models import HistoricalCharacter, HistoricalEvent, MapChallenge
@@ -31,8 +32,14 @@ def timeline_api(request):
 
         events = {e.id: e for e in HistoricalEvent.objects.filter(id__in=ordered_ids)}
         ordered_events = [events[eid] for eid in ordered_ids if eid in events]
+        # O'yin har doim 4 ta voqea beradi. Kamroq (masalan bitta) voqea yuborilsa, u
+        # "to'g'ri tartib" bo'lib qolardi va mukofot bepul olinardi.
+        if len(set(eid for eid in ordered_ids if eid in events)) < 4:
+            return Response({'error': "Kamida 4 ta voqea tartiblanishi kerak"}, status=400)
         is_correct = all(ordered_events[i].year <= ordered_events[i + 1].year for i in range(len(ordered_events) - 1))
 
+        if is_correct and not claim_daily_reward(profile.id, 'game_timeline'):
+            return Response({'correct': True, 'xp': 0, 'coins': 0, 'daily_limit_reached': True})
         if is_correct:
             xp, coins = 100, 10
             profile.add_xp(xp)
@@ -69,6 +76,9 @@ def map_api(request):
         region = request.data.get('region', '')
         challenge = get_object_or_404(MapChallenge, id=challenge_id)
         is_correct = region == challenge.correct_location
+        if is_correct and not claim_daily_reward(profile.id, 'game_map'):
+            return Response({'correct': True, 'xp': 0, 'coins': 0, 'daily_limit_reached': True,
+                             'correct_location': challenge.correct_location})
         if is_correct:
             xp, coins = 80, 8
             profile.add_xp(xp)
@@ -98,7 +108,12 @@ def character_api(request):
         character_id = request.data.get('character_id')
         guess = (request.data.get('guess') or '').strip()
         char = get_object_or_404(HistoricalCharacter, id=character_id)
-        is_correct = guess.lower() in char.name.lower() or char.name.lower() in guess.lower()
+        # Bo'sh yoki 1-2 harfli taxmin ("a") ham ilgari "to'g'ri" sanalardi: har qanday
+        # ism ichida u bor.
+        is_correct = len(guess) >= 3 and (guess.lower() in char.name.lower() or char.name.lower() in guess.lower())
+        if is_correct and not claim_daily_reward(profile.id, 'game_character'):
+            return Response({'correct': True, 'xp': 0, 'coins': 0, 'daily_limit_reached': True,
+                             'name': char.name, 'avatar_url': char.avatar_url})
         if is_correct:
             xp, coins = 120, 12
             profile.add_xp(xp)

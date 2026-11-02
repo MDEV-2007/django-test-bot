@@ -217,34 +217,19 @@ class Profile(models.Model):
 
     @property
     def is_vip_active(self) -> bool:
-        """Yagona VIP/Obuna holati:
-        1. Superadmin / Staff bo'lsa har doim True
-        2. Profile.is_premium va premium_expires_at > now
-        3. Profile.premium_mock_test_unlocked
-        4. classroom.Subscription (status='active' and current_period_end > now)
-        5. UserUsageQuota (growth.models) da is_vip
+        """Platforma PRO obunasi: superadmin/staff yoki faol `is_premium` muddati.
+
+        Bu yerga ATAYLAB kirmaydi:
+        - `classroom.Subscription` — bu bitta o'qituvchiga obuna; uni platforma VIP'i deb
+          hisoblash arzon o'qituvchiga obuna bo'lgan o'quvchiga boshqa o'qituvchilarning
+          pullik mocklarini va cheksiz AI mentorni ochib berardi
+          (classroom.services.has_class_access o'qituvchi obunasini o'zi tekshiradi).
+        - `premium_mock_test_unlocked` — bir martalik mock xaridi, PRO emas
+          (tests_app/api.py uni alohida hisobga oladi).
+        - `UserUsageQuota.is_vip()` — u o'zi `profile.is_vip` ga qaytadi, ya'ni bu yerdan
+          chaqirilsa cheksiz rekursiya bo'lardi.
         """
-        if self.is_privileged:
-            return True
-        if self.has_active_premium_lessons or self.premium_mock_test_unlocked:
-            return True
-        now = timezone.now()
-        try:
-            from classroom.models import Subscription as ClassSubscription
-            if ClassSubscription.objects.filter(
-                student=self, status='active', current_period_end__gt=now
-            ).exists():
-                return True
-        except Exception:
-            pass
-        try:
-            from growth.models import UserUsageQuota
-            quota = UserUsageQuota.objects.filter(profile=self).first()
-            if quota and (quota.is_vip() if callable(quota.is_vip) else bool(quota.is_vip)):
-                return True
-        except Exception:
-            pass
-        return False
+        return self.is_privileged or self.has_active_premium_lessons
 
     @property
     def is_vip(self) -> bool:

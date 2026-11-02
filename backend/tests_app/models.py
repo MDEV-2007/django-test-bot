@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 from accounts.models import Profile
+from core.html_sanitize import sanitize_rich_html
 from learning.models import Topic
 
 
@@ -123,6 +124,8 @@ class Question(models.Model):
     def save(self, *args, **kwargs):
         if self.question_type == 'mcq':
             self.question_type = 'single_choice'
+        # Matn frontendda HTML sifatida chiqariladi — core/html_sanitize.py ga qarang.
+        self.body = sanitize_rich_html(self.body)
         super().save(*args, **kwargs)
 
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, related_name='questions')

@@ -23,6 +23,10 @@ pymupdf==1.28.2
 
 # DRF API for the Next.js frontend (see frontend/), JWT-based so cross-origin requests
 # don't depend on the session cookie's SameSite policy.
+# Sanitizes teacher-authored rich-text HTML (Question.body) before it is stored —
+# the frontend renders it with dangerouslySetInnerHTML (see core/html_sanitize.py).
+nh3==0.3.7
+
 djangorestframework==3.18.0
 django-cors-headers==4.9.0
 djangorestframework-simplejwt==5.5.1

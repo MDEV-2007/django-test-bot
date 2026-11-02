@@ -56,3 +56,14 @@ class StudentLeadSubmission(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.phone_number}) -> {self.campaign.center_name if self.campaign else 'B2B'}"
+
+
+def existing_lead(profile, campaign):
+    """O'quvchining shu markazga avval yuborgan lidi (bo'lmasa None).
+
+    Lid uchun tanga BIR MARTA beriladi: ilgari har POST yangi lid yaratib +50 tanga
+    qo'shardi — skript bilan cheksiz tanga yig'ish va markazga bir xil lidni qayta-qayta
+    yuborish mumkin edi."""
+    if profile is None:
+        return None
+    return StudentLeadSubmission.objects.filter(student_profile=profile, campaign=campaign).first()

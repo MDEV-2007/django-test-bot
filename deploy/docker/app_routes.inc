@@ -18,6 +18,12 @@ location ^~ /media/payment_screenshots/ {
     return 404;
 }
 
+# Ma'lumotlar bazasi zaxiralari (to'liq dump: parol hashlari, telefonlar) — hech qachon
+# ommaviy berilmaydi. Faqat /api/panel/system/backups/download/<fayl>/ (superadmin) orqali.
+location ^~ /media/backups/ {
+    return 404;
+}
+
 # Yuklangan fayllar — Django emas, nginx beradi (tezroq va ASGI ishchisini band qilmaydi).
 location /media/ {
     alias /srv/media/;
