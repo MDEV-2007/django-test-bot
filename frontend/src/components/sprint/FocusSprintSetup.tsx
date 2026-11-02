@@ -255,7 +255,7 @@ export default function FocusSprintSetup({
   const isHeroSelected = selectedSubjectId === 0 || selectedSubjectId === heroSubject.id;
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto flex flex-col justify-between space-y-5 sm:space-y-6 pb-24 lg:pb-6">
+    <div className="relative w-full max-w-4xl mx-auto flex flex-col justify-between space-y-5 sm:space-y-6 pb-36 sm:pb-40 lg:pb-6">
       {/* ── Mayin radial yuqori nur ── */}
       <div className="pointer-events-none absolute -inset-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent rounded-3xl" />
 
@@ -557,10 +557,10 @@ export default function FocusSprintSetup({
         </div>
 
         {/* ─────────────────────────────────────────────────────────────
-            4. PREMIUM CTA BUTTON (Desktop: Static, Mobile: Sticky Bottom)
+            4. PREMIUM CTA BUTTON (Desktop: Static in-flow, Mobile: Floating above bottom tab bar)
            ───────────────────────────────────────────────────────────── */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl bg-background/95 border-t border-border p-3 sm:p-4 lg:static lg:bg-transparent lg:border-none lg:p-0">
-          <div className="max-w-4xl mx-auto">
+        <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] inset-x-0 z-30 px-3 sm:px-4 lg:static lg:bottom-auto lg:z-auto lg:p-0">
+          <div className="max-w-4xl mx-auto backdrop-blur-xl bg-background/90 lg:bg-transparent p-1.5 sm:p-2 lg:p-0 rounded-2xl border border-border/80 lg:border-none shadow-[0_8px_32px_rgba(0,0,0,0.45)] lg:shadow-none">
             <button
               type="button"
               disabled={loading}
