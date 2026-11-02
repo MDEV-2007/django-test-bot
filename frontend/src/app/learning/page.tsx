@@ -145,15 +145,11 @@ function LearningPageInner() {
     setSelectedTopicTitle(topicTitle);
     const targetTopic = allTopics.find((t) => t.id === topicId);
     const firstLessonId = targetTopic?.lessons?.[0]?.id;
-    if (studyMode === 'lesson') {
-      if (firstLessonId) {
-        router.push(`/learning?lesson_id=${firstLessonId}&topic_id=${topicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
-      } else {
-        // Agar bu mavzuda alohida matn bo'lmasa, avtomatik 60s Shpargalkani ochamiz
-        setStudyMode('cheatsheet');
-        router.push(`/learning?topic_id=${topicId}&view=cheatsheet${subject ? `&subject=${subject}` : ''}`);
-      }
+    if (studyMode === 'lesson' && firstLessonId) {
+      router.push(`/learning?lesson_id=${firstLessonId}&topic_id=${topicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
     } else {
+      // Har doim 60s Shpargalkani ochish — bo'sh yoki yuklanmoqda holatida qotib qolmasin
+      setStudyMode('cheatsheet');
       router.push(`/learning?topic_id=${topicId}&view=cheatsheet${subject ? `&subject=${subject}` : ''}`);
     }
   }
@@ -460,26 +456,23 @@ function LearningPageInner() {
                   {studyMode === 'lesson' && (
                 <>
                   {!lesson && (
-                    <Card className="rounded-[28px] border-border/80">
-                      <CardContent className="py-16 text-center space-y-3">
-                        <BookOpen className="mx-auto size-10 text-amber-500/60" />
-                        <div className="space-y-1">
-                          <p className="text-base font-bold text-foreground">
-                            {selectedTopicTitle ? `${selectedTopicTitle} uchun 60s Shpargalka tayyor` : 'Dars tanlanmagan'}
-                          </p>
-                          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                            Ushbu mavzuning to&apos;liq matni o&apos;rniga 60 soniyalik tezkor Shpargalka, asosiy faktlar va BMB qopqonlaridan foydalanishingiz mumkin.
-                          </p>
+                    <div className="space-y-4">
+                      <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.08] p-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <Zap className="size-4 text-amber-500 fill-current" />
+                          <span className="text-xs font-bold text-foreground">
+                            {selectedTopicTitle || 'Mavzu'}: 60 soniyalik Shpargalka & BMB Qopqonlari
+                          </span>
                         </div>
-                        <Button
-                          onClick={() => setStudyMode('cheatsheet')}
-                          className="rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-black cursor-pointer shadow-md shadow-amber-500/20"
-                        >
-                          <Zap className="size-4 mr-1.5 fill-current" />
-                          60s Shpargalkani ochish
-                        </Button>
-                      </CardContent>
-                    </Card>
+                        <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-500">
+                          Matnli dars o&apos;rniga
+                        </Badge>
+                      </div>
+                      <TopicCheatSheetView
+                        topicId={selectedTopicId || allTopics[0]?.id || 1}
+                        topicTitle={selectedTopicTitle || allTopics[0]?.title || 'Mavzu'}
+                      />
+                    </div>
                   )}
 
                   {lesson && (

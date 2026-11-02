@@ -557,16 +557,16 @@ export default function FocusSprintSetup({
         </div>
 
         {/* ─────────────────────────────────────────────────────────────
-            4. PREMIUM CTA BUTTON (Desktop: Static in-flow, Mobile: Floating above bottom tab bar)
+            4. PREMIUM CTA BUTTON (Desktop: Static in-flow, Mobile: Floating & In-flow)
            ───────────────────────────────────────────────────────────── */}
-        <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] inset-x-0 z-30 px-3 sm:px-4 lg:static lg:bottom-auto lg:z-auto lg:p-0">
-          <div className="max-w-4xl mx-auto backdrop-blur-xl bg-background/90 lg:bg-transparent p-1.5 sm:p-2 lg:p-0 rounded-2xl border border-border/80 lg:border-none shadow-[0_8px_32px_rgba(0,0,0,0.45)] lg:shadow-none">
+        <div className="pt-2 pb-6 lg:p-0">
+          <div className="max-w-4xl mx-auto backdrop-blur-xl bg-background/95 p-1 sm:p-2 lg:p-0 rounded-2xl border border-border/80 lg:border-none shadow-lg lg:shadow-none">
             <button
               type="button"
               disabled={loading}
               onClick={handleStartClick}
               className={cn(
-                'w-full h-12 sm:h-13 lg:h-14 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all active:scale-[0.99] flex items-center justify-between px-4 sm:px-5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
+                'w-full h-13 sm:h-14 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all active:scale-[0.99] flex items-center justify-between px-4 sm:px-5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
               )}
             >
               {loading ? (
@@ -577,7 +577,7 @@ export default function FocusSprintSetup({
               ) : (
                 <>
                   <div className="flex items-center gap-2 text-sm sm:text-base font-bold">
-                    <Zap className="size-4.5 sm:size-5 fill-white text-white shrink-0" />
+                    <Zap className="size-5 fill-white text-white shrink-0" />
                     <span>Testni Boshlash</span>
                     <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium text-white/70 bg-white/10 rounded border border-white/20 ml-1.5">
                       ↵ Enter
