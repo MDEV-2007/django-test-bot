@@ -18,6 +18,7 @@ import { tgHaptic } from '@/lib/telegram';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
+import { useTransliterate } from '@/lib/transliterate';
 
 type TabItem = {
   href: string;
@@ -44,6 +45,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const { isDark: systemIsDark } = useTheme();
   const isDark = propTheme !== undefined ? propTheme === 'dark' : systemIsDark;
   const { isEnabled, refresh } = useFeatureFlags();
+  const { t } = useTransliterate();
 
   useEffect(() => {
     refresh();
@@ -60,7 +62,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const tabs: TabItem[] = [
     {
       href: '/dashboard',
-      label: 'Asosiy',
+      label: t('Asosiy'),
       icon: LayoutDashboard,
       api: '/api/dashboard/home/',
       activeBg: 'bg-gradient-to-b from-[#2E96FF] to-[#007AFF]',
@@ -70,7 +72,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/sprint',
-      label: 'Mashq',
+      label: t('Mashq'),
       icon: Zap,
       matchPrefixes: ['/sprint', '/battles', '/games'],
       featureKey: 'sprint',
@@ -82,7 +84,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/tests',
-      label: 'Imtihon',
+      label: t('Imtihon'),
       icon: Landmark,
       matchPrefixes: ['/tests', '/dtm-test', '/milliy-sertifikat'],
       api: '/api/tests/',
@@ -96,7 +98,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/feed',
-      label: 'Lenta',
+      label: t('Lenta'),
       icon: Flame,
       matchPrefixes: ['/feed', '/reels'],
       api: '/api/learning/feed/',
@@ -115,11 +117,11 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const isProfileActive = pathname.startsWith('/profile');
 
   return (
-    <div className="ilm-mobile-tabbar fixed inset-x-0 z-40 flex justify-center px-2.5 sm:px-5 lg:hidden pointer-events-none select-none">
+    <div className="ilm-mobile-tabbar fixed inset-x-0 bottom-2.5 z-40 flex justify-center px-2.5 sm:px-5 lg:hidden pointer-events-none select-none pb-[env(safe-area-inset-bottom,0px)]">
       <nav
         aria-label="Mobil navigatsiya"
         className={cn(
-          'pointer-events-auto flex w-full max-w-[440px] items-center justify-between gap-1 rounded-[26px] p-1.5 backdrop-blur-2xl saturate-[190%] transition-all duration-300',
+          'ilm-mobile-tabbar pointer-events-auto flex w-full max-w-[440px] items-center justify-between gap-1 rounded-[26px] p-1.5 backdrop-blur-2xl saturate-[190%] transition-all duration-300',
           isDark
             ? 'border border-white/[0.14] bg-[#1C1C1E]/88 shadow-[0_18px_44px_rgba(0,0,0,0.68),inset_0_1px_0_rgba(255,255,255,0.12)]'
             : 'border border-black/[0.08] bg-white/86 shadow-[0_14px_38px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.95)]'
@@ -262,7 +264,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                 : 'font-semibold text-[#8E8E93] group-hover:text-[#1C1C1E]'
             )}
           >
-            Profil
+            {t('Profil')}
           </span>
         </Link>
       </nav>

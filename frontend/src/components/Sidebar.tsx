@@ -35,6 +35,8 @@ import VerifiedBadge from '@/components/ui/verified-badge';
 import { BrandMark } from '@/components/BrandMark';
 import { cn } from '@/lib/utils';
 import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
+import { useTransliterate } from '@/lib/transliterate';
+import ScriptToggle from '@/components/ScriptToggle';
 
 interface SidebarProps {
   mobileOpen?: boolean;
@@ -107,6 +109,7 @@ export default function Sidebar({
   const user = propUser || storeUser;
   const handleLogout = propLogout || logout;
   const { isEnabled, refresh } = useFeatureFlags();
+  const { t } = useTransliterate();
 
   useEffect(() => {
     refresh();
@@ -132,28 +135,31 @@ export default function Sidebar({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-[15px] font-extrabold tracking-[-0.02em] text-foreground">
-                  Ilm<span className="text-primary">Ildizi</span>
+                  {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
                 </span>
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary uppercase">
                   PRO
                 </span>
               </div>
               <p className="text-[11px] font-medium text-muted-foreground truncate">
-                Intellektual Ta&apos;lim
+                {t("Intellektual Ta'lim")}
               </p>
             </div>
           </Link>
 
-          {onMobileClose && (
-            <button
-              type="button"
-              onClick={onMobileClose}
-              className="lg:hidden ios-spring flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
-              aria-label="Yopish"
-            >
-              <X className="size-4" />
-            </button>
-          )}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <ScriptToggle />
+            {onMobileClose && (
+              <button
+                type="button"
+                onClick={onMobileClose}
+                className="lg:hidden ios-spring flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
+                aria-label="Yopish"
+              >
+                <X className="size-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Rol panellari tezkor havolasi */}
@@ -206,7 +212,7 @@ export default function Sidebar({
             return (
               <div key={gIdx} className="space-y-1.5">
                 <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  {group.label}
+                  {t(group.label)}
                 </span>
                 <div className="space-y-0.5">
                   {visibleItems.map((item) => {
@@ -234,7 +240,7 @@ export default function Sidebar({
                             size="xs"
                             solid
                           />
-                          <span className="truncate tracking-[-0.01em]">{item.label}</span>
+                          <span className="truncate tracking-[-0.01em]">{t(item.label)}</span>
                         </div>
 
                         {item.badge && (

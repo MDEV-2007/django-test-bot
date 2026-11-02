@@ -45,6 +45,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { useTransliterate } from '@/lib/transliterate';
 
 type NotificationItem = {
   id: number;
@@ -162,6 +163,7 @@ export default function DashboardPage() {
   const { access, authReady } = useAuthStore();
   const { isDark } = useTheme();
   const { isEnabled } = useFeatureFlags();
+  const { t } = useTransliterate();
 
   const { data, error, refresh: refreshDashboard } = useApiQuery<DashboardData>('/api/dashboard/home/');
   const { data: lbData } = useApiQuery<LeaderboardData>(access ? '/api/leaderboard/' : null);
@@ -392,7 +394,7 @@ export default function DashboardPage() {
                       href="/onboarding?mode=blitz"
                       className="ios-spring inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs sm:text-sm font-semibold text-primary-foreground shadow-[0_6px_18px_rgba(0,122,255,0.32)] shrink-0"
                     >
-                      <Play className="size-4 fill-current" /> Hozir boshlash
+                      <Play className="size-4 fill-current" /> {t('Hozir boshlash')}
                     </Link>
                   </div>
                 </div>
@@ -423,7 +425,7 @@ export default function DashboardPage() {
                       <PremiumIcon icon={Zap} tone="amber" size="md" solid className="mb-3 group-hover:scale-105" />
                       <div>
                         <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-amber-500 transition-colors">
-                          60s Anti-Darslik
+                          {t('60s Anti-Darslik')}
                         </h4>
                         <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                           BMB Qopqonlari &amp; Oltin Faktlar
@@ -440,7 +442,7 @@ export default function DashboardPage() {
                       <PremiumIcon icon={Clock} tone="sky" size="md" solid className="mb-3 group-hover:scale-105" />
                       <div>
                         <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-                          Fokus Xonasi
+                          {t('Fokus Xonasi')}
                         </h4>
                         <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                           Pomodoro &amp; Ambient tovushlar
@@ -510,7 +512,7 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2.5">
                 <PremiumIcon icon={Trophy} tone="amber" size="xs" solid />
                 <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                  Haftalik Reyting
+                  {t('Haftalik Reyting')}
                 </h3>
               </div>
               <Link

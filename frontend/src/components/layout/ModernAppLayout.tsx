@@ -43,7 +43,7 @@ export default function ModernAppLayout({
 
       <div className="relative flex min-h-[var(--tg-viewport,100dvh)]">
         {/* Main Content Column with safe-area bottom spacing for MobileTabBar */}
-        <div className="flex flex-1 flex-col min-w-0 lg:pl-64 pb-24 sm:pb-24 md:pb-8">
+        <div className="flex flex-1 flex-col min-w-0 lg:pl-64 pb-32 sm:pb-28 md:pb-12">
           {/* Topbar */}
           <ModernTopbar
             onMenuClick={() => setMobileMenuOpen(true)}

@@ -621,7 +621,7 @@ def user_detail_api(request, pk):
         'lesson_count': Lesson.objects.filter(created_by=u).count(),
         'attempts': [{'id': a.id, 'test_title': a.test.title if a.test else '—', 'score': a.score,
                       'started_at': a.started_at} for a in attempts],
-        'payments': [{'id': p.id, 'plan_name': p.plan.name, 'amount': str(p.amount), 'status': p.status,
+        'payments': [{'id': p.id, 'plan_name': p.plan.name if p.plan else 'Mock/Maxsus', 'amount': str(p.amount), 'status': p.status,
                       'created_at': p.created_at} for p in payments],
         'role_options': [{'value': v, 'label': l} for v, l in Profile.ROLE_CHOICES],
     })
@@ -1396,8 +1396,10 @@ def attempts_export_api(request):
 
 # ============================================================ PAYMENTS
 def _payment_row(p):
+    username = p.profile.user.username if (p.profile and getattr(p.profile, 'user', None)) else '-'
+    plan_name = p.plan.name if p.plan else 'Mock/Maxsus'
     return {
-        'id': p.id, 'username': p.profile.user.username, 'plan_name': p.plan.name,
+        'id': p.id, 'username': username, 'plan_name': plan_name,
         'amount': str(p.amount), 'status': p.status, 'status_display': p.get_status_display(),
         'status_tone': {'pending': 'amber', 'approved': 'green', 'rejected': 'rose'}.get(p.status, 'slate'),
         'created_at': p.created_at,
@@ -1432,7 +1434,7 @@ def payment_approve_api(request, pk):
         p.save()
         p.apply_to_profile()
         Notification.objects.create(profile=p.profile, title="Premium faollashtirildi",
-                                     message=f"To'lovingiz tasdiqlandi! '{p.plan.name}' faollashtirildi.", type='system')
+                                     message=f"To'lovingiz tasdiqlandi! '{p.plan.name if p.plan else 'Tarif'}' faollashtirildi.", type='system')
     return Response({'status': p.status})
 
 

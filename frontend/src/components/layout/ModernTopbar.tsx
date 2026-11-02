@@ -4,9 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { Menu, Flame, Coins, Swords, Bell, Search, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { useTransliterate } from '@/lib/transliterate';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { BrandMark } from '@/components/BrandMark';
 import PremiumIcon from '@/components/ui/premium-icon';
+import ScriptToggle from '@/components/ScriptToggle';
 
 interface ModernTopbarProps {
   onMenuClick: () => void;
@@ -33,6 +35,7 @@ export default function ModernTopbar({
   onStreakClick,
 }: ModernTopbarProps) {
   const { isDark, toggleTheme } = useTheme();
+  const { t } = useTransliterate();
 
   return (
     <header className="sticky top-0 z-20 flex h-14 sm:h-15 w-full items-center justify-between border-b border-border bg-background/78 px-3 sm:px-6 ios-glass transition-colors">
@@ -50,7 +53,7 @@ export default function ModernTopbar({
         <Link href="/dashboard" className="lg:hidden flex items-center gap-2 min-w-0">
           <BrandMark size={28} rounded="rounded-[8px]" />
           <span className="font-extrabold text-sm tracking-tight text-foreground truncate">
-            Ilm<span className="text-primary">Ildizi</span>
+            {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
           </span>
         </Link>
 
@@ -163,7 +166,10 @@ export default function ModernTopbar({
           </>
         )}
 
-        {/* 5. THEME TOGGLE (Sun / Moon) */}
+        {/* 5. SCRIPT TOGGLE (O'z / Ўз) */}
+        <ScriptToggle />
+
+        {/* 6. THEME TOGGLE (Sun / Moon) */}
         <Tooltip>
           <TooltipTrigger asChild>
             <button

@@ -28,6 +28,7 @@ import { soundFX } from '@/lib/soundFX';
 import { celebrate } from '@/lib/confetti';
 import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
+import { useTransliterate } from '@/lib/transliterate';
 
 // Ambient Sound Presets
 type AmbientSound = {
@@ -121,6 +122,7 @@ const WEEK_DAYS = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
 
 export default function StudyRoomPage() {
   const { user } = useAuthStore();
+  const { t } = useTransliterate();
 
   // Tanlangan Missiya
   const [activeMission, setActiveMission] = useState<StudyMission>(PRESET_MISSIONS[0]);
@@ -645,7 +647,7 @@ export default function StudyRoomPage() {
                       : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60"
                   )}
                 >
-                  <span>{tab.label}</span>
+                  <span>{t(tab.label)}</span>
                   <span className={cn(
                     "px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold",
                     activeTab === tab.id ? "bg-white/20 text-white" : "bg-primary/10 text-primary"

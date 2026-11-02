@@ -27,6 +27,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import PremiumIcon from '@/components/ui/premium-icon';
 import BmbStressLaunchModal from '@/components/stress/BmbStressLaunchModal';
+import { useTransliterate } from '@/lib/transliterate';
 
 type AnswerMode = 'open' | 'closed' | 'mixed' | null;
 
@@ -418,6 +419,7 @@ const STRESS_SUBJECT_DETAILS: Record<string, { desc: string; questionsCount: num
 
 export default function TestsPage() {
   const router = useRouter();
+  const { t } = useTransliterate();
   const searchParams = useSearchParams();
   const urlSubject = searchParams.get('subject');
 
@@ -649,7 +651,7 @@ export default function TestsPage() {
               )}
             >
               <GraduationCap className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'standard' ? 'text-primary' : 'text-muted-foreground')} />
-              <span className="truncate">Standart</span>
+              <span className="truncate">{t("Standart")}</span>
               <span className={cn(
                 'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'standard' ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
@@ -669,7 +671,7 @@ export default function TestsPage() {
               )}
             >
               <Sparkles className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'blitz' ? 'text-blue-500' : 'text-muted-foreground')} />
-              <span className="truncate">7-Blits</span>
+              <span className="truncate">{t("7-Blits")}</span>
               <span className={cn(
                 'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'blitz' ? 'bg-blue-500/15 text-blue-500' : 'bg-muted text-muted-foreground'
@@ -689,7 +691,7 @@ export default function TestsPage() {
               )}
             >
               <Flame className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'stress' ? 'text-rose-500' : 'text-muted-foreground')} />
-              <span className="truncate">Stress Zali</span>
+              <span className="truncate">{t("Stress Zali")}</span>
               <span className={cn(
                 'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'stress' ? 'bg-rose-500/15 text-rose-500' : 'bg-muted text-muted-foreground'
@@ -710,9 +712,9 @@ export default function TestsPage() {
                 transition={{ duration: 0.2 }}
               >
                 <PageHero
-                  eyebrow="BBA & Milliy Sertifikat · Rasmiy Simulyator"
+                  eyebrow={t("BBA & Milliy Sertifikat · Rasmiy Simulyator")}
                   eyebrowIcon={GraduationCap}
-                  title="Test va Imtihonlar Markazi"
+                  title={t("Test va Imtihonlar Markazi")}
                   description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
                 />
               </motion.div>
@@ -1534,7 +1536,7 @@ export default function TestsPage() {
                     <TabsList className="bg-muted/70 p-1 rounded-full border border-border">
                       {ANSWER_MODES.map((m) => (
                         <TabsTrigger key={m.value} value={m.value} className="rounded-full text-xs font-bold px-3 py-1">
-                          {m.label}
+                          {t(m.label)}
                         </TabsTrigger>
                       ))}
                     </TabsList>

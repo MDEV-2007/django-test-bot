@@ -18,6 +18,8 @@ import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
 import { BrandMark } from './BrandMark';
 import PremiumIcon from '@/components/ui/premium-icon';
+import ScriptToggle from './ScriptToggle';
+import { useTransliterate } from '@/lib/transliterate';
 
 let cachedUnreadCount = 0;
 let lastNotifsFetch = 0;
@@ -33,6 +35,7 @@ export default function AppShell({
   const isImmersiveMobile = hideTopbarOnMobile || Boolean(pathname?.startsWith('/reels'));
   const { user, access } = useAuthStore();
   const { isDark, toggleTheme } = useTheme();
+  const { t } = useTransliterate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(cachedUnreadCount);
@@ -102,7 +105,7 @@ export default function AppShell({
           <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
             <BrandMark size={28} rounded="rounded-[9px]" />
             <span className="font-extrabold text-sm text-foreground">
-              Ilm<span className="text-primary">Ildizi</span>
+              {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
             </span>
           </Link>
 
@@ -214,6 +217,8 @@ export default function AppShell({
               </Tooltip>
             </>
           )}
+
+          <ScriptToggle />
 
           <Tooltip>
             <TooltipTrigger asChild>

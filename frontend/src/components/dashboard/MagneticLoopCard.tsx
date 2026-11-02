@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useContinuousLoop } from '@/hooks/useContinuousLoop';
 import ContinuousLoopController from '@/components/loop/ContinuousLoopController';
+import { useTransliterate } from '@/lib/transliterate';
 
 interface MagneticLoopCardProps {
   userName?: string;
@@ -22,6 +23,7 @@ export default function MagneticLoopCard({
 }: MagneticLoopCardProps) {
   const [controllerOpen, setControllerOpen] = useState(false);
   const { loop, topic, ecoTree, loading, restartCycle } = useContinuousLoop();
+  const { t } = useTransliterate();
 
   // Multi-cycle marafon ko'rsatkichlari (3 raundlik marafon: 3x 18-20 daqiqa = 60 daqiqa)
   const cycleNumber = loop?.cycle_number || 1;
@@ -49,40 +51,40 @@ export default function MagneticLoopCard({
   }
 
   // Asosiy tugma matni va gradienti
-  let ctaTitle = "🚀 60 Daqiqalik Marafonni Boshlash (1-Raund: 90s Shpargalka & 15 Savol)";
-  let ctaSubtitle = "1-Raund (15-18 daqiqa) • 4 bosqich • Daraxtga +35% suv";
+  let ctaTitle = "🚀 60 Daqiqalik Marafon";
+  let ctaSubtitle = "1-Raund (15 daq) • 4 bosqich • Daraxtga +35% suv";
   let ctaGradient = "from-orange-500 via-rose-500 to-rose-600 shadow-rose-600/30";
 
   if (currentStage === 'STAGE_1_WARMUP') {
     if (cycleNumber === 2) {
-      ctaTitle = "🔥 2-Raundni Boshlash (90s Shpargalka & 15 Savol • 2.0x Combo)";
-      ctaSubtitle = "2-Raund (15-18 daqiqa) • 70% Suv sari • Yangi mavzu va Qasos zanjiri";
+      ctaTitle = "🔥 2-Raundni Boshlash";
+      ctaSubtitle = "15 daqiqa • 70% Suv sari • 2.0x Combo";
     } else if (cycleNumber >= 3) {
-      ctaTitle = "⚡ 3-Raund: Final Sinovi (90s Shpargalka & 15 Savol • 2.5x Combo)";
-      ctaSubtitle = "3-Raund (15-18 daqiqa) • 100% Suv • Chinorga aylantirish & Boss darajasi";
+      ctaTitle = "⚡ 3-Raund: Final Sinovi";
+      ctaSubtitle = "100% Suv • Chinor & Boss darajasi";
     }
   } else if (currentStage === 'STAGE_2_SPRINT') {
-    ctaTitle = `⚡ Zanjirni Davom Ettirish (2-Qadam: Jonli Sprint • ${combo.toFixed(1)}x Combo)`;
-    ctaSubtitle = "15 ta tezkor savol + Qasos zanjiri • 15 daqiqalik fokus";
+    ctaTitle = `⚡ 2-Qadam: Jonli Sprint (${combo.toFixed(1)}x)`;
+    ctaSubtitle = "15 ta tezkor savol + Qasos zanjiri";
   } else if (currentStage === 'STAGE_3_CLEANUP') {
     const mistakeCount = loop?.session_mistakes_ids?.length || 2;
-    ctaTitle = `🧹 Zanjirni Davom Ettirish (3-Qadam: ${mistakeCount} ta Xatoni Tozalash • ${combo.toFixed(1)}x)`;
-    ctaSubtitle = "90 soniyalik Flashcard tozalash • Xatolar Dueli";
+    ctaTitle = `🧹 3-Qadam: Xatolarni Tozalash (${mistakeCount} ta)`;
+    ctaSubtitle = "90 soniyalik Flashcard tozalash";
   } else if (currentStage === 'STAGE_4_ARENA') {
-    ctaTitle = `🔥 Zanjirni Davom Ettirish (4-Qadam: 1v1 Ghost Arena Dueli • ${combo.toFixed(1)}x)`;
-    ctaSubtitle = "60 soniyalik jonli bellashuv • So'nggi qadam!";
+    ctaTitle = `🔥 4-Qadam: 1v1 Ghost Arena Dueli`;
+    ctaSubtitle = "60 soniyalik jonli bellashuv";
   } else if (isCompleted) {
     if (cycleNumber === 1) {
-      ctaTitle = "🎁 1-Raund Yopildi! (🔥 2.0x Super-Combo bilan 2-Raundni Boshlash)";
-      ctaSubtitle = "Daraxtingiz 35% suv oldi • Hoziroq keyingi mavzuni 2 barobar ko'p XP bilan boshlang!";
+      ctaTitle = "🎁 1-Raund Yopildi! 2-Raundni Boshlash";
+      ctaSubtitle = "Daraxtingiz 35% suv oldi • 2.0x Super-Combo";
       ctaGradient = "from-orange-500 via-amber-500 to-rose-600 shadow-orange-500/30";
     } else if (cycleNumber === 2) {
-      ctaTitle = "⚡ 2-Raund Yopildi! (🚀 2.5x Ultra-Combo bilan 3-Raundni Boshlash)";
-      ctaSubtitle = "Daraxtingiz 70% suv oldi • Final 100% suv va Boss sinovini ochish sari!";
+      ctaTitle = "⚡ 2-Raund Yopildi! 3-Raundni Boshlash";
+      ctaSubtitle = "Daraxtingiz 70% suv oldi • 2.5x Ultra-Combo";
       ctaGradient = "from-amber-500 via-orange-500 to-rose-600 shadow-rose-500/30";
     } else {
-      ctaTitle = "⚔️ Kunlik Boss: 15 daqiqalik Mini-BMB Stress Sinovi";
-      ctaSubtitle = "3/3 Marafon 100% yopildi! Chinor darajasidagi yopiq sinovni boshlash";
+      ctaTitle = "⚔️ Kunlik Boss: 15 daqiqalik Sinov";
+      ctaSubtitle = "3/3 Marafon yopildi! Chinor Boss sinovi";
       ctaGradient = "from-emerald-500 via-teal-600 to-cyan-600 shadow-teal-500/30";
     }
   }
@@ -135,26 +137,26 @@ export default function MagneticLoopCard({
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30">
                 <Flame className="size-3.5 fill-current" />
-                <span>{userStreak} kunlik olovli zanjir</span>
+                <span>{userStreak} {t("kunlik olovli zanjir")}</span>
               </span>
 
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                <span>Raund {cycleNumber}/3</span>
-                <span className="text-[10px] opacity-75">(60 daqiqalik marafon)</span>
+                <span>{t('Raund')} {cycleNumber}/3</span>
+                <span className="text-[10px] opacity-75">({t('60 daqiqalik marafon')})</span>
               </span>
 
               {topic && (
                 <span className="text-xs font-semibold text-zinc-400">
-                  • Mavzu: <strong className="text-white">{topic.title}</strong>
+                  • {t('Mavzu')}: <strong className="text-white">{t(topic.title)}</strong>
                 </span>
               )}
             </div>
 
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Xayrli kun, {userName}! 🎯
+              {t('Xayrli kun')}, {userName}! 🎯
             </h2>
             <p className="text-xs sm:text-sm text-zinc-300">
-              3 raundlik uzluksiz marafonni yoping, <strong className="text-amber-400">Sirli Sandiq</strong> oching va <strong className="text-emerald-400">Chinor</strong> darajasiga yetib Boss sinovini oching!
+              {t("3 raundlik uzluksiz marafonni yoping, Sirli Sandiq oching va Chinor darajasiga yetib Boss sinovini oching!")}
             </p>
           </div>
 
@@ -166,9 +168,9 @@ export default function MagneticLoopCard({
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-zinc-300">Ilm Ildizi:</span>
+                  <span className="text-[11px] font-bold text-zinc-300">{t('Ilm Ildizi')}:</span>
                   <span className="text-[10px] font-black uppercase text-emerald-300 bg-emerald-500/25 px-2 py-0.5 rounded-md border border-emerald-500/40">
-                    {displayStageName}
+                    {t(displayStageName)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -269,8 +271,8 @@ export default function MagneticLoopCard({
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-black text-white">{step.title}</h4>
-                    <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-1">{step.desc}</p>
+                    <h4 className="text-xs font-black text-white">{t(step.title)}</h4>
+                    <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-1">{t(step.desc)}</p>
                   </div>
                 </div>
               );
@@ -290,17 +292,17 @@ export default function MagneticLoopCard({
                 <Play className="size-3.5 sm:size-4 fill-current text-amber-200" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm font-black leading-tight tracking-tight line-clamp-1 sm:line-clamp-none">
-                  {ctaTitle}
+                <div className="text-xs sm:text-sm font-black leading-tight tracking-tight break-words">
+                  {t(ctaTitle)}
                 </div>
-                <div className="text-[10px] sm:text-[11px] text-white/80 font-normal leading-tight mt-0.5 line-clamp-1 sm:line-clamp-none">
-                  {ctaSubtitle}
+                <div className="text-[10px] sm:text-[11px] text-white/80 font-normal leading-tight mt-0.5 break-words">
+                  {t(ctaSubtitle)}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-1.5 text-xs font-bold text-white/90 shrink-0">
-              <span className="hidden sm:inline">Boshlash</span>
+              <span className="hidden sm:inline">{t('Boshlash')}</span>
               <div className="size-7 sm:size-auto rounded-lg bg-white/15 sm:bg-transparent flex items-center justify-center">
                 <ArrowRight className="size-3.5 sm:size-4 group-hover:translate-x-1 transition-transform" />
               </div>

@@ -43,6 +43,7 @@ import FeedStoriesBar from '@/components/feed/FeedStoriesBar';
 import SosQuestionCard from '@/components/feed/SosQuestionCard';
 import TargetedAdBanner, { type TargetedOfferData } from '@/components/feed/TargetedAdBanner';
 import AutoShareModal from '@/components/feed/AutoShareModal';
+import { useTransliterate } from '@/lib/transliterate';
 
 type PostItem = {
   id: number;
@@ -139,6 +140,7 @@ const STUDY_MEMES = [
 
 export default function CommunityFeedPage() {
   const router = useRouter();
+  const { t } = useTransliterate();
   const { user } = useAuthStore();
 
   const [posts, setPosts] = useState<PostItem[]>([]);
@@ -666,7 +668,7 @@ export default function CommunityFeedPage() {
                       : 'bg-card text-muted-foreground border-border hover:text-foreground'
                   )}
                 >
-                  {tab.label}
+                  {t(tab.label)}
                 </button>
               );
             })}
