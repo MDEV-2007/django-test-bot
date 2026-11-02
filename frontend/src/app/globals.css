@@ -725,6 +725,11 @@ html[data-tg='on'] .ilm-topbar .font-voice {
   display: none !important;
 }
 
+/* Telegram WebApp ichida qidiruv va tepa statistika tugmalari (Streak, Coins, ELO) yashiriladi */
+html[data-tg='on'] .tg-hidden {
+  display: none !important;
+}
+
 html[data-tg='on'] .min-h-screen-safe {
   min-height: var(--tg-viewport, 100svh);
 }

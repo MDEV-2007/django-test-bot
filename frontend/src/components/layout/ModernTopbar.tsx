@@ -54,21 +54,21 @@ export default function ModernTopbar({
           </span>
         </Link>
 
-        {/* Mobile Search Button */}
+        {/* Mobile Search Button (Hidden in Telegram WebApp) */}
         <button
           type="button"
           onClick={onSearchClick}
-          className="md:hidden ios-spring flex size-8.5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
+          className="md:hidden tg-hidden ios-spring flex size-8.5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
           aria-label="Qidirish"
         >
           <Search className="size-3.5" />
         </button>
 
-        {/* iOS Spotlight Search Trigger (⌘K / Ctrl+K) */}
+        {/* iOS Spotlight Search Trigger (⌘K / Ctrl+K) (Hidden in Telegram WebApp) */}
         <button
           type="button"
           onClick={onSearchClick}
-          className="ios-spring hidden md:flex items-center gap-2.5 rounded-full bg-muted/80 hover:bg-muted px-3.5 py-1.5 text-xs text-muted-foreground hover:text-foreground transition cursor-pointer font-medium"
+          className="tg-hidden ios-spring hidden md:flex items-center gap-2.5 rounded-full bg-muted/80 hover:bg-muted px-3.5 py-1.5 text-xs text-muted-foreground hover:text-foreground transition cursor-pointer font-medium"
         >
           <Search className="size-3.5 text-muted-foreground" />
           <span>Kurslar, testlar va mavzularni qidirish...</span>
@@ -82,56 +82,62 @@ export default function ModernTopbar({
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {user && (
           <>
-            {/* 1. STREAK PILL */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={onStreakClick}
-                  className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
-                >
-                  <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
-                  <span className="font-mono text-[11px] sm:text-xs">{user.streak || 0}</span>
-                  <span className="hidden sm:inline text-[10px] font-semibold opacity-80">kun</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs font-medium">
-                {user.streak || 0} kunlik uzluksiz olovli dars seriyasi (Streak)
-              </TooltipContent>
-            </Tooltip>
+            {/* 1. STREAK PILL (Hidden in Telegram WebApp) */}
+            <div className="tg-hidden">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={onStreakClick}
+                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
+                  >
+                    <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
+                    <span className="font-mono text-[11px] sm:text-xs">{user.streak || 0}</span>
+                    <span className="hidden sm:inline text-[10px] font-semibold opacity-80">kun</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs font-medium">
+                  {user.streak || 0} kunlik uzluksiz olovli dars seriyasi (Streak)
+                </TooltipContent>
+              </Tooltip>
+            </div>
 
-            {/* 2. COINS PILL */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/shop"
-                  className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
-                >
-                  <PremiumIcon icon={Coins} tone="gold" size="2xs" solid />
-                  <span className="font-mono text-[11px] sm:text-xs">{(user.coins || 0).toLocaleString()}</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs font-medium">
-                Tangalar balansi — do&apos;kondan buyumlar olish uchun
-              </TooltipContent>
-            </Tooltip>
+            {/* 2. COINS PILL (Hidden in Telegram WebApp) */}
+            <div className="tg-hidden">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/shop"
+                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
+                  >
+                    <PremiumIcon icon={Coins} tone="gold" size="2xs" solid />
+                    <span className="font-mono text-[11px] sm:text-xs">{(user.coins || 0).toLocaleString()}</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs font-medium">
+                  Tangalar balansi — do&apos;kondan buyumlar olish uchun
+                </TooltipContent>
+              </Tooltip>
+            </div>
 
-            {/* 3. ARENA ELO PILL */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/battles"
-                  className="ios-spring hidden sm:flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
-                >
-                  <PremiumIcon icon={Swords} tone="sky" size="2xs" solid />
-                  <span className="font-mono">{user.elo_rating || 1200}</span>
-                  <span className="text-[10px] text-muted-foreground font-semibold">ELO</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs font-medium">
-                Arena ELO reytingi va 1v1 bellashuvlar
-              </TooltipContent>
-            </Tooltip>
+            {/* 3. ARENA ELO PILL (Hidden in Telegram WebApp) */}
+            <div className="tg-hidden hidden sm:block">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/battles"
+                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
+                  >
+                    <PremiumIcon icon={Swords} tone="sky" size="2xs" solid />
+                    <span className="font-mono">{user.elo_rating || 1200}</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold">ELO</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs font-medium">
+                  Arena ELO reytingi va 1v1 bellashuvlar
+                </TooltipContent>
+              </Tooltip>
+            </div>
 
             {/* 4. NOTIFICATION BELL */}
             <Tooltip>
