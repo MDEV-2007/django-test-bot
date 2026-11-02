@@ -119,47 +119,47 @@ export default function BmbStressBar({
   return (
     <div className="w-full space-y-2 mb-4">
       {/* Top Banner Bar */}
-      <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-950/80 via-slate-900 to-amber-950/70 border border-rose-500/30 text-white shadow-lg backdrop-blur-md">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="relative flex size-8 shrink-0 items-center justify-center rounded-xl bg-rose-600/30 border border-rose-500/50">
-            <Flame className="size-4.5 text-rose-400 animate-pulse" />
+      <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-rose-950/80 via-slate-900 to-amber-950/70 border border-rose-500/30 text-white shadow-lg backdrop-blur-md">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="relative flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-xl bg-rose-600/30 border border-rose-500/50">
+            <Flame className="size-4 sm:size-4.5 text-rose-400 animate-pulse" />
             <span className="absolute -top-1 -right-1 size-2 rounded-full bg-rose-500 animate-ping" />
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-black tracking-wide text-rose-300 uppercase">
+              <span className="text-[11px] sm:text-xs font-black tracking-wide text-rose-300 uppercase">
                 Real BMB Imtihon Zali
               </span>
-              <Badge variant="outline" className="text-[10px] border-rose-500/40 text-rose-200 py-0 px-1.5 bg-rose-500/10 font-bold">
-                STRESS MODE
+              <Badge variant="outline" className="text-[9px] sm:text-[10px] border-rose-500/40 text-rose-200 py-0 px-1.5 bg-rose-500/10 font-bold">
+                STRESS
               </Badge>
             </div>
-            <p className="text-[11px] text-slate-300 truncate hidden sm:block">
+            <p className="text-[11px] text-slate-300 truncate hidden md:block">
               500 kishilik zal shovqini, parta shitirlashi va nazoratchi ovozi faol
             </p>
           </div>
         </div>
 
         {/* Audio controls & Mobile Titul drawer button */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {onOpenBubbleDrawer && (
             <Button
               size="sm"
               onClick={onOpenBubbleDrawer}
-              className="lg:hidden text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs px-3"
+              className="lg:hidden text-[11px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs px-2.5 sm:px-3 h-8"
             >
-              <FileSpreadsheet className="size-3.5 mr-1.5" />
+              <FileSpreadsheet className="size-3.5 mr-1" />
               Titul
               {uncopiedCount > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.2 rounded-full bg-rose-500 text-[10px]">
+                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-[10px] font-bold">
                   {uncopiedCount}
                 </span>
               )}
             </Button>
           )}
 
-          <div className="flex items-center gap-1 bg-black/40 rounded-xl px-2 py-1 border border-white/10">
+          <div className="flex items-center gap-1.5 bg-black/40 rounded-xl px-2 py-1 border border-white/10">
             <button
               onClick={handleToggleMute}
               className="size-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer"
@@ -169,7 +169,7 @@ export default function BmbStressBar({
               {isMuted ? <VolumeX className="size-4 text-rose-400" /> : <Volume2 className="size-4 text-emerald-400" />}
             </button>
 
-            <div className="w-14 sm:w-20 hidden xs:block">
+            <div className="w-14 sm:w-20 hidden sm:block">
               <Slider
                 value={[isMuted ? 0 : volume * 100]}
                 max={100}

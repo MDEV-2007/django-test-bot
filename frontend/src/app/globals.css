@@ -300,6 +300,11 @@ body {
   max-width: 1180px;
   margin-inline: auto;
 }
+.page-shell-wide {
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
+}
 .page-shell-focus {
   width: 100%;
   max-width: 900px;
@@ -386,6 +391,7 @@ body {
 @media (min-width: 1024px) {
   aside.ilm-sidebar ~ main { padding-left: 16.5rem; }
   aside.ilm-sidebar ~ main.page-shell { max-width: calc(1180px + 16.5rem); }
+  aside.ilm-sidebar ~ main.page-shell-wide { max-width: calc(1360px + 16.5rem); }
   aside.ilm-sidebar ~ main.page-shell-focus { max-width: calc(900px + 16.5rem); }
   aside.ilm-sidebar ~ main.page-shell-narrow { max-width: calc(640px + 16.5rem); }
 }
@@ -404,6 +410,7 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
 @media (min-width: 1024px) {
   html[data-zen='on'] aside.ilm-sidebar ~ main { padding-left: 0; }
   html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell { max-width: 1180px; }
+  html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell-wide { max-width: 1360px; }
   html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell-focus { max-width: 900px; }
   html[data-zen='on'] aside.ilm-sidebar ~ main.page-shell-narrow { max-width: 640px; }
 }

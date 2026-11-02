@@ -69,7 +69,7 @@ export default function BmbBubbleSheet({
 
   return (
     <div className={cn(
-      "flex flex-col bg-[#fffef9] dark:bg-[#15171e] border-2 rounded-2xl shadow-xl transition-all duration-300 font-sans select-none",
+      "flex flex-col bg-[#fffef9] dark:bg-[#15171e] border-2 rounded-2xl shadow-xl transition-all duration-300 font-sans select-none overflow-hidden",
       isTimePanic ? "border-rose-600 shadow-rose-500/20 animate-pulse" :
       isTimeCritical ? "border-amber-500 shadow-amber-500/15" : "border-slate-300 dark:border-slate-700"
     )}>
@@ -91,9 +91,9 @@ export default function BmbBubbleSheet({
             </h3>
           </div>
 
-          <div className="text-right font-mono text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">
+          <div className="text-right font-mono text-[10px] text-slate-500 dark:text-slate-400">
             <p className="font-bold text-slate-800 dark:text-slate-200">ID: ABT-{attemptId}</p>
-            <p>VAR: #01-A</p>
+            <p className="hidden sm:block">VAR: #01-A</p>
           </div>
         </div>
 
@@ -151,7 +151,7 @@ export default function BmbBubbleSheet({
       )}
 
       {/* The Optical Bubble Sheet Grid */}
-      <div className="flex-1 overflow-y-auto max-h-[480px] p-3 sm:p-4 space-y-1.5 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto max-h-[calc(100vh-17rem)] min-h-[260px] p-2.5 sm:p-4 space-y-1.5 custom-scrollbar">
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((idx) => {
           const sIdx = String(idx);
           const chosenLetter = titulAnswers[sIdx];
@@ -165,7 +165,7 @@ export default function BmbBubbleSheet({
               key={idx}
               onClick={() => onJumpToQuestion && onJumpToQuestion(idx)}
               className={cn(
-                "flex items-center justify-between px-2.5 py-1.5 rounded-lg border transition-all text-xs cursor-pointer",
+                "flex items-center justify-between px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all text-xs cursor-pointer",
                 isCurrent
                   ? "bg-blue-50 dark:bg-blue-950/40 border-blue-400 dark:border-blue-700 shadow-xs"
                   : isDraftedNotBubbled
@@ -174,7 +174,7 @@ export default function BmbBubbleSheet({
               )}
             >
               {/* Question Number */}
-              <div className="flex items-center gap-1.5 w-12">
+              <div className="flex items-center gap-1.5 w-10 sm:w-12 shrink-0">
                 <span className={cn(
                   "font-mono font-bold text-xs",
                   isCurrent ? "text-blue-600 dark:text-blue-400 font-black" : "text-slate-600 dark:text-slate-400"
@@ -190,7 +190,7 @@ export default function BmbBubbleSheet({
               </div>
 
               {/* The 4 Bubbles (A, B, C, D) */}
-              <div className="flex items-center gap-2 sm:gap-3" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3" onClick={(e) => e.stopPropagation()}>
                 {BUBBLES.map((letter) => {
                   const isSelected = chosenLetter === letter;
 
@@ -201,7 +201,7 @@ export default function BmbBubbleSheet({
                       onClick={() => handleSelect(idx, isSelected ? '' : letter)}
                       aria-label={`${idx}-savol ${letter} varianti`}
                       className={cn(
-                        "size-6 sm:size-7 rounded-full font-mono text-[11px] font-bold flex items-center justify-center transition-transform active:scale-90 cursor-pointer border-2",
+                        "size-7 sm:size-7.5 rounded-full font-mono text-[11px] font-bold flex items-center justify-center transition-transform active:scale-90 cursor-pointer border-2",
                         isSelected
                           ? "bg-slate-900 dark:bg-blue-600 border-slate-950 dark:border-blue-500 text-white shadow-inner scale-105"
                           : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30"
@@ -218,13 +218,13 @@ export default function BmbBubbleSheet({
               </div>
 
               {/* Status Indicator */}
-              <div className="w-6 text-right">
+              <div className="w-6 text-right shrink-0">
                 {chosenLetter ? (
                   <span className="font-mono font-bold text-[11px] text-slate-900 dark:text-blue-400">
                     {chosenLetter}
                   </span>
                 ) : draftLetter ? (
-                  <span className="text-[9px] font-mono text-amber-600 dark:text-amber-400" title="Qoralamada bor">
+                  <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold" title="Qoralamada bor">
                     ({draftLetter})
                   </span>
                 ) : (

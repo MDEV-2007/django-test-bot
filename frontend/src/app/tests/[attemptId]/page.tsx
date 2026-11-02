@@ -497,16 +497,21 @@ export default function TestScreenPage() {
   const timeLeft = secondsLeft ?? data.seconds_left;
   const progress = (answeredIdxs.size / Math.max(1, data.total_questions)) * 100;
 
+  const uncopiedCount = Object.entries(draftAnswersMap).filter(([k, v]) => v && !titulAnswers[k]).length;
+
   return (
     <>
       <AppShell />
-      <main className="page-shell-focus flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-24 sm:p-6 sm:pb-12">
+      <main className={cn(
+        "flex-1 space-y-5 sm:space-y-6 bg-[var(--bg-page)] p-3 sm:p-5 lg:p-6 pb-28 sm:pb-14 mx-auto w-full",
+        isStressMode ? "page-shell-wide" : "page-shell-focus"
+      )}>
         {/* Real BMB Imtihon Zali Audio-bosim boshqaruv paneli */}
         {isStressMode && (
           <BmbStressBar
             secondsLeft={timeLeft ?? null}
             onOpenBubbleDrawer={() => setShowTitulDrawer(true)}
-            uncopiedCount={Object.entries(draftAnswersMap).filter(([k, v]) => v && !titulAnswers[k]).length}
+            uncopiedCount={uncopiedCount}
           />
         )}
         {/* Sticky boshqaruv paneli - mobilda ustiga chiqib qolmasligi uchun toza qattiq fon va to'liq kenglik */}
@@ -739,34 +744,62 @@ export default function TestScreenPage() {
     </div>
 
         {/* Navigatsiya — mobilda pastga yopishtirilgan */}
-        <div className="exam-bottom-bar fixed bottom-0 left-0 right-0 z-30 flex items-center justify-between gap-3 border-t bg-[var(--surface-card-strong)]/95 p-3 backdrop-blur-lg sm:static sm:border-t-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-          <Button variant="outline" size="lg" disabled={!data.has_prev} onClick={() => load(data.prev_idx)}>
-            <ArrowLeft className="size-4" /> Oldingi
+        <div className="exam-bottom-bar fixed bottom-0 left-0 right-0 z-30 flex items-center justify-between gap-2 border-t bg-[var(--surface-card-strong)]/95 p-2.5 sm:p-3 backdrop-blur-lg sm:static sm:border-t-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+          <Button
+            variant="outline"
+            size="lg"
+            disabled={!data.has_prev}
+            onClick={() => load(data.prev_idx)}
+            className="h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold"
+          >
+            <ArrowLeft className="size-4 mr-1" /> Oldingi
           </Button>
 
+          {/* Mobilda tezkor Titul varaqasini ochish tugmasi */}
+          {isStressMode && (
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => setShowTitulDrawer(true)}
+              className="lg:hidden relative rounded-xl border-blue-500/40 bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 font-bold text-xs gap-1.5 px-3 h-10 shadow-xs"
+            >
+              <FileSpreadsheet className="size-4 text-blue-400" />
+              <span>Titul ({Object.keys(titulAnswers).length}/{data.total_questions})</span>
+              {uncopiedCount > 0 && (
+                <span className="flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white animate-pulse">
+                  {uncopiedCount}
+                </span>
+              )}
+            </Button>
+          )}
+
           {data.has_next ? (
-            <Button size="lg" onClick={() => load(data.next_idx)}>
-              Keyingi <ArrowRight className="size-4" />
+            <Button
+              size="lg"
+              onClick={() => load(data.next_idx)}
+              className="h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold"
+            >
+              Keyingi <ArrowRight className="size-4 ml-1" />
             </Button>
           ) : inTelegram ? (
-            /* Telegram'da yakunlash Telegram'ning o'z pastki tugmasi orqali —
-               ikkita bir xil tugma bir-birining ustida turmasligi uchun. */
+            /* Telegram'da yakunlash Telegram'ning o'z pastki tugmasi orqali */
             null
           ) : (
             <Button
               size="lg"
               onClick={() => finish()}
               disabled={finishing}
-              className="animate-pulse bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/35 hover:bg-[var(--success)]/90"
+              className="animate-pulse bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/35 hover:bg-[var(--success)]/90 h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold"
             >
-              <CheckCircle2 className="size-4" /> {finishing ? 'Yakunlanmoqda...' : 'Imtihonni Yakunlash'}
+              <CheckCircle2 className="size-4 mr-1" /> {finishing ? 'Yakunlanmoqda...' : 'Yakunlash'}
             </Button>
           )}
         </div>
 
         {/* Mobilda BMB Titul Varaqasi Dialogi */}
         <Dialog open={showTitulDrawer} onOpenChange={setShowTitulDrawer}>
-          <DialogContent className="max-w-md p-2 bg-transparent border-0 shadow-none">
+          <DialogContent className="w-[96vw] max-w-md max-h-[92vh] p-0 bg-transparent border-0 shadow-none overflow-hidden flex flex-col">
             <BmbBubbleSheet
               totalQuestions={data.total_questions}
               currentQIdx={data.q_idx}
@@ -781,6 +814,7 @@ export default function TestScreenPage() {
               secondsLeft={timeLeft ?? null}
               subjectName={data.subject_name || data.test_title || 'BMB Rasmiy Blok'}
               attemptId={attemptId}
+              isCompact
             />
           </DialogContent>
         </Dialog>
