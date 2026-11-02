@@ -70,7 +70,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/dashboard', label: 'Bosh sahifa (Dashboard)', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
       { href: '/learning', label: '60s Anti-Darslik', icon: Brain, badge: '60s', glow: true, tone: 'amber', featureKey: 'learning', matchPrefixes: ['/learning'] },
-      { href: '/sprint', label: 'Mashq & Fokus', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
+      { href: '/sprint', label: 'Mashq & 1v1 Arena', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint', '/battles'] },
       { href: '/tests', label: 'Imtihon Zali', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests'] },
       { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },
       { href: '/library', label: 'Bazalar & Kitoblar', icon: BookOpen, badge: null, tone: 'emerald', featureKey: 'library', matchPrefixes: ['/library'] },
@@ -78,10 +78,9 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: 'Arena & Qo\'shimcha',
+    label: 'Intellekt & Qo\'shimcha',
     items: [
       { href: '/mentor', label: 'AI Mentor (24/7)', icon: Bot, badge: 'AI', highlight: true, tone: 'purple', featureKey: 'ai_mentor' },
-      { href: '/battles', label: '1v1 Arena (Jang)', icon: Swords, badge: 'LIVE', glow: true, tone: 'amber', featureKey: 'battles', matchPrefixes: ['/games'] },
       { href: '/reels', label: 'Bilim Reels', icon: Film, badge: '60s', glow: true, tone: 'rose', matchPrefixes: ['/reels'] },
       { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/leaderboard'] },
     ],

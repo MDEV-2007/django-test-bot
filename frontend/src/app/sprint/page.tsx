@@ -11,6 +11,7 @@ import ModernAppLayout from '@/components/layout/ModernAppLayout';
 import { useAuthStore } from '@/lib/auth-store';
 import { Zap, Flame, Sparkles, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import GhostBattleArena from '@/components/arena/GhostBattleArena';
 
 // Zaxira savollar (tarmoq uzilib qolsa)
 const FALLBACK_QUESTIONS: QuestionItem[] = [
@@ -68,6 +69,17 @@ export default function SprintPage() {
   const [isSprintActive, setIsSprintActive] = useState(false);
   const [questions, setQuestions] = useState<QuestionItem[] | null>(null);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sprint' | 'arena'>(() => {
+    return searchParams.get('tab') === 'arena' ? 'arena' : 'sprint';
+  });
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'arena') {
+      setActiveTab('arena');
+    } else if (!searchParams.get('tab')) {
+      setActiveTab('sprint');
+    }
+  }, [searchParams]);
 
   // Bazadagi amaldagi fanlarni yuklash
   useEffect(() => {
@@ -201,7 +213,27 @@ export default function SprintPage() {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 3. FANNI TANLASH VA SPRINTNI SOZLASH EKRANI (Bento Cockpit UI)
+  // 3. 1v1 GHOST ARENA REJIMI (Mashq Markazidagi Arena Tabi)
+  // ─────────────────────────────────────────────────────────────
+  if (activeTab === 'arena') {
+    const chosenSubject = subjects.find((s) => s.id === selectedSubjectId);
+    const slug = chosenSubject?.slug && chosenSubject.slug !== 'all' ? chosenSubject.slug : 'tarix';
+
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <GhostBattleArena
+          subjectSlug={slug}
+          onExit={() => {
+            setActiveTab('sprint');
+            router.push('/sprint');
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 4. FANNI TANLASH VA SPRINTNI SOZLASH EKRANI (Bento Cockpit UI)
   // ─────────────────────────────────────────────────────────────
   return (
     <ModernAppLayout user={user}>
@@ -212,6 +244,10 @@ export default function SprintPage() {
         questionCount={questionCount}
         onSelectCount={setQuestionCount}
         onStart={(subjId, count) => startSprint(subjId, count)}
+        onSelectArena={() => {
+          setActiveTab('arena');
+          router.push('/sprint?tab=arena');
+        }}
         loading={loadingQuestions}
       />
     </ModernAppLayout>

@@ -137,6 +137,7 @@ export interface FocusSprintSetupProps {
   questionCount: number;
   onSelectCount: (count: number) => void;
   onStart: (subjectId: number, count: number) => void;
+  onSelectArena?: () => void;
   loading?: boolean;
 }
 
@@ -147,6 +148,7 @@ export default function FocusSprintSetup({
   questionCount,
   onSelectCount,
   onStart,
+  onSelectArena,
   loading = false,
 }: FocusSprintSetupProps) {
   const router = useRouter();
@@ -328,7 +330,7 @@ export default function FocusSprintSetup({
 
               {/* 2. Anti-Darslik: 60s Shpargalkalar */}
               <Link
-                href="/study"
+                href="/learning"
                 onClick={() => { soundFX.click(); tgHaptic('medium'); }}
                 className="group p-3.5 rounded-2xl border border-border/80 bg-card hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all shadow-xs block cursor-pointer"
               >
@@ -348,11 +350,19 @@ export default function FocusSprintSetup({
                 </p>
               </Link>
 
-              {/* 3. 1v1 Ghost Arena */}
-              <Link
-                href="/battles"
-                onClick={() => { soundFX.click(); tgHaptic('medium'); }}
-                className="group p-3.5 rounded-2xl border border-border/80 bg-card hover:border-rose-500/60 hover:bg-rose-500/5 transition-all shadow-xs block cursor-pointer"
+              {/* 3. 1v1 Ghost Arena (Tab trigger) */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundFX.click();
+                  tgHaptic('medium');
+                  if (onSelectArena) {
+                    onSelectArena();
+                  } else {
+                    router.push('/sprint?tab=arena');
+                  }
+                }}
+                className="group p-3.5 rounded-2xl border border-border/80 bg-card hover:border-rose-500/60 hover:bg-rose-500/5 transition-all shadow-xs block cursor-pointer text-left w-full active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center font-black group-hover:scale-110 transition-transform">
@@ -368,7 +378,7 @@ export default function FocusSprintSetup({
                 <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                   Jonli bilimdon yoki Ghost replika bilan 60s duel &amp; ELO reyting.
                 </p>
-              </Link>
+              </button>
             </div>
           </div>
         </div>
