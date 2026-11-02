@@ -187,43 +187,47 @@ export default function CertificateModal({
       drawGirihCorner(width - 90, 90, 70);
 
       // 4. Yuqori Gerb / Logo
-      ctx.textAlign = 'center';
-
-      // Gerb doirasi
       const logoY = 130;
+      const logoImg = new Image();
+      logoImg.crossOrigin = 'anonymous';
+      logoImg.src = '/icon-192.png';
+      await new Promise((res) => {
+        logoImg.onload = res;
+        logoImg.onerror = res;
+      });
+
+      // Gerb doirasi va hoshiyasi
       ctx.beginPath();
       ctx.arc(width / 2, logoY, 48, 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff';
       ctx.fill();
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.8;
       ctx.strokeStyle = goldMain;
       ctx.stroke();
 
       ctx.beginPath();
       ctx.arc(width / 2, logoY, 43, 0, Math.PI * 2);
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.2;
       ctx.strokeStyle = goldLight;
       ctx.stroke();
 
-      // Logo matni
-      ctx.fillStyle = '#b91c1c';
-      ctx.font = 'bold 11px "Times New Roman", serif';
-      ctx.fillText('★ ILMILDIZI ★', width / 2, logoY - 14);
-      ctx.fillStyle = '#1c3c87';
-      ctx.font = '900 14px "Arial", sans-serif';
-      ctx.fillText('TARIX MILLIY', width / 2, logoY + 3);
-      ctx.fillStyle = '#cd9b2d';
-      ctx.font = 'bold 10px "Arial", sans-serif';
-      ctx.fillText('CERTIFICATE', width / 2, logoY + 17);
-      ctx.fillStyle = '#64748b';
-      ctx.font = '8px "Arial", sans-serif';
-      ctx.fillText("TEST MARKAZI", width / 2, logoY + 29);
+      if (logoImg.complete && logoImg.naturalWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(width / 2, logoY, 40, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(logoImg, width / 2 - 40, logoY - 40, 80, 80);
+        ctx.restore();
+      }
 
       // Agentlik sarlavhasi
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#065f46';
+      ctx.font = 'bold 22px "Times New Roman", serif';
+      ctx.fillText("ILMILDIZI RESPUBLIKA TA'LIM VA TEST MARKAZI", width / 2, 226);
       ctx.fillStyle = '#1c3c87';
-      ctx.font = 'bold 20px "Arial", sans-serif';
-      ctx.fillText('ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI', width / 2, 226);
-      ctx.fillText('BILIM VA MALAKALARNI BAHOLASH AGENTLIGI', width / 2, 256);
+      ctx.font = 'bold 18px "Arial", sans-serif';
+      ctx.fillText("BILIM VA MALAKALARNI BAHOLASH AGENTLIGI STANDARTLARI ASOSIDA", width / 2, 256);
 
       // Asosiy Sarlavha
       ctx.fillStyle = '#0f172a';
@@ -332,9 +336,9 @@ export default function CertificateModal({
       ctx.lineTo(width / 2 - 80, footerY + 75);
       ctx.stroke();
 
-      // O'ngda: Mas'ul rahbar
+      // O'ngda: Mas'ul rahbar / muhr
       ctx.textAlign = 'left';
-      ctx.fillText("Mag'rurbek Zaripov", width / 2 + 120, footerY + 65);
+      ctx.fillText("IlmIldizi", width / 2 + 120, footerY + 65);
       ctx.beginPath();
       ctx.moveTo(width / 2 + 80, footerY + 75);
       ctx.lineTo(lineEndX - 20, footerY + 75);
@@ -471,20 +475,28 @@ export default function CertificateModal({
                   </svg>
                 </div>
 
-                {/* 1. Gerb / Logo */}
-                <div className="flex flex-col items-center text-center mb-3">
-                  <div className="size-16 sm:size-20 rounded-full border-2 border-[#c59b27] bg-white flex flex-col items-center justify-center shadow-xs p-1 mb-2">
-                    <span className="text-[8px] sm:text-[9px] font-bold text-rose-700 tracking-tighter leading-none">★ ILMILDIZI ★</span>
-                    <span className="text-[10px] sm:text-xs font-black text-[#1c3c87] leading-tight">TARIX MILLIY</span>
-                    <span className="text-[8px] sm:text-[9px] font-bold text-[#c59b27] leading-none">CERTIFICATE</span>
-                    <span className="text-[6.5px] text-slate-500 leading-tight mt-0.5">TEST MARKAZI</span>
+                {/* Orqa fon: Nozik IlmIldizi Watermark */}
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.035] select-none">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/icon-192.png" alt="" className="size-72 sm:size-88 object-contain grayscale" />
+                </div>
+
+                {/* 1. Gerb / Logo: Rasmiy IlmIldizi Medallion */}
+                <div className="relative flex flex-col items-center text-center mb-3 z-10">
+                  <div className="size-18 sm:size-22 rounded-full border-2 border-[#c59b27] bg-white flex items-center justify-center p-2 mb-2 shadow-md ring-4 ring-[#e5c158]/35">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/icon-192.png"
+                      alt="IlmIldizi"
+                      className="size-full object-contain rounded-full"
+                    />
                   </div>
 
-                  <p className="text-xs sm:text-sm font-bold text-[#1c3c87] uppercase tracking-wide">
-                    ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI
+                  <p className="text-xs sm:text-sm font-bold text-[#065f46] uppercase tracking-wider font-serif">
+                    ILMILDIZI RESPUBLIKA TA&apos;LIM VA TEST MARKAZI
                   </p>
-                  <p className="text-xs sm:text-sm font-extrabold text-[#1c3c87] uppercase tracking-wide">
-                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI
+                  <p className="text-[10px] sm:text-xs font-extrabold text-[#1c3c87] uppercase tracking-wide mt-0.5">
+                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI STANDARTLARI ASOSIDA
                   </p>
                 </div>
 
@@ -590,7 +602,7 @@ export default function CertificateModal({
                   {/* Mas'ul shaxs */}
                   <div className="flex-1 flex flex-col items-center">
                     <span className="font-serif font-bold text-[#0f172a] text-xs sm:text-sm text-center">
-                      Mag&apos;rurbek Zaripov
+                      IlmIldizi
                     </span>
                     <div className="w-full max-w-[120px] sm:max-w-[150px] border-b border-[#c59b27] mt-3" />
                   </div>

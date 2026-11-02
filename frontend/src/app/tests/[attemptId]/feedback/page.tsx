@@ -929,25 +929,33 @@ export default function FeedbackPage() {
                 </Button>
               </div>
 
-              {/* Sertifikatning o'zi (Sariq-oq rang, tilla hoshiya, QR kod) */}
+              {/* Sertifikatning o'zi (IlmIldizi rasmiy standarti: Qaymoqrang, tilla hoshiya, IlmIldizi logosi, QR kod) */}
               <div 
                 onClick={() => setCertOpen(true)}
-                className="cursor-pointer group relative mx-auto w-full max-w-[580px] bg-[#fefcf6] border-[3px] border-[#c59b27] p-2.5 sm:p-3.5 shadow-xl rounded-sm transition-all hover:scale-[1.01] hover:shadow-2xl"
+                className="cursor-pointer group relative mx-auto w-full max-w-[580px] bg-[#fefcf6] border-[3px] border-[#c59b27] p-2.5 sm:p-3.5 shadow-xl rounded-sm transition-all hover:scale-[1.01] hover:shadow-2xl overflow-hidden"
               >
-                <div className="border border-[#d4af37] p-4 sm:p-6 bg-[#fdfbf7] flex flex-col items-center text-[#0f172a]">
+                {/* Orqa fon: Nozik IlmIldizi Watermark */}
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.035] select-none">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/icon-192.png" alt="" className="size-64 object-contain grayscale" />
+                </div>
+
+                <div className="relative border border-[#d4af37] p-4 sm:p-6 bg-[#fdfbf7]/90 flex flex-col items-center text-[#0f172a]">
                   
-                  {/* Top Emblem */}
-                  <div className="size-16 rounded-full border-2 border-[#c59b27] bg-white flex flex-col items-center justify-center p-1 mb-1.5 shadow-xs">
-                    <span className="text-[7.5px] font-bold text-rose-700 leading-none">★ ILMILDIZI ★</span>
-                    <span className="text-[9.5px] font-black text-[#1c3c87] leading-tight">TARIX MILLIY</span>
-                    <span className="text-[7.5px] font-bold text-[#c59b27] leading-none">CERTIFICATE</span>
-                    <span className="text-[6px] text-slate-500 leading-tight mt-0.5">TEST MARKAZI</span>
+                  {/* Top Emblem: Official IlmIldizi Logo with Gold Medallion Ring */}
+                  <div className="relative size-16 sm:size-18 rounded-full border-2 border-[#c59b27] bg-white flex items-center justify-center p-1.5 mb-2 shadow-sm ring-4 ring-[#e5c158]/30">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/icon-192.png"
+                      alt="IlmIldizi"
+                      className="size-full object-contain rounded-full"
+                    />
                   </div>
-                  <p className="text-[10px] sm:text-xs font-bold text-[#1c3c87] uppercase tracking-wide">
-                    ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI
+                  <p className="text-[10px] sm:text-xs font-bold text-[#065f46] uppercase tracking-wider font-serif text-center">
+                    ILMILDIZI RESPUBLIKA TA&apos;LIM VA TEST MARKAZI
                   </p>
-                  <p className="text-[10px] sm:text-xs font-extrabold text-[#1c3c87] uppercase tracking-wide mb-2">
-                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI
+                  <p className="text-[9px] sm:text-[10.5px] font-extrabold text-[#1c3c87] uppercase tracking-wide mb-2 text-center">
+                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI STANDARTLARI ASOSIDA
                   </p>
 
                   {/* Title */}
@@ -985,9 +993,11 @@ export default function FeedbackPage() {
                         <span className="font-bold text-[#1c3c87]">Umumiy ballga nisbatan foiz ko&apos;rsatkichi:</span>
                         <span className="font-mono font-bold">{pctVal}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="font-bold text-[#1c3c87]">Sertifikat darajasi:</span>
-                        <span className="font-black text-amber-700 text-sm">{certGrade}</span>
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-300 font-black text-xs font-mono">
+                          {certGrade}
+                        </span>
                       </div>
                     </div>
 
@@ -997,7 +1007,7 @@ export default function FeedbackPage() {
                     </div>
                   </div>
 
-                  {/* Bottom: Direktor, QR, Imzo */}
+                  {/* Bottom: Direktor, QR, IlmIldizi */}
                   <div className="w-full flex items-center justify-between gap-2 mt-4 pt-2">
                     <div className="flex-1 text-center font-serif text-[11px] font-bold">
                       Direktor<br /><span className="text-[10px] font-sans text-muted-foreground">_________</span>
@@ -1006,11 +1016,11 @@ export default function FeedbackPage() {
                     <div className="shrink-0 p-1 border border-[#c59b27] bg-white rounded flex flex-col items-center shadow-xs">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={qrImgUrl} alt="QR Kod" className="size-14 sm:size-16 object-contain" />
-                      <span className="text-[7px] font-bold text-[#1e3a8a] mt-0.5">QR VERIFIED</span>
+                      <span className="text-[7px] font-bold text-[#065f46] mt-0.5">QR VERIFIED</span>
                     </div>
 
                     <div className="flex-1 text-center font-serif text-[11px] font-bold">
-                      Mag&apos;rurbek Zaripov<br /><span className="text-[10px] font-sans text-muted-foreground">_________</span>
+                      IlmIldizi<br /><span className="text-[10px] font-sans text-muted-foreground">_________</span>
                     </div>
                   </div>
 

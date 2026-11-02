@@ -3303,21 +3303,39 @@ def generate_certificate_api(request, attempt_pk):
         draw_girih_corner(page_w - 52, 52, size=46)
         draw_girih_corner(52, page_h - 52, size=46)
 
-        # 3. Yuqori Emblem / Logo Badge
+        # 3. Yuqori Emblem / Logo Badge: Rasmiy IlmIldizi Logotipi
         badge_cx = page_w / 2
         badge_cy = 76
-        page.draw_circle(pymupdf.Point(badge_cx, badge_cy), 36, color=c_gold_main, fill=(1, 1, 1), width=2.0)
-        page.draw_circle(pymupdf.Point(badge_cx, badge_cy), 32, color=c_gold_light, width=0.8)
+        badge_r = 34
+        page.draw_circle(pymupdf.Point(badge_cx, badge_cy), badge_r + 3, color=c_gold_main, fill=(1, 1, 1), width=2.2)
+        page.draw_circle(pymupdf.Point(badge_cx, badge_cy), badge_r, color=c_gold_light, width=0.8)
 
-        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy - 24, badge_cx + 34, badge_cy - 8), "★ ILMILDIZI ★", fontsize=7.5, fontname=font_bold, color=c_red, align=1)
-        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy - 10, badge_cx + 34, badge_cy + 8), "TARIX MILLIY", fontsize=9.5, fontname=font_bold, color=c_blue, align=1)
-        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy + 7, badge_cx + 34, badge_cy + 20), "CERTIFICATE", fontsize=7.5, fontname=font_bold, color=c_gold_main, align=1)
-        page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy + 19, badge_cx + 34, badge_cy + 30), "TEST MARKAZI", fontsize=5.5, fontname=font_reg, color=(100/255, 116/255, 139/255), align=1)
+        logo_inserted = False
+        import os
+        from django.conf import settings
+        logo_paths = [
+            os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'ilmildizi-logo.png'),
+            os.path.join(settings.BASE_DIR, '..', 'frontend', 'public', 'icon-192.png'),
+            os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'icon.png'),
+        ]
+        for lp in logo_paths:
+            if os.path.exists(lp):
+                try:
+                    img_r = 27
+                    img_rect = pymupdf.Rect(badge_cx - img_r, badge_cy - img_r, badge_cx + img_r, badge_cy + img_r)
+                    page.insert_image(img_rect, filename=lp)
+                    logo_inserted = True
+                    break
+                except Exception:
+                    pass
+
+        if not logo_inserted:
+            page.insert_textbox(pymupdf.Rect(badge_cx - 34, badge_cy - 12, badge_cx + 34, badge_cy + 12), "ILMILDIZI", fontsize=11, fontname=font_bold, color=c_blue, align=1)
 
         # Agentlik nomi
         page.insert_textbox(
             pymupdf.Rect(30, 122, page_w - 30, 160),
-            "ILMILDIZI & TARIX MILLIY SERTIFIKAT HUZURIDAGI\nBILIM VA MALAKALARNI BAHOLASH AGENTLIGI",
+            "ILMILDIZI RESPUBLIKA TA'LIM VA TEST MARKAZI\nBILIM VA MALAKALARNI BAHOLASH AGENTLIGI STANDARTLARI ASOSIDA",
             fontsize=11.5, fontname=font_bold, color=c_blue, align=1
         )
 
@@ -3423,9 +3441,9 @@ def generate_certificate_api(request, attempt_pk):
         page.insert_text(pymupdf.Point(lx + 25, footer_y + 45), "Direktor", fontsize=12, fontname=font_bold, color=c_dark)
         page.draw_line(pymupdf.Point(lx, footer_y + 55), pymupdf.Point(lx + 130, footer_y + 55), color=c_gold_main, width=1.2)
 
-        # Mas'ul rahbar
-        page.insert_text(pymupdf.Point(rx_end - 130, footer_y + 45), "Mag'rurbek Zaripov", fontsize=11, fontname=font_bold, color=c_dark)
-        page.draw_line(pymupdf.Point(rx_end - 145, footer_y + 55), pymupdf.Point(rx_end, footer_y + 55), color=c_gold_main, width=1.2)
+        # Mas'ul rahbar / tashkilot
+        page.insert_text(pymupdf.Point(rx_end - 105, footer_y + 45), "IlmIldizi", fontsize=12, fontname=font_bold, color=c_dark)
+        page.draw_line(pymupdf.Point(rx_end - 130, footer_y + 55), pymupdf.Point(rx_end, footer_y + 55), color=c_gold_main, width=1.2)
 
         # QR kod markazda
         qr_size = 76
