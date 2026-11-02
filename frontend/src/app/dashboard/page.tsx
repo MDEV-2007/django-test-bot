@@ -33,6 +33,7 @@ import {
   LiveActivityTicker,
 } from '@/components/dashboard/ModernHeroDashboard';
 import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
+import MagneticLoopCard from '@/components/dashboard/MagneticLoopCard';
 import DashboardStoriesBar from '@/components/dashboard/DashboardStoriesBar';
 import SmartB2BSuggestionCard from '@/components/dashboard/SmartB2BSuggestionCard';
 import LiveRepublicBanner from '@/components/growth/LiveRepublicBanner';
@@ -359,54 +360,11 @@ export default function DashboardPage() {
               {/* 0. HAMJAMIYAT & VIP SPONSORED STORIES BAR */}
               <DashboardStoriesBar />
 
-              {/* 1. BUGUNGI AI MARAFON (3 BOSQICHLI AVTOPILOT ZANJIRI) */}
-              {(() => {
-                const step1Done = (data?.recent_attempts && data.recent_attempts.length > 0) || false;
-                const mistakesCount = mistakesSummary?.total_mistakes ?? 0;
-                const step2Done = mistakesSummary ? mistakesSummary.total_mistakes === 0 : false;
-                const step3Done = (currentGoals >= 2) || ((p as any)?.recent_battles && (p as any).recent_battles.length > 0) || false;
-                const completedSteps = (step1Done ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
-
-                const lastScore = lastAttempt?.score ?? 65;
-                const scaledScore = Number(((lastScore / 100) * 70).toFixed(1));
-                let predictedGrade = 'B';
-                let nextGrade = 'B+';
-                let gapToNext = 1.6;
-                if (scaledScore >= 65) {
-                  predictedGrade = 'A+'; nextGrade = 'A+'; gapToNext = 0;
-                } else if (scaledScore >= 60) {
-                  predictedGrade = 'A'; nextGrade = 'A+'; gapToNext = Number((65.0 - scaledScore).toFixed(1));
-                } else if (scaledScore >= 55) {
-                  predictedGrade = 'B+'; nextGrade = 'A'; gapToNext = Number((60.0 - scaledScore).toFixed(1));
-                } else if (scaledScore >= 50) {
-                  predictedGrade = 'B'; nextGrade = 'B+'; gapToNext = Number((55.0 - scaledScore).toFixed(1));
-                } else if (scaledScore >= 46) {
-                  predictedGrade = 'C+'; nextGrade = 'B'; gapToNext = Number((50.0 - scaledScore).toFixed(1));
-                } else if (scaledScore >= 42) {
-                  predictedGrade = 'C'; nextGrade = 'C+'; gapToNext = Number((46.0 - scaledScore).toFixed(1));
-                } else {
-                  predictedGrade = '—'; nextGrade = 'C'; gapToNext = Number((42.0 - scaledScore).toFixed(1));
-                }
-
-                return (
-                  <AiMarathonBanner
-                    userName={firstName}
-                    userLevel={p.level}
-                    userStreak={p.streak}
-                    dtmScore={178.4}
-                    maxDtmScore={189.0}
-                    predictedGrade={`${predictedGrade} (${scaledScore} ball)`}
-                    unresolvedMistakesCount={mistakesCount}
-                    step1Done={step1Done}
-                    step2Done={step2Done}
-                    step3Done={step3Done}
-                    chestStatus={chestStatus}
-                    onClaimSuccess={() => {
-                      if (refreshDashboard) refreshDashboard();
-                    }}
-                  />
-                );
-              })()}
+              {/* 1. YAGONA AVTOPILOT KONVEYERI (MAGNIT KUNLIK ZANJIR) */}
+              <MagneticLoopCard
+                userName={firstName}
+                userStreak={p.streak}
+              />
 
               {/* 2. JONLI RESPUBLIKA SPRINTI */}
               <LiveRepublicBanner

@@ -176,6 +176,7 @@ INSTALLED_APPS = [
     'sprint',
     'growth',
     'b2b_ads',
+    'learning_loop.apps.LearningLoopConfig',
 ]
 
 MIDDLEWARE = [
