@@ -45,50 +45,11 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
         const res = await apiFetch<{ stories: StoryItem[] }>('/api/learning/stories/');
         if (res && res.stories) {
           setStories(res.stories);
+        } else {
+          setStories([]);
         }
       } catch (e) {
-        // Fallback default stories
-        setStories([
-          {
-            id: 1,
-            author_name: "Javohir (DTM 178)",
-            avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
-            story_type: 'streak',
-            title: "30 kunlik olovli seriya! 🔥",
-            caption: "Bugun Tarixdan 25 ta savolni toza yechdim. Neyron zanjiri uzilmasin!",
-            badge: "🔥 30 Kun",
-            cta_text: "⚔️ Duelga chaqirish",
-            cta_link: "/battles",
-            views_count: 142,
-            created_at: "10 daq oldin",
-          },
-          {
-            id: 2,
-            author_name: "Registon O'quv Markazi",
-            avatar: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
-            story_type: 'promo',
-            title: "1-dars BEPUL va 20% Chegirma! 🎓",
-            caption: "DTM imtihoniga oz qoldi. Qiyin mavzularni repetitor bilan 2 oyda yopamiz!",
-            badge: "🎯 Homiylik",
-            cta_text: "📞 1-bosishda yozilish",
-            cta_link: "#lead",
-            views_count: 610,
-            created_at: "1 soat oldin",
-          },
-          {
-            id: 3,
-            author_name: "Madina (A+ Sertifikat)",
-            avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
-            story_type: 'certificate',
-            title: "Tarixdan A+ (68.5 ball) oldim! 🏆",
-            caption: "BMB Stress Zali va Titul varaqasi simulyatori sabab 0 ta xato bilan topshirdim!",
-            badge: "🏆 A+ Daraja",
-            cta_text: "🎉 Tabriklash (+10 XP)",
-            cta_link: "/feed",
-            views_count: 420,
-            created_at: "2 soat oldin",
-          },
-        ]);
+        setStories([]);
       }
     }
     loadStories();
@@ -172,6 +133,10 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
         router.push(story.cta_link);
       }
     }
+  }
+
+  if (stories.length === 0) {
+    return null;
   }
 
   return (

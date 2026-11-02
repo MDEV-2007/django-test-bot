@@ -33,55 +33,35 @@ export default function DashboardStoriesBar() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [submittingLead, setSubmittingLead] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState(false);
+  const [stories, setStories] = useState<DashboardStory[]>([]);
 
-  // VIP Homiy & Tengdoshlar Yutuqlari
-  const stories: DashboardStory[] = [
-    {
-      id: 'vip-center',
-      name: "Registon LC",
-      avatar: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
-      tagline: "👑 HOMIY",
-      badge: "⭐ 4.9 • 🎁 1-dars BEPUL",
-      isVip: true,
-      storyTitle: "DTM imtihoniga 60 kun qoldi: 1-dars BEPUL!",
-      storyBody: "Tarix va Ona tili bo'yicha intensiv kurs. 1-bosishda bepul darsga yoziling va +50 🪙 Ilm Tanga oling!",
-      ctaText: "🚀 Bepul Darsga Yozilish (+50 🪙)",
-      ctaLink: "https://t.me/ilmildiziuz_bot?start=registon",
-    },
-    {
-      id: 2,
-      name: "Sardor",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80",
-      tagline: "181.5 ball 🎯",
-      badge: "🏆 DTM Rekord",
-      storyTitle: "DTM Prognozim 181.5 ballga yetdi!",
-      storyBody: "IlmIldizi shpargalkalari va 1v1 Arena sabab barcha qopqon testlarni mixlab qo'ydim. Davom etamiz!",
-      ctaText: "⚔️ Sardorni Duelga chaqirish",
-      ctaLink: "/battles",
-    },
-    {
-      id: 3,
-      name: "Malika",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80",
-      tagline: "🔥 14 kun",
-      badge: "🔥 Olovli Seriya",
-      storyTitle: "14 kunlik uzluksiz seriya! 🌿",
-      storyBody: "Daraxtim 3-bosqichga o'tib, barglari yashnab turibdi. Hech qachon zanjirni uzmang!",
-      ctaText: "🎉 Tabriklash (+10 XP)",
-      ctaLink: "/feed",
-    },
-    {
-      id: 4,
-      name: "Javohir",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
-      tagline: "178 ball ⚡",
-      badge: "⚡ DTM A+",
-      storyTitle: "Tarixdan A+ (68.5 ball) oldim!",
-      storyBody: "Titul varaqasini bo'yashda 0 ta xato bilan topshirdim. Haqiqiy zal simulyatori juda yordam berdi!",
-      ctaText: "⚡ Tezkor Mashq Boshlash",
-      ctaLink: "/sprint",
-    },
-  ];
+  useEffect(() => {
+    async function loadStories() {
+      try {
+        const res = await apiFetch<{ stories: any[] }>('/api/learning/stories/');
+        if (res?.stories && res.stories.length > 0) {
+          const mapped: DashboardStory[] = res.stories.map((s) => ({
+            id: s.id,
+            name: s.author_name,
+            avatar: s.avatar,
+            tagline: s.badge || "Story",
+            badge: s.badge || "Yutuq",
+            isVip: s.story_type === 'promo',
+            storyTitle: s.title,
+            storyBody: s.caption,
+            ctaText: s.cta_text,
+            ctaLink: s.cta_link,
+          }));
+          setStories(mapped);
+        } else {
+          setStories([]);
+        }
+      } catch (e) {
+        setStories([]);
+      }
+    }
+    loadStories();
+  }, []);
 
   // Story timer
   useEffect(() => {
