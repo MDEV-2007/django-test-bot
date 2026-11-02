@@ -149,7 +149,9 @@ function LearningPageInner() {
       if (firstLessonId) {
         router.push(`/learning?lesson_id=${firstLessonId}&topic_id=${topicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
       } else {
-        router.push(`/learning?topic_id=${topicId}&view=lesson${subject ? `&subject=${subject}` : ''}`);
+        // Agar bu mavzuda alohida matn bo'lmasa, avtomatik 60s Shpargalkani ochamiz
+        setStudyMode('cheatsheet');
+        router.push(`/learning?topic_id=${topicId}&view=cheatsheet${subject ? `&subject=${subject}` : ''}`);
       }
     } else {
       router.push(`/learning?topic_id=${topicId}&view=cheatsheet${subject ? `&subject=${subject}` : ''}`);
@@ -460,21 +462,21 @@ function LearningPageInner() {
                   {!lesson && (
                     <Card className="rounded-[28px] border-border/80">
                       <CardContent className="py-16 text-center space-y-3">
-                        <BookOpen className="mx-auto size-10 text-muted-foreground/40" />
+                        <BookOpen className="mx-auto size-10 text-amber-500/60" />
                         <div className="space-y-1">
                           <p className="text-base font-bold text-foreground">
-                            {selectedTopicTitle ? `${selectedTopicTitle} darsi yuklanmoqda...` : 'Dars tanlanmagan'}
+                            {selectedTopicTitle ? `${selectedTopicTitle} uchun 60s Shpargalka tayyor` : 'Dars tanlanmagan'}
                           </p>
                           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                            Mavzu bo&apos;yicha to&apos;liq darslik va konspekt tayyorlanmoqda yoki 60 soniyalik Shpargalkadan foydalaning.
+                            Ushbu mavzuning to&apos;liq matni o&apos;rniga 60 soniyalik tezkor Shpargalka, asosiy faktlar va BMB qopqonlaridan foydalanishingiz mumkin.
                           </p>
                         </div>
                         <Button
                           onClick={() => setStudyMode('cheatsheet')}
-                          className="rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-black"
+                          className="rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-black cursor-pointer shadow-md shadow-amber-500/20"
                         >
                           <Zap className="size-4 mr-1.5 fill-current" />
-                          60s Shpargalkaga o&apos;tish
+                          60s Shpargalkani ochish
                         </Button>
                       </CardContent>
                     </Card>
