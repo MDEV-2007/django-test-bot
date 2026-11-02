@@ -638,8 +638,59 @@ def user_edit_api(request, pk):
             return Response({'error': "O'zingizni o'chira olmaysiz."}, status=400)
         if is_last_active_superadmin(u):
             return Response({'error': "Oxirgi faol super adminni o'chirib bo'lmaydi."}, status=400)
-        u.delete()
-        return Response({'deleted': True})
+        try:
+            with transaction.atomic():
+                profile = getattr(u, 'profile', None)
+                if profile:
+                    # 1. Clean up protected classroom payments, subscriptions, and payouts
+                    try:
+                        from classroom.models import Payment as ClassPay, Subscription as ClassSub, PayoutEntry
+                        from teacher.models import TeacherProfile as TPModel
+                        
+                        tp_obj = TPModel.objects.filter(profile=profile).first()
+                        if tp_obj:
+                            PayoutEntry.objects.filter(teacher=tp_obj).delete()
+                            teacher_subs = ClassSub.objects.filter(teacher=tp_obj)
+                            teacher_payments = ClassPay.objects.filter(subscription__in=teacher_subs)
+                            PayoutEntry.objects.filter(payment__in=teacher_payments).delete()
+                            teacher_payments.delete()
+                            teacher_subs.delete()
+                            tp_obj.delete()
+
+                        user_subs = ClassSub.objects.filter(student=profile)
+                        user_payments = ClassPay.objects.filter(subscription__in=user_subs)
+                        PayoutEntry.objects.filter(payment__in=user_payments).delete()
+                        user_payments.delete()
+                        user_subs.delete()
+                    except Exception as e:
+                        logger.warning("Error cleaning classroom dependencies for user %s: %s", u.id, e)
+
+                    # 2. Premium payments
+                    try:
+                        from premium.models import Payment as PremPay
+                        PremPay.objects.filter(profile=profile).delete()
+                    except Exception as e:
+                        logger.warning("Error cleaning premium payments for user %s: %s", u.id, e)
+
+                    # 3. Referrals update
+                    try:
+                        from accounts.models import Profile as AccProfile
+                        AccProfile.objects.filter(referred_by=profile).update(referred_by=None)
+                    except Exception as e:
+                        logger.warning("Error unlinking referrals for user %s: %s", u.id, e)
+
+                # 4. Teacher battle rooms
+                try:
+                    from core.models import ClassBattleRoom
+                    ClassBattleRoom.objects.filter(teacher=u).delete()
+                except Exception as e:
+                    logger.warning("Error cleaning class battle rooms for user %s: %s", u.id, e)
+
+                u.delete()
+            return Response({'deleted': True})
+        except Exception as e:
+            logger.exception("Failed to delete user %s: %s", u.id, e)
+            return Response({'error': f"Foydalanuvchini o'chirishda xatolik yuz berdi: {str(e)}"}, status=400)
 
     form = UserForm(request.data, instance=u)
     if not form.is_valid():
