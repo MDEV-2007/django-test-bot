@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { celebrate } from '@/lib/confetti';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { PartyPopper, Flame, Sprout, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,35 +81,46 @@ export default function Celebration({
         celebrate({ particleCount: 120, spread: 75, origin: { y: 0.35 } });
       } catch { /* noop */ }
     }
+
+    // 4 soniyadan so'ng avtomatik yo'qolishi
+    const timer = setTimeout(() => {
+      setMoment(null);
+    }, 4000);
+
+    return () => clearTimeout(timer);
   }, [level, streak, completedAttempts, reduce]);
 
-  if (!moment) return null;
-
-  const Icon = moment.icon === 'streak' ? Flame : moment.icon === 'level' ? Sprout : PartyPopper;
-  const tone = moment.icon === 'streak'
+  const Icon = moment?.icon === 'streak' ? Flame : moment?.icon === 'level' ? Sprout : PartyPopper;
+  const tone = moment?.icon === 'streak'
     ? 'border-amber-500/35 bg-amber-500/[0.08] text-amber-300'
     : 'border-[var(--accent-border)] bg-primary/[0.08] text-[var(--accent-text)]';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={springBouncy}
-    >
-      <Card className={tone}>
-        <CardContent className="flex items-center gap-4 pt-6">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--surface-hover)]">
-            <Icon className="size-6" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-voice text-lg font-bold">{moment.title}</p>
-            <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{moment.body}</p>
-          </div>
-          <Button variant="ghost" size="icon" onClick={() => setMoment(null)} aria-label="Yopish">
-            <X className="size-4" />
-          </Button>
-        </CardContent>
-      </Card>
-    </motion.div>
+    <AnimatePresence>
+      {moment && (
+        <motion.div
+          key={moment.title}
+          initial={{ opacity: 0, scale: 0.96, y: -8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.96, y: -8, transition: { duration: 0.25 } }}
+          transition={springBouncy}
+        >
+          <Card className={tone}>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--surface-hover)]">
+                <Icon className="size-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-voice text-lg font-bold">{moment.title}</p>
+                <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{moment.body}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setMoment(null)} aria-label="Yopish">
+                <X className="size-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
