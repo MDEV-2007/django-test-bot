@@ -93,10 +93,20 @@ function LearningPageInner() {
     setFlipped({});
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Default topic selection on data load
+  // Topic selection on data load or subject switch
   useEffect(() => {
-    if (allTopics.length > 0 && selectedTopicId === null) {
-      // Agar lesson mavjud bo'lsa, o'sha mavzuni topish
+    if (!allTopics || allTopics.length === 0) {
+      setSelectedTopicId(null);
+      setSelectedTopicTitle('');
+      return;
+    }
+
+    // Tekshiramiz: joriy selectedTopicId yangi fanning mavzulari ichida bormi?
+    const existsInCurrentSubject = selectedTopicId
+      ? allTopics.some((t) => t.id === selectedTopicId)
+      : false;
+
+    if (!existsInCurrentSubject) {
       if (lesson?.topic) {
         const found = allTopics.find((t) => t.title.toLowerCase() === lesson.topic?.toLowerCase());
         if (found) {
@@ -109,6 +119,15 @@ function LearningPageInner() {
       setSelectedTopicTitle(allTopics[0].title);
     }
   }, [allTopics, selectedTopicId, lesson]);
+
+  function handleSubjectChange(newSlug: string) {
+    if (newSlug === subject) return;
+    tgHaptic('select');
+    setSubject(newSlug);
+    setSelectedTopicId(null);
+    setSelectedTopicTitle('');
+    router.push(`/learning?subject=${newSlug}`);
+  }
 
   async function toggleBookmark() {
     if (!data?.lesson) return;
@@ -185,8 +204,8 @@ function LearningPageInner() {
                 key={s.slug}
                 size="sm"
                 variant="outline"
-                className={cn('shrink-0 rounded-full font-semibold', subject === s.slug && 'chip-active')}
-                onClick={() => setSubject(s.slug)}
+                className={cn('shrink-0 rounded-full font-semibold cursor-pointer', subject === s.slug && 'chip-active')}
+                onClick={() => handleSubjectChange(s.slug)}
               >
                 {s.name}
               </Button>
@@ -315,66 +334,92 @@ function LearningPageInner() {
                 RIGHT: CHOSEN VIEW (60s Anti-Darslik Cheat-Sheet OR Full Lesson)
                ───────────────────────────────────────────────────────────── */}
             <div className="space-y-4 md:col-span-8">
-              {/* Mode Switcher Tabs */}
-              <div className="flex items-center justify-between gap-3 flex-wrap bg-muted/60 border border-border/70 p-1.5 rounded-2xl shadow-xs">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      tgHaptic('select');
-                      setStudyMode('cheatsheet');
-                    }}
-                    className={cn(
-                      'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
-                      studyMode === 'cheatsheet'
-                        ? 'bg-amber-500 text-black shadow-sm font-black'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
+              {allTopics.length === 0 ? (
+                <Card className="rounded-[28px] border border-border/80 p-8 sm:p-14 text-center bg-card/60 backdrop-blur-sm">
+                  <CardContent className="space-y-4 max-w-md mx-auto p-0">
+                    <div className="size-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mx-auto shadow-sm">
+                      <Sparkles className="size-8" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-lg sm:text-xl font-black text-foreground">
+                        {data?.subjects?.find((s) => s.slug === subject)?.name || "Ushbu fan"} bo&apos;yicha darslar tayyorlanmoqda
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        Tez kunda {data?.subjects?.find((s) => s.slug === subject)?.name || "ushbu fan"} bo&apos;yicha 60 soniyalik Shpargalkalar, BMB Qopqonlari va audio konspektlar yuklanadi. Hozirda Tarix fanining barcha darslari to&apos;liq mavjud!
+                      </p>
+                    </div>
+                    <div className="pt-2">
+                      <Button
+                        onClick={() => handleSubjectChange('tarix')}
+                        className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 cursor-pointer"
+                      >
+                        Tarix darslarini ko&apos;rish
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  {/* Mode Switcher Tabs */}
+                  <div className="flex items-center justify-between gap-3 flex-wrap bg-muted/60 border border-border/70 p-1.5 rounded-2xl shadow-xs">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          tgHaptic('select');
+                          setStudyMode('cheatsheet');
+                        }}
+                        className={cn(
+                          'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
+                          studyMode === 'cheatsheet'
+                            ? 'bg-amber-500 text-black shadow-sm font-black'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
+                        )}
+                      >
+                        <Zap className="size-4 fill-current" />
+                        <span>⚡ 60s Anti-Darslik</span>
+                        <span className="rounded-full bg-black/15 px-1.5 py-0.2 text-[10px] font-mono uppercase">
+                          Tavsiya
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          tgHaptic('select');
+                          setStudyMode('lesson');
+                        }}
+                        className={cn(
+                          'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
+                          studyMode === 'lesson'
+                            ? 'bg-card text-foreground shadow-sm border border-border/50'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
+                        )}
+                      >
+                        <BookOpen className="size-4" />
+                        <span>📖 To&apos;liq Matnli Dars</span>
+                      </button>
+                    </div>
+
+                    {selectedTopicTitle && (
+                      <span className="text-xs font-semibold text-muted-foreground px-2 truncate max-w-xs hidden lg:inline">
+                        {selectedTopicTitle}
+                      </span>
                     )}
-                  >
-                    <Zap className="size-4 fill-current" />
-                    <span>⚡ 60s Anti-Darslik</span>
-                    <span className="rounded-full bg-black/15 px-1.5 py-0.2 text-[10px] font-mono uppercase">
-                      Tavsiya
-                    </span>
-                  </button>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      tgHaptic('select');
-                      setStudyMode('lesson');
-                    }}
-                    className={cn(
-                      'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none',
-                      studyMode === 'lesson'
-                        ? 'bg-card text-foreground shadow-sm border border-border/50'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-card/50'
-                    )}
-                  >
-                    <BookOpen className="size-4" />
-                    <span>📖 To&apos;liq Matnli Dars</span>
-                  </button>
-                </div>
+                  {/* VIEW 1: 60-SONIYALIK ANTI-DARSLIK (Shpargalka & BMB Qopqonlari) */}
+                  {studyMode === 'cheatsheet' && (
+                    <div className="space-y-4">
+                      <TopicCheatSheetView
+                        topicId={selectedTopicId || allTopics[0]?.id || 1}
+                        topicTitle={selectedTopicTitle || allTopics[0]?.title || 'Mavzu'}
+                      />
+                    </div>
+                  )}
 
-                {selectedTopicTitle && (
-                  <span className="text-xs font-semibold text-muted-foreground px-2 truncate max-w-xs hidden lg:inline">
-                    {selectedTopicTitle}
-                  </span>
-                )}
-              </div>
-
-              {/* VIEW 1: 60-SONIYALIK ANTI-DARSLIK (Shpargalka & BMB Qopqonlari) */}
-              {studyMode === 'cheatsheet' && (
-                <div className="space-y-4">
-                  <TopicCheatSheetView
-                    topicId={selectedTopicId || allTopics[0]?.id || 11}
-                    topicTitle={selectedTopicTitle || allTopics[0]?.title || 'Mavzu'}
-                  />
-                </div>
-              )}
-
-              {/* VIEW 2: TO'LIQ MATNLI DARS (Konspekt, Audio, Video, Flashcard) */}
-              {studyMode === 'lesson' && (
+                  {/* VIEW 2: TO'LIQ MATNLI DARS (Konspekt, Audio, Video, Flashcard) */}
+                  {studyMode === 'lesson' && (
                 <>
                   {!lesson && (
                     <Card className="rounded-[28px] border-border/80">
@@ -524,6 +569,8 @@ function LearningPageInner() {
                       )}
                     </>
                   )}
+                </>
+              )}
                 </>
               )}
             </div>
