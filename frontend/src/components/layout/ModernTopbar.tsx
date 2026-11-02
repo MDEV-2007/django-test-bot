@@ -47,9 +47,9 @@ export default function ModernTopbar({
           <Menu className="size-4" />
         </button>
 
-        <Link href="/dashboard" className="lg:hidden flex items-center gap-1.5 min-w-0">
-          <BrandMark size={26} rounded="rounded-[8px]" />
-          <span className="hidden xs:inline font-extrabold text-sm tracking-tight text-foreground truncate">
+        <Link href="/dashboard" className="lg:hidden flex items-center gap-2 min-w-0">
+          <BrandMark size={28} rounded="rounded-[8px]" />
+          <span className="font-extrabold text-sm tracking-tight text-foreground truncate">
             Ilm<span className="text-primary">Ildizi</span>
           </span>
         </Link>
