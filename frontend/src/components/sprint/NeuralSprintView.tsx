@@ -471,7 +471,7 @@ export default function NeuralSprintView({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed inset-0 z-50 p-3 sm:p-4 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center"
           >
-            <div className="w-full max-w-xl rounded-2xl border border-rose-500/40 bg-zinc-950 p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[85vh] overflow-y-auto">
+            <div className="w-full max-w-lg rounded-3xl border border-rose-500/40 bg-zinc-950 p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[85vh] overflow-y-auto overflow-x-hidden">
               {/* Sarlavha */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-wider">
@@ -515,25 +515,29 @@ export default function NeuralSprintView({
               )}
 
               {/* Tushundim va SOS tugmalari */}
-              <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isSendingSos}
-                  onClick={handleAskCommunitySOS}
-                  className="w-full sm:w-auto flex-1 rounded-2xl border-amber-500/40 text-amber-500 hover:bg-amber-500/10 font-bold text-xs h-11 gap-1.5 cursor-pointer"
-                >
-                  {isSendingSos ? <Loader2 className="size-4 animate-spin mr-1" /> : <HelpCircle className="size-4 text-amber-500" />}
-                  <span>🙋‍♂️ Hamjamiyatdan yordam so&apos;rash (SOS)</span>
-                </Button>
-
+              <div className="flex flex-col gap-2 pt-1.5">
                 <Button
                   disabled={isExplainingLoading}
                   onClick={dismissExplanation}
-                  className="w-full sm:w-auto flex-1 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs sm:text-sm h-11 shadow-lg shadow-rose-600/20 gap-2 cursor-pointer"
+                  className="w-full rounded-2xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm h-11 shadow-lg shadow-rose-600/20 gap-2 cursor-pointer active:scale-[0.99] transition-all"
                 >
                   <span>Tushundim, davom etamiz (+5 XP)</span>
-                  <ChevronRight className="size-4" />
+                  <ChevronRight className="size-4 shrink-0" />
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={isSendingSos}
+                  onClick={handleAskCommunitySOS}
+                  className="w-full rounded-xl text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 font-semibold text-xs h-9 gap-1.5 cursor-pointer transition-colors"
+                >
+                  {isSendingSos ? (
+                    <Loader2 className="size-3.5 animate-spin mr-1" />
+                  ) : (
+                    <HelpCircle className="size-3.5 text-amber-500" />
+                  )}
+                  <span>Savol tushunarsizmi? Hamjamiyatdan yordam so&apos;rash (SOS)</span>
                 </Button>
               </div>
             </div>
