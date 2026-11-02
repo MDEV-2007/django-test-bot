@@ -51,3 +51,23 @@ class BookAdmin(admin.ModelAdmin):
 class BookBookmarkAdmin(admin.ModelAdmin):
     list_display = ('user', 'book', 'created_at')
 
+
+from .models import CommunityPost, CommunityStory
+
+
+@admin.register(CommunityPost)
+class CommunityPostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'subject_name', 'post_type', 'is_pinned', 'created_at')
+    list_filter = ('post_type', 'subject_slug', 'is_pinned', 'created_at')
+    search_fields = ('title', 'caption', 'subject_name')
+    list_editable = ('is_pinned',)
+    ordering = ('-is_pinned', '-created_at')
+
+
+@admin.register(CommunityStory)
+class CommunityStoryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'center', 'story_type', 'exam_track', 'badge', 'views_count', 'expires_at')
+    list_filter = ('story_type', 'exam_track', 'expires_at')
+    search_fields = ('title', 'caption', 'badge')
+    ordering = ('-created_at',)
+
