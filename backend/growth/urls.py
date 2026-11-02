@@ -18,6 +18,7 @@ urlpatterns = [
     path('open-question/evaluate/', EvaluateOpenQuestionAPIView.as_view(), name='growth-open-question-eval'),
     path('essay/evaluate/', EvaluateEssayAPIView.as_view(), name='growth-essay-eval'),
     path('onboarding-blitz/', AdaptiveOnboardingAPIView.as_view(), name='growth-onboarding-blitz'),
+    path('onboarding/blitz/', AdaptiveOnboardingAPIView.as_view(), name='growth-onboarding-blitz-slash'),
     path('status/', UserGrowthStatusAPIView.as_view(), name='growth-status'),
 
     # 2. Ghost PvP Arena & Viral Duels

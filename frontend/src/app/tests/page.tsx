@@ -10,6 +10,7 @@ import {
   Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2,
   FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles, Bell, CheckCircle2,
   ArrowLeft, BookOpen, Landmark, Calculator, Dna, Languages, Globe, ChevronRight, Layers,
+  Headphones, Zap, Trophy, Shield,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
@@ -310,6 +311,111 @@ const SUBJECT_IOS_THEME: Record<string, {
   },
 };
 
+const FALLBACK_SUBJECTS = [
+  { id: 1, slug: 'tarix', name: 'Tarix' },
+  { id: 2, slug: 'ona-tili', name: 'Ona tili' },
+  { id: 3, slug: 'matematika', name: 'Matematika' },
+  { id: 4, slug: 'biologiya', name: 'Biologiya' },
+  { id: 6, slug: 'ingliz-tili', name: 'Ingliz tili' },
+  { id: 7, slug: 'rus-tili', name: 'Rus tili' },
+];
+
+const BLITZ_SUBJECT_DETAILS: Record<string, { desc: string; focus: string; questionsCount: number; duration: number; coins: number; xp: number }> = {
+  'tarix': {
+    desc: "Qadimgi Turondan mustaqillikkacha 7 ta saralangan o'ta muhim sana, janglar va BMB qopqonlari.",
+    focus: "Xronologiya, Shaxslar & Davlatlar",
+    questionsCount: 7,
+    duration: 7,
+    coins: 100,
+    xp: 50,
+  },
+  'ona-tili': {
+    desc: "Morfologiya, imlo qoidalari, leksika va mumtoz adabiyot durdonalaridan 7 ta tezkor savol.",
+    focus: "Grammatika, Imlo & Mumtoz Adabiyot",
+    questionsCount: 7,
+    duration: 7,
+    coins: 100,
+    xp: 50,
+  },
+  'matematika': {
+    desc: "Algebra, geometriya va mantiqiy fikrlash bo'yicha 7 ta chaqqon hisob-kitobli savol.",
+    focus: "Mantiq, Algebra & Tezkor Hisob",
+    questionsCount: 7,
+    duration: 7,
+    coins: 100,
+    xp: 50,
+  },
+  'biologiya': {
+    desc: "Hujayra tuzilishi, odam anatomiyasi, genetika va botanikadan 7 ta ekspress savol.",
+    focus: "Anatomiya, Sitologiya & Genetika",
+    questionsCount: 7,
+    duration: 7,
+    coins: 100,
+    xp: 50,
+  },
+  'ingliz-tili': {
+    desc: "Grammar, Reading va Vocabulary bo'yicha 7 ta tezkor savol. CEFR darajangizni lahzada aniqlang.",
+    focus: "CEFR Grammar, Lexis & Reading",
+    questionsCount: 7,
+    duration: 7,
+    coins: 100,
+    xp: 50,
+  },
+  'rus-tili': {
+    desc: "Rus tili grammatikasi, so'z turkumlari, orfografiya va so'z boyligidan 7 ta blitz test.",
+    focus: "Орфография, Грамматика & Лексика",
+    questionsCount: 7,
+    duration: 7,
+    coins: 100,
+    xp: 50,
+  },
+};
+
+const STRESS_SUBJECT_DETAILS: Record<string, { desc: string; questionsCount: number; duration: number; coins: number; bonusXp: string }> = {
+  'tarix': {
+    desc: "30 ta rasmiy DTM savoli, 500 kishilik zal shovqini va qora ruchkada titul varaqasini bo'yash.",
+    questionsCount: 30,
+    duration: 60,
+    coins: 200,
+    bonusXp: "+50% XP",
+  },
+  'ona-tili': {
+    desc: "Ona tili va adabiyotidan 30 ta chuqur tahliliy test, qat'iy vaqt bosimi va titul varaqasi.",
+    questionsCount: 30,
+    duration: 60,
+    coins: 200,
+    bonusXp: "+50% XP",
+  },
+  'matematika': {
+    desc: "30 ta algebra va geometriya masalalari, qora ruchkada doirachalarni xatosiz bo'yash testi.",
+    questionsCount: 30,
+    duration: 60,
+    coins: 200,
+    bonusXp: "+50% XP",
+  },
+  'biologiya': {
+    desc: "Tibbiyot yo'nalishi abituriyentlari uchun 30 ta biologiya savoli va real zal shovqini muhiti.",
+    questionsCount: 30,
+    duration: 60,
+    coins: 200,
+    bonusXp: "+50% XP",
+  },
+  'ingliz-tili': {
+    desc: "30 ta Reading, Lexis va Grammar testi, vaqt me'yori hamda BMB imtihon zali akustikasi.",
+    questionsCount: 30,
+    duration: 60,
+    coins: 200,
+    bonusXp: "+50% XP",
+  },
+  'rus-tili': {
+    desc: "Rus tili va adabiyotidan 30 ta BMB formati testi, qat'iy nazorat va titul varaqasi.",
+    questionsCount: 30,
+    duration: 60,
+    coins: 200,
+    bonusXp: "+50% XP",
+  },
+};
+
 export default function TestsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -317,6 +423,7 @@ export default function TestsPage() {
 
   const [startError, setStartError] = useState<{ message: string; testId?: number; scheduledAt?: string | null } | null>(null);
   const [starting, setStarting] = useState<number | null>(null);
+  const [startingStress, setStartingStress] = useState<string | null>(null);
   const [stressModalOpen, setStressModalOpen] = useState(false);
   const [stressPreselectedTest, setStressPreselectedTest] = useState<{ id: number; title: string } | null>(null);
 
@@ -327,6 +434,16 @@ export default function TestsPage() {
     if (urlMode === 'blitz') return 'blitz';
     return 'standard';
   });
+
+  useEffect(() => {
+    if (urlMode === 'stress' || urlStress === '1' || urlStress === 'true') {
+      setHeroMode('stress');
+    } else if (urlMode === 'blitz') {
+      setHeroMode('blitz');
+    } else if (urlMode === 'standard') {
+      setHeroMode('standard');
+    }
+  }, [urlMode, urlStress]);
 
   // subject: null bo'lsa boshlang'ich Grid (grid-cols-4 / grid-cols-2) ko'rinadi.
   // subject: 'tarix' bo'lsa shu fanning ichki subkategoriyalari va testlari ko'rinadi.
@@ -452,6 +569,65 @@ export default function TestsPage() {
     router.replace('/tests', { scroll: false });
   };
 
+  const displaySubjects = useMemo(() => {
+    return (data?.subjects && data.subjects.length > 0)
+      ? data.subjects
+      : FALLBACK_SUBJECTS;
+  }, [data?.subjects]);
+
+  const handleModeChange = (mode: 'standard' | 'blitz' | 'stress') => {
+    tgHaptic('select');
+    soundFX.click();
+    setHeroMode(mode);
+    const p = new URLSearchParams(searchParams.toString());
+    if (mode === 'standard') {
+      p.delete('mode');
+      p.delete('stress');
+    } else {
+      p.set('mode', mode);
+      p.delete('stress');
+    }
+    const qStr = p.toString();
+    router.replace(qStr ? `/tests?${qStr}` : '/tests', { scroll: false });
+  };
+
+  const handleStartStress = async (subjectSlug?: string, testId?: number) => {
+    setStartingStress(subjectSlug || 'all');
+    try {
+      const payload: { test_id?: number; subject_slug?: string } = {};
+      if (testId) {
+        payload.test_id = testId;
+      } else if (subjectSlug && subjectSlug !== 'all') {
+        payload.subject_slug = subjectSlug;
+      }
+
+      const res = await apiFetch<{ attempt_id: number; mode?: string; is_stress_mode?: boolean }>(
+        '/api/tests/start-stress/',
+        {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        }
+      );
+
+      toast.success("Imtihon zali eshiklari ochildi! Omad!", { duration: 3000 });
+      router.push(`/tests/${res.attempt_id}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Xatolik yuz berdi");
+    } finally {
+      setStartingStress(null);
+    }
+  };
+
+  const handleStartBlitz = (subjectSlug?: string) => {
+    tgHaptic('select');
+    soundFX.click();
+    if (subjectSlug && subjectSlug !== 'all') {
+      router.push(`/onboarding?mode=blitz&subject=${encodeURIComponent(subjectSlug)}`);
+    } else {
+      router.push('/onboarding?mode=blitz');
+    }
+  };
+
   return (
     <>
       <AppShell />
@@ -464,11 +640,7 @@ export default function TestsPage() {
           <div className="w-full max-w-xl grid grid-cols-3 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
             <button
               type="button"
-              onClick={() => {
-                tgHaptic('select');
-                soundFX.click();
-                setHeroMode('standard');
-              }}
+              onClick={() => handleModeChange('standard')}
               className={cn(
                 'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'standard'
@@ -488,11 +660,7 @@ export default function TestsPage() {
 
             <button
               type="button"
-              onClick={() => {
-                tgHaptic('select');
-                soundFX.click();
-                setHeroMode('blitz');
-              }}
+              onClick={() => handleModeChange('blitz')}
               className={cn(
                 'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'blitz'
@@ -512,11 +680,7 @@ export default function TestsPage() {
 
             <button
               type="button"
-              onClick={() => {
-                tgHaptic('select');
-                soundFX.click();
-                setHeroMode('stress');
-              }}
+              onClick={() => handleModeChange('stress')}
               className={cn(
                 'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'stress'
@@ -773,9 +937,379 @@ export default function TestsPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* 1. KIRGANDA: ASOSIY FANLAR SETKASI (Desktop: grid-cols-4, Mobile: grid-cols-2) */}
+        {/* REJIMLAR BO'YICHA KATALOG (7-Savol Blits | BMB Stress | Standart) */}
         {/* ========================================================================= */}
-        {subject === null ? (
+        {heroMode === 'blitz' ? (
+          /* 7-SAVOL BLITS REJIMI */
+          <div className="space-y-6">
+            {/* Yuqori Qoidalar va Sovrinlar Ko'rgazmasi */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-2xl border border-blue-500/25 bg-blue-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-blue-500 font-bold text-xs">
+                  <Zap className="size-4" />
+                  <span>7 Ta Savol</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Oson, o&apos;rtacha va zaif nuqtani aniqlovchi adaptiv tizim.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs">
+                  <Sparkles className="size-4 text-amber-400" />
+                  <span>+100 🪙 Tanga</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Har bir to&apos;liq yakunlangan blits uchun kafolatlangan dofamin bonusi.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs">
+                  <Clock className="size-4" />
+                  <span>7 Daqiqa</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Ortiqcha vaqt yo&apos;qotishsiz lahzalik bilim diagnostikasi.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl border border-purple-500/25 bg-purple-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-purple-500 font-bold text-xs">
+                  <Trophy className="size-4" />
+                  <span>B+ Potensial</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Darhol Milliy Sertifikat prognozi va kuchli mavzular tahlili.
+                </p>
+              </div>
+            </div>
+
+            {/* Sarlavha */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+                  <Sparkles className="size-5 text-blue-500" />
+                  <span>Fanlar bo&apos;yicha 7-Savol Blitslar</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  Qaysi fandan blits topshirmoqchisiz? Fanni tanlang va +100 tanga mukofotini oling.
+                </p>
+              </div>
+              <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-500 font-mono text-xs font-bold">
+                {displaySubjects.length} ta fan faol
+              </Badge>
+            </div>
+
+            {/* FANLAR BLITS GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displaySubjects.map((s) => {
+                const visual = getSubjectVisual(s.slug, s.name);
+                const IconComponent = visual.icon;
+                const details = BLITZ_SUBJECT_DETAILS[s.slug] || {
+                  desc: `${s.name} fanidan 7 ta saralangan ekspress savol va qopqonlar.`,
+                  focus: "Tezkor Sinov & Natija",
+                  questionsCount: 7,
+                  duration: 7,
+                  coins: 100,
+                  xp: 50,
+                };
+
+                return (
+                  <motion.div
+                    key={s.slug}
+                    whileHover={{ y: -3 }}
+                    className="group relative rounded-[24px] p-5 border border-border bg-card hover:border-blue-500/40 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
+                  >
+                    <div className={cn('pointer-events-none absolute inset-0 bg-gradient-to-br opacity-40 group-hover:opacity-80 transition-opacity', visual.gradient)} />
+
+                    <div className="relative space-y-3.5">
+                      {/* Header Badges */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className={cn('size-11 rounded-2xl flex items-center justify-center border shadow-xs', visual.iconBg)}>
+                          <IconComponent className={cn('size-5', visual.iconColor)} />
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                          <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-500 text-[10px] font-bold">
+                            ⚡ 7 savol
+                          </Badge>
+                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-bold">
+                            +100 🪙 Tanga
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Title & Desc */}
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight group-hover:text-blue-500 transition-colors">
+                          {s.name} · 7-Savol Blits
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
+                          {details.desc}
+                        </p>
+                      </div>
+
+                      {/* Sovrin & Format Box */}
+                      <div className="p-2.5 rounded-xl bg-muted/60 border border-border/80 space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Clock className="size-3 text-primary" /> Vaqt:
+                          </span>
+                          <span className="font-mono text-foreground">7 daqiqa</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Trophy className="size-3 text-amber-500" /> Sovrin:
+                          </span>
+                          <span className="text-amber-500 font-mono font-black">+100 🪙 & +50 XP</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="relative mt-4 pt-3 border-t border-border/60">
+                      <Button
+                        onClick={() => handleStartBlitz(s.slug)}
+                        className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 shadow-md shadow-blue-600/20 active:scale-98 transition-all cursor-pointer"
+                      >
+                        <span>Blitsni Boshlash</span>
+                        <ArrowRight className="size-3.5 ml-1.5" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Aralash Fanlar Super Blits Card */}
+            <div className="relative overflow-hidden rounded-[26px] border border-blue-500/30 bg-gradient-to-r from-blue-950/80 via-slate-900 to-indigo-950/80 p-5 sm:p-6 text-white shadow-lg">
+              <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-blue-500/10 rounded-full blur-2xl" />
+              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1.5 max-w-xl">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-0.5 text-xs font-bold text-blue-300 border border-blue-500/30">
+                    <Sparkles className="size-3.5 text-amber-300" /> Super Challenge · Barcha Fanlar
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black">
+                    Aralash Fanlar 7-Savol Super Blitsi
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Tarix, Ona tili, Matematika, Biologiya, Ingliz va Rus tilidan saralangan 7 ta eng muhim savol. Haqiqiy umumiy savodxonlik sinovi!
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs">
+                      Sovrin: +150 🪙 Tanga
+                    </Badge>
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-xs">
+                      +100 XP
+                    </Badge>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => handleStartBlitz()}
+                  size="lg"
+                  className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-black shadow-lg shadow-blue-500/30 shrink-0 h-11 px-6 cursor-pointer"
+                >
+                  Super Blitsni Boshlash <ArrowRight className="size-4 ml-1.5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : heroMode === 'stress' ? (
+          /* BMB STRESS ZALI REJIMI */
+          <div className="space-y-6">
+            {/* Yuqori Stress Xususiyatlari & Sovrinlar Paneli */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-rose-500 font-bold text-xs">
+                  <Headphones className="size-4" />
+                  <span>500 Kishi Akustikasi</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Haqiqiy DTM zalidagi shivir-shivir va parta tovushlari.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl border border-blue-500/25 bg-blue-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-blue-500 font-bold text-xs">
+                  <FileCheck2 className="size-4" />
+                  <span>Titul Varaqasi</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Qora ruchkada doirachalarni bo&apos;yash (Bubble Sheet) mashqi.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs">
+                  <Flame className="size-4" />
+                  <span>+50% Bonus XP</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Har bir to&apos;g&apos;ri javob uchun 1.5 baravar ko&apos;p tajriba bali.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs">
+                  <Shield className="size-4" />
+                  <span>Temir Asab</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Stress zalini yenggan abituriyentlarga profil maxsus nishoni.
+                </p>
+              </div>
+            </div>
+
+            {/* Sarlavha */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+                  <Flame className="size-5 text-rose-500" />
+                  <span>Fanlar bo&apos;yicha BMB Stress Zallari</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  Qaysi fanning imtihon zaliga kirasiz? DTM zalidagi shok va bosimga oldindan tayyorlaning.
+                </p>
+              </div>
+              <Badge variant="outline" className="border-rose-500/30 bg-rose-500/10 text-rose-500 font-mono text-xs font-bold">
+                {displaySubjects.length} ta zal tayyor
+              </Badge>
+            </div>
+
+            {/* FANLAR STRESS GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displaySubjects.map((s) => {
+                const visual = getSubjectVisual(s.slug, s.name);
+                const IconComponent = visual.icon;
+                const details = STRESS_SUBJECT_DETAILS[s.slug] || {
+                  desc: `${s.name} fanidan 30 ta BMB standarti testi va haqiqiy imtihon zali shovqini.`,
+                  questionsCount: 30,
+                  duration: 60,
+                  coins: 200,
+                  bonusXp: "+50% XP",
+                };
+                const isLaunching = startingStress === s.slug;
+
+                return (
+                  <motion.div
+                    key={s.slug}
+                    whileHover={{ y: -3 }}
+                    className="group relative rounded-[24px] p-5 border border-rose-500/30 bg-card hover:border-rose-500/60 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
+                  >
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+
+                    <div className="relative space-y-3.5">
+                      {/* Header Badges */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="size-11 rounded-2xl flex items-center justify-center border border-rose-500/30 bg-rose-500/15 text-rose-500 shadow-xs">
+                          <IconComponent className="size-5" />
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                          <Badge className="bg-rose-600 text-white text-[10px] font-black border-0">
+                            🔥 STRESS
+                          </Badge>
+                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-bold">
+                            +50% XP
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Title & Desc */}
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight group-hover:text-rose-500 transition-colors">
+                          {s.name} — BMB Stress Zali
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
+                          {details.desc}
+                        </p>
+                      </div>
+
+                      {/* Sovrin & Format Box */}
+                      <div className="p-2.5 rounded-xl bg-rose-500/5 border border-rose-500/20 space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Clock className="size-3 text-rose-500" /> Format:
+                          </span>
+                          <span className="font-mono text-foreground">{details.questionsCount} ta savol · {details.duration} daqiqa</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Trophy className="size-3 text-amber-500" /> Sovrin:
+                          </span>
+                          <span className="text-amber-500 font-mono font-black">+50% XP · +{details.coins} 🪙 · &quot;Temir Asab&quot;</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="relative mt-4 pt-3 border-t border-border/60">
+                      <Button
+                        disabled={startingStress !== null}
+                        onClick={() => handleStartStress(s.slug)}
+                        className="w-full rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs h-10 shadow-md shadow-rose-600/25 active:scale-98 transition-all cursor-pointer"
+                      >
+                        {isLaunching ? (
+                          <>
+                            <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                            <span>Zalga kirilmoqda...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Flame className="size-3.5 mr-1.5 animate-pulse" />
+                            <span>Imtihon Zaliga Kirish</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Katta Blok Imtihon Modal Launcher Card */}
+            <div className="relative overflow-hidden rounded-[26px] border border-rose-500/40 bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 p-5 sm:p-6 text-white shadow-xl">
+              <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-rose-500/15 rounded-full blur-2xl" />
+              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1.5 max-w-xl">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/20 px-3 py-0.5 text-xs font-bold text-rose-300 border border-rose-500/30">
+                    <Flame className="size-3.5 text-rose-400" /> Barcha Fanlar · Katta Zal Simulyatori
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black">
+                    DTM To&apos;liq Blok Imtihoni (Hardcore Ekstremal)
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Majburiy fanlar va asosiy mutaxassislik bloklari. 500 kishilik zal akustikasi, qat&apos;iy vaqt me&apos;yori va to&apos;liq Titul varaqasi!
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs">
+                      Sovrin: +100% Super Bonus XP
+                    </Badge>
+                    <Badge className="bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-xs">
+                      +500 🪙 Tanga · &quot;Oltin Nomzod&quot;
+                    </Badge>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    setStressPreselectedTest(null);
+                    setStressModalOpen(true);
+                  }}
+                  size="lg"
+                  className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black shadow-lg shadow-rose-600/30 shrink-0 h-11 px-6 cursor-pointer"
+                >
+                  <Flame className="size-4 mr-1.5 animate-pulse" />
+                  Blok Zaliga Kirish
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ========================================================================= */
+          /* STANDART REJIM (FANLAR SETKASI YOKI TANLANGAN FAN TESTLARI)                */
+          /* ========================================================================= */
+          subject === null ? (
           <div className="space-y-5">
             {/* Bo'lim Sarlavhasi */}
             <div className="flex items-center justify-between">
@@ -1242,7 +1776,7 @@ export default function TestsPage() {
               </div>
             )}
           </div>
-        )}
+        ))}
         {/* Real BMB Stress Mode Launch Modal */}
         <BmbStressLaunchModal
           open={stressModalOpen}

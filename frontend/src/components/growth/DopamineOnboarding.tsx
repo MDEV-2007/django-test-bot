@@ -38,6 +38,7 @@ interface BlitzQuestion {
 
 export interface DopamineOnboardingProps {
   onComplete?: () => void;
+  subject?: string;
 }
 
 // 7 ta moslashtirilgan Dofamin savollari (1-4 Easy, 5-6 Medium, 7 Hard)
@@ -128,7 +129,7 @@ const DEFAULT_BLITZ_QUESTIONS: BlitzQuestion[] = [
   },
 ];
 
-export default function DopamineOnboarding({ onComplete }: DopamineOnboardingProps) {
+export default function DopamineOnboarding({ onComplete, subject }: DopamineOnboardingProps) {
   const router = useRouter();
 
   const [questions, setQuestions] = useState<BlitzQuestion[]>(DEFAULT_BLITZ_QUESTIONS);
@@ -146,7 +147,8 @@ export default function DopamineOnboarding({ onComplete }: DopamineOnboardingPro
   useEffect(() => {
     async function loadQuestions() {
       try {
-        const res = await apiFetch<{ ok: boolean; questions: BlitzQuestion[] }>('/api/growth/onboarding/blitz/');
+        const query = subject ? `?subject=${encodeURIComponent(subject)}` : '';
+        const res = await apiFetch<{ ok: boolean; questions: BlitzQuestion[] }>(`/api/growth/onboarding/blitz/${query}`);
         if (res && res.ok && res.questions?.length === 7) {
           setQuestions(res.questions);
         }
@@ -155,7 +157,7 @@ export default function DopamineOnboarding({ onComplete }: DopamineOnboardingPro
       }
     }
     loadQuestions();
-  }, []);
+  }, [subject]);
 
   const handleSelect = (choice: BlitzChoice) => {
     if (isAnswered) return;
