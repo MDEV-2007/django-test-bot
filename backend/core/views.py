@@ -154,11 +154,32 @@ def class_battle_create_api(request):
     if not flags.enable_teacher_class_battles:
         return Response({'error': "Sinf janglari moduli vaqtincha faol emas."}, status=403)
 
+    profile = ensure_profile_for_user(request.user)
+    if not (profile.is_teacher or profile.is_superadmin):
+        return Response({'error': "Sinf jangini faqat o'qituvchi ochadi."}, status=403)
+
     title = request.data.get('title') or "Guruh Imtihon Jangi"
     subject_id = request.data.get('subject_id')
     topic_id = request.data.get('topic_id')
     test_id = request.data.get('test_id')
-    question_count = int(request.data.get('question_count', 10))
+    try:
+        question_count = max(1, min(50, int(request.data.get('question_count', 10))))
+    except (TypeError, ValueError):
+        return Response({'error': "Savollar soni noto'g'ri."}, status=400)
+
+    if test_id:
+        # Faqat o'z testi yoki hammaga ochiq (nashr qilingan, bepul, jonli bo'lmagan) test.
+        # Ilgari istalgan test — jumladan jonli mock — xonaga qo'yilib, tahlil orqali
+        # to'g'ri javoblari ochilardi.
+        from tests_app.models import TestSet
+        t_obj = TestSet.objects.filter(id=test_id).first()
+        allowed = t_obj and (
+            t_obj.created_by_id == request.user.id
+            or profile.is_superadmin
+            or (t_obj.is_published and not t_obj.is_archived and not t_obj.is_live_mock and not t_obj.is_premium)
+        )
+        if not allowed:
+            return Response({'error': 'Test topilmadi'}, status=404)
 
     room = create_class_battle_room(
         teacher_user=request.user,
@@ -242,9 +263,11 @@ def class_battle_state_api(request, room_id):
                 'avatar': p.profile.avatar_url,
                 'score': p.score,
                 'correct_count': p.correct_count,
+                'submitted': p.finished_at is not None,
             }
             for p in participants
         ],
+        'question_count': len(room.question_ids),
         'questions': questions_data,
     })
 
@@ -254,10 +277,23 @@ def class_battle_state_api(request, room_id):
 def class_battle_start_api(request, room_id):
     """O'qituvchi tomonidan 'Jangni Boshlash' buyrug'i."""
     room = get_object_or_404(ClassBattleRoom, id=room_id, teacher=request.user)
+    if room.status != 'waiting':
+        return Response({'error': "Jang allaqachon boshlangan yoki yakunlangan."}, status=400)
     room.status = 'live'
     room.started_at = timezone.now()
     room.save(update_fields=['status', 'started_at'])
     return Response({'success': True, 'status': 'live'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def class_battle_finish_api(request, room_id):
+    """O'qituvchi jangni yakunlaydi — shundan keyin o'quvchilar tahlilni (javoblarni) ko'radi."""
+    room = get_object_or_404(ClassBattleRoom, id=room_id, teacher=request.user)
+    if room.status != 'finished':
+        room.status = 'finished'
+        room.save(update_fields=['status'])
+    return Response({'success': True, 'status': 'finished'})
 
 
 @api_view(['POST'])
@@ -267,9 +303,17 @@ def class_battle_submit_api(request, room_id):
     room = get_object_or_404(ClassBattleRoom, id=room_id)
     profile = ensure_profile_for_user(request.user)
     part = get_object_or_404(ClassBattleParticipant, room=room, profile=profile)
+    # Faqat jonli jangda va bir marta. Ilgari yakunlangandan keyin tahlildagi to'g'ri
+    # javoblarni ko'rib, qayta yuborib 100% olish mumkin edi.
+    if room.status != 'live':
+        return Response({'error': "Jang hozir faol emas."}, status=400)
+    if part.finished_at is not None:
+        return Response({'error': "Javoblaringiz allaqachon qabul qilingan."}, status=400)
 
     # Javoblarni baholash
     submitted_answers = request.data.get('answers') or {}  # { "qid": choice_id }
+    if not isinstance(submitted_answers, dict):
+        return Response({'error': "Javoblar formati noto'g'ri."}, status=400)
     correct_count = 0
     total_score = 0
     evaluated = {}
@@ -293,11 +337,12 @@ def class_battle_submit_api(request, room_id):
         except (ValueError, TypeError):
             pass
 
-    part.score = total_score
-    part.correct_count = correct_count
-    part.answers = evaluated
-    part.finished_at = timezone.now()
-    part.save(update_fields=['score', 'correct_count', 'answers', 'finished_at'])
+    # Shartli update: parallel ikki so'rovdan faqat bittasi yoziladi.
+    saved = ClassBattleParticipant.objects.filter(pk=part.pk, finished_at__isnull=True).update(
+        score=total_score, correct_count=correct_count, answers=evaluated, finished_at=timezone.now(),
+    )
+    if not saved:
+        return Response({'error': "Javoblaringiz allaqachon qabul qilingan."}, status=400)
 
     return Response({
         'score': total_score,
@@ -311,6 +356,12 @@ def class_battle_submit_api(request, room_id):
 def class_battle_analytics_api(request, room_id):
     """Jang yakunidagi tahlil (Podest, Eng ko'p xato savollar)."""
     room = get_object_or_404(ClassBattleRoom, id=room_id)
+    # Tahlilda to'g'ri javoblar bor: o'qituvchi istalgan payt, qatnashchi esa faqat jang
+    # yakunlangandan keyin ko'radi. Begona foydalanuvchiga umuman berilmaydi.
+    is_owner = room.teacher_id == request.user.id
+    is_participant = room.participants.filter(profile__user=request.user).exists()
+    if not (is_owner or (is_participant and room.status == 'finished')):
+        return Response({'error': "Tahlil hozircha mavjud emas."}, status=403)
     analytics = calculate_class_battle_analytics(room)
     return Response(analytics)
 

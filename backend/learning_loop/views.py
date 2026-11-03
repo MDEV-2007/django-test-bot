@@ -12,6 +12,7 @@ from tests_app.models import Question, AnswerOption, Subject, AttemptAnswer
 from learning.models import Topic, Lesson, Flashcard, CommunityPost
 from growth.models import UserUsageQuota, ArenaGhostReplay
 from .models import DailyLearningLoop, UserEcoTree
+from tests_app.services.question_pool import practice_question_pool
 
 
 GHOST_OPPONENT_NAMES = [
@@ -42,7 +43,8 @@ def _pick_sprint_questions(topic, subject, count, rng):
     Ilgari mavzuda 15 tadan kam savol bo'lsa `Question.objects.all()[:20]` olinardi —
     har kuni bir xil 20 ta savol (masalan, "Amir Temur qaysi yilda tug'ilgan?").
     `rng` sikl id'si bilan urug'langan: sahifa yangilansa ham savollar o'zgarmaydi."""
-    base = Question.objects.filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
+    # Javoblar klientga is_correct bilan boradi — jonli mock va qoralama savollari chiqmasin.
+    base = practice_question_pool().filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
     picked = []
     for qs in (base.filter(topic=topic) if topic else None,
                base.filter(subject=subject) if subject else None,
@@ -53,6 +55,22 @@ def _pick_sprint_questions(topic, subject, count, rng):
         picked += rng.sample(ids, min(count - len(picked), len(ids)))
     by_id = Question.objects.prefetch_related('choices').in_bulk(picked)
     return [by_id[i] for i in picked if i in by_id]
+
+
+def _loop_sprint_question_ids(loop: DailyLearningLoop) -> list:
+    """Shu siklning sprint savollari ID'lari (_build_stage_data bilan bir xil urug')."""
+    topic = loop.topic
+    subject = loop.subject or (topic.subject if topic else None)
+    picked = _pick_sprint_questions(topic, subject, SPRINT_QUESTION_COUNT + ARENA_QUESTION_COUNT,
+                                    random.Random(loop.id))
+    return [q.id for q in picked[:SPRINT_QUESTION_COUNT]]
+
+
+def _as_int(value, default=0):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def _format_question_dict(q: Question) -> dict:
@@ -331,15 +349,27 @@ class AdvanceStageView(APIView):
         if from_stage == DailyLearningLoop.STAGE_1_WARMUP:
             # 1-bosqich tugadi -> 2-bosqich (Sprint) boshlanadi
             loop.current_stage = DailyLearningLoop.STAGE_2_SPRINT
-            loop.combo_multiplier = 1.0
+            # Combo tushirilmaydi: 2/3-sikl 2.0x/2.5x bilan boshlanadi (restart-cycle).
             loop.dtm_score_delta = round(loop.dtm_score_delta + 0.4, 2)
             loop.save()
 
         elif from_stage == DailyLearningLoop.STAGE_2_SPRINT:
             # 2-bosqich (Sprint) yakunlandi
-            mistake_ids = payload.get('mistake_question_ids', [])
-            correct_count = payload.get('correct_count', 0)
-            total_count = payload.get('total_count', 10)
+            # Klientga ko'r-ko'rona ishonilmaydi: xatolar faqat shu sprint savollaridan,
+            # to'g'ri javoblar soni esa sprint hajmi bilan cheklanadi. Ilgari istalgan savol
+            # ID'si yuborilib, 3-bosqich kartasida uning to'g'ri javobi ochilardi.
+            sprint_ids = _loop_sprint_question_ids(loop)
+            raw_mistakes = payload.get('mistake_question_ids', [])
+            if not isinstance(raw_mistakes, list):
+                raw_mistakes = []
+            allowed = set(sprint_ids)
+            mistake_ids = []
+            for qid in raw_mistakes:
+                qid = _as_int(qid, None)
+                if qid in allowed and qid not in mistake_ids:
+                    mistake_ids.append(qid)
+            total_count = len(sprint_ids)
+            correct_count = max(0, min(_as_int(payload.get('correct_count')), total_count - len(mistake_ids)))
 
             loop.sprint_score = correct_count
             loop.sprint_total = total_count
@@ -349,22 +379,22 @@ class AdvanceStageView(APIView):
                 # Xatolar bor -> 3-bosqichga (Flashcard tozalash) o'tkazamiz
                 loop.session_mistakes_ids = mistake_ids
                 loop.current_stage = DailyLearningLoop.STAGE_3_CLEANUP
-                loop.combo_multiplier = 1.5
+                loop.combo_multiplier = max(loop.combo_multiplier, 1.5)
             else:
                 # 0 ta xato! Mukammal sprint -> 3-bosqichdan sakrab, 2.0x Combo bilan to'g'ri Arenaga!
                 loop.session_mistakes_ids = []
                 loop.current_stage = DailyLearningLoop.STAGE_4_ARENA
-                loop.combo_multiplier = 2.0
+                loop.combo_multiplier = max(loop.combo_multiplier, 2.0)
 
             loop.save()
 
         elif from_stage == DailyLearningLoop.STAGE_3_CLEANUP:
             # 3-bosqich (Xatolar Dueli) yakunlandi
-            cleared_count = payload.get('cleared_count', len(loop.session_mistakes_ids))
-            loop.cleanup_cleared = cleared_count
+            cleared_count = _as_int(payload.get('cleared_count'), len(loop.session_mistakes_ids))
+            loop.cleanup_cleared = max(0, min(cleared_count, len(loop.session_mistakes_ids)))
             loop.dtm_score_delta = round(loop.dtm_score_delta + 0.6, 2)
             loop.current_stage = DailyLearningLoop.STAGE_4_ARENA
-            loop.combo_multiplier = 2.0
+            loop.combo_multiplier = max(loop.combo_multiplier, 2.0)
             loop.save()
 
         elif from_stage == DailyLearningLoop.STAGE_4_ARENA:
@@ -374,7 +404,7 @@ class AdvanceStageView(APIView):
 
             with transaction.atomic():
                 locked_loop = DailyLearningLoop.objects.select_for_update().get(pk=loop.pk)
-                arena_won = payload.get('arena_won', True)
+                arena_won = payload.get('arena_won') is True
                 locked_loop.arena_won = arena_won
                 if arena_won:
                     locked_loop.dtm_score_delta = round(locked_loop.dtm_score_delta + 0.8, 2)
@@ -444,24 +474,41 @@ class ShareLoopPostView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        from core.rewards import grant_rewards_atomic
+
         user = request.user
         loop = _get_or_create_today_loop(user)
 
-        caption = request.data.get('caption') or (
+        # Faqat yakunlangan sikl va har sikl uchun bitta post. Ilgari har bosishda +15 XP
+        # berilardi (va `content` maydoni yo'qligi sabab endpoint doim 500 qaytarardi).
+        if loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED:
+            return Response({'ok': False, 'error': "Avval kunlik siklni yakunlang."},
+                            status=status.HTTP_409_CONFLICT)
+        if CommunityPost.objects.filter(author=user, post_type='achievement',
+                                        created_at__gte=loop.created_at).exists():
+            return Response({'ok': False, 'error': "Bu sikl natijasi allaqachon lentaga chiqarilgan."},
+                            status=status.HTTP_409_CONFLICT)
+
+        caption = str(request.data.get('caption') or (
             f"🚀 Bugungi 4-bosqichli Marafonni 100% yopdim (+{loop.dtm_score_delta} DTM Ball)! "
             f"Sirli Sandiq ochildi va Ilm Ildizi Daraxtimga suv quydim! 🔥🎁"
-        )
+        ))[:1000]
 
+        profile = ensure_profile_for_user(user)
+        subject = loop.subject or (loop.topic.subject if loop.topic else None)
         post = CommunityPost.objects.create(
             author=user,
             post_type='achievement',
             title="Kunlik Avtopilot Marafoni Yakunlandi! 🎯",
-            content=caption,
+            caption=caption,
+            subject_name=subject.name if subject else 'Asosiy',
+            subject_slug=subject.slug if subject else 'tarix',
+            correct_count=loop.sprint_score,
+            total_questions=loop.sprint_total,
+            exam_track=profile.exam_track,
         )
 
-        profile = ensure_profile_for_user(user)
-        profile.xp = (profile.xp or 0) + 15
-        profile.save(update_fields=['xp'])
+        grant_rewards_atomic(profile.id, xp_delta=15)
 
         return Response({
             'ok': True,

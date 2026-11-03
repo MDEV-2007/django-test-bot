@@ -26,9 +26,9 @@ type BattleRoom = {
   id: number;
   pin_code: string;
   title: string;
-  status: 'WAITING' | 'ACTIVE' | 'FINISHED' | 'EXPIRED';
+  status: 'waiting' | 'live' | 'finished';
   participants_count: number;
-  question_count: number;
+  questions_count: number;
   created_at: string;
   subject_name?: string;
   test_title?: string;
@@ -46,7 +46,7 @@ type RoomState = {
   room_id: number;
   title: string;
   pin_code: string;
-  status: 'WAITING' | 'ACTIVE' | 'FINISHED' | 'EXPIRED';
+  status: 'waiting' | 'live' | 'finished';
   is_teacher: boolean;
   participants_count: number;
   participants: Participant[];
@@ -109,9 +109,10 @@ export default function TeacherBattlesPage() {
 
   const fetchRooms = useCallback(async () => {
     try {
-      const res = await apiFetch<{ rooms: BattleRoom[] }>('/api/v1/system/class-battles/my/');
-      if (res && res.rooms) {
-        setRooms(res.rooms);
+      // Backend xonalar ro'yxatini to'g'ridan-to'g'ri massiv sifatida qaytaradi.
+      const res = await apiFetch<BattleRoom[]>('/api/v1/system/class-battles/my/');
+      if (Array.isArray(res)) {
+        setRooms(res);
       }
     } catch {
       // ignore
@@ -140,7 +141,7 @@ export default function TeacherBattlesPage() {
     try {
       const res = await apiFetch<RoomState>(`/api/v1/system/class-battles/${roomId}/state/`);
       setRoomState(res);
-      if (res.status === 'FINISHED') {
+      if (res.status === 'finished') {
         loadAnalytics(roomId);
       }
     } catch {
@@ -225,6 +226,18 @@ export default function TeacherBattlesPage() {
     }
   }
 
+  async function handleFinishBattle(roomId: number) {
+    tgHaptic('medium');
+    try {
+      await apiFetch(`/api/v1/system/class-battles/${roomId}/finish/`, { method: 'POST' });
+      // Yakunlangandan keyin o'quvchilar ham tahlilni ko'radi; o'qituvchiga darhol ochamiz.
+      await pollRoomState(roomId);
+      fetchRooms();
+    } catch (e: any) {
+      toast.error(e.message || "Jangni yakunlashda xatolik yuz berdi");
+    }
+  }
+
   function handleCopyPIN(pin: string) {
     navigator.clipboard.writeText(pin);
     tgHaptic('light');
@@ -232,7 +245,7 @@ export default function TeacherBattlesPage() {
   }
 
   function handleCopyLink(pin: string) {
-    const link = `https://ilmildizi.uz/battles?pin=${pin}`;
+    const link = `${window.location.origin}/battles?pin=${pin}`;
     navigator.clipboard.writeText(link);
     tgHaptic('light');
     toast.success(`Havola nusxalandi: ${link}`);
@@ -274,12 +287,12 @@ export default function TeacherBattlesPage() {
                   </Badge>
                   <Badge variant="outline" className={cn(
                     'text-xs font-bold',
-                    roomState.status === 'WAITING' ? 'border-amber-500 text-amber-500 animate-pulse' :
-                    roomState.status === 'ACTIVE' ? 'border-emerald-500 text-emerald-500 animate-pulse' :
+                    roomState.status === 'waiting' ? 'border-amber-500 text-amber-500 animate-pulse' :
+                    roomState.status === 'live' ? 'border-emerald-500 text-emerald-500 animate-pulse' :
                     'border-zinc-500 text-muted-foreground'
                   )}>
-                    {roomState.status === 'WAITING' ? 'Kutish zali (Lobby)' :
-                     roomState.status === 'ACTIVE' ? 'Jang ketmoqda (Live)' : 'Jang yakunlandi'}
+                    {roomState.status === 'waiting' ? 'Kutish zali (Lobby)' :
+                     roomState.status === 'live' ? 'Jang ketmoqda (Live)' : 'Jang yakunlandi'}
                   </Badge>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-black text-foreground">
@@ -300,7 +313,7 @@ export default function TeacherBattlesPage() {
                 >
                   Studiyani yopish
                 </Button>
-                {roomState.status === 'WAITING' && (
+                {roomState.status === 'waiting' && (
                   <Button
                     onClick={() => handleStartBattle(roomState.room_id)}
                     size="lg"
@@ -309,21 +322,21 @@ export default function TeacherBattlesPage() {
                     <Play className="size-4 mr-2 fill-white" /> Jangni Boshlash ({roomState.participants_count} o&apos;quvchi)
                   </Button>
                 )}
-                {roomState.status === 'ACTIVE' && (
+                {roomState.status === 'live' && (
                   <Button
-                    onClick={() => loadAnalytics(roomState.room_id)}
+                    onClick={() => handleFinishBattle(roomState.room_id)}
                     variant="destructive"
                     size="lg"
                     className="rounded-2xl font-extrabold shadow-md px-6"
                   >
-                    <Trophy className="size-4 mr-2" /> Natijalarni ko&apos;rish
+                    <Trophy className="size-4 mr-2" /> Jangni yakunlash
                   </Button>
                 )}
               </div>
             </div>
 
             {/* WAITING LOBBY (Massive PIN + Live Joining Roster) */}
-            {roomState.status === 'WAITING' && (
+            {roomState.status === 'waiting' && (
               <div className="space-y-8">
                 {/* PIN Display Banner */}
                 <div className="text-center py-6 px-4 rounded-3xl bg-black/40 border border-amber-500/30 max-w-2xl mx-auto shadow-inner">
@@ -408,7 +421,7 @@ export default function TeacherBattlesPage() {
             )}
 
             {/* ACTIVE JANG (Leaderboard / Progress) */}
-            {roomState.status === 'ACTIVE' && (
+            {roomState.status === 'live' && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Card className="bg-card/60">
@@ -644,18 +657,18 @@ export default function TeacherBattlesPage() {
                       </span>
                       <Badge variant="outline" className={cn(
                         'text-[10px] font-bold uppercase',
-                        room.status === 'WAITING' ? 'border-amber-500 text-amber-500' :
-                        room.status === 'ACTIVE' ? 'border-emerald-500 text-emerald-500' :
+                        room.status === 'waiting' ? 'border-amber-500 text-amber-500' :
+                        room.status === 'live' ? 'border-emerald-500 text-emerald-500' :
                         'border-zinc-500 text-muted-foreground'
                       )}>
-                        {room.status === 'WAITING' ? 'Lobby' : room.status === 'ACTIVE' ? 'Jonli' : 'Yakunlangan'}
+                        {room.status === 'waiting' ? 'Lobby' : room.status === 'live' ? 'Jonli' : 'Yakunlangan'}
                       </Badge>
                     </div>
                     <CardTitle className="text-base font-extrabold text-foreground truncate">
                       {room.title}
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      {room.test_title || room.subject_name || 'Aralash test'} • {room.question_count} ta savol
+                      {room.test_title || room.subject_name || 'Aralash test'} • {room.questions_count} ta savol
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0 flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">

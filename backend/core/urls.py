@@ -20,6 +20,7 @@ urlpatterns = [
     path('class-battles/<str:pin_code>/join/', views.class_battle_join_api, name='class_battle_join'),
     path('class-battles/<int:room_id>/state/', views.class_battle_state_api, name='class_battle_state'),
     path('class-battles/<int:room_id>/start/', views.class_battle_start_api, name='class_battle_start'),
+    path('class-battles/<int:room_id>/finish/', views.class_battle_finish_api, name='class_battle_finish'),
     path('class-battles/<int:room_id>/submit/', views.class_battle_submit_api, name='class_battle_submit'),
     path('class-battles/<int:room_id>/analytics/', views.class_battle_analytics_api, name='class_battle_analytics'),
 

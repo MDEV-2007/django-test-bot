@@ -344,6 +344,11 @@ def start_test_api(request, test_id):
             and test.id not in _unlocked_ids(profile)):
         return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
     is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))
+    if (is_stress and not profile.is_vip_active
+            and Attempt.objects.filter(profile=profile, is_stress_mode=True).exists()):
+        # start_stress_test_api dagi "1-marta bepul, keyin PRO" qoidasini aylanib o'tmasin.
+        return Response({'error': "Stress zali birinchi marta bepul edi. Davom etish uchun PRO obuna kerak.",
+                         'requires_pro': True}, status=403)
     attempt = _new_attempt(profile, test, is_stress=is_stress)
     # `mode` — klient qaysi ekranni ochishini aytadi. Partlarga (ExamSection) bo'lingan
     # test CEFR imtihon ekranida ochiladi: matn/audio va butun part bir varaqda. Qolgan
@@ -1343,21 +1348,49 @@ def stress_config_api(request):
 def start_stress_test_api(request):
     """Maxsus Real BMB Imtihon Zali (Stress Mode) da testni boshlash."""
     try:
+        from premium.models import unlocked_test_ids as _unlocked_ids
+        from tests_app.services.question_pool import practice_question_pool
+
         profile = ensure_profile_for_user(request.user)
         test_id = request.data.get('test_id')
         subject_slug = request.data.get('subject_slug')
+        has_pro = profile.is_vip_active
+
+        # Stress zali: birinchi marta bepul, keyingilari PRO. Davom etayotgan stress
+        # urinishiga qaytish limitga kirmaydi.
+        if not has_pro and Attempt.objects.filter(profile=profile, is_stress_mode=True).exists():
+            resumable = (Attempt.objects.select_related('test')
+                         .filter(profile=profile, is_stress_mode=True, is_completed=False)
+                         .order_by('-started_at').first())
+            if not resumable:
+                return Response({'error': "Stress zali birinchi marta bepul edi. Davom etish uchun PRO obuna kerak.",
+                                 'requires_pro': True}, status=403)
+            mode = 'cefr' if resumable.test and resumable.test.sections.exists() else 'classic'
+            return Response({'attempt_id': resumable.id, 'mode': mode, 'is_stress_mode': True})
 
         if test_id:
-            test = get_object_or_404(TestSet, id=test_id)
+            # Oddiy start_test_api bilan bir xil ruxsat qoidalari. Ilgari bu yerda ID bo'yicha
+            # istalgan test (qoralama, premium, hali boshlanmagan jonli mock) ochilardi.
+            test = TestSet.objects.filter(id=test_id).first()
+            if (not test or test.is_live_mock
+                    or ((not test.is_published or test.is_archived)
+                        and test.created_by_id != request.user.id and not profile.is_superadmin)):
+                return Response({'error': 'Test topilmadi'}, status=404)
+            if (test.is_premium and not has_pro
+                    and not profile.premium_mock_test_unlocked
+                    and test.id not in _unlocked_ids(profile)):
+                return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
         else:
             qs = TestSet.objects.filter(is_published=True, is_archived=False, is_live_mock=False)
+            if not has_pro and not profile.premium_mock_test_unlocked:
+                qs = qs.filter(Q(is_premium=False) | Q(id__in=_unlocked_ids(profile)))
             if subject_slug and subject_slug != 'all':
                 qs = qs.filter(subject__slug=subject_slug)
-            test = qs.order_by('?').first() or TestSet.objects.filter(is_published=True, is_archived=False, is_live_mock=False).first()
+            test = qs.order_by('?').first()
 
         if not test or not test.questions.exists():
             # Savollardan avtomatik test tuzish
-            q_qs = Question.objects.all()
+            q_qs = practice_question_pool()
             if subject_slug and subject_slug != 'all':
                 sub_q = q_qs.filter(subject__slug=subject_slug)
                 if sub_q.exists():
@@ -1388,7 +1421,7 @@ def start_stress_test_api(request):
         return Response({'attempt_id': attempt.id, 'mode': mode, 'is_stress_mode': True})
     except Exception as e:
         logger.exception("start_stress_test_api error: %s", e)
-        return Response({'error': f"Imtihonni yuklashda xatolik yuz berdi: {str(e)}"}, status=500)
+        return Response({'error': "Imtihonni yuklashda xatolik yuz berdi."}, status=500)
 
 
 @api_view(['POST'])

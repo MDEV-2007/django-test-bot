@@ -258,8 +258,9 @@ def create_class_battle_room(teacher_user: User, title: str, subject_id: int = N
     if not pin_code:
         pin_code = f"{random.randint(100000, 999999)}"
 
-    # Savollarni tanlash
-    qs = Question.objects.all()
+    # Savollarni tanlash (test berilmasa — jonli mock/qoralama savollarisiz puldan)
+    from tests_app.services.question_pool import practice_question_pool
+    qs = practice_question_pool()
     if test_id:
         from tests_app.models import TestSet
         t_obj = TestSet.objects.filter(id=test_id).first()
@@ -274,7 +275,8 @@ def create_class_battle_room(teacher_user: User, title: str, subject_id: int = N
 
     q_ids = list(qs.values_list('id', flat=True)[:question_count])
     if len(q_ids) < question_count:
-        fallback_ids = list(Question.objects.exclude(id__in=q_ids).values_list('id', flat=True)[:question_count - len(q_ids)])
+        fallback_ids = list(practice_question_pool().exclude(id__in=q_ids)
+                            .values_list('id', flat=True)[:question_count - len(q_ids)])
         q_ids.extend(fallback_ids)
 
     room = ClassBattleRoom.objects.create(
@@ -304,6 +306,7 @@ def calculate_class_battle_analytics(room: ClassBattleRoom):
         return {
             'total_participants': 0,
             'avg_mastery': 0,
+            'average_score': 0,
             'podium': [],
             'hardest_questions': [],
             'struggling_students': [],
@@ -321,6 +324,7 @@ def calculate_class_battle_analytics(room: ClassBattleRoom):
             'avatar': p.profile.avatar_url,
             'score': p.score,
             'correct_count': p.correct_count,
+            'accuracy_rate': round(p.correct_count / total_q_count * 100, 1),
         })
 
     # Savollar bo'yicha xatolar tahlili
@@ -360,6 +364,12 @@ def calculate_class_battle_analytics(room: ClassBattleRoom):
                 'wrong_count': stats['wrong'],
                 'correct_answer': correct_choice,
                 'explanation': q_obj.explanation or "Ushbu savol o'quvchilar tomonidan eng ko'p adashtirilgan.",
+                # O'qituvchi sahifasi (teacher/battles) shu nomlarni kutadi.
+                'question_id': q_obj.id,
+                'question_text': q_obj.body,
+                'correct_count': stats['total'] - stats['wrong'],
+                'total_answers': stats['total'],
+                'accuracy_percent': 100 - wrong_pct,
             })
 
     # Orqada qolayotganlar (pastki 30% yoki 50% dan past ball)
@@ -372,12 +382,14 @@ def calculate_class_battle_analytics(room: ClassBattleRoom):
                 'correct_count': p.correct_count,
                 'total_questions': total_q_count,
                 'mastery_pct': round(pct, 1),
+                'accuracy_percent': round(pct, 1),
             })
 
     return {
         'total_participants': total_parts,
         'avg_score': round(avg_score, 1),
         'avg_mastery': avg_mastery,
+        'average_score': avg_mastery,
         'podium': podium,
         'hardest_questions': hardest_questions_data,
         'struggling_students': struggling[:5],
