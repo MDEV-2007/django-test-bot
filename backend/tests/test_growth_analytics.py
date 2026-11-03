@@ -1,5 +1,6 @@
 """Growth analytics: daily activity, client events whitelist, growth metrics, and the
 parent invoice price coming from the plan catalogue instead of a hard-coded number."""
+import io
 from datetime import timedelta
 from decimal import Decimal
 from unittest.mock import patch
@@ -129,3 +130,70 @@ class ParentInvoicePriceTests(TestCase):
         button = send.call_args.kwargs['reply_markup']['inline_keyboard'][0][0]['text']
         self.assertIn('25 000', button)
         self.assertNotIn('Payme', button)
+
+
+class ParentCheckoutTests(TestCase):
+    """The parent link must work without the student's login and only for the signed
+    student/plan pair."""
+
+    def setUp(self):
+        from core.models import ParentConnection
+
+        self.plan = SubscriptionPlan.objects.create(name='PRO', plan_type='lessons', price=Decimal('25000'),
+                                                    duration_days=30)
+        self.user, self.profile = make_user('pc_student')
+        type(self.user).objects.filter(pk=self.user.pk).update(first_name='Ali', last_name='Valiyev')
+        ParentConnection.objects.create(student=self.profile, parent_chat_id='555', is_active=True)
+
+    def _link(self):
+        from core.services import send_parent_vip_invoice
+        with patch('core.services.send_message', return_value={'ok': True}):
+            _, url, _ = send_parent_vip_invoice(self.profile)
+        return url
+
+    def _png(self):
+        import io
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+        buf = io.BytesIO()
+        Image.new('RGB', (20, 20), 'green').save(buf, 'PNG')
+        return SimpleUploadedFile('chek.png', buf.getvalue(), content_type='image/png')
+
+    def test_link_opens_without_login_and_creates_pending_payment(self):
+        url = self._link()
+        self.assertIn('/pay/', url)
+        token = url.rsplit('/pay/', 1)[1]
+        api = f'/api/premium/parent-checkout/{token}/'
+        info = self.client.get(api).json()
+        self.assertEqual(info['student_name'], 'Ali V.')
+        self.assertEqual(info['plan']['price'], '25000.00')
+
+        res = self.client.post(api, {'screenshot': self._png()})
+        self.assertEqual(res.status_code, 200)
+        pay = Payment.objects.get(profile=self.profile)
+        self.assertEqual((pay.status, pay.amount), ('pending', Decimal('25000')))
+
+    def test_tampered_token_is_rejected(self):
+        token = self._link().rsplit('/pay/', 1)[1]
+        self.assertEqual(self.client.get(f'/api/premium/parent-checkout/{token}x/').status_code, 404)
+
+    def test_open_payments_are_capped(self):
+        token = self._link().rsplit('/pay/', 1)[1]
+        api = f'/api/premium/parent-checkout/{token}/'
+        codes = [self.client.post(api, {'screenshot': self._png()}).status_code for _ in range(4)]
+        self.assertEqual(codes, [200, 200, 200, 429])
+
+
+class BackfillTests(TestCase):
+    def test_backfill_rebuilds_history_from_attempts(self):
+        from django.core.management import call_command
+        from tests.factories import make_attempt, make_question, make_test_set
+
+        _, profile = make_user('bf_student')
+        q = make_question()
+        attempt = make_attempt(profile, make_test_set(questions=[q]), [q])
+        old = timezone.now() - timedelta(days=10)
+        type(attempt).objects.filter(pk=attempt.pk).update(started_at=old)
+        DailyActivity.objects.all().delete()
+        call_command('backfill_daily_activity', stdout=io.StringIO())
+        self.assertTrue(DailyActivity.objects.filter(profile=profile, date=timezone.localtime(old).date()).exists())

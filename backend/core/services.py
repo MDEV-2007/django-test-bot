@@ -236,7 +236,14 @@ def send_parent_vip_invoice(student_profile: Profile, plan_id: int = None):
     )
 
     origin = getattr(settings, 'FRONTEND_URL', 'https://ilmildizi.uz')
-    checkout_url = f"{origin}/premium?student_id={student_profile.user_id}"
+    # Ota-ona farzandining akkauntiga kira olmaydi: imzolangan havola uni to'g'ridan-to'g'ri
+    # shu o'quvchi va tarif uchun to'lov sahifasiga olib boradi. Ilgari bu yerda
+    # /premium?student_id=... edi — u sahifa parametrni o'qimas va login talab qilardi.
+    if plan:
+        from premium.services import make_parent_checkout_token
+        checkout_url = f"{origin}/pay/{make_parent_checkout_token(student_profile, plan)}"
+    else:
+        checkout_url = f"{origin}/premium"
 
     keyboard = {
         'inline_keyboard': [

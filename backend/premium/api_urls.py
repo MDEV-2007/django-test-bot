@@ -9,6 +9,8 @@ urlpatterns = [
     path('public-plans/', api.public_plans_api, name='public_plans'),
     path('plans/', api.plans_api, name='plans'),
     path('checkout/<int:plan_id>/', api.CheckoutAPI.as_view(), name='checkout'),
+    # Ota-ona: akkauntsiz, imzolangan havola orqali to'lov.
+    path('parent-checkout/<str:token>/', api.ParentCheckoutAPI.as_view(), name='parent_checkout'),
     path('payments/<int:payment_id>/', api.payment_status_api, name='payment_status'),
     path('payments/<int:payment_id>/screenshot/', api.PaymentScreenshotAPI.as_view(), name='payment_screenshot'),
     path('my-payments/', api.my_payments_api, name='my_payments'),

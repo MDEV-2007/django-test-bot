@@ -13,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         '/dashboard', '/tests', '/learning', '/mentor', '/battles', '/games',
         '/leaderboard', '/analytics', '/profile', '/shop', '/premium',
-        '/onboarding', '/teacher', '/panel', '/design-system',
+        '/onboarding', '/teacher', '/panel', '/design-system', '/pay',
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,

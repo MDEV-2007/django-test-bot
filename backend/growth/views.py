@@ -102,6 +102,10 @@ class EvaluateEssayAPIView(APIView):
         # Kreditni sarflash (faqat haqiqiy baho berilganda)
         if not is_vip and can_use:
             quota.consume_essay_credit()
+        if not unlocked:
+            # Voronka: o'quvchi xatolar tahlili qulflanganini ko'rdi (esse paywall).
+            from analytics.tracking import track_event
+            track_event(profile, 'paywall_view', feature='essay')
 
         # Bazaga saqlash
         q_obj = None

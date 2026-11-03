@@ -74,3 +74,37 @@ def seed_plans_if_needed():
 
 
 
+
+
+# ── Ota-ona to'lov havolasi ────────────────────────────────────────────────
+# Ota-ona farzandining akkauntiga kirmaydi: havolada imzolangan token bor, u qaysi
+# o'quvchi va qaysi tarif uchun to'lov ekanini aytadi. Token soxtalashtirib bo'lmaydi
+# (SECRET_KEY bilan imzolangan) va 14 kundan keyin eskiradi.
+PARENT_CHECKOUT_SALT = 'premium.parent-checkout'
+PARENT_CHECKOUT_MAX_AGE = 14 * 24 * 3600
+
+
+def _parent_signer():
+    from django.core import signing
+    # sep='.': standart ':' URL'da %3A ga kodlanib, Next.js'da ikki marta kodlanardi.
+    return signing.TimestampSigner(salt=PARENT_CHECKOUT_SALT, sep='.')
+
+
+def make_parent_checkout_token(profile, plan):
+    return _parent_signer().sign_object({'s': profile.id, 'p': plan.id}, compress=True)
+
+
+def read_parent_checkout_token(token):
+    """(profile, plan) yoki None — token buzilgan, eskirgan yoki tarif o'chirilgan bo'lsa."""
+    from django.core import signing
+    from accounts.models import Profile
+    from .models import SubscriptionPlan
+    try:
+        data = _parent_signer().unsign_object(token, max_age=PARENT_CHECKOUT_MAX_AGE)
+    except signing.BadSignature:
+        return None
+    profile = Profile.objects.select_related('user').filter(id=data.get('s')).first()
+    plan = SubscriptionPlan.objects.filter(id=data.get('p'), is_active=True).first()
+    if not profile or not plan:
+        return None
+    return profile, plan

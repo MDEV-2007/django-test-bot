@@ -119,6 +119,66 @@ class CheckoutAPI(APIView):
         })
 
 
+class ParentCheckoutAPI(APIView):
+    """Ota-ona uchun to'lov sahifasi: akkauntga kirmasdan, imzolangan havola orqali.
+
+    GET  — kim uchun, qaysi tarif, qancha va qaysi kartaga to'lash.
+    POST — chek skrinshoti; to'lov o'quvchining profiliga `pending` bo'lib tushadi va
+           oddiy to'lovlar kabi admin tasdiqlaydi."""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    parser_classes = [MultiPartParser]
+    MAX_OPEN_PAYMENTS = 3
+
+    @staticmethod
+    def _resolve(token):
+        from .services import read_parent_checkout_token
+        return read_parent_checkout_token(token)
+
+    def get(self, request, token):
+        resolved = self._resolve(token)
+        if not resolved:
+            return Response({'error': "Havola eskirgan yoki noto'g'ri. Farzandingizdan yangi havola so'rang."}, status=404)
+        profile, plan = resolved
+        # Faqat ism va familiyaning bosh harfi — havola begona qo'lga tushsa ham ortiqcha ma'lumot chiqmasin.
+        first = profile.user.first_name or profile.user.username
+        last = (profile.user.last_name or '')[:1]
+        return Response({
+            'student_name': f"{first} {last}." if last else first,
+            'plan': {'name': plan.name, 'price': str(plan.price), 'duration_days': plan.duration_days},
+            'card_number': settings.PREMIUM_CARD_NUMBER,
+            'card_holder': settings.PREMIUM_CARD_HOLDER,
+        })
+
+    def post(self, request, token):
+        resolved = self._resolve(token)
+        if not resolved:
+            return Response({'error': "Havola eskirgan yoki noto'g'ri."}, status=404)
+        profile, plan = resolved
+        # Ochiq endpoint: bir o'quvchiga cheksiz kutilayotgan to'lov yaratib bo'lmasin.
+        if Payment.objects.filter(profile=profile, status='pending').count() >= self.MAX_OPEN_PAYMENTS:
+            return Response({'error': "Bu o'quvchi uchun tekshirilayotgan to'lovlar bor. Tasdiqlanishini kuting."}, status=429)
+
+        screenshot = request.FILES.get('screenshot')
+        if not screenshot:
+            return Response({'error': "Iltimos, to'lov skrinshotini yuklang."}, status=400)
+        error, safe_ext = validate_screenshot(screenshot)
+        if error:
+            return Response({'error': error}, status=400)
+
+        screenshot.name = f"payment_{profile.id}_parent_{int(time.time())}.{safe_ext}"
+        payment = Payment.objects.create(
+            profile=profile, plan=plan, amount=plan.price, status='pending', source='web',
+            screenshot=screenshot, admin_note="Ota-ona to'lovi (havola orqali)",
+        )
+        try:
+            from telegrambot.payment_review import send_payment_review_notification
+            send_payment_review_notification(payment)
+        except Exception as e:
+            logger.exception("send_payment_review_notification xatosi: %s", e)
+        return Response({'ok': True})
+
+
 def _payment_payload(payment):
     return {
         'id': payment.id, 'plan_name': payment.plan.name, 'amount': str(payment.amount),
