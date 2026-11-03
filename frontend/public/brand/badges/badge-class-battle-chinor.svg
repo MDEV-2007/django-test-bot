@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240" height="280">
+<defs>
+<linearGradient id="classbattlechinorf" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#F6DA8E"/><stop offset="1" stop-color="#B8892B"/></linearGradient>
+<radialGradient id="classbattlechinorc" cx="0.5" cy="0.35" r="0.75"><stop offset="0" stop-color="#B8892B"/><stop offset="1" stop-color="#2A1F08"/></radialGradient>
+<linearGradient id="classbattlechinorh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.45"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+</defs>
+<path d="M120 14 C162 14 206 22 214 40 L214 150 C214 204 172 242 120 268 C68 242 26 204 26 150 L26 40 C34 22 78 14 120 14 Z" fill="#000" opacity="0.18" transform="translate(0 6)"/>
+<path d="M120 14 C162 14 206 22 214 40 L214 150 C214 204 172 242 120 268 C68 242 26 204 26 150 L26 40 C34 22 78 14 120 14 Z" fill="url(#classbattlechinorf)"/>
+<path d="M120 14 C162 14 206 22 214 40 L214 150 C214 204 172 242 120 268 C68 242 26 204 26 150 L26 40 C34 22 78 14 120 14 Z" fill="url(#classbattlechinorc)" transform="translate(120 141) scale(0.84) translate(-120 -141)"/>
+<path d="M120 14 C162 14 206 22 214 40 L214 150 C214 204 172 242 120 268 C68 242 26 204 26 150 L26 40 C34 22 78 14 120 14 Z" fill="none" stroke="#FFF4D2" stroke-opacity="0.55" stroke-width="2" transform="translate(120 141) scale(0.84) translate(-120 -141)"/>
+<path d="M40 44 C70 26 170 26 200 44 L200 92 C160 74 80 74 40 92 Z" fill="url(#classbattlechinorh)"/>
+<path d="M120 2 C132 10 136 22 120 34 C104 22 108 10 120 2 Z" fill="#F6DA8E" stroke="#B8892B" stroke-width="2"/>
+<path d="M120 8 L120 30" stroke="#B8892B" stroke-width="1.5" opacity="0.6"/>
+<g transform="translate(72 96) scale(4)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" fill="none" stroke="#FFF4D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" fill="none" stroke="#FFF4D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 21v-2a4 4 0 0 0-3-3.87" fill="none" stroke="#FFF4D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" fill="none" stroke="#FFF4D2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>
