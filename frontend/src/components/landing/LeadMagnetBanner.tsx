@@ -7,7 +7,7 @@ const BOT_PDF_URL = 'https://t.me/ilmildiziuz_bot?start=pdf_gift';
 export default function LeadMagnetBanner() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="relative overflow-hidden rounded-[32px] border border-black/[0.07] bg-white p-6 sm:p-10 shadow-[0_6px_30px_-4px_rgba(0,0,0,0.05)]">
+      <div className="relative overflow-hidden rounded-3xl border border-black/[0.07] bg-white p-6 sm:p-10 shadow-[0_6px_30px_-4px_rgba(0,0,0,0.05)]">
         {/* Soft iOS Mesh Glow */}
         <div className="absolute right-0 top-0 -mr-16 -mt-16 size-72 rounded-full bg-[#007AFF]/10 blur-3xl pointer-events-none" />
         <div className="absolute left-0 bottom-0 -ml-16 -mb-16 size-72 rounded-full bg-[#34C759]/10 blur-3xl pointer-events-none" />

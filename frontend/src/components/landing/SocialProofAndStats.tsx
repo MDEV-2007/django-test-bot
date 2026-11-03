@@ -43,7 +43,7 @@ export default function SocialProofAndStats() {
   return (
     <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       {/* 1. Apple Numbers Style Metrics Bar */}
-      <div className="rounded-[30px] border border-black/[0.07] bg-white p-6 sm:p-8 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
+      <div className="rounded-3xl border border-black/[0.07] bg-white p-6 sm:p-8 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-0 md:divide-x md:divide-black/[0.06]">
           {STATS.map((stat, idx) => (
             <div
@@ -88,7 +88,7 @@ export default function SocialProofAndStats() {
           {TESTIMONIALS.map((item) => (
             <div
               key={item.name}
-              className="group relative flex flex-col justify-between rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_14px_34px_-6px_rgba(0,0,0,0.08)]"
+              className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_14px_34px_-6px_rgba(0,0,0,0.08)]"
             >
               <div>
                 <div className="flex items-center justify-between">

@@ -123,7 +123,7 @@ export default function LeaderboardPage() {
           </div>
 
           {/* 2. iOS 18 Hero Summary Card */}
-          <div className="ios-card relative overflow-hidden rounded-[28px] p-5 sm:p-6">
+          <div className="ios-card relative overflow-hidden rounded-2xl p-5 sm:p-6">
             <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-[#FF9500]/12 blur-3xl" />
             <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3.5">
@@ -142,7 +142,7 @@ export default function LeaderboardPage() {
               </div>
 
               {data && data.my_rank > 0 && (
-                <div className="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-0.5 rounded-[20px] border border-border bg-muted/40 px-4 py-3 shrink-0">
+                <div className="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-0.5 rounded-xl border border-border bg-muted/40 px-4 py-3 shrink-0">
                   <span className="font-mono text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                     Sizning o&apos;rningiz
                   </span>
@@ -188,11 +188,11 @@ export default function LeaderboardPage() {
           {!data && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <Skeleton className="h-44 rounded-[26px]" />
-                <Skeleton className="h-48 rounded-[26px]" />
-                <Skeleton className="h-44 rounded-[26px]" />
+                <Skeleton className="h-44 rounded-2xl" />
+                <Skeleton className="h-48 rounded-2xl" />
+                <Skeleton className="h-44 rounded-2xl" />
               </div>
-              <Skeleton className="h-64 w-full rounded-[26px]" />
+              <Skeleton className="h-64 w-full rounded-2xl" />
             </div>
           )}
 
@@ -206,7 +206,7 @@ export default function LeaderboardPage() {
                   <div
                     key={slot.badge}
                     className={cn(
-                      'relative rounded-[26px] p-4 sm:p-5 transition-all',
+                      'relative rounded-2xl p-4 sm:p-5 transition-all',
                       slot.order,
                       slot.cardClass
                     )}
@@ -278,7 +278,7 @@ export default function LeaderboardPage() {
 
           {/* 5. Sizning guruhingiz (Nearby Competitors) */}
           {data && data.my_group.length > 1 && (
-            <div className="ios-card rounded-[28px] p-5 sm:p-6 space-y-4">
+            <div className="ios-card rounded-2xl p-5 sm:p-6 space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                   <PremiumIcon icon={Users} tone="sky" size="sm" solid />
@@ -293,7 +293,7 @@ export default function LeaderboardPage() {
                 </div>
               </div>
 
-              <div className="divide-y divide-border rounded-[22px] border border-border bg-muted/25 overflow-hidden">
+              <div className="divide-y divide-border rounded-xl border border-border bg-muted/25 overflow-hidden">
                 {data.my_group.map((r, i) => (
                   <Reveal key={r.profile_id} index={i} y={4}>
                     <div
@@ -305,7 +305,7 @@ export default function LeaderboardPage() {
                       <div className="flex min-w-0 items-center gap-3">
                         <span
                           className={cn(
-                            'flex size-7 shrink-0 items-center justify-center rounded-[9px] font-mono text-xs font-bold',
+                            'flex size-7 shrink-0 items-center justify-center rounded-sm font-mono text-xs font-bold',
                             r.is_me
                               ? 'bg-primary text-white'
                               : 'bg-card border border-border text-muted-foreground'
@@ -353,7 +353,7 @@ export default function LeaderboardPage() {
 
           {/* 6. Reyting yetakchilari (#4 va undan past) */}
           {data && (
-            <div className="ios-card rounded-[28px] p-5 sm:p-6 space-y-4">
+            <div className="ios-card rounded-2xl p-5 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm sm:text-base font-bold text-foreground">
                   Top Ishtirokchilar Ro&apos;yxati
@@ -364,14 +364,14 @@ export default function LeaderboardPage() {
               </div>
 
               {data.rankings.length === 0 ? (
-                <div className="py-10 text-center rounded-[22px] border border-dashed border-border bg-muted/20">
+                <div className="py-10 text-center rounded-xl border border-dashed border-border bg-muted/20">
                   <PremiumIcon icon={Users} tone="zinc" size="lg" className="mx-auto mb-2.5" />
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Bu bo&apos;limda qo&apos;shimcha ishtirokchilar hali yo&apos;q.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border rounded-[22px] border border-border bg-muted/25 overflow-hidden">
+                <div className="divide-y divide-border rounded-xl border border-border bg-muted/25 overflow-hidden">
                   {data.rankings.map((r, i) => {
                     const isMe = user?.id === r.profile_id;
                     return (
@@ -385,7 +385,7 @@ export default function LeaderboardPage() {
                         <div className="flex min-w-0 items-center gap-3">
                           <span
                             className={cn(
-                              'flex size-7 shrink-0 items-center justify-center rounded-[9px] font-mono text-xs font-bold',
+                              'flex size-7 shrink-0 items-center justify-center rounded-sm font-mono text-xs font-bold',
                               isMe
                                 ? 'bg-primary text-white'
                                 : 'bg-card border border-border text-muted-foreground'

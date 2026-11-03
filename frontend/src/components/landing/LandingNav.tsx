@@ -40,8 +40,8 @@ export default function LandingNav() {
       >
         {/* Brand Logo (iOS Squircle) */}
         <Link href={loggedIn ? '/dashboard' : '/'} className="flex items-center gap-2.5 group">
-          <div className="relative flex size-9 shrink-0 items-center justify-center rounded-[11px] overflow-hidden border border-black/[0.08] bg-white shadow-[0_2px_6px_rgba(0,0,0,0.06)] transition-transform duration-200 group-hover:scale-105">
-            <BrandMark size={34} rounded="rounded-[10px]" />
+          <div className="relative flex size-9 shrink-0 items-center justify-center rounded-md overflow-hidden border border-black/[0.08] bg-white shadow-[0_2px_6px_rgba(0,0,0,0.06)] transition-transform duration-200 group-hover:scale-105">
+            <BrandMark size={34} rounded="rounded-md" />
           </div>
           <div className="flex flex-col">
             <span className="text-[15px] sm:text-base font-bold tracking-[-0.02em] text-[#1C1C1E] leading-none">
@@ -108,8 +108,8 @@ export default function LandingNav() {
 
       {/* iOS Inset Grouped Sheet Dropdown for Mobile */}
       {open && (
-        <div className="mx-auto mt-2 max-w-7xl rounded-[26px] border border-black/[0.08] bg-white/92 p-3 ios-glass shadow-[0_20px_50px_rgba(0,0,0,0.14)] md:hidden animate-scaleIn">
-          <div className="divide-y divide-black/[0.06] rounded-[18px] bg-[#F2F2F7]/80 px-3">
+        <div className="mx-auto mt-2 max-w-7xl rounded-2xl border border-black/[0.08] bg-white/92 p-3 ios-glass shadow-[0_20px_50px_rgba(0,0,0,0.14)] md:hidden animate-scaleIn">
+          <div className="divide-y divide-black/[0.06] rounded-xl bg-[#F2F2F7]/80 px-3">
             {LINKS.map((l) => (
               <a
                 key={l.href}

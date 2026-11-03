@@ -19,7 +19,7 @@ export default function DesignSystemPage() {
       </header>
 
       <section className="grid gap-8 lg:grid-cols-2">
-        <div className="rounded-[28px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
+        <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
           <h2 className="text-xl font-bold text-[var(--text-primary)]">Colors</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <div className="space-y-2">
@@ -41,7 +41,7 @@ export default function DesignSystemPage() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
+        <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
           <h2 className="text-xl font-bold text-[var(--text-primary)]">Typography</h2>
           <div className="space-y-4">
             <div>
@@ -63,7 +63,7 @@ export default function DesignSystemPage() {
       </section>
 
       <section className="grid gap-8 lg:grid-cols-3">
-        <div className="rounded-[28px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
+        <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
           <h3 className="text-lg font-bold text-[var(--text-primary)]">Tugmalar (Buttons)</h3>
           <div className="flex flex-col gap-3">
             <button className="w-full rounded-2xl bg-[var(--accent)] px-6 py-3 font-semibold text-[var(--on-accent)] transition">
@@ -81,7 +81,7 @@ export default function DesignSystemPage() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
+        <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
           <h3 className="text-lg font-bold text-[var(--text-primary)]">Nishonlar va Progress (Badges)</h3>
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2">
@@ -111,7 +111,7 @@ export default function DesignSystemPage() {
           </div>
         </div>
 
-        <div className="relative rounded-[28px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
+        <div className="relative rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
           <h3 className="text-lg font-bold text-[var(--text-primary)]">Kiritish maydonlari (Inputs)</h3>
           <div className="space-y-4">
             <div className="space-y-1.5">
@@ -144,7 +144,7 @@ export default function DesignSystemPage() {
       </section>
 
       <section className="grid gap-8 lg:grid-cols-2">
-        <div className="rounded-[28px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
+        <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
           <h3 className="text-lg font-bold text-[var(--text-primary)]">Muloqot oynalari (Dialogs)</h3>
           <p className="text-sm text-[var(--text-muted)]">Yutuqlar yoki tushuntirishlarni ko&apos;rsatish uchun modal.</p>
           <button
@@ -158,7 +158,7 @@ export default function DesignSystemPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-card-strong)] p-4 backdrop-blur-sm">
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="relative w-full max-w-sm rounded-[32px] border border-[var(--accent-border)] bg-[var(--surface-card-soft)] p-6 text-center"
+                className="relative w-full max-w-sm rounded-3xl border border-[var(--accent-border)] bg-[var(--surface-card-soft)] p-6 text-center"
               >
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-500">
                   🏆
@@ -181,7 +181,7 @@ export default function DesignSystemPage() {
           )}
         </div>
 
-        <div className="rounded-[28px] border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
+        <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-soft)] p-6 space-y-6">
           <h3 className="text-lg font-bold text-[var(--text-primary)]">Kutish animatsiyalari (Skeleton Loading)</h3>
           <div className="animate-pulse space-y-4">
             <div className="flex items-center gap-3">

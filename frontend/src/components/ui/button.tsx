@@ -5,7 +5,7 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-[14px] border border-transparent bg-clip-padding text-[14px] font-semibold tracking-tight whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-[#007AFF]/35 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-[14px] font-semibold tracking-tight whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-[#007AFF]/35 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
   {
     variants: {
       variant: {
@@ -24,13 +24,13 @@ const buttonVariants = cva(
       size: {
         default:
           "h-10 gap-2 px-4 has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5",
-        xs: "h-7 gap-1 rounded-[10px] px-2.5 text-xs [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-9 gap-1.5 rounded-[12px] px-3.5 text-[13px] [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-12 gap-2 rounded-[16px] px-6 text-[15px]",
-        icon: "size-10 rounded-[13px]",
-        "icon-xs": "size-7 rounded-[9px] [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8 rounded-[11px]",
-        "icon-lg": "size-12 rounded-[16px]",
+        xs: "h-7 gap-1 rounded-md px-2.5 text-xs [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-9 gap-1.5 rounded-md px-3.5 text-[13px] [&_svg:not([class*='size-'])]:size-3.5",
+        lg: "h-12 gap-2 rounded-lg px-6 text-[15px]",
+        icon: "size-10 rounded-lg",
+        "icon-xs": "size-7 rounded-sm [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 rounded-md",
+        "icon-lg": "size-12 rounded-lg",
       },
     },
     defaultVariants: {

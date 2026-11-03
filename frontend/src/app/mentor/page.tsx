@@ -152,9 +152,9 @@ export default function MentorPage() {
       {/* iOS 18 iMessage / Apple Intelligence Chat Container fitted above MobileTabBar */}
       <div className="flex flex-col h-[calc(var(--tg-viewport,100dvh)-9.75rem)] md:h-[calc(100dvh-6.5rem)] max-w-4xl mx-auto gap-3">
         {/* Top Header Card (iOS 18 Apple Intelligence Pill Header) */}
-        <div className="ios-card shrink-0 rounded-[24px] px-4 py-3 flex items-center justify-between gap-3">
+        <div className="ios-card shrink-0 rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#007AFF] to-[#5856D6] text-white font-bold shadow-[0_6px_16px_rgba(0,122,255,0.28)]">
+            <div className="relative flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-[#007AFF] to-[#5856D6] text-white font-bold shadow-[0_6px_16px_rgba(0,122,255,0.28)]">
               <Bot className="size-5" />
               <span className="absolute -top-0.5 -right-0.5 flex size-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-75" />
@@ -209,13 +209,13 @@ export default function MentorPage() {
         )}
 
         {error && (
-          <div className="shrink-0 rounded-[20px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3 text-xs font-semibold text-[#FF3B30]">
+          <div className="shrink-0 rounded-xl border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3 text-xs font-semibold text-[#FF3B30]">
             {error}
           </div>
         )}
 
         {/* Unified iOS 18 iMessage Card */}
-        <div className="ios-card flex-1 min-h-0 flex flex-col rounded-[28px] overflow-hidden">
+        <div className="ios-card flex-1 min-h-0 flex flex-col rounded-2xl overflow-hidden">
           <div className="flex-1 min-h-0 overflow-y-auto p-3.5 sm:p-5 space-y-4">
             {messages.length <= 1 && (
               <div className="space-y-2 pb-2">
@@ -229,7 +229,7 @@ export default function MentorPage() {
                       type="button"
                       disabled={sending}
                       onClick={() => send(p)}
-                      className="ios-spring inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[18px] border border-[#007AFF]/20 bg-[#007AFF]/[0.07] hover:bg-[#007AFF]/[0.12] text-xs text-foreground font-medium transition cursor-pointer text-left"
+                      className="ios-spring inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#007AFF]/20 bg-[#007AFF]/[0.07] hover:bg-[#007AFF]/[0.12] text-xs text-foreground font-medium transition cursor-pointer text-left"
                     >
                       <Sparkles className="size-3.5 text-[#007AFF] shrink-0" />
                       <span>{p}</span>
@@ -264,10 +264,10 @@ export default function MentorPage() {
 
                 <div
                   className={cn(
-                    'max-w-[85%] sm:max-w-[75%] rounded-[22px] px-4 py-3 text-xs sm:text-sm leading-relaxed',
+                    'max-w-[85%] sm:max-w-[75%] rounded-xl px-4 py-3 text-xs sm:text-sm leading-relaxed',
                     m.sender === 'user'
-                      ? 'rounded-br-[6px] bg-[#007AFF] text-white font-medium shadow-[0_4px_14px_rgba(0,122,255,0.22)]'
-                      : 'rounded-bl-[6px] border border-border bg-muted/55 text-foreground'
+                      ? 'rounded-br-sm bg-[#007AFF] text-white font-medium shadow-[0_4px_14px_rgba(0,122,255,0.22)]'
+                      : 'rounded-bl-sm border border-border bg-muted/55 text-foreground'
                   )}
                 >
                   {m.sender === 'user' ? (

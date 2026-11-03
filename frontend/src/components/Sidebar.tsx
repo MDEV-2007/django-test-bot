@@ -129,8 +129,8 @@ export default function Sidebar({
       <div className="space-y-5">
         <div className="flex items-center justify-between px-2">
           <Link href="/dashboard" onClick={onMobileClose} className="group flex items-center gap-2.5">
-            <div className="relative flex size-9.5 shrink-0 items-center justify-center rounded-[12px] overflow-hidden border border-border bg-background shadow-2xs transition-transform group-hover:scale-105">
-              <BrandMark size={36} rounded="rounded-[11px]" />
+            <div className="relative flex size-9.5 shrink-0 items-center justify-center rounded-md overflow-hidden border border-border bg-background shadow-2xs transition-transform group-hover:scale-105">
+              <BrandMark size={36} rounded="rounded-md" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
@@ -169,7 +169,7 @@ export default function Sidebar({
               <Link
                 href="/teacher"
                 onClick={onMobileClose}
-                className="ios-spring flex items-center justify-between rounded-[14px] border border-primary/20 bg-primary/8 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/14"
+                className="ios-spring flex items-center justify-between rounded-lg border border-primary/20 bg-primary/8 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/14"
               >
                 <span className="flex items-center gap-2 truncate">
                   <PremiumIcon icon={GraduationCap} tone="sky" size="2xs" solid />
@@ -182,7 +182,7 @@ export default function Sidebar({
               <Link
                 href="/panel"
                 onClick={onMobileClose}
-                className="ios-spring flex items-center justify-between rounded-[14px] border border-destructive/20 bg-destructive/8 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/14"
+                className="ios-spring flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/8 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/14"
               >
                 <span className="flex items-center gap-2 truncate">
                   <PremiumIcon icon={ShieldCheck} tone="rose" size="2xs" solid />
@@ -227,7 +227,7 @@ export default function Sidebar({
                         onMouseEnter={() => item.api && prefetchApi(item.api)}
                         onTouchStart={() => item.api && prefetchApi(item.api)}
                         className={cn(
-                          'ios-spring group relative flex min-h-[42px] items-center justify-between rounded-[14px] px-2.5 py-1.5 text-[13px] transition-all',
+                          'ios-spring group relative flex min-h-[42px] items-center justify-between rounded-lg px-2.5 py-1.5 text-[13px] transition-all',
                           active
                             ? 'bg-primary text-white font-semibold shadow-[0_4px_14px_rgba(45,106,79,0.30)]'
                             : 'text-foreground/85 hover:bg-muted/70 hover:text-foreground font-medium'
@@ -275,7 +275,7 @@ export default function Sidebar({
       <div className="pt-3 border-t border-border mt-4 space-y-2.5">
       {user && (
         <div>
-          <div className="rounded-[20px] border border-border bg-background/60 p-3 space-y-2.5 shadow-2xs">
+          <div className="rounded-xl border border-border bg-background/60 p-3 space-y-2.5 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <div
                 onClick={() => {

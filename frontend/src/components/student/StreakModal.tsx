@@ -41,7 +41,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-1.5rem)] max-w-[400px] overflow-hidden rounded-[32px] border border-border bg-card p-6 text-card-foreground shadow-[0_24px_64px_rgba(0,0,0,0.28)]">
+      <DialogContent className="w-[calc(100%-1.5rem)] max-w-[400px] overflow-hidden rounded-3xl border border-border bg-card p-6 text-card-foreground shadow-[0_24px_64px_rgba(0,0,0,0.28)]">
         <DialogHeader className="flex flex-col items-center text-center space-y-2">
           <div className="mb-1">
             <PremiumIcon icon={Flame} tone="amber" size="xl" solid />
@@ -67,7 +67,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
             </span>
           </div>
 
-          <div className="grid grid-cols-7 gap-1.5 rounded-[22px] border border-border bg-muted/45 p-2.5 text-center">
+          <div className="grid grid-cols-7 gap-1.5 rounded-xl border border-border bg-muted/45 p-2.5 text-center">
             {WEEKDAYS.map((day, idx) => {
               const isPast = idx < dayOfWeek;
               const isToday = idx === dayOfWeek;
@@ -78,7 +78,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
                   <span className="text-[12px] font-bold text-muted-foreground">{day.label}</span>
                   <div
                     className={cn(
-                      'flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all',
+                      'flex size-9 items-center justify-center rounded-md text-xs font-bold transition-all',
                       active
                         ? 'bg-gradient-to-b from-[#FF9F0A] to-[#FF9500] text-white shadow-[0_4px_10px_rgba(255,149,0,0.3)]'
                         : isToday
@@ -101,7 +101,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
         </div>
 
         {/* Streak Muzlatish (Freeze) Bloki */}
-        <div className="flex items-center justify-between gap-3 rounded-[22px] border border-primary/20 bg-primary/8 p-3.5">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/8 p-3.5">
           <div className="flex items-center gap-3 min-w-0">
             <PremiumIcon icon={Snowflake} tone="sky" size="sm" solid />
             <div className="min-w-0">

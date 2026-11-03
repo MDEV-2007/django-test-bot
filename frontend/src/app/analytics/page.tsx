@@ -100,7 +100,7 @@ export default function AnalyticsPage() {
           description="Mavzular bo'yicha o'zlashtirish ko'rsatkichlari, kunlik faollik va OTM qabul bashorati."
           actions={data && (
             <div className="flex flex-wrap gap-2.5">
-              <div className="rounded-[18px] bg-[#007AFF]/10 border border-[#007AFF]/20 px-4 py-2.5 text-center">
+              <div className="rounded-xl bg-[#007AFF]/10 border border-[#007AFF]/20 px-4 py-2.5 text-center">
                 <p className="text-[12px] font-bold uppercase tracking-wider text-[#007AFF]">Daraja va XP</p>
                 <p className="mt-0.5 font-mono text-[18px] font-bold text-foreground">
                   Lvl {data.level}{' '}
@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
               {data.total_tests > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="rounded-[18px] bg-[#FF9500]/10 border border-[#FF9500]/25 px-4 py-2.5 text-center cursor-help">
+                    <div className="rounded-xl bg-[#FF9500]/10 border border-[#FF9500]/25 px-4 py-2.5 text-center cursor-help">
                       <p className="text-[12px] font-bold uppercase tracking-wider text-[#FF9500]">Tayyorgarlik</p>
                       <p className="mt-0.5 font-mono text-[18px] font-bold text-foreground">{data.readiness_estimate}%</p>
                     </div>
@@ -126,19 +126,19 @@ export default function AnalyticsPage() {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="w-full overflow-x-auto no-scrollbar">
-            <TabsList className="h-11 p-1 rounded-[14px]">
-              <TabsTrigger value="overview" className="px-4 py-1.5 rounded-[10px] gap-2">
+            <TabsList className="h-11 p-1 rounded-lg">
+              <TabsTrigger value="overview" className="px-4 py-1.5 rounded-md gap-2">
                 <PremiumIcon icon={TrendingUp} tone="sky" size="2xs" />
                 <span>Umumiy Tahlil</span>
               </TabsTrigger>
-              <TabsTrigger value="admission" className="px-4 py-1.5 rounded-[10px] gap-2">
+              <TabsTrigger value="admission" className="px-4 py-1.5 rounded-md gap-2">
                 <PremiumIcon icon={GraduationCap} tone="emerald" size="2xs" />
                 <span>OTM Bashorati</span>
                 <span className="rounded-full bg-[#34C759]/15 px-2 py-0.5 text-[12px] font-bold text-[#34C759]">
                   2026
                 </span>
               </TabsTrigger>
-              <TabsTrigger value="topics" className="px-4 py-1.5 rounded-[10px] gap-2">
+              <TabsTrigger value="topics" className="px-4 py-1.5 rounded-md gap-2">
                 <PremiumIcon icon={BarChart2} tone="amber" size="2xs" />
                 <span>Fanlar va Mavzular</span>
               </TabsTrigger>
@@ -152,9 +152,9 @@ export default function AnalyticsPage() {
             {!data && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-[22px]" />)}
+                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
                 </div>
-                <Skeleton className="h-72 w-full rounded-[24px]" />
+                <Skeleton className="h-72 w-full rounded-2xl" />
               </div>
             )}
 
@@ -181,7 +181,7 @@ export default function AnalyticsPage() {
                 {/* 4 Apple Health Summary Widgets */}
                 <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
                   {stats.map((s) => (
-                    <div key={s.label} className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3">
+                    <div key={s.label} className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3">
                       <div className="flex items-center justify-between">
                         <PremiumIcon icon={s.icon} tone={s.iconTone} size="xs" />
                         <span className="text-[12px] font-semibold text-[#8E8E93]">{s.label}</span>

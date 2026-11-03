@@ -68,7 +68,7 @@ export default function PageHero({
   return (
     <div
       className={cn(
-        'ios-card relative overflow-hidden rounded-[28px] p-6 sm:p-7',
+        'ios-card relative overflow-hidden rounded-2xl p-6 sm:p-7',
         className
       )}
     >

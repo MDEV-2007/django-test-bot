@@ -51,7 +51,7 @@ export default function ModernTopbar({
         </button>
 
         <Link href="/dashboard" className="lg:hidden flex items-center gap-2 min-w-0">
-          <BrandMark size={28} rounded="rounded-[8px]" />
+          <BrandMark size={28} rounded="rounded-sm" />
           <span className="font-bold text-sm tracking-tight text-foreground truncate">
             {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
           </span>
@@ -61,7 +61,7 @@ export default function ModernTopbar({
         <button
           type="button"
           onClick={onSearchClick}
-          className="md:hidden tg-hidden ios-spring flex size-8.5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
+          className="md:hidden tg-hidden ios-spring tap-44 flex size-8.5 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
           aria-label="Qidirish"
         >
           <Search className="size-3.5" />
@@ -92,7 +92,7 @@ export default function ModernTopbar({
                   <button
                     type="button"
                     onClick={onStreakClick}
-                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
+                    className="ios-spring tap-44 flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
                   >
                     <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
                     <span className="font-mono text-[12px] sm:text-xs">{user.streak || 0}</span>
@@ -111,7 +111,7 @@ export default function ModernTopbar({
                 <TooltipTrigger asChild>
                   <Link
                     href="/shop"
-                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
+                    className="ios-spring tap-44 flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                   >
                     <PremiumIcon icon={Coins} tone="gold" size="2xs" solid />
                     <span className="font-mono text-[12px] sm:text-xs">{(user.coins || 0).toLocaleString()}</span>
@@ -129,7 +129,7 @@ export default function ModernTopbar({
                 <TooltipTrigger asChild>
                   <Link
                     href="/battles"
-                    className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
+                    className="ios-spring tap-44 flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                   >
                     <PremiumIcon icon={Swords} tone="sky" size="2xs" solid />
                     <span className="font-mono">{user.elo_rating || 1200}</span>
@@ -148,7 +148,7 @@ export default function ModernTopbar({
                 <button
                   type="button"
                   onClick={onNotificationsClick}
-                  className="ios-spring relative flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
+                  className="ios-spring tap-44 relative flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
                   aria-label="Bildirishnomalar"
                 >
                   <Bell className="size-4" />
@@ -175,7 +175,7 @@ export default function ModernTopbar({
             <button
               type="button"
               onClick={toggleTheme}
-              className="ios-spring flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
+              className="ios-spring tap-44 flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
               aria-label={isDark ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish"}
             >
               {isDark ? (

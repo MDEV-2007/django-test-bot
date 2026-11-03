@@ -205,7 +205,7 @@ export default function ProductWorkflow() {
       </div>
 
       {/* Main iPadOS Stage Window */}
-      <div className="mt-5 rounded-[34px] border border-black/[0.07] bg-white p-6 sm:p-10 shadow-[0_8px_36px_-6px_rgba(0,0,0,0.06)]">
+      <div className="mt-5 rounded-3xl border border-black/[0.07] bg-white p-6 sm:p-10 shadow-[0_8px_36px_-6px_rgba(0,0,0,0.06)]">
         <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-12">
           
           {/* Left: Explanation */}
@@ -251,7 +251,7 @@ export default function ProductWorkflow() {
 
           {/* Right: macOS / iPadOS Window Preview */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-[26px] border border-black/[0.08] bg-[#F2F2F7] p-5 sm:p-6 shadow-inner space-y-4">
+            <div className="relative rounded-2xl border border-black/[0.08] bg-[#F2F2F7] p-5 sm:p-6 shadow-inner space-y-4">
               {/* macOS Window Traffic Lights */}
               <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
                 <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function ProductWorkflow() {
               </div>
 
               {/* Inner White iOS Card */}
-              <div className="rounded-[20px] bg-white p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] space-y-3">
+              <div className="rounded-xl bg-white p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-bold text-[#1C1C1E]">{activeStep.preview.header}</p>
                   <span className="text-[12px] font-mono font-bold text-[#248A3D] bg-[#34C759]/12 px-2.5 py-0.5 rounded-full">
@@ -278,7 +278,7 @@ export default function ProductWorkflow() {
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-[16px] bg-[#F2F2F7] space-y-1.5">
+                <div className="p-3.5 rounded-lg bg-[#F2F2F7] space-y-1.5">
                   <p className="text-xs font-bold text-[#1C1C1E] flex items-center gap-1.5">
                     <Sparkles className="size-3.5 text-[#FF9500]" />
                     {activeStep.preview.detailTitle}

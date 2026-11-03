@@ -165,7 +165,7 @@ export function HeroFocusBanner({
   const progressPercent = Math.round((completedSteps / 3) * 100);
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-border bg-card p-5 sm:p-7 shadow-card space-y-5">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-7 shadow-card space-y-5">
       {/* Dynamic Ambient Background Meshes */}
       <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -left-20 -bottom-20 size-72 rounded-full bg-[#34C759]/10 blur-3xl" />
@@ -463,7 +463,7 @@ export function DailyGoalCard({
   const dayLabels = ['D', 'S', 'CH', 'P', 'J', 'SH', 'Y'];
 
   return (
-    <Card className="rounded-[26px] border border-border bg-card p-5 space-y-4 shadow-card">
+    <Card className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-card">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <PremiumIcon icon={Flame} tone="amber" size="sm" solid />
@@ -568,7 +568,7 @@ export function BattleArenaCard({
   theme?: string;
 }) {
   return (
-    <Card className="rounded-[26px] border border-border bg-card p-5 space-y-4 shadow-card">
+    <Card className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-card">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <PremiumIcon icon={Swords} tone="rose" size="sm" solid />
@@ -589,7 +589,7 @@ export function BattleArenaCard({
       </div>
 
       <div className="grid grid-cols-2 gap-2.5">
-        <div className="rounded-[18px] bg-muted/50 p-3.5">
+        <div className="rounded-xl bg-muted/50 p-3.5">
           <span className="text-[12px] uppercase font-bold text-muted-foreground block">
             Unvon
           </span>
@@ -597,7 +597,7 @@ export function BattleArenaCard({
             {battleArena.currentRank}
           </p>
         </div>
-        <div className="rounded-[18px] bg-muted/50 p-3.5">
+        <div className="rounded-xl bg-muted/50 p-3.5">
           <span className="text-[12px] uppercase font-bold text-muted-foreground block">
             Joriy ELO
           </span>

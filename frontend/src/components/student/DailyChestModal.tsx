@@ -186,7 +186,7 @@ export default function DailyChestModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-        className="relative w-full max-w-[400px] overflow-hidden rounded-[32px] border border-border bg-card p-6 sm:p-7 text-center text-card-foreground shadow-[0_24px_64px_rgba(0,0,0,0.28)]"
+        className="relative w-full max-w-[400px] overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-7 text-center text-card-foreground shadow-[0_24px_64px_rgba(0,0,0,0.28)]"
       >
         {/* Subtle Apple Ambient Aura */}
         <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-64 rounded-full bg-[#FF9500]/15 blur-3xl" />
@@ -241,8 +241,8 @@ export default function DailyChestModal({
               onClick={handleOpenChest}
               className="group relative flex flex-col items-center justify-center cursor-pointer select-none focus:outline-none"
             >
-              <div className="absolute -inset-3 rounded-[36px] bg-gradient-to-tr from-[#FF9500]/30 to-[#FFCC00]/25 blur-xl group-hover:opacity-100 opacity-80 transition-opacity" />
-              <div className="relative flex size-28 sm:size-30 flex-col items-center justify-center gap-2 rounded-[30px] bg-gradient-to-b from-[#FFCC00] via-[#FF9500] to-[#E07A00] text-white shadow-[0_14px_34px_-6px_rgba(255,149,0,0.5),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25 active:scale-95 transition-transform">
+              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-[#FF9500]/30 to-[#FFCC00]/25 blur-xl group-hover:opacity-100 opacity-80 transition-opacity" />
+              <div className="relative flex size-28 sm:size-30 flex-col items-center justify-center gap-2 rounded-3xl bg-gradient-to-b from-[#FFCC00] via-[#FF9500] to-[#E07A00] text-white shadow-[0_14px_34px_-6px_rgba(255,149,0,0.5),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25 active:scale-95 transition-transform">
                 <Gift className="size-12 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] stroke-[2.2]" />
                 <span className="rounded-full bg-black/20 backdrop-blur-xs px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white">
                   {opening ? 'Ochilmoqda...' : 'Bosib oching'}
@@ -255,7 +255,7 @@ export default function DailyChestModal({
               animate={{ scale: 1, opacity: 1 }}
               className="relative flex flex-col items-center justify-center"
             >
-              <div className="relative flex size-26 sm:size-28 flex-col items-center justify-center rounded-[28px] bg-gradient-to-b from-[#34C759] to-[#248A3D] text-white shadow-[0_14px_34px_-6px_rgba(52,199,89,0.45),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25">
+              <div className="relative flex size-26 sm:size-28 flex-col items-center justify-center rounded-2xl bg-gradient-to-b from-[#34C759] to-[#248A3D] text-white shadow-[0_14px_34px_-6px_rgba(52,199,89,0.45),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25">
                 {currentClaim?.reward_type === 'coins' ? (
                   <Coins className="size-12 text-white stroke-[2.2]" />
                 ) : currentClaim?.reward_type === 'streak_freeze' ? (
@@ -286,7 +286,7 @@ export default function DailyChestModal({
               </div>
 
               {currentClaim.extra_note && (
-                <p className="text-xs text-muted-foreground bg-muted/60 p-3 rounded-[16px] border border-border">
+                <p className="text-xs text-muted-foreground bg-muted/60 p-3 rounded-lg border border-border">
                   {currentClaim.extra_note}
                 </p>
               )}
@@ -310,7 +310,7 @@ export default function DailyChestModal({
             <div className="space-y-3">
               {/* Streak Multiplier Row */}
               {status && (
-                <div className="flex items-center justify-between gap-2.5 p-3 rounded-[20px] bg-muted/55 border border-border text-left">
+                <div className="flex items-center justify-between gap-2.5 p-3 rounded-xl bg-muted/55 border border-border text-left">
                   <div className="flex items-center gap-3 min-w-0">
                     <PremiumIcon icon={Flame} tone="amber" size="sm" solid />
                     <div className="min-w-0">
@@ -334,15 +334,15 @@ export default function DailyChestModal({
 
               {/* 3 Compact iOS Reward Tiles */}
               <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
+                <div className="rounded-lg border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
                   <PremiumIcon icon={Zap} tone="emerald" size="2xs" />
                   <span className="text-[12px] font-bold text-foreground leading-tight">500 XP gacha</span>
                 </div>
-                <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
+                <div className="rounded-lg border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
                   <PremiumIcon icon={Coins} tone="amber" size="2xs" />
                   <span className="text-[12px] font-bold text-foreground leading-tight">Oltin tangalar</span>
                 </div>
-                <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
+                <div className="rounded-lg border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
                   <PremiumIcon icon={ShieldCheck} tone="sky" size="2xs" />
                   <span className="text-[12px] font-bold text-foreground leading-tight">Streak Freeze</span>
                 </div>

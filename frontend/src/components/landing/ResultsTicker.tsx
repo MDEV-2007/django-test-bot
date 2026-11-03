@@ -91,10 +91,10 @@ export default function ResultsTicker() {
           <div
             key={`${item.id}-${idx}`}
             aria-hidden={idx >= RESULTS.length ? 'true' : undefined}
-            className="flex items-center gap-3 rounded-[20px] border border-black/[0.07] bg-white/92 px-3.5 py-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] ios-glass transition-all hover:shadow-[0_6px_18px_rgba(0,0,0,0.07)]"
+            className="flex items-center gap-3 rounded-xl border border-black/[0.07] bg-white/92 px-3.5 py-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] ios-glass transition-all hover:shadow-[0_6px_18px_rgba(0,0,0,0.07)]"
           >
             {/* iOS Squircle Badge */}
-            <div className={`flex size-8.5 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-b ${item.color} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]`}>
+            <div className={`flex size-8.5 shrink-0 items-center justify-center rounded-md bg-gradient-to-b ${item.color} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]`}>
               <Award className="size-4" />
             </div>
 

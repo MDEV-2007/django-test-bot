@@ -67,7 +67,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
   return (
     <Card
       className={cn(
-        'rounded-[28px] border border-border bg-card p-5 sm:p-6 shadow-card transition-all duration-300',
+        'rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-card transition-all duration-300',
         className
       )}
     >

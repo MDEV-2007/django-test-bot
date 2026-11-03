@@ -103,7 +103,7 @@ export default function AppShell({
           </button>
 
           <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
-            <BrandMark size={28} rounded="rounded-[9px]" />
+            <BrandMark size={28} rounded="rounded-sm" />
             <span className="font-bold text-sm text-foreground">
               {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
             </span>

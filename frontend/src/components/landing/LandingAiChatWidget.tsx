@@ -151,12 +151,12 @@ export default function LandingAiChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 18, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-20 right-4 sm:right-6 z-50 flex h-[500px] w-[calc(100vw-2rem)] sm:w-[380px] flex-col overflow-hidden rounded-[28px] border border-black/[0.08] bg-white/95 backdrop-blur-2xl shadow-[0_24px_64px_-12px_rgba(0,0,0,0.22)]"
+            className="fixed bottom-20 right-4 sm:right-6 z-50 flex h-[500px] w-[calc(100vw-2rem)] sm:w-[380px] flex-col overflow-hidden rounded-2xl border border-black/[0.08] bg-white/95 backdrop-blur-2xl shadow-[0_24px_64px_-12px_rgba(0,0,0,0.22)]"
           >
             {/* iOS Navigation Bar Header */}
             <div className="flex items-center justify-between border-b border-black/[0.06] bg-[#F2F2F7]/80 px-4 py-3.5 backdrop-blur-xl">
               <div className="flex items-center gap-2.5">
-                <div className="flex size-9 items-center justify-center rounded-[11px] bg-gradient-to-tr from-[#007AFF] via-[#5856D6] to-[#AF52DE] text-white shadow-sm">
+                <div className="flex size-9 items-center justify-center rounded-md bg-gradient-to-tr from-[#007AFF] via-[#5856D6] to-[#AF52DE] text-white shadow-sm">
                   <Sparkles className="size-4" />
                 </div>
                 <div>
@@ -193,10 +193,10 @@ export default function LandingAiChatWidget() {
                   className={`flex gap-2 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[82%] rounded-[20px] px-3.5 py-2.5 leading-relaxed ${
+                    className={`max-w-[82%] rounded-xl px-3.5 py-2.5 leading-relaxed ${
                       m.sender === 'user'
-                        ? 'bg-[#007AFF] text-white rounded-br-[6px] font-medium shadow-xs'
-                        : 'bg-[#F2F2F7] text-[#1C1C1E] rounded-bl-[6px]'
+                        ? 'bg-[#007AFF] text-white rounded-br-sm font-medium shadow-xs'
+                        : 'bg-[#F2F2F7] text-[#1C1C1E] rounded-bl-sm'
                     }`}
                   >
                     <p>{m.text}</p>
@@ -219,7 +219,7 @@ export default function LandingAiChatWidget() {
 
               {isTyping && (
                 <div className="flex items-center gap-2">
-                  <div className="rounded-[20px] rounded-bl-[6px] bg-[#F2F2F7] px-3.5 py-2.5">
+                  <div className="rounded-xl rounded-bl-sm bg-[#F2F2F7] px-3.5 py-2.5">
                     <span className="inline-flex gap-1 items-center">
                       <span className="size-1.5 rounded-full bg-[#8E8E93] animate-bounce" />
                       <span className="size-1.5 rounded-full bg-[#8E8E93] animate-bounce [animation-delay:0.2s]" />

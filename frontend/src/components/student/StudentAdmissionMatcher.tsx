@@ -138,7 +138,7 @@ export default function StudentAdmissionMatcher() {
   });
 
   return (
-    <div className="ios-card relative overflow-hidden rounded-[28px] p-5 sm:p-7 space-y-5 w-full">
+    <div className="ios-card relative overflow-hidden rounded-2xl p-5 sm:p-7 space-y-5 w-full">
       <div className="space-y-1.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-[#34C759]/30 bg-[#34C759]/10 px-2.5 py-1 text-xs font-bold text-[#34C759]">
@@ -195,7 +195,7 @@ export default function StudentAdmissionMatcher() {
           <select
             value={selectedBlock}
             onChange={(e) => handleBlockChange(e.target.value)}
-            className="w-full h-11 rounded-[13px] border border-black/[0.08] dark:border-white/[0.1] bg-[#767680]/[0.08] dark:bg-[#767680]/[0.18] px-3.5 text-[13.5px] font-semibold text-foreground focus:outline-none focus:border-[#007AFF]"
+            className="w-full h-11 rounded-lg border border-black/[0.08] dark:border-white/[0.1] bg-[#767680]/[0.08] dark:bg-[#767680]/[0.18] px-3.5 text-[13.5px] font-semibold text-foreground focus:outline-none focus:border-[#007AFF]"
           >
             <option value="tarix,ona-tili">Tarix + Ona tili (Gumanitar & Yuridik)</option>
             <option value="matematika,fizika">Matematika + Fizika (IT & Muhandislik)</option>
@@ -267,7 +267,7 @@ export default function StudentAdmissionMatcher() {
             return (
               <div
                 key={item.id}
-                className="flex flex-col justify-between rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/65 dark:bg-[#2C2C2E]/60 p-4 transition-all hover:border-[#007AFF]/40"
+                className="flex flex-col justify-between rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/65 dark:bg-[#2C2C2E]/60 p-4 transition-all hover:border-[#007AFF]/40"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">

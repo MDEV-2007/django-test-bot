@@ -391,10 +391,10 @@ export default function ProfilePage() {
       <>
         <AppShell />
         <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-          <Skeleton className="h-44 w-full rounded-[28px]" />
-          <Skeleton className="h-24 w-full rounded-[24px]" />
+          <Skeleton className="h-44 w-full rounded-2xl" />
+          <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-12 w-full rounded-2xl" />
-          <Skeleton className="h-64 w-full rounded-[28px]" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
         </main>
       </>
     );
@@ -432,7 +432,7 @@ export default function ProfilePage() {
         {/* ========================================================================= */}
         {/* 1. ASOSIY PROFILE CARD (Apple ID Style Anchor) */}
         {/* ========================================================================= */}
-        <div className="ios-card relative overflow-hidden rounded-[28px] p-6 sm:p-7 shadow-lg border border-border/80">
+        <div className="ios-card relative overflow-hidden rounded-2xl p-6 sm:p-7 shadow-lg border border-border/80">
           <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/[0.08] blur-[70px]" />
           <div className="relative flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
             <div className="relative shrink-0 group">
@@ -538,7 +538,7 @@ export default function ProfilePage() {
         {/* 2. GLANCEABLE QUICK WIDGETS ROW */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
+          <div className="ios-card rounded-2xl p-4 flex items-center gap-3">
             <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" solid />
             <div className="min-w-0">
               <span className="text-[12px] font-semibold text-muted-foreground block truncate">
@@ -550,7 +550,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
+          <div className="ios-card rounded-2xl p-4 flex items-center gap-3">
             <PremiumIcon icon={Flame} tone="amber" size="md" solid />
             <div className="min-w-0">
               <span className="text-[12px] font-semibold text-muted-foreground block truncate">
@@ -562,7 +562,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <Link href="/shop" className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3">
+          <Link href="/shop" className="ios-card ios-card-interactive rounded-2xl p-4 flex items-center gap-3">
             <PremiumIcon icon={Coins} tone="gold" size="md" solid />
             <div className="min-w-0">
               <span className="text-[12px] font-semibold text-muted-foreground block truncate">
@@ -576,7 +576,7 @@ export default function ProfilePage() {
 
           <Link
             href="/battles"
-            className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3 text-left cursor-pointer"
+            className="ios-card ios-card-interactive rounded-2xl p-4 flex items-center gap-3 text-left cursor-pointer"
           >
             <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
             <div className="min-w-0">
@@ -660,7 +660,7 @@ export default function ProfilePage() {
             >
               {/* 1. AKADEMIK ASOSIY KPI METRIKALARI (4 ta Bento Card) */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
+                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={FileCheck2} tone="sky" size="xs" solid />
                     <span className="text-[12px] font-semibold text-muted-foreground">Jami testlar</span>
@@ -673,7 +673,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
+                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={Target} tone="emerald" size="xs" solid />
                     <span className="text-[12px] font-semibold text-muted-foreground">O&apos;rtacha aniqlik</span>
@@ -686,7 +686,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
+                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={GraduationCap} tone="amber" size="xs" solid />
                     <span className="text-[12px] font-semibold text-muted-foreground">DTM Tayyorgarlik</span>
@@ -699,7 +699,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
+                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={Clock} tone="indigo" size="xs" solid />
                     <span className="text-[12px] font-semibold text-muted-foreground">Faol mashq vaqti</span>
@@ -716,7 +716,7 @@ export default function ProfilePage() {
               {/* 2. KUCHLI VA QIYNOLGAN (ZAIF) MAVZULAR (DIAGNOSTIKA) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* A. Kuchli Mavzular (80%+ Aniqlik) */}
-                <div className="rounded-[24px] border border-emerald-500/30 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.07] p-5 space-y-3.5 shadow-xs">
+                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.07] p-5 space-y-3.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0">
@@ -761,7 +761,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* B. Qiynalgan / Zaif Mavzular (<50% Aniqlik) */}
-                <div className="rounded-[24px] border border-rose-500/30 bg-rose-500/[0.04] dark:bg-rose-500/[0.07] p-5 space-y-3.5 shadow-xs">
+                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/[0.04] dark:bg-rose-500/[0.07] p-5 space-y-3.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
@@ -809,7 +809,7 @@ export default function ProfilePage() {
               </div>
 
               {/* 3. FANLAR BO'YICHA UMUMIY O'SISH (PROGRESS & MASTERY) */}
-              <Card className="rounded-[28px] border-border/80 shadow-md">
+              <Card className="rounded-2xl border-border/80 shadow-md">
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -893,7 +893,7 @@ export default function ProfilePage() {
 
               {/* 4. JAVOBLAR NISBATI (ACCURACY BREAKDOWN) */}
               {analyticsData && analyticsData.total_tests > 0 && (
-                <Card className="rounded-[28px] border-border/80 shadow-md">
+                <Card className="rounded-2xl border-border/80 shadow-md">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                       <PremiumIcon icon={Percent} tone="sky" size="xs" solid />
@@ -952,7 +952,7 @@ export default function ProfilePage() {
               )}
 
               {/* 5. BILIM ILDIZI — Apple Health / Home Ecological Widget */}
-              <div className="ios-card overflow-hidden rounded-[28px] p-6 sm:p-7 space-y-5 border border-border/80">
+              <div className="ios-card overflow-hidden rounded-2xl p-6 sm:p-7 space-y-5 border border-border/80">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <PremiumIcon icon={Sprout} tone="emerald" size="md" solid />
@@ -974,7 +974,7 @@ export default function ProfilePage() {
 
                 <div className="grid gap-6 lg:grid-cols-12 items-center">
                   {/* Organic Tree */}
-                  <div className="lg:col-span-5 flex items-center justify-center rounded-[24px] border border-emerald-500/20 bg-emerald-500/[0.05] p-4">
+                  <div className="lg:col-span-5 flex items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.05] p-4">
                     <KnowledgeTree
                       level={p.level}
                       xpProgress={xpProgress}
@@ -986,7 +986,7 @@ export default function ProfilePage() {
                   {/* 4 Apple Health Sub-cards */}
                   <div className="lg:col-span-7 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      <div className="rounded-[20px] border border-border/60 bg-muted/40 p-4 space-y-1">
+                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="text-[12px] font-semibold text-muted-foreground">Daraxt kuchi</span>
                           <PremiumIcon icon={Sprout} tone="emerald" size="2xs" solid />
@@ -999,7 +999,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
 
-                      <div className="rounded-[20px] border border-border/60 bg-muted/40 p-4 space-y-1">
+                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="text-[12px] font-semibold text-muted-foreground">Barglar zichligi</span>
                           <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
@@ -1012,7 +1012,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
 
-                      <div className="rounded-[20px] border border-border/60 bg-muted/40 p-4 space-y-1">
+                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="text-[12px] font-semibold text-muted-foreground">Tojdagi mevalar</span>
                           <PremiumIcon icon={Award} tone="rose" size="2xs" solid />
@@ -1025,7 +1025,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
 
-                      <div className="rounded-[20px] border border-border/60 bg-muted/40 p-4 space-y-2">
+                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-[12px] font-semibold text-muted-foreground">O&apos;sish sur&apos;ati</span>
                           <span className="font-mono text-[12px] font-bold text-primary">{xpProgress}%</span>
@@ -1042,7 +1042,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="rounded-[18px] bg-emerald-500/[0.08] border border-emerald-500/20 p-3.5 text-[12.5px] text-foreground leading-relaxed flex items-start gap-2.5">
+                    <div className="rounded-xl bg-emerald-500/[0.08] border border-emerald-500/20 p-3.5 text-[12.5px] text-foreground leading-relaxed flex items-start gap-2.5">
                       <PremiumIcon icon={Sprout} tone="emerald" size="2xs" solid className="mt-0.5" />
                       <span>
                         <strong>Har bir yechilgan test</strong>, ko&apos;rilgan dars va tuzatilgan xato bu daraxt ildizini chuqurlashtirib, unga yangi shoxlar qo&apos;shadi.
@@ -1058,7 +1058,7 @@ export default function ProfilePage() {
               </div>
 
               {/* 6. PLATFORMA YUTUQLARI & NISHONLAR */}
-              <Card className="rounded-[28px] border-border/80 shadow-md">
+              <Card className="rounded-2xl border-border/80 shadow-md">
                 <CardHeader>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -1078,7 +1078,7 @@ export default function ProfilePage() {
                       return (
                         <Tooltip key={idx}>
                           <TooltipTrigger asChild>
-                            <div className="rounded-[20px] border border-border/60 bg-muted/40 p-4 text-center space-y-2.5 transition-all hover:scale-[1.02] cursor-pointer">
+                            <div className="rounded-xl border border-border/60 bg-muted/40 p-4 text-center space-y-2.5 transition-all hover:scale-[1.02] cursor-pointer">
                               <PremiumIcon
                                 icon={Icon}
                                 tone={RARITY_TONE_KEY[b.rarity] || 'emerald'}
@@ -1096,7 +1096,7 @@ export default function ProfilePage() {
                     {(data.locked_badges ?? []).map((b) => (
                       <Tooltip key={`locked-${b.name}`}>
                         <TooltipTrigger asChild>
-                          <div className="rounded-[20px] border border-dashed border-border p-4 text-center space-y-2 opacity-65">
+                          <div className="rounded-xl border border-dashed border-border p-4 text-center space-y-2 opacity-65">
                             <PremiumIcon icon={Lock} tone="zinc" size="lg" className="mx-auto" />
                             <p className="text-[12px] font-bold leading-tight text-muted-foreground">{b.name}</p>
                             <p className="line-clamp-2 text-[12px] leading-snug text-muted-foreground">{b.description}</p>
@@ -1150,7 +1150,7 @@ export default function ProfilePage() {
               </div>
 
               {userPosts.length === 0 ? (
-                <div className="rounded-[28px] border border-dashed border-border/80 bg-card p-8 sm:p-12 text-center space-y-4 shadow-sm">
+                <div className="rounded-2xl border border-dashed border-border/80 bg-card p-8 sm:p-12 text-center space-y-4 shadow-sm">
                   <div className="size-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-inner">
                     <Share2 className="size-8" />
                   </div>
@@ -1182,7 +1182,7 @@ export default function ProfilePage() {
                   {userPosts.map((post) => (
                     <article
                       key={post.id}
-                      className="ios-card rounded-[24px] p-5 border border-border/80 space-y-3.5 flex flex-col justify-between transition-all hover:border-primary/40 shadow-xs"
+                      className="ios-card rounded-2xl p-5 border border-border/80 space-y-3.5 flex flex-col justify-between transition-all hover:border-primary/40 shadow-xs"
                     >
                       <div className="space-y-3">
                         {/* Header: Subject + Post Type + Delete */}
@@ -1330,7 +1330,7 @@ export default function ProfilePage() {
                   : allItems.filter((i) => i.category === inventoryTab);
 
                 return (
-                  <Card className="overflow-hidden border border-border/80 shadow-md rounded-[28px]">
+                  <Card className="overflow-hidden border border-border/80 shadow-md rounded-2xl">
                     <CardHeader className="pb-3.5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2.5">
@@ -1589,7 +1589,7 @@ export default function ProfilePage() {
             >
               {/* So'nggi test natijalari & So'nggi Arena duellari */}
               <div className="grid gap-5 md:grid-cols-2">
-                <Card className="rounded-[28px] border-border/80 shadow-md">
+                <Card className="rounded-2xl border-border/80 shadow-md">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <PremiumIcon icon={FileCheck2} tone="sky" size="xs" solid />
@@ -1625,7 +1625,7 @@ export default function ProfilePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="rounded-[28px] border-border/80 shadow-md">
+                <Card className="rounded-2xl border-border/80 shadow-md">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <PremiumIcon icon={Swords} tone="rose" size="xs" solid />
@@ -1661,7 +1661,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Referral Card */}
-              <div className="ios-card rounded-[28px] p-5 sm:p-6 flex flex-col items-center justify-between gap-4 sm:flex-row border border-border/80 shadow-md">
+              <div className="ios-card rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-between gap-4 sm:flex-row border border-border/80 shadow-md">
                 <div className="flex items-center gap-3.5 text-center sm:text-left">
                   <PremiumIcon icon={Gift} tone="sky" size="md" solid className="hidden sm:inline-flex" />
                   <div>
@@ -1698,7 +1698,7 @@ export default function ProfilePage() {
                 <p className="px-2 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   Ilova sozlamalari
                 </p>
-                <div className="ios-card overflow-hidden rounded-[22px] divide-y divide-border/60 border border-border/80">
+                <div className="ios-card overflow-hidden rounded-xl divide-y divide-border/60 border border-border/80">
                   <div className="flex items-center justify-between p-4">
                     <div className="space-y-0.5">
                       <div className="text-sm font-semibold text-foreground">Alifbo (Yozuv turi)</div>
@@ -1747,7 +1747,7 @@ export default function ProfilePage() {
         {/* 5. PROFILNI TAHRIRLASH MODALI */}
         {/* ========================================================================= */}
         <Dialog open={editOpen} onOpenChange={(open) => { if (!saving) setEditOpen(open); }}>
-          <DialogContent className="sm:max-w-md rounded-[28px]">
+          <DialogContent className="sm:max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-lg font-bold">
                 <Pencil className="size-5 text-primary" />

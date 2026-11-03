@@ -368,11 +368,6 @@ export default function DashboardPage() {
                 userStreak={p.streak}
               />
 
-              {/* 2. JONLI RESPUBLIKA SPRINTI */}
-              <LiveRepublicBanner
-                onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
-              />
-
               {/* ACTIVATION HOOK (0 attempts) */}
               {data.recent_attempts.length === 0 && (
                 <div className="relative overflow-hidden rounded-[28px] border border-primary/25 bg-card p-5 sm:p-7 shadow-card">
@@ -386,13 +381,13 @@ export default function DashboardPage() {
                         🎯 3 daqiqalik ekspress sinov — Darajangizni aniqlang!
                       </h2>
                       <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                        Bor-yo&apos;g&apos;i 5 ta qiziqarli savol. Testni yakunlashingiz bilan haqiqiy darajangiz (A+, B+, C),
+                        Bor-yo&apos;g&apos;i 7 ta qiziqarli savol. Testni yakunlashingiz bilan haqiqiy darajangiz (A+, B+, C),
                         zaif mavzular tahlili va <strong className="text-foreground">+50 Tanga hamda ilk olovingiz (Streak 🔥)</strong> faollashadi!
                       </p>
                     </div>
                     <Link
                       href="/onboarding?mode=blitz"
-                      className="ios-spring inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs sm:text-sm font-semibold text-primary-foreground shadow-[0_6px_18px_rgba(0,122,255,0.32)] shrink-0"
+                      className="ios-spring inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[var(--brand-border)] bg-[var(--brand-soft)] px-6 py-3 text-xs sm:text-sm font-semibold text-[var(--brand-text)] hover:bg-[var(--brand-soft)]/80 shrink-0"
                     >
                       <Play className="size-4 fill-current" /> {t('Hozir boshlash')}
                     </Link>
@@ -406,6 +401,11 @@ export default function DashboardPage() {
                 weakReviewTopic={data.weak_review?.topic_title || null}
                 theme={isDark ? 'dark' : 'light'}
               />
+              {/* Jonli Respublika Sprinti — asosiy sikldan keyingi ikkinchi darajali taklif */}
+              <LiveRepublicBanner
+                onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
+              />
+
 
               {/* 4. iOS CONTROL CENTER QUICK STUDY MODULES */}
               <div className="space-y-3">

@@ -82,9 +82,9 @@ function CheckoutPageInner() {
       <>
         <AppShell />
         <main className="page-shell-narrow flex-1 space-y-5 p-4 sm:p-6">
-          <Skeleton className="h-36 w-full rounded-[28px]" />
-          <Skeleton className="h-44 w-full rounded-[28px]" />
-          <Skeleton className="h-36 w-full rounded-[28px]" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-44 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
         </main>
       </>
     );
@@ -103,8 +103,8 @@ function CheckoutPageInner() {
         </Link>
 
         {/* Apple Pay Style Order Summary Card */}
-        <div className="ios-card rounded-[28px] p-6 text-center space-y-2">
-          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-[14px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_6px_16px_rgba(0,122,255,0.3)]">
+        <div className="ios-card rounded-2xl p-6 text-center space-y-2">
+          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-lg bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_6px_16px_rgba(0,122,255,0.3)]">
             <Crown className="size-6" />
           </div>
           <span className="inline-block rounded-full bg-[#007AFF]/10 px-3 py-0.5 text-[12px] font-bold uppercase tracking-wider text-[#007AFF]">
@@ -122,7 +122,7 @@ function CheckoutPageInner() {
         </div>
 
         {/* Apple Wallet Style Bank Card */}
-        <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#1C1C1E] via-[#2C2C2E] to-[#1C1C1E] p-6 text-white shadow-xl border border-white/10">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1C1C1E] via-[#2C2C2E] to-[#1C1C1E] p-6 text-white shadow-xl border border-white/10">
           <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[#007AFF]/20 blur-3xl" />
           <div className="relative flex items-center justify-between">
             <span className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-white/60">
@@ -151,13 +151,13 @@ function CheckoutPageInner() {
         </div>
 
         {error && (
-          <div className="rounded-[18px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-4 text-[13px] font-semibold text-[#FF3B30]">
+          <div className="rounded-xl border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-4 text-[13px] font-semibold text-[#FF3B30]">
             {error}
           </div>
         )}
 
         {/* Receipt Upload Card */}
-        <div className="ios-card rounded-[28px] p-6 space-y-4">
+        <div className="ios-card rounded-2xl p-6 space-y-4">
           <div>
             <h3 className="text-[15px] font-bold text-foreground">To&apos;lov chekini biriktiring</h3>
             <p className="text-[12.5px] text-[#8E8E93] mt-0.5">
@@ -167,7 +167,7 @@ function CheckoutPageInner() {
 
           <label
             htmlFor="screenshot"
-            className="flex flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed border-black/[0.1] dark:border-white/[0.12] bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/50 p-6 text-center cursor-pointer hover:border-[#007AFF] transition-colors"
+            className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-black/[0.1] dark:border-white/[0.12] bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/50 p-6 text-center cursor-pointer hover:border-[#007AFF] transition-colors"
           >
             <div className="flex size-11 items-center justify-center rounded-full bg-[#007AFF]/12 text-[#007AFF]">
               <Upload className="size-5" />

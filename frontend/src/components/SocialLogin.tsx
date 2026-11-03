@@ -112,7 +112,7 @@ export default function SocialLogin({ refCode, onSuccess }: { refCode?: string; 
   return (
     <div className="space-y-2.5">
       {error && (
-        <div className="flex items-center gap-2 rounded-[14px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3 text-xs font-medium text-[#FF3B30]">
+        <div className="flex items-center gap-2 rounded-lg border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3 text-xs font-medium text-[#FF3B30]">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>

@@ -160,7 +160,7 @@ export default function PremiumPage() {
       <AppShell />
       <main className="page-shell flex-1 space-y-7 bg-[var(--bg-page)] p-4 pb-20 sm:p-6">
         {/* iOS Live Activity Offer Banner */}
-        <div className="ios-card relative overflow-hidden rounded-[24px] p-4 sm:p-5 border border-[#FF9500]/25 bg-gradient-to-r from-[#FF9500]/[0.08] via-transparent to-[#FF3B30]/[0.06]">
+        <div className="ios-card relative overflow-hidden rounded-2xl p-4 sm:p-5 border border-[#FF9500]/25 bg-gradient-to-r from-[#FF9500]/[0.08] via-transparent to-[#FF3B30]/[0.06]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row items-center gap-3.5">
               <PremiumIcon icon={Flame} tone="amber" size="md" solid />
@@ -210,7 +210,7 @@ export default function PremiumPage() {
           ].map((item) => (
             <div
               key={item.title}
-              className="ios-card flex items-center gap-3.5 rounded-[22px] p-4"
+              className="ios-card flex items-center gap-3.5 rounded-xl p-4"
             >
               <PremiumIcon icon={item.icon} tone={item.tone} size="md" solid />
               <div className="min-w-0">
@@ -242,10 +242,10 @@ export default function PremiumPage() {
                 note: data.premium_mock_test_unlocked ? 'Ochilgan (muddatsiz)' : 'Qulflangan',
               },
             ].map((s) => (
-              <div key={s.label} className="ios-card flex items-center gap-4 rounded-[22px] p-4">
+              <div key={s.label} className="ios-card flex items-center gap-4 rounded-xl p-4">
                 <div
                   className={cn(
-                    'flex size-10 shrink-0 items-center justify-center rounded-[12px] text-white',
+                    'flex size-10 shrink-0 items-center justify-center rounded-md text-white',
                     s.on ? 'bg-[#34C759]' : 'bg-[#8E8E93]/30 text-[#8E8E93]'
                   )}
                 >
@@ -265,7 +265,7 @@ export default function PremiumPage() {
         {!data && (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-96 w-full rounded-[28px]" />
+              <Skeleton key={i} className="h-96 w-full rounded-2xl" />
             ))}
           </div>
         )}
@@ -283,7 +283,7 @@ export default function PremiumPage() {
                 key={p.id}
                 onClick={() => setSelectedPlanId(p.id)}
                 className={cn(
-                  'relative cursor-pointer flex flex-col justify-between rounded-[28px] p-6 transition-all duration-300',
+                  'relative cursor-pointer flex flex-col justify-between rounded-2xl p-6 transition-all duration-300',
                   mConfig.isSuper
                     ? 'bg-[#1C1C1E] text-white ring-2 ring-[#007AFF] shadow-[0_24px_48px_-12px_rgba(0,122,255,0.28)]'
                     : isSelected
@@ -380,7 +380,7 @@ export default function PremiumPage() {
                   </div>
 
                   {isSingleTestPlan && (
-                    <div className="rounded-[14px] bg-[#FF9500]/10 border border-[#FF9500]/25 p-3 text-[11.5px] text-foreground leading-snug">
+                    <div className="rounded-lg bg-[#FF9500]/10 border border-[#FF9500]/25 p-3 text-[11.5px] text-foreground leading-snug">
                       <strong className="text-[#FF9500]">Eslatma:</strong> Ushbu tarif faqat siz tanlagan 1 ta mock imtihonni ochadi.
                     </div>
                   )}
@@ -475,7 +475,7 @@ export default function PremiumPage() {
         </div>
 
         {/* Apple Keynote Comparison Section */}
-        <div className="ios-card rounded-[28px] p-6 sm:p-8 space-y-6">
+        <div className="ios-card rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="max-w-2xl mx-auto text-center space-y-2">
             <Badge variant="outline" className="border-[#007AFF]/25 text-[#007AFF] bg-[#007AFF]/10">
               <Sparkles className="size-3 mr-1" /> TAQQOSLASH
@@ -489,7 +489,7 @@ export default function PremiumPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            <div className="rounded-[22px] border border-[#FF3B30]/20 bg-[#FF3B30]/[0.04] p-5 space-y-3">
+            <div className="rounded-xl border border-[#FF3B30]/20 bg-[#FF3B30]/[0.04] p-5 space-y-3">
               <p className="text-[12px] font-bold text-[#FF3B30] uppercase tracking-wider">Oddiy Repetitor</p>
               <p className="text-[24px] font-bold text-foreground">400,000+ so&apos;m</p>
               <p className="text-[12px] text-[#8E8E93]">Har oy to&apos;lanadi</p>
@@ -500,7 +500,7 @@ export default function PremiumPage() {
               </ul>
             </div>
 
-            <div className="rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] p-5 space-y-3">
+            <div className="rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] p-5 space-y-3">
               <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider">Alohida 1 ta test</p>
               <p className="text-[24px] font-bold text-foreground">15,000 so&apos;m</p>
               <p className="text-[12px] text-[#8E8E93]">Har bir imtihon uchun alohida</p>
@@ -511,7 +511,7 @@ export default function PremiumPage() {
               </ul>
             </div>
 
-            <div className="rounded-[22px] border-2 border-[#007AFF] bg-[#007AFF]/[0.06] p-5 space-y-3 relative">
+            <div className="rounded-xl border-2 border-[#007AFF] bg-[#007AFF]/[0.06] p-5 space-y-3 relative">
               <span className="absolute -top-3 right-4 rounded-full bg-[#007AFF] text-white font-bold text-[12px] px-3 py-0.5 uppercase shadow-xs">
                 Eng to&apos;g&apos;ri tanlov
               </span>
@@ -534,7 +534,7 @@ export default function PremiumPage() {
             <p className="text-[13px] text-[#8E8E93]">To&apos;lov va obunalar bo&apos;yicha ma&apos;lumot</p>
           </div>
 
-          <div className="ios-card rounded-[24px] divide-y divide-black/[0.06] dark:divide-white/[0.08] overflow-hidden">
+          <div className="ios-card rounded-2xl divide-y divide-black/[0.06] dark:divide-white/[0.08] overflow-hidden">
             {[
               {
                 q: "To'lov qilgandan keyin obuna qachon faollashadi?",

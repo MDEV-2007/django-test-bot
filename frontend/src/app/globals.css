@@ -323,6 +323,11 @@ body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+/* Compact header controls keep their 34px look but get a 44px-tall hit area (Apple HIG).
+   The horizontal bleed stays within the 4px gap so neighbouring targets never overlap. */
+.tap-44 { position: relative; }
+.tap-44::after { content: ''; position: absolute; inset: -6px -2px; }
+
 .ios-spring {
   transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }

@@ -173,7 +173,7 @@ export default function WeeklyLeaderboardSection() {
 
       {/* Main Grid: Left = iOS Inset Grouped Leaderboard, Right = App Store Reviews */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
-        <div className="lg:col-span-7 rounded-[30px] border border-black/[0.07] bg-white p-5 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
+        <div className="lg:col-span-7 rounded-3xl border border-black/[0.07] bg-white p-5 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
           <div className="grid grid-cols-12 pb-3 border-b border-black/[0.06] text-[12px] font-bold tracking-wider uppercase text-[#8E8E93]">
             <span className="col-span-7">O&apos;QUVCHI &amp; VILOYAT</span>
             <span className="col-span-3 text-right">NATIJA</span>
@@ -184,7 +184,7 @@ export default function WeeklyLeaderboardSection() {
             {leaderboard.map((row) => (
               <div
                 key={row.rank}
-                className="grid grid-cols-12 items-center py-3.5 hover:bg-[#F2F2F7]/70 rounded-[18px] px-2.5 -mx-2.5 transition-colors group"
+                className="grid grid-cols-12 items-center py-3.5 hover:bg-[#F2F2F7]/70 rounded-xl px-2.5 -mx-2.5 transition-colors group"
               >
                 <div className="col-span-7 flex items-center gap-3">
                   <div className="shrink-0 size-9 rounded-full flex items-center justify-center font-bold text-xs">
@@ -260,7 +260,7 @@ export default function WeeklyLeaderboardSection() {
           {reviews.slice(0, 2).map((review, i) => (
             <div
               key={i}
-              className="rounded-[30px] border border-black/[0.07] bg-white p-6 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between transition-all hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.07)]"
+              className="rounded-3xl border border-black/[0.07] bg-white p-6 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)] flex flex-col justify-between transition-all hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.07)]"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 flex-wrap">

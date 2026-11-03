@@ -73,10 +73,10 @@ export default function HeroInteractiveQuiz() {
   return (
     <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
       {/* Soft Apple Intelligence Ambient Aura */}
-      <div className="absolute -inset-3 rounded-[40px] bg-gradient-to-tr from-[#007AFF]/16 via-[#34C759]/12 to-[#5856D6]/16 opacity-80 blur-2xl pointer-events-none" />
+      <div className="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-[#007AFF]/16 via-[#34C759]/12 to-[#5856D6]/16 opacity-80 blur-2xl pointer-events-none" />
 
       {/* iOS 18 / iPadOS Floating Window Card */}
-      <div className="relative overflow-hidden rounded-[32px] border border-black/[0.08] bg-white/92 ios-glass p-5 sm:p-7 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.10),0_4px_16px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.95)]">
+      <div className="relative overflow-hidden rounded-3xl border border-black/[0.08] bg-white/92 ios-glass p-5 sm:p-7 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.10),0_4px_16px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.95)]">
         
         {/* Top Window Bar + Dynamic Island Live Activity Pill */}
         <div className="flex items-center justify-between pb-4 border-b border-black/[0.06]">
@@ -103,9 +103,9 @@ export default function HeroInteractiveQuiz() {
         </div>
 
         {/* Apple Health-Style Live DTM Score Widget */}
-        <div className="mt-4 flex items-center justify-between rounded-[18px] bg-[#F2F2F7] px-4 py-3 border border-black/[0.04]">
+        <div className="mt-4 flex items-center justify-between rounded-xl bg-[#F2F2F7] px-4 py-3 border border-black/[0.04]">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-8 items-center justify-center rounded-[10px] bg-gradient-to-b from-[#34C759] to-[#28A745] text-white shadow-xs">
+            <div className="flex size-8 items-center justify-center rounded-md bg-gradient-to-b from-[#34C759] to-[#28A745] text-white shadow-xs">
               <TrendingUp className="size-4" />
             </div>
             <div>
@@ -175,12 +175,12 @@ export default function HeroInteractiveQuiz() {
                 type="button"
                 disabled={hasAnswered}
                 onClick={() => handleSelect(option)}
-                className={`ios-spring group relative flex w-full items-center gap-3 rounded-[18px] border p-3 sm:p-3.5 text-left text-xs sm:text-[13.5px] font-semibold ${containerStyles} ${
+                className={`ios-spring group relative flex w-full items-center gap-3 rounded-xl border p-3 sm:p-3.5 text-left text-xs sm:text-[13.5px] font-semibold ${containerStyles} ${
                   !hasAnswered ? 'cursor-pointer' : 'cursor-default'
                 }`}
               >
                 <span
-                  className={`flex size-7 shrink-0 items-center justify-center rounded-[10px] border text-xs font-bold transition-all ${badgeStyles}`}
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold transition-all ${badgeStyles}`}
                 >
                   {hasAnswered && option.isCorrect ? (
                     <CheckCircle2 className="size-4" />
@@ -204,11 +204,11 @@ export default function HeroInteractiveQuiz() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-4 rounded-[22px] border border-[#007AFF]/20 bg-gradient-to-br from-[#007AFF]/[0.06] via-white to-[#5856D6]/[0.06] p-4 space-y-2.5 shadow-sm"
+              className="mt-4 rounded-xl border border-[#007AFF]/20 bg-gradient-to-br from-[#007AFF]/[0.06] via-white to-[#5856D6]/[0.06] p-4 space-y-2.5 shadow-sm"
             >
               <div className="flex items-center justify-between flex-wrap gap-1.5">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#1C1C1E]">
-                  <span className="flex size-6 items-center justify-center rounded-[8px] bg-gradient-to-b from-[#5856D6] to-[#007AFF] text-white">
+                  <span className="flex size-6 items-center justify-center rounded-sm bg-gradient-to-b from-[#5856D6] to-[#007AFF] text-white">
                     <Sparkles className="size-3.5" />
                   </span>
                   <span>IlmIldizi Intelligence · AI Mentor</span>

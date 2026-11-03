@@ -136,7 +136,7 @@ export default function Stage5RewardCeremony({
             onClick={handleOpenChest}
             className="mx-auto size-36 sm:size-44 rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 p-1 shadow-2xl shadow-amber-500/30 cursor-pointer flex items-center justify-center group active:scale-95 transition-transform"
           >
-            <div className="size-full rounded-[22px] bg-zinc-950/80 flex flex-col items-center justify-center gap-2">
+            <div className="size-full rounded-xl bg-zinc-950/80 flex flex-col items-center justify-center gap-2">
               <Gift className="size-16 text-amber-400 group-hover:scale-110 transition-transform" />
               <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">
                 Bosing va Oching!

@@ -27,7 +27,7 @@ export default function LossAversionExitModal({
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-rose-500/40 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black p-6 sm:p-7 shadow-2xl text-center"
+          className="relative w-full max-w-md overflow-hidden rounded-2xl border border-rose-500/40 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black p-6 sm:p-7 shadow-2xl text-center"
         >
           {/* Orqa fon qizil nuri */}
           <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-48 rounded-full bg-rose-600/25 blur-[70px]" />

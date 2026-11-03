@@ -140,7 +140,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
         </p>
 
         {/* Authentic iOS UISegmentedControl */}
-        <div className="mt-8 inline-flex items-center rounded-[14px] bg-[#767680]/12 p-1">
+        <div className="mt-8 inline-flex items-center rounded-lg bg-[#767680]/12 p-1">
           {[
             { id: 'all', label: 'Barchasi' },
             { id: 'subscription', label: 'Obuna (1, 6 va 12 oylik)' },
@@ -149,7 +149,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id as any)}
-              className={`rounded-[10px] px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                 filter === tab.id
                   ? 'bg-white text-[#1C1C1E] shadow-[0_3px_8px_rgba(0,0,0,0.12),0_3px_1px_rgba(0,0,0,0.04)]'
                   : 'text-[#3A3A3C] hover:text-[#1C1C1E]'
@@ -169,7 +169,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
           return (
             <div
               key={plan.name}
-              className={`relative flex flex-col justify-between rounded-[30px] border p-6 sm:p-7 transition-all duration-200 ${
+              className={`relative flex flex-col justify-between rounded-3xl border p-6 sm:p-7 transition-all duration-200 ${
                 isPro
                   ? 'border-[#007AFF] bg-white shadow-[0_20px_50px_-10px_rgba(0,122,255,0.18)] ring-2 ring-[#007AFF]/20 lg:-translate-y-2'
                   : 'border-black/[0.07] bg-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_14px_34px_-6px_rgba(0,0,0,0.08)]'

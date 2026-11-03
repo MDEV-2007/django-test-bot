@@ -727,7 +727,7 @@ export default function TestsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="relative overflow-hidden rounded-[26px] bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-4 sm:p-5.5 text-white shadow-lg"
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-4 sm:p-5.5 text-white shadow-lg"
               >
                 <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-white/10 rounded-full blur-2xl" />
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -758,7 +758,7 @@ export default function TestsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-4 sm:p-6 shadow-xl text-white"
+                className="relative overflow-hidden rounded-2xl sm:rounded-2xl border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-4 sm:p-6 shadow-xl text-white"
               >
                 <div className="absolute top-0 right-0 -mr-12 -mt-12 size-60 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
@@ -815,10 +815,10 @@ export default function TestsPage() {
           const isReminded = pinnedReminded ?? data.pinned_mock.is_reminded;
           return (
             <Reveal>
-              <div className="relative overflow-hidden rounded-[28px] bg-card border border-border p-5 sm:p-6 shadow-xs">
+              <div className="relative overflow-hidden rounded-2xl bg-card border border-border p-5 sm:p-6 shadow-xs">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex min-w-0 items-start sm:items-center gap-4">
-                    <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-[16px] text-white shadow-xs", theme.squircle)}>
+                    <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg text-white shadow-xs", theme.squircle)}>
                       <Flame className="size-6 fill-white" />
                     </div>
                     <div className="min-w-0 space-y-1">
@@ -898,7 +898,7 @@ export default function TestsPage() {
           <Reveal>
             <div
               className={cn(
-                'relative overflow-hidden rounded-[24px] border p-4 sm:p-5 transition-all',
+                'relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-all',
                 (startError?.scheduledAt || errorMessage.includes('boshlanmadi'))
                   ? 'border-amber-500/30 bg-amber-500/10 text-foreground'
                   : 'border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400'
@@ -908,7 +908,7 @@ export default function TestsPage() {
                 <div className="flex items-start gap-3.5">
                   <div
                     className={cn(
-                      'flex size-10 shrink-0 items-center justify-center rounded-[12px] text-white',
+                      'flex size-10 shrink-0 items-center justify-center rounded-md text-white',
                       (startError?.scheduledAt || errorMessage.includes('boshlanmadi'))
                         ? 'bg-amber-500'
                         : 'bg-rose-500'
@@ -1021,7 +1021,7 @@ export default function TestsPage() {
                   <motion.div
                     key={s.slug}
                     whileHover={{ y: -3 }}
-                    className="group relative rounded-[24px] p-5 border border-border bg-card hover:border-blue-500/40 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
+                    className="group relative rounded-2xl p-5 border border-border bg-card hover:border-blue-500/40 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
                   >
                     <div className={cn('pointer-events-none absolute inset-0 bg-gradient-to-br opacity-40 group-hover:opacity-80 transition-opacity', visual.gradient)} />
 
@@ -1084,7 +1084,7 @@ export default function TestsPage() {
             </div>
 
             {/* Aralash Fanlar Super Blits Card */}
-            <div className="relative overflow-hidden rounded-[26px] border border-blue-500/30 bg-gradient-to-r from-blue-950/80 via-slate-900 to-indigo-950/80 p-5 sm:p-6 text-white shadow-lg">
+            <div className="relative overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-950/80 via-slate-900 to-indigo-950/80 p-5 sm:p-6 text-white shadow-lg">
               <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-blue-500/10 rounded-full blur-2xl" />
               <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1.5 max-w-xl">
@@ -1197,7 +1197,7 @@ export default function TestsPage() {
                   <motion.div
                     key={s.slug}
                     whileHover={{ y: -3 }}
-                    className="group relative rounded-[24px] p-5 border border-rose-500/30 bg-card hover:border-rose-500/60 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
+                    className="group relative rounded-2xl p-5 border border-rose-500/30 bg-card hover:border-rose-500/60 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
                   >
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
 
@@ -1270,7 +1270,7 @@ export default function TestsPage() {
             </div>
 
             {/* Katta Blok Imtihon Modal Launcher Card */}
-            <div className="relative overflow-hidden rounded-[26px] border border-rose-500/40 bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 p-5 sm:p-6 text-white shadow-xl">
+            <div className="relative overflow-hidden rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 p-5 sm:p-6 text-white shadow-xl">
               <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-rose-500/15 rounded-full blur-2xl" />
               <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1.5 max-w-xl">
@@ -1343,7 +1343,7 @@ export default function TestsPage() {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleSelectSubject(s.slug)}
                     className={cn(
-                      'group relative rounded-[24px] p-4 sm:p-5 border border-border bg-card hover:bg-card/90 transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-xs select-none',
+                      'group relative rounded-2xl p-4 sm:p-5 border border-border bg-card hover:bg-card/90 transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-xs select-none',
                       visual.borderHover
                     )}
                   >
@@ -1390,7 +1390,7 @@ export default function TestsPage() {
             {/* Apple Shortcuts Style Quick Test Card */}
             <div
               onClick={() => starting === null && startRandom()}
-              className="group cursor-pointer rounded-[26px] bg-card border border-border hover:border-emerald-500/50 p-5 sm:p-6 shadow-xs transition-all active:scale-[0.99] mt-2"
+              className="group cursor-pointer rounded-2xl bg-card border border-border hover:border-emerald-500/50 p-5 sm:p-6 shadow-xs transition-all active:scale-[0.99] mt-2"
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3.5">
@@ -1460,7 +1460,7 @@ export default function TestsPage() {
                 const visual = getSubjectVisual(currentSubjectObj.slug, currentSubjectObj.name);
                 const IconComponent = visual.icon;
                 return (
-                  <div className="relative overflow-hidden rounded-[26px] border border-border bg-card p-4 sm:p-6 shadow-xs">
+                  <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-xs">
                     <div className={cn('pointer-events-none absolute inset-0 bg-gradient-to-r opacity-60', visual.gradient)} />
                     <div className="relative flex items-center justify-between gap-4 flex-wrap">
                       <div className="flex items-center gap-4">
@@ -1495,7 +1495,7 @@ export default function TestsPage() {
             </div>
 
             {/* ICHMA-ICH SUBKATEGORIYALAR (Nested Subcategories & Filters) */}
-            <div className="rounded-[24px] border border-border bg-card p-4 sm:p-5 space-y-4 shadow-xs">
+            <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-4 shadow-xs">
               {/* 1-QATLAM: Subkategoriya (Imtihon turi: Milliy Sertifikat, Mavzulashtirilgan, BBA...) */}
               {visibleCategories.length > 1 && (
                 <div className="space-y-2">
@@ -1569,7 +1569,7 @@ export default function TestsPage() {
             {/* TEST KARTALARI RO'YXATI */}
             {!data && !errorMessage && (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 w-full rounded-[26px]" />)}
+                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 w-full rounded-2xl" />)}
               </div>
             )}
 
@@ -1593,7 +1593,7 @@ export default function TestsPage() {
                   <Reveal key={t.id} index={tIdx} className="h-full">
                     <div
                       className={cn(
-                        "group relative flex h-full flex-col justify-between rounded-[28px] p-5 sm:p-6 transition-all duration-300 shadow-xs hover:shadow-xl border overflow-hidden",
+                        "group relative flex h-full flex-col justify-between rounded-2xl p-5 sm:p-6 transition-all duration-300 shadow-xs hover:shadow-xl border overflow-hidden",
                         isLiveMock
                           ? "border-primary/50 bg-gradient-to-b from-primary/[0.07] via-card to-card hover:border-primary shadow-primary/10"
                           : isNew
@@ -1750,7 +1750,7 @@ export default function TestsPage() {
 
             {/* Test topilmaganda Empty State */}
             {data?.tests.length === 0 && (
-              <div className="rounded-[28px] bg-card border border-border py-14 px-4 text-center space-y-3">
+              <div className="rounded-2xl bg-card border border-border py-14 px-4 text-center space-y-3">
                 <PremiumIcon icon={FileCheck2} tone="zinc" size="lg" className="mx-auto" />
                 <h4 className="text-base font-bold text-foreground">
                   {search ? `"${search}" bo'yicha test topilmadi` : "Bu bo'limda hozircha testlar mavjud emas"}

@@ -8,7 +8,7 @@ const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing_banner';
 export default function TelegramBannerCta() {
   return (
     <section className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="relative overflow-hidden rounded-[36px] border border-white/12 bg-[#1C1C1E] p-8 sm:p-12 lg:p-14 text-white shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
+      <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-[#1C1C1E] p-8 sm:p-12 lg:p-14 text-white shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
         {/* Ambient iOS Mesh Glows */}
         <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-[#007AFF]/25 blur-3xl pointer-events-none" />
         <div className="absolute right-0 -top-20 size-80 rounded-full bg-[#30D158]/20 blur-3xl pointer-events-none" />

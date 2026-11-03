@@ -183,7 +183,7 @@ export default function LibraryPage() {
         <div className="max-w-7xl mx-auto space-y-6">
         
         {/* ── 1. APPLE BOOKS HERO CARD ──────────────────────────────────────── */}
-        <div className="relative overflow-hidden rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-6 sm:p-8 shadow-[0_6px_28px_rgba(0,0,0,0.04)]">
+        <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-6 sm:p-8 shadow-[0_6px_28px_rgba(0,0,0,0.04)]">
           <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-[#FF9500]/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-[#007AFF]/10 blur-3xl" />
 
@@ -206,7 +206,7 @@ export default function LibraryPage() {
             {/* Quick stats widgets */}
             {stats && (
               <div className="grid grid-cols-3 gap-2.5 sm:gap-3 self-stretch lg:self-auto shrink-0">
-                <div className="rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
+                <div className="rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
                   <div className="font-mono text-[20px] sm:text-[22px] font-bold text-[#007AFF]">
                     {stats.total_books}
                   </div>
@@ -215,7 +215,7 @@ export default function LibraryPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
+                <div className="rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
                   <div className="font-mono text-[20px] sm:text-[22px] font-bold text-[#34C759]">
                     {stats.total_reads.toLocaleString()}
                   </div>
@@ -224,7 +224,7 @@ export default function LibraryPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
+                <div className="rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
                   <div className="font-mono text-[20px] sm:text-[22px] font-bold text-[#5856D6]">
                     {stats.total_downloads.toLocaleString()}
                   </div>
@@ -367,12 +367,12 @@ export default function LibraryPage() {
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="h-96 rounded-[26px] animate-pulse bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08]"
+                className="h-96 rounded-2xl animate-pulse bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08]"
               />
             ))}
           </div>
         ) : books.length === 0 ? (
-          <div className="text-center py-16 rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] space-y-3">
+          <div className="text-center py-16 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] space-y-3">
             <PremiumIcon icon={BookOpen} tone="sky" size="xl" solid className="mx-auto" />
             <h3 className="text-[18px] font-bold text-slate-900 dark:text-white">
               Hech qanday kitob topilmadi
@@ -405,7 +405,7 @@ export default function LibraryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.22 }}
                 onClick={() => handleOpenReader(book)}
-                className="group relative flex flex-col rounded-[26px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] hover:border-[#007AFF]/40 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_14px_34px_rgba(0,122,255,0.09)] transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden"
+                className="group relative flex flex-col rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] hover:border-[#007AFF]/40 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_14px_34px_rgba(0,122,255,0.09)] transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden"
               >
                 {/* ── 3D APPLE BOOKS COVER HEADER ────────────────────── */}
                 <div className={cn(
@@ -543,13 +543,13 @@ export default function LibraryPage() {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.96, opacity: 0, y: 16 }}
                 onClick={(e) => e.stopPropagation()}
-                className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-[32px] bg-white dark:bg-[#1C1C1E] border border-black/[0.08] dark:border-white/[0.10] shadow-2xl overflow-hidden"
+                className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-[#1C1C1E] border border-black/[0.08] dark:border-white/[0.10] shadow-2xl overflow-hidden"
               >
                 {/* Modal Header */}
                 <div className="p-4 sm:p-5 border-b border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/60 backdrop-blur-xl flex items-center justify-between gap-4 shrink-0">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={cn(
-                      "size-10 rounded-[12px] flex items-center justify-center font-bold text-white shrink-0 bg-gradient-to-br shadow-xs",
+                      "size-10 rounded-md flex items-center justify-center font-bold text-white shrink-0 bg-gradient-to-br shadow-xs",
                       activeBook.cover_color
                     )}>
                       <BookOpen className="size-5" />
@@ -602,7 +602,7 @@ export default function LibraryPage() {
                 {/* Modal Content / Viewer */}
                 <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
                   {/* Detailed Description Inset Grouped Card */}
-                  <div className="p-5 rounded-[24px] bg-[#F2F2F7] dark:bg-[#2C2C2E]/70 border border-black/[0.05] dark:border-white/[0.07] space-y-4">
+                  <div className="p-5 rounded-2xl bg-[#F2F2F7] dark:bg-[#2C2C2E]/70 border border-black/[0.05] dark:border-white/[0.07] space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>
                         <div className="text-[12px] text-[#8E8E93] font-bold uppercase tracking-wider">
@@ -660,7 +660,7 @@ export default function LibraryPage() {
                           Alohida oynada ochish <ExternalLink className="size-3.5" />
                         </a>
                       </div>
-                      <div className="w-full h-96 rounded-[20px] overflow-hidden border border-black/[0.08] dark:border-white/[0.10] bg-slate-950">
+                      <div className="w-full h-96 rounded-xl overflow-hidden border border-black/[0.08] dark:border-white/[0.10] bg-slate-950">
                         <iframe
                           src={activeBook.file_url}
                           title={activeBook.title}
@@ -669,8 +669,8 @@ export default function LibraryPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-8 rounded-[24px] bg-[#007AFF]/[0.06] border border-[#007AFF]/20 text-center space-y-3">
-                      <div className="size-12 rounded-[14px] bg-[#007AFF] text-white flex items-center justify-center mx-auto shadow-xs">
+                    <div className="p-8 rounded-2xl bg-[#007AFF]/[0.06] border border-[#007AFF]/20 text-center space-y-3">
+                      <div className="size-12 rounded-lg bg-[#007AFF] text-white flex items-center justify-center mx-auto shadow-xs">
                         <Sparkles className="size-6" />
                       </div>
                       <h4 className="text-[16px] font-bold text-slate-900 dark:text-white">

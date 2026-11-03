@@ -315,7 +315,7 @@ export default function TopicCheatSheetView({
             disabled={startingSprint}
             className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 p-[1.5px] shadow-xl shadow-orange-500/20 active:scale-[0.99] transition-all cursor-pointer text-left"
           >
-            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-[15px] bg-zinc-950/95 px-4 py-3 backdrop-blur-md group-hover:bg-zinc-900/90 transition-colors">
+            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg bg-zinc-950/95 px-4 py-3 backdrop-blur-md group-hover:bg-zinc-900/90 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="size-11 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-600 flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
                   {startingSprint ? (

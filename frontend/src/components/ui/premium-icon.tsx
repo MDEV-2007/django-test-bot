@@ -111,32 +111,32 @@ const SIZE_STYLES: Record<
   '2xs': {
     box: 'size-5.5',
     icon: 'size-3',
-    rounded: 'rounded-[7px]',
+    rounded: 'rounded-sm',
   },
   xs: {
     box: 'size-6.5',
     icon: 'size-3.5',
-    rounded: 'rounded-[8px]',
+    rounded: 'rounded-sm',
   },
   sm: {
     box: 'size-8',
     icon: 'size-4',
-    rounded: 'rounded-[10px]',
+    rounded: 'rounded-md',
   },
   md: {
     box: 'size-9.5',
     icon: 'size-4.5',
-    rounded: 'rounded-[12px]',
+    rounded: 'rounded-md',
   },
   lg: {
     box: 'size-11',
     icon: 'size-5.5',
-    rounded: 'rounded-[14px]',
+    rounded: 'rounded-lg',
   },
   xl: {
     box: 'size-14',
     icon: 'size-7',
-    rounded: 'rounded-[18px]',
+    rounded: 'rounded-xl',
   },
 };
 

@@ -55,10 +55,10 @@ export default function SubscriptionGate() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-background/85 backdrop-blur-xl px-4 py-8">
-      <div className="ios-card relative w-full max-w-sm overflow-hidden rounded-[32px] p-6 sm:p-7 text-center shadow-2xl">
+      <div className="ios-card relative w-full max-w-sm overflow-hidden rounded-3xl p-6 sm:p-7 text-center shadow-2xl">
         <div className="pointer-events-none absolute -top-20 left-1/2 size-48 -translate-x-1/2 rounded-full bg-[#007AFF]/15 blur-3xl" />
 
-        <div className="relative mx-auto flex size-16 items-center justify-center rounded-[20px] bg-gradient-to-b from-[#007AFF] to-[#0055D4] text-white shadow-[0_10px_24px_rgba(0,122,255,0.32),inset_0_1px_0_rgba(255,255,255,0.28)]">
+        <div className="relative mx-auto flex size-16 items-center justify-center rounded-xl bg-gradient-to-b from-[#007AFF] to-[#0055D4] text-white shadow-[0_10px_24px_rgba(0,122,255,0.32),inset_0_1px_0_rgba(255,255,255,0.28)]">
           <Megaphone className="size-7" />
         </div>
 
@@ -74,7 +74,7 @@ export default function SubscriptionGate() {
           obuna. U yerda kunlik testlar, yangi funksiyalar va loyiha yangiliklari chiqadi.
         </p>
 
-        <ul className="mt-5 space-y-2.5 rounded-[22px] border border-border bg-muted/45 p-4 text-left text-xs text-foreground">
+        <ul className="mt-5 space-y-2.5 rounded-xl border border-border bg-muted/45 p-4 text-left text-xs text-foreground">
           {[
             'Har kuni yangi test va tahlil',
             'Yangi funksiyalar birinchi bo‘lib e’lon qilinadi',
@@ -111,7 +111,7 @@ export default function SubscriptionGate() {
         </button>
 
         {missed && (
-          <p className="mt-3 rounded-[16px] bg-[#FF3B30]/10 px-3 py-2 text-xs font-semibold text-[#FF3B30]">
+          <p className="mt-3 rounded-lg bg-[#FF3B30]/10 px-3 py-2 text-xs font-semibold text-[#FF3B30]">
             Obuna hali ko&apos;rinmadi. Kanalga qo&apos;shilib, bir necha soniyadan so&apos;ng qayta bosing.
           </p>
         )}

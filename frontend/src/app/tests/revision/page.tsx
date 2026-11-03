@@ -124,8 +124,8 @@ export default function RevisionPage() {
       <>
         <AppShell />
         <main className="page-shell flex-1 space-y-6 bg-[#F2F2F7] dark:bg-[#000000] p-4 pb-12 sm:p-6">
-          <Skeleton className="h-36 w-full rounded-[28px]" />
-          <Skeleton className="h-96 w-full rounded-[28px]" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-96 w-full rounded-2xl" />
         </main>
       </>
     );
@@ -144,7 +144,7 @@ export default function RevisionPage() {
           title="Xatolar Ustida Ishlash"
           description="Imtihonlarda adashgan savollaringizni to'liq o'zlashtirmaguningizcha takrorlash tizimi."
           actions={
-            <div className="flex items-center gap-3 rounded-[18px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-2.5 font-mono text-[12px]">
+            <div className="flex items-center gap-3 rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-2.5 font-mono text-[12px]">
               <div className="flex items-center gap-1.5">
                 <span className="size-2 animate-pulse rounded-full bg-[#FF3B30]" />
                 <span className="text-[#8E8E93]">Faol:</span>
@@ -237,7 +237,7 @@ export default function RevisionPage() {
         )}
 
         {!item && (
-          <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] py-16 px-6 text-center space-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+          <div className="rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] py-16 px-6 text-center space-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
             {topic ? (
               <>
                 <CheckCircle2 className="mx-auto mb-2 size-10 text-[#34C759]" />
@@ -263,7 +263,7 @@ export default function RevisionPage() {
             }
             transition={{ duration: dur.base, ease: easeOut }}
           >
-            <div className="rounded-[28px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-5 sm:p-7 space-y-5 shadow-[0_6px_28px_rgba(0,0,0,0.04)]">
+            <div className="rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-5 sm:p-7 space-y-5 shadow-[0_6px_28px_rgba(0,0,0,0.04)]">
               <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
                 <span className="rounded-full bg-[#FF9500]/12 border border-[#FF9500]/25 px-3 py-1 font-mono text-[12px] font-bold text-[#FF9500]">
                   {item.topic}
@@ -278,7 +278,7 @@ export default function RevisionPage() {
                 dangerouslySetInnerHTML={{ __html: item.body }}
               />
               {item.image && (
-                <img src={item.image} alt="" className="max-h-60 rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] object-contain" />
+                <img src={item.image} alt="" className="max-h-60 rounded-xl border border-black/[0.06] dark:border-white/[0.08] object-contain" />
               )}
 
               {item.inline && item.answer_mode === 'text' && (
@@ -301,13 +301,13 @@ export default function RevisionPage() {
                         disabled={!!result}
                         onClick={() => check(c.id)}
                         className={cn(
-                          'flex w-full items-center justify-between gap-3 rounded-[18px] border p-4 text-left text-[14px] font-medium transition-all active:scale-[0.99]',
+                          'flex w-full items-center justify-between gap-3 rounded-xl border p-4 text-left text-[14px] font-medium transition-all active:scale-[0.99]',
                           choiceStyle(c.id)
                         )}
                       >
                         <div className="flex min-w-0 items-center gap-3">
                           <span className={cn(
-                            "flex size-8 shrink-0 items-center justify-center rounded-[10px] font-mono text-[13px] font-bold",
+                            "flex size-8 shrink-0 items-center justify-center rounded-md font-mono text-[13px] font-bold",
                             result && isCorrect
                               ? "bg-[#34C759] text-white"
                               : result && isSelected && !isCorrect
@@ -335,7 +335,7 @@ export default function RevisionPage() {
               {result && (
                 <div className="animate-fadeIn space-y-4 pt-2">
                   <div className={cn(
-                    "rounded-[20px] border p-4 sm:p-5 space-y-2",
+                    "rounded-xl border p-4 sm:p-5 space-y-2",
                     result.correct
                       ? "border-[#34C759]/30 bg-[#34C759]/10"
                       : "border-[#FF3B30]/30 bg-[#FF3B30]/10"
@@ -399,7 +399,7 @@ function TextAnswerBlock({
               disabled={!!result}
               onClick={() => onSubmit(option)}
               className={cn(
-                'rounded-[16px] border px-5 py-3 text-[14px] font-bold transition-all active:scale-95',
+                'rounded-lg border px-5 py-3 text-[14px] font-bold transition-all active:scale-95',
                 chosen && result?.correct && 'border-2 border-[#34C759] bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]',
                 chosen && result && !result.correct && 'border-2 border-[#FF3B30] bg-[#FF3B30]/12 text-[#D70015] dark:text-[#FF453A]',
                 !chosen && 'border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-slate-800 dark:text-slate-200 hover:border-[#007AFF]',

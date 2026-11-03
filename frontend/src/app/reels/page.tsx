@@ -630,7 +630,7 @@ function ReelsInner() {
       <AppShell hideTopbarOnMobile />
       <main className="page-shell flex-1 w-full h-[var(--tg-viewport,100dvh)] lg:h-[calc(100dvh-3.75rem)] overflow-hidden flex items-stretch lg:items-center justify-center !p-0 sm:!p-3 !pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] lg:!pb-4 select-none font-sans min-h-0 bg-[#F2F2F7] dark:bg-[#000000]">
         {/* Main iOS 18 Device Frame Container */}
-        <div className="w-full h-full lg:h-[86vh] sm:max-w-[490px] md:max-w-[510px] relative rounded-none sm:rounded-[34px] overflow-hidden border-0 sm:border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white flex flex-col lg:my-auto transition-all">
+        <div className="w-full h-full lg:h-[86vh] sm:max-w-[490px] md:max-w-[510px] relative rounded-none sm:rounded-3xl overflow-hidden border-0 sm:border border-black/[0.08] dark:border-white/[0.10] shadow-[0_20px_60px_rgba(0,0,0,0.08)] bg-white dark:bg-[#1C1C1E] text-slate-900 dark:text-white flex flex-col lg:my-auto transition-all">
           
           {/* ── TOP HORIZONTAL iOS NAVIGATION & CAPSULES ── */}
           <header className="shrink-0 z-20 flex items-center justify-between px-3.5 pt-3.5 pb-2.5 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border-b border-black/[0.06] dark:border-white/[0.08]">
@@ -693,10 +693,10 @@ function ReelsInner() {
           {/* ── CARD CONTENT / REELS LIST ── */}
           {loading ? (
             <div className="w-full flex-1 flex flex-col items-center justify-center p-6 space-y-4 animate-pulse text-center">
-              <div className="size-14 rounded-[18px] bg-[#767680]/[0.12] mx-auto" />
+              <div className="size-14 rounded-xl bg-[#767680]/[0.12] mx-auto" />
               <div className="h-5 w-44 bg-[#767680]/[0.12] rounded-full mx-auto" />
-              <div className="h-20 w-full bg-[#767680]/[0.08] rounded-[22px]" />
-              <div className="h-36 w-full bg-[#767680]/[0.08] rounded-[22px]" />
+              <div className="h-20 w-full bg-[#767680]/[0.08] rounded-xl" />
+              <div className="h-36 w-full bg-[#767680]/[0.08] rounded-xl" />
             </div>
           ) : reels.length === 0 ? (
             <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center space-y-3">
@@ -749,7 +749,7 @@ function ReelsInner() {
                       )}
 
                       {/* iOS Amber Callout Banner */}
-                      <div className="rounded-[20px] bg-[#FF9500]/[0.10] border border-[#FF9500]/25 p-3 sm:p-3.5 flex items-start gap-3">
+                      <div className="rounded-xl bg-[#FF9500]/[0.10] border border-[#FF9500]/25 p-3 sm:p-3.5 flex items-start gap-3">
                         <PremiumIcon icon={AlertTriangle} tone="amber" size="xs" className="mt-0.5" />
                         <div className="space-y-0.5 flex-1 min-w-0">
                           <h4 className="text-[12px] font-bold uppercase tracking-wider text-[#FF9500]">
@@ -801,7 +801,7 @@ function ReelsInner() {
                     {/* ── MIDDLE SECTION: Question & iOS Option Rows ── */}
                     <div className="flex-1 flex flex-col justify-center py-2.5 sm:py-3 min-h-0 space-y-3 overflow-hidden">
                       {reel.media_type === 'video' && reel.video_url && (
-                        <div className="w-full h-36 rounded-[20px] overflow-hidden bg-black shrink-0 relative">
+                        <div className="w-full h-36 rounded-xl overflow-hidden bg-black shrink-0 relative">
                           <video
                             src={reel.video_url}
                             className="w-full h-full object-cover"
@@ -814,12 +814,12 @@ function ReelsInner() {
                       )}
 
                       {formattedQ.isMatching ? (
-                        <div className="space-y-2 max-h-[28vh] overflow-y-auto no-scrollbar p-3.5 rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.05] dark:border-white/[0.07]">
+                        <div className="space-y-2 max-h-[28vh] overflow-y-auto no-scrollbar p-3.5 rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.05] dark:border-white/[0.07]">
                           <h2 className="text-[13px] sm:text-[14px] font-bold text-slate-900 dark:text-white leading-snug">
                             {formattedQ.prompt}
                           </h2>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
-                            <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-[14px] border border-black/[0.05] dark:border-white/[0.07]">
+                            <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-lg border border-black/[0.05] dark:border-white/[0.07]">
                               <span className="text-[12px] font-bold text-[#FF9500] uppercase block mb-1">
                                 📌 Atamalar:
                               </span>
@@ -829,7 +829,7 @@ function ReelsInner() {
                                 </div>
                               ))}
                             </div>
-                            <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-[14px] border border-black/[0.05] dark:border-white/[0.07]">
+                            <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-lg border border-black/[0.05] dark:border-white/[0.07]">
                               <span className="text-[12px] font-bold text-[#007AFF] uppercase block mb-1">
                                 📝 Izohlar:
                               </span>
@@ -889,11 +889,11 @@ function ReelsInner() {
                               disabled={hasAnswered}
                               onClick={() => handleAnswerQuiz(reel.id, optIdx)}
                               className={cn(
-                                "w-full p-3 sm:p-3.5 rounded-[18px] border text-left flex items-center gap-3 transition-all cursor-pointer group active:scale-[0.985]",
+                                "w-full p-3 sm:p-3.5 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer group active:scale-[0.985]",
                                 cardStyle
                               )}
                             >
-                              <div className={cn("size-8 rounded-[10px] flex items-center justify-center font-mono font-bold text-[13px] shrink-0 transition-colors", badgeStyle)}>
+                              <div className={cn("size-8 rounded-md flex items-center justify-center font-mono font-bold text-[13px] shrink-0 transition-colors", badgeStyle)}>
                                 {letter}
                               </div>
                               <span className="text-[13px] sm:text-[14px] font-semibold flex-1 leading-snug break-words">
@@ -912,7 +912,7 @@ function ReelsInner() {
 
                       {/* Explanation Card when Answered */}
                       {quizAnswer && (
-                        <div className="p-3.5 rounded-[18px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] space-y-1.5 animate-in fade-in duration-300 shrink-0">
+                        <div className="p-3.5 rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] space-y-1.5 animate-in fade-in duration-300 shrink-0">
                           <div className="flex items-center justify-between text-[12px] font-bold">
                             <span className={quizAnswer.isCorrect ? "text-[#34C759] flex items-center gap-1" : "text-[#FF3B30] flex items-center gap-1"}>
                               {quizAnswer.isCorrect ? "✅ To'g'ri javob! (+5 XP)" : "❌ Noto'g'ri javob"}
@@ -1012,11 +1012,11 @@ function ReelsInner() {
         ))}
 
         {/* Desktop Navigation Floating iOS Pill Dock beside the card */}
-        <div className="hidden lg:flex flex-col items-center gap-2 fixed right-4 xl:right-10 top-1/2 -translate-y-1/2 z-30 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.10] p-2 rounded-[22px] shadow-[0_12px_36px_rgba(0,0,0,0.08)]">
+        <div className="hidden lg:flex flex-col items-center gap-2 fixed right-4 xl:right-10 top-1/2 -translate-y-1/2 z-30 bg-white/85 dark:bg-[#1C1C1E]/85 backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.10] p-2 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.08)]">
           <button
             onClick={() => scrollToReel(currentIndex - 1)}
             disabled={currentIndex === 0}
-            className="size-10 rounded-[14px] bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-slate-800 dark:text-white flex items-center justify-center disabled:opacity-25 transition-all active:scale-95 cursor-pointer"
+            className="size-10 rounded-lg bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-slate-800 dark:text-white flex items-center justify-center disabled:opacity-25 transition-all active:scale-95 cursor-pointer"
             title="Oldingi savol (Klaviatura ↑)"
           >
             <ChevronUp className="size-5" />
@@ -1027,7 +1027,7 @@ function ReelsInner() {
           <button
             onClick={() => scrollToReel(currentIndex + 1)}
             disabled={currentIndex >= reels.length - 1}
-            className="size-10 rounded-[14px] bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-slate-800 dark:text-white flex items-center justify-center disabled:opacity-25 transition-all active:scale-95 cursor-pointer"
+            className="size-10 rounded-lg bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-slate-800 dark:text-white flex items-center justify-center disabled:opacity-25 transition-all active:scale-95 cursor-pointer"
             title="Keyingi savol (Klaviatura ↓)"
           >
             <ChevronDown className="size-5" />
@@ -1041,7 +1041,7 @@ function ReelsInner() {
             onClick={() => setActiveCommentReel(null)}
           >
             <div
-              className="w-full sm:max-w-lg bg-white dark:bg-[#1C1C1E] border-t sm:border border-black/[0.08] dark:border-white/[0.10] rounded-t-[32px] sm:rounded-[32px] p-5 sm:p-6 flex flex-col h-[75vh] sm:h-[580px] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
+              className="w-full sm:max-w-lg bg-white dark:bg-[#1C1C1E] border-t sm:border border-black/[0.08] dark:border-white/[0.10] rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 flex flex-col h-[75vh] sm:h-[580px] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-10 h-1.5 bg-[#8E8E93]/30 rounded-full mx-auto mb-3 sm:hidden" />
@@ -1049,7 +1049,7 @@ function ReelsInner() {
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-8 items-center justify-center rounded-[10px] bg-[#007AFF] text-white">
+                  <div className="flex size-8 items-center justify-center rounded-md bg-[#007AFF] text-white">
                     <MessageCircle className="size-4" />
                   </div>
                   <h3 className="font-bold text-[16px] text-slate-900 dark:text-white">
@@ -1099,7 +1099,7 @@ function ReelsInner() {
                             c.user_name.charAt(0).toUpperCase()
                           )}
                         </div>
-                        <div className="flex-1 bg-[#F2F2F7] dark:bg-[#2C2C2E] rounded-[18px] p-3 space-y-1">
+                        <div className="flex-1 bg-[#F2F2F7] dark:bg-[#2C2C2E] rounded-xl p-3 space-y-1">
                           <div className="flex items-center justify-between text-xs">
                             <div className="flex items-center gap-1 min-w-0">
                               <span className="font-bold text-slate-900 dark:text-white truncate">{c.user_name}</span>
@@ -1143,7 +1143,7 @@ function ReelsInner() {
               </div>
 
               {replyingTo && (
-                <div className="flex items-center justify-between text-xs px-3 py-1.5 bg-[#007AFF]/10 border border-[#007AFF]/20 rounded-[12px] text-[#007AFF]">
+                <div className="flex items-center justify-between text-xs px-3 py-1.5 bg-[#007AFF]/10 border border-[#007AFF]/20 rounded-md text-[#007AFF]">
                   <span className="truncate">💬 <b>@{replyingTo.userName}</b> ga javob berilmoqda</span>
                   <button
                     type="button"
@@ -1185,7 +1185,7 @@ function ReelsInner() {
             onClick={() => setIsCreateModalOpen(false)}
           >
             <div
-              className="w-full sm:max-w-xl bg-white dark:bg-[#1C1C1E] border-t sm:border border-black/[0.08] dark:border-white/[0.10] rounded-t-[32px] sm:rounded-[32px] p-5 sm:p-6 flex flex-col max-h-[90vh] sm:max-h-[85vh] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
+              className="w-full sm:max-w-xl bg-white dark:bg-[#1C1C1E] border-t sm:border border-black/[0.08] dark:border-white/[0.10] rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 flex flex-col max-h-[90vh] sm:max-h-[85vh] shadow-2xl relative text-slate-900 dark:text-white animate-in slide-in-from-bottom duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-10 h-1.5 bg-[#8E8E93]/30 rounded-full mx-auto mb-3 sm:hidden" />
@@ -1193,7 +1193,7 @@ function ReelsInner() {
               {/* Modal Header */}
               <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-9 items-center justify-center rounded-[12px] bg-[#007AFF] text-white shadow-xs">
+                  <div className="flex size-9 items-center justify-center rounded-md bg-[#007AFF] text-white shadow-xs">
                     <Sparkles className="size-4.5" />
                   </div>
                   <div>
@@ -1223,7 +1223,7 @@ function ReelsInner() {
                   <select
                     value={createSubject}
                     onChange={(e) => setCreateSubject(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-[#007AFF]"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-[#007AFF]"
                   >
                     <option value="tarix">Tarix</option>
                     <option value="ona-tili">Ona tili va adabiyot</option>
@@ -1244,7 +1244,7 @@ function ReelsInner() {
                     placeholder="Masalan: Qaysi sulola davrida Mirzo Ulug'bek madrasasi qurilgan?.."
                     required
                     maxLength={500}
-                    className="w-full px-3.5 py-2.5 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none focus:border-[#007AFF] resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none focus:border-[#007AFF] resize-none"
                   />
                 </div>
 
@@ -1263,7 +1263,7 @@ function ReelsInner() {
                         <div
                           key={idx}
                           className={cn(
-                            "flex items-center gap-2 p-2 rounded-[14px] border transition-all",
+                            "flex items-center gap-2 p-2 rounded-lg border transition-all",
                             isCorrect
                               ? "border-[#34C759] bg-[#34C759]/10"
                               : "border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E]"
@@ -1273,7 +1273,7 @@ function ReelsInner() {
                             type="button"
                             onClick={() => { tgHaptic('select'); setCreateCorrectIndex(idx); }}
                             className={cn(
-                              "size-7 rounded-[9px] font-mono font-bold text-[12px] flex items-center justify-center shrink-0 transition-colors cursor-pointer",
+                              "size-7 rounded-sm font-mono font-bold text-[12px] flex items-center justify-center shrink-0 transition-colors cursor-pointer",
                               isCorrect
                                 ? "bg-[#34C759] text-white"
                                 : "bg-white dark:bg-[#1C1C1E] text-slate-700 dark:text-slate-200"
@@ -1312,11 +1312,11 @@ function ReelsInner() {
                     placeholder="Nima uchun bu javob to'g'ri ekanligini qisqacha izohlang..."
                     required
                     maxLength={350}
-                    className="w-full px-3.5 py-2.5 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none focus:border-[#007AFF] resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-black/[0.06] dark:border-white/[0.08] bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[14px] text-slate-900 dark:text-white placeholder:text-[#8E8E93] focus:outline-none focus:border-[#007AFF] resize-none"
                   />
                 </div>
 
-                <div className="p-3.5 rounded-[16px] bg-[#FF9500]/10 border border-[#FF9500]/25 flex items-center justify-between text-xs">
+                <div className="p-3.5 rounded-lg bg-[#FF9500]/10 border border-[#FF9500]/25 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 text-[#FF9500] font-semibold">
                     <Zap className="size-4 fill-[#FF9500]" />
                     <span>Tasdiqlanganda darhol hisobingizga mukofot:</span>

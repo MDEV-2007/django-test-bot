@@ -725,7 +725,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 z-40 rounded-t-[32px] border-t border-rose-500/40 bg-zinc-950/95 backdrop-blur-xl p-5 sm:p-7 shadow-2xl max-w-2xl mx-auto"
+            className="fixed inset-x-0 bottom-0 z-40 rounded-t-3xl border-t border-rose-500/40 bg-zinc-950/95 backdrop-blur-xl p-5 sm:p-7 shadow-2xl max-w-2xl mx-auto"
           >
             <div className="mx-auto size-1.5 w-12 rounded-full bg-zinc-700 mb-4" />
 

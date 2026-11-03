@@ -176,7 +176,7 @@ export default function FlashcardsPage() {
       <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-20 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full">
         {/* 1. HERO SIKL BANNERI */}
         {!activeDeck && (
-          <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-violet-950/70 via-zinc-900 to-indigo-950/50 border border-violet-500/25 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-950/70 via-zinc-900 to-indigo-950/50 border border-violet-500/25 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-bold uppercase tracking-wider">
@@ -258,7 +258,7 @@ export default function FlashcardsPage() {
                     <div
                       key={deck.id}
                       onClick={() => openDeck(deck.id)}
-                      className="group p-5 rounded-[26px] border border-white/10 bg-zinc-900/80 hover:bg-zinc-850 hover:border-violet-500/50 transition-all cursor-pointer shadow-lg space-y-3.5 flex flex-col justify-between"
+                      className="group p-5 rounded-2xl border border-white/10 bg-zinc-900/80 hover:bg-zinc-850 hover:border-violet-500/50 transition-all cursor-pointer shadow-lg space-y-3.5 flex flex-col justify-between"
                     >
                       <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
@@ -322,7 +322,7 @@ export default function FlashcardsPage() {
                 {/* 3D Flip Card */}
                 <div
                   onClick={handleFlip}
-                  className="min-h-[280px] sm:min-h-[320px] rounded-[32px] border-2 border-violet-500/30 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-8 shadow-2xl flex flex-col justify-between items-center text-center cursor-pointer transition-all hover:border-violet-500/60 select-none relative overflow-hidden"
+                  className="min-h-[280px] sm:min-h-[320px] rounded-3xl border-2 border-violet-500/30 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-8 shadow-2xl flex flex-col justify-between items-center text-center cursor-pointer transition-all hover:border-violet-500/60 select-none relative overflow-hidden"
                 >
                   <div className="w-full flex items-center justify-between text-xs text-zinc-400">
                     <span className="font-mono uppercase tracking-wider text-violet-400 font-bold">
@@ -384,7 +384,7 @@ export default function FlashcardsPage() {
               </div>
             ) : (
               /* Yakuniy Natija */
-              <div className="rounded-[32px] border border-emerald-500/30 bg-zinc-900/80 p-8 text-center space-y-4 shadow-2xl">
+              <div className="rounded-3xl border border-emerald-500/30 bg-zinc-900/80 p-8 text-center space-y-4 shadow-2xl">
                 <div className="size-16 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
                   <Trophy className="size-8" />
                 </div>

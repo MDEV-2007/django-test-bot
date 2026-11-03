@@ -42,7 +42,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-1rem)] sm:w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-3xl sm:rounded-[28px] border border-border bg-card p-4 sm:p-6 text-card-foreground shadow-2xl">
+      <DialogContent className="w-[calc(100%-1rem)] sm:w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-3xl sm:rounded-2xl border border-border bg-card p-4 sm:p-6 text-card-foreground shadow-2xl">
         <DialogHeader className="space-y-1.5 sm:space-y-2 text-left">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center justify-center size-8 sm:size-9 rounded-xl bg-amber-500/15 text-amber-500 shadow-xs">

@@ -119,7 +119,7 @@ export default function MistakesPage() {
       <AppShell />
       <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-20 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
         {/* Yuqori Hero Banner */}
-        <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-rose-950/70 via-zinc-900 to-orange-950/50 border border-rose-500/20 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-rose-950/70 via-zinc-900 to-orange-950/50 border border-rose-500/20 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold uppercase tracking-wider">
@@ -185,7 +185,7 @@ export default function MistakesPage() {
           </div>
         ) : !data || data.deck.length === 0 ? (
           /* Agar xatolar bo'lmasa — Tabrik ekrani */
-          <div className="rounded-[32px] border border-emerald-500/20 bg-zinc-900/60 p-8 sm:p-12 text-center space-y-4 shadow-xl backdrop-blur-xl">
+          <div className="rounded-3xl border border-emerald-500/20 bg-zinc-900/60 p-8 sm:p-12 text-center space-y-4 shadow-xl backdrop-blur-xl">
             <div className="size-16 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
               <CheckCircle2 className="size-9" />
             </div>
@@ -223,7 +223,7 @@ export default function MistakesPage() {
               </span>
             </div>
 
-            <div className="rounded-[30px] border border-white/10 bg-zinc-900/80 p-6 sm:p-8 shadow-xl space-y-5">
+            <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 sm:p-8 shadow-xl space-y-5">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-400 bg-amber-500/10">
                   {data.deck[idx].topic || 'Mavzu'}

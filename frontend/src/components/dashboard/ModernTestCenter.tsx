@@ -138,7 +138,7 @@ export default function ModernTestCenter({
         {curatedList.map((test) => (
           <div
             key={test.id}
-            className="ios-card ios-card-interactive relative rounded-[26px] p-5 sm:p-6 flex flex-col justify-between"
+            className="ios-card ios-card-interactive relative rounded-2xl p-5 sm:p-6 flex flex-col justify-between"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
@@ -189,7 +189,7 @@ export default function ModernTestCenter({
       {/* iOS Inset Grouped Catalog Row */}
       <Link
         href="/tests"
-        className="ios-card ios-card-interactive flex items-center justify-between rounded-[24px] p-4 text-xs group cursor-pointer"
+        className="ios-card ios-card-interactive flex items-center justify-between rounded-2xl p-4 text-xs group cursor-pointer"
       >
         <div className="flex items-center gap-3">
           <PremiumIcon icon={Layers} tone="sky" size="md" solid />

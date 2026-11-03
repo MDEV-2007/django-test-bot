@@ -34,7 +34,7 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
       </div>
 
       {/* iOS Inset Grouped Accordion List */}
-      <div className="mt-10 overflow-hidden rounded-[28px] border border-black/[0.07] bg-white divide-y divide-black/[0.06] shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
+      <div className="mt-10 overflow-hidden rounded-2xl border border-black/[0.07] bg-white divide-y divide-black/[0.06] shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
         {items.map((item, index) => {
           const isOpen = openIndex === index;
 

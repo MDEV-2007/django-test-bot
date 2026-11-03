@@ -208,7 +208,7 @@ export default function LiveRepublicBanner({
               </>
             ) : (
               <>
-                <span>Ro&apos;yxatdan o&apos;tish (Bepul)</span>
+                <span>Turnirga yozilish (Bepul)</span>
                 <ArrowRight className="size-3.5" />
               </>
             )}

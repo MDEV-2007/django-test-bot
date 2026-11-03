@@ -58,8 +58,8 @@ export default function AuthShell({
           transition={{ duration: dur.slow, ease: easeOut }}
         >
           <div>
-            <div className="mb-6 inline-flex items-center gap-3 rounded-[20px] bg-white/85 dark:bg-[#1C1C1E]/85 p-2.5 pr-4 border border-black/[0.06] dark:border-white/[0.08] shadow-sm backdrop-blur-xl">
-              <div className="flex size-11 items-center justify-center rounded-[13px] bg-gradient-to-b from-[#34C759]/15 to-[#34C759]/5 border border-[#34C759]/25">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-xl bg-white/85 dark:bg-[#1C1C1E]/85 p-2.5 pr-4 border border-black/[0.06] dark:border-white/[0.08] shadow-sm backdrop-blur-xl">
+              <div className="flex size-11 items-center justify-center rounded-lg bg-gradient-to-b from-[#34C759]/15 to-[#34C759]/5 border border-[#34C759]/25">
                 <BrandMark size={30} />
               </div>
               <div>
@@ -81,7 +81,7 @@ export default function AuthShell({
           </div>
 
           {/* iOS Inset Grouped Feature List */}
-          <div className="rounded-[24px] bg-white/90 dark:bg-[#1C1C1E]/90 border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.05] dark:divide-white/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div className="rounded-2xl bg-white/90 dark:bg-[#1C1C1E]/90 border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.05] dark:divide-white/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
             {points.map((p, i) => {
               const Icon = p.icon;
               const sqColor = SQUIRCLE_COLORS[i % SQUIRCLE_COLORS.length];
@@ -91,7 +91,7 @@ export default function AuthShell({
                   className="flex items-center gap-3.5 px-4 py-3.5 text-[13.5px] font-medium text-foreground"
                 >
                   <span
-                    className={`flex size-8 shrink-0 items-center justify-center rounded-[9px] ${sqColor} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]`}
+                    className={`flex size-8 shrink-0 items-center justify-center rounded-sm ${sqColor} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]`}
                   >
                     <Icon className="size-4 stroke-[2.2]" />
                   </span>
@@ -111,10 +111,10 @@ export default function AuthShell({
           transition={{ duration: dur.slow, ease: easeOut, delay: 0.05 }}
           className="mx-auto w-full max-w-[430px] lg:col-span-6"
         >
-          <div className="rounded-[32px] bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.6)]">
+          <div className="rounded-3xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.6)]">
             {/* Apple ID Style App Squircle Header */}
             <div className="mb-6 text-center">
-              <div className="mx-auto mb-3.5 flex size-16 items-center justify-center rounded-[18px] bg-gradient-to-b from-[#F2F2F7] to-white dark:from-[#2C2C2E] dark:to-[#1C1C1E] border border-black/[0.08] dark:border-white/[0.1] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.08)]">
+              <div className="mx-auto mb-3.5 flex size-16 items-center justify-center rounded-xl bg-gradient-to-b from-[#F2F2F7] to-white dark:from-[#2C2C2E] dark:to-[#1C1C1E] border border-black/[0.08] dark:border-white/[0.1] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.08)]">
                 <BrandMark size={40} />
               </div>
               <h1 className="text-[24px] font-bold tracking-[-0.025em] text-foreground">

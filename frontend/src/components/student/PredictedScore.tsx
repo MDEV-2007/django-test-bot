@@ -42,13 +42,13 @@ export default function PredictedScore() {
     apiFetch<Prediction>('/api/analytics/predicted-score/').then(setData).catch(() => setData(null));
   }, [access]);
 
-  if (!data) return <Skeleton className="h-36 w-full rounded-[24px]" />;
+  if (!data) return <Skeleton className="h-36 w-full rounded-2xl" />;
 
   if (!data.ready) {
     const pct = Math.min(100, Math.round((data.sample_size / data.needed) * 100));
     const left = Math.max(0, data.needed - data.sample_size);
     return (
-      <div className="ios-card rounded-[24px] p-5 sm:p-6 space-y-3.5">
+      <div className="ios-card rounded-2xl p-5 sm:p-6 space-y-3.5">
         <div className="flex items-center gap-2.5">
           <PremiumIcon icon={Target} tone="sky" size="xs" solid />
           <p className="text-[15px] font-bold text-foreground">DTM ball bashorati</p>
@@ -77,7 +77,7 @@ export default function PredictedScore() {
   const weak = data.topic_breakdown.filter((t) => t.score < 60).slice(0, 3);
 
   return (
-    <div className="ios-card rounded-[26px] p-5 sm:p-6 space-y-4">
+    <div className="ios-card rounded-2xl p-5 sm:p-6 space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export default function PredictedScore() {
           </p>
           <div className="grid gap-1.5">
             {weak.map((t) => (
-              <div key={t.title} className="flex items-center justify-between gap-3 rounded-[12px] bg-[#FF3B30]/[0.05] px-3 py-1.5 text-[12.5px]">
+              <div key={t.title} className="flex items-center justify-between gap-3 rounded-md bg-[#FF3B30]/[0.05] px-3 py-1.5 text-[12.5px]">
                 <span className="min-w-0 truncate font-medium text-foreground">{t.title}</span>
                 <span className="shrink-0 font-mono font-bold text-[#FF3B30]">{t.score}%</span>
               </div>

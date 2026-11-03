@@ -272,9 +272,9 @@ export default async function LandingPage() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="ios-spring flex items-center gap-2.5 rounded-[18px] border border-black/[0.06] bg-white/85 ios-glass p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:bg-white hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)] group"
+                    className="ios-spring flex items-center gap-2.5 rounded-xl border border-black/[0.06] bg-white/85 ios-glass p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:bg-white hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)] group"
                   >
-                    <span className={`flex size-7.5 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-b ${item.color} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] group-hover:scale-105 transition-transform`}>
+                    <span className={`flex size-7.5 shrink-0 items-center justify-center rounded-md bg-gradient-to-b ${item.color} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] group-hover:scale-105 transition-transform`}>
                       <item.icon className="size-3.5" />
                     </span>
                     <span className="text-xs font-semibold text-[#1C1C1E] truncate">{item.label}</span>
@@ -363,13 +363,13 @@ export default async function LandingPage() {
             ========================================================= */}
         <section className="relative mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
           <RevealOnScroll>
-            <div className="relative overflow-hidden rounded-[36px] border border-white/12 bg-[#1C1C1E] p-8 text-center shadow-[0_24px_60px_rgba(0,0,0,0.18)] sm:p-14 text-white">
+            <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-[#1C1C1E] p-8 text-center shadow-[0_24px_60px_rgba(0,0,0,0.18)] sm:p-14 text-white">
               {/* Apple Intelligence Ambient Glows */}
               <div className="absolute -right-20 -top-20 size-80 rounded-full bg-[#007AFF]/25 blur-3xl pointer-events-none" />
               <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-[#34C759]/20 blur-3xl pointer-events-none" />
 
               <div className="relative z-10 mx-auto max-w-2xl">
-                <span className="inline-flex size-14 items-center justify-center rounded-[18px] bg-gradient-to-b from-[#34C759] to-[#28A745] text-white shadow-[0_8px_20px_rgba(52,199,89,0.35),inset_0_1px_0_rgba(255,255,255,0.35)]">
+                <span className="inline-flex size-14 items-center justify-center rounded-xl bg-gradient-to-b from-[#34C759] to-[#28A745] text-white shadow-[0_8px_20px_rgba(52,199,89,0.35),inset_0_1px_0_rgba(255,255,255,0.35)]">
                   <Sprout className="size-7 text-white" />
                 </span>
 
@@ -425,8 +425,8 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2.5">
-              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-[10px] overflow-hidden border border-black/[0.08] bg-white shadow-2xs">
-                <BrandMark size={28} rounded="rounded-[8px]" />
+              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-md overflow-hidden border border-black/[0.08] bg-white shadow-2xs">
+                <BrandMark size={28} rounded="rounded-sm" />
               </div>
               <span className="text-base font-bold tracking-tight text-[#1C1C1E]">
                 Ilm<span className="text-[#007AFF]">Ildizi</span>

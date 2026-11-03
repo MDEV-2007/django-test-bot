@@ -102,13 +102,13 @@ export default function SubjectsShowcase() {
           <Link
             key={s.shortName}
             href={s.href}
-            className="ios-spring group relative flex flex-col justify-between rounded-[28px] border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_14px_34px_-6px_rgba(0,0,0,0.08)]"
+            className="ios-spring group relative flex flex-col justify-between rounded-2xl border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_14px_34px_-6px_rgba(0,0,0,0.08)]"
           >
             <div>
               {/* Top Row: iOS App Icon Squircle + Syllabus Pill */}
               <div className="flex items-center justify-between">
                 <span
-                  className={`flex size-13 items-center justify-center rounded-[15px] bg-gradient-to-b ${s.squircle} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-200 group-hover:scale-105`}
+                  className={`flex size-13 items-center justify-center rounded-lg bg-gradient-to-b ${s.squircle} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-200 group-hover:scale-105`}
                 >
                   <s.icon className="size-6 stroke-[2.2]" />
                 </span>

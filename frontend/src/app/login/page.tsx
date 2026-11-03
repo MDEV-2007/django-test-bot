@@ -211,7 +211,7 @@ function LoginPageInner() {
         </div>
 
         {error && (
-          <div className="flex items-center gap-2.5 rounded-[16px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3.5 text-[13px] font-medium text-[#FF3B30]">
+          <div className="flex items-center gap-2.5 rounded-lg border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3.5 text-[13px] font-medium text-[#FF3B30]">
             <AlertCircle className="size-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -228,7 +228,7 @@ function LoginPageInner() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* iOS Settings Inset Grouped Input Table */}
-          <div className="overflow-hidden rounded-[18px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.06] dark:divide-white/[0.08]">
+          <div className="overflow-hidden rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.06] dark:divide-white/[0.08]">
             <label htmlFor="username" className="flex items-center gap-3 px-4 py-3 cursor-text">
               <User className="size-4 shrink-0 text-[#8E8E93]" />
               <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">

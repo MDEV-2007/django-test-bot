@@ -571,7 +571,7 @@ export default function CommunityFeedPage() {
               setActiveModalTab('result');
               setIsCreateModalOpen(true);
             }}
-            className="ios-card ios-card-interactive rounded-[26px] p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer"
+            className="ios-card ios-card-interactive rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer"
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <Avatar className="size-10 border border-border shrink-0">
@@ -672,7 +672,7 @@ export default function CommunityFeedPage() {
             {loading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="ios-card rounded-[28px] p-5 space-y-4 animate-pulse">
+                  <div key={i} className="ios-card rounded-2xl p-5 space-y-4 animate-pulse">
                     <div className="flex items-center gap-3">
                       <div className="size-11 rounded-full bg-muted" />
                       <div className="space-y-2 flex-1">
@@ -680,13 +680,13 @@ export default function CommunityFeedPage() {
                         <div className="h-3 w-20 bg-muted/60 rounded-full" />
                       </div>
                     </div>
-                    <div className="h-36 w-full bg-muted rounded-[20px]" />
+                    <div className="h-36 w-full bg-muted rounded-xl" />
                   </div>
                 ))}
               </div>
             ) : posts.length === 0 ? (
               <Reveal>
-                <div className="ios-card rounded-[28px] py-14 px-5 text-center space-y-4">
+                <div className="ios-card rounded-2xl py-14 px-5 text-center space-y-4">
                   <PremiumIcon icon={Trophy} tone="amber" size="xl" className="mx-auto" />
                   <div className="space-y-1">
                     <h3 className="text-base sm:text-lg font-bold text-foreground">
@@ -752,7 +752,7 @@ export default function CommunityFeedPage() {
                         <TargetedAdBanner offer={targetedOffer} weakTopics="Qadimgi Rim, Ochiq savollar" />
                       </div>
                     )}
-                    <article className="ios-card overflow-hidden rounded-[28px] p-4 sm:p-5 space-y-4 min-w-0">
+                    <article className="ios-card overflow-hidden rounded-2xl p-4 sm:p-5 space-y-4 min-w-0">
                       {/* 1. Author Header */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
@@ -823,7 +823,7 @@ export default function CommunityFeedPage() {
 
                       {/* 2. Result / Subject Summary Block */}
                       {post.score > 0 || post.total_questions > 0 || post.grade ? (
-                        <div className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-muted/40 p-3.5 sm:p-4 min-w-0">
+                        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3.5 sm:p-4 min-w-0">
                           <div className="space-y-1 min-w-0 flex-1">
                             <span className="inline-block rounded-full bg-card border border-border px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground">
                               {post.subject_name}
@@ -841,7 +841,7 @@ export default function CommunityFeedPage() {
                           </div>
 
                           {post.score > 0 && (
-                            <div className="flex flex-col items-end shrink-0 rounded-[16px] bg-[#34C759]/14 border border-[#34C759]/25 px-3.5 py-2">
+                            <div className="flex flex-col items-end shrink-0 rounded-lg bg-[#34C759]/14 border border-[#34C759]/25 px-3.5 py-2">
                               <span className="text-lg sm:text-2xl font-bold font-mono tracking-tight text-[#248A3D] dark:text-[#30D158] leading-none">
                                 {post.score?.toFixed(0)}%
                               </span>
@@ -877,7 +877,7 @@ export default function CommunityFeedPage() {
                       {post.image_url && (
                         <div
                           onClick={() => setPreviewImage(post.image_url)}
-                          className="relative overflow-hidden rounded-[22px] border border-border bg-[#F2F2F7] dark:bg-[#1C1C1E] group cursor-pointer flex items-center justify-center max-h-[500px] w-full"
+                          className="relative overflow-hidden rounded-xl border border-border bg-[#F2F2F7] dark:bg-[#1C1C1E] group cursor-pointer flex items-center justify-center max-h-[500px] w-full"
                         >
                           <img
                             src={post.image_url}
@@ -895,7 +895,7 @@ export default function CommunityFeedPage() {
                       {post.test_id && (
                         <Link
                           href={`/tests/mock/${post.test_id}`}
-                          className="ios-spring flex items-center justify-between rounded-[16px] bg-primary/10 hover:bg-primary/15 border border-primary/20 px-4 py-2.5 text-xs font-bold text-primary transition-colors"
+                          className="ios-spring flex items-center justify-between rounded-lg bg-primary/10 hover:bg-primary/15 border border-primary/20 px-4 py-2.5 text-xs font-bold text-primary transition-colors"
                         >
                           <span>Shu testni siz ham yechib ko&apos;ring</span>
                           <ArrowRight className="size-3.5" />
@@ -964,7 +964,7 @@ export default function CommunityFeedPage() {
                                   <div
                                     key={c.id}
                                     className={cn(
-                                      'flex items-start gap-2.5 text-xs p-2.5 rounded-[16px] transition-all',
+                                      'flex items-start gap-2.5 text-xs p-2.5 rounded-lg transition-all',
                                       isReply
                                         ? 'ml-6 bg-muted/40 border-l-2 border-primary/50'
                                         : 'bg-muted/55'
@@ -1097,7 +1097,7 @@ export default function CommunityFeedPage() {
           onClick={() => setPreviewImage(null)}
           className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
         >
-          <div className="relative max-w-3xl w-full max-h-[90vh] overflow-hidden rounded-[28px] border border-white/15 shadow-2xl flex items-center justify-center bg-black/60">
+          <div className="relative max-w-3xl w-full max-h-[90vh] overflow-hidden rounded-2xl border border-white/15 shadow-2xl flex items-center justify-center bg-black/60">
             <button
               type="button"
               onClick={() => setPreviewImage(null)}
@@ -1116,7 +1116,7 @@ export default function CommunityFeedPage() {
 
       {/* Create New Post Dialog Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="w-[calc(100%-1.25rem)] sm:w-full sm:max-w-lg bg-card text-card-foreground border border-border p-0 rounded-[28px] max-h-[85svh] flex flex-col overflow-hidden shadow-2xl">
+        <DialogContent className="w-[calc(100%-1.25rem)] sm:w-full sm:max-w-lg bg-card text-card-foreground border border-border p-0 rounded-2xl max-h-[85svh] flex flex-col overflow-hidden shadow-2xl">
           <div className="p-4 sm:p-5 pb-3.5 border-b border-border shrink-0 bg-muted/25">
             <div className="flex items-center gap-2.5 pr-8">
               <PremiumIcon icon={Plus} tone="emerald" size="sm" solid />
@@ -1130,12 +1130,12 @@ export default function CommunityFeedPage() {
               </div>
             </div>
 
-            <div className="mt-3.5 grid grid-cols-2 gap-1.5 rounded-[14px] bg-muted p-1">
+            <div className="mt-3.5 grid grid-cols-2 gap-1.5 rounded-lg bg-muted p-1">
               <button
                 type="button"
                 onClick={() => setActiveModalTab('result')}
                 className={cn(
-                  'py-2 px-3 rounded-[10px] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
+                  'py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
                   activeModalTab === 'result'
                     ? 'bg-card text-foreground shadow-2xs'
                     : 'text-muted-foreground hover:text-foreground'
@@ -1148,7 +1148,7 @@ export default function CommunityFeedPage() {
                 type="button"
                 onClick={() => setActiveModalTab('custom')}
                 className={cn(
-                  'py-2 px-3 rounded-[10px] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
+                  'py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
                   activeModalTab === 'custom'
                     ? 'bg-card text-foreground shadow-2xs'
                     : 'text-muted-foreground hover:text-foreground'
@@ -1169,7 +1169,7 @@ export default function CommunityFeedPage() {
                     <p className="text-xs text-muted-foreground">Test natijalaringiz yuklanmoqda...</p>
                   </div>
                 ) : userAttempts.length === 0 ? (
-                  <div className="py-8 text-center space-y-3 p-4 rounded-[20px] bg-muted/30 border border-dashed border-border">
+                  <div className="py-8 text-center space-y-3 p-4 rounded-xl bg-muted/30 border border-dashed border-border">
                     <PremiumIcon icon={Award} tone="amber" size="lg" className="mx-auto" />
                     <div>
                       <p className="text-xs font-bold text-foreground">
@@ -1202,7 +1202,7 @@ export default function CommunityFeedPage() {
                             key={att.id}
                             onClick={() => setSelectedAttemptId(att.id)}
                             className={cn(
-                              'p-3 rounded-[18px] border transition-all cursor-pointer flex items-center justify-between gap-2.5 text-xs',
+                              'p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 text-xs',
                               isSelected
                                 ? 'bg-primary/10 border-primary ring-1 ring-primary/30 text-foreground'
                                 : 'bg-card border-border hover:bg-muted/40 text-foreground'
@@ -1262,7 +1262,7 @@ export default function CommunityFeedPage() {
                         value={attemptCaption}
                         onChange={(e) => setAttemptCaption(e.target.value)}
                         placeholder="Masalan: Mehnat o'z mevasini berdi! 88% natija oldim..."
-                        className="rounded-[16px] text-xs sm:text-sm bg-background border-border min-h-[64px] resize-none"
+                        className="rounded-lg text-xs sm:text-sm bg-background border-border min-h-[64px] resize-none"
                         maxLength={500}
                       />
                     </div>
@@ -1311,7 +1311,7 @@ export default function CommunityFeedPage() {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="Masalan: Bugun 50 ta tarix testi yechdim!"
-                    className="rounded-[14px] text-xs sm:text-sm bg-background border-border h-10"
+                    className="rounded-lg text-xs sm:text-sm bg-background border-border h-10"
                     maxLength={150}
                   />
                 </div>
@@ -1324,7 +1324,7 @@ export default function CommunityFeedPage() {
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
                     placeholder="Tarix, Ona tili, Matematika, Biologiya..."
-                    className="rounded-[14px] text-xs sm:text-sm bg-background border-border h-10"
+                    className="rounded-lg text-xs sm:text-sm bg-background border-border h-10"
                     maxLength={60}
                   />
                 </div>
@@ -1337,7 +1337,7 @@ export default function CommunityFeedPage() {
                     value={newCaption}
                     onChange={(e) => setNewCaption(e.target.value)}
                     placeholder="Do'stlaringizga foydali maslahat yoki motivatsiya yozing..."
-                    className="rounded-[16px] text-xs sm:text-sm bg-background border-border min-h-[70px] resize-none"
+                    className="rounded-lg text-xs sm:text-sm bg-background border-border min-h-[70px] resize-none"
                     maxLength={1000}
                   />
                 </div>
@@ -1355,11 +1355,11 @@ export default function CommunityFeedPage() {
                   />
 
                   {imagePreviewUrl ? (
-                    <div className="relative rounded-[18px] overflow-hidden border border-border bg-muted/40 p-2 flex items-center justify-center">
+                    <div className="relative rounded-xl overflow-hidden border border-border bg-muted/40 p-2 flex items-center justify-center">
                       <img
                         src={imagePreviewUrl}
                         alt="Preview"
-                        className="max-h-40 rounded-[12px] object-contain"
+                        className="max-h-40 rounded-md object-contain"
                       />
                       <button
                         type="button"
@@ -1375,7 +1375,7 @@ export default function CommunityFeedPage() {
                   ) : (
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-border hover:border-primary/50 rounded-[18px] p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-muted/25"
+                      className="border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-muted/25"
                     >
                       <PremiumIcon icon={UploadCloud} tone="emerald" size="md" solid />
                       <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
