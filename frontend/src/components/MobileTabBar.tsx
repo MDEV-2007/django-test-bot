@@ -8,9 +8,8 @@ import {
   LayoutDashboard,
   Zap,
   Landmark,
-  Flame,
+  Swords,
   User,
-  Brain,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -54,16 +53,11 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 
-  // 6-Tugmali Bottom Navigation (Asosiy, O'rganish, Mashq, Imtihon, Jamiyat, Profil):
-  // 1. Asosiy (/dashboard)
-  // 2. Mashq (/sprint)
-  // 3. Imtihon (/tests) - Markaziy Katta Tugma
-  // 4. Lenta (/feed)
-  // 5. Profil (/profile)
+  // 5 ta asosiy tab: Bosh sahifa, Sprint, Sinovlar (markaziy), Arena, Profil (pastda alohida).
   const tabs: TabItem[] = [
     {
       href: '/dashboard',
-      label: t('Asosiy'),
+      label: t('Bosh sahifa'),
       icon: LayoutDashboard,
       api: '/api/dashboard/home/',
       activeBg: 'bg-gradient-to-b from-[var(--brand-hover)] to-[var(--brand)]',
@@ -72,21 +66,10 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       activeLabelText: 'text-[var(--brand-text)]',
     },
     {
-      href: '/study',
-      label: t("O'rganish"),
-      icon: Brain,
-      matchPrefixes: ['/study', '/learning', '/library', '/mentor'],
-      featureKey: 'learning',
-      activeBg: 'bg-gradient-to-b from-[#52B788] to-[var(--brand)]',
-      activeShadow: 'shadow-[0_4px_12px_rgba(45,106,79,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
-      inactiveIconText: 'text-[var(--brand-text)]',
-      activeLabelText: 'text-[var(--brand-text)]',
-    },
-    {
       href: '/sprint',
-      label: t('Mashq'),
+      label: t('Sprint'),
       icon: Zap,
-      matchPrefixes: ['/sprint', '/battles', '/games', '/reels'],
+      matchPrefixes: ['/sprint'],
       featureKey: 'sprint',
       activeBg: 'bg-gradient-to-b from-[#FF9500] to-[#FF3B30]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,149,0,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
@@ -96,7 +79,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/tests',
-      label: t('Imtihon'),
+      label: t('Sinovlar'),
       icon: Landmark,
       matchPrefixes: ['/tests', '/dtm-test', '/milliy-sertifikat'],
       api: '/api/tests/',
@@ -106,14 +89,13 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       activeShadow: 'shadow-[0_6px_22px_rgba(88,86,214,0.65),inset_0_1px_0_rgba(255,255,255,0.45)]',
       inactiveIconText: 'text-[#7D7AFF]',
       activeLabelText: 'text-[#5856D6] dark:text-[#9D9BFF]',
-      badge: 'BMB',
     },
     {
-      href: '/feed',
-      label: t('Jamiyat'),
-      icon: Flame,
-      matchPrefixes: ['/feed', '/leaderboard'],
-      api: '/api/learning/feed/',
+      href: '/battles',
+      label: t('Arena'),
+      icon: Swords,
+      matchPrefixes: ['/battles'],
+      featureKey: 'battles',
       activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
       inactiveIconText: 'text-[#FF2D55]',
@@ -215,7 +197,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
           );
         })}
 
-        {/* 5-Tugma: Profil & Eco-Daraxt */}
+        {/* 5-Tab: Profil & Eco-Daraxt */}
         <Link
           href="/profile"
           onClick={() => tgHaptic('select')}

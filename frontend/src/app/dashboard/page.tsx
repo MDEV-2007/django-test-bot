@@ -17,7 +17,6 @@ import {
   Layers,
   Play,
   Gift,
-  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
@@ -31,7 +30,6 @@ import { useFeatureFlags } from '@/lib/features';
 import {
   DailyGoalCard,
 } from '@/components/dashboard/ModernHeroDashboard';
-import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
 import MagneticLoopCard from '@/components/dashboard/MagneticLoopCard';
 import DashboardStoriesBar from '@/components/dashboard/DashboardStoriesBar';
 import SmartB2BSuggestionCard from '@/components/dashboard/SmartB2BSuggestionCard';
@@ -361,7 +359,7 @@ export default function DashboardPage() {
               {/* 0. HAMJAMIYAT & VIP SPONSORED STORIES BAR */}
               <DashboardStoriesBar />
 
-              {/* 1. YAGONA AVTOPILOT KONVEYERI (MAGNIT KUNLIK ZANJIR) */}
+              {/* 1-BLOK: YAGONA KUNLIK ZANJIR (Sprint -> Xatolar -> Arena + Sirli Sandiq) */}
               <MagneticLoopCard
                 userName={firstName}
                 userStreak={p.streak}
@@ -394,19 +392,19 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* 3. CURATED TESTS */}
+              {/* 2-BLOK: Jonli Respublika Sprinti (20:30) */}
+              <LiveRepublicBanner
+                onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
+              />
+
+              {/* 3-BLOK: Tavsiya etilgan sinovlar */}
               <ModernTestCenter
                 activeSubject={activeSubject}
                 weakReviewTopic={data.weak_review?.topic_title || null}
                 theme={isDark ? 'dark' : 'light'}
               />
 
-              {/* Jonli Respublika Sprinti — asosiy sikldan keyingi ikkinchi darajali taklif */}
-              <LiveRepublicBanner
-                onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
-              />
-
-              {/* 4. iOS CONTROL CENTER QUICK STUDY MODULES */}
+              {/* 4-BLOK: O'quv qurollari */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -415,24 +413,7 @@ export default function DashboardPage() {
                   <span className="text-xs font-medium text-muted-foreground">Fokus va xotira mashqlari</span>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                  {isEnabled('learning') && (
-                    <Link
-                      href="/learning"
-                      className="ios-card ios-card-interactive group rounded-[24px] p-4 flex flex-col justify-between border-amber-500/20 hover:border-amber-500/40"
-                    >
-                      <PremiumIcon icon={Zap} tone="amber" size="md" solid className="mb-3 group-hover:scale-105" />
-                      <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-amber-500 transition-colors">
-                          {t('60s Anti-Darslik')}
-                        </h4>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                          BMB Qopqonlari &amp; Oltin Faktlar
-                        </p>
-                      </div>
-                    </Link>
-                  )}
-
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                   {isEnabled('study') && (
                     <Link
                       href="/study"
@@ -549,6 +530,43 @@ export default function DashboardPage() {
                 ))}
               </div>
             </Card>
+
+          {/* 5. KUNLIK BONUS KVEST (server missiyalari) */}
+          {data.missions.length > 0 && (
+            <Card className="rounded-[26px] border border-border bg-card p-5 shadow-card space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <PremiumIcon icon={Gift} tone="emerald" size="xs" solid />
+                  <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                    {t('Kunlik Bonus Kvest')}
+                  </h3>
+                </div>
+                <span className="text-xs font-semibold tabular-nums text-muted-foreground">
+                  {doneMissions}/{data.missions.length}
+                </span>
+              </div>
+              <div className="space-y-2.5">
+                {data.missions.slice(0, 3).map((m) => {
+                  const pct = m.target_count > 0 ? Math.min(100, Math.round((m.current_count / m.target_count) * 100)) : 0;
+                  return (
+                    <div key={m.title} className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className={cn('font-semibold truncate', m.is_completed ? 'text-muted-foreground line-through' : 'text-foreground')}>
+                          {m.title}
+                        </span>
+                        <span className="shrink-0 font-mono text-[11px] font-bold text-primary">
+                          +{m.xp_reward} XP
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
         </div>
       </div>
 

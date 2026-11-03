@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Flame, Trophy, Sparkles, X, ChevronRight,
-  RotateCcw, Swords, BookOpen, AlertTriangle, Lightbulb,
+  RotateCcw, AlertTriangle, Lightbulb,
   CheckCircle2, XCircle, ShieldAlert, Award, ArrowRight,
   Hourglass, Brain, Coins
 } from 'lucide-react';
@@ -153,7 +153,6 @@ export default function NeuralSprintView({
   // ─────────────────────────────────────────────────────────────
   if (isFinished) {
     const hasMistakes = stats.wrong > 0;
-    const isMastered = scorePredictor.topicMasteryPercentage >= 80;
 
     return (
       <div className="relative min-h-[90vh] flex flex-col items-center justify-center p-4 sm:p-6 text-foreground">
@@ -204,77 +203,72 @@ export default function NeuralSprintView({
               <Sparkles className="size-3.5 text-primary" /> Keyingi Qadam (Avtopilot Oqimi)
             </span>
 
+            {/* Kunlik Marafon: 1-Qadam (Sprint) yopildi — keyingi qadamga avtopilot */}
+            <div className="flex items-center gap-2 text-[12px] font-bold text-muted-foreground">
+              <CheckCircle2 className="size-3.5 text-emerald-500" />
+              <span>Kunlik Marafon: 1/3-Qadam yakunlandi</span>
+            </div>
+
             {hasMistakes ? (
-              // Stsenariy A: Xatolar mavjud bo'lsa Flashcard-blits
+              // 1-Qadam -> 2-Qadam: Xatolarni Tozalash
               <Card className="p-4 rounded-2xl border-2 border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-amber-500/10 shadow-lg space-y-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Badge className="bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[12px] font-bold">
-                      {stats.wrong} ta nozik nuqta
+                      {stats.wrong} ta xato
                     </Badge>
-                    <span className="text-xs font-bold text-foreground">Xatolar ustida blits-mashq</span>
+                    <span className="text-xs font-bold text-foreground">Xatolarni tozalash vaqti</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Ushbu mavzuni 100% ga yopish va ballni saqlab qolish uchun 90 soniyalik Flashcard bilan mustahkamlang.
+                    Xatolaringiz Aqlli Xatolar Daftariga tushdi. Ularni hozir yopsangiz, mavzu mustahkamlanadi.
                   </p>
                 </div>
                 <Button
                   asChild
-                  className="w-full rounded-xl bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 text-white font-bold text-xs h-10 shadow-md shadow-primary/25 gap-2 cursor-pointer"
+                  className="w-full min-h-11 h-auto py-2.5 rounded-xl bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 text-white font-bold text-xs shadow-md shadow-primary/25 gap-2 cursor-pointer whitespace-normal"
                 >
-                  <Link href="/study">
-                    <BookOpen className="size-4" />
-                    <span>Flashcard-blitsni Boshlash (+40 Tanga)</span>
-                    <ArrowRight className="size-4 ml-auto" />
-                  </Link>
-                </Button>
-              </Card>
-            ) : isMastered ? (
-              // Stsenariy B: Mavzu > 80% o'zlashtirilgan bo'lsa 1v1 Arena
-              <Card className="p-4 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-primary/10 to-emerald-500/10 shadow-lg space-y-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[12px] font-bold">
-                      Tayyorlik 85%+
-                    </Badge>
-                    <span className="text-xs font-bold text-foreground">Haqiqiy raqib bilan sinov</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Siz hozir bu mavzuda to&apos;liq tayyorsiz! Jonli 1v1 Arenada 60 soniyalik duelda kuch sinashing.
-                  </p>
-                </div>
-                <Button
-                  asChild
-                  className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-bold text-xs h-10 shadow-md shadow-amber-500/25 gap-2 cursor-pointer"
-                >
-                  <Link href="/battles">
-                    <Swords className="size-4" />
-                    <span>1v1 Arena Dueliga Kirish (+50 XP, 2x Bonus)</span>
-                    <ArrowRight className="size-4 ml-auto" />
+                  <Link href="/tests/revision">
+                    <span>🧹 2-Qadamga O&apos;tish: Xatolarni Tozalash (1.5x Combo)</span>
+                    <ArrowRight className="size-4 ml-auto shrink-0" />
                   </Link>
                 </Button>
               </Card>
             ) : (
-              // Boshqa stsenariy: Navbatdagi sprint
-              <Button
-                onClick={() => window.location.reload()}
-                className="w-full rounded-xl bg-primary text-primary-foreground font-bold text-xs h-10 shadow-md gap-2 cursor-pointer"
-              >
-                <RotateCcw className="size-4" />
-                <span>Yangi Fokus Sprintini Boshlash</span>
-              </Button>
+              // 0 ta xato: to'g'ridan-to'g'ri 3-Qadam (Arena)
+              <Card className="p-4 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-primary/10 to-emerald-500/10 shadow-lg space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[12px] font-bold">
+                      0 ta xato
+                    </Badge>
+                    <span className="text-xs font-bold text-foreground">Tozalash shart emas</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Bitta ham xato qilmadingiz — 2-Qadamni o&apos;tkazib, to&apos;g&apos;ridan-to&apos;g&apos;ri Arenaga chiqing.
+                  </p>
+                </div>
+                <Button
+                  asChild
+                  className="w-full min-h-11 h-auto py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-bold text-xs shadow-md shadow-amber-500/25 gap-2 cursor-pointer whitespace-normal"
+                >
+                  <Link href="/battles">
+                    <span>⚔️ Ideal natija! 3-Qadam: 1v1 Arena Dueliga Kirish (2.0x Combo)</span>
+                    <ArrowRight className="size-4 ml-auto shrink-0" />
+                  </Link>
+                </Button>
+              </Card>
             )}
 
-            {/* Ikkilamchi Tugmalar */}
+            {/* Ikkilamchi (xira) tugmalar */}
             <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={onExit}
-                className="text-xs gap-1.5 rounded-xl cursor-pointer"
+                className="text-xs gap-1.5 rounded-xl cursor-pointer text-muted-foreground hover:text-foreground"
               >
-                <BookOpen className="size-3.5" />
-                <span>Boshqa fanni tanlash</span>
+                <RotateCcw className="size-3.5" />
+                <span>Yana sprint / boshqa fan</span>
               </Button>
               <Button
                 asChild
@@ -282,7 +276,7 @@ export default function NeuralSprintView({
                 size="sm"
                 className="text-xs text-muted-foreground hover:text-foreground cursor-pointer rounded-xl"
               >
-                <Link href="/dashboard">Dashboardga qaytish</Link>
+                <Link href="/dashboard">Bosh sahifaga qaytish</Link>
               </Button>
             </div>
           </div>

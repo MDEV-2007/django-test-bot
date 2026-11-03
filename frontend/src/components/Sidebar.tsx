@@ -6,8 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
-  FileCheck2,
-  Bot,
   Layers,
   Swords,
   Trophy,
@@ -18,13 +16,13 @@ import {
   X,
   GraduationCap,
   ShieldCheck,
-  BookOpen,
   Film,
   ChevronRight,
   Zap,
   Flame,
   Landmark,
   Brain,
+  RotateCcw,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { tgHaptic } from '@/lib/telegram';
@@ -69,46 +67,37 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    // Aynan 6 ta asosiy bo'lim. Ikkilamchi sahifalar faol bo'limning ostida ko'rinadi.
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
+      { href: '/sprint', label: 'Jonli Sprint', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
       {
-        href: '/study', label: "O'rganish", icon: Brain, badge: null, tone: 'amber', featureKey: 'learning',
+        href: '/tests', label: 'Sinov Testlari', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests',
+        matchPrefixes: ['/dtm-test', '/milliy-sertifikat'],
+      },
+      {
+        href: '/study', label: "O'rganish & Shpargalka", icon: Brain, badge: null, tone: 'amber', featureKey: 'learning',
         matchPrefixes: ['/study', '/learning', '/library', '/mentor'],
-        children: [
-          { href: '/study', label: "Fokus & Shpargalkalar" },
-          { href: '/library', label: 'Kutubxona & Bazalar' },
-          { href: '/mentor', label: 'AI Mentor (24/7)' },
-        ],
       },
-      {
-        href: '/sprint', label: 'Mashq & Arena', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint',
-        matchPrefixes: ['/sprint', '/battles', '/games', '/reels'],
-        children: [
-          { href: '/sprint', label: 'Kunlik mashq' },
-          { href: '/battles', label: '1v1 Arena' },
-          { href: '/reels', label: 'Bilim Reels' },
-        ],
-      },
-      { href: '/tests', label: 'Imtihon', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests', '/dtm-test', '/milliy-sertifikat'] },
-      {
-        href: '/feed', label: 'Jamiyat', icon: Flame, badge: null, tone: 'rose',
-        matchPrefixes: ['/feed', '/leaderboard'],
-        children: [
-          { href: '/feed', label: "Lenta & Story'lar" },
-          { href: '/leaderboard', label: 'Liga & Reyting' },
-        ],
-      },
-      {
-        href: '/profile', label: 'Profil', icon: User, badge: null, tone: 'sky',
-        matchPrefixes: ['/profile', '/shop', '/premium'],
-        children: [
-          { href: '/profile', label: 'Mening natijalarim' },
-          { href: '/shop', label: "Do'kon & Sovg'a" },
-          { href: '/premium', label: 'VIP Obuna' },
-        ],
-      },
+      { href: '/feed', label: 'Hamjamiyat', icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'], api: '/api/learning/feed/' },
+    ],
+  },
+  {
+    label: 'Musobaqa & Xotira',
+    items: [
+      { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'Live', tone: 'rose', featureKey: 'battles', matchPrefixes: ['/battles'] },
+      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: null, tone: 'rose', featureKey: 'reels', matchPrefixes: ['/reels'] },
+      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'purple', featureKey: 'flashcards', matchPrefixes: ['/flashcards'] },
+      { href: '/tests/revision', label: 'Xatolar ustida ishlash', icon: RotateCcw, badge: null, tone: 'amber', matchPrefixes: ['/tests/revision', '/tests/mistakes'] },
+      { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'amber', featureKey: 'leaderboard', matchPrefixes: ['/leaderboard'] },
+    ],
+  },
+  {
+    label: 'Shaxsiy',
+    items: [
+      { href: '/profile', label: 'Profilim', icon: User, badge: null, tone: 'sky', matchPrefixes: ['/profile'] },
+      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, tone: 'emerald', matchPrefixes: ['/analytics'] },
+      { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'VIP', vip: true, tone: 'gold', matchPrefixes: ['/premium'] },
     ],
   },
 ];
@@ -136,8 +125,14 @@ export default function Sidebar({
 
   if (isTeacher || isAdmin) return null;
 
-  const isActive = (item: NavItem) =>
-    pathname === item.href || (item.matchPrefixes?.some((p) => pathname.startsWith(p)) ?? false);
+  const isActive = (item: NavItem) => {
+    if (pathname === item.href || (item.matchPrefixes?.some((p) => pathname.startsWith(p)) ?? false)) return true;
+    // "Sinov Testlari" /tests/* ostida faol, lekin Xatolar daftari o'z bandiga ega.
+    return item.href === '/tests'
+      && pathname.startsWith('/tests/')
+      && !pathname.startsWith('/tests/revision')
+      && !pathname.startsWith('/tests/mistakes');
+  };
 
   const sidebarContent = (
     <div className="flex h-full flex-col justify-between overflow-y-auto scrollbar-none px-3.5 py-5 select-none bg-card/85 ios-glass text-card-foreground">

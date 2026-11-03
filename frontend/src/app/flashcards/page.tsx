@@ -193,7 +193,7 @@ export default function FlashcardsPage() {
 
               <div className="flex items-center gap-3 shrink-0">
                 <Button asChild variant="outline" className="rounded-xl border-white/10 text-white font-bold">
-                  <Link href="/tests/mistakes">
+                  <Link href="/tests/revision">
                     <Flame className="size-4 text-orange-400 mr-1.5" />
                     <span>{t("Mening xatolarim")}</span>
                   </Link>
@@ -232,7 +232,7 @@ export default function FlashcardsPage() {
                 variant="outline"
                 className="shrink-0 rounded-full font-bold border-rose-500/40 text-rose-400 hover:bg-rose-500/10 cursor-pointer"
               >
-                <Link href="/tests/mistakes">
+                <Link href="/tests/revision">
                   🔥 {t("Xatolar Banki")}
                 </Link>
               </Button>

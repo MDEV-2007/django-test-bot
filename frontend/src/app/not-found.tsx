@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 const QUICK_LINKS = [
   { href: '/dashboard', label: 'Asosiy Dashboard', icon: LayoutDashboard },
   { href: '/tests', label: 'Test Markazi', icon: FileCheck2 },
-  { href: '/learning', label: "Darslar & O'qish", icon: BookOpen },
+  { href: '/study', label: "Darslar & O'qish", icon: BookOpen },
   { href: '/leaderboard', label: 'Reyting Jadvali', icon: Trophy },
 ];
 

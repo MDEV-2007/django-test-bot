@@ -167,7 +167,7 @@ export default function SprintPage() {
 
   const handleExitSprint = () => {
     if (searchParams.get('from') === 'learning') {
-      router.push('/learning');
+      router.push('/study');
       return;
     }
     setIsSprintActive(false);

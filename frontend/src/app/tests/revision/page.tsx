@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { celebrate } from '@/lib/confetti';
-import { RotateCcw, CheckCircle2, XCircle, ArrowRight, Flame, PartyPopper, AlertTriangle } from 'lucide-react';
+import { RotateCcw, CheckCircle2, XCircle, ArrowRight, Flame, PartyPopper, AlertTriangle, Swords } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -160,6 +161,8 @@ export default function RevisionPage() {
           }
         />
 
+        <DailyChainBar deckDone={!item} />
+
         {combo >= 3 && (
           <motion.div
             key={combo}
@@ -249,6 +252,16 @@ export default function RevisionPage() {
                 <p className="text-[16px] font-bold text-slate-900 dark:text-white">Barcha xatolar muvaffaqiyatli tuzatildi!</p>
               </>
             )}
+            <p className="text-[13px] text-[#8E8E93]">Kunlik Marafon: 2/3-Qadam yopildi. Oxirgi qadam qoldi!</p>
+            <div className="pt-3">
+              <Button asChild size="lg" className="h-auto min-h-12 whitespace-normal rounded-full bg-gradient-to-r from-amber-500 to-emerald-600 px-6 py-3 font-bold text-white shadow-md hover:from-amber-600 hover:to-emerald-700">
+                <Link href="/battles">
+                  <Swords className="size-4 shrink-0" />
+                  <span>⚔️ Yakuniy 3-Qadam: 1v1 Arena Dueliga Kirish (🎁 Sirli Sandiqni ochish)</span>
+                  <ArrowRight className="size-4 shrink-0" />
+                </Link>
+              </Button>
+            </div>
           </div>
         )}
 
@@ -372,8 +385,56 @@ export default function RevisionPage() {
             </div>
           </motion.div>
         )}
+
+        {item && (
+          <div className="flex flex-col items-center gap-2 pt-2 text-center">
+            <p className="text-[12px] text-[#8E8E93]">
+              Kunlik Marafon: 2/3-Qadam · Qolgan xatolar: {data.deck.length - idx} ta
+            </p>
+            <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal rounded-full px-5 py-2.5 font-semibold">
+              <Link href="/battles">
+                <span>⚔️ Yakuniy 3-Qadam: 1v1 Arena Dueliga Kirish (🎁 Sirli Sandiqni ochish)</span>
+                <ArrowRight className="size-4 shrink-0" />
+              </Link>
+            </Button>
+          </div>
+        )}
       </main>
     </>
+  );
+}
+
+function DailyChainBar({ deckDone }: { deckDone: boolean }) {
+  const steps: { label: string; state: 'done' | 'current' | 'next' }[] = [
+    { label: '1. Fokus Sprint', state: 'done' },
+    { label: '2. Xatolarni Tozalash', state: deckDone ? 'done' : 'current' },
+    { label: '3. 1v1 Arena', state: deckDone ? 'current' : 'next' },
+  ];
+  return (
+    <div className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1E] p-3 sm:p-4 space-y-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[12px] font-bold uppercase tracking-wider text-[#FF9500]">Kunlik Marafon: 2/3-Qadam</span>
+        <Link href="/battles" className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#007AFF] hover:underline">
+          3-Qadam <ArrowRight className="size-3.5" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {steps.map((s) => (
+          <div
+            key={s.label}
+            className={cn(
+              'flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-[12px] font-semibold',
+              s.state === 'done' && 'bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]',
+              s.state === 'current' && 'bg-[#FF9500]/12 text-[#FF9500] ring-1 ring-[#FF9500]/40',
+              s.state === 'next' && 'bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#8E8E93]'
+            )}
+          >
+            {s.state === 'done' ? <CheckCircle2 className="size-3.5 shrink-0" /> : <span className="size-1.5 shrink-0 rounded-full bg-current" />}
+            <span className="truncate">{s.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

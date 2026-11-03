@@ -215,6 +215,27 @@ class ExplainMistakeAPIView(APIView):
         except Exception as e:
             logger.debug(f"UserMistakeNotebook yozishda xatolik: {e}")
 
+        # Daily chain step 1 -> step 2: sprint mistakes must land in the same
+        # spaced-repetition deck that /tests/revision reads (RevisionItem).
+        try:
+            from tests_app.models import RevisionItem
+            profile = getattr(user, 'profile', None)
+            question = Question.objects.only('id', 'subject_id').filter(pk=question_id).first()
+            if profile is not None and question is not None:
+                item, created = RevisionItem.objects.get_or_create(
+                    profile=profile,
+                    question=question,
+                    defaults={'subject_id': question.subject_id, 'times_wrong': 1, 'mastered': False},
+                )
+                if not created:
+                    RevisionItem.objects.filter(pk=item.pk).update(
+                        times_wrong=F('times_wrong') + 1,
+                        mastered=False,
+                        updated_at=timezone.now(),
+                    )
+        except Exception as e:
+            logger.debug(f"RevisionItem yozishda xatolik: {e}")
+
 
 class ResolveRevengeMistakeAPIView(APIView):
     """POST /api/v1/sprint/resolve-revenge/
