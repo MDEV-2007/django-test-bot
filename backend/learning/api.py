@@ -550,6 +550,10 @@ def study_session_complete_api(request):
     except (ValueError, TypeError):
         goals_done = 1
 
+    # Klient qiymatlari ishonchsiz: sessiya davomiyligi va maqsadlar sonini cheklaymiz.
+    duration_minutes = max(1, min(60, duration_minutes))
+    goals_done = max(0, min(5, goals_done))
+
     # Har 25 daqiqa dars uchun 25 XP va 10 tanga
     xp_gain = max(10, min(150, int((duration_minutes / 25) * 25) + goals_done * 5))
     coin_gain = max(5, min(50, int((duration_minutes / 25) * 10)))

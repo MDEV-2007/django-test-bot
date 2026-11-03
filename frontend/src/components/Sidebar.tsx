@@ -59,6 +59,7 @@ interface NavItem {
   vip?: boolean;
   highlight?: boolean;
   teacherOrAdminOnly?: boolean;
+  children?: { href: string; label: string }[];
 }
 
 interface NavGroup {
@@ -68,31 +69,46 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
+    // Aynan 6 ta asosiy bo'lim. Ikkilamchi sahifalar faol bo'limning ostida ko'rinadi.
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
-      { href: '/study', label: "O'rganish & Shpargalkalar", icon: Brain, badge: '60s', glow: true, tone: 'amber', featureKey: 'learning', matchPrefixes: ['/study', '/learning'] },
-      { href: '/sprint', label: 'Mashq & 1v1 Arena', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint', '/battles'] },
-      { href: '/tests', label: 'Imtihon Zali', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests'] },
-      { href: '/feed', label: "Lenta & Story'lar", icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'] },
-      { href: '/library', label: 'Bazalar & Kitoblar', icon: BookOpen, badge: null, tone: 'emerald', featureKey: 'library', matchPrefixes: ['/library'] },
-      { href: '/profile', label: 'Profil', icon: User, badge: '', tone: 'sky', matchPrefixes: ['/profile'] },
-    ],
-  },
-  {
-    label: 'Intellekt & Qo\'shimcha',
-    items: [
-      { href: '/mentor', label: 'AI Mentor (24/7)', icon: Bot, badge: 'AI', highlight: true, tone: 'purple', featureKey: 'ai_mentor' },
-      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: '60s', glow: true, tone: 'rose', matchPrefixes: ['/reels'] },
-      { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'gold', matchPrefixes: ['/leaderboard'] },
-    ],
-  },
-  {
-    label: 'Boshqaruv & Ustoz',
-    items: [
-      { href: '/teacher', label: 'Sinfxona (Ustozlar)', icon: GraduationCap, badge: 'Sinf', tone: 'amber', matchPrefixes: ['/teacher'], teacherOrAdminOnly: true },
-      { href: '/panel/features', label: 'Super Admin Paneli', icon: ShieldCheck, badge: 'Flags', tone: 'gold', teacherOrAdminOnly: true },
-      { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'PRO', tone: 'gold', vip: true },
+      {
+        href: '/study', label: "O'rganish", icon: Brain, badge: null, tone: 'amber', featureKey: 'learning',
+        matchPrefixes: ['/study', '/learning', '/library', '/mentor'],
+        children: [
+          { href: '/study', label: "Fokus & Shpargalkalar" },
+          { href: '/library', label: 'Kutubxona & Bazalar' },
+          { href: '/mentor', label: 'AI Mentor (24/7)' },
+        ],
+      },
+      {
+        href: '/sprint', label: 'Mashq & Arena', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint',
+        matchPrefixes: ['/sprint', '/battles', '/games', '/reels'],
+        children: [
+          { href: '/sprint', label: 'Kunlik mashq' },
+          { href: '/battles', label: '1v1 Arena' },
+          { href: '/reels', label: 'Bilim Reels' },
+        ],
+      },
+      { href: '/tests', label: 'Imtihon', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests', matchPrefixes: ['/tests', '/dtm-test', '/milliy-sertifikat'] },
+      {
+        href: '/feed', label: 'Jamiyat', icon: Flame, badge: null, tone: 'rose',
+        matchPrefixes: ['/feed', '/leaderboard'],
+        children: [
+          { href: '/feed', label: "Lenta & Story'lar" },
+          { href: '/leaderboard', label: 'Liga & Reyting' },
+        ],
+      },
+      {
+        href: '/profile', label: 'Profil', icon: User, badge: null, tone: 'sky',
+        matchPrefixes: ['/profile', '/shop', '/premium'],
+        children: [
+          { href: '/profile', label: 'Mening natijalarim' },
+          { href: '/shop', label: "Do'kon & Sovg'a" },
+          { href: '/premium', label: 'VIP Obuna' },
+        ],
+      },
     ],
   },
 ];
@@ -220,8 +236,8 @@ export default function Sidebar({
                     const active = isActive(item);
 
                     return (
+                      <div key={item.href}>
                       <Link
-                        key={item.href}
                         href={item.href}
                         onClick={onMobileClose}
                         onMouseEnter={() => item.api && prefetchApi(item.api)}
@@ -262,6 +278,26 @@ export default function Sidebar({
                           </span>
                         )}
                       </Link>
+                        {active && item.children && (
+                          <div className="ml-[38px] mt-0.5 mb-1 space-y-0.5 border-l border-border pl-2.5">
+                            {item.children.map((c) => (
+                              <Link
+                                key={c.href}
+                                href={c.href}
+                                onClick={onMobileClose}
+                                className={cn(
+                                  'block rounded-md px-2 py-1.5 text-[13px] transition-colors',
+                                  pathname === c.href || pathname.startsWith(c.href + '/')
+                                    ? 'font-semibold text-primary'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                )}
+                              >
+                                {t(c.label)}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

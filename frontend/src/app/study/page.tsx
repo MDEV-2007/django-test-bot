@@ -292,8 +292,26 @@ export default function StudyRoomPage() {
     setIsRunning(false);
     setSessionsCompleted((prev) => prev + 1);
 
-    const xpEarned = activeMission.xpReward;
-    const newStreak = currentStreak + 1;
+    // Mukofot faqat server javobiga ko'ra ko'rsatiladi (kunlik limit / xato bo'lsa 0 XP).
+    let xpEarned = 0;
+    let newStreak = currentStreak;
+    try {
+      const res = await apiFetch<{ xp_earned: number; streak: number }>(
+        '/api/learning/study/complete/',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            duration_minutes: durationMinutes,
+            mission_id: activeMission.id,
+          }),
+        },
+      );
+      xpEarned = res.xp_earned ?? 0;
+      newStreak = res.streak ?? currentStreak;
+      fetchMe().catch(() => {});
+    } catch {
+      // Tarmoq xatosi: yolg'on mukofot ko'rsatmaymiz.
+    }
 
     setCompletedStats({
       xpEarned,
@@ -303,19 +321,6 @@ export default function StudyRoomPage() {
       subject: activeMission.subject,
     });
     setShowCompletionModal(true);
-
-    try {
-      await apiFetch('/api/learning/study/complete/', {
-        method: 'POST',
-        body: JSON.stringify({
-          duration_minutes: durationMinutes,
-          mission_id: activeMission.id,
-        }),
-      });
-      fetchMe().catch(() => {});
-    } catch {
-      // Offline / demo fallback
-    }
   }
 
   const toggleTimer = () => {

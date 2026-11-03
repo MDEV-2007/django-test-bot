@@ -10,6 +10,7 @@ import {
   Landmark,
   Flame,
   User,
+  Brain,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
@@ -53,7 +54,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 
-  // 5-Tugmali Super-App Bottom Navigation:
+  // 6-Tugmali Bottom Navigation (Asosiy, O'rganish, Mashq, Imtihon, Jamiyat, Profil):
   // 1. Asosiy (/dashboard)
   // 2. Mashq (/sprint)
   // 3. Imtihon (/tests) - Markaziy Katta Tugma
@@ -71,10 +72,21 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       activeLabelText: 'text-[var(--brand-text)]',
     },
     {
+      href: '/study',
+      label: t("O'rganish"),
+      icon: Brain,
+      matchPrefixes: ['/study', '/learning', '/library', '/mentor'],
+      featureKey: 'learning',
+      activeBg: 'bg-gradient-to-b from-[#52B788] to-[var(--brand)]',
+      activeShadow: 'shadow-[0_4px_12px_rgba(45,106,79,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+      inactiveIconText: 'text-[var(--brand-text)]',
+      activeLabelText: 'text-[var(--brand-text)]',
+    },
+    {
       href: '/sprint',
       label: t('Mashq'),
       icon: Zap,
-      matchPrefixes: ['/sprint', '/battles', '/games'],
+      matchPrefixes: ['/sprint', '/battles', '/games', '/reels'],
       featureKey: 'sprint',
       activeBg: 'bg-gradient-to-b from-[#FF9500] to-[#FF3B30]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,149,0,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
@@ -98,9 +110,9 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/feed',
-      label: t('Lenta'),
+      label: t('Jamiyat'),
       icon: Flame,
-      matchPrefixes: ['/feed', '/reels'],
+      matchPrefixes: ['/feed', '/leaderboard'],
       api: '/api/learning/feed/',
       activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
@@ -114,7 +126,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const isActive = (href: string, prefixes?: string[]) =>
     pathname === href || (prefixes?.some((p) => pathname.startsWith(p)) ?? false);
 
-  const isProfileActive = pathname.startsWith('/profile');
+  const isProfileActive = ['/profile', '/shop', '/premium'].some((p) => pathname.startsWith(p));
 
   return (
     <div className="ilm-mobile-tabbar fixed inset-x-0 bottom-2.5 z-40 flex justify-center px-2.5 sm:px-5 lg:hidden pointer-events-none select-none pb-[env(safe-area-inset-bottom,0px)]">
