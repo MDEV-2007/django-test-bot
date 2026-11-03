@@ -28,6 +28,9 @@ load_dotenv(BASE_DIR / '.env')
 # Falls back to a dev-only key so `manage.py` still runs if .env is missing —
 # always set a real SECRET_KEY via .env outside of local development.
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-fallback-key-do-not-use-in-production')
+# Placeholder values shipped in .env.example — production refuses to start with them
+# (see the DEBUG=False guard further down).
+_INSECURE_SECRET_KEYS = {'change-me-to-a-random-value', 'changeme', 'secret'}
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Defaults to False (fail-safe): if .env is ever missing or DEBUG is unset for any reason
@@ -314,6 +317,15 @@ if not DEBUG:
             "deploy/DEPLOY_VPS.md. Running production on SQLite/in-memory cache silently "
             "breaks under real concurrent traffic instead of failing here at startup."
         )
+    # The dev fallback key is public (it is in this file). Running production on it lets
+    # anyone forge JWTs for any account, including superadmins, and forge signed parent
+    # payment links. Refuse to start instead of silently using it.
+    if not os.environ.get('SECRET_KEY') or SECRET_KEY in _INSECURE_SECRET_KEYS or SECRET_KEY.startswith('django-insecure'):
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured(
+            "SECRET_KEY must be set to a real random value when DEBUG=False (production). "
+            "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(50))\""
+        )
 
 
 # Password validation
@@ -457,6 +469,52 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-# CEFR Listening va boshqa audio/video fayllar uchun maksimal hajm (150MB)
-DATA_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024  # 150MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024  # 150MB
+# Yuklama hajmi. Fayllarning umumiy chegarasi nginx'da (client_max_body_size 150M —
+# CEFR Listening audiolari). Bu yerda faqat XOTIRADA qancha ushlanishi:
+# - FILE_UPLOAD_MAX_MEMORY_SIZE: 5MB dan katta fayl vaqtinchalik faylga (diskka) yoziladi.
+#   Ilgari 150MB edi — 4 ta worker bir vaqtda katta audio qabul qilsa, kichik VPS xotirasi
+#   tugab, sayt to'xtardi. 150MB gacha fayl yuklash avvalgidek ishlaydi.
+# - DATA_UPLOAD_MAX_MEMORY_SIZE: fayl bo'lmagan so'rov tanasi (JSON, forma maydonlari).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024  # 20MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+
+# Logging: everything goes to stdout, where `docker compose logs web` picks it up. Before
+# this there was no LOGGING config, so app-level logger.warning/exception calls (payment
+# notifications, broadcasts, AI failures) had no consistent format or level.
+LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'plain': {'format': '%(asctime)s %(levelname)s %(name)s: %(message)s'},
+    },
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'plain'},
+    },
+    'root': {'handlers': ['console'], 'level': LOG_LEVEL},
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        # 5xx and unhandled exceptions with their tracebacks.
+        'django.request': {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
+    },
+}
+
+# Error monitoring (optional): set SENTRY_DSN in .env to get an alert with the traceback
+# for every unhandled server error. Without it nothing changes. A Sentry problem must
+# never stop the site from booting, hence the broad except.
+SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            environment=os.environ.get('SENTRY_ENVIRONMENT', 'production' if not DEBUG else 'development'),
+            traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0')),
+            send_default_pii=False,
+        )
+    except Exception as exc:  # pragma: no cover
+        import logging as _logging
+        _logging.getLogger(__name__).warning('Sentry init skipped: %s', exc)

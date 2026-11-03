@@ -81,6 +81,9 @@ class EvaluateEssayAPIView(APIView):
 
         if not essay_text:
             return Response({'ok': False, 'error': "Esse matni kiritilmadi."}, status=400)
+        if not claim_daily_reward(request.user.id, 'essay_ai'):
+            return Response({'ok': False, 'error': "Bugungi AI esse tekshiruvi limiti tugadi. Ertaga qayta urinib ko'ring."},
+                            status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         is_vip = quota.is_vip()
         can_use = quota.can_use_essay()

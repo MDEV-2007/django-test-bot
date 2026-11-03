@@ -23,6 +23,9 @@ DAILY_REWARD_LIMITS = {
     'battle_bot': 15,
     # Mukofot emas, AI xarajati: ochiq javobni Groq bilan baholash (user.id bo'yicha).
     'open_question_ai': 60,
+    # Esse tekshiruvi: qulflangan (bepul) natija ham to'liq Groq chaqiruvi. Limitsiz bo'lsa,
+    # bitta o'quvchi bepul kvotani tugatib, AI'ni hamma uchun o'chirib qo'yishi mumkin edi.
+    'essay_ai': 10,
 }
 
 _DAY_SECONDS = 60 * 60 * 26
