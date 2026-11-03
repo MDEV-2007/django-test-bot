@@ -379,9 +379,11 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             nextStageNumber={currentStageIndex + 1}
             nextStageTitle={STEPS[currentStageIndex]?.label || "Keyingi bosqich"}
             nextStageBenefit={
-              mistakeIds.length > 0 && currentStageIndex === 2
+              // 1 — sprint tugadi, keyingisi xatolar flashcardi. Ilgari `=== 2` edi va bu
+              // xabar flashcardlardan KEYIN chiqardi; combo esa oshmasa ham "oshdi" deyilardi.
+              mistakeIds.length > 0 && currentStageIndex === 1
                 ? `Hozirgi sprintda ${mistakeIds.length} ta nozik xato aniqlandi — ularni 60 soniyada Flashcard bilan yopamiz!`
-                : "Ajoyib natija! Combo bonusingiz oshdi — to'xtamasdan Sirli Sandiq tomon intilamiz!"
+                : "Ajoyib natija! To'xtamasdan Sirli Sandiq tomon intilamiz!"
             }
             comboMultiplier={loop?.combo_multiplier || 1.0}
             secondsLeft={autoplaySecondsLeft}

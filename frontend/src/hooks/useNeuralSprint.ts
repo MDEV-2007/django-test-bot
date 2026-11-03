@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { tgHaptic, useTelegramBackButton } from '@/lib/telegram';
+import { apiFetch } from '@/lib/api-client';
 import type {
   QuestionItem,
   QuestionOption,
@@ -207,9 +208,9 @@ export function useNeuralSprint({
 
         // Django backendga xatoni yechildi deb belgilash signali
         const targetQId = currentQuestion.originalQuestionId || currentQuestion.id;
-        fetch('/api/v1/sprint/resolve-revenge/', {
+        // apiFetch: token bilan. Oddiy fetch sarlavhasiz ketib, har doim 401 olardi.
+        apiFetch('/api/v1/sprint/resolve-revenge/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ question_id: targetQId }),
         }).catch(() => {});
       }
@@ -295,14 +296,12 @@ export function useNeuralSprint({
       };
 
       try {
-        const res = await fetch('/api/v1/sprint/explain-mistake/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
+        const json = await apiFetch<{ ok: boolean; cached?: boolean; data?: Record<string, string> }>(
+          '/api/v1/sprint/explain-mistake/',
+          { method: 'POST', body: JSON.stringify(payload) },
+        ).catch(() => null);
 
-        if (res.ok) {
-          const json = await res.json();
+        if (json) {
           if (json.ok && json.data) {
             const expData: MistakeExplanationCache = {
               questionId: json.data.question_id || realQuestionId,

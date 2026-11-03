@@ -64,31 +64,39 @@ export default function Stage5RewardCeremony({
     setSharing(false);
   };
 
+  // Bekor qilingani ref'da ham saqlanadi: state yangilanishi kechiksa ham, allaqachon
+  // navbatga tushgan tik keyingi raundni boshlab yubormasin.
+  const cancelledRef = useRef(false);
+  const firedRef = useRef(false);
+
   const cancelTimer = () => {
+    cancelledRef.current = true;
     setTimerActive(false);
     if (timerRef.current) clearInterval(timerRef.current);
   };
 
-  // 5 soniyalik avtopilot taymeri (1- va 2-raundlar tugaganda)
+  // 5 soniyalik avtopilot taymeri (1- va 2-raundlar tugaganda). Taymer faqat sanaydi;
+  // raundni boshlash pastdagi alohida effektda. Ilgari `onRestartCycle` setState
+  // updater ichida chaqirilardi — StrictMode'da ikki marta ishlardi va "To'xtatish"
+  // bosilgandan keyin ham raund boshlanib ketardi.
   useEffect(() => {
-    if (chestOpened && cycleNumber < 3 && timerActive) {
-      setCountdown(5);
-      timerRef.current = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            onRestartCycle();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    if (!(chestOpened && cycleNumber < 3 && timerActive)) return;
+    setCountdown(5);
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [chestOpened, cycleNumber, timerActive]);
 
-      return () => {
-        if (timerRef.current) clearInterval(timerRef.current);
-      };
-    }
-  }, [chestOpened, cycleNumber, timerActive, onRestartCycle]);
+  useEffect(() => {
+    if (countdown !== 0 || !timerActive || cancelledRef.current || firedRef.current) return;
+    if (!(chestOpened && cycleNumber < 3)) return;
+    firedRef.current = true;
+    if (timerRef.current) clearInterval(timerRef.current);
+    onRestartCycle();
+  }, [countdown, timerActive, chestOpened, cycleNumber, onRestartCycle]);
 
   // Suv hisobi (Raund 1: 35%, Raund 2: 70%, Raund 3: 100%)
   const waterLevel = cycleNumber >= 3 ? 100 : cycleNumber === 2 ? 70 : 35;

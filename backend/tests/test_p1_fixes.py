@@ -117,3 +117,19 @@ class LearningLoopFlowTests(TestCase):
             self.assertEqual(self.client.post('/api/v1/loop/restart-cycle/').status_code, 200)
         self._complete_cycle()
         self.assertEqual(self.client.post('/api/v1/loop/restart-cycle/').status_code, 429)
+
+
+class RegisterPasswordMessageTests(TestCase):
+    def test_short_password_error_is_in_uzbek(self):
+        res = self.client.post('/api/auth/register/', {
+            'username': 'uz_msg_user', 'first_name': 'Ali', 'password': 'abc123',
+        }, content_type='application/json')
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("kamida 8 ta belgi", res.json()['error'])
+        self.assertNotIn('too short', res.json()['error'])
+
+
+class SprintExplainMistakeAuthTests(TestCase):
+    def test_anonymous_cannot_trigger_ai_explanation(self):
+        res = self.client.post('/api/v1/sprint/explain-mistake/', {}, content_type='application/json')
+        self.assertEqual(res.status_code, 401)

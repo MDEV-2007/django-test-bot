@@ -70,8 +70,11 @@ class ExplainMistakeAPIView(APIView):
     - 1-qadam (Cache Check): PostgreSQL jadvalida (question_id, selected_option_id) bormi?
     - 2-qadam (Cache Hit): 0.01 soniyada (0 so'm xarajat bilan) tayyor JSON qaytadi.
     - 3-qadam (Cache Miss): LLM orqali yaratilib, bazaga saqlanadi va qaytariladi.
+
+    Faqat tizimga kirganlar uchun: cache miss pullik LLM so'rovi, va xato o'quvchining
+    "Xatolar daftari"ga yozilishi uchun foydalanuvchi ma'lum bo'lishi kerak.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         start_time = time.time()

@@ -76,6 +76,20 @@ def login_api(request):
     return _auth_response(user)
 
 
+# Django'ning parol validatorlari xabarlarini inglizcha qaytaradi (o'zbekcha tarjimasi yo'q),
+# shuning uchun ro'yxatdan o'tish formasi uchun kod bo'yicha o'zbekchalashtiriladi.
+_PASSWORD_ERRORS_UZ = {
+    'password_too_short': "Parol kamida 8 ta belgidan iborat bo'lsin.",
+    'password_too_common': "Bu parol juda oddiy — boshqasini tanlang.",
+    'password_entirely_numeric': "Parol faqat raqamlardan iborat bo'lmasin.",
+    'password_too_similar': "Parol ismingiz yoki loginingizga juda o'xshash.",
+}
+
+
+def _password_error_uz(err):
+    return _PASSWORD_ERRORS_UZ.get(err.code, ' '.join(err.messages))
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_api(request):
@@ -96,7 +110,7 @@ def register_api(request):
     try:
         validate_password(password, user=User(username=username, first_name=first_name))
     except ValidationError as e:
-        return Response({'error': ' '.join(e.messages)}, status=400)
+        return Response({'error': ' '.join(_password_error_uz(err) for err in e.error_list)}, status=400)
 
     user = User.objects.create_user(
         username=username, password=password, first_name=first_name, last_name=last_name,

@@ -66,7 +66,6 @@ export default function BattlesPage() {
   const [duelToken, setDuelToken] = useState<string | null>(null);
   const [duelUserScore, setDuelUserScore] = useState(80);
   const [activeBattleTab, setActiveBattleTab] = useState<'1v1' | 'class' | 'leaderboard'>('1v1');
-  const [inGhostArena, setInGhostArena] = useState(false);
   /* Jangdan OLDINGI ELO — natija ekranida o'zgarishni ko'rsatish uchun. Server yangi
      qiymatni qaytargach, raqam eskidan yangisiga "aylanib" o'tadi. */
   const [prevElo, setPrevElo] = useState<number | null>(null);
@@ -490,7 +489,9 @@ export default function BattlesPage() {
                     onClick={() => {
                       soundFX.click();
                       tgHaptic('medium');
-                      setInGhostArena(true);
+                      // Arena `mode === 'ghost'` da chiziladi. Ilgari bu yerda hech narsa
+                      // o'qimaydigan `inGhostArena` holati o'rnatilardi — tugma ishlamasdi.
+                      setMode('ghost');
                     }}
                     className="h-12 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-black text-sm shadow-xl shadow-rose-600/30 shrink-0 cursor-pointer"
                   >

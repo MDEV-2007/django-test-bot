@@ -230,9 +230,12 @@ export default function MistakesPage() {
                 </Badge>
               </div>
 
-              <h3 className="text-base sm:text-xl font-bold text-white leading-snug">
-                {data.deck[idx].body}
-              </h3>
+              {/* Savol matni CKEditor HTML'i (serverda nh3 bilan tozalangan) — matn sifatida
+                  chiqarilsa `<p>...</p>` teglari ko'rinib qolardi. */}
+              <h3
+                className="text-base sm:text-xl font-bold text-white leading-snug"
+                dangerouslySetInnerHTML={{ __html: data.deck[idx].body }}
+              />
 
               {/* Variantlar */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">

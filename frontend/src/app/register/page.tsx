@@ -160,7 +160,7 @@ function RegisterPageInner() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Kamida 6 belgi"
+                placeholder="Kamida 8 belgi"
                 autoComplete="new-password"
                 required
                 className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"

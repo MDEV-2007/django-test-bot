@@ -68,6 +68,7 @@ export default function TestScreenPage() {
   const [finishing, setFinishing] = useState(false);
   const [finishNetworkError, setFinishNetworkError] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showJumpDrawer, setShowJumpDrawer] = useState(false);
   const [answeredIdxs, setAnsweredIdxs] = useState<Set<number>>(new Set());
   const [fontKey, setFontKey] = useState<FontKey>('md');
@@ -489,10 +490,22 @@ export default function TestScreenPage() {
     }
   }
 
+  /* Javobsiz savol qolgan bo'lsa avval so'raladi: ilgari "Yakunlash" darhol topshirardi
+     va tasodifiy bosish bilan test yarim yo'lda tugab qolardi. Stress rejimining o'z
+     ogohlantirishi bor (titulga ko'chirilmagan javoblar), u finish() ichida. */
+  const unansweredCount = data ? Math.max(0, data.total_questions - answeredIdxs.size) : 0;
+  function requestFinish() {
+    if (!isStressMode && unansweredCount > 0) {
+      setShowFinishConfirm(true);
+      return;
+    }
+    finish();
+  }
+
   /* Oxirgi savolda Telegram'ning nativ pastki tugmasi "Yakunlash" bo'lib chiqadi */
   useTelegramMainButton(
     data && !data.has_next ? 'Imtihonni Yakunlash' : null,
-    finish,
+    requestFinish,
     { loading: finishing },
   );
 
@@ -843,7 +856,7 @@ export default function TestScreenPage() {
           ) : (
             <Button
               size="lg"
-              onClick={() => finish()}
+              onClick={requestFinish}
               disabled={finishing}
               className="animate-pulse bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/35 hover:bg-[var(--success)]/90 h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold"
             >
@@ -920,6 +933,39 @@ export default function TestScreenPage() {
                 Baribir topshirish (0 ballga rozi bo&apos;lish)
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showFinishConfirm} onOpenChange={setShowFinishConfirm}>
+          <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--surface-card-strong)] p-6 shadow-2xl mx-auto">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                <AlertTriangle className="size-7" />
+              </div>
+              <div className="space-y-1.5">
+                <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+                  {unansweredCount} ta savol javobsiz qoldi
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Yakunlasangiz, ular xato hisoblanadi va testga qaytib bo&apos;lmaydi.
+                </DialogDescription>
+              </div>
+              <div className="w-full flex flex-col-reverse sm:flex-row items-center gap-3 pt-3">
+                <Button
+                  variant="outline"
+                  onClick={() => { setShowFinishConfirm(false); finish(); }}
+                  className="w-full sm:w-auto flex-1 rounded-2xl font-bold h-12"
+                >
+                  Baribir yakunlash
+                </Button>
+                <Button
+                  onClick={() => setShowFinishConfirm(false)}
+                  className="w-full sm:w-auto flex-1 rounded-2xl font-black bg-emerald-600 hover:bg-emerald-700 text-white h-12"
+                >
+                  Savollarga qaytish
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 

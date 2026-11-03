@@ -41,6 +41,28 @@ const FALLBACK_QUESTIONS: QuestionItem[] = [
   },
 ];
 
+/* Server snake_case qaytaradi. Ilgari javob to'g'ridan-to'g'ri `QuestionItem` deb
+   olinardi — `correctOptionId` undefined bo'lib, HAR BIR javob xato deb baholanardi. */
+type SprintApiQuestion = {
+  id: number;
+  body: string;
+  topic_title: string;
+  correct_option_id: number;
+  difficulty?: QuestionItem['difficulty'];
+  options: { id: number; text: string }[];
+};
+
+function toQuestionItem(q: SprintApiQuestion): QuestionItem {
+  return {
+    id: q.id,
+    body: q.body,
+    topicTitle: q.topic_title,
+    correctOptionId: q.correct_option_id,
+    difficulty: q.difficulty,
+    options: q.options,
+  };
+}
+
 const DEFAULT_SUBJECTS: SprintSubject[] = [
   { id: 0, name: "Barcha fanlar (Aralash)", slug: "all", questions_count: 1671, is_available: true },
   { id: 1, name: "Tarix", slug: "tarix", questions_count: 722, is_available: true },
@@ -119,12 +141,12 @@ export default function SprintPage() {
       } else if (subjectId > 0) {
         qParam = `&subject_id=${subjectId}`;
       }
-      const res = await apiFetch<{ ok: boolean; questions: QuestionItem[] }>(
+      const res = await apiFetch<{ ok: boolean; questions: SprintApiQuestion[] }>(
         `/api/v1/sprint/questions/?count=${count}${qParam}`
       );
 
       if (res?.ok && res.questions?.length > 0) {
-        setQuestions(res.questions);
+        setQuestions(res.questions.map(toQuestionItem));
         setIsSprintActive(true);
       } else {
         setQuestions(FALLBACK_QUESTIONS);

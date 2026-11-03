@@ -65,7 +65,7 @@ export default function MagneticLoopCard({
     }
   } else if (currentStage === 'STAGE_2_SPRINT') {
     ctaTitle = `⚡ 2-Qadam: Jonli Sprint (${combo.toFixed(1)}x)`;
-    ctaSubtitle = "15 ta tezkor savol + Qasos zanjiri";
+    ctaSubtitle = "12 ta tezkor savol + Qasos zanjiri";
   } else if (currentStage === 'STAGE_3_CLEANUP') {
     const mistakeCount = loop?.session_mistakes_ids?.length || 2;
     ctaTitle = `🧹 3-Qadam: Xatolarni Tozalash (${mistakeCount} ta)`;
@@ -93,7 +93,7 @@ export default function MagneticLoopCard({
     {
       id: 'step1',
       title: '1. Shpargalka & Sprint',
-      desc: '90s Shpargalka + 15 ta savol (+Qasos)',
+      desc: '90s Shpargalka + 12 ta savol (+Qasos)',
       icon: Brain,
       isDone: currentStage !== 'STAGE_1_WARMUP',
       isCurrent: currentStage === 'STAGE_1_WARMUP' || currentStage === 'STAGE_2_SPRINT',

@@ -38,21 +38,6 @@ export function applyDomTheme(next: AppTheme) {
   } catch {}
 }
 
-export function getInitialTheme(): AppTheme {
-  if (typeof document === 'undefined') return 'light';
-  if (document.documentElement.classList.contains('dark') || document.documentElement.dataset.theme === 'dark') {
-    return 'dark';
-  }
-  try {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    if (saved === 'dark' || saved === 'light') return saved;
-  } catch {}
-  if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.colorScheme === 'dark') {
-    return 'dark';
-  }
-  return 'light';
-}
-
 export function useTheme(): {
   theme: AppTheme;
   isLight: boolean;
@@ -60,7 +45,11 @@ export function useTheme(): {
   setTheme: (t: AppTheme) => void;
   toggleTheme: () => void;
 } {
-  const [theme, setLocalTheme] = useState<AppTheme>(getInitialTheme);
+  // Birinchi render server bilan bir xil ('light') bo'lishi shart: ilgari bu yerda
+  // `getInitialTheme` (localStorage) o'qilardi va mavzu tugmasi har sahifada hydration
+  // xatosini berib, React butun daraxtni qayta qurardi. Haqiqiy mavzu pastdagi effektda
+  // DOM'dan (layout skripti allaqachon qo'ygan klassdan) olinadi.
+  const [theme, setLocalTheme] = useState<AppTheme>('light');
 
   useEffect(() => {
     if (typeof document === 'undefined') return;

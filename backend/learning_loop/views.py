@@ -22,6 +22,37 @@ GHOST_OPPONENT_NAMES = [
 
 
 MAX_CYCLES_PER_DAY = 3
+SPRINT_QUESTION_COUNT = 12
+ARENA_QUESTION_COUNT = 5
+
+
+def _topic_with_questions(subject=None, exclude_id=None):
+    """Savoli bor mavzu (eng ko'p savollisi). Ilgari `Topic.first()` olinardi — u ko'pincha
+    savolsiz mavzu bo'lib, sprintga butunlay boshqa mavzudagi savollar tushardi."""
+    qs = Topic.objects.annotate(n=Count('questions')).filter(n__gt=0)
+    if subject:
+        qs = qs.filter(subject=subject)
+    if exclude_id:
+        qs = qs.exclude(id=exclude_id)
+    return qs.order_by('-n').first()
+
+
+def _pick_sprint_questions(topic, subject, count, rng):
+    """Avval mavzudan, yetmasa fandan, oxirida umumiy bankdan TASODIFIY savollar.
+    Ilgari mavzuda 15 tadan kam savol bo'lsa `Question.objects.all()[:20]` olinardi —
+    har kuni bir xil 20 ta savol (masalan, "Amir Temur qaysi yilda tug'ilgan?").
+    `rng` sikl id'si bilan urug'langan: sahifa yangilansa ham savollar o'zgarmaydi."""
+    base = Question.objects.filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
+    picked = []
+    for qs in (base.filter(topic=topic) if topic else None,
+               base.filter(subject=subject) if subject else None,
+               base):
+        if qs is None or len(picked) >= count:
+            continue
+        ids = list(qs.exclude(id__in=picked).order_by('id').values_list('id', flat=True))
+        picked += rng.sample(ids, min(count - len(picked), len(ids)))
+    by_id = Question.objects.prefetch_related('choices').in_bulk(picked)
+    return [by_id[i] for i in picked if i in by_id]
 
 
 def _format_question_dict(q: Question) -> dict:
@@ -86,6 +117,7 @@ def _get_or_create_today_loop(user) -> DailyLearningLoop:
     )
     if recent_wrong:
         weak_subject = recent_wrong.question.subject
+        weak_topic = recent_wrong.question.topic
 
     if not weak_subject:
         # Eng ko'p savolga ega fanlardan birini tanlaymiz
@@ -93,11 +125,8 @@ def _get_or_create_today_loop(user) -> DailyLearningLoop:
             q_cnt=Count('questions')
         ).filter(q_cnt__gt=5).first() or Subject.objects.first()
 
-    if weak_subject:
-        weak_topic = Topic.objects.filter(subject=weak_subject).first()
-    
     if not weak_topic:
-        weak_topic = Topic.objects.first()
+        weak_topic = _topic_with_questions(weak_subject) or _topic_with_questions()
 
     # Yangi loop yaratamiz
     loop = DailyLearningLoop.objects.create(
@@ -141,24 +170,12 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
         )
     }
 
-    # 2. STAGE 2: SPRINT SAVOLLARI (15 ta savol + Qasos)
-    q_filter = Q()
-    if topic:
-        q_filter |= Q(topic=topic)
-    if subject:
-        q_filter |= Q(subject=subject)
-
-    questions_qs = Question.objects.filter(q_filter).prefetch_related('choices').distinct()
-    if questions_qs.count() < 15:
-        questions_qs = Question.objects.all().prefetch_related('choices')[:20]
-    else:
-        questions_qs = questions_qs[:20]
-
-    sprint_questions = [_format_question_dict(q) for q in questions_qs]
-    # Agar savollar kam bo'lsa zaxiradan to'ldiramiz
-    if not sprint_questions:
-        all_q = Question.objects.prefetch_related('choices')[:15]
-        sprint_questions = [_format_question_dict(q) for q in all_q]
+    # 2. STAGE 2: SPRINT SAVOLLARI (mavzu -> fan -> umumiy, tasodifiy)
+    picked = _pick_sprint_questions(topic, subject, SPRINT_QUESTION_COUNT + ARENA_QUESTION_COUNT,
+                                    random.Random(loop.id))
+    sprint_questions = [_format_question_dict(q) for q in picked[:SPRINT_QUESTION_COUNT]]
+    # Arena dueli sprintdagi savollarni takrorlamaydi (savol kam bo'lsa — sprintdan oladi).
+    arena_pool = [_format_question_dict(q) for q in picked[SPRINT_QUESTION_COUNT:]]
 
     # 3. STAGE 3: CLEANUP (Flashcards for Session Mistakes)
     cleanup_cards = []
@@ -182,7 +199,7 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     ghost_avatar = f"https://api.dicebear.com/7.x/adventurer/svg?seed={ghost_name.replace(' ', '')}"
     ghost_elo = max(900, user_elo + random.randint(-30, 30))
 
-    arena_questions = sprint_questions[:5] if len(sprint_questions) >= 5 else sprint_questions
+    arena_questions = arena_pool if len(arena_pool) >= ARENA_QUESTION_COUNT else sprint_questions[:ARENA_QUESTION_COUNT]
 
     arena_data = {
         'opponent': {
@@ -482,7 +499,10 @@ class RestartCycleView(APIView):
         combo = 2.0 if new_cycle_number == 2 else 2.5
 
         # Keyingi yangi mavzuni tanlaymiz
-        new_topic = Topic.objects.order_by('?').first()
+        # Keyingi raund — shu fandagi boshqa (savoli bor) mavzu.
+        new_topic = (_topic_with_questions(last_loop.subject if last_loop else None,
+                                           exclude_id=last_loop.topic_id if last_loop else None)
+                     or _topic_with_questions())
 
         new_loop = DailyLearningLoop.objects.create(
             user=user,
