@@ -14,9 +14,9 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=seo_milliy';
 
 export const metadata: Metadata = {
-  title: 'Milliy Sertifikat Testlari 2026 — Tarix, Ona tili va Matematika (Rasch Modeli) | IlmIldizi',
+  title: 'Milliy sertifikat testlari 2026 — bepul onlayn mock',
   description:
-    "Milliy sertifikat rasmiy formati bo'yicha bepul onlayn mock testlar. Rasch modeli hisobi, yozma ochiq savollar, esse tahlili va aniq A+, A, B darajangizni aniqlang.",
+    "Milliy sertifikat formatidagi bepul onlayn mock testlar: Rasch modeli bo'yicha ball, ochiq savollar va esse tahlili. A+, A, B darajangizni aniqlang.",
   keywords: [
     'milliy sertifikat', 'milliy sertifikat testlari', 'tarix milliy sertifikat',
     'ona tili milliy sertifikat', 'biologiya milliy sertifikat', 'rasch modeli test',
@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     title: 'Milliy Sertifikat Testlari 2026 — Tarix, Ona tili, Matematika (Rasch Modeli)',
     description:
       "BMB rasmiy Rasch modeli standarti bo'yicha Milliy sertifikat mock imtihonlari. Ochiq savollar va esselarni AI tekshirib darajangizni hisoblab beradi.",
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'IlmIldizi' }],
   },
 };
 
@@ -257,6 +258,12 @@ export default function MilliySertifikatLandingPage() {
               </Link>
             </Button>
           </div>
+          <p className="pt-2 text-sm text-slate-400">
+            DTM (BMB) imtihoniga ham tayyorlanyapsizmi?{' '}
+            <Link href="/dtm-test" className="font-semibold text-amber-300 underline-offset-4 hover:underline">
+              DTM test yechish
+            </Link>
+          </p>
         </div>
       </section>
     </div>

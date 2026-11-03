@@ -10,7 +10,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: SITE_URL, lastModified: now, changeFrequency: 'daily', priority: 1.0 },
     { url: `${SITE_URL}/dtm-test`, lastModified: now, changeFrequency: 'daily', priority: 0.95 },
     { url: `${SITE_URL}/milliy-sertifikat`, lastModified: now, changeFrequency: 'daily', priority: 0.95 },
-    { url: `${SITE_URL}/login`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${SITE_URL}/register`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
   ];
 }

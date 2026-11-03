@@ -28,10 +28,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=landing';
 
 export const metadata: Metadata = {
-  title: "IlmIldizi — Milliy sertifikat va DTM imtihonlariga AI tayyorgarlik platformasi",
+  title: "IlmIldizi — Milliy sertifikat va DTMga AI bilan tayyorgarlik",
   description:
-    "BMB va Milliy sertifikat rasmiy formatidagi mock testlar, 24/7 AI mentor va har bir savol bo'yicha darslik tahlili. "
-    + "Kuchsiz mavzuni toping, ildizidan yo'q qiling.",
+    "Milliy sertifikat va DTM (BMB) formatidagi mock testlar, 24/7 AI mentor va har bir xato bo'yicha tahlil. "
+    + "Kuchsiz mavzuni toping va ildizidan tuzating.",
   keywords: [
     'milliy sertifikat', 'BBA', 'DTM', 'mock test', 'onlayn test', 'tarix testlari',
     'cefr multi-level', 'abituriyent', 'test yechish', 'IlmIldizi', 'AI mentor', "ta'lim platformasi",
@@ -438,6 +438,8 @@ export default async function LandingPage() {
               <a href="#qanday" className="transition-colors hover:text-[#1C1C1E]">Qanday ishlaydi</a>
               <a href="#narxlar" className="transition-colors hover:text-[#1C1C1E]">Narxlar</a>
               <a href="#savollar" className="transition-colors hover:text-[#1C1C1E]">Savollar</a>
+              <Link href="/dtm-test" className="transition-colors hover:text-[#1C1C1E]">DTM test yechish</Link>
+              <Link href="/milliy-sertifikat" className="transition-colors hover:text-[#1C1C1E]">Milliy sertifikat testlari</Link>
               <Link href="/login" className="transition-colors hover:text-[#1C1C1E]">Kirish</Link>
               <Link href="/register" className="transition-colors hover:text-[#1C1C1E]">Ro&apos;yxatdan o&apos;tish</Link>
             </nav>

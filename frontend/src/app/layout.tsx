@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     default: "DTM Test Yechish Onlayn & Milliy Sertifikat Testlari 2026 — IlmIldizi",
     template: '%s · IlmIldizi',
   },
-  description: "DTM (BMB) testlarini bepul onlayn yechish va Milliy sertifikat rasmiy formati bo'yicha mock imtihonlar. Tarix, Ona tili, Matematika fanlaridan Rasch modeli va 24/7 AI mentor bilan tayyorlaning.",
+  description: "DTM (BMB) va Milliy sertifikat testlarini onlayn yeching: rasmiy formatdagi mock imtihonlar, Rasch modeli bo'yicha ball va 24/7 AI mentor.",
   keywords: [
     'DTM test', 'DTM test yechish', 'DTM testlari onlayn', 'milliy sertifikat',
     'milliy sertifikat testlari', 'BMB testlar', 'bepul mock test', 'tarix test',

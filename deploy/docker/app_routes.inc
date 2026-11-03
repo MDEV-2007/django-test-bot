@@ -11,6 +11,15 @@ client_max_body_size 150M;
 add_header X-Content-Type-Options "nosniff" always;
 add_header X-XSS-Protection "1; mode=block" always;
 add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+# HSTS: brauzer saytni faqat HTTPS orqali ochadi. HTTP javobida brauzerlar buni e'tiborsiz
+# qoldiradi, shuning uchun ikkala blokda ham xavfsiz. includeSubDomains/preload ataylab yo'q.
+add_header Strict-Transport-Security "max-age=31536000" always;
+
+# www.<domen> → <domen> (SEO: bitta asosiy manzil). Domen nomi yozilmagan, shuning uchun
+# SERVER_NAME qanday bo'lishidan qat'i nazar ishlaydi.
+if ($host ~* ^www\.(.+)$) {
+    return 301 https://$1$request_uri;
+}
 
 # To'lov skrinshotlari (shaxsiy cheklar) ommaviy media ichidan to'siladi — ularni faqat
 # /api/premium/payments/<id>/screenshot/?token=... orqali autentifikatsiyadan o'tgan holda ko'rish mumkin.

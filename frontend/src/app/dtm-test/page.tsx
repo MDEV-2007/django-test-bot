@@ -14,9 +14,9 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
 const BOT_URL = 'https://t.me/ilmildiziuz_bot?start=seo_dtm';
 
 export const metadata: Metadata = {
-  title: 'DTM Test Yechish Onlayn 2026 — BMB Bepul Mock Imtihon | IlmIldizi',
+  title: 'DTM test yechish onlayn 2026 — bepul BMB mock',
   description:
-    "DTM (BMB) testlarini onlayn bepul yeching. 2026-yilgi yangi standart bo'yicha Tarix, Ona tili, Matematika va barcha fanlardan namunaviy testlar, to'g'ri javoblari va AI tahlili.",
+    "DTM (BMB) testlarini onlayn bepul yeching: Tarix, Ona tili, Matematika va boshqa fanlardan 2026 formatidagi mock testlar, javoblar va AI tahlili.",
   keywords: [
     'DTM test', 'DTM test yechish', 'DTM testlari onlayn', 'BMB testlar',
     'DTM 2026', 'majburiy fanlar test yechish', 'bepul mock test', 'tarix dtm test',
@@ -32,6 +32,7 @@ export const metadata: Metadata = {
     title: 'DTM Test Yechish Onlayn 2026 — BMB Bepul Mock Imtihon',
     description:
       "BMB rasmiy talablari asosidagi DTM testlari. Natijangizni darhol bilib oling, zaif mavzularni AI bilan aniqlang va OTM talabasi bo'ling.",
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'IlmIldizi' }],
   },
 };
 
@@ -291,6 +292,12 @@ export default function DtmTestLandingPage() {
               </Link>
             </Button>
           </div>
+          <p className="pt-2 text-sm text-slate-400">
+            Milliy sertifikatga ham tayyorlanyapsizmi?{' '}
+            <Link href="/milliy-sertifikat" className="font-semibold text-emerald-300 underline-offset-4 hover:underline">
+              Milliy sertifikat testlari
+            </Link>
+          </p>
         </div>
       </section>
     </div>
