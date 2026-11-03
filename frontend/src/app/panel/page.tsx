@@ -134,8 +134,8 @@ const STAT_CARDS: { key: string; label: string; icon: typeof Users; tone: Premiu
   { key: 'testsets', label: 'Testlar', icon: FileCheck2, tone: 'cyan', href: '/panel/tests' },
   { key: 'lessons', label: 'Darslar', icon: BookOpen, tone: 'sky', href: '/panel/lessons' },
   { key: 'games', label: "O'yinlar", icon: Gamepad2, tone: 'purple', href: '/panel/games' },
-  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'emerald', href: '/panel/results' },
-  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'emerald', href: '/panel/results' },
+  { key: 'attempts_today', label: 'Bugungi urinishlar', icon: Activity, tone: 'emerald', href: '/panel/attempts' },
+  { key: 'attempts_total', label: 'Jami urinishlar', icon: TrendingUp, tone: 'emerald', href: '/panel/attempts' },
   { key: 'pending_payments', label: "Kutayotgan to'lovlar", icon: CreditCard, tone: 'amber', href: '/panel/payments?status=pending' },
   { key: 'total_revenue', label: 'Tushum', icon: Wallet, tone: 'gold', href: '/panel/payments' },
   { key: 'active_today', label: 'Bugun faol', icon: Radio, tone: 'emerald', href: '/panel/users' },
@@ -227,7 +227,7 @@ export default function PanelDashboard() {
               Platformaning umumiy holati, o&apos;sish dinamikasi va so&apos;nggi harakatlar.
             </p>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Button
               variant="outline"
               size="sm"

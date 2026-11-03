@@ -306,6 +306,12 @@ def _new_attempt(profile, test, is_stress=False):
 def start_test_api(request, test_id):
     test = get_object_or_404(TestSet, id=test_id)
     profile = ensure_profile_for_user(request.user)
+    # Qoralama/arxivdagi test faqat muallifiga (va adminga) ochiq. Ilgari ID bilan
+    # istalgan o'qituvchining nashr qilinmagan testini boshlash va javoblarini ko'rish
+    # mumkin edi.
+    if ((not test.is_published or test.is_archived)
+            and test.created_by_id != request.user.id and not profile.is_superadmin):
+        return Response({'error': 'Test topilmadi'}, status=404)
     now = timezone.now()
 
     # Jonli Mock Imtihon vaqti tekshiruvi
@@ -423,13 +429,17 @@ def start_random_test_api(request):
     profile = ensure_profile_for_user(request.user)
     subject, _ = _resolve_subject(request)
 
-    questions = list(Question.objects.filter(subject=subject) if subject else Question.objects.all())
-    if not questions:
+    # Faqat id'lar olinadi: ilgari butun savol banki (matn, HTML) har so'rovda xotiraga
+    # yuklanib aralashtirilardi.
+    pool = Question.objects.filter(subject=subject) if subject else Question.objects.all()
+    q_ids = list(pool.values_list('id', flat=True))
+    if not q_ids:
         return Response({'error': "Bu fanda hali savollar yo'q."}, status=400)
 
     import random
-    random.shuffle(questions)
-    questions_to_use = questions[:10]
+    picked = random.sample(q_ids, min(10, len(q_ids)))
+    questions_to_use = list(Question.objects.filter(id__in=picked))
+    random.shuffle(questions_to_use)
 
     test = TestSet.objects.create(
         title=f"Tasodifiy {subject.name if subject else 'Tarix'} Testi",
@@ -438,8 +448,7 @@ def start_random_test_api(request):
     )
     test.questions.set(questions_to_use)
     attempt = Attempt.objects.create(profile=profile, test=test)
-    for q in questions_to_use:
-        AttemptAnswer.objects.create(attempt=attempt, question=q)
+    AttemptAnswer.objects.bulk_create([AttemptAnswer(attempt=attempt, question=q) for q in questions_to_use])
     return Response({'attempt_id': attempt.id})
 
 

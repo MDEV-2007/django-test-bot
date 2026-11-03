@@ -199,17 +199,9 @@ export default function CommunityFeedPage() {
         const res = await apiFetch<TargetedOfferData>('/api/v1/system/ads/targeted-offer/?subject=Tarix&score=42');
         if (res && res.title) setTargetedOffer(res);
       } catch {
-        setTargetedOffer({
-          id: 1,
-          center_id: 1,
-          center_name: "Registon O'quv Markazi",
-          title: "Grammar va Reading'da 50% dan o'tolmayapsizmi?",
-          description: "Registon LC ning 2 oylik intensiv kursiga yoziling — IlmIldizi o'quvchilari uchun 1-dars BEPUL va 20% chegirma!",
-          cta_text: "📞 1-bosishda ro'yxatdan o'tish (1-dars BEPUL)",
-          badge_text: "Homiylik Taklifi • -20% Chegirma",
-          score_received: 42,
-          subject: "Ingliz tili",
-        });
+        // Reklama ixtiyoriy: server javob bermasa banner ko'rsatilmaydi. Ilgari bu yerda
+        // mavjud bo'lmagan markazning soxta taklifi chizilardi.
+        setTargetedOffer(null);
       }
     }
     loadTargetedOffer();

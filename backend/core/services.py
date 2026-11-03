@@ -394,7 +394,7 @@ def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float =
     reklama taklifini tanlab beradi.
     """
     from b2b_ads.models import EduCenterCampaign
-    from django.db.models import Q
+    from django.db.models import F, Q
 
     user_region = region or (getattr(profile, 'region', '') if profile else '')
 
@@ -421,25 +421,13 @@ def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float =
 
     campaign = qs.first()
 
-    # Agar hali birorta kampaniya kiritilmagan bo'lsa, rasmiy standart Registon LC seed kampaniyasini olamiz
+    # Kampaniya bo'lmasa reklama ham yo'q. Ilgari bu yerda bazaga "Registon O'quv
+    # Markazi" degan soxta kampaniya yaratilardi — o'quvchilar mavjud bo'lmagan markazga
+    # lid yuborardi.
     if not campaign:
-        campaign, _ = EduCenterCampaign.objects.get_or_create(
-            center_name="Registon O'quv Markazi",
-            defaults={
-                'title': f"{subject or 'Tarix va Ona tili'} intensiv DTM kursi",
-                'description': "Registon LC da 2 oylik intensiv tayyorgarlik kursi orqali qiyin mavzularda 90%+ natijaga erishing!",
-                'offer_badge': "1-dars BEPUL + 20% chegirma",
-                'target_subject': subject or "Tarix",
-                'target_region': user_region or "Toshkent",
-                'max_score_threshold': 65,
-                'rating': 4.9,
-                'logo': "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
-                'is_active': True,
-            }
-        )
+        return None
 
-    # Ko'rishlar sonini oshiramiz
-    EduCenterCampaign.objects.filter(id=campaign.id).update(impressions_count=campaign.impressions_count + 1)
+    EduCenterCampaign.objects.filter(id=campaign.id).update(impressions_count=F('impressions_count') + 1)
 
     return {
         'id': campaign.id,

@@ -346,11 +346,14 @@ def targeted_offer_api(request):
 
     profile = ensure_profile_for_user(request.user) if request.user.is_authenticated else None
     subject = request.GET.get('subject', '')
-    score = float(request.GET.get('score', 0))
+    try:
+        score = float(request.GET.get('score', 0))
+    except (TypeError, ValueError):
+        score = 0.0
     region = request.GET.get('region', '')
 
     offer = get_hyper_targeted_offer(profile, subject=subject, score=score, region=region)
-    return Response(offer)
+    return Response(offer or {})
 
 
 @api_view(['POST'])

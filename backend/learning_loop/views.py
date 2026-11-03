@@ -21,10 +21,13 @@ GHOST_OPPONENT_NAMES = [
 ]
 
 
+MAX_CYCLES_PER_DAY = 3
+
+
 def _format_question_dict(q: Question) -> dict:
     """Savol va uning variantlarini qulay JSON formatiga o'tkazish."""
     options = []
-    for opt in q.options.all():
+    for opt in q.choices.all():
         options.append({
             'id': opt.id,
             'text': opt.text,
@@ -41,7 +44,7 @@ def _format_question_dict(q: Question) -> dict:
 
     return {
         'id': q.id,
-        'text': q.text,
+        'text': q.body,
         'image_url': q.image.url if getattr(q, 'image', None) and q.image else None,
         'options': options,
         'ai_hint': {
@@ -71,21 +74,23 @@ def _get_or_create_today_loop(user) -> DailyLearningLoop:
     weak_topic = None
 
     # O'quvchining so'nggi noto'g'ri javoblarini tekshiramiz
-    recent_wrong = AttemptAnswer.objects.filter(
-        attempt__user=user,
-        is_correct=False
-    ).select_related('question__test__subject').order_by('-id')[:10]
-
-    if recent_wrong.exists():
-        for wa in recent_wrong:
-            if wa.question and wa.question.test and wa.question.test.subject:
-                weak_subject = wa.question.test.subject
-                break
+    # Attempt foydalanuvchiga Profile orqali bog'langan, Question esa fanga to'g'ridan-to'g'ri
+    # (`question.subject`). Ilgari bu yerda mavjud bo'lmagan `attempt__user` va
+    # `question.test` ishlatilgan edi — kunning birinchi so'rovi har doim 500 qaytarardi.
+    recent_wrong = (
+        AttemptAnswer.objects
+        .filter(attempt__profile__user=user, is_correct=False, question__subject__isnull=False)
+        .select_related('question__subject')
+        .order_by('-id')
+        .first()
+    )
+    if recent_wrong:
+        weak_subject = recent_wrong.question.subject
 
     if not weak_subject:
         # Eng ko'p savolga ega fanlardan birini tanlaymiz
         weak_subject = Subject.objects.annotate(
-            q_cnt=Count('tests__questions')
+            q_cnt=Count('questions')
         ).filter(q_cnt__gt=5).first() or Subject.objects.first()
 
     if weak_subject:
@@ -141,30 +146,30 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     if topic:
         q_filter |= Q(topic=topic)
     if subject:
-        q_filter |= Q(test__subject=subject)
+        q_filter |= Q(subject=subject)
 
-    questions_qs = Question.objects.filter(q_filter).prefetch_related('options').distinct()
+    questions_qs = Question.objects.filter(q_filter).prefetch_related('choices').distinct()
     if questions_qs.count() < 15:
-        questions_qs = Question.objects.all().prefetch_related('options')[:20]
+        questions_qs = Question.objects.all().prefetch_related('choices')[:20]
     else:
         questions_qs = questions_qs[:20]
 
     sprint_questions = [_format_question_dict(q) for q in questions_qs]
     # Agar savollar kam bo'lsa zaxiradan to'ldiramiz
     if not sprint_questions:
-        all_q = Question.objects.prefetch_related('options')[:15]
+        all_q = Question.objects.prefetch_related('choices')[:15]
         sprint_questions = [_format_question_dict(q) for q in all_q]
 
     # 3. STAGE 3: CLEANUP (Flashcards for Session Mistakes)
     cleanup_cards = []
     if loop.session_mistakes_ids:
-        mistake_qs = Question.objects.filter(id__in=loop.session_mistakes_ids).prefetch_related('options')
+        mistake_qs = Question.objects.filter(id__in=loop.session_mistakes_ids).prefetch_related('choices')
         for q in mistake_qs:
-            correct_opt = q.options.filter(is_correct=True).first()
+            correct_opt = q.choices.filter(is_correct=True).first()
             correct_text = correct_opt.text if correct_opt else "To'g'ri javob"
             cleanup_cards.append({
                 'id': q.id,
-                'front': q.text,
+                'front': q.body,
                 'back': correct_text,
                 'tip': q.explanation or "Kalit atama va mantiqiy bog'liqlikni eslab qoling.",
                 'memory_code': f"Aha Moment: {correct_text}",
@@ -291,8 +296,17 @@ class AdvanceStageView(APIView):
         loop = _get_or_create_today_loop(user)
         eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
 
-        from_stage = request.data.get('from_stage') or loop.current_stage
+        # Bosqich faqat serverdagi joriy holatdan keyingisiga o'tadi. Ilgari klient
+        # `from_stage=STAGE_4_ARENA` yuborib, sprint va duelsiz to'g'ridan-to'g'ri sandiq
+        # mukofotini olardi (restart-cycle bilan birga — cheksiz tanga).
+        from_stage = loop.current_stage
+        requested = request.data.get('from_stage')
+        if requested and requested != from_stage:
+            return Response({'ok': False, 'error': "Bosqich ketma-ketligi buzildi", 'current_stage': from_stage},
+                            status=status.HTTP_409_CONFLICT)
         payload = request.data.get('payload', {})
+        if not isinstance(payload, dict):
+            payload = {}
 
         water_result = None
         rewards_awarded = None
@@ -455,6 +469,14 @@ class RestartCycleView(APIView):
             user=user,
             date=today
         ).order_by('-cycle_number').first()
+
+        # Yangi sikl faqat oldingisi yakunlangandan keyin va kuniga MAX_CYCLES_PER_DAY
+        # martagacha: har sikl sandiq mukofoti beradi.
+        if last_loop and last_loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED:
+            return Response({'ok': False, 'error': "Avval joriy siklni yakunlang"}, status=status.HTTP_409_CONFLICT)
+        if last_loop and last_loop.cycle_number >= MAX_CYCLES_PER_DAY:
+            return Response({'ok': False, 'error': "Bugungi sikllar limiti tugadi. Ertaga davom etamiz!"},
+                            status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         new_cycle_number = (last_loop.cycle_number + 1) if last_loop else 1
         combo = 2.0 if new_cycle_number == 2 else 2.5

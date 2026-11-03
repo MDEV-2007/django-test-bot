@@ -16,6 +16,7 @@ class EduCenterCampaign(models.Model):
     story_video_url = models.URLField(max_length=500, blank=True, help_text="Promo Story uchun video/media URL")
     telegram_webhook_or_chat_id = models.CharField(max_length=100, blank=True, help_text="O'quv markaz Telegram Chat ID yoki guruhi")
     is_active = models.BooleanField(default=True, db_index=True)
+    impressions_count = models.IntegerField(default=0, help_text="Feed'da necha marta ko'rsatilgan")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

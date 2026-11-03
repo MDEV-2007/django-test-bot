@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { apiFetch } from '@/lib/api-client';
+import { apiFetch, ApiError } from '@/lib/api-client';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { toast } from 'sonner';
@@ -546,7 +546,13 @@ export function useContinuousLoop() {
           setStageData(res.stage_data);
           return res;
         }
-      } catch {
+      } catch (err) {
+        // Server bosqich ketma-ketligini rad etdi (409): lokal holat eskirgan — serverdan
+        // qayta olinadi, soxta lokal o'tish qilinmaydi.
+        if (err instanceof ApiError && err.status === 409) {
+          await fetchLoop();
+          return null;
+        }
         // Fallback optimistic local transition
         setLoop((prev) => {
           if (!prev) return prev;
@@ -589,7 +595,7 @@ export function useContinuousLoop() {
       }
       return null;
     },
-    []
+    [fetchLoop]
   );
 
   // 3-Soniyalik Avtopilotni ishga tushirish (Bridge Tramplin)
@@ -676,7 +682,13 @@ export function useContinuousLoop() {
         toast.success(res.message);
         return true;
       }
-    } catch {
+    } catch (err) {
+      // Server yangi siklni rad etdi (joriy sikl tugamagan / kunlik limit) — xabar
+      // ko'rsatiladi; lokal "soxta" sikl ochilmaydi.
+      if (err instanceof ApiError && (err.status === 409 || err.status === 429)) {
+        toast.error(err.message);
+        return false;
+      }
       // Fallback local multi-cycle transition (Offline / 404 da ham ishlaydi)
       let nextCycle = 2;
       setLoop((prev) => {

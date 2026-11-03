@@ -220,12 +220,14 @@ export default function AppShell({
 
           <ScriptToggle />
 
+          {/* Telefonda (<sm) yashirin: 360-375px kenglikda topbar sig'masdan shu tugma
+              ekrandan chiqib ketardi. Mavzu Profil sahifasidagi sozlamalarda ham bor. */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="ios-spring flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
+                className="ios-spring hidden sm:flex size-8.5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground shadow-2xs cursor-pointer"
                 aria-label={isDark ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish"}
               >
                 {isDark ? (

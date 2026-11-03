@@ -159,14 +159,14 @@ class SubscriptionApiTests(TestCase):
 
     def test_starting_a_test_is_blocked_for_an_unsubscribed_user(self):
         from tests_app.models import TestSet
-        test = TestSet.objects.create(title='Sinov', is_premium=False)
+        test = TestSet.objects.create(title='Sinov', is_premium=False, is_published=True)
         with patch('telegrambot.subscription.api_call', return_value=member('left')):
             res = self.client.post(f'/api/tests/{test.id}/start/', **self._miniapp())
         self.assertEqual(res.status_code, 403)
 
     def test_starting_a_test_works_once_subscribed(self):
         from tests_app.models import TestSet
-        test = TestSet.objects.create(title='Sinov', is_premium=False)
+        test = TestSet.objects.create(title='Sinov', is_premium=False, is_published=True)
         with patch('telegrambot.subscription.api_call', return_value=member('member')):
             res = self.client.post(f'/api/tests/{test.id}/start/', **self._miniapp())
         self.assertEqual(res.status_code, 200)
@@ -179,7 +179,7 @@ class SubscriptionApiTests(TestCase):
 
     def test_website_user_is_never_blocked_from_starting_a_test(self):
         from tests_app.models import TestSet
-        test = TestSet.objects.create(title='Sinov', is_premium=False)
+        test = TestSet.objects.create(title='Sinov', is_premium=False, is_published=True)
 
         with patch('telegrambot.subscription.api_call', return_value=member('left')):
             res = self.client.post(f'/api/tests/{test.id}/start/', **self._auth())

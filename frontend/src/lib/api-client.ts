@@ -13,6 +13,16 @@ import { isTelegramEnv } from './telegram';
  * "shu origin" degani. */
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
+const API_TIMEOUT_MS = 60_000;
+
+/* `AbortSignal.timeout` eski Telegram WebView'larida (iOS < 16) yo'q — u yerda
+   so'rov taymautsiz ketadi, lekin umuman yiqilmaydi. */
+function timeoutSignal(): AbortSignal | undefined {
+  return typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function'
+    ? AbortSignal.timeout(API_TIMEOUT_MS)
+    : undefined;
+}
+
 export class ApiError extends Error {
   status: number;
   /* Serverning to'liq javob tanasi. `message` faqat qisqa kod bo'lishi mumkin
@@ -131,8 +141,12 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
 
   const isFormData = typeof FormData !== 'undefined' && init.body instanceof FormData;
 
+  /* Server osilib qolsa so'rov abadiy kutmasin: ilgari dashboard shunday holatda cheksiz
+     skeleton ko'rsatib turardi. 60s — AI baholash (finish, esse) uchun ham yetarli.
+     Chaqiruvchi o'z `signal`ini bersa, o'shasi ishlatiladi. */
   const doFetch = async (token: string | null) =>
     fetch(`${API_URL}${path}`, {
+      signal: timeoutSignal(),
       ...init,
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
@@ -153,6 +167,10 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     }
   } catch (err: unknown) {
     if (err instanceof ApiError) throw err;
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new ApiError(0, "Server javob bermadi. Birozdan so'ng qayta urinib ko'ring.");
+    }
+    if (err instanceof DOMException && err.name === 'AbortError') throw err;
     throw new ApiError(0, "Internet aloqasi yoki server bilan bog'lanishda uzilish yuz berdi. Iltimos qayta urinib ko'ring.");
   }
 

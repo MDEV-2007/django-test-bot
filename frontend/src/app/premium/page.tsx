@@ -550,10 +550,10 @@ export default function PremiumPage() {
               },
             ].map((faq, i) => (
               <div key={i} className="p-5 space-y-1.5">
-                <p className="text-[14px] font-bold text-foreground flex items-center gap-2">
+                <div className="text-[14px] font-bold text-foreground flex items-center gap-2">
                   <PremiumIcon icon={HelpCircle} tone="sky" size="2xs" solid />
                   <span>{faq.q}</span>
-                </p>
+                </div>
                 <p className="text-[13px] text-[#8E8E93] leading-relaxed pl-7">
                   {faq.a}
                 </p>
