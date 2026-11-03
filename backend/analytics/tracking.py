@@ -54,3 +54,29 @@ def track_event(profile, name, **props):
         ProductEvent.objects.create(profile=profile, name=name, props=clean_props(props))
     except Exception:  # pragma: no cover
         logger.warning('track_event failed', exc_info=True)
+
+
+_SOURCE_ALLOWED = set('abcdefghijklmnopqrstuvwxyz0123456789_-.')
+
+
+def clean_source(raw):
+    """Havoladan kelgan belgini xavfsiz qisqa nomga aylantiradi: kichik harf,
+    faqat [a-z0-9_-.], ko'pi bilan 64 belgi. Bo'sh bo'lsa — None."""
+    if not raw:
+        return None
+    value = ''.join(ch for ch in str(raw).strip().lower() if ch in _SOURCE_ALLOWED)[:64]
+    return value or None
+
+
+def record_signup_source(profile, raw_source, referred=False):
+    """Faqat yangi profil uchun, bir marta (birinchi tegish) yoziladi. Referal kod bilan
+    kelganlar `referral` deb belgilanadi: har bir o'quvchining shaxsiy kodi alohida
+    manba bo'lib jadvalni to'ldirib yubormasin."""
+    source = 'referral' if referred else clean_source(raw_source)
+    if not source or profile is None or profile.pk is None:
+        return
+    try:
+        from .models import SignupSource
+        SignupSource.objects.get_or_create(profile=profile, defaults={'source': source})
+    except Exception:  # pragma: no cover
+        logger.warning('record_signup_source failed', exc_info=True)

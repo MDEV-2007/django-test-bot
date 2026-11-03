@@ -12,10 +12,11 @@ from django.utils import timezone
 from accounts.models import Profile
 from premium.models import Payment
 
-from .models import DailyActivity, ProductEvent
+from .models import DailyActivity, ProductEvent, SignupSource
 
 FUNNEL_WINDOW_DAYS = 30
 COHORT_WEEKS = 6
+SOURCE_WINDOW_DAYS = 90
 
 
 def _students():
@@ -106,6 +107,38 @@ def monetization_funnel(now):
     }
 
 
+def source_funnel(now):
+    """Manba bo'yicha: ro'yxatdan o'tdi → faollashdi (≥1 test tugatdi) → 7 kunda faol →
+    to'ladi (tasdiqlangan to'lov). So'nggi 90 kunda ro'yxatdan o'tgan o'quvchilar."""
+    from tests_app.models import Attempt
+
+    since = now - timedelta(days=SOURCE_WINDOW_DAYS)
+    rows = list(SignupSource.objects.filter(created_at__gte=since, profile__role='student')
+                .values_list('source', 'profile_id'))
+    if not rows:
+        return []
+    pids = {pid for _, pid in rows}
+    activated = set(Attempt.objects.filter(profile_id__in=pids, is_completed=True)
+                    .values_list('profile_id', flat=True))
+    active_7d = set(_students().filter(id__in=pids, last_seen_at__gte=now - timedelta(days=7))
+                    .values_list('id', flat=True))
+    paid = set(Payment.objects.filter(profile_id__in=pids, status='approved').values_list('profile_id', flat=True))
+
+    by_source = {}
+    for source, pid in rows:
+        by_source.setdefault(source, set()).add(pid)
+    out = []
+    for source, members in by_source.items():
+        out.append({
+            'source': source,
+            'signups': len(members),
+            'activated': len(members & activated),
+            'active_7d': len(members & active_7d),
+            'paid': len(members & paid),
+        })
+    return sorted(out, key=lambda r: (-r['signups'], r['source']))
+
+
 def growth_metrics():
     now = timezone.now()
     today = timezone.localdate()
@@ -117,4 +150,6 @@ def growth_metrics():
         'activity': activity_summary(today),
         'retention': retention_cohorts(today, tracking_since),
         'monetization': monetization_funnel(now),
+        'sources': source_funnel(now),
+        'source_window_days': SOURCE_WINDOW_DAYS,
     }

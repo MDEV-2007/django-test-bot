@@ -26,6 +26,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from .models import Profile, ensure_profile_for_user
 from .referrals import apply_referral
+from analytics.tracking import record_signup_source
 from .serializers import ProfileSerializer
 from .utils import (
     generate_unique_username,
@@ -118,8 +119,8 @@ def register_api(request):
     profile = ensure_profile_for_user(user)
     profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
     profile.save()
-    if ref_code:
-        apply_referral(profile, ref_code)
+    referrer = apply_referral(profile, ref_code) if ref_code else None
+    record_signup_source(profile, request.data.get('source') or 'web', referred=bool(referrer))
 
     return _auth_response(user)
 
@@ -157,8 +158,8 @@ def google_login_api(request):
         profile.avatar_url = picture or f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
         profile.save()
         ref_code = (request.data.get('ref') or '').strip()
-        if ref_code:
-            apply_referral(profile, ref_code)
+        referrer = apply_referral(profile, ref_code) if ref_code else None
+        record_signup_source(profile, request.data.get('source') or 'web_google', referred=bool(referrer))
 
     user = profile.user
     if not user.is_active:
@@ -242,8 +243,11 @@ def telegram_login_api(request):
             profile.save()
 
         start_param = (request.data.get('start_param') or '').strip()
+        referrer = None
         if start_param and not start_param.startswith(('mock_', 'arena_', 'landing', 'pdf_')):
-            apply_referral(profile, start_param)
+            referrer = apply_referral(profile, start_param)
+        record_signup_source(profile, request.data.get('source') or start_param or 'telegram_miniapp',
+                             referred=bool(referrer))
 
     tg_photo = sync_telegram_avatar(tg_id)
     if tg_photo:

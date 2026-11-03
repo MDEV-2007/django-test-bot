@@ -62,8 +62,10 @@ def get_or_create_profile(tg_user, referral_code=None):
         profile.avatar_url = f"https://api.dicebear.com/7.x/adventurer/svg?seed={seed}"
     profile.last_active_date = timezone.localdate()
     profile.save()
-    if referral_code:
-        apply_referral(profile, referral_code)
+    referrer = apply_referral(profile, referral_code) if referral_code else None
+    # Reklama/kanal manbasi: `?start=ig_w1_a`. Haqiqiy referal kodi bo'lsa — `referral`.
+    from analytics.tracking import record_signup_source
+    record_signup_source(profile, referral_code or 'telegram_bot', referred=bool(referrer))
     return profile
 
 

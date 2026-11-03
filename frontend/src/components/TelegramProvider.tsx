@@ -6,6 +6,7 @@ import {
   getWebApp, isTelegramEnv, loadTelegramSdk, markTelegramReady, useTelegramBackButton,
 } from '@/lib/telegram';
 import { applyDomTheme, THEME_STORAGE_KEY, type AppTheme } from '@/hooks/useTheme';
+import { getSource } from '@/lib/attribution';
 
 /* Telegram Mini App qobig'i (Apple iOS 18 Light #F2F2F7 & Dark #000000 sinxronizatsiyasi bilan). */
 export default function TelegramProvider() {
@@ -76,7 +77,11 @@ export default function TelegramProvider() {
           fetch('/api/auth/telegram/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ initData: wa.initData }),
+            body: JSON.stringify({
+              initData: wa.initData,
+              start_param: wa.initDataUnsafe?.start_param,
+              source: getSource(),
+            }),
           })
             .then((r) => r.json())
             .then((res) => {

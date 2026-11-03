@@ -21,7 +21,11 @@ type GrowthData = {
     paying_now: number;
     parent_invoices_sent: number;
   };
+  sources?: { source: string; signups: number; activated: number; active_7d: number; paid: number }[];
+  source_window_days?: number;
 };
+
+const pct = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : '—');
 
 const fmtPct = (v: number | null) => (v === null ? '—' : `${v}%`);
 
@@ -163,6 +167,42 @@ export default function GrowthPage() {
             )}
           </section>
         </div>
+
+        <section className="rounded-2xl border border-[#1e2330] bg-[#11141c]/95 p-5">
+          <h2 className="text-sm font-semibold text-white">
+            Manbalar bo&apos;yicha — {data?.source_window_days ?? 90} kun
+          </h2>
+          <p className="mt-1 text-xs text-slate-400">
+            Reklama havolasi: <code className="text-slate-300">?src=ig_w1_a</code> (sayt) yoki{' '}
+            <code className="text-slate-300">?start=ig_w1_a</code> (bot). Faollashdi = kamida 1 ta test tugatdi.
+          </p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-sm">
+              <thead className="text-left text-xs text-slate-400">
+                <tr>
+                  <th className="py-1.5">Manba</th>
+                  <th>Ro&apos;yxatdan o&apos;tdi</th>
+                  <th>Faollashdi</th>
+                  <th>7 kunda faol</th>
+                  <th>To&apos;ladi</th>
+                </tr>
+              </thead>
+              <tbody className="tabular-nums text-slate-200">
+                {data?.sources?.length ? data.sources.map((r) => (
+                  <tr key={r.source} className="border-t border-[#1e2330]">
+                    <td className="py-1.5 font-medium">{r.source}</td>
+                    <td>{r.signups}</td>
+                    <td>{r.activated} <span className="text-xs text-slate-400">({pct(r.activated, r.signups)})</span></td>
+                    <td>{r.active_7d} <span className="text-xs text-slate-400">({pct(r.active_7d, r.signups)})</span></td>
+                    <td>{r.paid} <span className="text-xs text-slate-400">({pct(r.paid, r.signups)})</span></td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={5} className="py-3 text-xs text-slate-400">Hali manba bilan ro&apos;yxatdan o&apos;tganlar yo&apos;q.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </PanelShell>
   );

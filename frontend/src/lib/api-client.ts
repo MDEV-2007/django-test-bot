@@ -1,5 +1,6 @@
 import { useAuthStore, type Profile, ACCESS_KEY, REFRESH_KEY } from './auth-store';
 import { isTelegramEnv } from './telegram';
+import { getSource } from './attribution';
 
 /* API manzili.
  *
@@ -102,7 +103,7 @@ async function refreshAccessToken(): Promise<string | null> {
             const res = await fetch(`${API_URL}/api/auth/telegram/`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', ...miniAppHeader() },
-              body: JSON.stringify({ initData, start_param: tg?.initDataUnsafe?.start_param }),
+              body: JSON.stringify({ initData, start_param: tg?.initDataUnsafe?.start_param, source: getSource() }),
             });
             if (res.ok) {
               const data = await res.json();
@@ -234,7 +235,7 @@ export async function login(username: string, password: string) {
 export async function register(payload: { username: string; first_name: string; last_name?: string; password: string; ref?: string }) {
   const data = await apiFetch<{ access: string; refresh: string; user: Profile }>(
     '/api/auth/register/',
-    { method: 'POST', body: JSON.stringify(payload) },
+    { method: 'POST', body: JSON.stringify({ ...payload, source: getSource() }) },
   );
   useAuthStore.getState().setSession(data.access, data.refresh, data.user);
   return data.user;
@@ -251,7 +252,7 @@ export async function fetchAuthConfig() {
 export async function loginWithGoogle(credential: string, ref?: string) {
   const data = await apiFetch<{ access: string; refresh: string; user: Profile }>(
     '/api/auth/google/',
-    { method: 'POST', body: JSON.stringify({ credential, ref }) },
+    { method: 'POST', body: JSON.stringify({ credential, ref, source: getSource() }) },
   );
   useAuthStore.getState().setSession(data.access, data.refresh, data.user);
   return data.user;
@@ -260,7 +261,7 @@ export async function loginWithGoogle(credential: string, ref?: string) {
 export async function loginWithTelegram(initData: string, startParam?: string) {
   const data = await apiFetch<{ access: string; refresh: string; user: Profile }>(
     '/api/auth/telegram/',
-    { method: 'POST', body: JSON.stringify({ initData, start_param: startParam }) },
+    { method: 'POST', body: JSON.stringify({ initData, start_param: startParam, source: getSource() }) },
   );
   useAuthStore.getState().setSession(data.access, data.refresh, data.user);
   return data.user;

@@ -61,3 +61,22 @@ class ProductEvent(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.profile_id})'
+
+
+class SignupSource(models.Model):
+    """O'quvchi qayerdan kelgani (birinchi tegish). Reklama va kanallar samarasini
+    "ro'yxatdan o'tdi → faol bo'ldi → to'ladi" bo'yicha solishtirish uchun.
+
+    Manba: bot havolasi `?start=ig_w1_a`, sayt havolasi `?src=ig_w1_a` (yoki utm_source),
+    referal kodi bo'lsa — `referral`."""
+
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='signup_source')
+    source = models.CharField(max_length=64, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Ro'yxatdan o'tish manbasi"
+        verbose_name_plural = "Ro'yxatdan o'tish manbalari"
+
+    def __str__(self):
+        return f'{self.profile_id}: {self.source}'
