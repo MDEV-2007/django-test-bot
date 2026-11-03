@@ -81,7 +81,7 @@ class SiteSettingsForm(StyledFormMixin, forms.ModelForm):
 class BroadcastForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Broadcast
-        fields = ['title', 'message', 'image', 'audience', 'via_telegram']
+        fields = ['title', 'message', 'image', 'audience', 'via_telegram', 'limit', 'exclude_broadcast']
         widgets = {'message': forms.Textarea(attrs={'rows': 5})}
 
 

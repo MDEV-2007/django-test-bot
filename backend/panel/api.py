@@ -1508,14 +1508,8 @@ def audit_log_api(request):
 
 # ============================================================ BROADCAST
 def _audience_profiles(audience):
-    qs = Profile.objects.select_related('user').filter(user__is_active=True)
-    if audience == 'students':
-        return qs.filter(role='student')
-    if audience == 'teachers':
-        return qs.filter(role='teacher')
-    if audience == 'premium':
-        return qs.filter(Q(is_premium=True) | Q(premium_mock_test_unlocked=True))
-    return qs
+    from panel.broadcasting import audience_profiles
+    return audience_profiles(audience)
 
 
 @api_view(['GET', 'POST'])
@@ -1525,26 +1519,37 @@ def broadcast_api(request):
     if request.method == 'GET':
         return Response({
             'history': [{
-                'id': b.id, 'title': b.title, 'audience': b.audience, 'recipients_count': b.recipients_count,
+                'id': b.id, 'title': b.title, 'message': b.message, 'audience': b.audience,
+                'recipients_count': b.recipients_count,
                 'telegram_sent_count': b.telegram_sent_count, 'sent_at': b.sent_at,
                 'image': b.image.url if b.image else None,
                 'scheduled_at': b.scheduled_at.isoformat() if b.scheduled_at else None,
                 'is_sent': b.is_sent,
+                'limit': b.limit,
+                'exclude_broadcast': b.exclude_broadcast_id,
             } for b in Broadcast.objects.select_related('sent_by')[:30]],
             'audience_counts': {a[0]: _audience_profiles(a[0]).count() for a in Broadcast.AUDIENCE_CHOICES},
+            # Telegram orqali yetib boradiganlar — sinov guruhi hajmini tanlash uchun.
+            'audience_telegram_counts': {
+                a[0]: _audience_profiles(a[0]).exclude(telegram_id__isnull=True).exclude(telegram_id__in=['', '0']).count()
+                for a in Broadcast.AUDIENCE_CHOICES
+            },
         })
+
+    from panel.broadcasting import caption_lookup, personalize, select_recipients
 
     form = BroadcastForm(request.data, request.FILES)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     bc = form.save(commit=False)
     bc.sent_by = request.user
-    profiles = list(_audience_profiles(bc.audience))
+    profiles = select_recipients(bc)
 
     Notification.objects.bulk_create([
-        Notification(profile=p, title=bc.title, message=bc.message, type='system') for p in profiles
+        Notification(profile=p, title=bc.title, message=personalize(bc.message, p), type='system') for p in profiles
     ])
     bc.recipients_count = len(profiles)
+    bc.recipient_ids = [p.id for p in profiles]
     bc.save()
 
     if bc.via_telegram:
@@ -1554,6 +1559,7 @@ def broadcast_api(request):
 
         image_path = bc.image.path if (bc.image and bc.image.storage.exists(bc.image.name)) else None
         caption = f"{bc.title}\n\n{bc.message}"
+        caption_for = caption_lookup(bc, tg_profiles)
         tg_ids = [p.telegram_id for p in tg_profiles]
         bc_id = bc.id
 
@@ -1566,6 +1572,7 @@ def broadcast_api(request):
                 caption=caption,
                 image_path=image_path,
                 on_progress=_progress,
+                caption_for=caption_for,
             )
             Broadcast.objects.filter(id=bc_id).update(
                 telegram_sent_count=res['sent_count'],
@@ -3884,7 +3891,8 @@ def broadcast_schedule_api(request):
                     dt = timezone.make_aware(dt)
                 bc.scheduled_at = dt
                 bc.is_sent = False
-                bc.recipients_count = _audience_profiles(bc.audience).count()
+                total = _audience_profiles(bc.audience).count()
+                bc.recipients_count = min(total, bc.limit) if bc.limit else total
                 bc.save()
                 return Response({
                     'id': bc.id,

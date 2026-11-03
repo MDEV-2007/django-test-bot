@@ -2,7 +2,7 @@ import logging
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from panel.models import Broadcast
-from panel.api import _audience_profiles
+from panel.broadcasting import caption_lookup, has_telegram, personalize, select_recipients
 from core.models import Notification
 from accounts.utils import execute_telegram_broadcast
 
@@ -29,17 +29,19 @@ class Command(BaseCommand):
 
         for bc in pending:
             try:
-                profiles = list(_audience_profiles(bc.audience))
+                profiles = select_recipients(bc)
                 Notification.objects.bulk_create([
-                    Notification(profile=p, title=bc.title, message=bc.message, type='system')
+                    Notification(profile=p, title=bc.title, message=personalize(bc.message, p), type='system')
                     for p in profiles
                 ])
                 bc.recipients_count = len(profiles)
+                bc.recipient_ids = [p.id for p in profiles]
 
                 if bc.via_telegram:
                     caption = f"{bc.title}\n\n{bc.message}"
                     image_path = bc.image.path if (bc.image and bc.image.storage.exists(bc.image.name)) else None
-                    tg_ids = [p.telegram_id for p in profiles if p.telegram_id and str(p.telegram_id).strip() not in ('', '0')]
+                    tg_profiles = [p for p in profiles if has_telegram(p)]
+                    tg_ids = [p.telegram_id for p in tg_profiles]
 
                     def _progress(sent, total):
                         Broadcast.objects.filter(id=bc.id).update(telegram_sent_count=sent)
@@ -49,6 +51,7 @@ class Command(BaseCommand):
                         caption=caption,
                         image_path=image_path,
                         on_progress=_progress,
+                        caption_for=caption_lookup(bc, tg_profiles),
                     )
                     bc.telegram_sent_count = res['sent_count']
 

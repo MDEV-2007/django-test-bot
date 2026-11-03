@@ -166,9 +166,13 @@ def execute_telegram_broadcast(
     caption: str,
     image_path: str | None = None,
     on_progress=None,
+    caption_for=None,
 ) -> dict:
     """Send broadcast to multiple Telegram users efficiently with Keep-Alive connection reuse,
     automatic file_id caching, rate-limit retry, and blocked user skipping.
+
+    `caption_for(chat_id) -> str`, agar berilsa, har bir qabul qiluvchi uchun shaxsiy
+    matn qaytaradi (masalan {ism} o'rniga ism). Berilmasa, hammaga `caption` ketadi.
 
     Returns dict:
         {
@@ -211,6 +215,10 @@ def execute_telegram_broadcast(
     failed_count = 0
 
     for idx, chat_id in enumerate(unique_ids, start=1):
+        if caption_for is not None:
+            personal = caption_for(chat_id) or caption
+            photo_caption = personal[:1024]
+            text_content = personal[:4096]
         try:
             if has_image:
                 if file_id:

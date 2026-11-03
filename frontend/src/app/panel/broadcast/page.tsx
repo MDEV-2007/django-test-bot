@@ -33,15 +33,27 @@ type HistoryRow = {
   image: string | null;
   scheduled_at?: string | null;
   is_sent?: boolean;
+  message?: string;
+  limit?: number | null;
+  exclude_broadcast?: number | null;
 };
 
-type BroadcastData = { history: HistoryRow[]; audience_counts: Record<string, number> };
+type BroadcastData = {
+  history: HistoryRow[];
+  audience_counts: Record<string, number>;
+  audience_telegram_counts?: Record<string, number>;
+};
 
 const AUDIENCES = [
   { value: 'all', label: 'Barchasi' },
   { value: 'students', label: "O'quvchilar" },
   { value: 'teachers', label: "O'qituvchilar" },
   { value: 'premium', label: 'Premium' },
+  // Qayta faollashtirish segmentlari (faqat o'quvchilar)
+  { value: 'active_7d', label: 'Faol (7 kunda kirgan)' },
+  { value: 'lapsed', label: 'Yaqinda ketgan (8–30 kun)' },
+  { value: 'dormant', label: 'Uxlab qolgan (30+ kun)' },
+  { value: 'no_test', label: 'Hali test tugatmagan' },
 ];
 const AUDIENCE_LABEL = Object.fromEntries(AUDIENCES.map((a) => [a.value, a.label]));
 
@@ -55,6 +67,9 @@ export default function PanelBroadcastPage() {
   const [image, setImage] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<HistoryRow | null>(null);
+  // Sinov guruhi: avval N kishiga, natijani ko'rib keyin qolganlarga.
+  const [limit, setLimit] = useState('');
+  const [excludeFrom, setExcludeFrom] = useState<HistoryRow | null>(null);
 
   // Broadcast Scheduler
   const [isScheduled, setIsScheduled] = useState(false);
@@ -74,7 +89,23 @@ export default function PanelBroadcastPage() {
     return () => clearInterval(timer);
   }, [data?.history]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const recipients = data?.audience_counts[audience];
+  const audienceTotal = data?.audience_counts[audience];
+  const audienceTelegram = data?.audience_telegram_counts?.[audience];
+  const limitNum = Number(limit) > 0 ? Math.floor(Number(limit)) : null;
+  const recipients = audienceTotal === undefined ? undefined
+    : Math.max(0, Math.min(limitNum ?? Infinity, audienceTotal - (excludeFrom?.recipients_count ?? 0)));
+
+  // "Qolganlarga yuborish": sinov xabarini qayta to'ldiradi va uni olganlarni chiqarib tashlaydi.
+  function sendToRest(b: HistoryRow) {
+    setTitle(b.title);
+    setMessage(b.message || '');
+    setAudience(b.audience);
+    setLimit('');
+    setExcludeFrom(b);
+    setIsScheduled(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast.info("Xabar qayta to'ldirildi — sinov guruhidagilarga ikkinchi marta yuborilmaydi.");
+  }
 
   async function handleSendOrSchedule() {
     if (!title.trim() || !message.trim()) {
@@ -94,6 +125,8 @@ export default function PanelBroadcastPage() {
       form.append('message', message);
       form.append('audience', audience);
       form.append('via_telegram', viaTelegram ? 'true' : '');
+      if (limitNum) form.append('limit', String(limitNum));
+      if (excludeFrom) form.append('exclude_broadcast', String(excludeFrom.id));
       if (image) form.append('image', image);
 
       if (isScheduled) {
@@ -128,6 +161,8 @@ export default function PanelBroadcastPage() {
       setTitle('');
       setMessage('');
       setImage(null);
+      setLimit('');
+      setExcludeFrom(null);
       setIsScheduled(false);
       setScheduledDateTime('');
       load();
@@ -198,7 +233,10 @@ export default function PanelBroadcastPage() {
 
             <div className="space-y-1.5">
               <Label htmlFor="bc-msg">Xabar matni</Label>
-              <Textarea id="bc-msg" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Xabar mazmuni..." />
+              <Textarea id="bc-msg" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Salom, {ism}! ..." />
+              <p className="text-xs text-muted-foreground">
+                <code className="rounded bg-muted px-1">{'{ism}'}</code> o&apos;rniga har bir o&apos;quvchining ismi qo&apos;yiladi.
+              </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -215,6 +253,23 @@ export default function PanelBroadcastPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="bc-limit">Sinov guruhi (ixtiyoriy)</Label>
+                <Input
+                  id="bc-limit"
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  value={limit}
+                  onChange={(e) => setLimit(e.target.value)}
+                  placeholder="Masalan: 100"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Tasodifiy N kishiga yuboriladi{viaTelegram ? ' (Telegram ulanganlardan)' : ''}.
+                  {audienceTelegram !== undefined && ` Telegram'da yetadi: ${audienceTelegram}.`}
+                </p>
               </div>
 
               <div className="space-y-1.5">
@@ -254,6 +309,19 @@ export default function PanelBroadcastPage() {
           </CardContent>
 
           <Separator />
+
+          {excludeFrom && (
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-sky-500/30 bg-sky-500/5 p-3 text-xs">
+                <span>
+                  «{excludeFrom.title}» olgan {excludeFrom.recipients_count} kishi chiqarib tashlanadi.
+                </span>
+                <Button type="button" variant="ghost" size="sm" className="h-8 text-xs" onClick={() => setExcludeFrom(null)}>
+                  Bekor qilish
+                </Button>
+              </div>
+            </CardContent>
+          )}
 
           <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-4">
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -324,11 +392,18 @@ export default function PanelBroadcastPage() {
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {AUDIENCE_LABEL[b.audience] || b.audience} · {b.recipients_count} ta qabul qiluvchi
+                        {b.limit ? ' · Sinov guruhi' : ''}
+                        {b.exclude_broadcast ? ' · Qolganlarga' : ''}
                         {b.telegram_sent_count > 0 && ` · TG: ${b.telegram_sent_count}`}
                         {' · '}
                         {new Date(b.sent_at).toLocaleString('uz-UZ')}
                       </p>
                     </div>
+                    {b.limit && b.is_sent ? (
+                      <Button variant="outline" size="sm" className="h-8 shrink-0 text-xs" onClick={() => sendToRest(b)}>
+                        Qolganlarga yuborish
+                      </Button>
+                    ) : null}
                     <Button
                       variant="ghost"
                       size="icon"

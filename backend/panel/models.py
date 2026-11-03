@@ -96,6 +96,11 @@ class Broadcast(models.Model):
         ('students', "O'quvchilar"),
         ('teachers', "O'qituvchilar"),
         ('premium', 'Premium foydalanuvchilar'),
+        # Qayta faollashtirish segmentlari (faqat o'quvchilar, `last_seen_at` bo'yicha).
+        ('active_7d', "Faol o'quvchilar (7 kunda kirgan)"),
+        ('lapsed', "Yaqinda ketgan (8–30 kun kirmagan)"),
+        ('dormant', "Uxlab qolgan (30+ kun kirmagan)"),
+        ('no_test', "Hali test tugatmagan o'quvchilar"),
     ]
     title = models.CharField(max_length=200)
     message = models.TextField()
@@ -103,6 +108,17 @@ class Broadcast(models.Model):
                               help_text="Ixtiyoriy — xabar bilan birga ko'rinadigan rasm")
     audience = models.CharField(max_length=20, choices=AUDIENCE_CHOICES, default='all')
     via_telegram = models.BooleanField(default=False)
+    # Sinov guruhi: avval N kishiga yuborib natijani ko'rish, keyin qolganlarga.
+    limit = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Faqat shuncha tasodifiy qabul qiluvchi (sinov guruhi). Bo'sh — hammasi.",
+    )
+    exclude_broadcast = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
+        help_text="Shu xabarni olganlarga qayta yubormaslik (sinovdan keyin «qolganlarga»).",
+    )
+    recipient_ids = models.JSONField(default=list, blank=True,
+                                     help_text="Xabar ketgan profil ID'lari (qayta yubormaslik uchun).")
     recipients_count = models.IntegerField(default=0)
     telegram_sent_count = models.IntegerField(default=0)
     sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='broadcasts')
