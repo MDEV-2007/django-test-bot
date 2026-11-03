@@ -85,15 +85,21 @@ class EvaluateEssayAPIView(APIView):
         is_vip = quota.is_vip()
         can_use = quota.can_use_essay()
 
-        # Agar bepul limit tugagan bo'lsa va VIP bo'lmasa:
-        # Ballar hisoblanadi, lekin is_locked=True bilan xiralashtiriladi (Blur)
+        # VIP yoki bepul kreditni sarflayotgan o'quvchi to'liq tahlilni ko'radi. Ilgari
+        # kredit sarflansa ham natija qulflangan qaytardi — "1 bepul AI esse tekshiruvi"
+        # mukofoti amalda hech narsa bermasdi. Kredit ham, VIP ham bo'lmasa — ballar
+        # ko'rinadi, xatolar ro'yxati qulflanadi.
+        unlocked = is_vip or can_use
         eval_result = evaluate_essay_bmb(
             essay_text=essay_text,
             prompt_text=prompt_text,
-            is_vip=is_vip
+            is_vip=unlocked
         )
+        if eval_result is None:
+            return Response({'ok': False, 'error': "AI tekshiruvi hozir ishlamayapti. Birozdan so'ng qayta urinib ko'ring."},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        # Kreditni sarflash
+        # Kreditni sarflash (faqat haqiqiy baho berilganda)
         if not is_vip and can_use:
             quota.consume_essay_credit()
 

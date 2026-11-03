@@ -139,7 +139,7 @@ def evaluate_essay_bmb(
     essay_text: str,
     prompt_text: str = "",
     is_vip: bool = False
-) -> dict:
+) -> dict | None:
     """45-topshiriq (Ona tili va adabiyot Esse) uchun rasmiy BMB 75 ballik AI tekshiruvi.
 
     Mezonlar:
@@ -249,20 +249,7 @@ Iltimos, ushbu esseni BMB mezonida tekshirib, xatolar ro'yxati va ballarini hiso
     except Exception as e:
         logger.error(f"Esse AI evaluation error: {e}")
 
-    # Favqulodda hisob-kitob
-    est_total = min(75.0, round(word_count * 0.35, 1))
-    return {
-        'mazmun_ball': round(est_total * 0.4, 1),
-        'mantiq_uslub_ball': round(est_total * 0.28, 1),
-        'savodxonlik_ball': round(est_total * 0.32, 1),
-        'total_ball': est_total,
-        'word_count': word_count,
-        'summary_feedback': "Essengiz muvaffaqiyatli qabul qilindi va dastlabki baholandi.",
-        'strengths': ["Mavzu bo'yicha fikr bildirilgan"],
-        'weaknesses': ["Imlo va punktuatsiyaga e'tibor qarating"],
-        'errors_list': [],
-        'total_errors_count': 3,
-        'is_locked': not is_vip,
-        'paywall_message': "🔒 Xatolar tahlilini ko'rish uchun VIP rejimni faollashtiring." if not is_vip else ""
-    }
+    # AI javob bermadi — ball O'YLAB TOPILMAYDI. Ilgari bu yerda so'zlar soniga qarab
+    # "baho" (word_count * 0.35) va "3 ta xato" qaytarilardi; chaqiruvchi xato ko'rsatadi.
+    return None
 

@@ -426,6 +426,8 @@ def lead_submit_api(request):
 
     if not campaign_id:
         return Response({'error': "campaign_id kiritilishi shart."}, status=400)
+    if len(phone.replace(' ', '').replace('-', '')) < 9:
+        return Response({'error': "Iltimos, telefon raqamingizni kiriting."}, status=400)
 
     try:
         res = submit_center_lead(

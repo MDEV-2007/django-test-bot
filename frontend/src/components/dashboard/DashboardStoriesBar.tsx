@@ -102,43 +102,24 @@ export default function DashboardStoriesBar() {
     const wa = (window as any).Telegram?.WebApp;
 
     if (story.isVip) {
-      setSubmittingLead(true);
+      // Homiy story faqat havolani ochadi. Ilgari bir bosishda — telefon raqami va
+      // roziliksiz — o'quvchi ma'lumoti qattiq yozilgan `campaign_id: 1` markaziga lid
+      // sifatida yuborilardi. Lid endi faqat dashboarddagi rozilik formasi orqali.
       tgHaptic('medium');
-      try {
-        const res = await apiFetch<{ success: boolean; message: string; coins_earned: number }>(
-          '/api/v1/b2b/submit-lead/',
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              campaign_id: 1,
-              source: 'vip_story',
-            }),
-          }
-        );
-        setLeadSuccess(true);
-        toast.success(res.message || "Arizangiz qabul qilindi! +50 🪙 berildi.");
-        
-        setTimeout(() => {
-          setActiveStory(null);
-          if (story.ctaLink) {
-            if (story.ctaLink.startsWith('http')) {
-              if (wa?.openLink) { wa.openLink(story.ctaLink); } else { window.open(story.ctaLink, '_blank'); }
-            } else {
-              router.push(story.ctaLink);
-            }
-          }
-        }, 1200);
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Xatolik yuz berdi");
-      } finally {
-        setSubmittingLead(false);
+      setActiveStory(null);
+      if (story.ctaLink) {
+        if (story.ctaLink.startsWith('http')) {
+          if (wa?.openLink) { wa.openLink(story.ctaLink); } else { window.open(story.ctaLink, '_blank'); }
+        } else {
+          router.push(story.ctaLink);
+        }
       }
       return;
     }
 
     tgHaptic('select');
     if (story.id === 3) {
-      toast.success("Do'stingizni tabrikladingiz! (+10 XP) 🎉");
+      toast.success("Do'stingizni tabrikladingiz! 🎉");
     } else if (story.id === 2) {
       toast.success("1v1 Duel Arenaga yo'naltirilmoqda! ⚔️");
     } else {

@@ -498,7 +498,7 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
         }
 
     lead_name = name or (profile.user.get_full_name() or profile.user.username if profile else "Abituriyent")
-    lead_phone = phone or (getattr(profile, 'phone_number', '') if profile else "+998 90 --- -- --")
+    lead_phone = phone or (getattr(profile, 'phone_number', '') if profile else '')
     lead_tg = getattr(profile, 'telegram_username', '') if profile else ""
 
     lead = StudentLeadSubmission.objects.create(
@@ -507,8 +507,8 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
         full_name=lead_name,
         phone_number=lead_phone,
         telegram_username=lead_tg,
-        predicted_dtm_score=str(score or "178.4"),
-        weakest_topics=weak_topics or f"{subject or 'Fan'} bo'yicha zaif mavzular",
+        predicted_dtm_score=str(score or ''),
+        weakest_topics=weak_topics or '',
         coins_rewarded=50,
     )
 

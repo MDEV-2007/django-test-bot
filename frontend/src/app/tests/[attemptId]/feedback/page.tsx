@@ -354,7 +354,7 @@ export default function FeedbackPage() {
               onClick={() => setCertOpen(true)}
               className="border-[var(--tone-premium)]/40 bg-[var(--tone-premium-soft)] font-semibold text-[var(--tone-premium-text)] hover:bg-[var(--tone-premium)]/20"
             >
-              <Award className="size-4" /> Sertifikat
+              <Award className="size-4" /> Natija kartasi
             </Button>
             <StoryShareButton attemptId={attemptId} />
             <Button
@@ -713,7 +713,7 @@ export default function FeedbackPage() {
                       badgeText = "🥉 A2 Daraja (Boshlang'ich Sertifikat)";
                       badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300';
                     } else {
-                      badgeText = "❌ Sinovdan o'tmadi (Sertifikat berilmaydi)";
+                      badgeText = "❌ Sinovdan o'tmadi";
                       badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400';
                     }
                     return (
@@ -733,7 +733,7 @@ export default function FeedbackPage() {
                     else if (c >= 24) { badgeText = '🥈 B+ Daraja (Juda yaxshi)'; badgeClass = 'border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400'; }
                     else if (c >= 21) { badgeText = '🥉 B Daraja (Yaxshi)'; badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400'; }
                     else if (c >= 18) { badgeText = '📜 C+ Daraja (Qoniqarli)'; badgeClass = 'border-orange-500/40 bg-orange-500/15 text-orange-600 dark:text-orange-400'; }
-                    else { badgeText = '❌ Sinovdan o\'tmadi (Sertifikat berilmaydi)'; badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400'; }
+                    else { badgeText = '❌ Sinovdan o\'tmadi'; badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400'; }
 
                     return (
                       <Badge variant="outline" className={`py-1.5 px-3 text-xs sm:text-sm font-bold ${badgeClass}`}>
@@ -849,7 +849,7 @@ export default function FeedbackPage() {
                   onClick={() => setCertOpen(true)}
                   className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/25 gap-2 active:scale-95 transition-all text-xs border border-emerald-400/30 cursor-pointer"
                 >
-                  <Award className="size-4" /> Rasmiy PDF Sertifikatni ochish
+                  <Award className="size-4" /> Natija kartasini ochish
                 </Button>
               </div>
 
@@ -955,13 +955,13 @@ export default function FeedbackPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-amber-300/30">
                 <div className="space-y-1">
                   <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-                    <Award className="size-3.5" /> Rasmiy Milliy Sertifikat
+                    <Award className="size-3.5" /> Natija kartasi
                   </div>
                   <h3 className="text-lg sm:text-xl font-black text-foreground">
-                    Sizning sinov natijangiz bo&apos;yicha sertifikat tayyor! 📜
+                    Natijangiz kartasi tayyor! 📜
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Ushbu sertifikat rasmiy BMB (DTM) standarti bo&apos;yicha sariq-oq rangda va QR-kod bilan taqdim etiladi.
+                    Natijangizni rasm yoki PDF qilib saqlang va ulashing. Bu IlmIldizi mashq testi natijasi — rasmiy BMB sertifikati emas.
                   </p>
                 </div>
                 <Button
@@ -972,7 +972,7 @@ export default function FeedbackPage() {
                 </Button>
               </div>
 
-              {/* Sertifikatning o'zi (IlmIldizi rasmiy standarti: Qaymoqrang, tilla hoshiya, IlmIldizi logosi, QR kod) */}
+              {/* Natija kartasi (qaymoqrang, tilla hoshiya, IlmIldizi logosi, natijaga QR havola) */}
               <div 
                 onClick={() => setCertOpen(true)}
                 className="cursor-pointer group relative mx-auto w-full max-w-[580px] bg-[#fefcf6] border-[3px] border-[#c59b27] p-2.5 sm:p-3.5 shadow-xl rounded-sm transition-all hover:scale-[1.01] hover:shadow-2xl overflow-hidden"
@@ -995,22 +995,24 @@ export default function FeedbackPage() {
                     />
                   </div>
                   <p className="text-[10px] sm:text-xs font-bold text-[#065f46] uppercase tracking-wider font-serif text-center">
-                    ILMILDIZI RESPUBLIKA TA&apos;LIM VA TEST MARKAZI
+                    ILMILDIZI · ONLAYN MASHQ PLATFORMASI
                   </p>
+                  {/* Davlat organi (BMB) nomi va "rasmiy" so'zi ataylab ishlatilmaydi: bu
+                      platformaning mashq natijasi, davlat hujjatiga o'xshatish noqonuniy. */}
                   <p className="text-[9px] sm:text-[10.5px] font-extrabold text-[#1c3c87] uppercase tracking-wide mb-2 text-center">
-                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI STANDARTLARI ASOSIDA
+                    Rasmiy hujjat emas · BMB formatidagi mashq testi
                   </p>
 
                   {/* Title */}
                   <h4 className="font-serif text-sm sm:text-base font-black text-[#0f172a] uppercase tracking-wide text-center leading-snug">
-                    UMUMTA&apos;LIM FANINI BILISH DARAJASI<br />TO&apos;G&apos;RISIDA SERTIFIKAT
+                    MASHQ TESTI<br />NATIJA KARTASI
                   </h4>
 
                   {/* Data Rows */}
                   <div className="w-full mt-3 space-y-2 text-[11px] sm:text-xs">
                     <div className="space-y-1 pb-1.5 border-b border-[#e5c158]">
                       <div className="flex justify-between">
-                        <span className="font-bold text-[#1c3c87]">Sertifikat raqami:</span>
+                        <span className="font-bold text-[#1c3c87]">Natija raqami:</span>
                         <span className="font-mono font-bold">{certNumber}</span>
                       </div>
                       <div className="flex justify-between">
@@ -1037,7 +1039,7 @@ export default function FeedbackPage() {
                         <span className="font-mono font-bold">{pctVal}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-[#1c3c87]">Sertifikat darajasi:</span>
+                        <span className="font-bold text-[#1c3c87]">Taxminiy daraja:</span>
                         <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-300 font-black text-xs font-mono">
                           {certGrade}
                         </span>
@@ -1050,25 +1052,17 @@ export default function FeedbackPage() {
                     </div>
                   </div>
 
-                  {/* Bottom: Direktor, QR, IlmIldizi */}
-                  <div className="w-full flex items-center justify-between gap-2 mt-4 pt-2">
-                    <div className="flex-1 text-center font-serif text-[11px] font-bold">
-                      Direktor<br /><span className="text-[10px] font-sans text-muted-foreground">_________</span>
-                    </div>
-
+                  {/* Pastda: natija sahifasiga QR havola (imzo/muhr yo'q — bu rasmiy hujjat emas) */}
+                  <div className="w-full flex items-center justify-center gap-3 mt-4 pt-2">
                     <div className="shrink-0 p-1 border border-[#c59b27] bg-white rounded flex flex-col items-center shadow-xs">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={qrImgUrl} alt="QR Kod" className="size-14 sm:size-16 object-contain" />
-                      <span className="text-[7px] font-bold text-[#065f46] mt-0.5">QR VERIFIED</span>
-                    </div>
-
-                    <div className="flex-1 text-center font-serif text-[11px] font-bold">
-                      IlmIldizi<br /><span className="text-[10px] font-sans text-muted-foreground">_________</span>
+                      <img src={qrImgUrl} alt="Natija sahifasiga QR havola" className="size-14 sm:size-16 object-contain" />
+                      <span className="text-[7px] font-bold text-[#065f46] mt-0.5">NATIJANI KO&apos;RISH</span>
                     </div>
                   </div>
 
                   <div className="mt-3 text-[10px] text-amber-700 font-bold group-hover:underline flex items-center gap-1">
-                    Bosing: Sertifikatni to&apos;liq ochish va yuklab olish &rarr;
+                    Bosing: kartani to&apos;liq ochish va yuklab olish &rarr;
                   </div>
                 </div>
               </div>
@@ -1241,42 +1235,21 @@ export default function FeedbackPage() {
           </div>
         )}
 
-        {/* MICRO-PAYWALL: AI Tahlil va Chuqur Yechimlar Teaseri */}
-        {!user?.is_premium && (a.wrong_answers || 0) > 0 && (
-          <div className="relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-yellow-500/10 p-5 shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-500">
-                  <Lock className="size-3.5" /> Shaxsiy AI Tahlil va Har Bir Savol Yechimi
-                </div>
-                <h4 className="text-sm sm:text-base font-black text-foreground">
-                  Xatolar formulasini chuqur tushunmoqchimisiz?
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  Bor-yo&apos;g&apos;i <b>3,000 so&apos;m</b> evaziga (yoki VIP obuna bilan) har bir savolning batafsil yechimi, qoidalari va AI shaxsiy mentor tavsiyalarini oching!
-                </p>
-              </div>
-              <Button asChild size="sm" className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl shadow shrink-0">
-                <Link href="/shop">
-                  <Sparkles className="size-4 mr-1.5" /> Tahlilni Ochish (3,000 so&apos;m)
-                </Link>
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* "3,000 so'mga tahlilni ochish" bloki olib tashlandi: tugma tangalar do'koniga
+            olib borardi (bunday mahsulot yo'q), savollar yechimi esa pastda bepul ko'rinadi. */}
 
         {/* 36-45-TOPSHIRIQLAR: AI BMB EKSPERT & ESSE TEKSHIRUVI (FREEMIUM / VIP PAYWALL) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-500/40 bg-purple-500/15 px-3 py-0.5 text-xs font-bold text-purple-400">
-                <Sparkles className="size-3.5" /> 36–45-topshiriqlar · BMB Rasmiy Mezon
+                <Sparkles className="size-3.5" /> 36–45-topshiriqlar · BMB mezoni asosida
               </div>
               <h3 className="text-lg font-black text-foreground">
                 AI BMB Ekspert & Esse Baholash
               </h3>
               <p className="text-xs text-muted-foreground">
-                Ochiq savollar va Esse matningizni rasmiy 75 ballik BMB rubrikasi va AI ekspert orqali tahlil qiling.
+                Ochiq savollar va esse matningizni 75 ballik mezon bo&apos;yicha AI orqali tekshiring.
               </p>
             </div>
           </div>

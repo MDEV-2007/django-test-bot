@@ -30,7 +30,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useFeatureFlags } from '@/lib/features';
 import {
   DailyGoalCard,
-  LiveActivityTicker,
 } from '@/components/dashboard/ModernHeroDashboard';
 import AiMarathonBanner from '@/components/dashboard/AiMarathonBanner';
 import MagneticLoopCard from '@/components/dashboard/MagneticLoopCard';
@@ -351,8 +350,8 @@ export default function DashboardPage() {
         completedAttempts={data.recent_attempts.length}
       />
 
-      {/* JONLI FAOLIYAT MIKRO-TIKERI (Multiplayer Live Ribbon) */}
-      <LiveActivityTicker />
+      {/* "Jonli lenta" olib tashlandi: undagi o'quvchilar va voqealar qattiq yozilgan
+          (haqiqiy faoliyat emas) edi. */}
 
       {/* ============================================================ */}
       {/* 3. iPadOS SPLIT VIEW: MAIN COLUMN (8) + SMART STACK (4)      */}
@@ -401,11 +400,11 @@ export default function DashboardPage() {
                 weakReviewTopic={data.weak_review?.topic_title || null}
                 theme={isDark ? 'dark' : 'light'}
               />
+
               {/* Jonli Respublika Sprinti — asosiy sikldan keyingi ikkinchi darajali taklif */}
               <LiveRepublicBanner
                 onRegisterClick={() => router.push('/sprint?subject=0&count=20&autostart=true')}
               />
-
 
               {/* 4. iOS CONTROL CENTER QUICK STUDY MODULES */}
               <div className="space-y-3">

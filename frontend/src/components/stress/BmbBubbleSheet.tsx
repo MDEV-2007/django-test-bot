@@ -73,14 +73,15 @@ export default function BmbBubbleSheet({
       isTimePanic ? "border-rose-600 shadow-rose-500/20 animate-pulse" :
       isTimeCritical ? "border-amber-500 shadow-amber-500/15" : "border-slate-300 dark:border-slate-700"
     )}>
-      {/* Authentic BMB Official Header */}
+      {/* BMB titul varaqasiga o'xshatilgan MASHQ nusxasi — davlat organi nomi bilan
+          "rasmiy" ko'rinish berilmaydi. */}
       <div className="border-b-2 border-slate-300 dark:border-slate-700 p-3 sm:p-4 bg-[#f8f6ee] dark:bg-[#1a1c24] rounded-t-2xl">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
               <span className="inline-block size-2 rounded-full bg-blue-600 animate-ping" />
               <p className="text-[10px] sm:text-[11px] font-black tracking-wider uppercase text-blue-900 dark:text-blue-400">
-                BILIM VA MALAKALARNI BAHOLASH AGENTLIGI (BMB)
+                BMB titul varaqasi namunasi · mashq
               </p>
             </div>
             <h3 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-1.5">

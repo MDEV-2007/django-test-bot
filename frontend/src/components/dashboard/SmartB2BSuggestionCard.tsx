@@ -47,32 +47,18 @@ export type B2BCampaignData = {
 export type B2BDiagnosisData = {
   weakest_topic: string;
   mastery_percentage: number;
-  predicted_score: string;
-  target_grade: string;
+  predicted_score: string | null;
 };
 
 export default function SmartB2BSuggestionCard() {
   const { t } = useTransliterate();
   const { user } = useAuthStore();
 
-  const [campaign, setCampaign] = useState<B2BCampaignData>({
-    id: 1,
-    center_name: "Registon O'quv Markazi",
-    logo: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
-    title: "Tarix va Ona tili intensiv DTM kursi",
-    description: "2 oylik intensiv tayyorgarlik orqali qiyin mavzularda 90%+ natijaga erishing!",
-    offer_badge: "1-dars BEPUL + 20% chegirma",
-    target_subject: "Tarix",
-    target_region: "Toshkent",
-    rating: 4.9,
-  });
-
-  const [diagnosis, setDiagnosis] = useState<B2BDiagnosisData>({
-    weakest_topic: "Qadimiy dunyo (Rim/Yunoniston) sardorlari va janglari",
-    mastery_percentage: 42,
-    predicted_score: "178.4",
-    target_grade: "A+ (175+ ball)",
-  });
+  /* Faqat serverdagi haqiqiy kampaniya va diagnostika. Ilgari bu yerda soxta "Registon
+     O'quv Markazi" va "42% — prognoz 178.4" boshlang'ich qiymatlari turardi va server
+     javob bermasa ham ko'rsatilardi. */
+  const [campaign, setCampaign] = useState<B2BCampaignData | null>(null);
+  const [diagnosis, setDiagnosis] = useState<B2BDiagnosisData | null>(null);
 
   // Consent Modal state
   const [isConsentOpen, setIsConsentOpen] = useState(false);
@@ -93,16 +79,16 @@ export default function SmartB2BSuggestionCard() {
     async function loadCampaign() {
       try {
         const res = await apiFetch<{
-          campaign: B2BCampaignData;
-          diagnosis: B2BDiagnosisData;
+          campaign: B2BCampaignData | null;
+          diagnosis: B2BDiagnosisData | null;
         }>('/api/v1/b2b/active-campaign/');
 
         if (isMounted) {
-          if (res?.campaign) setCampaign(res.campaign);
-          if (res?.diagnosis) setDiagnosis(res.diagnosis);
+          setCampaign(res?.campaign ?? null);
+          setDiagnosis(res?.diagnosis ?? null);
         }
       } catch {
-        // Fallback default mock
+        // Reklama ixtiyoriy — xatoda karta ko'rsatilmaydi.
       }
     }
     loadCampaign();
@@ -136,11 +122,11 @@ export default function SmartB2BSuggestionCard() {
       }>('/api/v1/b2b/submit-lead/', {
         method: 'POST',
         body: JSON.stringify({
-          campaign_id: campaign.id,
+          campaign_id: campaign?.id,
           full_name: fullName,
           phone_number: phone,
-          weakest_topics: diagnosis.weakest_topic,
-          predicted_dtm_score: diagnosis.predicted_score,
+          weakest_topics: diagnosis?.weakest_topic ?? '',
+          predicted_dtm_score: diagnosis?.predicted_score ?? '',
         }),
       });
 
@@ -163,10 +149,13 @@ export default function SmartB2BSuggestionCard() {
     }
   };
 
+  if (!campaign) return null;
+
   return (
     <>
       <div className="relative overflow-hidden rounded-[28px] border border-amber-500/30 bg-gradient-to-b from-amber-500/[0.08] via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-xl backdrop-blur-xl">
-        {/* Yuqori AI Diagnostika Izohi */}
+        {/* Yuqori AI Diagnostika Izohi — faqat haqiqiy test natijasi bo'lsa */}
+        {diagnosis && (
         <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 mb-4 space-y-1.5">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
             <Sparkles className="size-4" />
@@ -176,6 +165,7 @@ export default function SmartB2BSuggestionCard() {
             {t("Siz")} <strong className="text-white">&quot;{t(diagnosis.weakest_topic)}&quot;</strong> {t("mavzusida")} <span className="font-mono text-rose-400 font-bold">{diagnosis.mastery_percentage}%</span> {t("natija ko'rsatmoqdasiz.")} {t("A+ darajasiga chiqish uchun rasmiy o'quv markaz ustozlari tavsiya etiladi.")}
           </p>
         </div>
+        )}
 
         {/* O'quv Markaz Kartasi */}
         <div className="flex items-start gap-3.5 mb-4">

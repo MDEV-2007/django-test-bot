@@ -18,41 +18,26 @@ def active_campaign_api(request):
     """Dashboarddagi AI Ustoz & O'quv Markaz Tavsiyasi uchun aktiv kampaniya va AI tahlil."""
     profile = ensure_profile_for_user(request.user) if request.user.is_authenticated else None
 
-    # O'quvchining so'nggi xatolari va zaif mavzularini aniqlaymiz
-    weakest_topic = "XIX asr xonliklari davri"
-    weakest_percentage = 42
-    predicted_score = "178.4"
-
+    # Diagnostika faqat haqiqiy ma'lumotdan: o'quvchining oxirgi yakunlangan testi va
+    # AI tahlilidagi zaif mavzu. Ilgari test yechmagan o'quvchiga ham "XIX asr xonliklari —
+    # 42%, prognoz 178.4" qattiq yozilgan qiymatlari qaytarilardi.
+    diagnosis = None
     if profile:
         last_attempt = Attempt.objects.filter(profile=profile, is_completed=True).order_by('-completed_at').first()
-        if last_attempt:
-            feedback = AIFeedback.objects.filter(attempt=last_attempt).first()
-            if feedback and feedback.weak_topics:
-                wt_list = [t.strip() for t in feedback.weak_topics.split(',') if t.strip()]
-                if wt_list:
-                    weakest_topic = wt_list[0]
-            if last_attempt.score:
-                weakest_percentage = int(last_attempt.score)
-            if feedback and feedback.predicted_score:
-                predicted_score = str(feedback.predicted_score)
+        feedback = AIFeedback.objects.filter(attempt=last_attempt).first() if last_attempt else None
+        weak = [t.strip() for t in (feedback.weak_topics or '').split(',') if t.strip()] if feedback else []
+        if last_attempt and last_attempt.score is not None and weak:
+            diagnosis = {
+                'weakest_topic': weak[0],
+                'mastery_percentage': int(last_attempt.score),
+                'predicted_score': str(feedback.predicted_score) if feedback.predicted_score else None,
+            }
 
+    # Kampaniya bo'lmasa reklama yo'q. Ilgari bu yerda bazaga soxta "Registon O'quv
+    # Markazi" yaratilardi va o'quvchilar mavjud bo'lmagan markazga lid yuborardi.
     campaign = EduCenterCampaign.objects.filter(is_active=True).first()
-
-    # Agar bazada hali kampaniya yo'q bo'lsa, seed data yaratamiz
     if not campaign:
-        campaign = EduCenterCampaign.objects.create(
-            center_name="Registon O'quv Markazi",
-            logo="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
-            title="Tarix va Ona tili intensiv DTM kursi",
-            description="Registon LC da 2 oylik intensiv tayyorgarlik kursi orqali qiyin mavzularda 90%+ natijaga erishing!",
-            offer_badge="1-dars BEPUL + 20% chegirma",
-            target_subject="Tarix",
-            target_region="Toshkent",
-            max_score_threshold=65,
-            rating=4.9,
-            story_video_url="",
-            is_active=True,
-        )
+        return Response({'campaign': None, 'diagnosis': diagnosis})
 
     return Response({
         'campaign': {
@@ -67,12 +52,7 @@ def active_campaign_api(request):
             'rating': campaign.rating,
             'story_video_url': campaign.story_video_url,
         },
-        'diagnosis': {
-            'weakest_topic': weakest_topic,
-            'mastery_percentage': weakest_percentage,
-            'predicted_score': predicted_score,
-            'target_grade': "A+ (175+ ball)",
-        },
+        'diagnosis': diagnosis,
         'user_preview': {
             'full_name': (profile.user.get_full_name() or profile.user.first_name or profile.user.username) if profile else "",
             'telegram_username': getattr(profile, 'telegram_username', '') if profile else "",
@@ -91,10 +71,14 @@ def submit_lead_api(request):
     campaign = EduCenterCampaign.objects.filter(id=campaign_id).first() if campaign_id else EduCenterCampaign.objects.filter(is_active=True).first()
 
     full_name = (data.get('full_name') or profile.user.get_full_name() or profile.user.username).strip()
-    phone_number = (data.get('phone_number') or "+998 90 --- -- --").strip()
+    phone_number = (data.get('phone_number') or '').strip()
     telegram_username = (data.get('telegram_username') or getattr(profile, 'telegram_username', '') or profile.user.username).strip()
-    predicted_score = str(data.get('predicted_dtm_score') or "178.4")
-    weakest_topics = (data.get('weakest_topics') or "XIX asr xonliklari, Xronologiya va Esse tahlili").strip()
+    # Markazga faqat haqiqiy ma'lumot ketadi. Ilgari telefon bo'lmasa "+998 90 --- -- --",
+    # prognoz "178.4" va o'ylab topilgan zaif mavzular yuborilardi.
+    predicted_score = str(data.get('predicted_dtm_score') or '')
+    weakest_topics = (data.get('weakest_topics') or '').strip()
+    if len(phone_number.replace(' ', '').replace('-', '')) < 9:
+        return Response({'success': False, 'error': "Iltimos, telefon raqamingizni kiriting."}, status=400)
 
     previous = existing_lead(profile, campaign)
     if previous:

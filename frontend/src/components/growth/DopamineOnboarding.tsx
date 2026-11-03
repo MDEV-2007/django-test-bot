@@ -140,8 +140,8 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
   const [answersStatus, setAnswersStatus] = useState<boolean[]>([]); // har bir savol to'g'ri/xato
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
-  // Zaif nuqta mavzusi (odatda oxirgi qiyin savol yoki xato qilingan savol)
-  const [weakTopic, setWeakTopic] = useState<string>('Jadidchilik va XX asr boshlari');
+  // Xato qilingan savollarning mavzulari (takrorlanmasdan) — natijada ko'rsatiladi.
+  const [weakTopics, setWeakTopics] = useState<string[]>([]);
 
   // Backenddan 7 ta savol olish (agar mavjud bo'lsa)
   useEffect(() => {
@@ -175,7 +175,8 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
       soundFX.incorrect();
       tgHaptic('error');
       // Xato qilingan mavzuni eslab qolish
-      setWeakTopic(questions[currentIndex]?.topic || 'Jadidchilik va XX asr boshlari');
+      const topic = questions[currentIndex]?.topic;
+      if (topic) setWeakTopics((prev) => (prev.includes(topic) ? prev : [...prev, topic]));
     }
 
     setTimeout(() => {
@@ -207,6 +208,18 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
   };
 
   const currentQ = questions[currentIndex];
+
+  /* Natija faqat haqiqiy javoblardan. Ilgari bu yerda hamma uchun bir xil "B+, 164.5/189
+     ball, A daraja kafolatlanadi" qattiq yozilgan edi — 7 ta savoldan sertifikat balli
+     bashorat qilib bo'lmaydi, shuning uchun ball ko'rsatilmaydi. */
+  const total = questions.length;
+  const level =
+    correctAnswersCount >= total - 1
+      ? { label: 'Kuchli boshlanish', tone: 'text-emerald-300', note: "Asosiy bilimlar mustahkam. Endi rasmiy formatdagi to'liq testlar bilan darajangizni aniqlang." }
+      : correctAnswersCount >= Math.ceil(total / 2)
+      ? { label: "O'rtacha", tone: 'text-blue-300', note: "Yaxshi asos bor. Quyidagi mavzularni mustahkamlasangiz, natija tez o'sadi." }
+      : { label: "Boshlang'ich", tone: 'text-amber-300', note: "Hammasi oldinda — kunlik qisqa mashqlar bilan bilimlar tez to'planadi." };
+  const DIFFICULTY_UZ: Record<BlitzQuestion['difficulty'], string> = { EASY: 'Oson', MEDIUM: "O'rta", HARD: 'Qiyin' };
 
   return (
     <div className="relative w-full max-w-xl mx-auto min-h-[580px] flex flex-col justify-between p-4 sm:p-5 bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-white/[0.07] shadow-2xl select-none overflow-hidden">
@@ -265,7 +278,7 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
                   currentQ.difficulty === 'HARD' && 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                 )}
               >
-                {currentQ.difficulty}
+                {DIFFICULTY_UZ[currentQ.difficulty] ?? currentQ.difficulty}
               </span>
               <span className="text-xs text-zinc-400 truncate">{currentQ.topic}</span>
             </div>
@@ -314,7 +327,7 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
           </motion.div>
         )}
 
-        {/* ── 2. "B+ POTENSIAL" NATIJA KARTASI (TRAMPLIN UI) ── */}
+        {/* ── 2. NATIJA KARTASI (haqiqiy javoblardan) ── */}
         {isCompleted && (
           <motion.div
             key="blitz_result"
@@ -322,83 +335,50 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
             animate={{ opacity: 1, scale: 1 }}
             className="my-auto flex flex-col justify-between space-y-5 py-4 text-center"
           >
-            {/* O'rtada yarqirab turuvchi Sertifikat Daraja Nishoni */}
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Award className="size-3.5" />
                 <span>Diagnostika Natijasi</span>
               </div>
 
-              {/* Katta B+ Nishoni */}
               <div className="relative mx-auto size-28 sm:size-32 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-emerald-500 p-[2px] shadow-[0_0_35px_rgba(59,130,246,0.45)]">
                 <div className="size-full bg-[#07090E] rounded-2xl flex flex-col items-center justify-center p-3">
-                  <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-300">
-                    B+
+                  <span className="text-3xl sm:text-4xl font-black text-white font-mono">
+                    {correctAnswersCount}/{total}
                   </span>
                   <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase mt-1">
-                    POTENSIAL
-                  </span>
-                  <span className="text-[11px] font-mono font-bold text-emerald-400 mt-0.5">
-                    164.5 / 189 ball
+                    to&apos;g&apos;ri javob
                   </span>
                 </div>
               </div>
 
-              <h2 className="text-lg sm:text-xl font-bold text-white pt-1">
-                Ajoyib Start! Milliy Sertifikatda B+ Olishingiz Mumkin
-              </h2>
+              <h2 className={cn('text-lg sm:text-xl font-bold pt-1', level.tone)}>{level.label}</h2>
+              <p className="text-xs text-zinc-300 max-w-md mx-auto">{level.note}</p>
             </div>
 
-            {/* Daraja Shkalasi (Progress Gauge: B+ dan A gacha atigi kichik masofa) */}
-            <div className="p-3.5 rounded-xl bg-zinc-950/70 border border-white/10 text-left space-y-2 max-w-md mx-auto w-full">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-300">Daraja Shkalasi:</span>
-                <span className="font-bold text-blue-400 text-[11px]">
-                  A darajagacha atigi <strong className="text-emerald-400">+10.5 ball</strong> qoldi!
-                </span>
+            {weakTopics.length > 0 && (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-left max-w-md mx-auto w-full space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
+                  <Target className="size-4 text-amber-400 shrink-0" />
+                  <span>Takrorlash kerak bo&apos;lgan mavzular:</span>
+                </div>
+                <ul className="text-xs text-zinc-200 pl-5 list-disc space-y-0.5">
+                  {weakTopics.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
               </div>
+            )}
 
-              {/* Progress Bar: B+ (80%) -> A (100%) */}
-              <div className="relative h-2.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)] transition-all duration-700"
-                  style={{ width: '87%' }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono">
-                <span>B (140 b.)</span>
-                <span className="text-blue-300 font-bold">B+ (164.5 b.) [SIZ]</span>
-                <span className="text-emerald-400 font-bold">A (175+ b.)</span>
-              </div>
-            </div>
-
-            {/* Qizil/Sariq Diagnostika bloki: Aniqlangan yagona zaif nuqta */}
-            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-left max-w-md mx-auto w-full space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
-                <Target className="size-4 text-amber-400 shrink-0" />
-                <span>Aniqlangan yagona zaif nuqta:</span>
-              </div>
-              <p className="text-xs text-zinc-200 pl-5">
-                <strong className="text-white font-semibold">{weakTopic}</strong> — shu mavzuni yopsangiz, A daraja kafolatlanadi.
-              </p>
-            </div>
-
-            {/* Yagona Pulsatsiyali CTA (Sticky Mobile Bottom Bar) */}
             <div className="pt-2">
               <button
                 type="button"
                 onClick={handleStartSprintTramplin}
-                className="w-full h-13 sm:h-14 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-[0_0_30px_-5px_rgba(37,99,235,0.5)] transition-all active:scale-[0.99] flex items-center justify-between px-4 sm:px-5 cursor-pointer"
+                className="w-full h-13 sm:h-14 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-[0_0_30px_-5px_rgba(37,99,235,0.5)] transition-all active:scale-[0.99] flex items-center justify-center gap-2 px-4 sm:px-5 cursor-pointer"
               >
-                <div className="flex items-center gap-2">
-                  <Zap className="size-4.5 fill-white text-white shrink-0" />
-                  <span>A darajaga chiqish: 3 daqiqalik Sprint</span>
-                </div>
-                <div className="bg-white/15 px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1">
-                  <span>+100 🪙 Bonus</span>
-                  <ArrowRight className="size-3.5" />
-                </div>
+                <Zap className="size-4.5 fill-white text-white shrink-0" />
+                <span>Mashqni boshlash</span>
+                <ArrowRight className="size-3.5" />
               </button>
             </div>
           </motion.div>

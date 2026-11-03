@@ -25,7 +25,7 @@ const STEPS: { badge: string; icon: LucideIcon; title: string; description: stri
   {
     badge: 'BATTLE ARENA & MENTOR',
     icon: Swords,
-    title: 'Jonli duellar va 24/7 shaxsiy AI Tarix Mentor',
+    title: 'Jonli duellar va 24/7 shaxsiy AI Mentor',
     description:
       "Boshqa abituriyentlar bilan 1v1 intellektual janglarda kuch sinashing, tangalar yuting va avatar ramkalarini kolleksiya qiling.",
     points: [
@@ -36,12 +36,12 @@ const STEPS: { badge: string; icon: LucideIcon; title: string; description: stri
   {
     badge: '3 DAQIQALIK ILK SINOV',
     icon: Target,
-    title: 'Darajangizni aniqlang va B+ potensialini kashf qiling',
+    title: 'Darajangizni aniqlang',
     description:
-      "Hech qanday murakkabliksiz — hoziroq 7 ta savollik ekspress diagnostikadan o'ting, bilim darajangizni aniqlang va +100 Tanga bonusga ega bo'ling!",
+      "Hech qanday murakkabliksiz — 7 ta savollik ekspress diagnostikadan o'ting va qaysi mavzularni takrorlash kerakligini bilib oling.",
     points: [
       "7 ta adaptiv savol (Oson -> O'rtacha -> Qiyin)",
-      'B+ Milliy Sertifikat daraja potensiali nishoni',
+      "Natija darhol: to'g'ri javoblar soni va daraja",
       'Kuchli va zaif mavzularingizning lahzalik tahlili',
     ],
   },
@@ -142,7 +142,7 @@ export default function OnboardingPage() {
           </div>
 
           <Button onClick={handleNext} size="lg" className="w-full font-bold cursor-pointer">
-            {currentStep === STEPS.length - 1 ? '🚀 7 ta savollik Dofamin Blitsni boshlash' : 'Keyingisi'}
+            {currentStep === STEPS.length - 1 ? '🚀 7 ta savollik diagnostikani boshlash' : 'Keyingisi'}
             <ArrowRight className="size-4" />
           </Button>
         </CardContent>

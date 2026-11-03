@@ -220,20 +220,21 @@ export default function CertificateModal({
         ctx.restore();
       }
 
-      // Agentlik sarlavhasi
+      // Sarlavha. Davlat organi (BMB) nomi, "respublika markazi", imzo va muhr ataylab
+      // yo'q: bu platformaning mashq natijasi — davlat hujjatiga o'xshatish noqonuniy.
       ctx.textAlign = 'center';
       ctx.fillStyle = '#065f46';
       ctx.font = 'bold 22px "Times New Roman", serif';
-      ctx.fillText("ILMILDIZI RESPUBLIKA TA'LIM VA TEST MARKAZI", width / 2, 226);
+      ctx.fillText("ILMILDIZI · ONLAYN MASHQ PLATFORMASI", width / 2, 226);
       ctx.fillStyle = '#1c3c87';
       ctx.font = 'bold 18px "Arial", sans-serif';
-      ctx.fillText("BILIM VA MALAKALARNI BAHOLASH AGENTLIGI STANDARTLARI ASOSIDA", width / 2, 256);
+      ctx.fillText("RASMIY HUJJAT EMAS · BMB FORMATIDAGI MASHQ TESTI", width / 2, 256);
 
       // Asosiy Sarlavha
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 32px "Times New Roman", serif';
-      ctx.fillText("UMUMTA'LIM FANINI BILISH DARAJASI", width / 2, 330);
-      ctx.fillText("TO'G'RISIDA SERTIFIKAT", width / 2, 372);
+      ctx.fillText("MASHQ TESTI", width / 2, 330);
+      ctx.fillText("NATIJA KARTASI", width / 2, 372);
 
       // 5. Ma'lumotlar jadvali qatorlari
       const startY = 460;
@@ -269,7 +270,7 @@ export default function CertificateModal({
       };
 
       // Qatorlar 1: Talabgor
-      drawDataRow(startY, 'Sertifikat raqami:', certNumber);
+      drawDataRow(startY, 'Natija raqami:', certNumber);
       drawDataRow(startY + rowGap, 'Talabgorning shaxsiy kodi:', personalCode);
       drawDataRow(startY + rowGap * 2, 'Familiyasi:', lastName);
       drawDataRow(startY + rowGap * 3, 'Ismi:', firstName);
@@ -280,7 +281,7 @@ export default function CertificateModal({
       drawDataRow(sec2Y, "Umumta'lim fani:", testTitle || 'Tarix Milliy Sertifikat');
       drawDataRow(sec2Y + rowGap, "Umumiy to'plagan bali:", scaledScoreStr);
       drawDataRow(sec2Y + rowGap * 2, "Umumiy ballga nisbatan foiz ko'rsatkichi:", pctStr, true, true);
-      drawDataRow(sec2Y + rowGap * 3, 'Sertifikat darajasi:', certGrade);
+      drawDataRow(sec2Y + rowGap * 3, 'Taxminiy daraja:', certGrade);
       drawDivider(sec2Y + rowGap * 3.7);
 
       // Qatorlar 3: Sinov natijasi
@@ -324,25 +325,8 @@ export default function CertificateModal({
       // 6. Pastki QR Kod va Imzo
       const footerY = height - 200;
 
-      // Chapda: Direktor
-      ctx.textAlign = 'right';
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 22px "Times New Roman", serif';
-      ctx.fillText('Direktor', width / 2 - 120, footerY + 65);
-      ctx.strokeStyle = '#c59b27';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(leftX + 20, footerY + 75);
-      ctx.lineTo(width / 2 - 80, footerY + 75);
-      ctx.stroke();
-
-      // O'ngda: Mas'ul rahbar / muhr
-      ctx.textAlign = 'left';
-      ctx.fillText("IlmIldizi", width / 2 + 120, footerY + 65);
-      ctx.beginPath();
-      ctx.moveTo(width / 2 + 80, footerY + 75);
-      ctx.lineTo(lineEndX - 20, footerY + 75);
-      ctx.stroke();
 
       // Markazda: QR Kod
       const qrImg = new Image();
@@ -364,7 +348,7 @@ export default function CertificateModal({
         ctx.strokeRect(width / 2 - 60, footerY, 120, 120);
         ctx.textAlign = 'center';
         ctx.font = '12px sans-serif';
-        ctx.fillText('QR VERIFIED', width / 2, footerY + 65);
+        ctx.fillText("NATIJANI KO'RISH", width / 2, footerY + 65);
         finishDownload();
       };
       qrImg.src = qrImgUrl;
@@ -397,10 +381,10 @@ export default function CertificateModal({
                 </div>
                 <div>
                   <DialogTitle className="text-base sm:text-lg font-bold text-[#0f172a]">
-                    Rasmiy Milliy Sertifikat
+                    Natija kartasi
                   </DialogTitle>
                   <p className="text-xs text-muted-foreground">
-                    Bilim va malakalarni baholash agentligi (BMB) standarti
+                    IlmIldizi mashq testi natijasi — rasmiy BMB sertifikati emas
                   </p>
                 </div>
               </div>
@@ -493,20 +477,20 @@ export default function CertificateModal({
                   </div>
 
                   <p className="text-xs sm:text-sm font-bold text-[#065f46] uppercase tracking-wider font-serif">
-                    ILMILDIZI RESPUBLIKA TA&apos;LIM VA TEST MARKAZI
+                    ILMILDIZI · ONLAYN MASHQ PLATFORMASI
                   </p>
                   <p className="text-[10px] sm:text-xs font-extrabold text-[#1c3c87] uppercase tracking-wide mt-0.5">
-                    BILIM VA MALAKALARNI BAHOLASH AGENTLIGI STANDARTLARI ASOSIDA
+                    Rasmiy hujjat emas · BMB formatidagi mashq testi
                   </p>
                 </div>
 
                 {/* 2. Asosiy Sarlavha */}
                 <div className="text-center my-3 sm:my-4">
                   <h2 className="font-serif text-lg sm:text-2xl font-black text-[#0f172a] uppercase tracking-wide leading-tight">
-                    UMUMTA&apos;LIM FANINI BILISH DARAJASI
+                    MASHQ TESTI
                   </h2>
                   <h2 className="font-serif text-lg sm:text-2xl font-black text-[#0f172a] uppercase tracking-wide leading-tight">
-                    TO&apos;G&apos;RISIDA SERTIFIKAT
+                    NATIJA KARTASI
                   </h2>
                 </div>
 
@@ -515,7 +499,7 @@ export default function CertificateModal({
                   {/* Blok 1 */}
                   <div className="space-y-1.5 pb-2 border-b border-[#e5c158]/90">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Sertifikat raqami:</span>
+                      <span className="font-bold text-[#1c3c87]">Natija raqami:</span>
                       <span className="font-mono font-bold text-[#0f172a] text-right">{certNumber}</span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -547,7 +531,7 @@ export default function CertificateModal({
                       <span className="font-mono font-bold text-[#0f172a] text-right">{pctStr}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Sertifikat darajasi:</span>
+                      <span className="font-bold text-[#1c3c87]">Taxminiy daraja:</span>
                       <span className="font-mono font-black text-amber-700 text-base sm:text-lg text-right">{certGrade}</span>
                     </div>
                   </div>
@@ -578,33 +562,18 @@ export default function CertificateModal({
                   <div className="h-[1.5px] flex-1 bg-gradient-to-l from-transparent via-[#c59b27] to-[#c59b27]" />
                 </div>
 
-                {/* 4. Pastki qism: Direktor, QR Kod, Mas'ul */}
-                <div className="w-full flex items-center justify-between gap-2 sm:gap-4 mt-1 pt-1">
-                  {/* Direktor */}
-                  <div className="flex-1 flex flex-col items-center">
-                    <span className="font-serif font-bold text-[#0f172a] text-sm sm:text-base">Direktor</span>
-                    <div className="w-full max-w-[120px] sm:max-w-[150px] border-b border-[#c59b27] mt-3" />
-                  </div>
-
-                  {/* QR Kod (Markazda) */}
+                {/* 4. Pastki qism: natija sahifasiga QR havola (imzo/muhr yo'q) */}
+                <div className="w-full flex items-center justify-center mt-1 pt-1">
                   <div className="shrink-0 flex flex-col items-center justify-center p-1.5 border-2 border-[#c59b27] rounded-md bg-white shadow-xs">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={qrImgUrl}
-                      alt="Sertifikat QR kodi"
+                      alt="Natija sahifasiga QR havola"
                       className="size-20 sm:size-24 object-contain"
                     />
                     <span className="text-[8px] font-mono font-bold text-[#1e3a8a] mt-0.5 tracking-tight">
-                      VERIFIED CERT
+                      NATIJANI KO&apos;RISH
                     </span>
-                  </div>
-
-                  {/* Mas'ul shaxs */}
-                  <div className="flex-1 flex flex-col items-center">
-                    <span className="font-serif font-bold text-[#0f172a] text-xs sm:text-sm text-center">
-                      IlmIldizi
-                    </span>
-                    <div className="w-full max-w-[120px] sm:max-w-[150px] border-b border-[#c59b27] mt-3" />
                   </div>
                 </div>
 
