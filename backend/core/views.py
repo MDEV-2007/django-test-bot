@@ -414,20 +414,22 @@ def targeted_offer_api(request):
 @permission_classes([IsAuthenticated])
 def lead_submit_api(request):
     """1-bosishda O'quv Markaziga lid va zaif mavzular tahlilini yuborish."""
+    from b2b_ads.services import LeadError
     from core.services import submit_center_lead
 
     profile = ensure_profile_for_user(request.user)
     campaign_id = request.data.get('campaign_id')
-    phone = (request.data.get('phone') or '').strip()
-    name = (request.data.get('name') or '').strip()
-    subject = (request.data.get('subject') or '').strip()
-    score = float(request.data.get('score', 0))
-    weak_topics = (request.data.get('weak_topics') or '').strip()
+    phone = str(request.data.get('phone') or '').strip()
+    name = str(request.data.get('name') or '').strip()
+    subject = str(request.data.get('subject') or '').strip()
+    try:
+        score = float(request.data.get('score') or 0)
+    except (TypeError, ValueError):
+        score = 0.0
+    weak_topics = str(request.data.get('weak_topics') or '').strip()
 
     if not campaign_id:
         return Response({'error': "campaign_id kiritilishi shart."}, status=400)
-    if len(phone.replace(' ', '').replace('-', '')) < 9:
-        return Response({'error': "Iltimos, telefon raqamingizni kiriting."}, status=400)
 
     try:
         res = submit_center_lead(
@@ -439,9 +441,9 @@ def lead_submit_api(request):
             score=score,
             weak_topics=weak_topics,
         )
-        return Response(res)
-    except Exception as e:
-        return Response({'error': str(e)}, status=400)
+    except LeadError as exc:
+        return Response({'error': str(exc)}, status=400)
+    return Response(res)
 
 
 @api_view(['GET'])

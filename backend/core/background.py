@@ -13,7 +13,6 @@ the result still missing.
 import functools
 import logging
 import os
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from django.db import close_old_connections, connections
 
@@ -25,30 +24,36 @@ QUEUE_LIMIT = int(os.environ.get('BACKGROUND_QUEUE_LIMIT', '200'))
 _executor = ThreadPoolExecutor(max_workers=MAX_WORKERS, thread_name_prefix='ilm-bg')
 
 
-def run_in_background(fn):
-    """Dekorator: har qanday funksiyani alohida thread'da xavfsiz ishga tushiradi.
-    Har bir thread funksiyasi boshlanishida va finally: blokida majburiy close_old_connections()
-    chaqiriladi (too many clients already / leak bo'lmasligi uchun). Xatolar esa logger.exception orqali yoziladi.
+def _close_db_connections():
+    """Close this worker thread's DB connections.
+
+    Django connections are thread-local and are only cleaned up by the request/response
+    cycle. A pool thread never sees that cycle, so without this every task would leave a
+    PostgreSQL connection open until the server hits "too many clients already".
     """
+    close_old_connections()
+    try:
+        connections.close_all()
+    except Exception:
+        pass
+
+
+def _target_wrapper(fn, *args, **kwargs):
+    close_old_connections()
+    try:
+        fn(*args, **kwargs)
+    except Exception as exc:
+        logger.exception("Background task error: %s", exc)
+    finally:
+        _close_db_connections()
+
+
+def run_in_background(fn):
+    """Decorator form of `submit`: calling the decorated function queues it on the same
+    bounded pool instead of spawning an unbounded thread per call."""
     @functools.wraps(fn)
     def wrapper(*args, **kwargs):
-        def _task():
-            close_old_connections()
-            try:
-                fn(*args, **kwargs)
-            except Exception as exc:
-                logger.exception("Background task failed: %s", exc)
-            finally:
-                close_old_connections()
-                try:
-                    connections.close_all()
-                except Exception:
-                    pass
-
-        t = threading.Thread(target=_task, name=f"ilm-bg-{getattr(fn, '__name__', 'task')}")
-        t.daemon = True
-        t.start()
-        return t
+        return submit(fn, *args, **kwargs)
 
     return wrapper
 
@@ -62,17 +67,7 @@ def submit(fn, *args, **kwargs):
         return False
 
     def _run():
-        close_old_connections()
-        try:
-            fn(*args, **kwargs)
-        except Exception as exc:
-            logger.exception("Background task failed: %s", exc)
-        finally:
-            close_old_connections()
-            try:
-                connections.close_all()
-            except Exception:
-                pass
+        _target_wrapper(fn, *args, **kwargs)
 
     try:
         _executor.submit(_run)

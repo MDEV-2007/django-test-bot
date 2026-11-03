@@ -418,167 +418,45 @@ def calculate_class_battle_analytics(room: ClassBattleRoom):
 # ─── B2B HYPER-TARGET ADS & LEAD SERVICES ────────────────────────────────────
 
 def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float = 0.0, region: str = ""):
-    """Geo + Weak-Topic Snayper Matching:
-    Admin Panelda yaratilgan EduCenterCampaign modellaridan o'quvchining hududi (region)
-    va zaif o'zlashtirgan fani (<65%) bo'yicha yagona manbadan (Single Source of Truth)
-    reklama taklifini tanlab beradi.
+    """Geo + zaif fan bo'yicha O'quv markaz taklifi (feed banneri uchun).
+
+    Tanlash mantiqi `b2b_ads.services.pick_campaign` da — dashboard kartasi bilan bir xil manba.
     """
-    from b2b_ads.models import EduCenterCampaign
-    from django.db.models import F, Q
+    from b2b_ads.services import campaign_payload, pick_campaign, record_impression
 
-    user_region = region or (getattr(profile, 'region', '') if profile else '')
-
-    # 1. Aktiv kampaniyalarni filtrlaymiz
-    qs = EduCenterCampaign.objects.filter(is_active=True)
-
-    # Hudud bo'yicha filtr (masalan: Farg'ona, Toshkent yoki Barcha hududlar)
-    if user_region:
-        qs_geo = qs.filter(Q(target_region__iexact=user_region) | Q(target_region__iexact='ALL') | Q(target_region__iexact='Onlayn'))
-        if qs_geo.exists():
-            qs = qs_geo
-
-    # Fan bo'yicha filtr
-    if subject:
-        qs_sub = qs.filter(Q(target_subject__icontains=subject) | Q(target_subject__iexact='ALL'))
-        if qs_sub.exists():
-            qs = qs_sub
-
-    # Ball chegarasi bo'yicha filtr (Agar o'quvchi <65% olgan bo'lsa)
-    if score > 0:
-        qs_score = qs.filter(max_score_threshold__gte=int(score))
-        if qs_score.exists():
-            qs = qs_score
-
-    campaign = qs.first()
-
-    # Kampaniya bo'lmasa reklama ham yo'q. Ilgari bu yerda bazaga "Registon O'quv
-    # Markazi" degan soxta kampaniya yaratilardi — o'quvchilar mavjud bo'lmagan markazga
-    # lid yuborardi.
+    campaign = pick_campaign(profile, subject=subject, score=score, region=region)
     if not campaign:
         return None
+    record_impression(campaign)
 
-    EduCenterCampaign.objects.filter(id=campaign.id).update(impressions_count=F('impressions_count') + 1)
-
-    return {
-        'id': campaign.id,
+    payload = campaign_payload(campaign)
+    payload.update({
         'center_id': campaign.id,
-        'center_name': campaign.center_name,
-        'center_logo': campaign.logo or "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80",
-        'center_phone': "+998 78 113 27 00",
-        'title': campaign.title,
-        'description': campaign.description,
-        'cta_text': "📞 1-bosishda ro'yxatdan o'tish (1-dars BEPUL)",
-        'offer_badge': campaign.offer_badge,
+        'center_logo': payload['logo'],
+        'cta_text': "📞 Bepul darsga yozilish (1-dars BEPUL)",
         'badge_text': campaign.offer_badge,
         'banner_url': campaign.logo,
         'video_url': campaign.story_video_url,
-        'target_region': campaign.target_region,
-        'target_subject': campaign.target_subject,
-        'rating': campaign.rating,
         'score_received': score,
         'subject': subject or campaign.target_subject,
-    }
+    })
+    return payload
 
 
 def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str = "", subject: str = "", score: float = 0.0, weak_topics: str = ""):
-    """O'quvchi bitta tugmani bosganda barcha issiq lidlar yagona StudentLeadSubmission
-    modeliga yoziladi, Telegram orqali bildirishnoma jo'natiladi va o'quvchiga +50 tanga beriladi.
-    """
-    from b2b_ads.models import EduCenterCampaign, StudentLeadSubmission, existing_lead
-    from telegrambot.client import send_message
-    from django.utils import timezone
-    import logging
-    logger = logging.getLogger(__name__)
+    """Feed banneridan lid. Atomik va bir kampaniyaga bir marta mukofotli —
+    `b2b_ads.services.submit_lead` ga topshiriladi. Xato bo'lsa `LeadError` ko'tariladi."""
+    from b2b_ads.services import submit_lead
 
-    campaign = EduCenterCampaign.objects.filter(id=campaign_id).first()
-    if not campaign:
-        campaign = EduCenterCampaign.objects.filter(is_active=True).first()
-
-    previous = existing_lead(profile, campaign)
-    if previous:
-        return {
-            'success': True,
-            'lead_id': previous.id,
-            'coins_earned': 0,
-            'already_submitted': True,
-            'message': "Arizangiz allaqachon yuborilgan — markaz siz bilan bog'lanadi.",
-        }
-
-    lead_name = name or (profile.user.get_full_name() or profile.user.username if profile else "Abituriyent")
-    lead_phone = phone or (getattr(profile, 'phone_number', '') if profile else '')
-    lead_tg = getattr(profile, 'telegram_username', '') if profile else ""
-
-    lead = StudentLeadSubmission.objects.create(
-        student_profile=profile,
-        campaign=campaign,
+    lead_name = name or profile.user.get_full_name() or profile.user.username
+    return submit_lead(
+        profile=profile,
+        campaign_id=campaign_id,
         full_name=lead_name,
-        phone_number=lead_phone,
-        telegram_username=lead_tg,
+        phone_number=phone,
+        weakest_topics=weak_topics or subject,
         predicted_dtm_score=str(score or ''),
-        weakest_topics=weak_topics or '',
-        coins_rewarded=50,
     )
-
-    if profile:
-        profile.add_coins(50)
-
-    # Telegram xabarnoma
-    if campaign and campaign.telegram_webhook_or_chat_id:
-        chat_id = campaign.telegram_webhook_or_chat_id
-        tg_text = (
-            f"🔥 <b>YANGI ISSIQ LID (IlmIldizi B2B)!</b>\n\n"
-            f"🏢 <b>Markaz:</b> {campaign.center_name}\n"
-            f"👤 <b>O'quvchi:</b> {lead_name}\n"
-            f"📞 <b>Telefon:</b> <code>{lead_phone}</code>\n"
-            f"✈️ <b>Telegram:</b> @{lead_tg}\n"
-            f"🎯 <b>Prognoz DTM:</b> {score} ball\n"
-            f"⚠️ <b>Zaif mavzulari:</b> {weak_topics or subject}\n"
-            f"🎁 <b>Aksiya:</b> {campaign.offer_badge}\n"
-            f"⏰ <b>Vaqt:</b> {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
-            f"<i>O'quvchi bilan 10 daqiqada bog'lanib, 1-bepul darsga taklif eting!</i>"
-        )
-        try:
-            send_message(int(chat_id), tg_text)
-        except Exception as e:
-            logger.warning("Failed to dispatch B2B lead to Telegram: %s", e)
-
-    return {
-        'success': True,
-        'lead_id': lead.id,
-        'coins_earned': 50,
-        'message': f"Arizangiz '{campaign.center_name if campaign else 'Oquv markaz'}' ma'muriyatiga muvaffaqiyatli yuborildi! +50 🪙 hisobingizga qo'shildi.",
-    }
-
-    campaign.leads_count += 1
-    campaign.save(update_fields=['leads_count'])
-
-    # O'quvchiga bonus tanga beramiz
-    profile.coins += 20
-    profile.save(update_fields=['coins'])
-
-    # Agar markazning Telegram chat ID si bo'lsa, darhol xabar boradi
-    if campaign.center.telegram_chat_id:
-        tg_text = (
-            f"🔥 <b>YANGI ISSIQ LID (IlmIldizi)!</b>\n\n"
-            f"🏢 <b>Markaz:</b> {campaign.center.name}\n"
-            f"👤 <b>O'quvchi:</b> {lead_name}\n"
-            f"📞 <b>Telefon:</b> {lead_phone}\n"
-            f"📚 <b>Fan:</b> {lead_subject} ({score}% natija)\n"
-            f"⚠️ <b>Zaif mavzulari:</b> {weak_topics or 'Aniqlanmagan'}\n"
-            f"🎯 <b>Taklif:</b> {campaign.title}\n"
-            f"⏰ <b>Vaqt:</b> {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
-            f"<i>O'quvchi bilan zudlik bilan bog'lanib, 1-bepul darsga taklif qiling!</i>"
-        )
-        try:
-            send_message(int(campaign.center.telegram_chat_id), tg_text)
-        except Exception as e:
-            logger.warning("Failed to send lead alert to center telegram: %s", e)
-
-    return {
-        'success': True,
-        'message': f"Arizangiz '{campaign.center.name}' ma'muriyatiga muvaffaqiyatli yuborildi! Tez orada siz bilan bog'lanishadi. (+20 🪙 Tanga berildi)",
-        'lead_id': lead.id,
-    }
 
 
 def calculate_student_radar(profile: Profile):

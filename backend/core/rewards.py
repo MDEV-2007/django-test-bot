@@ -24,10 +24,48 @@ def calculate_streak_bonus_pct(streak: int) -> int:
     return 0
 
 
+def daily_chain_completed(profile: Profile, today=None) -> bool:
+    """Bugungi kunlik zanjir (Sprint -> Xatolar -> 1v1 Arena) yopilganmi?
+
+    Ikki yo'ldan biri yetarli:
+    1. Avtopilot marafoni (DailyLearningLoop) bugun kamida bir marta STAGE_5_COMPLETED ga yetgan.
+    2. Mustaqil zanjir sahifalari orqali yakuniy 3-qadam — bugun tugallangan 1v1 duel bor.
+       (/sprint -> /tests/revision -> /battles: har bir sahifa keyingisiga yo'naltiradi,
+       zanjirning oxiri esa duel.)
+    """
+    from django.db.models import Q
+
+    today = today or timezone.localdate()
+    try:
+        from learning_loop.models import DailyLearningLoop
+        if DailyLearningLoop.objects.filter(
+            user_id=profile.user_id,
+            date=today,
+            current_stage=DailyLearningLoop.STAGE_5_COMPLETED,
+        ).exists():
+            return True
+    except Exception:
+        pass
+
+    try:
+        from battles.models import Battle
+        tz = timezone.get_current_timezone()
+        day_start = timezone.make_aware(datetime.combine(today, time.min), tz)
+        return Battle.objects.filter(
+            Q(player1=profile) | Q(player2=profile),
+            status='finished',
+            finished_at__gte=day_start,
+            finished_at__lt=day_start + timedelta(days=1),
+        ).exists()
+    except Exception:
+        return False
+
+
 def get_daily_chest_status(profile: Profile) -> dict:
     """Foydalanuvchining bugungi sirli sandiq holatini hisoblaydi."""
     today = timezone.localdate()
     claim = DailyChestClaim.objects.filter(profile=profile, date=today).first()
+    chain_done = claim is not None or daily_chain_completed(profile, today)
     
     # Keyingi tungi 00:00 gacha qolgan soniya
     now = timezone.localtime()
@@ -41,7 +79,8 @@ def get_daily_chest_status(profile: Profile) -> dict:
     bonus_pct = calculate_streak_bonus_pct(streak)
 
     return {
-        'can_claim': claim is None,
+        'can_claim': claim is None and chain_done,
+        'chain_completed': chain_done,
         'seconds_remaining': seconds_remaining,
         'streak': streak,
         'streak_bonus_pct': bonus_pct,
@@ -57,12 +96,16 @@ def get_daily_chest_status(profile: Profile) -> dict:
 
 
 @transaction.atomic
-def grant_rewards_atomic(profile_id: int, coins_delta: int = 0, xp_delta: int = 0) -> Profile:
-    """Yagona atomik mukofotlash funksiyasi.
-    with transaction.atomic() va select_for_update() orqali race condition (double-spend) ni yo'q qiladi.
+def award_profile_rewards_atomic(profile_id: int, coins_delta: int = 0, xp_delta: int = 0) -> Profile:
+    """Yagona atomik mukofotlash funksiyasi (tanga va XP).
+
+    Profil qatori `select_for_update()` bilan qulflanadi, balans `F()` ifodasi bilan
+    yangilanadi — parallel so'rovlar bir-birining natijasini yo'qotmaydi va tanga
+    minusga tushmaydi. Super admin va o'qituvchilarga XP qo'shilmaydi (global reyting
+    buzilmasligi uchun); ularga faqat tanga beriladi.
     """
-    from django.db.models import F
     from django.core.exceptions import ValidationError
+    from django.db.models import F
 
     locked = Profile.objects.select_for_update().get(pk=profile_id)
     updates = {}
@@ -77,10 +120,15 @@ def grant_rewards_atomic(profile_id: int, coins_delta: int = 0, xp_delta: int = 
     if updates:
         Profile.objects.filter(pk=profile_id).update(**updates)
         locked.refresh_from_db(fields=list(updates.keys()))
-        if xp_delta > 0:
+        if 'xp' in updates and xp_delta > 0:
+            # XP allaqachon qo'shilgan: add_xp(0) faqat daraja (level) ni qayta hisoblaydi.
             locked.add_xp(0)
 
     return locked
+
+
+# Eski nom: mavjud chaqiruvlar (learning_loop) buzilmasligi uchun saqlanadi.
+grant_rewards_atomic = award_profile_rewards_atomic
 
 
 @transaction.atomic
@@ -102,6 +150,13 @@ def open_daily_chest(profile_id: int) -> dict:
                 'rarity': existing.rarity,
                 'streak_bonus_pct': existing.streak_bonus_pct,
             }
+        }
+
+    if not daily_chain_completed(profile, today):
+        return {
+            'success': False,
+            'locked': True,
+            'message': "Sandiq bugungi 3 qadamdan keyin ochiladi: Fokus Sprint -> Xatolarni tozalash -> 1v1 Arena dueli.",
         }
 
     streak = profile.streak or 0

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
   Gift,
@@ -12,6 +13,7 @@ import {
   Trophy,
   X,
   Clock,
+  Lock,
 } from 'lucide-react';
 import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
@@ -34,6 +36,8 @@ export interface DailyChestClaimData {
 
 export interface DailyChestStatus {
   can_claim: boolean;
+  /** Bugungi zanjir (Sprint -> Xatolar -> Arena) yopilganmi; sandiq faqat shundan keyin ochiladi. */
+  chain_completed?: boolean;
   seconds_remaining: number;
   streak: number;
   streak_bonus_pct: number;
@@ -91,7 +95,7 @@ export default function DailyChestModal({
   };
 
   const handleOpenChest = async () => {
-    if (loading || opening) return;
+    if (loading || opening || (status !== null && !status.can_claim)) return;
     setLoading(true);
     setOpening(true);
     soundFX.click();
@@ -139,6 +143,7 @@ export default function DailyChestModal({
 
   const currentClaim = openedReward || status?.today_claim;
   const isAlreadyClaimed = !status?.can_claim && !!currentClaim;
+  const isLocked = !isAlreadyClaimed && status !== null && !status.can_claim;
 
   const getRarityConfig = (rarity: string = 'common') => {
     switch (rarity) {
@@ -214,7 +219,9 @@ export default function DailyChestModal({
           <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-xs mx-auto">
             {isAlreadyClaimed
               ? "Siz bugungi sirli sandiqni muvaffaqiyatli ochib bo'ldingiz."
-              : "Har kuni kiring, sandiqni oching va tasodifiy mukofotlarga ega bo'ling!"}
+              : isLocked
+              ? "Sandiq bugungi 3 qadamdan keyin ochiladi: Fokus Sprint, Xatolarni tozalash va 1v1 Arena dueli."
+              : "Kunlik zanjirni yopdingiz — sandiqni oching va tasodifiy mukofotga ega bo'ling!"}
           </p>
         </div>
 
@@ -243,9 +250,13 @@ export default function DailyChestModal({
             >
               <div className="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-[#FF9500]/30 to-[#FFCC00]/25 blur-xl group-hover:opacity-100 opacity-80 transition-opacity" />
               <div className="relative flex size-28 sm:size-30 flex-col items-center justify-center gap-2 rounded-3xl bg-gradient-to-b from-[#FFCC00] via-[#FF9500] to-[#E07A00] text-white shadow-[0_14px_34px_-6px_rgba(255,149,0,0.5),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25 active:scale-95 transition-transform">
-                <Gift className="size-12 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] stroke-[2.2]" />
+                {isLocked ? (
+                  <Lock className="size-12 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] stroke-[2.2]" />
+                ) : (
+                  <Gift className="size-12 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] stroke-[2.2]" />
+                )}
                 <span className="rounded-full bg-black/20 backdrop-blur-xs px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white">
-                  {opening ? 'Ochilmoqda...' : 'Bosib oching'}
+                  {isLocked ? 'Qulflangan' : opening ? 'Ochilmoqda...' : 'Bosib oching'}
                 </span>
               </div>
             </motion.button>
@@ -353,7 +364,16 @@ export default function DailyChestModal({
 
         {/* 4. PRIMARY ACTION BUTTON */}
         <div className="relative z-10 mt-5 pt-4 border-t border-border">
-          {!isAlreadyClaimed ? (
+          {isLocked ? (
+            <Link
+              href="/sprint"
+              onClick={onClose}
+              className="ios-spring w-full min-h-12 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF7A00] text-white font-bold text-sm sm:text-[15px] shadow-[0_8px_22px_rgba(255,149,0,0.38)] flex items-center justify-center gap-2 px-4 py-2.5"
+            >
+              <Zap className="size-4 fill-white" />
+              <span>1-Qadam: Fokus Sprintni boshlash</span>
+            </Link>
+          ) : !isAlreadyClaimed ? (
             <button
               type="button"
               onClick={handleOpenChest}
