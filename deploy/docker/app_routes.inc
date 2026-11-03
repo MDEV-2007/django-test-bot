@@ -16,9 +16,27 @@ add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 add_header Strict-Transport-Security "max-age=31536000" always;
 
 # www.<domen> → <domen> (SEO: bitta asosiy manzil). Domen nomi yozilmagan, shuning uchun
-# SERVER_NAME qanday bo'lishidan qat'i nazar ishlaydi.
+# SERVER_NAME qanday bo'lishidan qat'i nazar ishlaydi. Let's Encrypt tekshiruvi
+# (/.well-known/acme-challenge/) bu yo'naltirishdan istisno: aks holda www sertifikati
+# yangilanmaydi.
+set $redirect_www_to "";
 if ($host ~* ^www\.(.+)$) {
-    return 301 https://$1$request_uri;
+    set $redirect_www_to $1;
+}
+if ($request_uri ~ ^/\.well-known/acme-challenge/) {
+    set $redirect_www_to "";
+}
+if ($redirect_www_to != "") {
+    return 301 https://$redirect_www_to$request_uri;
+}
+
+# Let's Encrypt HTTP-01 tekshiruvi. HTTP blokidagi server darajasidagi `return 301`
+# har qanday location'dan OLDIN bajariladi, shuning uchun tekshiruv so'rovi HTTPS'ga
+# yo'naltirilib shu yerga keladi. Bu location bo'lmasa, u Next.js'ga tushib 404 qaytarardi
+# va `certbot renew` "Some challenges have failed" bilan yiqilardi.
+location ^~ /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+    default_type text/plain;
 }
 
 # To'lov skrinshotlari (shaxsiy cheklar) ommaviy media ichidan to'siladi — ularni faqat
