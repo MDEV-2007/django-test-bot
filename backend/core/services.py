@@ -213,8 +213,17 @@ def send_parent_weekly_report(conn: ParentConnection):
 
 def send_parent_vip_invoice(student_profile: Profile, plan_id: int = None):
     """Ota-onaga 'Farzandingizga VIP ta'lim sovg'a qiling' invoysini yuborish."""
+    from premium.models import SubscriptionPlan
+
     conns = student_profile.parent_connections.filter(is_active=True, parent_chat_id__isnull=False)
     student_name = student_profile.user.get_full_name() or student_profile.user.username
+
+    # Narx tarif katalogidan olinadi: ilgari bu yerda 39,000 qattiq yozilgan edi, sayt esa
+    # oylik PRO uchun boshqa narx olardi — ota-ona bir narxni ko'rib, boshqasini to'lardi.
+    plan = (SubscriptionPlan.objects.filter(id=plan_id, is_active=True).first() if plan_id else None) or (
+        SubscriptionPlan.objects.filter(plan_type='lessons', duration_days=30, is_active=True).first())
+    price_text = f"{int(plan.price):,}".replace(',', ' ') + " so'm" if plan else ''
+    period_text = f" / {plan.duration_days} kun" if plan and plan.duration_days else ''
 
     invoice_text = (
         f"🎓 <b>Hurmatli ota-ona!</b>\n\n"
@@ -222,8 +231,8 @@ def send_parent_vip_invoice(student_profile: Profile, plan_id: int = None):
         f"<b>A+ daraja (175+ ball)</b> to'plab, Davlat Granti asosida talaba bo'lishi uchun "
         f"platformada to'liq <b>VIP O'quv Dasturini (24/7 AI Ustoz, BMB Stress Zali va Barcha Darslar)</b> "
         f"faollashtirishni so'ramoqda.\n\n"
-        f"💰 <b>Narxi:</b> Atigi 39,000 so'm (repetitorning 1 kunlik yo'lkira narxidan ham arzon).\n\n"
-        f"Farzandingizning ilmiga sarmoya kiritish uchun quyidagi tugma orqali 10 soniyada faollashtirishingiz mumkin:"
+        + (f"💰 <b>Narxi:</b> {price_text}{period_text}.\n\n" if price_text else "")
+        + "Farzandingizning ilmiga sarmoya kiritish uchun quyidagi tugma orqali faollashtirishingiz mumkin:"
     )
 
     origin = getattr(settings, 'FRONTEND_URL', 'https://ilmildizi.uz')
@@ -231,7 +240,9 @@ def send_parent_vip_invoice(student_profile: Profile, plan_id: int = None):
 
     keyboard = {
         'inline_keyboard': [
-            [{'text': "💳 Click / Payme orqali to'lash (39,000 so'm)", 'url': checkout_url}],
+            # To'lov hozircha karta orqali qabul qilinadi (Click/Payme ulanmagan).
+            [{'text': f"💳 Karta orqali to'lash ({price_text})" if price_text else "💳 Karta orqali to'lash",
+              'url': checkout_url}],
         ]
     }
 

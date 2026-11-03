@@ -135,6 +135,9 @@ def parent_radar_send_invoice_api(request):
     plan_id = request.data.get('plan_id')
 
     sent_count, checkout_url, invoice_text = send_parent_vip_invoice(profile, plan_id)
+    if sent_count:
+        from analytics.tracking import track_event
+        track_event(profile, 'parent_invoice_sent')
 
     return Response({
         'sent_count': sent_count,

@@ -284,6 +284,10 @@ def ensure_profile_for_user(user):
     if profile.last_seen_at is None or (now - profile.last_seen_at).total_seconds() > 60:
         profile.last_seen_at = now
         profile.save(update_fields=['last_seen_at'])
+    # O'sish analitikasi (DAU/retention). 60s shartidan tashqarida: yangi profilda
+    # last_seen_at endi qo'yilgan bo'ladi. Kesh kaliti bazaga kuniga bitta yozuv qoldiradi.
+    from analytics.tracking import record_activity
+    record_activity(profile)
     return profile
 
 

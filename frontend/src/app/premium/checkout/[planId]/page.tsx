@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Crown, ChevronLeft, Upload, CreditCard, Copy, Check, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, apiUpload } from '@/lib/api-client';
+import { trackEvent } from '@/lib/analytics';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,6 +36,11 @@ function CheckoutPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Voronka: to'lov sahifasi ochildi.
+  useEffect(() => {
+    if (access) trackEvent('checkout_view', { plan_id: planId, feature: testId ? 'mock' : undefined });
+  }, [access, planId, testId]);
 
   useEffect(() => {
     if (authReady && !access) {

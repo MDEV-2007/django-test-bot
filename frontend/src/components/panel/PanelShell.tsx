@@ -56,6 +56,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/panel/mocks', label: 'Mock Natijalari', icon: Award, tone: 'gold' },
       { href: '/panel/attempts', label: 'Barcha Natijalar', icon: ClipboardList, tone: 'indigo' },
       { href: '/panel/finance', label: 'Moliya & Tushum', icon: TrendingUp, tone: 'emerald' },
+      { href: '/panel/growth', label: "O'sish metrikalari", icon: Activity, tone: 'indigo' },
       { href: '/panel/payments', label: "To'lovlar", icon: CreditCard, tone: 'amber' },
       { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent, tone: 'cyan' },
       { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart, tone: 'rose' },

@@ -1,7 +1,8 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from accounts.models import ensure_profile_for_user
+from accounts.permissions import IsSuperAdmin
 
 from . import prediction, services
 
@@ -47,3 +48,40 @@ def tagging_status_api(request):
     if not profile.is_superadmin:
         return Response({'detail': 'Faqat administrator uchun.'}, status=403)
     return Response(prediction.tagging_status())
+
+
+@api_view(['POST'])
+def track_event_api(request):
+    """Klientdan monetizatsiya voronkasi hodisasi (paywall_view, premium_view, checkout_view).
+
+    Faqat ruxsat etilgan nomlar va maydonlar qabul qilinadi; bitta foydalanuvchi uchun
+    daqiqasiga 30 tadan ko'p yozilmaydi (spam jadvalni to'ldirmasin)."""
+    from django.core.cache import cache
+
+    from .tracking import CLIENT_EVENTS, track_event
+
+    name = request.data.get('name')
+    if name not in CLIENT_EVENTS:
+        return Response({'error': "Noma'lum hodisa"}, status=400)
+    profile = ensure_profile_for_user(request.user)
+    key = f'evt-rate:{profile.pk}'
+    cache.add(key, 0, timeout=60)
+    try:
+        count = cache.incr(key)
+    except ValueError:  # kalit add va incr orasida muddati tugagan bo'lsa
+        cache.set(key, 1, timeout=60)
+        count = 1
+    if count > 30:
+        return Response({'ok': False, 'throttled': True}, status=429)
+    props = request.data.get('props') or {}
+    track_event(profile, name, **(props if isinstance(props, dict) else {}))
+    return Response({'ok': True})
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def growth_metrics_api(request):
+    """Super admin: DAU/WAU/MAU, haftalik kogortalar qaytishi va to'lov voronkasi."""
+    from .growth import growth_metrics
+
+    return Response(growth_metrics())

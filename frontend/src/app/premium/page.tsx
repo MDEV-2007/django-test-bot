@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
+import { trackEvent } from '@/lib/analytics';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
@@ -122,6 +123,11 @@ export default function PremiumPage() {
   const { access, authReady } = useAuthStore();
   const [data, setData] = useState<PlansData | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+
+  // Voronka: tariflar sahifasi ochildi (faqat kirgan foydalanuvchi uchun, bir marta).
+  useEffect(() => {
+    if (access) trackEvent('premium_view');
+  }, [access]);
 
   useEffect(() => {
     if (authReady && !access) {

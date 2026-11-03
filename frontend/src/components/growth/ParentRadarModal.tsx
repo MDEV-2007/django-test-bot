@@ -181,13 +181,10 @@ export default function ParentRadarModal({ open, onOpenChange }: ParentRadarModa
                 <Sparkles className="size-3.5 text-amber-400" />
                 VIP Obunaga mablag&apos; kerakmi?
               </span>
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[11px]">
-                92% ota-onalar qo&apos;llab-quvvatlaydi
-              </Badge>
             </div>
 
             <p className="text-[12px] text-zinc-400 leading-relaxed">
-              Tugmani bossangiz, Telegram orqali ota-onangizga shaxsiylashtirilgan taklif va 39,000 so&apos;mlik to&apos;lov havolasi boradi.
+              Tugmani bossangiz, Telegram orqali ota-onangizga shaxsiylashtirilgan taklif va PRO obuna uchun to&apos;lov havolasi boradi.
             </p>
 
             <Button
@@ -200,7 +197,7 @@ export default function ParentRadarModal({ open, onOpenChange }: ParentRadarModa
               ) : (
                 <CreditCard className="size-4 mr-2" />
               )}
-              👨‍👩‍👦 Ota-onamga to&apos;lov so&apos;rovini yuborish (39,000 so&apos;m)
+              👨‍👩‍👦 Ota-onamga to&apos;lov so&apos;rovini yuborish
             </Button>
           </div>
         </div>

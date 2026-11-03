@@ -30,6 +30,7 @@ from .services.answering import apply_answer
 from .services.grading import grade_open_answers
 from .services.review import describe_answer, section_label, writing_payload
 from core.ai_client import ask_groq
+from analytics.tracking import track_event
 
 logger = logging.getLogger(__name__)
 
@@ -342,6 +343,7 @@ def start_test_api(request, test_id):
             and not profile.is_vip_active
             and not profile.premium_mock_test_unlocked
             and test.id not in _unlocked_ids(profile)):
+        track_event(profile, 'paywall_view', feature='mock')
         return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)
     is_stress = bool(request.data.get('stress') or request.query_params.get('stress'))
     if (is_stress and not profile.is_vip_active
@@ -1363,6 +1365,7 @@ def start_stress_test_api(request):
                          .filter(profile=profile, is_stress_mode=True, is_completed=False)
                          .order_by('-started_at').first())
             if not resumable:
+                track_event(profile, 'paywall_view', feature='stress')
                 return Response({'error': "Stress zali birinchi marta bepul edi. Davom etish uchun PRO obuna kerak.",
                                  'requires_pro': True}, status=403)
             mode = 'cefr' if resumable.test and resumable.test.sections.exists() else 'classic'
