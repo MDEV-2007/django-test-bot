@@ -6,21 +6,38 @@
    shadcn'ning `dark:` variantini ham shunga moslaymiz. */
 @custom-variant dark (&:is([data-theme="dark"] *, .dark, .dark *));
 
-/* Apple iOS 18 / iPadOS HIG System Grouped Design Tokens */
+/* IlmIldizi brand tokens on top of the iOS grouped surfaces.
+   --brand (emerald) is the single primary colour: CTAs, active nav, progress.
+   --reward (gold) is reserved for reward moments: coins, chest, VIP, achievements.
+   --accent stays as an alias of --brand so existing components follow the brand. */
 :root, :root[data-theme="light"] {
   color-scheme: light;
-  /* ── Apple iOS 18 Light System Grouped Palette ────────────────── */
   --bg-page: #F2F2F7;             /* Apple systemGroupedBackground */
-  --accent: #007AFF;              /* iOS System Blue */
-  --accent-hover: #0062CC;
-  --accent-soft: rgba(0, 122, 255, 0.10);
-  --accent-border: rgba(0, 122, 255, 0.22);
-  --accent-text: #0066CC;
-  --on-accent: #ffffff;
 
-  --success: #34C759;             /* iOS System Green */
-  --success-soft: rgba(52, 199, 89, 0.12);
-  --success-text: #248A3D;
+  --brand: #2D6A4F;               /* Emerald — white text 6.4:1 */
+  --brand-hover: #245A41;
+  --brand-soft: rgba(45, 106, 79, 0.10);
+  --brand-border: rgba(45, 106, 79, 0.26);
+  --brand-text: #1F5A40;          /* 7.3:1 on page */
+  --on-brand: #ffffff;
+
+  --reward: #E9C46A;              /* Gold — fills only, never small text on light */
+  --reward-hover: #DDB24E;
+  --reward-soft: rgba(233, 196, 106, 0.22);
+  --reward-border: rgba(196, 150, 40, 0.40);
+  --reward-text: #7A5B0F;         /* 5.6:1 on page */
+  --on-reward: #1C1C1E;           /* text on a gold fill */
+
+  --accent: var(--brand);
+  --accent-hover: var(--brand-hover);
+  --accent-soft: var(--brand-soft);
+  --accent-border: var(--brand-border);
+  --accent-text: var(--brand-text);
+  --on-accent: var(--on-brand);
+
+  --success: #357F5E;             /* emerald family, kept distinct from --brand */
+  --success-soft: rgba(53, 127, 94, 0.12);
+  --success-text: #24704C;
   --danger: #FF3B30;              /* iOS System Red */
   --danger-soft: rgba(255, 59, 48, 0.12);
   --danger-text: #D70015;
@@ -55,9 +72,9 @@
   --tone-streak-text: #C93400;
   --tone-streak-soft: rgba(255, 149, 0, 0.14);
 
-  --tone-premium: #FF9500;
-  --tone-premium-text: #B25000;
-  --tone-premium-soft: rgba(255, 204, 0, 0.18);
+  --tone-premium: var(--reward);
+  --tone-premium-text: var(--reward-text);
+  --tone-premium-soft: var(--reward-soft);
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
@@ -79,18 +96,33 @@
 
 :root[data-theme="dark"], :root.dark, html.dark, .dark {
   color-scheme: dark;
-  /* ── Apple iOS 18 Dark System Grouped Palette (Elevated OLED) ──────── */
   --bg-page: #000000;             /* Apple Dark systemGroupedBackground */
-  --accent: #0A84FF;              /* iOS Dark System Blue */
-  --accent-hover: #409CFF;
-  --accent-soft: rgba(10, 132, 255, 0.16);
-  --accent-border: rgba(10, 132, 255, 0.32);
-  --accent-text: #64D2FF;
-  --on-accent: #FFFFFF;
 
-  --success: #30D158;             /* iOS Dark System Green */
-  --success-soft: rgba(48, 209, 88, 0.16);
-  --success-text: #63E6BE;
+  /* Lifted emerald: #2D6A4F disappears on #000; this keeps white text at 4.8:1. */
+  --brand: #357F5E;
+  --brand-hover: #3A8562;
+  --brand-soft: rgba(82, 183, 136, 0.14);
+  --brand-border: rgba(82, 183, 136, 0.34);
+  --brand-text: #74C69D;          /* 8.3:1 on card */
+  --on-brand: #FFFFFF;
+
+  --reward: #E9C46A;
+  --reward-hover: #F0D07F;
+  --reward-soft: rgba(233, 196, 106, 0.16);
+  --reward-border: rgba(233, 196, 106, 0.36);
+  --reward-text: #E9C46A;         /* 10:1 on card */
+  --on-reward: #1C1C1E;
+
+  --accent: var(--brand);
+  --accent-hover: var(--brand-hover);
+  --accent-soft: var(--brand-soft);
+  --accent-border: var(--brand-border);
+  --accent-text: var(--brand-text);
+  --on-accent: var(--on-brand);
+
+  --success: #52B788;
+  --success-soft: rgba(82, 183, 136, 0.16);
+  --success-text: #95D5B2;
   --danger: #FF453A;              /* iOS Dark System Red */
   --danger-soft: rgba(255, 69, 58, 0.16);
   --danger-text: #FF6961;
@@ -126,9 +158,9 @@
   --tone-streak-text: #FFD60A;
   --tone-streak-soft: rgba(255, 159, 10, 0.16);
 
-  --tone-premium: #FF9F0A;
-  --tone-premium-text: #FFD60A;
-  --tone-premium-soft: rgba(255, 159, 10, 0.16);
+  --tone-premium: var(--reward);
+  --tone-premium-text: var(--reward-text);
+  --tone-premium-soft: var(--reward-soft);
 
   --tone-danger: var(--danger);
   --tone-danger-text: var(--danger-text);
@@ -195,7 +227,8 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--surface-hover);
-  --color-brand: var(--accent);
+  --color-brand: var(--brand);
+  --color-reward: var(--reward);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -475,9 +508,9 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   --input: var(--border-card);
   --ring: var(--accent-border);
 
-  --chart-1: #007AFF;
-  --chart-2: #FF9500;
-  --chart-3: #34C759;
+  --chart-1: #2D6A4F;
+  --chart-2: #E9C46A;
+  --chart-3: #007AFF;
   --chart-4: #5856D6;
   --chart-5: #AF52DE;
 
@@ -573,10 +606,10 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
   background-color: #f2f2f7;
 }
 :root[data-theme='light'] [data-slot='button'][data-variant='default'] {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 6px 16px -6px rgba(0, 122, 255, 0.45);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 6px 16px -6px rgba(45, 106, 79, 0.40);
 }
 :root[data-theme='light'] [data-slot='button'][data-variant='default']:hover {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 10px 22px -8px rgba(0, 122, 255, 0.55);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 10px 22px -8px rgba(45, 106, 79, 0.50);
 }
 
 :root[data-theme='light'] [data-slot='input'],

@@ -229,7 +229,7 @@ export default function Sidebar({
                         className={cn(
                           'ios-spring group relative flex min-h-[42px] items-center justify-between rounded-[14px] px-2.5 py-1.5 text-[13px] transition-all',
                           active
-                            ? 'bg-primary text-white font-semibold shadow-[0_4px_14px_rgba(0,122,255,0.28)]'
+                            ? 'bg-primary text-white font-semibold shadow-[0_4px_14px_rgba(45,106,79,0.30)]'
                             : 'text-foreground/85 hover:bg-muted/70 hover:text-foreground font-medium'
                         )}
                       >
