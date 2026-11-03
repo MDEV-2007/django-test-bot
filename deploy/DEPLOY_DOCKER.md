@@ -206,16 +206,17 @@ Admin panel: `https://ilmildizi.uz/admin/`
 
 ## 10. Sertifikatni avtomatik yangilash
 
-Let's Encrypt sertifikati 90 kun amal qiladi. Oyiga bir marta yangilash uchun:
+Let's Encrypt sertifikati 90 kun amal qiladi. Yangilash `deploy/scripts/renew-cert.sh`
+skriptida: u kuniga ikki marta tekshiradi (certbot faqat 30 kundan kam qolganda yangilaydi)
+va nginx'ni qayta yuklaydi. Cron qatori `deploy/scripts/crontab.example` ichida — butun
+crontab'ni shu fayldan o'rnating (11-bo'limga qarang).
+
+Qo'lda tekshirish:
 
 ```bash
-crontab -e
-```
-
-Oxiriga qo'shing:
-
-```cron
-0 3 1 * * cd /opt/ilmildizi && docker compose run --rm certbot renew --quiet && docker compose exec -T nginx nginx -s reload
+/opt/ilmildizi/deploy/scripts/renew-cert.sh
+docker run --rm -v ilmildizi_certbot-conf:/etc/letsencrypt alpine \
+  sh -c 'apk add -q openssl && openssl x509 -enddate -noout -in /etc/letsencrypt/live/ilmildizi.uz/fullchain.pem'
 ```
 
 ## 10.5. Domenni almashtirish (duckdns'dan o'z domeningizga)
@@ -346,16 +347,32 @@ docker compose logs -f frontend   # Next.js
 docker compose logs -f nginx      # kirish so'rovlari
 ```
 
-Baza zaxirasi (kuniga bir marta cron'ga qo'ying):
+Baza va media zaxirasi: `deploy/scripts/backup.sh` (har kuni 03:15, 14 kun saqlanadi,
+`/opt/ilmildizi-backups` papkasiga). Cron jadvali bitta faylda — `deploy/scripts/crontab.example`:
 
 ```bash
-docker compose exec -T db pg_dump -U ilmildizi ilmildizi | gzip > /root/ilmildizi-$(date +%F).sql.gz
+crontab -l > /root/crontab.old            # eski jadvalning nusxasi
+crontab /opt/ilmildizi/deploy/scripts/crontab.example
+/opt/ilmildizi/deploy/scripts/backup.sh   # birinchi zaxirani hozir yaratib tekshirish
+ls -lh /opt/ilmildizi-backups
 ```
 
-Zaxiradan tiklash:
+Zaxira shu serverning o'zida turadi: server yo'qolsa, u ham yo'qoladi. Haftada bir marta
+nusxasini boshqa joyga oling, masalan o'z kompyuteringizga:
 
 ```bash
-gunzip -c /root/ilmildizi-2026-08-23.sql.gz | docker compose exec -T db psql -U ilmildizi ilmildizi
+scp root@SERVER:/opt/ilmildizi-backups/db-*.dump ./
+```
+
+Zaxiradan tiklash (avval ilovani to'xtating, baza ichidagi joriy ma'lumot almashtiriladi):
+
+```bash
+docker compose stop web
+docker compose exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists' \
+  < /opt/ilmildizi-backups/db-YYYYmmdd-HHMM.dump
+docker run --rm -v ilmildizi_media:/media -v /opt/ilmildizi-backups:/backup alpine \
+  tar xzf /backup/media-YYYYmmdd-HHMM.tgz -C /media
+docker compose start web
 ```
 
 ---
