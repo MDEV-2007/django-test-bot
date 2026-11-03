@@ -193,11 +193,11 @@ export default function SprintPage() {
           </div>
         </div>
 
-        <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 mb-3 px-3 py-1 font-extrabold text-xs uppercase tracking-wider">
+        <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 mb-3 px-3 py-1 font-bold text-xs uppercase tracking-wider">
           ⚡ 3 Daqiqalik Fokus Sprint
         </Badge>
 
-        <h2 className="text-xl sm:text-2xl font-black text-white max-w-md mb-2 leading-snug">
+        <h2 className="text-xl sm:text-2xl font-bold text-white max-w-md mb-2 leading-snug">
           &ldquo;{displayTitle}&rdquo;
         </h2>
 

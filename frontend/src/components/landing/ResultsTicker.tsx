@@ -104,11 +104,11 @@ export default function ResultsTicker() {
                 <span className="text-xs font-bold text-[#1C1C1E] tracking-tight">{item.name}</span>
                 <CheckCircle2 className="size-3.5 text-[#007AFF] fill-[#007AFF]/10" />
               </div>
-              <span className="text-[11px] font-medium text-[#6C6C70]">{item.result}</span>
+              <span className="text-[12px] font-medium text-[#6C6C70]">{item.result}</span>
             </div>
 
             {/* Score pill */}
-            <span className="ml-2 rounded-full bg-[#34C759]/12 px-2.5 py-1 font-mono text-[11px] font-bold text-[#248A3D] whitespace-nowrap">
+            <span className="ml-2 rounded-full bg-[#34C759]/12 px-2.5 py-1 font-mono text-[12px] font-bold text-[#248A3D] whitespace-nowrap">
               {item.badge}
             </span>
           </div>

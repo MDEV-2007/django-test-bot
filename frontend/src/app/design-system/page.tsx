@@ -14,7 +14,7 @@ export default function DesignSystemPage() {
   return (
     <main className="mx-auto max-w-6xl flex-1 space-y-12 bg-[var(--bg-page)] p-6">
       <header className="border-b border-[var(--border-card)] pb-6">
-        <h1 className="text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">IlmIldizi Design System</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-[var(--text-primary)]">IlmIldizi Design System</h1>
         <p className="mt-2 text-[var(--text-muted)]">Tailwind CSS + React komponentlari — dizayn tokenlarining yagona havolasi.</p>
       </header>
 
@@ -46,7 +46,7 @@ export default function DesignSystemPage() {
           <div className="space-y-4">
             <div>
               <span className="text-xs uppercase tracking-widest text-[var(--text-faint)]">Heading 1</span>
-              <h1 className="text-3xl font-extrabold text-[var(--text-primary)]">Bu yirik sarlavha</h1>
+              <h1 className="text-3xl font-bold text-[var(--text-primary)]">Bu yirik sarlavha</h1>
             </div>
             <div>
               <span className="text-xs uppercase tracking-widest text-[var(--text-faint)]">Heading 2</span>

@@ -101,12 +101,12 @@ export default function ParentRadarModal({ open, onOpenChange }: ParentRadarModa
             <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
               <Users className="size-4" />
             </span>
-            <Badge className="bg-emerald-500/20 text-emerald-300 font-mono text-[10px] tracking-wider uppercase border border-emerald-500/30">
+            <Badge className="bg-emerald-500/20 text-emerald-300 font-mono text-[12px] tracking-wider uppercase border border-emerald-500/30">
               OTA-ONA RADARI & NAZORAT
             </Badge>
           </div>
 
-          <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight text-white mt-2">
+          <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-2">
             👨‍👩‍👦 Ota-Ona Radari & VIP To&apos;lov
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-zinc-300">
@@ -121,7 +121,7 @@ export default function ParentRadarModal({ open, onOpenChange }: ParentRadarModa
               <span className="text-xs font-bold text-zinc-200">
                 1. Ota-onangizga shaxsiy havolangizni yuboring:
               </span>
-              <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-[10px] font-mono">
+              <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 text-[12px] font-mono">
                 +100 🪙 Tanga Sovg&apos;a
               </Badge>
             </div>
@@ -166,7 +166,7 @@ export default function ParentRadarModal({ open, onOpenChange }: ParentRadarModa
               <p className="leading-relaxed">
                 Hurmatli ota-ona! Farzandingiz <strong>{studentName}</strong> ushbu haftada platformada <strong>5 soat 20 daqiqa</strong> ilmiy mashg&apos;ulot bajardi va <strong>240 ta</strong> BMB testini yechdi.
               </p>
-              <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1 font-mono text-[11px]">
+              <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 space-y-1 font-mono text-[12px]">
                 <p>📈 BMB Prognoz balli: <strong>158.2 ➡️ 169.4 ball (+11.2 ball o&apos;sish)</strong></p>
                 <p>🏆 Eng yaxshi mavzu: <strong>Temuriylar davri (92%)</strong></p>
                 <p>🔥 Uzluksiz seriya: <strong>30 kun ketma-ket darsda</strong></p>
@@ -181,19 +181,19 @@ export default function ParentRadarModal({ open, onOpenChange }: ParentRadarModa
                 <Sparkles className="size-3.5 text-amber-400" />
                 VIP Obunaga mablag&apos; kerakmi?
               </span>
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[9px]">
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[11px]">
                 92% ota-onalar qo&apos;llab-quvvatlaydi
               </Badge>
             </div>
 
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
+            <p className="text-[12px] text-zinc-400 leading-relaxed">
               Tugmani bossangiz, Telegram orqali ota-onangizga shaxsiylashtirilgan taklif va 39,000 so&apos;mlik to&apos;lov havolasi boradi.
             </p>
 
             <Button
               onClick={handleSendInvoice}
               disabled={sendingInvoice}
-              className="w-full h-10 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:opacity-95 text-zinc-950 font-black text-xs shadow-md shadow-amber-500/10 cursor-pointer"
+              className="w-full h-10 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:opacity-95 text-zinc-950 font-bold text-xs shadow-md shadow-amber-500/10 cursor-pointer"
             >
               {sendingInvoice ? (
                 <Loader2 className="size-4 animate-spin mr-2" />

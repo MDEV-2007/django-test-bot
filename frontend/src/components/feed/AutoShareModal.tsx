@@ -94,7 +94,7 @@ export default function AutoShareModal({
           🔥 Ajoyib Yutuq!
         </Badge>
 
-        <h3 className="text-xl font-black text-white mb-2 leading-tight">
+        <h3 className="text-xl font-bold text-white mb-2 leading-tight">
           {title}
         </h3>
 
@@ -105,7 +105,7 @@ export default function AutoShareModal({
         {/* Preview mini card */}
         <div className="rounded-2xl bg-black/40 border border-white/[0.08] p-3.5 mb-6 text-left flex items-center justify-between">
           <div>
-            <span className="text-[11px] text-zinc-500 block uppercase font-bold">{subjectName}</span>
+            <span className="text-[12px] text-zinc-500 block uppercase font-bold">{subjectName}</span>
             <span className="text-sm font-bold text-white">
               {correctCount} / {totalQuestions} to'g'ri ({score ?? Math.round(((correctCount ?? 0) / (totalQuestions || 1)) * 100)}%)
             </span>
@@ -117,7 +117,7 @@ export default function AutoShareModal({
           <Button
             onClick={handleShare}
             disabled={sharing}
-            className="w-full h-12 bg-gradient-to-r from-orange-500 via-red-500 to-amber-500 hover:from-orange-600 hover:to-red-600 text-white font-extrabold rounded-2xl text-sm transition-transform active:scale-95 flex items-center justify-center gap-2"
+            className="w-full h-12 bg-gradient-to-r from-orange-500 via-red-500 to-amber-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-2xl text-sm transition-transform active:scale-95 flex items-center justify-center gap-2"
           >
             <Share2 className="size-4" />
             <span>{sharing ? "Ulashilmoqda..." : "🔥 Lenta va Story'ga ulashish (+15 XP)"}</span>

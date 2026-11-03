@@ -193,7 +193,7 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
                 </div>
               </div>
 
-              <span className="text-[11px] font-medium text-zinc-300 max-w-[68px] truncate text-center">
+              <span className="text-[12px] font-medium text-zinc-300 max-w-[68px] truncate text-center">
                 {s.author_name.split(' ')[0]}
               </span>
             </button>
@@ -241,12 +241,12 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
                     <h4 className="text-sm font-bold text-white leading-tight">
                       {currentStory.author_name}
                     </h4>
-                    <span className="text-[11px] text-zinc-400">{currentStory.created_at}</span>
+                    <span className="text-[12px] text-zinc-400">{currentStory.created_at}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-white/10 text-white border-white/15 text-[10px]">
+                  <Badge className="bg-white/10 text-white border-white/15 text-[12px]">
                     {currentStory.badge}
                   </Badge>
                   <button
@@ -286,7 +286,7 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
                   )}
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-black text-white leading-tight mb-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight mb-2">
                   {currentStory.title}
                 </h3>
                 <p className="text-sm text-zinc-300 leading-relaxed max-w-sm">
@@ -301,7 +301,7 @@ export default function FeedStoriesBar({ examTrack = 'DTM_SERTIFIKAT', onOpenTar
                   className={cn(
                     'w-full py-3.5 text-sm font-bold rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2',
                     currentStory.story_type === 'promo'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-bold'
                       : currentStory.story_type === 'certificate'
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
                       : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white'

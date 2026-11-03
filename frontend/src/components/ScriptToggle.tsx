@@ -33,7 +33,7 @@ export default function ScriptToggle({ className }: ScriptToggleProps) {
           type="button"
           onClick={handleToggle}
           className={cn(
-            'ios-spring flex h-8.5 px-2.5 items-center justify-center gap-1 rounded-full border border-border bg-card text-xs font-black shadow-2xs cursor-pointer select-none transition-all active:scale-95',
+            'ios-spring flex h-8.5 px-2.5 items-center justify-center gap-1 rounded-full border border-border bg-card text-xs font-bold shadow-2xs cursor-pointer select-none transition-all active:scale-95',
             script === 'cyrillic'
               ? 'text-primary border-primary/40 bg-primary/10'
               : 'text-muted-foreground hover:text-foreground',
@@ -43,17 +43,17 @@ export default function ScriptToggle({ className }: ScriptToggleProps) {
         >
           <span
             className={cn(
-              'text-[10px] tracking-tight transition-colors',
-              script === 'cyrillic' ? 'text-primary font-black' : 'text-muted-foreground/60 font-semibold'
+              'text-[12px] tracking-tight transition-colors',
+              script === 'cyrillic' ? 'text-primary font-bold' : 'text-muted-foreground font-semibold'
             )}
           >
             Ўз
           </span>
-          <span className="text-[10px] text-muted-foreground/35 font-mono">/</span>
+          <span aria-hidden="true" className="text-[12px] text-muted-foreground/60 font-mono">/</span>
           <span
             className={cn(
-              'text-[10px] tracking-tight transition-colors',
-              script === 'latin' ? 'text-foreground font-black' : 'text-muted-foreground/60 font-semibold'
+              'text-[12px] tracking-tight transition-colors',
+              script === 'latin' ? 'text-foreground font-bold' : 'text-muted-foreground font-semibold'
             )}
           >
             Oʻz

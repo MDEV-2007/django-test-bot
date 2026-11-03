@@ -44,10 +44,10 @@ export default function LandingNav() {
             <BrandMark size={34} rounded="rounded-[10px]" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[15px] sm:text-base font-extrabold tracking-[-0.02em] text-[#1C1C1E] leading-none">
+            <span className="text-[15px] sm:text-base font-bold tracking-[-0.02em] text-[#1C1C1E] leading-none">
               Ilm<span className="text-[#007AFF]">Ildizi</span>
             </span>
-            <span className="text-[9px] font-semibold text-[#8E8E93] tracking-wider uppercase mt-0.5">
+            <span className="text-[11px] font-semibold text-[#8E8E93] tracking-wider uppercase mt-0.5">
               Smart EdTech
             </span>
           </div>

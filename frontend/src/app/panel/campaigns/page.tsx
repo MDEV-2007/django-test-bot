@@ -256,7 +256,7 @@ export default function PanelCampaignsPage() {
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <Building2 className="size-6 text-amber-500" />
               <span>O&apos;quv Markazlari (B2B Ads) Boshqaruvi</span>
             </h1>
@@ -361,15 +361,15 @@ export default function PanelCampaignsPage() {
                               className="size-9 rounded-xl object-contain border bg-white p-1"
                             />
                           ) : (
-                            <div className="size-9 rounded-xl bg-amber-500/15 text-amber-500 font-black flex items-center justify-center text-xs">
+                            <div className="size-9 rounded-xl bg-amber-500/15 text-amber-500 font-bold flex items-center justify-center text-xs">
                               {camp.center_name.slice(0, 2).toUpperCase()}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <p className="text-sm font-extrabold text-foreground truncate">
+                            <p className="text-sm font-bold text-foreground truncate">
                               {camp.center_name}
                             </p>
-                            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                            <p className="text-[12px] text-muted-foreground flex items-center gap-1">
                               <Star className="size-3 fill-amber-400 text-amber-400" />
                               <span>{camp.rating}</span>
                               <span>• {camp.target_region}</span>
@@ -388,7 +388,7 @@ export default function PanelCampaignsPage() {
                     </CardHeader>
 
                     <CardContent className="p-4 pt-1 space-y-2.5 flex-1">
-                      <h4 className="font-extrabold text-sm text-foreground leading-snug">
+                      <h4 className="font-bold text-sm text-foreground leading-snug">
                         {camp.title}
                       </h4>
 
@@ -404,11 +404,11 @@ export default function PanelCampaignsPage() {
 
                       <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
                         <div className="p-2 rounded-xl bg-muted/40 border border-border/60">
-                          <span className="text-[10px] text-muted-foreground block font-bold">Maqsadli Fan</span>
+                          <span className="text-[12px] text-muted-foreground block font-bold">Maqsadli Fan</span>
                           <span className="font-bold text-foreground truncate block">{camp.target_subject}</span>
                         </div>
                         <div className="p-2 rounded-xl bg-muted/40 border border-border/60">
-                          <span className="text-[10px] text-muted-foreground block font-bold">Chegara Ball</span>
+                          <span className="text-[12px] text-muted-foreground block font-bold">Chegara Ball</span>
                           <span className="font-bold text-rose-500 truncate block">&lt; {camp.max_score_threshold}%</span>
                         </div>
                       </div>
@@ -467,7 +467,7 @@ export default function PanelCampaignsPage() {
               <div className="rounded-2xl border border-border overflow-hidden bg-card shadow-xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-muted/50 border-b border-border text-[11px] font-bold text-muted-foreground uppercase">
+                    <thead className="bg-muted/50 border-b border-border text-[12px] font-bold text-muted-foreground uppercase">
                       <tr>
                         <th className="p-3.5">O&apos;quvchi</th>
                         <th className="p-3.5">Telefon Raqami</th>
@@ -549,7 +549,7 @@ export default function PanelCampaignsPage() {
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-lg rounded-3xl bg-card border-border p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-lg font-black flex items-center gap-2">
+              <DialogTitle className="text-lg font-bold flex items-center gap-2">
                 <Building2 className="size-5 text-amber-500" />
                 <span>{editingCampaign ? "Kampaniyani Tahrirlash" : "Yangi Reklama Kampaniyasi"}</span>
               </DialogTitle>
@@ -680,7 +680,7 @@ export default function PanelCampaignsPage() {
               <div className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border">
                 <div>
                   <p className="text-xs font-bold text-foreground">Kampaniya holati</p>
-                  <p className="text-[11px] text-muted-foreground">O&apos;quvchilarga ko&apos;rsatilsinmi?</p>
+                  <p className="text-[12px] text-muted-foreground">O&apos;quvchilarga ko&apos;rsatilsinmi?</p>
                 </div>
                 <Switch checked={isActive} onCheckedChange={setIsActive} />
               </div>

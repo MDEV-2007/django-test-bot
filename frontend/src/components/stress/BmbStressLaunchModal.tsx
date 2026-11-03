@@ -80,12 +80,12 @@ export default function BmbStressLaunchModal({
             <span className="flex size-7 items-center justify-center rounded-lg bg-rose-600">
               <Flame className="size-4 text-white animate-pulse" />
             </span>
-            <Badge className="bg-rose-500 text-white font-black tracking-wider text-[10px] uppercase">
+            <Badge className="bg-rose-500 text-white font-bold tracking-wider text-[12px] uppercase">
               HARDCORE EXAM SIMULATOR
             </Badge>
           </div>
 
-          <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight text-white">
+          <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             🔥 Real BMB Imtihon Zali (Stress Mode)
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-slate-300">
@@ -101,7 +101,7 @@ export default function BmbStressLaunchModal({
                 <Volume2 className="size-4 shrink-0" />
                 <span>Audio-bosim</span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
                 Parta g&apos;ichirlashi, odamlar yo&apos;talishi, qog&apos;oz shitirlashi va nazoratchi ovozi.
               </p>
             </div>
@@ -111,7 +111,7 @@ export default function BmbStressLaunchModal({
                 <FileSpreadsheet className="size-4 shrink-0" />
                 <span>Titul Varaqasi</span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
                 Javoblarni titulga bo&apos;yash shart! 10 daqiqa qolganda ulgurmasangiz — javoblar kuyadi!
               </p>
             </div>
@@ -121,7 +121,7 @@ export default function BmbStressLaunchModal({
                 <Sparkles className="size-4 shrink-0" />
                 <span>+50% Bonus XP</span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
                 Stressga bardosh bergan haqiqiy abituriyentlarga qo&apos;shimcha 1.5x XP mukofoti!
               </p>
             </div>

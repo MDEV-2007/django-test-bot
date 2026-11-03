@@ -42,7 +42,7 @@ export default function AuthShell({
           <span>Bosh sahifa</span>
         </Link>
 
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-xl px-3 py-1.5 text-[11px] font-semibold text-[#8E8E93] border border-black/[0.05] dark:border-white/[0.08]">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-xl px-3 py-1.5 text-[12px] font-semibold text-[#8E8E93] border border-black/[0.05] dark:border-white/[0.08]">
           <ShieldCheck className="size-3.5 text-[#34C759]" />
           <span>IlmIldizi ID • Xavfsiz kirish</span>
         </div>
@@ -66,7 +66,7 @@ export default function AuthShell({
                 <p className="text-[16px] font-bold tracking-tight text-foreground leading-none">
                   Ilm<span className="text-[#34C759]">Ildizi</span>
                 </p>
-                <p className="mt-1 text-[11px] font-medium text-[#8E8E93]">
+                <p className="mt-1 text-[12px] font-medium text-[#8E8E93]">
                   Milliy Sertifikat va BBA/DTM 2026 platformasi
                 </p>
               </div>
@@ -135,7 +135,7 @@ export default function AuthShell({
       </div>
 
       {/* Bottom Copyright */}
-      <footer className="mx-auto w-full max-w-5xl py-2 text-center text-[11px] text-[#8E8E93]">
+      <footer className="mx-auto w-full max-w-5xl py-2 text-center text-[12px] text-[#8E8E93]">
         © 2026 IlmIldizi EdTech • Barcha ma&apos;lumotlar shifrlangan holda saqlanadi
       </footer>
     </div>

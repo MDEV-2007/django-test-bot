@@ -88,7 +88,7 @@ export default function OpenWrittenQuestion({
           </div>
         ))}
         <div className="flex items-center justify-between gap-3 pt-1">
-          <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+          <div className="text-[12px] text-muted-foreground flex items-center gap-1.5">
             {saveStatus === 'saving' && (
               <>
                 <Loader2 className="size-3 animate-spin text-[var(--accent-text)]" />
@@ -127,7 +127,7 @@ export default function OpenWrittenQuestion({
         className="w-full rounded-2xl border border-[var(--border-card)] bg-[var(--surface-input)] p-3.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors focus:border-[var(--accent)] focus:outline-none"
       />
       <div className="flex items-center justify-between gap-3 pt-1">
-        <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+        <div className="text-[12px] text-muted-foreground flex items-center gap-1.5">
           {saveStatus === 'saving' && (
             <>
               <Loader2 className="size-3 animate-spin text-[var(--accent-text)]" />

@@ -17,7 +17,7 @@ export default function BentoGrid() {
         <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
           Mukammal Ta&apos;lim Ekotizimi
         </div>
-        <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
+        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
           Oddiy test emas,{' '}
           <span className="bg-gradient-to-r from-[#007AFF] to-[#34C759] bg-clip-text text-transparent">
             natijani ildizidan o&apos;stiruvchi
@@ -45,7 +45,7 @@ export default function BentoGrid() {
                   <ShieldCheck className="size-5.5" />
                 </span>
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#248A3D]">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-[#248A3D]">
                     Intellektual Natijalar Analitikasi
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
@@ -53,7 +53,7 @@ export default function BentoGrid() {
                   </h3>
                 </div>
               </div>
-              <span className="rounded-full bg-[#34C759]/12 px-3 py-1 font-mono text-[11px] font-bold text-[#248A3D]">
+              <span className="rounded-full bg-[#34C759]/12 px-3 py-1 font-mono text-[12px] font-bold text-[#248A3D]">
                 96% Aniqlik
               </span>
             </div>
@@ -67,7 +67,7 @@ export default function BentoGrid() {
               <div className="sm:col-span-2 flex flex-col justify-center border-b sm:border-b-0 sm:border-r border-black/[0.08] pb-3 sm:pb-0 sm:pr-4">
                 <span className="text-xs text-[#6C6C70] font-medium">Kutilayotgan ball:</span>
                 <div className="mt-1 flex items-baseline gap-1.5">
-                  <span className="font-mono text-4xl sm:text-5xl font-black tracking-tight text-[#1C1C1E]">178.4</span>
+                  <span className="font-mono text-4xl sm:text-5xl font-bold tracking-tight text-[#1C1C1E]">178.4</span>
                   <span className="font-mono text-xs text-[#8E8E93]">/ 189.0</span>
                 </div>
                 <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-[#248A3D]">
@@ -128,7 +128,7 @@ export default function BentoGrid() {
                 <Bot className="size-5.5" />
               </span>
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#5856D6]">
+                <span className="text-[12px] font-bold uppercase tracking-wider text-[#5856D6]">
                   Darslik Sahifasi Bilan
                 </span>
                 <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
@@ -150,14 +150,14 @@ export default function BentoGrid() {
               </div>
 
               <div className="flex gap-2 items-end">
-                <div className="flex size-6.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#5856D6] to-[#007AFF] text-white text-[10px] font-bold">
+                <div className="flex size-6.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#5856D6] to-[#007AFF] text-white text-[12px] font-bold">
                   AI
                 </div>
                 <div className="rounded-[18px] rounded-bl-[4px] bg-white border border-black/[0.06] p-3 text-xs text-[#1C1C1E] space-y-2 shadow-2xs">
                   <p className="leading-relaxed">
                     1365-yilda Ilyosxo&apos;jaga qarshi <strong>&quot;Loy jangi&quot;</strong> bo&apos;lgan. Amir Temur esa 1370-yil Balx qurultoyida Movarounnahr amiri deb e&apos;lon qilinadi.
                   </p>
-                  <div className="flex items-center gap-1.5 rounded-[10px] bg-[#5856D6]/10 px-2.5 py-1 text-[11px] font-bold text-[#5856D6]">
+                  <div className="flex items-center gap-1.5 rounded-[10px] bg-[#5856D6]/10 px-2.5 py-1 text-[12px] font-bold text-[#5856D6]">
                     <BookOpen className="size-3.5 shrink-0" />
                     <span>7-sinf O&apos;zbekiston tarixi, 84-bet</span>
                   </div>
@@ -184,7 +184,7 @@ export default function BentoGrid() {
                 <Swords className="size-5.5" />
               </span>
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#C93400]">
+                <span className="text-[12px] font-bold uppercase tracking-wider text-[#C93400]">
                   Game Center Duel
                 </span>
                 <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
@@ -203,7 +203,7 @@ export default function BentoGrid() {
                 <span className="text-[#30D158] font-bold flex items-center gap-1">
                   <Flame className="size-3.5 fill-[#FF9F0A] text-[#FF9F0A]" /> Tarix bo&apos;yicha duel
                 </span>
-                <span className="rounded-full bg-white/10 px-2.5 py-0.5 font-mono text-[11px] text-[#FFD60A] font-bold">
+                <span className="rounded-full bg-white/10 px-2.5 py-0.5 font-mono text-[12px] text-[#FFD60A] font-bold">
                   00:14 qoldi
                 </span>
               </div>
@@ -215,18 +215,18 @@ export default function BentoGrid() {
                   </div>
                   <div>
                     <div className="text-xs font-bold">Siz</div>
-                    <div className="text-[10px] font-mono text-[#30D158] font-bold">6/7 to&apos;g&apos;ri</div>
+                    <div className="text-[12px] font-mono text-[#30D158] font-bold">6/7 to&apos;g&apos;ri</div>
                   </div>
                 </div>
 
-                <span className="rounded-full bg-[#FF453A]/20 border border-[#FF453A]/40 px-2.5 py-0.5 text-[10px] font-black text-[#FF6961]">
+                <span className="rounded-full bg-[#FF453A]/20 border border-[#FF453A]/40 px-2.5 py-0.5 text-[12px] font-bold text-[#FF6961]">
                   VS
                 </span>
 
                 <div className="flex items-center gap-2.5 text-right">
                   <div>
                     <div className="text-xs font-bold">Jasurbek M.</div>
-                    <div className="text-[10px] font-mono text-[#8E8E93] font-bold">5/7 to&apos;g&apos;ri</div>
+                    <div className="text-[12px] font-mono text-[#8E8E93] font-bold">5/7 to&apos;g&apos;ri</div>
                   </div>
                   <div className="size-9 rounded-full bg-[#2C2C2E] border border-white/15 flex items-center justify-center font-bold text-xs text-white">
                     JM
@@ -239,7 +239,7 @@ export default function BentoGrid() {
                   <div className="h-full bg-[#30D158]" style={{ width: '60%' }} />
                   <div className="h-full bg-[#FF453A]" style={{ width: '40%' }} />
                 </div>
-                <div className="flex justify-between text-[10px] text-[#8E8E93] font-mono">
+                <div className="flex justify-between text-[12px] text-[#8E8E93] font-mono">
                   <span>+45 XP yutuqda</span>
                   <span>ELO: 1,450</span>
                 </div>
@@ -266,7 +266,7 @@ export default function BentoGrid() {
                   <Target className="size-5.5" />
                 </span>
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#007AFF]">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-[#007AFF]">
                     Syllabus Diagnostikasi & Spaced Repetition
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
@@ -274,7 +274,7 @@ export default function BentoGrid() {
                   </h3>
                 </div>
               </div>
-              <span className="rounded-full bg-[#007AFF]/10 px-3 py-1 font-mono text-[11px] font-bold text-[#007AFF]">
+              <span className="rounded-full bg-[#007AFF]/10 px-3 py-1 font-mono text-[12px] font-bold text-[#007AFF]">
                 Avto-tahlil
               </span>
             </div>
@@ -339,7 +339,7 @@ export default function BentoGrid() {
                   <Film className="size-5.5" />
                 </span>
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#D70015]">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-[#D70015]">
                     15 Soniyalik Blits Viktorina
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
@@ -347,7 +347,7 @@ export default function BentoGrid() {
                   </h3>
                 </div>
               </div>
-              <span className="rounded-full bg-[#FF2D55]/10 px-3 py-1 font-mono text-[11px] font-bold text-[#D70015]">
+              <span className="rounded-full bg-[#FF2D55]/10 px-3 py-1 font-mono text-[12px] font-bold text-[#D70015]">
                 Reels 2.0
               </span>
             </div>
@@ -363,7 +363,7 @@ export default function BentoGrid() {
                   <span className="flex size-2 rounded-full bg-[#FF375F] animate-pulse" />
                   <span className="font-semibold text-[#E5E5EA]">Tarix · 68% abituriyent adashgan savol</span>
                 </div>
-                <span className="font-mono text-[11px] text-[#FF375F] font-bold bg-[#FF375F]/15 px-2.5 py-0.5 rounded-full">
+                <span className="font-mono text-[12px] text-[#FF375F] font-bold bg-[#FF375F]/15 px-2.5 py-0.5 rounded-full">
                   15s
                 </span>
               </div>
@@ -375,16 +375,16 @@ export default function BentoGrid() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white">Kir II va Tomaris to&apos;qnashuvi</p>
-                    <p className="text-[10px] text-[#8E8E93]">Asosiy sanalar va darslik fokuslari</p>
+                    <p className="text-[12px] text-[#8E8E93]">Asosiy sanalar va darslik fokuslari</p>
                   </div>
                 </div>
-                <span className="text-[10px] font-bold font-mono text-[#30D158] bg-[#30D158]/15 px-2.5 py-1 rounded-full">
+                <span className="text-[12px] font-bold font-mono text-[#30D158] bg-[#30D158]/15 px-2.5 py-1 rounded-full">
                   +15 XP
                 </span>
               </div>
 
               <div className="space-y-1.5 pt-0.5">
-                <p className="text-[11px] font-semibold text-[#D1D1D6]">
+                <p className="text-[12px] font-semibold text-[#D1D1D6]">
                   ❓ Savol: Kir II qaysi jangda halok bo&apos;lgan?
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -419,7 +419,7 @@ export default function BentoGrid() {
                   <Sparkles className="size-5.5" />
                 </span>
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#8944AB]">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-[#8944AB]">
                     Ijtimoiy Ta&apos;lim Tarmog&apos;i
                   </span>
                   <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1C1E]">
@@ -427,7 +427,7 @@ export default function BentoGrid() {
                   </h3>
                 </div>
               </div>
-              <span className="rounded-full bg-[#AF52DE]/12 px-3 py-1 font-mono text-[11px] font-bold text-[#8944AB]">
+              <span className="rounded-full bg-[#AF52DE]/12 px-3 py-1 font-mono text-[12px] font-bold text-[#8944AB]">
                 Jonli Feed
               </span>
             </div>
@@ -448,10 +448,10 @@ export default function BentoGrid() {
                       Madinabonu S.
                       <span className="text-[#8E8E93] font-normal">· 2 daq oldin</span>
                     </div>
-                    <div className="text-[10px] text-[#007AFF] font-semibold">TDYU Davlat Granti maqsadi</div>
+                    <div className="text-[12px] text-[#007AFF] font-semibold">TDYU Davlat Granti maqsadi</div>
                   </div>
                 </div>
-                <span className="rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 text-[10px] font-bold text-[#C93400] flex items-center gap-1">
+                <span className="rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 text-[12px] font-bold text-[#C93400] flex items-center gap-1">
                   <Award className="size-3 text-[#FF9500]" /> A+ Sertifikat
                 </span>
               </div>
@@ -471,7 +471,7 @@ export default function BentoGrid() {
                     <MessageCircle className="size-3.5 text-[#8E8E93]" /> 32 ta fikr
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-[#248A3D] bg-[#34C759]/12 px-2.5 py-0.5 rounded-full">
+                <span className="text-[12px] font-bold text-[#248A3D] bg-[#34C759]/12 px-2.5 py-0.5 rounded-full">
                   +100 XP Bonus
                 </span>
               </div>
@@ -495,7 +495,7 @@ export default function BentoGrid() {
               <span className="flex size-11 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#5856D6] to-[#4644B5] text-white shadow-[0_4px_12px_rgba(88,86,214,0.28)]">
                 <Layers className="size-5.5" />
               </span>
-              <span className="rounded-full bg-[#5856D6]/10 px-2.5 py-0.5 text-[11px] font-bold text-[#5856D6]">
+              <span className="rounded-full bg-[#5856D6]/10 px-2.5 py-0.5 text-[12px] font-bold text-[#5856D6]">
                 3D Xotira Kartalari
               </span>
             </div>
@@ -520,7 +520,7 @@ export default function BentoGrid() {
               <span className="flex size-11 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#FF9500] to-[#E08600] text-white shadow-[0_4px_12px_rgba(255,149,0,0.28)]">
                 <Library className="size-5.5" />
               </span>
-              <span className="rounded-full bg-[#FF9500]/12 px-2.5 py-0.5 text-[11px] font-bold text-[#C93400]">
+              <span className="rounded-full bg-[#FF9500]/12 px-2.5 py-0.5 text-[12px] font-bold text-[#C93400]">
                 Elektron qo&apos;llanmalar
               </span>
             </div>
@@ -545,7 +545,7 @@ export default function BentoGrid() {
               <span className="flex size-11 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#30B0C7] to-[#2492A6] text-white shadow-[0_4px_12px_rgba(48,176,199,0.28)]">
                 <Headphones className="size-5.5" />
               </span>
-              <span className="rounded-full bg-[#30B0C7]/12 px-2.5 py-0.5 text-[11px] font-bold text-[#1E7C8D]">
+              <span className="rounded-full bg-[#30B0C7]/12 px-2.5 py-0.5 text-[12px] font-bold text-[#1E7C8D]">
                 Pomodoro & Ambient
               </span>
             </div>
@@ -573,7 +573,7 @@ export default function BentoGrid() {
               <Users className="size-3.5" />
               <span>O&apos;qituvchilar va Repetitorlar uchun iPadOS / macOS Panel</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+            <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
               Butun sinf yoki guruh o&apos;quvchilarini bitta paneldan nazorat qiling
             </h3>
             <p className="text-xs sm:text-sm text-[#AEAEB2] leading-relaxed">
@@ -583,8 +583,8 @@ export default function BentoGrid() {
 
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
             <div className="rounded-[20px] border border-white/12 bg-[#2C2C2E] px-4 py-3 text-center sm:text-left w-full sm:w-auto">
-              <span className="text-[10px] text-[#8E8E93] block font-bold uppercase">Guruh o&apos;rtacha bali</span>
-              <span className="text-xl font-mono font-black text-[#30D158]">172.6 ball (+18.4)</span>
+              <span className="text-[12px] text-[#8E8E93] block font-bold uppercase">Guruh o&apos;rtacha bali</span>
+              <span className="text-xl font-mono font-bold text-[#30D158]">172.6 ball (+18.4)</span>
             </div>
             <Link
               href="/register"

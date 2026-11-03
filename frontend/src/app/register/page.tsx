@@ -94,7 +94,7 @@ function RegisterPageInner() {
 
         <div className="relative flex items-center justify-center py-1">
           <div className="h-px w-full bg-black/[0.06] dark:bg-white/[0.08]" />
-          <span className="absolute bg-white dark:bg-[#1C1C1E] px-3 text-[11px] font-semibold uppercase tracking-wider text-[#8E8E93]">
+          <span className="absolute bg-white dark:bg-[#1C1C1E] px-3 text-[12px] font-semibold uppercase tracking-wider text-[#8E8E93]">
             yoki ma&apos;lumotlar bilan
           </span>
         </div>

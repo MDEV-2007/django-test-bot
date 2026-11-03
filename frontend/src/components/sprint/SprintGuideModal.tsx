@@ -48,12 +48,12 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
             <span className="inline-flex items-center justify-center size-8 sm:size-9 rounded-xl bg-amber-500/15 text-amber-500 shadow-xs">
               <Zap className="size-4 sm:size-5 fill-amber-500" />
             </span>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
+            <span className="text-[12px] sm:text-[12px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
               Qo&apos;llanma &amp; Yo&apos;riqnoma
             </span>
           </div>
 
-          <DialogTitle className="text-lg sm:text-2xl font-extrabold tracking-tight text-foreground">
+          <DialogTitle className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
             Tezkor Test qanday ishlaydi?
           </DialogTitle>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
@@ -70,7 +70,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
               setActiveTab('flow');
             }}
             className={cn(
-              'py-2 px-1 sm:px-2.5 text-[11px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
+              'py-2 px-1 sm:px-2.5 text-[12px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
               activeTab === 'flow'
                 ? 'bg-card text-foreground shadow-xs border border-border'
                 : 'text-muted-foreground hover:text-foreground'
@@ -87,7 +87,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
               setActiveTab('mechanics');
             }}
             className={cn(
-              'py-2 px-1 sm:px-2.5 text-[11px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
+              'py-2 px-1 sm:px-2.5 text-[12px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
               activeTab === 'mechanics'
                 ? 'bg-card text-foreground shadow-xs border border-border'
                 : 'text-muted-foreground hover:text-foreground'
@@ -104,7 +104,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
               setActiveTab('hints');
             }}
             className={cn(
-              'py-2 px-1 sm:px-2.5 text-[11px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
+              'py-2 px-1 sm:px-2.5 text-[12px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
               activeTab === 'hints'
                 ? 'bg-card text-foreground shadow-xs border border-border'
                 : 'text-muted-foreground hover:text-foreground'
@@ -124,7 +124,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
               </div>
               <div className="min-w-0">
                 <h4 className="font-bold text-foreground text-xs sm:text-sm">Fanni tanlang</h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   Barcha fanlar aralashmasi (<b>AI Smart Mix</b>) yoki maxsus fan (Tarix, Ingliz tili va b.) ni belgilang.
                 </p>
               </div>
@@ -136,7 +136,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
               </div>
               <div className="min-w-0">
                 <h4 className="font-bold text-foreground text-xs sm:text-sm">Davomiylik va intensivlik</h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   <b>10 ta savol (~5 daq)</b>: Tezkor isinish mashqi.<br />
                   <b>20 ta savol (~10 daq)</b>: Optimal o&apos;quv zanjiri (Tavsiya etiladi).<br />
                   <b>30 ta savol (~15 daq)</b>: Chuqur diqqat (Deep Flow).
@@ -150,7 +150,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
               </div>
               <div className="min-w-0">
                 <h4 className="font-bold text-foreground text-xs sm:text-sm">Tezkor oqim va natija</h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   Savollarga variantlarni bosish yoki klaviatura orqali tezda javob bering. Yakunda to&apos;plangan XP va oshgan DTM balingiz saqlanadi.
                 </p>
               </div>
@@ -169,7 +169,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
                 <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
                   <span>2.0x Combo &amp; Ko&apos;proq XP</span>
                 </h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   Ketma-ket to&apos;g&apos;ri javob berganingizda Combo ko&apos;paytirgich faollashadi (1.5x va 2.0x). Har bir to&apos;g&apos;ri javob uchun ikki barobar ko&apos;p XP va tanga olasiz!
                 </p>
               </div>
@@ -183,7 +183,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
                 <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
                   <span>Jonli DTM Prognoz (+0.2 ball)</span>
                 </h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   Har bir to&apos;g&apos;ri javob real vaqt rejimida DTM kirish imtihoni ehtimoliy balingizni o&apos;stiradi. Natijangiz jonli barometrda aks etadi.
                 </p>
               </div>
@@ -197,7 +197,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
                 <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
                   <span>0.2s AI Qasos Savoli (Revenge)</span>
                 </h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   Agar biron savolda xatoga yo&apos;l qo&apos;ysangiz, tizim bu mavzuni eslab qoladi va test davomida bilimingizni mustahkamlash uchun yana qaytarib beradi.
                 </p>
               </div>
@@ -216,7 +216,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
                 <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
                   <span>AI Tushuntirish &amp; Mnemonika</span>
                 </h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   Savol ostidagi AI layfxak orqali qoidalar va sanalarni oson eslab qolish yo&apos;llarini ko&apos;rishingiz mumkin.
                 </p>
               </div>
@@ -230,7 +230,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
                 <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
                   <span>Aqlli Daftar sinxronizatsiyasi</span>
                 </h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
                   Barcha xatolar avtomatik profilingizdagi <b>Aqlli Daftar</b>ga tushadi, shunda istalgan vaqt xatolar ustida ishlab, ularni tozalashingiz mumkin.
                 </p>
               </div>
@@ -244,8 +244,8 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
                 <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
                   <span>Klaviatura Tezkor Tugmalari</span>
                 </h4>
-                <p className="text-muted-foreground text-[11px] sm:text-xs mt-0.5 leading-relaxed">
-                  Desktopda <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] sm:text-[11px] font-mono">1-4</kbd> yoki <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] sm:text-[11px] font-mono">A-D</kbd> orqali javoblarni tezkor tanlashingiz va <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[10px] sm:text-[11px] font-mono">Enter</kbd> bosishingiz mumkin.
+                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
+                  Desktopda <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[12px] sm:text-[12px] font-mono">1-4</kbd> yoki <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[12px] sm:text-[12px] font-mono">A-D</kbd> orqali javoblarni tezkor tanlashingiz va <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[12px] sm:text-[12px] font-mono">Enter</kbd> bosishingiz mumkin.
                 </p>
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
 
         {/* Modal Pastki Harakat Tugmasi (Responsive: Clean button and helper tip) */}
         <div className="pt-3 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center justify-between border-t border-border/70 mt-2 sm:mt-3">
-          <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 order-2 sm:order-1">
+          <div className="text-[12px] text-muted-foreground flex items-center gap-1.5 order-2 sm:order-1">
             <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
             <span className="leading-tight">Istalgan vaqt tepadagi <b>&quot;Qo&apos;llanma&quot;</b> orqali qayta ochishingiz mumkin</span>
           </div>
@@ -262,7 +262,7 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
           <button
             type="button"
             onClick={handleClose}
-            className="w-full sm:w-auto shrink-0 whitespace-nowrap px-6 py-3 sm:py-2.5 rounded-xl bg-primary text-primary-foreground font-extrabold text-xs sm:text-sm hover:opacity-90 shadow-md shadow-primary/25 transition-all cursor-pointer flex items-center justify-center gap-2 order-1 sm:order-2 active:scale-[0.99]"
+            className="w-full sm:w-auto shrink-0 whitespace-nowrap px-6 py-3 sm:py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs sm:text-sm hover:opacity-90 shadow-md shadow-primary/25 transition-all cursor-pointer flex items-center justify-center gap-2 order-1 sm:order-2 active:scale-[0.99]"
           >
             <span>Tushundim, Boshlaymiz!</span>
             <ArrowRight className="size-4 shrink-0" />

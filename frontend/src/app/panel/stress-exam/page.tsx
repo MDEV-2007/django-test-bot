@@ -319,7 +319,7 @@ export default function StressExamAdminPage() {
                       onChange={(e) => setConfig({ ...config, warning_time_minutes: parseInt(e.target.value) || 10 })}
                       className="bg-background"
                     />
-                    <p className="text-[11px] text-muted-foreground">Qolgan vaqtda qizil signal va titul shoshi beraladi</p>
+                    <p className="text-[12px] text-muted-foreground">Qolgan vaqtda qizil signal va titul shoshi beraladi</p>
                   </div>
 
                   <div className="space-y-1.5">
@@ -333,7 +333,7 @@ export default function StressExamAdminPage() {
                       onChange={(e) => setConfig({ ...config, bonus_xp_multiplier: parseFloat(e.target.value) || 1.5 })}
                       className="bg-background"
                     />
-                    <p className="text-[11px] text-muted-foreground">Stress rejimida topshirgan abituriyentga bonus</p>
+                    <p className="text-[12px] text-muted-foreground">Stress rejimida topshirgan abituriyentga bonus</p>
                   </div>
                 </div>
               </CardContent>
@@ -383,7 +383,7 @@ export default function StressExamAdminPage() {
                           placeholder="soniya (-1 boshida, 0 oxirida)"
                           className="h-8 text-xs font-mono w-28 bg-background"
                         />
-                        <span className="text-[11px] text-muted-foreground/80">soniya</span>
+                        <span className="text-[12px] text-muted-foreground/80">soniya</span>
                       </div>
                     </div>
 
@@ -471,13 +471,13 @@ export default function StressExamAdminPage() {
                           <div className="flex items-center gap-2.5">
                             <Avatar className="size-7">
                               <AvatarImage src={att.avatar || undefined} />
-                              <AvatarFallback className="text-[10px] uppercase">
+                              <AvatarFallback className="text-[12px] uppercase">
                                 {att.username.slice(0, 2)}
                               </AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-semibold text-foreground">{att.user}</p>
-                              <p className="text-[11px] text-muted-foreground">@{att.username}</p>
+                              <p className="text-[12px] text-muted-foreground">@{att.username}</p>
                             </div>
                           </div>
                         </td>
@@ -486,7 +486,7 @@ export default function StressExamAdminPage() {
                         </td>
                         <td className="py-3 font-bold text-foreground">
                           {att.score !== null ? `${att.score}%` : '—'}
-                          <span className="block text-[10px] text-muted-foreground font-normal">
+                          <span className="block text-[12px] text-muted-foreground font-normal">
                             ~{att.dtm_ball} DTM ball
                           </span>
                         </td>
@@ -495,11 +495,11 @@ export default function StressExamAdminPage() {
                         </td>
                         <td className="py-3">
                           {att.lost_points > 0 ? (
-                            <Badge variant="destructive" className="text-[10px] px-1.5 py-0 font-mono">
+                            <Badge variant="destructive" className="text-[12px] px-1.5 py-0 font-mono">
                               -{att.lost_points}%
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-emerald-500 border-emerald-500/30">
+                            <Badge variant="outline" className="text-[12px] px-1.5 py-0 text-emerald-500 border-emerald-500/30">
                               0%
                             </Badge>
                           )}

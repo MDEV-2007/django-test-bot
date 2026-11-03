@@ -107,7 +107,7 @@ function CheckoutPageInner() {
           <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-[14px] bg-[#007AFF] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_6px_16px_rgba(0,122,255,0.3)]">
             <Crown className="size-6" />
           </div>
-          <span className="inline-block rounded-full bg-[#007AFF]/10 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#007AFF]">
+          <span className="inline-block rounded-full bg-[#007AFF]/10 px-3 py-0.5 text-[12px] font-bold uppercase tracking-wider text-[#007AFF]">
             IlmIldizi Pay
           </span>
           <h1 className="text-[22px] font-bold tracking-tight text-foreground">{info.plan.name}</h1>
@@ -116,7 +116,7 @@ function CheckoutPageInner() {
               Ochiladigan imtihon: <strong className="text-foreground">{info.test.title}</strong>
             </p>
           )}
-          <p className="pt-1 font-mono text-[32px] font-black tracking-tight text-foreground">
+          <p className="pt-1 font-mono text-[32px] font-bold tracking-tight text-foreground">
             {Number(info.plan.price).toLocaleString()} <span className="text-[15px] font-semibold text-[#8E8E93]">so&apos;m</span>
           </p>
         </div>
@@ -125,10 +125,10 @@ function CheckoutPageInner() {
         <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#1C1C1E] via-[#2C2C2E] to-[#1C1C1E] p-6 text-white shadow-xl border border-white/10">
           <div className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[#007AFF]/20 blur-3xl" />
           <div className="relative flex items-center justify-between">
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white/60">
+            <span className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-white/60">
               <CreditCard className="size-4 text-[#007AFF]" /> Qabul qiluvchi karta
             </span>
-            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-white/80">
+            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[12px] font-semibold text-white/80">
               Uzcard / Humo
             </span>
           </div>

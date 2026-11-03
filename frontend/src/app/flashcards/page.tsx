@@ -183,7 +183,7 @@ export default function FlashcardsPage() {
                   <Brain className="size-3.5" />
                   <span>{t("Interaktiv Xotira Kartalari (Flashcards)")}</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   {t("Barcha Fanlar Bo'yicha Lug'at & Qoidalar")} 🧠
                 </h1>
                 <p className="text-sm text-zinc-300 max-w-xl leading-relaxed">
@@ -265,11 +265,11 @@ export default function FlashcardsPage() {
                           <span className="size-11 rounded-2xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
                             <IconComp className="size-5" />
                           </span>
-                          <Badge variant="outline" className="text-[11px] font-mono border-white/10 text-zinc-400">
+                          <Badge variant="outline" className="text-[12px] font-mono border-white/10 text-zinc-400">
                             {deck.difficulty}
                           </Badge>
                         </div>
-                        <h3 className="text-base font-black text-white group-hover:text-violet-300 transition-colors line-clamp-1">
+                        <h3 className="text-base font-bold text-white group-hover:text-violet-300 transition-colors line-clamp-1">
                           {t(deck.title)}
                         </h3>
                         <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
@@ -328,13 +328,13 @@ export default function FlashcardsPage() {
                     <span className="font-mono uppercase tracking-wider text-violet-400 font-bold">
                       {isFlipped ? t("Orqa tomon (Javob)") : t("Old tomon (Savol / So'z)")}
                     </span>
-                    <span className="flex items-center gap-1 text-[11px]">
+                    <span className="flex items-center gap-1 text-[12px]">
                       <RotateCw className="size-3" /> {t("Aylantirish")}
                     </span>
                   </div>
 
                   <div className="my-auto space-y-3 px-2">
-                    <h2 className="text-xl sm:text-2xl font-black text-white leading-snug">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
                       {isFlipped
                         ? activeDeck.cards[currentIndex]?.back
                         : activeDeck.cards[currentIndex]?.front}
@@ -351,12 +351,12 @@ export default function FlashcardsPage() {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setShowHint(true); tgHaptic('light'); }}
-                        className="text-[11px] font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-[12px] font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <HelpCircle className="size-3.5" /> {t("Maslahat olish")}
                       </button>
                     ) : <span />}
-                    <span className="text-[11px] text-zinc-500">{t("Kartani bosib aylantiring")}</span>
+                    <span className="text-[12px] text-zinc-500">{t("Kartani bosib aylantiring")}</span>
                   </div>
                 </div>
 
@@ -388,7 +388,7 @@ export default function FlashcardsPage() {
                 <div className="size-16 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
                   <Trophy className="size-8" />
                 </div>
-                <h2 className="text-2xl font-black text-white">
+                <h2 className="text-2xl font-bold text-white">
                   {t("Ajoyib natija! Koloda yakunlandi")} 🎉
                 </h2>
                 <p className="text-xs text-zinc-300 max-w-sm mx-auto">

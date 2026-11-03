@@ -290,7 +290,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
         <div className="flex items-center justify-between gap-2">
           {/* Chapda: Mavzu va Uzluksizlik nishoni */}
           <div className="flex items-center gap-2 min-w-0">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
               Avtopilot • #{loop?.cycle_number || 1}
             </span>
             <h1 className="text-xs sm:text-sm font-bold text-zinc-200 truncate">
@@ -305,7 +305,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
               <span>+{(loop?.dtm_score_delta ?? 0.4).toFixed(1)} DTM</span>
             </div>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-orange-500/20 to-rose-500/20 border border-orange-500/40 text-xs font-mono font-black text-orange-400 shadow-sm animate-pulse">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-orange-500/20 to-rose-500/20 border border-orange-500/40 text-xs font-mono font-bold text-orange-400 shadow-sm animate-pulse">
               <Flame className="size-3.5 fill-current" />
               <span>{(loop?.combo_multiplier ?? 1.0).toFixed(1)}x</span>
             </div>
@@ -332,7 +332,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
               <React.Fragment key={step.id}>
                 <div className="flex items-center gap-1.5">
                   <div
-                    className={`size-7 sm:size-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${
+                    className={`size-7 sm:size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                       isCurrent
                         ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/30 ring-2 ring-orange-400'
                         : isDone
@@ -343,7 +343,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                     {isDone ? <Check className="size-3.5" /> : <StepIcon className="size-3.5" />}
                   </div>
                   <span
-                    className={`hidden md:inline text-[11px] font-bold ${
+                    className={`hidden md:inline text-[12px] font-bold ${
                       isCurrent ? 'text-white' : isDone ? 'text-zinc-400' : 'text-zinc-600'
                     }`}
                   >
@@ -421,7 +421,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 </div>
 
                 <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-5 sm:p-7 shadow-xl space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-black text-white">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
                     {stageData?.warmup?.title || topic?.title || "Oltin Qoidalar & BMB Qopqonlari"}
                   </h2>
                   <p className="text-xs sm:text-sm text-zinc-300 whitespace-pre-line leading-relaxed">
@@ -430,7 +430,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                   </p>
 
                   <div className="space-y-2 pt-2">
-                    <h3 className="text-xs font-black uppercase text-rose-400 tracking-wider flex items-center gap-1.5">
+                    <h3 className="text-xs font-bold uppercase text-rose-400 tracking-wider flex items-center gap-1.5">
                       <ShieldAlert className="size-3.5" />
                       <span>BMB / DTM Qopqonlari:</span>
                     </h3>
@@ -458,7 +458,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 <Button
                   type="button"
                   onClick={handleStartSprint}
-                  className="w-full h-13 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-black text-base shadow-xl shadow-rose-600/30 cursor-pointer"
+                  className="w-full h-13 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-bold text-base shadow-xl shadow-rose-600/30 cursor-pointer"
                 >
                   <Zap className="size-5 fill-current" />
                   <span>Tayyorman, Sprintga start! ⚡</span>
@@ -482,7 +482,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                       Savol {sprintIndex + 1} / {Math.min(12, sprintQuestions.length)}
                     </span>
                     {sprintQuestions[sprintIndex].isRevenge && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-black animate-pulse">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold animate-pulse">
                         <Flame className="size-3.5 fill-current text-orange-400" />
                         <span>QASOS SAVOLI (2x Ball)</span>
                       </span>
@@ -547,7 +547,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 className="w-full space-y-5"
               >
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-black uppercase">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase">
                     <Swords className="size-3.5" />
                     <span>3-Bosqich: Xatolar Flashcardi ({cleanupIndex + 1}/{stageData.cleanup.cards.length})</span>
                   </div>
@@ -564,7 +564,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                   >
                     {!isCardFlipped ? (
                       <div className="space-y-4">
-                        <span className="text-[11px] font-black uppercase tracking-wider text-zinc-400">
+                        <span className="text-[12px] font-bold uppercase tracking-wider text-zinc-400">
                           Xato qilingan savol (Bosing va to'g'ri javobni ko'ring):
                         </span>
                         <p className="text-base sm:text-lg font-bold text-white">
@@ -573,11 +573,11 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                        <span className="text-[12px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                           <Check className="size-3.5" />
                           <span>To'g'ri Javob va Layfxak:</span>
                         </span>
-                        <p className="text-lg sm:text-xl font-black text-emerald-300">
+                        <p className="text-lg sm:text-xl font-bold text-emerald-300">
                           {stageData.cleanup.cards[cleanupIndex].back}
                         </p>
                         <p className="text-xs text-zinc-300 bg-zinc-950 p-3 rounded-xl border border-white/5">
@@ -586,7 +586,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                       </div>
                     )}
 
-                    <div className="text-center text-[11px] text-zinc-500 pt-3 border-t border-white/5">
+                    <div className="text-center text-[12px] text-zinc-500 pt-3 border-t border-white/5">
                       {isCardFlipped ? "Yana bosib savolga qayting" : "Karta orqasini o'qish uchun bosing"}
                     </div>
                   </div>
@@ -628,25 +628,25 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 <div className="rounded-3xl border border-orange-500/30 bg-zinc-900/80 p-4 sm:p-5 shadow-xl flex items-center justify-between gap-4">
                   {/* Siz */}
                   <div className="flex items-center gap-2.5">
-                    <div className="size-11 rounded-full bg-primary/20 border border-primary flex items-center justify-center font-black text-sm text-primary">
+                    <div className="size-11 rounded-full bg-primary/20 border border-primary flex items-center justify-center font-bold text-sm text-primary">
                       SIZ
                     </div>
                     <div>
                       <div className="text-xs text-zinc-400">Sizning ballingiz</div>
-                      <div className="text-lg font-black text-white font-mono">{userScore}</div>
+                      <div className="text-lg font-bold text-white font-mono">{userScore}</div>
                     </div>
                   </div>
 
-                  <div className="text-center font-mono font-black text-orange-400 text-sm">
+                  <div className="text-center font-mono font-bold text-orange-400 text-sm">
                     VS
-                    <div className="text-[10px] text-zinc-500">⏱ {arenaTimeLeft}s</div>
+                    <div className="text-[12px] text-zinc-500">⏱ {arenaTimeLeft}s</div>
                   </div>
 
                   {/* Arvoh Raqib */}
                   <div className="flex items-center gap-2.5 text-right">
                     <div>
                       <div className="text-xs text-zinc-400">{stageData.arena.opponent.name}</div>
-                      <div className="text-lg font-black text-orange-400 font-mono">{ghostScore}</div>
+                      <div className="text-lg font-bold text-orange-400 font-mono">{ghostScore}</div>
                     </div>
                     <img
                       src={stageData.arena.opponent.avatar_url}
@@ -658,7 +658,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
 
                 {/* Savol */}
                 <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-5 sm:p-7 shadow-xl">
-                  <span className="text-[10px] font-black uppercase text-orange-400 tracking-wider">
+                  <span className="text-[12px] font-bold uppercase text-orange-400 tracking-wider">
                     Tezkor Duel Savoli ({arenaIndex + 1}/{arenaQuestions.length})
                   </span>
                   <p className="text-base sm:text-lg font-bold text-white mt-1.5">
@@ -730,11 +730,11 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             <div className="mx-auto size-1.5 w-12 rounded-full bg-zinc-700 mb-4" />
 
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-rose-400 font-black text-xs uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
                 <Lightbulb className="size-4 animate-pulse" />
                 <span>AI Mentor Layfxaki (Aha Moment)</span>
               </div>
-              <span className="text-[11px] font-mono text-zinc-400">10s tahlil</span>
+              <span className="text-[12px] font-mono text-zinc-400">10s tahlil</span>
             </div>
 
             <div className="space-y-3 bg-rose-950/20 border border-rose-500/30 p-4 rounded-2xl text-xs sm:text-sm text-rose-200">
@@ -749,7 +749,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             <Button
               type="button"
               onClick={proceedSprintToNext}
-              className="w-full h-12 mt-4 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-black text-sm cursor-pointer"
+              className="w-full h-12 mt-4 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-bold text-sm cursor-pointer"
             >
               <span>Tushundim, davom etamiz (+5 XP)</span>
               <ArrowRight className="size-4 ml-1.5" />

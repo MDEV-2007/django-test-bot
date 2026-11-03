@@ -139,7 +139,7 @@ export default function NewTestPage() {
                         Jonli Mock Imtihon (Live Mock)
                       </Label>
                       {isLiveMock && (
-                        <Badge className="bg-rose-500 text-white text-[10px] px-1.5 py-0 font-bold uppercase">
+                        <Badge className="bg-rose-500 text-white text-[12px] px-1.5 py-0 font-bold uppercase">
                           Jonli
                         </Badge>
                       )}
@@ -171,7 +171,7 @@ export default function NewTestPage() {
                       required={isLiveMock}
                       className="border-rose-500/30 bg-background"
                     />
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-[12px] text-muted-foreground">
                       O&apos;quvchilar sahifasida ushbu vaqtga qadar kutilma taymer ko&apos;rsatiladi.
                     </p>
                   </div>
@@ -181,7 +181,7 @@ export default function NewTestPage() {
                       <Label htmlFor="notif-all" className="text-xs font-medium flex items-center gap-1 cursor-pointer">
                         <Bell className="size-3 text-amber-400" /> Telegram xabarnoma yuborish
                       </Label>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-[12px] text-muted-foreground">
                         Barcha o&apos;quvchilarga bot orqali imtihon haqida e&apos;lon boradi
                       </p>
                     </div>

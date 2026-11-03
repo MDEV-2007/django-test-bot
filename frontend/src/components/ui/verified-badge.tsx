@@ -48,7 +48,7 @@ export function VerifiedBadge({
           )}
         />
         {showLabel && (
-          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30 backdrop-blur-md">
+          <span className="px-1.5 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30 backdrop-blur-md">
             Super Admin
           </span>
         )}
@@ -69,7 +69,7 @@ export function VerifiedBadge({
         )}
       />
       {showLabel && (
-        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 backdrop-blur-md">
+        <span className="px-1.5 py-0.5 rounded-full text-[12px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 backdrop-blur-md">
           O&apos;qituvchi
         </span>
       )}

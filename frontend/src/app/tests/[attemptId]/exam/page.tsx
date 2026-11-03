@@ -550,7 +550,7 @@ export default function CefrExamPage() {
                 <div className="truncate text-xs sm:text-sm font-bold text-foreground" title={exam.test.title}>
                   {exam.test.title}
                 </div>
-                <div className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
+                <div className="text-[12px] sm:text-[12px] text-muted-foreground truncate">
                   Jami: <strong className="text-foreground">{totals.answered}/{totals.total}</strong> savol
                 </div>
               </div>
@@ -560,7 +560,7 @@ export default function CefrExamPage() {
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Countdown Timer */}
               <div className={cn(
-                'flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-black font-mono tracking-wider shrink-0',
+                'flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-bold font-mono tracking-wider shrink-0',
                 secondsLeft <= 300
                   ? 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/40'
                   : 'bg-[var(--surface-card-medium)] border border-[var(--border-card)] text-foreground',
@@ -642,7 +642,7 @@ export default function CefrExamPage() {
                   <Badge className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold px-3 py-1">
                     CEFR MULTI-LEVEL MOCK
                   </Badge>
-                  <h1 className="text-xl sm:text-2xl font-black text-foreground">
+                  <h1 className="text-xl sm:text-2xl font-bold text-foreground">
                     Imtihon Bo&apos;limlari (3 Skills)
                   </h1>
                   <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
@@ -652,8 +652,8 @@ export default function CefrExamPage() {
 
                 <div className="flex items-center gap-3 bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-3.5 shrink-0">
                   <div className="text-right">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">Umumiy progress</span>
-                    <span className="text-lg font-black text-foreground">
+                    <span className="text-[12px] text-muted-foreground uppercase font-bold block">Umumiy progress</span>
+                    <span className="text-lg font-bold text-foreground">
                       {totals.answered} <span className="text-xs text-muted-foreground">/ {totals.total} ta</span>
                     </span>
                   </div>
@@ -697,7 +697,7 @@ export default function CefrExamPage() {
 
                     <div>
                       <div className="text-xs font-bold uppercase tracking-wider text-violet-400">Skill 1</div>
-                      <h3 className="text-lg font-black text-foreground group-hover:text-violet-400 transition-colors">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-violet-400 transition-colors">
                         Listening (Tinglab tushunish)
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -769,7 +769,7 @@ export default function CefrExamPage() {
 
                     <div>
                       <div className="text-xs font-bold uppercase tracking-wider text-blue-400">Skill 2</div>
-                      <h3 className="text-lg font-black text-foreground group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-blue-400 transition-colors">
                         Reading (O&apos;qish)
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -841,7 +841,7 @@ export default function CefrExamPage() {
 
                     <div>
                       <div className="text-xs font-bold uppercase tracking-wider text-amber-400">Skill 3</div>
-                      <h3 className="text-lg font-black text-foreground group-hover:text-amber-400 transition-colors">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-amber-400 transition-colors">
                         Writing (Yozma ish)
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -888,7 +888,7 @@ export default function CefrExamPage() {
             {/* Yakuniy Topshirish Kartasi */}
             <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="space-y-1 text-center sm:text-left">
-                <h4 className="text-base sm:text-lg font-black text-foreground">
+                <h4 className="text-base sm:text-lg font-bold text-foreground">
                   Imtihonni topshirishga tayyormisiz?
                 </h4>
                 <p className="text-xs text-muted-foreground">
@@ -899,7 +899,7 @@ export default function CefrExamPage() {
               <Button
                 size="lg"
                 onClick={() => setShowFinishConfirm(true)}
-                className="w-full sm:w-auto rounded-2xl font-black text-sm sm:text-base px-8 h-13 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl shadow-emerald-600/25 shrink-0"
+                className="w-full sm:w-auto rounded-2xl font-bold text-sm sm:text-base px-8 h-13 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl shadow-emerald-600/25 shrink-0"
               >
                 Imtihonni yakunlash 🏁
               </Button>
@@ -926,10 +926,10 @@ export default function CefrExamPage() {
               </Button>
 
               <div className="text-center min-w-0 px-1">
-                <span className="text-xs sm:text-sm font-black text-foreground block truncate">
+                <span className="text-xs sm:text-sm font-bold text-foreground block truncate">
                   Listening
                 </span>
-                <span className="text-[10px] sm:text-[11px] text-muted-foreground truncate block">
+                <span className="text-[12px] sm:text-[12px] text-muted-foreground truncate block">
                   {skillStats.listening.answered} / {skillStats.listening.total} savol
                 </span>
               </div>
@@ -954,7 +954,7 @@ export default function CefrExamPage() {
                 <span className="font-bold flex items-center gap-1.5 text-violet-400 truncate">
                   <Headphones className="size-4 shrink-0" /> CEFR Listening Audio
                 </span>
-                <span className="text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md shrink-0">
+                <span className="text-[12px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md shrink-0">
                   No rewind
                 </span>
               </div>
@@ -985,7 +985,7 @@ export default function CefrExamPage() {
                   className="shrink-0 rounded-xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] px-3 py-1.5 text-xs font-bold hover:border-violet-500/50 transition-all text-muted-foreground hover:text-foreground"
                 >
                   Part {sec.part_number}
-                  <span className="ml-1.5 text-[10px] text-violet-400">
+                  <span className="ml-1.5 text-[12px] text-violet-400">
                     ({sec.questions.filter((q) => q.answered).length}/{sec.questions.length})
                   </span>
                 </button>
@@ -1034,7 +1034,7 @@ export default function CefrExamPage() {
                         </span>
                       </div>
                       {sec.title && (
-                        <h3 className="text-base sm:text-lg font-black text-foreground mt-2">
+                        <h3 className="text-base sm:text-lg font-bold text-foreground mt-2">
                           {sec.title}
                         </h3>
                       )}
@@ -1110,7 +1110,7 @@ export default function CefrExamPage() {
                   markSkillCompleted('listening');
                   setViewMode('hub');
                 }}
-                className="rounded-2xl font-black text-sm sm:text-base px-8 h-13 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl gap-2"
+                className="rounded-2xl font-bold text-sm sm:text-base px-8 h-13 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl gap-2"
               >
                 Listeningni yakunlash va Hub&apos;ga qaytish <ArrowRight className="size-5" />
               </Button>
@@ -1168,7 +1168,7 @@ export default function CefrExamPage() {
                     )}
                   >
                     Part {sec.part_number}
-                    <span className="ml-1 text-[10px] opacity-80">
+                    <span className="ml-1 text-[12px] opacity-80">
                       ({sec.questions.filter((q) => q.answered).length}/{sec.questions.length})
                     </span>
                   </button>
@@ -1232,7 +1232,7 @@ export default function CefrExamPage() {
                   {hasPassage ? (
                     <div className="lg:col-span-6 rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] p-5 sm:p-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto space-y-4 shadow-sm">
                       {sec.title && (
-                        <h2 className="text-lg sm:text-xl font-black text-foreground border-b border-[var(--border-card)] pb-3">
+                        <h2 className="text-lg sm:text-xl font-bold text-foreground border-b border-[var(--border-card)] pb-3">
                           {sec.title}
                         </h2>
                       )}
@@ -1455,7 +1455,7 @@ export default function CefrExamPage() {
       <Dialog open={showPalette} onOpenChange={setShowPalette}>
         <DialogContent className="max-h-[85vh] overflow-y-auto w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6 mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg font-black">Savollar xaritasi</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg font-bold">Savollar xaritasi</DialogTitle>
             <DialogDescription className="text-xs">
               Yashil — javoblangan, oq — javobsiz savollar. Istalganiga bosib sakrashingiz mumkin.
             </DialogDescription>
@@ -1483,7 +1483,7 @@ export default function CefrExamPage() {
             </div>
 
             <div className="space-y-1.5">
-              <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">
                 Imtihondan chiqmoqchimisiz?
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
@@ -1497,7 +1497,7 @@ export default function CefrExamPage() {
                 <Clock className="size-4 shrink-0" />
                 <span>Diqqat: Imtihon vaqti to&apos;xtatilmaydi!</span>
               </div>
-              <p className="text-[11px] text-amber-300/80">
+              <p className="text-[12px] text-amber-300/80">
                 Sahifani yopsangiz ham serverda taymer hisoblanishda davom etadi. Belgilangan barcha javoblaringiz esa saqlab qolinadi.
               </p>
             </div>
@@ -1521,7 +1521,7 @@ export default function CefrExamPage() {
               </Button>
               <Button
                 onClick={() => setShowExit(false)}
-                className="w-full sm:w-auto flex-1 rounded-2xl font-black bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white shadow-lg shadow-emerald-600/30 h-12 sm:h-12.5 text-sm sm:text-base gap-2"
+                className="w-full sm:w-auto flex-1 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white shadow-lg shadow-emerald-600/30 h-12 sm:h-12.5 text-sm sm:text-base gap-2"
               >
                 <CheckCircle2 className="size-5" />
                 Davom ettirish
@@ -1540,7 +1540,7 @@ export default function CefrExamPage() {
             </div>
 
             <div className="space-y-1">
-              <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">
                 Imtihonni topshirasizmi?
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
@@ -1551,8 +1551,8 @@ export default function CefrExamPage() {
             {/* Answer stats card */}
             <div className="w-full grid grid-cols-2 gap-2.5">
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">Javoblangan</span>
-                <span className="text-lg sm:text-xl font-black text-emerald-300 font-mono mt-0.5 block">
+                <span className="text-[12px] font-bold uppercase tracking-wider text-emerald-400 block">Javoblangan</span>
+                <span className="text-lg sm:text-xl font-bold text-emerald-300 font-mono mt-0.5 block">
                   {totals.answered} <span className="text-xs text-muted-foreground font-normal">/ {totals.total}</span>
                 </span>
               </div>
@@ -1564,13 +1564,13 @@ export default function CefrExamPage() {
                   : 'border-[var(--border-card)] bg-[var(--surface-card-medium)]'
               )}>
                 <span className={cn(
-                  'text-[10px] font-bold uppercase tracking-wider block',
+                  'text-[12px] font-bold uppercase tracking-wider block',
                   totals.total - totals.answered > 0 ? 'text-amber-400' : 'text-muted-foreground'
                 )}>
                   Javobsiz qolgan
                 </span>
                 <span className={cn(
-                  'text-lg sm:text-xl font-black font-mono mt-0.5 block',
+                  'text-lg sm:text-xl font-bold font-mono mt-0.5 block',
                   totals.total - totals.answered > 0 ? 'text-amber-300' : 'text-muted-foreground'
                 )}>
                   {totals.total - totals.answered} ta
@@ -1598,7 +1598,7 @@ export default function CefrExamPage() {
               <Button
                 onClick={finish}
                 disabled={finishing}
-                className="w-full sm:w-auto flex-1 rounded-2xl font-black text-sm sm:text-base bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-600/25 active:scale-[0.98] transition-all h-12 sm:h-12.5 gap-2"
+                className="w-full sm:w-auto flex-1 rounded-2xl font-bold text-sm sm:text-base bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-600/25 active:scale-[0.98] transition-all h-12 sm:h-12.5 gap-2"
               >
                 {finishing ? <Loader2 className="size-5 animate-spin" /> : null}
                 Ha, topshirish 🏁

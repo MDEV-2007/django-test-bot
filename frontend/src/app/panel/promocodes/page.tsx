@@ -221,7 +221,7 @@ export default function PromocodesPage() {
                             <Copy className="size-3.5" />
                           </button>
                         </div>
-                        {p.description && <p className="text-[11px] text-slate-400 mt-0.5">{p.description}</p>}
+                        {p.description && <p className="text-[12px] text-slate-400 mt-0.5">{p.description}</p>}
                       </td>
                       <td className="py-3 px-4">
                         <span className="font-semibold text-white">
@@ -239,7 +239,7 @@ export default function PromocodesPage() {
                       <td className="py-3 px-4 font-mono text-slate-200">
                         {p.total_revenue.toLocaleString()} so&apos;m
                       </td>
-                      <td className="py-3 px-4 text-slate-400 text-[11px]">
+                      <td className="py-3 px-4 text-slate-400 text-[12px]">
                         {p.valid_until ? new Date(p.valid_until).toLocaleDateString('uz-UZ') : 'Muddatsiz'}
                       </td>
                       <td className="py-3 px-4">

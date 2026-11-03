@@ -125,7 +125,7 @@ export default function TeacherTestsPage() {
                           {t.title}
                         </p>
                         {t.is_live_mock && (
-                          <Badge variant="outline" className="border-rose-500/40 bg-rose-500/10 text-rose-400 text-[10px] font-bold gap-1 px-1.5 py-0.5">
+                          <Badge variant="outline" className="border-rose-500/40 bg-rose-500/10 text-rose-400 text-[12px] font-bold gap-1 px-1.5 py-0.5">
                             <span className="size-1.5 rounded-full bg-rose-500 animate-ping" />
                             Live Mock
                           </Badge>

@@ -131,7 +131,7 @@ export default function ViralDuelModal({
            ───────────────────────────────────────────────────────────── */}
         {isChallengerMode ? (
           <div className="space-y-5 text-center py-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30">
               <Swords className="size-3.5 text-rose-400" />
               <span>RASMIY DUEL CHAQIRIG&apos;I</span>
             </div>
@@ -144,7 +144,7 @@ export default function ViralDuelModal({
                   alt={challengerName}
                   className="size-full rounded-2xl bg-zinc-950 object-cover"
                 />
-                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500 text-white shadow">
+                <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[11px] font-bold uppercase bg-rose-500 text-white shadow">
                   Chaqiruvchi
                 </span>
               </div>
@@ -164,11 +164,11 @@ export default function ViralDuelModal({
             {/* Qoidalar & Mukofot */}
             <div className="grid grid-cols-2 gap-2 text-left p-3 rounded-xl bg-zinc-950/70 border border-white/5 text-xs">
               <div>
-                <span className="text-[10px] text-zinc-400 uppercase">Savollar soni:</span>
+                <span className="text-[12px] text-zinc-400 uppercase">Savollar soni:</span>
                 <p className="font-bold text-white">{totalQuestions} ta test</p>
               </div>
               <div>
-                <span className="text-[10px] text-zinc-400 uppercase">G&apos;olib mukofoti:</span>
+                <span className="text-[12px] text-zinc-400 uppercase">G&apos;olib mukofoti:</span>
                 <p className="font-bold text-emerald-400">+50 XP • +25 🪙</p>
               </div>
             </div>
@@ -178,7 +178,7 @@ export default function ViralDuelModal({
               <button
                 type="button"
                 onClick={handleAccept}
-                className="w-full h-13 rounded-xl bg-gradient-to-r from-orange-500 via-rose-600 to-orange-500 hover:from-orange-400 hover:to-rose-500 text-white font-extrabold text-sm shadow-[0_0_25px_rgba(244,63,94,0.5)] transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full h-13 rounded-xl bg-gradient-to-r from-orange-500 via-rose-600 to-orange-500 hover:from-orange-400 hover:to-rose-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(244,63,94,0.5)] transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Flame className="size-4.5 fill-white text-white" />
                 <span>QO&apos;LQOPNI KO&apos;TARISH: Jangni Boshlash</span>
@@ -191,7 +191,7 @@ export default function ViralDuelModal({
              ───────────────────────────────────────────────────────────── */
           <div className="space-y-5 text-center py-2">
             <div className="space-y-1">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-400">
+              <span className="text-[12px] font-mono font-bold uppercase tracking-wider text-blue-400">
                 1v1 VIRAL LOOP
               </span>
               <h3 className="text-lg font-bold text-white">Do&apos;stingizni Duelga Chorlang</h3>
@@ -205,7 +205,7 @@ export default function ViralDuelModal({
               <div className="flex items-center justify-between">
                 {/* Sizning kartangiz */}
                 <div className="flex-1 text-left space-y-1">
-                  <span className="text-[10px] text-zinc-400 uppercase block font-semibold">Siz</span>
+                  <span className="text-[12px] text-zinc-400 uppercase block font-semibold">Siz</span>
                   <div className="flex items-center gap-2">
                     <img
                       src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'}
@@ -216,7 +216,7 @@ export default function ViralDuelModal({
                       <p className="text-xs font-bold text-white truncate max-w-[90px]">
                         {user?.first_name || user?.username || 'Murodulla'}
                       </p>
-                      <p className="text-[11px] font-mono font-extrabold text-blue-400">
+                      <p className="text-[12px] font-mono font-bold text-blue-400">
                         {userScore} ball
                       </p>
                     </div>
@@ -224,17 +224,17 @@ export default function ViralDuelModal({
                 </div>
 
                 {/* Markazdagi VS */}
-                <div className="size-8 rounded-full bg-blue-500/20 text-blue-400 font-black text-xs flex items-center justify-center shrink-0 border border-blue-500/30">
+                <div className="size-8 rounded-full bg-blue-500/20 text-blue-400 font-bold text-xs flex items-center justify-center shrink-0 border border-blue-500/30">
                   VS
                 </div>
 
                 {/* Bo'sh do'st silueti (?) */}
                 <div className="flex-1 text-right space-y-1">
-                  <span className="text-[10px] text-zinc-400 uppercase block font-semibold">Sinfdoshingiz</span>
+                  <span className="text-[12px] text-zinc-400 uppercase block font-semibold">Sinfdoshingiz</span>
                   <div className="flex items-center justify-end gap-2">
                     <div>
                       <p className="text-xs font-bold text-zinc-400">Raqib</p>
-                      <p className="text-[11px] font-mono font-bold text-zinc-500">? / {totalQuestions}</p>
+                      <p className="text-[12px] font-mono font-bold text-zinc-500">? / {totalQuestions}</p>
                     </div>
                     <div className="size-8 rounded-full border border-dashed border-white/20 bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-400">
                       ?
@@ -244,7 +244,7 @@ export default function ViralDuelModal({
               </div>
 
               {/* Bonus yorlig'i */}
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[12px]">
                 <span className="text-zinc-400">Har bir duel uchun bonus:</span>
                 <span className="font-bold text-amber-400">+100 🪙 Tanga</span>
               </div>

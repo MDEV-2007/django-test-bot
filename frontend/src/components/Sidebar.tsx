@@ -134,14 +134,14 @@ export default function Sidebar({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-[15px] font-extrabold tracking-[-0.02em] text-foreground">
+                <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground">
                   {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
                 </span>
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary uppercase">
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary uppercase">
                   PRO
                 </span>
               </div>
-              <p className="text-[11px] font-medium text-muted-foreground truncate">
+              <p className="text-[12px] font-medium text-muted-foreground truncate">
                 {t("Intellektual Ta'lim")}
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function Sidebar({
 
             return (
               <div key={gIdx} className="space-y-1.5">
-                <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="px-3 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   {t(group.label)}
                 </span>
                 <div className="space-y-0.5">
@@ -246,7 +246,7 @@ export default function Sidebar({
                         {item.badge && (
                           <span
                             className={cn(
-                              'rounded-full px-2 py-0.5 text-[9px] font-bold tracking-tight shrink-0 select-none',
+                              'rounded-full px-2 py-0.5 text-[11px] font-bold tracking-tight shrink-0 select-none',
                               active
                                 ? 'bg-white/20 text-white'
                                 : item.glow
@@ -292,7 +292,7 @@ export default function Sidebar({
                   fallbackClassName="text-xs font-bold text-primary"
                 />
                 {user.is_premium && (
-                  <span className="absolute -top-1 -right-1 size-4 rounded-full bg-[#FF9500] flex items-center justify-center text-[8px] text-white font-black shadow-2xs">
+                  <span className="absolute -top-1 -right-1 size-[18px] rounded-full bg-[#C93400] flex items-center justify-center text-[10px] text-white font-bold shadow-2xs">
                     ★
                   </span>
                 )}
@@ -311,7 +311,7 @@ export default function Sidebar({
                   </p>
                   <VerifiedBadge role={user.role} isSuperadmin={user.is_superadmin} isTeacher={user.is_teacher} size="xs" />
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
+                <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-medium">
                   <span className="font-mono font-bold text-primary">Lvl {user.level || 1}</span>
                   <span>·</span>
                   <span className="font-mono">{(user.xp || 0).toLocaleString()} XP</span>
@@ -333,7 +333,7 @@ export default function Sidebar({
 
             {/* Level XP Progress Bar */}
             <div className="space-y-1">
-              <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
+              <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
                 <span>Keyingi daraja</span>
                 <span className="font-bold text-primary">
                   {Math.min(100, Math.round(((user.xp || 0) % 1000) / 10))}%

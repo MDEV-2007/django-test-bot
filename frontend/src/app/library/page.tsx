@@ -195,7 +195,7 @@ export default function LibraryPage() {
                   Raqamli Kutubxona & Konspektlar
                 </span>
               </div>
-              <h1 className="text-[24px] sm:text-[32px] font-extrabold tracking-[-0.025em] text-slate-900 dark:text-white leading-tight">
+              <h1 className="text-[24px] sm:text-[32px] font-bold tracking-[-0.025em] text-slate-900 dark:text-white leading-tight">
                 Darsliklar va Spravochniklar
               </h1>
               <p className="text-[14px] sm:text-[15px] leading-relaxed text-[#8E8E93]">
@@ -207,28 +207,28 @@ export default function LibraryPage() {
             {stats && (
               <div className="grid grid-cols-3 gap-2.5 sm:gap-3 self-stretch lg:self-auto shrink-0">
                 <div className="rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
-                  <div className="font-mono text-[20px] sm:text-[22px] font-extrabold text-[#007AFF]">
+                  <div className="font-mono text-[20px] sm:text-[22px] font-bold text-[#007AFF]">
                     {stats.total_books}
                   </div>
-                  <div className="text-[11px] font-semibold text-[#8E8E93]">
+                  <div className="text-[12px] font-semibold text-[#8E8E93]">
                     Kitoblar
                   </div>
                 </div>
 
                 <div className="rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
-                  <div className="font-mono text-[20px] sm:text-[22px] font-extrabold text-[#34C759]">
+                  <div className="font-mono text-[20px] sm:text-[22px] font-bold text-[#34C759]">
                     {stats.total_reads.toLocaleString()}
                   </div>
-                  <div className="text-[11px] font-semibold text-[#8E8E93]">
+                  <div className="text-[12px] font-semibold text-[#8E8E93]">
                     O‘qishlar
                   </div>
                 </div>
 
                 <div className="rounded-[20px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-4 py-3 text-center">
-                  <div className="font-mono text-[20px] sm:text-[22px] font-extrabold text-[#5856D6]">
+                  <div className="font-mono text-[20px] sm:text-[22px] font-bold text-[#5856D6]">
                     {stats.total_downloads.toLocaleString()}
                   </div>
-                  <div className="text-[11px] font-semibold text-[#8E8E93]">
+                  <div className="text-[12px] font-semibold text-[#8E8E93]">
                     Yuklamalar
                   </div>
                 </div>
@@ -291,7 +291,7 @@ export default function LibraryPage() {
                 >
                   <span>{s.name}</span>
                   <span className={cn(
-                    "px-2 py-0.5 rounded-full font-mono text-[11px] font-bold",
+                    "px-2 py-0.5 rounded-full font-mono text-[12px] font-bold",
                     active ? "bg-white/25 text-white" : "bg-[#767680]/[0.12] text-[#8E8E93]"
                   )}>
                     {s.books_count}
@@ -418,7 +418,7 @@ export default function LibraryPage() {
                   
                   {/* Top badges */}
                   <div className="relative z-10 flex items-center justify-between gap-2">
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-black/25 text-white backdrop-blur-md">
+                    <span className="px-2.5 py-1 rounded-full text-[12px] font-bold bg-black/25 text-white backdrop-blur-md">
                       {book.grade_display}
                     </span>
 
@@ -438,21 +438,21 @@ export default function LibraryPage() {
 
                   {/* Center Book Title Preview */}
                   <div className="relative z-10 my-auto text-center px-3">
-                    <div className="text-white/85 text-[10px] font-bold tracking-widest uppercase mb-1">
+                    <div className="text-white/85 text-[12px] font-bold tracking-widest uppercase mb-1">
                       {book.subject_name}
                     </div>
-                    <div className="text-white font-extrabold text-[16px] leading-snug line-clamp-2 drop-shadow-xs">
+                    <div className="text-white font-bold text-[16px] leading-snug line-clamp-2 drop-shadow-xs">
                       {book.title}
                     </div>
                     {book.author && (
-                      <div className="text-white/75 text-[11px] mt-1 font-medium line-clamp-1">
+                      <div className="text-white/75 text-[12px] mt-1 font-medium line-clamp-1">
                         {book.author}
                       </div>
                     )}
                   </div>
 
                   {/* Bottom meta in cover */}
-                  <div className="relative z-10 flex items-center justify-between text-white/85 text-[11px] font-mono">
+                  <div className="relative z-10 flex items-center justify-between text-white/85 text-[12px] font-mono">
                     <span className="flex items-center gap-1 font-semibold">
                       <FileText className="size-3.5" />
                       {book.page_count > 0 ? `${book.page_count} bet` : book.file_size}
@@ -470,11 +470,11 @@ export default function LibraryPage() {
                 <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3.5">
                   <div>
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="rounded-full bg-[#767680]/[0.12] px-2.5 py-0.5 text-[10px] font-bold text-[#8E8E93]">
+                      <span className="rounded-full bg-[#767680]/[0.12] px-2.5 py-0.5 text-[12px] font-bold text-[#8E8E93]">
                         {book.category_display}
                       </span>
                       {book.is_premium && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FF9500]/12 px-2 py-0.5 text-[10px] font-bold text-[#FF9500]">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#FF9500]/12 px-2 py-0.5 text-[12px] font-bold text-[#FF9500]">
                           <Crown className="size-3" /> PRO
                         </span>
                       )}
@@ -493,7 +493,7 @@ export default function LibraryPage() {
 
                   {/* Footer actions */}
                   <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.07] flex items-center justify-between">
-                    <div className="flex items-center gap-3 font-mono text-[11px] font-semibold text-[#8E8E93]">
+                    <div className="flex items-center gap-3 font-mono text-[12px] font-semibold text-[#8E8E93]">
                       <span className="flex items-center gap-1" title="Ko'rishlar">
                         <Eye className="size-3.5" />
                         {book.views_count}
@@ -515,7 +515,7 @@ export default function LibraryPage() {
 
                       <button
                         onClick={() => handleOpenReader(book)}
-                        className="px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-[#007AFF]/12 group-hover:bg-[#007AFF] text-[#007AFF] group-hover:text-white transition-all flex items-center gap-1"
+                        className="px-3.5 py-1.5 rounded-full text-[12px] font-bold uppercase tracking-wide bg-[#007AFF]/12 group-hover:bg-[#007AFF] text-[#007AFF] group-hover:text-white transition-all flex items-center gap-1"
                       >
                         <span>O‘QISH</span>
                         <ChevronRight className="size-3.5" />
@@ -605,7 +605,7 @@ export default function LibraryPage() {
                   <div className="p-5 rounded-[24px] bg-[#F2F2F7] dark:bg-[#2C2C2E]/70 border border-black/[0.05] dark:border-white/[0.07] space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>
-                        <div className="text-[11px] text-[#8E8E93] font-bold uppercase tracking-wider">
+                        <div className="text-[12px] text-[#8E8E93] font-bold uppercase tracking-wider">
                           Muallif(lar)
                         </div>
                         <div className="text-[15px] font-bold mt-0.5 text-slate-900 dark:text-white">
@@ -615,7 +615,7 @@ export default function LibraryPage() {
 
                       {activeBook.year && (
                         <div>
-                          <div className="text-[11px] text-[#8E8E93] font-bold uppercase tracking-wider">
+                          <div className="text-[12px] text-[#8E8E93] font-bold uppercase tracking-wider">
                             Nashr yili
                           </div>
                           <div className="text-[15px] font-bold mt-0.5 text-slate-900 dark:text-white font-mono">
@@ -625,7 +625,7 @@ export default function LibraryPage() {
                       )}
 
                       <div>
-                        <div className="text-[11px] text-[#8E8E93] font-bold uppercase tracking-wider">
+                        <div className="text-[12px] text-[#8E8E93] font-bold uppercase tracking-wider">
                           Hajmi va Sahifalar
                         </div>
                         <div className="text-[15px] font-bold mt-0.5 text-slate-900 dark:text-white font-mono">
@@ -635,7 +635,7 @@ export default function LibraryPage() {
                     </div>
 
                     <div className="pt-3.5 border-t border-black/[0.06] dark:border-white/[0.08]">
-                      <div className="text-[11px] text-[#8E8E93] font-bold uppercase tracking-wider mb-1">
+                      <div className="text-[12px] text-[#8E8E93] font-bold uppercase tracking-wider mb-1">
                         Kitob haqida
                       </div>
                       <p className="text-[13px] sm:text-[14px] leading-relaxed text-slate-700 dark:text-slate-200">
@@ -648,7 +648,7 @@ export default function LibraryPage() {
                   {activeBook.file_url ? (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">
+                        <span className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider">
                           PDF ko‘rish oynasi
                         </span>
                         <a

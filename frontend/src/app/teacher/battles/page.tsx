@@ -263,7 +263,7 @@ export default function TeacherBattlesPage() {
                 tgHaptic('medium');
                 setCreateOpen(true);
               }}
-              className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold shadow-md shadow-amber-500/20"
+              className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-md shadow-amber-500/20"
             >
               <Plus className="size-4 mr-1.5" /> Yangi Sinf Jangi Ochish
             </Button>
@@ -282,7 +282,7 @@ export default function TeacherBattlesPage() {
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-border/60 pb-5">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge className="bg-amber-500 text-black font-black uppercase text-[10px] tracking-wider">
+                  <Badge className="bg-amber-500 text-black font-bold uppercase text-[12px] tracking-wider">
                     JONLI STUDIYA
                   </Badge>
                   <Badge variant="outline" className={cn(
@@ -295,7 +295,7 @@ export default function TeacherBattlesPage() {
                      roomState.status === 'live' ? 'Jang ketmoqda (Live)' : 'Jang yakunlandi'}
                   </Badge>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                   {roomState.title}
                 </h2>
               </div>
@@ -317,7 +317,7 @@ export default function TeacherBattlesPage() {
                   <Button
                     onClick={() => handleStartBattle(roomState.room_id)}
                     size="lg"
-                    className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold shadow-lg shadow-emerald-500/25 px-6"
+                    className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold shadow-lg shadow-emerald-500/25 px-6"
                   >
                     <Play className="size-4 mr-2 fill-white" /> Jangni Boshlash ({roomState.participants_count} o&apos;quvchi)
                   </Button>
@@ -327,7 +327,7 @@ export default function TeacherBattlesPage() {
                     onClick={() => handleFinishBattle(roomState.room_id)}
                     variant="destructive"
                     size="lg"
-                    className="rounded-2xl font-extrabold shadow-md px-6"
+                    className="rounded-2xl font-bold shadow-md px-6"
                   >
                     <Trophy className="size-4 mr-2" /> Jangni yakunlash
                   </Button>
@@ -344,7 +344,7 @@ export default function TeacherBattlesPage() {
                     Doskaga / Telegramga ulashing:
                   </p>
                   <div className="flex items-center justify-center gap-4">
-                    <span className="font-mono text-5xl sm:text-7xl font-black tracking-widest text-white drop-shadow-[0_4px_20px_rgba(245,158,11,0.5)]">
+                    <span className="font-mono text-5xl sm:text-7xl font-bold tracking-widest text-white drop-shadow-[0_4px_20px_rgba(245,158,11,0.5)]">
                       {roomState.pin_code.slice(0, 3)} {roomState.pin_code.slice(3)}
                     </span>
                   </div>
@@ -403,12 +403,12 @@ export default function TeacherBattlesPage() {
                           transition={{ delay: idx * 0.04 }}
                           className="p-3 rounded-2xl bg-card border border-border/80 flex items-center gap-2.5 shadow-xs"
                         >
-                          <div className="size-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white font-extrabold flex items-center justify-center text-xs shrink-0">
+                          <div className="size-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
                             {p.nickname.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-xs font-bold text-foreground truncate">{p.nickname}</p>
-                            <span className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1">
+                            <span className="text-[12px] text-emerald-500 font-semibold flex items-center gap-1">
                               <CheckCircle2 className="size-2.5" /> Tayyor
                             </span>
                           </div>
@@ -427,19 +427,19 @@ export default function TeacherBattlesPage() {
                   <Card className="bg-card/60">
                     <CardHeader className="pb-2">
                       <CardDescription className="text-xs">Savollar soni</CardDescription>
-                      <CardTitle className="text-2xl font-black text-amber-500">{roomState.question_count} ta</CardTitle>
+                      <CardTitle className="text-2xl font-bold text-amber-500">{roomState.question_count} ta</CardTitle>
                     </CardHeader>
                   </Card>
                   <Card className="bg-card/60">
                     <CardHeader className="pb-2">
                       <CardDescription className="text-xs">Uланган o&apos;quvchilar</CardDescription>
-                      <CardTitle className="text-2xl font-black text-emerald-500">{roomState.participants_count} nafar</CardTitle>
+                      <CardTitle className="text-2xl font-bold text-emerald-500">{roomState.participants_count} nafar</CardTitle>
                     </CardHeader>
                   </Card>
                   <Card className="bg-card/60">
                     <CardHeader className="pb-2">
                       <CardDescription className="text-xs">Javob berganlar</CardDescription>
-                      <CardTitle className="text-2xl font-black text-primary">
+                      <CardTitle className="text-2xl font-bold text-primary">
                         {roomState.participants.filter(p => p.submitted).length} / {roomState.participants_count}
                       </CardTitle>
                     </CardHeader>
@@ -461,7 +461,7 @@ export default function TeacherBattlesPage() {
                         <div key={p.id} className="p-3.5 flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <span className={cn(
-                              'size-7 rounded-xl flex items-center justify-center font-black text-xs',
+                              'size-7 rounded-xl flex items-center justify-center font-bold text-xs',
                               idx === 0 ? 'bg-amber-500 text-black' :
                               idx === 1 ? 'bg-zinc-300 text-zinc-900' :
                               idx === 2 ? 'bg-amber-700 text-white' :
@@ -478,7 +478,7 @@ export default function TeacherBattlesPage() {
                             )}>
                               {p.submitted ? 'Yakunladi' : 'Yechmoqda...'}
                             </span>
-                            <span className="font-mono font-black text-base text-foreground tabular-nums">
+                            <span className="font-mono font-bold text-base text-foreground tabular-nums">
                               {p.score} ball
                             </span>
                           </div>
@@ -497,7 +497,7 @@ export default function TeacherBattlesPage() {
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 text-amber-500 px-3 py-1 text-xs font-bold">
                     <Crown className="size-4" /> G&apos;oliblar Shoxsupasi
                   </div>
-                  <h3 className="text-2xl font-black text-foreground">Jang Yakunlari va Reyting</h3>
+                  <h3 className="text-2xl font-bold text-foreground">Jang Yakunlari va Reyting</h3>
                   <p className="text-xs text-muted-foreground">
                     Sinf o&apos;rtacha o&apos;zlashtirishi: <strong className="text-emerald-500 font-bold">{analytics.average_score}%</strong>
                   </p>
@@ -512,7 +512,7 @@ export default function TeacherBattlesPage() {
                       'border-amber-700 bg-amber-800/10'
                     )}>
                       <CardContent className="pt-6 pb-5 space-y-2">
-                        <div className="size-12 rounded-2xl mx-auto flex items-center justify-center font-black text-lg shadow-sm"
+                        <div className="size-12 rounded-2xl mx-auto flex items-center justify-center font-bold text-lg shadow-sm"
                           style={{
                             background: pod.rank === 1 ? '#f59e0b' : pod.rank === 2 ? '#9ca3af' : '#b45309',
                             color: '#fff',
@@ -520,8 +520,8 @@ export default function TeacherBattlesPage() {
                         >
                           {pod.rank === 1 ? <Crown className="size-6 text-white" /> : `${pod.rank}`}
                         </div>
-                        <h4 className="text-base font-extrabold text-foreground truncate">{pod.nickname}</h4>
-                        <p className="font-mono text-2xl font-black text-primary tabular-nums">
+                        <h4 className="text-base font-bold text-foreground truncate">{pod.nickname}</h4>
+                        <p className="font-mono text-2xl font-bold text-primary tabular-nums">
                           {pod.score} <span className="text-xs text-muted-foreground font-normal">ball</span>
                         </p>
                         <Badge variant="outline" className="text-xs font-semibold">
@@ -552,7 +552,7 @@ export default function TeacherBattlesPage() {
                             <p className="text-xs font-medium text-foreground line-clamp-2">
                               {idx + 1}. {hq.question_text}
                             </p>
-                            <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
+                            <div className="flex items-center justify-between text-[12px] text-muted-foreground pt-1">
                               <span>To&apos;g&apos;ri javoblar: {hq.correct_count} / {hq.total_answers}</span>
                               <span className="text-rose-500 font-bold">Aniqlik: {hq.accuracy_percent}%</span>
                             </div>
@@ -581,7 +581,7 @@ export default function TeacherBattlesPage() {
                           <div key={idx} className="p-3 rounded-xl bg-muted/40 border border-border/60 flex items-center justify-between gap-3">
                             <div className="min-w-0">
                               <p className="text-xs font-bold text-foreground truncate">{st.nickname}</p>
-                              <p className="text-[11px] text-rose-500">
+                              <p className="text-[12px] text-rose-500">
                                 {st.wrong_count} ta xato javob
                               </p>
                             </div>
@@ -652,11 +652,11 @@ export default function TeacherBattlesPage() {
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="font-mono font-black text-lg text-amber-500 tracking-wider">
+                      <span className="font-mono font-bold text-lg text-amber-500 tracking-wider">
                         PIN: {room.pin_code}
                       </span>
                       <Badge variant="outline" className={cn(
-                        'text-[10px] font-bold uppercase',
+                        'text-[12px] font-bold uppercase',
                         room.status === 'waiting' ? 'border-amber-500 text-amber-500' :
                         room.status === 'live' ? 'border-emerald-500 text-emerald-500' :
                         'border-zinc-500 text-muted-foreground'
@@ -664,7 +664,7 @@ export default function TeacherBattlesPage() {
                         {room.status === 'waiting' ? 'Lobby' : room.status === 'live' ? 'Jonli' : 'Yakunlangan'}
                       </Badge>
                     </div>
-                    <CardTitle className="text-base font-extrabold text-foreground truncate">
+                    <CardTitle className="text-base font-bold text-foreground truncate">
                       {room.title}
                     </CardTitle>
                     <CardDescription className="text-xs">
@@ -724,7 +724,7 @@ export default function TeacherBattlesPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[12px] text-muted-foreground">
                   O&apos;zingiz yaratgan maxsus testni tanlashingiz yoki butun bazadan savollar tanlashingiz mumkin.
                 </p>
               </div>
@@ -739,7 +739,7 @@ export default function TeacherBattlesPage() {
                       type="button"
                       onClick={() => setNewQuestionCount(cnt)}
                       className={cn(
-                        'py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer',
+                        'py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer',
                         newQuestionCount === cnt
                           ? 'border-amber-500 bg-amber-500/15 text-amber-500 shadow-xs'
                           : 'border-border bg-card text-muted-foreground hover:text-foreground'
@@ -763,7 +763,7 @@ export default function TeacherBattlesPage() {
               <Button
                 onClick={handleCreateRoom}
                 disabled={creating}
-                className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black"
+                className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold"
               >
                 {creating ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <Play className="size-4 mr-1.5" />}
                 Xona Ochish (PIN olish)

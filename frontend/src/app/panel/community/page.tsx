@@ -216,7 +216,7 @@ export default function PanelCommunityPage() {
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-black text-foreground flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <MessageSquareHeart className="size-6 text-rose-500" />
               <span>Hamjamiyat &amp; Stories Boshqaruvi</span>
             </h1>
@@ -354,7 +354,7 @@ export default function PanelCommunityPage() {
                             <p className="text-xs font-bold text-foreground truncate">
                               {post.author.name}
                             </p>
-                            <p className="text-[10px] text-muted-foreground truncate">
+                            <p className="text-[12px] text-muted-foreground truncate">
                               @{post.author.username} • {post.created_at}
                             </p>
                           </div>
@@ -362,11 +362,11 @@ export default function PanelCommunityPage() {
 
                         <div className="flex items-center gap-1 shrink-0">
                           {post.is_pinned && (
-                            <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30 text-[10px] px-1.5 py-0">
+                            <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30 text-[12px] px-1.5 py-0">
                               <Pin className="size-2.5 mr-0.5 fill-current" /> Pin
                             </Badge>
                           )}
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 uppercase">
+                          <Badge variant="outline" className="text-[12px] px-1.5 py-0 uppercase">
                             {post.post_type}
                           </Badge>
                         </div>
@@ -374,7 +374,7 @@ export default function PanelCommunityPage() {
                     </CardHeader>
 
                     <CardContent className="p-4 pt-1 space-y-2 flex-1">
-                      <h4 className="font-extrabold text-sm text-foreground leading-snug">
+                      <h4 className="font-bold text-sm text-foreground leading-snug">
                         {post.title}
                       </h4>
                       {post.caption && (
@@ -404,7 +404,7 @@ export default function PanelCommunityPage() {
                           <MessageCircle className="size-3 text-sky-500" /> {post.comments_count}
                         </span>
                         {post.subject_name && (
-                          <span className="text-[11px] font-semibold text-primary truncate">
+                          <span className="text-[12px] font-semibold text-primary truncate">
                             • {post.subject_name}
                           </span>
                         )}
@@ -518,7 +518,7 @@ export default function PanelCommunityPage() {
                             <p className="text-xs font-bold text-foreground truncate">
                               {story.author_name}
                             </p>
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-[12px] text-muted-foreground">
                               {story.created_at}
                             </p>
                           </div>
@@ -526,7 +526,7 @@ export default function PanelCommunityPage() {
 
                         <Badge
                           className={cn(
-                            'text-[10px] px-1.5 py-0',
+                            'text-[12px] px-1.5 py-0',
                             story.is_expired
                               ? 'bg-zinc-800 text-zinc-400'
                               : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
@@ -538,7 +538,7 @@ export default function PanelCommunityPage() {
                     </CardHeader>
 
                     <CardContent className="p-4 pt-1 space-y-2 flex-1">
-                      <h4 className="font-extrabold text-sm text-foreground leading-snug">
+                      <h4 className="font-bold text-sm text-foreground leading-snug">
                         {story.title}
                       </h4>
                       {story.caption && (
@@ -548,13 +548,13 @@ export default function PanelCommunityPage() {
                       )}
 
                       {story.cta_text && (
-                        <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] font-bold text-amber-500 truncate flex items-center justify-between">
+                        <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[12px] font-bold text-amber-500 truncate flex items-center justify-between">
                           <span>{story.cta_text}</span>
-                          <span className="text-[9px] text-muted-foreground">{story.cta_link}</span>
+                          <span className="text-[11px] text-muted-foreground">{story.cta_link}</span>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between pt-1 text-[11px] text-muted-foreground">
+                      <div className="flex items-center justify-between pt-1 text-[12px] text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Eye className="size-3 text-primary" /> {story.views_count} ko&apos;rish
                         </span>
@@ -565,7 +565,7 @@ export default function PanelCommunityPage() {
                     </CardContent>
 
                     <div className="p-3 bg-muted/30 border-t border-border flex items-center justify-between gap-2">
-                      <Badge variant="outline" className="text-[10px] uppercase">
+                      <Badge variant="outline" className="text-[12px] uppercase">
                         {story.story_type}
                       </Badge>
 
@@ -612,7 +612,7 @@ export default function PanelCommunityPage() {
         <Dialog open={isStoryModalOpen} onOpenChange={setIsStoryModalOpen}>
           <DialogContent className="max-w-md rounded-3xl bg-card border-border p-6 shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="text-lg font-black flex items-center gap-2">
+              <DialogTitle className="text-lg font-bold flex items-center gap-2">
                 <Sparkles className="size-5 text-amber-500" />
                 <span>Yangi Story Chop Etish</span>
               </DialogTitle>

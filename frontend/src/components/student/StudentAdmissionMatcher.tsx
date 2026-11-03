@@ -180,7 +180,7 @@ export default function StudentAdmissionMatcher() {
               value={scoreInput}
               onChange={(e) => handleScoreChange(e.target.value)}
               placeholder="164.5"
-              className="font-mono text-[17px] font-black pr-12"
+              className="font-mono text-[17px] font-bold pr-12"
             />
             <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[12px] font-bold text-[#8E8E93] pointer-events-none">
               ball
@@ -271,12 +271,12 @@ export default function StudentAdmissionMatcher() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93] truncate">
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#8E8E93] truncate">
                       {item.faculty}
                     </span>
                     <span
                       className={cn(
-                        'shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase',
+                        'shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase',
                         isGrant
                           ? 'bg-[#34C759]/15 text-[#34C759]'
                           : isKontrakt
@@ -299,15 +299,15 @@ export default function StudentAdmissionMatcher() {
 
                 <div className="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/[0.08] grid grid-cols-3 gap-2 text-[12px] font-mono">
                   <div>
-                    <span className="text-[#8E8E93] block text-[10px] font-sans">Grant</span>
+                    <span className="text-[#8E8E93] block text-[12px] font-sans">Grant</span>
                     <span className="font-bold text-[#34C759]">{item.grantBall}</span>
                   </div>
                   <div>
-                    <span className="text-[#8E8E93] block text-[10px] font-sans">Kontrakt</span>
+                    <span className="text-[#8E8E93] block text-[12px] font-sans">Kontrakt</span>
                     <span className="font-bold text-[#007AFF]">{item.kontraktBall}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[#8E8E93] block text-[10px] font-sans">Farq</span>
+                    <span className="text-[#8E8E93] block text-[12px] font-sans">Farq</span>
                     <span className={cn('font-bold', diffGrant >= 0 ? 'text-[#34C759]' : 'text-[#FF3B30]')}>
                       {diffGrant >= 0 ? `+${diffGrant.toFixed(1)}` : diffGrant.toFixed(1)}
                     </span>

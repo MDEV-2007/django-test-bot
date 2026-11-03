@@ -146,7 +146,7 @@ export default function ProductWorkflow() {
         <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
           Natija Beruvchi Tizim
         </div>
-        <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
+        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
           IlmIldizi qanday qilib{' '}
           <span className="bg-gradient-to-r from-[#007AFF] via-[#5856D6] to-[#34C759] bg-clip-text text-transparent">
             xatoni ildizidan
@@ -184,7 +184,7 @@ export default function ProductWorkflow() {
             >
               <span
                 className={cn(
-                  'flex size-5 items-center justify-center rounded-full font-mono text-[10px] font-bold',
+                  'flex size-5 items-center justify-center rounded-full font-mono text-[12px] font-bold',
                   isActive ? 'bg-[#007AFF] text-white' : 'bg-[#F2F2F7] text-[#6C6C70]'
                 )}
               >
@@ -214,12 +214,12 @@ export default function ProductWorkflow() {
               <span className="font-mono text-xs font-bold uppercase text-[#007AFF] bg-[#007AFF]/10 px-3 py-1 rounded-full">
                 Bosqich {activeStep.step} / 06
               </span>
-              <span className="text-[11px] font-semibold text-[#6C6C70] bg-[#F2F2F7] px-3 py-1 rounded-full">
+              <span className="text-[12px] font-semibold text-[#6C6C70] bg-[#F2F2F7] px-3 py-1 rounded-full">
                 {activeStep.tag}
               </span>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1C1C1E] tracking-[-0.02em]">
+            <h3 className="text-2xl sm:text-3xl font-bold text-[#1C1C1E] tracking-[-0.02em]">
               {activeStep.title}
             </h3>
 
@@ -264,7 +264,7 @@ export default function ProductWorkflow() {
                     ilmildizi.uz/{activeStep.id}
                   </span>
                 </div>
-                <span className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-semibold text-[#1C1C1E] shadow-2xs">
+                <span className="rounded-full bg-white px-2.5 py-0.5 text-[12px] font-semibold text-[#1C1C1E] shadow-2xs">
                   {activeStep.preview.chip}
                 </span>
               </div>
@@ -273,7 +273,7 @@ export default function ProductWorkflow() {
               <div className="rounded-[20px] bg-white p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-bold text-[#1C1C1E]">{activeStep.preview.header}</p>
-                  <span className="text-[11px] font-mono font-bold text-[#248A3D] bg-[#34C759]/12 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[12px] font-mono font-bold text-[#248A3D] bg-[#34C759]/12 px-2.5 py-0.5 rounded-full">
                     {activeStep.preview.badge}
                   </span>
                 </div>
@@ -289,7 +289,7 @@ export default function ProductWorkflow() {
                 </div>
 
                 {/* Page Control Dots */}
-                <div className="pt-1 flex items-center justify-between text-[11px] text-[#8E8E93]">
+                <div className="pt-1 flex items-center justify-between text-[12px] text-[#8E8E93]">
                   <span>Sikldagi o&apos;rni:</span>
                   <div className="flex items-center gap-1.5">
                     {WORKFLOW_STEPS.map((_, i) => (

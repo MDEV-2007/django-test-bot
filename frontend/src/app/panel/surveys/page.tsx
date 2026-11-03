@@ -270,7 +270,7 @@ export default function PanelSurveysPage() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Jami Sharhlar</p>
-                <p className="text-2xl font-black text-foreground mt-1">{totalCount}</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{totalCount}</p>
               </div>
               <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
                 <MessageSquareHeart className="size-5" />
@@ -282,7 +282,7 @@ export default function PanelSurveysPage() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Landingda Ko&apos;rinmoqda</p>
-                <p className="text-2xl font-black text-emerald-700 mt-1">{featuredCount}</p>
+                <p className="text-2xl font-bold text-emerald-700 mt-1">{featuredCount}</p>
               </div>
               <div className="size-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
                 <Globe className="size-5" />
@@ -295,7 +295,7 @@ export default function PanelSurveysPage() {
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">O&apos;rtacha Baho</p>
                 <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-2xl font-black text-foreground">{avgRating}</span>
+                  <span className="text-2xl font-bold text-foreground">{avgRating}</span>
                   <div className="flex items-center text-amber-400">
                     <Star className="size-4 fill-amber-400" />
                   </div>
@@ -311,7 +311,7 @@ export default function PanelSurveysPage() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Matnli Fikrlar</p>
-                <p className="text-2xl font-black text-foreground mt-1">{withComments.length}</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{withComments.length}</p>
               </div>
               <div className="size-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center">
                 <Sparkles className="size-5" />
@@ -426,11 +426,11 @@ export default function PanelSurveysPage() {
                     {/* Featured Ribbon */}
                     {item.is_featured && (
                       <div className="mb-2.5 flex items-center justify-between bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 rounded-xl">
-                        <span className="text-[11px] font-extrabold text-emerald-600 flex items-center gap-1.5">
+                        <span className="text-[12px] font-bold text-emerald-600 flex items-center gap-1.5">
                           <Globe className="size-3.5" /> Landing sahifasida ko&apos;rinmoqda
                         </span>
                         {item.featured_badge && (
-                          <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-white/80 dark:bg-slate-900/80 px-2 py-0.5 rounded-md">
+                          <span className="text-[12px] font-bold text-emerald-800 dark:text-emerald-300 bg-white/80 dark:bg-slate-900/80 px-2 py-0.5 rounded-md">
                             {item.featured_badge}
                           </span>
                         )}
@@ -444,7 +444,7 @@ export default function PanelSurveysPage() {
                         </div>
                         <div className="min-w-0">
                           <h4 className="text-sm font-bold text-foreground truncate">{displayName}</h4>
-                          <p className="text-[11px] text-muted-foreground truncate">
+                          <p className="text-[12px] text-muted-foreground truncate">
                             {item.custom_role || (item.username ? `@${item.username}` : "Abituriyent")}
                           </p>
                         </div>
@@ -473,16 +473,16 @@ export default function PanelSurveysPage() {
                       <div className="space-y-1.5 mb-2.5">
                         <div className="flex flex-wrap items-center gap-1.5">
                           {item.subject_name && (
-                            <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 border-amber-500/40 bg-amber-500/10 text-amber-400 shrink-0">
+                            <Badge variant="outline" className="text-[12px] font-bold px-2 py-0.5 border-amber-500/40 bg-amber-500/10 text-amber-400 shrink-0">
                               {item.subject_name}
                             </Badge>
                           )}
                           {item.score !== null && (
-                            <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold shrink-0">
+                            <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[12px] font-bold shrink-0">
                               Natija: {item.score.toFixed(0)}%
                             </Badge>
                           )}
-                          <Badge variant="outline" className={`text-[10px] font-semibold gap-1 shrink-0 ${diff.tone}`}>
+                          <Badge variant="outline" className={`text-[12px] font-semibold gap-1 shrink-0 ${diff.tone}`}>
                             <span>{diff.emoji}</span> {diff.label}
                           </Badge>
                         </div>
@@ -494,12 +494,12 @@ export default function PanelSurveysPage() {
                       {/* Sharh matni */}
                       {item.comment ? (
                         <div className="relative rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3 text-xs leading-relaxed text-foreground italic shadow-inner">
-                          <span className="text-amber-500 font-serif font-black text-sm mr-1">&ldquo;</span>
+                          <span className="text-amber-500 font-serif font-bold text-sm mr-1">&ldquo;</span>
                           {item.comment}
-                          <span className="text-amber-500 font-serif font-black text-sm ml-1">&rdquo;</span>
+                          <span className="text-amber-500 font-serif font-bold text-sm ml-1">&rdquo;</span>
                         </div>
                       ) : (
-                        <p className="text-[11px] text-muted-foreground/60 italic py-1">
+                        <p className="text-[12px] text-muted-foreground/60 italic py-1">
                           (Faqat baho va qiyinlik darajasi belgilangan, matn yozilmagan)
                         </p>
                       )}
@@ -507,7 +507,7 @@ export default function PanelSurveysPage() {
 
                     {/* Pastki boshqaruv qismi (Landingga tanlash & Tahrirlash) */}
                     <div className="pt-3 border-t border-[var(--border-card)] space-y-2">
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                      <div className="flex items-center justify-between text-[12px] text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="size-3" /> {item.created_at}
                         </span>

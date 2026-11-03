@@ -112,10 +112,10 @@ export default function ModernTestCenter({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg sm:text-xl font-extrabold tracking-[-0.02em] text-foreground">
+            <h2 className="text-lg sm:text-xl font-bold tracking-[-0.02em] text-foreground">
               Tavsiya Etilgan Sinovlar
             </h2>
-            <span className="rounded-full bg-primary/12 px-2.5 py-0.5 text-[10px] font-bold text-primary">
+            <span className="rounded-full bg-primary/12 px-2.5 py-0.5 text-[12px] font-bold text-primary">
               DARAJANGA MOS
             </span>
           </div>
@@ -142,17 +142,17 @@ export default function ModernTestCenter({
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="rounded-full bg-primary/12 px-3 py-0.5 text-[11px] font-bold text-primary">
+                <span className="rounded-full bg-primary/12 px-3 py-0.5 text-[12px] font-bold text-primary">
                   {test.level}
                 </span>
-                <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5">
+                <span className="text-[12px] font-semibold text-muted-foreground flex items-center gap-1.5">
                   {test.isPriority && <PremiumIcon icon={Sparkles} tone="amber" size="2xs" />}
                   <span>{test.tag}</span>
                 </span>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   {test.subjectName}
                 </span>
                 <h4 className="text-sm sm:text-base font-bold text-foreground mt-0.5 leading-snug line-clamp-2 tracking-[-0.01em]">
@@ -197,7 +197,7 @@ export default function ModernTestCenter({
             <span className="font-bold block text-foreground text-xs sm:text-sm">
               Barcha fanlar bo&apos;yicha to&apos;liq testlar bazasi
             </span>
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-[12px] text-muted-foreground">
               Ona tili, Tarix, Biologiya, Matematika, Ingliz tili va CEFR formatlari
             </span>
           </div>

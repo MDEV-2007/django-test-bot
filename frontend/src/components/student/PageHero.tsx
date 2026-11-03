@@ -92,7 +92,7 @@ export default function PageHero({
               )}
               <span
                 className={cn(
-                  'rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider',
+                  'rounded-full border px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider',
                   t.badgeBg,
                   t.badgeText
                 )}

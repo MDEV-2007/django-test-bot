@@ -170,7 +170,7 @@ export default function NeuralSprintView({
           </div>
 
           <div className="space-y-1.5">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text">
               Fokus Sprinti Yakunlandi!
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground">
@@ -181,26 +181,26 @@ export default function NeuralSprintView({
           {/* KPI Kartochkalari */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">To&apos;g&apos;ri</span>
-              <p className="text-xl font-black text-emerald-500 mt-0.5">{stats.correct}</p>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">To&apos;g&apos;ri</span>
+              <p className="text-xl font-bold text-emerald-500 mt-0.5">{stats.correct}</p>
             </div>
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Qasos G&apos;alabasi</span>
-              <p className="text-xl font-black text-amber-500 mt-0.5">+{stats.revengeSolved}</p>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Qasos G&apos;alabasi</span>
+              <p className="text-xl font-bold text-amber-500 mt-0.5">+{stats.revengeSolved}</p>
             </div>
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">DTM Ball</span>
-              <p className="text-xl font-black text-primary mt-0.5">{scorePredictor.currentScore}</p>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">DTM Ball</span>
+              <p className="text-xl font-bold text-primary mt-0.5">{scorePredictor.currentScore}</p>
             </div>
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mukofot</span>
-              <p className="text-xl font-black text-amber-400 mt-0.5">+{stats.totalXp} XP</p>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Mukofot</span>
+              <p className="text-xl font-bold text-amber-400 mt-0.5">+{stats.totalXp} XP</p>
             </div>
           </div>
 
           {/* ─── ZERO DEAD-ENDS: Keyingi Bosqich Tramplini (CTA) ─── */}
           <div className="pt-2 space-y-3 text-left">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
+            <span className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-primary">
               <Sparkles className="size-3.5 text-primary" /> Keyingi Qadam (Avtopilot Oqimi)
             </span>
 
@@ -209,7 +209,7 @@ export default function NeuralSprintView({
               <Card className="p-4 rounded-2xl border-2 border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-amber-500/10 shadow-lg space-y-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[10px] font-bold">
+                    <Badge className="bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[12px] font-bold">
                       {stats.wrong} ta nozik nuqta
                     </Badge>
                     <span className="text-xs font-bold text-foreground">Xatolar ustida blits-mashq</span>
@@ -234,7 +234,7 @@ export default function NeuralSprintView({
               <Card className="p-4 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-primary/10 to-emerald-500/10 shadow-lg space-y-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                    <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[12px] font-bold">
                       Tayyorlik 85%+
                     </Badge>
                     <span className="text-xs font-bold text-foreground">Haqiqiy raqib bilan sinov</span>
@@ -317,7 +317,7 @@ export default function NeuralSprintView({
               <span>Prognoz: <b className="font-mono">{scorePredictor.currentScore}</b> / {scorePredictor.maxScore}</span>
               {scorePredictor.deltaScore !== null && (
                 <span className={cn(
-                  'text-[10px] font-black animate-pulse',
+                  'text-[12px] font-bold animate-pulse',
                   scorePredictor.deltaScore > 0 ? 'text-emerald-500' : 'text-rose-500'
                 )}>
                   {scorePredictor.deltaScore > 0 ? `+${scorePredictor.deltaScore}` : scorePredictor.deltaScore}
@@ -327,7 +327,7 @@ export default function NeuralSprintView({
 
             {/* 2. Combo Multiplier */}
             <div className={cn(
-              'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black transition-all duration-300',
+              'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300',
               combo.multiplier >= 2.0
                 ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30 scale-105'
                 : combo.multiplier >= 1.5
@@ -347,7 +347,7 @@ export default function NeuralSprintView({
 
         {/* Mavzu o'zlashtirish Progress Bar */}
         <div className="space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground px-0.5">
+          <div className="flex items-center justify-between text-[12px] font-medium text-muted-foreground px-0.5">
             <span className="truncate max-w-[200px]">{scorePredictor.topicName}</span>
             <span className="font-mono font-bold text-primary">{scorePredictor.topicMasteryPercentage}%</span>
           </div>
@@ -359,7 +359,7 @@ export default function NeuralSprintView({
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-2 flex items-center justify-center gap-1.5 py-1 px-2.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-bold text-amber-600 dark:text-amber-400"
+            className="mt-2 flex items-center justify-center gap-1.5 py-1 px-2.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[12px] font-bold text-amber-600 dark:text-amber-400"
           >
             <Hourglass className="size-3 text-amber-500 animate-spin" />
             <span>{revengeQueueCount} ta Qasos savoli navbatda ({nextRevengeDistance} qadam qoldi)</span>
@@ -376,11 +376,11 @@ export default function NeuralSprintView({
             animate={{ scale: 1, opacity: 1 }}
             className="rounded-2xl p-3 bg-gradient-to-r from-rose-500/20 via-amber-500/20 to-rose-500/20 border-2 border-amber-500/50 shadow-md text-center space-y-0.5"
           >
-            <div className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-amber-500">
+            <div className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-amber-500">
               <Flame className="size-4 fill-current text-amber-500 animate-bounce" />
               QASOS SAVOLI (2x Ball & XP)
             </div>
-            <p className="text-[11px] font-semibold text-foreground/80">
+            <p className="text-[12px] font-semibold text-foreground/80">
               Boyagi xatoyingizni ildizi bilan yo&apos;q qiling!
             </p>
           </motion.div>
@@ -484,7 +484,7 @@ export default function NeuralSprintView({
                   <Lightbulb className="size-4 animate-bounce" />
                   <span>AI Mentor Layfxaki (Aha! Moment)</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] text-muted-foreground font-mono">
+                <Badge variant="outline" className="text-[12px] text-muted-foreground font-mono">
                   10s tahlil
                 </Badge>
               </div>
@@ -503,19 +503,19 @@ export default function NeuralSprintView({
                 <div className="space-y-2.5 text-xs sm:text-sm">
                   {/* Nega adashdingiz */}
                   <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300">
-                    <p className="font-bold text-[11px] uppercase tracking-wider mb-0.5">❌ Nega adashdingiz:</p>
+                    <p className="font-bold text-[12px] uppercase tracking-wider mb-0.5">❌ Nega adashdingiz:</p>
                     <p className="leading-relaxed">{activeExplanation.whyWrong}</p>
                   </div>
 
                   {/* Eslab qolish kodi */}
                   <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300">
-                    <p className="font-bold text-[11px] uppercase tracking-wider mb-0.5">🧠 Eslab qolish kodi:</p>
+                    <p className="font-bold text-[12px] uppercase tracking-wider mb-0.5">🧠 Eslab qolish kodi:</p>
                     <p className="font-semibold leading-relaxed">{activeExplanation.memoryHack}</p>
                   </div>
                 </div>
               ) : (
                 <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs space-y-1">
-                  <p className="font-bold text-[11px] uppercase tracking-wider">💡 Eslatma:</p>
+                  <p className="font-bold text-[12px] uppercase tracking-wider">💡 Eslatma:</p>
                   <p className="leading-relaxed">Savol javobini yaxshilab eslab qoling va qasos savolida to'g'ri variantni belgilang!</p>
                 </div>
               )}
@@ -525,7 +525,7 @@ export default function NeuralSprintView({
                 <Button
                   disabled={isExplainingLoading}
                   onClick={dismissExplanation}
-                  className="w-full rounded-2xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm h-11 shadow-lg shadow-rose-600/20 gap-2 cursor-pointer active:scale-[0.99] transition-all"
+                  className="w-full rounded-2xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm h-11 shadow-lg shadow-rose-600/20 gap-2 cursor-pointer active:scale-[0.99] transition-all"
                 >
                   <span>Tushundim, davom etamiz (+5 XP)</span>
                   <ChevronRight className="size-4 shrink-0" />

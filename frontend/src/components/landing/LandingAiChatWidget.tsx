@@ -162,11 +162,11 @@ export default function LandingAiChatWidget() {
                 <div>
                   <div className="flex items-center gap-1.5">
                     <h4 className="text-[14px] font-bold text-[#1C1C1E] tracking-tight">IlmIldizi AI</h4>
-                    <span className="rounded-full bg-[#007AFF]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#007AFF] uppercase">
+                    <span className="rounded-full bg-[#007AFF]/10 px-1.5 py-0.5 text-[11px] font-bold text-[#007AFF] uppercase">
                       Beta
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-[11px] text-[#34C759] font-medium">
+                  <div className="flex items-center gap-1 text-[12px] text-[#34C759] font-medium">
                     <span className="size-1.5 rounded-full bg-[#34C759]" />
                     <span>iMessage AI • 24/7 onlayn</span>
                   </div>
@@ -184,7 +184,7 @@ export default function LandingAiChatWidget() {
 
             {/* iMessage Conversation Stream */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 text-[13px] bg-white">
-              <div className="text-center text-[11px] font-medium text-[#8E8E93] pb-1">
+              <div className="text-center text-[12px] font-medium text-[#8E8E93] pb-1">
                 Bugun • AI Mentor
               </div>
               {messages.map((m) => (
@@ -239,7 +239,7 @@ export default function LandingAiChatWidget() {
                   <button
                     key={prompt}
                     onClick={() => handleSend(prompt)}
-                    className="shrink-0 rounded-full border border-black/[0.06] bg-white px-3 py-1 text-[11px] font-medium text-[#1C1C1E] hover:border-[#007AFF]/40 hover:text-[#007AFF] transition-colors shadow-2xs"
+                    className="shrink-0 rounded-full border border-black/[0.06] bg-white px-3 py-1 text-[12px] font-medium text-[#1C1C1E] hover:border-[#007AFF]/40 hover:text-[#007AFF] transition-colors shadow-2xs"
                   >
                     {prompt}
                   </button>

@@ -268,7 +268,7 @@ export default function TelegramCenterPage() {
               <span className="text-sky-300 truncate">{webhook.url}</span>
             </div>
             {webhook.last_error_message && (
-              <span className="text-rose-400 text-[11px] shrink-0 font-sans">
+              <span className="text-rose-400 text-[12px] shrink-0 font-sans">
                 Oxirgi xatolik: {webhook.last_error_message}
               </span>
             )}
@@ -329,7 +329,7 @@ export default function TelegramCenterPage() {
                         Doimiy Faol
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right text-slate-500 text-[11px]">
+                    <td className="py-3 px-4 text-right text-slate-500 text-[12px]">
                       Tizim kanali
                     </td>
                   </tr>

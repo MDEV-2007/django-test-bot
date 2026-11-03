@@ -97,7 +97,7 @@ export default function MilliySertifikatLandingPage() {
             <span>Rasch Modeli & Ochiq Savollar Algoritmi</span>
           </div>
 
-          <h1 className="text-3xl font-black sm:text-5xl md:text-6xl text-slate-900 leading-tight tracking-tight">
+          <h1 className="text-3xl font-bold sm:text-5xl md:text-6xl text-slate-900 leading-tight tracking-tight">
             Milliy Sertifikat Testlari —{' '}
             <span className="bg-gradient-to-r from-amber-600 via-orange-600 to-emerald-600 bg-clip-text text-transparent">
               Rasch Modeli va AI Tahlili
@@ -110,7 +110,7 @@ export default function MilliySertifikatLandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button asChild size="lg" className="h-13 px-8 rounded-2xl bg-gradient-to-r from-amber-600 to-emerald-600 hover:from-amber-500 hover:to-emerald-500 text-white font-black text-base shadow-lg shadow-amber-600/20 gap-2 w-full sm:w-auto">
+            <Button asChild size="lg" className="h-13 px-8 rounded-2xl bg-gradient-to-r from-amber-600 to-emerald-600 hover:from-amber-500 hover:to-emerald-500 text-white font-bold text-base shadow-lg shadow-amber-600/20 gap-2 w-full sm:w-auto">
               <Link href="/register">
                 <Play className="size-5 fill-white" /> Milliy Sertifikat Testini Boshlash
               </Link>
@@ -134,10 +134,10 @@ export default function MilliySertifikatLandingPage() {
       <section className="py-14 bg-white border-y border-slate-200">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center space-y-2 mb-10">
-            <Badge variant="outline" className="border-amber-500/40 text-amber-700 bg-amber-50 text-[11px] font-black uppercase">
+            <Badge variant="outline" className="border-amber-500/40 text-amber-700 bg-amber-50 text-[12px] font-bold uppercase">
               BMB Rasmiy Mezonlari
             </Badge>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
               Milliy Sertifikat Darajalari va OTM Imtiyozlari
             </h2>
             <p className="text-sm text-slate-500">Qaysi daraja abituriyentga qancha imtiyoz beradi?</p>
@@ -150,10 +150,10 @@ export default function MilliySertifikatLandingPage() {
                 className="rounded-2xl border-2 border-slate-200 bg-slate-50/50 p-6 flex flex-col justify-between hover:shadow-xl hover:border-amber-500/50 transition-all text-center"
               >
                 <div>
-                  <div className={`size-14 mx-auto rounded-2xl bg-gradient-to-tr ${g.color} text-white font-black text-2xl flex items-center justify-center shadow-md`}>
+                  <div className={`size-14 mx-auto rounded-2xl bg-gradient-to-tr ${g.color} text-white font-bold text-2xl flex items-center justify-center shadow-md`}>
                     {g.grade}
                   </div>
-                  <h3 className="mt-4 text-lg font-black text-slate-900">{g.pct}</h3>
+                  <h3 className="mt-4 text-lg font-bold text-slate-900">{g.pct}</h3>
                   <p className="text-xs font-bold text-emerald-700 bg-emerald-50 rounded-lg p-2 mt-2">
                     {g.perk}
                   </p>
@@ -172,37 +172,37 @@ export default function MilliySertifikatLandingPage() {
       {/* MILLIY SERTIFIKAT O'ZIGA XOSLIGI */}
       <section className="py-16 mx-auto max-w-5xl px-4 sm:px-6">
         <div className="text-center space-y-2 mb-12">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Nega IlmIldizi — Milliy Sertifikat uchun №1 Platforma?
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
-            <span className="text-2xl p-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 inline-block font-black">
+            <span className="text-2xl p-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 inline-block font-bold">
               📊
             </span>
-            <h3 className="text-base font-black text-slate-900">Rasch Modeli Algoritmi</h3>
+            <h3 className="text-base font-bold text-slate-900">Rasch Modeli Algoritmi</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Faqat to&apos;g&apos;ri javoblarni sanamaydi. Har bir savolning o&apos;quvchilar orasidagi qiyinlik darajasiga qarab haqiqiy Rasch theta balingizni chiqaradi.
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
-            <span className="text-2xl p-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block font-black">
+            <span className="text-2xl p-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block font-bold">
               ✍️
             </span>
-            <h3 className="text-base font-black text-slate-900">Ochiq & Yozma Savollar AI</h3>
+            <h3 className="text-base font-bold text-slate-900">Ochiq & Yozma Savollar AI</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Ona tili esselari va Tarixning 3 qismli yozma topshiriqlarini Groq AI adolatli tekshiradi, imlo va mohiyatiga qarab ball beradi.
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
-            <span className="text-2xl p-2.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 inline-block font-black">
+            <span className="text-2xl p-2.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 inline-block font-bold">
               📜
             </span>
-            <h3 className="text-base font-black text-slate-900">Elektron Prognoz Sertifikat</h3>
+            <h3 className="text-base font-bold text-slate-900">Elektron Prognoz Sertifikat</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Har bir mock imtihon yakunida rasmiy ko&apos;rinishdagi elektron sertifikat va zaif mavzular xaritasi beriladi.
             </p>
@@ -214,10 +214,10 @@ export default function MilliySertifikatLandingPage() {
       <section className="py-16 bg-white border-t border-slate-200">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="text-center space-y-2 mb-10">
-            <Badge variant="outline" className="border-slate-300 text-slate-700 text-[11px] font-black uppercase">
+            <Badge variant="outline" className="border-slate-300 text-slate-700 text-[12px] font-bold uppercase">
               Ko&apos;p Beriladigan Savollar
             </Badge>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
               Milliy Sertifikat Bo&apos;yicha Savol-Javoblar
             </h2>
           </div>
@@ -241,17 +241,17 @@ export default function MilliySertifikatLandingPage() {
       {/* FOOTER CTA */}
       <section className="py-16 bg-gradient-to-br from-slate-900 via-amber-950 to-slate-900 text-white text-center px-4">
         <div className="max-w-2xl mx-auto space-y-5">
-          <Badge className="bg-amber-400 text-slate-950 font-black uppercase text-xs">
+          <Badge className="bg-amber-400 text-slate-950 font-bold uppercase text-xs">
             A+ Darajaga Tayyormisiz?
           </Badge>
-          <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">
             IlmIldizi bilan A+ Oltin Sertifikatini qo&apos;lga kiriting!
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
             Haqiqiy imtihon muhitini sezib ko&apos;ring. Rasch modeli hisobi bilan imtihonga to&apos;liq tayyor holda kiring.
           </p>
           <div className="pt-2">
-            <Button asChild size="lg" className="h-12 px-8 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-base shadow-lg shadow-amber-400/20">
+            <Button asChild size="lg" className="h-12 px-8 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-base shadow-lg shadow-amber-400/20">
               <Link href="/register">
                 Sinov Testini Yechish 🎯
               </Link>

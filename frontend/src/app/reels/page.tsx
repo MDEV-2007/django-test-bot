@@ -657,14 +657,14 @@ function ReelsInner() {
             {/* Sound & XP indicators, +Savol & Combo */}
             <div className="flex items-center gap-1.5 shrink-0 pl-2">
               {comboStreak >= 2 && (
-                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FF9500]/15 border border-[#FF9500]/30 text-[#FF9500] text-[11px] font-bold">
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FF9500]/15 border border-[#FF9500]/30 text-[#FF9500] text-[12px] font-bold">
                   <Flame className="size-3.5 fill-[#FF9500]" />
                   <span>{comboStreak}x</span>
                 </div>
               )}
               <button
                 onClick={() => { tgHaptic('medium'); setIsCreateModalOpen(true); }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#007AFF] hover:bg-[#0066D6] active:scale-95 text-white text-[11px] font-bold shadow-[0_2px_8px_rgba(0,122,255,0.25)] transition-all cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#007AFF] hover:bg-[#0066D6] active:scale-95 text-white text-[12px] font-bold shadow-[0_2px_8px_rgba(0,122,255,0.25)] transition-all cursor-pointer"
                 title="O'z qiyin savolingizni qo'shing va +20 XP oling"
               >
                 <Plus className="size-3.5 stroke-[2.5]" />
@@ -683,7 +683,7 @@ function ReelsInner() {
               >
                 {soundEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
               </button>
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FF9500]/12 border border-[#FF9500]/25 text-[#FF9500] text-[11px] font-bold font-mono">
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FF9500]/12 border border-[#FF9500]/25 text-[#FF9500] text-[12px] font-bold font-mono">
                 <Zap className="size-3 fill-[#FF9500]" />
                 <span>+{todayXpEarned}</span>
               </div>
@@ -739,10 +739,10 @@ function ReelsInner() {
                     {/* ── TOP SECTION: iOS Callout Card & Dynamic Island Timer ── */}
                     <div className="space-y-2.5 shrink-0">
                       {reel.author && (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#007AFF]/10 border border-[#007AFF]/20 text-[#007AFF] text-[11px] font-bold w-fit">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#007AFF]/10 border border-[#007AFF]/20 text-[#007AFF] text-[12px] font-bold w-fit">
                           <PremiumIcon icon={Sparkles} tone="sky" size="2xs" />
                           <span>Muallif: @{reel.author.username || reel.author.name}</span>
-                          <span className="text-[10px] bg-[#007AFF]/15 px-1.5 py-0.5 rounded-full font-extrabold">
+                          <span className="text-[12px] bg-[#007AFF]/15 px-1.5 py-0.5 rounded-full font-bold">
                             Hamjamiyat
                           </span>
                         </div>
@@ -752,7 +752,7 @@ function ReelsInner() {
                       <div className="rounded-[20px] bg-[#FF9500]/[0.10] border border-[#FF9500]/25 p-3 sm:p-3.5 flex items-start gap-3">
                         <PremiumIcon icon={AlertTriangle} tone="amber" size="xs" className="mt-0.5" />
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-[#FF9500]">
+                          <h4 className="text-[12px] font-bold uppercase tracking-wider text-[#FF9500]">
                             MURAKKAB SAVOL · {reel.subject_name}
                           </h4>
                           <p className="text-[12px] text-slate-700 dark:text-slate-200 leading-snug">
@@ -820,7 +820,7 @@ function ReelsInner() {
                           </h2>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
                             <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-[14px] border border-black/[0.05] dark:border-white/[0.07]">
-                              <span className="text-[10px] font-extrabold text-[#FF9500] uppercase block mb-1">
+                              <span className="text-[12px] font-bold text-[#FF9500] uppercase block mb-1">
                                 📌 Atamalar:
                               </span>
                               {formattedQ.romanItems.map((item, idx) => (
@@ -830,7 +830,7 @@ function ReelsInner() {
                               ))}
                             </div>
                             <div className="space-y-1 bg-white dark:bg-[#1C1C1E] p-2.5 rounded-[14px] border border-black/[0.05] dark:border-white/[0.07]">
-                              <span className="text-[10px] font-extrabold text-[#007AFF] uppercase block mb-1">
+                              <span className="text-[12px] font-bold text-[#007AFF] uppercase block mb-1">
                                 📝 Izohlar:
                               </span>
                               {formattedQ.letterItems.map((item, idx) => (
@@ -847,7 +847,7 @@ function ReelsInner() {
                           isLongQuestion ? "max-h-[26vh] sm:max-h-[30vh]" : "max-h-[22vh]"
                         )}>
                           <h2 className={cn(
-                            "font-extrabold tracking-[-0.015em] text-slate-900 dark:text-white leading-snug",
+                            "font-bold tracking-[-0.015em] text-slate-900 dark:text-white leading-snug",
                             (formattedQ.prompt?.length || 0) > 180
                               ? "text-[13px] sm:text-[14px]"
                               : (formattedQ.prompt?.length || 0) > 90
@@ -1021,7 +1021,7 @@ function ReelsInner() {
           >
             <ChevronUp className="size-5" />
           </button>
-          <div className="text-[11px] font-mono font-bold text-[#8E8E93] py-0.5">
+          <div className="text-[12px] font-mono font-bold text-[#8E8E93] py-0.5">
             {currentIndex + 1} / {reels.length}
           </div>
           <button
@@ -1092,7 +1092,7 @@ function ReelsInner() {
                     return (
                       <div key={c.id} className={cn("flex gap-2.5 items-start group", isReply && "ml-5 pl-2 border-l-2 border-[#007AFF]/40")}>
                         {isReply && <CornerDownRight className="size-3 text-[#007AFF] mt-2 shrink-0" />}
-                        <div className="size-7 rounded-full bg-gradient-to-tr from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white font-extrabold text-[10px] shrink-0 shadow-xs overflow-hidden mt-0.5">
+                        <div className="size-7 rounded-full bg-gradient-to-tr from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white font-bold text-[12px] shrink-0 shadow-xs overflow-hidden mt-0.5">
                           {c.user_avatar ? (
                             <img src={c.user_avatar} alt={c.user_name} className="w-full h-full object-cover" />
                           ) : (
@@ -1105,7 +1105,7 @@ function ReelsInner() {
                               <span className="font-bold text-slate-900 dark:text-white truncate">{c.user_name}</span>
                               <VerifiedBadge role={c.role} isSuperadmin={c.is_superadmin} isTeacher={c.is_teacher} size="xs" />
                             </div>
-                            <span className="text-[10px] text-[#8E8E93] font-mono shrink-0">{c.created_at}</span>
+                            <span className="text-[12px] text-[#8E8E93] font-mono shrink-0">{c.created_at}</span>
                           </div>
                           <p className="text-[13px] text-slate-700 dark:text-slate-200 leading-relaxed break-words">{c.text}</p>
                           <div className="pt-0.5">
@@ -1115,7 +1115,7 @@ function ReelsInner() {
                                 setReplyingTo({ id: c.id, userName: c.user_name });
                                 setNewCommentText(`@${c.user_name} `);
                               }}
-                              className="text-[11px] font-bold text-[#007AFF] hover:underline cursor-pointer"
+                              className="text-[12px] font-bold text-[#007AFF] hover:underline cursor-pointer"
                             >
                               Javob berish
                             </button>
@@ -1129,13 +1129,13 @@ function ReelsInner() {
 
               {/* Quick Meme Stickers */}
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1.5 border-t border-black/[0.06] dark:border-white/[0.08]">
-                <span className="text-[10px] text-[#8E8E93] font-bold shrink-0">Stiker:</span>
+                <span className="text-[12px] text-[#8E8E93] font-bold shrink-0">Stiker:</span>
                 {REELS_STUDY_MEMES.map((m, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => setNewCommentText((prev) => (prev ? prev + ' ' : '') + m.text)}
-                    className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#767680]/[0.10] hover:bg-[#767680]/[0.18] text-slate-800 dark:text-slate-200 shrink-0 transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-full text-[12px] font-semibold bg-[#767680]/[0.10] hover:bg-[#767680]/[0.18] text-slate-800 dark:text-slate-200 shrink-0 transition-colors cursor-pointer"
                   >
                     {m.label}
                   </button>

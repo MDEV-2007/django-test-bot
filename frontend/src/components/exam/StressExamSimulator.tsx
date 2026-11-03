@@ -106,7 +106,7 @@ export default function StressExamSimulator({
             <span className="text-xs font-bold text-zinc-100 tracking-tight">
               Real BMB Stress Zali
             </span>
-            <Badge variant="outline" className="text-[10px] border-rose-500/30 bg-rose-500/10 text-rose-300 font-mono">
+            <Badge variant="outline" className="text-[12px] border-rose-500/30 bg-rose-500/10 text-rose-300 font-mono">
               HARDCORE
             </Badge>
           </div>
@@ -182,12 +182,12 @@ export default function StressExamSimulator({
           <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 space-y-2 text-xs">
             <p className="font-semibold text-rose-200">Aniqlangan qator adashishlari:</p>
             {shiftErrors.map((err, i) => (
-              <div key={i} className="flex items-center justify-between font-mono text-[11px] p-2 bg-black/40 rounded-lg">
+              <div key={i} className="flex items-center justify-between font-mono text-[12px] p-2 bg-black/40 rounded-lg">
                 <span>{err.draftQ}-savol qoralama: <strong>{err.draftLetter}</strong></span>
                 <span className="text-rose-400">➡️ Titulda {err.titulQ}-qatorga bo&apos;yalgan!</span>
               </div>
             ))}
-            <p className="text-[11px] text-zinc-400 pt-1">
+            <p className="text-[12px] text-zinc-400 pt-1">
               Bu xatolik tufayli imtihonda <strong>{(shiftErrors.length * 3.1).toFixed(1)} ball</strong> yo&apos;qotishingiz mumkin edi!
             </p>
           </div>

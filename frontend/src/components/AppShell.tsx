@@ -104,7 +104,7 @@ export default function AppShell({
 
           <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
             <BrandMark size={28} rounded="rounded-[9px]" />
-            <span className="font-extrabold text-sm text-foreground">
+            <span className="font-bold text-sm text-foreground">
               {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
             </span>
           </Link>
@@ -126,7 +126,7 @@ export default function AppShell({
           >
             <Search className="size-3.5 text-muted-foreground" />
             <span>Kurslar, testlar va mavzularni qidirish...</span>
-            <kbd className="ml-3 rounded-full border border-border bg-card px-2 py-0.5 font-mono text-[10px] text-muted-foreground font-semibold shadow-2xs">
+            <kbd className="ml-3 rounded-full border border-border bg-card px-2 py-0.5 font-mono text-[12px] text-muted-foreground font-semibold shadow-2xs">
               ⌘K
             </kbd>
           </button>
@@ -150,7 +150,7 @@ export default function AppShell({
                     >
                       <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
                       <span className="font-mono">{user.streak || 0}</span>
-                      <span className="hidden sm:inline text-[10px] font-semibold opacity-80">kun</span>
+                      <span className="hidden sm:inline text-[12px] font-semibold opacity-80">kun</span>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs font-medium">
@@ -187,7 +187,7 @@ export default function AppShell({
                     >
                       <PremiumIcon icon={Swords} tone="sky" size="2xs" solid />
                       <span className="font-mono">{user.elo_rating || 1200}</span>
-                      <span className="text-[10px] text-muted-foreground font-semibold">ELO</span>
+                      <span className="text-[12px] text-muted-foreground font-semibold">ELO</span>
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs font-medium">
@@ -205,7 +205,7 @@ export default function AppShell({
                   >
                     <Bell className="size-4" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-[#FF3B30] text-[9px] font-black !text-white shadow-2xs leading-none ring-2 ring-background">
+                      <span className="absolute -top-0.5 -right-0.5 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-[#FF3B30] text-[11px] font-bold !text-white shadow-2xs leading-none ring-2 ring-background">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}

@@ -34,7 +34,7 @@ export default function MobileStickyCta() {
                 <Sparkles className="size-3.5 text-[#007AFF]" />
                 1-test mutlaqo bepul
               </span>
-              <span className="text-[10px] text-[#6C6C70]">
+              <span className="text-[12px] text-[#6C6C70]">
                 Telegram yoki Google orqali
               </span>
             </div>

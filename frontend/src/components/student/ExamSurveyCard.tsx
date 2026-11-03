@@ -116,7 +116,7 @@ export default function ExamSurveyCard({ attemptId, testTitle }: ExamSurveyCardP
               <CardTitle className="text-sm sm:text-base font-bold text-foreground">
                 Imtihon qanday o&apos;tdi? (Tezkor so&apos;rovnoma)
               </CardTitle>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="text-[12px] text-muted-foreground mt-0.5">
                 Fikringiz biz uchun juda muhim — 10 soniyada o&apos;z bahoyingizni bering
               </p>
             </div>
@@ -157,7 +157,7 @@ export default function ExamSurveyCard({ attemptId, testTitle }: ExamSurveyCardP
                   >
                     <span className="text-base">{d.emoji}</span>
                     <span className="text-xs font-bold mt-1">{d.label}</span>
-                    <span className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">{d.desc}</span>
+                    <span className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{d.desc}</span>
                   </button>
                 );
               })}
@@ -200,7 +200,7 @@ export default function ExamSurveyCard({ attemptId, testTitle }: ExamSurveyCardP
           <div className="space-y-1.5 pt-1">
             <label htmlFor="survey-comment" className="text-xs font-semibold text-foreground flex items-center justify-between">
               <span>3. Fikr yoki taklifingiz (ixtiyoriy):</span>
-              <span className="text-[10px] text-muted-foreground">savollarda xato yoki takliflar</span>
+              <span className="text-[12px] text-muted-foreground">savollarda xato yoki takliflar</span>
             </label>
             <textarea
               id="survey-comment"

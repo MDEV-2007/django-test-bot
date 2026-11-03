@@ -236,7 +236,7 @@ export default function PanelBroadcastPage() {
                   onChange={(e) => setScheduledDateTime(e.target.value)}
                   className="bg-background border-amber-500/30 text-xs h-10"
                 />
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[12px] text-muted-foreground">
                   Belgilangan paytda server xabarni avtomatik ravishda jo&apos;natadi.
                 </p>
               </div>
@@ -309,15 +309,15 @@ export default function PanelBroadcastPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium text-foreground text-sm truncate">{b.title}</p>
                         {isPendingSchedule ? (
-                          <Badge variant="outline" className="border-amber-500/40 text-amber-400 bg-amber-500/10 text-[10px] px-1.5 py-0">
+                          <Badge variant="outline" className="border-amber-500/40 text-amber-400 bg-amber-500/10 text-[12px] px-1.5 py-0">
                             🕒 Rejalashtirilgan: {new Date(b.scheduled_at!).toLocaleString('uz-UZ')}
                           </Badge>
                         ) : isSending ? (
-                          <Badge variant="outline" className="border-sky-500/40 text-sky-400 bg-sky-500/10 text-[10px] px-1.5 py-0 animate-pulse">
+                          <Badge variant="outline" className="border-sky-500/40 text-sky-400 bg-sky-500/10 text-[12px] px-1.5 py-0 animate-pulse">
                             ⚡️ Telegramga yuborilmoqda... {b.telegram_sent_count > 0 ? `(${b.telegram_sent_count})` : ''}
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-[10px] px-1.5 py-0">
+                          <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 text-[12px] px-1.5 py-0">
                             ✓ Yuborilgan
                           </Badge>
                         )}

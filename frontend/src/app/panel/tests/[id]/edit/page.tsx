@@ -297,7 +297,7 @@ export default function PanelTestSetEditPage() {
                   value={ts.scheduled_at || ''}
                   onChange={(e) => setTs({ ...ts, scheduled_at: e.target.value })}
                 />
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[12px] text-muted-foreground">
                   Masalan: <b>2026-09-10T21:30</b> (Ertaga soat 21:30)
                 </p>
               </div>
@@ -305,7 +305,7 @@ export default function PanelTestSetEditPage() {
               <div className="flex items-center justify-between gap-4 pt-2 border-t border-amber-500/20">
                 <div className="space-y-0.5">
                   <div className="text-xs font-semibold text-foreground">Barcha bot foydalanuvchilariga e&apos;lon qilish</div>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[12px] text-muted-foreground">
                     {ts.notify_all !== false
                       ? "Imtihon boshlanganda Telegramdagi barcha o'quvchilarga yuboriladi."
                       : "Faqat sahifada eslatma so'ragan o'quvchilarga yuboriladi."}
@@ -335,7 +335,7 @@ export default function PanelTestSetEditPage() {
                 </div>
               ) : (
                 <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="text-[11px] text-muted-foreground">
+                  <div className="text-[12px] text-muted-foreground">
                     ⏳ 21:30 da cron orqali avtomatik jo&apos;natiladi
                   </div>
                   <Button
@@ -403,7 +403,7 @@ export default function PanelTestSetEditPage() {
                 </audio>
 
                 <div className="pt-2 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <span className="text-[11px] text-muted-foreground">Boshqa audio fayl bilan almashtirish:</span>
+                  <span className="text-[12px] text-muted-foreground">Boshqa audio fayl bilan almashtirish:</span>
                   <label className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-500">
                     <Upload className="size-3.5" />
                     <span>{audioUploading ? "Yuklanmoqda..." : "Yangi fayl tanlash"}</span>
@@ -475,7 +475,7 @@ export default function PanelTestSetEditPage() {
                   value={ts.price ?? ''}
                   onChange={(e) => setTs({ ...ts, price: e.target.value === '' ? null : Number(e.target.value) })}
                 />
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                <p className="text-[12px] text-muted-foreground leading-relaxed">
                   O&apos;quvchi aynan shu testni xarid qilayotganda to&apos;laydigan summa. Agar bo&apos;sh qoldirsangiz, tizimning standart mock narxi (10 000 so&apos;m) olinadi.
                 </p>
               </div>
@@ -499,7 +499,7 @@ export default function PanelTestSetEditPage() {
             </div>
             <div className="flex-1 space-y-1">
               <DialogHeader className="p-0 pr-0">
-                <DialogTitle className="text-lg font-black text-slate-900 dark:text-white">
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
                   Testni o&apos;chirish
                 </DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed pt-1">

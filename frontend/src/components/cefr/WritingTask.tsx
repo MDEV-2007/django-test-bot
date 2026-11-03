@@ -118,7 +118,7 @@ export function WritingReviewCard({ review }: { review: WritingReview }) {
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex h-14 w-14 flex-col items-center justify-center rounded-2xl bg-primary/15 text-primary">
           <span className="text-lg font-bold leading-none">{review.overall}</span>
-          <span className="text-[10px] leading-none opacity-70">/ 5</span>
+          <span className="text-[12px] leading-none opacity-70">/ 5</span>
         </div>
         <div>
           <div className="text-sm text-muted-foreground">Taxminiy daraja</div>

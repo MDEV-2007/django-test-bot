@@ -217,7 +217,7 @@ export default function QuestionForm({
           <label className="text-xs font-semibold text-[var(--text-secondary)]">
             Savol rasmi (xarita, diagramma yoki sxema)
           </label>
-          <span className="text-[11px] text-muted-foreground">JPG, PNG, WebP</span>
+          <span className="text-[12px] text-muted-foreground">JPG, PNG, WebP</span>
         </div>
 
         {/* Agar avvaldan rasm bo'lsa yoki yangi tanlangan bo'lsa */}

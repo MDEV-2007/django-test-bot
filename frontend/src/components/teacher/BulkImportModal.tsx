@@ -261,7 +261,7 @@ export default function BulkImportModal({
                     <div className="space-y-1.5">
                       <p className="text-sm font-bold text-foreground">Word (.docx) yoki PDF faylini shu yerga tashlang</p>
                       <p className="text-xs text-muted-foreground">yoki kompyuterdan tanlash uchun bosing</p>
-                      <p className="text-[11px] text-muted-foreground/80 pt-1">Maksimal hajm: 20 MB (.docx, .pdf, .txt)</p>
+                      <p className="text-[12px] text-muted-foreground/80 pt-1">Maksimal hajm: 20 MB (.docx, .pdf, .txt)</p>
                     </div>
                   )}
                 </div>
@@ -314,7 +314,7 @@ export default function BulkImportModal({
                 Tahlil natijalari ({parsed.length} ta savol)
               </label>
               {parsed.length > 0 && (
-                <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px]">
+                <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[12px]">
                   {parsed.length} ta savol tayyor
                 </Badge>
               )}
@@ -325,13 +325,13 @@ export default function BulkImportModal({
                 <div className="flex h-full flex-col items-center justify-center py-16 text-center">
                   <Loader2 className="size-8 text-indigo-500 animate-spin mb-3" />
                   <p className="text-xs font-bold text-foreground">AI faylni o&apos;qimoqda va savollarni ajratmoqda...</p>
-                  <p className="text-[11px] text-muted-foreground mt-1">Bu jarayon bir necha soniya vaqt oladi.</p>
+                  <p className="text-[12px] text-muted-foreground mt-1">Bu jarayon bir necha soniya vaqt oladi.</p>
                 </div>
               ) : parsed.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center py-14 text-center text-muted-foreground">
                   <AlertCircle className="size-8 opacity-40 mb-2" />
                   <p className="text-xs font-semibold">Savollar hali tahlil qilinmagan</p>
-                  <p className="text-[11px] opacity-70 mt-0.5">Faylni yuklang va &quot;AI orqali tahlil qilish&quot; tugmasini bosing.</p>
+                  <p className="text-[12px] opacity-70 mt-0.5">Faylni yuklang va &quot;AI orqali tahlil qilish&quot; tugmasini bosing.</p>
                 </div>
               ) : (
                 parsed.map((q, qIdx) => (
@@ -339,7 +339,7 @@ export default function BulkImportModal({
                     <CardContent className="p-3.5 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-2">
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-indigo-500/15 font-mono text-[11px] font-bold text-indigo-500">
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-indigo-500/15 font-mono text-[12px] font-bold text-indigo-500">
                             {qIdx + 1}
                           </span>
                           <p className="text-xs font-semibold leading-snug">{q.body}</p>
@@ -363,7 +363,7 @@ export default function BulkImportModal({
                             onClick={() => handleToggleCorrect(qIdx, optIdx)}
                             title="To'g'ri variant qilib belgilash uchun bosing"
                             className={cn(
-                              'flex items-center gap-1.5 rounded-lg px-2 py-1 text-left text-[11px] border transition-all cursor-pointer',
+                              'flex items-center gap-1.5 rounded-lg px-2 py-1 text-left text-[12px] border transition-all cursor-pointer',
                               opt.is_correct
                                 ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold'
                                 : 'border-transparent bg-[var(--surface-input)] text-muted-foreground hover:text-foreground',
@@ -377,7 +377,7 @@ export default function BulkImportModal({
                       </div>
 
                       {q.explanation && (
-                        <p className="text-[10px] text-muted-foreground italic border-t border-[var(--border-card)] pt-1 mt-1">
+                        <p className="text-[12px] text-muted-foreground italic border-t border-[var(--border-card)] pt-1 mt-1">
                           <strong>Izoh:</strong> {q.explanation}
                         </p>
                       )}

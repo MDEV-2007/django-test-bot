@@ -39,7 +39,7 @@ export default function PresenceRow({
         </div>
 
         {solvedToday > 0 && (
-          <span className="text-[11px] text-[#8E8E93] font-medium">
+          <span className="text-[12px] text-[#8E8E93] font-medium">
             Bugun <strong className="text-foreground font-bold">{solvedToday}</strong> nafar abituriyent test yechdi
           </span>
         )}
@@ -64,7 +64,7 @@ export default function PresenceRow({
                 <div className="relative shrink-0">
                   <Avatar className="size-5 border border-black/10 dark:border-white/10">
                     <AvatarImage src={peer.avatar_url || undefined} alt={displayName} />
-                    <AvatarFallback className="text-[9px] font-bold bg-[#007AFF]/15 text-[#007AFF]">
+                    <AvatarFallback className="text-[11px] font-bold bg-[#007AFF]/15 text-[#007AFF]">
                       {displayName.replace('@', '').slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -72,11 +72,11 @@ export default function PresenceRow({
                 </div>
 
                 <div className="flex items-center gap-1 min-w-0">
-                  <span className="font-semibold text-[11px] truncate max-w-[120px]">
+                  <span className="font-semibold text-[12px] truncate max-w-[120px]">
                     {displayName}
                   </span>
                   {peer.is_me && (
-                    <span className="text-[9px] font-bold uppercase bg-[#007AFF] text-white px-1.5 py-0.5 rounded-full leading-none">
+                    <span className="text-[11px] font-bold uppercase bg-[#007AFF] text-white px-1.5 py-0.5 rounded-full leading-none">
                       Siz
                     </span>
                   )}

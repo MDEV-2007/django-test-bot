@@ -133,7 +133,7 @@ export default function ShopPage() {
                 <PremiumIcon icon={Coins} tone="gold" size="md" solid />
                 <div>
                   <p className="font-mono text-xs uppercase text-muted-foreground">Sizdagi tangalar</p>
-                  <p className="font-mono text-xl font-black tabular-nums text-[#FF9500]"><StatNumber value={data.coins} /></p>
+                  <p className="font-mono text-xl font-bold tabular-nums text-[#FF9500]"><StatNumber value={data.coins} /></p>
                 </div>
               </CardContent>
             </Card>
@@ -209,7 +209,7 @@ export default function ShopPage() {
                       {item.rarity}
                     </Badge>
                     {isPremiumUnlock && (
-                      <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-semibold">
+                      <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[12px] font-semibold">
                         Bir martalik
                       </Badge>
                     )}
@@ -244,7 +244,7 @@ export default function ShopPage() {
                           <Badge variant="outline" className="w-full justify-center border-[var(--success)]/30 bg-[var(--success-soft)] py-2 text-[var(--success-text)] font-medium">
                             <CheckCircle2 className="mr-1.5 size-3.5" /> Ochilgan (Sizda bor)
                           </Badge>
-                          <p className="text-[11px] text-muted-foreground">Bir martalik xarid faol</p>
+                          <p className="text-[12px] text-muted-foreground">Bir martalik xarid faol</p>
                         </div>
                       ) : (
                         <Badge variant="outline" className="w-full justify-center border-[var(--success)]/30 bg-[var(--success-soft)] py-2 text-[var(--success-text)]">

@@ -237,12 +237,12 @@ export default function FinancePage() {
                       )}
                       <div>
                         <p className="text-xs font-semibold text-white">{s.label}</p>
-                        <p className="text-[11px] text-slate-400">{s.count} ta muvaffaqiyatli to&apos;lov</p>
+                        <p className="text-[12px] text-slate-400">{s.count} ta muvaffaqiyatli to&apos;lov</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-mono text-xs font-bold text-white">{s.amount.toLocaleString()} so&apos;m</p>
-                      <p className="text-[11px] text-slate-400 font-mono">{pct}% ulush</p>
+                      <p className="text-[12px] text-slate-400 font-mono">{pct}% ulush</p>
                     </div>
                   </div>
                 );
@@ -250,15 +250,15 @@ export default function FinancePage() {
 
               <div className="grid grid-cols-3 gap-2 pt-2">
                 <div className="rounded-xl border border-emerald-900/40 bg-emerald-950/20 p-3 text-center">
-                  <p className="text-[11px] text-emerald-400 font-medium">Tasdiqlangan</p>
+                  <p className="text-[12px] text-emerald-400 font-medium">Tasdiqlangan</p>
                   <p className="font-mono text-lg font-bold text-emerald-300 mt-0.5">{statusCounts?.approved || 0}</p>
                 </div>
                 <div className="rounded-xl border border-amber-900/40 bg-amber-950/20 p-3 text-center">
-                  <p className="text-[11px] text-amber-400 font-medium">Kutayotgan</p>
+                  <p className="text-[12px] text-amber-400 font-medium">Kutayotgan</p>
                   <p className="font-mono text-lg font-bold text-amber-300 mt-0.5">{statusCounts?.pending || 0}</p>
                 </div>
                 <div className="rounded-xl border border-rose-900/40 bg-rose-950/20 p-3 text-center">
-                  <p className="text-[11px] text-rose-400 font-medium">Rad etilgan</p>
+                  <p className="text-[12px] text-rose-400 font-medium">Rad etilgan</p>
                   <p className="font-mono text-lg font-bold text-rose-300 mt-0.5">{statusCounts?.rejected || 0}</p>
                 </div>
               </div>

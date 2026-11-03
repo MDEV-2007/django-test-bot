@@ -153,7 +153,7 @@ export default function TestPrintPage() {
                 return (
                   <div key={q.id || idx} className="rounded border border-neutral-300 p-1.5 text-xs">
                     <span className="block font-bold text-neutral-600">{idx + 1}</span>
-                    <span className="block font-mono font-black text-sm text-emerald-700">{letter}</span>
+                    <span className="block font-mono font-bold text-sm text-emerald-700">{letter}</span>
                   </div>
                 );
               })}

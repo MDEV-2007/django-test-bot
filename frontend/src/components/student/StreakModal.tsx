@@ -47,7 +47,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
             <PremiumIcon icon={Flame} tone="amber" size="xl" solid />
           </div>
 
-          <DialogTitle className="text-2xl sm:text-3xl font-extrabold tracking-[-0.025em] text-foreground">
+          <DialogTitle className="text-2xl sm:text-3xl font-bold tracking-[-0.025em] text-foreground">
             {streak} kunlik <span className="text-[#FF9500]">Olov!</span>
           </DialogTitle>
 
@@ -75,7 +75,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
 
               return (
                 <div key={day.key} className="flex flex-col items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-muted-foreground">{day.label}</span>
+                  <span className="text-[12px] font-bold text-muted-foreground">{day.label}</span>
                   <div
                     className={cn(
                       'flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all',
@@ -108,7 +108,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
               <p className="text-xs font-bold text-foreground truncate">
                 {freezeCount > 0 ? `${freezeCount} ta muzlatish mavjud` : 'Muzlatish mavjud emas'}
               </p>
-              <p className="text-[11px] text-muted-foreground truncate">
+              <p className="text-[12px] text-muted-foreground truncate">
                 {freezeCount > 0
                   ? 'Kira olmagan kuningizda olov avtomatik saqlanadi.'
                   : 'Streak uzilishidan himoya qilish uchun oling.'}
@@ -132,7 +132,7 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
             <Link
               href="/tests"
               onClick={() => onOpenChange(false)}
-              className="ios-spring w-full h-12 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF7A00] font-extrabold text-sm text-white shadow-[0_8px_22px_rgba(255,149,0,0.35)] flex items-center justify-center gap-2"
+              className="ios-spring w-full h-12 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF7A00] font-bold text-sm text-white shadow-[0_8px_22px_rgba(255,149,0,0.35)] flex items-center justify-center gap-2"
             >
               <Flame className="size-4 fill-white" />
               <span>Bugungi testni yechish</span>

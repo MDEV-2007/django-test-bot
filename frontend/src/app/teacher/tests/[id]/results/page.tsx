@@ -300,12 +300,12 @@ export default function TestResultsPage() {
 
                             {/* Anti-cheat indikatorlari */}
                             {isCheater && (
-                              <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-400 text-[10px] font-semibold gap-1 px-1.5 py-0">
+                              <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-400 text-[12px] font-semibold gap-1 px-1.5 py-0">
                                 <AlertTriangle className="size-3" /> {a.tab_switch_count}x tab almashtirgan
                               </Badge>
                             )}
                             {a.is_speed_flagged && (
-                              <Badge variant="outline" className="border-rose-500/40 bg-rose-500/10 text-rose-400 text-[10px] font-semibold gap-1 px-1.5 py-0">
+                              <Badge variant="outline" className="border-rose-500/40 bg-rose-500/10 text-rose-400 text-[12px] font-semibold gap-1 px-1.5 py-0">
                                 <Zap className="size-3" /> Shubhali tezlik
                               </Badge>
                             )}
@@ -378,14 +378,14 @@ export default function TestResultsPage() {
                         <div className="flex items-center justify-between gap-2">
                           <div className="min-w-0">
                             <p className="text-xs font-semibold truncate">{s.user_name}</p>
-                            <p className="text-[11px] text-muted-foreground font-mono">@{s.username}</p>
+                            <p className="text-[12px] text-muted-foreground font-mono">@{s.username}</p>
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <Badge variant="outline" className={`text-[10px] font-semibold px-2 py-0.5 ${diff.tone}`}>
+                            <Badge variant="outline" className={`text-[12px] font-semibold px-2 py-0.5 ${diff.tone}`}>
                               {diff.label}
                             </Badge>
                             {s.score !== null && (
-                              <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
+                              <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-400 text-[12px] font-bold">
                                 {s.score.toFixed(0)}%
                               </Badge>
                             )}
@@ -397,12 +397,12 @@ export default function TestResultsPage() {
                             &ldquo;{s.comment}&rdquo;
                           </p>
                         ) : (
-                          <p className="text-[11px] text-muted-foreground italic">
+                          <p className="text-[12px] text-muted-foreground italic">
                             (Faqat qiyinlik darajasi belgilangan, matn yozilmagan)
                           </p>
                         )}
 
-                        <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/30">
+                        <div className="flex items-center justify-between text-[12px] text-muted-foreground pt-1 border-t border-border/30">
                           <span>{new Date(s.created_at).toLocaleDateString('uz-UZ')}</span>
                           <span className="text-amber-400 font-bold">★ {s.platform_rating}/5</span>
                         </div>

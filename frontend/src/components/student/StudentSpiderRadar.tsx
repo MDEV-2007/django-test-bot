@@ -107,14 +107,14 @@ export default function StudentSpiderRadar({
             <Sparkles className="size-4 text-blue-400" />
             Radar-Analitika (Spider Chart)
           </h3>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-[12px] text-zinc-400">
             6 ta asosiy ilmiy ko'nikma balansi
           </p>
         </div>
 
         <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1 rounded-xl shadow-md shadow-blue-500/25">
           <Zap className="size-3.5 fill-current" />
-          <span className="text-xs font-black tracking-wider">{overall} OVR</span>
+          <span className="text-xs font-bold tracking-wider">{overall} OVR</span>
         </div>
       </div>
 
@@ -209,7 +209,7 @@ export default function StudentSpiderRadar({
                 <text
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className="fill-zinc-300 text-[10px] font-bold select-none"
+                  className="fill-zinc-300 text-[12px] font-bold select-none"
                 >
                   {axis.icon} {axis.label}
                 </text>
@@ -217,7 +217,7 @@ export default function StudentSpiderRadar({
                   y="12"
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className="fill-blue-400 text-[9px] font-black font-mono select-none"
+                  className="fill-blue-400 text-[11px] font-bold font-mono select-none"
                 >
                   {val}%
                 </text>
@@ -228,7 +228,7 @@ export default function StudentSpiderRadar({
       </div>
 
       {/* Footer hint */}
-      <div className="w-full pt-3 mt-1 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+      <div className="w-full pt-3 mt-1 border-t border-white/[0.06] flex items-center justify-between text-[12px] text-zinc-400">
         <span>Eng kuchli tomon: <b>Tezlik (85%)</b></span>
         <span className="text-amber-400">O'sish talab: <b>Esse (65%)</b></span>
       </div>

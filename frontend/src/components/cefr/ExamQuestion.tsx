@@ -234,7 +234,7 @@ function GroupedItemSelector({
               title={option.text}
               onClick={() => onAnswer({ group_option_id: selected ? null : option.id })}
               className={cn(
-                'flex h-9 min-w-9 sm:h-10 sm:min-w-10 px-2 items-center justify-center rounded-xl border text-xs sm:text-sm font-black transition-all cursor-pointer select-none active:scale-95',
+                'flex h-9 min-w-9 sm:h-10 sm:min-w-10 px-2 items-center justify-center rounded-xl border text-xs sm:text-sm font-bold transition-all cursor-pointer select-none active:scale-95',
                 selected
                   ? 'border-blue-500 bg-blue-600 text-white shadow-md ring-2 ring-blue-500/30 scale-105'
                   : 'border-border/80 bg-card/70 hover:border-blue-500/50 hover:bg-blue-500/10 text-foreground'
@@ -250,7 +250,7 @@ function GroupedItemSelector({
           <button
             type="button"
             onClick={() => setShowOptionsList(!showOptionsList)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-border/70 bg-card/50 hover:bg-[var(--surface-hover)] text-[11px] font-bold text-muted-foreground hover:text-foreground transition ml-auto cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-border/70 bg-card/50 hover:bg-[var(--surface-hover)] text-[12px] font-bold text-muted-foreground hover:text-foreground transition ml-auto cursor-pointer"
           >
             <span>{showOptionsList ? "Variantlarni yashirish" : "Variantlar matni"}</span>
             {showOptionsList ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
@@ -262,11 +262,11 @@ function GroupedItemSelector({
       {selectedOption && (
         <div className="flex items-start justify-between gap-2.5 rounded-2xl border border-blue-500/40 bg-blue-500/10 p-3 text-xs text-blue-300 shadow-xs animate-in fade-in-50">
           <div className="flex items-start gap-2.5 min-w-0 flex-1">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white text-[11px] font-black mt-0.5">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white text-[12px] font-bold mt-0.5">
               {selectedOption.label}
             </span>
             <div className="min-w-0 flex-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 block">
+              <span className="text-[12px] font-bold uppercase tracking-wider text-blue-400 block">
                 Tanlangan javob
               </span>
               <p className="font-semibold text-foreground leading-relaxed mt-0.5">
@@ -277,7 +277,7 @@ function GroupedItemSelector({
           <button
             type="button"
             onClick={() => onAnswer({ group_option_id: null })}
-            className="text-[11px] text-muted-foreground hover:text-rose-400 font-bold shrink-0 px-2 py-1 rounded-lg hover:bg-rose-500/10 transition cursor-pointer"
+            className="text-[12px] text-muted-foreground hover:text-rose-400 font-bold shrink-0 px-2 py-1 rounded-lg hover:bg-rose-500/10 transition cursor-pointer"
             title="Bekor qilish"
           >
             Bekor qilish ✕
@@ -288,7 +288,7 @@ function GroupedItemSelector({
       {/* Expandable Options List */}
       {showOptionsList && group && (
         <div className="rounded-2xl border border-border/80 bg-card/90 p-3 space-y-1.5 animate-in fade-in-50">
-          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pb-1">
+          <p className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider pb-1">
             Mavjud variantlardan birini tanlang:
           </p>
           <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
@@ -307,7 +307,7 @@ function GroupedItemSelector({
                   )}
                 >
                   <span className={cn(
-                    'flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-black',
+                    'flex size-5 shrink-0 items-center justify-center rounded text-[12px] font-bold',
                     isSelected ? 'bg-blue-600 text-white' : 'bg-muted text-foreground border border-border/60'
                   )}>
                     {opt.label}

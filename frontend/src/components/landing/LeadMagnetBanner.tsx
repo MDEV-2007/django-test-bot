@@ -19,7 +19,7 @@ export default function LeadMagnetBanner() {
               <span>Maxsus raqamli qo&apos;llanma</span>
             </div>
 
-            <h3 className="mt-3 text-xl font-extrabold tracking-[-0.02em] text-[#1C1C1E] sm:text-2xl lg:text-3xl">
+            <h3 className="mt-3 text-xl font-bold tracking-[-0.02em] text-[#1C1C1E] sm:text-2xl lg:text-3xl">
               2026-yilgi namunaviy savollar to&apos;plamini (PDF) bepul oling
             </h3>
 

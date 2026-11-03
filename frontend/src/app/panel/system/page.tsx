@@ -329,7 +329,7 @@ function SystemHealthContent() {
           >
             <ShieldAlert className="size-4" /> Anti-Cheat Dashboard
             {antiCheat?.summary?.tab_issue_count ? (
-              <Badge variant="outline" className="ml-1 border-amber-500/40 bg-amber-500/20 text-amber-300 text-[10px] px-1.5 py-0">
+              <Badge variant="outline" className="ml-1 border-amber-500/40 bg-amber-500/20 text-amber-300 text-[12px] px-1.5 py-0">
                 {antiCheat.summary.tab_issue_count}
               </Badge>
             ) : null}
@@ -450,27 +450,27 @@ function SystemHealthContent() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div className="rounded-xl bg-[#171b26] p-3 border border-[#222838]">
-                    <p className="text-[11px] text-slate-400">Foydalanuvchilar</p>
+                    <p className="text-[12px] text-slate-400">Foydalanuvchilar</p>
                     <p className="font-mono text-lg font-bold text-white mt-1">{tables.users || 0}</p>
                   </div>
                   <div className="rounded-xl bg-[#171b26] p-3 border border-[#222838]">
-                    <p className="text-[11px] text-slate-400">Urinishlar</p>
+                    <p className="text-[12px] text-slate-400">Urinishlar</p>
                     <p className="font-mono text-lg font-bold text-white mt-1">{tables.attempts || 0}</p>
                   </div>
                   <div className="rounded-xl bg-[#171b26] p-3 border border-[#222838]">
-                    <p className="text-[11px] text-slate-400">Test To&apos;plamlari</p>
+                    <p className="text-[12px] text-slate-400">Test To&apos;plamlari</p>
                     <p className="font-mono text-lg font-bold text-white mt-1">{tables.testsets || 0}</p>
                   </div>
                   <div className="rounded-xl bg-[#171b26] p-3 border border-[#222838]">
-                    <p className="text-[11px] text-slate-400">Savollar Bazasi</p>
+                    <p className="text-[12px] text-slate-400">Savollar Bazasi</p>
                     <p className="font-mono text-lg font-bold text-white mt-1">{tables.questions || 0}</p>
                   </div>
                   <div className="rounded-xl bg-[#171b26] p-3 border border-[#222838]">
-                    <p className="text-[11px] text-slate-400">Darslar</p>
+                    <p className="text-[12px] text-slate-400">Darslar</p>
                     <p className="font-mono text-lg font-bold text-white mt-1">{tables.lessons || 0}</p>
                   </div>
                   <div className="rounded-xl bg-[#171b26] p-3 border border-[#222838]">
-                    <p className="text-[11px] text-slate-400">To&apos;lovlar</p>
+                    <p className="text-[12px] text-slate-400">To&apos;lovlar</p>
                     <p className="font-mono text-lg font-bold text-white mt-1">{tables.payments || 0}</p>
                   </div>
                 </div>
@@ -484,7 +484,7 @@ function SystemHealthContent() {
                   <Terminal className="size-4 text-emerald-400" />
                   <span className="text-xs font-mono font-semibold text-slate-200">Server Voqealari &amp; Xatoliklar Jurnali (Logs)</span>
                 </div>
-                <span className="text-[11px] text-slate-400 font-mono">So&apos;nggi 100 qator</span>
+                <span className="text-[12px] text-slate-400 font-mono">So&apos;nggi 100 qator</span>
               </div>
               <div className="p-4 font-mono text-xs text-slate-300 max-h-80 overflow-y-auto space-y-1 select-text bg-[#090b10]">
                 {logs.length === 0 ? (
@@ -597,13 +597,13 @@ function SystemHealthContent() {
                           <tr key={s.attempt_id} className="hover:bg-[#151926] transition-colors">
                             <td className="py-2.5 px-3">
                               <p className="font-semibold text-white truncate max-w-[130px]">{s.student_name}</p>
-                              <p className="text-[11px] text-slate-500 font-mono">@{s.username || 'noma\'lum'}</p>
+                              <p className="text-[12px] text-slate-500 font-mono">@{s.username || 'noma\'lum'}</p>
                             </td>
                             <td className="py-2.5 px-3 text-slate-300 truncate max-w-[140px]" title={s.test_title}>
                               {s.test_title}
                             </td>
                             <td className="py-2.5 px-3 text-center">
-                              <span className="font-mono font-black px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                              <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300">
                                 {s.tab_switch_count}x
                               </span>
                             </td>
@@ -613,7 +613,7 @@ function SystemHealthContent() {
                             <td className="py-2.5 px-3 text-right">
                               <Link
                                 href={`/panel/attempts/${s.attempt_id}`}
-                                className="inline-flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300"
+                                className="inline-flex items-center gap-1 text-[12px] text-sky-400 hover:text-sky-300"
                               >
                                 <Eye className="size-3" /> Ko&apos;rish
                               </Link>
@@ -667,7 +667,7 @@ function SystemHealthContent() {
                             <tr key={s.attempt_id} className="hover:bg-[#151926] transition-colors">
                               <td className="py-2.5 px-3">
                                 <p className="font-semibold text-white truncate max-w-[130px]">{s.student_name}</p>
-                                <p className="text-[11px] text-slate-500 font-mono">@{s.username || 'noma\'lum'}</p>
+                                <p className="text-[12px] text-slate-500 font-mono">@{s.username || 'noma\'lum'}</p>
                               </td>
                               <td className="py-2.5 px-3 text-slate-300 truncate max-w-[140px]" title={s.test_title}>
                                 {s.test_title}
@@ -676,7 +676,7 @@ function SystemHealthContent() {
                                 <span className="font-mono text-rose-300 font-bold px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30">
                                   ⚡ {timeStr}
                                 </span>
-                                <span className="block text-[10px] text-slate-500 mt-0.5">
+                                <span className="block text-[12px] text-slate-500 mt-0.5">
                                   (Limit: {s.allowed_minutes} daq)
                                 </span>
                               </td>
@@ -686,7 +686,7 @@ function SystemHealthContent() {
                               <td className="py-2.5 px-3 text-right">
                                 <Link
                                   href={`/panel/attempts/${s.attempt_id}`}
-                                  className="inline-flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300"
+                                  className="inline-flex items-center gap-1 text-[12px] text-sky-400 hover:text-sky-300"
                                 >
                                   <Eye className="size-3" /> Ko&apos;rish
                                 </Link>

@@ -301,7 +301,7 @@ export default function MarketingPage() {
               </Badge>
               <Badge variant="secondary" className="text-xs font-medium">Data-driven Engine</Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground mt-1.5">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-1.5">
               Marketing & Voronka Analitikasi
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl">
@@ -341,11 +341,11 @@ export default function MarketingPage() {
                 </div>
               </div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-black text-foreground">
+                <span className="text-2xl font-bold text-foreground">
                   {loading ? <Skeleton className="h-7 w-12" /> : data?.acquisition.today_new_users ?? 0}
                 </span>
                 {!loading && (data?.acquisition.new_users_growth ?? 0) !== 0 && (
-                  <span className={`text-[11px] font-bold ${
+                  <span className={`text-[12px] font-bold ${
                     (data?.acquisition.new_users_growth ?? 0) > 0 ? 'text-emerald-500' : 'text-rose-500'
                   }`}>
                     {(data?.acquisition.new_users_growth ?? 0) > 0 ? '+' : ''}
@@ -369,10 +369,10 @@ export default function MarketingPage() {
                 </div>
               </div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-black text-foreground">
+                <span className="text-2xl font-bold text-foreground">
                   {loading ? <Skeleton className="h-7 w-12" /> : data?.retention.dau ?? 0}
                 </span>
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                <span className="text-[12px] text-emerald-600 dark:text-emerald-400 font-semibold">
                   ({data?.retention.stickiness_pct ?? 0}% Stickiness)
                 </span>
               </div>
@@ -392,10 +392,10 @@ export default function MarketingPage() {
                 </div>
               </div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-black text-foreground">
+                <span className="text-2xl font-bold text-foreground">
                   {loading ? <Skeleton className="h-7 w-12" /> : `${data?.activation.funnel[2]?.pct_of_total ?? 0}%`}
                 </span>
-                <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                <span className="text-[12px] text-indigo-600 dark:text-indigo-400 font-semibold">
                   ({data?.activation.funnel[2]?.count ?? 0} o&apos;quvchi)
                 </span>
               </div>
@@ -415,10 +415,10 @@ export default function MarketingPage() {
                 </div>
               </div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-black text-foreground">
+                <span className="text-2xl font-bold text-foreground">
                   {loading ? <Skeleton className="h-7 w-12" /> : `${data?.conversion.overall_conversion_pct ?? 0}%`}
                 </span>
-                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+                <span className="text-[12px] text-amber-600 dark:text-amber-400 font-semibold">
                   ({data?.conversion.total_payments_approved ?? 0} to&apos;lov)
                 </span>
               </div>
@@ -480,7 +480,7 @@ export default function MarketingPage() {
                       <div key={step.step} className="relative">
                         <div className="flex items-center justify-between text-xs mb-1.5 font-medium">
                           <div className="flex items-center gap-2">
-                            <span className="flex size-5 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-[10px]">
+                            <span className="flex size-5 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-[12px]">
                               {step.step}
                             </span>
                             <span className="text-foreground font-semibold">{step.title}</span>
@@ -489,7 +489,7 @@ export default function MarketingPage() {
                             <span className="font-bold text-foreground">{step.count.toLocaleString()} ta</span>
                             <span className="text-muted-foreground w-12 text-right">({step.pct_of_total}%)</span>
                             {idx > 0 && (
-                              <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${
+                              <span className={`text-[12px] font-semibold px-1.5 py-0.5 rounded ${
                                 step.conversion_from_prev >= 60
                                   ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                                   : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
@@ -561,13 +561,13 @@ export default function MarketingPage() {
 
                       <div className="grid grid-cols-2 gap-3 pt-3 border-t">
                         <div className="p-2.5 bg-muted/40 rounded-lg">
-                          <p className="text-[11px] text-muted-foreground">Checkoutdan to&apos;lovga</p>
+                          <p className="text-[12px] text-muted-foreground">Checkoutdan to&apos;lovga</p>
                           <p className="text-base font-bold text-foreground mt-0.5">
                             {data?.conversion.checkout_conversion_pct}%
                           </p>
                         </div>
                         <div className="p-2.5 bg-muted/40 rounded-lg">
-                          <p className="text-[11px] text-muted-foreground">O&apos;rtacha chek (AOV)</p>
+                          <p className="text-[12px] text-muted-foreground">O&apos;rtacha chek (AOV)</p>
                           <p className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                             {formatMoney(data?.conversion.aov ?? 0)}
                           </p>
@@ -597,19 +597,19 @@ export default function MarketingPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Jami tasdiqlangan</p>
-                          <p className="text-xl font-black text-foreground mt-1">
+                          <p className="text-xl font-bold text-foreground mt-1">
                             {formatMoney(data?.conversion.total_revenue ?? 0)}
                           </p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                          <p className="text-[12px] text-muted-foreground mt-0.5">
                             {data?.conversion.total_payments_approved} ta xarid
                           </p>
                         </div>
                         <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl">
                           <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Bugungi tushum</p>
-                          <p className="text-xl font-black text-foreground mt-1">
+                          <p className="text-xl font-bold text-foreground mt-1">
                             {formatMoney(data?.conversion.today_revenue ?? 0)}
                           </p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                          <p className="text-[12px] text-muted-foreground mt-0.5">
                             Kutilayotgan: {data?.conversion.pending_payments} ta ariza
                           </p>
                         </div>
@@ -618,7 +618,7 @@ export default function MarketingPage() {
                       <div className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border/60">
                         <div>
                           <p className="text-xs font-semibold text-foreground">To&apos;lov arizalarini tekshirish</p>
-                          <p className="text-[11px] text-muted-foreground">Admin panelidan to&apos;lov skrinshotlarini tasdiqlash</p>
+                          <p className="text-[12px] text-muted-foreground">Admin panelidan to&apos;lov skrinshotlarini tasdiqlash</p>
                         </div>
                         <Link href="/panel/payments">
                           <Button size="sm" variant="outline" className="text-xs font-semibold">
@@ -728,37 +728,37 @@ export default function MarketingPage() {
                     <div className="p-4 bg-muted/40 rounded-xl border border-border/60">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-muted-foreground">D1 Retention</span>
-                        <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-500 border-blue-500/20">
+                        <Badge variant="outline" className="text-[12px] bg-blue-500/10 text-blue-500 border-blue-500/20">
                           1 kundan so&apos;ng
                         </Badge>
                       </div>
-                      <p className="text-2xl font-black text-foreground mt-2">{data?.retention.d1_pct}%</p>
+                      <p className="text-2xl font-bold text-foreground mt-2">{data?.retention.d1_pct}%</p>
                       <Progress value={data?.retention.d1_pct ?? 0} className="h-1.5 mt-2" />
-                      <p className="text-[11px] text-muted-foreground mt-1.5">Ertasi kuni kirib test ishlaganlar</p>
+                      <p className="text-[12px] text-muted-foreground mt-1.5">Ertasi kuni kirib test ishlaganlar</p>
                     </div>
 
                     <div className="p-4 bg-muted/40 rounded-xl border border-border/60">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-muted-foreground">D7 Retention</span>
-                        <Badge variant="outline" className="text-[10px] bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
+                        <Badge variant="outline" className="text-[12px] bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
                           1 haftadan so&apos;ng
                         </Badge>
                       </div>
-                      <p className="text-2xl font-black text-foreground mt-2">{data?.retention.d7_pct}%</p>
+                      <p className="text-2xl font-bold text-foreground mt-2">{data?.retention.d7_pct}%</p>
                       <Progress value={data?.retention.d7_pct ?? 0} className="h-1.5 mt-2" />
-                      <p className="text-[11px] text-muted-foreground mt-1.5">7-14 kundan so&apos;ng faol bo&apos;lganlar</p>
+                      <p className="text-[12px] text-muted-foreground mt-1.5">7-14 kundan so&apos;ng faol bo&apos;lganlar</p>
                     </div>
 
                     <div className="p-4 bg-muted/40 rounded-xl border border-border/60">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-muted-foreground">D30 Retention</span>
-                        <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                        <Badge variant="outline" className="text-[12px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                           1 oydan so&apos;ng
                         </Badge>
                       </div>
-                      <p className="text-2xl font-black text-foreground mt-2">{data?.retention.d30_pct}%</p>
+                      <p className="text-2xl font-bold text-foreground mt-2">{data?.retention.d30_pct}%</p>
                       <Progress value={data?.retention.d30_pct ?? 0} className="h-1.5 mt-2" />
-                      <p className="text-[11px] text-muted-foreground mt-1.5">30 kundan keyin ham o&apos;qiyotganlar</p>
+                      <p className="text-[12px] text-muted-foreground mt-1.5">30 kundan keyin ham o&apos;qiyotganlar</p>
                     </div>
                   </div>
                 )}
@@ -793,12 +793,12 @@ export default function MarketingPage() {
                             <span className="font-bold text-muted-foreground w-4">{idx + 1}.</span>
                             <div className="min-w-0">
                               <p className="font-semibold text-foreground truncate">{t.title}</p>
-                              <p className="text-[11px] text-muted-foreground">{t.subject}</p>
+                              <p className="text-[12px] text-muted-foreground">{t.subject}</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
                             <span className="font-bold text-foreground">{t.attempts} ta urinish</span>
-                            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                            <p className="text-[12px] text-emerald-600 dark:text-emerald-400 font-medium">
                               {t.avg_score}% o&apos;rtacha
                             </p>
                           </div>
@@ -831,12 +831,12 @@ export default function MarketingPage() {
                             <span className="font-bold text-muted-foreground w-4">{idx + 1}.</span>
                             <div>
                               <p className="font-semibold text-foreground">{s.name}</p>
-                              <p className="text-[11px] text-muted-foreground">{s.students} nafar faol o&apos;quvchi</p>
+                              <p className="text-[12px] text-muted-foreground">{s.students} nafar faol o&apos;quvchi</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
                             <span className="font-bold text-foreground">{s.attempts} ta test</span>
-                            <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
+                            <p className="text-[12px] text-indigo-600 dark:text-indigo-400 font-medium">
                               {s.avg_score}% natija
                             </p>
                           </div>
@@ -870,10 +870,10 @@ export default function MarketingPage() {
                       {data?.content.hardest_questions.map((q, idx) => (
                         <div key={q.id} className="p-3 bg-muted/40 rounded-xl border border-border/60 text-xs space-y-1.5">
                           <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-[10px] font-semibold bg-rose-500/10 text-rose-600 border-rose-500/20">
+                            <Badge variant="outline" className="text-[12px] font-semibold bg-rose-500/10 text-rose-600 border-rose-500/20">
                               {q.error_pct}% xato ({q.total_answered} javob)
                             </Badge>
-                            <span className="text-[11px] text-muted-foreground">{q.subject}</span>
+                            <span className="text-[12px] text-muted-foreground">{q.subject}</span>
                           </div>
                           <p className="text-foreground font-medium line-clamp-2 italic">
                             &ldquo;{q.text}&rdquo;
@@ -907,7 +907,7 @@ export default function MarketingPage() {
                             <span className="font-semibold text-foreground truncate max-w-[200px]">{wt.title}</span>
                             <span className="text-rose-600 dark:text-rose-400 font-bold">{wt.accuracy_pct}% to&apos;g&apos;ri</span>
                           </div>
-                          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                          <div className="flex items-center justify-between text-[12px] text-muted-foreground">
                             <span>Fan: {wt.subject}</span>
                             <span>{wt.total_answers} ta savol ishlangan</span>
                           </div>
@@ -1007,7 +1007,7 @@ export default function MarketingPage() {
                             Istalgan fan yoki barcha fanlardan eng qiyin savolni tanlang
                           </span>
                         </div>
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-[12px] text-muted-foreground">
                           Avtomatik to&apos;liq matn va variantlar bilan shakllanadi
                         </span>
                       </div>
@@ -1074,19 +1074,19 @@ export default function MarketingPage() {
                           <div className="pt-2.5 border-t border-border/50 space-y-2">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div className="flex flex-wrap items-center gap-2">
-                                <Badge variant="outline" className="text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20">
+                                <Badge variant="outline" className="text-[12px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20">
                                   {activeQ.error_pct}% xato ({activeQ.total_answered} ta o&apos;quvchi ishlagan)
                                 </Badge>
-                                <Badge variant="secondary" className="text-[10px] font-semibold">
+                                <Badge variant="secondary" className="text-[12px] font-semibold">
                                   Fan: #{activeQ.subject}
                                 </Badge>
                                 {activeQ.topic && (
-                                  <span className="text-[11px] text-muted-foreground truncate max-w-[250px]">
+                                  <span className="text-[12px] text-muted-foreground truncate max-w-[250px]">
                                     Mavzu: {activeQ.topic}
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[11px] text-muted-foreground">
+                              <span className="text-[12px] text-muted-foreground">
                                 Savol ID: #{activeQ.id}
                               </span>
                             </div>
@@ -1096,7 +1096,7 @@ export default function MarketingPage() {
                                 ❓ {activeQ.text}
                               </p>
                               {activeQ.options_text && (
-                                <div className="p-2.5 bg-muted/50 rounded-md border border-border/50 font-mono text-[11px] text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                                <div className="p-2.5 bg-muted/50 rounded-md border border-border/50 font-mono text-[12px] text-muted-foreground whitespace-pre-wrap leading-relaxed">
                                   {activeQ.options_text}
                                 </div>
                               )}
@@ -1129,7 +1129,7 @@ export default function MarketingPage() {
                               toast.info("Shablon dastlabki holatiga qaytarildi");
                             }
                           }}
-                          className="hover:text-foreground text-[11px] underline underline-offset-2 transition-colors cursor-pointer"
+                          className="hover:text-foreground text-[12px] underline underline-offset-2 transition-colors cursor-pointer"
                         >
                           Shablonni yangilash
                         </button>
@@ -1153,25 +1153,25 @@ export default function MarketingPage() {
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                       <div className="bg-background/80 p-2 rounded-lg border border-border/50">
-                        <span className="text-[10px] text-muted-foreground">O&apos;quvchilar:</span>
+                        <span className="text-[12px] text-muted-foreground">O&apos;quvchilar:</span>
                         <p className="font-bold text-foreground mt-0.5">
                           {data?.viral_generator.stats_preview.active_students} nafar
                         </p>
                       </div>
                       <div className="bg-background/80 p-2 rounded-lg border border-border/50">
-                        <span className="text-[10px] text-muted-foreground">Yechilgan savollar:</span>
+                        <span className="text-[12px] text-muted-foreground">Yechilgan savollar:</span>
                         <p className="font-bold text-foreground mt-0.5">
                           {data?.viral_generator.stats_preview.questions_solved} ta
                         </p>
                       </div>
                       <div className="bg-background/80 p-2 rounded-lg border border-border/50">
-                        <span className="text-[10px] text-muted-foreground">O&apos;rtacha natija:</span>
+                        <span className="text-[12px] text-muted-foreground">O&apos;rtacha natija:</span>
                         <p className="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                           {data?.viral_generator.stats_preview.avg_score}%
                         </p>
                       </div>
                       <div className="bg-background/80 p-2 rounded-lg border border-border/50">
-                        <span className="text-[10px] text-muted-foreground">Zaif mavzu:</span>
+                        <span className="text-[12px] text-muted-foreground">Zaif mavzu:</span>
                         <p className="font-bold text-foreground mt-0.5 truncate">
                           {data?.viral_generator.stats_preview.weakest_topic}
                         </p>
@@ -1216,7 +1216,7 @@ export default function MarketingPage() {
                   placeholder="@ilmildizi"
                   className="mt-1 text-xs"
                 />
-                <p className="text-[11px] text-muted-foreground mt-1">
+                <p className="text-[12px] text-muted-foreground mt-1">
                   Bot ushbu kanalda administrator (post qo&apos;yish huquqi bilan) bo&apos;lishi lozim.
                 </p>
               </div>

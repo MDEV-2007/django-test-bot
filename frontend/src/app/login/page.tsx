@@ -137,7 +137,7 @@ function LoginPageInner() {
             <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>240+ o&apos;quvchi hozir platformada test yechmoqda</span>
           </div>
-          <span className="font-mono text-[11px] text-emerald-400">Jonli</span>
+          <span className="font-mono text-[12px] text-emerald-400">Jonli</span>
         </div>
 
         {/* 3-Savollik Interaktiv DTM Mini-Blits Viktorinasi */}
@@ -160,7 +160,7 @@ function LoginPageInner() {
             <div className="pt-2 border-t border-amber-500/20 space-y-2.5">
               {!blitzDone ? (
                 <>
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <div className="flex items-center justify-between text-[12px] text-muted-foreground">
                     <span>Savol {blitzIdx + 1} / {MINI_BLITZ_QUESTIONS.length}</span>
                     <span>To&apos;g&apos;ri: {blitzScore} ta</span>
                   </div>
@@ -191,17 +191,17 @@ function LoginPageInner() {
                     })}
                   </div>
                   {blitzSelected !== null && (
-                    <p className="text-[11px] text-amber-400 font-medium pt-1">
+                    <p className="text-[12px] text-amber-400 font-medium pt-1">
                       💡 {MINI_BLITZ_QUESTIONS[blitzIdx].aha}
                     </p>
                   )}
                 </>
               ) : (
                 <div className="text-center py-2 space-y-2">
-                  <p className="text-sm font-black text-foreground">
+                  <p className="text-sm font-bold text-foreground">
                     🎉 Natijangiz: {blitzScore} / {MINI_BLITZ_QUESTIONS.length} to&apos;g&apos;ri!
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[12px] text-muted-foreground">
                     To&apos;liq tahlil, 24/7 AI Mentor va DTM prognozini ko&apos;rish uchun tizimga kiring:
                   </p>
                 </div>
@@ -221,7 +221,7 @@ function LoginPageInner() {
 
         <div className="relative flex items-center justify-center py-1">
           <div className="h-px w-full bg-black/[0.06] dark:bg-white/[0.08]" />
-          <span className="absolute bg-white dark:bg-[#1C1C1E] px-3 text-[11px] font-semibold uppercase tracking-wider text-[#8E8E93]">
+          <span className="absolute bg-white dark:bg-[#1C1C1E] px-3 text-[12px] font-semibold uppercase tracking-wider text-[#8E8E93]">
             yoki login orqali
           </span>
         </div>

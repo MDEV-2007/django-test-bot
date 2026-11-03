@@ -261,7 +261,7 @@ export default function PanelDashboard() {
             <PremiumIcon icon={Flame} tone="rose" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-rose-200">🚀 Marketing &amp; Voronka</p>
-              <p className="text-[11px] text-rose-300/80 truncate">Acquisition, Voronka &amp; Viral Loop</p>
+              <p className="text-[12px] text-rose-300/80 truncate">Acquisition, Voronka &amp; Viral Loop</p>
             </div>
           </Link>
 
@@ -272,7 +272,7 @@ export default function PanelDashboard() {
             <PremiumIcon icon={ShieldAlert} tone="amber" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-amber-200">🛡️ Anti-Cheat Nazorati</p>
-              <p className="text-[11px] text-amber-300/80 truncate">Tab almashtirish &amp; tezkor topshirish</p>
+              <p className="text-[12px] text-amber-300/80 truncate">Tab almashtirish &amp; tezkor topshirish</p>
             </div>
           </Link>
 
@@ -283,7 +283,7 @@ export default function PanelDashboard() {
             <PremiumIcon icon={HardDrive} tone="emerald" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-emerald-200">💾 Baza Zaxirasi (Backup)</p>
-              <p className="text-[11px] text-emerald-300/80 truncate">One-Click SQL zaxirasini olish</p>
+              <p className="text-[12px] text-emerald-300/80 truncate">One-Click SQL zaxirasini olish</p>
             </div>
           </Link>
 
@@ -294,7 +294,7 @@ export default function PanelDashboard() {
             <PremiumIcon icon={Bot} tone="purple" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-purple-200">🤖 AI Token Monitor</p>
-              <p className="text-[11px] text-purple-300/80 truncate">Groq token sarfi va xarajatlar</p>
+              <p className="text-[12px] text-purple-300/80 truncate">Groq token sarfi va xarajatlar</p>
             </div>
           </Link>
 
@@ -305,7 +305,7 @@ export default function PanelDashboard() {
             <PremiumIcon icon={Megaphone} tone="sky" size="md" glow />
             <div className="min-w-0">
               <p className="font-bold text-xs sm:text-sm text-white group-hover:text-sky-200">📅 Rejali Xabarlar</p>
-              <p className="text-[11px] text-sky-300/80 truncate">Kelajak vaqtga avtomatik rejalashtirish</p>
+              <p className="text-[12px] text-sky-300/80 truncate">Kelajak vaqtga avtomatik rejalashtirish</p>
             </div>
           </Link>
         </div>
@@ -348,7 +348,7 @@ export default function PanelDashboard() {
               <div className="flex items-center gap-2">
                 <CardTitle className="text-base">O&apos;sish dinamikasi</CardTitle>
                 {!loading && series.length > 0 && (
-                  <Badge variant="outline" className="text-[11px] font-normal text-muted-foreground border-border/70 hidden sm:inline-flex">
+                  <Badge variant="outline" className="text-[12px] font-normal text-muted-foreground border-border/70 hidden sm:inline-flex">
                     Davr jami: <span className="font-semibold text-amber-400 mx-1">{fmt(totalPeriodAttempts)}</span> urinish &bull; <span className="font-semibold text-emerald-400 mx-1">{fmt(totalPeriodReg)}</span> a&apos;zo
                   </Badge>
                 )}
@@ -456,7 +456,7 @@ export default function PanelDashboard() {
                   <div className="flex items-start justify-between gap-3 py-2.5">
                     <div className="min-w-0 flex-1">
                       {q.subject_name && (
-                        <span className="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground mb-1">
+                        <span className="inline-block text-[12px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground mb-1">
                           {q.subject_name}
                         </span>
                       )}
@@ -533,10 +533,10 @@ export default function PanelDashboard() {
                   <PremiumIcon icon={Target} tone="sky" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-foreground">
+                  <span className="text-2xl font-bold text-foreground">
                     {loading ? <Skeleton className="h-7 w-16" /> : `${stats.completion_rate ?? 0}%`}
                   </span>
-                  <span className="text-[11px] text-muted-foreground font-medium">boshlangan testlardan</span>
+                  <span className="text-[12px] text-muted-foreground font-medium">boshlangan testlardan</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Jami {fmt(stats.attempts_total)} ta test oxirigacha topshirilgan
@@ -552,10 +552,10 @@ export default function PanelDashboard() {
                   <PremiumIcon icon={Flame} tone="emerald" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-foreground">
+                  <span className="text-2xl font-bold text-foreground">
                     {loading ? <Skeleton className="h-7 w-16" /> : `${stats.avg_score ?? 0}%`}
                   </span>
-                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <span className="text-[12px] text-emerald-600 dark:text-emerald-400 font-semibold">
                     Max: {stats.max_score ?? 0}%
                   </span>
                 </div>
@@ -573,10 +573,10 @@ export default function PanelDashboard() {
                   <PremiumIcon icon={CheckCircle2} tone="amber" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-foreground">
+                  <span className="text-2xl font-bold text-foreground">
                     {loading ? <Skeleton className="h-7 w-16" /> : `${stats.pass_rate ?? 0}%`}
                   </span>
-                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">sertifikat darajasi</span>
+                  <span className="text-[12px] text-amber-600 dark:text-amber-400 font-semibold">sertifikat darajasi</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   60% dan yuqori to&apos;plagan muvaffaqiyatli urinishlar
@@ -592,10 +592,10 @@ export default function PanelDashboard() {
                   <PremiumIcon icon={Send} tone="purple" size="sm" glow />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-foreground">
+                  <span className="text-2xl font-bold text-foreground">
                     {loading ? <Skeleton className="h-7 w-16" /> : `${stats.tg_connected ?? 0}`}
                   </span>
-                  <span className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold">
+                  <span className="text-[12px] text-purple-600 dark:text-purple-400 font-semibold">
                     ({stats.tg_pct ?? 0}% ulangan)
                   </span>
                 </div>
@@ -612,7 +612,7 @@ export default function PanelDashboard() {
               <div className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1.5 max-w-xl">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-amber-500 text-white font-bold text-[11px] gap-1 px-2">
+                    <Badge className="bg-amber-500 text-white font-bold text-[12px] gap-1 px-2">
                       <Sparkles className="size-3" /> Jonli Mock Tahlili
                     </Badge>
                     {upcomingMock?.scheduled_at && (
@@ -634,15 +634,15 @@ export default function PanelDashboard() {
                 {mockAnalytics && (
                   <div className="flex flex-wrap items-center gap-3 shrink-0">
                     <div className="bg-background/80 border border-border/70 rounded-xl p-3 min-w-[100px] text-center">
-                      <p className="text-[11px] text-muted-foreground font-medium">Jami mocklar</p>
+                      <p className="text-[12px] text-muted-foreground font-medium">Jami mocklar</p>
                       <p className="text-lg font-bold text-foreground mt-0.5">{fmt(mockAnalytics.total_attempts)} ta</p>
                     </div>
                     <div className="bg-background/80 border border-border/70 rounded-xl p-3 min-w-[100px] text-center">
-                      <p className="text-[11px] text-muted-foreground font-medium">O&apos;rtacha ball</p>
+                      <p className="text-[12px] text-muted-foreground font-medium">O&apos;rtacha ball</p>
                       <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{mockAnalytics.avg_score}%</p>
                     </div>
                     <div className="bg-background/80 border border-border/70 rounded-xl p-3 min-w-[100px] text-center">
-                      <p className="text-[11px] text-muted-foreground font-medium">Oltin (80%+)</p>
+                      <p className="text-[12px] text-muted-foreground font-medium">Oltin (80%+)</p>
                       <p className="text-lg font-bold text-amber-500 mt-0.5">{fmt(mockAnalytics.gold_count)} ta</p>
                     </div>
                     <Link href="/panel/mocks">
@@ -755,7 +755,7 @@ export default function PanelDashboard() {
                       title={`Bo'sh: ${ansAnatomy?.skipped_pct || 0}%`}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground px-0.5">
+                  <div className="flex items-center justify-between text-[12px] text-muted-foreground px-0.5">
                     <span>Jami yechilgan savollar: <strong>{fmt(ansAnatomy?.total)} ta</strong></span>
                     <span>Aniqlik ko&apos;rsatkichi: <strong>{ansAnatomy?.correct_pct || 0}%</strong></span>
                   </div>
@@ -763,31 +763,31 @@ export default function PanelDashboard() {
 
                 <div className="grid grid-cols-3 gap-2.5 pt-1">
                   <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-center">
-                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-center gap-1">
+                    <p className="text-[12px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-center gap-1">
                       <CheckCircle2 className="size-3" /> To&apos;g&apos;ri
                     </p>
-                    <p className="text-lg font-black text-foreground mt-1">{fmt(ansAnatomy?.correct)}</p>
-                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <p className="text-lg font-bold text-foreground mt-1">{fmt(ansAnatomy?.correct)}</p>
+                    <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
                       {ansAnatomy?.correct_pct || 0}%
                     </span>
                   </div>
 
                   <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-center">
-                    <p className="text-[11px] text-red-600 dark:text-red-400 font-semibold flex items-center justify-center gap-1">
+                    <p className="text-[12px] text-red-600 dark:text-red-400 font-semibold flex items-center justify-center gap-1">
                       <XCircle className="size-3" /> Xato
                     </p>
-                    <p className="text-lg font-black text-foreground mt-1">{fmt(ansAnatomy?.wrong)}</p>
-                    <span className="text-[11px] font-bold text-red-600 dark:text-red-400">
+                    <p className="text-lg font-bold text-foreground mt-1">{fmt(ansAnatomy?.wrong)}</p>
+                    <span className="text-[12px] font-bold text-red-600 dark:text-red-400">
                       {ansAnatomy?.wrong_pct || 0}%
                     </span>
                   </div>
 
                   <div className="rounded-xl border border-slate-500/20 bg-slate-500/5 p-3 text-center">
-                    <p className="text-[11px] text-muted-foreground font-semibold flex items-center justify-center gap-1">
+                    <p className="text-[12px] text-muted-foreground font-semibold flex items-center justify-center gap-1">
                       <HelpCircle className="size-3" /> Bo&apos;sh / O&apos;tgan
                     </p>
-                    <p className="text-lg font-black text-foreground mt-1">{fmt(ansAnatomy?.skipped)}</p>
-                    <span className="text-[11px] font-bold text-muted-foreground">
+                    <p className="text-lg font-bold text-foreground mt-1">{fmt(ansAnatomy?.skipped)}</p>
+                    <span className="text-[12px] font-bold text-muted-foreground">
                       {ansAnatomy?.skipped_pct || 0}%
                     </span>
                   </div>
@@ -891,7 +891,7 @@ export default function PanelDashboard() {
                       <div className="flex items-center justify-between text-xs">
                         <span className={`font-semibold flex items-center gap-1.5 ${isEvening ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}>
                           {item.label}
-                          {isEvening && <Badge variant="outline" className="text-[10px] px-1 py-0 bg-amber-500/10 border-amber-500/30 text-amber-600">Eng pik vaqt</Badge>}
+                          {isEvening && <Badge variant="outline" className="text-[12px] px-1 py-0 bg-amber-500/10 border-amber-500/30 text-amber-600">Eng pik vaqt</Badge>}
                         </span>
                         <span className="font-mono font-bold text-foreground">
                           {item.pct}% ({item.count} ta)
@@ -904,7 +904,7 @@ export default function PanelDashboard() {
                     </div>
                   );
                 })}
-                <div className="pt-2 text-[11px] text-muted-foreground flex items-center gap-1.5 border-t border-border/50">
+                <div className="pt-2 text-[12px] text-muted-foreground flex items-center gap-1.5 border-t border-border/50">
                   <Zap className="size-3 text-amber-500 shrink-0" />
                   <span>Jonli mock imtihonlarni <strong>18:00 – 22:00</strong> oralig&apos;iga qo&apos;yish eng yuqori qatnashuvni ta&apos;minlaydi.</span>
                 </div>
@@ -925,19 +925,19 @@ export default function PanelDashboard() {
               <CardContent className="space-y-3.5">
                 <div className="grid grid-cols-3 gap-2.5">
                   <div className="p-3 rounded-xl border border-border/70 bg-card/60 text-center">
-                    <p className="text-[11px] text-muted-foreground font-medium">1 ta topshirgan</p>
-                    <p className="text-lg font-black text-foreground mt-1">{retention?.one_attempt || 0}</p>
-                    <span className="text-[10px] text-muted-foreground">Yangi o&apos;quvchilar</span>
+                    <p className="text-[12px] text-muted-foreground font-medium">1 ta topshirgan</p>
+                    <p className="text-lg font-bold text-foreground mt-1">{retention?.one_attempt || 0}</p>
+                    <span className="text-[12px] text-muted-foreground">Yangi o&apos;quvchilar</span>
                   </div>
                   <div className="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 text-center">
-                    <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">2–5 ta topshirgan</p>
-                    <p className="text-lg font-black text-foreground mt-1">{retention?.two_to_five || 0}</p>
-                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">Qiziquvchilar</span>
+                    <p className="text-[12px] text-blue-600 dark:text-blue-400 font-medium">2–5 ta topshirgan</p>
+                    <p className="text-lg font-bold text-foreground mt-1">{retention?.two_to_five || 0}</p>
+                    <span className="text-[12px] text-blue-600 dark:text-blue-400 font-semibold">Qiziquvchilar</span>
                   </div>
                   <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-center">
-                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">6+ ta topshirgan</p>
-                    <p className="text-lg font-black text-foreground mt-1">{retention?.six_plus || 0}</p>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Doimiy / Sodiq</span>
+                    <p className="text-[12px] text-emerald-600 dark:text-emerald-400 font-medium">6+ ta topshirgan</p>
+                    <p className="text-lg font-bold text-foreground mt-1">{retention?.six_plus || 0}</p>
+                    <span className="text-[12px] text-emerald-600 dark:text-emerald-400 font-semibold">Doimiy / Sodiq</span>
                   </div>
                 </div>
 
@@ -976,7 +976,7 @@ export default function PanelDashboard() {
                   {topStudents.map((st) => (
                     <div key={st.rank} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-2.5">
-                        <span className={`inline-flex size-6 items-center justify-center rounded-full text-xs font-black ${
+                        <span className={`inline-flex size-6 items-center justify-center rounded-full text-xs font-bold ${
                           st.rank === 1
                             ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/40'
                             : st.rank === 2
@@ -989,14 +989,14 @@ export default function PanelDashboard() {
                         </span>
                         <div>
                           <p className="font-semibold text-xs text-foreground truncate max-w-[200px]">{st.name}</p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-[12px] text-muted-foreground">
                             {st.username ? `@${st.username}` : (st.phone || 'O\'quvchi')} • {st.tests_count} ta test
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">{st.avg_score}%</p>
-                        <p className="text-[10px] text-muted-foreground">Max: {st.max_score}%</p>
+                        <p className="text-[12px] text-muted-foreground">Max: {st.max_score}%</p>
                       </div>
                     </div>
                   ))}

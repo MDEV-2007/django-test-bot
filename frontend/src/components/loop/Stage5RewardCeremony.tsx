@@ -114,12 +114,12 @@ export default function Stage5RewardCeremony({
           animate={{ opacity: 1, scale: 1 }}
           className="space-y-6"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
             <Trophy className="size-4 animate-bounce" />
             <span>Raund #{cycleNumber} To'liq Yopildi!</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
             🎁 Tabriklaymiz! Oltin Sandiq Tayyor!
           </h2>
           <p className="text-sm text-zinc-300 max-w-md mx-auto">
@@ -138,7 +138,7 @@ export default function Stage5RewardCeremony({
           >
             <div className="size-full rounded-[22px] bg-zinc-950/80 flex flex-col items-center justify-center gap-2">
               <Gift className="size-16 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-black text-amber-300 uppercase tracking-wider">
+              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">
                 Bosing va Oching!
               </span>
             </div>
@@ -147,7 +147,7 @@ export default function Stage5RewardCeremony({
           <Button
             type="button"
             onClick={handleOpenChest}
-            className="h-13 px-8 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-base shadow-xl shadow-amber-500/30 cursor-pointer"
+            className="h-13 px-8 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-base shadow-xl shadow-amber-500/30 cursor-pointer"
           >
             <Sparkles className="size-5 fill-current" />
             <span>Sandiqni Ochish (+{coinsEarned} Tanga)</span>
@@ -163,11 +163,11 @@ export default function Stage5RewardCeremony({
         >
           {/* Kulminatsiya Sarlavhasi */}
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-black uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
               <Sparkles className="size-3.5" />
               <span>Sandiq Ochildi • Raund #{cycleNumber} Yopildi</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               G'alaba va Rivojlanish! 🌳✨
             </h2>
           </div>
@@ -182,11 +182,11 @@ export default function Stage5RewardCeremony({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-zinc-400">Ilm Ildizi Daraxti</span>
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    <span className="text-[12px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                       {stageName}
                     </span>
                   </div>
-                  <p className="text-sm font-black text-white mt-0.5">
+                  <p className="text-sm font-bold text-white mt-0.5">
                     +35% Suv Quyildi! (Jami: {waterLevel}%) 💧
                   </p>
                 </div>
@@ -196,7 +196,7 @@ export default function Stage5RewardCeremony({
               <div className="w-full sm:w-44 text-right">
                 <div className="flex justify-between text-xs font-bold text-zinc-300 mb-1">
                   <span>Namlik</span>
-                  <span className="text-sky-400 font-mono font-black">{waterLevel}%</span>
+                  <span className="text-sky-400 font-mono font-bold">{waterLevel}%</span>
                 </div>
                 <div className="h-2.5 w-full bg-zinc-800 rounded-full overflow-hidden border border-white/5">
                   <motion.div
@@ -221,7 +221,7 @@ export default function Stage5RewardCeremony({
               </div>
               <div className="flex items-center gap-2">
                 <span className={`size-2.5 rounded-full ${cycleNumber >= 3 ? 'bg-amber-400 shadow-sm shadow-amber-400' : 'bg-zinc-700'}`} />
-                <span className={cycleNumber >= 3 ? 'text-amber-300 font-black' : 'text-zinc-500'}>3-Raund (100% 👑)</span>
+                <span className={cycleNumber >= 3 ? 'text-amber-300 font-bold' : 'text-zinc-500'}>3-Raund (100% 👑)</span>
               </div>
             </div>
           </div>
@@ -230,41 +230,41 @@ export default function Stage5RewardCeremony({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="p-3 rounded-2xl bg-zinc-900/80 border border-amber-500/20 text-center">
               <Coins className="size-4.5 text-amber-400 mx-auto mb-1 fill-amber-400/20" />
-              <div className="text-base font-black text-amber-300 font-mono">
+              <div className="text-base font-bold text-amber-300 font-mono">
                 +{coinsEarned}
               </div>
-              <div className="text-[10px] font-bold text-zinc-400">Tanga</div>
+              <div className="text-[12px] font-bold text-zinc-400">Tanga</div>
             </div>
 
             <div className="p-3 rounded-2xl bg-zinc-900/80 border border-indigo-500/20 text-center">
               <Zap className="size-4.5 text-indigo-400 mx-auto mb-1 fill-indigo-400/20" />
-              <div className="text-base font-black text-indigo-300 font-mono">
+              <div className="text-base font-bold text-indigo-300 font-mono">
                 +{xpEarned}
               </div>
-              <div className="text-[10px] font-bold text-zinc-400">XP Tajriba</div>
+              <div className="text-[12px] font-bold text-zinc-400">XP Tajriba</div>
             </div>
 
             <div className="p-3 rounded-2xl bg-zinc-900/80 border border-emerald-500/20 text-center">
               <Trophy className="size-4.5 text-emerald-400 mx-auto mb-1" />
-              <div className="text-base font-black text-emerald-300 font-mono">
+              <div className="text-base font-bold text-emerald-300 font-mono">
                 +{dtmScoreDelta.toFixed(1)}
               </div>
-              <div className="text-[10px] font-bold text-zinc-400">DTM Ball</div>
+              <div className="text-[12px] font-bold text-zinc-400">DTM Ball</div>
             </div>
 
             <div className="p-3 rounded-2xl bg-zinc-900/80 border border-purple-500/20 text-center">
               <Sparkles className="size-4.5 text-purple-400 mx-auto mb-1" />
-              <div className="text-base font-black text-purple-300 font-mono">
+              <div className="text-base font-bold text-purple-300 font-mono">
                 +1 Bepul
               </div>
-              <div className="text-[10px] font-bold text-zinc-400">AI Esse Krediti</div>
+              <div className="text-[12px] font-bold text-zinc-400">AI Esse Krediti</div>
             </div>
           </div>
 
           {/* Strava 1-Click Auto-Post to Community Feed */}
           <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-white/10 text-left flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-black text-orange-400 uppercase tracking-wide">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-orange-400 uppercase tracking-wide">
                 <Share2 className="size-3.5" />
                 <span>Strava Rejimi: Hamjamiyatga Ulashish</span>
               </div>
@@ -303,12 +303,12 @@ export default function Stage5RewardCeremony({
           {cycleNumber === 1 && (
             <div className="p-4 rounded-2xl border border-orange-500/40 bg-gradient-to-r from-orange-500/15 via-rose-500/10 to-amber-500/15 text-left space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-orange-500/25 text-orange-300 border border-orange-500/40">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-bold uppercase bg-orange-500/25 text-orange-300 border border-orange-500/40">
                   <Flame className="size-3.5 fill-current" />
                   <span>🔥 2.0x SUPER-COMBO YOQILDI!</span>
                 </span>
                 {timerActive && (
-                  <span className="font-mono text-xs font-black text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-500/30">
+                  <span className="font-mono text-xs font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-500/30">
                     Avtostart: {countdown}s
                   </span>
                 )}
@@ -333,7 +333,7 @@ export default function Stage5RewardCeremony({
                 <Button
                   type="button"
                   onClick={onRestartCycle}
-                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-orange-500 via-rose-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-orange-500 via-rose-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   <Flame className="size-4 fill-current" />
                   <span>🔥 2-Raundni Boshlash (2.0x Super-Combo) {timerActive ? `(${countdown}s)` : ''}</span>
@@ -357,12 +357,12 @@ export default function Stage5RewardCeremony({
           {cycleNumber === 2 && (
             <div className="p-4 rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-500/15 via-purple-500/10 to-amber-500/15 text-left space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase bg-rose-500/25 text-rose-300 border border-rose-500/40">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-bold uppercase bg-rose-500/25 text-rose-300 border border-rose-500/40">
                   <Zap className="size-3.5 fill-current" />
                   <span>⚡ 2.5x ULTRA-COMBO!</span>
                 </span>
                 {timerActive && (
-                  <span className="font-mono text-xs font-black text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
+                  <span className="font-mono text-xs font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
                     Avtostart: {countdown}s
                   </span>
                 )}
@@ -387,7 +387,7 @@ export default function Stage5RewardCeremony({
                 <Button
                   type="button"
                   onClick={onRestartCycle}
-                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
                 >
                   <Zap className="size-4 fill-current" />
                   <span>🚀 3-Raundni Boshlash (2.5x Ultra-Combo) {timerActive ? `(${countdown}s)` : ''}</span>
@@ -415,10 +415,10 @@ export default function Stage5RewardCeremony({
                   <Trophy className="size-4" />
                 </span>
                 <div>
-                  <h4 className="text-sm font-black text-amber-300 uppercase tracking-wide">
+                  <h4 className="text-sm font-bold text-amber-300 uppercase tracking-wide">
                     👑 DARAХT 100% SUG'ORILDI VA CHINORGA AYLANDI!
                   </h4>
-                  <p className="text-[11px] text-zinc-300">
+                  <p className="text-[12px] text-zinc-300">
                     Siz bugungi 60 daqiqalik marafonning barcha 3 ta raundini to'liq yopdingiz!
                   </p>
                 </div>
@@ -435,7 +435,7 @@ export default function Stage5RewardCeremony({
               <Button
                 type="button"
                 onClick={onStartBoss || onRestartCycle}
-                className="w-full h-13 rounded-xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-xl shadow-rose-600/40 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                className="w-full h-13 rounded-xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-rose-600/40 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
               >
                 <Swords className="size-4" />
                 <span>⚔️ 15 Daqiqalik Kunlik Boss: Mini-BMB Stress Sinovini Boshlash</span>

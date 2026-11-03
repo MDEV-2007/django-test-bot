@@ -20,9 +20,9 @@ export default function TelegramBannerCta() {
               <span>Telegram Mini App · Barcha qurilmalarda</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-[-0.03em] leading-[1.12]">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-[-0.03em] leading-[1.12]">
               Birgina{' '}
-              <span className="text-[#30D158] font-black">/start</span>{' '}
+              <span className="text-[#30D158] font-bold">/start</span>{' '}
               bosish orqali imtihonga tayyorgarlikni boshlang!
             </h2>
 
@@ -42,7 +42,7 @@ export default function TelegramBannerCta() {
               className="ios-spring group inline-flex w-full sm:w-auto min-w-[260px] items-center justify-center gap-3 rounded-full bg-white px-7 py-4 sm:py-4.5 shadow-[0_12px_32px_rgba(0,0,0,0.28)] hover:bg-[#F2F2F7]"
             >
               <Send className="size-5.5 -rotate-12 text-[#007AFF] transition-transform group-hover:scale-110" />
-              <span className="text-lg sm:text-xl font-black tracking-tight text-[#1C1C1E]">
+              <span className="text-lg sm:text-xl font-bold tracking-tight text-[#1C1C1E]">
                 @ilmildiziuz_bot
               </span>
             </a>

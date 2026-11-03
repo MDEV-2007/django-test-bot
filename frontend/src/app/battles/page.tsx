@@ -396,8 +396,8 @@ export default function BattlesPage() {
                   <Card key={s.label} className={cn('gap-0 py-3', s.cls)}>
                     <CardContent className="px-2 text-center">
                       <p className="text-xs font-bold uppercase text-muted-foreground">{s.label}</p>
-                      <p className={cn('mt-0.5 font-mono text-base font-black tabular-nums', s.text)}>{s.value}</p>
-                      {s.sub && <p className="mt-0.5 text-[9px] font-semibold text-blue-300">{s.sub}</p>}
+                      <p className={cn('mt-0.5 font-mono text-base font-bold tabular-nums', s.text)}>{s.value}</p>
+                      {s.sub && <p className="mt-0.5 text-[11px] font-semibold text-blue-300">{s.sub}</p>}
                     </CardContent>
                   </Card>
                 ))}
@@ -426,7 +426,7 @@ export default function BattlesPage() {
                 type="button"
                 onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('1v1'); }}
                 className={cn(
-                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
                   activeBattleTab === '1v1'
                     ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md'
                     : 'text-muted-foreground hover:text-foreground'
@@ -440,7 +440,7 @@ export default function BattlesPage() {
                 type="button"
                 onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('class'); }}
                 className={cn(
-                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
                   activeBattleTab === 'class'
                     ? 'bg-amber-500 text-black shadow-md'
                     : 'text-muted-foreground hover:text-foreground'
@@ -454,7 +454,7 @@ export default function BattlesPage() {
                 type="button"
                 onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('leaderboard'); }}
                 className={cn(
-                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
                   activeBattleTab === 'leaderboard'
                     ? 'bg-primary text-primary-foreground shadow-md'
                     : 'text-muted-foreground hover:text-foreground'
@@ -472,12 +472,12 @@ export default function BattlesPage() {
                 <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-500/15 via-zinc-900 to-rose-500/15 p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-gradient-to-r from-orange-500 to-rose-600 text-white font-black text-[10px] uppercase">
+                      <Badge className="bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold text-[12px] uppercase">
                         Ghost PvP 24/7
                       </Badge>
                       <span className="text-xs font-mono font-bold text-orange-400">⏱ 3 Soniyada Raqib</span>
                     </div>
-                    <h3 className="text-lg font-black text-white">
+                    <h3 className="text-lg font-bold text-white">
                       Tezkor 1v1 Ghost Duel Arena
                     </h3>
                     <p className="text-xs text-zinc-300 max-w-lg leading-relaxed">
@@ -493,7 +493,7 @@ export default function BattlesPage() {
                       // o'qimaydigan `inGhostArena` holati o'rnatilardi — tugma ishlamasdi.
                       setMode('ghost');
                     }}
-                    className="h-12 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-black text-sm shadow-xl shadow-rose-600/30 shrink-0 cursor-pointer"
+                    className="h-12 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-bold text-sm shadow-xl shadow-rose-600/30 shrink-0 cursor-pointer"
                   >
                     <Swords className="size-4 mr-2" />
                     <span>Duelni Boshlash (3s)</span>
@@ -562,7 +562,7 @@ export default function BattlesPage() {
                     <div className="flex items-center gap-2">
                       <PremiumIcon icon={Sparkles} tone="emerald" size="xs" glow />
                       <div>
-                        <h3 className="text-base font-black text-foreground">Intellektual O&apos;yinlar &amp; Mini-Gamlar</h3>
+                        <h3 className="text-base font-bold text-foreground">Intellektual O&apos;yinlar &amp; Mini-Gamlar</h3>
                         <p className="text-xs text-muted-foreground">Xaritalar, tarixiy shaxslar va xronologiya bo&apos;yicha maxsus sinovlar</p>
                       </div>
                     </div>
@@ -575,11 +575,11 @@ export default function BattlesPage() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
                               <PremiumIcon icon={MapPin} tone="sky" size="md" glow className="group-hover:scale-110" />
-                              <Badge variant="outline" className="border-blue-500/40 bg-blue-500/10 text-blue-400 text-[10px] font-black">
+                              <Badge variant="outline" className="border-blue-500/40 bg-blue-500/10 text-blue-400 text-[12px] font-bold">
                                 XARITA GAME
                               </Badge>
                             </div>
-                            <h4 className="text-base font-black text-foreground group-hover:text-blue-400 transition-colors">
+                            <h4 className="text-base font-bold text-foreground group-hover:text-blue-400 transition-colors">
                               Xarita topshirig&apos;i
                             </h4>
                             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -587,7 +587,7 @@ export default function BattlesPage() {
                             </p>
                           </div>
                           <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                            <span className="text-[11px] font-bold text-amber-400">+25 XP • +10 tanga</span>
+                            <span className="text-[12px] font-bold text-amber-400">+25 XP • +10 tanga</span>
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
                               O&apos;ynash <ArrowRight className="size-3.5" />
                             </span>
@@ -602,11 +602,11 @@ export default function BattlesPage() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
                               <PremiumIcon icon={UserCheck} tone="purple" size="md" glow className="group-hover:scale-110" />
-                              <Badge variant="outline" className="border-purple-500/40 bg-purple-500/10 text-purple-400 text-[10px] font-black">
+                              <Badge variant="outline" className="border-purple-500/40 bg-purple-500/10 text-purple-400 text-[12px] font-bold">
                                 TARIXIY SHAXS
                               </Badge>
                             </div>
-                            <h4 className="text-base font-black text-foreground group-hover:text-purple-400 transition-colors">
+                            <h4 className="text-base font-bold text-foreground group-hover:text-purple-400 transition-colors">
                               Tarixiy Shaxslar
                             </h4>
                             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -614,7 +614,7 @@ export default function BattlesPage() {
                             </p>
                           </div>
                           <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                            <span className="text-[11px] font-bold text-amber-400">+25 XP • +10 tanga</span>
+                            <span className="text-[12px] font-bold text-amber-400">+25 XP • +10 tanga</span>
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
                               O&apos;ynash <ArrowRight className="size-3.5" />
                             </span>
@@ -629,11 +629,11 @@ export default function BattlesPage() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
                               <PremiumIcon icon={History} tone="emerald" size="md" glow className="group-hover:scale-110" />
-                              <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-black">
+                              <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[12px] font-bold">
                                 XRONOLOGIYA
                               </Badge>
                             </div>
-                            <h4 className="text-base font-black text-foreground group-hover:text-emerald-400 transition-colors">
+                            <h4 className="text-base font-bold text-foreground group-hover:text-emerald-400 transition-colors">
                               Vaqt o&apos;qi (Timeline)
                             </h4>
                             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -641,7 +641,7 @@ export default function BattlesPage() {
                             </p>
                           </div>
                           <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                            <span className="text-[11px] font-bold text-amber-400">+30 XP • +15 tanga</span>
+                            <span className="text-[12px] font-bold text-amber-400">+30 XP • +15 tanga</span>
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
                               O&apos;ynash <ArrowRight className="size-3.5" />
                             </span>
@@ -667,17 +667,17 @@ export default function BattlesPage() {
                 >
                   <CardContent className="p-5 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                     <div className="flex items-center gap-4">
-                      <div className="size-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-black shrink-0 shadow-md">
+                      <div className="size-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-bold shrink-0 shadow-md">
                         <Swords className="size-7" />
                       </div>
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
-                          <Badge className="bg-amber-500 text-black font-black text-[10px] uppercase tracking-wider">
+                          <Badge className="bg-amber-500 text-black font-bold text-[12px] uppercase tracking-wider">
                             TEACHER LIVE QUIZ
                           </Badge>
                           <span className="text-xs font-bold text-amber-500">6 Xonali PIN-kod</span>
                         </div>
-                        <h3 className="text-lg sm:text-xl font-black text-foreground">
+                        <h3 className="text-lg sm:text-xl font-bold text-foreground">
                           O&apos;qituvchi Sinf Jangiga Kirish (PIN)
                         </h3>
                         <p className="text-xs sm:text-sm text-muted-foreground max-w-lg">
@@ -685,7 +685,7 @@ export default function BattlesPage() {
                         </p>
                       </div>
                     </div>
-                    <Button className="h-12 px-6 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-black text-sm shrink-0 shadow-md cursor-pointer">
+                    <Button className="h-12 px-6 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold text-sm shrink-0 shadow-md cursor-pointer">
                       PIN Kiritish <ArrowRight className="size-4 ml-1.5" />
                     </Button>
                   </CardContent>
@@ -698,7 +698,7 @@ export default function BattlesPage() {
               <div className="space-y-4">
                 <div className="rounded-3xl border border-primary/30 bg-primary/10 p-6 text-center space-y-3">
                   <Trophy className="size-12 text-primary mx-auto animate-bounce" />
-                  <h3 className="text-lg font-black text-foreground">Haftalik ELO Ligasi va Respublika Reytingi</h3>
+                  <h3 className="text-lg font-bold text-foreground">Haftalik ELO Ligasi va Respublika Reytingi</h3>
                   <p className="text-xs text-muted-foreground max-w-md mx-auto">
                     Har bir g&apos;alaba sizga +25 ELO ball beradi. Respublika bo&apos;yicha top-10 o&apos;quvchilar ro&apos;yxatiga kiring va qimmatbaho sovrinlarni yutib oling!
                   </p>
@@ -778,7 +778,7 @@ export default function BattlesPage() {
                   </Avatar>
                   <div className="min-w-0">
                     <p className="truncate text-xs font-bold">Siz</p>
-                    <p className="font-mono text-sm font-black text-[var(--accent-text)]">{myScore} ball</p>
+                    <p className="font-mono text-sm font-bold text-[var(--accent-text)]">{myScore} ball</p>
                   </div>
                 </div>
 
@@ -786,13 +786,13 @@ export default function BattlesPage() {
                   <span className="block font-mono text-xs font-bold uppercase text-muted-foreground">
                     Raund {roundIdx + 1} / {questions.length}
                   </span>
-                  <span className="text-xs font-black text-rose-400">VS</span>
+                  <span className="text-xs font-bold text-rose-400">VS</span>
                 </div>
 
                 <div className="flex min-w-0 items-center gap-2.5 text-right">
                   <div className="min-w-0">
                     <p className="truncate text-xs font-bold">{opponentName}</p>
-                    <p className="font-mono text-sm font-black text-rose-400">{oppScore} ball</p>
+                    <p className="font-mono text-sm font-bold text-rose-400">{oppScore} ball</p>
                   </div>
                   <Avatar className="size-10 border border-rose-400">
                     <AvatarFallback className="bg-[var(--surface-input)] text-rose-300"><Bot className="size-5" /></AvatarFallback>
@@ -880,7 +880,7 @@ export default function BattlesPage() {
               {arena && (
                 <div className="w-full rounded-2xl border bg-[var(--surface-input)] px-4 py-3">
                   <p className="font-mono text-xs uppercase text-muted-foreground">Arena reytingi</p>
-                  <p className="mt-0.5 flex items-center justify-center gap-2 font-mono text-xl font-black">
+                  <p className="mt-0.5 flex items-center justify-center gap-2 font-mono text-xl font-bold">
                     <StatNumber value={arena.elo_rating} />
                     {prevElo !== null && prevElo !== arena.elo_rating && (
                       <span className={cn(

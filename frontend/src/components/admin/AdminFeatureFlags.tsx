@@ -154,16 +154,16 @@ export default function AdminFeatureFlags() {
                       <h4 className="text-xs sm:text-sm font-bold text-zinc-100 tracking-tight">
                         {mod.title}
                       </h4>
-                      <Badge variant="outline" className={cn("text-[9px] font-mono py-0 px-1.5", toneColors)}>
+                      <Badge variant="outline" className={cn("text-[11px] font-mono py-0 px-1.5", toneColors)}>
                         {mod.badge}
                       </Badge>
                       {isEnabled ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400">
+                        <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-400">
                           <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
                           Faol
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-zinc-500">
+                        <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-zinc-500">
                           <span className="size-1.5 rounded-full bg-zinc-600" />
                           O&apos;chirilgan
                         </span>
@@ -174,7 +174,7 @@ export default function AdminFeatureFlags() {
                       {mod.description}
                     </p>
 
-                    <div className="pt-1 flex items-center gap-2 text-[11px] text-zinc-500">
+                    <div className="pt-1 flex items-center gap-2 text-[12px] text-zinc-500">
                       <span>🎯 <strong>O&apos;sish kuchi:</strong> {mod.impact}</span>
                     </div>
                   </div>

@@ -129,7 +129,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
         <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
           Oddiy va Shaffof Tariflar
         </div>
-        <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
+        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
           Natijaga mos,{' '}
           <span className="bg-gradient-to-r from-[#007AFF] to-[#34C759] bg-clip-text text-transparent">
             hamyonbop obuna
@@ -176,7 +176,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
               }`}
             >
               {plan.ribbon && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#007AFF] px-3.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-[0_4px_10px_rgba(0,122,255,0.3)] whitespace-nowrap">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#007AFF] px-3.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_4px_10px_rgba(0,122,255,0.3)] whitespace-nowrap">
                   {plan.ribbon}
                 </div>
               )}
@@ -185,7 +185,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-base font-bold text-[#1C1C1E]">{plan.name}</h3>
                   {plan.perDay && (
-                    <span className="rounded-full bg-[#34C759]/12 px-2.5 py-0.5 text-[11px] font-mono font-bold text-[#248A3D]">
+                    <span className="rounded-full bg-[#34C759]/12 px-2.5 py-0.5 text-[12px] font-mono font-bold text-[#248A3D]">
                       {plan.perDay}
                     </span>
                   )}
@@ -197,7 +197,7 @@ export default function PricingSection({ plans }: PricingSectionProps) {
 
                 <div className="mt-4 border-y border-black/[0.06] py-4">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-3xl font-black tracking-tight text-[#1C1C1E]">
+                    <span className="font-mono text-3xl font-bold tracking-tight text-[#1C1C1E]">
                       {plan.price}
                     </span>
                     <span className="text-xs text-[#6C6C70] font-medium">{plan.unit}</span>

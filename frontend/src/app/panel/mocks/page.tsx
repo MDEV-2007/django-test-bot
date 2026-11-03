@@ -358,7 +358,7 @@ export default function PanelMocksPage() {
                     <Trophy className="size-4.5 text-amber-500" />
                     Mock Imtihon Sessiyalari
                   </span>
-                  <Badge variant="secondary" className="text-[11px] font-semibold">
+                  <Badge variant="secondary" className="text-[12px] font-semibold">
                     {data.available_mocks.length} ta imtihon
                   </Badge>
                 </div>
@@ -393,15 +393,15 @@ export default function PanelMocksPage() {
                 >
                   <div>
                     <div className="flex items-center justify-between w-full">
-                      <Badge variant={!selectedTestId ? 'default' : 'outline'} className="text-[10px] px-1.5 py-0 h-4.5">
+                      <Badge variant={!selectedTestId ? 'default' : 'outline'} className="text-[12px] px-1.5 py-0 h-4.5">
                         Hammasi
                       </Badge>
                       {!selectedTestId && <CheckCircle2 className="size-3.5 text-primary" />}
                     </div>
                     <p className="font-bold text-xs mt-2 text-foreground">Barcha imtihonlar</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Umumiy barcha natijalar</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">Umumiy barcha natijalar</p>
                   </div>
-                  <span className="text-[11px] text-muted-foreground/80 mt-2 font-medium">
+                  <span className="text-[12px] text-muted-foreground/80 mt-2 font-medium">
                     Jami: {data.total_count} urinish
                   </span>
                 </button>
@@ -424,7 +424,7 @@ export default function PanelMocksPage() {
                         <div className="flex items-center justify-between w-full gap-1.5">
                           <Badge
                             variant="outline"
-                            className={`text-[10px] px-1.5 py-0 h-4.5 font-semibold ${
+                            className={`text-[12px] px-1.5 py-0 h-4.5 font-semibold ${
                               isSelected
                                 ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/40'
                                 : 'bg-muted text-muted-foreground'
@@ -433,13 +433,13 @@ export default function PanelMocksPage() {
                             {m.subject_name || 'Fan'}
                           </Badge>
                           {isSelected ? (
-                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-[11px] font-bold">
+                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-[12px] font-bold">
                               <span>Tanlangan</span>
                               <CheckCircle2 className="size-3.5" />
                             </div>
                           ) : (
                             m.scheduled_at && (
-                              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                              <span className="text-[12px] text-muted-foreground flex items-center gap-0.5">
                                 <Calendar className="size-2.5" /> {m.scheduled_at.split(' ')[0]}
                               </span>
                             )
@@ -451,7 +451,7 @@ export default function PanelMocksPage() {
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-border/40 text-[11px] text-muted-foreground">
+                      <div className="flex items-center justify-between gap-2 mt-2.5 pt-2 border-t border-border/40 text-[12px] text-muted-foreground">
                         <span className="flex items-center gap-1 font-medium">
                           <UserCheck className="size-3 text-blue-500" /> {m.participants_count || 0} o&apos;quvchi
                         </span>
@@ -460,7 +460,7 @@ export default function PanelMocksPage() {
                             <Trophy className="size-3" /> Max: {m.max_score}%
                           </span>
                         ) : (
-                          <span className="text-[10px] text-muted-foreground/60">—</span>
+                          <span className="text-[12px] text-muted-foreground/60">—</span>
                         )}
                       </div>
                     </button>
@@ -485,12 +485,12 @@ export default function PanelMocksPage() {
                     </span>
                   )}
                 </div>
-                <div className="text-muted-foreground text-[11px] shrink-0">
+                <div className="text-muted-foreground text-[12px] shrink-0">
                   Faqat ushbu imtihonga oid 1-o&apos;rin, 2-o&apos;rin va natijalar ko&apos;rsatilmoqda
                 </div>
               </div>
             ) : (
-              <div className="px-4 py-2 bg-muted/40 border-t border-border/40 text-[11px] text-muted-foreground flex items-center gap-1.5">
+              <div className="px-4 py-2 bg-muted/40 border-t border-border/40 text-[12px] text-muted-foreground flex items-center gap-1.5">
                 <HelpCircle className="size-3.5 text-amber-500 shrink-0" />
                 <span>
                   Maslahat: Masalan, tarixdan 2 ta mock o&apos;tkazilgan bo&apos;lsa, har birining 1-o&apos;rin g&apos;oliblari va o&apos;rinlarini alohida ko&apos;rish uchun yuqoridagi mos imtihon kartochkasini bosing.
@@ -780,20 +780,20 @@ export default function PanelMocksPage() {
                         {/* O'rin */}
                         <td className="py-3.5 px-4 text-center">
                           {isTop1 ? (
-                            <span className="inline-flex size-7 items-center justify-center rounded-full bg-amber-500/20 text-amber-500 font-black text-sm shadow-xs ring-1 ring-amber-500/40">
+                            <span className="inline-flex size-7 items-center justify-center rounded-full bg-amber-500/20 text-amber-500 font-bold text-sm shadow-xs ring-1 ring-amber-500/40">
                               🥇
                             </span>
                           ) : isTop2 ? (
-                            <span className="inline-flex size-7 items-center justify-center rounded-full bg-slate-400/20 text-slate-400 font-black text-sm shadow-xs ring-1 ring-slate-400/40">
+                            <span className="inline-flex size-7 items-center justify-center rounded-full bg-slate-400/20 text-slate-400 font-bold text-sm shadow-xs ring-1 ring-slate-400/40">
                               🥈
                             </span>
                           ) : isTop3 ? (
-                            <span className="inline-flex size-7 items-center justify-center rounded-full bg-amber-700/20 text-amber-700 dark:text-amber-600 font-black text-sm shadow-xs ring-1 ring-amber-700/40">
+                            <span className="inline-flex size-7 items-center justify-center rounded-full bg-amber-700/20 text-amber-700 dark:text-amber-600 font-bold text-sm shadow-xs ring-1 ring-amber-700/40">
                               🥉
                             </span>
                           ) : item.is_cheating_flagged ? (
                             <span
-                              className="inline-flex h-6 items-center justify-center rounded-md px-1.5 text-[11px] font-bold text-destructive bg-destructive/12 ring-1 ring-destructive/30 whitespace-nowrap"
+                              className="inline-flex h-6 items-center justify-center rounded-md px-1.5 text-[12px] font-bold text-destructive bg-destructive/12 ring-1 ring-destructive/30 whitespace-nowrap"
                               title={`Imtihon oynasidan ${item.tab_switch_count ?? 0} marta chiqqan — reytingdan chetlatilgan`}
                             >
                               ⚠ {item.tab_switch_count ?? 0}x
@@ -839,7 +839,7 @@ export default function PanelMocksPage() {
                                     <>
                                       {displayU && <span className="truncate">{displayU}</span>}
                                       {item.phone && (
-                                        <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground/80">
+                                        <span className="inline-flex items-center gap-0.5 text-[12px] text-muted-foreground/80">
                                           <Phone className="size-2.5" /> {item.phone}
                                         </span>
                                       )}
@@ -859,7 +859,7 @@ export default function PanelMocksPage() {
                           <p className="font-medium text-foreground line-clamp-1 max-w-xs text-xs sm:text-sm">
                             {item.test_title}
                           </p>
-                          <span className="inline-block mt-0.5 text-[11px] font-semibold text-muted-foreground px-1.5 py-0.5 rounded-sm bg-muted">
+                          <span className="inline-block mt-0.5 text-[12px] font-semibold text-muted-foreground px-1.5 py-0.5 rounded-sm bg-muted">
                             {item.subject_name}
                           </span>
                         </td>
@@ -872,7 +872,7 @@ export default function PanelMocksPage() {
                             </span>
                             <Badge
                               variant="outline"
-                              className={`text-[11px] font-bold px-2 py-0.5 ${GRADE_BADGE_STYLES[item.grade_tone] || GRADE_BADGE_STYLES.slate}`}
+                              className={`text-[12px] font-bold px-2 py-0.5 ${GRADE_BADGE_STYLES[item.grade_tone] || GRADE_BADGE_STYLES.slate}`}
                             >
                               {item.grade}
                             </Badge>
@@ -953,7 +953,7 @@ export default function PanelMocksPage() {
           {items.length > 0 && (
             <div className="border-t border-border/40 bg-muted/20 px-4 py-3 text-xs text-muted-foreground flex items-center justify-between">
               <span>Ko&apos;rsatildi: <b>{items.length}</b> ta natija</span>
-              <span className="text-[11px] text-muted-foreground/80">
+              <span className="text-[12px] text-muted-foreground/80">
                 Ism yoki &ldquo;Sertifikat&rdquo; ustiga bosib sertifikatni ko&apos;rishingiz mumkin
               </span>
             </div>
@@ -1021,13 +1021,13 @@ export default function PanelMocksPage() {
                       <div key={t.attempt_id} className="p-2.5 flex items-center justify-between text-xs">
                         <div>
                           <p className="font-semibold text-white">{t.user_name}</p>
-                          <p className="text-[11px] text-slate-400">{t.test_title}</p>
+                          <p className="text-[12px] text-slate-400">{t.test_title}</p>
                         </div>
                         <div className="text-right">
                           <span className="font-mono text-emerald-400 font-medium">
                             {t.elapsed_minutes} daqiqa o&apos;tdi
                           </span>
-                          <p className="text-[11px] text-slate-400">{t.answered_count} ta savol belgilandi</p>
+                          <p className="text-[12px] text-slate-400">{t.answered_count} ta savol belgilandi</p>
                         </div>
                       </div>
                     ))}
@@ -1051,7 +1051,7 @@ export default function PanelMocksPage() {
                       <div key={test.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                         <div>
                           <p className="font-semibold text-white text-sm">{test.title}</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="text-[12px] text-slate-400 mt-0.5">
                             Fan: <span className="text-slate-300">{test.subject_name}</span> • 
                             Eslatma oluvchilar: <span className="text-amber-400 font-semibold">{test.reminders_count} nafar</span>
                           </p>

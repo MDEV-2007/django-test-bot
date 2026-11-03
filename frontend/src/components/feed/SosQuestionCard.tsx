@@ -114,7 +114,7 @@ export default function SosQuestionCard({
               <span className="text-sm font-bold text-white leading-none">{author.name}</span>
               <span className="text-xs text-zinc-400">@{author.username}</span>
             </div>
-            <span className="text-[11px] text-zinc-500 font-medium">{subjectName} • SOS Savol</span>
+            <span className="text-[12px] text-zinc-500 font-medium">{subjectName} • SOS Savol</span>
           </div>
         </div>
 
@@ -181,7 +181,7 @@ export default function SosQuestionCard({
                 <div className="flex items-center gap-2.5">
                   <div
                     className={cn(
-                      'size-7 rounded-xl font-black text-xs flex items-center justify-center shrink-0 transition-colors',
+                      'size-7 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 transition-colors',
                       hasVoted
                         ? isCorrect
                           ? 'bg-emerald-500 text-black'

@@ -25,7 +25,7 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
         <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
           Savol-Javoblar
         </div>
-        <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl">
+        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl">
           Ko&apos;p so&apos;raladigan savollar
         </h2>
         <p className="mt-3 text-sm text-[#6C6C70] max-w-xl mx-auto">

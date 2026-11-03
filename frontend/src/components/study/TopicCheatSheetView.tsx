@@ -130,14 +130,14 @@ export default function TopicCheatSheetView({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-amber-400">
+              <span className="text-[12px] font-mono uppercase tracking-wider font-bold text-amber-400">
                 ANTI-DARSLIK
               </span>
-              <Badge variant="outline" className="text-[9px] border-amber-500/30 text-amber-300 py-0">
+              <Badge variant="outline" className="text-[11px] border-amber-500/30 text-amber-300 py-0">
                 60 SONIYALIK MIKRO-XARITA
               </Badge>
             </div>
-            <h3 className="text-sm sm:text-base font-extrabold text-zinc-100 tracking-tight">
+            <h3 className="text-sm sm:text-base font-bold text-zinc-100 tracking-tight">
               {data.topic_title || topicTitle}
             </h3>
           </div>
@@ -203,12 +203,12 @@ export default function TopicCheatSheetView({
                 key={idx}
                 className="p-3 rounded-lg border border-white/[0.06] bg-zinc-900/50 hover:border-amber-500/30 transition-all flex items-start gap-2.5"
               >
-                <span className="size-5 rounded-md bg-amber-500/10 text-amber-400 font-mono text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                <span className="size-5 rounded-md bg-amber-500/10 text-amber-400 font-mono text-[12px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                   #{idx + 1}
                 </span>
                 <div className="space-y-0.5 min-w-0">
                   <p className="text-xs font-bold text-zinc-100">{pill.term}</p>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">{pill.definition}</p>
+                  <p className="text-[12px] text-zinc-400 leading-relaxed">{pill.definition}</p>
                 </div>
               </div>
             ))}
@@ -225,7 +225,7 @@ export default function TopicCheatSheetView({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   {/* Left (Wrong - Red Border) */}
                   <div className="p-2.5 rounded-lg border border-rose-500/30 bg-rose-500/[0.06] space-y-1">
-                    <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wide flex items-center gap-1">
+                    <span className="text-[12px] font-bold text-rose-400 uppercase tracking-wide flex items-center gap-1">
                       ❌ Ko&apos;pchilik adashadi:
                     </span>
                     <p className="text-zinc-200 font-medium leading-relaxed">{trap.wrong}</p>
@@ -233,7 +233,7 @@ export default function TopicCheatSheetView({
 
                   {/* Right (Correct - Green Border) */}
                   <div className="p-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] space-y-1">
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1">
+                    <span className="text-[12px] font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1">
                       ✅ Haqiqiy BMB javobi:
                     </span>
                     <p className="text-zinc-200 font-bold leading-relaxed">{trap.correct}</p>
@@ -241,7 +241,7 @@ export default function TopicCheatSheetView({
                 </div>
 
                 {trap.explanation && (
-                  <p className="text-[11px] text-zinc-400 italic px-1">
+                  <p className="text-[12px] text-zinc-400 italic px-1">
                     💡 <strong>Layfxak:</strong> {trap.explanation}
                   </p>
                 )}
@@ -257,11 +257,11 @@ export default function TopicCheatSheetView({
                 <h4 className="text-sm font-bold text-white flex items-center gap-2">
                   <Clock className="size-4 text-cyan-400" />
                   <span>Mantiqiy Xronologiya &amp; Zanjir</span>
-                  <Badge variant="outline" className="text-[10px] font-mono border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+                  <Badge variant="outline" className="text-[12px] font-mono border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
                     {data.visual_chain.length} ta bosqich
                   </Badge>
                 </h4>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
+                <p className="text-[12px] text-zinc-400 mt-0.5">
                   Voqea va hodisalarning ketma-ket mantiqiy bog&apos;liqlik xaritasi
                 </p>
               </div>
@@ -283,17 +283,17 @@ export default function TopicCheatSheetView({
                     )}
 
                     {/* Step Node Circle */}
-                    <div className="size-8 sm:size-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-md shadow-cyan-500/20 ring-4 ring-zinc-900 z-10 group-hover:scale-105 transition-transform">
+                    <div className="size-8 sm:size-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-md shadow-cyan-500/20 ring-4 ring-zinc-900 z-10 group-hover:scale-105 transition-transform">
                       {idx + 1}
                     </div>
 
                     {/* Step Content Card */}
                     <div className="flex-1 rounded-2xl border border-white/[0.08] bg-zinc-900/80 hover:bg-zinc-800/80 p-3.5 sm:p-4 transition-all space-y-1.5 shadow-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md">
+                        <span className="text-[12px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md">
                           {stageLabel}
                         </span>
-                        <span className="text-[10px] font-mono text-zinc-500">
+                        <span className="text-[12px] font-mono text-zinc-500">
                           #{idx + 1}-qadam
                         </span>
                       </div>
@@ -326,20 +326,20 @@ export default function TopicCheatSheetView({
                 </div>
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full">
                       ⚡ 3 Daqiqalik Fokus Sprint
                     </span>
-                    <span className="text-[10px] font-bold text-zinc-400">
+                    <span className="text-[12px] font-bold text-zinc-400">
                       10 ta saralangan savol • +50 XP
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm font-extrabold text-white leading-snug">
+                  <p className="text-xs sm:text-sm font-bold text-white leading-snug">
                     Ushbu 10 ta fakt va 3 ta qopqonni hoziroq Sprintda mixlab qo&apos;ying!
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 shrink-0 self-end sm:self-center group-hover:opacity-95 transition-opacity">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 text-white font-bold text-xs shadow-md shadow-orange-500/20 shrink-0 self-end sm:self-center group-hover:opacity-95 transition-opacity">
                 <span>Mashqni Boshlash</span>
                 <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
               </div>

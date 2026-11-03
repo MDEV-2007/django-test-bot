@@ -375,7 +375,7 @@ export default function MockLobbyPage() {
 
                   {/* Title & Description */}
                   <div className="space-y-2">
-                    <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black tracking-tight text-foreground leading-tight">
+                    <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight text-foreground leading-tight">
                       {data.title}
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed pt-1">
@@ -386,16 +386,16 @@ export default function MockLobbyPage() {
                   {/* 3 Quick Stat Cards */}
                   <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                     <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3 sm:p-3.5 text-center">
-                      <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Savollar</span>
-                      <span className="text-sm sm:text-lg font-black text-foreground mt-0.5 block">{data.questions_count || (isCefr ? 73 : 45)} ta</span>
+                      <span className="text-[12px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Savollar</span>
+                      <span className="text-sm sm:text-lg font-bold text-foreground mt-0.5 block">{data.questions_count || (isCefr ? 73 : 45)} ta</span>
                     </div>
                     <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3 sm:p-3.5 text-center">
-                      <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Vaqt</span>
-                      <span className="text-sm sm:text-lg font-black text-foreground mt-0.5 block">{data.duration_minutes || (isCefr ? 150 : 90)} daqiqa</span>
+                      <span className="text-[12px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Vaqt</span>
+                      <span className="text-sm sm:text-lg font-bold text-foreground mt-0.5 block">{data.duration_minutes || (isCefr ? 150 : 90)} daqiqa</span>
                     </div>
                     <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/40 p-3 sm:p-3.5 text-center">
-                      <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Baholash</span>
-                      <span className={`text-sm sm:text-lg font-black mt-0.5 block ${isCefr ? 'text-violet-500 dark:text-violet-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
+                      <span className="text-[12px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Baholash</span>
+                      <span className={`text-sm sm:text-lg font-bold mt-0.5 block ${isCefr ? 'text-violet-500 dark:text-violet-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
                         {isCefr ? 'C1 dan A2' : 'A+ dan C+'}
                       </span>
                     </div>
@@ -448,7 +448,7 @@ export default function MockLobbyPage() {
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                             <span className="relative inline-flex size-3 rounded-full bg-emerald-500" />
                           </span>
-                          <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-400">
+                          <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-400">
                             {data.has_active_attempt ? "Imtihoningiz davom etmoqda" : "Imtihon ochiq — Hoziroq boshlang!"}
                           </span>
                         </div>
@@ -459,7 +459,7 @@ export default function MockLobbyPage() {
                         size="lg"
                         onClick={startTest}
                         disabled={starting}
-                        className="w-full rounded-2xl font-black text-base sm:text-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/25 h-14"
+                        className="w-full rounded-2xl font-bold text-base sm:text-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/25 h-14"
                       >
                         {starting ? 'Boshlanmoqda...' : data.has_active_attempt ? 'Davom ettirish 🚀' : 'Imtihonni boshlash 🚀'}
                         <ArrowRight className="size-5 ml-2" />
@@ -468,10 +468,10 @@ export default function MockLobbyPage() {
                   ) : (
                     <div className="space-y-5 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface-card)]/90 p-5 sm:p-6 backdrop-blur-md">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                        <span className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
                           <Clock className="size-3.5 text-amber-500" /> Boshlanishiga qoldi:
                         </span>
-                        <span className="text-[11px] text-muted-foreground font-medium">
+                        <span className="text-[12px] text-muted-foreground font-medium">
                           {data.scheduled_at ? formatScheduledTime(data.scheduled_at) : 'Tez kunda'}
                         </span>
                       </div>
@@ -485,10 +485,10 @@ export default function MockLobbyPage() {
                           { label: 'Soniya', val: seconds },
                         ].map((item, idx) => (
                           <div key={idx} className="flex flex-col items-center justify-center rounded-2xl border border-[var(--border-card)] bg-[var(--surface-hover)]/70 p-3 sm:p-4 shadow-sm">
-                            <span className="text-2xl sm:text-4xl font-black tabular-nums font-mono text-foreground tracking-tight">
+                            <span className="text-2xl sm:text-4xl font-bold tabular-nums font-mono text-foreground tracking-tight">
                               {String(item.val).padStart(2, '0')}
                             </span>
-                            <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase mt-1">
+                            <span className="text-[12px] sm:text-xs font-semibold text-muted-foreground uppercase mt-1">
                               {item.label}
                             </span>
                           </div>
@@ -501,7 +501,7 @@ export default function MockLobbyPage() {
                           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                             <ShieldCheck className="size-4 text-emerald-500" /> Tayyorgarlik cheklisti:
                           </span>
-                          <span className="text-[11px] font-mono font-bold text-emerald-400">
+                          <span className="text-[12px] font-mono font-bold text-emerald-400">
                             {Object.values(readinessChecks).filter(Boolean).length}/3 tayyor
                           </span>
                         </div>
@@ -642,7 +642,7 @@ export default function MockLobbyPage() {
                     </div>
                     <div>
                       <CardTitle className="text-sm sm:text-base font-bold text-foreground">Baholash Mezonlari</CardTitle>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-[12px] text-muted-foreground">
                         {isCefr ? "CEFR B2-C1 ballari bo'yicha darajalar taqsimoti" : "To'plangan ballar bo'yicha darajalar taqsimoti"}
                       </p>
                     </div>
@@ -651,7 +651,7 @@ export default function MockLobbyPage() {
 
                 <CardContent className="p-0">
                   {/* Table Header Row */}
-                  <div className="grid grid-cols-12 items-center bg-[var(--surface-hover)]/80 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-[var(--border-card)]">
+                  <div className="grid grid-cols-12 items-center bg-[var(--surface-hover)]/80 px-4 py-2.5 text-[12px] font-bold uppercase tracking-wider text-muted-foreground border-b border-[var(--border-card)]">
                     <div className="col-span-5">{isCefr ? "To'plangan ball" : "Ball oralig'i"}</div>
                     <div className="col-span-4">Daraja</div>
                     <div className="col-span-3 text-right">Sertifikat</div>
@@ -670,7 +670,7 @@ export default function MockLobbyPage() {
                             {item.score}
                           </div>
                           {item.percent && (
-                            <div className="text-[10px] font-mono text-muted-foreground leading-tight mt-0.5">
+                            <div className="text-[12px] font-mono text-muted-foreground leading-tight mt-0.5">
                               {item.percent}
                             </div>
                           )}
@@ -683,7 +683,7 @@ export default function MockLobbyPage() {
 
                         {/* Badge Column (Aligned right) */}
                         <div className="col-span-3 text-right">
-                          <span className={`inline-flex items-center justify-center min-w-[38px] px-2 py-1 rounded-md text-xs font-black border ${item.tone}`}>
+                          <span className={`inline-flex items-center justify-center min-w-[38px] px-2 py-1 rounded-md text-xs font-bold border ${item.tone}`}>
                             {item.grade}
                           </span>
                         </div>
@@ -697,7 +697,7 @@ export default function MockLobbyPage() {
                         <Sparkles className="size-3.5 text-emerald-400" />
                         <span>Rasch Modeli (BMB / DTM Standarti)</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      <p className="text-[12px] text-muted-foreground leading-relaxed">
                         Ushbu imtihon Bilim va malakalarni baholash agentligi (BMB) ning rasmiy Rasch (Item Response Theory) modeli: <code className="text-emerald-400 font-mono">P = e^(θ - b) / (1 + e^(θ - b))</code> bo&apos;yicha hisoblanadi. Savollar qiyinligi <code className="text-emerald-400 font-mono">b = ln((N - R)/R)</code> bo&apos;yicha aniqlanib, natija 70 ballik shkalaga o&apos;tkaziladi.
                       </p>
                     </div>

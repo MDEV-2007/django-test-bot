@@ -103,7 +103,7 @@ export default function TargetedAdBanner({
           {/* Header Badges */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] sm:text-xs font-bold uppercase tracking-wider shrink-0 px-2.5 py-1 rounded-xl">
+              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[12px] sm:text-xs font-bold uppercase tracking-wider shrink-0 px-2.5 py-1 rounded-xl">
                 <Sparkles className="size-3 mr-1 inline" />
                 {offer.badge_text || "Homiylik Taklifi"}
               </Badge>
@@ -112,7 +112,7 @@ export default function TargetedAdBanner({
                 <span>{offer.center_name}</span>
               </div>
             </div>
-            <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline-flex items-center gap-1">
+            <span className="text-[12px] text-zinc-400 font-medium hidden sm:inline-flex items-center gap-1">
               <ShieldCheck className="size-3.5 text-amber-400" />
               Tasdiqlangan Hamkor
             </span>
@@ -120,7 +120,7 @@ export default function TargetedAdBanner({
 
           {/* Title & Description — Full Width to prevent awkward wrapping */}
           <div className="space-y-1.5">
-            <h3 className="text-base sm:text-lg md:text-xl font-black text-white leading-snug">
+            <h3 className="text-base sm:text-lg md:text-xl font-bold text-white leading-snug">
               {offer.title}
             </h3>
             <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
@@ -130,7 +130,7 @@ export default function TargetedAdBanner({
 
           {/* Bottom Action Row: Highlights + Prominent CTA button */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/[0.08]">
-            <div className="flex items-center gap-2 text-[11px] text-amber-300/90 font-medium">
+            <div className="flex items-center gap-2 text-[12px] text-amber-300/90 font-medium">
               <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
                 🎁 1-dars BEPUL
               </span>
@@ -141,7 +141,7 @@ export default function TargetedAdBanner({
 
             <Button
               onClick={handleOpenModal}
-              className="w-full sm:w-auto min-h-[44px] bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold px-6 py-2.5 rounded-2xl shadow-lg shadow-amber-500/20 transition-transform active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer shrink-0"
+              className="w-full sm:w-auto min-h-[44px] bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-black font-bold px-6 py-2.5 rounded-2xl shadow-lg shadow-amber-500/20 transition-transform active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer shrink-0"
             >
               <PhoneCall className="size-4 shrink-0" />
               <span>{(offer.cta_text || "1-bosishda ro'yxatdan o'tish (1-dars BEPUL)").replace(/^[📞\s]+/, '').trim()}</span>
@@ -176,13 +176,13 @@ export default function TargetedAdBanner({
                     </div>
                     <div>
                       <h4 className="text-base font-bold text-white">{offer.center_name}</h4>
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[12px]">
                         1-dars BEPUL • Rasmiy Hamkor
                       </Badge>
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-black text-white mb-2 leading-tight">
+                  <h3 className="text-lg font-bold text-white mb-2 leading-tight">
                     {offer.title}
                   </h3>
                   <p className="text-xs text-zinc-300 mb-5 leading-relaxed">
@@ -224,7 +224,7 @@ export default function TargetedAdBanner({
                   <Button
                     onClick={handleSubmitLead}
                     disabled={submitting}
-                    className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-black rounded-2xl text-sm transition-transform active:scale-95"
+                    className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-bold rounded-2xl text-sm transition-transform active:scale-95"
                   >
                     {submitting ? "Yuborilmoqda..." : "📞 1-bosishda ariza topshirish"}
                   </Button>
@@ -234,7 +234,7 @@ export default function TargetedAdBanner({
                   <div className="size-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto">
                     <CheckCircle2 className="size-8" />
                   </div>
-                  <h3 className="text-xl font-black text-white">
+                  <h3 className="text-xl font-bold text-white">
                     Arizangiz qabul qilindi! 🎉
                   </h3>
                   <p className="text-sm text-zinc-300 max-w-sm mx-auto">

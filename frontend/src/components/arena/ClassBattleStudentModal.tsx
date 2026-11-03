@@ -215,14 +215,14 @@ export default function ClassBattleStudentModal({
         <div className="p-5 sm:p-6 bg-gradient-to-r from-amber-950 via-zinc-900 to-amber-900 text-white relative overflow-hidden">
           <div className="flex items-center justify-between gap-3 relative z-10">
             <div className="flex items-center gap-2.5">
-              <span className="size-9 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-black">
+              <span className="size-9 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-bold">
                 <Swords className="size-5" />
               </span>
               <div>
-                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] font-black uppercase">
+                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[12px] font-bold uppercase">
                   TEACHER LIVE QUIZ
                 </Badge>
-                <DialogTitle className="text-lg sm:text-xl font-black text-white">
+                <DialogTitle className="text-lg sm:text-xl font-bold text-white">
                   {roomState ? roomState.title : "Sinf Jangi (Live PIN Arena)"}
                 </DialogTitle>
               </div>
@@ -240,7 +240,7 @@ export default function ClassBattleStudentModal({
         {!roomId && (
           <div className="p-6 space-y-5">
             <div className="text-center space-y-1">
-              <h3 className="text-base font-extrabold text-foreground">
+              <h3 className="text-base font-bold text-foreground">
                 O&apos;qituvchingiz bergan 6 xonali PIN-kodni kiriting
               </h3>
               <p className="text-xs text-muted-foreground">
@@ -255,7 +255,7 @@ export default function ClassBattleStudentModal({
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="Masalan: 849201"
-                  className="h-14 text-center font-mono text-2xl tracking-[0.4em] font-black rounded-2xl border-2 focus-visible:border-amber-500"
+                  className="h-14 text-center font-mono text-2xl tracking-[0.4em] font-bold rounded-2xl border-2 focus-visible:border-amber-500"
                   maxLength={6}
                 />
               </div>
@@ -274,7 +274,7 @@ export default function ClassBattleStudentModal({
               <Button
                 onClick={handleJoinRoom}
                 disabled={joining || pin.length !== 6 || !nickname.trim()}
-                className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-sm rounded-2xl shadow-lg transition-transform active:scale-[0.98] cursor-pointer"
+                className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-sm rounded-2xl shadow-lg transition-transform active:scale-[0.98] cursor-pointer"
               >
                 {joining ? <Loader2 className="size-4 animate-spin mr-2" /> : <Swords className="size-4 mr-2" />}
                 Jangga Kirish
@@ -294,7 +294,7 @@ export default function ClassBattleStudentModal({
               <Badge className="bg-emerald-500/20 text-emerald-500 border-emerald-500/30 text-xs font-bold">
                 ✓ Siz jangga muvaffaqiyatli ulandingiz!
               </Badge>
-              <h3 className="text-xl font-black text-foreground">
+              <h3 className="text-xl font-bold text-foreground">
                 O&apos;qituvchi jangni boshlashini kuting...
               </h3>
               <p className="text-xs text-muted-foreground max-w-sm mx-auto">
@@ -329,7 +329,7 @@ export default function ClassBattleStudentModal({
 
             {/* Question Box */}
             <div className="p-4 sm:p-5 rounded-2xl bg-muted/40 border border-border min-h-[90px] flex items-center justify-center text-center">
-              <h4 className="text-base sm:text-lg font-extrabold text-foreground leading-snug">
+              <h4 className="text-base sm:text-lg font-bold text-foreground leading-snug">
                 {currentQ.text}
               </h4>
             </div>
@@ -346,7 +346,7 @@ export default function ClassBattleStudentModal({
                     className={cn(
                       'p-4 rounded-2xl border-2 text-left font-bold text-sm transition-all duration-150 flex items-center justify-between gap-3 min-h-[64px] shadow-sm cursor-pointer',
                       isSelected
-                        ? 'ring-4 ring-amber-400 border-amber-500 bg-amber-500 text-black font-black scale-[1.02]'
+                        ? 'ring-4 ring-amber-400 border-amber-500 bg-amber-500 text-black font-bold scale-[1.02]'
                         : CHOICE_COLORS[cIdx % CHOICE_COLORS.length]
                     )}
                   >
@@ -382,7 +382,7 @@ export default function ClassBattleStudentModal({
                   size="sm"
                   onClick={handleSubmitAnswers}
                   disabled={submitting}
-                  className="rounded-xl text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-black"
+                  className="rounded-xl text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
                 >
                   {submitting ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : <CheckCircle2 className="size-3.5 mr-1.5" />}
                   Jangni Yakunlash
@@ -400,10 +400,10 @@ export default function ClassBattleStudentModal({
             </div>
 
             <div className="space-y-1.5">
-              <Badge className="bg-amber-500 text-black font-black text-xs uppercase">
+              <Badge className="bg-amber-500 text-black font-bold text-xs uppercase">
                 JANG YAKUNLANDI
               </Badge>
-              <h3 className="text-2xl font-black text-foreground">
+              <h3 className="text-2xl font-bold text-foreground">
                 Barakalla, {nickname}!
               </h3>
               <p className="text-xs text-muted-foreground">
@@ -414,19 +414,19 @@ export default function ClassBattleStudentModal({
             {myResult && (
               <div className="p-4 rounded-2xl bg-muted/40 border border-border max-w-xs mx-auto grid grid-cols-2 gap-3 text-center">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold">To&apos;plangan ball:</p>
-                  <p className="font-mono text-2xl font-black text-amber-500">{myResult.score}</p>
+                  <p className="text-[12px] text-muted-foreground font-semibold">To&apos;plangan ball:</p>
+                  <p className="font-mono text-2xl font-bold text-amber-500">{myResult.score}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold">Aniqlik darajasi:</p>
-                  <p className="font-mono text-2xl font-black text-emerald-500">{myResult.accuracy}%</p>
+                  <p className="text-[12px] text-muted-foreground font-semibold">Aniqlik darajasi:</p>
+                  <p className="font-mono text-2xl font-bold text-emerald-500">{myResult.accuracy}%</p>
                 </div>
               </div>
             )}
 
             <Button
               onClick={handleClose}
-              className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black px-8 h-11"
+              className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold px-8 h-11"
             >
               Yopish
             </Button>

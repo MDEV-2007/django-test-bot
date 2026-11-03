@@ -29,7 +29,7 @@ export default function GapInput({ number, value, maxWords, active, onChange, on
       {number !== null && (
         <span
           className={cn(
-            'inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[11px] font-semibold tabular-nums transition',
+            'inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[12px] font-semibold tabular-nums transition',
             active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
           )}
         >

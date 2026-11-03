@@ -241,11 +241,11 @@ export default function TeacherSurveysPage() {
                         <p className="text-xs text-muted-foreground">@{survey.username}</p>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Badge variant="outline" className={cn('text-[11px] font-medium', diff.tone)}>
+                        <Badge variant="outline" className={cn('text-[12px] font-medium', diff.tone)}>
                           {diff.label}
                         </Badge>
                         {survey.score !== null && (
-                          <Badge variant="secondary" className="text-[11px] font-semibold">
+                          <Badge variant="secondary" className="text-[12px] font-semibold">
                             {survey.score} ball
                           </Badge>
                         )}

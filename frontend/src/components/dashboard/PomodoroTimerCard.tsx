@@ -79,7 +79,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
             <h3 className="text-sm font-bold text-foreground tracking-tight">
               Fokus Taymeri (Pomodoro)
             </h3>
-            <p className="text-[11px] font-medium text-muted-foreground">
+            <p className="text-[12px] font-medium text-muted-foreground">
               25-daqiqalik chuqur diqqat va fokus rejimi
             </p>
           </div>
@@ -125,10 +125,10 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
             </svg>
 
             <div className="absolute flex flex-col items-center justify-center text-center select-none">
-              <span className="text-2xl font-black font-mono tracking-tight text-foreground leading-none">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground leading-none">
                 {formattedTime}
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-1">
+              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground mt-1">
                 {isRunning ? 'Qoldi' : 'Seans'}
               </span>
             </div>
@@ -138,7 +138,7 @@ export default function PomodoroTimerCard({ onSessionComplete, className }: Pomo
         {/* Controls & iOS UISegmentedControl Presets */}
         <div className="sm:col-span-7 space-y-4">
           <div className="space-y-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
               Vaqtni tanlash
             </span>
             {/* Authentic iOS Segmented Control */}

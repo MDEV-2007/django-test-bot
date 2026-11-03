@@ -644,7 +644,7 @@ export default function TestsPage() {
               type="button"
               onClick={() => handleModeChange('standard')}
               className={cn(
-                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
+                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'standard'
                   ? 'bg-card text-foreground shadow-sm border border-border/60'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
@@ -653,7 +653,7 @@ export default function TestsPage() {
               <GraduationCap className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'standard' ? 'text-primary' : 'text-muted-foreground')} />
               <span className="truncate">{t("Standart")}</span>
               <span className={cn(
-                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
+                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'standard' ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
               )}>
                 Rasmiy
@@ -664,7 +664,7 @@ export default function TestsPage() {
               type="button"
               onClick={() => handleModeChange('blitz')}
               className={cn(
-                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
+                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'blitz'
                   ? 'bg-card text-foreground shadow-sm border border-border/60'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
@@ -673,7 +673,7 @@ export default function TestsPage() {
               <Sparkles className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'blitz' ? 'text-blue-500' : 'text-muted-foreground')} />
               <span className="truncate">{t("7-Blits")}</span>
               <span className={cn(
-                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
+                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'blitz' ? 'bg-blue-500/15 text-blue-500' : 'bg-muted text-muted-foreground'
               )}>
                 +100 🪙
@@ -684,7 +684,7 @@ export default function TestsPage() {
               type="button"
               onClick={() => handleModeChange('stress')}
               className={cn(
-                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
+                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                 heroMode === 'stress'
                   ? 'bg-card text-foreground shadow-sm border border-border/60'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
@@ -693,7 +693,7 @@ export default function TestsPage() {
               <Flame className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'stress' ? 'text-rose-500' : 'text-muted-foreground')} />
               <span className="truncate">{t("Stress Zali")}</span>
               <span className={cn(
-                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
+                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'stress' ? 'bg-rose-500/15 text-rose-500' : 'bg-muted text-muted-foreground'
               )}>
                 🔥 DTM
@@ -735,14 +735,14 @@ export default function TestsPage() {
                     <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-0.5 text-xs font-bold text-white">
                       <Sparkles className="size-3.5 text-amber-300" /> Ilk Sinov · 3 Daqiqalik Dofamin Blits
                     </div>
-                    <h3 className="text-lg sm:text-xl font-black">
+                    <h3 className="text-lg sm:text-xl font-bold">
                       Qaysi darajadasiz? 7 ta savolda B+ potensialini aniqlang!
                     </h3>
                     <p className="text-xs sm:text-sm text-blue-100 leading-relaxed">
                       45 ta savollik to&apos;liq testga kirishdan oldin 7 ta adaptiv savoldan o&apos;ting, kuchli va zaif mavzularingizni ko&apos;ring hamda <strong>+100 Tanga bonus</strong> oling!
                     </p>
                   </div>
-                  <Button asChild size="lg" className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-black shadow-md shrink-0 h-11 px-6 cursor-pointer">
+                  <Button asChild size="lg" className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-md shrink-0 h-11 px-6 cursor-pointer">
                     <Link href="/onboarding?mode=blitz">
                       Sinovdan o&apos;tish <ArrowRight className="size-4 ml-1.5" />
                     </Link>
@@ -768,20 +768,20 @@ export default function TestsPage() {
                     </div>
                     <div className="min-w-0 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge className="bg-rose-600 text-white font-black text-[10px] tracking-wider uppercase border-0 shrink-0">
+                        <Badge className="bg-rose-600 text-white font-bold text-[12px] tracking-wider uppercase border-0 shrink-0">
                           🔥 EKSTREMAL
                         </Badge>
-                        <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[10px] sm:text-[11px] font-bold shrink-0">
+                        <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[12px] sm:text-[12px] font-bold shrink-0">
                           🎧 500 Kishi Zali
                         </Badge>
-                        <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[10px] sm:text-[11px] font-bold shrink-0">
+                        <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[12px] sm:text-[12px] font-bold shrink-0">
                           📝 Titul Varaqasi
                         </Badge>
-                        <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[10px] sm:text-[11px] font-bold shrink-0">
+                        <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[12px] sm:text-[12px] font-bold shrink-0">
                           ⚡ +50% XP
                         </Badge>
                       </div>
-                      <h3 className="text-base sm:text-xl font-black tracking-tight text-white leading-tight">
+                      <h3 className="text-base sm:text-xl font-bold tracking-tight text-white leading-tight">
                         Real BMB Imtihon Zali (Stress Mode)
                       </h3>
                       <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
@@ -823,23 +823,23 @@ export default function TestsPage() {
                     </div>
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white", theme.squircle)}>
+                        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white", theme.squircle)}>
                           <span className="size-1.5 rounded-full bg-white animate-ping" />
                           Katta Mock Imtihon
                         </span>
-                        <Badge variant="outline" className={cn("text-[11px] font-bold", theme.pill)}>
+                        <Badge variant="outline" className={cn("text-[12px] font-bold", theme.pill)}>
                           {data.pinned_mock.subject}
                         </Badge>
                         {data.pinned_mock.scheduled_at && (
-                          <Badge variant="outline" className="font-mono text-[11px] gap-1 font-bold border-border bg-muted text-foreground">
+                          <Badge variant="outline" className="font-mono text-[12px] gap-1 font-bold border-border bg-muted text-foreground">
                             <Clock className="size-3 text-primary" /> {formatScheduledTime(data.pinned_mock.scheduled_at)}
                           </Badge>
                         )}
-                        <Badge variant="outline" className="border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] gap-1">
+                        <Badge variant="outline" className="border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[12px] gap-1">
                           <Users className="size-3" /> {data.pinned_mock.waiting_participants_count || 32}+ abituriyent
                         </Badge>
                       </div>
-                      <h3 className="text-[17px] sm:text-[19px] font-extrabold tracking-tight text-foreground truncate">
+                      <h3 className="text-[17px] sm:text-[19px] font-bold tracking-tight text-foreground truncate">
                         {data.pinned_mock.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] sm:text-[13px] text-muted-foreground">
@@ -951,7 +951,7 @@ export default function TestsPage() {
                   <Zap className="size-4" />
                   <span>7 Ta Savol</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[12px] text-muted-foreground leading-snug">
                   Oson, o&apos;rtacha va zaif nuqtani aniqlovchi adaptiv tizim.
                 </p>
               </div>
@@ -961,7 +961,7 @@ export default function TestsPage() {
                   <Sparkles className="size-4 text-amber-400" />
                   <span>+100 🪙 Tanga</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[12px] text-muted-foreground leading-snug">
                   Har bir to&apos;liq yakunlangan blits uchun kafolatlangan dofamin bonusi.
                 </p>
               </div>
@@ -971,7 +971,7 @@ export default function TestsPage() {
                   <Clock className="size-4" />
                   <span>7 Daqiqa</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[12px] text-muted-foreground leading-snug">
                   Ortiqcha vaqt yo&apos;qotishsiz lahzalik bilim diagnostikasi.
                 </p>
               </div>
@@ -981,7 +981,7 @@ export default function TestsPage() {
                   <Trophy className="size-4" />
                   <span>B+ Potensial</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[12px] text-muted-foreground leading-snug">
                   Darhol Milliy Sertifikat prognozi va kuchli mavzular tahlili.
                 </p>
               </div>
@@ -990,7 +990,7 @@ export default function TestsPage() {
             {/* Sarlavha */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
                   <Sparkles className="size-5 text-blue-500" />
                   <span>Fanlar bo&apos;yicha 7-Savol Blitslar</span>
                 </h2>
@@ -1032,10 +1032,10 @@ export default function TestsPage() {
                           <IconComponent className={cn('size-5', visual.iconColor)} />
                         </div>
                         <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                          <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-500 text-[10px] font-bold">
+                          <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-500 text-[12px] font-bold">
                             ⚡ 7 savol
                           </Badge>
-                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-bold">
+                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[12px] font-bold">
                             +100 🪙 Tanga
                           </Badge>
                         </div>
@@ -1043,7 +1043,7 @@ export default function TestsPage() {
 
                       {/* Title & Desc */}
                       <div>
-                        <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight group-hover:text-blue-500 transition-colors">
+                        <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight group-hover:text-blue-500 transition-colors">
                           {s.name} · 7-Savol Blits
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
@@ -1053,17 +1053,17 @@ export default function TestsPage() {
 
                       {/* Sovrin & Format Box */}
                       <div className="p-2.5 rounded-xl bg-muted/60 border border-border/80 space-y-1">
-                        <div className="flex items-center justify-between text-[11px] font-bold">
+                        <div className="flex items-center justify-between text-[12px] font-bold">
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Clock className="size-3 text-primary" /> Vaqt:
                           </span>
                           <span className="font-mono text-foreground">7 daqiqa</span>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] font-bold">
+                        <div className="flex items-center justify-between text-[12px] font-bold">
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Trophy className="size-3 text-amber-500" /> Sovrin:
                           </span>
-                          <span className="text-amber-500 font-mono font-black">+100 🪙 & +50 XP</span>
+                          <span className="text-amber-500 font-mono font-bold">+100 🪙 & +50 XP</span>
                         </div>
                       </div>
                     </div>
@@ -1091,7 +1091,7 @@ export default function TestsPage() {
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-0.5 text-xs font-bold text-blue-300 border border-blue-500/30">
                     <Sparkles className="size-3.5 text-amber-300" /> Super Challenge · Barcha Fanlar
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black">
+                  <h3 className="text-lg sm:text-xl font-bold">
                     Aralash Fanlar 7-Savol Super Blitsi
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -1110,7 +1110,7 @@ export default function TestsPage() {
                 <Button
                   onClick={() => handleStartBlitz()}
                   size="lg"
-                  className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-black shadow-lg shadow-blue-500/30 shrink-0 h-11 px-6 cursor-pointer"
+                  className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/30 shrink-0 h-11 px-6 cursor-pointer"
                 >
                   Super Blitsni Boshlash <ArrowRight className="size-4 ml-1.5" />
                 </Button>
@@ -1127,7 +1127,7 @@ export default function TestsPage() {
                   <Headphones className="size-4 shrink-0" />
                   <span className="truncate">500 Kishi Akustikasi</span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
+                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Haqiqiy DTM zalidagi shivir-shivir va parta tovushlari.
                 </p>
               </div>
@@ -1137,7 +1137,7 @@ export default function TestsPage() {
                   <FileCheck2 className="size-4 shrink-0" />
                   <span className="truncate">Titul Varaqasi</span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
+                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Qora ruchkada doirachalarni bo&apos;yash (Bubble Sheet) mashqi.
                 </p>
               </div>
@@ -1147,7 +1147,7 @@ export default function TestsPage() {
                   <Flame className="size-4 shrink-0" />
                   <span className="truncate">+50% Bonus XP</span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
+                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Har bir to&apos;g&apos;ri javob uchun 1.5 baravar ko&apos;p tajriba bali.
                 </p>
               </div>
@@ -1157,7 +1157,7 @@ export default function TestsPage() {
                   <Shield className="size-4 shrink-0" />
                   <span className="truncate">Temir Asab</span>
                 </div>
-                <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
+                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
                   Stress zalini yenggan abituriyentlarga profil maxsus nishoni.
                 </p>
               </div>
@@ -1166,7 +1166,7 @@ export default function TestsPage() {
             {/* Sarlavha */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
                   <Flame className="size-5 text-rose-500" />
                   <span>Fanlar bo&apos;yicha BMB Stress Zallari</span>
                 </h2>
@@ -1208,10 +1208,10 @@ export default function TestsPage() {
                           <IconComponent className="size-5" />
                         </div>
                         <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                          <Badge className="bg-rose-600 text-white text-[10px] font-black border-0">
+                          <Badge className="bg-rose-600 text-white text-[12px] font-bold border-0">
                             🔥 STRESS
                           </Badge>
-                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-bold">
+                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[12px] font-bold">
                             +50% XP
                           </Badge>
                         </div>
@@ -1219,7 +1219,7 @@ export default function TestsPage() {
 
                       {/* Title & Desc */}
                       <div>
-                        <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight group-hover:text-rose-500 transition-colors">
+                        <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight group-hover:text-rose-500 transition-colors">
                           {s.name} — BMB Stress Zali
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
@@ -1229,17 +1229,17 @@ export default function TestsPage() {
 
                       {/* Sovrin & Format Box */}
                       <div className="p-2.5 rounded-xl bg-rose-500/5 border border-rose-500/20 space-y-1">
-                        <div className="flex items-center justify-between text-[11px] font-bold">
+                        <div className="flex items-center justify-between text-[12px] font-bold">
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Clock className="size-3 text-rose-500" /> Format:
                           </span>
                           <span className="font-mono text-foreground">{details.questionsCount} ta savol · {details.duration} daqiqa</span>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] font-bold">
+                        <div className="flex items-center justify-between text-[12px] font-bold">
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Trophy className="size-3 text-amber-500" /> Sovrin:
                           </span>
-                          <span className="text-amber-500 font-mono font-black">+50% XP · +{details.coins} 🪙 · &quot;Temir Asab&quot;</span>
+                          <span className="text-amber-500 font-mono font-bold">+50% XP · +{details.coins} 🪙 · &quot;Temir Asab&quot;</span>
                         </div>
                       </div>
                     </div>
@@ -1277,7 +1277,7 @@ export default function TestsPage() {
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/20 px-3 py-0.5 text-xs font-bold text-rose-300 border border-rose-500/30">
                     <Flame className="size-3.5 text-rose-400" /> Barcha Fanlar · Katta Zal Simulyatori
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black">
+                  <h3 className="text-lg sm:text-xl font-bold">
                     DTM To&apos;liq Blok Imtihoni (Hardcore Ekstremal)
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -1299,7 +1299,7 @@ export default function TestsPage() {
                     setStressModalOpen(true);
                   }}
                   size="lg"
-                  className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black shadow-lg shadow-rose-600/30 shrink-0 h-11 px-6 cursor-pointer"
+                  className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 shrink-0 h-11 px-6 cursor-pointer"
                 >
                   <Flame className="size-4 mr-1.5 animate-pulse" />
                   Blok Zaliga Kirish
@@ -1316,7 +1316,7 @@ export default function TestsPage() {
             {/* Bo'lim Sarlavhasi */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
                   <BookOpen className="size-5 text-primary" />
                   <span>Fanlar to&apos;plami</span>
                 </h2>
@@ -1357,7 +1357,7 @@ export default function TestsPage() {
                         </div>
 
                         <span className={cn(
-                          'text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full border',
+                          'text-[12px] sm:text-[12px] font-bold px-2.5 py-0.5 rounded-full border',
                           testsCount > 0
                             ? 'border-primary/25 bg-primary/10 text-primary'
                             : 'border-border bg-muted text-muted-foreground'
@@ -1367,7 +1367,7 @@ export default function TestsPage() {
                       </div>
 
                       <div>
-                        <h3 className="text-base sm:text-lg font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
+                        <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors tracking-tight">
                           {s.name}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
@@ -1377,7 +1377,7 @@ export default function TestsPage() {
                     </div>
 
                     <div className="relative mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-bold text-primary">
-                      <span className="text-[11px] text-muted-foreground font-semibold truncate max-w-[100px]">{visual.tag}</span>
+                      <span className="text-[12px] text-muted-foreground font-semibold truncate max-w-[100px]">{visual.tag}</span>
                       <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform shrink-0">
                         Kirish <ArrowRight className="size-3.5" />
                       </span>
@@ -1469,7 +1469,7 @@ export default function TestsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                            <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                               {currentSubjectObj.name} testlari
                             </h1>
                             <Badge variant="outline" className="text-xs font-bold border-primary/25 bg-primary/10 text-primary">
@@ -1484,7 +1484,7 @@ export default function TestsPage() {
 
                       <div className="text-right">
                         <span className="text-xs font-bold text-muted-foreground">Mavjud testlar:</span>
-                        <p className="text-lg sm:text-2xl font-black font-mono text-primary">
+                        <p className="text-lg sm:text-2xl font-bold font-mono text-primary">
                           {data?.tests?.length || 0} ta
                         </p>
                       </div>
@@ -1609,40 +1609,40 @@ export default function TestsPage() {
                         <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-1.5">
                             {isNew && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-xs">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-xs">
                                 <Sparkles className="size-2.5 fill-white" /> Yangi
                               </span>
                             )}
                             {isLiveMock ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-xs">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-xs">
                                 <span className="size-1.5 rounded-full bg-white animate-ping" />
                                 Jonli Mock
                               </span>
                             ) : (
-                              <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                              <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[12px] font-bold text-primary">
                                 {CATEGORY_BADGE[t.category] || t.category}
                               </span>
                             )}
                             {t.answer_mode && ANSWER_MODE_BADGE[t.answer_mode] && (
-                              <Badge variant="outline" className={cn("text-[10px] font-bold rounded-full", ANSWER_MODE_BADGE[t.answer_mode].className)}>
+                              <Badge variant="outline" className={cn("text-[12px] font-bold rounded-full", ANSWER_MODE_BADGE[t.answer_mode].className)}>
                                 {ANSWER_MODE_BADGE[t.answer_mode].label}
                               </Badge>
                             )}
                           </div>
 
                           {isLiveMock && t.scheduled_at ? (
-                            <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-bold", cTheme.pill)}>
+                            <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[12px] font-bold", cTheme.pill)}>
                               <Clock className="size-3 text-primary" /> {formatScheduledTime(t.scheduled_at)}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-muted-foreground bg-muted/60 px-2.5 py-0.5 rounded-full border border-border/70">
+                            <span className="inline-flex items-center gap-1 font-mono text-[12px] font-bold text-muted-foreground bg-muted/60 px-2.5 py-0.5 rounded-full border border-border/70">
                               <Clock className="size-3 text-primary" /> {t.duration_minutes} daq
                             </span>
                           )}
                         </div>
 
                         {/* 2. Title & Description */}
-                        <h3 className="text-[17px] sm:text-[18px] font-black leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors">
+                        <h3 className="text-[17px] sm:text-[18px] font-bold leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors">
                           {t.title}
                         </h3>
                         <p className="mt-1.5 line-clamp-2 flex-1 text-[12.5px] sm:text-[13px] leading-relaxed text-muted-foreground">
@@ -1658,7 +1658,7 @@ export default function TestsPage() {
                               {t.author.avatar ? (
                                 <img src={t.author.avatar} alt="" className="size-5 rounded-full object-cover ring-1 ring-border" />
                               ) : (
-                                <div className="flex size-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
+                                <div className="flex size-5 items-center justify-center rounded-full bg-primary/15 text-[12px] font-bold text-primary">
                                   {t.author.name[0] || 'O'}
                                 </div>
                               )}
@@ -1674,7 +1674,7 @@ export default function TestsPage() {
                             </span>
 
                             {t.subject && (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-primary/10 text-[11px] font-bold text-primary border border-primary/20">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-primary/10 text-[12px] font-bold text-primary border border-primary/20">
                                 <BookOpen className="size-3 text-primary" />
                                 <span>{t.subject}</span>
                               </span>

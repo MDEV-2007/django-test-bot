@@ -89,7 +89,7 @@ export default function HeroInteractiveQuiz() {
             <span className="ml-1 text-xs font-bold tracking-tight text-[#1C1C1E]">
               {QUESTION.subject}
             </span>
-            <span className="rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#007AFF]">
+            <span className="rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[12px] font-bold text-[#007AFF]">
               {QUESTION.examType}
             </span>
           </div>
@@ -98,7 +98,7 @@ export default function HeroInteractiveQuiz() {
           <div className="flex items-center gap-1.5 rounded-full bg-[#1C1C1E] px-3 py-1 text-white shadow-xs">
             <span className="size-1.5 rounded-full bg-[#30D158] animate-pulse" />
             <Clock className="size-3 text-[#30D158]" />
-            <span className="font-mono text-[11px] font-semibold tracking-tight">00:35</span>
+            <span className="font-mono text-[12px] font-semibold tracking-tight">00:35</span>
           </div>
         </div>
 
@@ -109,12 +109,12 @@ export default function HeroInteractiveQuiz() {
               <TrendingUp className="size-4" />
             </div>
             <div>
-              <span className="text-[11px] text-[#6C6C70] font-medium block leading-none">
+              <span className="text-[12px] text-[#6C6C70] font-medium block leading-none">
                 Kutilayotgan DTM ball
               </span>
-              <strong className="font-mono text-base font-extrabold text-[#1C1C1E] tracking-tight">
+              <strong className="font-mono text-base font-bold text-[#1C1C1E] tracking-tight">
                 {hasAnswered && isCorrect ? '181.5' : '178.4'}{' '}
-                <span className="text-[11px] font-normal text-[#8E8E93]">/ 189.0</span>
+                <span className="text-[12px] font-normal text-[#8E8E93]">/ 189.0</span>
               </strong>
             </div>
           </div>
@@ -123,12 +123,12 @@ export default function HeroInteractiveQuiz() {
             <motion.div
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-1 font-bold text-white bg-[#34C759] px-3 py-1 rounded-full text-[11px] shadow-[0_2px_8px_rgba(52,199,89,0.35)]"
+              className="flex items-center gap-1 font-bold text-white bg-[#34C759] px-3 py-1 rounded-full text-[12px] shadow-[0_2px_8px_rgba(52,199,89,0.35)]"
             >
               <Zap className="size-3 fill-white" /> +{scoreIncrement} ball
             </motion.div>
           ) : (
-            <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#6C6C70] shadow-2xs border border-black/[0.05]">
+            <span className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-[#6C6C70] shadow-2xs border border-black/[0.05]">
               Interaktiv sinov
             </span>
           )}
@@ -137,10 +137,10 @@ export default function HeroInteractiveQuiz() {
         {/* Question Prompt */}
         <div className="mt-5">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E8E93]">
+            <span className="text-[12px] font-bold uppercase tracking-wider text-[#8E8E93]">
               Savol 1 / 45 · Rasmiy format
             </span>
-            <span className="text-[11px] font-semibold text-[#007AFF]">+3.1 ball</span>
+            <span className="text-[12px] font-semibold text-[#007AFF]">+3.1 ball</span>
           </div>
           <h3 className="mt-1.5 text-[15px] sm:text-[17px] font-bold leading-snug text-[#1C1C1E] tracking-[-0.01em]">
             {QUESTION.text}
@@ -213,7 +213,7 @@ export default function HeroInteractiveQuiz() {
                   </span>
                   <span>IlmIldizi Intelligence · AI Mentor</span>
                 </div>
-                <div className="flex items-center gap-1 rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#007AFF]">
+                <div className="flex items-center gap-1 rounded-full bg-[#007AFF]/10 px-2.5 py-0.5 text-[12px] font-semibold text-[#007AFF]">
                   <BookOpen className="size-3" />
                   <span>{QUESTION.explanation.citation}</span>
                 </div>

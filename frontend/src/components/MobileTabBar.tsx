@@ -181,7 +181,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                 </div>
 
                 {tab.badge && !active && (
-                  <span className="absolute -right-1.5 -top-1 rounded-full bg-[#FF3B30] px-1 py-[1px] text-[7px] font-black leading-none text-white shadow-2xs">
+                  <span className="absolute -right-1.5 -top-1 rounded-full bg-[#D70015] px-1 py-[1px] text-[10px] font-bold leading-none text-white shadow-2xs">
                     {tab.badge}
                   </span>
                 )}
@@ -189,12 +189,12 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
               <span
                 className={cn(
-                  'relative z-10 mt-1 max-w-full truncate text-[10px] leading-none tracking-[-0.01em] transition-colors',
+                  'relative z-10 mt-1 max-w-full truncate text-[12px] leading-none tracking-[-0.01em] transition-colors',
                   active
-                    ? cn('font-extrabold', tab.activeLabelText)
+                    ? cn('font-bold', tab.activeLabelText)
                     : isDark
                     ? 'font-semibold text-[#8E8E93] group-hover:text-white/90'
-                    : 'font-semibold text-[#8E8E93] group-hover:text-[#1C1C1E]'
+                    : 'font-semibold text-[#6C6C70] group-hover:text-[#1C1C1E]'
                 )}
               >
                 {tab.label}
@@ -235,7 +235,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                 <AvatarImage src={user?.avatar_url || ''} alt={user?.username || 'User'} />
                 <AvatarFallback
                   className={cn(
-                    'rounded-[8px] text-[10px] font-bold',
+                    'rounded-[8px] text-[12px] font-bold',
                     isProfileActive
                       ? 'bg-white text-[#007AFF]'
                       : isDark
@@ -249,19 +249,19 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
             </div>
 
             {/* Eco-tree status sprout badge */}
-            <span className="absolute -right-1 -top-1 rounded-full bg-emerald-500 px-0.5 py-[1px] text-[8px] leading-none text-white shadow-2xs">
+            <span className="absolute -right-1 -top-1 rounded-full bg-[var(--brand)] px-0.5 py-[1px] text-[10px] leading-none text-white shadow-2xs">
               🌳
             </span>
           </div>
 
           <span
             className={cn(
-              'relative z-10 mt-1 max-w-full truncate text-[10px] leading-none tracking-[-0.01em] transition-colors',
+              'relative z-10 mt-1 max-w-full truncate text-[12px] leading-none tracking-[-0.01em] transition-colors',
               isProfileActive
-                ? 'font-extrabold text-[#007AFF] dark:text-[#409CFF]'
+                ? 'font-bold text-[#007AFF] dark:text-[#409CFF]'
                 : isDark
                 ? 'font-semibold text-[#8E8E93] group-hover:text-white/90'
-                : 'font-semibold text-[#8E8E93] group-hover:text-[#1C1C1E]'
+                : 'font-semibold text-[#6C6C70] group-hover:text-[#1C1C1E]'
             )}
           >
             {t('Profil')}

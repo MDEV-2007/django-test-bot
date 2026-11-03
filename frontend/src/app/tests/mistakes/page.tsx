@@ -126,7 +126,7 @@ export default function MistakesPage() {
                 <Brain className="size-3.5" />
                 <span>Aqlli Xatolar Banki & Qasos Rejimi</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 Xatolarni Tozalash va Mustahkamlash 🎯
               </h1>
               <p className="text-sm text-zinc-300 max-w-xl leading-relaxed">
@@ -139,7 +139,7 @@ export default function MistakesPage() {
               <Button
                 type="button"
                 onClick={() => setOpenLoopModal(true)}
-                className="h-12 px-5 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-black text-sm shadow-xl shadow-rose-600/25 cursor-pointer"
+                className="h-12 px-5 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-bold text-sm shadow-xl shadow-rose-600/25 cursor-pointer"
               >
                 <Zap className="size-4 fill-current mr-2" />
                 <span>Qasos Sprintini Boshlash</span>
@@ -150,26 +150,26 @@ export default function MistakesPage() {
           {/* Statistika indikatori */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/10">
             <div className="p-3 rounded-2xl bg-black/30 border border-white/5">
-              <span className="text-[11px] text-zinc-400 font-medium block">Tuzatilishi kerak</span>
-              <span className="text-lg font-black text-rose-400 font-mono">
+              <span className="text-[12px] text-zinc-400 font-medium block">Tuzatilishi kerak</span>
+              <span className="text-lg font-bold text-rose-400 font-mono">
                 {data?.active_count || data?.deck?.length || 0} ta
               </span>
             </div>
             <div className="p-3 rounded-2xl bg-black/30 border border-white/5">
-              <span className="text-[11px] text-zinc-400 font-medium block">O&apos;zlashtirilgan</span>
-              <span className="text-lg font-black text-emerald-400 font-mono">
+              <span className="text-[12px] text-zinc-400 font-medium block">O&apos;zlashtirilgan</span>
+              <span className="text-lg font-bold text-emerald-400 font-mono">
                 {data?.mastered_count || 0} ta
               </span>
             </div>
             <div className="p-3 rounded-2xl bg-black/30 border border-white/5">
-              <span className="text-[11px] text-zinc-400 font-medium block">Combo zanjir</span>
-              <span className="text-lg font-black text-amber-400 font-mono flex items-center gap-1">
+              <span className="text-[12px] text-zinc-400 font-medium block">Combo zanjir</span>
+              <span className="text-lg font-bold text-amber-400 font-mono flex items-center gap-1">
                 <Flame className="size-4 fill-current" />
                 {combo}x
               </span>
             </div>
             <div className="p-3 rounded-2xl bg-black/30 border border-white/5">
-              <span className="text-[11px] text-zinc-400 font-medium block">Tezkor o&apos;tish</span>
+              <span className="text-[12px] text-zinc-400 font-medium block">Tezkor o&apos;tish</span>
               <Link href="/flashcards" className="text-xs font-bold text-primary hover:underline flex items-center gap-1 mt-1">
                 Flashcards <ArrowRight className="size-3" />
               </Link>
@@ -189,7 +189,7 @@ export default function MistakesPage() {
             <div className="size-16 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
               <CheckCircle2 className="size-9" />
             </div>
-            <h2 className="text-2xl font-black text-white">
+            <h2 className="text-2xl font-bold text-white">
               Tabriklaymiz! Hozircha tuzatish kerak bo&apos;lgan xatolar yo&apos;q 🎉
             </h2>
             <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">

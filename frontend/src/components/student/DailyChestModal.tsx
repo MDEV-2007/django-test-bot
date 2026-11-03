@@ -203,12 +203,12 @@ export default function DailyChestModal({
 
         {/* 1. HEADER */}
         <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#C93400] dark:text-[#FF9F0A]">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 px-3 py-1 text-[12px] font-bold uppercase tracking-wider text-[#C93400] dark:text-[#FF9F0A]">
             <PremiumIcon icon={Gift} tone="amber" size="2xs" />
             <span>Kundalik Sirli Sandiq</span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-extrabold tracking-[-0.025em] text-foreground pt-1">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-[-0.025em] text-foreground pt-1">
             {isAlreadyClaimed ? 'Bugungi Mukofotingiz' : 'Sirli Sandiqni Ochish'}
           </h2>
           <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-xs mx-auto">
@@ -244,7 +244,7 @@ export default function DailyChestModal({
               <div className="absolute -inset-3 rounded-[36px] bg-gradient-to-tr from-[#FF9500]/30 to-[#FFCC00]/25 blur-xl group-hover:opacity-100 opacity-80 transition-opacity" />
               <div className="relative flex size-28 sm:size-30 flex-col items-center justify-center gap-2 rounded-[30px] bg-gradient-to-b from-[#FFCC00] via-[#FF9500] to-[#E07A00] text-white shadow-[0_14px_34px_-6px_rgba(255,149,0,0.5),inset_0_1.5px_0_rgba(255,255,255,0.45)] border border-white/25 active:scale-95 transition-transform">
                 <Gift className="size-12 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] stroke-[2.2]" />
-                <span className="rounded-full bg-black/20 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">
+                <span className="rounded-full bg-black/20 backdrop-blur-xs px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white">
                   {opening ? 'Ochilmoqda...' : 'Bosib oching'}
                 </span>
               </div>
@@ -274,14 +274,14 @@ export default function DailyChestModal({
             <div className="space-y-3">
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-extrabold uppercase',
+                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold uppercase',
                   rarityInfo.pillClass
                 )}
               >
                 {rarityInfo.label}
               </span>
 
-              <div className={cn('text-2xl sm:text-3xl font-black tracking-tight', rarityInfo.titleClass)}>
+              <div className={cn('text-2xl sm:text-3xl font-bold tracking-tight', rarityInfo.titleClass)}>
                 {currentClaim.reward_title}
               </div>
 
@@ -317,7 +317,7 @@ export default function DailyChestModal({
                       <p className="text-xs sm:text-[13px] font-bold text-foreground truncate">
                         {status.streak} kunlik olov (Streak)
                       </p>
-                      <p className="text-[11px] text-muted-foreground truncate">
+                      <p className="text-[12px] text-muted-foreground truncate">
                         {status.streak_bonus_pct > 0
                           ? `Mukofotga +${status.streak_bonus_pct}% bonus qo'shiladi!`
                           : "Streakni uzmasangiz mukofotlar ko'payadi"}
@@ -325,7 +325,7 @@ export default function DailyChestModal({
                     </div>
                   </div>
                   {status.streak_bonus_pct > 0 && (
-                    <span className="shrink-0 text-xs font-mono font-extrabold text-[#C93400] dark:text-[#FF9F0A] bg-[#FF9500]/14 px-2.5 py-1 rounded-full border border-[#FF9500]/25">
+                    <span className="shrink-0 text-xs font-mono font-bold text-[#C93400] dark:text-[#FF9F0A] bg-[#FF9500]/14 px-2.5 py-1 rounded-full border border-[#FF9500]/25">
                       +{status.streak_bonus_pct}%
                     </span>
                   )}
@@ -336,15 +336,15 @@ export default function DailyChestModal({
               <div className="grid grid-cols-3 gap-2">
                 <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
                   <PremiumIcon icon={Zap} tone="emerald" size="2xs" />
-                  <span className="text-[11px] font-bold text-foreground leading-tight">500 XP gacha</span>
+                  <span className="text-[12px] font-bold text-foreground leading-tight">500 XP gacha</span>
                 </div>
                 <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
                   <PremiumIcon icon={Coins} tone="amber" size="2xs" />
-                  <span className="text-[11px] font-bold text-foreground leading-tight">Oltin tangalar</span>
+                  <span className="text-[12px] font-bold text-foreground leading-tight">Oltin tangalar</span>
                 </div>
                 <div className="rounded-[16px] border border-border bg-muted/35 p-2.5 flex flex-col items-center gap-1 text-center">
                   <PremiumIcon icon={ShieldCheck} tone="sky" size="2xs" />
-                  <span className="text-[11px] font-bold text-foreground leading-tight">Streak Freeze</span>
+                  <span className="text-[12px] font-bold text-foreground leading-tight">Streak Freeze</span>
                 </div>
               </div>
             </div>
@@ -358,7 +358,7 @@ export default function DailyChestModal({
               type="button"
               onClick={handleOpenChest}
               disabled={loading || opening}
-              className="ios-spring w-full h-12 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF7A00] text-white font-extrabold text-sm sm:text-[15px] shadow-[0_8px_22px_rgba(255,149,0,0.38)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              className="ios-spring w-full h-12 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF7A00] text-white font-bold text-sm sm:text-[15px] shadow-[0_8px_22px_rgba(255,149,0,0.38)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
               <Sparkles className="size-4 fill-white" />
               <span>{opening ? 'Sandiq ochilmoqda...' : 'Sandiqni Ochish (100% Bepul)'}</span>

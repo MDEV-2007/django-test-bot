@@ -15,7 +15,7 @@ export default function NotFound() {
     <div className="flex min-h-[80vh] flex-1 items-center justify-center p-4">
       <div className="flex w-full max-w-xl flex-col items-center text-center">
         <div className="relative mb-2 select-none">
-          <span className="inline-block bg-gradient-to-b from-[var(--accent-text)] via-[var(--accent)] to-[var(--accent-hover)] bg-clip-text text-8xl font-black leading-none tracking-tighter text-transparent sm:text-[140px]">
+          <span className="inline-block bg-gradient-to-b from-[var(--accent-text)] via-[var(--accent)] to-[var(--accent-hover)] bg-clip-text text-8xl font-bold leading-none tracking-tighter text-transparent sm:text-[140px]">
             404
           </span>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-12 animate-bounce rounded-full border-4 border-[var(--bg-page)] bg-[var(--accent)] p-3 text-[var(--on-accent)] shadow-xl">

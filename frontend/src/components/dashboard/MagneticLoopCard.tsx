@@ -135,14 +135,14 @@ export default function MagneticLoopCard({
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/10">
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30">
                 <Flame className="size-3.5 fill-current" />
                 <span>{userStreak} {t("kunlik olovli zanjir")}</span>
               </span>
 
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
                 <span>{t('Raund')} {cycleNumber}/3</span>
-                <span className="text-[10px] opacity-75">({t('60 daqiqalik marafon')})</span>
+                <span className="text-[12px] opacity-75">({t('60 daqiqalik marafon')})</span>
               </span>
 
               {topic && (
@@ -152,7 +152,7 @@ export default function MagneticLoopCard({
               )}
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
               {t('Xayrli kun')}, {userName}! 🎯
             </h2>
             <p className="text-xs sm:text-sm text-zinc-300">
@@ -168,17 +168,17 @@ export default function MagneticLoopCard({
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-zinc-300">{t('Ilm Ildizi')}:</span>
-                  <span className="text-[10px] font-black uppercase text-emerald-300 bg-emerald-500/25 px-2 py-0.5 rounded-md border border-emerald-500/40">
+                  <span className="text-[12px] font-bold text-zinc-300">{t('Ilm Ildizi')}:</span>
+                  <span className="text-[12px] font-bold uppercase text-emerald-300 bg-emerald-500/25 px-2 py-0.5 rounded-md border border-emerald-500/40">
                     {t(displayStageName)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs font-mono font-black text-sky-400 flex items-center gap-0.5">
+                  <span className="text-xs font-mono font-bold text-sky-400 flex items-center gap-0.5">
                     <Droplets className="size-3 text-sky-400" />
                     {displayWater}% suv
                   </span>
-                  <span className="text-[10px] text-zinc-400 font-semibold">• Raund {cycleNumber}/3</span>
+                  <span className="text-[12px] text-zinc-400 font-semibold">• Raund {cycleNumber}/3</span>
                 </div>
               </div>
             </div>
@@ -188,48 +188,48 @@ export default function MagneticLoopCard({
               <div className="flex items-center gap-1.5">
                 {/* 1-Tomchi (Raund 1: 35%) */}
                 <div
-                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[10px] font-black transition-all border ${
+                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[12px] font-bold transition-all border ${
                     drop1Done
                       ? 'bg-sky-500/20 border-sky-400/50 text-sky-300 shadow-sm shadow-sky-500/20'
                       : cycleNumber === 1
                       ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 animate-pulse'
-                      : 'bg-zinc-900 border-white/5 text-zinc-600'
+                      : 'bg-zinc-900 border-white/5 text-zinc-400'
                   }`}
                 >
-                  <Droplets className={`size-3 ${drop1Done ? 'fill-sky-400 text-sky-400' : 'text-zinc-500'}`} />
+                  <Droplets className={`size-3 ${drop1Done ? 'fill-sky-400 text-sky-400' : 'text-zinc-400'}`} />
                   <span>35%</span>
                 </div>
 
                 {/* 2-Tomchi (Raund 2: 70%) */}
                 <div
-                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[10px] font-black transition-all border ${
+                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[12px] font-bold transition-all border ${
                     drop2Done
                       ? 'bg-sky-500/20 border-sky-400/50 text-sky-300 shadow-sm shadow-sky-500/20'
                       : cycleNumber === 2
                       ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 animate-pulse'
-                      : 'bg-zinc-900 border-white/5 text-zinc-600'
+                      : 'bg-zinc-900 border-white/5 text-zinc-400'
                   }`}
                 >
-                  <Droplets className={`size-3 ${drop2Done ? 'fill-sky-400 text-sky-400' : 'text-zinc-500'}`} />
+                  <Droplets className={`size-3 ${drop2Done ? 'fill-sky-400 text-sky-400' : 'text-zinc-400'}`} />
                   <span>70%</span>
                 </div>
 
                 {/* 3-Tomchi (Raund 3: 100% + Boss) */}
                 <div
-                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[10px] font-black transition-all border ${
+                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[12px] font-bold transition-all border ${
                     drop3Done
                       ? 'bg-gradient-to-r from-amber-500/30 to-emerald-500/30 border-amber-400/60 text-amber-200 shadow-md shadow-amber-500/30'
                       : cycleNumber >= 3
                       ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 animate-pulse'
-                      : 'bg-zinc-900 border-white/5 text-zinc-600'
+                      : 'bg-zinc-900 border-white/5 text-zinc-400'
                   }`}
                 >
-                  <Sparkles className={`size-3 ${drop3Done ? 'fill-amber-300 text-amber-300' : 'text-zinc-500'}`} />
+                  <Sparkles className={`size-3 ${drop3Done ? 'fill-amber-300 text-amber-300' : 'text-zinc-400'}`} />
                   <span>100% 👑</span>
                 </div>
               </div>
 
-              <p className="text-[10px] font-bold text-zinc-400 text-center leading-tight">
+              <p className="text-[12px] font-bold text-zinc-400 text-center leading-tight">
                 {dropletsText}
               </p>
             </div>
@@ -254,7 +254,7 @@ export default function MagneticLoopCard({
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div
-                      className={`size-7 rounded-xl flex items-center justify-center text-xs font-black ${
+                      className={`size-7 rounded-xl flex items-center justify-center text-xs font-bold ${
                         step.isDone
                           ? 'bg-emerald-500/20 text-emerald-400'
                           : step.isCurrent
@@ -265,14 +265,14 @@ export default function MagneticLoopCard({
                       {step.isDone ? <CheckCircle2 className="size-4" /> : <StepIcon className="size-3.5" />}
                     </div>
 
-                    <span className="text-[10px] font-mono font-bold text-zinc-500">
+                    <span className="text-[12px] font-mono font-bold text-zinc-400">
                       #{idx + 1}
                     </span>
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-black text-white">{t(step.title)}</h4>
-                    <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-1">{t(step.desc)}</p>
+                    <h4 className="text-xs font-bold text-white">{t(step.title)}</h4>
+                    <p className="text-[12px] text-zinc-400 mt-0.5 line-clamp-1">{t(step.desc)}</p>
                   </div>
                 </div>
               );
@@ -285,17 +285,17 @@ export default function MagneticLoopCard({
           <Button
             type="button"
             onClick={() => setControllerOpen(true)}
-            className={`w-full min-h-[58px] sm:min-h-[64px] h-auto py-2.5 sm:py-3 px-3.5 sm:px-6 rounded-2xl bg-gradient-to-r ${ctaGradient} hover:opacity-95 text-white font-black shadow-xl flex items-center justify-between gap-2.5 cursor-pointer transition-all active:scale-[0.99] group whitespace-normal max-w-full overflow-hidden`}
+            className={`w-full min-h-[58px] sm:min-h-[64px] h-auto py-2.5 sm:py-3 px-3.5 sm:px-6 rounded-2xl bg-gradient-to-r ${ctaGradient} hover:opacity-95 text-white font-bold shadow-xl flex items-center justify-between gap-2.5 cursor-pointer transition-all active:scale-[0.99] group whitespace-normal max-w-full overflow-hidden`}
           >
             <div className="text-left flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
               <div className="size-8 sm:size-9 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
                 <Play className="size-3.5 sm:size-4 fill-current text-amber-200" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm font-black leading-tight tracking-tight break-words">
+                <div className="text-xs sm:text-sm font-bold leading-tight tracking-tight break-words">
                   {t(ctaTitle)}
                 </div>
-                <div className="text-[10px] sm:text-[11px] text-white/80 font-normal leading-tight mt-0.5 break-words">
+                <div className="text-[12px] sm:text-[12px] text-white/80 font-normal leading-tight mt-0.5 break-words">
                   {t(ctaSubtitle)}
                 </div>
               </div>

@@ -113,7 +113,7 @@ export default function AiMarathonBanner({
               </Badge>
             )}
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
             Xayrli kun, {userName}! 🎯
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
@@ -127,16 +127,16 @@ export default function AiMarathonBanner({
             <Award className="size-6 text-primary" />
           </div>
           <div className="space-y-0.5">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
               Kutilayotgan DTM Ball
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-mono text-xl sm:text-2xl font-black text-foreground">
+              <span className="font-mono text-xl sm:text-2xl font-bold text-foreground">
                 {dtmScore}
               </span>
               <span className="text-xs text-muted-foreground font-mono">/ {maxDtmScore} ball</span>
             </div>
-            <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
               Prognoz: {predictedGrade}
             </div>
           </div>
@@ -184,15 +184,15 @@ export default function AiMarathonBanner({
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                    <span className="text-[12px] font-bold text-muted-foreground uppercase">
                       {idx + 1}-qadam
                     </span>
-                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 font-mono font-bold text-primary">
+                    <Badge variant="outline" className="text-[11px] px-1.5 py-0 font-mono font-bold text-primary">
                       {st.rewardText}
                     </Badge>
                   </div>
                   <h4 className="font-bold text-sm text-foreground truncate">{st.title}</h4>
-                  <p className="text-[11px] text-muted-foreground line-clamp-1">{st.subtitle}</p>
+                  <p className="text-[12px] text-muted-foreground line-clamp-1">{st.subtitle}</p>
                 </div>
 
                 <div className="shrink-0 pt-0.5">
@@ -211,7 +211,7 @@ export default function AiMarathonBanner({
               {/* Tugma */}
               <div>
                 {st.isCompleted ? (
-                  <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <div className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 className="size-3.5" /> Bajarildi
                   </div>
                 ) : st.id === 'sprint' && onOpenSprint ? (
@@ -256,7 +256,7 @@ export default function AiMarathonBanner({
                 <Gift className="size-6" />
               </div>
               <div>
-                <h4 className="font-black text-sm text-foreground flex items-center gap-1.5 justify-center sm:justify-start">
+                <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5 justify-center sm:justify-start">
                   <span>Kundalik Sirli Sandiq Qulfi Yechildi!</span>
                   <Sparkles className="size-4 text-amber-500" />
                 </h4>
@@ -268,7 +268,7 @@ export default function AiMarathonBanner({
 
             <Button
               onClick={() => setChestModalOpen(true)}
-              className="rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-black text-xs px-5 h-10 shadow-lg shadow-amber-500/25 cursor-pointer shrink-0"
+              className="rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-bold text-xs px-5 h-10 shadow-lg shadow-amber-500/25 cursor-pointer shrink-0"
             >
               <Gift className="size-4 mr-1.5" />
               Sandiqni Ochish
@@ -284,11 +284,11 @@ export default function AiMarathonBanner({
               <div className="space-y-0.5 min-w-0 flex-1">
                 <div className="text-xs font-bold text-foreground flex items-center justify-between sm:justify-start gap-2 flex-wrap">
                   <span className="truncate">Kundalik Sirli Sandiq (Qulflangan)</span>
-                  <Badge variant="outline" className="text-[10px] font-mono shrink-0">
+                  <Badge variant="outline" className="text-[12px] font-mono shrink-0">
                     {completedCount} / 3 qadam
                   </Badge>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[12px] text-muted-foreground">
                   Sandiqni ochish uchun yana <strong className="text-foreground">{3 - completedCount} ta qadamni</strong> yakunlang.
                 </p>
               </div>

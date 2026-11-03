@@ -128,7 +128,7 @@ export default function ShareTestModal({
               <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                 <span className="text-sky-500">📱</span> Telegram Bot havolasi (Mini App ochadi)
               </label>
-              <span className="text-[10px] text-muted-foreground">Tavsiya etiladi</span>
+              <span className="text-[12px] text-muted-foreground">Tavsiya etiladi</span>
             </div>
             <div className="flex items-center gap-2">
               <Input readOnly value={tgBotUrl} className="font-mono text-xs bg-[var(--surface-input)]" />

@@ -359,7 +359,7 @@ export default function GhostBattleArena({
                   <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 border-2 border-zinc-900" />
                 </div>
                 <p className="mt-2 text-xs font-bold text-white truncate max-w-[100px]">{user?.first_name || user?.username || 'Siz'}</p>
-                <span className="text-[10px] font-mono text-blue-400 font-semibold">{user?.elo_rating || 1200} ELO</span>
+                <span className="text-[12px] font-mono text-blue-400 font-semibold">{user?.elo_rating || 1200} ELO</span>
               </div>
 
               {/* VS Chaqmoq */}
@@ -367,7 +367,7 @@ export default function GhostBattleArena({
                 <div className="size-10 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse">
                   <Zap className="size-5 fill-white" />
                 </div>
-                <span className="mt-1 text-[10px] font-black italic tracking-wider text-orange-400">VS</span>
+                <span className="mt-1 text-[12px] font-bold italic tracking-wider text-orange-400">VS</span>
               </div>
 
               {/* Radar: Raqib qidirilmoqda */}
@@ -380,7 +380,7 @@ export default function GhostBattleArena({
                   </div>
                 </div>
                 <p className="mt-2 text-xs font-bold text-zinc-300">Raqib...</p>
-                <span className="text-[10px] font-mono text-zinc-500">Qidirilmoqda</span>
+                <span className="text-[12px] font-mono text-zinc-500">Qidirilmoqda</span>
               </div>
             </div>
 
@@ -391,7 +391,7 @@ export default function GhostBattleArena({
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.15)]">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.15)]">
               <Radio className="size-3.5 animate-pulse text-rose-400" />
               <span>Tezkor Matchmaking (3 soniya)</span>
             </div>
@@ -423,10 +423,10 @@ export default function GhostBattleArena({
                   className="size-16 rounded-full border-2 border-blue-500 bg-zinc-900 object-cover shadow-[0_0_15px_rgba(59,130,246,0.4)]"
                 />
                 <span className="text-xs font-bold text-white">{user?.first_name || user?.username || 'Siz'}</span>
-                <span className="text-[10px] font-mono text-blue-400">{user?.elo_rating || 1200} ELO</span>
+                <span className="text-[12px] font-mono text-blue-400">{user?.elo_rating || 1200} ELO</span>
               </div>
 
-              <div className="text-2xl font-black italic text-orange-400 animate-pulse">VS</div>
+              <div className="text-2xl font-bold italic text-orange-400 animate-pulse">VS</div>
 
               {/* Raqib: scale-105 chaqnash */}
               <motion.div
@@ -443,8 +443,8 @@ export default function GhostBattleArena({
                   <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 border-2 border-zinc-900" />
                 </div>
                 <span className="text-xs font-bold text-white truncate max-w-[110px]">{opponent.name}</span>
-                <span className="text-[10px] text-zinc-400 truncate max-w-[110px]">{opponent.region}</span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                <span className="text-[12px] text-zinc-400 truncate max-w-[110px]">{opponent.region}</span>
+                <span className="px-2 py-0.5 rounded text-[12px] font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
                   {opponent.elo_rating} ELO
                 </span>
               </motion.div>
@@ -475,14 +475,14 @@ export default function GhostBattleArena({
                       alt="Siz"
                       className="size-5 rounded-full border border-blue-400"
                     />
-                    <span className="font-bold text-white text-[11px] truncate max-w-[100px]">{user?.first_name || user?.username || 'Siz'}</span>
+                    <span className="font-bold text-white text-[12px] truncate max-w-[100px]">{user?.first_name || user?.username || 'Siz'}</span>
                     {userCombo > 1 && (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                      <span className="px-1.5 py-0.2 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
                         🔥 {userCombo}x Combo
                       </span>
                     )}
                   </div>
-                  <span className="font-mono font-extrabold text-blue-400 text-xs">{userScore} ball</span>
+                  <span className="font-mono font-bold text-blue-400 text-xs">{userScore} ball</span>
                 </div>
                 {/* Ko'k progress bar */}
                 <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
@@ -505,12 +505,12 @@ export default function GhostBattleArena({
                       />
                       <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-emerald-400 animate-ping" />
                     </div>
-                    <span className="font-bold text-zinc-300 text-[11px] truncate max-w-[100px]">{opponent?.name}</span>
+                    <span className="font-bold text-zinc-300 text-[12px] truncate max-w-[100px]">{opponent?.name}</span>
                     <span className="text-[9.5px] font-medium text-emerald-400 flex items-center gap-0.5">
                       <span className="size-1.5 rounded-full bg-emerald-400" /> Jonli
                     </span>
                   </div>
-                  <span className="font-mono font-extrabold text-rose-400 text-xs">{opponentScore} ball</span>
+                  <span className="font-mono font-bold text-rose-400 text-xs">{opponentScore} ball</span>
                 </div>
                 {/* Olovrang progress bar */}
                 <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
@@ -528,7 +528,7 @@ export default function GhostBattleArena({
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
-                    className="text-[10px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-md px-2 py-0.5 text-center truncate"
+                    className="text-[12px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-md px-2 py-0.5 text-center truncate"
                   >
                     {opponentToast}
                   </motion.div>
@@ -538,7 +538,7 @@ export default function GhostBattleArena({
 
             {/* Savol Matni */}
             <div className="py-2 space-y-1">
-              <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+              <span className="text-[12px] font-mono text-zinc-400 uppercase tracking-wider">
                 Savol {currentQIndex + 1} / {totalQuestions}
               </span>
               <p className="text-sm sm:text-base font-semibold text-white leading-relaxed">
@@ -605,14 +605,14 @@ export default function GhostBattleArena({
                 {isWinner ? <Trophy className="size-10 fill-white" /> : <Shield className="size-10 text-zinc-400" />}
               </div>
               {isWinner && (
-                <span className="absolute -top-1.5 -right-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-500 text-white shadow">
+                <span className="absolute -top-1.5 -right-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold uppercase bg-emerald-500 text-white shadow">
                   G&apos;alaba!
                 </span>
               )}
             </div>
 
             <div className="space-y-1">
-              <h2 className="text-xl sm:text-2xl font-extrabold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-white">
                 {isWinner ? "G'alaba Qozondingiz!" : "Bu Gal Raqib Qo'li Baland Keldi"}
               </h2>
               <p className="text-xs text-zinc-400">
@@ -624,15 +624,15 @@ export default function GhostBattleArena({
             {/* Mukofotlar bloki */}
             <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
               <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
-                <span className="text-[10px] text-zinc-400 uppercase font-semibold">Tajriba</span>
+                <span className="text-[12px] text-zinc-400 uppercase font-semibold">Tajriba</span>
                 <p className="text-xs font-mono font-bold text-blue-400 mt-0.5">+50 XP</p>
               </div>
               <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
-                <span className="text-[10px] text-zinc-400 uppercase font-semibold">Tanga</span>
+                <span className="text-[12px] text-zinc-400 uppercase font-semibold">Tanga</span>
                 <p className="text-xs font-mono font-bold text-amber-400 mt-0.5">+25 🪙</p>
               </div>
               <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
-                <span className="text-[10px] text-zinc-400 uppercase font-semibold">Reyting</span>
+                <span className="text-[12px] text-zinc-400 uppercase font-semibold">Reyting</span>
                 <p className="text-xs font-mono font-bold text-emerald-400 mt-0.5">
                   {isWinner ? '+18 ELO' : '-10 ELO'}
                 </p>
@@ -643,14 +643,14 @@ export default function GhostBattleArena({
             <div className="w-full max-w-sm p-3.5 rounded-xl bg-gradient-to-r from-blue-950/40 via-zinc-950 to-indigo-950/40 border border-blue-500/25 space-y-2.5">
               <div className="flex items-center justify-between text-xs">
                 <div className="text-left">
-                  <span className="text-[10px] text-zinc-400 uppercase">Sizning Natijangiz</span>
+                  <span className="text-[12px] text-zinc-400 uppercase">Sizning Natijangiz</span>
                   <p className="font-bold text-white">{userScore} ball</p>
                 </div>
                 <div className="size-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
                   VS
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-zinc-400 uppercase">Do&apos;stingiz</span>
+                  <span className="text-[12px] text-zinc-400 uppercase">Do&apos;stingiz</span>
                   <p className="font-bold text-zinc-500">? / 10</p>
                 </div>
               </div>

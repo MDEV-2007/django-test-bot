@@ -128,14 +128,14 @@ export default function BmbStressBar({
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] sm:text-xs font-black tracking-wide text-rose-300 uppercase">
+              <span className="text-[12px] sm:text-xs font-bold tracking-wide text-rose-300 uppercase">
                 Real BMB Imtihon Zali
               </span>
-              <Badge variant="outline" className="text-[9px] sm:text-[10px] border-rose-500/40 text-rose-200 py-0 px-1.5 bg-rose-500/10 font-bold">
+              <Badge variant="outline" className="text-[11px] sm:text-[12px] border-rose-500/40 text-rose-200 py-0 px-1.5 bg-rose-500/10 font-bold">
                 STRESS
               </Badge>
             </div>
-            <p className="text-[11px] text-slate-300 truncate hidden md:block">
+            <p className="text-[12px] text-slate-300 truncate hidden md:block">
               500 kishilik zal shovqini, parta shitirlashi va nazoratchi ovozi faol
             </p>
           </div>
@@ -147,12 +147,12 @@ export default function BmbStressBar({
             <Button
               size="sm"
               onClick={onOpenBubbleDrawer}
-              className="lg:hidden text-[11px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs px-2.5 sm:px-3 h-8"
+              className="lg:hidden text-[12px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs px-2.5 sm:px-3 h-8"
             >
               <FileSpreadsheet className="size-3.5 mr-1" />
               Titul
               {uncopiedCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-[10px] font-bold">
+                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-[12px] font-bold">
                   {uncopiedCount}
                 </span>
               )}

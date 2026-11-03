@@ -154,7 +154,7 @@ export default function MentorPage() {
         {/* Top Header Card (iOS 18 Apple Intelligence Pill Header) */}
         <div className="ios-card shrink-0 rounded-[24px] px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#007AFF] to-[#5856D6] text-white font-black shadow-[0_6px_16px_rgba(0,122,255,0.28)]">
+            <div className="relative flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#007AFF] to-[#5856D6] text-white font-bold shadow-[0_6px_16px_rgba(0,122,255,0.28)]">
               <Bot className="size-5" />
               <span className="absolute -top-0.5 -right-0.5 flex size-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-75" />
@@ -163,14 +163,14 @@ export default function MentorPage() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-extrabold text-foreground tracking-[-0.02em] truncate">
+                <h1 className="text-sm sm:text-base font-bold text-foreground tracking-[-0.02em] truncate">
                   AI Mentor 24/7
                 </h1>
-                <Badge className="bg-[#34C759]/12 border border-[#34C759]/25 text-[#248A3D] dark:text-[#30D158] text-[10px] font-bold py-0 px-2 rounded-full">
+                <Badge className="bg-[#34C759]/12 border border-[#34C759]/25 text-[#248A3D] dark:text-[#30D158] text-[12px] font-bold py-0 px-2 rounded-full">
                   ONLINE
                 </Badge>
               </div>
-              <p className="text-[11px] text-muted-foreground truncate">
+              <p className="text-[12px] text-muted-foreground truncate">
                 {subject ? `${subjects.find((s) => s.slug === subject)?.name || subject} fani bo'yicha repetitor` : "DTM & Milliy Sertifikat bo'yicha aqlli repetitor"}
               </p>
             </div>
@@ -219,7 +219,7 @@ export default function MentorPage() {
           <div className="flex-1 min-h-0 overflow-y-auto p-3.5 sm:p-5 space-y-4">
             {messages.length <= 1 && (
               <div className="space-y-2 pb-2">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                <span className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">
                   Tezkor savollar:
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -252,7 +252,7 @@ export default function MentorPage() {
                 >
                   <AvatarFallback
                     className={cn(
-                      'text-[11px] font-bold',
+                      'text-[12px] font-bold',
                       m.sender === 'user'
                         ? 'bg-[#007AFF] text-white'
                         : 'bg-[#007AFF]/12 text-[#007AFF]'
@@ -282,7 +282,7 @@ export default function MentorPage() {
                   )}
                   <span
                     className={cn(
-                      'mt-1.5 block text-right font-mono text-[10px]',
+                      'mt-1.5 block text-right font-mono text-[12px]',
                       m.sender === 'user' ? 'text-white/75' : 'text-muted-foreground'
                     )}
                   >

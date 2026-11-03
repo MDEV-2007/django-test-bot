@@ -152,7 +152,7 @@ export default function WeeklyLeaderboardSection() {
             <Trophy className="size-3.5 text-[#FF9500]" />
             <span>Game Center Peshqadamlari</span>
           </div>
-          <h2 className="mt-2.5 text-3xl font-extrabold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl lg:text-5xl">
+          <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl lg:text-5xl">
             Haftalik Yetakchilar Reytingi
           </h2>
           <p className="mt-2 text-sm sm:text-base text-[#6C6C70] font-normal">
@@ -174,7 +174,7 @@ export default function WeeklyLeaderboardSection() {
       {/* Main Grid: Left = iOS Inset Grouped Leaderboard, Right = App Store Reviews */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
         <div className="lg:col-span-7 rounded-[30px] border border-black/[0.07] bg-white p-5 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
-          <div className="grid grid-cols-12 pb-3 border-b border-black/[0.06] text-[11px] font-bold tracking-wider uppercase text-[#8E8E93]">
+          <div className="grid grid-cols-12 pb-3 border-b border-black/[0.06] text-[12px] font-bold tracking-wider uppercase text-[#8E8E93]">
             <span className="col-span-7">O&apos;QUVCHI &amp; VILOYAT</span>
             <span className="col-span-3 text-right">NATIJA</span>
             <span className="col-span-2 text-right">XP BALL</span>
@@ -216,12 +216,12 @@ export default function WeeklyLeaderboardSection() {
                         {row.name}
                       </span>
                       {row.gradeBadge && (
-                        <span className="inline-flex items-center rounded-full bg-[#34C759]/14 px-2 py-0.5 text-[10px] font-bold text-[#248A3D]">
+                        <span className="inline-flex items-center rounded-full bg-[#34C759]/14 px-2 py-0.5 text-[12px] font-bold text-[#248A3D]">
                           {row.gradeBadge}
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-[#6C6C70] font-medium truncate mt-0.5">
+                    <p className="text-[12px] text-[#6C6C70] font-medium truncate mt-0.5">
                       {row.regionAndSubject}
                     </p>
                   </div>
@@ -290,7 +290,7 @@ export default function WeeklyLeaderboardSection() {
                   <h4 className="font-bold text-[#1C1C1E] text-xs sm:text-sm">
                     {review.author}
                   </h4>
-                  <p className="text-[11px] sm:text-xs text-[#6C6C70] truncate">
+                  <p className="text-[12px] sm:text-xs text-[#6C6C70] truncate">
                     {review.role}
                   </p>
                 </div>

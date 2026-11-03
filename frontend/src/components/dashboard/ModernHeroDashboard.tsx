@@ -103,7 +103,7 @@ export function LiveActivityTicker() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-[#34C759]" />
           </span>
-          <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+          <span className="shrink-0 text-[12px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
             Jonli Lenta
           </span>
           <div className="flex items-center gap-1.5 truncate text-foreground font-medium animate-fadeIn">
@@ -114,7 +114,7 @@ export function LiveActivityTicker() {
 
         <Link
           href="/feed"
-          className="shrink-0 text-[11px] font-semibold text-primary hover:underline flex items-center gap-0.5"
+          className="shrink-0 text-[12px] font-semibold text-primary hover:underline flex items-center gap-0.5"
         >
           <span>Hamjamiyat</span>
           <ChevronRight className="size-3" />
@@ -180,30 +180,30 @@ export function HeroFocusBanner({
             </span>
 
             {/* Combo Multiplier (Flow State) */}
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-600 dark:text-amber-400">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400">
               <Zap className="size-3 fill-amber-500 text-amber-500" />
               {comboMultiplier}x Fokus Oqimi faol!
             </span>
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Salom, {firstName}! 🚀
           </h1>
         </div>
 
         {/* Dinamik Sertifikat Barometri */}
         <div className="flex items-center gap-3 rounded-2xl bg-muted/60 border border-border/80 px-4 py-2.5 self-start md:self-auto">
-          <div className="size-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 font-black text-sm">
+          <div className="size-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 font-bold text-sm">
             {predictedScore.grade || 'B+'}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
               <span>Sertifikat Prognozi:</span>
-              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                 {predictedScore.scaledScore?.toFixed(1) || '58.4'} ball
               </span>
             </div>
-            <p className="text-[11px] text-muted-foreground font-medium">
+            <p className="text-[12px] text-muted-foreground font-medium">
               Keyingi <strong className="text-foreground font-bold">&quot;{predictedScore.nextGrade || 'A'}&quot;</strong> darajaga atigi{' '}
               <span className="font-mono font-bold text-primary">{predictedScore.gapToNext || 1.6} ball</span> qoldi! 🎯
             </p>
@@ -244,16 +244,16 @@ export function HeroFocusBanner({
         >
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                 <Clock className="size-3.5 text-primary" />
                 1-Bosqich · Sprint
               </span>
               {marathon.step1Done ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
                   <Check className="size-3 stroke-[2.5]" /> Bajarildi
                 </span>
               ) : (
-                <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                <span className="text-[12px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   15 daqiqa
                 </span>
               )}
@@ -262,13 +262,13 @@ export function HeroFocusBanner({
             <h3 className="text-sm font-bold text-foreground leading-snug line-clamp-2">
               {recommendedSprint.title}
             </h3>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[12px] text-muted-foreground">
               Kunlik fokus sinovini yakunlab, o&apos;zlashtirishni mustahkamlang.
             </p>
           </div>
 
           <div className="mt-3 pt-2.5 border-t border-border/50 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">+50 XP bonus</span>
+            <span className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">+50 XP bonus</span>
             {marathon.step1Done ? (
               <Button size="sm" variant="ghost" className="h-7 text-xs font-semibold text-muted-foreground" disabled>
                 Bajarildi ✓
@@ -295,16 +295,16 @@ export function HeroFocusBanner({
         >
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                 <Target className="size-3.5 text-rose-500" />
                 2-Bosqich · Xatolar
               </span>
               {marathon.step2Done ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
                   <Check className="size-3 stroke-[2.5]" /> Tozalandi
                 </span>
               ) : (
-                <span className="text-[10px] font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
+                <span className="text-[12px] font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
                   {marathon.mistakesCount} ta xato
                 </span>
               )}
@@ -313,7 +313,7 @@ export function HeroFocusBanner({
             <h3 className="text-sm font-bold text-foreground leading-snug">
               Aqlli Xatolar Daftari
             </h3>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[12px] text-muted-foreground">
               {marathon.mistakesCount > 0
                 ? `${marathon.mistakesCount} ta xatoni yanchib, bilimdagi kemtiklarni yoping.`
                 : "Ajoyib! Barcha xatolar to'liq tozalangan."}
@@ -321,7 +321,7 @@ export function HeroFocusBanner({
           </div>
 
           <div className="mt-3 pt-2.5 border-t border-border/50 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400">+40 XP &amp; Tahlil</span>
+            <span className="text-[12px] font-semibold text-rose-600 dark:text-rose-400">+40 XP &amp; Tahlil</span>
             {marathon.step2Done ? (
               <Button size="sm" variant="ghost" className="h-7 text-xs font-semibold text-muted-foreground" disabled>
                 0 ta xato ✓
@@ -350,16 +350,16 @@ export function HeroFocusBanner({
         >
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                 <Swords className="size-3.5 text-amber-500" />
                 3-Bosqich · Arena
               </span>
               {marathon.step3Done ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
                   <Check className="size-3 stroke-[2.5]" /> Duel o&apos;ynaldi
                 </span>
               ) : (
-                <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                <span className="text-[12px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
                   1v1 Jang
                 </span>
               )}
@@ -368,13 +368,13 @@ export function HeroFocusBanner({
             <h3 className="text-sm font-bold text-foreground leading-snug">
               1v1 Intellektual Bellashuv
             </h3>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[12px] text-muted-foreground">
               Tengdosh abituriyent bilan real vaqtda kuch sinashib, ELO to&apos;plang.
             </p>
           </div>
 
           <div className="mt-3 pt-2.5 border-t border-border/50 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">+50 Tanga yutug&apos;i</span>
+            <span className="text-[12px] font-semibold text-amber-600 dark:text-amber-400">+50 Tanga yutug&apos;i</span>
             {marathon.step3Done ? (
               <Button size="sm" variant="ghost" className="h-7 text-xs font-semibold text-muted-foreground" disabled>
                 Yakunlandi ✓
@@ -399,14 +399,14 @@ export function HeroFocusBanner({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-xs sm:text-sm font-extrabold text-foreground">
+              <h4 className="text-xs sm:text-sm font-bold text-foreground">
                 🎁 MUKOFOT: Kundalik Sirli Sandiq
               </h4>
               <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
                 {completedSteps}/3 bajarildi
               </span>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[12px] text-muted-foreground">
               {isMarathonComplete
                 ? "Barcha 3 ta bosqich muvaffaqiyatli yakunlandi! Sandiqni ochishga tayyorsiz!"
                 : "3 ta bosqichni to'liq yakunlang va 500 XP gacha, tangalar yoki Freeze mukofotini oling!"}
@@ -431,7 +431,7 @@ export function HeroFocusBanner({
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <span className="block text-right text-[10px] font-mono text-muted-foreground font-semibold">
+            <span className="block text-right text-[12px] font-mono text-muted-foreground font-semibold">
               {progressPercent}% tayyor
             </span>
           </div>
@@ -471,12 +471,12 @@ export function DailyGoalCard({
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
               Kunlik Marra &amp; Streak
             </h3>
-            <p className="text-[11px] text-muted-foreground font-normal">
+            <p className="text-[12px] text-muted-foreground font-normal">
               Kunlik maqsad rivojlanish halqasi
             </p>
           </div>
         </div>
-        <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#34C759]/14 text-[#248A3D] dark:text-[#30D158]">
+        <span className="text-[12px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#34C759]/14 text-[#248A3D] dark:text-[#30D158]">
           {goalPct}%
         </span>
       </div>
@@ -506,7 +506,7 @@ export function DailyGoalCard({
           </svg>
           <div className="absolute flex flex-col items-center justify-center text-center select-none gap-0.5">
             <Flame className="size-3.5 text-[#FF9500] fill-[#FF9500]" />
-            <span className="text-xs font-extrabold font-mono text-foreground leading-none">
+            <span className="text-xs font-bold font-mono text-foreground leading-none">
               {dailyGoals.current}/{dailyGoals.target}
             </span>
           </div>
@@ -516,7 +516,7 @@ export function DailyGoalCard({
           <p className="text-xs sm:text-sm font-bold text-foreground">
             {goalPct >= 100 ? 'Bugungi marra bajarildi! 🎉' : "Sur'atni saqlang!"}
           </p>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-[12px] text-muted-foreground leading-relaxed">
             Ketma-ket{' '}
             <strong className="font-bold text-[#FF9500]">
               {user.streak || 0} kundan
@@ -534,7 +534,7 @@ export function DailyGoalCard({
               <div key={idx} className="flex flex-col items-center gap-1">
                 <div
                   className={cn(
-                    'flex size-7 items-center justify-center rounded-full text-[10px] transition-all',
+                    'flex size-7 items-center justify-center rounded-full text-[12px] transition-all',
                     active
                       ? 'bg-gradient-to-b from-[#FF9500] to-[#E08600] text-white font-bold shadow-[0_2px_8px_rgba(255,149,0,0.35)]'
                       : 'bg-muted/70 text-muted-foreground font-semibold'
@@ -542,7 +542,7 @@ export function DailyGoalCard({
                 >
                   {active ? <Check className="size-3.5 stroke-[2.5]" /> : day}
                 </div>
-                <span className="text-[9px] font-semibold text-muted-foreground">
+                <span className="text-[11px] font-semibold text-muted-foreground">
                   {day}
                 </span>
               </div>
@@ -576,13 +576,13 @@ export function BattleArenaCard({
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
               1v1 Jonli Bellashuv
             </h3>
-            <p className="text-[11px] text-muted-foreground font-normal">
+            <p className="text-[12px] text-muted-foreground font-normal">
               Game Center intellektual duel
             </p>
           </div>
         </div>
 
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]">
+        <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1 rounded-full bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]">
           <span className="size-1.5 rounded-full bg-[#34C759] animate-pulse" />
           {battleArena.onlinePlayers} onlayn
         </span>
@@ -590,7 +590,7 @@ export function BattleArenaCard({
 
       <div className="grid grid-cols-2 gap-2.5">
         <div className="rounded-[18px] bg-muted/50 p-3.5">
-          <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+          <span className="text-[12px] uppercase font-bold text-muted-foreground block">
             Unvon
           </span>
           <p className="text-sm font-bold text-foreground mt-0.5">
@@ -598,7 +598,7 @@ export function BattleArenaCard({
           </p>
         </div>
         <div className="rounded-[18px] bg-muted/50 p-3.5">
-          <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+          <span className="text-[12px] uppercase font-bold text-muted-foreground block">
             Joriy ELO
           </span>
           <p className="text-sm font-mono font-bold text-primary mt-0.5">

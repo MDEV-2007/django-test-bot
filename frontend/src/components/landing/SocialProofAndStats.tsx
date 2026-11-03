@@ -53,14 +53,14 @@ export default function SocialProofAndStats() {
               }`}
             >
               <div className="flex items-baseline gap-1">
-                <span className="font-mono text-2xl font-extrabold tracking-tight text-[#1C1C1E] sm:text-3xl lg:text-4xl">
+                <span className="font-mono text-2xl font-bold tracking-tight text-[#1C1C1E] sm:text-3xl lg:text-4xl">
                   {stat.value}
                 </span>
               </div>
               <span className="mt-2 text-xs sm:text-sm font-bold text-[#1C1C1E]">
                 {stat.label}
               </span>
-              <span className="mt-0.5 text-[11px] text-[#8E8E93] font-medium">
+              <span className="mt-0.5 text-[12px] text-[#8E8E93] font-medium">
                 {stat.sub}
               </span>
             </div>
@@ -75,7 +75,7 @@ export default function SocialProofAndStats() {
             <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
               Ishonch va Natijalar
             </div>
-            <h2 className="mt-1.5 text-2xl font-extrabold tracking-[-0.025em] text-[#1C1C1E] sm:text-3xl lg:text-4xl">
+            <h2 className="mt-1.5 text-2xl font-bold tracking-[-0.025em] text-[#1C1C1E] sm:text-3xl lg:text-4xl">
               O&apos;quvchilar va ustozlar nima deydi?
             </h2>
           </div>
@@ -118,7 +118,7 @@ export default function SocialProofAndStats() {
                 </p>
               </div>
 
-              <div className="mt-5 pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-[11px] text-[#8E8E93]">
+              <div className="mt-5 pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-[12px] text-[#8E8E93]">
                 <span className="font-semibold text-[#007AFF]">{item.verified}</span>
                 <div className="flex text-[#FF9500] gap-0.5">
                   {[...Array(5)].map((_, i) => (

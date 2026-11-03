@@ -139,17 +139,17 @@ export default function LiveRepublicBanner({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-black text-xs sm:text-sm md:text-base tracking-wide uppercase text-white whitespace-nowrap">
+              <span className="font-bold text-xs sm:text-sm md:text-base tracking-wide uppercase text-white whitespace-nowrap">
                 JONLI RESPUBLIKA SPRINTI
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/40 whitespace-nowrap">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/40 whitespace-nowrap">
                 • 20:30
               </span>
-              <span className="inline-flex px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-500/25 text-rose-300 border border-rose-500/40 uppercase tracking-wider whitespace-nowrap">
+              <span className="inline-flex px-1.5 py-0.5 rounded text-[11px] font-bold bg-rose-500/25 text-rose-300 border border-rose-500/40 uppercase tracking-wider whitespace-nowrap">
                 Turnir
               </span>
             </div>
-            <p className="text-[11px] sm:text-xs text-zinc-300 mt-1 leading-snug">
+            <p className="text-[12px] sm:text-xs text-zinc-300 mt-1 leading-snug">
               Respublika bo&apos;yicha bir vaqtda jonli start • ELO va Reyting bellashuvi
             </p>
           </div>
@@ -170,13 +170,13 @@ export default function LiveRepublicBanner({
                   />
                 ))}
               </div>
-              <span className="text-[11px] font-bold text-zinc-300 whitespace-nowrap">
+              <span className="text-[12px] font-bold text-zinc-300 whitespace-nowrap">
                 +{registeredCount} kutishda
               </span>
             </div>
 
             {/* Monospace taymer */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950/80 border border-orange-500/30 text-xs font-mono font-black text-orange-400 shadow-xs whitespace-nowrap">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950/80 border border-orange-500/30 text-xs font-mono font-bold text-orange-400 shadow-xs whitespace-nowrap">
               <Clock className="size-3.5 text-orange-400 animate-pulse shrink-0" />
               <span>⏳ {timeLeft}</span>
             </div>
@@ -187,7 +187,7 @@ export default function LiveRepublicBanner({
             type="button"
             onClick={handleAction}
             className={cn(
-              'w-full sm:w-auto h-10 sm:h-11 px-4 sm:px-5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap',
+              'w-full sm:w-auto h-10 sm:h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap',
               isLiveOpen
                 ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-emerald-500/30 animate-pulse'
                 : isRegistered

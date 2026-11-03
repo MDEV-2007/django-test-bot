@@ -37,7 +37,7 @@ export default function LossAversionExitModal({
             <AlertTriangle className="size-8 animate-bounce" />
           </div>
 
-          <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             ⚠️ To'xtang! Zanjir uzilmasin!
           </h3>
 
@@ -71,7 +71,7 @@ export default function LossAversionExitModal({
           <Button
             type="button"
             onClick={onContinue}
-            className="w-full h-12 sm:h-13 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-black text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] mb-3"
+            className="w-full h-12 sm:h-13 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] mb-3"
           >
             <Play className="size-4 fill-current" />
             <span>Siklni Davom Ettirish (2 daqiqa)</span>

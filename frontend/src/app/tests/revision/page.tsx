@@ -229,7 +229,7 @@ export default function RevisionPage() {
                   )}
                 >
                   <span className="max-w-44 truncate">{t.title}</span>
-                  <span className="font-mono text-[11px] opacity-75">({t.count})</span>
+                  <span className="font-mono text-[12px] opacity-75">({t.count})</span>
                 </button>
               );
             })}

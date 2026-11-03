@@ -247,23 +247,23 @@ export default function FeaturesManagementPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Card className="py-3 px-4">
               <p className="text-xs text-muted-foreground">Jami Modullar</p>
-              <p className="font-mono text-2xl font-extrabold text-foreground">{data.stats.total}</p>
+              <p className="font-mono text-2xl font-bold text-foreground">{data.stats.total}</p>
             </Card>
             <Card className="py-3 px-4 border-emerald-500/30 bg-emerald-500/[0.04]">
               <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Barchaga Ochiq</p>
-              <p className="font-mono text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+              <p className="font-mono text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {data.stats.enabled}
               </p>
             </Card>
             <Card className="py-3 px-4 border-amber-500/30 bg-amber-500/[0.04]">
               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Beta (Faqat Admin)</p>
-              <p className="font-mono text-2xl font-extrabold text-amber-600 dark:text-amber-400">
+              <p className="font-mono text-2xl font-bold text-amber-600 dark:text-amber-400">
                 {data.stats.admin_only}
               </p>
             </Card>
             <Card className="py-3 px-4 border-rose-500/30 bg-rose-500/[0.04]">
               <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">Vaqtincha O&apos;chiq</p>
-              <p className="font-mono text-2xl font-extrabold text-rose-600 dark:text-rose-400">
+              <p className="font-mono text-2xl font-bold text-rose-600 dark:text-rose-400">
                 {data.stats.disabled}
               </p>
             </Card>
@@ -331,7 +331,7 @@ export default function FeaturesManagementPage() {
                       <PremiumIcon icon={Icon} tone={tone} size="md" glow={feat.is_enabled} />
                       <div className="flex items-center gap-1.5">
                         {feat.badge_text && (
-                          <Badge variant="outline" className="text-[10px] font-bold">
+                          <Badge variant="outline" className="text-[12px] font-bold">
                             {feat.badge_text}
                           </Badge>
                         )}
@@ -351,7 +351,7 @@ export default function FeaturesManagementPage() {
                   </CardHeader>
 
                   <CardContent className="space-y-4 pt-0">
-                    <div className="rounded-xl border border-border/60 bg-muted/40 p-2.5 font-mono text-[11px] text-muted-foreground">
+                    <div className="rounded-xl border border-border/60 bg-muted/40 p-2.5 font-mono text-[12px] text-muted-foreground">
                       <span>Yo&apos;l: </span>
                       <strong className="text-foreground">{feat.target_route || '—'}</strong>
                     </div>
@@ -361,7 +361,7 @@ export default function FeaturesManagementPage() {
                       <div className="flex items-center justify-between rounded-xl border border-border/40 p-2.5">
                         <div>
                           <p className="text-xs font-semibold">O&apos;quvchilarga ochiq</p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-[12px] text-muted-foreground">
                             {feat.is_enabled && !feat.admin_only
                               ? 'Hozir barchaga ko‘rinadi'
                               : 'O‘quvchilardan yashirilgan'}
@@ -380,7 +380,7 @@ export default function FeaturesManagementPage() {
                           <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
                             Faqat Admin (Beta test)
                           </p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-[12px] text-muted-foreground">
                             Oddiylarga yopiq, sizga ochiq
                           </p>
                         </div>
@@ -394,7 +394,7 @@ export default function FeaturesManagementPage() {
                   </CardContent>
                 </div>
 
-                <div className="border-t border-border/40 px-6 py-2.5 text-[10px] text-muted-foreground flex items-center justify-between">
+                <div className="border-t border-border/40 px-6 py-2.5 text-[12px] text-muted-foreground flex items-center justify-between">
                   <span>Kalit: <code className="font-mono font-bold">{feat.key}</code></span>
                   <span>{feat.updated_by ? `O'zgartirdi: ${feat.updated_by}` : 'Standart'}</span>
                 </div>

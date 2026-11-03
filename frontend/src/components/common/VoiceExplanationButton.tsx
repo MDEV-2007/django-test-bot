@@ -112,7 +112,7 @@ export default function VoiceExplanationButton({
       {status === 'playing' ? (
         <>
           <Square className="size-3 fill-current text-indigo-500 animate-pulse" />
-          <span className="text-[11px] font-bold text-indigo-500">To&apos;xtatish</span>
+          <span className="text-[12px] font-bold text-indigo-500">To&apos;xtatish</span>
           <span className="flex items-center gap-0.5 ml-1">
             <span className="h-2.5 w-0.5 rounded-full bg-indigo-500 animate-[pulse_0.6s_ease-in-out_infinite]" />
             <span className="h-4 w-0.5 rounded-full bg-indigo-500 animate-[pulse_0.4s_ease-in-out_infinite]" />
@@ -122,7 +122,7 @@ export default function VoiceExplanationButton({
       ) : (
         <>
           <Volume2 className="size-3.5 text-indigo-500 group-hover:scale-110 transition-transform" />
-          <span className="text-[11px] font-medium">{label}</span>
+          <span className="text-[12px] font-medium">{label}</span>
         </>
       )}
     </Button>

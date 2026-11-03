@@ -87,7 +87,7 @@ export default function ShareToCommunityModal({
           <div className="mx-auto sm:mx-0 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 text-white shadow-md shadow-amber-500/25 mb-1">
             <Sparkles className="size-6" />
           </div>
-          <DialogTitle className="text-lg sm:text-xl font-black tracking-tight text-foreground">
+          <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             Hamjamiyatga ulashish
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
@@ -98,20 +98,20 @@ export default function ShareToCommunityModal({
         {/* Natija kartochkasi preview */}
         <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 via-[var(--surface-hover)] to-teal-500/10 p-4 space-y-3 shadow-inner">
           <div className="flex items-center justify-between">
-            <Badge className="bg-emerald-600 text-white text-[10px] font-extrabold uppercase tracking-wider">
+            <Badge className="bg-emerald-600 text-white text-[12px] font-bold uppercase tracking-wider">
               {isCert ? '🏆 Milliy Sertifikat' : '📝 Test Natijasi'}
             </Badge>
-            <span className="text-[11px] font-mono font-bold text-amber-400 flex items-center gap-1">
+            <span className="text-[12px] font-mono font-bold text-amber-400 flex items-center gap-1">
               <Sparkles className="size-3" /> +15 XP Bonus
             </span>
           </div>
 
           <div className="space-y-1">
-            <h4 className="font-extrabold text-foreground text-sm leading-snug line-clamp-1">
+            <h4 className="font-bold text-foreground text-sm leading-snug line-clamp-1">
               {testTitle}
             </h4>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black font-mono tracking-tight text-emerald-400">
+              <span className="text-3xl font-bold font-mono tracking-tight text-emerald-400">
                 {score.toFixed(0)}%
               </span>
               {grade && (
@@ -121,7 +121,7 @@ export default function ShareToCommunityModal({
               )}
             </div>
             {totalQuestions && (
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[12px] text-muted-foreground">
                 To&apos;g&apos;ri javoblar: <b>{correctCount}</b> / {totalQuestions} ta
               </p>
             )}
@@ -132,7 +132,7 @@ export default function ShareToCommunityModal({
         <div className="space-y-1.5 pt-1">
           <label className="text-xs font-semibold text-foreground flex items-center justify-between">
             <span>Taassurotingiz yoki fikringiz:</span>
-            <span className="text-[10px] text-muted-foreground font-normal">Ixtiyoriy</span>
+            <span className="text-[12px] text-muted-foreground font-normal">Ixtiyoriy</span>
           </label>
           <Textarea
             value={caption}

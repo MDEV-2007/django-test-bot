@@ -436,7 +436,7 @@ export default function PanelReelsPage() {
           <div>
             <div className="flex items-center gap-2">
               <PremiumIcon icon={Sparkles} tone="rose" size="md" glow />
-              <h1 className="text-2xl font-black tracking-tight text-foreground">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
                 Bilim Reels & Hamjamiyat Boshqaruvi
               </h1>
               <Badge variant="outline" className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30">
@@ -515,7 +515,7 @@ export default function PanelReelsPage() {
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-muted-foreground font-medium">Jami Reelslar</p>
-                    <p className="text-2xl font-black text-foreground mt-0.5">{stats.total}</p>
+                    <p className="text-2xl font-bold text-foreground mt-0.5">{stats.total}</p>
                   </div>
                   <PremiumIcon icon={Layers} tone="indigo" size="md" />
                 </CardContent>
@@ -525,7 +525,7 @@ export default function PanelReelsPage() {
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-muted-foreground font-medium">O&apos;quvchilarga Ochiq (Chop etilgan)</p>
-                    <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{stats.published}</p>
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{stats.published}</p>
                   </div>
                   <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" />
                 </CardContent>
@@ -535,7 +535,7 @@ export default function PanelReelsPage() {
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-muted-foreground font-medium">Qoralamalar (Yashirin)</p>
-                    <p className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5">{stats.drafts}</p>
+                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">{stats.drafts}</p>
                   </div>
                   <PremiumIcon icon={Sliders} tone="amber" size="md" />
                 </CardContent>
@@ -652,7 +652,7 @@ export default function PanelReelsPage() {
                       >
                         <Flame className="w-3.5 h-3.5" />
                         <span>Kutilayotganlar</span>
-                        <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ${
+                        <span className={`px-1.5 py-0.5 text-[12px] rounded-full font-bold ${
                           recommendationFilter === 'pending' ? 'bg-white/20 text-white' : 'bg-rose-500/10 text-rose-600'
                         }`}>
                           {pendingQuestions.length}
@@ -673,7 +673,7 @@ export default function PanelReelsPage() {
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Chop etilganlar</span>
-                        <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold ${
+                        <span className={`px-1.5 py-0.5 text-[12px] rounded-full font-bold ${
                           recommendationFilter === 'converted' ? 'bg-white/20 text-white' : 'bg-emerald-500/10 text-emerald-600'
                         }`}>
                           {convertedQuestions.length}
@@ -767,14 +767,14 @@ export default function PanelReelsPage() {
                             }`}
                           >
                             <div className="space-y-1.5">
-                              <div className="flex items-center justify-between text-[10px]">
+                              <div className="flex items-center justify-between text-[12px]">
                                 <span className={`font-bold px-2 py-0.5 rounded-md ${
                                   converted ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/15' : 'text-rose-600 dark:text-rose-400 bg-rose-500/10'
                                 }`}>
                                   {q.subject_name} · Xatolik: {q.fail_rate}%
                                 </span>
                                 {converted ? (
-                                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                  <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                     <CheckCircle2 className="w-3 h-3" /> Reel tayyor
                                   </span>
                                 ) : (
@@ -826,7 +826,7 @@ export default function PanelReelsPage() {
             {/* Reels Table List */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-extrabold text-base text-foreground">
+                <h3 className="font-bold text-base text-foreground">
                   Mavjud Bilim Reelslar ({reels.length})
                 </h3>
                 <Button
@@ -859,25 +859,25 @@ export default function PanelReelsPage() {
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5">
-                              <Badge variant="outline" className="text-[10px] font-bold">
+                              <Badge variant="outline" className="text-[12px] font-bold">
                                 {reel.subject_name}
                               </Badge>
                               {reel.media_type === 'video' ? (
-                                <Badge className="bg-rose-500/15 text-rose-500 border-rose-500/30 text-[10px] gap-1">
+                                <Badge className="bg-rose-500/15 text-rose-500 border-rose-500/30 text-[12px] gap-1">
                                   <Video className="size-2.5" /> Video
                                 </Badge>
                               ) : (
-                                <Badge variant="secondary" className="text-[10px]">
+                                <Badge variant="secondary" className="text-[12px]">
                                   Matn
                                 </Badge>
                               )}
                             </div>
-                            <span className="text-[10px] text-muted-foreground font-mono">
+                            <span className="text-[12px] text-muted-foreground font-mono">
                               {reel.created_at || '—'}
                             </span>
                           </div>
 
-                          <h4 className="font-extrabold text-sm text-foreground leading-snug line-clamp-2">
+                          <h4 className="font-bold text-sm text-foreground leading-snug line-clamp-2">
                             {reel.hook}
                           </h4>
 
@@ -886,7 +886,7 @@ export default function PanelReelsPage() {
                           </p>
 
                           {reel.media_type === 'video' && reel.video_url && (
-                            <div className="text-[11px] text-primary truncate bg-primary/5 p-1.5 rounded-lg border border-primary/20">
+                            <div className="text-[12px] text-primary truncate bg-primary/5 p-1.5 rounded-lg border border-primary/20">
                               🔗 {reel.video_url}
                             </div>
                           )}
@@ -897,7 +897,7 @@ export default function PanelReelsPage() {
                             <button
                               onClick={() => handleTogglePublish(reel)}
                               className={cn(
-                                "px-2.5 py-1 rounded-full text-[11px] font-bold transition-all border",
+                                "px-2.5 py-1 rounded-full text-[12px] font-bold transition-all border",
                                 reel.is_published
                                   ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
                                   : "bg-amber-500/10 text-amber-600 border-amber-500/30"
@@ -997,14 +997,14 @@ export default function PanelReelsPage() {
                           <div>
                             <div className="flex items-center gap-1.5">
                               <span className="font-bold text-foreground text-xs">{post.author.name}</span>
-                              <span className="text-[10px] text-muted-foreground">@{post.author.username}</span>
+                              <span className="text-[12px] text-muted-foreground">@{post.author.username}</span>
                               {post.is_pinned && (
-                                <span className="text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1 rounded flex items-center gap-0.5">
+                                <span className="text-[12px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1 rounded flex items-center gap-0.5">
                                   <Pin className="size-2.5" /> Qadalgan
                                 </span>
                               )}
                             </div>
-                            <span className="text-[10px] text-muted-foreground">{post.created_at}</span>
+                            <span className="text-[12px] text-muted-foreground">{post.created_at}</span>
                           </div>
                         </div>
 
@@ -1041,11 +1041,11 @@ export default function PanelReelsPage() {
                       {/* Content */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5">
-                          <Badge variant="outline" className="text-[10px]">
+                          <Badge variant="outline" className="text-[12px]">
                             {post.subject_name || 'Umumiy'}
                           </Badge>
                           {post.score > 0 && (
-                            <Badge className="bg-emerald-500/15 text-emerald-500 text-[10px]">
+                            <Badge className="bg-emerald-500/15 text-emerald-500 text-[12px]">
                               {post.score.toFixed(0)}% natija
                             </Badge>
                           )}
@@ -1076,7 +1076,7 @@ export default function PanelReelsPage() {
                       )}
 
                       {/* Footer Stats */}
-                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border">
+                      <div className="flex items-center justify-between text-[12px] text-muted-foreground pt-2 border-t border-border">
                         <span className="flex items-center gap-1">
                           <Heart className="size-3 text-rose-500" /> {post.likes_count} ta reaksiya
                         </span>
@@ -1117,7 +1117,7 @@ export default function PanelReelsPage() {
               <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center gap-2">
                   <PremiumIcon icon={Sparkles} tone="rose" size="sm" glow />
-                  <h3 className="text-lg font-black text-foreground">
+                  <h3 className="text-lg font-bold text-foreground">
                     Yangi Bilim Reel Yaratish
                   </h3>
                 </div>
@@ -1163,7 +1163,7 @@ export default function PanelReelsPage() {
 
                   {mediaType === 'video' && (
                     <div className="pt-2 space-y-1">
-                      <label className="text-[11px] font-bold text-foreground block">
+                      <label className="text-[12px] font-bold text-foreground block">
                         Video Havolasi (URL - MP4 yoki WebM video fayl)
                       </label>
                       <Input
@@ -1172,7 +1172,7 @@ export default function PanelReelsPage() {
                         onChange={(e) => setVideoUrl(e.target.value)}
                         className="h-9 rounded-xl font-mono text-xs"
                       />
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[12px] text-muted-foreground">
                         Vertikal (9:16) formatdagi to&apos;g&apos;ridan-to&apos;g&apos;ri video havolasini kiriting.
                       </span>
                     </div>
@@ -1272,13 +1272,13 @@ export default function PanelReelsPage() {
 
                 {/* Micro Quiz */}
                 <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-3">
-                  <span className="font-extrabold text-foreground flex items-center gap-1">
+                  <span className="font-bold text-foreground flex items-center gap-1">
                     <Flame className="w-3.5 h-3.5 text-rose-500" />
                     Tezkor Mikrokvest Savoli va Variantlari
                   </span>
 
                   <div>
-                    <label className="text-[11px] font-bold text-foreground block mb-1">Savol matni</label>
+                    <label className="text-[12px] font-bold text-foreground block mb-1">Savol matni</label>
                     <Input
                       placeholder="Savolni kiriting..."
                       value={quizQuestion}
@@ -1289,7 +1289,7 @@ export default function PanelReelsPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] font-bold text-foreground block mb-0.5">Variant A</label>
+                      <label className="text-[12px] font-bold text-foreground block mb-0.5">Variant A</label>
                       <Input
                         placeholder="Variant A"
                         value={optionA}
@@ -1298,7 +1298,7 @@ export default function PanelReelsPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-foreground block mb-0.5">Variant B</label>
+                      <label className="text-[12px] font-bold text-foreground block mb-0.5">Variant B</label>
                       <Input
                         placeholder="Variant B"
                         value={optionB}
@@ -1307,7 +1307,7 @@ export default function PanelReelsPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-foreground block mb-0.5">Variant C</label>
+                      <label className="text-[12px] font-bold text-foreground block mb-0.5">Variant C</label>
                       <Input
                         placeholder="Variant C"
                         value={optionC}
@@ -1316,7 +1316,7 @@ export default function PanelReelsPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-foreground block mb-0.5">Variant D</label>
+                      <label className="text-[12px] font-bold text-foreground block mb-0.5">Variant D</label>
                       <Input
                         placeholder="Variant D"
                         value={optionD}
@@ -1328,7 +1328,7 @@ export default function PanelReelsPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <div>
-                      <label className="text-[11px] font-bold text-foreground block mb-1">To&apos;g&apos;ri variant</label>
+                      <label className="text-[12px] font-bold text-foreground block mb-1">To&apos;g&apos;ri variant</label>
                       <select
                         value={correctIndex}
                         onChange={(e) => setCorrectIndex(Number(e.target.value))}
@@ -1342,7 +1342,7 @@ export default function PanelReelsPage() {
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-bold text-foreground block mb-1">Tushuntirish (Explanation)</label>
+                      <label className="text-[12px] font-bold text-foreground block mb-1">Tushuntirish (Explanation)</label>
                       <Input
                         placeholder="Nega aynan shu javob to'g'ri?"
                         value={quizExplanation}
@@ -1364,7 +1364,7 @@ export default function PanelReelsPage() {
                           type="button"
                           onClick={() => setGradientTheme(th.id)}
                           className={cn(
-                            "px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all",
+                            "px-2.5 py-1 rounded-xl text-[12px] font-bold border transition-all",
                             gradientTheme === th.id
                               ? "bg-primary text-primary-foreground border-primary shadow-sm"
                               : "bg-muted text-muted-foreground border-border hover:text-foreground"

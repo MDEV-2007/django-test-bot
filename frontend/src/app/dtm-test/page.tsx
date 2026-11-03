@@ -98,7 +98,7 @@ export default function DtmTestLandingPage() {
             <span>DTM / BMB 2026 Yangi Standarti Bo&apos;yicha Testlar</span>
           </div>
 
-          <h1 className="text-3xl font-black sm:text-5xl md:text-6xl text-slate-900 leading-tight tracking-tight">
+          <h1 className="text-3xl font-bold sm:text-5xl md:text-6xl text-slate-900 leading-tight tracking-tight">
             DTM Test Yechish Onlayn —{' '}
             <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">
               Bepul Mock Imtihonlar
@@ -111,7 +111,7 @@ export default function DtmTestLandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button asChild size="lg" className="h-13 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow-lg shadow-emerald-600/20 gap-2 w-full sm:w-auto">
+            <Button asChild size="lg" className="h-13 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base shadow-lg shadow-emerald-600/20 gap-2 w-full sm:w-auto">
               <Link href="/register">
                 <Play className="size-5 fill-white" /> Testni Hoziroq Boshlash (Bepul)
               </Link>
@@ -135,10 +135,10 @@ export default function DtmTestLandingPage() {
       <section className="py-12 bg-white border-y border-slate-200">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center space-y-2 mb-10">
-            <Badge variant="outline" className="border-emerald-500/30 text-emerald-700 bg-emerald-50 text-[11px] font-black uppercase">
+            <Badge variant="outline" className="border-emerald-500/30 text-emerald-700 bg-emerald-50 text-[12px] font-bold uppercase">
               Fanlar Kesimida Testlar
             </Badge>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
               Qaysi fandan DTM test topshirmoqchisiz?
             </h2>
             <p className="text-sm text-slate-500">O&apos;zingizga kerakli fanni tanlang va sinovni boshlang.</p>
@@ -152,9 +152,9 @@ export default function DtmTestLandingPage() {
               >
                 <div className="flex items-start justify-between">
                   <span className="text-3xl p-2 rounded-xl bg-white border border-slate-100 shadow-xs">{s.icon}</span>
-                  <Badge variant="secondary" className="text-[10px] font-bold">{s.badge}</Badge>
+                  <Badge variant="secondary" className="text-[12px] font-bold">{s.badge}</Badge>
                 </div>
-                <h3 className="mt-4 text-lg font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
+                <h3 className="mt-4 text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
                   {s.name}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 font-medium">{s.count}</p>
@@ -173,10 +173,10 @@ export default function DtmTestLandingPage() {
       {/* DTM IMTIHON STRUKTURASI */}
       <section className="py-16 mx-auto max-w-5xl px-4 sm:px-6">
         <div className="text-center space-y-2 mb-10">
-          <Badge className="bg-slate-900 text-white text-[11px] font-black uppercase">
+          <Badge className="bg-slate-900 text-white text-[12px] font-bold uppercase">
             Ballar Tasimoti
           </Badge>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
             DTM 2026 Test Tuzilishi va Maksimal 189 Ball
           </h2>
           <p className="text-sm text-slate-500">Har bir savol uchun ajratilgan ballar shkalasi.</p>
@@ -185,7 +185,7 @@ export default function DtmTestLandingPage() {
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200 text-xs font-black uppercase text-slate-600">
+              <thead className="bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase text-slate-600">
                 <tr>
                   <th className="px-5 py-3.5">Fan turi</th>
                   <th className="px-5 py-3.5">Fanlar nomi</th>
@@ -231,7 +231,7 @@ export default function DtmTestLandingPage() {
                   <td className="px-5 py-3 text-right font-bold text-emerald-700">63 ball</td>
                 </tr>
               </tbody>
-              <tfoot className="bg-slate-900 text-white font-black text-sm">
+              <tfoot className="bg-slate-900 text-white font-bold text-sm">
                 <tr>
                   <td colSpan={2} className="px-5 py-3.5">UMUMIY NATIJA</td>
                   <td className="px-5 py-3.5 text-center">90 ta savol</td>
@@ -248,10 +248,10 @@ export default function DtmTestLandingPage() {
       <section className="py-16 bg-white border-t border-slate-200">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="text-center space-y-2 mb-10">
-            <Badge variant="outline" className="border-slate-300 text-slate-700 text-[11px] font-black uppercase">
+            <Badge variant="outline" className="border-slate-300 text-slate-700 text-[12px] font-bold uppercase">
               Ko&apos;p Beriladigan Savollar
             </Badge>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
               DTM Testlar Bo&apos;yicha Savol-Javoblar
             </h2>
           </div>
@@ -275,17 +275,17 @@ export default function DtmTestLandingPage() {
       {/* FOOTER CTA */}
       <section className="py-16 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white text-center px-4">
         <div className="max-w-2xl mx-auto space-y-5">
-          <Badge className="bg-emerald-500 text-slate-950 font-black uppercase text-xs">
+          <Badge className="bg-emerald-500 text-slate-950 font-bold uppercase text-xs">
             Kelajagingizni bugun quring
           </Badge>
-          <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight">
             OTM talabasi bo&apos;lish sari ilk qadamni qo&apos;ying!
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
             IlmIldizi bilan har kuni 15 daqiqa test yeching, o&apos;z zaif mavzularingizni yo&apos;qoting va imtihonda 100% ishonch bilan qatnashing.
           </p>
           <div className="pt-2">
-            <Button asChild size="lg" className="h-12 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base shadow-lg shadow-emerald-500/20">
+            <Button asChild size="lg" className="h-12 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-base shadow-lg shadow-emerald-500/20">
               <Link href="/register">
                 Bepul Boshlash 🚀
               </Link>

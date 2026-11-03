@@ -160,7 +160,7 @@ export default function LessonAudioPlayer({
             }}
           />
         </div>
-        <div className="flex items-center justify-between font-mono text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-between font-mono text-[12px] text-muted-foreground">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>

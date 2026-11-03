@@ -401,7 +401,7 @@ export default function KnowledgeTree({
       </svg>
 
       {/* Daraxt osti maqom tegi */}
-      <div className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-extrabold text-emerald-400">
+      <div className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[12px] font-bold text-emerald-400">
         <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" />
         <span>Tirik Bilim Ildizi · {safeLevel}-bosqich</span>
       </div>

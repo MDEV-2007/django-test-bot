@@ -129,10 +129,10 @@ export default function LeaderboardPage() {
               <div className="flex items-start gap-3.5">
                 <PremiumIcon icon={Trophy} tone="amber" size="lg" solid />
                 <div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#C93400] dark:text-[#FF9F0A]">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#FF9500]/15 px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-[#C93400] dark:text-[#FF9F0A]">
                     Game Center · Oltin Liga
                   </span>
-                  <h1 className="mt-1 text-lg sm:text-2xl font-extrabold tracking-tight text-foreground">
+                  <h1 className="mt-1 text-lg sm:text-2xl font-bold tracking-tight text-foreground">
                     Respublika Reyting Jadvali
                   </h1>
                   <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground max-w-xl">
@@ -143,10 +143,10 @@ export default function LeaderboardPage() {
 
               {data && data.my_rank > 0 && (
                 <div className="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-0.5 rounded-[20px] border border-border bg-muted/40 px-4 py-3 shrink-0">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="font-mono text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                     Sizning o&apos;rningiz
                   </span>
-                  <span className="font-mono text-xl sm:text-2xl font-black text-primary">
+                  <span className="font-mono text-xl sm:text-2xl font-bold text-primary">
                     #{data.my_rank}
                   </span>
                 </div>
@@ -214,7 +214,7 @@ export default function LeaderboardPage() {
                     <div className="flex items-center justify-between sm:justify-center mb-3">
                       <span
                         className={cn(
-                          'inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[10px] font-black tracking-wide',
+                          'inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[12px] font-bold tracking-wide',
                           slot.chipClass
                         )}
                       >
@@ -222,7 +222,7 @@ export default function LeaderboardPage() {
                         {slot.badge}
                       </span>
                       {r && (
-                        <span className="sm:hidden inline-flex items-center gap-1 rounded-full bg-[#FF9500]/14 px-2.5 py-0.5 font-mono text-xs font-extrabold text-[#C93400] dark:text-[#FF9F0A]">
+                        <span className="sm:hidden inline-flex items-center gap-1 rounded-full bg-[#FF9500]/14 px-2.5 py-0.5 font-mono text-xs font-bold text-[#C93400] dark:text-[#FF9F0A]">
                           <Zap className="size-3" /> <StatNumber value={r.xp} /> XP
                         </span>
                       )}
@@ -239,10 +239,10 @@ export default function LeaderboardPage() {
                           src={r.avatar_url}
                           name={name(r)}
                           cosmetics={r.cosmetics}
-                          fallbackClassName="text-xs font-extrabold"
+                          fallbackClassName="text-xs font-bold"
                         />
                         <div className="min-w-0 flex-1 sm:w-full">
-                          <h4 className="flex items-center sm:justify-center gap-1 truncate text-sm sm:text-[15px] font-extrabold text-foreground">
+                          <h4 className="flex items-center sm:justify-center gap-1 truncate text-sm sm:text-[15px] font-bold text-foreground">
                             <span className="truncate">{name(r)}</span>
                             <VerifiedBadge
                               role={r.role}
@@ -252,13 +252,13 @@ export default function LeaderboardPage() {
                             />
                             <CosmeticBadge cosmetics={r.cosmetics} />
                           </h4>
-                          <span className="block font-mono text-[11px] text-muted-foreground">
+                          <span className="block font-mono text-[12px] text-muted-foreground">
                             {r.cosmetics?.title?.payload?.title ?? `Level ${r.level}`}
                           </span>
                         </div>
                         <span
                           className={cn(
-                            'hidden sm:inline-flex items-center gap-1 rounded-full px-3 py-1 font-mono text-xs font-extrabold',
+                            'hidden sm:inline-flex items-center gap-1 rounded-full px-3 py-1 font-mono text-xs font-bold',
                             isChampion
                               ? 'bg-[#FF9500]/16 text-[#C93400] dark:text-[#FF9F0A]'
                               : 'bg-muted text-foreground'
@@ -283,7 +283,7 @@ export default function LeaderboardPage() {
                 <div className="flex items-center gap-2.5">
                   <PremiumIcon icon={Users} tone="sky" size="sm" solid />
                   <div>
-                    <h3 className="text-sm sm:text-base font-extrabold text-foreground">
+                    <h3 className="text-sm sm:text-base font-bold text-foreground">
                       Sizning raqobat guruhingiz
                     </h3>
                     <p className="text-xs text-muted-foreground">
@@ -331,17 +331,17 @@ export default function LeaderboardPage() {
                             />
                             <CosmeticBadge cosmetics={r.cosmetics} />
                             {r.is_me && (
-                              <span className="ml-0.5 rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] font-extrabold text-primary">
+                              <span className="ml-0.5 rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[12px] font-bold text-primary">
                                 Siz
                               </span>
                             )}
                           </p>
-                          <span className="font-mono text-[11px] text-muted-foreground">
+                          <span className="font-mono text-[12px] text-muted-foreground">
                             {r.cosmetics?.title?.payload?.title ?? `Level ${r.level}`}
                           </span>
                         </div>
                       </div>
-                      <span className="flex shrink-0 items-center gap-1 font-mono text-xs sm:text-sm font-extrabold text-primary">
+                      <span className="flex shrink-0 items-center gap-1 font-mono text-xs sm:text-sm font-bold text-primary">
                         <Zap className="size-3.5 text-[#FF9500]" /> <StatNumber value={r.xp} /> XP
                       </span>
                     </div>
@@ -355,7 +355,7 @@ export default function LeaderboardPage() {
           {data && (
             <div className="ios-card rounded-[28px] p-5 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm sm:text-base font-extrabold text-foreground">
+                <h3 className="text-sm sm:text-base font-bold text-foreground">
                   Top Ishtirokchilar Ro&apos;yxati
                 </h3>
                 <span className="text-xs font-medium text-muted-foreground">
@@ -411,17 +411,17 @@ export default function LeaderboardPage() {
                               />
                               <CosmeticBadge cosmetics={r.cosmetics} />
                               {isMe && (
-                                <span className="ml-0.5 rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] font-extrabold text-primary">
+                                <span className="ml-0.5 rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[12px] font-bold text-primary">
                                   Siz
                                 </span>
                               )}
                             </p>
-                            <span className="font-mono text-[11px] text-muted-foreground">
+                            <span className="font-mono text-[12px] text-muted-foreground">
                               {r.cosmetics?.title?.payload?.title ?? `Level ${r.level}`}
                             </span>
                           </div>
                         </div>
-                        <span className="flex shrink-0 items-center gap-1 font-mono text-xs sm:text-sm font-extrabold text-primary">
+                        <span className="flex shrink-0 items-center gap-1 font-mono text-xs sm:text-sm font-bold text-primary">
                           <Zap className="size-3.5 text-[#FF9500]" /> <StatNumber value={r.xp} /> XP
                         </span>
                       </div>

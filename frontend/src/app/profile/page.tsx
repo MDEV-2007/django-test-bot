@@ -476,22 +476,22 @@ export default function ProfilePage() {
                   <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
                 </h1>
                 <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
-                <span className="rounded-full bg-primary/12 px-2.5 py-0.5 font-mono text-[11px] font-bold text-primary">
+                <span className="rounded-full bg-primary/12 px-2.5 py-0.5 font-mono text-[12px] font-bold text-primary">
                   Daraja {p.level}
                 </span>
                 {p.cosmetics?.title?.payload?.title && (
-                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400">
                     👑 {p.cosmetics.title.payload.title}
                   </span>
                 )}
                 {p.cosmetics?.frame?.name && (
-                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
                     <span className="size-1.5 rounded-full bg-amber-500 inline-block animate-pulse" />
                     {p.cosmetics.frame.name}
                   </span>
                 )}
                 {p.cosmetics?.theme?.name && (
-                  <span className="rounded-full bg-emerald-500/12 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <span className="rounded-full bg-emerald-500/12 border border-emerald-500/30 px-2.5 py-0.5 text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <span className="size-1.5 rounded-full inline-block" style={{ backgroundColor: p.cosmetics.theme.payload.accent || '#10b981' }} />
                     {p.cosmetics.theme.name}
                   </span>
@@ -541,10 +541,10 @@ export default function ProfilePage() {
           <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
             <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" solid />
             <div className="min-w-0">
-              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
                 Bugun yechildi
               </span>
-              <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
                 {data.solved_today || 0} <span className="text-xs font-normal text-muted-foreground">test</span>
               </p>
             </div>
@@ -553,10 +553,10 @@ export default function ProfilePage() {
           <div className="ios-card rounded-[24px] p-4 flex items-center gap-3">
             <PremiumIcon icon={Flame} tone="amber" size="md" solid />
             <div className="min-w-0">
-              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
                 Uzluksiz Streak
               </span>
-              <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
                 {p.streak || 0} <span className="text-xs font-normal text-muted-foreground">kun 🔥</span>
               </p>
             </div>
@@ -565,10 +565,10 @@ export default function ProfilePage() {
           <Link href="/shop" className="ios-card ios-card-interactive rounded-[24px] p-4 flex items-center gap-3">
             <PremiumIcon icon={Coins} tone="gold" size="md" solid />
             <div className="min-w-0">
-              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
                 Tanga balansi
               </span>
-              <p className="text-base sm:text-lg font-extrabold font-mono text-foreground leading-tight">
+              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
                 {(p.coins || 0).toLocaleString()}
               </p>
             </div>
@@ -580,11 +580,11 @@ export default function ProfilePage() {
           >
             <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
             <div className="min-w-0">
-              <span className="text-[11px] font-semibold text-muted-foreground block truncate">
+              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
                 {rankInfo.title}
               </span>
-              <p className="text-base sm:text-lg font-extrabold font-mono text-primary leading-tight">
-                {p.elo_rating || 1200} <span className="text-[11px] font-normal text-muted-foreground">ELO</span>
+              <p className="text-base sm:text-lg font-bold font-mono text-primary leading-tight">
+                {p.elo_rating || 1200} <span className="text-[12px] font-normal text-muted-foreground">ELO</span>
               </p>
             </div>
           </Link>
@@ -608,7 +608,7 @@ export default function ProfilePage() {
                     setActiveTab(tab.id);
                   }}
                   className={cn(
-                    'flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-2 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
+                    'flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-2 px-1 sm:px-2 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
                     active
                       ? 'bg-card text-foreground shadow-sm border border-border/60 scale-[1.01]'
                       : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
@@ -617,7 +617,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-1 shrink-0">
                     <Icon className={cn('size-3.5 sm:size-4 transition-colors', active ? 'text-primary' : 'text-muted-foreground')} />
                     {tab.count !== null && tab.count > 0 && (
-                      <span className="sm:hidden px-1 py-0.2 rounded-full text-[9px] font-mono font-bold leading-none bg-primary/15 text-primary">
+                      <span className="sm:hidden px-1 py-0.2 rounded-full text-[11px] font-mono font-bold leading-none bg-primary/15 text-primary">
                         {tab.count}
                       </span>
                     )}
@@ -628,7 +628,7 @@ export default function ProfilePage() {
                   </span>
                   {tab.count !== null && tab.count > 0 && (
                     <span className={cn(
-                      'hidden sm:inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none shrink-0',
+                      'hidden sm:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
                       active ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
                     )}>
                       {tab.count}
@@ -663,52 +663,52 @@ export default function ProfilePage() {
                 <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={FileCheck2} tone="sky" size="xs" solid />
-                    <span className="text-[11px] font-semibold text-muted-foreground">Jami testlar</span>
+                    <span className="text-[12px] font-semibold text-muted-foreground">Jami testlar</span>
                   </div>
                   <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-black tracking-tight tabular-nums text-foreground">
+                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-foreground">
                       {analyticsData?.total_tests || 0} <span className="text-sm font-semibold text-muted-foreground">ta</span>
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Yechilgan to&apos;liq testlar</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">Yechilgan to&apos;liq testlar</p>
                   </div>
                 </div>
 
                 <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={Target} tone="emerald" size="xs" solid />
-                    <span className="text-[11px] font-semibold text-muted-foreground">O&apos;rtacha aniqlik</span>
+                    <span className="text-[12px] font-semibold text-muted-foreground">O&apos;rtacha aniqlik</span>
                   </div>
                   <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-black tracking-tight tabular-nums text-emerald-500">
+                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-emerald-500">
                       {analyticsData?.accuracy || 0}%
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">To&apos;g&apos;ri javoblar ulushi</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">To&apos;g&apos;ri javoblar ulushi</p>
                   </div>
                 </div>
 
                 <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={GraduationCap} tone="amber" size="xs" solid />
-                    <span className="text-[11px] font-semibold text-muted-foreground">DTM Tayyorgarlik</span>
+                    <span className="text-[12px] font-semibold text-muted-foreground">DTM Tayyorgarlik</span>
                   </div>
                   <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-black tracking-tight tabular-nums text-amber-500">
+                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-amber-500">
                       {analyticsData?.readiness_estimate || 0}%
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Imtihon bashorat darajasi</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">Imtihon bashorat darajasi</p>
                   </div>
                 </div>
 
                 <div className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
                   <div className="flex items-center justify-between">
                     <PremiumIcon icon={Clock} tone="indigo" size="xs" solid />
-                    <span className="text-[11px] font-semibold text-muted-foreground">Faol mashq vaqti</span>
+                    <span className="text-[12px] font-semibold text-muted-foreground">Faol mashq vaqti</span>
                   </div>
                   <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-black tracking-tight tabular-nums text-indigo-500">
+                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-indigo-500">
                       {analyticsData?.time_minutes || 0} <span className="text-sm font-semibold text-muted-foreground">daq</span>
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Fokus dars vaqti</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">Fokus dars vaqti</p>
                   </div>
                 </div>
               </div>
@@ -725,11 +725,11 @@ export default function ProfilePage() {
                       <div>
                         <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
                           <span>Kuchli mavzularingiz</span>
-                          <span className="text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.2 rounded-full">
+                          <span className="text-[12px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.2 rounded-full">
                             {analyticsData?.mastery?.strong?.length || 0} ta
                           </span>
                         </h3>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-[12px] text-muted-foreground">
                           80%+ aniqlik bilan mustahkam o&apos;zlashtirilgan
                         </p>
                       </div>
@@ -745,7 +745,7 @@ export default function ProfilePage() {
                         >
                           <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
                           <span>{topicName}</span>
-                          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 ml-1 font-bold">
+                          <span className="text-[12px] font-mono text-emerald-600 dark:text-emerald-400 ml-1 font-bold">
                             ✓ Mustahkam
                           </span>
                         </span>
@@ -770,11 +770,11 @@ export default function ProfilePage() {
                       <div>
                         <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
                           <span>Qiynalgan mavzularingiz</span>
-                          <span className="text-[11px] font-mono font-bold bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2 py-0.2 rounded-full">
+                          <span className="text-[12px] font-mono font-bold bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2 py-0.2 rounded-full">
                             {analyticsData?.mastery?.weak?.length || 0} ta
                           </span>
                         </h3>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-[12px] text-muted-foreground">
                           BMB testlarida ko&apos;p xato qilingan va takrorlash zarur bo&apos;lgan mavzular
                         </p>
                       </div>
@@ -792,7 +792,7 @@ export default function ProfilePage() {
                         >
                           <AlertTriangle className="size-3.5 text-rose-500 shrink-0" />
                           <span>{topicName}</span>
-                          <span className="text-[10px] font-bold text-rose-500 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                          <span className="text-[12px] font-bold text-rose-500 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
                             Qasos <ArrowRight className="size-2.5" />
                           </span>
                         </Link>
@@ -851,10 +851,10 @@ export default function ProfilePage() {
                               <span className="font-bold text-foreground truncate">{sub.name}</span>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
-                              <span className="font-mono font-black text-sm text-primary">
+                              <span className="font-mono font-bold text-sm text-primary">
                                 {sub.mastery}%
                               </span>
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-primary/10 text-primary border border-primary/20">
+                              <span className="text-[12px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-primary/10 text-primary border border-primary/20">
                                 {getGradeLetter(sub.mastery)}
                               </span>
                             </div>
@@ -862,7 +862,7 @@ export default function ProfilePage() {
 
                           <Progress value={sub.mastery} className="h-2 rounded-full" />
 
-                          <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-0.5">
+                          <div className="flex items-center justify-between text-[12px] text-muted-foreground pt-0.5">
                             <span>{sub.answered || 0} ta savol ishlangan</span>
                             <span>{sub.mastery >= 75 ? 'Yuqori daraja' : sub.mastery >= 50 ? "O'rtacha" : "E'tibor zarur"}</span>
                           </div>
@@ -932,15 +932,15 @@ export default function ProfilePage() {
 
                           <div className="grid grid-cols-3 gap-2 text-center text-xs">
                             <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                              <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">To&apos;g&apos;ri</p>
+                              <p className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">To&apos;g&apos;ri</p>
                               <p className="font-mono font-bold text-sm text-foreground mt-0.5">{correct} ta</p>
                             </div>
                             <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
-                              <p className="text-[11px] font-semibold text-rose-600 dark:text-rose-400">Xato</p>
+                              <p className="text-[12px] font-semibold text-rose-600 dark:text-rose-400">Xato</p>
                               <p className="font-mono font-bold text-sm text-foreground mt-0.5">{wrong} ta</p>
                             </div>
                             <div className="p-2.5 rounded-xl bg-muted/60 border border-border/60">
-                              <p className="text-[11px] font-semibold text-muted-foreground">O&apos;tkazilgan</p>
+                              <p className="text-[12px] font-semibold text-muted-foreground">O&apos;tkazilgan</p>
                               <p className="font-mono font-bold text-sm text-foreground mt-0.5">{skipped} ta</p>
                             </div>
                           </div>
@@ -966,7 +966,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-3 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-3 py-1 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
                     <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
                     Faol o&apos;sishda
                   </span>
@@ -1099,7 +1099,7 @@ export default function ProfilePage() {
                           <div className="rounded-[20px] border border-dashed border-border p-4 text-center space-y-2 opacity-65">
                             <PremiumIcon icon={Lock} tone="zinc" size="lg" className="mx-auto" />
                             <p className="text-[12px] font-bold leading-tight text-muted-foreground">{b.name}</p>
-                            <p className="line-clamp-2 text-[11px] leading-snug text-muted-foreground">{b.description}</p>
+                            <p className="line-clamp-2 text-[12px] leading-snug text-muted-foreground">{b.description}</p>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-56">Hali ochilmagan — {b.description}</TooltipContent>
@@ -1188,10 +1188,10 @@ export default function ProfilePage() {
                         {/* Header: Subject + Post Type + Delete */}
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                            <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[12px] font-bold text-primary">
                               {post.subject_name || 'Fan'}
                             </span>
-                            <span className="text-[11px] text-muted-foreground">
+                            <span className="text-[12px] text-muted-foreground">
                               {new Date(post.created_at).toLocaleDateString('uz-UZ')}
                             </span>
                           </div>
@@ -1214,11 +1214,11 @@ export default function ProfilePage() {
 
                         {/* Title & Score Pill */}
                         <div className="flex items-start justify-between gap-3">
-                          <h4 className="font-extrabold text-sm sm:text-base text-foreground leading-snug line-clamp-2">
+                          <h4 className="font-bold text-sm sm:text-base text-foreground leading-snug line-clamp-2">
                             {post.title}
                           </h4>
                           {post.score > 0 && (
-                            <span className="shrink-0 rounded-xl bg-emerald-500/12 border border-emerald-500/25 px-2.5 py-1 text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">
+                            <span className="shrink-0 rounded-xl bg-emerald-500/12 border border-emerald-500/25 px-2.5 py-1 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
                               {post.score.toFixed(0)}%
                             </span>
                           )}
@@ -1493,14 +1493,14 @@ export default function ProfilePage() {
                                         {item.name}
                                       </span>
                                       {isEquipped && (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.2 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.2 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
                                           <Check className="size-2.5 stroke-[2.5]" />
                                           Taqilgan
                                         </span>
                                       )}
                                     </div>
 
-                                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                    <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
                                       <span className="font-semibold text-foreground/70">
                                         {getCategoryTag(item)}
                                       </span>
@@ -1518,12 +1518,12 @@ export default function ProfilePage() {
                                     <>
                                       <div className="flex items-center gap-1.5 text-xs">
                                         {isEquipped ? (
-                                          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
+                                          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 text-[12px]">
                                             <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                             Faol profilga ulangan
                                           </span>
                                         ) : (
-                                          <span className="text-[11px] text-muted-foreground">
+                                          <span className="text-[12px] text-muted-foreground">
                                             Inventarda mavjud
                                           </span>
                                         )}
@@ -1552,7 +1552,7 @@ export default function ProfilePage() {
                                     </>
                                   ) : (
                                     <>
-                                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-600 dark:text-sky-400">
+                                      <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-sky-600 dark:text-sky-400">
                                         <Shield className="size-3.5" />
                                         Avtomatik amal qiladi
                                       </span>
@@ -1830,7 +1830,7 @@ export default function ProfilePage() {
                     </Button>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground">PNG, JPG yoki WebP (maks. 10 MB)</p>
+                <p className="text-[12px] text-muted-foreground">PNG, JPG yoki WebP (maks. 10 MB)</p>
               </div>
 
               <div className="space-y-3.5">

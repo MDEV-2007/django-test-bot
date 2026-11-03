@@ -65,7 +65,7 @@ export default function PanelUsersPage() {
         <span className="inline-flex items-center gap-1.5 font-medium">
           <span>{u.full_name}</span>
           {u.is_premium && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            <span className="text-[12px] font-bold px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-400 border border-amber-500/30">
               PRO
             </span>
           )}

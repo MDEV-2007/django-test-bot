@@ -251,14 +251,16 @@
 body {
   background: var(--bg-page);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, var(--font-sans), 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
+  /* Brand font first: with -apple-system first, iPhones rendered SF Pro and everyone
+     else Jakarta, so the product looked different per platform. */
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   font-feature-settings: 'ss01', 'cv01';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .font-voice {
-  font-family: -apple-system, BlinkMacSystemFont, var(--font-voice), var(--font-sans), sans-serif;
+  font-family: var(--font-voice), var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.025em;
 }
 
@@ -645,6 +647,11 @@ html[data-zen='on'] nav.ilm-mobile-tabbar {
 
 :root[data-theme='light'] .text-orange-300,
 :root[data-theme='light'] .text-orange-400 { color: var(--warning-text); }
+
+/* In dark mode the brand fill (#357F5E) is too dim for text (3.5:1 on cards), so text
+   coloured with `text-primary` uses the lighter brand text tone instead. */
+:root[data-theme='dark'] .text-primary,
+.dark .text-primary { color: var(--brand-text); }
 
 nav.ilm-mobile-tabbar {
   bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));

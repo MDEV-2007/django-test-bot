@@ -586,7 +586,7 @@ export default function CommunityFeedPage() {
                 <p className="text-xs sm:text-sm font-semibold text-muted-foreground truncate">
                   Natijangiz, sertifikatingiz yoki fikringizni ulashing...
                 </p>
-                <p className="text-[11px] font-medium text-primary mt-0.5">
+                <p className="text-[12px] font-medium text-primary mt-0.5">
                   Har bir foydali post uchun +15 XP bonus ✨
                 </p>
               </div>
@@ -600,7 +600,7 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('result');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3 py-1.5 text-[11px] font-bold text-[#C93400] dark:text-[#FF9F0A] cursor-pointer"
+                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3 py-1.5 text-[12px] font-bold text-[#C93400] dark:text-[#FF9F0A] cursor-pointer"
               >
                 <PremiumIcon icon={Award} tone="amber" size="2xs" />
                 <span>Natija</span>
@@ -612,7 +612,7 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('custom');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#34C759]/14 border border-[#34C759]/25 px-3 py-1.5 text-[11px] font-bold text-[#248A3D] dark:text-[#30D158] cursor-pointer"
+                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#34C759]/14 border border-[#34C759]/25 px-3 py-1.5 text-[12px] font-bold text-[#248A3D] dark:text-[#30D158] cursor-pointer"
               >
                 <PremiumIcon icon={Camera} tone="emerald" size="2xs" />
                 <span>Rasm</span>
@@ -689,7 +689,7 @@ export default function CommunityFeedPage() {
                 <div className="ios-card rounded-[28px] py-14 px-5 text-center space-y-4">
                   <PremiumIcon icon={Trophy} tone="amber" size="xl" className="mx-auto" />
                   <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-extrabold text-foreground">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">
                       Hozircha postlar mavjud emas
                     </h3>
                     <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
@@ -760,13 +760,13 @@ export default function CommunityFeedPage() {
                             {post.author.avatar && (
                               <AvatarImage src={post.author.avatar} alt={post.author.name} />
                             )}
-                            <AvatarFallback className="font-extrabold bg-primary text-white text-xs sm:text-sm">
+                            <AvatarFallback className="font-bold bg-primary text-white text-xs sm:text-sm">
                               {post.author.name.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-extrabold text-foreground text-sm leading-tight truncate">
+                              <span className="font-bold text-foreground text-sm leading-tight truncate">
                                 {post.author.name}
                               </span>
                               <VerifiedBadge
@@ -775,16 +775,16 @@ export default function CommunityFeedPage() {
                                 isTeacher={post.author.is_teacher}
                                 size="xs"
                               />
-                              <span className="rounded-full bg-primary/12 px-2 py-0.5 font-mono text-[10px] font-bold text-primary">
+                              <span className="rounded-full bg-primary/12 px-2 py-0.5 font-mono text-[12px] font-bold text-primary">
                                 Lvl {post.author.level}
                               </span>
                               {post.is_pinned && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[#FF2D55]/14 px-2 py-0.5 text-[10px] font-bold text-[#D70015] dark:text-[#FF375F]">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#FF2D55]/14 px-2 py-0.5 text-[12px] font-bold text-[#D70015] dark:text-[#FF375F]">
                                   <Pin className="size-2.5" /> Qadalgan
                                 </span>
                               )}
                             </div>
-                            <p className="text-[11px] font-medium text-muted-foreground mt-0.5 truncate">
+                            <p className="text-[12px] font-medium text-muted-foreground mt-0.5 truncate">
                               @{post.author.username} · {post.created_at}
                             </p>
                           </div>
@@ -825,14 +825,14 @@ export default function CommunityFeedPage() {
                       {post.score > 0 || post.total_questions > 0 || post.grade ? (
                         <div className="flex items-center justify-between gap-3 rounded-[20px] border border-border bg-muted/40 p-3.5 sm:p-4 min-w-0">
                           <div className="space-y-1 min-w-0 flex-1">
-                            <span className="inline-block rounded-full bg-card border border-border px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                            <span className="inline-block rounded-full bg-card border border-border px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground">
                               {post.subject_name}
                             </span>
-                            <h4 className="font-extrabold text-foreground text-xs sm:text-sm leading-snug line-clamp-1">
+                            <h4 className="font-bold text-foreground text-xs sm:text-sm leading-snug line-clamp-1">
                               {post.title}
                             </h4>
                             {post.total_questions > 0 && (
-                              <p className="text-[11px] font-medium text-muted-foreground truncate">
+                              <p className="text-[12px] font-medium text-muted-foreground truncate">
                                 To&apos;g&apos;ri javoblar:{' '}
                                 <strong className="text-foreground">{post.correct_count}</strong> /{' '}
                                 {post.total_questions} ta
@@ -842,11 +842,11 @@ export default function CommunityFeedPage() {
 
                           {post.score > 0 && (
                             <div className="flex flex-col items-end shrink-0 rounded-[16px] bg-[#34C759]/14 border border-[#34C759]/25 px-3.5 py-2">
-                              <span className="text-lg sm:text-2xl font-black font-mono tracking-tight text-[#248A3D] dark:text-[#30D158] leading-none">
+                              <span className="text-lg sm:text-2xl font-bold font-mono tracking-tight text-[#248A3D] dark:text-[#30D158] leading-none">
                                 {post.score?.toFixed(0)}%
                               </span>
                               {post.grade && (
-                                <span className="mt-0.5 text-[10px] font-extrabold uppercase text-[#C93400] dark:text-[#FF9F0A]">
+                                <span className="mt-0.5 text-[12px] font-bold uppercase text-[#C93400] dark:text-[#FF9F0A]">
                                   Daraja: {post.grade}
                                 </span>
                               )}
@@ -856,11 +856,11 @@ export default function CommunityFeedPage() {
                       ) : (
                         <div className="space-y-1">
                           {post.subject_name && (
-                            <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                            <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground">
                               {post.subject_name}
                             </span>
                           )}
-                          <h4 className="font-extrabold text-foreground text-sm sm:text-base leading-snug">
+                          <h4 className="font-bold text-foreground text-sm sm:text-base leading-snug">
                             {post.title}
                           </h4>
                         </div>
@@ -924,7 +924,7 @@ export default function CommunityFeedPage() {
                                 title={meta.label}
                               >
                                 <span>{meta.icon}</span>
-                                {count > 0 && <span className="font-mono text-[11px]">{count}</span>}
+                                {count > 0 && <span className="font-mono text-[12px]">{count}</span>}
                               </button>
                             );
                           })}
@@ -977,7 +977,7 @@ export default function CommunityFeedPage() {
                                       {c.user_avatar && (
                                         <AvatarImage src={c.user_avatar} alt={c.user_name} />
                                       )}
-                                      <AvatarFallback className="text-[9px] font-bold bg-primary/12 text-primary">
+                                      <AvatarFallback className="text-[11px] font-bold bg-primary/12 text-primary">
                                         {c.user_name.charAt(0).toUpperCase()}
                                       </AvatarFallback>
                                     </Avatar>
@@ -994,7 +994,7 @@ export default function CommunityFeedPage() {
                                             size="xs"
                                           />
                                         </div>
-                                        <span className="text-[10px] text-muted-foreground shrink-0">
+                                        <span className="text-[12px] text-muted-foreground shrink-0">
                                           {c.created_at}
                                         </span>
                                       </div>
@@ -1011,7 +1011,7 @@ export default function CommunityFeedPage() {
                                             [post.id]: `@${c.user_name} `,
                                           }));
                                         }}
-                                        className="mt-1 text-[10px] font-bold text-primary hover:underline cursor-pointer"
+                                        className="mt-1 text-[12px] font-bold text-primary hover:underline cursor-pointer"
                                       >
                                         Javob berish
                                       </button>
@@ -1034,7 +1034,7 @@ export default function CommunityFeedPage() {
                                     [post.id]: (prev[post.id] ? prev[post.id] + ' ' : '') + m.text,
                                   }));
                                 }}
-                                className="rounded-full px-2.5 py-1 text-[10px] font-semibold bg-muted/70 border border-border text-foreground/85 hover:border-primary/40 shrink-0 transition-colors cursor-pointer"
+                                className="rounded-full px-2.5 py-1 text-[12px] font-semibold bg-muted/70 border border-border text-foreground/85 hover:border-primary/40 shrink-0 transition-colors cursor-pointer"
                               >
                                 {m.label}
                               </button>
@@ -1121,10 +1121,10 @@ export default function CommunityFeedPage() {
             <div className="flex items-center gap-2.5 pr-8">
               <PremiumIcon icon={Plus} tone="emerald" size="sm" solid />
               <div>
-                <h3 className="text-base font-extrabold text-foreground">
+                <h3 className="text-base font-bold text-foreground">
                   Hamjamiyatga Post Qo&apos;yish
                 </h3>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[12px] text-muted-foreground">
                   Test natijangizni yoki fikringizni do&apos;stlaringiz bilan ulashing (+15 XP)
                 </p>
               </div>
@@ -1175,7 +1175,7 @@ export default function CommunityFeedPage() {
                       <p className="text-xs font-bold text-foreground">
                         Hali topshirilgan testlar yo&apos;q
                       </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs mx-auto">
+                      <p className="text-[12px] text-muted-foreground mt-0.5 max-w-xs mx-auto">
                         Avval birorta test yeching, so&apos;ng natijangizni bu yerda ulashing.
                       </p>
                     </div>
@@ -1187,7 +1187,7 @@ export default function CommunityFeedPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-foreground">Ulashish uchun natijani tanlang:</span>
-                      <span className="text-muted-foreground font-mono text-[11px]">
+                      <span className="text-muted-foreground font-mono text-[12px]">
                         {userAttempts.length} ta natija
                       </span>
                     </div>
@@ -1214,12 +1214,12 @@ export default function CommunityFeedPage() {
                                   {att.test_title}
                                 </span>
                                 {isCert && (
-                                  <Badge className="bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A] text-[9px] px-1.5 py-0.5 shrink-0 border border-[#FF9500]/30 font-bold">
+                                  <Badge className="bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A] text-[11px] px-1.5 py-0.5 shrink-0 border border-[#FF9500]/30 font-bold">
                                     🏆 Sertifikat
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-[11px] text-muted-foreground truncate">
+                              <p className="text-[12px] text-muted-foreground truncate">
                                 {att.correct_answers} to&apos;g&apos;ri • {att.wrong_answers} xato •{' '}
                                 {new Date(att.completed_at).toLocaleDateString('uz-UZ')}
                               </p>
@@ -1228,7 +1228,7 @@ export default function CommunityFeedPage() {
                             <div className="flex items-center gap-2 shrink-0">
                               <span
                                 className={cn(
-                                  'font-mono font-black text-xs px-2.5 py-1 rounded-full border',
+                                  'font-mono font-bold text-xs px-2.5 py-1 rounded-full border',
                                   scoreVal >= 80
                                     ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] border-[#34C759]/30'
                                     : scoreVal >= 60
@@ -1379,7 +1379,7 @@ export default function CommunityFeedPage() {
                     >
                       <PremiumIcon icon={UploadCloud} tone="emerald" size="md" solid />
                       <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[12px] text-muted-foreground">
                         PNG, JPG, WebP (maks. 5MB)
                       </span>
                     </div>

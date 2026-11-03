@@ -94,7 +94,7 @@ export default function HistoryPage() {
                     <span>Hamjamiyatga qo&apos;yish</span>
                   </Button>
                   <Link href={`/tests/${e.id}/feedback`} className="flex items-center gap-2">
-                    <span className={cn('rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 text-sm sm:text-base font-black', scoreTone(e.score))}>
+                    <span className={cn('rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 text-sm sm:text-base font-bold', scoreTone(e.score))}>
                       {e.score !== null ? `${e.score.toFixed(0)}%` : '—'}
                     </span>
                     <ArrowRight className="size-4 text-muted-foreground transition-colors group-hover:text-[var(--accent-text)]" />

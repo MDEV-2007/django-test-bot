@@ -101,8 +101,8 @@ export default function AnalyticsPage() {
           actions={data && (
             <div className="flex flex-wrap gap-2.5">
               <div className="rounded-[18px] bg-[#007AFF]/10 border border-[#007AFF]/20 px-4 py-2.5 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#007AFF]">Daraja va XP</p>
-                <p className="mt-0.5 font-mono text-[18px] font-black text-foreground">
+                <p className="text-[12px] font-bold uppercase tracking-wider text-[#007AFF]">Daraja va XP</p>
+                <p className="mt-0.5 font-mono text-[18px] font-bold text-foreground">
                   Lvl {data.level}{' '}
                   <span className="text-[12px] font-semibold text-[#34C759]">({data.xp.toLocaleString('uz-UZ')} XP)</span>
                 </p>
@@ -111,8 +111,8 @@ export default function AnalyticsPage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="rounded-[18px] bg-[#FF9500]/10 border border-[#FF9500]/25 px-4 py-2.5 text-center cursor-help">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#FF9500]">Tayyorgarlik</p>
-                      <p className="mt-0.5 font-mono text-[18px] font-black text-foreground">{data.readiness_estimate}%</p>
+                      <p className="text-[12px] font-bold uppercase tracking-wider text-[#FF9500]">Tayyorgarlik</p>
+                      <p className="mt-0.5 font-mono text-[18px] font-bold text-foreground">{data.readiness_estimate}%</p>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-60">
@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
               <TabsTrigger value="admission" className="px-4 py-1.5 rounded-[10px] gap-2">
                 <PremiumIcon icon={GraduationCap} tone="emerald" size="2xs" />
                 <span>OTM Bashorati</span>
-                <span className="rounded-full bg-[#34C759]/15 px-2 py-0.5 text-[10px] font-bold text-[#34C759]">
+                <span className="rounded-full bg-[#34C759]/15 px-2 py-0.5 text-[12px] font-bold text-[#34C759]">
                   2026
                 </span>
               </TabsTrigger>
@@ -184,9 +184,9 @@ export default function AnalyticsPage() {
                     <div key={s.label} className="ios-card rounded-[22px] p-4 flex flex-col justify-between gap-3">
                       <div className="flex items-center justify-between">
                         <PremiumIcon icon={s.icon} tone={s.iconTone} size="xs" />
-                        <span className="text-[11px] font-semibold text-[#8E8E93]">{s.label}</span>
+                        <span className="text-[12px] font-semibold text-[#8E8E93]">{s.label}</span>
                       </div>
-                      <p className={`font-mono text-[24px] font-black tracking-tight tabular-nums ${s.tone}`}>
+                      <p className={`font-mono text-[24px] font-bold tracking-tight tabular-nums ${s.tone}`}>
                         {s.value}
                       </p>
                     </div>

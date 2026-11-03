@@ -21,7 +21,7 @@ export default function QuestionPalette({ sections, activeQuestionId, flagged, o
     <div className="space-y-4">
       {sections.map((section, sectionIndex) => (
         <div key={section.id}>
-          <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="mb-2 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
             <span>{SKILL_LABEL[section.skill as CefrSkill] ?? section.skill}</span>
             <span className="opacity-60">Part {section.part_number}</span>
           </div>

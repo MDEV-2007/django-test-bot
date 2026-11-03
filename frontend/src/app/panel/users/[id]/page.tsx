@@ -382,7 +382,7 @@ export default function UserDetailPage() {
                   setCustomPassword(generateSecurePassword());
                   setShowCustomPassword(true);
                 }}
-                className="h-6 text-[11px] text-primary gap-1 px-1.5"
+                className="h-6 text-[12px] text-primary gap-1 px-1.5"
               >
                 <Sparkles className="size-3" /> Tasodifiy parol
               </Button>

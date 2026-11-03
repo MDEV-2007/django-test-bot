@@ -169,7 +169,7 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
           </div>
 
           <div>
-            <h3 className="text-xl font-black text-white">⚔️ Jonli Sinf Jangiga Kirish</h3>
+            <h3 className="text-xl font-bold text-white">⚔️ Jonli Sinf Jangiga Kirish</h3>
             <p className="text-xs text-zinc-400 mt-1">
               O&apos;qituvchingiz bergan 6 xonali PIN-kodni kiriting:
             </p>
@@ -182,13 +182,13 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
               value={pinInput}
               onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
               placeholder="482 910"
-              className="w-full text-center tracking-[0.4em] text-3xl font-mono font-black bg-zinc-950 border border-white/[0.12] rounded-xl py-3 text-amber-400 focus:outline-none focus:border-amber-400"
+              className="w-full text-center tracking-[0.4em] text-3xl font-mono font-bold bg-zinc-950 border border-white/[0.12] rounded-xl py-3 text-amber-400 focus:outline-none focus:border-amber-400"
             />
 
             <Button
               onClick={handleJoinByPin}
               disabled={loading || pinInput.length !== 6}
-              className="w-full h-11 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs uppercase tracking-wider rounded-xl cursor-pointer"
+              className="w-full h-11 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer"
             >
               {loading ? "Ulanmoqda..." : "Jangga Qo'shilish"}
               <ArrowRight className="size-4 ml-1.5" />
@@ -205,17 +205,17 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
       <div className="space-y-6 max-w-4xl mx-auto">
         <Card className="border border-white/[0.08] bg-[#07090E] rounded-xl p-6 sm:p-10 text-white shadow-2xl text-center space-y-6">
           <div className="space-y-2">
-            <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-[10px] font-mono">
+            <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-[12px] font-mono">
               B2B2C LIVE QUIZ LOBBY
             </Badge>
-            <h2 className="text-xl sm:text-2xl font-black text-zinc-100">{state.title}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-zinc-100">{state.title}</h2>
           </div>
 
           {/* Neon 6-Digit PIN Code */}
           <div className="p-6 rounded-2xl bg-zinc-950/80 border border-white/[0.1] inline-block mx-auto space-y-2">
             <p className="text-xs font-mono text-zinc-400 uppercase tracking-widest">O&apos;quvchilar uchun PIN-kod:</p>
             <div className="flex items-center justify-center gap-3">
-              <span className="text-4xl sm:text-6xl font-mono font-black tracking-widest text-amber-400 select-all drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]">
+              <span className="text-4xl sm:text-6xl font-mono font-bold tracking-widest text-amber-400 select-all drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]">
                 {state.pin_code.slice(0, 3)} {state.pin_code.slice(3)}
               </span>
               <button
@@ -226,7 +226,7 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
                 {copied ? <Check className="size-5 text-emerald-400" /> : <Copy className="size-5" />}
               </button>
             </div>
-            <p className="text-[11px] text-zinc-500 font-mono">
+            <p className="text-[12px] text-zinc-500 font-mono">
               Telegramdan kirish: t.me/ilmildiziuz_bot?startapp=battle_{state.pin_code}
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
                   >
                     <Avatar className="size-5">
                       <AvatarImage src={p.avatar || undefined} />
-                      <AvatarFallback className="text-[9px] uppercase">{p.nickname.slice(0, 2)}</AvatarFallback>
+                      <AvatarFallback className="text-[11px] uppercase">{p.nickname.slice(0, 2)}</AvatarFallback>
                     </Avatar>
                     <span>{p.nickname}</span>
                   </motion.div>
@@ -264,7 +264,7 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
             <Button
               onClick={handleStartBattle}
               disabled={state.participants.length === 0}
-              className="h-12 px-8 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:opacity-95 text-zinc-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer active:scale-98"
+              className="h-12 px-8 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:opacity-95 text-zinc-950 font-bold text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer active:scale-98"
             >
               <Play className="size-5 mr-2 fill-zinc-950" />
               🔥 JANGNI BOSHLASH ({state.participants.length} o&apos;quvchi)
@@ -292,7 +292,7 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
               Jonli Poyga Jadvali (Live Race)
             </span>
           </div>
-          <Badge className="bg-rose-500 text-white font-mono text-[10px]">
+          <Badge className="bg-rose-500 text-white font-mono text-[12px]">
             {state.status === 'live' ? 'JONLI JANG' : 'YAKUNLANDI'}
           </Badge>
         </div>
@@ -306,7 +306,7 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
               <div key={p.id} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
-                    <span className="font-mono text-zinc-500 text-[10px]">#{idx + 1}</span>
+                    <span className="font-mono text-zinc-500 text-[12px]">#{idx + 1}</span>
                     {p.nickname}
                   </span>
                   <span className="font-mono font-bold text-amber-400">{p.score} ball</span>
@@ -369,11 +369,11 @@ export default function ClassBattleArena({ initialPin, roomId }: ClassBattleAren
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {analytics.hardest_questions.map((hq, idx) => (
               <div key={idx} className="p-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 space-y-2 text-xs">
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 font-mono">
+                <Badge variant="destructive" className="text-[12px] px-1.5 py-0 font-mono">
                   {hq.wrong_percentage}% o&apos;quvchi adashdi
                 </Badge>
                 <div className="text-zinc-200 font-medium line-clamp-3" dangerouslySetInnerHTML={{ __html: hq.body }} />
-                <p className="text-emerald-400 font-bold text-[11px]">
+                <p className="text-emerald-400 font-bold text-[12px]">
                   ✅ To&apos;g&apos;ri javob: {hq.correct_answer}
                 </p>
               </div>

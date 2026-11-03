@@ -110,7 +110,7 @@ function DiscountCountdownPill() {
         <span className="text-white/40">:</span>
         <span className="text-[#FF9500]">{String(timeLeft.seconds).padStart(2, '0')}</span>
       </div>
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
+      <span className="text-[12px] font-semibold uppercase tracking-wider text-[#8E8E93]">
         qoldi
       </span>
     </div>
@@ -169,7 +169,7 @@ export default function PremiumPage() {
                   <span className="font-bold text-[13px] text-[#FF9500] uppercase tracking-wider">
                     Mavsumiy Aksiya • 50% gacha chegirma
                   </span>
-                  <span className="rounded-full bg-[#FF3B30] px-2 py-0.5 text-[10px] font-bold text-white uppercase">
+                  <span className="rounded-full bg-[#FF3B30] px-2 py-0.5 text-[12px] font-bold text-white uppercase">
                     Cheklangan vaqt
                   </span>
                 </div>
@@ -296,7 +296,7 @@ export default function PremiumPage() {
                   <div className="flex items-center justify-between gap-2">
                     <span
                       className={cn(
-                        'rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider',
+                        'rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider',
                         mConfig.isSuper
                           ? 'bg-[#007AFF] text-white'
                           : isSingleTestPlan
@@ -308,7 +308,7 @@ export default function PremiumPage() {
                     </span>
 
                     {mConfig.discountPercent && (
-                      <span className="rounded-full bg-[#34C759]/15 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#34C759]">
+                      <span className="rounded-full bg-[#34C759]/15 px-2.5 py-0.5 font-mono text-[12px] font-bold text-[#34C759]">
                         {mConfig.discountPercent}
                       </span>
                     )}
@@ -351,7 +351,7 @@ export default function PremiumPage() {
                     <div className="flex items-baseline gap-1.5">
                       <span
                         className={cn(
-                          'font-mono text-[32px] font-black tracking-tight tabular-nums leading-none',
+                          'font-mono text-[32px] font-bold tracking-tight tabular-nums leading-none',
                           mConfig.isSuper ? 'text-white' : 'text-foreground'
                         )}
                       >
@@ -447,7 +447,7 @@ export default function PremiumPage() {
                         <span>Test tanlab ochish</span>
                         <ArrowRight className="size-4" />
                       </Link>
-                      <p className="text-[11px] text-center text-[#8E8E93]">
+                      <p className="text-[12px] text-center text-[#8E8E93]">
                         Yoki{' '}
                         <Link href={`/premium/checkout/${p.id}`} className="text-[#007AFF] font-semibold hover:underline">
                           to&apos;g&apos;ridan-to&apos;g&apos;ri to&apos;lash
@@ -490,8 +490,8 @@ export default function PremiumPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
             <div className="rounded-[22px] border border-[#FF3B30]/20 bg-[#FF3B30]/[0.04] p-5 space-y-3">
-              <p className="text-[11px] font-bold text-[#FF3B30] uppercase tracking-wider">Oddiy Repetitor</p>
-              <p className="text-[24px] font-black text-foreground">400,000+ so&apos;m</p>
+              <p className="text-[12px] font-bold text-[#FF3B30] uppercase tracking-wider">Oddiy Repetitor</p>
+              <p className="text-[24px] font-bold text-foreground">400,000+ so&apos;m</p>
               <p className="text-[12px] text-[#8E8E93]">Har oy to&apos;lanadi</p>
               <ul className="text-[12.5px] space-y-2 text-[#8E8E93] pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
                 <li>• Haftada atigi 3 kun dars</li>
@@ -501,8 +501,8 @@ export default function PremiumPage() {
             </div>
 
             <div className="rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] p-5 space-y-3">
-              <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">Alohida 1 ta test</p>
-              <p className="text-[24px] font-black text-foreground">15,000 so&apos;m</p>
+              <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider">Alohida 1 ta test</p>
+              <p className="text-[24px] font-bold text-foreground">15,000 so&apos;m</p>
               <p className="text-[12px] text-[#8E8E93]">Har bir imtihon uchun alohida</p>
               <ul className="text-[12.5px] space-y-2 text-[#8E8E93] pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
                 <li>• Faqat tanlangan 1 ta test ochiladi</li>
@@ -512,11 +512,11 @@ export default function PremiumPage() {
             </div>
 
             <div className="rounded-[22px] border-2 border-[#007AFF] bg-[#007AFF]/[0.06] p-5 space-y-3 relative">
-              <span className="absolute -top-3 right-4 rounded-full bg-[#007AFF] text-white font-bold text-[10px] px-3 py-0.5 uppercase shadow-xs">
+              <span className="absolute -top-3 right-4 rounded-full bg-[#007AFF] text-white font-bold text-[12px] px-3 py-0.5 uppercase shadow-xs">
                 Eng to&apos;g&apos;ri tanlov
               </span>
-              <p className="text-[11px] font-bold text-[#007AFF] uppercase tracking-wider">ILMILDIZI PRO (YILLIK)</p>
-              <p className="text-[24px] font-black text-foreground">12,500 so&apos;m/oy</p>
+              <p className="text-[12px] font-bold text-[#007AFF] uppercase tracking-wider">ILMILDIZI PRO (YILLIK)</p>
+              <p className="text-[24px] font-bold text-foreground">12,500 so&apos;m/oy</p>
               <p className="text-[12px] text-[#007AFF] font-semibold">Butun o&apos;quv yili uchun 150,000 so&apos;m</p>
               <ul className="text-[12.5px] space-y-2 text-foreground font-medium pt-3 border-t border-[#007AFF]/20">
                 <li className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-[#34C759]" /> Barcha 50+ rasmiy mock testlar</li>

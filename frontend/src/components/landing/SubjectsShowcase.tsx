@@ -87,7 +87,7 @@ export default function SubjectsShowcase() {
           <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
             Fanlar va Manbalar Katalogi
           </div>
-          <h2 className="mt-1.5 text-2xl font-extrabold tracking-[-0.025em] text-[#1C1C1E] sm:text-3xl lg:text-4xl">
+          <h2 className="mt-1.5 text-2xl font-bold tracking-[-0.025em] text-[#1C1C1E] sm:text-3xl lg:text-4xl">
             Qaysi yo&apos;nalishda imtihonga tayyorlanyapsiz?
           </h2>
         </div>
@@ -112,7 +112,7 @@ export default function SubjectsShowcase() {
                 >
                   <s.icon className="size-6 stroke-[2.2]" />
                 </span>
-                <span className="rounded-full bg-[#F2F2F7] px-3 py-1 text-[11px] font-semibold text-[#3A3A3C]">
+                <span className="rounded-full bg-[#F2F2F7] px-3 py-1 text-[12px] font-semibold text-[#3A3A3C]">
                   {s.syllabus}
                 </span>
               </div>
@@ -127,7 +127,7 @@ export default function SubjectsShowcase() {
               </p>
 
               {/* Subject Mini-metrics */}
-              <div className="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold pt-3.5 border-t border-black/[0.06]">
+              <div className="mt-4 flex flex-wrap items-center gap-1.5 text-[12px] font-semibold pt-3.5 border-t border-black/[0.06]">
                 <span className="rounded-full bg-[#F2F2F7] px-2.5 py-0.5 text-[#3A3A3C]">
                   {s.count}
                 </span>

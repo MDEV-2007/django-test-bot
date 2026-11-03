@@ -68,7 +68,7 @@ export default function ComingSoonFeature({
           </div>
 
           <div className="space-y-3">
-            <h1 className="font-voice text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="font-voice text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               {title} — Tez Kunda! 🚀
             </h1>
             <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">

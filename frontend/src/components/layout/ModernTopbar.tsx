@@ -52,7 +52,7 @@ export default function ModernTopbar({
 
         <Link href="/dashboard" className="lg:hidden flex items-center gap-2 min-w-0">
           <BrandMark size={28} rounded="rounded-[8px]" />
-          <span className="font-extrabold text-sm tracking-tight text-foreground truncate">
+          <span className="font-bold text-sm tracking-tight text-foreground truncate">
             {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
           </span>
         </Link>
@@ -75,7 +75,7 @@ export default function ModernTopbar({
         >
           <Search className="size-3.5 text-muted-foreground" />
           <span>Kurslar, testlar va mavzularni qidirish...</span>
-          <kbd className="ml-3 rounded-full bg-card px-2 py-0.5 font-mono text-[10px] text-muted-foreground font-semibold shadow-2xs border border-border">
+          <kbd className="ml-3 rounded-full bg-card px-2 py-0.5 font-mono text-[12px] text-muted-foreground font-semibold shadow-2xs border border-border">
             ⌘K
           </kbd>
         </button>
@@ -95,8 +95,8 @@ export default function ModernTopbar({
                     className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-[#FF9500]/25 bg-[#FF9500]/12 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-[#C93400] dark:text-[#FF9F0A] hover:bg-[#FF9500]/18 cursor-pointer"
                   >
                     <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
-                    <span className="font-mono text-[11px] sm:text-xs">{user.streak || 0}</span>
-                    <span className="hidden sm:inline text-[10px] font-semibold opacity-80">kun</span>
+                    <span className="font-mono text-[12px] sm:text-xs">{user.streak || 0}</span>
+                    <span className="hidden sm:inline text-[12px] font-semibold opacity-80">kun</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs font-medium">
@@ -114,7 +114,7 @@ export default function ModernTopbar({
                     className="ios-spring flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/70 pl-1.5 pr-2.5 sm:pr-3 text-xs font-bold text-foreground shadow-2xs cursor-pointer"
                   >
                     <PremiumIcon icon={Coins} tone="gold" size="2xs" solid />
-                    <span className="font-mono text-[11px] sm:text-xs">{(user.coins || 0).toLocaleString()}</span>
+                    <span className="font-mono text-[12px] sm:text-xs">{(user.coins || 0).toLocaleString()}</span>
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs font-medium">
@@ -133,7 +133,7 @@ export default function ModernTopbar({
                   >
                     <PremiumIcon icon={Swords} tone="sky" size="2xs" solid />
                     <span className="font-mono">{user.elo_rating || 1200}</span>
-                    <span className="text-[10px] text-muted-foreground font-semibold">ELO</span>
+                    <span className="text-[12px] text-muted-foreground font-semibold">ELO</span>
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent className="text-xs font-medium">
@@ -153,7 +153,7 @@ export default function ModernTopbar({
                 >
                   <Bell className="size-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-[#FF3B30] text-[9px] font-black !text-white shadow-2xs leading-none ring-2 ring-background">
+                    <span className="absolute -top-0.5 -right-0.5 flex min-w-4 h-4 px-1 items-center justify-center rounded-full bg-[#FF3B30] text-[11px] font-bold !text-white shadow-2xs leading-none ring-2 ring-background">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}

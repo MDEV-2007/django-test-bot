@@ -200,7 +200,7 @@ export default function TeacherTestInfoPage() {
                       value={info.scheduled_at || ''}
                       onChange={(e) => setInfo({ ...info, scheduled_at: e.target.value })}
                     />
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-[12px] text-muted-foreground">
                       Masalan: ertaga soat 21:30 uchun <b>2026-09-10T21:30</b> qilib belgilang.
                     </p>
                   </div>
@@ -208,7 +208,7 @@ export default function TeacherTestInfoPage() {
                   <div className="flex items-center justify-between gap-4 pt-2 border-t border-amber-500/20">
                     <div className="space-y-0.5">
                       <div className="text-xs font-semibold text-foreground">Barcha bot foydalanuvchilariga e&apos;lon qilish</div>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-[12px] text-muted-foreground">
                         {info.notify_all !== false
                           ? "Imtihon boshlanganda Telegramdagi barcha o'quvchilarga yuboriladi."
                           : "Faqat sahifada eslatma so'ragan o'quvchilarga yuboriladi."}
@@ -238,7 +238,7 @@ export default function TeacherTestInfoPage() {
                     </div>
                   ) : (
                     <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="text-[11px] text-muted-foreground">
+                      <div className="text-[12px] text-muted-foreground">
                         ⏳ 21:30 da cron orqali avtomatik jo&apos;natiladi
                       </div>
                       <Button

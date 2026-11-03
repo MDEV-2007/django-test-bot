@@ -283,13 +283,13 @@ export default function FocusSprintSetup({
                   soundFX.click();
                   setGuideModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-accent hover:bg-accent/80 text-foreground border border-border shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] sm:text-xs font-semibold bg-accent hover:bg-accent/80 text-foreground border border-border shadow-2xs transition-colors cursor-pointer"
               >
                 <HelpCircle className="size-3.5 text-primary" />
                 <span>Qo&apos;llanma</span>
               </button>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shadow-xs">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] sm:text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shadow-xs">
                 <Zap className="size-3.5 fill-primary text-primary" />
                 <span className="tracking-wide uppercase">15 Daqiqalik Flow State</span>
               </div>
@@ -299,7 +299,7 @@ export default function FocusSprintSetup({
           {/* Sarlavha & Kunlik 3 ta Mashq Qurollari Hubi */}
           <div className="space-y-3.5">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
                 <span className="inline-flex items-center justify-center size-9 sm:size-10 rounded-2xl bg-amber-500/15 text-amber-500 shadow-xs">
                   <Zap className="size-5 fill-amber-500" />
                 </span>
@@ -315,15 +315,15 @@ export default function FocusSprintSetup({
               {/* 1. Fokus & Qasos Sprinti (Faol Rejim) */}
               <div className="p-3.5 rounded-2xl border-2 border-amber-500 bg-amber-500/10 shadow-md relative overflow-hidden">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="size-8 rounded-xl bg-amber-500 text-black flex items-center justify-center font-black shadow-xs">
+                  <div className="size-8 rounded-xl bg-amber-500 text-black flex items-center justify-center font-bold shadow-xs">
                     <Zap className="size-4 fill-black" />
                   </div>
-                  <span className="bg-amber-500 text-black text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+                  <span className="bg-amber-500 text-black text-[12px] font-bold uppercase px-2 py-0.5 rounded-full">
                     FAOL MASHQ
                   </span>
                 </div>
-                <h4 className="font-extrabold text-sm text-foreground">Fokus &amp; Qasos Sprinti</h4>
-                <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                <h4 className="font-bold text-sm text-foreground">Fokus &amp; Qasos Sprinti</h4>
+                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
                   Neyron zanjiri, 3 qadamli Qasos savollari va 2.0x Combo.
                 </p>
               </div>
@@ -335,17 +335,17 @@ export default function FocusSprintSetup({
                 className="group p-3.5 rounded-2xl border border-border/80 bg-card hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all shadow-xs block cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center font-black group-hover:scale-110 transition-transform">
+                  <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
                     <FileSpreadsheet className="size-4" />
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-0.5">
+                  <span className="text-[12px] font-bold text-emerald-500 flex items-center gap-0.5">
                     Ochish <ArrowRight className="size-3" />
                   </span>
                 </div>
-                <h4 className="font-extrabold text-sm text-foreground group-hover:text-emerald-500 transition-colors">
+                <h4 className="font-bold text-sm text-foreground group-hover:text-emerald-500 transition-colors">
                   60s Anti-Darslik
                 </h4>
-                <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
                   800 betlik kitob o&apos;rniga 15 ta BMB qopqoni &amp; shpargalkasi.
                 </p>
               </Link>
@@ -365,17 +365,17 @@ export default function FocusSprintSetup({
                 className="group p-3.5 rounded-2xl border border-border/80 bg-card hover:border-rose-500/60 hover:bg-rose-500/5 transition-all shadow-xs block cursor-pointer text-left w-full active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className="size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center font-black group-hover:scale-110 transition-transform">
+                  <div className="size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
                     <Swords className="size-4" />
                   </div>
-                  <span className="text-[10px] font-bold text-rose-500 flex items-center gap-0.5">
+                  <span className="text-[12px] font-bold text-rose-500 flex items-center gap-0.5">
                     Arenaga kirish <ArrowRight className="size-3" />
                   </span>
                 </div>
-                <h4 className="font-extrabold text-sm text-foreground group-hover:text-rose-500 transition-colors">
+                <h4 className="font-bold text-sm text-foreground group-hover:text-rose-500 transition-colors">
                   1v1 Ghost Arena
                 </h4>
-                <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
                   Jonli bilimdon yoki Ghost replika bilan 60s duel &amp; ELO reyting.
                 </p>
               </button>
@@ -392,7 +392,7 @@ export default function FocusSprintSetup({
               <BookOpen className="size-3.5 text-primary" />
               <span>1. Fanni tanlang:</span>
             </span>
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-[12px] text-muted-foreground">
               {gridCards.filter((c) => c.is_available).length + 1} ta fan faol
             </span>
           </div>
@@ -419,7 +419,7 @@ export default function FocusSprintSetup({
                     <p className="font-bold text-sm sm:text-base text-foreground truncate">
                       Barcha fanlar (Aralash)
                     </p>
-                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-primary/15 text-primary border border-primary/25">
+                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-semibold bg-primary/15 text-primary border border-primary/25">
                       AI Smart Mix
                     </span>
                   </div>
@@ -430,7 +430,7 @@ export default function FocusSprintSetup({
               </div>
 
               <div className="flex items-center gap-2.5 shrink-0">
-                <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/15 text-primary border border-primary/25">
+                <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-primary/15 text-primary border border-primary/25">
                   AI Tavsiyasi
                 </span>
 
@@ -480,7 +480,7 @@ export default function FocusSprintSetup({
                         <p className="font-semibold text-xs sm:text-sm text-foreground truncate leading-snug">
                           {subj.name}
                         </p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                        <p className="text-[12px] text-muted-foreground mt-0.5 truncate">
                           {subj.is_available ? `${subj.questions_count} ta test` : 'Tez kunda'}
                         </p>
                       </div>
@@ -528,26 +528,26 @@ export default function FocusSprintSetup({
                 >
                   {/* Eng ommabop yorlig'i */}
                   {item.isPopular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40 shadow-xs">
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40 shadow-xs">
                       Ommabop
                     </span>
                   )}
 
-                  <p className="text-xs sm:text-sm font-extrabold text-foreground">
+                  <p className="text-xs sm:text-sm font-bold text-foreground">
                     {item.count} ta savol
                   </p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.time}</p>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">{item.time}</p>
 
                   <span
                     className={cn(
-                      'mt-1.5 text-[9.5px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-md border truncate max-w-full',
+                      'mt-1.5 text-[9.5px] sm:text-[12px] font-semibold px-2 py-0.5 rounded-md border truncate max-w-full',
                       item.badgeColor
                     )}
                   >
                     {item.badge}
                   </span>
 
-                  <span className={cn('mt-1 text-[10px] font-bold', item.xpColor)}>
+                  <span className={cn('mt-1 text-[12px] font-bold', item.xpColor)}>
                     {item.xpText}
                   </span>
                 </button>
@@ -579,7 +579,7 @@ export default function FocusSprintSetup({
                   <div className="flex items-center gap-2 text-sm sm:text-base font-bold">
                     <Zap className="size-5 fill-white text-white shrink-0" />
                     <span>Testni Boshlash</span>
-                    <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium text-white/70 bg-white/10 rounded border border-white/20 ml-1.5">
+                    <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[12px] font-mono font-medium text-white/70 bg-white/10 rounded border border-white/20 ml-1.5">
                       ↵ Enter
                     </kbd>
                   </div>

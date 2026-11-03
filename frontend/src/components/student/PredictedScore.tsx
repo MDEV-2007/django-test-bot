@@ -95,7 +95,7 @@ export default function PredictedScore() {
             </Tooltip>
           </div>
           <p className="mt-2 flex items-baseline gap-2">
-            <span className="font-mono text-[38px] font-black tracking-tight text-[#007AFF] leading-none">
+            <span className="font-mono text-[38px] font-bold tracking-tight text-[#007AFF] leading-none">
               <StatNumber value={data.predicted_dtm ?? 0} />
             </span>
             <span className="text-[14px] font-semibold text-[#8E8E93]">/ {data.dtm_max ?? 189} ball</span>

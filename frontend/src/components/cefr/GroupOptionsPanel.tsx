@@ -56,13 +56,13 @@ export default function GroupOptionsPanel({
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 text-blue-400 font-bold text-xs">
                     <FileText className="size-4" />
                   </span>
-                  <h3 className="text-sm sm:text-base font-black text-foreground truncate">
+                  <h3 className="text-sm sm:text-base font-bold text-foreground truncate">
                     {groupTitle}
                   </h3>
                   <Badge
                     variant="outline"
                     className={cn(
-                      'text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0',
+                      'text-[12px] font-bold px-2 py-0.5 rounded-full shrink-0',
                       usedOptionsCount === totalOptions
                         ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
                         : 'border-blue-500/40 bg-blue-500/10 text-blue-400'
@@ -116,7 +116,7 @@ export default function GroupOptionsPanel({
                       {/* Option Letter Badge */}
                       <span
                         className={cn(
-                          'flex size-7 shrink-0 items-center justify-center rounded-xl font-black text-xs transition-all',
+                          'flex size-7 shrink-0 items-center justify-center rounded-xl font-bold text-xs transition-all',
                           isUsed
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                             : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 group-hover:scale-105'
@@ -141,7 +141,7 @@ export default function GroupOptionsPanel({
                           {isUsed ? (
                             <a
                               href={`#q-${matchedQuestion?.id}`}
-                              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:underline"
+                              className="inline-flex items-center gap-1 text-[12px] font-bold text-emerald-400 hover:underline"
                             >
                               <Check className="size-3" />
                               <span>
@@ -151,7 +151,7 @@ export default function GroupOptionsPanel({
                               </span>
                             </a>
                           ) : (
-                            <span className="text-[10px] text-muted-foreground/70 font-mono">
+                            <span className="text-[12px] text-muted-foreground/70 font-mono">
                               Ishlatilmagan (bo&apos;sh)
                             </span>
                           )}
@@ -170,7 +170,7 @@ export default function GroupOptionsPanel({
                             }
                           }}
                           className={cn(
-                            'shrink-0 text-[11px] font-bold px-2 py-1 rounded-lg transition',
+                            'shrink-0 text-[12px] font-bold px-2 py-1 rounded-lg transition',
                             isForActiveQuestion
                               ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
                               : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'
@@ -186,7 +186,7 @@ export default function GroupOptionsPanel({
             )}
 
             {/* Footer tip */}
-            <div className="px-4 py-2.5 bg-[var(--surface-hover)]/20 border-t border-[var(--border-card)] text-[11px] text-muted-foreground flex items-center gap-1.5">
+            <div className="px-4 py-2.5 bg-[var(--surface-hover)]/20 border-t border-[var(--border-card)] text-[12px] text-muted-foreground flex items-center gap-1.5">
               <Info className="size-3.5 text-blue-400 shrink-0" />
               <span>Har bir variant faqat 1 ta savolga mos keladi. Ortiqcha variantlar bo&apos;lishi mumkin.</span>
             </div>

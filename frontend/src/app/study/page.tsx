@@ -448,7 +448,7 @@ export default function StudyRoomPage() {
 
             {/* Giant Countdown */}
             <div className="py-6 space-y-3">
-              <span className="font-mono text-7xl sm:text-8xl font-black tracking-tight text-foreground">
+              <span className="font-mono text-7xl sm:text-8xl font-bold tracking-tight text-foreground">
                 {formatTime(timeLeft)}
               </span>
 
@@ -649,7 +649,7 @@ export default function StudyRoomPage() {
                 >
                   <span>{t(tab.label)}</span>
                   <span className={cn(
-                    "px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold",
+                    "px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold",
                     activeTab === tab.id ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
                   )}>
                     {tab.badge}
@@ -691,10 +691,10 @@ export default function StudyRoomPage() {
                   ].map((topicItem) => (
                     <Card key={topicItem.id} className="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-xs hover:border-primary/40 transition">
                       <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-[10px] bg-primary/10 border-primary/20 text-primary font-bold">
+                        <Badge variant="outline" className="text-[12px] bg-primary/10 border-primary/20 text-primary font-bold">
                           ⚡ 60s Shpargalka
                         </Badge>
-                        <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
+                        <span className="text-[12px] font-mono text-muted-foreground flex items-center gap-1">
                           <Clock className="size-3 text-amber-500" /> {topicItem.mins} daqiqa
                         </span>
                       </div>
@@ -783,7 +783,7 @@ export default function StudyRoomPage() {
                       </div>
 
                       <div className="space-y-2.5 pt-2 border-t border-border/60">
-                        <div className="flex items-center justify-between text-[11px] font-mono font-bold">
+                        <div className="flex items-center justify-between text-[12px] font-mono font-bold">
                           <span className="text-emerald-500">{game.xp}</span>
                           <span className="text-amber-500">{game.coins}</span>
                         </div>
@@ -875,10 +875,10 @@ export default function StudyRoomPage() {
 
                   <div className="space-y-1.5 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-primary font-mono text-[10px] font-semibold uppercase tracking-wider">
+                      <span className="px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-primary font-mono text-[12px] font-semibold uppercase tracking-wider">
                         AI Mentor Tavsiyasi
                       </span>
-                      <Badge variant="secondary" className="text-[10px] font-mono bg-muted text-muted-foreground border-border">
+                      <Badge variant="secondary" className="text-[12px] font-mono bg-muted text-muted-foreground border-border">
                         Bugun siz uchun
                       </Badge>
                     </div>
@@ -890,11 +890,11 @@ export default function StudyRoomPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2.5 pt-0.5 text-xs text-muted-foreground">
-                      <span className="text-[11px] font-medium text-muted-foreground">
+                      <span className="text-[12px] font-medium text-muted-foreground">
                         Tavsiya etilgan: <strong className="text-primary font-semibold">{activeMission.subject}</strong>
                       </span>
                       <span className="opacity-40">•</span>
-                      <span className="text-[11px]">
+                      <span className="text-[12px]">
                         Mastery: <strong className="text-emerald-500 font-mono font-semibold">{activeMission.currentMastery}%</strong> ➔ <strong className="text-primary font-mono font-semibold">{activeMission.targetMastery}%</strong>
                       </span>
                     </div>
@@ -903,7 +903,7 @@ export default function StudyRoomPage() {
 
                 {/* Switch Subject presets */}
                 <div className="flex flex-wrap items-center gap-1 self-start md:self-auto shrink-0 bg-muted/50 p-1.5 rounded-xl border border-border">
-                  <span className="text-[10px] uppercase font-mono font-semibold text-muted-foreground px-2">Fanlar:</span>
+                  <span className="text-[12px] uppercase font-mono font-semibold text-muted-foreground px-2">Fanlar:</span>
                   {PRESET_MISSIONS.map((m) => (
                     <button
                       key={m.id}
@@ -939,7 +939,7 @@ export default function StudyRoomPage() {
                         <span className="text-xs font-mono uppercase tracking-wider font-semibold text-primary flex items-center gap-1">
                           <Target className="size-3.5" /> BUGUNGI FOKUS MAQSADI
                         </span>
-                        <Badge variant="outline" className="text-[10px] font-semibold border-primary/20 text-primary bg-primary/10">
+                        <Badge variant="outline" className="text-[12px] font-semibold border-primary/20 text-primary bg-primary/10">
                           {activeMission.subject}
                         </Badge>
                       </div>
@@ -1005,14 +1005,14 @@ export default function StudyRoomPage() {
                         </svg>
 
                         <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-                          <span className="font-mono text-4xl sm:text-5xl font-black text-foreground tracking-tight">
+                          <span className="font-mono text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
                             {formatTime(timeLeft)}
                           </span>
-                          <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mt-1">
+                          <span className="text-[12px] uppercase tracking-widest font-semibold text-muted-foreground mt-1">
                             FOKUS JARAYONI
                           </span>
                           {isRunning && (
-                            <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                            <span className="mt-1.5 inline-flex items-center gap-1 text-[12px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
                               <Flame className="size-3 text-amber-500 animate-pulse fill-amber-500" /> Davom etmoqda
                             </span>
                           )}
@@ -1121,7 +1121,7 @@ export default function StudyRoomPage() {
                         <span className="font-semibold text-amber-600 dark:text-amber-400">
                           🎁 Sessiya Mukofoti:
                         </span>
-                        <span className="font-mono font-black text-amber-600 dark:text-amber-400">
+                        <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
                           +{activeMission.xpReward} XP &bull; Mastery +3%
                         </span>
                       </div>
@@ -1139,7 +1139,7 @@ export default function StudyRoomPage() {
                         <h4 className="text-sm font-bold text-foreground">
                           🎧 Fokus Muhiti (Ambient Fon Tovushlari)
                         </h4>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-[12px] text-muted-foreground">
                           Miyani tinchlantiruvchi va diqqatni jamlovchi tabiiy tovushlar
                         </p>
                       </div>
@@ -1188,7 +1188,7 @@ export default function StudyRoomPage() {
                             )}
                           </div>
                           <span className="text-xs font-bold block truncate">{snd.name}</span>
-                          <span className={cn("text-[10px] block truncate mt-0.5", isActive ? "text-emerald-500 font-semibold" : "text-muted-foreground")}>
+                          <span className={cn("text-[12px] block truncate mt-0.5", isActive ? "text-emerald-500 font-semibold" : "text-muted-foreground")}>
                             {isActive ? '🔊 Yangramoqda' : 'Yoqish'}
                           </span>
                         </button>
@@ -1198,7 +1198,7 @@ export default function StudyRoomPage() {
 
                   {activeSound && (
                     <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                      <span className="italic text-[11px]">Hozir faol: <strong className="text-foreground">{currentAmbient?.name}</strong></span>
+                      <span className="italic text-[12px]">Hozir faol: <strong className="text-foreground">{currentAmbient?.name}</strong></span>
                       <button
                         onClick={stopAmbientSound}
                         className="text-xs font-semibold text-rose-500 hover:underline"
@@ -1217,17 +1217,17 @@ export default function StudyRoomPage() {
                   <div className="flex items-center justify-between pb-3 border-b border-[var(--border-card)]">
                     <div className="flex items-center gap-2">
                       <PremiumIcon icon={Flame} tone="amber" size="sm" glow />
-                      <h3 className="text-sm font-black uppercase tracking-wider text-orange-500 font-mono">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-orange-500 font-mono">
                         FOCUS STREAK
                       </h3>
                     </div>
-                    <Badge variant="outline" className="border-orange-500/30 bg-orange-500/10 text-orange-500 font-mono text-xs font-extrabold">
+                    <Badge variant="outline" className="border-orange-500/30 bg-orange-500/10 text-orange-500 font-mono text-xs font-bold">
                       +{currentStreak * 5} XP Bonus
                     </Badge>
                   </div>
 
                   <div className="text-center py-2 space-y-1">
-                    <p className="text-3xl sm:text-4xl font-black text-foreground font-mono flex items-center justify-center gap-2">
+                    <p className="text-3xl sm:text-4xl font-bold text-foreground font-mono flex items-center justify-center gap-2">
                       <Flame className="size-7 text-orange-500 fill-orange-500" />
                       <span>{currentStreak} KUN</span>
                     </p>
@@ -1244,15 +1244,15 @@ export default function StudyRoomPage() {
                         const isToday = idx === todayDayIndex;
                         return (
                           <div key={day} className="flex flex-col items-center space-y-1.5">
-                            <span className="text-[10px] font-mono font-bold text-muted-foreground">
+                            <span className="text-[12px] font-mono font-bold text-muted-foreground">
                               {day}
                             </span>
                             <div className={cn(
                               "size-6 rounded-full flex items-center justify-center text-xs transition-all",
                               isDone
-                                ? "bg-amber-500 text-white font-black shadow-xs shadow-amber-500/30"
+                                ? "bg-amber-500 text-white font-bold shadow-xs shadow-amber-500/30"
                                 : isToday
-                                ? "border-2 border-dashed border-orange-500 bg-orange-500/20 text-orange-500 font-black animate-pulse"
+                                ? "border-2 border-dashed border-orange-500 bg-orange-500/20 text-orange-500 font-bold animate-pulse"
                                 : "bg-[var(--surface-hover)] text-muted-foreground/60 border border-[var(--border-card)]"
                             )}>
                               {isDone ? '●' : isToday ? '○' : '·'}
@@ -1270,7 +1270,7 @@ export default function StudyRoomPage() {
                         <Target className="size-3.5 text-orange-500" />
                         <span>Bugungi Maqsad</span>
                       </span>
-                      <span className="font-mono text-orange-500 font-black">
+                      <span className="font-mono text-orange-500 font-bold">
                         25 / 50 daq (50%)
                       </span>
                     </div>
@@ -1280,14 +1280,14 @@ export default function StudyRoomPage() {
                         style={{ width: '50%' }}
                       />
                     </div>
-                    <p className="text-[11px] text-muted-foreground flex items-center justify-between">
+                    <p className="text-[12px] text-muted-foreground flex items-center justify-between">
                       <span>🎯 Yana 1 ta Pomodoro qoldi</span>
                       <span className="font-semibold text-teal-600 dark:text-teal-400">+25 XP</span>
                     </p>
                   </div>
 
                   <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center text-xs">
-                    <span className="text-muted-foreground block text-[11px]">Bugun sessiyani yakunlab uzluksizlikni saqlang:</span>
+                    <span className="text-muted-foreground block text-[12px]">Bugun sessiyani yakunlab uzluksizlikni saqlang:</span>
                     <strong className="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5 inline-block">
                       Bugun davom ettiring: +25 XP
                     </strong>
@@ -1299,11 +1299,11 @@ export default function StudyRoomPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <PremiumIcon icon={BookOpen} tone="indigo" size="sm" glow />
-                      <h4 className="text-xs font-mono font-black uppercase tracking-wider text-muted-foreground">
+                      <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground">
                         O&apos;quv Qurollari
                       </h4>
                     </div>
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-900/40">
+                    <span className="flex items-center gap-1 text-[12px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-900/40">
                       <span className="size-1.5 rounded-full bg-rose-500 animate-ping" />
                       <span>Yangiliklar</span>
                     </span>
@@ -1319,7 +1319,7 @@ export default function StudyRoomPage() {
                         <span>Amaliy Mashqlar Banki</span>
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-black">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[12px] font-mono font-bold">
                           +15 yangi
                         </span>
                         <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
@@ -1335,7 +1335,7 @@ export default function StudyRoomPage() {
                         <span>Quick Learn Flashcards</span>
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-mono font-black">
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[12px] font-mono font-bold">
                           8 ta takrorlash
                         </span>
                         <ArrowRight className="size-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
@@ -1351,7 +1351,7 @@ export default function StudyRoomPage() {
                         <span>Bilim Reels Videolari</span>
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[10px] font-mono font-black flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[12px] font-mono font-bold flex items-center gap-1">
                           <span className="size-1.5 rounded-full bg-rose-500 animate-ping" />
                           <span>Yangi 🔥</span>
                         </span>
@@ -1377,7 +1377,7 @@ export default function StudyRoomPage() {
             <div className="mx-auto flex size-16 items-center justify-center rounded-3xl bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 text-3xl">
               🎉
             </div>
-            <DialogTitle className="text-xl sm:text-2xl font-black text-foreground">
+            <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
               MISSIYA BAJARILDI!
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
@@ -1390,15 +1390,15 @@ export default function StudyRoomPage() {
               {/* Rewards Grid */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center">
-                  <span className="text-[10px] uppercase font-bold text-amber-500 block">Mukofot</span>
-                  <span className="text-xl font-black text-amber-500 font-mono">
+                  <span className="text-[12px] uppercase font-bold text-amber-500 block">Mukofot</span>
+                  <span className="text-xl font-bold text-amber-500 font-mono">
                     +{completedStats.xpEarned} XP
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center">
-                  <span className="text-[10px] uppercase font-bold text-rose-500 block">Focus Streak</span>
-                  <span className="text-xl font-black text-rose-500 font-mono">
+                  <span className="text-[12px] uppercase font-bold text-rose-500 block">Focus Streak</span>
+                  <span className="text-xl font-bold text-rose-500 font-mono">
                     🔥 {completedStats.streak} kun
                   </span>
                 </div>
@@ -1408,7 +1408,7 @@ export default function StudyRoomPage() {
               <div className="p-4 rounded-2xl bg-card border border-border/80 text-left space-y-2">
                 <div className="flex items-center justify-between text-xs font-bold">
                   <span className="text-foreground">🧠 {completedStats.subject} Mastery</span>
-                  <span className="font-mono text-emerald-500 font-extrabold">
+                  <span className="font-mono text-emerald-500 font-bold">
                     {completedStats.prevMastery}% ➔ {completedStats.newMastery}% (+3%)
                   </span>
                 </div>
@@ -1424,7 +1424,7 @@ export default function StudyRoomPage() {
 
           {/* Action Buttons */}
           <div className="space-y-2 pt-2">
-            <Button asChild size="lg" className="w-full rounded-2xl font-black text-xs gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white shadow-md">
+            <Button asChild size="lg" className="w-full rounded-2xl font-bold text-xs gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white shadow-md">
               <Link href="/tests">
                 <span>[ Keyingi missiya (Mashqlar) ➔ ]</span>
               </Link>

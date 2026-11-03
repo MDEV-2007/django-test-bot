@@ -193,7 +193,7 @@ export default async function LandingPage() {
               </div>
 
               {/* Apple Keynote Headline */}
-              <h1 className="text-4xl font-extrabold leading-[1.06] tracking-[-0.035em] sm:text-5xl md:text-[58px] text-[#1C1C1E]">
+              <h1 className="text-4xl font-bold leading-[1.06] tracking-[-0.035em] sm:text-5xl md:text-[58px] text-[#1C1C1E]">
                 Milliy sertifikat va DTMga{' '}
                 <span className="bg-gradient-to-r from-[#007AFF] via-[#5856D6] to-[#34C759] bg-clip-text text-transparent">
                   AI bilan
@@ -237,7 +237,7 @@ export default async function LandingPage() {
                     {['#007AFF', '#34C759', '#5856D6', '#FF9500'].map((col, i) => (
                       <div
                         key={i}
-                        className="size-6.5 rounded-full border-2 border-[#F2F2F7] flex items-center justify-center text-[10px] font-bold text-white shadow-2xs"
+                        className="size-6.5 rounded-full border-2 border-[#F2F2F7] flex items-center justify-center text-[12px] font-bold text-white shadow-2xs"
                         style={{ backgroundColor: col }}
                       >
                         ✓
@@ -373,7 +373,7 @@ export default async function LandingPage() {
                   <Sprout className="size-7 text-white" />
                 </span>
 
-                <h2 className="mt-6 text-3xl font-extrabold tracking-[-0.03em] text-white sm:text-4xl md:text-5xl leading-tight">
+                <h2 className="mt-6 text-3xl font-bold tracking-[-0.03em] text-white sm:text-4xl md:text-5xl leading-tight">
                   Bugun bitta test — imtihonda esa{' '}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#64D2FF] via-[#30D158] to-[#5E5CE6]">
                     Grant va Kontrakt
@@ -428,7 +428,7 @@ export default async function LandingPage() {
               <div className="relative flex size-8 shrink-0 items-center justify-center rounded-[10px] overflow-hidden border border-black/[0.08] bg-white shadow-2xs">
                 <BrandMark size={28} rounded="rounded-[8px]" />
               </div>
-              <span className="text-base font-extrabold tracking-tight text-[#1C1C1E]">
+              <span className="text-base font-bold tracking-tight text-[#1C1C1E]">
                 Ilm<span className="text-[#007AFF]">Ildizi</span>
               </span>
             </div>

@@ -629,7 +629,7 @@ export default function TestScreenPage() {
                   title="Offline himoya faol: har bir belgilagan javobingiz lokal xotiraga zaxiralanadi va internet uzilsa ham saqlanadi"
                 >
                   <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[11px] font-bold">Himoyalangan</span>
+                  <span className="text-[12px] font-bold">Himoyalangan</span>
                 </div>
               )}
 
@@ -721,7 +721,7 @@ export default function TestScreenPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary">Savol {data.q_idx}</Badge>
                 {data.q_idx >= 36 && (
-                  <Badge variant="outline" className="border-amber-500/40 bg-amber-500/15 text-amber-400 text-[11px] font-bold">
+                  <Badge variant="outline" className="border-amber-500/40 bg-amber-500/15 text-amber-400 text-[12px] font-bold">
                     ⚡ AI BMB Ekspert tekshiruvi
                   </Badge>
                 )}
@@ -778,12 +778,12 @@ export default function TestScreenPage() {
             )}
 
             {/* Desktop klaviatura eslatmasi */}
-            <div className="hidden sm:flex items-center justify-between border-t border-[var(--border-card)] pt-3 text-[11px] text-muted-foreground">
+            <div className="hidden sm:flex items-center justify-between border-t border-[var(--border-card)] pt-3 text-[12px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">A-D</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">1-4</kbd> — variantni tanlash
+                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">A-D</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">1-4</kbd> — variantni tanlash
               </span>
               <span className="flex items-center gap-1.5">
-                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[10px]">→</kbd> — keyingi savol
+                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">Enter</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">→</kbd> — keyingi savol
               </span>
             </div>
           </CardContent>
@@ -835,7 +835,7 @@ export default function TestScreenPage() {
               <FileSpreadsheet className="size-4 text-blue-400" />
               <span>Titul ({Object.keys(titulAnswers).length}/{data.total_questions})</span>
               {uncopiedCount > 0 && (
-                <span className="flex size-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white animate-pulse">
+                <span className="flex size-4 items-center justify-center rounded-full bg-rose-500 text-[11px] font-bold text-white animate-pulse">
                   {uncopiedCount}
                 </span>
               )}
@@ -943,7 +943,7 @@ export default function TestScreenPage() {
                 <AlertTriangle className="size-7" />
               </div>
               <div className="space-y-1.5">
-                <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+                <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">
                   {unansweredCount} ta savol javobsiz qoldi
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
@@ -960,7 +960,7 @@ export default function TestScreenPage() {
                 </Button>
                 <Button
                   onClick={() => setShowFinishConfirm(false)}
-                  className="w-full sm:w-auto flex-1 rounded-2xl font-black bg-emerald-600 hover:bg-emerald-700 text-white h-12"
+                  className="w-full sm:w-auto flex-1 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white h-12"
                 >
                   Savollarga qaytish
                 </Button>
@@ -977,7 +977,7 @@ export default function TestScreenPage() {
               </div>
 
               <div className="space-y-1.5">
-                <DialogTitle className="text-lg sm:text-xl font-black text-foreground">
+                <DialogTitle className="text-lg sm:text-xl font-bold text-foreground">
                   Imtihondan chiqmoqchimisiz?
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
@@ -991,7 +991,7 @@ export default function TestScreenPage() {
                   <Clock className="size-4 shrink-0" />
                   <span>Diqqat: Imtihon vaqti to&apos;xtatilmaydi!</span>
                 </div>
-                <p className="text-[11px] text-amber-300/80">
+                <p className="text-[12px] text-amber-300/80">
                   Sahifani tark etsangiz ham taymer orqa fonda hisoblanadi. Javoblaringiz esa saqlab qolinadi.
                 </p>
               </div>
@@ -1007,7 +1007,7 @@ export default function TestScreenPage() {
                 </Button>
                 <Button
                   onClick={() => setShowExitModal(false)}
-                  className="w-full sm:w-auto flex-1 rounded-2xl font-black bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white shadow-lg shadow-emerald-600/30 h-12 sm:h-12.5 text-sm sm:text-base gap-2"
+                  className="w-full sm:w-auto flex-1 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white shadow-lg shadow-emerald-600/30 h-12 sm:h-12.5 text-sm sm:text-base gap-2"
                 >
                   <CheckCircle2 className="size-5" />
                   Davom etish

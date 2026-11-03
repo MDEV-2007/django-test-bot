@@ -62,11 +62,11 @@ export default function SubscriptionGate() {
           <Megaphone className="size-7" />
         </div>
 
-        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#007AFF]/12 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#007AFF]">
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#007AFF]/12 px-3 py-1 font-mono text-[12px] font-bold uppercase tracking-wider text-[#007AFF]">
           <Sparkles className="size-3" /> Rasmiy hamjamiyat
         </div>
 
-        <h1 className="mt-3 text-xl font-extrabold tracking-[-0.025em] text-foreground">
+        <h1 className="mt-3 text-xl font-bold tracking-[-0.025em] text-foreground">
           Kanalimizga obuna bo&apos;ling
         </h1>
         <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">

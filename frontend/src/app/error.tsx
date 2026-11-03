@@ -14,7 +14,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
             <AlertTriangle className="size-8" />
           </div>
 
-          <span className="mb-1 bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-5xl font-black text-transparent">500</span>
+          <span className="mb-1 bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-5xl font-bold text-transparent">500</span>
 
           <h2 className="font-voice mb-2 text-xl font-bold">Serverda kutilmagan xatolik</h2>
 
