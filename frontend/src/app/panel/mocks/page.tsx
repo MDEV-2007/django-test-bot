@@ -24,7 +24,10 @@ import {
 
 interface MockItem {
   id: number;
-  rank: number;
+  /** null — anti-cheat chetlatgan urinish: reytingda o'rin olmaydi. */
+  rank: number | null;
+  is_cheating_flagged?: boolean;
+  tab_switch_count?: number;
   student_name: string;
   username: string;
   telegram_id: number | string | null;
@@ -787,6 +790,13 @@ export default function PanelMocksPage() {
                           ) : isTop3 ? (
                             <span className="inline-flex size-7 items-center justify-center rounded-full bg-amber-700/20 text-amber-700 dark:text-amber-600 font-black text-sm shadow-xs ring-1 ring-amber-700/40">
                               🥉
+                            </span>
+                          ) : item.is_cheating_flagged ? (
+                            <span
+                              className="inline-flex h-6 items-center justify-center rounded-md px-1.5 text-[11px] font-bold text-destructive bg-destructive/12 ring-1 ring-destructive/30 whitespace-nowrap"
+                              title={`Imtihon oynasidan ${item.tab_switch_count ?? 0} marta chiqqan — reytingdan chetlatilgan`}
+                            >
+                              ⚠ {item.tab_switch_count ?? 0}x
                             </span>
                           ) : (
                             <span className="inline-flex size-6 items-center justify-center rounded-md font-mono text-xs text-muted-foreground font-semibold bg-muted/60">

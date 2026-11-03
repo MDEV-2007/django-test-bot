@@ -534,6 +534,7 @@ def _question_screen_data(attempt, q_idx, current_answer, total_questions, secon
     data = {
         'attempt_id': attempt.id,
         'is_stress_mode': attempt.is_stress_mode,
+        'anti_cheat': anti_cheat_enabled(attempt),
         'titul_answers': attempt.titul_answers or {},
         'test_title': attempt.test.title if attempt.test else "BMB Rasmiy Test",
         'subject_name': attempt.test.subject.name if (attempt.test and attempt.test.subject) else "BMB Standart",
@@ -813,12 +814,8 @@ def finish_api(request, attempt_id):
         if elapsed < allowed * 0.20:
             attempt.is_speed_flagged = True
 
-    tab_switches = request.data.get('tab_switches') if (hasattr(request, 'data') and isinstance(request.data, dict)) else None
-    if tab_switches is not None:
-        try:
-            attempt.tab_switch_count = max(0, int(tab_switches))
-        except (ValueError, TypeError):
-            pass
+    # Tab almashishlar soni endi serverda (/tab-switch/) yuritiladi; klient yuborgan
+    # qiymat bilan uni kamaytirib yoki nolga tushirib bo'lmaydi.
 
     # ─── Rasch Modeli (IRT) Hisoblash ─────────────────────────────────
     rasch_metrics = None
@@ -1296,21 +1293,33 @@ def story_image_api(request, attempt_id):
 
 
 # ============================================================ ANTI-CHEAT: TAB SWITCH
+TAB_SWITCH_LIMIT = 3
+
+
+def anti_cheat_enabled(attempt):
+    """Anti-cheat faqat sovrinli/qat'iy rejimlarda: jonli mock va Stress Zali. Oddiy
+    mashqda Telegram'dan chiqib qaytgan o'quvchi jazolanmasligi kerak."""
+    return bool(attempt.is_stress_mode or (attempt.test and attempt.test.is_live_mock))
+
+
 @api_view(['POST'])
 def report_tab_switch_api(request, attempt_id):
-    """Frontend har safar o'quvchi brauzer tabini almashtirganda chaqiradi.
-    3 marta yoki undan ko'p tab switch qilinsa, is_cheating_flagged = True bo'ladi."""
-    try:
-        attempt = Attempt.objects.get(id=attempt_id, profile=request.user.profile, is_completed=False)
-    except Attempt.DoesNotExist:
+    """Frontend o'quvchi imtihon oynasidan chiqqanda chaqiradi. Hisob serverda yuritiladi;
+    TAB_SWITCH_LIMIT ga yetganda urinish chetlatiladi (natija saqlanadi, lekin mock
+    reytingida o'rin olmaydi va panelda belgi bilan ko'rinadi)."""
+    attempt = (Attempt.objects.select_related('test')
+               .filter(id=attempt_id, profile=request.user.profile, is_completed=False).first())
+    if not attempt:
         return Response({'error': 'Urinish topilmadi'}, status=404)
-    
-    current_switches = (attempt.tab_switches_count or 0) + 1
-    attempt.tab_switches_count = current_switches
-    if current_switches >= 3:
-        attempt.is_cheating_flagged = True
-    attempt.save(update_fields=['tab_switches_count', 'is_cheating_flagged'])
-    return Response({'ok': True, 'tab_switches': current_switches, 'is_cheating_flagged': attempt.is_cheating_flagged})
+    if not anti_cheat_enabled(attempt):
+        return Response({'ok': True, 'enabled': False, 'tab_switches': 0, 'limit': TAB_SWITCH_LIMIT,
+                         'is_cheating_flagged': False})
+
+    Attempt.objects.filter(pk=attempt.pk).update(tab_switch_count=F('tab_switch_count') + 1)
+    Attempt.objects.filter(pk=attempt.pk, tab_switch_count__gte=TAB_SWITCH_LIMIT).update(is_cheating_flagged=True)
+    attempt.refresh_from_db(fields=['tab_switch_count', 'is_cheating_flagged'])
+    return Response({'ok': True, 'enabled': True, 'tab_switches': attempt.tab_switch_count,
+                     'limit': TAB_SWITCH_LIMIT, 'is_cheating_flagged': attempt.is_cheating_flagged})
 
 
 @api_view(['GET'])

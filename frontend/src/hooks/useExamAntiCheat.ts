@@ -1,133 +1,80 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 
-interface UseExamAntiCheatOptions {
-  attemptId: number | string;
-  userId?: number | string;
-  username?: string;
-  maxViolations?: number; // Sukut bo'yicha 3 marta
-  onDisqualified?: () => void;
-  enabled?: boolean;
+interface TabSwitchResponse {
+  enabled: boolean;
+  tab_switches: number;
+  limit: number;
+  is_cheating_flagged: boolean;
 }
 
-export function useExamAntiCheat({
-  attemptId,
-  userId,
-  username,
-  maxViolations = 3,
-  onDisqualified,
-  enabled = true,
-}: UseExamAntiCheatOptions) {
-  const [tabSwitchesCount, setTabSwitchesCount] = useState(0);
-  const [showWarningModal, setShowWarningModal] = useState(false);
-  const [warningMessage, setWarningMessage] = useState('');
+/* Imtihon oynasidan chiqishni kuzatadi — faqat jonli mock va Stress Zali'da
+   (`enabled` ni server `anti_cheat` maydoni orqali aytadi).
+
+   Hisob SERVERDA yuritiladi (/tab-switch/): sahifani yangilash yoki klientni aldash
+   bilan uni nolga tushirib bo'lmaydi. Limitga yetgan urinish chetlatiladi — natija
+   saqlanadi, lekin mock reytingida o'rin olmaydi.
+
+   Faqat `visibilitychange` tinglanadi: `blur` Telegram WebView'da klaviatura yoki tizim
+   oynasi ochilganda ham ishga tushib, o'quvchini nohaq jazolardi. */
+export function useExamAntiCheat(attemptId: number | string, enabled: boolean) {
   const [isDisqualified, setIsDisqualified] = useState(false);
-  const lastViolationTime = useRef(0);
-
-  const handleViolation = useCallback(
-    async (reason: string) => {
-      if (!enabled || isDisqualified) return;
-
-      const now = Date.now();
-      // 1.5 soniya ichidagi takroriy triggerlarni filtrlash (debounce)
-      if (now - lastViolationTime.current < 1500) return;
-      lastViolationTime.current = now;
-
-      setTabSwitchesCount((prev) => {
-        const nextCount = prev + 1;
-
-        soundFX.incorrect?.();
-        tgHaptic('error');
-
-        if (nextCount >= maxViolations) {
-          setIsDisqualified(true);
-          setShowWarningModal(true);
-          setWarningMessage(
-            `Diqqat! Siz imtihon oynasidan ${nextCount} marta chiqdingiz. Qoidalarga ko'ra natijangiz bekor qilindi va sovrinli reytingdan chetlatildingiz.`
-          );
-
-          // Backendga chetlatish signalini yuborish
-          apiFetch(`/api/tests/attempts/${attemptId}/flag-cheat/`, {
-            method: 'POST',
-            body: JSON.stringify({
-              tab_switches: nextCount,
-              reason: 'TAB_SWITCH_LIMIT_EXCEEDED',
-            }),
-          }).catch(() => {});
-
-          if (onDisqualified) onDisqualified();
-        } else {
-          setShowWarningModal(true);
-          setWarningMessage(
-            `Ogohlantirish (${nextCount}/${maxViolations})! Imtihon paytida boshqa ilovalarga yoki brauzer oynasiga o'tish taqiqlanadi. Yana ${
-              maxViolations - nextCount
-            } marta takrorlansa, natijangiz bekor qilinadi!`
-          );
-        }
-
-        return nextCount;
-      });
-    },
-    [enabled, isDisqualified, maxViolations, attemptId, onDisqualified]
-  );
+  const lastReportAt = useRef(0);
 
   useEffect(() => {
     if (!enabled || isDisqualified) return;
 
-    // 1. Tab switch (visibility change)
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        handleViolation("Oynadan chiqish aniqlandi");
+    const onVisibilityChange = async () => {
+      if (!document.hidden) return;
+      // Bitta chiqish bir nechta hodisa berishi mumkin — 1.5s ichidagilari bitta sanaladi.
+      const now = Date.now();
+      if (now - lastReportAt.current < 1500) return;
+      lastReportAt.current = now;
+
+      let res: TabSwitchResponse;
+      try {
+        res = await apiFetch<TabSwitchResponse>(`/api/tests/attempts/${attemptId}/tab-switch/`, { method: 'POST' });
+      } catch {
+        return;
+      }
+      if (!res.enabled) return;
+
+      soundFX.incorrect?.();
+      tgHaptic('error');
+      if (res.is_cheating_flagged) {
+        setIsDisqualified(true);
+        toast.error(
+          `Siz imtihon oynasidan ${res.tab_switches} marta chiqdingiz. Natijangiz saqlanadi, lekin mock reytingidan chetlatildingiz.`,
+          { duration: 8000 },
+        );
+      } else {
+        toast.warning(
+          `Ogohlantirish (${res.tab_switches}/${res.limit}): imtihon paytida boshqa ilova yoki oynaga o'tmang. ` +
+          `Yana ${res.limit - res.tab_switches} marta takrorlansa, reytingdan chetlatilasiz.`,
+          { duration: 6000 },
+        );
       }
     };
 
-    // 2. Window blur (boshqa oynaga fokus o'tganda)
-    const onWindowBlur = () => {
-      handleViolation("Boshqa oynaga o'tish aniqlandi");
-    };
-
-    // 3. Nusxalash va kesishni to'sish
-    const onCopy = (e: ClipboardEvent) => {
+    const blockCopy = (e: ClipboardEvent) => {
       e.preventDefault();
-      toast.warning("Imtihon paytida savollarni nusxalash taqiqlanadi!");
-    };
-
-    const onCut = (e: ClipboardEvent) => {
-      e.preventDefault();
-      toast.warning("Imtihon paytida matnni kesish taqiqlanadi!");
-    };
-
-    const onContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      toast.warning("Imtihon paytida o'ng tugma menyusi o'chirilgan!");
+      toast.warning("Imtihon paytida matnni nusxalash taqiqlanadi!");
     };
 
     document.addEventListener('visibilitychange', onVisibilityChange);
-    window.addEventListener('blur', onWindowBlur);
-    document.addEventListener('copy', onCopy);
-    document.addEventListener('cut', onCut);
-    document.addEventListener('contextmenu', onContextMenu);
-
+    document.addEventListener('copy', blockCopy);
+    document.addEventListener('cut', blockCopy);
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('blur', onWindowBlur);
-      document.removeEventListener('copy', onCopy);
-      document.removeEventListener('cut', onCut);
-      document.removeEventListener('contextmenu', onContextMenu);
+      document.removeEventListener('copy', blockCopy);
+      document.removeEventListener('cut', blockCopy);
     };
-  }, [enabled, isDisqualified, handleViolation]);
+  }, [attemptId, enabled, isDisqualified]);
 
-  return {
-    tabSwitchesCount,
-    showWarningModal,
-    setShowWarningModal,
-    warningMessage,
-    isDisqualified,
-    watermarkText: `${username || 'USER'}_ID:${userId || '0'}`,
-  };
+  return { isDisqualified };
 }

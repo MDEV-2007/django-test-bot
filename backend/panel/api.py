@@ -1941,6 +1941,8 @@ def _build_mock_attempts_qs(request):
     else:  # score / rating
         qs = qs.order_by(
             F('is_completed').desc(),
+            # Anti-cheat chetlatganlar reytingda o'rin olmaydi — ro'yxat oxirida turadi.
+            F('is_cheating_flagged').asc(),
             F('score').desc(nulls_last=True),
             F('correct_answers').desc(nulls_last=True),
             F('started_at').asc(nulls_last=True),
@@ -2041,7 +2043,10 @@ def mock_attempts_api(request):
 
         items = []
         tz = timezone.get_current_timezone()
-        for idx, a in enumerate(qs[:250], start=1):
+        rank = 0
+        for a in qs[:250]:
+            if not a.is_cheating_flagged:
+                rank += 1
             profile = getattr(a, 'profile', None)
             u = None
             if profile:
@@ -2097,7 +2102,9 @@ def mock_attempts_api(request):
 
             items.append({
                 'id': a.id,
-                'rank': idx,
+                'rank': None if a.is_cheating_flagged else rank,
+                'is_cheating_flagged': bool(a.is_cheating_flagged),
+                'tab_switch_count': a.tab_switch_count or 0,
                 'student_name': user_full,
                 'username': uname or "—",
                 'telegram_id': telegram_id,
@@ -3210,21 +3217,8 @@ def trigger_mock_reminder_api(request, pk):
 def anti_cheat_report_api(request):
     """Anti-cheat hisoboti: eng ko'p tab almashtirganlar va shubhali tezlikda topshirganlar."""
     try:
-        # Mavjud o'tgan urinishlarni avtomatik hisoblash va belgilash (agar hali belgilanmagan bo'lsa)
-        if not Attempt.objects.filter(is_speed_flagged=True).exists():
-            for a in Attempt.objects.filter(is_completed=True).select_related('test'):
-                if a.started_at and a.completed_at:
-                    dur = (a.completed_at - a.started_at).total_seconds()
-                    allowed = (a.test.duration_minutes * 60) if a.test else 600
-                    if 0 < dur < allowed * 0.20:
-                        a.is_speed_flagged = True
-                        a.save(update_fields=['is_speed_flagged'])
-
-        if not Attempt.objects.filter(tab_switch_count__gt=0).exists():
-            for idx, a in enumerate(Attempt.objects.filter(is_completed=True, is_speed_flagged=True)[:5], start=1):
-                a.tab_switch_count = (idx * 2) + 1
-                a.save(update_fields=['tab_switch_count'])
-
+        # Hisobot faqat haqiqiy yozuvlarni ko'rsatadi. Ilgari ma'lumot bo'lmasa bu yerda
+        # haqiqiy o'quvchilarning urinishlariga to'qima tab-switch sonlari yozilardi.
         # Top tab switchers (3+ tab switch)
         top_tab_switchers = (
             Attempt.objects

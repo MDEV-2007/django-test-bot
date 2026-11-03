@@ -12,6 +12,7 @@ import {
   Clock, FileEdit, Headphones, LayoutGrid, Loader2, LogOut, ShieldAlert, Sparkles, X,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
+import { useExamAntiCheat } from '@/hooks/useExamAntiCheat';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import {
@@ -60,6 +61,7 @@ export default function CefrExamPage() {
   const { access, authReady } = useAuthStore();
 
   const [exam, setExam] = useState<CefrExam | null>(null);
+  useExamAntiCheat(attemptId, Boolean(exam?.anti_cheat && !exam.is_completed));
   const [error, setError] = useState<string | null>(null);
 
   // View rejim: 'hub' (3 ta card markazi) | 'listening' | 'reading' | 'writing'

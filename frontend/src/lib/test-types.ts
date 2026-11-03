@@ -8,6 +8,8 @@ export type QuestionData = {
   next_idx: number;
   seconds_left?: number;
   is_stress_mode?: boolean;
+  /** Jonli mock / Stress Zali: imtihon oynasidan chiqish kuzatiladi. */
+  anti_cheat?: boolean;
   titul_answers?: Record<string, string>;
   test_title?: string;
   subject_name?: string;

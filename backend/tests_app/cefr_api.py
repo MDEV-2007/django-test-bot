@@ -161,8 +161,10 @@ def exam_api(request, attempt_id):
     grouped_ids = {q['id'] for s in section_payloads for q in s['questions']}
     loose = [_question_payload(a.question, a) for a in answers if a.question_id not in grouped_ids]
 
+    from .api import anti_cheat_enabled
     return Response({
         'attempt_id': attempt.id,
+        'anti_cheat': anti_cheat_enabled(attempt),
         'is_completed': attempt.is_completed,
         # Vaqtning yagona manbai — server soati (Attempt.seconds_left).
         'seconds_left': attempt.seconds_left(),

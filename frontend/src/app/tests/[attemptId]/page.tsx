@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { celebrate } from '@/lib/confetti';
 import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut, Wifi, WifiOff, RefreshCw, Check, Flame, FileSpreadsheet, Sparkles } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
+import { useExamAntiCheat } from '@/hooks/useExamAntiCheat';
 import {
   tgHaptic, useIsTelegram, useTelegramBackButton, useTelegramClosingConfirmation, useTelegramMainButton,
 } from '@/lib/telegram';
@@ -71,6 +72,7 @@ export default function TestScreenPage() {
   const [answeredIdxs, setAnsweredIdxs] = useState<Set<number>>(new Set());
   const [fontKey, setFontKey] = useState<FontKey>('md');
   const inTelegram = useIsTelegram();
+  useExamAntiCheat(attemptId, Boolean(data?.anti_cheat));
 
   // BMB Real Imtihon Zali (Stress Mode) holatlari
   const [isStressMode, setIsStressMode] = useState(false);

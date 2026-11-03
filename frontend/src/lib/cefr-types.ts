@@ -91,6 +91,8 @@ export type CefrExam = {
   attempt_id: number;
   is_completed: boolean;
   seconds_left: number;
+  /** Jonli mock / Stress Zali: imtihon oynasidan chiqish kuzatiladi. */
+  anti_cheat?: boolean;
   test: { id: number | null; title: string; category: string; duration_minutes: number; listening_audio?: string };
   sections: CefrSection[];
   loose_questions: CefrQuestion[];
