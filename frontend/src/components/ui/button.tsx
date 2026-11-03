@@ -5,21 +5,21 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-[14px] font-semibold tracking-tight whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-[#007AFF]/35 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-[14px] font-semibold tracking-tight whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-[var(--brand-border)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
   {
     variants: {
       variant: {
         default:
-          "bg-[#007AFF] text-white hover:bg-[#0071EB] shadow-[0_4px_14px_-2px_rgba(0,122,255,0.35)]",
+          "bg-[var(--brand)] text-[var(--on-brand)] hover:bg-[var(--brand-hover)] shadow-[0_4px_14px_-4px_rgba(45,106,79,0.45)]",
         outline:
-          "border border-black/[0.08] dark:border-white/[0.12] bg-white/80 dark:bg-[#2C2C2E]/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] text-foreground backdrop-blur-md shadow-2xs",
+          "border border-black/[0.08] dark:border-white/[0.12] bg-white/80 dark:bg-[#2C2C2E]/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] text-foreground shadow-2xs",
         secondary:
           "bg-[#767680]/[0.12] dark:bg-[#767680]/[0.24] text-foreground hover:bg-[#767680]/[0.18] dark:hover:bg-[#767680]/[0.32]",
         ghost:
           "hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground",
         destructive:
-          "bg-[#FF3B30] text-white hover:bg-[#E0352B] shadow-[0_4px_14px_-2px_rgba(255,59,48,0.35)] font-semibold",
-        link: "text-[#007AFF] underline-offset-4 hover:underline",
+          "bg-[#D70015] text-white hover:bg-[#B80012] shadow-[0_4px_14px_-4px_rgba(215,0,21,0.35)] font-semibold",
+        link: "text-[var(--brand-text)] underline-offset-4 hover:underline",
       },
       size: {
         default:

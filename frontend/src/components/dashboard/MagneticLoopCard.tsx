@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Flame, Trophy, Gift, ArrowRight, Play,
-  CheckCircle2, TreeDeciduous, Droplets, Sparkles,
+  CheckCircle2, Droplets, Sparkles,
   ShieldCheck, Brain, Swords, Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,9 @@ interface MagneticLoopCardProps {
   userName?: string;
   userStreak?: number;
 }
+
+// Brand illustrations for the eco-tree stage shown in the loop card.
+const TREE_ART = ['tree-2-nihol.svg', 'tree-3-kochat.svg', 'tree-4-daraxt.svg', 'tree-5-chinor.svg'];
 
 export default function MagneticLoopCard({
   userName = "Abituriyent",
@@ -159,7 +162,12 @@ export default function MagneticLoopCard({
           <div className="flex flex-col gap-2 p-3 sm:px-4 sm:py-3 rounded-xl bg-[var(--surface-input)] border border-[var(--brand-border)] shrink-0">
             <div className="flex items-center gap-3">
               <div className="size-11 rounded-xl bg-[var(--brand-soft)] border border-[var(--brand-border)] flex items-center justify-center text-[var(--brand-text)]">
-                <TreeDeciduous className="size-6" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/brand/gamification/${TREE_ART[Math.min(completedRounds, 3)]}`}
+                  alt=""
+                  className="size-10 object-contain"
+                />
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-1.5">

@@ -175,7 +175,6 @@ export default function StudyRoomPage() {
   const gainNodeRef = useRef<GainNode | null>(null);
 
   // Onlayn hamrohlar
-  const [peerCount, setPeerCount] = useState(48);
 
   // Taymer hisobi
   useEffect(() => {
@@ -199,14 +198,6 @@ export default function StudyRoomPage() {
     setTimeLeft(activeMission.durationMinutes * 60);
     setIsRunning(false);
   }, [activeMission]);
-
-  // Jonli foydalanuvchilar
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setPeerCount((prev) => Math.max(38, prev + (Math.random() > 0.5 ? 1 : -1)));
-    }, 15000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Web Audio API ambient tovush yaratish
   const stopAmbientSound = useCallback(() => {
@@ -594,24 +585,19 @@ export default function StudyRoomPage() {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary text-xs font-semibold uppercase px-2.5 py-0.5 rounded-md gap-1.5">
                     <Target className="size-3.5" />
-                    <span>STUDY MODE</span>
+                    <span>Fokus rejimi</span>
                   </Badge>
                   <span className="text-xs text-muted-foreground font-medium">
                     25 daqiqa. Bitta maqsad. Nol chalg&apos;ituvchi.
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mt-1">
-                  Fokus Xonasi &amp; Study Session
+                  Fokus xonasi
                 </h1>
               </div>
 
               {/* Jonli talabalar & Zen button */}
               <div className="flex items-center gap-2.5 self-start sm:self-auto">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
-                  <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span>{peerCount} nafar o&apos;quvchi zalda</span>
-                </div>
-
                 <Button
                   variant="outline"
                   size="sm"
@@ -619,7 +605,7 @@ export default function StudyRoomPage() {
                   className="rounded-lg text-xs font-semibold gap-1.5 border-border bg-card hover:bg-muted text-foreground"
                 >
                   <Maximize2 className="size-3.5" />
-                  <span className="hidden sm:inline">Zen Mode</span>
+                  <span className="hidden sm:inline">To&apos;liq ekran</span>
                 </Button>
               </div>
             </div>
