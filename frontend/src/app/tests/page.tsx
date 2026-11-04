@@ -10,7 +10,7 @@ import {
   Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2,
   FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles, Bell, CheckCircle2,
   ArrowLeft, BookOpen, Landmark, Calculator, Dna, Languages, Globe, ChevronRight, Layers,
-  Headphones, Zap, Trophy, Shield,
+  Headphones, Zap, Trophy, Shield, Target, Gauge, Brain, History,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { useApiQuery } from '@/lib/api-cache';
@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import AppShell from '@/components/AppShell';
 import { cn } from '@/lib/utils';
 import Reveal from '@/components/motion/Reveal';
-import PageHero from '@/components/student/PageHero';
+import { Panel, PanelLabel, PanelLink, PageHeader, Pill, IconTile, StatCell, BrandButton, SegmentedTabs } from '@/components/design/kit';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -434,6 +434,120 @@ function useStressBonusLabel(): string {
   return label;
 }
 
+type ModeCard = {
+  key: 'standard' | 'blitz' | 'stress' | 'sprint';
+  icon: typeof Target;
+  tone: 'brand' | 'gold' | 'danger' | 'dark';
+  title: string;
+  subtitle: string;
+  accent: string;
+  description: string;
+  stats: { value: string | number; label: string }[];
+  chips: string[];
+  cta: string;
+};
+
+const MODE_CARDS: ModeCard[] = [
+  {
+    key: 'standard',
+    icon: Target,
+    tone: 'brand',
+    title: 'Standart test',
+    subtitle: "To'liq baholash",
+    accent: 'text-[var(--brand-text)]',
+    description: "Rasmiy formatdagi to'liq imtihon: DTM va Milliy sertifikat vaqt me'yori, batafsil tahlil va xatolar ustida ishlash.",
+    stats: [],
+    chips: ['Rasmiy format', "Yakunda ko'rib chiqish", 'Batafsil tahlil', 'Xatolar ustida ishlash'],
+    cta: 'Standart testni boshlash',
+  },
+  {
+    key: 'blitz',
+    icon: Zap,
+    tone: 'gold',
+    title: 'Blits',
+    subtitle: 'Tezkor sinov',
+    accent: 'text-[var(--reward-text)]',
+    description: '7 ta adaptiv savol orqali bir necha daqiqada darajangiz va zaif mavzularingizni aniqlang.',
+    stats: [
+      { value: 7, label: 'Savol' },
+      { value: '~3 daq', label: 'Davomiyligi' },
+      { value: 'Bepul', label: 'Narxi' },
+    ],
+    chips: ['Adaptiv savollar', 'Darhol natija', 'Daraja bahosi', 'Zaif mavzular'],
+    cta: 'Blitsni boshlash',
+  },
+  {
+    key: 'stress',
+    icon: Gauge,
+    tone: 'danger',
+    title: 'Stress zali',
+    subtitle: 'Real imtihon bosimi',
+    accent: 'text-[var(--danger-text)]',
+    description: "Real BMB zali muhiti: umumiy taymer, titul varaqasi va zal shovqini. Imtihon kunidagi hayajonga oldindan tayyorlaning.",
+    stats: [],
+    chips: ['Umumiy taymer', 'Titul varaqasi', 'Zal ovozlari', 'Imtihon simulyatsiyasi'],
+    cta: 'Stress zaliga kirish',
+  },
+  {
+    key: 'sprint',
+    icon: Brain,
+    tone: 'dark',
+    title: 'Fokus sprint',
+    subtitle: 'Kundalik musobaqa',
+    accent: 'text-[var(--brand-text)]',
+    description: "Ketma-ket savollar bilan tezlik va aniqlikni oshiring. Har kuni 20:30 da respublika sprinti jonli o'tadi.",
+    stats: [
+      { value: 20, label: 'Savol' },
+      { value: '20:30', label: 'Jonli sprint' },
+      { value: 'Live', label: 'Reyting' },
+    ],
+    chips: ['Tezlik', 'Jonli reyting', 'Har kuni', 'Barcha fanlar'],
+    cta: 'Sprintni boshlash',
+  },
+];
+
+type RecentRow = { id: number; test__title: string | null; score: number | null; completed_at: string };
+
+function RecentTestHistory() {
+  const { data } = useApiQuery<{ recent: RecentRow[] }>('/api/analytics/');
+  const rows = (data?.recent || []).slice(0, 4);
+  if (!data || rows.length === 0) return null;
+  return (
+    <Panel>
+      <PanelLabel icon={History} right={<PanelLink href="/tests/history">Hammasi</PanelLink>}>
+        So&apos;nggi testlar tarixi
+      </PanelLabel>
+      <div className="space-y-2">
+        {rows.map((r) => {
+          const score = Math.round(r.score ?? 0);
+          const passed = score >= 60;
+          return (
+            <Link key={r.id} href={`/tests/${r.id}/feedback`} className="ds-row">
+              <span
+                className={cn(
+                  'flex h-8 w-11 shrink-0 items-center justify-center rounded-md text-xs font-bold tabular-nums',
+                  passed ? 'bg-[var(--brand-soft)] text-[var(--brand-text)]' : 'bg-[var(--danger-soft)] text-[var(--danger-text)]'
+                )}
+              >
+                {score}%
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold text-foreground truncate">{r.test__title || 'Tasodifiy test'}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {new Date(r.completed_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' })}
+                </p>
+              </div>
+              <Pill tone={passed ? 'brand' : 'danger'} dot>
+                {passed ? "O'tdi" : 'Qayta urinish'}
+              </Pill>
+            </Link>
+          );
+        })}
+      </div>
+    </Panel>
+  );
+}
+
 export default function TestsPage() {
   const stressXpLabel = useStressBonusLabel();
   const router = useRouter();
@@ -652,188 +766,93 @@ export default function TestsPage() {
     <>
       <AppShell />
       <main className="page-shell flex-1 space-y-5 sm:space-y-6 bg-background text-foreground p-3.5 sm:p-6 lg:p-8 pb-32 sm:pb-28 max-w-7xl mx-auto w-full">
-        {/* ========================================================================= */}
-        {/* IMTIHON REJIMLARI TAB SWITCHER (Standart | Blits | BMB Stress) */}
-        {/* ========================================================================= */}
-        <div className="space-y-3.5">
-          {/* Segmented Mode Switcher (Fully responsive grid) */}
-          <div className="w-full max-w-2xl grid grid-cols-4 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
-            <button
-              type="button"
-              onClick={() => handleModeChange('standard')}
-              className={cn(
-                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
-                heroMode === 'standard'
-                  ? 'bg-card text-foreground shadow-sm border border-border/60'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
-              )}
-            >
-              <GraduationCap className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'standard' ? 'text-primary' : 'text-muted-foreground')} />
-              <span className="truncate">{t("Standart")}</span>
-              <span className={cn(
-                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
-                heroMode === 'standard' ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
-              )}>
-                Rasmiy
-              </span>
-            </button>
+        <PageHeader
+          icon={Target}
+          eyebrow={t("Imtihon portali")}
+          title={t("Test rejimini tanlang")}
+          subtitle="Har bir rejim turli maqsad uchun: to'liq baholash, tezkor sinov, real zal bosimi yoki kundalik sprint."
+        />
 
-            <button
-              type="button"
-              onClick={() => handleModeChange('blitz')}
-              className={cn(
-                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
-                heroMode === 'blitz'
-                  ? 'bg-card text-foreground shadow-sm border border-border/60'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
-              )}
-            >
-              <Sparkles className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'blitz' ? 'text-blue-500' : 'text-muted-foreground')} />
-              <span className="truncate">{t("7-Blits")}</span>
-              <span className={cn(
-                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
-                heroMode === 'blitz' ? 'bg-blue-500/15 text-blue-500' : 'bg-muted text-muted-foreground'
-              )}>
-                7 savol
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleModeChange('stress')}
-              className={cn(
-                'flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
-                heroMode === 'stress'
-                  ? 'bg-card text-foreground shadow-sm border border-border/60'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
-              )}
-            >
-              <Flame className={cn('size-3.5 sm:size-4 shrink-0 transition-colors', heroMode === 'stress' ? 'text-rose-500' : 'text-muted-foreground')} />
-              <span className="truncate">{t("Stress Zali")}</span>
-              <span className={cn(
-                'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
-                heroMode === 'stress' ? 'bg-rose-500/15 text-rose-500' : 'bg-muted text-muted-foreground'
-              )}>
-                🔥 DTM
-              </span>
-            </button>
-
-            {/* Fokus Sprint — 4-rejim (alohida sahifa). Mobil pastki menyuda endi Sinovlar ichida. */}
-            <Link
-              href="/sprint"
-              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center text-muted-foreground hover:text-foreground hover:bg-card/40"
-            >
-              <Zap className="size-3.5 sm:size-4 shrink-0 text-amber-500" />
-              <span className="truncate">{t("Sprint")}</span>
-            </Link>
-          </div>
-
-          {/* Active Mode Card with Smooth Transition */}
-          <AnimatePresence mode="wait">
-            {heroMode === 'standard' && (
-              <motion.div
-                key="standard"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-              >
-                <PageHero
-                  eyebrow={t("BBA & Milliy Sertifikat · Rasmiy Simulyator")}
-                  eyebrowIcon={GraduationCap}
-                  title={t("Test va Imtihonlar Markazi")}
-                  description="Davlat imtihonlariga moslashgan vaqt me'yori, baholash mezonlari va xatolar ustida ishlash tizimi."
-                />
-              </motion.div>
-            )}
-
-            {heroMode === 'blitz' && (
-              <motion.div
-                key="blitz"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-4 sm:p-5.5 text-white shadow-lg"
-              >
-                <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-white/10 rounded-full blur-2xl" />
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1.5 max-w-xl">
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md px-3 py-0.5 text-xs font-bold text-white">
-                      <Sparkles className="size-3.5 text-amber-300" /> Ilk Sinov · 3 Daqiqalik Dofamin Blits
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold">
-                      Qaysi darajadasiz? 7 ta savolda B+ potensialini aniqlang!
-                    </h3>
-                    <p className="text-xs sm:text-sm text-blue-100 leading-relaxed">
-                      45 ta savollik to&apos;liq testga kirishdan oldin 7 ta adaptiv savoldan o&apos;ting, kuchli va zaif mavzularingizni bepul aniqlang.
-                    </p>
-                  </div>
-                  <Button asChild size="lg" className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-md shrink-0 h-11 px-6 cursor-pointer">
-                    <Link href="/onboarding?mode=blitz">
-                      Sinovdan o&apos;tish <ArrowRight className="size-4 ml-1.5" />
-                    </Link>
-                  </Button>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {MODE_CARDS.map((m, i) => {
+            const active = m.key === heroMode;
+            const stats =
+              m.key === 'standard'
+                ? [
+                    { value: (data?.subjects || []).reduce((n, s) => n + (s.tests_count || 0), 0) || '—', label: 'Testlar' },
+                    { value: data ? data.total_attempts : '—', label: 'Urinishlaringiz' },
+                    { value: data ? `${Math.round(data.avg_score || 0)}%` : '—', label: "O'rtacha ball" },
+                  ]
+                : m.key === 'stress'
+                  ? [
+                      { value: 'BMB', label: 'Format' },
+                      { value: 'Titul', label: 'Javob varaqasi' },
+                      { value: stressXpLabel, label: 'Mukofot' },
+                    ]
+                  : m.stats;
+            return (
+              <Panel key={m.key} className={cn('flex flex-col', active && 'ring-1 ring-[var(--brand-border)]')}>
+                <div className="flex items-start justify-between">
+                  <IconTile icon={m.icon} tone={m.tone} size="lg" />
+                  <Pill>{i + 1}-rejim</Pill>
                 </div>
-              </motion.div>
-            )}
-
-            {heroMode === 'stress' && (
-              <motion.div
-                key="stress"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="relative overflow-hidden rounded-2xl sm:rounded-2xl border-2 border-rose-500/40 bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 p-4 sm:p-6 shadow-xl text-white"
-              >
-                <div className="absolute top-0 right-0 -mr-12 -mt-12 size-60 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-                  <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                    <div className="flex size-11 sm:size-14 shrink-0 items-center justify-center rounded-2xl bg-rose-600/30 border border-rose-500/40 shadow-inner">
-                      <Flame className="size-5 sm:size-7 text-rose-400 animate-pulse" />
-                    </div>
-                    <div className="min-w-0 space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge className="bg-rose-600 text-white font-bold text-[12px] tracking-wider uppercase border-0 shrink-0">
-                          🔥 EKSTREMAL
-                        </Badge>
-                        <Badge variant="outline" className="border-rose-400/40 bg-rose-400/10 text-rose-200 text-[12px] sm:text-[12px] font-bold shrink-0">
-                          🎧 500 Kishi Zali
-                        </Badge>
-                        <Badge variant="outline" className="border-blue-400/40 bg-blue-400/10 text-blue-200 text-[12px] sm:text-[12px] font-bold shrink-0">
-                          📝 Titul Varaqasi
-                        </Badge>
-                        <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[12px] sm:text-[12px] font-bold shrink-0">
-                          ⚡ {stressXpLabel}
-                        </Badge>
-                      </div>
-                      <h3 className="text-base sm:text-xl font-bold tracking-tight text-white leading-tight">
-                        Real BMB Imtihon Zali (Stress Mode)
-                      </h3>
-                      <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                        Divanda choy ichib 80% olish boshqa, real DTM zalidagi shivir-shivir, parta g&apos;ichirlashi, nazoratchi ovozi va Titul varaqasida qo&apos;l qaltirashi boshqa! Imtihon kuni shokiga tushmaslik uchun hoziroq o&apos;zingizni sinang.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <Button
-                      onClick={() => {
+                <h2 className="mt-3.5 text-base font-bold text-foreground">{t(m.title)}</h2>
+                <p className={cn('text-xs font-semibold', m.accent)}>{t(m.subtitle)}</p>
+                <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{m.description}</p>
+                <div className="mt-3.5 grid grid-cols-3 gap-2">
+                  {stats.map((st) => (
+                    <StatCell key={st.label} value={st.value} label={st.label} />
+                  ))}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {m.chips.map((c) => (
+                    <span key={c} className="rounded-md border border-[var(--ds-panel-border)] px-2 py-0.5 text-[10px] text-muted-foreground">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-auto pt-4">
+                  <BrandButton
+                    className="w-full"
+                    disabled={m.key === 'stress' && startingStress !== null}
+                    onClick={() => {
+                      if (m.key === 'standard') {
+                        handleModeChange('standard');
+                        document.getElementById('test-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      } else if (m.key === 'blitz') {
+                        handleStartBlitz(subject || undefined);
+                      } else if (m.key === 'stress') {
+                        handleModeChange('stress');
                         setStressPreselectedTest(null);
                         setStressModalOpen(true);
-                      }}
-                      size="lg"
-                      className="w-full sm:w-auto rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 cursor-pointer h-11 px-6 text-xs sm:text-sm active:scale-95 transition-all flex items-center justify-center"
-                    >
-                      <Flame className="size-4 mr-2 animate-pulse" />
-                      Imtihon Zaliga Kirish
-                    </Button>
-                  </div>
+                      } else {
+                        router.push('/sprint');
+                      }
+                    }}
+                  >
+                    {t(m.cta)} <ChevronRight className="size-4" />
+                  </BrandButton>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </Panel>
+            );
+          })}
+        </div>
+
+        <RecentTestHistory />
+
+        <div id="test-catalog" className="scroll-mt-20 flex flex-wrap items-center justify-between gap-3 pt-2">
+          <span className="ds-label inline-flex items-center gap-1.5">
+            <BookOpen className="size-3.5" /> Testlar katalogi
+          </span>
+          <SegmentedTabs
+            items={[
+              { value: 'standard', label: 'Standart' },
+              { value: 'blitz', label: 'Blits' },
+              { value: 'stress', label: 'Stress' },
+            ]}
+            value={heroMode}
+            onChange={(v) => handleModeChange(v as 'standard' | 'blitz' | 'stress')}
+          />
         </div>
 
         {/* LIVE ACTIVITY PINNED MOCK IMTIHON BANNER */}

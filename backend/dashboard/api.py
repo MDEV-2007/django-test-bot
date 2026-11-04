@@ -100,8 +100,31 @@ def home_api(request):
             'answered': 0,
         } for s in all_subs]
 
+    # Upcoming / running live mock exams (TestSet.is_live_mock) for the "Upcoming tests" card.
+    from datetime import timedelta
+    from tests_app.models import TestSet
+    now = timezone.now()
+    upcoming_mocks = []
+    for t in (TestSet.objects.filter(is_published=True, is_archived=False, is_live_mock=True,
+                                     scheduled_at__gte=now - timedelta(hours=3))
+              .select_related('subject').order_by('scheduled_at')[:6]):
+        ends = t.scheduled_at + timedelta(minutes=t.duration_minutes or 0)
+        if ends < now:
+            continue
+        upcoming_mocks.append({
+            'id': t.id,
+            'title': t.title,
+            'subject': t.subject.name if t.subject else '',
+            'scheduled_at': timezone.localtime(t.scheduled_at).isoformat(),
+            'duration_minutes': t.duration_minutes,
+            'is_live': t.scheduled_at <= now,
+        })
+        if len(upcoming_mocks) == 3:
+            break
+
     return Response({
         'profile': ProfileSerializer(profile).data,
+        'upcoming_mocks': upcoming_mocks,
         'xp_progress': profile.xp_progress,
         'freeze_count': freeze_count,
         'online_count': online_count,

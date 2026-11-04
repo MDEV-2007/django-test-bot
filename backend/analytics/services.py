@@ -227,12 +227,23 @@ def dashboard_data(profile, use_cache=True):
         .annotate(day=TruncDate('completed_at')).values('day')
         .annotate(count=Count('id'), avg=Avg('score'))
     }
+    # Per-day focus minutes (started_at → completed_at). Each attempt is capped at 3 hours
+    # so a tab left open overnight does not inflate the weekly focus chart.
+    daily_minutes = {}
+    for r in attempts.filter(completed_at__date__gte=since_14).values('started_at', 'completed_at'):
+        if not (r['started_at'] and r['completed_at']):
+            continue
+        secs = min(max(0.0, (r['completed_at'] - r['started_at']).total_seconds()), 3 * 3600)
+        day = timezone.localtime(r['completed_at']).date()
+        daily_minutes[day] = daily_minutes.get(day, 0.0) + secs / 60
     daily = []
     for i in range(14):
         d = since_14 + timedelta(days=i)
         row = daily_rows.get(d)
-        daily.append({'date': d.strftime('%d.%m'), 'count': row['count'] if row else 0,
-                      'avg': round(row['avg']) if row and row['avg'] else 0})
+        daily.append({'date': d.strftime('%d.%m'), 'iso': d.isoformat(), 'weekday': d.weekday(),
+                      'count': row['count'] if row else 0,
+                      'avg': round(row['avg']) if row and row['avg'] else 0,
+                      'minutes': round(daily_minutes.get(d, 0))})
 
     # --- Monthly progress, last 6 months (area: tests + avg score + cumulative XP) ---
     # Ilgari bu blok HAFTALIK edi: 1-2 ustunli grafik hech qanday tendensiyani

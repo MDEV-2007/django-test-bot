@@ -18,7 +18,7 @@ const display = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable:
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const viewport: Viewport = {
-  themeColor: '#F2F2F7',
+  themeColor: '#F6F8F9',
   viewportFit: 'cover',
   width: 'device-width',
   initialScale: 1,

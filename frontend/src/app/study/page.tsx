@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
+import { Panel, PanelLabel, PanelLink, PageHeader, Pill, IconTile, Bar, EmptyNote } from '@/components/design/kit';
+import { Sigma, Atom, FlaskConical, Landmark, Check } from 'lucide-react';
 import TopicCheatSheetView from '@/components/study/TopicCheatSheetView';
 import { Gamepad2, Swords, Compass, MapPin } from 'lucide-react';
 import Reveal from '@/components/motion/Reveal';
@@ -128,6 +130,87 @@ function buildMissions(data: MasteryResponse | null): StudyMission[] {
 }
 
 const WEEK_DAYS = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
+
+const SUBJECT_TILE_TONES = ['brand', 'dark', 'gold', 'sky', 'violet'] as const;
+const SUBJECT_TILE_ICONS = [Sigma, Atom, FlaskConical, Dna, Landmark];
+
+/* Subject progress cards + "Continue learning" — all numbers are the student's real
+   mastery from /api/analytics/ (correct ÷ answered per subject / topic). */
+function StudyOverview({ data, loading }: { data?: MasteryResponse | null; loading: boolean }) {
+  const subjects = (data?.mastery?.subjects || []).slice(0, 4);
+  const topics = [...(data?.mastery?.topics || [])]
+    .filter((tp) => tp.answered > 0)
+    .sort((a, b) => a.mastery - b.mastery)
+    .slice(0, 4);
+
+  if (loading && !data) {
+    return (
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="ds-panel h-28 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {subjects.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {subjects.map((s, i) => (
+            <Link key={s.id} href={`/learning`} className="ds-panel ds-panel-interactive p-3.5">
+              <IconTile icon={SUBJECT_TILE_ICONS[i % SUBJECT_TILE_ICONS.length]} tone={SUBJECT_TILE_TONES[i % SUBJECT_TILE_TONES.length]} size="sm" />
+              <p className="mt-3 text-[13px] font-bold text-foreground truncate">{s.name}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {s.answered} ta javob · {s.mastery}% o&apos;zlashtirildi
+              </p>
+              <Bar value={s.mastery} className="mt-2.5" />
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <Panel>
+        <PanelLabel icon={Play} right={topics.length ? <Pill tone="brand">{topics.length} ta mavzu</Pill> : null}>
+          O&apos;qishni davom ettirish
+        </PanelLabel>
+        {topics.length === 0 ? (
+          <EmptyNote action={<PanelLink href="/tests">Test yechish →</PanelLink>}>
+            Test yechganingizdan keyin eng ko&apos;p yordam kerak bo&apos;lgan mavzular shu yerda chiqadi.
+          </EmptyNote>
+        ) : (
+          <div className="space-y-2">
+            {topics.map((tp) => {
+              const done = tp.mastery >= 80;
+              return (
+                <Link key={tp.id} href={`/learning?topic_id=${tp.id}`} className="ds-row">
+                  <span
+                    className={cn(
+                      'flex size-9 shrink-0 items-center justify-center rounded-lg',
+                      done ? 'bg-[var(--brand-soft)] text-[var(--brand)]' : 'bg-[var(--brand)] text-white'
+                    )}
+                  >
+                    {done ? <Check className="size-4" /> : <Play className="size-4 fill-current" />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-semibold text-foreground truncate">{tp.title}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {tp.answered} ta savol · {tp.mastery}% to&apos;g&apos;ri
+                    </p>
+                    {!done && <Bar value={tp.mastery} tone={tp.mastery < 50 ? 'danger' : 'brand'} className="mt-1.5 h-1" />}
+                  </div>
+                  <span className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                    {done ? 'Takrorlash' : 'Davom etish'} <ChevronRight className="size-3.5" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </Panel>
+    </div>
+  );
+}
 
 export default function StudyRoomPage() {
   const { user } = useAuthStore();
@@ -607,36 +690,46 @@ export default function StudyRoomPage() {
           /* ODDIY REJIM: AI TAVSIYA, FOKUS MISSIYASI & STREAK            */
           /* ============================================================ */
           <>
-            {/* Sarlavha */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary text-xs font-semibold uppercase px-2.5 py-0.5 rounded-md gap-1.5">
-                    <Target className="size-3.5" />
-                    <span>Fokus rejimi</span>
-                  </Badge>
-                  <span className="text-xs text-muted-foreground font-medium">
-                    25 daqiqa. Bitta maqsad. Nol chalg&apos;ituvchi.
-                  </span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mt-1">
-                  Fokus xonasi
-                </h1>
-              </div>
-
-              {/* Jonli talabalar & Zen button */}
-              <div className="flex items-center gap-2.5 self-start sm:self-auto">
-                <Button
-                  variant="outline"
-                  size="sm"
+            <PageHeader
+              icon={BookOpen}
+              eyebrow="Shaxsiy o'quv studiyasi"
+              title="O'qish maydoni"
+              subtitle="Darslar, 60 soniyalik shpargalkalar, flashcards va xatolar ustida ishlash — barchasi bir joyda."
+              right={
+                <button
+                  type="button"
                   onClick={() => setIsFullscreen(true)}
-                  className="rounded-lg text-xs font-semibold gap-1.5 border-border bg-card hover:bg-muted text-foreground"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs font-semibold text-foreground hover:border-[var(--brand-border)] cursor-pointer"
                 >
-                  <Maximize2 className="size-3.5" />
-                  <span className="hidden sm:inline">To&apos;liq ekran</span>
-                </Button>
-              </div>
-            </div>
+                  <Maximize2 className="size-3.5" /> Zen rejim
+                </button>
+              }
+            />
+
+            <nav className="flex gap-1 overflow-x-auto no-scrollbar rounded-xl bg-[var(--ds-subtle)] p-1">
+              {[
+                { href: '/learning', label: 'Darslar', icon: BookOpen },
+                { href: '/study', label: 'Fokus xonasi', icon: Target, active: true },
+                { href: '/flashcards', label: 'Flashcards', icon: Layers },
+                { href: '/tests/revision', label: 'Takrorlash', icon: RotateCcw },
+              ].map((tab) => (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={cn(
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition',
+                    tab.active
+                      ? 'bg-[var(--surface-card)] text-foreground shadow-[0_1px_3px_rgba(15,23,42,0.08)]'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <tab.icon className="size-3.5" />
+                  {tab.label}
+                </Link>
+              ))}
+            </nav>
+
+            <StudyOverview data={masteryData} loading={masteryLoading} />
 
             {/* ============================================================ */}
             {/* 🧭 4 TA YADROVIY O'RGANISH TABLARI (Segmented Learning Hub)  */}

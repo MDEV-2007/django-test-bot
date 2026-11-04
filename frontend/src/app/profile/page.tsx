@@ -404,17 +404,18 @@ export default function ProfilePage() {
         {/* ========================================================================= */}
         {/* 1. ASOSIY PROFILE CARD (Apple ID Style Anchor) */}
         {/* ========================================================================= */}
-        <div className="ios-card relative overflow-hidden rounded-2xl p-6 sm:p-7 shadow-lg border border-border/80">
-          <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/[0.08] blur-[70px]" />
-          <div className="relative flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
-            <div className="relative shrink-0 group">
+        <div className="ds-panel relative overflow-hidden">
+          <div className="h-24 sm:h-28" style={{ background: 'var(--ds-hero-bg)' }} />
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+          <div className="relative flex flex-col items-center gap-4 pt-3 text-center sm:flex-row sm:items-start sm:text-left">
+            <div className="relative shrink-0 group -mt-14 sm:-mt-16">
               <div
                 onClick={handleOpenEdit}
                 className="cursor-pointer relative rounded-full transition-transform hover:scale-105"
                 title="Profilni tahrirlash"
               >
                 <CosmeticAvatar
-                  className="size-22 sm:size-24"
+                  className="size-22 sm:size-24 ring-4 ring-[var(--surface-card)]"
                   src={p.avatar_url}
                   name={p.first_name || p.username}
                   cosmetics={p.cosmetics}
@@ -448,8 +449,8 @@ export default function ProfilePage() {
                   <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
                 </h1>
                 <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
-                <span className="rounded-full bg-primary/12 px-2.5 py-0.5 font-mono text-[12px] font-bold text-primary">
-                  Daraja {p.level}
+                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--reward-border)] bg-[var(--reward-soft)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--reward-text)]">
+                  <span className="size-1.5 rounded-full bg-[var(--reward)]" /> {p.level}-daraja
                 </span>
                 {p.cosmetics?.title?.payload?.title && (
                   <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400">
@@ -490,19 +491,20 @@ export default function ProfilePage() {
                 variant="outline"
                 size="sm"
                 onClick={handleOpenEdit}
-                className="rounded-full gap-1.5"
+                className="rounded-lg gap-1.5"
               >
                 <Pencil className="size-3.5 text-primary" />
                 Tahrirlash
               </Button>
               <Link
                 href="/premium"
-                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 text-[13px] font-semibold text-white shadow-md hover:opacity-95 active:scale-95 transition-all"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-hover)] px-4 text-[13px] font-semibold text-white active:scale-95 transition-all"
               >
                 {p.is_premium ? <Crown className="size-4 fill-current" /> : <Lock className="size-3.5" />}
                 <span>{p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}</span>
               </Link>
             </div>
+          </div>
           </div>
         </div>
 

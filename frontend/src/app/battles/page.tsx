@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Swords, Bot, Trophy, Shield, Loader2, RotateCcw, Radio, Share2, Copy, MapPin, UserCheck, History, Sparkles, ArrowRight } from 'lucide-react';
+import { Swords, Bot, Trophy, Shield, Users, Target, Flame, Zap, Play, Loader2, RotateCcw, Radio, Share2, Copy, MapPin, UserCheck, History, Sparkles, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -11,7 +11,8 @@ import { tgHaptic } from '@/lib/telegram';
 import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
 import StatNumber from '@/components/motion/StatNumber';
-import { arenaRankTitle } from '@/lib/rank';
+import { arenaRankTitle, getRankInfo } from '@/lib/rank';
+import { PageHeader, HeroBanner, HeroStat, HeroButton, SegmentedTabs, BrandButton } from '@/components/design/kit';
 import AppShell from '@/components/AppShell';
 import CardMotif from '@/components/student/CardMotif';
 import PageHero from '@/components/student/PageHero';
@@ -355,54 +356,74 @@ export default function BattlesPage() {
 
         {mode === 'idle' && (
           <div className="space-y-6">
-            <PageHero
-              tone="amber"
-              eyebrow="1v1 Duel"
-              eyebrowIcon={Swords}
-              title="Battle Arena"
-              description="Tezkor savollarda raqiblaringizdan ustun keling va ELO ballingizni oshiring."
+            <PageHeader
+              icon={Swords}
+              eyebrow="Raqobatli o'rganish"
+              title="Arena"
+              subtitle="Tengdoshlaringizga qarshi chiqing, ligada ko'tariling va bilimingizni jonli bellashuvda isbotlang."
             />
 
-            {/* Hali jang qilmagan o'yinchi uchun 5 ta nol to'la qator asosiy harakatdan
-                diqqatni tortadi — o'rniga bitta boshlang'ich ELO kartasi ko'rsatiladi. */}
-            {arena && arena.total_battles === 0 && (
-              <Card className="border-blue-500/25 bg-blue-500/[0.05]">
-                <CardContent className="flex items-center gap-4 pt-6">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-300">
-                    <Swords className="size-6" />
+            {arena && (() => {
+              const rk = getRankInfo(arena.elo_rating);
+              const decided = arena.wins + arena.losses + arena.draws;
+              const winRate = decided ? Math.round((arena.wins / decided) * 100) : 0;
+              return (
+                <HeroBanner>
+                  <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-11 items-center justify-center rounded-xl bg-[var(--reward)] text-[var(--on-reward)] shadow-[0_6px_18px_-6px_rgba(233,196,106,0.7)]">
+                          <Shield className="size-5" strokeWidth={2.4} />
+                        </span>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--reward)]">Joriy unvon</p>
+                          <p className="text-xl font-extrabold tracking-tight">{rk.title}</p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm text-white/70">
+                        {rk.nextTitle ? (
+                          <>
+                            <span className="font-bold text-[var(--reward)]">{rk.pointsNeeded} ELO</span> qoldi —{' '}
+                            {rk.nextTitle} unvoniga ko&apos;tarilish uchun g&apos;alabalarni davom ettiring.
+                          </>
+                        ) : (
+                          'Siz eng yuqori unvondasiz — o\'rningizni himoya qiling!'
+                        )}
+                      </p>
+                      <div className="mt-3 max-w-md">
+                        <div className="flex justify-between text-[10px] text-white/50 mb-1.5 tabular-nums">
+                          <span>{arena.elo_rating} ELO</span>
+                          {rk.nextElo && <span>{rk.nextElo} ELO keyingi unvon</span>}
+                        </div>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                          <div className="h-full rounded-full bg-[var(--reward)]" style={{ width: `${rk.progressPercent}%` }} />
+                        </div>
+                      </div>
+                      <div className="mt-5 flex flex-wrap gap-2.5">
+                        <HeroButton
+                          icon={Swords}
+                          onClick={() => {
+                            soundFX.click();
+                            tgHaptic('medium');
+                            setMode('ghost');
+                          }}
+                        >
+                          Raqib topish
+                        </HeroButton>
+                        <HeroButton icon={Users} variant="ghost" onClick={() => setActiveBattleTab('class')}>
+                          Sinf jangi
+                        </HeroButton>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2.5 lg:w-[300px]">
+                      <HeroStat icon={Trophy} value={arena.wins} label="G'alaba" iconClass="text-[#74C69D]" />
+                      <HeroStat icon={Target} value={`${winRate}%`} label="G'alaba ulushi" />
+                      <HeroStat icon={Flame} value={arena.total_battles} label="Janglar" iconClass="text-[#F4A261]" />
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold">
-                      Boshlang&apos;ich reyting: <span className="font-mono text-blue-300">{arena.elo_rating}</span>
-                      <span className="ml-1.5 text-xs font-semibold text-muted-foreground">({arenaRankTitle(arena.elo_rating)})</span>
-                    </p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                      Birinchi jangingizni boshlang — g&apos;alaba ELO, XP va tanga olib keladi.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {arena && arena.total_battles > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                {[
-                  { label: 'ELO', value: arena.elo_rating, sub: arenaRankTitle(arena.elo_rating), cls: 'col-span-2 sm:col-span-1 border-[#007AFF]/25 bg-[#007AFF]/[0.06]', text: 'text-foreground' },
-                  { label: 'Janglar', value: arena.total_battles, sub: null, cls: '', text: 'text-foreground' },
-                  { label: "G'alaba", value: arena.wins, sub: null, cls: 'border-[var(--success)]/25 bg-[var(--success)]/[0.05]', text: 'text-[var(--success-text)]' },
-                  { label: 'Durang', value: arena.draws, sub: null, cls: '', text: 'text-[var(--text-secondary)]' },
-                  { label: "Mag'lub", value: arena.losses, sub: null, cls: 'border-rose-500/25 bg-rose-500/[0.05]', text: 'text-rose-300' },
-                ].map((s) => (
-                  <Card key={s.label} className={cn('gap-0 py-3', s.cls)}>
-                    <CardContent className="px-2 text-center">
-                      <p className="text-xs font-bold uppercase text-muted-foreground">{s.label}</p>
-                      <p className={cn('mt-0.5 font-mono text-base font-bold tabular-nums', s.text)}>{s.value}</p>
-                      {s.sub && <p className="mt-0.5 text-[11px] font-semibold text-blue-300">{s.sub}</p>}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+                </HeroBanner>
+              );
+            })()}
 
             {arena && arena.subjects.length > 0 && (
               <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
@@ -420,84 +441,47 @@ export default function BattlesPage() {
               </div>
             )}
 
-            {/* 3 ta Segmented Tab: 1v1 Jonli Duel / Sinf Jangi / Liga va Reyting */}
-            <div className="flex items-center justify-center p-1.5 rounded-2xl bg-muted/60 border border-border/70 max-w-xl mx-auto w-full shadow-sm mb-4">
-              <button
-                type="button"
-                onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('1v1'); }}
-                className={cn(
-                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
-                  activeBattleTab === '1v1'
-                    ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <Swords className="size-4" />
-                <span>⚔️ 1v1 Jonli Duel</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('class'); }}
-                className={cn(
-                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
-                  activeBattleTab === 'class'
-                    ? 'bg-amber-500 text-black shadow-md'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <Sparkles className="size-4" />
-                <span>🎓 Sinf Jangi (PIN)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { soundFX.click(); tgHaptic('select'); setActiveBattleTab('leaderboard'); }}
-                className={cn(
-                  'flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
-                  activeBattleTab === 'leaderboard'
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <Trophy className="size-4" />
-                <span>🏆 Liga & Reyting</span>
-              </button>
-            </div>
+            <SegmentedTabs
+              items={[
+                { value: '1v1', label: '1v1 Duel', icon: Swords },
+                { value: 'class', label: 'Sinf jangi', icon: Users },
+                { value: 'leaderboard', label: 'Liga va reyting', icon: Trophy },
+              ]}
+              value={activeBattleTab}
+              onChange={(v) => {
+                soundFX.click();
+                tgHaptic('select');
+                setActiveBattleTab(v as '1v1' | 'class' | 'leaderboard');
+              }}
+            />
 
             {/* TAB 1: 1v1 JONLI DUEL (Ghost Battle & Fast Matchmaking) */}
             {activeBattleTab === '1v1' && (
               <div className="space-y-5">
-                {/* 3 Soniyalik Instant Ghost PvP Banner */}
-                <div className="rounded-3xl border border-orange-500/30 bg-gradient-to-r from-orange-500/15 via-zinc-900 to-rose-500/15 p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-gradient-to-r from-orange-500 to-rose-600 text-white font-bold text-[12px] uppercase">
-                        Ghost PvP 24/7
-                      </Badge>
-                      <span className="text-xs font-mono font-bold text-orange-400">⏱ 3 Soniyada Raqib</span>
+                {/* Quick match */}
+                <div className="ds-panel flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-gradient-to-r from-[var(--brand-soft)] to-transparent">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
+                      <Zap className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[15px] font-bold text-foreground">Tezkor duel</p>
+                      <p className="text-xs text-muted-foreground">
+                        Kutish yo&apos;q: o&apos;zingizga yaqin darajadagi raqib bilan bir zumda bellashing.
+                      </p>
                     </div>
-                    <h3 className="text-lg font-bold text-white">
-                      Tezkor 1v1 Ghost Duel Arena
-                    </h3>
-                    <p className="text-xs text-zinc-300 max-w-lg leading-relaxed">
-                      Kutish yo&apos;q! Haqiqiy abituriyentlarning Ghost replikasi yoki tirik onlayn o&apos;quvchi bilan 60 soniyada DTM darajangizni sinang.
-                    </p>
                   </div>
-
-                  <Button
+                  <BrandButton
+                    className="shrink-0"
                     onClick={() => {
                       soundFX.click();
                       tgHaptic('medium');
-                      // Arena `mode === 'ghost'` da chiziladi. Ilgari bu yerda hech narsa
-                      // o'qimaydigan `inGhostArena` holati o'rnatilardi — tugma ishlamasdi.
+                      // Arena `mode === 'ghost'` da chiziladi.
                       setMode('ghost');
                     }}
-                    className="h-12 px-6 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-bold text-sm shadow-xl shadow-rose-600/30 shrink-0 cursor-pointer"
                   >
-                    <Swords className="size-4 mr-2" />
-                    <span>Duelni Boshlash (3s)</span>
-                  </Button>
+                    <Play className="size-4" /> Duelni boshlash
+                  </BrandButton>
                 </div>
 
                 <div className="grid gap-4 pt-2 md:grid-cols-3">

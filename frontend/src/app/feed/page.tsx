@@ -26,6 +26,10 @@ import {
 import { toast } from 'sonner';
 
 import AppShell from '@/components/AppShell';
+import SmartB2BSuggestionCard from '@/components/dashboard/SmartB2BSuggestionCard';
+import { Panel, PanelLabel, PanelLink, Initials } from '@/components/design/kit';
+import { useApiQuery } from '@/lib/api-cache';
+import { TrendingUp } from 'lucide-react';
 import Reveal from '@/components/motion/Reveal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -140,6 +144,70 @@ const STUDY_MEMES = [
   { label: 'Kitob 📚', text: '📚 Kitoblar titilgan, natija esa bomba!' },
   { label: 'Chempion 🏆', text: '🏆 Haqiqiy chempionlik natijasi!' },
 ];
+
+type LbRow = { profile_id: number; username: string; first_name: string; last_name: string; avatar_url: string; xp: number };
+
+/* Right rail of the community page: trending subjects (counted from the posts actually
+   loaded), this week's top learners (leaderboard API) and the native sponsored slot. */
+function FeedSidebar({ posts }: { posts: PostItem[] }) {
+  const { data: lb } = useApiQuery<{ podium?: LbRow[]; rankings?: LbRow[]; top?: LbRow[] }>('/api/leaderboard/?timeframe=weekly');
+  const leaders = [...(lb?.podium || []), ...(lb?.rankings || []), ...(lb?.top || [])].slice(0, 4);
+
+  const trending = React.useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of posts) {
+      const key = (p.subject_name || '').trim();
+      if (!key) continue;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [posts]);
+
+  return (
+    <aside className="hidden xl:block space-y-4 xl:sticky xl:top-20 self-start">
+      <Panel>
+        <PanelLabel icon={TrendingUp}>Trendda</PanelLabel>
+        {trending.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Hozircha postlar kam.</p>
+        ) : (
+          <ul className="space-y-3">
+            {trending.map(([name, n]) => (
+              <li key={name}>
+                <p className="text-[13px] font-bold text-foreground">#{name.replace(/\s+/g, '')}</p>
+                <p className="text-[11px] text-muted-foreground">{n} ta post</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+
+      <Panel>
+        <PanelLabel icon={Trophy} right={<PanelLink href="/leaderboard">Reyting</PanelLink>}>
+          Hafta yetakchilari
+        </PanelLabel>
+        {leaders.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Bu hafta hali natija yo&apos;q.</p>
+        ) : (
+          <ul className="space-y-3">
+            {leaders.map((r, i) => (
+              <li key={r.profile_id} className="flex items-center gap-2.5">
+                <Initials name={`${r.first_name || r.username} ${r.last_name || ''}`} src={r.avatar_url} size={30} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-foreground truncate">
+                    {[r.first_name, r.last_name].filter(Boolean).join(' ') || r.username}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">#{i + 1} · {r.xp.toLocaleString('uz-UZ')} XP</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+
+      <SmartB2BSuggestionCard />
+    </aside>
+  );
+}
 
 export default function CommunityFeedPage() {
   const router = useRouter();
@@ -548,25 +616,19 @@ export default function CommunityFeedPage() {
     <>
       <AppShell />
       <main className="page-shell flex-1 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-4 sm:p-6 pb-28">
+        <div className="mx-auto grid w-full max-w-[1180px] gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="mx-auto max-w-2xl space-y-5 w-full min-w-0">
           {/* 0. Kunlik Streak & O'quv Markaz Stories */}
           <FeedStoriesBar examTrack={examTrack} />
 
 
-          {/* 1. iOS 18 Top Segmented Bar & Action Button */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5">
-            <div className="ios-segmented inline-flex items-center">
-              <div className="ios-segmented-thumb flex items-center gap-2 px-3.5 sm:px-5 py-1.5 text-xs sm:text-[13px] font-bold select-none">
-                <PremiumIcon icon={Sparkles} tone="emerald" size="2xs" />
-                <span>Hamjamiyat</span>
-              </div>
-              <Link
-                href="/leaderboard"
-                className="flex items-center gap-2 px-3.5 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <PremiumIcon icon={Trophy} tone="amber" size="2xs" />
-                <span>Liderlar Ligasi</span>
-              </Link>
+          {/* 1. Page header & actions */}
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <span className="ds-label inline-flex items-center gap-1.5">
+                <TrendingUp className="size-3.5" /> Hamjamiyat lentasi
+              </span>
+              <h1 className="mt-1.5 text-2xl sm:text-[28px] font-extrabold tracking-tight text-foreground">Nima gap?</h1>
             </div>
 
             <div className="flex items-center gap-2">
@@ -583,7 +645,7 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('result');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs sm:text-[13px] font-bold text-white shadow-[0_6px_16px_rgba(0,122,255,0.34)] cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-hover)] px-4 py-2 text-xs sm:text-[13px] font-semibold text-white cursor-pointer"
               >
                 <Plus className="size-4 stroke-[2.5]" />
                 <span>Yangi post</span>
@@ -1138,6 +1200,8 @@ export default function CommunityFeedPage() {
               </div>
             )}
           </div>
+        </div>
+        <FeedSidebar posts={posts} />
         </div>
       </main>
 
