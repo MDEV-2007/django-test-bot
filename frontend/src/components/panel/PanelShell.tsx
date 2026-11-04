@@ -57,6 +57,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { href: '/panel/marketing', label: 'Marketing & Voronka', icon: Flame, tone: 'rose' },
       { href: '/panel/growth', label: "O'sish metrikalari", icon: Activity, tone: 'indigo' },
       { href: '/panel/campaigns', label: "O'quv Markazlari (B2B Ads)", icon: Megaphone, tone: 'amber' },
+      { href: '/panel/advertisers', label: 'Ads Manager moderatsiya', icon: ShieldCheck, tone: 'amber' },
       { href: '/panel/broadcast', label: 'Xabarlar & Rejalashtirish', icon: Megaphone, tone: 'sky' },
       { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent, tone: 'cyan' },
       { href: '/panel/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple' },

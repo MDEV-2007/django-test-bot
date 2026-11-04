@@ -33,6 +33,7 @@ urlpatterns = [
     # shablonlar va sahifa marshrutlari olib tashlandi, butun UI Next.js tomonida.
     path('api/auth/', include('accounts.api_urls')),
     path('api/v1/b2b/', include('b2b_ads.urls')),
+    path('api/v1/advertiser/', include('b2b_ads.advertiser_urls')),
     path('api/v1/system/', include('core.urls')),
     path('api/core/', include('core.urls')),
     path('api/dashboard/', include('dashboard.api_urls')),

@@ -434,9 +434,10 @@ def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float =
     payload.update({
         'center_id': campaign.id,
         'center_logo': payload['logo'],
-        'cta_text': "📞 Bepul darsga yozilish (1-dars BEPUL)",
+        'cta_text': campaign.cta_text or "📞 Bepul darsga yozilish (1-dars BEPUL)",
         'badge_text': campaign.offer_badge,
-        'banner_url': campaign.logo,
+        # Advertiser yuklagan banner bo'lsa — o'sha; aks holda eski xulq (logo).
+        'banner_url': campaign.banner_url or campaign.logo,
         'video_url': campaign.story_video_url,
         'subject': campaign.target_subject,
     })

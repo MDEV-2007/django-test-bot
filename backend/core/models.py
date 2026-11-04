@@ -353,6 +353,47 @@ class EducationCenter(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # --- Ads Manager (ads.ilmildizi.uz) advertiser hisobi ---------------------------
+    # Alohida "Advertiser" modeli yaratilmadi: reklama beruvchi — aynan shu markaz.
+    # Ruxsat = foydalanuvchi `owner` va status `approved` (Profile.role o'zgarmaydi,
+    # o'qituvchi yoki o'quvchi hisobi ham markaz egasi bo'lishi mumkin). Yangi ariza
+    # `pending` bo'ladi va faqat Super Admin tasdiqlaydi.
+    STATUS_CHOICES = [
+        ('pending', "Ko'rib chiqilmoqda"),
+        ('approved', 'Tasdiqlangan'),
+        ('rejected', 'Rad etilgan'),
+        ('suspended', "To'xtatilgan"),
+    ]
+    owner = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='education_centers', help_text="Ads Manager kabinetiga kira oladigan hisob",
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
+    contact_name = models.CharField(max_length=150, blank=True)
+    contact_email = models.EmailField(blank=True)
+    website = models.URLField(max_length=300, blank=True)
+    description = models.TextField(blank=True)
+    review_note = models.TextField(blank=True, help_text="Rad etish / to'xtatish sababi (advertiserga ko'rinadi)")
+    reviewed_by = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_centers')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    notify_new_leads = models.BooleanField(default=True, help_text="Yangi lid haqida Telegram xabari")
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    @property
+    def is_approved(self):
+        return self.status == 'approved'
+
+    def save(self, *args, **kwargs):
+        # `slug` noyob, lekin forma uni so'ramaydi: bo'sh slug bilan ikkinchi markaz
+        # yaratilganda UNIQUE xatosi bo'lmasligi uchun avtomatik to'ldiriladi.
+        if not self.slug:
+            import secrets
+            from django.utils.text import slugify
+            base = slugify(self.name)[:180] or 'center'
+            self.slug = f"{base}-{secrets.token_hex(3)}"
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "O'quv Markazi"
         verbose_name_plural = "O'quv Markazlari"

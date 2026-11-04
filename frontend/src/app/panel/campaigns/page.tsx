@@ -36,7 +36,7 @@ type CampaignItem = {
   telegram_webhook_or_chat_id?: string;
   is_active: boolean;
   leads_count: number;
-  status?: 'active' | 'paused' | 'scheduled' | 'ended' | 'exhausted';
+  status?: 'active' | 'paused' | 'scheduled' | 'ended' | 'exhausted' | 'draft' | 'pending_review' | 'rejected';
   max_leads?: number | null;
   ends_at?: string | null;
   // Faqat haqiqiy tracking. null — hisoblab bo'lmaydi (masalan narx modeli yo'q).
@@ -67,6 +67,9 @@ const CAMPAIGN_STATUS_LABEL: Record<string, string> = {
   scheduled: 'Rejalashtirilgan',
   ended: 'Muddati tugagan',
   exhausted: 'Lid limiti tugagan',
+  draft: 'Qoralama (advertiser)',
+  pending_review: "Moderatsiya kutilmoqda",
+  rejected: 'Rad etilgan',
 };
 
 function fmtPct(v: number | null | undefined) {

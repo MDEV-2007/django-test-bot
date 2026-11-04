@@ -4992,7 +4992,7 @@ def panel_campaigns_api(request):
     from django.db.models import Q
     from b2b_ads.services import campaign_metrics
 
-    campaigns_qs = EduCenterCampaign.objects.annotate(
+    campaigns_qs = EduCenterCampaign.objects.select_related('center').annotate(
         leads_count=Count('leads'),
         enrolled_count=Count('leads', filter=Q(leads__status='ENROLLED')),
     ).order_by('-created_at')
@@ -5018,6 +5018,12 @@ def panel_campaigns_api(request):
             'ends_at': c.ends_at.isoformat() if c.ends_at else None,
             'max_leads': c.max_leads,
             'leads_count': c.leads_count,
+            'review_status': c.review_status,
+            'review_note': c.review_note,
+            'center_id': c.center_id,
+            'advertiser': c.center.name if c.center_id else None,
+            'banner_url': c.banner_url,
+            'submitted_at': c.submitted_at.isoformat() if c.submitted_at else None,
             # Faqat haqiqiy tracking: impressions/clicks/CTR/leads/enrolled. Narx modeli
             # yo'q — spent/CPL null (UI "—" ko'rsatadi, soxta raqam emas).
             'metrics': campaign_metrics(c, c.leads_count, c.enrolled_count),
@@ -5028,6 +5034,7 @@ def panel_campaigns_api(request):
         'campaigns': campaigns_data,
         'total': len(campaigns_data),
         'active_count': sum(1 for c in campaigns_data if c['is_active']),
+        'pending_review_count': sum(1 for c in campaigns_data if c['review_status'] == 'pending_review'),
     })
 
 
@@ -5230,6 +5237,95 @@ def panel_lead_status_api(request, lead_id):
             changes={'status': [old_status, new_status]},
         )
     return Response({'success': True, 'id': lead.id, 'status': lead.status})
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_campaign_review_api(request, campaign_id):
+    """Advertiser kampaniyasini moderatsiya: approve | reject (sabab majburiy).
+    Tasdiqlangan kampaniya muddat / lid limiti / pause holatiga qarab avtomatik ko'rsatiladi."""
+    from b2b_ads.models import EduCenterCampaign
+
+    action = str(request.data.get('action') or '')
+    note = str(request.data.get('note') or '').strip()[:2000]
+    if action not in ('approve', 'reject'):
+        return Response({'error': "action: approve yoki reject."}, status=400)
+    if action == 'reject' and not note:
+        return Response({'error': "Rad etish sababini yozing (advertiserga ko'rinadi)."}, status=400)
+    with transaction.atomic():
+        campaign = get_object_or_404(EduCenterCampaign.objects.select_for_update(), id=campaign_id)
+        if campaign.review_status != 'pending_review':
+            return Response({'error': "Kampaniya ko'rib chiqish navbatida emas."}, status=409)
+        old = campaign.review_status
+        campaign.review_status = 'approved' if action == 'approve' else 'rejected'
+        campaign.review_note = '' if action == 'approve' else note
+        campaign.reviewed_at = timezone.now()
+        campaign.save(update_fields=['review_status', 'review_note', 'reviewed_at'])
+    _audit(request, 'update', 'EduCenterCampaign', campaign.pk, f"Moderatsiya: {campaign.title}",
+           {'review_status': [old, campaign.review_status], 'note': note})
+    return Response({'success': True, 'review_status': campaign.review_status})
+
+
+def _advertiser_row(center):
+    return {
+        'id': center.id,
+        'name': center.name,
+        'status': center.status,
+        'owner_username': center.owner.username if center.owner_id else None,
+        'contact_name': center.contact_name,
+        'contact_email': center.contact_email,
+        'phone': center.phone,
+        'city_or_region': center.city_or_region,
+        'website': center.website,
+        'description': center.description,
+        'telegram_username': center.telegram_username,
+        'review_note': center.review_note,
+        'campaigns_count': getattr(center, 'campaigns_total', 0),
+        'created_at': center.created_at.isoformat() if center.created_at else None,
+        'reviewed_at': center.reviewed_at.isoformat() if center.reviewed_at else None,
+    }
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def panel_advertisers_api(request):
+    """Ads Manager advertiserlari (owner bog'langan EducationCenter'lar) va arizalar."""
+    from core.models import EducationCenter
+    qs = (EducationCenter.objects.filter(owner__isnull=False).select_related('owner')
+          .annotate(campaigns_total=Count('ad_campaigns')).order_by('-created_at'))
+    status_filter = request.GET.get('status')
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    counts = dict(EducationCenter.objects.filter(owner__isnull=False)
+                  .values_list('status').annotate(n=Count('id')))
+    return Response({'advertisers': [_advertiser_row(c) for c in qs[:500]], 'status_counts': counts})
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_advertiser_review_api(request, center_id):
+    """approve | reject | suspend. Suspend — advertiser kabinetga kira olmaydi va uning
+    barcha kampaniyalari darhol ko'rsatilmaydi (live_campaigns center.status ni tekshiradi)."""
+    from core.models import EducationCenter
+
+    action = str(request.data.get('action') or '')
+    note = str(request.data.get('note') or '').strip()[:2000]
+    target = {'approve': 'approved', 'reject': 'rejected', 'suspend': 'suspended'}.get(action)
+    if target is None:
+        return Response({'error': "action: approve, reject yoki suspend."}, status=400)
+    if target in ('rejected', 'suspended') and not note:
+        return Response({'error': "Sababini yozing (advertiserga ko'rinadi)."}, status=400)
+    center = get_object_or_404(EducationCenter, id=center_id, owner__isnull=False)
+    old = center.status
+    center.status = target
+    center.review_note = '' if target == 'approved' else note
+    center.is_verified = target == 'approved'
+    center.reviewed_by = request.user
+    center.reviewed_at = timezone.now()
+    center.save(update_fields=['status', 'review_note', 'is_verified', 'reviewed_by', 'reviewed_at', 'updated_at'])
+    _audit(request, 'update', 'EducationCenter', center.pk, f"Advertiser: {center.name}",
+           {'status': [old, target], 'note': note})
+    return Response({'success': True, 'advertiser': _advertiser_row(center)})
 
 
 @api_view(['POST'])

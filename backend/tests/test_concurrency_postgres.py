@@ -107,6 +107,22 @@ class ConcurrencyTests(TransactionTestCase):
         self.assertEqual(errors, [])
         self.assertEqual(campaign.leads.count(), 2)
 
+    def test_parallel_ad_clicks_counted_once(self):
+        """Ads Manager: bir foydalanuvchining parallel CTA bosishlari — AdEvent UniqueConstraint
+        tufayli faqat bitta qator va counter faqat +1 (kesh emas, baza kafolatlaydi)."""
+        from django.core.cache import cache
+        from b2b_ads.models import AdEvent, EduCenterCampaign
+        cache.clear()
+        campaign = EduCenterCampaign.objects.create(center_name='M', title='K')
+        user, _ = make_user('par_click')
+        results, errors = run_parallel(lambda: self.client_for(user).post(
+            '/api/v1/b2b/track/', {'campaign_id': campaign.id, 'event': 'click'}, format='json').json()['counted'])
+        self.assertEqual(errors, [])
+        self.assertEqual(results.count(True), 1, results)
+        campaign.refresh_from_db()
+        self.assertEqual(campaign.clicks_count, 1)
+        self.assertEqual(AdEvent.objects.filter(campaign=campaign).count(), 1)
+
     def test_parallel_loop_finish_pays_once(self):
         from accounts.models import Profile
         from learning_loop.models import DailyLearningLoop

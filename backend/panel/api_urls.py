@@ -145,6 +145,9 @@ urlpatterns = [
     path('campaigns/leads/', api.panel_campaign_leads_api, name='panel_campaign_leads'),
     path('campaigns/leads/<int:lead_id>/status/', api.panel_lead_status_api, name='panel_lead_status'),
     path('campaigns/leads', api.panel_campaign_leads_api),
+    path('campaigns/<int:campaign_id>/review/', api.panel_campaign_review_api, name='panel_campaign_review'),
+    path('advertisers/', api.panel_advertisers_api, name='panel_advertisers'),
+    path('advertisers/<int:center_id>/review/', api.panel_advertiser_review_api, name='panel_advertiser_review'),
 
     # BMB Real Imtihon Zali (Stress Mode) Super Admin
     path('stress-exam/', api.stress_exam_admin_api, name='stress_exam_admin'),
