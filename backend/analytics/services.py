@@ -84,6 +84,69 @@ def compute_mastery(profile):
     }
 
 
+SPEED_FAST_SEC = 30    # savolga o'rtacha 30s va tezroq -> 100
+SPEED_SLOW_SEC = 150   # 150s va sekinroq -> 0
+
+
+def compute_skill_radar(profile, mastery=None):
+    """6 o'qli radar — yagona manba (profil, analitika, ota-ona radari).
+
+    Har o'q: {'value': 0-100 yoki None, 'basis': qanday hisoblangani, 'is_proxy': bool}.
+    `value=None` — ma'lumot yo'q (soxta raqam ko'rsatilmaydi). Proxy o'qlar (bevosita
+    o'lchanmaydigan) shunday belgilanadi va UI ularni "taxminiy" deb ko'rsatadi.
+    """
+    mastery = mastery or compute_mastery(profile)
+    agg = _answer_qs(profile).aggregate(
+        total=Count('id'),
+        avg_time=Avg('time_spent_sec', filter=Q(time_spent_sec__gt=0)),
+    )
+    total = agg['total'] or 0
+    # Aniqlik — dashboard bilan bir xil: yakunlangan attemptlardagi to'g'ri/(to'g'ri+xato),
+    # o'tkazib yuborilgan savollar hisobga olinmaydi.
+    att = Attempt.objects.filter(profile=profile, is_completed=True).aggregate(
+        correct=Sum('correct_answers'), wrong=Sum('wrong_answers'))
+    graded = (att['correct'] or 0) + (att['wrong'] or 0)
+
+    subjects = mastery['subjects']
+    subject_value = round(sum(s['mastery'] for s in subjects) / len(subjects)) if subjects else None
+    accuracy = round((att['correct'] or 0) / graded * 100) if graded else None
+
+    speed = None
+    if agg['avg_time']:
+        span = SPEED_SLOW_SEC - SPEED_FAST_SEC
+        speed = round(max(0, min(100, (SPEED_SLOW_SEC - agg['avg_time']) / span * 100)))
+
+    writing = compute_cefr_skills(profile)['writing']
+    writing_value = round(writing['avg_score'] / 5 * 100) if writing['avg_score'] is not None else None
+
+    has_tests = total > 0
+    elo = getattr(profile, 'elo_rating', None)
+    logic = round(max(0, min(100, (elo - 500) / 1500 * 100))) if (elo and has_tests) else None
+    consistency = min(100, (profile.streak or 0) * 100 // 30)
+
+    axes = {
+        'subject_mastery': {'value': subject_value, 'is_proxy': False,
+                            'basis': "Fanlar bo'yicha to'g'ri javoblar foizi (o'rtacha)"},
+        'accuracy': {'value': accuracy, 'is_proxy': False,
+                     'basis': "Barcha yakunlangan testlardagi to'g'ri / (to'g'ri + xato)"},
+        'speed': {'value': speed, 'is_proxy': False,
+                  'basis': f"Savolga o'rtacha sarflangan vaqt ({SPEED_FAST_SEC}s=100, {SPEED_SLOW_SEC}s=0)"},
+        'writing': {'value': writing_value, 'is_proxy': False,
+                    'basis': "AI baholagan CEFR Writing o'rtacha bali (0-5)"},
+        'logic': {'value': logic, 'is_proxy': True,
+                  'basis': "Taxminiy: 1v1 Arena ELO reytingi asosida (500=0, 2000=100)"},
+        'consistency': {'value': consistency, 'is_proxy': True,
+                        'basis': "Taxminiy: uzluksiz faollik (streak) kunlari, 30 kun = 100"},
+    }
+    measured = [a['value'] for a in axes.values() if a['value'] is not None]
+    return {
+        'axes': axes,
+        'overall': round(sum(measured) / len(measured)) if measured else None,
+        'answered': total,
+        'has_data': has_tests,
+    }
+
+
 def compute_cefr_skills(profile):
     """CEFR ko'nikmalari kesimi: Listening / Reading / Writing bo'yicha o'zlashtirish.
 
@@ -255,6 +318,8 @@ def dashboard_data(profile, use_cache=True):
         'monthly': monthly,
         'subject_dist': subject_dist,
         'mastery': mastery,
+        # Radar (profil + analitika uchun yagona manba; proxy o'qlar belgilangan).
+        'skill_radar': compute_skill_radar(profile, mastery),
         # CEFR ko'nikmalari — faqat CEFR imtihonini yechganlarda to'ladi.
         'cefr': compute_cefr_skills(profile),
         'recent': recent,

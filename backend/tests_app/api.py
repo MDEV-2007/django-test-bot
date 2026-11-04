@@ -1153,7 +1153,9 @@ def revision_api(request):
         is_text = q.question_type in Question.TEXT_INPUT_TYPES
         deck.append({
             'item_id': item.id, 'question_id': q.id, 'body': q.body, 'type': q.question_type,
-            'image': q.image.url if q.image else (q.image_url or ''), 'explanation': q.explanation or '',
+            # `explanation` bu yerda yo'q: u odatda to'g'ri javobni aytadi — faqat
+            # /revision/<id>/check/ javobidan keyin qaytadi.
+            'image': q.image.url if q.image else (q.image_url or ''),
             'topic': q.topic.title if q.topic else '', 'times_wrong': item.times_wrong,
             'inline': is_choice or is_text,
             # 'choice' — variantlardan tanlanadi, 'text' — javob yoziladi (yoki

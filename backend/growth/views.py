@@ -208,11 +208,11 @@ class AdaptiveOnboardingAPIView(APIView):
             'session_id': session.id if session else None,
             'total_questions': len(payload),
             'questions': payload,
+            # Blitz mukofot bermaydi: ilgari bu yerda hamma uchun bir xil "B+ (164.5 ball)"
+            # va hech qachon berilmaydigan "+100 tanga" qaytarilardi.
             'tramplin_bonus': {
-                'badge': "B+ Potensial (164.5 ball)",
-                'reward_coins': 100,
                 'next_step_route': "/sprint",
-                'cta_text': "🚀 A darajaga chiqish: 3 daqiqalik 2-bosqichni boshlash (+100 Tanga Bonus)"
+                'cta_text': "🚀 Keyingi qadam: 3 daqiqalik Fokus Sprint",
             }
         })
 

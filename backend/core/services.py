@@ -460,60 +460,18 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
 
 
 def calculate_student_radar(profile: Profile):
-    """O'quvchining 6 burchakli Spider-Radar analitikasi (FIFA / PUBG uslubida):
-    1. Fan Bilimi (Subject Mastery)
-    2. Mantiq & Tahlil (Logic)
-    3. Tezlik (Speed)
-    4. Aniqlik (Accuracy)
-    5. Esse & Analiz (Writing)
-    6. Barqarorlik (Consistency / Streak)
+    """O'quvchining 6 burchakli radari — analytics.services.compute_skill_radar dan.
+
+    Ilgari bu yerda alohida formula bor edi: "Tezlik" darajadan, "Esse" XP'dan olinardi,
+    yangi o'quvchiga esa soxta 55/60/45 qiymatlar qaytarilardi; "Aniqlik" esa mavjud
+    bo'lmagan `total_questions` maydoni sabab 100% dan oshib ketardi. Endi profil, analitika
+    va ota-ona radari bitta manbadan foydalanadi. Ma'lumot yo'q o'q — None.
     """
-    from tests_app.models import Attempt
+    from analytics.services import compute_skill_radar
 
-    completed_attempts = Attempt.objects.filter(profile=profile, is_completed=True).order_by('-completed_at')[:20]
-
-    if not completed_attempts.exists():
-        # Yangi foydalanuvchi uchun boshlang'ich muvozanatli qiymatlar
-        return {
-            'subject_mastery': 55,
-            'logic': 50,
-            'speed': 60,
-            'accuracy': 52,
-            'writing': 45,
-            'consistency': min(100, max(20, profile.streak * 15)),
-            'overall_power': 52,
-        }
-
-    # 1. Fan Bilimi: o'rtacha ball
-    avg_score = completed_attempts.aggregate(avg=Avg('score'))['avg'] or 50.0
-    subject_mastery = round(min(100, max(20, avg_score)))
-
-    # 2. Aniqlik: to'g'ri javoblar foizi
-    total_correct = sum(getattr(a, 'correct_answers', 0) for a in completed_attempts)
-    total_questions = sum(getattr(a, 'total_questions', 1) for a in completed_attempts)
-    accuracy = round((total_correct / max(1, total_questions)) * 100)
-
-    # 3. Tezlik: o'rtacha ball va vaqt nisbati
-    speed = min(98, max(30, 60 + (profile.level * 2)))
-
-    # 4. Mantiq & Tahlil: ELO ratingga asoslangan
-    elo = getattr(profile, 'elo_rating', 1000)
-    logic = round(min(99, max(35, (elo / 1500) * 100)))
-
-    # 5. Esse & Analiz
-    writing = round(min(95, max(30, 45 + (profile.xp // 100))))
-
-    # 6. Barqarorlik
-    consistency = round(min(100, max(25, profile.streak * 8 + 35)))
-
-    overall = round((subject_mastery + logic + speed + accuracy + writing + consistency) / 6)
-
-    return {
-        'subject_mastery': subject_mastery,
-        'logic': logic,
-        'speed': speed,
-        'accuracy': accuracy,
-        'writing': writing,
-        'consistency': consistency,
-        'overall_power': overall,
-    }
+    radar = compute_skill_radar(profile)
+    data = {key: axis['value'] for key, axis in radar['axes'].items()}
+    data['overall_power'] = radar['overall']
+    data['axes'] = radar['axes']
+    data['has_data'] = radar['has_data']
+    return data

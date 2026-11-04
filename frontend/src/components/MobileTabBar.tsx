@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
-  Zap,
+  Brain,
   Landmark,
+  MessageCircle,
   Swords,
   User,
 } from 'lucide-react';
@@ -35,6 +36,10 @@ type TabItem = {
   isCentral?: boolean;
 };
 
+const STUDY_PREFIXES = ['/study', '/learning', '/library', '/mentor', '/flashcards', '/games',
+                        '/tests/revision', '/tests/mistakes'];
+const TESTS_PREFIXES = ['/tests', '/sprint', '/dtm-test', '/milliy-sertifikat', '/onboarding'];
+
 interface MobileTabBarProps {
   theme?: 'dark' | 'light';
 }
@@ -53,7 +58,10 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   if (pathname.startsWith('/teacher') || pathname.startsWith('/panel')) return null;
 
-  // 5 ta asosiy tab: Bosh sahifa, Sprint, Sinovlar (markaziy), Arena, Profil (pastda alohida).
+  // 6 ta asosiy tab (rejadagi student navigatsiyasi): Bosh sahifa, O'rganish, Sinovlar
+  // (markaziy: Standard / Blitz / Stress / Sprint), Hamjamiyat, Arena, Profil (pastda).
+  // Hech bir sahifa o'chirilmagan — Sprint, Revision, Flashcards, Reels, Reyting va
+  // Analitika tegishli tab ostida faol bo'ladi (matchPrefixes) va Sidebar'da ichki havola.
   const tabs: TabItem[] = [
     {
       href: '/dashboard',
@@ -66,22 +74,21 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       activeLabelText: 'text-[var(--brand-text)]',
     },
     {
-      href: '/sprint',
-      label: t('Sprint'),
-      icon: Zap,
-      matchPrefixes: ['/sprint'],
-      featureKey: 'sprint',
-      activeBg: 'bg-gradient-to-b from-[#FF9500] to-[#FF3B30]',
+      href: '/study',
+      label: t("O'rganish"),
+      icon: Brain,
+      matchPrefixes: STUDY_PREFIXES,
+      featureKey: 'learning',
+      activeBg: 'bg-gradient-to-b from-[#FF9500] to-[#FF7A00]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,149,0,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
       inactiveIconText: 'text-[#FF9500]',
-      activeLabelText: 'text-[#FF9500] dark:text-[#FF9F0A]',
-      badge: 'HOT',
+      activeLabelText: 'text-[#C93400] dark:text-[#FF9F0A]',
     },
     {
       href: '/tests',
       label: t('Sinovlar'),
       icon: Landmark,
-      matchPrefixes: ['/tests', '/dtm-test', '/milliy-sertifikat'],
+      matchPrefixes: TESTS_PREFIXES,
       api: '/api/tests/',
       featureKey: 'tests',
       isCentral: true,
@@ -91,10 +98,21 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       activeLabelText: 'text-[#5856D6] dark:text-[#9D9BFF]',
     },
     {
+      href: '/feed',
+      label: t('Hamjamiyat'),
+      icon: MessageCircle,
+      matchPrefixes: ['/feed', '/reels'],
+      api: '/api/learning/feed/',
+      activeBg: 'bg-gradient-to-b from-[#34C759] to-[#248A3D]',
+      activeShadow: 'shadow-[0_4px_12px_rgba(52,199,89,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
+      inactiveIconText: 'text-[#34C759]',
+      activeLabelText: 'text-[#248A3D] dark:text-[#30D158]',
+    },
+    {
       href: '/battles',
       label: t('Arena'),
       icon: Swords,
-      matchPrefixes: ['/battles'],
+      matchPrefixes: ['/battles', '/leaderboard'],
       featureKey: 'battles',
       activeBg: 'bg-gradient-to-b from-[#FF5E7E] to-[#FF2D55]',
       activeShadow: 'shadow-[0_4px_12px_rgba(255,45,85,0.42),inset_0_1px_0_rgba(255,255,255,0.38)]',
@@ -105,10 +123,13 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   const visibleTabs = tabs.filter((t) => !t.featureKey || isEnabled(t.featureKey));
 
-  const isActive = (href: string, prefixes?: string[]) =>
-    pathname === href || (prefixes?.some((p) => pathname.startsWith(p)) ?? false);
+  const isActive = (href: string, prefixes?: string[]) => {
+    // Xatolar ustida ishlash /tests/* ostida bo'lsa ham O'rganish bo'limiga tegishli.
+    if (href === '/tests' && STUDY_PREFIXES.some((p) => pathname.startsWith(p))) return false;
+    return pathname === href || (prefixes?.some((p) => pathname.startsWith(p)) ?? false);
+  };
 
-  const isProfileActive = ['/profile', '/shop', '/premium'].some((p) => pathname.startsWith(p));
+  const isProfileActive = ['/profile', '/shop', '/premium', '/analytics'].some((p) => pathname.startsWith(p));
 
   return (
     <div className="ilm-mobile-tabbar fixed inset-x-0 bottom-2.5 z-40 flex justify-center px-2.5 sm:px-5 lg:hidden pointer-events-none select-none pb-[env(safe-area-inset-bottom,0px)]">
@@ -197,7 +218,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
           );
         })}
 
-        {/* 5-Tab: Profil & Eco-Daraxt */}
+        {/* 6-Tab: Profil (statistika, analitika, inventar) */}
         <Link
           href="/profile"
           onClick={() => tgHaptic('select')}

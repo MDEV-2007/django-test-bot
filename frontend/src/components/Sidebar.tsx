@@ -57,7 +57,7 @@ interface NavItem {
   vip?: boolean;
   highlight?: boolean;
   teacherOrAdminOnly?: boolean;
-  children?: { href: string; label: string }[];
+  children?: { href: string; label: string; featureKey?: string }[];
 }
 
 interface NavGroup {
@@ -65,38 +65,65 @@ interface NavGroup {
   items: NavItem[];
 }
 
+// Student navigatsiyasi: 6 ta asosiy bo'lim. Ilgari 13 ta teng darajali havola bor edi;
+// endi har bir sahifa (hech biri o'chirilmagan) tegishli bo'limning ichki havolasi —
+// bo'lim faol bo'lganda ostida ko'rinadi.
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Asosiy',
     items: [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard, badge: null, tone: 'sky', api: '/api/dashboard/home/' },
-      { href: '/sprint', label: 'Jonli Sprint', icon: Zap, badge: 'HOT', glow: true, tone: 'amber', featureKey: 'sprint', matchPrefixes: ['/sprint'] },
       {
-        href: '/tests', label: 'Sinov Testlari', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests',
-        matchPrefixes: ['/dtm-test', '/milliy-sertifikat'],
+        href: '/tests', label: 'Sinovlar', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests',
+        matchPrefixes: ['/sprint', '/dtm-test', '/milliy-sertifikat', '/onboarding'],
+        children: [
+          { href: '/tests?mode=standard', label: 'Standart testlar' },
+          { href: '/tests?mode=blitz', label: '7-savol Blitz' },
+          { href: '/tests?mode=stress', label: 'BMB Stress zali' },
+          { href: '/sprint', label: 'Fokus Sprint', featureKey: 'sprint' },
+          { href: '/tests/history', label: 'Natijalar tarixi' },
+        ],
       },
       {
-        href: '/study', label: "O'rganish & Shpargalka", icon: Brain, badge: null, tone: 'amber', featureKey: 'learning',
-        matchPrefixes: ['/study', '/learning', '/library', '/mentor'],
+        href: '/study', label: "O'rganish", icon: Brain, badge: null, tone: 'amber', featureKey: 'learning',
+        matchPrefixes: ['/study', '/learning', '/library', '/mentor', '/flashcards', '/games', '/tests/revision', '/tests/mistakes'],
+        children: [
+          { href: '/study', label: 'Dars va shpargalka' },
+          { href: '/study?tab=focus', label: 'Fokus xonasi' },
+          { href: '/flashcards', label: 'Flashcards', featureKey: 'flashcards' },
+          { href: '/tests/revision', label: 'Xatolar ustida ishlash' },
+          { href: '/library', label: 'Kutubxona' },
+        ],
       },
-      { href: '/feed', label: 'Hamjamiyat', icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed'], api: '/api/learning/feed/' },
+      {
+        href: '/feed', label: 'Hamjamiyat', icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed', '/reels'],
+        api: '/api/learning/feed/',
+        children: [
+          { href: '/feed', label: 'Lenta' },
+          { href: '/reels', label: 'Bilim Reels', featureKey: 'reels' },
+        ],
+      },
+      {
+        href: '/battles', label: 'Arena', icon: Swords, badge: 'Live', tone: 'rose', featureKey: 'battles',
+        matchPrefixes: ['/battles', '/leaderboard'],
+        children: [
+          { href: '/battles', label: '1v1 Arena' },
+          { href: '/leaderboard', label: 'Liga & Reyting', featureKey: 'leaderboard' },
+        ],
+      },
+      {
+        href: '/profile', label: 'Profil', icon: User, badge: null, tone: 'sky', matchPrefixes: ['/profile', '/analytics', '/shop'],
+        children: [
+          { href: '/profile', label: 'Profilim' },
+          { href: '/analytics', label: "O'sish analitikasi" },
+          { href: '/shop', label: "Do'kon" },
+        ],
+      },
     ],
   },
   {
-    label: 'Musobaqa & Xotira',
+    label: 'Obuna',
     items: [
-      { href: '/battles', label: '1v1 Arena', icon: Swords, badge: 'Live', tone: 'rose', featureKey: 'battles', matchPrefixes: ['/battles'] },
-      { href: '/reels', label: 'Bilim Reels', icon: Film, badge: null, tone: 'rose', featureKey: 'reels', matchPrefixes: ['/reels'] },
-      { href: '/flashcards', label: 'Flashcards', icon: Layers, badge: null, tone: 'purple', featureKey: 'flashcards', matchPrefixes: ['/flashcards'] },
-      { href: '/tests/revision', label: 'Xatolar ustida ishlash', icon: RotateCcw, badge: null, tone: 'amber', matchPrefixes: ['/tests/revision', '/tests/mistakes'] },
-      { href: '/leaderboard', label: 'Liga & Reyting', icon: Trophy, badge: null, tone: 'amber', featureKey: 'leaderboard', matchPrefixes: ['/leaderboard'] },
-    ],
-  },
-  {
-    label: 'Shaxsiy',
-    items: [
-      { href: '/profile', label: 'Profilim', icon: User, badge: null, tone: 'sky', matchPrefixes: ['/profile'] },
-      { href: '/analytics', label: "O'sish Analitikasi", icon: BarChart3, badge: null, tone: 'emerald', matchPrefixes: ['/analytics'] },
       { href: '/premium', label: 'VIP Obuna', icon: Crown, badge: 'VIP', vip: true, tone: 'gold', matchPrefixes: ['/premium'] },
     ],
   },
@@ -126,6 +153,10 @@ export default function Sidebar({
   if (isTeacher || isAdmin) return null;
 
   const isActive = (item: NavItem) => {
+    // Xatolar daftari /tests/* ostida, lekin O'rganish bo'limiga tegishli.
+    if (item.href === '/tests' && (pathname.startsWith('/tests/revision') || pathname.startsWith('/tests/mistakes'))) {
+      return false;
+    }
     if (pathname === item.href || (item.matchPrefixes?.some((p) => pathname.startsWith(p)) ?? false)) return true;
     // "Sinov Testlari" /tests/* ostida faol, lekin Xatolar daftari o'z bandiga ega.
     return item.href === '/tests'
@@ -275,14 +306,14 @@ export default function Sidebar({
                       </Link>
                         {active && item.children && (
                           <div className="ml-[38px] mt-0.5 mb-1 space-y-0.5 border-l border-border pl-2.5">
-                            {item.children.map((c) => (
+                            {item.children.filter((c) => !c.featureKey || isEnabled(c.featureKey)).map((c) => (
                               <Link
                                 key={c.href}
                                 href={c.href}
                                 onClick={onMobileClose}
                                 className={cn(
                                   'block rounded-md px-2 py-1.5 text-[13px] transition-colors',
-                                  pathname === c.href || pathname.startsWith(c.href + '/')
+                                  !c.href.includes('?') && (pathname === c.href || (c.href !== item.href && pathname.startsWith(c.href + '/')))
                                     ? 'font-semibold text-primary'
                                     : 'text-muted-foreground hover:text-foreground'
                                 )}

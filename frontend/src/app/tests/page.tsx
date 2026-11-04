@@ -639,7 +639,7 @@ export default function TestsPage() {
         {/* ========================================================================= */}
         <div className="space-y-3.5">
           {/* Segmented Mode Switcher (Fully responsive grid) */}
-          <div className="w-full max-w-xl grid grid-cols-3 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
+          <div className="w-full max-w-2xl grid grid-cols-4 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
             <button
               type="button"
               onClick={() => handleModeChange('standard')}
@@ -676,7 +676,7 @@ export default function TestsPage() {
                 'hidden md:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
                 heroMode === 'blitz' ? 'bg-blue-500/15 text-blue-500' : 'bg-muted text-muted-foreground'
               )}>
-                +100 🪙
+                7 savol
               </span>
             </button>
 
@@ -699,6 +699,15 @@ export default function TestsPage() {
                 🔥 DTM
               </span>
             </button>
+
+            {/* Fokus Sprint — 4-rejim (alohida sahifa). Mobil pastki menyuda endi Sinovlar ichida. */}
+            <Link
+              href="/sprint"
+              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1 sm:px-3 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center text-muted-foreground hover:text-foreground hover:bg-card/40"
+            >
+              <Zap className="size-3.5 sm:size-4 shrink-0 text-amber-500" />
+              <span className="truncate">{t("Sprint")}</span>
+            </Link>
           </div>
 
           {/* Active Mode Card with Smooth Transition */}
@@ -739,7 +748,7 @@ export default function TestsPage() {
                       Qaysi darajadasiz? 7 ta savolda B+ potensialini aniqlang!
                     </h3>
                     <p className="text-xs sm:text-sm text-blue-100 leading-relaxed">
-                      45 ta savollik to&apos;liq testga kirishdan oldin 7 ta adaptiv savoldan o&apos;ting, kuchli va zaif mavzularingizni ko&apos;ring hamda <strong>+100 Tanga bonus</strong> oling!
+                      45 ta savollik to&apos;liq testga kirishdan oldin 7 ta adaptiv savoldan o&apos;ting, kuchli va zaif mavzularingizni bepul aniqlang.
                     </p>
                   </div>
                   <Button asChild size="lg" className="rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold shadow-md shrink-0 h-11 px-6 cursor-pointer">
@@ -959,7 +968,7 @@ export default function TestsPage() {
               <div className="p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs">
                   <Sparkles className="size-4 text-amber-400" />
-                  <span>+100 🪙 Tanga</span>
+                  <span>Bepul diagnostika</span>
                 </div>
                 <p className="text-[12px] text-muted-foreground leading-snug">
                   Har bir to&apos;liq yakunlangan blits uchun kafolatlangan dofamin bonusi.
@@ -995,7 +1004,7 @@ export default function TestsPage() {
                   <span>Fanlar bo&apos;yicha 7-Savol Blitslar</span>
                 </h2>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Qaysi fandan blits topshirmoqchisiz? Fanni tanlang va +100 tanga mukofotini oling.
+                  Qaysi fandan blits topshirmoqchisiz? Fanni tanlang va zaif mavzularingizni aniqlang.
                 </p>
               </div>
               <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-500 font-mono text-xs font-bold">
@@ -1036,7 +1045,7 @@ export default function TestsPage() {
                             ⚡ 7 savol
                           </Badge>
                           <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[12px] font-bold">
-                            +100 🪙 Tanga
+                            7 savol · bepul
                           </Badge>
                         </div>
                       </div>
@@ -1063,7 +1072,7 @@ export default function TestsPage() {
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Trophy className="size-3 text-amber-500" /> Sovrin:
                           </span>
-                          <span className="text-amber-500 font-mono font-bold">+100 🪙 & +50 XP</span>
+                          <span className="text-amber-500 font-mono font-bold">Diagnostika (mukofotsiz)</span>
                         </div>
                       </div>
                     </div>
@@ -1099,10 +1108,7 @@ export default function TestsPage() {
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs">
-                      Sovrin: +150 🪙 Tanga
-                    </Badge>
-                    <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-xs">
-                      +100 XP
+                      Bepul diagnostika
                     </Badge>
                   </div>
                 </div>

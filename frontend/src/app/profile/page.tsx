@@ -20,7 +20,7 @@ import { useAuthStore, type Profile, type Cosmetics } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import { cn } from '@/lib/utils';
 import KnowledgeTree from '@/components/student/KnowledgeTree';
-import StudentSpiderRadar, { type RadarStats } from '@/components/student/StudentSpiderRadar';
+import StudentSpiderRadar, { type SkillRadar } from '@/components/student/StudentSpiderRadar';
 import { AudioToggle, ThemeToggle } from '@/components/SettingsToggles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -85,6 +85,7 @@ type AnalyticsDashboard = {
     writing: { reviewed_count: number; avg_score: number | null; level: string };
     has_data: boolean;
   };
+  skill_radar?: SkillRadar;
   mastery: {
     subjects: { id?: number; name: string; mastery: number; color: string; answered?: number }[];
     topics: { id: number; title: string; mastery: number; answered: number }[];
@@ -165,7 +166,7 @@ export default function ProfilePage() {
   const { data: postsData, refresh: refreshPosts } = useApiQuery<{ posts: UserPostItem[]; total: number }>(
     access ? '/api/learning/feed/?mine=1' : null
   );
-  const { data: analyticsData } = useApiQuery<AnalyticsDashboard>(access ? '/api/analytics/' : null);
+  const { data: analyticsData, error: analyticsError } = useApiQuery<AnalyticsDashboard>(access ? '/api/analytics/' : null);
 
   const [equipBusy, setEquipBusy] = useState<string | null>(null);
   const [inventoryTab, setInventoryTab] = useState<string>('all');
@@ -198,43 +199,14 @@ export default function ProfilePage() {
   }, [data]);
 
   const streak = typeof data?.profile?.streak === 'number' ? data.profile.streak : 0;
-  const radarStats: RadarStats = useMemo(() => {
-    if (!analyticsData || typeof analyticsData !== 'object') {
-      return {
-        subject_mastery: 78,
-        logic: 72,
-        speed: 85,
-        accuracy: 80,
-        writing: 65,
-        consistency: Math.min(100, Math.max(30, streak * 10)),
-        overall_power: 78,
-      };
-    }
-
-    const subjects = Array.isArray(analyticsData.mastery?.subjects) ? analyticsData.mastery.subjects : [];
-    const avgSubMastery = subjects.length
-      ? Math.round(subjects.reduce((sum, s) => sum + (Number(s?.mastery) || 0), 0) / subjects.length)
-      : Number(analyticsData.accuracy) || 75;
-
-    const consistency = Math.min(100, Math.max(35, streak * 12));
-    const accuracy = Number(analyticsData.accuracy) || 70;
-    const logic = Number(analyticsData.avg_score) || 72;
-    const speed = Number(analyticsData.time_minutes) > 0 ? 85 : 75;
-    const writingScore = Number(analyticsData.cefr?.writing?.avg_score);
-    const writing = writingScore > 0 ? Math.round((writingScore / 5) * 100) : 65;
-
-    const ovr = Math.round((avgSubMastery + consistency + accuracy + logic + speed + writing) / 6);
-
-    return {
-      subject_mastery: avgSubMastery,
-      logic,
-      speed,
-      accuracy,
-      writing,
-      consistency,
-      overall_power: ovr,
-    };
-  }, [analyticsData, streak]);
+  // Radar — /api/analytics/ dagi `skill_radar` (Analytics sahifasi bilan bir manba).
+  // Ilgari bu yerda yuklanish paytida va ma'lumot yo'q o'qlarda soxta 78/72/85 qiymatlar
+  // ko'rsatilardi, "Tezlik" esa vaqtdan qat'i nazar 85 edi.
+  const skillRadar: SkillRadar | null | undefined = analyticsError
+    ? null
+    : analyticsData
+    ? analyticsData.skill_radar ?? null
+    : undefined;
 
   async function handleToggleEquip(slug: string, currentlyEquipped: boolean, name: string) {
     setEquipBusy(slug);
@@ -1053,7 +1025,7 @@ export default function ProfilePage() {
 
                 {/* 6 burchakli Radar-Analitika (Spider Chart) — Haqiqiy statistika bilan */}
                 <div className="mt-6 pt-6 border-t border-border/60">
-                  <StudentSpiderRadar stats={radarStats} />
+                  <StudentSpiderRadar radar={skillRadar} />
                 </div>
               </div>
 

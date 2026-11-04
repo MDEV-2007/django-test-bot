@@ -29,6 +29,7 @@ import { celebrate } from '@/lib/confetti';
 import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 import { useTransliterate } from '@/lib/transliterate';
+import { useApiQuery } from '@/lib/api-cache';
 
 // Ambient Sound Presets
 type AmbientSound = {
@@ -53,7 +54,6 @@ type StudyMission = {
   topic: string;
   icon: any;
   durationMinutes: number;
-  xpReward: number;
   tasks: {
     id: string;
     label: string;
@@ -62,61 +62,70 @@ type StudyMission = {
     current?: number;
     total?: number;
   }[];
+  /** Tavsiya sababi — faqat haqiqiy natijalardan yasalgan matn. */
   aiReason: string;
-  currentMastery: number;
-  targetMastery: number;
+  /** Fan bo'yicha haqiqiy o'zlashtirish (yakunlangan testlardan); null — ma'lumot yo'q. */
+  currentMastery: number | null;
+  answered: number;
 };
 
-const PRESET_MISSIONS: StudyMission[] = [
-  {
-    id: 'bio-cell',
-    subject: 'Biologiya',
-    topic: 'Hujayra va uning tuzilishi',
-    icon: Dna,
-    durationMinutes: 25,
-    xpReward: 75,
-    currentMastery: 64,
-    targetMastery: 67,
-    aiReason: 'Bugun Biologiyadan 64% mastery\'dasan. Kecha "Hujayra membranasi" savollarida qiynalgansan. Bugungi fokus uchun shu mavzuni tayyorladim.',
-    tasks: [
-      { id: 't1', label: '10 min mavzu o\'rganish', type: 'reading', completed: false },
-      { id: 't2', label: '10 ta savol yechish', type: 'questions', completed: false, current: 0, total: 10 },
-      { id: 't3', label: 'Flashcard takrorlash', type: 'flashcard', completed: false, current: 0, total: 5 },
-    ],
-  },
-  {
-    id: 'hist-temur',
-    subject: 'Tarix',
-    topic: 'Amir Temur davlati va harbiy yurishlari',
-    icon: BookOpen,
-    durationMinutes: 25,
-    xpReward: 75,
-    currentMastery: 78,
-    targetMastery: 82,
-    aiReason: 'Tarixdan 78% o\'zlashtirishdasan. Temuriylar davri xronologiyasini mustahkamlash uchun ajoyib fursat.',
-    tasks: [
-      { id: 'h1', label: '10 min konspekt tahlili', type: 'reading', completed: false },
-      { id: 'h2', label: '10 ta test savolini yechish', type: 'questions', completed: false, current: 0, total: 10 },
-      { id: 'h3', label: 'Sanalar flashcardini ko\'rish', type: 'flashcard', completed: false, current: 0, total: 5 },
-    ],
-  },
-  {
-    id: 'math-quad',
-    subject: 'Matematika',
-    topic: 'Kvadrat tenglamalar va Viyet teoremasi',
-    icon: Target,
-    durationMinutes: 25,
-    xpReward: 75,
-    currentMastery: 71,
-    targetMastery: 75,
-    aiReason: 'Matematika mastery darajang 71%. Viyet formulalarida tezlikni oshirish bugungi fokus vazifang.',
-    tasks: [
-      { id: 'm1', label: 'Formulalar tahlili (8 min)', type: 'reading', completed: false },
-      { id: 'm2', label: '10 ta amaliy mashq yechish', type: 'questions', completed: false, current: 0, total: 10 },
-      { id: 'm3', label: 'Tezkor hisoblash kartasi', type: 'flashcard', completed: false, current: 0, total: 5 },
-    ],
-  },
-];
+type MasteryResponse = {
+  mastery?: {
+    subjects: { id: number; name: string; mastery: number; answered: number }[];
+    topics: { id: number; title: string; mastery: number; answered: number }[];
+    weak: string[];
+  };
+};
+
+const MISSION_ICONS: Record<string, any> = { Biologiya: Dna, Tarix: BookOpen, Matematika: Target };
+
+function missionTasks(prefix: string): StudyMission['tasks'] {
+  return [
+    { id: `${prefix}-1`, label: "10 min mavzu o'rganish", type: 'reading', completed: false },
+    { id: `${prefix}-2`, label: '10 ta savol yechish', type: 'questions', completed: false, current: 0, total: 10 },
+    { id: `${prefix}-3`, label: 'Flashcard takrorlash', type: 'flashcard', completed: false, current: 0, total: 5 },
+  ];
+}
+
+// Natija yo'q (yoki yuklanmagan) holatdagi erkin fokus sessiyasi. Ilgari bu yerda
+// "Biologiya 64%", "kecha Hujayra membranasida qiynalgansan" kabi soxta tavsiyalar
+// hamma o'quvchiga bir xil ko'rsatilardi.
+const FREE_FOCUS_MISSION: StudyMission = {
+  id: 'free-focus',
+  subject: 'Erkin fokus',
+  topic: "O'zingiz tanlagan mavzu",
+  icon: Brain,
+  durationMinutes: 25,
+  aiReason: "Hali yakunlangan test natijangiz yo'q. Bitta test yeching — tavsiyalar haqiqiy natijalaringiz asosida tuziladi.",
+  currentMastery: null,
+  answered: 0,
+  tasks: missionTasks('free'),
+};
+
+/** Eng past o'zlashtirilgan 3 ta fan — /api/analytics/ dagi haqiqiy mastery'dan. */
+function buildMissions(data: MasteryResponse | null): StudyMission[] {
+  const subjects = data?.mastery?.subjects ?? [];
+  if (!subjects.length) return [];
+  const weakTopic = data?.mastery?.topics
+    ?.filter((t) => t.answered > 0)
+    .sort((x, y) => x.mastery - y.mastery)[0];
+  return [...subjects]
+    .sort((x, y) => x.mastery - y.mastery)
+    .slice(0, 3)
+    .map((s, idx) => ({
+      id: `subject-${s.id}`,
+      subject: s.name,
+      topic: idx === 0 && weakTopic ? weakTopic.title : `${s.name}: takrorlash`,
+      icon: MISSION_ICONS[s.name] ?? BookOpen,
+      durationMinutes: 25,
+      aiReason:
+        `${s.name} fanidan o'zlashtirishingiz ${s.mastery}% (${s.answered} ta javob asosida).` +
+        (idx === 0 && weakTopic ? ` Eng zaif mavzu: "${weakTopic.title}" (${weakTopic.mastery}%).` : ''),
+      currentMastery: s.mastery,
+      answered: s.answered,
+      tasks: missionTasks(`s${s.id}`),
+    }));
+}
 
 const WEEK_DAYS = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
 
@@ -125,7 +134,15 @@ export default function StudyRoomPage() {
   const { t } = useTransliterate();
 
   // Tanlangan Missiya
-  const [activeMission, setActiveMission] = useState<StudyMission>(PRESET_MISSIONS[0]);
+  // Tavsiyalar — haqiqiy natijalardan (yuklanish / xato / bo'sh holatlar bilan).
+  const { data: masteryData, error: masteryError, loading: masteryLoading, refresh: refreshMastery } =
+    useApiQuery<MasteryResponse>('/api/analytics/');
+  const missions = React.useMemo(() => buildMissions(masteryData), [masteryData]);
+  const [activeMission, setActiveMission] = useState<StudyMission>(FREE_FOCUS_MISSION);
+  const pickedMissionRef = useRef(false);
+  useEffect(() => {
+    if (!pickedMissionRef.current && missions.length) setActiveMission(missions[0]);
+  }, [missions]);
 
   // Pomodoro Taymer
   const [durationMinutes, setDurationMinutes] = useState(25);
@@ -158,14 +175,13 @@ export default function StudyRoomPage() {
   const [completedStats, setCompletedStats] = useState<{
     xpEarned: number;
     streak: number;
-    prevMastery: number;
-    newMastery: number;
     subject: string;
   } | null>(null);
 
   // Streak ma'lumoti
-  const currentStreak = 17; // foydalanuvchi streaki
-  const todayDayIndex = 5; // Shanba (0=Du, 5=Sh)
+  // Haqiqiy streak (profil) va bugungi hafta kuni (0=Du ... 6=Ya).
+  const currentStreak = typeof user?.streak === 'number' ? user.streak : 0;
+  const todayDayIndex = (new Date().getDay() + 6) % 7;
 
   // Ambient Ovoz generatori
   const [activeSound, setActiveSound] = useState<string | null>('rain');
@@ -319,8 +335,6 @@ export default function StudyRoomPage() {
     setCompletedStats({
       xpEarned,
       streak: newStreak,
-      prevMastery: activeMission.currentMastery,
-      newMastery: activeMission.targetMastery,
       subject: activeMission.subject,
     });
     setShowCompletionModal(true);
@@ -504,7 +518,7 @@ export default function StudyRoomPage() {
             <div className="max-w-md mx-auto p-4 sm:p-5 rounded-2xl bg-card border border-border text-left space-y-3 shadow-card">
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="text-foreground tracking-wide">Sessiya Vazifalari</span>
-                <span className="text-amber-500 font-mono font-bold">+{activeMission.xpReward} XP</span>
+                <span className="text-amber-500 font-mono font-bold">≈ +{durationMinutes} XP</span>
               </div>
 
               <div className="space-y-2">
@@ -876,7 +890,7 @@ export default function StudyRoomPage() {
                   <div className="space-y-1.5 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-primary font-mono text-[12px] font-semibold uppercase tracking-wider">
-                        AI Mentor Tavsiyasi
+                        Natijalaringiz asosida
                       </span>
                       <Badge variant="secondary" className="text-[12px] font-mono bg-muted text-muted-foreground border-border">
                         Bugun siz uchun
@@ -884,9 +898,24 @@ export default function StudyRoomPage() {
                     </div>
 
                     <div className="border-l-2 border-primary pl-3 py-0.5 my-1">
-                      <p className="text-xs sm:text-[13px] text-foreground italic font-medium leading-relaxed">
-                        &ldquo;{activeMission.aiReason}&rdquo;
-                      </p>
+                      {masteryLoading && !masteryData ? (
+                        <p className="text-xs text-muted-foreground">Natijalaringiz yuklanmoqda...</p>
+                      ) : masteryError && !masteryData ? (
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className="text-rose-500">Tavsiyalarni yuklab bo&apos;lmadi.</span>
+                          <button type="button" onClick={() => refreshMastery()}
+                                  className="font-semibold text-primary underline cursor-pointer">
+                            Qayta urinish
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-xs sm:text-[13px] text-foreground font-medium leading-relaxed">
+                          {activeMission.aiReason}
+                          {!missions.length && (
+                            <Link href="/tests" className="ml-1 font-semibold text-primary underline">Testlarga o&apos;tish</Link>
+                          )}
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2.5 pt-0.5 text-xs text-muted-foreground">
@@ -895,7 +924,7 @@ export default function StudyRoomPage() {
                       </span>
                       <span className="opacity-40">•</span>
                       <span className="text-[12px]">
-                        Mastery: <strong className="text-emerald-500 font-mono font-semibold">{activeMission.currentMastery}%</strong> ➔ <strong className="text-primary font-mono font-semibold">{activeMission.targetMastery}%</strong>
+                        O&apos;zlashtirish: <strong className="text-emerald-500 font-mono font-semibold">{activeMission.currentMastery !== null ? `${activeMission.currentMastery}%` : "ma'lumot yo'q"}</strong>
                       </span>
                     </div>
                   </div>
@@ -904,11 +933,12 @@ export default function StudyRoomPage() {
                 {/* Switch Subject presets */}
                 <div className="flex flex-wrap items-center gap-1 self-start md:self-auto shrink-0 bg-muted/50 p-1.5 rounded-xl border border-border">
                   <span className="text-[12px] uppercase font-mono font-semibold text-muted-foreground px-2">Fanlar:</span>
-                  {PRESET_MISSIONS.map((m) => (
+                  {(missions.length ? missions : [FREE_FOCUS_MISSION]).map((m) => (
                     <button
                       key={m.id}
                       onClick={() => {
                         soundFX.click();
+                        pickedMissionRef.current = true;
                         setActiveMission(m);
                       }}
                       className={cn(
@@ -950,7 +980,7 @@ export default function StudyRoomPage() {
 
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="font-mono text-xs font-semibold text-amber-500 border-amber-500/30 bg-amber-500/10 gap-1">
-                        <Zap className="size-3.5 fill-amber-500" /> +{activeMission.xpReward} XP
+                        <Zap className="size-3.5 fill-amber-500" /> ≈ +{durationMinutes} XP
                       </Badge>
                       <Button
                         variant="ghost"
@@ -1122,7 +1152,7 @@ export default function StudyRoomPage() {
                           🎁 Sessiya Mukofoti:
                         </span>
                         <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
-                          +{activeMission.xpReward} XP &bull; Mastery +3%
+                          ≈ +{durationMinutes} XP (server hisoblaydi, kuniga 6 ta sessiya)
                         </span>
                       </div>
                     </div>
@@ -1222,7 +1252,7 @@ export default function StudyRoomPage() {
                       </h3>
                     </div>
                     <Badge variant="outline" className="border-orange-500/30 bg-orange-500/10 text-orange-500 font-mono text-xs font-bold">
-                      +{currentStreak * 5} XP Bonus
+                      Streak
                     </Badge>
                   </div>
 
@@ -1240,7 +1270,8 @@ export default function StudyRoomPage() {
                   <div className="p-3.5 rounded-2xl bg-[var(--surface-input)] border border-[var(--border-card)]">
                     <div className="grid grid-cols-7 gap-1 text-center">
                       {WEEK_DAYS.map((day, idx) => {
-                        const isDone = idx < todayDayIndex;
+                        // Streak oynasi: bugundan oldingi `currentStreak` kun (streak asosida).
+                        const isDone = idx < todayDayIndex && todayDayIndex - idx <= currentStreak;
                         const isToday = idx === todayDayIndex;
                         return (
                           <div key={day} className="flex flex-col items-center space-y-1.5">
@@ -1381,7 +1412,7 @@ export default function StudyRoomPage() {
               MISSIYA BAJARILDI!
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-              Ajoyib natija! Siz 25 daqiqalik chuqur fokus sessiyasini muvaffaqiyatli yakunladingiz.
+              Fokus sessiyasi yakunlandi. Mukofot server o&apos;lchagan vaqt bo&apos;yicha hisoblanadi.
             </DialogDescription>
           </DialogHeader>
 
@@ -1404,21 +1435,11 @@ export default function StudyRoomPage() {
                 </div>
               </div>
 
-              {/* Mastery Progress: 64% -> 67% */}
-              <div className="p-4 rounded-2xl bg-card border border-border/80 text-left space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-foreground">🧠 {completedStats.subject} Mastery</span>
-                  <span className="font-mono text-emerald-500 font-bold">
-                    {completedStats.prevMastery}% ➔ {completedStats.newMastery}% (+3%)
-                  </span>
-                </div>
-                <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted/60 p-0.5">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
-                    style={{ width: `${completedStats.newMastery}%` }}
-                  />
-                </div>
-              </div>
+              {/* O'zlashtirish fokus sessiyasidan emas, test natijalaridan hisoblanadi —
+                  ilgari bu yerda har sessiyadan keyin soxta "+3% mastery" ko'rsatilardi. */}
+              <p className="p-3 rounded-2xl bg-card border border-border/80 text-left text-xs text-muted-foreground">
+                🧠 {completedStats.subject}: o&apos;zlashtirish test natijalaringizdan hisoblanadi — o&apos;sishni ko&apos;rish uchun shu fandan test yeching.
+              </p>
             </div>
           )}
 
