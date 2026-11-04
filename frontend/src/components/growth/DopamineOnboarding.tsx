@@ -25,7 +25,6 @@ import { toast } from 'sonner';
 interface BlitzChoice {
   id: number;
   text: string;
-  is_correct: boolean;
 }
 
 interface BlitzQuestion {
@@ -41,98 +40,13 @@ export interface DopamineOnboardingProps {
   subject?: string;
 }
 
-// 7 ta moslashtirilgan Dofamin savollari (1-4 Easy, 5-6 Medium, 7 Hard)
-const DEFAULT_BLITZ_QUESTIONS: BlitzQuestion[] = [
-  {
-    id: 1,
-    difficulty: 'EASY',
-    topic: 'Qadimgi Turon Tarixi',
-    body: "Amir Temur qaysi shahar yaqinida 'Loy jangi'da qatnashgan?",
-    choices: [
-      { id: 1, text: 'Chinoz va Toshkent oraligʻida', is_correct: true },
-      { id: 2, text: 'Samarqand yaqinida', is_correct: false },
-      { id: 3, text: 'Buxoro chekkasida', is_correct: false },
-      { id: 4, text: 'Balx atrofida', is_correct: false },
-    ],
-  },
-  {
-    id: 2,
-    difficulty: 'EASY',
-    topic: 'Alisher Navoiy Davri',
-    body: "Alisher Navoiy o'zining besh dostondan iborat durdonasini nima deb atagan?",
-    choices: [
-      { id: 5, text: 'Devoni Foniy', is_correct: false },
-      { id: 6, text: 'Xamsa', is_correct: true },
-      { id: 7, text: 'Majolis un-nafois', is_correct: false },
-      { id: 8, text: 'Mahbub ul-qulub', is_correct: false },
-    ],
-  },
-  {
-    id: 3,
-    difficulty: 'EASY',
-    topic: 'Oʻzbekiston Geografiyasi',
-    body: "O'zbekistonning eng uzun va sersuv daryosi qaysi?",
-    choices: [
-      { id: 9, text: 'Sirdaryo', is_correct: false },
-      { id: 10, text: 'Amudaryo', is_correct: true },
-      { id: 11, text: 'Zarafshon', is_correct: false },
-      { id: 12, text: 'Chirchiq', is_correct: false },
-    ],
-  },
-  {
-    id: 4,
-    difficulty: 'EASY',
-    topic: 'Tarixiy Shaharlar',
-    body: "Qaysi shahar qadimda 'Sayqali roʻyi zamin' (Yer yuzining sayqali) deb ulug'langan?",
-    choices: [
-      { id: 13, text: 'Xiva', is_correct: false },
-      { id: 14, text: 'Samarqand', is_correct: true },
-      { id: 15, text: 'Qoʻqon', is_correct: false },
-      { id: 16, text: 'Termiz', is_correct: false },
-    ],
-  },
-  {
-    id: 5,
-    difficulty: 'MEDIUM',
-    topic: 'Davlat Boshqaruvi',
-    body: "Temuriylar davlatida moliya va devon ishlarini nazorat qiluvchi oliy mansabdor kim bo'lgan?",
-    choices: [
-      { id: 17, text: 'Kotib', is_correct: false },
-      { id: 18, text: 'Devonbegi', is_correct: true },
-      { id: 19, text: 'Xos Hojib', is_correct: false },
-      { id: 20, text: 'Kutvol', is_correct: false },
-    ],
-  },
-  {
-    id: 6,
-    difficulty: 'MEDIUM',
-    topic: 'Mantiq va Grammatika',
-    body: "'Bilim oʻrganish — igna bilan quduq qazish kabidir' gapida qo'llangan badiiy san'at turi?",
-    choices: [
-      { id: 21, text: 'Tazod', is_correct: false },
-      { id: 22, text: 'Tashbeh (Oʻxshatish)', is_correct: true },
-      { id: 23, text: 'Mubolagʻa', is_correct: false },
-      { id: 24, text: 'Talmeh', is_correct: false },
-    ],
-  },
-  {
-    id: 7,
-    difficulty: 'HARD',
-    topic: 'Jadidchilik Harakati',
-    body: "1917-yilda Turkiston Muxtoriyati hukumatining birinchi raisi etib kim saylangan?",
-    choices: [
-      { id: 25, text: 'Mustafo Choʻqay', is_correct: false },
-      { id: 26, text: 'Muhammadjon Tinishboyev', is_correct: true },
-      { id: 27, text: 'Mahmudxoʻja Behbudiy', is_correct: false },
-      { id: 28, text: 'Munavvarqori Abdurashidxonov', is_correct: false },
-    ],
-  },
-];
-
 export default function DopamineOnboarding({ onComplete, subject }: DopamineOnboardingProps) {
   const router = useRouter();
 
-  const [questions, setQuestions] = useState<BlitzQuestion[]>(DEFAULT_BLITZ_QUESTIONS);
+  const [questions, setQuestions] = useState<BlitzQuestion[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [correctChoiceId, setCorrectChoiceId] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
@@ -149,45 +63,66 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
       try {
         const query = subject ? `?subject=${encodeURIComponent(subject)}` : '';
         const res = await apiFetch<{ ok: boolean; questions: BlitzQuestion[] }>(`/api/growth/onboarding/blitz/${query}`);
-        if (res && res.ok && res.questions?.length === 7) {
-          setQuestions(res.questions);
-        }
+        if (!res?.ok || res.questions?.length !== 7) throw new Error('Diagnostika savollari hozircha mavjud emas.');
+        setQuestions(res.questions);
+        setLoadError(null);
       } catch {
-        // Fallback ishlaydi
+        setQuestions([]);
+        setLoadError("Diagnostika savollarini yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.");
+      } finally {
+        setIsLoading(false);
       }
     }
     loadQuestions();
   }, [subject]);
 
-  const handleSelect = (choice: BlitzChoice) => {
-    if (isAnswered) return;
+  const handleSelect = async (choice: BlitzChoice) => {
+    if (isAnswered || !currentQ) return;
+
     setIsAnswered(true);
     setSelectedId(choice.id);
 
-    const isCorrect = choice.is_correct;
-    setAnswersStatus((prev) => [...prev, isCorrect]);
+    try {
+      const result = await apiFetch<{
+        ok: boolean;
+        is_correct: boolean;
+        correct_choice_id: number;
+      }>('/api/growth/onboarding/blitz/answer/', {
+        method: 'POST',
+        body: JSON.stringify({ question_id: currentQ.id, choice_id: choice.id }),
+      });
 
-    if (isCorrect) {
-      soundFX.correct();
-      tgHaptic('success');
-      setCorrectAnswersCount((prev) => prev + 1);
-    } else {
-      soundFX.incorrect();
-      tgHaptic('error');
-      // Xato qilingan mavzuni eslab qolish
-      const topic = questions[currentIndex]?.topic;
-      if (topic) setWeakTopics((prev) => (prev.includes(topic) ? prev : [...prev, topic]));
-    }
+      if (!result?.ok) throw new Error("Javobni tekshirib bo'lmadi.");
 
-    setTimeout(() => {
-      if (currentIndex + 1 < questions.length) {
-        setCurrentIndex((prev) => prev + 1);
-        setSelectedId(null);
-        setIsAnswered(false);
+      setCorrectChoiceId(result.correct_choice_id);
+      setAnswersStatus((prev) => [...prev, result.is_correct]);
+
+      if (result.is_correct) {
+        soundFX.correct();
+        tgHaptic('success');
+        setCorrectAnswersCount((prev) => prev + 1);
       } else {
-        finishDiagnostic();
+        soundFX.incorrect();
+        tgHaptic('error');
+        const topic = currentQ.topic;
+        if (topic) setWeakTopics((prev) => (prev.includes(topic) ? prev : [...prev, topic]));
       }
-    }, 1200);
+
+      setTimeout(() => {
+        if (currentIndex + 1 < questions.length) {
+          setCurrentIndex((prev) => prev + 1);
+          setSelectedId(null);
+          setCorrectChoiceId(null);
+          setIsAnswered(false);
+        } else {
+          finishDiagnostic();
+        }
+      }, 1200);
+    } catch {
+      setIsAnswered(false);
+      setSelectedId(null);
+      toast.error("Javobni serverda tekshirib bo'lmadi. Qayta urinib ko'ring.");
+    }
   };
 
   const finishDiagnostic = () => {
@@ -224,7 +159,16 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
   return (
     <div className="relative w-full max-w-xl mx-auto min-h-[580px] flex flex-col justify-between p-4 sm:p-5 bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-white/[0.07] shadow-2xl select-none overflow-hidden">
       <AnimatePresence mode="wait">
-        {!isCompleted && currentQ && (
+        {isLoading && !isCompleted && (
+          <div className="flex-1 flex items-center justify-center text-sm text-zinc-300">Savollar yuklanmoqda...</div>
+        )}
+        {loadError && !isLoading && !isCompleted && (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center text-sm text-zinc-300">
+            <p>{loadError}</p>
+            <button type="button" onClick={() => window.location.reload()} className="rounded-lg bg-blue-600 px-4 py-2 text-white">Qayta yuklash</button>
+          </div>
+        )}
+        {!isLoading && !loadError && !isCompleted && currentQ && (
           <motion.div
             key="blitz_quiz"
             initial={{ opacity: 0 }}
@@ -297,9 +241,9 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
                 let choiceStyle = 'border-white/10 bg-zinc-950/60 hover:bg-zinc-800/70 hover:border-white/20 text-zinc-200';
 
                 if (isAnswered) {
-                  if (choice.is_correct) {
+                  if (choice.id === correctChoiceId) {
                     choiceStyle = 'border-emerald-500 bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
-                  } else if (isSelected && !choice.is_correct) {
+                  } else if (isSelected && choice.id !== correctChoiceId) {
                     choiceStyle = 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.3)]';
                   } else {
                     choiceStyle = 'opacity-40 border-white/5 bg-zinc-950/30 text-zinc-500';
@@ -318,8 +262,8 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
                     )}
                   >
                     <span>{choice.text}</span>
-                    {isAnswered && choice.is_correct && <CheckCircle2 className="size-4 text-emerald-400 shrink-0 ml-2" />}
-                    {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-4 text-rose-400 shrink-0 ml-2" />}
+                    {isAnswered && choice.id === correctChoiceId && <CheckCircle2 className="size-4 text-emerald-400 shrink-0 ml-2" />}
+                    {isAnswered && isSelected && choice.id !== correctChoiceId && <XCircle className="size-4 text-rose-400 shrink-0 ml-2" />}
                   </button>
                 );
               })}
