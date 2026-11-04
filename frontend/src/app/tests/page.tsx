@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import {
-  Shuffle, Search, Clock, HelpCircle, Lock, ArrowRight, Loader2,
+  Shuffle, Search, Clock, Lock, ArrowRight, Loader2,
   FileCheck2, GraduationCap, Users, Flame, AlertCircle, X, Sparkles, Bell, CheckCircle2,
-  ArrowLeft, BookOpen, Landmark, Calculator, Dna, Languages, Globe, ChevronRight, Layers,
+  ArrowLeft, ArrowUpRight, BookOpen, Landmark, Calculator, Dna, Languages, Globe, ChevronRight, Layers,
   Headphones, Zap, Trophy, Shield, Target, Gauge, Brain, History,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
@@ -18,14 +18,14 @@ import { toast } from 'sonner';
 import AppShell from '@/components/AppShell';
 import { cn } from '@/lib/utils';
 import Reveal from '@/components/motion/Reveal';
-import { Panel, PanelLabel, PanelLink, PageHeader, Pill, IconTile, StatCell, BrandButton, SegmentedTabs } from '@/components/design/kit';
+import { TestsHero, ModeBento, CatalogTitle, type PastelMode } from '@/components/tests/TestsPastelHero';
+import { FeatureStrip, SectionHead, CountChip, SubjectCard, PromoBand, InViewItem, TONE, TONE_CYCLE } from '@/components/tests/PastelCatalog';
+import { Panel, PanelLabel, PanelLink, Pill } from '@/components/design/kit';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VerifiedBadge from '@/components/ui/verified-badge';
-import PremiumIcon from '@/components/ui/premium-icon';
 import BmbStressLaunchModal from '@/components/stress/BmbStressLaunchModal';
 import { useTransliterate } from '@/lib/transliterate';
 
@@ -563,6 +563,12 @@ export default function TestsPage() {
 
   const urlMode = searchParams.get('mode');
   const urlStress = searchParams.get('stress');
+  // /tests — faqat rejimlar sahifasi. Rejim tanlansa (?mode=...) yoki fan ochilsa (?subject=...)
+  // alohida katalog sahifasi ko'rinadi: shu turdagi testlar ro'yxati.
+  const isCatalog =
+    urlMode === 'standard' || urlMode === 'blitz' || urlMode === 'stress' ||
+    urlStress === '1' || urlStress === 'true' ||
+    Boolean(urlSubject && urlSubject !== 'all');
   const [heroMode, setHeroMode] = useState<'standard' | 'blitz' | 'stress'>(() => {
     if (urlMode === 'stress' || urlStress === '1' || urlStress === 'true') return 'stress';
     if (urlMode === 'blitz') return 'blitz';
@@ -574,7 +580,7 @@ export default function TestsPage() {
       setHeroMode('stress');
     } else if (urlMode === 'blitz') {
       setHeroMode('blitz');
-    } else if (urlMode === 'standard') {
+    } else {
       setHeroMode('standard');
     }
   }, [urlMode, urlStress]);
@@ -700,7 +706,7 @@ export default function TestsPage() {
     setSubject(null);
     setCategory('all');
     setAnswerMode('all');
-    router.replace('/tests', { scroll: false });
+    router.replace('/tests?mode=standard', { scroll: false });
   };
 
   const displaySubjects = useMemo(() => {
@@ -763,20 +769,31 @@ export default function TestsPage() {
   };
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-5 sm:space-y-6 bg-background text-foreground p-3.5 sm:p-6 lg:p-8 pb-32 sm:pb-28 max-w-7xl mx-auto w-full">
-        <PageHeader
-          icon={Target}
+      <main className="page-shell flex-1 space-y-6 sm:space-y-8 text-foreground p-3.5 sm:p-6 lg:p-8 pb-32 sm:pb-28 max-w-7xl mx-auto w-full overflow-x-clip">
+        {!isCatalog && (
+          <>
+        <TestsHero
           eyebrow={t("Imtihon portali")}
-          title={t("Test rejimini tanlang")}
-          subtitle="Har bir rejim turli maqsad uchun: to'liq baholash, tezkor sinov, real zal bosimi yoki kundalik sprint."
+          testsCount={data ? (data.subjects || []).reduce((n, s) => n + (s.tests_count || 0), 0) : undefined}
+          attempts={data?.total_attempts}
+          avgScore={data ? data.avg_score || 0 : undefined}
         />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {MODE_CARDS.map((m, i) => {
-            const active = m.key === heroMode;
-            const stats =
+        <ModeBento
+          t={t}
+          activeKey=""
+          busyKey={startingStress !== null ? 'stress' : null}
+          modes={MODE_CARDS.map((m) => ({
+            key: m.key as PastelMode['key'],
+            icon: m.icon,
+            title: m.title,
+            subtitle: m.subtitle,
+            description: m.description,
+            chips: m.chips,
+            cta: m.cta,
+            stats:
               m.key === 'standard'
                 ? [
                     { value: (data?.subjects || []).reduce((n, s) => n + (s.tests_count || 0), 0) || '—', label: 'Testlar' },
@@ -789,74 +806,33 @@ export default function TestsPage() {
                       { value: 'Titul', label: 'Javob varaqasi' },
                       { value: stressXpLabel, label: 'Mukofot' },
                     ]
-                  : m.stats;
-            return (
-              <Panel key={m.key} className={cn('flex flex-col', active && 'ring-1 ring-[var(--brand-border)]')}>
-                <div className="flex items-start justify-between">
-                  <IconTile icon={m.icon} tone={m.tone} size="lg" />
-                  <Pill>{i + 1}-rejim</Pill>
-                </div>
-                <h2 className="mt-3.5 text-base font-bold text-foreground">{t(m.title)}</h2>
-                <p className={cn('text-xs font-semibold', m.accent)}>{t(m.subtitle)}</p>
-                <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{m.description}</p>
-                <div className="mt-3.5 grid grid-cols-3 gap-2">
-                  {stats.map((st) => (
-                    <StatCell key={st.label} value={st.value} label={st.label} />
-                  ))}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {m.chips.map((c) => (
-                    <span key={c} className="rounded-md border border-[var(--ds-panel-border)] px-2 py-0.5 text-[10px] text-muted-foreground">
-                      {c}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-auto pt-4">
-                  <BrandButton
-                    className="w-full"
-                    disabled={m.key === 'stress' && startingStress !== null}
-                    onClick={() => {
-                      if (m.key === 'standard') {
-                        handleModeChange('standard');
-                        document.getElementById('test-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      } else if (m.key === 'blitz') {
-                        handleStartBlitz(subject || undefined);
-                      } else if (m.key === 'stress') {
-                        handleModeChange('stress');
-                        setStressPreselectedTest(null);
-                        setStressModalOpen(true);
-                      } else {
-                        router.push('/sprint');
-                      }
-                    }}
-                  >
-                    {t(m.cta)} <ChevronRight className="size-4" />
-                  </BrandButton>
-                </div>
-              </Panel>
-            );
-          })}
-        </div>
+                  : m.stats,
+          }))}
+          onAction={(key) => {
+            // Har bir rejim — alohida sahifa: shu turdagi testlar katalogi.
+            tgHaptic('select');
+            soundFX.click();
+            router.push(key === 'sprint' ? '/sprint' : `/tests?mode=${key}`);
+          }}
+        />
 
         <RecentTestHistory />
+          </>
+        )}
 
-        <div id="test-catalog" className="scroll-mt-20 flex flex-wrap items-center justify-between gap-3 pt-2">
-          <span className="ds-label inline-flex items-center gap-1.5">
-            <BookOpen className="size-3.5" /> Testlar katalogi
-          </span>
-          <SegmentedTabs
-            items={[
-              { value: 'standard', label: 'Standart' },
-              { value: 'blitz', label: 'Blits' },
-              { value: 'stress', label: 'Stress' },
-            ]}
-            value={heroMode}
-            onChange={(v) => handleModeChange(v as 'standard' | 'blitz' | 'stress')}
-          />
-        </div>
+        {isCatalog && (
+          <div id="test-catalog" className="space-y-4 pt-2">
+            <Link href="/tests" className="ps-chip w-fit transition-transform hover:-translate-x-0.5">
+              <ArrowLeft className="size-4" /> Barcha rejimlar
+            </Link>
+            <CatalogTitle>
+              {heroMode === 'blitz' ? 'Blits testlari' : heroMode === 'stress' ? 'Stress zallari' : 'Standart testlar'}
+            </CatalogTitle>
+          </div>
+        )}
 
         {/* LIVE ACTIVITY PINNED MOCK IMTIHON BANNER */}
-        {data?.pinned_mock && (() => {
+        {!isCatalog && data?.pinned_mock && (() => {
           const theme = SUBJECT_IOS_THEME[data.pinned_mock.subject_slug] || SUBJECT_IOS_THEME['tarix'];
           const isReminded = pinnedReminded ?? data.pinned_mock.is_reminded;
           return (
@@ -987,566 +963,253 @@ export default function TestsPage() {
         {/* ========================================================================= */}
         {/* REJIMLAR BO'YICHA KATALOG (7-Savol Blits | BMB Stress | Standart) */}
         {/* ========================================================================= */}
-        {heroMode === 'blitz' ? (
-          /* 7-SAVOL BLITS REJIMI */
-          <div className="space-y-6">
-            {/* Yuqori Qoidalar va Sovrinlar Ko'rgazmasi */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-2xl border border-blue-500/25 bg-blue-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-blue-500 font-bold text-xs">
-                  <Zap className="size-4" />
-                  <span>7 Ta Savol</span>
-                </div>
-                <p className="text-[12px] text-muted-foreground leading-snug">
-                  Oson, o&apos;rtacha va zaif nuqtani aniqlovchi adaptiv tizim.
-                </p>
-              </div>
+        {isCatalog && (heroMode === 'blitz' ? (
+          /* ── 7-SAVOL BLITS KATALOGI ─────────────────────────────────── */
+          <div className="space-y-8">
+            <FeatureStrip
+              items={[
+                { icon: Zap, title: '7 ta savol', tone: 'purple', text: "Oson, o'rtacha va zaif nuqtani aniqlovchi adaptiv tizim." },
+                { icon: Sparkles, title: 'Bepul diagnostika', tone: 'orange', text: "Har bir to'liq yakunlangan blits uchun kafolatlangan bonus." },
+                { icon: Clock, title: '7 daqiqa', tone: 'green', text: "Ortiqcha vaqt yo'qotishsiz lahzalik bilim diagnostikasi." },
+                { icon: Trophy, title: 'B+ potensial', tone: 'ink', text: 'Darhol Milliy Sertifikat prognozi va kuchli mavzular tahlili.' },
+              ]}
+            />
 
-              <div className="p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs">
-                  <Sparkles className="size-4 text-amber-400" />
-                  <span>Bepul diagnostika</span>
-                </div>
-                <p className="text-[12px] text-muted-foreground leading-snug">
-                  Har bir to&apos;liq yakunlangan blits uchun kafolatlangan dofamin bonusi.
-                </p>
-              </div>
+            <SectionHead
+              eyebrow="Fanni tanlang"
+              title={<>Fanlar bo&apos;yicha <span className="text-[var(--ps-purple)]">blitslar</span></>}
+              right={<CountChip>{displaySubjects.length} ta fan faol</CountChip>}
+            />
 
-              <div className="p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs">
-                  <Clock className="size-4" />
-                  <span>7 Daqiqa</span>
-                </div>
-                <p className="text-[12px] text-muted-foreground leading-snug">
-                  Ortiqcha vaqt yo&apos;qotishsiz lahzalik bilim diagnostikasi.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl border border-purple-500/25 bg-purple-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-purple-500 font-bold text-xs">
-                  <Trophy className="size-4" />
-                  <span>B+ Potensial</span>
-                </div>
-                <p className="text-[12px] text-muted-foreground leading-snug">
-                  Darhol Milliy Sertifikat prognozi va kuchli mavzular tahlili.
-                </p>
-              </div>
-            </div>
-
-            {/* Sarlavha */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
-                  <Sparkles className="size-5 text-blue-500" />
-                  <span>Fanlar bo&apos;yicha 7-Savol Blitslar</span>
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Qaysi fandan blits topshirmoqchisiz? Fanni tanlang va zaif mavzularingizni aniqlang.
-                </p>
-              </div>
-              <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-500 font-mono text-xs font-bold">
-                {displaySubjects.length} ta fan faol
-              </Badge>
-            </div>
-
-            {/* FANLAR BLITS GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {displaySubjects.map((s) => {
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+              {displaySubjects.map((s, i) => {
                 const visual = getSubjectVisual(s.slug, s.name);
-                const IconComponent = visual.icon;
                 const details = BLITZ_SUBJECT_DETAILS[s.slug] || {
                   desc: `${s.name} fanidan 7 ta saralangan ekspress savol va qopqonlar.`,
-                  focus: "Tezkor Sinov & Natija",
+                  focus: 'Tezkor Sinov & Natija',
                   questionsCount: 7,
                   duration: 7,
                   coins: 100,
                   xp: 50,
                 };
-
                 return (
-                  <motion.div
+                  <SubjectCard
                     key={s.slug}
-                    whileHover={{ y: -3 }}
-                    className="group relative rounded-2xl p-5 border border-border bg-card hover:border-blue-500/40 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
-                  >
-                    <div className={cn('pointer-events-none absolute inset-0 bg-gradient-to-br opacity-40 group-hover:opacity-80 transition-opacity', visual.gradient)} />
-
-                    <div className="relative space-y-3.5">
-                      {/* Header Badges */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className={cn('size-11 rounded-2xl flex items-center justify-center border shadow-xs', visual.iconBg)}>
-                          <IconComponent className={cn('size-5', visual.iconColor)} />
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                          <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-500 text-[12px] font-bold">
-                            ⚡ 7 savol
-                          </Badge>
-                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[12px] font-bold">
-                            7 savol · bepul
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Title & Desc */}
-                      <div>
-                        <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight group-hover:text-blue-500 transition-colors">
-                          {s.name} · 7-Savol Blits
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                          {details.desc}
-                        </p>
-                      </div>
-
-                      {/* Sovrin & Format Box */}
-                      <div className="p-2.5 rounded-xl bg-muted/60 border border-border/80 space-y-1">
-                        <div className="flex items-center justify-between text-[12px] font-bold">
-                          <span className="text-muted-foreground flex items-center gap-1">
-                            <Clock className="size-3 text-primary" /> Vaqt:
-                          </span>
-                          <span className="font-mono text-foreground">7 daqiqa</span>
-                        </div>
-                        <div className="flex items-center justify-between text-[12px] font-bold">
-                          <span className="text-muted-foreground flex items-center gap-1">
-                            <Trophy className="size-3 text-amber-500" /> Sovrin:
-                          </span>
-                          <span className="text-amber-500 font-mono font-bold">Diagnostika (mukofotsiz)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="relative mt-4 pt-3 border-t border-border/60">
-                      <Button
-                        onClick={() => handleStartBlitz(s.slug)}
-                        className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 shadow-md shadow-blue-600/20 active:scale-98 transition-all cursor-pointer"
-                      >
-                        <span>Blitsni Boshlash</span>
-                        <ArrowRight className="size-3.5 ml-1.5" />
-                      </Button>
-                    </div>
-                  </motion.div>
+                    index={i}
+                    tone={TONE_CYCLE[i % TONE_CYCLE.length]}
+                    icon={visual.icon}
+                    title={s.name}
+                    subtitle="7-savol blits"
+                    desc={details.desc}
+                    badges={['⚡ 7 savol', 'Bepul']}
+                    meta={[
+                      { label: 'Vaqt', value: '7 daqiqa' },
+                      { label: 'Natija', value: 'Diagnostika' },
+                    ]}
+                    cta="Blitsni boshlash"
+                    onClick={() => handleStartBlitz(s.slug)}
+                  />
                 );
               })}
             </div>
 
-            {/* Aralash Fanlar Super Blits Card */}
-            <div className="relative overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-950/80 via-slate-900 to-indigo-950/80 p-5 sm:p-6 text-white shadow-lg">
-              <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-blue-500/10 rounded-full blur-2xl" />
-              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1.5 max-w-xl">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-0.5 text-xs font-bold text-blue-300 border border-blue-500/30">
-                    <Sparkles className="size-3.5 text-amber-300" /> Super Challenge · Barcha Fanlar
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-bold">
-                    Aralash Fanlar 7-Savol Super Blitsi
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    Tarix, Ona tili, Matematika, Biologiya, Ingliz va Rus tilidan saralangan 7 ta eng muhim savol. Haqiqiy umumiy savodxonlik sinovi!
-                  </p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs">
-                      Bepul diagnostika
-                    </Badge>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => handleStartBlitz()}
-                  size="lg"
-                  className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/30 shrink-0 h-11 px-6 cursor-pointer"
-                >
-                  Super Blitsni Boshlash <ArrowRight className="size-4 ml-1.5" />
-                </Button>
-              </div>
-            </div>
+            <PromoBand
+              tone="purple"
+              icon={Sparkles}
+              eyebrow="Super challenge · Barcha fanlar"
+              badge="Bepul diagnostika"
+              title="Aralash fanlar super blitsi"
+              text="Tarix, Ona tili, Matematika, Biologiya, Ingliz va Rus tilidan saralangan 7 ta eng muhim savol. Haqiqiy umumiy savodxonlik sinovi!"
+              cta="Super blitsni boshlash"
+              onClick={() => handleStartBlitz()}
+            />
           </div>
         ) : heroMode === 'stress' ? (
-          /* BMB STRESS ZALI REJIMI */
-          <div className="space-y-6">
-            {/* Yuqori Stress Xususiyatlari & Sovrinlar Paneli */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-              <div className="p-3 sm:p-3.5 rounded-2xl border border-rose-500/25 bg-rose-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-rose-500 font-bold text-xs">
-                  <Headphones className="size-4 shrink-0" />
-                  <span className="truncate">500 Kishi Akustikasi</span>
-                </div>
-                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
-                  Haqiqiy DTM zalidagi shivir-shivir va parta tovushlari.
-                </p>
-              </div>
+          /* ── BMB STRESS ZALI KATALOGI ───────────────────────────────── */
+          <div className="space-y-8">
+            <FeatureStrip
+              items={[
+                { icon: Headphones, title: '500 kishi akustikasi', tone: 'coral', text: 'Haqiqiy DTM zalidagi shivir-shivir va parta tovushlari.' },
+                { icon: FileCheck2, title: 'Titul varaqasi', tone: 'blue', text: "Qora ruchkada doirachalarni bo'yash (Bubble Sheet) mashqi." },
+                { icon: Flame, title: `${stressXpLabel} bonus`, tone: 'orange', text: <>To&apos;g&apos;ri javoblar uchun {stressXpLabel} va 1.5 baravar tanga (birinchi urinishda).</> },
+                { icon: Shield, title: 'Real bosim', tone: 'ink', text: "Javoblarni vaqt ichida titulga ko'chirish — xuddi haqiqiy imtihondagidek." },
+              ]}
+            />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl border border-blue-500/25 bg-blue-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-blue-500 font-bold text-xs">
-                  <FileCheck2 className="size-4 shrink-0" />
-                  <span className="truncate">Titul Varaqasi</span>
-                </div>
-                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
-                  Qora ruchkada doirachalarni bo&apos;yash (Bubble Sheet) mashqi.
-                </p>
-              </div>
+            <SectionHead
+              eyebrow="Zalni tanlang"
+              title={<>Fanlar bo&apos;yicha <span className="text-[var(--ps-coral)]">stress zallari</span></>}
+              right={<CountChip>{displaySubjects.length} ta zal tayyor</CountChip>}
+            />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl border border-amber-500/25 bg-amber-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs">
-                  <Flame className="size-4 shrink-0" />
-                  <span className="truncate">+50% Bonus XP</span>
-                </div>
-                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
-                  To&apos;g&apos;ri javoblar uchun {stressXpLabel} va 1.5 baravar tanga (birinchi urinishda).
-                </p>
-              </div>
-
-              <div className="p-3 sm:p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs">
-                  <Shield className="size-4 shrink-0" />
-                  <span className="truncate">Titul varaqasi</span>
-                </div>
-                <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
-                  Javoblarni vaqt ichida titulga ko&apos;chirish mashqi — xuddi haqiqiy imtihondagidek.
-                </p>
-              </div>
-            </div>
-
-            {/* Sarlavha */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
-                  <Flame className="size-5 text-rose-500" />
-                  <span>Fanlar bo&apos;yicha BMB Stress Zallari</span>
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Qaysi fanning imtihon zaliga kirasiz? DTM zalidagi shok va bosimga oldindan tayyorlaning.
-                </p>
-              </div>
-              <Badge variant="outline" className="border-rose-500/30 bg-rose-500/10 text-rose-500 font-mono text-xs font-bold">
-                {displaySubjects.length} ta zal tayyor
-              </Badge>
-            </div>
-
-            {/* FANLAR STRESS GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {displaySubjects.map((s) => {
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+              {displaySubjects.map((s, i) => {
                 const visual = getSubjectVisual(s.slug, s.name);
-                const IconComponent = visual.icon;
                 const details = STRESS_SUBJECT_DETAILS[s.slug] || {
                   desc: `${s.name} fanidan 30 ta BMB standarti testi va haqiqiy imtihon zali shovqini.`,
                   questionsCount: 30,
                   duration: 60,
                   coins: 200,
-                  bonusXp: "+50% XP",
+                  bonusXp: '+50% XP',
                 };
-                const isLaunching = startingStress === s.slug;
-
                 return (
-                  <motion.div
+                  <SubjectCard
                     key={s.slug}
-                    whileHover={{ y: -3 }}
-                    className="group relative rounded-2xl p-5 border border-rose-500/30 bg-card hover:border-rose-500/60 transition-all flex flex-col justify-between overflow-hidden shadow-xs"
-                  >
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-
-                    <div className="relative space-y-3.5">
-                      {/* Header Badges */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="size-11 rounded-2xl flex items-center justify-center border border-rose-500/30 bg-rose-500/15 text-rose-500 shadow-xs">
-                          <IconComponent className="size-5" />
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                          <Badge className="bg-rose-600 text-white text-[12px] font-bold border-0">
-                            🔥 STRESS
-                          </Badge>
-                          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[12px] font-bold">
-                            {stressXpLabel}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Title & Desc */}
-                      <div>
-                        <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight group-hover:text-rose-500 transition-colors">
-                          {s.name} — BMB Stress Zali
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                          {details.desc}
-                        </p>
-                      </div>
-
-                      {/* Sovrin & Format Box */}
-                      <div className="p-2.5 rounded-xl bg-rose-500/5 border border-rose-500/20 space-y-1">
-                        <div className="flex items-center justify-between text-[12px] font-bold">
-                          <span className="text-muted-foreground flex items-center gap-1">
-                            <Clock className="size-3 text-rose-500" /> Format:
-                          </span>
-                          <span className="font-mono text-foreground">{details.questionsCount} ta savol · {details.duration} daqiqa</span>
-                        </div>
-                        <div className="flex items-center justify-between text-[12px] font-bold">
-                          <span className="text-muted-foreground flex items-center gap-1">
-                            <Trophy className="size-3 text-amber-500" /> Sovrin:
-                          </span>
-                          <span className="text-amber-500 font-mono font-bold">{stressXpLabel} · tanga ×1.5</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="relative mt-4 pt-3 border-t border-border/60">
-                      <Button
-                        disabled={startingStress !== null}
-                        onClick={() => handleStartStress(s.slug)}
-                        className="w-full rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs h-10 shadow-md shadow-rose-600/25 active:scale-98 transition-all cursor-pointer"
-                      >
-                        {isLaunching ? (
-                          <>
-                            <Loader2 className="size-3.5 animate-spin mr-1.5" />
-                            <span>Zalga kirilmoqda...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Flame className="size-3.5 mr-1.5 animate-pulse" />
-                            <span>Imtihon Zaliga Kirish</span>
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </motion.div>
+                    index={i}
+                    tone={TONE_CYCLE[(i + 3) % TONE_CYCLE.length]}
+                    icon={visual.icon}
+                    title={s.name}
+                    subtitle="BMB stress zali"
+                    desc={details.desc}
+                    badges={['🔥 Stress', stressXpLabel]}
+                    meta={[
+                      { label: 'Format', value: `${details.questionsCount} savol · ${details.duration} daq` },
+                      { label: 'Sovrin', value: `${stressXpLabel} · ×1.5` },
+                    ]}
+                    cta={startingStress === s.slug ? 'Zalga kirilmoqda…' : 'Imtihon zaliga kirish'}
+                    busy={startingStress === s.slug}
+                    disabled={startingStress !== null}
+                    onClick={() => handleStartStress(s.slug)}
+                  />
                 );
               })}
             </div>
 
-            {/* Katta Blok Imtihon Modal Launcher Card */}
-            <div className="relative overflow-hidden rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 p-5 sm:p-6 text-white shadow-xl">
-              <div className="pointer-events-none absolute -right-10 -bottom-10 size-40 bg-rose-500/15 rounded-full blur-2xl" />
-              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1.5 max-w-xl">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/20 px-3 py-0.5 text-xs font-bold text-rose-300 border border-rose-500/30">
-                    <Flame className="size-3.5 text-rose-400" /> Barcha Fanlar · Katta Zal Simulyatori
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-bold">
-                    DTM To&apos;liq Blok Imtihoni (Hardcore Ekstremal)
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    Majburiy fanlar va asosiy mutaxassislik bloklari. 500 kishilik zal akustikasi, qat&apos;iy vaqt me&apos;yori va to&apos;liq Titul varaqasi!
-                  </p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs">
-                      {stressXpLabel} · tanga ×1.5
-                    </Badge>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => {
-                    setStressPreselectedTest(null);
-                    setStressModalOpen(true);
-                  }}
-                  size="lg"
-                  className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-lg shadow-rose-600/30 shrink-0 h-11 px-6 cursor-pointer"
-                >
-                  <Flame className="size-4 mr-1.5 animate-pulse" />
-                  Blok Zaliga Kirish
-                </Button>
-              </div>
-            </div>
+            <PromoBand
+              tone="coral"
+              icon={Flame}
+              eyebrow="Barcha fanlar · Katta zal simulyatori"
+              badge={`${stressXpLabel} · tanga ×1.5`}
+              title="DTM to'liq blok imtihoni"
+              text="Majburiy fanlar va asosiy mutaxassislik bloklari. 500 kishilik zal akustikasi, qat'iy vaqt me'yori va to'liq titul varaqasi!"
+              cta="Blok zaliga kirish"
+              onClick={() => {
+                setStressPreselectedTest(null);
+                setStressModalOpen(true);
+              }}
+            />
           </div>
         ) : (
-          /* ========================================================================= */
-          /* STANDART REJIM (FANLAR SETKASI YOKI TANLANGAN FAN TESTLARI)                */
-          /* ========================================================================= */
+          /* ── STANDART KATALOG ───────────────────────────────────────── */
           subject === null ? (
-          <div className="space-y-5">
-            {/* Bo'lim Sarlavhasi */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
-                  <BookOpen className="size-5 text-primary" />
-                  <span>Fanlar to&apos;plami</span>
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  Fanni tanlang va unga tegishli milliy sertifikat hamda BMB testlarini yeching
-                </p>
-              </div>
-              <span className="hidden sm:inline-flex text-xs font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
-                {data?.subjects?.length || 6} ta yo&apos;nalish faol
-              </span>
-            </div>
+          <div className="space-y-8">
+            <SectionHead
+              eyebrow="Fanni tanlang"
+              title={<>Fanlar <span className="text-[var(--ps-purple)]">to&apos;plami</span></>}
+              right={<CountChip>{data?.subjects?.length || 0} ta yo&apos;nalish faol</CountChip>}
+            />
 
-            {/* RESPONSIV GRID: Mobile: grid-cols-2, Desktop: grid-cols-4 */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4.5">
-              {(data?.subjects || []).map((s) => {
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+              {(data?.subjects || []).map((s, i) => {
                 const visual = getSubjectVisual(s.slug, s.name);
-                const IconComponent = visual.icon;
                 const testsCount = s.tests_count ?? 0;
-
                 return (
-                  <motion.div
+                  <SubjectCard
                     key={s.slug}
-                    whileHover={{ y: -3 }}
-                    whileTap={{ scale: 0.98 }}
+                    index={i}
+                    tone={TONE_CYCLE[i % TONE_CYCLE.length]}
+                    icon={visual.icon}
+                    title={s.name}
+                    subtitle={visual.subtitle}
+                    badges={[testsCount > 0 ? `${testsCount} ta test` : 'Tez kunda', visual.tag]}
+                    cta="Testlarni ko'rish"
+                    wholeCardClick
                     onClick={() => handleSelectSubject(s.slug)}
-                    className={cn(
-                      'group relative rounded-2xl p-4 sm:p-5 border border-border bg-card hover:bg-card/90 transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-xs select-none',
-                      visual.borderHover
-                    )}
-                  >
-                    {/* Gradient fon */}
-                    <div className={cn('pointer-events-none absolute inset-0 bg-gradient-to-br opacity-50 group-hover:opacity-100 transition-opacity', visual.gradient)} />
-
-                    <div className="relative space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className={cn('size-11 sm:size-12 rounded-2xl flex items-center justify-center border shadow-xs transition-transform group-hover:scale-105', visual.iconBg)}>
-                          <IconComponent className={cn('size-5 sm:size-6', visual.iconColor)} />
-                        </div>
-
-                        <span className={cn(
-                          'text-[12px] sm:text-[12px] font-bold px-2.5 py-0.5 rounded-full border',
-                          testsCount > 0
-                            ? 'border-primary/25 bg-primary/10 text-primary'
-                            : 'border-border bg-muted text-muted-foreground'
-                        )}>
-                          {testsCount > 0 ? `${testsCount} ta test` : 'Tez kunda'}
-                        </span>
-                      </div>
-
-                      <div>
-                        <h3 className="text-base sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors tracking-tight">
-                          {s.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                          {visual.subtitle}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="relative mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-bold text-primary">
-                      <span className="text-[12px] text-muted-foreground font-semibold truncate max-w-[100px]">{visual.tag}</span>
-                      <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform shrink-0">
-                        Kirish <ArrowRight className="size-3.5" />
-                      </span>
-                    </div>
-                  </motion.div>
+                  />
                 );
               })}
+              {!data &&
+                Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-60 w-full rounded-[28px] bg-white/40" />)}
             </div>
 
-            {/* Apple Shortcuts Style Quick Test Card */}
-            <div
-              onClick={() => starting === null && startRandom()}
-              className="group cursor-pointer rounded-2xl bg-card border border-border hover:border-emerald-500/50 p-5 sm:p-6 shadow-xs transition-all active:scale-[0.99] mt-2"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex min-w-0 items-center gap-3.5">
-                  <PremiumIcon icon={Shuffle} tone="emerald" size="md" solid />
-                  <div className="min-w-0">
-                    <h3 className="text-[16px] sm:text-[17px] font-bold tracking-tight text-foreground group-hover:text-emerald-500 transition-colors">
-                      Tezkor Blits Test
-                    </h3>
-                    <p className="mt-0.5 text-[13px] text-muted-foreground">
-                      10 ta savol · 10 daqiqa · bepul — barcha fanlardan aralash test yechish
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  disabled={starting !== null}
-                  onClick={(e) => { e.stopPropagation(); startRandom(); }}
-                  className="rounded-full px-5 bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 cursor-pointer"
-                >
-                  {starting === -1 ? <Loader2 className="size-4 animate-spin mr-1.5" /> : null}
-                  BOSHLASH
-                </Button>
-              </div>
-            </div>
+            <PromoBand
+              tone="green"
+              icon={Shuffle}
+              eyebrow="Barcha fanlardan aralash"
+              badge="Bepul"
+              title="Tezkor blits test"
+              text="10 ta savol · 10 daqiqa — barcha fanlardan aralash test yechib, umumiy darajangizni tekshiring."
+              cta={starting === -1 ? 'Boshlanmoqda…' : 'Boshlash'}
+              busy={starting === -1}
+              disabled={starting !== null}
+              onClick={() => startRandom()}
+            />
           </div>
         ) : (
-          /* ========================================================================= */
-          /* 2. FAN TANLANGANDA: BREADCRUMB, SUBCATEGORIYALAR VA TESTLAR RO'YXATI        */
-          /* ========================================================================= */
+          /* ── TANLANGAN FAN: TESTLAR RO'YXATI ────────────────────────── */
           <div className="space-y-6">
-            {/* Yuqori Navigatsiya: Orqaga qaytish & Fanlar pills */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleBackToAllSubjects}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold border border-border bg-card hover:bg-accent text-foreground transition-all cursor-pointer shadow-xs active:scale-95 group"
-                >
-                  <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-                  <span>← Barcha fanlarga qaytish</span>
-                </button>
-
-                {/* Boshqa fanga tezkor o'tish tugmalari */}
-                <div className="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar max-w-full">
-                  {data?.subjects.map((s) => {
-                    const active = subject === s.slug;
-                    return (
-                      <button
-                        key={s.slug}
-                        type="button"
-                        onClick={() => handleSelectSubject(s.slug)}
-                        className={cn(
-                          'shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all border active:scale-95 cursor-pointer',
-                          active
-                            ? 'bg-primary text-primary-foreground border-primary shadow-xs'
-                            : 'bg-card text-muted-foreground hover:text-foreground border-border'
-                        )}
-                      >
-                        {s.name}
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={handleBackToAllSubjects}
+                className="ps-chip cursor-pointer transition-transform hover:-translate-x-0.5"
+              >
+                <ArrowLeft className="size-4" /> Barcha fanlar
+              </button>
+              <div className="no-scrollbar flex max-w-full items-center gap-1.5 overflow-x-auto py-1">
+                {data?.subjects.map((s) => {
+                  const active = subject === s.slug;
+                  return (
+                    <button
+                      key={s.slug}
+                      type="button"
+                      onClick={() => handleSelectSubject(s.slug)}
+                      className={cn(
+                        'shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95',
+                        active
+                          ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                          : 'bg-[var(--ps-paper)] text-[var(--text-muted)] hover:text-[var(--text-primary)]',
+                      )}
+                    >
+                      {s.name}
+                    </button>
+                  );
+                })}
               </div>
-
-              {/* Tanlangan Fanning Bosh Banneri */}
-              {currentSubjectObj && (() => {
-                const visual = getSubjectVisual(currentSubjectObj.slug, currentSubjectObj.name);
-                const IconComponent = visual.icon;
-                return (
-                  <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-xs">
-                    <div className={cn('pointer-events-none absolute inset-0 bg-gradient-to-r opacity-60', visual.gradient)} />
-                    <div className="relative flex items-center justify-between gap-4 flex-wrap">
-                      <div className="flex items-center gap-4">
-                        <div className={cn('size-12 sm:size-14 rounded-2xl flex items-center justify-center border shadow-xs', visual.iconBg)}>
-                          <IconComponent className={cn('size-6 sm:size-7', visual.iconColor)} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                              {currentSubjectObj.name} testlari
-                            </h1>
-                            <Badge variant="outline" className="text-xs font-bold border-primary/25 bg-primary/10 text-primary">
-                              {visual.tag}
-                            </Badge>
-                          </div>
-                          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                            {visual.subtitle} · Rasmiy DTM me&apos;yori va Rasch modeli baholash standarti
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-muted-foreground">Mavjud testlar:</span>
-                        <p className="text-lg sm:text-2xl font-bold font-mono text-primary">
-                          {data?.tests?.length || 0} ta
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
 
-            {/* ICHMA-ICH SUBKATEGORIYALAR (Nested Subcategories & Filters) */}
-            <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-4 shadow-xs">
-              {/* 1-QATLAM: Subkategoriya (Imtihon turi: Milliy Sertifikat, Mavzulashtirilgan, BBA...) */}
-              {visibleCategories.length > 1 && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <Sparkles className="size-3.5 text-primary" />
-                      <span>Subkategoriya (Imtihon formati):</span>
-                    </span>
-                  </div>
+            {/* Fan banneri */}
+            {currentSubjectObj && (() => {
+              const visual = getSubjectVisual(currentSubjectObj.slug, currentSubjectObj.name);
+              const IconComponent = visual.icon;
+              const idx = Math.max(0, (data?.subjects || []).findIndex((x) => x.slug === currentSubjectObj.slug));
+              const tone = TONE[TONE_CYCLE[idx % TONE_CYCLE.length]];
+              return (
+                <InViewItem>
+                  <section className="ps-card ps-ink relative overflow-hidden !border-0 !rounded-[32px] p-6 sm:p-8">
+                    <div aria-hidden className={cn('absolute -right-16 -top-16 size-64 rounded-full opacity-90', tone.bg)} />
+                    <div aria-hidden className="ps-stripes absolute -bottom-10 right-1/3 size-32 rounded-full text-white/15" />
+                    <div className="relative flex flex-wrap items-end justify-between gap-6">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={cn('inline-flex size-12 items-center justify-center rounded-2xl', tone.bg)}>
+                            <IconComponent className="size-6" />
+                          </span>
+                          <span className="rounded-full bg-white/12 px-3 py-1 text-[11px] font-bold">{visual.tag}</span>
+                        </div>
+                        <h1 className="ps-display mt-4 text-[36px] sm:text-[52px]">
+                          {currentSubjectObj.name} <span className="text-[var(--ps-orange)]">testlari</span>
+                        </h1>
+                        <p className="mt-2 max-w-xl text-sm text-white/65">
+                          {visual.subtitle} · Rasmiy DTM me&apos;yori va Rasch modeli baholash standarti
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="ps-num text-[56px] sm:text-[72px]">{data?.tests?.length || 0}</p>
+                        <p className="text-xs font-semibold text-white/60">ta test mavjud</p>
+                      </div>
+                    </div>
+                  </section>
+                </InViewItem>
+              );
+            })()}
 
-                  <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
+            {/* Filtrlar */}
+            <div className="ps-card space-y-4 p-5 sm:p-6">
+              {visibleCategories.length > 1 && (
+                <div className="space-y-2.5">
+                  <p className="ps-eyebrow text-[var(--text-muted)]">Imtihon formati</p>
+                  <div className="no-scrollbar flex items-center gap-2 overflow-x-auto py-1">
                     {visibleCategories.map((c) => {
                       const active = category === c.value;
                       return (
@@ -1555,10 +1218,10 @@ export default function TestsPage() {
                           type="button"
                           onClick={() => setCategory(c.value)}
                           className={cn(
-                            'shrink-0 rounded-full px-4 py-1.5 text-xs sm:text-[13px] font-bold transition-all border active:scale-95 cursor-pointer',
+                            'shrink-0 cursor-pointer rounded-full px-4 py-2 text-xs font-bold transition-all active:scale-95 sm:text-[13px]',
                             active
-                              ? 'bg-primary text-primary-foreground border-primary shadow-xs'
-                              : 'bg-muted/60 text-muted-foreground hover:text-foreground border-border'
+                              ? 'bg-[var(--ps-purple)] text-white shadow-[0_8px_18px_-10px_rgba(118,89,199,0.9)]'
+                              : 'bg-[var(--ps-neutral)] text-[var(--text-muted)] hover:text-[var(--text-primary)]',
                           )}
                         >
                           {c.label}
@@ -1569,51 +1232,51 @@ export default function TestsPage() {
                 </div>
               )}
 
-              {/* 2-QATLAM: Savol shakli (Yopiq / Ochiq / Aralash) va Qidiruv */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-border/60">
-                <div className="flex items-center gap-2">
-                  <Tabs value={answerMode} onValueChange={setAnswerMode}>
-                    <TabsList className="bg-muted/70 p-1 rounded-full border border-border">
-                      {ANSWER_MODES.map((m) => (
-                        <TabsTrigger key={m.value} value={m.value} className="rounded-full text-xs font-bold px-3 py-1">
-                          {t(m.label)}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                </div>
+              <div className="flex flex-col justify-between gap-3 border-t border-[var(--border-card)] pt-4 sm:flex-row sm:items-center">
+                <Tabs value={answerMode} onValueChange={setAnswerMode}>
+                  <TabsList className="h-auto rounded-full bg-[var(--ps-neutral)] p-1">
+                    {ANSWER_MODES.map((m) => (
+                      <TabsTrigger
+                        key={m.value}
+                        value={m.value}
+                        className="rounded-full px-3.5 py-1.5 text-xs font-bold data-[state=active]:bg-[#080808] data-[state=active]:text-[#FFFCF7] dark:data-[state=active]:bg-[#FFFCF7] dark:data-[state=active]:text-[#080808]"
+                      >
+                        {t(m.label)}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
 
-                <div className="relative w-full sm:w-72">
-                  <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <div className="relative w-full sm:w-80">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--text-muted)]" />
                   <Input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={`${currentSubjectObj?.name || 'Fan'} testlaridan qidirish...`}
-                    className="pl-10 rounded-full bg-background border-border"
+                    className="!pl-11"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Statistika & Topilgan testlar sanog'i */}
             {data && (
-              <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[12px] font-medium text-muted-foreground">
-                <span>
-                  Jami urinishlar: <strong className="font-mono font-bold text-foreground">{data.total_attempts}</strong>
-                  {' · '}O&apos;rtacha natija: <strong className="font-mono font-bold text-primary">{data.avg_score.toFixed(0)}%</strong>
-                </span>
-                <span className="font-mono font-semibold">{data.tests.length} ta test topildi</span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <span className="ps-chip">Jami urinishlar: <b className="tabular-nums">{data.total_attempts}</b></span>
+                  <span className="ps-chip">O&apos;rtacha natija: <b className="tabular-nums text-[var(--ps-purple)]">{data.avg_score.toFixed(0)}%</b></span>
+                </div>
+                <span className="ps-chip !bg-[#080808] !text-[#FFFCF7]">{data.tests.length} ta test topildi</span>
               </div>
             )}
 
-            {/* TEST KARTALARI RO'YXATI */}
             {!data && !errorMessage && (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 w-full rounded-2xl" />)}
+                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[28px] bg-white/40" />)}
               </div>
             )}
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Test kartalari */}
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
               {data?.tests.map((t, tIdx) => {
                 const locked = t.is_premium && !t.is_unlocked;
                 const isLiveMock = Boolean(t.is_live_mock);
@@ -1626,199 +1289,175 @@ export default function TestsPage() {
                 const buyHref = data.mock_plan
                   ? `/premium/checkout/${data.mock_plan.id}?test=${t.id}`
                   : '/premium';
-                const cardSubjectSlug = t.subject || data.pinned_mock?.subject_slug || subject || 'tarix';
-                const cTheme = SUBJECT_IOS_THEME[cardSubjectSlug] || SUBJECT_IOS_THEME['tarix'];
 
                 return (
-                  <Reveal key={t.id} index={tIdx} className="h-full">
+                  <InViewItem key={t.id} index={tIdx} className="h-full">
                     <div
                       className={cn(
-                        "group relative flex h-full flex-col justify-between rounded-2xl p-5 sm:p-6 transition-all duration-300 shadow-xs hover:shadow-xl border overflow-hidden",
-                        isLiveMock
-                          ? "border-primary/50 bg-gradient-to-b from-primary/[0.07] via-card to-card hover:border-primary shadow-primary/10"
-                          : isNew
-                          ? "border-amber-500/40 bg-gradient-to-b from-amber-500/[0.06] via-card to-card hover:border-amber-500/70 shadow-amber-500/10"
-                          : "border-border/80 bg-gradient-to-b from-card via-card to-muted/20 hover:border-primary/50 hover:shadow-primary/10"
+                        'ps-card ps-lift relative flex h-full flex-col overflow-hidden p-5 sm:p-6',
+                        isLiveMock && 'ring-2 ring-[var(--ps-purple)]',
+                        !isLiveMock && isNew && 'ring-2 ring-[var(--ps-orange)]',
                       )}
                     >
-                      {/* Top highlight bar on hover */}
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div
+                        aria-hidden
+                        className={cn(
+                          'absolute -right-10 -top-10 size-28 rounded-full opacity-15',
+                          isLiveMock ? 'bg-[var(--ps-purple)]' : isNew ? 'bg-[var(--ps-orange)]' : 'bg-[var(--ps-blue)]',
+                        )}
+                      />
 
-                      <div className="flex flex-1 flex-col">
-                        {/* 1. Top Badges & Duration */}
-                        <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {isNew && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-xs">
-                                <Sparkles className="size-2.5 fill-white" /> Yangi
-                              </span>
-                            )}
-                            {isLiveMock ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-xs">
-                                <span className="size-1.5 rounded-full bg-white animate-ping" />
-                                Jonli Mock
-                              </span>
-                            ) : (
-                              <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[12px] font-bold text-primary">
-                                {CATEGORY_BADGE[t.category] || t.category}
-                              </span>
-                            )}
-                            {t.answer_mode && ANSWER_MODE_BADGE[t.answer_mode] && (
-                              <Badge variant="outline" className={cn("text-[12px] font-bold rounded-full", ANSWER_MODE_BADGE[t.answer_mode].className)}>
-                                {ANSWER_MODE_BADGE[t.answer_mode].label}
-                              </Badge>
-                            )}
-                          </div>
-
-                          {isLiveMock && t.scheduled_at ? (
-                            <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[12px] font-bold", cTheme.pill)}>
-                              <Clock className="size-3 text-primary" /> {formatScheduledTime(t.scheduled_at)}
+                      {/* Belgilar va davomiylik */}
+                      <div className="relative flex flex-wrap items-start justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {isNew && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-2.5 py-1 text-[11px] font-bold text-[#080808]">
+                              <Sparkles className="size-3" /> Yangi
+                            </span>
+                          )}
+                          {isLiveMock ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-purple)] px-2.5 py-1 text-[11px] font-bold text-white">
+                              <span className="size-1.5 animate-ping rounded-full bg-white" /> Jonli mock
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 font-mono text-[12px] font-bold text-muted-foreground bg-muted/60 px-2.5 py-0.5 rounded-full border border-border/70">
-                              <Clock className="size-3 text-primary" /> {t.duration_minutes} daq
+                            <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[11px] font-bold text-[var(--text-secondary)]">
+                              {CATEGORY_BADGE[t.category] || t.category}
+                            </span>
+                          )}
+                          {t.answer_mode && ANSWER_MODE_BADGE[t.answer_mode] && (
+                            <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[11px] font-bold text-[var(--text-secondary)]">
+                              {ANSWER_MODE_BADGE[t.answer_mode].label}
                             </span>
                           )}
                         </div>
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#080808] px-2.5 py-1 text-[11px] font-bold text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+                          <Clock className="size-3" />
+                          {isLiveMock && t.scheduled_at ? formatScheduledTime(t.scheduled_at) : `${t.duration_minutes} daq`}
+                        </span>
+                      </div>
 
-                        {/* 2. Title & Description */}
-                        <h3 className="text-[17px] sm:text-[18px] font-bold leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors">
-                          {t.title}
-                        </h3>
-                        <p className="mt-1.5 line-clamp-2 flex-1 text-[12.5px] sm:text-[13px] leading-relaxed text-muted-foreground">
-                          {t.description}
-                        </p>
+                      <h3 className="ps-display relative mt-4 text-[21px] leading-tight sm:text-[23px]">{t.title}</h3>
+                      <p className="relative mt-2 line-clamp-2 flex-1 text-[13px] leading-relaxed text-[var(--text-muted)]">
+                        {t.description}
+                      </p>
 
-                        <div className="my-3.5 h-px bg-border/60" />
-
-                        {/* 3. Author & Meta Pills */}
-                        <div className="space-y-2.5 mb-4">
-                          {t.author && (
-                            <div className="flex items-center gap-2 text-[12px]">
-                              {t.author.avatar ? (
-                                <img src={t.author.avatar} alt="" className="size-5 rounded-full object-cover ring-1 ring-border" />
-                              ) : (
-                                <div className="flex size-5 items-center justify-center rounded-full bg-primary/15 text-[12px] font-bold text-primary">
-                                  {t.author.name[0] || 'O'}
-                                </div>
-                              )}
-                              <span className="font-bold text-foreground truncate max-w-[190px]">{t.author.name}</span>
-                              <VerifiedBadge role={t.author.role} isSuperadmin={t.author.is_superadmin} isTeacher={t.author.is_teacher} size="xs" />
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between gap-2 text-[12px]">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-accent/60 text-[11.5px] font-bold text-foreground border border-border/80">
-                              <HelpCircle className="size-3.5 text-primary" />
-                              <span>{t.questions_count} ta savol</span>
+                      {t.author && (
+                        <div className="relative mt-4 flex items-center gap-2 text-[12px]">
+                          {t.author.avatar ? (
+                            <img src={t.author.avatar} alt="" className="size-6 rounded-full object-cover ring-2 ring-[var(--ps-orange)]" />
+                          ) : (
+                            <span className="flex size-6 items-center justify-center rounded-full bg-[var(--ps-purple)] text-[11px] font-bold text-white">
+                              {t.author.name[0] || 'O'}
                             </span>
-
-                            {t.subject && (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-primary/10 text-[12px] font-bold text-primary border border-primary/20">
-                                <BookOpen className="size-3 text-primary" />
-                                <span>{t.subject}</span>
-                              </span>
-                            )}
-                          </div>
+                          )}
+                          <span className="max-w-[190px] truncate font-bold">{t.author.name}</span>
+                          <VerifiedBadge role={t.author.role} isSuperadmin={t.author.is_superadmin} isTeacher={t.author.is_teacher} size="xs" />
                         </div>
+                      )}
 
-                        {/* 4. Action Button (Vivid, modern gradient button) */}
+                      <div className="relative mt-4 grid grid-cols-2 gap-2">
+                        <div className="rounded-2xl bg-[var(--ps-neutral)] px-3 py-2.5">
+                          <p className="ps-num text-[22px]">{t.questions_count}</p>
+                          <p className="mt-0.5 text-[11px] font-semibold text-[var(--text-muted)]">ta savol</p>
+                        </div>
+                        <div className="min-w-0 rounded-2xl bg-[var(--ps-neutral)] px-3 py-2.5">
+                          <p className="truncate text-[13px] font-bold">{currentSubjectObj?.name || t.subject || '—'}</p>
+                          <p className="mt-0.5 text-[11px] font-semibold text-[var(--text-muted)]">fan</p>
+                        </div>
+                      </div>
+
+                      {/* Harakat */}
+                      <div className="relative mt-5">
                         {locked ? (
-                          <Link
-                            href={buyHref}
-                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/15 px-4 text-[13px] font-bold text-amber-600 dark:text-amber-400 hover:border-amber-500/70 hover:bg-amber-500/20 transition-all active:scale-[0.98] shadow-xs"
-                          >
-                            <Lock className="size-3.5" />
-                            <span>
+                          <Link href={buyHref} className="ps-btn w-full justify-between bg-[var(--ps-orange)] text-[#080808]">
+                            <span className="inline-flex items-center gap-2">
+                              <Lock className="size-4" />
                               {data.mock_plan
                                 ? `${Number(t.price ?? data.mock_plan.price).toLocaleString('uz-UZ')} so'mga ochish`
                                 : (t.price ? `${Number(t.price).toLocaleString('uz-UZ')} so'mga ochish` : 'PRO obuna bilan ochiladi')}
                             </span>
-                            <ArrowRight className="size-4 ml-1" />
+                            <span className="ps-btn-arrow !bg-[#080808] !text-[var(--ps-orange)]"><ArrowUpRight className="size-4" /></span>
                           </Link>
                         ) : isLiveMock && isScheduledFuture ? (
-                          <Link
-                            href={`/tests/mock/${t.id}`}
-                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-4 text-[13px] font-bold text-white shadow-md shadow-blue-600/25 transition-all active:scale-[0.98]"
-                          >
-                            <span>Kutish zaliga kirish (Lobby)</span>
-                            <ArrowRight className="size-4" />
+                          <Link href={`/tests/mock/${t.id}`} className="ps-btn w-full justify-between bg-[var(--ps-purple)] text-white">
+                            Kutish zaliga kirish
+                            <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
                           </Link>
                         ) : isLiveMock ? (
                           <button
                             type="button"
-                            className="inline-flex h-11.5 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:opacity-95 px-4 text-[13px] font-bold text-white shadow-md shadow-blue-600/25 transition-all active:scale-[0.98] cursor-pointer"
+                            className="ps-btn w-full justify-between bg-[var(--ps-purple)] text-white"
                             onClick={() => start(t.id)}
                             disabled={starting !== null}
                           >
-                            {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
-                            <span>{starting === t.id ? 'Boshlanmoqda...' : 'Jonli imtihonga kirish 🚀'}</span>
-                            {starting !== t.id && <ArrowRight className="size-4" />}
+                            <span className="inline-flex items-center gap-2">
+                              {starting === t.id && <Loader2 className="size-4 animate-spin" />}
+                              {starting === t.id ? 'Boshlanmoqda...' : 'Jonli imtihonga kirish'}
+                            </span>
+                            <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
                           </button>
                         ) : (
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              className="inline-flex h-11.5 flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 px-4 text-[13px] sm:text-sm font-bold text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
+                              className="ps-btn ps-btn-ink flex-1 justify-between"
                               onClick={() => start(t.id)}
                               disabled={starting !== null}
                             >
-                              {starting === t.id ? <Loader2 className="size-4 animate-spin" /> : null}
-                              <span>{starting === t.id ? 'Boshlanmoqda...' : 'Testni boshlash'}</span>
-                              {starting !== t.id && <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />}
+                              <span className="inline-flex items-center gap-2">
+                                {starting === t.id && <Loader2 className="size-4 animate-spin" />}
+                                {starting === t.id ? 'Boshlanmoqda...' : 'Testni boshlash'}
+                              </span>
+                              <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
                             </button>
                             <button
                               type="button"
                               title="Ushbu testni Real BMB Stress zali rejimida ishlash"
-                              className="inline-flex h-11.5 items-center justify-center gap-1.5 rounded-2xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-3 text-xs font-bold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer shrink-0"
+                              aria-label="Stress zali rejimida ishlash"
+                              className="inline-flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[var(--ps-coral)] text-white transition-transform hover:-translate-y-0.5 active:scale-95"
                               onClick={() => {
                                 setStressPreselectedTest({ id: t.id, title: t.title });
                                 setStressModalOpen(true);
                               }}
                             >
-                              <Flame className="size-4 text-rose-500 animate-pulse" />
-                              <span>Stress</span>
+                              <Flame className="size-5" />
                             </button>
                           </div>
                         )}
                       </div>
                     </div>
-                  </Reveal>
+                  </InViewItem>
                 );
               })}
             </div>
 
-            {/* Test topilmaganda Empty State */}
             {data?.tests.length === 0 && (
-              <div className="rounded-2xl bg-card border border-border py-14 px-4 text-center space-y-3">
-                <PremiumIcon icon={FileCheck2} tone="zinc" size="lg" className="mx-auto" />
-                <h4 className="text-base font-bold text-foreground">
-                  {search ? `"${search}" bo'yicha test topilmadi` : "Bu bo'limda hozircha testlar mavjud emas"}
+              <div className="ps-card flex flex-col items-center px-6 py-14 text-center">
+                <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                  <FileCheck2 className="size-7" />
+                </span>
+                <h4 className="ps-display mt-4 text-[24px]">
+                  {search ? `"${search}" bo'yicha test topilmadi` : "Bu bo'limda hozircha testlar yo'q"}
                 </h4>
-                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
-                  Boshqa subkategoriya yoki formatni tanlab ko&apos;ring, yoxud barcha fanlarga qayting.
+                <p className="mt-2 max-w-sm text-sm text-[var(--text-muted)]">
+                  Boshqa formatni tanlab ko&apos;ring yoki barcha fanlarga qayting.
                 </p>
-                <div className="pt-2 flex justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                <div className="mt-5 flex flex-wrap justify-center gap-2">
+                  <button
+                    type="button"
                     onClick={() => { setCategory('all'); setAnswerMode('all'); setSearch(''); }}
-                    className="rounded-full text-xs cursor-pointer"
+                    className="ps-btn ps-btn-ghost"
                   >
                     Filtrlarni tozalash
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleBackToAllSubjects}
-                    className="rounded-full text-xs cursor-pointer"
-                  >
+                  </button>
+                  <button type="button" onClick={handleBackToAllSubjects} className="ps-btn ps-btn-ink">
                     Barcha fanlar
-                  </Button>
+                  </button>
                 </div>
               </div>
             )}
           </div>
-        ))}
+        )))}
         {/* Real BMB Stress Mode Launch Modal */}
         <BmbStressLaunchModal
           open={stressModalOpen}
@@ -1828,6 +1467,6 @@ export default function TestsPage() {
           preselectedTitle={stressPreselectedTest?.title}
         />
       </main>
-    </>
+    </div>
   );
 }

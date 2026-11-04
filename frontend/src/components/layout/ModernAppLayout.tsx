@@ -15,6 +15,8 @@ interface ModernAppLayoutProps {
   unreadCount?: number;
   onNotificationsClick?: () => void;
   onLogout?: () => void;
+  /** "pastel" — editorial pastel tema (hozircha faqat Dashboard). */
+  variant?: 'default' | 'pastel';
 }
 
 export default function ModernAppLayout({
@@ -23,6 +25,7 @@ export default function ModernAppLayout({
   unreadCount = 0,
   onNotificationsClick,
   onLogout,
+  variant = 'default',
 }: ModernAppLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
@@ -30,7 +33,13 @@ export default function ModernAppLayout({
   const handleLogout = onLogout || logout;
 
   return (
-    <div className="min-h-screen w-full bg-background text-foreground transition-colors duration-200">
+    <div
+      className={
+        variant === 'pastel'
+          ? 'theme-pastel min-h-screen w-full text-foreground'
+          : 'min-h-screen w-full bg-background text-foreground transition-colors duration-200'
+      }
+    >
       <CosmeticTheme />
 
       {/* Minimalist Sidebar (Desktop fixed + Mobile drawer) */}

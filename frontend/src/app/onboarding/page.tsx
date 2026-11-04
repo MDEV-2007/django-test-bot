@@ -77,7 +77,8 @@ export default function OnboardingPage() {
   // 7-Savollik Dofamin Onboarding
   if (showBlitz) {
     return (
-      <div className="relative flex min-h-[85vh] flex-1 flex-col items-center justify-center p-4">
+      <div className="theme-pastel min-h-screen w-full">
+        <main className="page-shell-focus mx-auto w-full space-y-5 p-3 pb-14 sm:p-5 lg:p-6">
         <DopamineOnboarding
           subject={urlSubject}
           onComplete={async () => {
@@ -85,6 +86,7 @@ export default function OnboardingPage() {
             router.push(urlSubject ? `/sprint?subject=${urlSubject}&count=10` : '/sprint?subject=tarix&count=10');
           }}
         />
+        </main>
       </div>
     );
   }

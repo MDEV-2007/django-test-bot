@@ -136,7 +136,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
       <nav
         aria-label="Mobil navigatsiya"
         className={cn(
-          'ilm-mobile-tabbar pointer-events-auto flex w-full max-w-[440px] items-center justify-between gap-1 rounded-2xl p-1.5 backdrop-blur-2xl saturate-[190%] transition-all duration-300',
+          'ps-tabbar ilm-mobile-tabbar pointer-events-auto flex w-full max-w-[440px] items-center justify-between gap-1 rounded-2xl p-1.5 backdrop-blur-2xl saturate-[190%] transition-all duration-300',
           isDark
             ? 'border border-white/[0.14] bg-[#1C1C1E]/88 shadow-[0_18px_44px_rgba(0,0,0,0.68),inset_0_1px_0_rgba(255,255,255,0.12)]'
             : 'border border-black/[0.08] bg-white/86 shadow-[0_14px_38px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.95)]'
@@ -163,7 +163,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
                   layoutId="ios-mobile-tab-pill"
                   transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   className={cn(
-                    'inset-0 absolute rounded-xl',
+                    'ps-tab-pill inset-0 absolute rounded-xl',
                     isDark
                       ? 'bg-white/[0.10] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]'
                       : 'bg-[#007AFF]/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'

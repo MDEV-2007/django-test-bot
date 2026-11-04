@@ -28,14 +28,15 @@ export default function SingleChoiceQuestion({
             /* Tanlanganda karta bir zumda "nafas oladi" — javob qabul qilinganini
                his qildiradigan yagona signal (ovoz o'chirilgan bo'lishi mumkin). */
             whileTap={reduce ? undefined : { scale: 0.985 }}
-            className={`tactile-btn reading-scale flex w-full items-center justify-between gap-3.5 rounded-2xl p-4 text-left font-medium leading-relaxed transition-colors duration-150 sm:p-4.5 ${
+            data-selected={isSelected ? 'true' : undefined}
+            className={`ps-choice tactile-btn reading-scale flex w-full items-center justify-between gap-3.5 rounded-2xl p-4 text-left font-medium leading-relaxed transition-colors duration-150 sm:p-4.5 ${
               isSelected
                 ? 'border-2 border-[var(--accent)] bg-[var(--accent)]/[0.16] text-[var(--text-primary)] shadow-md shadow-[var(--accent)]/15'
                 : 'border border-[var(--border-soft)] bg-[var(--surface-input)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
             }`}
           >
             <div className="flex items-center gap-3.5">
-              <span className={`flex size-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-colors ${isSelected ? 'bg-[var(--accent)] text-[var(--on-accent)]' : 'bg-[var(--surface-hover)] text-[var(--text-muted)]'}`}>
+              <span className={`ps-choice-letter flex size-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-colors ${isSelected ? 'bg-[var(--accent)] text-[var(--on-accent)]' : 'bg-[var(--surface-hover)] text-[var(--text-muted)]'}`}>
                 {LETTERS[i] || i + 1}
               </span>
               <span className="leading-snug">{c.text}</span>
@@ -47,7 +48,7 @@ export default function SingleChoiceQuestion({
                 transition={spring}
                 className="shrink-0"
               >
-                <CheckCircle2 className="size-5 text-[var(--accent-text)]" />
+                <CheckCircle2 className="ps-choice-check size-5 text-[var(--accent-text)]" />
               </motion.span>
             )}
           </motion.button>

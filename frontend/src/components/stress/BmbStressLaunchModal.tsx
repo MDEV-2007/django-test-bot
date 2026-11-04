@@ -69,7 +69,7 @@ export default function BmbStressLaunchModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl max-h-[92vh] flex flex-col p-0 overflow-hidden border-2 border-rose-500/40 bg-card">
+      <DialogContent className="ps-shell ps-dialog sm:max-w-xl max-h-[92vh] flex flex-col p-0 overflow-hidden border-2 border-rose-500/40 bg-card">
         {/* Exciting Stress Header */}
         <div className="p-4 sm:p-6 bg-gradient-to-br from-rose-950 via-slate-900 to-amber-950 text-white space-y-2 relative overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">

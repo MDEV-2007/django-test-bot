@@ -14,7 +14,6 @@ import {
   MapPin,
   Loader2,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -213,80 +212,92 @@ export default function SmartB2BSuggestionCard() {
 
   return (
     <>
-      <div ref={cardRef} className="relative overflow-hidden rounded-[28px] border border-amber-500/30 bg-gradient-to-b from-amber-500/[0.08] via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-xl backdrop-blur-xl">
+      <div ref={cardRef} className="relative isolate overflow-hidden rounded-[28px] bg-[#FFFCF7] p-5 text-[#080808] shadow-[0_1px_2px_rgba(40,20,60,0.05),0_18px_40px_-26px_rgba(60,30,110,0.45)] sm:p-6 dark:bg-[#1C1726] dark:text-[#F6F1EA]">
+        {/* Dekor: apelsin burchak + punktir halqa */}
+        <span aria-hidden className="absolute -right-10 -top-10 -z-10 size-32 rounded-full bg-[#FFB82E] opacity-90" />
+        <span aria-hidden className="absolute -right-2 -top-2 -z-10 size-16 rounded-full border-2 border-dashed border-[#FFFCF7]/80" />
+        <span aria-hidden className="absolute -bottom-12 -left-10 -z-10 size-32 rounded-full bg-[#7659C7] opacity-15" />
+
+        <span className="inline-flex items-center rounded-full bg-[#080808]/6 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#5E5868] dark:bg-white/10 dark:text-white/70">
+          {t('Reklama')}
+        </span>
+
         {/* AI tavsiyasi — faqat haqiqiy test natijasi bo'lsa */}
         {diagnosis && (
-          <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 mb-4 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
-              <Sparkles className="size-4" />
+          <div className="mt-4 space-y-1.5 rounded-[20px] bg-[#F7F4EF] p-3.5 dark:bg-white/8">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#8A5A00] dark:text-[#FFB82E]">
+              <Sparkles className="size-3.5" />
               <span>{t('AI tavsiyasi: zaif mavzu')}</span>
             </div>
-            <p className="text-xs sm:text-[13px] text-zinc-300 leading-relaxed">
-              {t('Siz')} <strong className="text-white">&quot;{t(diagnosis.weakest_topic)}&quot;</strong> {t('mavzusida')}{' '}
-              <span className="font-mono text-rose-400 font-bold">{diagnosis.mastery_percentage}%</span> {t("natija ko'rsatmoqdasiz.")}{' '}
-              {t("Bu mavzuni ustoz bilan yopish uchun quyidagi o'quv markaz tavsiya etiladi.")}
+            <p className="text-[12px] leading-relaxed text-[#5E5868] dark:text-white/70">
+              {t('Siz')} <strong className="text-[#080808] dark:text-white">&quot;{t(diagnosis.weakest_topic)}&quot;</strong> {t('mavzusida')}{' '}
+              <span className="rounded-full bg-[#F0523D] px-1.5 py-0.5 font-bold text-white">{diagnosis.mastery_percentage}%</span>{' '}
+              {t("natija ko'rsatmoqdasiz.")} {t("Bu mavzuni ustoz bilan yopish uchun quyidagi o'quv markaz tavsiya etiladi.")}
             </p>
           </div>
         )}
 
-        <span className="mb-3 inline-flex items-center rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-zinc-200">
-          {t('Reklama')}
-        </span>
-
         {/* O'quv markaz */}
-        <div className="flex items-start gap-3.5 mb-4">
-          <Avatar className="size-12 rounded-2xl border border-white/10 shrink-0">
+        <div className="mt-4 flex items-start gap-3.5">
+          <Avatar className="size-14 shrink-0 rounded-[18px] ring-2 ring-[#FFB82E] ring-offset-2 ring-offset-[#FFFCF7] dark:ring-offset-[#1C1726]">
             <AvatarImage src={campaign.logo} alt={campaign.center_name} className="object-cover" />
-            <AvatarFallback className="font-bold bg-amber-500/20 text-amber-300">
+            <AvatarFallback className="rounded-[18px] bg-[#FFB82E] font-bold text-[#080808]">
               {campaign.center_name.slice(0, 2)}
             </AvatarFallback>
           </Avatar>
-
-          <div className="min-w-0 space-y-1">
-            <h3 className="text-sm sm:text-base font-black text-white truncate">{campaign.center_name}</h3>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge className="bg-amber-500 text-black font-black text-[10px] px-2 py-0.5">
-                🎁 {t('1-dars BEPUL')}
-              </Badge>
+          <div className="min-w-0 space-y-1.5">
+            <h3 className="line-clamp-2 text-[19px] font-bold leading-tight tracking-[-0.03em] [font-family:var(--font-grotesk),var(--font-sans),sans-serif]">
+              {campaign.center_name}
+            </h3>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-full bg-[#FFB82E] px-2.5 py-0.5 text-[11px] font-bold text-[#080808]">
+                🎁 {t('1-dars bepul')}
+              </span>
+              <span className="rounded-full bg-[#4C806B] px-2.5 py-0.5 text-[11px] font-bold text-white">+{REWARD_COINS} 🪙</span>
               {campaign.target_region && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-400">
-                  <MapPin className="size-3 text-amber-400" />
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#F7F4EF] px-2.5 py-0.5 text-[11px] font-semibold text-[#5E5868] dark:bg-white/10 dark:text-white/70">
+                  <MapPin className="size-3" />
                   {t(campaign.target_region)}
                 </span>
               )}
             </div>
-            <p className="text-xs text-zinc-300 font-medium line-clamp-2">{campaign.title}</p>
           </div>
         </div>
+        <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-[#5E5868] dark:text-white/70">{campaign.title}</p>
 
         {isDone ? (
-          <div className="flex items-start gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-600/15 px-4 py-3 text-xs sm:text-sm font-bold text-emerald-300">
-            <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-emerald-400" />
+          <div className="mt-4 flex items-start gap-2 rounded-[20px] bg-[#4C806B] px-4 py-3 text-[13px] font-bold text-white">
+            <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
             <span>
               {submitState === 'submitted'
-                ? t(`✅ Arizangiz qabul qilindi! +${REWARD_COINS} 🪙 hisobingizga qo'shildi`)
+                ? t(`Arizangiz qabul qilindi! +${REWARD_COINS} 🪙 hisobingizga qo'shildi`)
                 : t("Arizangiz allaqachon yuborilgan — markaz siz bilan bog'lanadi.")}
             </span>
           </div>
         ) : (
-          <Button
+          <button
             type="button"
             onClick={handleOpenConsent}
-            className="w-full h-12 rounded-2xl font-black text-xs sm:text-sm shadow-xl transition-all cursor-pointer bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black shadow-orange-500/20"
+            className="group mt-4 flex h-12 w-full cursor-pointer items-center justify-between gap-2 rounded-full bg-[#FFB82E] pl-4 pr-1.5 text-[13px] font-bold text-[#080808] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
           >
-            <span className="flex items-center gap-2">
-              <PhoneCall className="size-4" />
-              {t(`📞 Bepul Darsga Yozilish (+${REWARD_COINS} 🪙)`)}
+            <span className="flex min-w-0 items-center gap-2">
+              <PhoneCall className="size-4 shrink-0" />
+              <span className="truncate">{t('Bepul darsga yozilish')}</span>
             </span>
-          </Button>
+            <span className="flex shrink-0 items-center gap-1.5">
+              <span className="flex size-9 items-center justify-center rounded-full bg-[#080808] text-[#FFB82E] transition-transform group-hover:-rotate-45">
+                <ArrowRight className="size-4" />
+              </span>
+            </span>
+          </button>
         )}
 
-        <div className="flex items-center justify-between text-[11px] text-zinc-500 mt-3 pt-2 border-t border-white/5">
+        <div className="mt-4 flex items-center justify-between border-t border-[#080808]/8 pt-3 text-[11px] text-[#8A8494] dark:border-white/10 dark:text-white/50">
           <span className="flex items-center gap-1">
-            <GraduationCap className="size-3.5 text-amber-400" />
+            <GraduationCap className="size-3.5 text-[#F0523D]" />
             {t('Homiy kontent')}
           </span>
-          <Link href="/feed" className="hover:text-zinc-300 flex items-center gap-0.5 font-medium">
+          <Link href="/feed" className="flex items-center gap-0.5 font-semibold hover:text-[#080808] dark:hover:text-white">
             {t('Hamjamiyat lentasi')} <ArrowRight className="size-3" />
           </Link>
         </div>
@@ -294,24 +305,24 @@ export default function SmartB2BSuggestionCard() {
 
       {/* ── 2-BOSQICHLI ROZILIK OYNASI ── */}
       <Dialog open={isConsentOpen} onOpenChange={(open) => !submitting && setIsConsentOpen(open)}>
-        <DialogContent className="sm:max-w-md bg-zinc-950 border border-amber-500/30 text-white rounded-3xl p-6 shadow-2xl">
+        <DialogContent className="ps-shell ps-dialog sm:max-w-md p-6">
           <DialogHeader className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold w-fit">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFB82E] text-[#080808] text-xs font-bold w-fit">
               <ShieldCheck className="size-3.5" />
               <span>{t('Faqat sizning roziligingiz bilan')}</span>
             </div>
-            <DialogTitle className="text-lg sm:text-xl font-black text-white leading-snug">
+            <DialogTitle className="text-[22px] sm:text-[26px] font-bold leading-tight text-[var(--text-primary)]">
               🎓 {campaign.center_name} — {t('Bepul sinov darsiga yozilish')}
             </DialogTitle>
-            <DialogDescription className="text-xs text-zinc-300">
+            <DialogDescription className="text-xs text-[var(--text-muted)]">
               {t("Ma'lumotlaringizni tekshiring. Ular faqat tasdiqlaganingizdan keyin yuboriladi.")}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleConfirmLead} className="space-y-4 pt-2" noValidate>
             <div className="space-y-1.5">
-              <label htmlFor="b2b-full-name" className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
-                <User className="size-3.5 text-amber-400" />
+              <label htmlFor="b2b-full-name" className="text-xs font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
+                <User className="size-3.5 text-[var(--ps-orange)]" />
                 <span>{t('Ism-familiyangiz')}</span>
               </label>
               <Input
@@ -320,14 +331,14 @@ export default function SmartB2BSuggestionCard() {
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="masalan: Azizbek Karimov"
                 autoComplete="name"
-                className="h-11 rounded-xl bg-zinc-900 border-white/10 text-white text-sm"
+                className="h-11 rounded-full border-0 bg-[var(--ps-neutral)] px-4 text-sm text-[var(--text-primary)]"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="b2b-phone" className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
-                <Phone className="size-3.5 text-amber-400" />
+              <label htmlFor="b2b-phone" className="text-xs font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
+                <Phone className="size-3.5 text-[var(--ps-orange)]" />
                 <span>{t('Telefon raqamingiz')}</span>
               </label>
               <Input
@@ -343,7 +354,7 @@ export default function SmartB2BSuggestionCard() {
                 placeholder="+998 90 123 45 67"
                 aria-invalid={phoneError ? true : undefined}
                 aria-describedby={phoneError ? 'b2b-phone-error' : undefined}
-                className="h-11 rounded-xl bg-zinc-900 border-white/10 text-white text-sm font-mono"
+                className="h-11 rounded-full border-0 bg-[var(--ps-neutral)] px-4 text-sm font-mono text-[var(--text-primary)]"
                 required
               />
               {phoneError && (
@@ -353,7 +364,7 @@ export default function SmartB2BSuggestionCard() {
               )}
             </div>
 
-            <label className="flex items-start gap-2 text-xs text-zinc-300 cursor-pointer">
+            <label className="flex items-start gap-2 text-xs text-[var(--text-secondary)] cursor-pointer">
               <input
                 type="checkbox"
                 checked={guardianConfirmed}
@@ -362,7 +373,7 @@ export default function SmartB2BSuggestionCard() {
               />
               <span>{t("Men 18 yoshdan kattaman yoki ota-onam (vasiyim) roziligi bor.")}</span>
             </label>
-            <p className="p-3 rounded-xl bg-black/40 border border-white/5 text-[11px] text-zinc-400 leading-relaxed">
+            <p className="rounded-[18px] bg-[var(--ps-neutral)] p-3 text-[11px] leading-relaxed text-[var(--text-muted)]">
               {t("Tasdiqlash orqali o'quv markaz mutaxassisi siz bilan bog'lanib, bepul dars vaqtini belgilashiga rozilik bildirasiz.")}
             </p>
 
@@ -372,14 +383,14 @@ export default function SmartB2BSuggestionCard() {
                 variant="outline"
                 onClick={() => setIsConsentOpen(false)}
                 disabled={submitting}
-                className="sm:flex-1 h-11 rounded-xl border-white/10 text-zinc-300"
+                className="sm:flex-1 h-11 rounded-full border-[var(--border-strong)] bg-transparent text-[var(--text-primary)]"
               >
                 {t('Bekor qilish')}
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="sm:flex-[1.4] min-h-11 h-auto py-2 whitespace-normal rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs sm:text-sm"
+                className="sm:flex-[1.4] min-h-11 h-auto py-2 whitespace-normal rounded-full bg-[#080808] text-[#FFFCF7] hover:bg-black font-bold text-xs sm:text-sm dark:bg-[#FFFCF7] dark:text-[#080808]"
               >
                 {submitting ? (
                   <span className="flex items-center gap-2">
@@ -387,7 +398,7 @@ export default function SmartB2BSuggestionCard() {
                     {t('Yuborilmoqda...')}
                   </span>
                 ) : (
-                  t(`✅ Tasdiqlash va +${REWARD_COINS} 🪙 Olish`)
+                  t(`Tasdiqlash va +${REWARD_COINS} 🪙 olish`)
                 )}
               </Button>
             </div>

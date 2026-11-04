@@ -12,8 +12,7 @@ import {
 import { toast } from 'sonner';
 
 import AppShell from '@/components/AppShell';
-import PageHero from '@/components/student/PageHero';
-import { Panel, PanelLabel, PanelLink, PageHeader, Pill, IconTile, Bar, EmptyNote } from '@/components/design/kit';
+import { Panel, PanelLabel, PanelLink, Pill, IconTile, Bar, EmptyNote } from '@/components/design/kit';
 import { Sigma, Atom, FlaskConical, Landmark, Check } from 'lucide-react';
 import TopicCheatSheetView from '@/components/study/TopicCheatSheetView';
 import { Gamepad2, Swords, Compass, MapPin } from 'lucide-react';
@@ -507,11 +506,11 @@ export default function StudyRoomPage() {
   const currentAmbient = AMBIENT_SOUNDS.find((s) => s.id === activeSound);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors">
+    <div className="theme-pastel min-h-screen text-foreground flex flex-col">
       {!isFullscreen && <AppShell />}
 
       <main className={cn(
-        "flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6 pb-20",
+        "ps-scope flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8 pb-24 overflow-x-clip",
         isFullscreen && "max-w-none p-4 sm:p-8 flex flex-col justify-center min-h-screen"
       )}>
         {/* ============================================================ */}
@@ -543,14 +542,14 @@ export default function StudyRoomPage() {
                 <SubjectIcon className="size-3.5" />
                 <span>{activeMission.subject}</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+              <h2 className="ps-display text-[32px] sm:text-[44px] text-foreground">
                 {activeMission.topic}
               </h2>
             </div>
 
             {/* Giant Countdown */}
             <div className="py-6 space-y-3">
-              <span className="font-mono text-7xl sm:text-8xl font-bold tracking-tight text-foreground">
+              <span className="ps-num text-[88px] sm:text-[120px] text-foreground">
                 {formatTime(timeLeft)}
               </span>
 
@@ -573,7 +572,7 @@ export default function StudyRoomPage() {
             </div>
 
             {/* Inline Ambient Audio Controller */}
-            <div className="flex flex-wrap items-center justify-center gap-3 p-3 rounded-xl bg-card border border-border shadow-xs max-w-lg mx-auto">
+            <div className="flex flex-wrap items-center justify-center gap-3 p-3 rounded-full bg-[var(--ps-paper)] shadow-[var(--ds-panel-shadow)] max-w-lg mx-auto">
               <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
                 <Headphones className="size-4 text-primary" />
                 <span>{currentAmbient ? `${currentAmbient.name} • ${Math.round(volume * 100)}%` : 'Ovoz o\'chirilgan'}</span>
@@ -608,7 +607,7 @@ export default function StudyRoomPage() {
                 {activeMission.tasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 border border-border text-xs transition-colors"
+                    className="flex items-center justify-between p-3 rounded-2xl bg-[var(--ps-neutral)] text-xs transition-colors"
                   >
                     <button
                       onClick={() => toggleTask(task.id)}
@@ -690,23 +689,58 @@ export default function StudyRoomPage() {
           /* ODDIY REJIM: AI TAVSIYA, FOKUS MISSIYASI & STREAK            */
           /* ============================================================ */
           <>
-            <PageHeader
-              icon={BookOpen}
-              eyebrow="Shaxsiy o'quv studiyasi"
-              title="O'qish maydoni"
-              subtitle="Darslar, 60 soniyalik shpargalkalar, flashcards va xatolar ustida ishlash — barchasi bir joyda."
-              right={
-                <button
-                  type="button"
-                  onClick={() => setIsFullscreen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs font-semibold text-foreground hover:border-[var(--brand-border)] cursor-pointer"
-                >
-                  <Maximize2 className="size-3.5" /> Zen rejim
-                </button>
-              }
-            />
+            {/* ── Hero ── */}
+            <section className="relative grid items-center gap-8 pt-2 lg:grid-cols-[1.25fr_0.75fr]">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="ps-chip">
+                    <span className="size-2 rounded-full bg-[var(--ps-green)]" /> Shaxsiy o&apos;quv studiyasi
+                  </span>
+                  {currentStreak > 0 && (
+                    <span className="ps-chip">
+                      <Flame className="size-3.5 text-[var(--ps-coral)]" /> {currentStreak} kunlik seriya
+                    </span>
+                  )}
+                </div>
+                <h1 className="ps-display mt-5 text-[46px] sm:text-[68px] xl:text-[80px]">
+                  O&apos;qish{' '}
+                  <span className="relative inline-block text-[var(--ps-purple)]">
+                    maydoni
+                    <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)] sm:-bottom-3 sm:h-4">
+                      <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+                    </svg>
+                  </span>
+                  <span className="text-[var(--ps-coral)]">.</span>
+                </h1>
+                <p className="mt-7 max-w-lg text-[15px] leading-relaxed text-[var(--text-secondary)]">
+                  Darslar, 60 soniyalik shpargalkalar, flashcards va xatolar ustida ishlash — barchasi bir joyda.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button type="button" onClick={() => setIsFullscreen(true)} className="ps-btn ps-btn-ink">
+                    <Maximize2 className="size-4" /> Zen rejim
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </button>
+                  <Link href="/learning" className="ps-btn ps-btn-ghost">
+                    Darslarga o&apos;tish
+                  </Link>
+                </div>
+              </div>
 
-            <nav className="flex gap-1 overflow-x-auto no-scrollbar rounded-xl bg-[var(--ds-subtle)] p-1">
+              {/* Taymer kompozitsiyasi — joriy pomodoro uzunligi */}
+              <div className="relative mx-auto aspect-square w-full max-w-[230px] sm:max-w-[320px]">
+                <div aria-hidden className="absolute inset-[4%] rounded-full bg-[var(--ps-green)]" />
+                <div aria-hidden className="absolute -right-2 bottom-[4%] size-[34%] rounded-tl-full bg-[var(--ps-orange)]" />
+                <div aria-hidden className="ps-dots absolute left-0 top-0 size-[28%] rounded-2xl text-[var(--ps-ink)] opacity-25" />
+                <div className="absolute inset-[16%] flex flex-col items-center justify-center rounded-full border-[6px] border-[#FFFCF7] bg-[#080808] text-[#FFFCF7]">
+                  <span className="ps-eyebrow text-white/60">Fokus</span>
+                  <span className="ps-num mt-1 text-[44px] sm:text-[56px]">{formatTime(timeLeft)}</span>
+                  <span className="mt-1 text-[11px] font-semibold text-[var(--ps-orange)]">{isRunning ? 'Davom etmoqda' : 'Tayyor'}</span>
+                </div>
+              </div>
+            </section>
+
+            {/* ── O'quv bo'limlari ── */}
+            <nav className="ds-seg flex w-full gap-1 overflow-x-auto no-scrollbar sm:w-fit">
               {[
                 { href: '/learning', label: 'Darslar', icon: BookOpen },
                 { href: '/study', label: 'Fokus xonasi', icon: Target, active: true },
@@ -716,12 +750,8 @@ export default function StudyRoomPage() {
                 <Link
                   key={tab.href}
                   href={tab.href}
-                  className={cn(
-                    'inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition',
-                    tab.active
-                      ? 'bg-[var(--surface-card)] text-foreground shadow-[0_1px_3px_rgba(15,23,42,0.08)]'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
+                  data-active={tab.active ? 'true' : undefined}
+                  className="ds-seg-item inline-flex shrink-0 items-center gap-1.5 font-semibold"
                 >
                   <tab.icon className="size-3.5" />
                   {tab.label}
@@ -731,58 +761,60 @@ export default function StudyRoomPage() {
 
             <StudyOverview data={masteryData} loading={masteryLoading} />
 
-            {/* ============================================================ */}
-            {/* 🧭 4 TA YADROVIY O'RGANISH TABLARI (Segmented Learning Hub)  */}
-            {/* ============================================================ */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {/* ── 4 ta o'rganish bo'limi ── */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {[
-                { id: 'cheatsheets', label: '🧠 60s Shpargalkalar', badge: '60s' },
-                { id: 'games', label: '🎮 Fan O\'yinlari & Arena', badge: 'XP' },
-                { id: 'library', label: '📚 Audio & Kitoblar', badge: 'PDF' },
-                { id: 'focus', label: '🎧 Fokus Xonasi (Zen)', badge: 'Zen' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id as 'cheatsheets' | 'games' | 'library' | 'focus');
-                    soundFX.click();
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer",
-                    activeTab === tab.id
-                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                      : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60"
-                  )}
-                >
-                  <span>{t(tab.label)}</span>
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold",
-                    activeTab === tab.id ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
-                  )}>
-                    {tab.badge}
-                  </span>
-                </button>
-              ))}
+                { id: 'cheatsheets', label: '60s shpargalkalar', badge: '60s', icon: Zap, tone: 'bg-[var(--ps-purple)] text-white' },
+                { id: 'games', label: "Fan o'yinlari & Arena", badge: 'XP', icon: Gamepad2, tone: 'bg-[var(--ps-orange)] text-[#080808]' },
+                { id: 'library', label: 'Audio & kitoblar', badge: 'PDF', icon: BookOpen, tone: 'bg-[var(--ps-blue)] text-[#080808]' },
+                { id: 'focus', label: 'Fokus xonasi (Zen)', badge: 'Zen', icon: Headphones, tone: 'bg-[var(--ps-green)] text-white' },
+              ].map((tab) => {
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      setActiveTab(tab.id as 'cheatsheets' | 'games' | 'library' | 'focus');
+                      soundFX.click();
+                    }}
+                    className={cn(
+                      'relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-[24px] p-4 text-left transition-transform hover:-translate-y-1 sm:p-5',
+                      tab.tone,
+                      active && 'ps-mode-active',
+                    )}
+                  >
+                    <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/15" />
+                    <span className="relative flex w-full items-center justify-between">
+                      <span className="inline-flex size-10 items-center justify-center rounded-full bg-black/15">
+                        <tab.icon className="size-5" />
+                      </span>
+                      <span className="rounded-full bg-black/15 px-2 py-0.5 text-[11px] font-bold">{tab.badge}</span>
+                    </span>
+                    <span className="ps-display relative text-[18px] sm:text-[21px]">{t(tab.label)}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* ── 1-TAB: 60s ANTI-DARSLIK VA SHPARGALKALAR ── */}
+            {/* ── 1-TAB: 60s shpargalkalar ── */}
             {activeTab === 'cheatsheets' && (
               <div className="space-y-5">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="space-y-0.5">
-                    <h2 className="text-lg font-bold text-foreground">Anti-Darslik: 60 Soniyalik Shpargalkalar</h2>
-                    <p className="text-xs text-muted-foreground">800 betlik darslikni o'qimasdan, imtihonda tushadigan eng muhim faktlar va formulalar</p>
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="ps-eyebrow text-[var(--text-muted)]">Anti-darslik</p>
+                    <h2 className="ps-display mt-2 text-[28px] sm:text-[36px]">60 soniyalik <span className="text-[var(--ps-purple)]">shpargalkalar</span></h2>
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">Imtihonda tushadigan eng muhim faktlar va formulalar</p>
                   </div>
-
-                  <div className="flex items-center gap-1.5 overflow-x-auto p-1 rounded-xl bg-muted/50 border border-border">
+                  <div className="ds-seg flex max-w-full gap-1 overflow-x-auto no-scrollbar">
                     {['Tarix', 'Ona tili', 'Matematika', 'Biologiya', 'Ingliz tili'].map((sub) => (
                       <button
                         key={sub}
+                        type="button"
+                        data-active={studySubject === sub ? 'true' : undefined}
                         onClick={() => { setStudySubject(sub); soundFX.click(); }}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer",
-                          studySubject === sub ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-                        )}
+                        className="ds-seg-item shrink-0 cursor-pointer font-semibold"
                       >
                         {sub}
                       </button>
@@ -790,59 +822,42 @@ export default function StudyRoomPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {[
                     { id: 1, title: studySubject === 'Tarix' ? "Qadimgi davlatlar va ilk sivilizatsiyalar" : `${studySubject}: Asosiy qoidalar va formulalar`, traps: "Inkor savollari va davrlar chalkashishi", bullets: 3, mins: 1 },
                     { id: 2, title: studySubject === 'Tarix' ? "Amir Temur va Temuriylar saltanati" : `${studySubject}: Imtihon qopqonlari`, traps: "Yillar va jang maydonlari nozik farqlari", bullets: 4, mins: 1 },
                     { id: 3, title: studySubject === 'Tarix' ? "O'zbek xonliklari va mustaqillik sari" : `${studySubject}: Test tahlili va formulalar`, traps: "Shaxslar va asarlar mualliflari", bullets: 3, mins: 1 },
-                  ].map((topicItem) => (
-                    <Card key={topicItem.id} className="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-xs hover:border-primary/40 transition">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-[12px] bg-primary/10 border-primary/20 text-primary font-bold">
-                          ⚡ 60s Shpargalka
-                        </Badge>
-                        <span className="text-[12px] font-mono text-muted-foreground flex items-center gap-1">
-                          <Clock className="size-3 text-amber-500" /> {topicItem.mins} daqiqa
-                        </span>
+                  ].map((topicItem, i) => (
+                    <div key={topicItem.id} className="ps-card ps-lift relative flex flex-col overflow-hidden p-5 sm:p-6">
+                      <div aria-hidden className={cn('absolute -right-10 -top-10 size-32 rounded-full opacity-20', ['bg-[var(--ps-purple)]', 'bg-[var(--ps-orange)]', 'bg-[var(--ps-green)]'][i % 3])} />
+                      <div className="relative flex items-center justify-between">
+                        <span className="rounded-full bg-[var(--ps-orange)] px-2.5 py-1 text-[11px] font-bold text-[#080808]">⚡ 60s shpargalka</span>
+                        <span className="ps-num text-[30px] text-[var(--text-faint)] opacity-50">{String(i + 1).padStart(2, '0')}</span>
                       </div>
-
-                      <div>
-                        <h3 className="text-sm font-bold text-foreground line-clamp-1">{topicItem.title}</h3>
-                        <p className="text-xs text-rose-500 font-medium mt-1 line-clamp-1">⚠️ Qopqon: {topicItem.traps}</p>
+                      <h3 className="ps-display relative mt-4 line-clamp-2 text-[21px]">{topicItem.title}</h3>
+                      <p className="relative mt-2 rounded-2xl bg-[var(--ps-coral)]/12 px-3 py-2 text-[12px] font-semibold text-[var(--ps-coral)]">
+                        ⚠️ Qopqon: {topicItem.traps}
+                      </p>
+                      <div className="relative mt-auto flex items-center gap-2 pt-5">
+                        <button type="button" onClick={() => setSelectedCheatTopic(topicItem)} className="ps-btn ps-btn-ink flex-1 justify-between">
+                          Shpargalkani ko&apos;rish
+                          <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                        </button>
+                        <Link href="/sprint" aria-label="Sprint" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ps-neutral)] text-[var(--text-primary)] transition-transform hover:-translate-y-0.5">
+                          <Zap className="size-4" />
+                        </Link>
                       </div>
-
-                      <div className="flex items-center gap-2 pt-1">
-                        <Button
-                          size="sm"
-                          onClick={() => setSelectedCheatTopic(topicItem)}
-                          className="flex-1 rounded-xl text-xs font-bold gap-1.5"
-                        >
-                          <Zap className="size-3.5" />
-                          <span>Shpargalkani ko'rish</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          asChild
-                          className="rounded-xl text-xs font-semibold"
-                        >
-                          <Link href="/sprint">
-                            <span>Sprint</span>
-                            <ArrowRight className="size-3 ml-1" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
 
-                {/* Shpargalka Modali */}
+                {/* Shpargalka modali */}
                 {selectedCheatTopic && (
                   <Dialog open={Boolean(selectedCheatTopic)} onOpenChange={() => setSelectedCheatTopic(null)}>
-                    <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6 rounded-3xl">
+                    <DialogContent className="ps-shell ps-dialog max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6 rounded-3xl">
                       <DialogHeader>
                         <DialogTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
-                          <Zap className="size-4 text-primary" />
+                          <Zap className="size-4 text-[var(--ps-purple)]" />
                           <span>{selectedCheatTopic.title}</span>
                         </DialogTitle>
                         <DialogDescription className="text-xs text-muted-foreground">
@@ -863,106 +878,76 @@ export default function StudyRoomPage() {
               </div>
             )}
 
-            {/* ── 2-TAB: FAN O'YINLARI VA 1v1 ARENA ── */}
+            {/* ── 2-TAB: Fan o'yinlari va arena ── */}
             {activeTab === 'games' && (
-              <div className="space-y-4">
-                <div className="space-y-0.5">
-                  <h2 className="text-lg font-bold text-foreground">Interaktiv Fan O'yinlari & Arena</h2>
-                  <p className="text-xs text-muted-foreground">O'yin o'ynab bilimni mustahkamlang, reytingda ko'tariling va bonus XP yutib oling</p>
+              <div className="space-y-5">
+                <div>
+                  <p className="ps-eyebrow text-[var(--text-muted)]">O&apos;ynab o&apos;rganing</p>
+                  <h2 className="ps-display mt-2 text-[28px] sm:text-[36px]">Fan o&apos;yinlari va <span className="text-[var(--ps-orange)]">arena</span></h2>
+                  <p className="mt-1 text-sm text-[var(--text-muted)]">O&apos;yin o&apos;ynab bilimni mustahkamlang, reytingda ko&apos;tariling va bonus XP yutib oling</p>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {[
-                    { title: "Tarixiy Xronologiya", desc: "Voqealarni to'g'ri vaqt tartibida terish", xp: "+50 XP", coins: "+20 🪙", href: "/games/timeline", icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" },
-                    { title: "Tarixiy Shaxslar", desc: "Hukmdorlar va kashfiyotlar mosligi", xp: "+60 XP", coins: "+25 🪙", href: "/games/character", icon: Gamepad2, color: "text-purple-500", bg: "bg-purple-500/10 border-purple-500/20" },
-                    { title: "Xaritalar & Hududlar", desc: "Davlatlar chegaralari va geografiya", xp: "+45 XP", coins: "+15 🪙", href: "/games/map", icon: MapPin, color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
-                    { title: "1v1 Ghost Battle", desc: "60 soniyada tengdoshlaringiz bilan duel", xp: "+100 XP", coins: "+50 🪙", href: "/battles", icon: Swords, color: "text-rose-500", bg: "bg-rose-500/10 border-rose-500/20" },
+                    { title: 'Tarixiy xronologiya', desc: "Voqealarni to'g'ri vaqt tartibida terish", xp: '+50 XP', coins: '+20 🪙', href: '/games/timeline', icon: Clock, tone: 'bg-[var(--ps-orange)] text-[#080808]', dark: false },
+                    { title: 'Tarixiy shaxslar', desc: 'Hukmdorlar va kashfiyotlar mosligi', xp: '+60 XP', coins: '+25 🪙', href: '/games/character', icon: Gamepad2, tone: 'bg-[var(--ps-purple)] text-white', dark: true },
+                    { title: 'Xaritalar & hududlar', desc: 'Davlatlar chegaralari va geografiya', xp: '+45 XP', coins: '+15 🪙', href: '/games/map', icon: MapPin, tone: 'bg-[var(--ps-green)] text-white', dark: true },
+                    { title: '1v1 Ghost Battle', desc: '60 soniyada tengdoshlaringiz bilan duel', xp: '+100 XP', coins: '+50 🪙', href: '/battles', icon: Swords, tone: 'bg-[var(--ps-coral)] text-white', dark: true },
                   ].map((game) => (
-                    <Card key={game.title} className="rounded-2xl border border-border bg-card p-4 flex flex-col justify-between space-y-3 shadow-xs hover:border-primary/40 transition">
-                      <div className="space-y-2">
-                        <div className={cn("size-10 rounded-xl flex items-center justify-center border", game.bg, game.color)}>
-                          <game.icon className="size-5" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-foreground">{game.title}</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{game.desc}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2.5 pt-2 border-t border-border/60">
-                        <div className="flex items-center justify-between text-[12px] font-mono font-bold">
-                          <span className="text-emerald-500">{game.xp}</span>
-                          <span className="text-amber-500">{game.coins}</span>
-                        </div>
-                        <Button size="sm" asChild className="w-full rounded-xl text-xs font-bold">
-                          <Link href={game.href}>
-                            <span>O'ynash</span>
-                            <ArrowRight className="size-3.5 ml-1" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </Card>
+                    <Link
+                      key={game.title}
+                      href={game.href}
+                      className={cn('group relative flex flex-col justify-between gap-6 overflow-hidden rounded-[28px] p-5 transition-transform hover:-translate-y-1 sm:p-6', game.tone)}
+                    >
+                      <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+                      <span className="relative inline-flex size-12 items-center justify-center rounded-full bg-black/15">
+                        <game.icon className="size-6" />
+                      </span>
+                      <span className="relative">
+                        <span className="ps-display block text-[22px]">{game.title}</span>
+                        <span className={cn('mt-1.5 block text-[12px] leading-relaxed', game.dark ? 'text-white/75' : 'text-black/65')}>{game.desc}</span>
+                      </span>
+                      <span className="relative flex items-center justify-between gap-2">
+                        <span className="flex gap-1.5">
+                          <span className="rounded-full bg-black/15 px-2.5 py-1 text-[11px] font-bold">{game.xp}</span>
+                          <span className="rounded-full bg-black/15 px-2.5 py-1 text-[11px] font-bold">{game.coins}</span>
+                        </span>
+                        <span className="flex size-10 items-center justify-center rounded-full bg-[#080808] text-[#FFFCF7] transition-transform group-hover:-rotate-45">
+                          <ArrowRight className="size-4" />
+                        </span>
+                      </span>
+                    </Link>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* ── 3-TAB: AUDIO, VIDEO VA ELEKTRON KITOB KUTUBXONASI ── */}
+            {/* ── 3-TAB: Audio, video va kitoblar ── */}
             {activeTab === 'library' && (
-              <div className="space-y-4">
-                <div className="space-y-0.5">
-                  <h2 className="text-lg font-bold text-foreground">Audio Konspektlar & Rasmiy Darsliklar</h2>
-                  <p className="text-xs text-muted-foreground">Kutubxona darsliklari, ekspert audio konspektlar va rasmiy BMB qo'llanmalari</p>
+              <div className="space-y-5">
+                <div>
+                  <p className="ps-eyebrow text-[var(--text-muted)]">Kutubxona</p>
+                  <h2 className="ps-display mt-2 text-[28px] sm:text-[36px]">Audio konspektlar va <span className="text-[var(--ps-blue)]">darsliklar</span></h2>
+                  <p className="mt-1 text-sm text-[var(--text-muted)]">Kutubxona darsliklari, ekspert audio konspektlar va rasmiy BMB qo&apos;llanmalari</p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="rounded-2xl border border-border bg-card p-5 space-y-3">
-                    <div className="size-10 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center">
-                      <BookOpen className="size-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground">DTM & BMB Rasmiy Darsliklar</h3>
-                      <p className="text-xs text-muted-foreground mt-1">Maktab darsliklari va test savollariga asos bo'lgan barcha kitoblar PDF shaklida</p>
-                    </div>
-                    <Button size="sm" asChild className="w-full rounded-xl text-xs font-bold">
-                      <Link href="/library">
-                        <span>Kutubxonaga o'tish</span>
-                        <ArrowRight className="size-3.5 ml-1" />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {[
+                    { title: 'DTM & BMB rasmiy darsliklar', desc: "Maktab darsliklari va test savollariga asos bo'lgan barcha kitoblar PDF shaklida", href: '/library', cta: "Kutubxonaga o'tish", icon: BookOpen, tone: 'ps-ink', accent: 'bg-[var(--ps-blue)] text-[#080808]' },
+                    { title: '5 daqiqalik audio konspektlar', desc: "Yo'lda yoki dam olayotganda mavzuni tezda takrorlash uchun audio darsliklar", href: '/study?tab=cheatsheets', cta: 'Audio darslarni tinglash', icon: Headphones, tone: '', accent: 'bg-[var(--ps-purple)] text-white' },
+                    { title: 'Bilim Reels: 60s video darslar', desc: "Eng qiyin savollarning 60 soniyalik qisqa video tahlillari va sirlari", href: '/reels', cta: 'Reels tomosha qilish', icon: Flame, tone: '', accent: 'bg-[var(--ps-coral)] text-white' },
+                  ].map((it) => (
+                    <div key={it.title} className={cn('ps-card ps-lift relative flex flex-col overflow-hidden p-6', it.tone && `${it.tone} !border-0`)}>
+                      <div aria-hidden className={cn('absolute -right-10 -top-10 size-32 rounded-full opacity-25', it.accent)} />
+                      <span className={cn('relative inline-flex size-12 items-center justify-center rounded-2xl', it.accent)}>
+                        <it.icon className="size-6" />
+                      </span>
+                      <h3 className="ps-display relative mt-5 text-[22px]">{it.title}</h3>
+                      <p className={cn('relative mt-2 text-[13px] leading-relaxed', it.tone ? 'text-white/65' : 'text-[var(--text-muted)]')}>{it.desc}</p>
+                      <Link href={it.href} className={cn('ps-btn relative mt-auto w-full justify-between', it.tone ? 'ps-btn-light' : 'ps-btn-ink', 'mt-6')}>
+                        {it.cta}
+                        <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
                       </Link>
-                    </Button>
-                  </Card>
-
-                  <Card className="rounded-2xl border border-border bg-card p-5 space-y-3">
-                    <div className="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 flex items-center justify-center">
-                      <Headphones className="size-5" />
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground">5 Daqiqalik Audio Konspektlar</h3>
-                      <p className="text-xs text-muted-foreground mt-1">Yo'lda yoki dam olayotganda mavzuni tezda takrorlash uchun audio darsliklar</p>
-                    </div>
-                    <Button size="sm" variant="outline" asChild className="w-full rounded-xl text-xs font-bold">
-                      <Link href="/study?tab=cheatsheets">
-                        <span>Audio darslarni tinglash</span>
-                        <ArrowRight className="size-3.5 ml-1" />
-                      </Link>
-                    </Button>
-                  </Card>
-
-                  <Card className="rounded-2xl border border-border bg-card p-5 space-y-3">
-                    <div className="size-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center">
-                      <Flame className="size-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground">Bilim Reels: 60s Video Darslar</h3>
-                      <p className="text-xs text-muted-foreground mt-1">Eng qiyin savollarning 60 soniyalik qisqa video tahlillari va sirlari</p>
-                    </div>
-                    <Button size="sm" variant="outline" asChild className="w-full rounded-xl text-xs font-bold">
-                      <Link href="/reels">
-                        <span>Reels tomosha qilish</span>
-                        <ArrowRight className="size-3.5 ml-1" />
-                      </Link>
-                    </Button>
-                  </Card>
+                  ))}
                 </div>
               </div>
             )}
@@ -973,7 +958,7 @@ export default function StudyRoomPage() {
             {/* ============================================================ */}
             {/* 🤖 AI MENTOR: BUGUN SIZ UCHUN TAVSIYA                        */}
             {/* ============================================================ */}
-            <Card className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-card">
+            <Card className="ps-card !border-0 p-5 sm:p-7">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-3.5 max-w-2xl">
                   <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
@@ -1054,7 +1039,7 @@ export default function StudyRoomPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* ASOSIY STUDY SESSION KARTASI (Col 8) */}
               <div className="lg:col-span-8 space-y-6">
-                <Card className="rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-card">
+                <Card className="ps-card !border-0 !rounded-[32px] p-6 sm:p-8">
                   {/* Header: Fan & Mavzu */}
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
                     <div className="space-y-1">

@@ -13,20 +13,8 @@ import {
   MessageCircle,
   Swords,
   X,
-  Flame,
-  Zap,
-  Target,
   BookOpen,
-  CircleCheck,
-  Circle,
-  TrendingUp,
-  Activity,
-  CalendarDays,
-  Clock,
   Brain,
-  History,
-  ArrowRight,
-  AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
@@ -39,24 +27,22 @@ import PremiumIcon from '@/components/ui/premium-icon';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Panel,
-  PanelLabel,
-  PanelLink,
-  HeroBanner,
-  HeroStat,
-  HeroButton,
-  Pill,
-  IconTile,
-  Bar,
-  Ring,
-  StatCell,
-  EmptyNote,
-  greeting,
-  relativeTime,
-  formatMinutes,
-} from '@/components/design/kit';
+import { greeting, relativeTime } from '@/components/design/kit';
 import { cn } from '@/lib/utils';
+import {
+  InView,
+  PastelHero,
+  StatBento,
+  GrowthCard,
+  MissionsCard,
+  WeeklyFocus,
+  UpcomingCard,
+  SubjectsSection,
+  NextSteps,
+  ActivityCard,
+  ChestFinale,
+  type Recommendation,
+} from '@/components/dashboard/pastel/PastelSections';
 
 type NotificationItem = {
   id: number;
@@ -122,7 +108,6 @@ type LeaderboardData = { my_rank: number };
 
 
 const WEEKDAYS_UZ = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
-const MONTHS_SHORT = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
 
 function getNotifIcon(type: string, title: string) {
   const t = (type || '').toLowerCase();
@@ -148,17 +133,21 @@ function notifTime(raw: string) {
 
 function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] p-4 sm:p-8">
+    <div className="theme-pastel min-h-screen p-4 sm:p-8 lg:pl-72">
       <div className="mx-auto max-w-[1180px] space-y-5">
-        <Skeleton className="h-60 w-full rounded-[20px] bg-muted" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 rounded-2xl bg-muted" />
-          ))}
+        <div className="grid items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-4">
+            <Skeleton className="h-7 w-40 rounded-full bg-white/40" />
+            <Skeleton className="h-28 w-4/5 rounded-3xl bg-white/40" />
+            <Skeleton className="h-12 w-64 rounded-full bg-white/40" />
+          </div>
+          <Skeleton className="mx-auto aspect-square w-full max-w-[380px] rounded-full bg-white/40" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <Skeleton className="h-56 md:col-span-2 rounded-2xl bg-muted" />
-          <Skeleton className="h-56 rounded-2xl bg-muted" />
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-12">
+          <Skeleton className="col-span-2 h-48 rounded-[28px] bg-white/40 lg:col-span-4" />
+          <Skeleton className="h-48 rounded-[28px] bg-white/40 lg:col-span-3" />
+          <Skeleton className="h-48 rounded-[28px] bg-white/40 lg:col-span-3" />
+          <Skeleton className="col-span-2 h-48 rounded-[28px] bg-white/40 lg:col-span-2" />
         </div>
       </div>
     </div>
@@ -332,12 +321,11 @@ export default function DashboardPage() {
       ? `Siz ${p.streak} kunlik seriyadasiz. Bugun yana ${remainingMissions} ta vazifani bajarib, seriyani saqlang.`
       : `Siz ${p.streak} kunlik seriyadasiz. Bugungi barcha vazifalar bajarildi — ajoyib!`;
 
-  const recommendations: { href?: string; onClick?: () => void; icon: typeof Brain; tone: 'brand' | 'gold' | 'dark'; title: string; meta: string; tag: string }[] = [];
+  const recommendations: Recommendation[] = [];
   if (data.weak_review) {
     recommendations.push({
       onClick: handleStartMistakesTest,
       icon: Brain,
-      tone: 'brand',
       title: `Takrorlash: ${data.weak_review.topic_title}`,
       meta: `${data.weak_review.times_wrong} marta xato · ${data.weak_review.days_ago} kun oldin`,
       tag: 'Tavsiya',
@@ -347,7 +335,6 @@ export default function DashboardPage() {
     recommendations.push({
       href: '/study',
       icon: BookOpen,
-      tone: 'gold',
       title: data.suggested_topic.title,
       meta: data.selected_subject?.name || "O'qish",
       tag: 'Keyingi dars',
@@ -356,322 +343,94 @@ export default function DashboardPage() {
   recommendations.push({
     href: '/battles',
     icon: Trophy,
-    tone: 'dark',
     title: 'Arenada raqib bilan bellashish',
     meta: `1v1 · ELO ${p.elo_rating}`,
     tag: 'Bellashuv',
   });
 
   return (
-    <ModernAppLayout user={{ ...p, freeze_count: data.freeze_count }} unreadCount={unreadCount} onNotificationsClick={handleOpenNotifications}>
+    <ModernAppLayout
+      variant="pastel"
+      user={{ ...p, freeze_count: data.freeze_count }}
+      unreadCount={unreadCount}
+      onNotificationsClick={handleOpenNotifications}
+    >
       <Celebration level={p.level || 1} streak={p.streak || 0} completedAttempts={data.recent_attempts.length} />
 
-      <div className="mx-auto w-full max-w-[1180px] space-y-5">
-        {/* ── HERO ─────────────────────────────────────────────────── */}
-        <HeroBanner>
-          <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Pill tone="glass" className="text-white">
-                  <span className="size-1.5 rounded-full bg-[var(--reward)]" /> {p.level}-daraja
-                </Pill>
-                {rank ? <Pill tone="glass">Reytingda #{rank.toLocaleString('uz-UZ')}</Pill> : null}
-                {p.is_premium && <Pill tone="glass">Premium</Pill>}
-              </div>
-              <h1 className="mt-3 text-[28px] sm:text-4xl font-extrabold tracking-tight leading-tight">
-                {greeting()}, <span className="text-[var(--reward)]">{firstName}</span>
-              </h1>
-              <p className="mt-2 max-w-xl text-sm text-white/70 leading-relaxed">{heroLine}</p>
-              <div className="mt-5 flex flex-wrap gap-2.5">
-                {isNewUser ? (
-                  <HeroButton href="/onboarding?mode=blitz" icon={Zap}>Ekspress testni boshlash</HeroButton>
-                ) : (
-                  <HeroButton href="/tests" icon={Zap}>Test yechish</HeroButton>
-                )}
-                <HeroButton href="/study" icon={BookOpen} variant="ghost">O&apos;qishni davom ettirish</HeroButton>
-              </div>
-            </div>
+      <div className="mx-auto w-full max-w-[1180px] space-y-5 sm:space-y-6 overflow-x-clip">
+        <PastelHero
+          greeting={greeting()}
+          firstName={firstName}
+          level={p.level}
+          rank={rank}
+          isPremium={p.is_premium}
+          heroLine={heroLine}
+          isNewUser={isNewUser}
+          streak={p.streak}
+          solvedToday={data.solved_today}
+          elo={p.elo_rating}
+        />
 
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-2 lg:w-[300px]">
-              <HeroStat
-                icon={Flame}
-                value={p.streak}
-                label="Kunlik seriya"
-                hint={`${data.freeze_count} ta muzlatish`}
-                iconClass="text-[#F4A261]"
-              />
-              <HeroStat
-                icon={Zap}
-                value={p.xp.toLocaleString('uz-UZ')}
-                label="Jami XP"
-                hint={`${data.solved_today} ta savol bugun`}
-                iconClass="text-[#74C69D]"
-              />
-              <HeroStat
-                icon={Target}
-                value={stats ? `${stats.accuracy}%` : '—'}
-                label="Aniqlik"
-                hint={stats ? `${stats.total_tests} ta test` : undefined}
-                iconClass="text-[#74C69D]"
-              />
-              <HeroStat
-                icon={Trophy}
-                value={rank ? `#${rank.toLocaleString('uz-UZ')}` : '—'}
-                label="Reyting o'rni"
-                hint={`ELO ${p.elo_rating}`}
-              />
-            </div>
-          </div>
-        </HeroBanner>
+        <StatBento
+          streak={p.streak}
+          freezeCount={data.freeze_count}
+          xp={p.xp}
+          coins={p.coins}
+          accuracy={stats?.accuracy}
+          totalTests={stats?.total_tests}
+          avgScore={stats?.avg_score}
+          rank={rank}
+        />
 
-        {/* ── ROW 2: Experience · Missions · Subjects ─────────────── */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <Panel>
-            <PanelLabel icon={Sparkles} right={data.solved_today > 0 ? <Pill tone="brand">{data.solved_today} savol bugun</Pill> : null}>
-              Tajriba
-            </PanelLabel>
-            <div className="flex items-center gap-4">
-              <Ring value={data.xp_progress}>
-                <span className="text-base font-extrabold text-foreground tabular-nums">{data.xp_progress}%</span>
-                <span className="text-[9px] text-muted-foreground">{p.level + 1}-darajagacha</span>
-              </Ring>
-              <div className="min-w-0">
-                <p className="text-[11px] text-muted-foreground">Joriy daraja</p>
-                <p className="text-base font-bold text-foreground">{p.level}-daraja</p>
-                <p className="mt-1 text-[11px] text-muted-foreground">Keyingisi: {p.level + 1}-daraja</p>
-                <p className="text-xs font-semibold text-[var(--brand-text)]">{xpRemaining.toLocaleString('uz-UZ')} XP qoldi</p>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              <StatCell value={stats?.total_tests ?? '—'} label="Testlar" />
-              <StatCell value={stats ? `${stats.avg_score}%` : '—'} label="O'rtacha" />
-              <StatCell value={p.coins.toLocaleString('uz-UZ')} label="Tanga" />
-              <StatCell value={p.elo_rating} label="ELO" />
-            </div>
-          </Panel>
-
-          <Panel>
-            <PanelLabel icon={Target} right={<span className="text-xs font-semibold tabular-nums text-muted-foreground">{doneMissions}/{data.missions.length}</span>}>
-              Kunlik vazifalar
-            </PanelLabel>
-            <Bar value={data.missions.length ? (doneMissions / data.missions.length) * 100 : 0} className="mb-3 h-1" />
-            {data.missions.length === 0 ? (
-              <EmptyNote>Bugungi vazifalar hali tayyorlanmagan.</EmptyNote>
-            ) : (
-              <div className="space-y-2">
-                {data.missions.slice(0, 4).map((m) => (
-                  <div
-                    key={m.title}
-                    className={cn(
-                      'ds-row',
-                      m.is_completed && 'border-[var(--brand-border)] bg-[var(--brand-soft)]'
-                    )}
-                  >
-                    {m.is_completed ? (
-                      <CircleCheck className="size-[18px] shrink-0 text-[var(--brand)]" />
-                    ) : (
-                      <Circle className="size-[18px] shrink-0 text-muted-foreground/50" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className={cn('text-xs font-semibold truncate', m.is_completed ? 'text-muted-foreground line-through' : 'text-foreground')}>
-                        {m.title}
-                      </p>
-                      {!m.is_completed && m.target_count > 1 && (
-                        <p className="text-[10px] text-muted-foreground tabular-nums">
-                          {m.current_count}/{m.target_count}
-                        </p>
-                      )}
-                    </div>
-                    <Pill tone={m.is_completed ? 'brand' : 'gold'}>+{m.xp_reward} XP</Pill>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Panel>
-
-          <Panel className="md:col-span-2 xl:col-span-1">
-            <PanelLabel icon={TrendingUp} right={<PanelLink href="/analytics">Batafsil</PanelLink>}>
-              Fanlar bo&apos;yicha natija
-            </PanelLabel>
-            {subjects.every((s) => s.answered === 0) ? (
-              <EmptyNote action={<PanelLink href="/tests">Test yechish →</PanelLink>}>
-                Test yechganingizdan keyin har bir fan bo&apos;yicha o&apos;zlashtirish shu yerda ko&apos;rinadi.
-              </EmptyNote>
-            ) : (
-              <div className="space-y-3.5">
-                {subjects.map((s) => (
-                  <div key={s.id} className="grid grid-cols-[minmax(0,110px)_1fr_auto] items-center gap-3">
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">{s.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{s.answered} ta javob</p>
-                    </div>
-                    <Bar value={s.mastery} tone={s.mastery < 50 ? 'danger' : s.mastery < 75 ? 'gold' : 'brand'} />
-                    <span className="text-xs font-bold tabular-nums text-foreground w-9 text-right">{s.mastery}%</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Panel>
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12">
+          <InView className="lg:col-span-5">
+            <GrowthCard level={p.level} xpProgress={data.xp_progress} xpRemaining={xpRemaining} />
+          </InView>
+          <InView className="lg:col-span-7" delay={0.08}>
+            <MissionsCard missions={data.missions} />
+          </InView>
         </div>
 
-        {/* ── ROW 3: Weekly focus · Upcoming tests ─────────────────── */}
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-          <Panel className="xl:col-span-2">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <span className="ds-label inline-flex items-center gap-1.5">
-                  <Activity className="size-3.5" /> O&apos;quv faolligi
-                </span>
-                <p className="mt-1 text-sm font-bold text-foreground">Shu haftadagi fokus vaqti</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-extrabold tracking-tight text-[var(--brand-text)] tabular-nums">
-                  {formatMinutes(week.total)}
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {week.delta >= 0 ? '+' : '−'}
-                  {formatMinutes(Math.abs(week.delta))} o&apos;tgan haftaga nisbatan
-                </p>
-              </div>
-            </div>
-
-            <div className="relative mt-5 flex h-36 items-end gap-2 sm:gap-4">
-              {week.total === 0 && (
-                <p className="absolute inset-x-0 top-1/3 text-center text-xs text-muted-foreground">
-                  Bu hafta hali test yechilmadi — birinchi sessiyangizni boshlang.
-                </p>
-              )}
-              {(week.days.length ? week.days : WEEKDAYS_UZ.map((label) => ({ label, minutes: 0, tests: 0, isPeak: false }))).map((d, i) => {
-                const h = week.peak > 0 ? Math.max(4, (d.minutes / week.peak) * 100) : 4;
-                return (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-2 h-full justify-end group">
-                    <div className="relative w-full flex-1 flex items-end">
-                      <div
-                        className={cn(
-                          'w-full rounded-md transition-[height] duration-700',
-                          d.minutes === 0 ? 'bg-[var(--ds-track)]' : d.isPeak ? 'bg-[var(--reward)]' : 'bg-[var(--brand)]'
-                        )}
-                        style={{ height: `${h}%` }}
-                        title={`${formatMinutes(d.minutes)} · ${d.tests} ta test`}
-                      />
-                    </div>
-                    <span className="text-[10px] text-muted-foreground">{d.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-3 flex items-center gap-4 border-t border-[var(--ds-panel-border)] pt-3 text-[10px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-sm bg-[var(--brand)]" /> O&apos;qish sessiyalari</span>
-              <span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-sm bg-[var(--reward)]" /> Eng faol kun</span>
-            </div>
-          </Panel>
-
-          <Panel>
-            <PanelLabel icon={CalendarDays} right={<PanelLink href="/tests">Testlar</PanelLink>}>
-              Kelayotgan testlar
-            </PanelLabel>
-            {upcoming.length === 0 ? (
-              <EmptyNote action={<PanelLink href="/tests">Mock test tanlash →</PanelLink>}>
-                Yaqin kunlarda rejalashtirilgan imtihon yo&apos;q.
-              </EmptyNote>
-            ) : (
-              <div className="space-y-2">
-                {upcoming.map((m, i) => {
-                  const d = new Date(m.scheduled_at);
-                  const soon = m.is_live || d.getTime() - Date.now() < 86400_000;
-                  const tone = i === 0 ? 'bg-[var(--danger-soft)] text-[var(--danger-text)]' : i === 1 ? 'bg-[var(--reward-soft)] text-[var(--reward-text)]' : 'bg-[var(--brand-soft)] text-[var(--brand-text)]';
-                  return (
-                    <Link key={m.id} href={`/tests/mock/${m.id}`} className="ds-row">
-                      <span className={cn('flex size-10 shrink-0 flex-col items-center justify-center rounded-lg leading-none', tone)}>
-                        <span className="text-sm font-bold">{d.getDate()}</span>
-                        <span className="text-[9px] font-semibold">{MONTHS_SHORT[d.getMonth()]}</span>
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-foreground truncate">{m.title}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">
-                          {[m.subject, d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })].filter(Boolean).join(' · ')}
-                        </p>
-                      </div>
-                      {m.is_live ? (
-                        <Pill tone="danger" dot>Jonli</Pill>
-                      ) : soon ? (
-                        <AlertCircle className="size-4 shrink-0 text-[var(--danger)]" />
-                      ) : null}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </Panel>
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12">
+          <InView className="lg:col-span-7 xl:col-span-8">
+            <WeeklyFocus
+              days={week.days.length ? week.days : WEEKDAYS_UZ.map((label) => ({ label, minutes: 0, tests: 0, isPeak: false }))}
+              total={week.total}
+              delta={week.delta}
+              peak={week.peak}
+            />
+          </InView>
+          <InView className="lg:col-span-5 xl:col-span-4" delay={0.08}>
+            <UpcomingCard mocks={upcoming} />
+          </InView>
         </div>
 
-        {/* ── ROW 4: Recommended next · Recent activity ────────────── */}
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-          <Panel className="xl:col-span-2">
-            <PanelLabel icon={Sparkles}>Keyingi qadam</PanelLabel>
-            <div className="space-y-2">
-              {recommendations.map((r) => {
-                const inner = (
-                  <>
-                    <IconTile icon={r.icon} tone={r.tone} />
-                    <div className="min-w-0 flex-1 text-left">
-                      <p className="text-[13px] font-semibold text-foreground truncate">{r.title}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{r.meta}</p>
-                    </div>
-                    <Pill className="hidden sm:inline-flex">{r.tag}</Pill>
-                    <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-                  </>
-                );
-                return r.href ? (
-                  <Link key={r.title} href={r.href} className="ds-row">{inner}</Link>
-                ) : (
-                  <button key={r.title} type="button" onClick={r.onClick} disabled={startingMistakesTest} className="ds-row w-full cursor-pointer disabled:opacity-60">
-                    {inner}
-                  </button>
-                );
-              })}
-            </div>
-            {lastAttempt && (
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--ds-panel-border)] pt-3">
-                <div className="min-w-0 flex items-center gap-2 text-xs text-muted-foreground">
-                  <History className="size-3.5 shrink-0" />
-                  <span className="truncate">
-                    Oxirgi test: <span className="font-semibold text-foreground">{lastAttempt.test_title}</span>
-                    {lastAttempt.score != null && ` · ${Math.round(lastAttempt.score)}%`}
-                  </span>
-                </div>
-                <Link href={`/tests/${lastAttempt.id}/feedback`} className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-[var(--brand-text)]">
-                  Tahlil <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
-            )}
-          </Panel>
+        <InView>
+          <SubjectsSection subjects={subjects} />
+        </InView>
 
-          <Panel>
-            <PanelLabel icon={Clock} right={<button type="button" onClick={handleOpenNotifications} className="text-xs font-semibold text-muted-foreground hover:text-[var(--brand-text)] cursor-pointer">Hammasi</button>}>
-              So&apos;nggi faollik
-            </PanelLabel>
-            {activity.length === 0 ? (
-              <EmptyNote>{loadingNotifs ? 'Yuklanmoqda…' : "Hozircha faollik yo'q."}</EmptyNote>
-            ) : (
-              <ul className="space-y-3.5">
-                {activity.map((n) => (
-                  <li key={n.id} className="flex items-start gap-3">
-                    <span className="shrink-0">{getNotifIcon(n.type, n.title)}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-foreground leading-snug line-clamp-2">
-                        <span className="font-semibold">{n.title}</span>
-                        {n.message ? <span className="text-muted-foreground"> — {n.message}</span> : null}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{notifTime(n.created_at)}</p>
-                    </div>
-                    {!n.is_read && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-[var(--brand)]" />}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Panel>
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12 lg:items-start">
+          <InView className="lg:col-span-7 xl:col-span-8">
+            <NextSteps items={recommendations} busy={startingMistakesTest} lastAttempt={lastAttempt} />
+          </InView>
+          <InView className="lg:col-span-5 xl:col-span-4 lg:mt-[76px]" delay={0.08}>
+            <ActivityCard
+              items={activity}
+              loading={loadingNotifs}
+              onOpenAll={handleOpenNotifications}
+              renderIcon={getNotifIcon}
+              timeLabel={notifTime}
+            />
+          </InView>
         </div>
+
+        <InView>
+          <ChestFinale
+            canClaim={!!chestStatus?.can_claim}
+            claimedToday={!!chestStatus?.today_claim}
+            onOpenChest={() => setChestModalOpen(true)}
+          />
+        </InView>
       </div>
 
       {/* iOS NOTIFICATION CENTER SHEET POPOVER */}

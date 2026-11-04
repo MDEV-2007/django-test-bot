@@ -57,7 +57,6 @@ interface NavItem {
   vip?: boolean;
   highlight?: boolean;
   teacherOrAdminOnly?: boolean;
-  children?: { href: string; label: string; featureKey?: string }[];
 }
 
 interface NavGroup {
@@ -66,8 +65,7 @@ interface NavGroup {
 }
 
 // Student navigatsiyasi: 6 ta asosiy bo'lim. Ilgari 13 ta teng darajali havola bor edi;
-// endi har bir sahifa (hech biri o'chirilmagan) tegishli bo'limning ichki havolasi —
-// bo'lim faol bo'lganda ostida ko'rinadi.
+// ichki sahifalarga o'tish har bir bo'lim sahifasining o'zida (masalan, /tests rejimlari).
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Asosiy',
@@ -76,48 +74,21 @@ const NAV_GROUPS: NavGroup[] = [
       {
         href: '/tests', label: 'Sinovlar', icon: Landmark, badge: 'BMB', tone: 'purple', featureKey: 'tests',
         matchPrefixes: ['/sprint', '/dtm-test', '/milliy-sertifikat', '/onboarding'],
-        children: [
-          { href: '/tests?mode=standard', label: 'Standart testlar' },
-          { href: '/tests?mode=blitz', label: '7-savol Blitz' },
-          { href: '/tests?mode=stress', label: 'BMB Stress zali' },
-          { href: '/sprint', label: 'Fokus Sprint', featureKey: 'sprint' },
-          { href: '/tests/history', label: 'Natijalar tarixi' },
-        ],
       },
       {
         href: '/study', label: "O'rganish", icon: Brain, badge: null, tone: 'amber', featureKey: 'learning',
         matchPrefixes: ['/study', '/learning', '/library', '/mentor', '/flashcards', '/games', '/tests/revision', '/tests/mistakes'],
-        children: [
-          { href: '/study', label: 'Dars va shpargalka' },
-          { href: '/study?tab=focus', label: 'Fokus xonasi' },
-          { href: '/flashcards', label: 'Flashcards', featureKey: 'flashcards' },
-          { href: '/tests/revision', label: 'Xatolar ustida ishlash' },
-          { href: '/library', label: 'Kutubxona' },
-        ],
       },
       {
         href: '/feed', label: 'Hamjamiyat', icon: Flame, badge: null, tone: 'rose', matchPrefixes: ['/feed', '/reels'],
         api: '/api/learning/feed/',
-        children: [
-          { href: '/feed', label: 'Lenta' },
-          { href: '/reels', label: 'Bilim Reels', featureKey: 'reels' },
-        ],
       },
       {
         href: '/battles', label: 'Arena', icon: Swords, badge: 'Live', tone: 'rose', featureKey: 'battles',
         matchPrefixes: ['/battles', '/leaderboard'],
-        children: [
-          { href: '/battles', label: '1v1 Arena' },
-          { href: '/leaderboard', label: 'Liga & Reyting', featureKey: 'leaderboard' },
-        ],
       },
       {
         href: '/profile', label: 'Profil', icon: User, badge: null, tone: 'sky', matchPrefixes: ['/profile', '/analytics', '/shop'],
-        children: [
-          { href: '/profile', label: 'Profilim' },
-          { href: '/analytics', label: "O'sish analitikasi" },
-          { href: '/shop', label: "Do'kon" },
-        ],
       },
     ],
   },
@@ -165,43 +136,74 @@ export default function Sidebar({
       && !pathname.startsWith('/tests/mistakes');
   };
 
+  // VIP obuna — profil kartasi bilan bir xil o'lchamdagi karta; pastda, profil kartasi ustida turadi.
+  const vipItem = NAV_GROUPS.flatMap((g) => g.items).find((it) => it.vip);
+  const renderVipCard = (item: NavItem) => {
+    const active = isActive(item);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={onMobileClose}
+        data-active={active ? 'true' : undefined}
+        className="ps-sb-vip ios-spring group relative block overflow-hidden rounded-xl border border-[#FF9500]/30 bg-[#FF9500]/10 p-3.5"
+      >
+        <span aria-hidden className="ps-sb-vip-ring" />
+        <span className="relative flex items-center gap-3">
+          <span className="ps-sb-vip-icon flex size-11 shrink-0 items-center justify-center rounded-full bg-[#FF9500] text-white">
+            <Crown className="size-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="ps-sb-vip-title block truncate text-sm font-bold text-foreground">{t(item.label)}</span>
+            <span className="ps-sb-vip-sub mt-1 inline-flex max-w-full whitespace-nowrap rounded-full bg-[#FF9500]/15 px-2 py-0.5 text-[11px] font-semibold text-[#C93400]">
+              {t('Premium tarif')}
+            </span>
+          </span>
+        </span>
+        <span className="ps-sb-vip-cta relative mt-3.5 flex h-8 items-center justify-between rounded-full bg-[#FF9500] pl-3.5 pr-1 text-[12px] font-bold text-white">
+          {t("Obunani ko'rish")}
+          <span className="ps-sb-vip-go flex size-6 items-center justify-center rounded-full bg-white/25 transition-transform group-hover:translate-x-0.5">
+            <ChevronRight className="size-3.5" />
+          </span>
+        </span>
+      </Link>
+    );
+  };
+
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between overflow-y-auto scrollbar-none px-3.5 py-5 select-none bg-card/85 ios-glass text-card-foreground">
+    <div className="ps-sb-inner flex h-full flex-col justify-between overflow-y-auto scrollbar-none px-3.5 py-5 select-none bg-card/85 ios-glass text-card-foreground">
       {/* 1. iPadOS BRAND HEADER */}
       <div className="space-y-5">
-        <div className="flex items-center justify-between px-2">
-          <Link href="/dashboard" onClick={onMobileClose} className="group flex items-center gap-2.5">
-            <div className="relative flex size-9.5 shrink-0 items-center justify-center rounded-md overflow-hidden border border-border bg-background shadow-2xs transition-transform group-hover:scale-105">
-              <BrandMark size={36} rounded="rounded-md" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[15px] font-bold tracking-[-0.02em] text-foreground">
-                  {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
-                </span>
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary uppercase">
-                  PRO
-                </span>
-              </div>
-              <p className="text-[12px] font-medium text-muted-foreground truncate">
+        <div className="flex items-center justify-between gap-2 px-1.5">
+          <Link href="/dashboard" onClick={onMobileClose} className="ps-sb-brand group flex min-w-0 flex-1 items-center gap-3">
+            <span className="relative shrink-0">
+              <span className="ps-sb-logo relative flex size-11 items-center justify-center overflow-hidden rounded-[14px] border border-border bg-background shadow-2xs transition-transform group-hover:scale-105">
+                <BrandMark size={44} rounded="rounded-[14px]" />
+              </span>
+              <span className="ps-sb-pro absolute -bottom-1.5 -right-2 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold leading-none text-white uppercase">
+                PRO
+              </span>
+            </span>
+            <span className="flex min-w-0 flex-col">
+              <span className="ps-sb-name truncate text-[15px] font-bold leading-tight tracking-[-0.02em] text-foreground">
+                {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
+              </span>
+              <span className="ps-sb-sub mt-0.5 truncate text-[12px] font-medium text-muted-foreground">
                 {t("Intellektual Ta'lim")}
-              </p>
-            </div>
+              </span>
+            </span>
           </Link>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <ScriptToggle />
-            {onMobileClose && (
-              <button
-                type="button"
-                onClick={onMobileClose}
-                className="lg:hidden ios-spring flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label="Yopish"
-              >
-                <X className="size-4" />
-              </button>
-            )}
-          </div>
+          {onMobileClose && (
+            <button
+              type="button"
+              onClick={onMobileClose}
+              className="lg:hidden ios-spring flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label="Yopish"
+            >
+              <X className="size-4" />
+            </button>
+          )}
         </div>
 
         {/* Rol panellari tezkor havolasi */}
@@ -211,7 +213,7 @@ export default function Sidebar({
               <Link
                 href="/teacher"
                 onClick={onMobileClose}
-                className="ios-spring flex items-center justify-between rounded-lg border border-primary/20 bg-primary/8 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/14"
+                className="ps-sb-panel ios-spring flex items-center justify-between rounded-lg border border-primary/20 bg-primary/8 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/14"
               >
                 <span className="flex items-center gap-2 truncate">
                   <PremiumIcon icon={GraduationCap} tone="sky" size="2xs" solid />
@@ -236,8 +238,10 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* 2. iOS SETTINGS-STYLE NAVIGATION GROUPS */}
-        <nav className="space-y-5">
+      </div>
+
+      {/* 2. Navigatsiya — desktopda logo va profil kartasi orasida, o'rtada */}
+      <nav className="ps-sb-nav mt-5 space-y-5 lg:my-auto lg:py-6">
           {NAV_GROUPS.map((group, gIdx) => {
             const isTeacherOrAdmin = Boolean(
               user?.is_teacher ||
@@ -246,6 +250,7 @@ export default function Sidebar({
               user?.role === 'superadmin'
             );
             const visibleItems = group.items.filter((it) => {
+              if (it.vip) return false; // VIP kartasi pastda, profil kartasi ustida
               if (it.teacherOrAdminOnly && !isTeacherOrAdmin) return false;
               return !it.featureKey || isEnabled(it.featureKey);
             });
@@ -253,7 +258,7 @@ export default function Sidebar({
 
             return (
               <div key={gIdx} className="space-y-1.5">
-                <span className="px-3 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="ps-sb-group px-3 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   {t(group.label)}
                 </span>
                 <div className="space-y-0.5">
@@ -268,8 +273,9 @@ export default function Sidebar({
                         onClick={onMobileClose}
                         onMouseEnter={() => item.api && prefetchApi(item.api)}
                         onTouchStart={() => item.api && prefetchApi(item.api)}
+                        data-active={active ? 'true' : undefined}
                         className={cn(
-                          'ios-spring group relative flex min-h-[42px] items-center justify-between rounded-lg px-2.5 py-1.5 text-[13px] transition-all',
+                          'ilm-nav-item ios-spring group relative flex min-h-[42px] items-center justify-between rounded-lg px-2.5 py-1.5 text-[13px] transition-all',
                           active
                             ? 'bg-primary text-white font-semibold shadow-[0_4px_14px_rgba(45,106,79,0.30)]'
                             : 'text-foreground/85 hover:bg-muted/70 hover:text-foreground font-medium'
@@ -304,25 +310,6 @@ export default function Sidebar({
                           </span>
                         )}
                       </Link>
-                        {active && item.children && (
-                          <div className="ml-[38px] mt-0.5 mb-1 space-y-0.5 border-l border-border pl-2.5">
-                            {item.children.filter((c) => !c.featureKey || isEnabled(c.featureKey)).map((c) => (
-                              <Link
-                                key={c.href}
-                                href={c.href}
-                                onClick={onMobileClose}
-                                className={cn(
-                                  'block rounded-md px-2 py-1.5 text-[13px] transition-colors',
-                                  !c.href.includes('?') && (pathname === c.href || (c.href !== item.href && pathname.startsWith(c.href + '/')))
-                                    ? 'font-semibold text-primary'
-                                    : 'text-muted-foreground hover:text-foreground'
-                                )}
-                              >
-                                {t(c.label)}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -331,54 +318,53 @@ export default function Sidebar({
             );
           })}
         </nav>
-      </div>
 
       {/* 3. APPLE ID / ICLOUD STYLE USER PROFILE FOOTER */}
       <div className="pt-3 border-t border-border mt-4 space-y-2.5">
-      {user && (
-        <div>
-          <div className="rounded-xl border border-border bg-background/60 p-3 space-y-2.5 shadow-2xs">
-            <div className="flex items-center gap-2.5">
-              <div
-                onClick={() => {
-                  onMobileClose?.();
-                  router.push('/profile');
-                }}
-                className="relative shrink-0 cursor-pointer"
-              >
+      {onMobileClose && (
+        <div className="lg:hidden flex items-center justify-between px-2">
+          <span className="text-[12px] font-semibold text-muted-foreground">{t('Yozuv')}</span>
+          <ScriptToggle />
+        </div>
+      )}
+      {vipItem && <div className="!mb-[10px]">{renderVipCard(vipItem)}</div>}
+      {user && (() => {
+        const pct = Math.min(100, Math.round(((user.xp || 0) % 1000) / 10));
+        const openProfile = () => {
+          onMobileClose?.();
+          router.push('/profile');
+        };
+        return (
+          <div className="ps-sb-user relative overflow-hidden rounded-xl border border-border bg-background/60 p-3.5 shadow-2xs">
+            <span aria-hidden className="ps-sb-user-ring" />
+            <div className="relative flex items-center gap-3">
+              <button type="button" onClick={openProfile} className="ps-sb-avatar relative shrink-0 cursor-pointer rounded-full" aria-label="Profil">
                 <CosmeticAvatar
-                  className="size-9 border border-border shadow-2xs"
+                  className="size-11 border border-border shadow-2xs"
                   src={user.avatar_url}
                   name={user.first_name || user.username}
                   cosmetics={user.cosmetics}
                   fallbackClassName="text-xs font-bold text-primary"
                 />
                 {user.is_premium && (
-                  <span className="absolute -top-1 -right-1 size-[18px] rounded-full bg-[#C93400] flex items-center justify-center text-[10px] text-white font-bold shadow-2xs">
+                  <span className="absolute -top-1 -right-1 flex size-[18px] items-center justify-center rounded-full bg-[#C93400] text-[10px] font-bold text-white shadow-2xs">
                     ★
                   </span>
                 )}
-              </div>
+              </button>
 
-              <div
-                onClick={() => {
-                  onMobileClose?.();
-                  router.push('/profile');
-                }}
-                className="min-w-0 flex-1 cursor-pointer"
-              >
-                <div className="flex items-center gap-1">
-                  <p className="text-xs font-bold truncate text-foreground hover:text-primary transition-colors">
+              <button type="button" onClick={openProfile} className="min-w-0 flex-1 cursor-pointer text-left">
+                <span className="flex items-center gap-1 pr-7">
+                  <span className="ps-sb-uname truncate text-sm font-bold text-foreground">
                     {user.first_name || user.username}
-                  </p>
+                  </span>
                   <VerifiedBadge role={user.role} isSuperadmin={user.is_superadmin} isTeacher={user.is_teacher} size="xs" />
-                </div>
-                <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-medium">
-                  <span className="font-mono font-bold text-primary">Lvl {user.level || 1}</span>
-                  <span>·</span>
-                  <span className="font-mono">{(user.xp || 0).toLocaleString()} XP</span>
-                </div>
-              </div>
+                </span>
+                <span className="mt-1 flex items-center gap-1.5 whitespace-nowrap text-[11px] font-semibold text-muted-foreground">
+                  <span className="ps-sb-lvl rounded-full bg-primary/12 px-2 py-0.5 text-primary">{user.level || 1}-daraja</span>
+                  <span className="tabular-nums">{(user.xp || 0).toLocaleString('uz-UZ')} XP</span>
+                </span>
+              </button>
 
               <button
                 type="button"
@@ -386,31 +372,29 @@ export default function Sidebar({
                   handleLogout();
                   router.push('/login');
                 }}
-                className="ios-spring flex size-7.5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-destructive hover:bg-destructive/12 transition cursor-pointer"
+                className="ps-sb-logout ios-spring absolute -right-1 -top-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-destructive hover:bg-destructive/12 transition cursor-pointer"
                 title="Tizimdan chiqish"
+                aria-label="Tizimdan chiqish"
               >
                 <LogOut className="size-3.5" />
               </button>
             </div>
 
-            {/* Level XP Progress Bar */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
-                <span>Keyingi daraja</span>
-                <span className="font-bold text-primary">
-                  {Math.min(100, Math.round(((user.xp || 0) % 1000) / 10))}%
-                </span>
+            <div className="relative mt-3.5">
+              <div className="flex items-baseline justify-between text-[11px] font-semibold text-muted-foreground">
+                <span>{(user.level || 1) + 1}-darajagacha</span>
+                <span className="ps-sb-pct font-bold tabular-nums text-primary">{pct}%</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div className="ps-sb-track mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary transition-all duration-300"
-                  style={{ width: `${Math.max(5, Math.min(100, Math.round(((user.xp || 0) % 1000) / 10)))}%` }}
+                  className="ps-sb-fill h-full rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${Math.max(5, pct)}%` }}
                 />
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
       </div>
     </div>
   );
@@ -418,7 +402,7 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop Fixed iPadOS Sidebar */}
-      <aside className="ilm-sidebar fixed left-0 top-0 z-40 hidden h-screen w-64 select-none flex-col border-r border-border bg-card/85 ios-glass text-card-foreground lg:flex">
+      <aside className="ps-shell ilm-sidebar fixed left-0 top-0 z-40 hidden h-screen w-64 select-none flex-col border-r border-border bg-card/85 ios-glass text-card-foreground lg:flex">
         {sidebarContent}
       </aside>
 
@@ -438,7 +422,7 @@ export default function Sidebar({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-              className="fixed inset-y-0 left-0 z-[80] w-72 max-w-[85vw] border-r border-border bg-card shadow-2xl lg:hidden"
+              className="ps-shell ps-drawer fixed inset-y-0 left-0 z-[80] w-72 max-w-[85vw] border-r border-border bg-card shadow-2xl lg:hidden"
             >
               {sidebarContent}
             </motion.div>

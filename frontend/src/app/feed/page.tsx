@@ -118,22 +118,22 @@ const REACTION_EMOJIS: Record<string, { icon: string; label: string; activeClass
   fire: {
     icon: '🔥',
     label: 'Olov',
-    activeClass: 'bg-[#FF9500]/15 border-[#FF9500]/45 text-[#C93400] dark:text-[#FF9F0A]',
+    activeClass: 'bg-[var(--ps-orange)]/15 border-[var(--ps-orange)]/45 text-[#8A5A00] dark:text-[var(--ps-orange)]',
   },
   clap: {
     icon: '👏',
     label: 'Qarsak',
-    activeClass: 'bg-[#34C759]/15 border-[#34C759]/45 text-[#248A3D] dark:text-[#30D158]',
+    activeClass: 'bg-[var(--ps-green)]/15 border-[var(--ps-green)]/45 text-[var(--ps-green)]',
   },
   trophy: {
     icon: '🏆',
     label: 'Kubok',
-    activeClass: 'bg-[#FFCC00]/20 border-[#FF9500]/45 text-[#B25000] dark:text-[#FFD60A]',
+    activeClass: 'bg-[#FFCC00]/20 border-[var(--ps-orange)]/45 text-[#B25000] dark:text-[#FFD60A]',
   },
   heart: {
     icon: '❤️',
     label: 'Yurak',
-    activeClass: 'bg-[#FF2D55]/15 border-[#FF2D55]/45 text-[#D70015] dark:text-[#FF375F]',
+    activeClass: 'bg-[var(--ps-coral)]/15 border-[var(--ps-coral)]/45 text-[var(--ps-coral)]',
   },
 };
 
@@ -613,45 +613,48 @@ export default function CommunityFeedPage() {
   }
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-4 sm:p-6 pb-28">
+      <main className="page-shell flex-1 w-full max-w-full min-w-0 overflow-x-hidden p-4 sm:p-6 pb-28">
         <div className="mx-auto grid w-full max-w-[1180px] gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="mx-auto max-w-2xl space-y-5 w-full min-w-0">
           {/* 0. Kunlik Streak & O'quv Markaz Stories */}
           <FeedStoriesBar examTrack={examTrack} />
 
 
-          {/* 1. Page header & actions */}
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <span className="ds-label inline-flex items-center gap-1.5">
-                <TrendingUp className="size-3.5" /> Hamjamiyat lentasi
-              </span>
-              <h1 className="mt-1.5 text-2xl sm:text-[28px] font-extrabold tracking-tight text-foreground">Nima gap?</h1>
+          {/* 1. Sarlavha */}
+          <section className="pt-2">
+            <span className="ps-chip">
+              <TrendingUp className="size-3.5 text-[var(--ps-purple)]" /> Hamjamiyat lentasi
+            </span>
+            <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
+              <h1 className="ps-display text-[48px] sm:text-[68px]">
+                Nima{' '}
+                <span className="relative inline-block text-[var(--ps-purple)]">
+                  gap
+                  <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)] sm:-bottom-3 sm:h-4">
+                    <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+                  </svg>
+                </span>
+                <span className="text-[var(--ps-coral)]">?</span>
+              </h1>
+              <div className="flex items-center gap-2">
+                <Link href="/tests/history" className="ps-chip hidden sm:inline-flex">
+                  <Award className="size-3.5 text-[var(--ps-orange)]" /> Natijalarim
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModalTab('result');
+                    setIsCreateModalOpen(true);
+                  }}
+                  className="ps-btn ps-btn-ink !min-h-11"
+                >
+                  <Plus className="size-4 stroke-[2.5]" /> Yangi post
+                </button>
+              </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                href="/tests/history"
-                className="ios-spring hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground shadow-2xs hover:bg-muted/70"
-              >
-                <PremiumIcon icon={Award} tone="amber" size="2xs" />
-                <span>Natijalarim</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveModalTab('result');
-                  setIsCreateModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-hover)] px-4 py-2 text-xs sm:text-[13px] font-semibold text-white cursor-pointer"
-              >
-                <Plus className="size-4 stroke-[2.5]" />
-                <span>Yangi post</span>
-              </button>
-            </div>
-          </div>
+          </section>
 
           {/* 2. iOS 18 Quick Composer Card */}
           <div
@@ -659,7 +662,7 @@ export default function CommunityFeedPage() {
               setActiveModalTab('result');
               setIsCreateModalOpen(true);
             }}
-            className="ios-card ios-card-interactive rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer"
+            className="ps-card ps-lift flex cursor-pointer items-center justify-between gap-3 !rounded-full p-2.5 pl-3 sm:p-3 sm:pl-3.5"
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <Avatar className="size-10 border border-border shrink-0">
@@ -688,7 +691,7 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('result');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3 py-1.5 text-[12px] font-bold text-[#C93400] dark:text-[#FF9F0A] cursor-pointer"
+                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-orange)]/14 border border-[var(--ps-orange)]/25 px-3 py-1.5 text-[12px] font-bold text-[#8A5A00] dark:text-[var(--ps-orange)] cursor-pointer"
               >
                 <PremiumIcon icon={Award} tone="amber" size="2xs" />
                 <span>Natija</span>
@@ -700,7 +703,7 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('custom');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#34C759]/14 border border-[#34C759]/25 px-3 py-1.5 text-[12px] font-bold text-[#248A3D] dark:text-[#30D158] cursor-pointer"
+                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)]/14 border border-[var(--ps-green)]/25 px-3 py-1.5 text-[12px] font-bold text-[var(--ps-green)] cursor-pointer"
               >
                 <PremiumIcon icon={Camera} tone="emerald" size="2xs" />
                 <span>Rasm</span>
@@ -742,10 +745,10 @@ export default function CommunityFeedPage() {
                   type="button"
                   onClick={() => setSelectedFilter(tab.slug)}
                   className={cn(
-                    'ios-spring shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer border',
+                    'ios-spring shrink-0 rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer',
                     isSel
-                      ? 'bg-primary text-white border-primary shadow-[0_4px_12px_rgba(0,122,255,0.3)]'
-                      : 'bg-card text-muted-foreground border-border hover:text-foreground'
+                      ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                      : 'bg-[var(--ps-paper)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                   )}
                 >
                   {t(tab.label)}
@@ -787,7 +790,7 @@ export default function CommunityFeedPage() {
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-[0_6px_16px_rgba(0,122,255,0.32)] cursor-pointer"
+                    className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-[0_6px_16px_rgba(118,89,199,0.45)] cursor-pointer"
                   >
                     <Plus className="size-4" />
                     <span>Birinchi postni qoldirish</span>
@@ -867,7 +870,7 @@ export default function CommunityFeedPage() {
                                 Lvl {post.author.level}
                               </span>
                               {post.is_pinned && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[#FF2D55]/14 px-2 py-0.5 text-[12px] font-bold text-[#D70015] dark:text-[#FF375F]">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-coral)]/14 px-2 py-0.5 text-[12px] font-bold text-[var(--ps-coral)]">
                                   <Pin className="size-2.5" /> Qadalgan
                                 </span>
                               )}
@@ -883,10 +886,10 @@ export default function CommunityFeedPage() {
                             className={cn(
                               'rounded-full px-2.5 py-1 text-[10.5px] font-bold border',
                               post.post_type === 'achievement'
-                                ? 'border-[#AF52DE]/30 bg-[#AF52DE]/12 text-[#8944AB] dark:text-[#BF5AF2]'
+                                ? 'border-[var(--ps-purple)]/30 bg-[var(--ps-purple)]/12 text-[var(--ps-purple)]'
                                 : isCert
-                                ? 'border-[#FF9500]/30 bg-[#FF9500]/14 text-[#C93400] dark:text-[#FF9F0A]'
-                                : 'border-[#007AFF]/30 bg-[#007AFF]/12 text-[#007AFF] dark:text-[#409CFF]'
+                                ? 'border-[var(--ps-orange)]/30 bg-[var(--ps-orange)]/14 text-[#8A5A00] dark:text-[var(--ps-orange)]'
+                                : 'border-[var(--ps-purple)]/30 bg-[var(--ps-purple)]/12 text-[var(--ps-purple)]'
                             )}
                           >
                             {post.post_type === 'achievement'
@@ -900,7 +903,7 @@ export default function CommunityFeedPage() {
                             <button
                               type="button"
                               onClick={() => handleReportPost(post.id)}
-                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[#FF9500] hover:bg-[#FF9500]/12 transition-colors cursor-pointer"
+                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[var(--ps-orange)] hover:bg-[var(--ps-orange)]/12 transition-colors cursor-pointer"
                               title="Shikoyat qilish"
                               aria-label="Postga shikoyat qilish"
                             >
@@ -912,7 +915,7 @@ export default function CommunityFeedPage() {
                             <button
                               type="button"
                               onClick={() => handleDeletePost(post.id)}
-                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[#FF3B30] hover:bg-[#FF3B30]/12 transition-colors cursor-pointer"
+                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[var(--ps-coral)] hover:bg-[var(--ps-coral)]/12 transition-colors cursor-pointer"
                               title="Postni o'chirish"
                             >
                               <Trash2 className="size-3.5" />
@@ -923,7 +926,7 @@ export default function CommunityFeedPage() {
 
                       {/* 2. Result / Subject Summary Block */}
                       {post.score > 0 || post.total_questions > 0 || post.grade ? (
-                        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3.5 sm:p-4 min-w-0">
+                        <div className="flex items-center justify-between gap-3 rounded-[22px] bg-[var(--ps-neutral)] p-4 min-w-0">
                           <div className="space-y-1 min-w-0 flex-1">
                             <span className="inline-block rounded-full bg-card border border-border px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground">
                               {post.subject_name}
@@ -941,12 +944,12 @@ export default function CommunityFeedPage() {
                           </div>
 
                           {post.score > 0 && (
-                            <div className="flex flex-col items-end shrink-0 rounded-lg bg-[#34C759]/14 border border-[#34C759]/25 px-3.5 py-2">
-                              <span className="text-lg sm:text-2xl font-bold font-mono tracking-tight text-[#248A3D] dark:text-[#30D158] leading-none">
+                            <div className="flex flex-col items-end shrink-0 rounded-[18px] bg-[var(--ps-green)] px-4 py-2.5 text-white">
+                              <span className="ps-num text-[26px] sm:text-[32px] leading-none">
                                 {post.score?.toFixed(0)}%
                               </span>
                               {post.grade && (
-                                <span className="mt-0.5 text-[12px] font-bold uppercase text-[#C93400] dark:text-[#FF9F0A]">
+                                <span className="mt-1 text-[11px] font-bold uppercase text-[var(--ps-orange)]">
                                   Daraja: {post.grade}
                                 </span>
                               )}
@@ -977,7 +980,7 @@ export default function CommunityFeedPage() {
                       {post.image_url && (
                         <div
                           onClick={() => setPreviewImage(post.image_url)}
-                          className="relative overflow-hidden rounded-xl border border-border bg-[#F2F2F7] dark:bg-[#1C1C1E] group cursor-pointer flex items-center justify-center max-h-[500px] w-full"
+                          className="relative overflow-hidden rounded-xl border border-border bg-[var(--ps-neutral)] group cursor-pointer flex items-center justify-center max-h-[500px] w-full"
                         >
                           <img
                             src={post.image_url}
@@ -995,7 +998,7 @@ export default function CommunityFeedPage() {
                       {post.test_id && (
                         <Link
                           href={`/tests/mock/${post.test_id}`}
-                          className="ios-spring flex items-center justify-between rounded-lg bg-primary/10 hover:bg-primary/15 border border-primary/20 px-4 py-2.5 text-xs font-bold text-primary transition-colors"
+                          className="ios-spring flex items-center justify-between rounded-full bg-[#080808] px-5 py-3 text-xs font-bold text-[#FFFCF7] transition-transform hover:-translate-y-0.5 dark:bg-[#FFFCF7] dark:text-[#080808]"
                         >
                           <span>Shu testni siz ham yechib ko&apos;ring</span>
                           <ArrowRight className="size-3.5" />
@@ -1328,7 +1331,7 @@ export default function CommunityFeedPage() {
                                   {att.test_title}
                                 </span>
                                 {isCert && (
-                                  <Badge className="bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A] text-[11px] px-1.5 py-0.5 shrink-0 border border-[#FF9500]/30 font-bold">
+                                  <Badge className="bg-[var(--ps-orange)]/15 text-[#8A5A00] dark:text-[var(--ps-orange)] text-[11px] px-1.5 py-0.5 shrink-0 border border-[var(--ps-orange)]/30 font-bold">
                                     🏆 Sertifikat
                                   </Badge>
                                 )}
@@ -1344,10 +1347,10 @@ export default function CommunityFeedPage() {
                                 className={cn(
                                   'font-mono font-bold text-xs px-2.5 py-1 rounded-full border',
                                   scoreVal >= 80
-                                    ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] border-[#34C759]/30'
+                                    ? 'bg-[var(--ps-green)]/15 text-[var(--ps-green)] border-[var(--ps-green)]/30'
                                     : scoreVal >= 60
-                                    ? 'bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A] border-[#FF9500]/30'
-                                    : 'bg-[#FF3B30]/15 text-[#D70015] dark:text-[#FF6961] border-[#FF3B30]/30'
+                                    ? 'bg-[var(--ps-orange)]/15 text-[#8A5A00] dark:text-[var(--ps-orange)] border-[var(--ps-orange)]/30'
+                                    : 'bg-[var(--ps-coral)]/15 text-[#D70015] dark:text-[#FF6961] border-[var(--ps-coral)]/30'
                                 )}
                               >
                                 {scoreVal.toFixed(0)}%
@@ -1481,7 +1484,7 @@ export default function CommunityFeedPage() {
                           setSelectedImageFile(null);
                           setImagePreviewUrl(null);
                         }}
-                        className="absolute top-2.5 right-2.5 size-7 rounded-full bg-black/75 text-white flex items-center justify-center hover:bg-[#FF3B30] transition-colors cursor-pointer"
+                        className="absolute top-2.5 right-2.5 size-7 rounded-full bg-black/75 text-white flex items-center justify-center hover:bg-[var(--ps-coral)] transition-colors cursor-pointer"
                       >
                         <X className="size-3.5" />
                       </button>
@@ -1528,6 +1531,6 @@ export default function CommunityFeedPage() {
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

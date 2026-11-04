@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Bricolage_Grotesque, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Bricolage_Grotesque, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import "./pastel-theme.css";
 import AuthProvider from "@/components/AuthProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import SourceCapture from "@/components/SourceCapture";
@@ -16,6 +17,8 @@ import { FeatureFlagProvider } from "@/context/FeatureFlagContext";
 const sans = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext"], variable: "--font-sans", display: "swap" });
 const display = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable: "--font-voice", display: "swap" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
+/* Pastel dashboard sarlavhalari va katta raqamlari uchun grotesk. */
+const grotesk = Space_Grotesk({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700"], variable: "--font-grotesk", display: "swap" });
 
 export const viewport: Viewport = {
   themeColor: '#F6F8F9',
@@ -49,7 +52,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="uz" suppressHydrationWarning className={`h-full antialiased ${sans.variable} ${display.variable} ${mono.variable}`}>
+    <html lang="uz" suppressHydrationWarning className={`h-full antialiased ${sans.variable} ${display.variable} ${mono.variable} ${grotesk.variable}`}>
       {/* Pastdagi mavzu skripti `dark` klassini gidratatsiyadan oldin body ga ham qo'shadi. */}
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <Script id="ilm-theme" strategy="beforeInteractive">

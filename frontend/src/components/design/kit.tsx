@@ -45,7 +45,7 @@ export function PanelLabel({
 }) {
   return (
     <div className={cn('flex items-center justify-between gap-3 mb-3.5', className)}>
-      <span className="ds-label inline-flex items-center gap-1.5">
+      <span className="ds-label ds-section-title inline-flex items-center gap-1.5">
         {Icon && <Icon className="size-3.5" strokeWidth={2} />}
         {children}
       </span>
@@ -56,7 +56,7 @@ export function PanelLabel({
 
 export function PanelLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="text-xs font-semibold text-muted-foreground hover:text-[var(--brand-text)] transition-colors">
+    <Link href={href} className="ds-link text-xs font-semibold text-muted-foreground hover:text-[var(--brand-text)] transition-colors">
       {children}
     </Link>
   );
@@ -86,7 +86,7 @@ export function PageHeader({
           {Icon && <Icon className="size-3.5" strokeWidth={2} />}
           {eyebrow}
         </span>
-        <h1 className="mt-1.5 text-2xl sm:text-[28px] font-extrabold tracking-tight text-foreground leading-tight">
+        <h1 className="ds-page-title mt-1.5 text-2xl sm:text-[28px] font-extrabold tracking-tight text-foreground leading-tight">
           {title}
         </h1>
         {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
@@ -122,7 +122,8 @@ export function Pill({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+        'ds-pill inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+        `ds-pill-${tone}`,
         PILL_TONES[tone],
         className,
       )}
@@ -162,7 +163,8 @@ export function IconTile({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center justify-center bg-gradient-to-br text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(16,40,30,0.18)]',
+        'ds-tile inline-flex shrink-0 items-center justify-center bg-gradient-to-br text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(16,40,30,0.18)]',
+        `ds-tile-${tone}`,
         TILE_TONES[tone],
         dims,
         className,
@@ -193,7 +195,7 @@ export function HeroStat({
   iconClass?: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/12 bg-white/[0.06] p-3 sm:p-3.5 backdrop-blur-sm min-w-0">
+    <div className="ds-hero-stat rounded-xl border border-white/12 bg-white/[0.06] p-3 sm:p-3.5 backdrop-blur-sm min-w-0">
       <Icon className={cn('size-4', iconClass)} strokeWidth={2.2} />
       <p className="mt-2 text-xl sm:text-2xl font-extrabold tracking-tight text-white tabular-nums leading-none">{value}</p>
       <p className="mt-1 text-[11px] font-medium text-white/60 truncate">{label}</p>
@@ -218,7 +220,8 @@ export function HeroButton({
   disabled?: boolean;
 }) {
   const cls = cn(
-    'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition active:scale-[0.98] disabled:opacity-60',
+    'ds-hero-btn inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition active:scale-[0.98] disabled:opacity-60',
+    `ds-hero-btn-${variant}`,
     variant === 'gold'
       ? 'bg-[var(--reward)] text-[var(--on-reward)] hover:bg-[var(--reward-hover)] shadow-[0_4px_14px_-4px_rgba(233,196,106,0.6)]'
       : 'border border-white/20 bg-white/[0.04] text-white hover:bg-white/10',
@@ -241,7 +244,7 @@ export function HeroButton({
 
 export function StatCell({ value, label, className }: { value: React.ReactNode; label: string; className?: string }) {
   return (
-    <div className={cn('rounded-lg bg-[var(--ds-subtle)] px-2 py-2 text-center min-w-0', className)}>
+    <div className={cn('ds-stat rounded-lg bg-[var(--ds-subtle)] px-2 py-2 text-center min-w-0', className)}>
       <p className="text-sm font-bold text-foreground tabular-nums truncate">{value}</p>
       <p className="text-[10px] text-muted-foreground truncate">{label}</p>
     </div>
@@ -266,7 +269,7 @@ export function BrandButton({
   size?: 'sm' | 'md';
 }) {
   const cls = cn(
-    'inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] font-semibold text-[var(--on-brand)] hover:bg-[var(--brand-hover)] transition active:scale-[0.99] disabled:opacity-60 disabled:pointer-events-none',
+    'ds-brand-btn inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] font-semibold text-[var(--on-brand)] hover:bg-[var(--brand-hover)] transition active:scale-[0.99] disabled:opacity-60 disabled:pointer-events-none',
     size === 'sm' ? 'min-h-8 px-3 text-xs' : 'min-h-10 px-4 text-sm',
     className,
   );
@@ -296,7 +299,7 @@ export function SegmentedTabs<T extends string>({
   return (
     <div
       role="tablist"
-      className={cn('flex gap-1 overflow-x-auto no-scrollbar rounded-xl bg-[var(--ds-subtle)] p-1', className)}
+      className={cn('ds-seg flex gap-1 overflow-x-auto no-scrollbar rounded-xl bg-[var(--ds-subtle)] p-1', className)}
     >
       {items.map((it) => {
         const active = it.value === value;
@@ -307,9 +310,10 @@ export function SegmentedTabs<T extends string>({
             type="button"
             role="tab"
             aria-selected={active}
+            data-active={active ? 'true' : undefined}
             onClick={() => onChange(it.value)}
             className={cn(
-              'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition',
+              'ds-seg-item inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition',
               stretch && 'flex-1',
               active
                 ? 'bg-[var(--surface-card)] text-foreground shadow-[0_1px_3px_rgba(15,23,42,0.08)]'
@@ -331,8 +335,8 @@ export function Bar({ value, tone = 'brand', className }: { value: number; tone?
   const pct = Math.max(0, Math.min(100, value));
   const fill = tone === 'gold' ? 'bg-[var(--reward)]' : tone === 'danger' ? 'bg-[var(--danger)]' : 'bg-[var(--brand)]';
   return (
-    <div className={cn('h-1.5 w-full overflow-hidden rounded-full bg-[var(--ds-track)]', className)}>
-      <div className={cn('h-full rounded-full transition-[width] duration-700', fill)} style={{ width: `${pct}%` }} />
+    <div className={cn('ds-bar h-1.5 w-full overflow-hidden rounded-full bg-[var(--ds-track)]', className)}>
+      <div className={cn('ds-bar-fill h-full rounded-full transition-[width] duration-700', fill)} style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -404,7 +408,7 @@ export function Initials({
 
 export function EmptyNote({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-dashed border-[var(--border-card)] px-4 py-6 text-center">
+    <div className="ds-empty rounded-xl border border-dashed border-[var(--border-card)] px-4 py-6 text-center">
       <p className="text-xs text-muted-foreground">{children}</p>
       {action && <div className="mt-3">{action}</div>}
     </div>

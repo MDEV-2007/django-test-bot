@@ -15,11 +15,9 @@ import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import AppShell from '@/components/AppShell';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
 import { useTransliterate } from '@/lib/transliterate';
+import { SubjectCard, TONE_CYCLE } from '@/components/tests/PastelCatalog';
 import { cn } from '@/lib/utils';
 
 interface FlashcardItem {
@@ -46,7 +44,7 @@ interface DeckDetail extends Deck {
   cards: FlashcardItem[];
 }
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Users,
   Home,
   Crown: Award,
@@ -170,259 +168,292 @@ export default function FlashcardsPage() {
     return d.subject_slug === selectedSubject;
   });
 
+  const card = activeDeck?.cards[currentIndex];
+  const total = activeDeck?.cards.length ?? 0;
+
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-20 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full">
-        {/* 1. HERO SIKL BANNERI */}
+      <main className="page-shell flex-1 space-y-8 p-4 pb-24 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full overflow-x-clip">
         {!activeDeck && (
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-950/70 via-zinc-900 to-indigo-950/50 border border-violet-500/25 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-bold uppercase tracking-wider">
-                  <Brain className="size-3.5" />
-                  <span>{t("Interaktiv Xotira Kartalari (Flashcards)")}</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  {t("Barcha Fanlar Bo'yicha Lug'at & Qoidalar")} 🧠
+          <>
+            {/* ── Hero ── */}
+            <section className="relative grid items-center gap-8 pt-2 lg:grid-cols-[1.3fr_0.7fr]">
+              <div className="min-w-0">
+                <span className="ps-chip">
+                  <Brain className="size-3.5 text-[var(--ps-purple)]" /> {t("Interaktiv xotira kartalari")}
+                </span>
+                <h1 className="ps-display mt-5 text-[46px] sm:text-[68px] xl:text-[80px]">
+                  Flash
+                  <span className="relative inline-block text-[var(--ps-purple)]">
+                    cards
+                    <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)] sm:-bottom-3 sm:h-4">
+                      <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+                    </svg>
+                  </span>
+                  <span className="text-[var(--ps-coral)]">.</span>
                 </h1>
-                <p className="text-sm text-zinc-300 max-w-xl leading-relaxed">
-                  {t("Qisqa muddatli xotiradan uzoq muddatli xotiraga o'tkazuvchi ilmiy intervalli takrorlash. Har bir kartani o'zlashtirib, DTM va CEFR imtihonlariga tayyorlaning.")}
+                <p className="mt-7 max-w-lg text-[15px] leading-relaxed text-[var(--text-secondary)]">
+                  {t("Qisqa muddatli xotiradan uzoq muddatli xotiraga o'tkazuvchi intervalli takrorlash. Har bir kartani o'zlashtirib, DTM va CEFR imtihonlariga tayyorlaning.")}
                 </p>
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                <Button asChild variant="outline" className="rounded-xl border-white/10 text-white font-bold">
-                  <Link href="/tests/revision">
-                    <Flame className="size-4 text-orange-400 mr-1.5" />
-                    <span>{t("Mening xatolarim")}</span>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link href="/tests/revision" className="ps-btn ps-btn-ink">
+                    <Flame className="size-4 text-[var(--ps-orange)]" /> {t("Mening xatolarim")}
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
                   </Link>
-                </Button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* 2. FANLAR FILTRI (1-QADAM) */}
-        {!activeDeck && (
-          <div className="space-y-4">
-            <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
-              <Button
-                size="sm"
-                variant="outline"
-                className={cn('shrink-0 rounded-full font-bold cursor-pointer', selectedSubject === 'all' && 'chip-active')}
+              {/* Kartalar to'plami kompozitsiyasi */}
+              <div className="relative mx-auto h-[220px] w-[220px] sm:h-[280px] sm:w-[280px]" aria-hidden>
+                <div className="absolute inset-[6%] rounded-full bg-[var(--ps-orange)]" />
+                <div className="absolute left-[14%] top-[16%] h-[58%] w-[48%] -rotate-12 rounded-[22px] bg-[var(--ps-green)] shadow-xl" />
+                <div className="absolute left-[28%] top-[12%] h-[62%] w-[50%] rotate-6 rounded-[22px] bg-[var(--ps-purple)] shadow-xl" />
+                <div className="absolute left-[24%] top-[20%] flex h-[60%] w-[50%] flex-col items-center justify-center rounded-[22px] bg-[#FFFCF7] text-[#080808] shadow-2xl">
+                  <Layers className="size-7 text-[var(--ps-purple)]" />
+                  <span className="ps-num mt-2 text-[40px]">{decks.length}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-black/50">koloda</span>
+                </div>
+                <div className="ps-spin absolute -right-1 bottom-[6%] size-14 text-[var(--ps-ink)]">
+                  <svg viewBox="0 0 100 100" className="size-full"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z" fill="currentColor" /></svg>
+                </div>
+              </div>
+            </section>
+
+            {/* ── Fanlar filtri ── */}
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="ps-eyebrow text-[var(--text-muted)]">Kolodani tanlang</p>
+                <h2 className="ps-display mt-2 text-[28px] sm:text-[36px]">Fanlar bo&apos;yicha <span className="text-[var(--ps-purple)]">kolodalar</span></h2>
+              </div>
+              <span className="ps-chip">{filteredDecks.length} ta koloda</span>
+            </div>
+            <div className="ds-seg flex max-w-full gap-1 overflow-x-auto no-scrollbar sm:w-fit">
+              <button
+                type="button"
+                data-active={selectedSubject === 'all' ? 'true' : undefined}
                 onClick={() => { tgHaptic('select'); setSelectedSubject('all'); }}
+                className="ds-seg-item shrink-0 cursor-pointer font-bold"
               >
-                {t("Barcha Fanlar")} ({decks.length})
-              </Button>
-              {subjects.map((s) => (
-                <Button
+                {t("Barcha fanlar")} ({decks.length})
+              </button>
+              {subjects.filter((s) => s.slug !== 'all').map((s) => (
+                <button
                   key={s.slug}
-                  size="sm"
-                  variant="outline"
-                  className={cn('shrink-0 rounded-full font-bold cursor-pointer', selectedSubject === s.slug && 'chip-active')}
+                  type="button"
+                  data-active={selectedSubject === s.slug ? 'true' : undefined}
                   onClick={() => { tgHaptic('select'); setSelectedSubject(s.slug); }}
+                  className="ds-seg-item shrink-0 cursor-pointer font-bold"
                 >
                   {t(s.name)}
-                </Button>
+                </button>
               ))}
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="shrink-0 rounded-full font-bold border-rose-500/40 text-rose-400 hover:bg-rose-500/10 cursor-pointer"
-              >
-                <Link href="/tests/revision">
-                  🔥 {t("Xatolar Banki")}
-                </Link>
-              </Button>
+              <Link href="/tests/revision" className="ds-seg-item shrink-0 font-bold !text-[var(--ps-coral)]">
+                🔥 {t("Xatolar banki")}
+              </Link>
             </div>
 
-            {/* 3. BENTO-KOLODALAR (2-QADAM) */}
+            {/* ── Kolodalar ── */}
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Skeleton key={i} className="h-44 rounded-3xl" />
+                  <Skeleton key={i} className="h-64 rounded-[28px] bg-white/40" />
                 ))}
               </div>
             ) : filteredDecks.length === 0 ? (
-              <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-10 text-center space-y-3">
-                <Layers className="size-10 text-zinc-500 mx-auto" />
-                <p className="text-zinc-300 font-bold">{t("Ushbu fan bo'yicha hozircha kolodalar mavjud emas.")}</p>
+              <div className="ps-card flex flex-col items-center px-6 py-14 text-center">
+                <span className="flex size-16 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                  <Layers className="size-7" />
+                </span>
+                <p className="ps-display mt-4 text-[24px]">{t("Ushbu fan bo'yicha hozircha kolodalar yo'q")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredDecks.map((deck) => {
-                  const IconComp = ICON_MAP[deck.icon] || Layers;
-                  return (
-                    <div
-                      key={deck.id}
-                      onClick={() => openDeck(deck.id)}
-                      className="group p-5 rounded-2xl border border-white/10 bg-zinc-900/80 hover:bg-zinc-850 hover:border-violet-500/50 transition-all cursor-pointer shadow-lg space-y-3.5 flex flex-col justify-between"
-                    >
-                      <div className="space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="size-11 rounded-2xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center font-bold group-hover:scale-105 transition-transform">
-                            <IconComp className="size-5" />
-                          </span>
-                          <Badge variant="outline" className="text-[12px] font-mono border-white/10 text-zinc-400">
-                            {deck.difficulty}
-                          </Badge>
-                        </div>
-                        <h3 className="text-base font-bold text-white group-hover:text-violet-300 transition-colors line-clamp-1">
-                          {t(deck.title)}
-                        </h3>
-                        <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
-                          {t(deck.description)}
-                        </p>
-                      </div>
-
-                      <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-                        <span className="font-bold text-violet-400 font-mono">
-                          {deck.total_cards} {t("ta karta")}
-                        </span>
-                        <span className="text-amber-400 font-mono font-bold">
-                          +{deck.xp_reward} XP
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+                {filteredDecks.map((deck, i) => (
+                  <SubjectCard
+                    key={deck.id}
+                    index={i}
+                    tone={TONE_CYCLE[i % TONE_CYCLE.length]}
+                    icon={ICON_MAP[deck.icon] || Layers}
+                    title={t(deck.title)}
+                    subtitle={deck.subject}
+                    desc={t(deck.description)}
+                    badges={[deck.difficulty]}
+                    meta={[
+                      { label: t('Kartalar'), value: `${deck.total_cards} ta` },
+                      { label: t('Mukofot'), value: `+${deck.xp_reward} XP` },
+                    ]}
+                    cta={loadingDeck ? t('Ochilmoqda…') : t('Kolodani ochish')}
+                    busy={loadingDeck}
+                    disabled={loadingDeck}
+                    wholeCardClick
+                    onClick={() => openDeck(deck.id)}
+                  />
+                ))}
               </div>
             )}
-          </div>
+          </>
         )}
 
-        {/* 4. 3D FLIP KARTASI (3-QADAM: ACTIVE STUDY SESSION) */}
+        {/* ── Faol mashg'ulot ── */}
         {activeDeck && (
-          <div className="space-y-6 max-w-xl mx-auto">
-            {/* Header: Chiqish va Progress bar */}
-            <div className="flex items-center justify-between gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => { setActiveDeck(null); tgHaptic('medium'); }}
-                className="rounded-xl border-white/10 text-zinc-300"
-              >
-                <ArrowLeft className="size-4 mr-1.5" />
-                <span>{t("Kolodalarga qaytish")}</span>
-              </Button>
-              <div className="text-xs font-mono font-bold text-zinc-400">
-                {currentIndex + 1} / {activeDeck.cards.length}
+          <div className="mx-auto max-w-2xl space-y-5">
+            {/* Yuqori panel — test ekrani bilan bir xil */}
+            <div className="ps-runner-bar sticky top-2 z-30 rounded-[28px] p-2.5 sm:top-3 sm:p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <button
+                    type="button"
+                    aria-label={t("Kolodalarga qaytish")}
+                    title={t("Kolodalarga qaytish")}
+                    onClick={() => { setActiveDeck(null); tgHaptic('medium'); }}
+                    className="ps-runner-icon flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:rotate-90"
+                  >
+                    <X className="size-4" />
+                  </button>
+                  <span className="ps-runner-count flex h-10 shrink-0 items-center gap-2 rounded-full pl-1.5 pr-3.5 text-sm font-bold">
+                    <span className="flex size-7 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                      <Layers className="size-3.5" />
+                    </span>
+                    <span className="tabular-nums">
+                      {Math.min(currentIndex + 1, total)}<span className="opacity-50">/{total}</span>
+                    </span>
+                  </span>
+                  <span className="ps-runner-chip hidden h-10 min-w-0 items-center rounded-full px-3 text-xs font-bold sm:flex">
+                    <span className="truncate">{t(activeDeck.title)}</span>
+                  </span>
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <span className="flex h-10 items-center gap-1 rounded-full bg-[var(--ps-green)] px-3 text-sm font-bold text-white">
+                    <Check className="size-4" /> {masteredIds.length}
+                  </span>
+                  <span className="flex h-10 items-center gap-1 rounded-full bg-[var(--ps-coral)] px-3 text-sm font-bold text-white">
+                    <X className="size-4" /> {reviewIds.length}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-2.5 px-1">
+                <div className="ps-runner-track h-2 overflow-hidden rounded-full">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--ps-purple)] to-[var(--ps-coral)] transition-[width] duration-500"
+                    style={{ width: `${Math.max(2, (currentIndex / Math.max(1, total)) * 100)}%` }}
+                  />
+                </div>
               </div>
             </div>
 
-            <Progress
-              value={((currentIndex) / activeDeck.cards.length) * 100}
-              className="h-2 rounded-full bg-zinc-800"
-            />
-
             {!isCompleted ? (
-              <div className="space-y-5">
-                {/* 3D Flip Card */}
-                <div
-                  onClick={handleFlip}
-                  className="min-h-[280px] sm:min-h-[320px] rounded-3xl border-2 border-violet-500/30 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-8 shadow-2xl flex flex-col justify-between items-center text-center cursor-pointer transition-all hover:border-violet-500/60 select-none relative overflow-hidden"
-                >
-                  <div className="w-full flex items-center justify-between text-xs text-zinc-400">
-                    <span className="font-mono uppercase tracking-wider text-violet-400 font-bold">
-                      {isFlipped ? t("Orqa tomon (Javob)") : t("Old tomon (Savol / So'z)")}
-                    </span>
-                    <span className="flex items-center gap-1 text-[12px]">
-                      <RotateCw className="size-3" /> {t("Aylantirish")}
-                    </span>
-                  </div>
-
-                  <div className="my-auto space-y-3 px-2">
-                    <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
-                      {isFlipped
-                        ? activeDeck.cards[currentIndex]?.back
-                        : activeDeck.cards[currentIndex]?.front}
-                    </h2>
-                    {showHint && activeDeck.cards[currentIndex]?.hint && (
-                      <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 py-1.5 px-3 rounded-xl inline-block">
-                        💡 {activeDeck.cards[currentIndex]?.hint}
-                      </p>
+              <div className="space-y-4">
+                {/* Aylanuvchi karta */}
+                <AnimatePresence mode="wait">
+                  <motion.button
+                    type="button"
+                    key={`${card?.id}-${isFlipped ? 'b' : 'f'}`}
+                    onClick={handleFlip}
+                    initial={{ rotateY: 90, opacity: 0 }}
+                    animate={{ rotateY: 0, opacity: 1 }}
+                    exit={{ rotateY: -90, opacity: 0 }}
+                    transition={{ duration: 0.22 }}
+                    className={cn(
+                      'relative flex min-h-[300px] w-full cursor-pointer select-none flex-col items-center justify-between overflow-hidden rounded-[32px] p-6 text-center shadow-[0_30px_60px_-34px_rgba(60,30,110,0.7)] sm:min-h-[340px] sm:p-9',
+                      isFlipped ? 'bg-[var(--ps-purple)] text-white' : 'bg-[var(--ps-paper)] text-[var(--text-primary)]',
                     )}
-                  </div>
+                  >
+                    <span aria-hidden className={cn('absolute -right-14 -top-14 size-44 rounded-full', isFlipped ? 'bg-white/15' : 'bg-[var(--ps-purple)] opacity-15')} />
+                    <span className="relative flex w-full items-center justify-between text-xs">
+                      <span className={cn('rounded-full px-3 py-1 font-bold', isFlipped ? 'bg-white/20' : 'bg-[var(--ps-neutral)]')}>
+                        {isFlipped ? t("Orqa tomon · javob") : t("Old tomon · savol")}
+                      </span>
+                      <span className={cn('flex items-center gap-1 font-semibold', isFlipped ? 'text-white/75' : 'text-[var(--text-muted)]')}>
+                        <RotateCw className="size-3.5" /> {t("Aylantirish")}
+                      </span>
+                    </span>
 
-                  <div className="w-full flex justify-between items-center pt-2">
-                    {activeDeck.cards[currentIndex]?.hint && !showHint ? (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setShowHint(true); tgHaptic('light'); }}
-                        className="text-[12px] font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <HelpCircle className="size-3.5" /> {t("Maslahat olish")}
-                      </button>
-                    ) : <span />}
-                    <span className="text-[12px] text-zinc-500">{t("Kartani bosib aylantiring")}</span>
-                  </div>
-                </div>
+                    <span className="relative my-auto block space-y-4 px-2">
+                      <span className="ps-display block text-[26px] !leading-[1.15] sm:text-[34px]">
+                        {isFlipped ? card?.back : card?.front}
+                      </span>
+                      {showHint && card?.hint && (
+                        <span className="inline-block rounded-full bg-[var(--ps-orange)] px-4 py-1.5 text-xs font-bold text-[#080808]">
+                          💡 {card.hint}
+                        </span>
+                      )}
+                    </span>
+
+                    <span className="relative flex w-full items-center justify-between">
+                      {card?.hint && !showHint ? (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => { e.stopPropagation(); setShowHint(true); tgHaptic('light'); }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); setShowHint(true); } }}
+                          className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-[12px] font-bold text-[#080808]"
+                        >
+                          <HelpCircle className="size-3.5" /> {t("Maslahat olish")}
+                        </span>
+                      ) : <span />}
+                      <span className={cn('text-[12px]', isFlipped ? 'text-white/65' : 'text-[var(--text-faint)]')}>{t("Kartani bosib aylantiring")}</span>
+                    </span>
+                  </motion.button>
+                </AnimatePresence>
 
                 {/* Javob tugmalari */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <Button
+                <div className="grid grid-cols-2 gap-3">
+                  <button
                     type="button"
                     onClick={() => handleAnswer(false)}
-                    variant="outline"
-                    className="h-14 rounded-2xl border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-bold text-sm cursor-pointer"
+                    className="ps-btn h-14 justify-center bg-[var(--ps-coral)] text-white shadow-[0_14px_28px_-16px_rgba(240,82,61,0.9)]"
                   >
-                    <X className="size-5 mr-2 text-rose-400" />
-                    <span>{t("❌ Bilmadim")}</span>
-                  </Button>
-
-                  <Button
+                    <X className="size-5" /> {t("Bilmadim")}
+                  </button>
+                  <button
                     type="button"
                     onClick={() => handleAnswer(true)}
-                    className="h-14 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 cursor-pointer"
+                    className="ps-btn h-14 justify-center bg-[var(--ps-green)] text-white shadow-[0_14px_28px_-16px_rgba(76,128,107,0.9)]"
                   >
-                    <Check className="size-5 mr-2" />
-                    <span>{t("✅ Bildim (+5 XP)")}</span>
-                  </Button>
+                    <Check className="size-5" /> {t("Bildim (+5 XP)")}
+                  </button>
                 </div>
               </div>
             ) : (
-              /* Yakuniy Natija */
-              <div className="rounded-3xl border border-emerald-500/30 bg-zinc-900/80 p-8 text-center space-y-4 shadow-2xl">
-                <div className="size-16 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
-                  <Trophy className="size-8" />
+              /* Yakuniy natija */
+              <section className="ps-card relative flex flex-col items-center gap-5 overflow-hidden !rounded-[32px] p-8 text-center sm:p-10">
+                <span aria-hidden className="absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-purple)] opacity-20" />
+                <div className="relative size-40">
+                  <div className="absolute inset-0 rounded-full bg-[var(--ps-orange)]" />
+                  <div className="absolute inset-[12%] flex flex-col items-center justify-center rounded-full border-[5px] border-[#FFFCF7] bg-[#080808] text-[#FFFCF7]">
+                    <Trophy className="size-5 text-[var(--ps-orange)]" />
+                    <span className="ps-num mt-1 text-[38px]">
+                      {masteredIds.length}<span className="text-[0.5em] text-[var(--ps-orange)]">/{total}</span>
+                    </span>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-white">
-                  {t("Ajoyib natija! Koloda yakunlandi")} 🎉
+                <h2 className="ps-display relative text-[32px] sm:text-[40px]">
+                  {t("Koloda yakunlandi")}<span className="text-[var(--ps-coral)]">!</span>
                 </h2>
-                <p className="text-xs text-zinc-300 max-w-sm mx-auto">
-                  {t("Siz")} {activeDeck.cards.length} {t("ta kartadan")} {masteredIds.length} {t("tasini to'liq eslab qoldingiz.")}
+                <p className="relative max-w-sm text-sm text-[var(--text-muted)]">
+                  {t("Siz")} {total} {t("ta kartadan")} {masteredIds.length} {t("tasini to'liq eslab qoldingiz.")}
                 </p>
                 {earnedReward && (
-                  <div className="inline-flex items-center gap-4 p-3 rounded-2xl bg-black/40 border border-white/10 font-mono text-sm">
-                    <span className="text-emerald-400 font-bold">+{earnedReward.xp} XP</span>
-                    <span className="text-amber-400 font-bold">+{earnedReward.coins} Tanga</span>
+                  <div className="relative flex gap-2">
+                    <span className="rounded-full bg-[var(--ps-green)] px-4 py-2 text-sm font-bold text-white">+{earnedReward.xp} XP</span>
+                    <span className="rounded-full bg-[var(--ps-orange)] px-4 py-2 text-sm font-bold text-[#080808]">+{earnedReward.coins} {t("tanga")}</span>
                   </div>
                 )}
-                <div className="pt-2 flex justify-center gap-3">
-                  <Button
-                    type="button"
-                    onClick={() => openDeck(activeDeck.id)}
-                    variant="outline"
-                    className="rounded-xl border-white/10 text-white font-bold"
-                  >
-                    <RotateCw className="size-4 mr-1.5" />
-                    <span>{t("Qayta takrorlash")}</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => setActiveDeck(null)}
-                    className="rounded-xl bg-primary text-primary-foreground font-bold"
-                  >
-                    <span>{t("Boshqa kolodalar")}</span>
-                  </Button>
+                <div className="relative flex flex-wrap justify-center gap-3 pt-2">
+                  <button type="button" onClick={() => openDeck(activeDeck.id)} className="ps-btn ps-btn-ghost">
+                    <RotateCw className="size-4" /> {t("Qayta takrorlash")}
+                  </button>
+                  <button type="button" onClick={() => setActiveDeck(null)} className="ps-btn ps-btn-ink">
+                    {t("Boshqa kolodalar")}
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </button>
                 </div>
-              </div>
+              </section>
             )}
           </div>
         )}
       </main>
-    </>
+    </div>
   );
 }

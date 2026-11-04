@@ -2,19 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { History, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { History, ChevronLeft, ChevronRight, ArrowRight, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
-import PageHero from '@/components/student/PageHero';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 import ShareToCommunityModal from '@/components/student/ShareToCommunityModal';
-import { Award, Sparkles } from 'lucide-react';
 
 type HistoryEntry = {
   id: number; test_title: string; score: number | null;
@@ -24,13 +20,6 @@ type HistoryEntry = {
 type HistoryResponse = {
   results: HistoryEntry[]; page: number; num_pages: number; has_next: boolean; has_prev: boolean;
 };
-
-function scoreTone(score: number | null) {
-  if (score === null) return 'bg-[var(--surface-hover)] text-[var(--text-secondary)]';
-  if (score >= 80) return 'bg-[var(--success)]/20 text-[var(--success-text)]';
-  if (score >= 50) return 'bg-amber-500/20 text-amber-300';
-  return 'bg-rose-500/20 text-rose-300';
-}
 
 export default function HistoryPage() {
   const { access } = useAuthStore();
@@ -45,75 +34,109 @@ export default function HistoryPage() {
   }, [access, page]);
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-        <PageHero
-          tone="indigo"
-          eyebrow="Arxiv & Natijalar"
-          eyebrowIcon={History}
-          title="Topshirilgan Testlar Tarixi"
-          description="Barcha topshirilgan imtihonlaringiz, sertifikatlaringiz va ularni Hamjamiyatga ulashish."
-        />
+      <main className="page-shell flex-1 space-y-8 p-4 pb-12 sm:p-6">
+        {/* Sarlavha */}
+        <section className="relative grid items-end gap-6 pt-2 sm:grid-cols-[1fr_auto]">
+          <div>
+            <Link href="/tests" className="ps-chip w-fit transition-transform hover:-translate-x-0.5">
+              <ChevronLeft className="size-4" /> Testlar
+            </Link>
+            <p className="ps-eyebrow mt-6 text-[var(--text-muted)]">Arxiv va natijalar</p>
+            <h1 className="ps-display mt-3 text-[44px] sm:text-[64px]">
+              Testlar <span className="text-[var(--ps-purple)]">tarixi</span>
+              <span className="text-[var(--ps-coral)]">.</span>
+            </h1>
+            <p className="mt-4 max-w-lg text-[15px] text-[var(--text-secondary)]">
+              Barcha topshirilgan imtihonlaringiz, natijalari va ularni hamjamiyatga ulashish.
+            </p>
+          </div>
+          {data && (
+            <div className="flex items-center gap-3 rounded-[28px] bg-[#080808] px-6 py-5 text-[#FFFCF7]">
+              <History className="size-6 text-[var(--ps-orange)]" />
+              <div>
+                <p className="ps-num text-[40px]">{data.results.length}</p>
+                <p className="text-[11px] font-semibold text-white/60">shu sahifada</p>
+              </div>
+            </div>
+          )}
+        </section>
 
         {!data && (
           <div className="space-y-3">
-            {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-[86px] w-full" />)}
+            {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-[92px] w-full rounded-[28px] bg-white/40" />)}
           </div>
         )}
 
         {data?.results.length === 0 && (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <History className="mx-auto mb-2 size-8 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">Hali test yechilmagan.</p>
-              <Button asChild size="sm" className="mt-4"><Link href="/tests">Birinchi testni boshlash</Link></Button>
-            </CardContent>
-          </Card>
+          <div className="ps-card flex flex-col items-center px-6 py-16 text-center">
+            <span className="flex size-16 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+              <History className="size-7" />
+            </span>
+            <p className="ps-display mt-4 text-[26px]">Hali test yechilmagan</p>
+            <Link href="/tests" className="ps-btn ps-btn-ink mt-5">
+              Birinchi testni boshlash
+              <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+            </Link>
+          </div>
         )}
 
         <div className="space-y-3">
-          {data?.results.map((e) => (
-            <Card key={e.id} className="gap-0 py-0 transition-colors hover:border-[var(--accent)]/40 group">
-              <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 sm:p-5">
-                <Link href={`/tests/${e.id}/feedback`} className="min-w-0 space-y-1 flex-1">
-                  <h3 className="truncate text-sm font-bold transition-colors group-hover:text-[var(--accent-text)]">{e.test_title}</h3>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(e.completed_at).toLocaleString('uz-UZ')} · <span className="text-[var(--success-text)]">{e.correct_answers} to&apos;g&apos;ri</span>, <span className="text-[var(--danger-text)]">{e.wrong_answers} xato</span>, <span>{e.skipped_answers} javobsiz</span>
-                  </p>
-                </Link>
-                <div className="flex shrink-0 items-center justify-between sm:justify-end gap-2.5">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSharingAttempt(e)}
-                    className="rounded-xl text-xs font-bold border-amber-500/30 text-amber-500 hover:bg-amber-500/10 gap-1 h-8"
-                  >
-                    <Sparkles className="size-3 text-amber-400" />
-                    <span>Hamjamiyatga qo&apos;yish</span>
-                  </Button>
-                  <Link href={`/tests/${e.id}/feedback`} className="flex items-center gap-2">
-                    <span className={cn('rounded-xl px-2.5 py-0.5 sm:px-3 sm:py-1 text-sm sm:text-base font-bold', scoreTone(e.score))}>
-                      {e.score !== null ? `${e.score.toFixed(0)}%` : '—'}
+          {data?.results.map((e) => {
+            const score = e.score;
+            const tone =
+              score === null ? 'bg-[var(--ps-neutral)] text-[var(--text-primary)]' :
+              score >= 80 ? 'bg-[var(--ps-green)] text-white' :
+              score >= 50 ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-coral)] text-white';
+            return (
+              <div key={e.id} className="ps-card ps-lift group flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
+                <Link href={`/tests/${e.id}/feedback`} className="flex min-w-0 flex-1 items-center gap-4">
+                  <span className={cn('flex size-16 shrink-0 flex-col items-center justify-center rounded-[20px]', tone)}>
+                    <span className="ps-num text-[22px]">{score !== null ? `${score.toFixed(0)}%` : '—'}</span>
+                  </span>
+                  <span className="min-w-0 space-y-1.5">
+                    <span className="ps-display block truncate text-[18px] sm:text-[20px]">{e.test_title}</span>
+                    <span className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+                      <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[var(--text-muted)]">
+                        {new Date(e.completed_at).toLocaleString('uz-UZ')}
+                      </span>
+                      <span className="rounded-full bg-[var(--ps-green)]/15 px-2.5 py-1 text-[var(--ps-green)]">{e.correct_answers} to&apos;g&apos;ri</span>
+                      <span className="rounded-full bg-[var(--ps-coral)]/15 px-2.5 py-1 text-[var(--ps-coral)]">{e.wrong_answers} xato</span>
+                      <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[var(--text-muted)]">{e.skipped_answers} javobsiz</span>
                     </span>
-                    <ArrowRight className="size-4 text-muted-foreground transition-colors group-hover:text-[var(--accent-text)]" />
+                  </span>
+                </Link>
+                <div className="flex shrink-0 items-center justify-between gap-2 sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setSharingAttempt(e)}
+                    className="ps-chip cursor-pointer !bg-[var(--ps-purple)] !text-white"
+                  >
+                    <Sparkles className="size-3.5" /> Hamjamiyatga qo&apos;yish
+                  </button>
+                  <Link
+                    href={`/tests/${e.id}/feedback`}
+                    aria-label="Natijani ko'rish"
+                    className="flex size-11 items-center justify-center rounded-full bg-[#080808] text-[#FFFCF7] transition-transform group-hover:-rotate-45 dark:bg-[#FFFCF7] dark:text-[#080808]"
+                  >
+                    <ArrowRight className="size-4" />
                   </Link>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
 
         {data && data.num_pages > 1 && (
           <div className="flex items-center justify-between pt-2">
-            <Button variant="outline" size="sm" disabled={!data.has_prev} onClick={() => setPage((p) => p - 1)}>
+            <button type="button" disabled={!data.has_prev} onClick={() => setPage((p) => p - 1)} className="ps-btn ps-btn-ghost">
               <ChevronLeft className="size-4" /> Oldingi
-            </Button>
-            <span className="text-xs font-medium text-muted-foreground">Sahifa {data.page} / {data.num_pages}</span>
-            <Button variant="outline" size="sm" disabled={!data.has_next} onClick={() => setPage((p) => p + 1)}>
+            </button>
+            <span className="ps-chip">Sahifa {data.page} / {data.num_pages}</span>
+            <button type="button" disabled={!data.has_next} onClick={() => setPage((p) => p + 1)} className="ps-btn ps-btn-ink">
               Keyingi <ChevronRight className="size-4" />
-            </Button>
+            </button>
           </div>
         )}
 
@@ -131,6 +154,6 @@ export default function HistoryPage() {
           />
         )}
       </main>
-    </>
+    </div>
   );
 }

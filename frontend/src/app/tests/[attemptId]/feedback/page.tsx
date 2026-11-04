@@ -285,32 +285,30 @@ export default function FeedbackPage() {
 
   if (error) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <main className="page-shell flex-1 p-6">
-          <Card className="border-rose-500/25 bg-rose-500/10">
-            <CardContent className="pt-6 text-sm text-rose-300">{error}</CardContent>
-          </Card>
+          <div className="ps-card p-6 text-sm font-semibold">{error}</div>
         </main>
-      </>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <main className="page-shell flex-1 space-y-6 p-4 sm:p-6">
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-56 w-full" />
+          <Skeleton className="h-64 w-full rounded-[32px] bg-white/40" />
+          <Skeleton className="h-56 w-full rounded-[28px] bg-white/40" />
         </main>
-      </>
+      </div>
     );
   }
 
   if (data.status === 'pending') {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <main className="page-shell flex-1 space-y-4 p-4 sm:p-6">
           <Card>
@@ -321,7 +319,7 @@ export default function FeedbackPage() {
           </Card>
           <Skeleton className="h-40 w-full" />
         </main>
-      </>
+      </div>
     );
   }
 
@@ -340,90 +338,70 @@ export default function FeedbackPage() {
 
   const a = data.attempt!;
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+      <main className="page-shell flex-1 space-y-8 p-4 pb-12 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button asChild variant="outline" size="sm">
-            <Link href="/tests"><ChevronLeft className="size-4" /> Testlar ro&apos;yxati</Link>
-          </Button>
+          <Link href="/tests" className="ps-chip transition-transform hover:-translate-x-0.5">
+            <ChevronLeft className="size-4" /> Testlar ro&apos;yxati
+          </Link>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setCertOpen(true)}
-              className="border-[var(--tone-premium)]/40 bg-[var(--tone-premium-soft)] font-semibold text-[var(--tone-premium-text)] hover:bg-[var(--tone-premium)]/20"
-            >
+            <button type="button" onClick={() => setCertOpen(true)} className="ps-chip cursor-pointer !bg-[var(--ps-orange)] !text-[#080808]">
               <Award className="size-4" /> Natija kartasi
-            </Button>
+            </button>
             <StoryShareButton attemptId={attemptId} />
-            <Button
-              size="sm"
-              onClick={handleChallengeFriend}
-              className="border-rose-500/50 bg-gradient-to-r from-rose-600 to-amber-600 text-white font-bold hover:from-rose-500 hover:to-amber-500 gap-1.5 shadow-sm"
-            >
-              <Swords className="size-4" /> Do&apos;stni duelga chaqirish ⚔️
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setCommunityModalOpen(true)}
-              className="border-amber-500/40 bg-gradient-to-r from-amber-500/15 to-orange-500/15 font-bold text-amber-300 hover:from-amber-500/25 hover:to-orange-500/25 gap-1.5 shadow-sm"
-            >
-              <Sparkles className="size-4 text-amber-400" /> Hamjamiyatga ulashish (+15 XP)
-            </Button>
+            <button type="button" onClick={handleChallengeFriend} className="ps-chip cursor-pointer !bg-[var(--ps-coral)] !text-white">
+              <Swords className="size-4" /> Do&apos;stni duelga chaqirish
+            </button>
+            <button type="button" onClick={() => setCommunityModalOpen(true)} className="ps-chip cursor-pointer !bg-[var(--ps-purple)] !text-white">
+              <Sparkles className="size-4" /> Hamjamiyatga ulashish (+15 XP)
+            </button>
             {a.score < 100 && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={startMistakesTest}
-              className="border-rose-500/30 bg-rose-500/15 text-rose-200 hover:bg-rose-500/25 hover:text-rose-100"
-            >
-              <RotateCcw className="size-4" /> Xatolar ustida ishlash
-            </Button>
+              <button type="button" onClick={startMistakesTest} className="ps-chip cursor-pointer !bg-[#080808] !text-[#FFFCF7]">
+                <RotateCcw className="size-4" /> Xatolar ustida ishlash
+              </button>
             )}
           </div>
         </div>
 
         {mistakesError && (
-          <Card className="border-rose-500/25 bg-rose-500/10">
-            <CardContent className="pt-6 text-sm text-rose-300">{mistakesError}</CardContent>
-          </Card>
+          <div className="ps-card flex items-start gap-3 p-5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+              <AlertTriangle className="size-4" />
+            </span>
+            <p className="pt-1.5 text-sm font-semibold">{mistakesError}</p>
+          </div>
         )}
 
-        {/* 2 TA YADROVIY SEGMENTED TAB */}
-        <div className="flex items-center justify-center p-1.5 rounded-2xl bg-zinc-900/80 border border-white/10 max-w-lg mx-auto w-full shadow-lg">
+        {/* 2 ta bo'lim: Xulosa · Savollar tahlili */}
+        <div role="tablist" className="ds-seg mx-auto flex w-full max-w-lg items-center">
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'summary'}
+            data-active={activeTab === 'summary' ? 'true' : undefined}
             onClick={() => {
               setActiveTab('summary');
               tgHaptic('light');
             }}
-            className={cn(
-              'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer',
-              activeTab === 'summary'
-                ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md shadow-rose-500/20'
-                : 'text-zinc-400 hover:text-white'
-            )}
+            className="ds-seg-item flex flex-1 cursor-pointer items-center justify-center gap-2 font-bold"
           >
             <Trophy className="size-4" />
-            <span>🏆 Xulosa va Keyingi Qadam</span>
+            Xulosa va keyingi qadam
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'review'}
+            data-active={activeTab === 'review' ? 'true' : undefined}
             onClick={() => {
               setActiveTab('review');
               tgHaptic('light');
             }}
-            className={cn(
-              'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer',
-              activeTab === 'review'
-                ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md shadow-rose-500/20'
-                : 'text-zinc-400 hover:text-white'
-            )}
+            className="ds-seg-item flex flex-1 cursor-pointer items-center justify-center gap-2 font-bold"
           >
             <CheckCircle2 className="size-4" />
-            <span>📋 Savollar Tahlili ({data.review_items?.length || 0})</span>
+            Savollar tahlili ({data.review_items?.length || 0})
           </button>
         </div>
 
@@ -557,245 +535,144 @@ export default function FeedbackPage() {
 
           const isCefrTest = Boolean(data?.attempt?.test_title?.toLowerCase().includes('cefr')) || totalQ >= 60;
 
+          const verdict =
+            scoreVal >= 80 ? { text: "A'lo natija!", tone: 'bg-[var(--ps-green)] text-white' } :
+            scoreVal >= 60 ? { text: 'Yaxshi natija!', tone: 'bg-[var(--ps-blue)] text-[#080808]' } :
+            scoreVal >= 40 ? { text: "O'rtacha natija", tone: 'bg-[var(--ps-orange)] text-[#080808]' } :
+            { text: "Ko'proq mashq zarur", tone: 'bg-[var(--ps-coral)] text-white' };
+
           return (
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#11141d]/95 p-6 sm:p-8 shadow-xl backdrop-blur-md">
-              {/* Dynamic Ambient Glow behind Score */}
-              <div
-                className={cn(
-                  "pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-72 rounded-full blur-3xl opacity-25",
-                  scoreVal >= 80 ? "bg-emerald-500" :
-                  scoreVal >= 60 ? "bg-sky-500" :
-                  scoreVal >= 40 ? "bg-amber-500" : "bg-rose-500"
-                )}
-              />
+            <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-9">
+              <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-[var(--ps-purple)] opacity-15" />
+              <div aria-hidden className="ps-dots pointer-events-none absolute bottom-8 right-8 hidden size-20 text-[var(--ps-purple)] opacity-25 sm:block" />
 
-              <div className="relative z-10 flex flex-col items-center text-center">
-                {/* Test Title / Eyebrow */}
-                {data?.attempt?.test_title && (
-                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                    {data.attempt.test_title} natijalari
-                  </span>
-                )}
-
-                {/* Circular Score Gauge Centerpiece */}
-                <div className="relative flex size-36 sm:size-40 items-center justify-center my-2">
-                  <svg className="size-full -rotate-90" viewBox="0 0 130 130">
-                    <circle
-                      cx="65"
-                      cy="65"
-                      r={radius}
-                      className="stroke-slate-100 dark:stroke-white/10"
-                      strokeWidth="10"
-                      fill="transparent"
-                    />
-                    <circle
-                      cx="65"
-                      cy="65"
-                      r={radius}
-                      className={cn(
-                        "transition-all duration-1000 ease-out",
-                        scoreVal >= 80 ? "stroke-emerald-500" :
-                        scoreVal >= 60 ? "stroke-sky-500" :
-                        scoreVal >= 40 ? "stroke-amber-500" : "stroke-rose-500"
-                      )}
-                      strokeWidth="10"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      fill="transparent"
-                    />
-                  </svg>
-
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="font-mono text-3xl sm:text-4xl font-black tracking-tight text-foreground">
-                      {scoreVal.toFixed(0)}%
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5">
-                      Umumiy ball
-                    </span>
-                  </div>
-                </div>
-
-                {/* Dynamic Status Pill */}
-                <div className="mt-1">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold font-sans shadow-2xs",
-                      scoreVal >= 80 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30" :
-                      scoreVal >= 60 ? "bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30" :
-                      scoreVal >= 40 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30" :
-                      "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
-                    )}
-                  >
-                    {scoreVal >= 80 ? "A'lo natija! 🏆" :
-                     scoreVal >= 60 ? "Yaxshi natija! 🎯" :
-                     scoreVal >= 40 ? "O'rtacha natija 📈" : "Ko'proq mashq zarur 💡"}
-                  </span>
-                </div>
-
-                {/* Multi-Color Segmented Progress Bar */}
-                <div className="w-full max-w-md mt-6 space-y-1.5">
-                  <div className="h-2.5 w-full rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden flex shadow-inner">
-                    {correctPct > 0 && (
-                      <div
-                        style={{ width: `${correctPct}%` }}
-                        className="bg-emerald-500 transition-all duration-700"
-                        title={`To'g'ri: ${a.correct_answers}`}
+              <div className="relative grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
+                {/* Ball kompozitsiyasi */}
+                <div className="relative mx-auto size-56 sm:size-64">
+                  <div aria-hidden className="absolute inset-0 rounded-full bg-[var(--ps-orange)]" />
+                  <div aria-hidden className="absolute -bottom-2 -left-4 size-20 rounded-tr-full bg-[var(--ps-purple)]" />
+                  <div className="absolute inset-[9%] flex items-center justify-center rounded-full border-[6px] border-[#FFFCF7] bg-[#080808] text-[#FFFCF7]">
+                    <svg className="absolute inset-2 -rotate-90" viewBox="0 0 130 130">
+                      <circle cx="65" cy="65" r={radius} stroke="rgba(255,255,255,0.12)" strokeWidth="7" fill="transparent" />
+                      <circle
+                        cx="65"
+                        cy="65"
+                        r={radius}
+                        stroke="var(--ps-orange)"
+                        strokeWidth="7"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        fill="transparent"
+                        className="transition-all duration-1000 ease-out"
                       />
-                    )}
-                    {wrongPct > 0 && (
-                      <div
-                        style={{ width: `${wrongPct}%` }}
-                        className="bg-rose-500 transition-all duration-700"
-                        title={`Xato: ${a.wrong_answers}`}
-                      />
-                    )}
-                    {skippedPct > 0 && (
-                      <div
-                        style={{ width: `${skippedPct}%` }}
-                        className="bg-slate-300 dark:bg-slate-700 transition-all duration-700"
-                        title={`Javobsiz: ${a.skipped_answers}`}
-                      />
-                    )}
+                    </svg>
+                    <div className="relative flex flex-col items-center">
+                      <span className="ps-num text-[56px] sm:text-[64px]">
+                        {scoreVal.toFixed(0)}
+                        <span className="text-[0.45em] text-[var(--ps-orange)]">%</span>
+                      </span>
+                      <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/60">Umumiy ball</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 3 Metric Cards: To'g'ri / Xato / Javobsiz */}
-                <div className="grid grid-cols-3 gap-2.5 sm:gap-4 w-full max-w-md mt-4">
-                  <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10 p-3 sm:p-3.5 flex flex-col items-center justify-center gap-1 transition-transform hover:scale-[1.02]">
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
-                      <CheckCircle2 className="size-3.5" />
-                      <span>To&apos;g&apos;ri</span>
-                    </div>
-                    <span className="font-mono text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                      {a.correct_answers}
-                    </span>
-                  </div>
-
-                  <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 dark:bg-rose-500/10 p-3 sm:p-3.5 flex flex-col items-center justify-center gap-1 transition-transform hover:scale-[1.02]">
-                    <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
-                      <XCircle className="size-3.5" />
-                      <span>Xato</span>
-                    </div>
-                    <span className="font-mono text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400">
-                      {a.wrong_answers}
-                    </span>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/50 dark:bg-white/5 p-3 sm:p-3.5 flex flex-col items-center justify-center gap-1 transition-transform hover:scale-[1.02]">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-bold">
-                      <HelpCircle className="size-3.5" />
-                      <span>Javobsiz</span>
-                    </div>
-                    <span className="font-mono text-xl sm:text-2xl font-black text-slate-600 dark:text-slate-300">
-                      {a.skipped_answers}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Sertifikat & Prognoz Badges */}
-                <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                  {/* CEFR Daraja */}
-                  {isCefrTest && (() => {
-                    const score = a.score || 0;
-                    let badgeText = '';
-                    let badgeClass = '';
-                    if (score >= 86) {
-                      badgeText = "🏆 C1 Daraja (Ilg'or — Oliy Sertifikat)";
-                      badgeClass = 'border-purple-500/40 bg-purple-500/15 text-purple-600 dark:text-purple-300';
-                    } else if (score >= 67) {
-                      badgeText = "🥇 B2 Daraja (Mustaqil — OTM Imtiyozi)";
-                      badgeClass = 'border-blue-500/40 bg-blue-500/15 text-blue-600 dark:text-blue-300';
-                    } else if (score >= 47) {
-                      badgeText = "🥈 B1 Daraja (Ostonaviy Sertifikat)";
-                      badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-300';
-                    } else if (score >= 27) {
-                      badgeText = "🥉 A2 Daraja (Boshlang'ich Sertifikat)";
-                      badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300';
-                    } else {
-                      badgeText = "❌ Sinovdan o'tmadi";
-                      badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400';
-                    }
-                    return (
-                      <Badge variant="outline" className={`py-1.5 px-3.5 text-xs sm:text-sm font-bold ${badgeClass}`}>
-                        {badgeText}
-                      </Badge>
-                    );
-                  })()}
-
-                  {/* Milliy Sertifikat 45 talik */}
-                  {!isCefrTest && totalQ === 45 && (() => {
-                    const c = a.correct_answers;
-                    let badgeText = '';
-                    let badgeClass = '';
-                    if (c >= 34) { badgeText = '🏆 A+ Daraja (Oltin Sertifikat)'; badgeClass = 'border-amber-500/40 bg-amber-500/15 text-amber-500 dark:text-amber-400'; }
-                    else if (c >= 28) { badgeText = '🥇 A Daraja (A\'lo Sertifikat)'; badgeClass = 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'; }
-                    else if (c >= 24) { badgeText = '🥈 B+ Daraja (Juda yaxshi)'; badgeClass = 'border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400'; }
-                    else if (c >= 21) { badgeText = '🥉 B Daraja (Yaxshi)'; badgeClass = 'border-teal-500/40 bg-teal-500/15 text-teal-600 dark:text-teal-400'; }
-                    else if (c >= 18) { badgeText = '📜 C+ Daraja (Qoniqarli)'; badgeClass = 'border-orange-500/40 bg-orange-500/15 text-orange-600 dark:text-orange-400'; }
-                    else { badgeText = '❌ Sinovdan o\'tmadi'; badgeClass = 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400'; }
-
-                    return (
-                      <Badge variant="outline" className={`py-1.5 px-3 text-xs sm:text-sm font-bold ${badgeClass}`}>
-                        {badgeText}
-                      </Badge>
-                    );
-                  })()}
-
-                  {/* Prognoz Sertifikat */}
-                  {data.predicted_score && (
-                    <div className="flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs sm:text-sm font-bold text-amber-500 dark:text-amber-300 shadow-xs">
-                      <Crown className="size-4 text-amber-400 shrink-0 animate-pulse" />
-                      <span>Prognoz Sertifikat: <b>{((a.correct_answers || 0) === 0 || (a.score || 0) === 0) ? "— (0.0 ball)" : data.predicted_score}</b></span>
-                    </div>
+                {/* Matn va ko'rsatkichlar */}
+                <div className="min-w-0 text-center lg:text-left">
+                  {data?.attempt?.test_title && (
+                    <p className="ps-eyebrow text-[var(--text-muted)]">{data.attempt.test_title}</p>
                   )}
-                </div>
+                  <h1 className="ps-display mt-3 text-[40px] sm:text-[56px]">
+                    Natijangiz<span className="text-[var(--ps-coral)]">.</span>
+                  </h1>
+                  <span className={cn('mt-3 inline-flex rounded-full px-3.5 py-1.5 text-xs font-bold', verdict.tone)}>
+                    {verdict.text}
+                  </span>
 
-                {/* ─── ZERO DEAD-ENDS / AUTOPLAY KONVEYER BLOKI ─── */}
-                <div className="w-full max-w-xl mt-6 p-4.5 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-amber-500/10 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
-                  <div className="space-y-1 min-w-0">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                      <Sparkles className="size-3 text-amber-500 animate-pulse" />
-                      Keyingi Qadam · Konveyer Oqimi
-                    </span>
-                    <h4 className="text-xs sm:text-sm font-extrabold text-foreground">
-                      {(a.wrong_answers || 0) > 0
-                        ? `🔥 ${a.wrong_answers} ta xatoingiz aniqlandi: Hoziroq 2 daqiqada ularni yanchib tashlang!`
-                        : `🏆 Ajoyib natija! 1v1 Arenada tengdoshingiz bilan kuch sinashing!`}
-                    </h4>
-                    <p className="text-[11px] text-muted-foreground">
-                      {(a.wrong_answers || 0) > 0
-                        ? `Xatolarni tozalab, +40 XP oling va marafon zanjirini davom ettiring.`
-                        : `Ketma-ket g'alaba seriyasi uchun +50 Tanga va 2x Bonus.`}
-                    </p>
+                  {/* Taqsimot chizig'i */}
+                  <div className="mt-6 flex h-3 w-full overflow-hidden rounded-full bg-[var(--ds-track)]">
+                    {correctPct > 0 && <div style={{ width: `${correctPct}%` }} className="bg-[var(--ps-green)] transition-all duration-700" title={`To'g'ri: ${a.correct_answers}`} />}
+                    {wrongPct > 0 && <div style={{ width: `${wrongPct}%` }} className="bg-[var(--ps-coral)] transition-all duration-700" title={`Xato: ${a.wrong_answers}`} />}
+                    {skippedPct > 0 && <div style={{ width: `${skippedPct}%` }} className="bg-[var(--text-faint)] opacity-40 transition-all duration-700" title={`Javobsiz: ${a.skipped_answers}`} />}
                   </div>
 
-                  <div className="shrink-0 flex items-center gap-2 w-full sm:w-auto">
-                    {(a.wrong_answers || 0) > 0 ? (
-                      <Button
-                        onClick={startMistakesTest}
-                        className="w-full sm:w-auto rounded-full bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs px-5 shadow-md shadow-rose-500/25 gap-1.5 cursor-pointer"
-                      >
-                        <RotateCcw className="size-3.5" />
-                        <span>Xatolarni Yanchish (+40 XP)</span>
-                        <ArrowRight className="size-3.5" />
-                      </Button>
-                    ) : (
-                      <Button
-                        asChild
-                        className="w-full sm:w-auto rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-600 hover:to-emerald-600 text-white font-bold text-xs px-5 shadow-md shadow-amber-500/25 gap-1.5 cursor-pointer"
-                      >
-                        <Link href="/battles">
-                          <Swords className="size-3.5" />
-                          <span>1v1 Arenaga Kirish (+50 Tanga)</span>
-                          <ArrowRight className="size-3.5" />
-                        </Link>
-                      </Button>
+                  <div className="mt-4 grid grid-cols-3 gap-2.5 sm:gap-3">
+                    <div className="rounded-[22px] bg-[var(--ps-green)] p-3.5 text-left text-white sm:p-4">
+                      <CheckCircle2 className="size-4" />
+                      <p className="ps-num mt-2 text-[30px] sm:text-[36px]">{a.correct_answers}</p>
+                      <p className="mt-1 text-[11px] font-semibold text-white/75">To&apos;g&apos;ri</p>
+                    </div>
+                    <div className="rounded-[22px] bg-[var(--ps-coral)] p-3.5 text-left text-white sm:p-4">
+                      <XCircle className="size-4" />
+                      <p className="ps-num mt-2 text-[30px] sm:text-[36px]">{a.wrong_answers}</p>
+                      <p className="mt-1 text-[11px] font-semibold text-white/75">Xato</p>
+                    </div>
+                    <div className="rounded-[22px] bg-[var(--ps-neutral)] p-3.5 text-left sm:p-4">
+                      <HelpCircle className="size-4 text-[var(--text-muted)]" />
+                      <p className="ps-num mt-2 text-[30px] sm:text-[36px]">{a.skipped_answers}</p>
+                      <p className="mt-1 text-[11px] font-semibold text-[var(--text-muted)]">Javobsiz</p>
+                    </div>
+                  </div>
+
+                  {/* Sertifikat va prognoz belgilari */}
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                    {isCefrTest && (() => {
+                      const score = a.score || 0;
+                      const text =
+                        score >= 86 ? "🏆 C1 daraja (Ilg'or)" :
+                        score >= 67 ? '🥇 B2 daraja (Mustaqil)' :
+                        score >= 47 ? '🥈 B1 daraja' :
+                        score >= 27 ? "🥉 A2 daraja (Boshlang'ich)" : "❌ Sinovdan o'tmadi";
+                      return <span className="ps-chip">{text}</span>;
+                    })()}
+                    {!isCefrTest && totalQ === 45 && (() => {
+                      const c = a.correct_answers;
+                      const text =
+                        c >= 34 ? '🏆 A+ daraja (Oltin sertifikat)' :
+                        c >= 28 ? "🥇 A daraja (A'lo sertifikat)" :
+                        c >= 24 ? '🥈 B+ daraja (Juda yaxshi)' :
+                        c >= 21 ? '🥉 B daraja (Yaxshi)' :
+                        c >= 18 ? '📜 C+ daraja (Qoniqarli)' : "❌ Sinovdan o'tmadi";
+                      return <span className="ps-chip">{text}</span>;
+                    })()}
+                    {data.predicted_score && (
+                      <span className="ps-chip !bg-[#080808] !text-[#FFFCF7]">
+                        <Crown className="size-3.5 text-[var(--ps-orange)]" />
+                        Prognoz: <b>{((a.correct_answers || 0) === 0 || (a.score || 0) === 0) ? '— (0.0 ball)' : data.predicted_score}</b>
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Keyingi qadam */}
+              <div className="relative mt-8 flex flex-col items-start justify-between gap-4 rounded-[26px] bg-[#080808] p-5 text-[#FFFCF7] sm:flex-row sm:items-center sm:p-6">
+                <div className="min-w-0">
+                  <p className="ps-eyebrow text-[var(--ps-orange)]">Keyingi qadam</p>
+                  <p className="ps-display mt-2 text-[22px] sm:text-[26px]">
+                    {(a.wrong_answers || 0) > 0
+                      ? `${a.wrong_answers} ta xatoni hoziroq tuzating`
+                      : 'Arenada kuch sinashing'}
+                  </p>
+                  <p className="mt-1.5 text-[12px] text-white/65">
+                    {(a.wrong_answers || 0) > 0
+                      ? 'Xatolarni tozalab, +40 XP oling va marafon zanjirini davom ettiring.'
+                      : "Ketma-ket g'alaba seriyasi uchun +50 tanga va 2x bonus."}
+                  </p>
+                </div>
+                {(a.wrong_answers || 0) > 0 ? (
+                  <button type="button" onClick={startMistakesTest} className="ps-btn ps-btn-light w-full shrink-0 justify-between sm:w-auto">
+                    <span className="inline-flex items-center gap-2"><RotateCcw className="size-4" /> Xatolar ustida ishlash</span>
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </button>
+                ) : (
+                  <Link href="/battles" className="ps-btn ps-btn-light w-full shrink-0 justify-between sm:w-auto">
+                    <span className="inline-flex items-center gap-2"><Swords className="size-4" /> 1v1 Arenaga kirish</span>
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </Link>
+                )}
+              </div>
+            </section>
           );
         })()}
 
@@ -1479,6 +1356,6 @@ export default function FeedbackPage() {
           </>
         )}
       </main>
-    </>
+    </div>
   );
 }

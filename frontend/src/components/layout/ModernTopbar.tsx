@@ -97,12 +97,12 @@ export default function ModernTopbar({
     </>
   );
   const bellCls =
-    'tap-44 relative flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[var(--ds-subtle)] transition-colors cursor-pointer';
+    'ps-tb-icon tap-44 relative flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[var(--ds-subtle)] transition-colors cursor-pointer';
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-20 flex h-14 w-full items-center justify-between gap-3 border-b border-[var(--ds-panel-border)] bg-[var(--surface-card)]/85 px-3 sm:px-6 ios-glass',
+        'ds-topbar sticky top-0 z-20 flex h-14 w-full items-center justify-between gap-3 border-b border-[var(--ds-panel-border)] bg-[var(--surface-card)]/85 px-3 sm:px-6 ios-glass',
         className,
       )}
     >
@@ -111,7 +111,7 @@ export default function ModernTopbar({
         <button
           type="button"
           onClick={onMenuClick}
-          className="lg:hidden flex size-9 shrink-0 items-center justify-center rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] text-foreground cursor-pointer"
+          className="ps-tb-menu lg:hidden flex size-9 shrink-0 items-center justify-center rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] text-foreground cursor-pointer"
           aria-label="Menyu ochish"
         >
           <Menu className="size-4" />
@@ -125,7 +125,7 @@ export default function ModernTopbar({
         </Link>
 
         {title && (
-          <h2 className="hidden lg:block text-[15px] font-bold tracking-tight text-foreground truncate">{t(title)}</h2>
+          <h2 className="ps-tb-title hidden lg:block text-[15px] font-bold tracking-tight text-foreground truncate">{t(title)}</h2>
         )}
         {leftSlot}
       </div>
@@ -135,16 +135,16 @@ export default function ModernTopbar({
         <button
           type="button"
           onClick={search}
-          className="tg-hidden hidden md:flex w-56 lg:w-64 items-center gap-2 rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs text-muted-foreground hover:border-[var(--brand-border)] transition-colors cursor-pointer"
+          className="ps-tb-search tg-hidden hidden md:flex w-56 lg:w-64 items-center gap-2 rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs text-muted-foreground hover:border-[var(--brand-border)] transition-colors cursor-pointer"
         >
           <Search className="size-3.5" />
           <span className="truncate">Dars, test, odamlarni qidirish…</span>
-          <kbd className="ml-auto rounded border border-[var(--ds-panel-border)] px-1 font-mono text-[10px]">⌘K</kbd>
+          <kbd className="ps-tb-kbd ml-auto rounded border border-[var(--ds-panel-border)] px-1 font-mono text-[10px]">⌘K</kbd>
         </button>
         <button
           type="button"
           onClick={search}
-          className="md:hidden tg-hidden tap-44 flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--ds-subtle)] cursor-pointer"
+          className="ps-tb-icon md:hidden tg-hidden tap-44 flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--ds-subtle)] cursor-pointer"
           aria-label="Qidirish"
         >
           <Search className="size-4" />
@@ -157,9 +157,9 @@ export default function ModernTopbar({
                 <button
                   type="button"
                   onClick={onStreakClick}
-                  className="tg-hidden tap-44 flex h-8 items-center gap-1.5 rounded-lg border border-[var(--reward-border)] bg-[var(--reward-soft)] px-2.5 text-xs font-bold text-[var(--reward-text)] cursor-pointer"
+                  className="ps-tb-streak tg-hidden tap-44 flex h-8 items-center gap-1.5 rounded-lg border border-[var(--reward-border)] bg-[var(--reward-soft)] px-2.5 text-xs font-bold text-[var(--reward-text)] cursor-pointer"
                 >
-                  <Flame className="size-3.5 text-[#E07A1F]" strokeWidth={2.4} />
+                  <Flame className="ps-tb-flame size-3.5 text-[#E07A1F]" strokeWidth={2.4} />
                   <span className="tabular-nums">{user.streak || 0}</span>
                   <span className="hidden sm:inline font-medium opacity-80">kunlik seriya</span>
                 </button>
@@ -189,7 +189,7 @@ export default function ModernTopbar({
         <button
           type="button"
           onClick={toggleTheme}
-          className="hidden sm:flex tap-44 size-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[var(--ds-subtle)] cursor-pointer"
+          className="ps-tb-icon hidden sm:flex tap-44 size-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[var(--ds-subtle)] cursor-pointer"
           aria-label={isDark ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish"}
         >
           {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -198,7 +198,7 @@ export default function ModernTopbar({
         {user && (
           <Link
             href="/profile"
-            className="flex items-center gap-2 rounded-lg py-1 pl-1 pr-1.5 hover:bg-[var(--ds-subtle)] transition-colors"
+            className="ps-tb-user flex items-center gap-2 rounded-lg py-1 pl-1 pr-1.5 hover:bg-[var(--ds-subtle)] transition-colors"
           >
             <Initials name={`${user.first_name || user.username} ${user.last_name || ''}`} src={user.avatar_url} size={30} />
             <span className="hidden lg:flex flex-col leading-tight min-w-0">

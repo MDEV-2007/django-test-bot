@@ -12,10 +12,7 @@ import { celebrate } from '@/lib/confetti';
 import { soundFX } from '@/lib/soundFX';
 import StatNumber from '@/components/motion/StatNumber';
 import { arenaRankTitle, getRankInfo } from '@/lib/rank';
-import { PageHeader, HeroBanner, HeroStat, HeroButton, SegmentedTabs, BrandButton } from '@/components/design/kit';
 import AppShell from '@/components/AppShell';
-import CardMotif from '@/components/student/CardMotif';
-import PageHero from '@/components/student/PageHero';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
 import { useFeatureFlags } from '@/lib/features';
 import { Card, CardContent } from '@/components/ui/card';
@@ -336,9 +333,9 @@ export default function BattlesPage() {
   }
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+      <main className="page-shell flex-1 space-y-8 p-4 pb-12 sm:p-6 overflow-x-clip">
                 {mode === 'ghost' && (
           <GhostBattleArena
             subjectSlug={selectedSubject || 'tarix'}
@@ -356,341 +353,337 @@ export default function BattlesPage() {
 
         {mode === 'idle' && (
           <div className="space-y-6">
-            <PageHeader
-              icon={Swords}
-              eyebrow="Raqobatli o'rganish"
-              title="Arena"
-              subtitle="Tengdoshlaringizga qarshi chiqing, ligada ko'tariling va bilimingizni jonli bellashuvda isbotlang."
-            />
+            {/* ── Hero ── */}
+            <section className="relative grid items-center gap-8 pt-2 lg:grid-cols-[1.2fr_0.8fr]">
+              <div className="min-w-0">
+                <span className="ps-chip">
+                  <Swords className="size-3.5 text-[var(--ps-coral)]" /> Raqobatli o&apos;rganish
+                </span>
+                <h1 className="ps-display mt-5 text-[52px] sm:text-[76px] xl:text-[88px]">
+                  <span className="relative inline-block text-[var(--ps-coral)]">
+                    Arena
+                    <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)] sm:-bottom-3 sm:h-4">
+                      <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+                    </svg>
+                  </span>
+                  <span className="text-[var(--ps-purple)]">.</span>
+                </h1>
+                <p className="mt-7 max-w-lg text-[15px] leading-relaxed text-[var(--text-secondary)]">
+                  Tengdoshlaringizga qarshi chiqing, ligada ko&apos;tariling va bilimingizni jonli bellashuvda isbotlang.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundFX.click();
+                      tgHaptic('medium');
+                      setMode('ghost');
+                    }}
+                    className="ps-btn ps-btn-ink"
+                  >
+                    <Swords className="size-4 text-[var(--ps-orange)]" /> Raqib topish
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </button>
+                  <button type="button" onClick={() => setActiveBattleTab('class')} className="ps-btn ps-btn-ghost">
+                    <Users className="size-4" /> Sinf jangi
+                  </button>
+                </div>
+              </div>
 
+              {/* Unvon kompozitsiyasi — real ELO */}
+              {arena ? (() => {
+                const rk = getRankInfo(arena.elo_rating);
+                return (
+                  <div className="relative mx-auto aspect-square w-full max-w-[240px] sm:max-w-[320px]">
+                    <div aria-hidden className="absolute inset-[4%] rounded-full bg-[var(--ps-coral)]" />
+                    <div aria-hidden className="absolute -left-2 bottom-[4%] size-[32%] rounded-tr-full bg-[var(--ps-orange)]" />
+                    <div aria-hidden className="ps-dots absolute right-0 top-0 size-[26%] rounded-2xl text-[var(--ps-ink)] opacity-25" />
+                    <div className="absolute inset-[16%] flex flex-col items-center justify-center rounded-full border-[6px] border-[#FFFCF7] bg-[#080808] text-center text-[#FFFCF7]">
+                      <Shield className="size-6 text-[var(--ps-orange)]" />
+                      <span className="ps-num mt-1 text-[44px] sm:text-[56px]">{arena.elo_rating}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/60">ELO</span>
+                    </div>
+                    <div className="ps-float absolute -right-1 top-[14%] sm:-right-5">
+                      <span className="ps-chip text-[13px]">{rk.title}</span>
+                    </div>
+                  </div>
+                );
+              })() : null}
+            </section>
+
+            {/* ── Statistika bento ── */}
             {arena && (() => {
               const rk = getRankInfo(arena.elo_rating);
               const decided = arena.wins + arena.losses + arena.draws;
               const winRate = decided ? Math.round((arena.wins / decided) * 100) : 0;
               return (
-                <HeroBanner>
-                  <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-3">
-                        <span className="flex size-11 items-center justify-center rounded-xl bg-[var(--reward)] text-[var(--on-reward)] shadow-[0_6px_18px_-6px_rgba(233,196,106,0.7)]">
-                          <Shield className="size-5" strokeWidth={2.4} />
-                        </span>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--reward)]">Joriy unvon</p>
-                          <p className="text-xl font-extrabold tracking-tight">{rk.title}</p>
-                        </div>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-12">
+                  <div className="ps-ink col-span-2 relative overflow-hidden rounded-[28px] p-6 lg:col-span-6">
+                    <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full bg-[var(--ps-purple)] opacity-50" />
+                    <p className="ps-eyebrow relative text-white/60">Joriy unvon</p>
+                    <p className="ps-display relative mt-2 text-[32px] sm:text-[40px]">{rk.title}</p>
+                    <p className="relative mt-2 text-[13px] text-white/70">
+                      {rk.nextTitle ? (
+                        <>
+                          <b className="text-[var(--ps-orange)]">{rk.pointsNeeded} ELO</b> qoldi — {rk.nextTitle} unvoniga ko&apos;tarilish uchun g&apos;alabalarni davom ettiring.
+                        </>
+                      ) : (
+                        "Siz eng yuqori unvondasiz — o'rningizni himoya qiling!"
+                      )}
+                    </p>
+                    <div className="relative mt-4">
+                      <div className="mb-1.5 flex justify-between text-[11px] tabular-nums text-white/55">
+                        <span>{arena.elo_rating} ELO</span>
+                        {rk.nextElo && <span>{rk.nextElo} ELO</span>}
                       </div>
-                      <p className="mt-3 text-sm text-white/70">
-                        {rk.nextTitle ? (
-                          <>
-                            <span className="font-bold text-[var(--reward)]">{rk.pointsNeeded} ELO</span> qoldi —{' '}
-                            {rk.nextTitle} unvoniga ko&apos;tarilish uchun g&apos;alabalarni davom ettiring.
-                          </>
-                        ) : (
-                          'Siz eng yuqori unvondasiz — o\'rningizni himoya qiling!'
-                        )}
-                      </p>
-                      <div className="mt-3 max-w-md">
-                        <div className="flex justify-between text-[10px] text-white/50 mb-1.5 tabular-nums">
-                          <span>{arena.elo_rating} ELO</span>
-                          {rk.nextElo && <span>{rk.nextElo} ELO keyingi unvon</span>}
-                        </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                          <div className="h-full rounded-full bg-[var(--reward)]" style={{ width: `${rk.progressPercent}%` }} />
-                        </div>
+                      <div className="h-2.5 overflow-hidden rounded-full bg-white/12">
+                        <div className="h-full rounded-full bg-gradient-to-r from-[var(--ps-orange)] to-[var(--ps-coral)]" style={{ width: `${rk.progressPercent}%` }} />
                       </div>
-                      <div className="mt-5 flex flex-wrap gap-2.5">
-                        <HeroButton
-                          icon={Swords}
-                          onClick={() => {
-                            soundFX.click();
-                            tgHaptic('medium');
-                            setMode('ghost');
-                          }}
-                        >
-                          Raqib topish
-                        </HeroButton>
-                        <HeroButton icon={Users} variant="ghost" onClick={() => setActiveBattleTab('class')}>
-                          Sinf jangi
-                        </HeroButton>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2.5 lg:w-[300px]">
-                      <HeroStat icon={Trophy} value={arena.wins} label="G'alaba" iconClass="text-[#74C69D]" />
-                      <HeroStat icon={Target} value={`${winRate}%`} label="G'alaba ulushi" />
-                      <HeroStat icon={Flame} value={arena.total_battles} label="Janglar" iconClass="text-[#F4A261]" />
                     </div>
                   </div>
-                </HeroBanner>
+                  <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-green)] p-5 text-white lg:col-span-2">
+                    <Trophy className="size-5" />
+                    <p className="ps-num mt-4 text-[44px]">{arena.wins}</p>
+                    <p className="text-[12px] font-semibold text-white/75">G&apos;alaba</p>
+                  </div>
+                  <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-orange)] p-5 text-[#080808] lg:col-span-2">
+                    <Target className="size-5" />
+                    <p className="ps-num mt-4 text-[44px]">{winRate}%</p>
+                    <p className="text-[12px] font-semibold text-black/65">G&apos;alaba ulushi</p>
+                  </div>
+                  <div className="col-span-2 relative overflow-hidden rounded-[28px] bg-[var(--ps-purple)] p-5 text-white lg:col-span-2">
+                    <Flame className="size-5" />
+                    <p className="ps-num mt-4 text-[44px]">{arena.total_battles}</p>
+                    <p className="text-[12px] font-semibold text-white/75">Janglar</p>
+                  </div>
+                </div>
               );
             })()}
 
+            {/* ── Fan filtri ── */}
             {arena && arena.subjects.length > 0 && (
-              <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
+              <div className="ds-seg flex max-w-full gap-1 overflow-x-auto no-scrollbar sm:w-fit">
                 {arena.subjects.map((s) => (
-                  <Button
+                  <button
                     key={s.id}
-                    size="sm"
-                    variant="outline"
-                    className={cn('shrink-0 rounded-full', selectedSubject === s.slug && 'chip-active')}
+                    type="button"
+                    data-active={selectedSubject === s.slug ? 'true' : undefined}
                     onClick={() => selectSubject(s.slug)}
+                    className="ds-seg-item shrink-0 cursor-pointer font-semibold"
                   >
                     {s.name}
-                  </Button>
+                  </button>
                 ))}
               </div>
             )}
 
-            <SegmentedTabs
-              items={[
-                { value: '1v1', label: '1v1 Duel', icon: Swords },
-                { value: 'class', label: 'Sinf jangi', icon: Users },
-                { value: 'leaderboard', label: 'Liga va reyting', icon: Trophy },
-              ]}
-              value={activeBattleTab}
-              onChange={(v) => {
-                soundFX.click();
-                tgHaptic('select');
-                setActiveBattleTab(v as '1v1' | 'class' | 'leaderboard');
-              }}
-            />
-
-            {/* TAB 1: 1v1 JONLI DUEL (Ghost Battle & Fast Matchmaking) */}
-            {activeBattleTab === '1v1' && (
-              <div className="space-y-5">
-                {/* Quick match */}
-                <div className="ds-panel flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-gradient-to-r from-[var(--brand-soft)] to-transparent">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--brand)] text-white">
-                      <Zap className="size-5" />
+            {/* ── 3 ta bo'lim ── */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              {[
+                { value: '1v1', label: '1v1 duel', icon: Swords, tone: 'bg-[var(--ps-coral)] text-white' },
+                { value: 'class', label: 'Sinf jangi', icon: Users, tone: 'bg-[var(--ps-orange)] text-[#080808]' },
+                { value: 'leaderboard', label: 'Liga va reyting', icon: Trophy, tone: 'bg-[var(--ps-purple)] text-white' },
+              ].map((tab) => {
+                const active = activeBattleTab === tab.value;
+                return (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      soundFX.click();
+                      tgHaptic('select');
+                      setActiveBattleTab(tab.value as '1v1' | 'class' | 'leaderboard');
+                    }}
+                    className={cn(
+                      'relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-[24px] p-4 text-left transition-transform hover:-translate-y-1 sm:p-5',
+                      tab.tone,
+                      active && 'ps-mode-active',
+                    )}
+                  >
+                    <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/15" />
+                    <span className="relative inline-flex size-10 items-center justify-center rounded-full bg-black/15">
+                      <tab.icon className="size-5" />
                     </span>
-                    <div className="min-w-0">
-                      <p className="text-[15px] font-bold text-foreground">Tezkor duel</p>
-                      <p className="text-xs text-muted-foreground">
+                    <span className="ps-display relative text-[16px] sm:text-[22px]">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* TAB 1: 1v1 jonli duel */}
+            {activeBattleTab === '1v1' && (
+              <div className="space-y-8">
+                {/* Tezkor duel banneri */}
+                <section className="ps-ink relative flex flex-col items-start justify-between gap-5 overflow-hidden rounded-[32px] p-6 sm:flex-row sm:items-center sm:p-8">
+                  <span aria-hidden className="absolute -right-12 -top-16 size-48 rounded-full bg-[var(--ps-coral)] opacity-60" />
+                  <div className="relative flex items-center gap-4">
+                    <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                      <Zap className="size-7" />
+                    </span>
+                    <div>
+                      <p className="ps-display text-[28px] sm:text-[34px]">Tezkor duel</p>
+                      <p className="mt-1 max-w-md text-[13px] text-white/70">
                         Kutish yo&apos;q: o&apos;zingizga yaqin darajadagi raqib bilan bir zumda bellashing.
                       </p>
                     </div>
                   </div>
-                  <BrandButton
-                    className="shrink-0"
+                  <button
+                    type="button"
                     onClick={() => {
                       soundFX.click();
                       tgHaptic('medium');
                       // Arena `mode === 'ghost'` da chiziladi.
                       setMode('ghost');
                     }}
+                    className="ps-btn ps-btn-light relative shrink-0"
                   >
                     <Play className="size-4" /> Duelni boshlash
-                  </BrandButton>
-                </div>
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </button>
+                </section>
 
-                <div className="grid gap-4 pt-2 md:grid-cols-3">
-                  <Card
-                    onClick={startAiBattle}
-                    className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-[var(--accent-border)] transition-colors hover:border-[var(--accent)]"
-                  >
-                    <CardMotif shape="bot" className="text-[var(--accent)]" />
-                    <CardContent className="relative pt-6">
-                      <PremiumIcon icon={Bot} tone="primary" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
-                      <h3 className="text-base font-bold transition-colors group-hover:text-[var(--accent-text)]">AI bilan mashg&apos;ulot jangi</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                        AI bilan tezkor savollarda mashq qiling. Xavf yo&apos;q, bilimlarni mustahkamlang.
-                      </p>
-                      <span className="mt-4 inline-block text-xs font-bold text-[var(--accent-text)]">Boshlash (tezkor) <ArrowRight className="size-3.5 inline ml-1" /></span>
-                    </CardContent>
-                  </Card>
-
-                  <Card
-                    onClick={startLiveMatch}
-                    className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-rose-500/30 transition-colors hover:border-rose-500"
-                  >
-                    <CardMotif shape="arena" className="text-rose-400" />
-                    <CardContent className="relative pt-6">
-                      <PremiumIcon icon={Swords} tone="rose" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
-                      <h3 className="text-base font-bold transition-colors group-hover:text-rose-400">Jonli abituriyent bilan duel</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                        Onlayn o&apos;quvchilar bilan real vaqtda bellashing va ELO reyting to&apos;plang.
-                      </p>
-                      <span className="mt-4 inline-block text-xs font-bold text-rose-400">Raqib topish <ArrowRight className="size-3.5 inline ml-1" /></span>
-                    </CardContent>
-                  </Card>
-
-                  <Card
-                    onClick={inviteFriend}
-                    className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/30 transition-colors hover:border-amber-500"
-                  >
-                    <CardMotif shape="arena" className="text-amber-400" />
-                    <CardContent className="relative pt-6">
-                      <PremiumIcon icon={Share2} tone="amber" size="lg" glow className="mb-4 transition-transform group-hover:scale-110" />
-                      <h3 className="text-base font-bold transition-colors group-hover:text-amber-400">Do&apos;stni jangga chorlash</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                        Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.
-                      </p>
-                      <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xs font-bold text-amber-400">Telegramda ulashish <ArrowRight className="size-3.5 inline ml-1" /></span>
-                        <button
-                          onClick={copyInviteLink}
-                          title="Nusxa olish"
-                          className="rounded-lg p-1 text-muted-foreground transition hover:bg-amber-500/10 hover:text-amber-400"
-                        >
-                          <Copy className="size-4" />
-                        </button>
+                {/* 3 ta duel turi */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  {[
+                    { onClick: startAiBattle, icon: Bot, title: "AI bilan mashg'ulot jangi", desc: "AI bilan tezkor savollarda mashq qiling. Xavf yo'q, bilimlarni mustahkamlang.", cta: 'Boshlash', tone: 'bg-[var(--ps-purple)]' },
+                    { onClick: startLiveMatch, icon: Swords, title: 'Jonli abituriyent bilan duel', desc: "Onlayn o'quvchilar bilan real vaqtda bellashing va ELO reyting to'plang.", cta: 'Raqib topish', tone: 'bg-[var(--ps-coral)]' },
+                    { onClick: inviteFriend, icon: Share2, title: "Do'stni jangga chorlash", desc: "Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.", cta: 'Telegramda ulashish', tone: 'bg-[var(--ps-orange)]', copy: true },
+                  ].map((c, i) => (
+                    <div
+                      key={c.title}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => c.onClick()}
+                      onKeyDown={(e) => { if (e.key === 'Enter') c.onClick(); }}
+                      className="ps-card ps-lift tactile-btn group relative flex cursor-pointer flex-col overflow-hidden p-6"
+                    >
+                      <span aria-hidden className={cn('absolute -right-10 -top-10 size-32 rounded-full opacity-25', c.tone)} />
+                      <div className="relative flex items-start justify-between">
+                        <span className={cn('ps-zoom inline-flex size-12 items-center justify-center rounded-2xl', c.tone, c.tone.includes('orange') ? 'text-[#080808]' : 'text-white')}>
+                          <c.icon className="size-6" />
+                        </span>
+                        <span className="ps-num text-[34px] text-[var(--text-faint)] opacity-50">{String(i + 1).padStart(2, '0')}</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Maxsus O'yinlar & Mini-Arenalar */}
-                <div className="space-y-3 pt-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <PremiumIcon icon={Sparkles} tone="emerald" size="xs" glow />
-                      <div>
-                        <h3 className="text-base font-bold text-foreground">Intellektual O&apos;yinlar &amp; Mini-Gamlar</h3>
-                        <p className="text-xs text-muted-foreground">Xaritalar, tarixiy shaxslar va xronologiya bo&apos;yicha maxsus sinovlar</p>
+                      <h3 className="ps-display relative mt-5 text-[22px]">{c.title}</h3>
+                      <p className="relative mt-2 text-[13px] leading-relaxed text-[var(--text-muted)]">{c.desc}</p>
+                      <div className="relative mt-auto flex items-center justify-between gap-2 pt-5">
+                        <span className="ps-btn ps-btn-ink !min-h-11 flex-1 justify-between">
+                          {c.cta}
+                          <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                        </span>
+                        {c.copy && (
+                          <button
+                            type="button"
+                            onClick={copyInviteLink}
+                            title="Nusxa olish"
+                            aria-label="Havoladan nusxa olish"
+                            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--ps-neutral)] text-[var(--text-primary)] transition-transform hover:-translate-y-0.5"
+                          >
+                            <Copy className="size-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
 
+                {/* Mini-o'yinlar */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="ps-eyebrow text-[var(--text-muted)]">Mini-o&apos;yinlar</p>
+                    <h2 className="ps-display mt-2 text-[28px] sm:text-[34px]">Intellektual <span className="text-[var(--ps-green)]">o&apos;yinlar</span></h2>
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">Xaritalar, tarixiy shaxslar va xronologiya bo&apos;yicha maxsus sinovlar</p>
+                  </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <Link href="/games/map" className="group">
-                      <Card className="h-full border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-[var(--surface-card)] to-transparent hover:border-blue-500 hover:shadow-lg transition-all">
-                        <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <PremiumIcon icon={MapPin} tone="sky" size="md" glow className="group-hover:scale-110" />
-                              <Badge variant="outline" className="border-blue-500/40 bg-blue-500/10 text-blue-400 text-[12px] font-bold">
-                                XARITA GAME
-                              </Badge>
-                            </div>
-                            <h4 className="text-base font-bold text-foreground group-hover:text-blue-400 transition-colors">
-                              Xarita topshirig&apos;i
-                            </h4>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                              Tarixiy xaritalardan qadimiy hudud, shahar va davlatlarni aniqlang.
-                            </p>
-                          </div>
-                          <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                            <span className="text-[12px] font-bold text-amber-400">+25 XP • +10 tanga</span>
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
-                              O&apos;ynash <ArrowRight className="size-3.5" />
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-
-                    <Link href="/games/character" className="group">
-                      <Card className="h-full border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-[var(--surface-card)] to-transparent hover:border-purple-500 hover:shadow-lg transition-all">
-                        <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <PremiumIcon icon={UserCheck} tone="purple" size="md" glow className="group-hover:scale-110" />
-                              <Badge variant="outline" className="border-purple-500/40 bg-purple-500/10 text-purple-400 text-[12px] font-bold">
-                                TARIXIY SHAXS
-                              </Badge>
-                            </div>
-                            <h4 className="text-base font-bold text-foreground group-hover:text-purple-400 transition-colors">
-                              Tarixiy Shaxslar
-                            </h4>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                              Tarixiy shaxslar hayoti va faoliyatini savollarda oching.
-                            </p>
-                          </div>
-                          <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                            <span className="text-[12px] font-bold text-amber-400">+25 XP • +10 tanga</span>
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
-                              O&apos;ynash <ArrowRight className="size-3.5" />
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-
-                    <Link href="/games/timeline" className="group">
-                      <Card className="h-full border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-[var(--surface-card)] to-transparent hover:border-emerald-500 hover:shadow-lg transition-all">
-                        <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <PremiumIcon icon={History} tone="emerald" size="md" glow className="group-hover:scale-110" />
-                              <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[12px] font-bold">
-                                XRONOLOGIYA
-                              </Badge>
-                            </div>
-                            <h4 className="text-base font-bold text-foreground group-hover:text-emerald-400 transition-colors">
-                              Vaqt o&apos;qi (Timeline)
-                            </h4>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                              Voqealar ketma-ketligini xronologik tartibda to&apos;g&apos;ri joylashtiring.
-                            </p>
-                          </div>
-                          <div className="pt-2 flex items-center justify-between border-t border-[var(--border-card)]">
-                            <span className="text-[12px] font-bold text-amber-400">+30 XP • +15 tanga</span>
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
-                              O&apos;ynash <ArrowRight className="size-3.5" />
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
+                    {[
+                      { href: '/games/map', icon: MapPin, badge: 'Xarita', title: "Xarita topshirig'i", desc: 'Tarixiy xaritalardan qadimiy hudud, shahar va davlatlarni aniqlang.', reward: '+25 XP • +10 tanga', tone: 'bg-[var(--ps-blue)] text-[#080808]', dark: false },
+                      { href: '/games/character', icon: UserCheck, badge: 'Tarixiy shaxs', title: 'Tarixiy shaxslar', desc: 'Tarixiy shaxslar hayoti va faoliyatini savollarda oching.', reward: '+25 XP • +10 tanga', tone: 'bg-[var(--ps-purple)] text-white', dark: true },
+                      { href: '/games/timeline', icon: History, badge: 'Xronologiya', title: "Vaqt o'qi (Timeline)", desc: "Voqealar ketma-ketligini xronologik tartibda to'g'ri joylashtiring.", reward: '+30 XP • +15 tanga', tone: 'bg-[var(--ps-green)] text-white', dark: true },
+                    ].map((g) => (
+                      <Link key={g.href} href={g.href} className={cn('group relative flex flex-col justify-between gap-6 overflow-hidden rounded-[28px] p-6 transition-transform hover:-translate-y-1', g.tone)}>
+                        <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+                        <span className="relative flex items-center justify-between">
+                          <span className="inline-flex size-12 items-center justify-center rounded-full bg-black/15">
+                            <g.icon className="size-6" />
+                          </span>
+                          <span className="rounded-full bg-black/15 px-2.5 py-1 text-[11px] font-bold">{g.badge}</span>
+                        </span>
+                        <span className="relative">
+                          <span className="ps-display block text-[24px]">{g.title}</span>
+                          <span className={cn('mt-1.5 block text-[12px] leading-relaxed', g.dark ? 'text-white/75' : 'text-black/65')}>{g.desc}</span>
+                        </span>
+                        <span className="relative flex items-center justify-between gap-2">
+                          <span className="rounded-full bg-black/15 px-3 py-1 text-[11px] font-bold">{g.reward}</span>
+                          <span className="flex size-10 items-center justify-center rounded-full bg-[#080808] text-[#FFFCF7] transition-transform group-hover:-rotate-45">
+                            <ArrowRight className="size-4" />
+                          </span>
+                        </span>
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB 2: SINF JANGI (PIN Kiritish) */}
+            {/* TAB 2: Sinf jangi (PIN) */}
             {activeBattleTab === 'class' && (
-              <div className="space-y-4">
-                <Card
-                  onClick={() => {
-                    soundFX.click();
-                    tgHaptic('medium');
-                    setShowClassBattle(true);
-                  }}
-                  className="tactile-btn group relative cursor-pointer overflow-hidden border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent hover:border-amber-500 hover:shadow-lg transition-all"
-                >
-                  <CardContent className="p-5 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-                    <div className="flex items-center gap-4">
-                      <div className="size-14 rounded-2xl bg-amber-500 text-black flex items-center justify-center font-bold shrink-0 shadow-md">
-                        <Swords className="size-7" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-amber-500 text-black font-bold text-[12px] uppercase tracking-wider">
-                            TEACHER LIVE QUIZ
-                          </Badge>
-                          <span className="text-xs font-bold text-amber-500">6 Xonali PIN-kod</span>
-                        </div>
-                        <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                          O&apos;qituvchi Sinf Jangiga Kirish (PIN)
-                        </h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground max-w-lg">
-                          Ustozingiz doskaga PIN-kod tashladimi? Shu tugmani bosing va 6 xonali PIN bilan butun sinf doskasidagi jonli jangga qo&apos;shiling!
-                        </p>
-                      </div>
+              <section
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  soundFX.click();
+                  tgHaptic('medium');
+                  setShowClassBattle(true);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') setShowClassBattle(true); }}
+                className="tactile-btn relative flex cursor-pointer flex-col items-start justify-between gap-6 overflow-hidden rounded-[32px] bg-[var(--ps-orange)] p-6 text-[#080808] transition-transform hover:-translate-y-1 sm:flex-row sm:items-center sm:p-9"
+              >
+                <span aria-hidden className="absolute -right-14 -top-14 size-52 rounded-full bg-white/25" />
+                <div className="relative flex items-center gap-5">
+                  <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)]">
+                    <Swords className="size-8" />
+                  </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-[#080808] px-2.5 py-1 text-[11px] font-bold text-white">Teacher live quiz</span>
+                      <span className="text-[12px] font-bold">6 xonali PIN-kod</span>
                     </div>
-                    <Button className="h-12 px-6 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold text-sm shrink-0 shadow-md cursor-pointer">
-                      PIN Kiritish <ArrowRight className="size-4 ml-1.5" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* TAB 3: LIGA VA REYTING */}
-            {activeBattleTab === 'leaderboard' && (
-              <div className="space-y-4">
-                <div className="rounded-3xl border border-primary/30 bg-primary/10 p-6 text-center space-y-3">
-                  <Trophy className="size-12 text-primary mx-auto animate-bounce" />
-                  <h3 className="text-lg font-bold text-foreground">Haftalik ELO Ligasi va Respublika Reytingi</h3>
-                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                    Har bir g&apos;alaba sizga +25 ELO ball beradi. Respublika bo&apos;yicha top-10 o&apos;quvchilar ro&apos;yxatiga kiring va qimmatbaho sovrinlarni yutib oling!
-                  </p>
-                  <Button asChild className="rounded-xl bg-primary font-bold">
-                    <Link href="/leaderboard">To&apos;liq Reyting Jadvalini Ochish <ArrowRight className="size-4 ml-1.5" /></Link>
-                  </Button>
+                    <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">Sinf jangiga kirish</h3>
+                    <p className="mt-2 max-w-lg text-[13px] text-black/70">
+                      Ustozingiz doskaga PIN-kod tashladimi? Shu tugmani bosing va 6 xonali PIN bilan butun sinf doskasidagi jonli jangga qo&apos;shiling!
+                    </p>
+                  </div>
                 </div>
-              </div>
+                <span className="ps-btn ps-btn-ink relative shrink-0">
+                  PIN kiritish
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </span>
+              </section>
+            )}
+
+            {/* TAB 3: Liga va reyting */}
+            {activeBattleTab === 'leaderboard' && (
+              <section className="relative overflow-hidden rounded-[32px] bg-[var(--ps-purple)] p-6 text-white sm:p-9">
+                <span aria-hidden className="absolute -right-14 -top-14 size-52 rounded-full bg-white/15" />
+                <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-5">
+                    <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                      <Trophy className="size-8" />
+                    </span>
+                    <div>
+                      <h3 className="ps-display text-[28px] sm:text-[36px]">Haftalik ELO ligasi</h3>
+                      <p className="mt-2 max-w-md text-[13px] text-white/75">
+                        Har bir g&apos;alaba sizga +25 ELO ball beradi. Respublika bo&apos;yicha top-10 o&apos;quvchilar ro&apos;yxatiga kiring va sovrinlarni yutib oling!
+                      </p>
+                    </div>
+                  </div>
+                  <Link href="/leaderboard" className="ps-btn ps-btn-light relative shrink-0">
+                    To&apos;liq reyting
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </Link>
+                </div>
+              </section>
             )}
 
             {activeBattleTab === '1v1' && onlineUsers.length > 0 && (
@@ -741,8 +734,8 @@ export default function BattlesPage() {
             <Card className="w-full max-w-sm">
               <CardContent className="flex flex-col items-center py-10 text-center">
                 <div className="relative mb-6">
-                  <div className="size-20 animate-spin rounded-full border-4 border-[var(--accent)]/20 border-t-[var(--accent)]" />
-                  <Swords className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 text-rose-400" />
+                  <div className="size-20 animate-spin rounded-full border-4 border-[var(--ps-coral)]/20 border-t-[var(--ps-coral)]" />
+                  <Swords className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 text-[var(--ps-coral)]" />
                 </div>
                 <h3 className="mb-1 text-lg font-bold">Raqib qidirilmoqda...</h3>
                 <p className="text-sm text-muted-foreground">Sizning darajangizga mos bilimdon ulanmoqda</p>
@@ -770,16 +763,16 @@ export default function BattlesPage() {
                   <span className="block font-mono text-xs font-bold uppercase text-muted-foreground">
                     Raund {roundIdx + 1} / {questions.length}
                   </span>
-                  <span className="text-xs font-bold text-rose-400">VS</span>
+                  <span className="text-xs font-bold text-[var(--ps-coral)]">VS</span>
                 </div>
 
                 <div className="flex min-w-0 items-center gap-2.5 text-right">
                   <div className="min-w-0">
                     <p className="truncate text-xs font-bold">{opponentName}</p>
-                    <p className="font-mono text-sm font-bold text-rose-400">{oppScore} ball</p>
+                    <p className="font-mono text-sm font-bold text-[var(--ps-coral)]">{oppScore} ball</p>
                   </div>
-                  <Avatar className="size-10 border border-rose-400">
-                    <AvatarFallback className="bg-[var(--surface-input)] text-rose-300"><Bot className="size-5" /></AvatarFallback>
+                  <Avatar className="size-10 border border-[var(--ps-coral)]">
+                    <AvatarFallback className="bg-[var(--surface-input)] text-[var(--ps-coral)]"><Bot className="size-5" /></AvatarFallback>
                   </Avatar>
                 </div>
               </CardContent>
@@ -810,7 +803,7 @@ export default function BattlesPage() {
                       let cls = 'border bg-[var(--surface-input)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]';
                       if (selectedChoice !== null) {
                         if (isCorrect) cls = 'border-2 border-[var(--success)] bg-[var(--success)]/20 font-bold text-[var(--success-text)]';
-                        else if (isSelected) cls = 'border-2 border-rose-500 bg-rose-500/20 font-bold text-rose-300';
+                        else if (isSelected) cls = 'border-2 border-rose-500 bg-rose-500/20 font-bold text-[var(--ps-coral)]';
                         else cls = 'border bg-[var(--surface-input)]/50 text-[var(--text-faint)] opacity-60';
                       }
                       return (
@@ -869,7 +862,7 @@ export default function BattlesPage() {
                     {prevElo !== null && prevElo !== arena.elo_rating && (
                       <span className={cn(
                         'text-sm font-bold',
-                        arena.elo_rating > prevElo ? 'text-[var(--success-text)]' : 'text-rose-300',
+                        arena.elo_rating > prevElo ? 'text-[var(--success-text)]' : 'text-[var(--ps-coral)]',
                       )}>
                         {arena.elo_rating > prevElo ? '+' : ''}{arena.elo_rating - prevElo}
                       </span>
@@ -889,7 +882,7 @@ export default function BattlesPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Swords className="size-5 text-rose-400" /> Jang chaqiruvi
+                <Swords className="size-5 text-[var(--ps-coral)]" /> Jang chaqiruvi
               </DialogTitle>
               <DialogDescription>
                 <strong className="text-foreground">{incomingChallenge?.from.name}</strong> sizni tezkor duelga chaqirmoqda. Jang qilasizmi?
@@ -922,7 +915,6 @@ export default function BattlesPage() {
           setMode('ghost');
         }}
       />
-    </>
+    </div>
   );
 }
-

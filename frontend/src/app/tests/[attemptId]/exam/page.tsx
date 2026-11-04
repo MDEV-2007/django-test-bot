@@ -481,20 +481,20 @@ export default function CefrExamPage() {
 
   if (error && !exam) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <div className="mx-auto max-w-md p-6 text-center">
+        <div className="ps-scope mx-auto max-w-md p-6 text-center">
           <AlertCircle className="mx-auto mb-3 h-8 w-8 text-rose-400" />
           <p className="text-sm text-muted-foreground">{error}</p>
           <Button className="mt-4" onClick={() => router.push('/tests')}>Testlarga qaytish</Button>
         </div>
-      </>
+      </div>
     );
   }
 
   if (!exam) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <div className="mx-auto max-w-5xl space-y-4 p-4">
           <Skeleton className="h-14 w-full rounded-2xl" />
@@ -504,7 +504,7 @@ export default function CefrExamPage() {
             <Skeleton className="h-[50vh] rounded-2xl" />
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -512,14 +512,14 @@ export default function CefrExamPage() {
   const currentWritingSection = writingSections[writingPartIndex] || writingSections[0];
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="mx-auto w-full max-w-[1440px] flex-1 px-2.5 pb-24 pt-2.5 sm:px-6 min-w-0 max-w-full overflow-x-hidden">
+      <main className="ps-scope mx-auto w-full max-w-[1440px] flex-1 px-2.5 pb-24 pt-2.5 sm:px-6 min-w-0 max-w-full overflow-x-hidden">
         
         {/* =========================================================
             TOP HEADER BAR (Timer, Mode Switch, Palette, Submit)
             ========================================================= */}
-        <header className="sticky top-0 z-30 mb-4 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-base)]/95 px-3 py-2 sm:px-4 sm:py-2.5 backdrop-blur-md shadow-md min-w-0 max-w-full">
+        <header className="ps-runner-bar sticky top-2 z-30 mb-5 rounded-[28px] px-3 py-2.5 sm:top-3 sm:px-4 sm:py-3 min-w-0 max-w-full">
           <div className="flex items-center justify-between gap-2 min-w-0">
             
             {/* Left: Exit or Back to Hub */}
@@ -563,7 +563,7 @@ export default function CefrExamPage() {
                 'flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-bold font-mono tracking-wider shrink-0',
                 secondsLeft <= 300
                   ? 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/40'
-                  : 'bg-[var(--surface-card-medium)] border border-[var(--border-card)] text-foreground',
+                  : 'bg-[var(--ps-orange)] text-[#080808]',
               )}>
                 <Clock className="size-3 sm:size-3.5" />
                 {formatTime(secondsLeft)}
@@ -607,7 +607,7 @@ export default function CefrExamPage() {
                 size="sm"
                 variant="destructive"
                 onClick={() => setShowFinishConfirm(true)}
-                className="rounded-xl font-bold text-xs shadow-md bg-rose-600 hover:bg-rose-700 text-white h-8 px-2.5 sm:px-3.5"
+                className="rounded-full font-bold text-xs bg-[var(--ps-coral)] hover:bg-[var(--ps-coral)]/90 text-white h-9 px-3.5 sm:px-4"
               >
                 Tugatish
               </Button>
@@ -1453,7 +1453,7 @@ export default function CefrExamPage() {
 
       {/* Savollar Palitrasi (Modal) */}
       <Dialog open={showPalette} onOpenChange={setShowPalette}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6 mx-auto">
+        <DialogContent className="ps-shell ps-dialog max-h-[85vh] overflow-y-auto w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6 mx-auto">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg font-bold">Savollar xaritasi</DialogTitle>
             <DialogDescription className="text-xs">
@@ -1476,7 +1476,7 @@ export default function CefrExamPage() {
 
       {/* Chiqish Ogohlantirish Modali */}
       <Dialog open={showExit} onOpenChange={setShowExit}>
-        <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+        <DialogContent className="ps-shell ps-dialog w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--ps-paper)] p-6 shadow-2xl mx-auto">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-lg shadow-amber-500/10">
               <AlertTriangle className="size-7" />
@@ -1533,7 +1533,7 @@ export default function CefrExamPage() {
 
       {/* Yakuniy Tasdiqlash Modal */}
       <Dialog open={showFinishConfirm} onOpenChange={setShowFinishConfirm}>
-        <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-emerald-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+        <DialogContent className="ps-shell ps-dialog w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-emerald-500/30 bg-[var(--ps-paper)] p-6 shadow-2xl mx-auto">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/10">
               <CheckCircle2 className="size-7" />
@@ -1607,6 +1607,6 @@ export default function CefrExamPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

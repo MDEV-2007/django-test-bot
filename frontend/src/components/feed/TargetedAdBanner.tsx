@@ -100,68 +100,71 @@ export default function TargetedAdBanner({
 
   return (
     <>
-      {/* Native Ad Banner — "Reklama" deb aniq belgilangan */}
+      {/* Native Ad Banner — "Reklama" deb aniq belgilangan; oltin fon — ko'zga tashlanadi */}
       <div
         ref={bannerRef}
         className={cn(
-          'relative w-full overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/40 via-zinc-900 to-[#0A0C12] p-4 sm:p-5 md:p-6 shadow-2xl backdrop-blur-xl',
+          'ps-gold-card relative isolate w-full overflow-hidden rounded-[28px] p-5 text-[#2A1A00] sm:p-6 md:p-7',
           className
         )}
       >
-        {/* Glow corner */}
-        <div className="absolute -top-16 -right-16 size-40 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Dekor: yaltiroq chiziq, oq doira, punktir halqa */}
+        <span aria-hidden className="ps-gold-shine pointer-events-none absolute inset-0 -z-10" />
+        <span aria-hidden className="pointer-events-none absolute -right-14 -top-16 -z-10 size-48 rounded-full bg-white/30" />
+        <span aria-hidden className="pointer-events-none absolute -right-2 -top-4 -z-10 size-20 rounded-full border-2 border-dashed border-[#2A1A00]/25" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-16 left-1/3 -z-10 size-40 rounded-full bg-[#F0523D]/15" />
 
-        <div className="relative z-10 space-y-3.5">
-          {/* Header Badges */}
+        <div className="relative space-y-4">
+          {/* Yuqori belgilar */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-zinc-200">
+              <span className="inline-flex items-center rounded-full bg-[#2A1A00]/12 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]">
                 {offer.sponsored_label || 'Reklama'}
               </span>
-              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[12px] sm:text-xs font-bold uppercase tracking-wider shrink-0 px-2.5 py-1 rounded-xl">
-                <Sparkles className="size-3 mr-1 inline" />
-                {offer.badge_text || "Homiylik Taklifi"}
-              </Badge>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.08] border border-white/[0.1] text-xs font-semibold text-zinc-200 shrink-0">
-                <Building2 className="size-3.5 text-amber-400 shrink-0" />
-                <span>{offer.center_name}</span>
-              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#080808] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#FFD36B]">
+                <Sparkles className="size-3" />
+                {offer.badge_text || 'Homiylik taklifi'}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1 text-xs font-bold">
+                <Building2 className="size-3.5 shrink-0" />
+                {offer.center_name}
+              </span>
             </div>
-            <span className="text-[12px] text-zinc-400 font-medium hidden sm:inline-flex items-center gap-1">
-              <ShieldCheck className="size-3.5 text-amber-400" />
+            <span className="hidden items-center gap-1 text-[12px] font-semibold text-[#2A1A00]/65 sm:inline-flex">
+              <ShieldCheck className="size-3.5" />
               Homiy kontent
             </span>
           </div>
 
-          {/* Title & Description — Full Width to prevent awkward wrapping */}
-          <div className="space-y-1.5">
-            <h3 className="text-base sm:text-lg md:text-xl font-bold text-white leading-snug">
+          {/* Sarlavha va tavsif */}
+          <div className="space-y-2">
+            <h3 className="text-[24px] font-bold leading-tight tracking-[-0.03em] sm:text-[30px] [font-family:var(--font-grotesk),var(--font-sans),sans-serif]">
               {offer.title}
             </h3>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+            <p className="max-w-2xl text-[13px] leading-relaxed text-[#2A1A00]/75 sm:text-sm">
               {offer.description}
             </p>
           </div>
 
-          {/* Bottom Action Row: Highlights + Prominent CTA button */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-white/[0.08]">
-            <div className="flex items-center gap-2 text-[12px] text-amber-300/90 font-medium">
-              <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
-                🎁 1-dars BEPUL
-              </span>
-              <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
-                🏷️ 20% Chegirma
-              </span>
+          {/* Pastki qator: afzalliklar + CTA */}
+          <div className="flex flex-col justify-between gap-3 border-t border-[#2A1A00]/12 pt-4 sm:flex-row sm:items-center">
+            <div className="flex flex-wrap items-center gap-2 text-[12px] font-bold">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/60 px-3 py-1">🎁 1-dars bepul</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#F0523D] px-3 py-1 text-white">🏷️ 20% chegirma</span>
             </div>
-
-            <Button
+            <button
+              type="button"
               onClick={handleOpenModal}
-              className="w-full sm:w-auto min-h-[44px] bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-black font-bold px-6 py-2.5 rounded-2xl shadow-lg shadow-amber-500/20 transition-transform active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer shrink-0"
+              className="group inline-flex min-h-12 w-full shrink-0 cursor-pointer items-center justify-between gap-3 rounded-full bg-[#080808] py-1.5 pl-5 pr-1.5 text-[13px] font-bold text-[#FFFCF7] shadow-[0_14px_28px_-14px_rgba(8,8,8,0.8)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] sm:w-auto sm:text-sm"
             >
-              <PhoneCall className="size-4 shrink-0" />
-              <span>{(offer.cta_text || "1-bosishda ro'yxatdan o'tish (1-dars BEPUL)").replace(/^[📞\s]+/, '').trim()}</span>
-              <ChevronRight className="size-4 shrink-0" />
-            </Button>
+              <span className="flex items-center gap-2">
+                <PhoneCall className="size-4 shrink-0 text-[#FFD36B]" />
+                <span>{(offer.cta_text || "1-bosishda ro'yxatdan o'tish (1-dars BEPUL)").replace(/^[📞\s]+/, '').trim()}</span>
+              </span>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FFB82E] text-[#080808] transition-transform group-hover:-rotate-45">
+                <ChevronRight className="size-4" />
+              </span>
+            </button>
           </div>
         </div>
       </div>
