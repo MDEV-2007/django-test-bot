@@ -174,7 +174,7 @@ export function useNeuralSprint({
       return;
     }
 
-    const question = { ...question, correctOptionId: verification.correct_option_id };
+    const question = { ...currentQuestion, correctOptionId: verification.correct_option_id };
     setQuestionsQueue((prev) => prev.map((item, index) =>
       index === currentIndex ? question : item
     ));
@@ -367,7 +367,7 @@ export function useNeuralSprint({
   }, [
     isVerifying,
     feedbackStatus,
-    question,
+    currentQuestion,
     combo.multiplier,
     currentIndex,
     questionsQueue.length,
