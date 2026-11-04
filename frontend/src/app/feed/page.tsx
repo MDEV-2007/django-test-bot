@@ -196,7 +196,7 @@ export default function CommunityFeedPage() {
   useEffect(() => {
     async function loadTargetedOffer() {
       try {
-        const res = await apiFetch<TargetedOfferData>('/api/v1/system/ads/targeted-offer/?subject=Tarix&score=42');
+        const res = await apiFetch<TargetedOfferData>('/api/v1/system/ads/targeted-offer/');
         if (res && res.title) setTargetedOffer(res);
       } catch {
         // Reklama ixtiyoriy: server javob bermasa banner ko'rsatilmaydi. Ilgari bu yerda

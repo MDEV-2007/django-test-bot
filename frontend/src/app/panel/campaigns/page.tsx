@@ -36,8 +36,42 @@ type CampaignItem = {
   telegram_webhook_or_chat_id?: string;
   is_active: boolean;
   leads_count: number;
+  status?: 'active' | 'paused' | 'scheduled' | 'ended' | 'exhausted';
+  max_leads?: number | null;
+  ends_at?: string | null;
+  // Faqat haqiqiy tracking. null — hisoblab bo'lmaydi (masalan narx modeli yo'q).
+  metrics?: {
+    impressions: number;
+    clicks: number;
+    ctr: number | null;
+    leads: number;
+    enrolled: number;
+    conversion_rate: number | null;
+    spent: number | null;
+    cpl: number | null;
+    remaining_leads: number | null;
+  };
   created_at: string;
 };
+
+const LEAD_STATUSES: { value: string; label: string }[] = [
+  { value: 'NEW', label: 'Yangi' },
+  { value: 'CONTACTED', label: "Bog'lanildi" },
+  { value: 'ENROLLED', label: "Ro'yxatdan o'tdi" },
+  { value: 'REJECTED', label: 'Rad etildi' },
+];
+
+const CAMPAIGN_STATUS_LABEL: Record<string, string> = {
+  active: 'Faol',
+  paused: "To'xtatilgan",
+  scheduled: 'Rejalashtirilgan',
+  ended: 'Muddati tugagan',
+  exhausted: 'Lid limiti tugagan',
+};
+
+function fmtPct(v: number | null | undefined) {
+  return typeof v === 'number' ? `${v}%` : '—';
+}
 
 type LeadItem = {
   id: number;
@@ -49,11 +83,26 @@ type LeadItem = {
   campaign_id?: number;
   campaign_name: string;
   coins_rewarded: number;
+  status?: string;
+  consent_at?: string | null;
   created_at: string;
 };
 
 export default function PanelCampaignsPage() {
   const [activeTab, setActiveTab] = useState<'campaigns' | 'leads'>('campaigns');
+
+  // Lid CRM holati (server audit jurnaliga yozadi). Xatoda eski holat qoladi.
+  const updateLeadStatus = async (leadId: number, status: string) => {
+    try {
+      const res = await apiFetch<{ success: boolean; status: string }>(
+        `/api/panel/campaigns/leads/${leadId}/status/`,
+        { method: 'POST', body: JSON.stringify({ status }) },
+      );
+      setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, status: res.status } : l)));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Holatni o'zgartirib bo'lmadi");
+    }
+  };
 
   // Campaigns state
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
@@ -413,10 +462,31 @@ export default function PanelCampaignsPage() {
                         </div>
                       </div>
 
+                      {camp.metrics && (
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                          <div className="p-2 rounded-xl bg-muted/40 border border-border/60">
+                            <span className="block text-[11px] text-muted-foreground font-bold">Ko&apos;rsatish</span>
+                            <b>{camp.metrics.impressions}</b>
+                          </div>
+                          <div className="p-2 rounded-xl bg-muted/40 border border-border/60">
+                            <span className="block text-[11px] text-muted-foreground font-bold">Bosish · CTR</span>
+                            <b>{camp.metrics.clicks}</b> · {fmtPct(camp.metrics.ctr)}
+                          </div>
+                          <div className="p-2 rounded-xl bg-muted/40 border border-border/60">
+                            <span className="block text-[11px] text-muted-foreground font-bold">Yozildi · Konv.</span>
+                            <b>{camp.metrics.enrolled}</b> · {fmtPct(camp.metrics.conversion_rate)}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
                         <span className="flex items-center gap-1">
-                          <Users className="size-3.5 text-blue-500" /> <b>{camp.leads_count}</b> ta lid
+                          <Users className="size-3.5 text-blue-500" /> <b>{camp.leads_count}</b>
+                          {typeof camp.max_leads === 'number' ? ` / ${camp.max_leads}` : ''} ta lid
                         </span>
+                        {camp.status && (
+                          <Badge variant="outline" className="text-[11px]">{CAMPAIGN_STATUS_LABEL[camp.status] ?? camp.status}</Badge>
+                        )}
                         <span>{camp.created_at}</span>
                       </div>
                     </CardContent>
@@ -475,6 +545,7 @@ export default function PanelCampaignsPage() {
                         <th className="p-3.5">Markaz</th>
                         <th className="p-3.5">Prognoz Ball</th>
                         <th className="p-3.5">Zaif Mavzular</th>
+                        <th className="p-3.5">Holat</th>
                         <th className="p-3.5">Sana</th>
                       </tr>
                     </thead>
@@ -526,11 +597,23 @@ export default function PanelCampaignsPage() {
                           </td>
                           <td className="p-3.5">
                             <Badge className="bg-primary/10 text-primary border-primary/25 font-bold">
-                              {lead.predicted_dtm_score || '165.4'}
+                              {lead.predicted_dtm_score || '—'}
                             </Badge>
                           </td>
                           <td className="p-3.5 max-w-xs text-muted-foreground truncate">
-                            {lead.weakest_topics || "O'rta asrlar, Rim tarixi"}
+                            {lead.weakest_topics || '—'}
+                          </td>
+                          <td className="p-3.5">
+                            <select
+                              aria-label="Lid holati"
+                              value={lead.status || 'NEW'}
+                              onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
+                              className="rounded-lg border border-border bg-card px-2 py-1 text-xs"
+                            >
+                              {LEAD_STATUSES.map((st) => (
+                                <option key={st.value} value={st.value}>{st.label}</option>
+                              ))}
+                            </select>
                           </td>
                           <td className="p-3.5 text-muted-foreground whitespace-nowrap">
                             {lead.created_at}

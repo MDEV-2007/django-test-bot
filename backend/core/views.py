@@ -440,6 +440,7 @@ def lead_submit_api(request):
             subject=subject,
             score=score,
             weak_topics=weak_topics,
+            consent=request.data.get('consent') is True,
         )
     except LeadError as exc:
         return Response({'error': str(exc)}, status=400)

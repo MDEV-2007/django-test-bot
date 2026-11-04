@@ -141,6 +141,7 @@ urlpatterns = [
     path('campaigns/<int:campaign_id>/delete/', api.panel_campaign_delete_api, name='panel_campaign_delete'),
     path('campaigns/<int:campaign_id>/delete', api.panel_campaign_delete_api),
     path('campaigns/leads/', api.panel_campaign_leads_api, name='panel_campaign_leads'),
+    path('campaigns/leads/<int:lead_id>/status/', api.panel_lead_status_api, name='panel_lead_status'),
     path('campaigns/leads', api.panel_campaign_leads_api),
 
     # BMB Real Imtihon Zali (Stress Mode) Super Admin

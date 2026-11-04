@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   Sparkles,
@@ -28,6 +28,7 @@ import {
 import { tgHaptic } from '@/lib/telegram';
 import { soundFX } from '@/lib/soundFX';
 import { apiFetch } from '@/lib/api-client';
+import { trackAd, useAdImpression } from '@/lib/adTracking';
 import { useAuthStore } from '@/lib/auth-store';
 import { useTransliterate } from '@/lib/transliterate';
 import { toast } from 'sonner';
@@ -130,10 +131,13 @@ export default function SmartB2BSuggestionCard() {
   }, []);
 
   const isDone = submitState !== 'idle';
+  const cardRef = useRef<HTMLDivElement>(null);
+  useAdImpression(cardRef, campaign?.id);
 
   // 1-bosqich: tugma faqat rozilik oynasini ochadi, hech narsa yuborilmaydi.
   const handleOpenConsent = () => {
     if (isDone) return;
+    trackAd(campaign?.id, 'click');
     soundFX.click();
     tgHaptic('medium');
     setPhoneError(null);
@@ -165,8 +169,9 @@ export default function SmartB2BSuggestionCard() {
           campaign_id: campaign.id,
           full_name: fullName.trim(),
           phone_number: normalizedPhone,
-          weakest_topics: diagnosis?.weakest_topic ?? '',
-          predicted_dtm_score: diagnosis?.predicted_score ?? '',
+          // Rozilik oynasidagi tasdiqlash — aniq rozilik. Zaif mavzu/prognoz ball
+          // klientdan yuborilmaydi: server haqiqiy natijalardan oladi.
+          consent: true,
         }),
       });
 
@@ -202,7 +207,7 @@ export default function SmartB2BSuggestionCard() {
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-[28px] border border-amber-500/30 bg-gradient-to-b from-amber-500/[0.08] via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-xl backdrop-blur-xl">
+      <div ref={cardRef} className="relative overflow-hidden rounded-[28px] border border-amber-500/30 bg-gradient-to-b from-amber-500/[0.08] via-zinc-950 to-zinc-950 p-5 sm:p-6 shadow-xl backdrop-blur-xl">
         {/* AI tavsiyasi — faqat haqiqiy test natijasi bo'lsa */}
         {diagnosis && (
           <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 mb-4 space-y-1.5">
@@ -217,6 +222,10 @@ export default function SmartB2BSuggestionCard() {
             </p>
           </div>
         )}
+
+        <span className="mb-3 inline-flex items-center rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-zinc-200">
+          {t('Reklama')}
+        </span>
 
         {/* O'quv markaz */}
         <div className="flex items-start gap-3.5 mb-4">
@@ -269,7 +278,7 @@ export default function SmartB2BSuggestionCard() {
         <div className="flex items-center justify-between text-[11px] text-zinc-500 mt-3 pt-2 border-t border-white/5">
           <span className="flex items-center gap-1">
             <GraduationCap className="size-3.5 text-amber-400" />
-            {t('IlmIldizi Rasmiy Hamkori')}
+            {t('Homiy kontent')}
           </span>
           <Link href="/feed" className="hover:text-zinc-300 flex items-center gap-0.5 font-medium">
             {t('Hamjamiyat lentasi')} <ArrowRight className="size-3" />

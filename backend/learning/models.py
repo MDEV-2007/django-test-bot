@@ -212,7 +212,9 @@ class Reel(models.Model):
         }
         return gradients.get(self.gradient_theme, gradients['purple'])
 
-    def to_dict(self):
+    def to_dict(self, include_answer=True):
+        """`include_answer=False` — o'quvchi lentasi uchun: to'g'ri variant va izoh faqat
+        javob yuborilgandan keyin (/reels/answer/) qaytadi (javob +XP beradi)."""
         try:
             c_count = self.comments.count()
         except Exception:
@@ -242,8 +244,8 @@ class Reel(models.Model):
             'quiz': {
                 'question': self.quiz_question,
                 'options': self.quiz_options,
-                'correct_index': self.quiz_correct_index,
-                'explanation': self.quiz_explanation,
+                **({'correct_index': self.quiz_correct_index, 'explanation': self.quiz_explanation}
+                   if include_answer else {}),
             },
             'likes': self.likes_count,
             'shares': self.shares_count,
@@ -360,6 +362,22 @@ class CommunityPost(models.Model):
     def __str__(self):
         return f"{self.author.username} - {self.title} ({self.score}%)"
 
+    def public_poll_data(self, current_user=None):
+        """So'rovnoma lentada: to'g'ri javob va izoh faqat ovoz bergan (yoki muallif)
+        foydalanuvchiga; kim nimaga ovoz bergani (`voted_users`) hech kimga chiqmaydi."""
+        poll = dict(getattr(self, 'poll_data', None) or {})
+        if not poll:
+            return poll
+        voted = poll.pop('voted_users', {}) or {}
+        uid = str(getattr(current_user, 'id', '') or '')
+        user_choice = voted.get(uid) if uid else None
+        is_author = bool(uid) and uid == str(self.author_id)
+        if not (user_choice or is_author):
+            poll.pop('correct_option', None)
+            poll.pop('explanation', None)
+        poll['user_choice'] = user_choice
+        return poll
+
     def to_dict(self, current_user=None):
         profile = getattr(self.author, 'profile', None)
         author_name = self.author.get_full_name() or self.author.first_name or self.author.username
@@ -428,7 +446,7 @@ class CommunityPost(models.Model):
             'reaction_counts': reaction_counts,
             'user_reaction': user_reaction,
             'exam_track': getattr(self, 'exam_track', 'DTM_SERTIFIKAT'),
-            'poll_data': getattr(self, 'poll_data', {}),
+            'poll_data': self.public_poll_data(current_user),
             'video_url': getattr(self, 'video_url', ''),
             'video_duration': getattr(self, 'video_duration', 30),
             'linked_quiz_question_ids': getattr(self, 'linked_quiz_question_ids', []),

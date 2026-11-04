@@ -72,7 +72,7 @@ def pick_campaign(profile: Profile | None, subject: str = '', score: float = 0.0
         subject, weak_score = weakest_subject_for(profile)
         score = score or weak_score
 
-    qs = EduCenterCampaign.objects.filter(is_active=True)
+    qs = live_campaigns()
 
     if user_region:
         region_q = Q(target_region__iexact=user_region)
@@ -95,6 +95,18 @@ def pick_campaign(profile: Profile | None, subject: str = '', score: float = 0.0
     return qs.first()
 
 
+def live_campaigns():
+    """Hozir ko'rsatish mumkin bo'lgan kampaniyalar: faol, muddati ichida va lid limiti
+    (byudjeti) tugamagan. Tugagan / to'xtatilgan kampaniya hech qayerda ko'rsatilmaydi."""
+    from django.db.models import Count
+    now = timezone.now()
+    return (EduCenterCampaign.objects.filter(is_active=True)
+            .filter(Q(starts_at__isnull=True) | Q(starts_at__lte=now))
+            .filter(Q(ends_at__isnull=True) | Q(ends_at__gt=now))
+            .annotate(_leads=Count('leads'))
+            .filter(Q(max_leads__isnull=True) | Q(_leads__lt=F('max_leads'))))
+
+
 def campaign_payload(campaign: EduCenterCampaign) -> dict:
     return {
         'id': campaign.id,
@@ -107,11 +119,62 @@ def campaign_payload(campaign: EduCenterCampaign) -> dict:
         'target_region': campaign.target_region,
         'rating': campaign.rating,
         'story_video_url': campaign.story_video_url,
+        # Reklama ekanligi UI'da aniq ko'rsatilishi uchun.
+        'is_sponsored': True,
+        'sponsored_label': 'Reklama',
     }
 
 
-def record_impression(campaign: EduCenterCampaign) -> None:
-    EduCenterCampaign.objects.filter(pk=campaign.pk).update(impressions_count=F('impressions_count') + 1)
+TRACK_EVENTS = {'impression': 'impressions_count', 'click': 'clicks_count'}
+
+
+def track_event(campaign: EduCenterCampaign, event: str, user_id: int) -> bool:
+    """Haqiqiy ko'rsatish / bosish hodisasi. Bir foydalanuvchi + kampaniya + kun uchun
+    bir marta sanaladi (sahifani yangilash, takroriy va parallel so'rovlar, bot bosishlari
+    hisobni sun'iy oshirmasin). Qaytaradi: hisoblandimi.
+
+    Ilgari impression reklama API'si har chaqirilganda (prefetch, anonim so'rov ham)
+    oshirilardi; click umuman yozilmasdi."""
+    from django.core.cache import cache
+    field = TRACK_EVENTS[event]
+    key = f"b2b_track:{event}:{campaign.pk}:{user_id}:{timezone.localdate().isoformat()}"
+    if not cache.add(key, 1, 26 * 60 * 60):
+        return False
+    EduCenterCampaign.objects.filter(pk=campaign.pk).update(**{field: F(field) + 1})
+    return True
+
+
+def campaign_metrics(campaign: EduCenterCampaign, leads_count: int, enrolled_count: int) -> dict:
+    """Faqat haqiqiy hodisalardan hisoblanadigan ko'rsatkichlar. Narx/byudjet (so'm) modeli
+    yo'q — shuning uchun spent / CPL / remaining budget soxta raqam bilan to'ldirilmaydi."""
+    impressions = campaign.impressions_count or 0
+    clicks = campaign.clicks_count or 0
+    return {
+        'impressions': impressions,
+        'clicks': clicks,
+        'ctr': round(clicks / impressions * 100, 2) if impressions else None,
+        'leads': leads_count,
+        'lead_rate': round(leads_count / clicks * 100, 2) if clicks else None,
+        'enrolled': enrolled_count,
+        'conversion_rate': round(enrolled_count / leads_count * 100, 2) if leads_count else None,
+        'reach': None,
+        'spent': None,
+        'cpl': None,
+        'remaining_leads': (max(0, campaign.max_leads - leads_count) if campaign.max_leads is not None else None),
+    }
+
+
+def server_lead_diagnosis(profile: Profile) -> tuple[str, str]:
+    """(zaif mavzular, prognoz ball) — faqat serverdagi haqiqiy natijalardan."""
+    from tests_app.models import AIFeedback, Attempt
+    last = Attempt.objects.filter(profile=profile, is_completed=True).order_by('-completed_at').first()
+    feedback = AIFeedback.objects.filter(attempt=last).first() if last else None
+    topics = (feedback.weak_topics or '') if feedback else ''
+    if not topics:
+        subject, _ = weakest_subject_for(profile)
+        topics = subject
+    predicted = str(feedback.predicted_score) if feedback and feedback.predicted_score else ''
+    return topics[:1000], predicted[:50]
 
 
 def has_submitted(profile: Profile | None, campaign: EduCenterCampaign | None) -> bool:
@@ -158,12 +221,20 @@ def submit_lead(
     telegram_username: str = '',
     weakest_topics: str = '',
     predicted_dtm_score: str = '',
+    consent: bool = False,
 ) -> dict:
     """O'quvchi tasdiqlagan ism va telefon bilan lid yaratadi.
+
+    - Telefon markazga faqat aniq rozilik (`consent=True`) bilan uzatiladi.
+    - Zaif mavzu va prognoz ball klientdan olinmaydi: serverdagi haqiqiy natijalardan
+      (`weakest_topics`/`predicted_dtm_score` argumentlari e'tiborsiz — eski klientlar uchun).
+    - Kampaniya qatori qulflanadi: parallel lidlar lid limitidan (byudjetdan) oshmaydi.
 
     Bitta kampaniyaga bitta lid va bir marta +50 tanga. Profil qatori qulflanadi, shuning
     uchun bir vaqtda kelgan ikki so'rov ikkinchi lid / ikkinchi mukofot yarata olmaydi.
     """
+    if consent is not True:
+        raise LeadError("Ma'lumotlaringizni markazga yuborishga rozilik bering.")
     phone = normalize_uz_phone(phone_number)
     if phone is None:
         raise LeadError("Telefon raqamini +998 XX XXX XX XX formatida kiriting.")
@@ -175,11 +246,13 @@ def submit_lead(
         campaign_pk = int(campaign_id)
     except (TypeError, ValueError):
         raise LeadError("Kampaniya topilmadi.")
-    campaign = EduCenterCampaign.objects.filter(pk=campaign_pk, is_active=True).first()
-    if campaign is None:
-        raise LeadError("Bu taklif endi faol emas.")
+    if not EduCenterCampaign.objects.filter(pk=campaign_pk).exists():
+        raise LeadError("Kampaniya topilmadi.")
+
+    weakest_topics, predicted_dtm_score = server_lead_diagnosis(profile)
 
     with transaction.atomic():
+        campaign = EduCenterCampaign.objects.select_for_update().get(pk=campaign_pk)
         locked = Profile.objects.select_for_update().get(pk=profile.pk)
         lead = StudentLeadSubmission.objects.filter(student_profile=locked, campaign=campaign).first()
         if lead is not None:
@@ -191,6 +264,8 @@ def submit_lead(
                 'lead_id': lead.id,
                 'message': "Arizangiz allaqachon yuborilgan — markaz siz bilan bog'lanadi.",
             }
+        if campaign.lifecycle_status() != 'active':
+            raise LeadError("Bu taklif endi faol emas.")
 
         lead = StudentLeadSubmission.objects.create(
             student_profile=locked,
@@ -201,6 +276,7 @@ def submit_lead(
             predicted_dtm_score=(predicted_dtm_score or '')[:50],
             weakest_topics=(weakest_topics or '')[:1000],
             coins_rewarded=LEAD_REWARD_COINS,
+            consent_at=timezone.now(),
         )
         Profile.objects.filter(pk=locked.pk).update(coins=F('coins') + LEAD_REWARD_COINS)
         locked.refresh_from_db(fields=['coins'])

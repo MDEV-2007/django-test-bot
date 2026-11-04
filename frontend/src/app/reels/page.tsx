@@ -415,20 +415,15 @@ function ReelsInner() {
           const nextCombo = comboStreak + 1;
           setComboStreak(nextCombo);
 
-          let bonusXp = 0;
-          let comboMessage = `To'g'ri javob! +${res.xp_earned} XP 🔥`;
-          if (nextCombo >= 5) {
-            bonusXp = 10;
-            comboMessage = `👑 5x DAHO COMBO! +${res.xp_earned + bonusXp} XP 🚀`;
-          } else if (nextCombo >= 3) {
-            bonusXp = 5;
-            comboMessage = `⚡ 3x MEGA COMBO! +${res.xp_earned + bonusXp} XP 🔥`;
-          } else if (nextCombo >= 2) {
-            bonusXp = 2;
-            comboMessage = `🔥 2x COMBO! +${res.xp_earned + bonusXp} XP ✨`;
-          }
+          // XP faqat server bergan miqdor (combo — faqat vizual, qo'shimcha XP bermaydi).
+          const xp = res.xp_earned || 0;
+          const xpText = xp ? ` +${xp} XP` : '';
+          let comboMessage = `To'g'ri javob!${xpText} 🔥`;
+          if (nextCombo >= 5) comboMessage = `👑 5x DAHO COMBO!${xpText} 🚀`;
+          else if (nextCombo >= 3) comboMessage = `⚡ 3x MEGA COMBO!${xpText} 🔥`;
+          else if (nextCombo >= 2) comboMessage = `🔥 2x COMBO!${xpText} ✨`;
 
-          setTodayXpEarned((prev) => prev + (res.xp_earned || 5) + bonusXp);
+          setTodayXpEarned((prev) => prev + xp);
           toast.success(comboMessage, { duration: 3000 });
         } else {
           if (soundEnabled) soundFX.incorrect();
@@ -440,34 +435,8 @@ function ReelsInner() {
         }
       }
     } catch {
-      const targetReel = reels.find((r) => r.id === reelId);
-      const correctIdx = typeof targetReel?.quiz.correct_index === 'number' ? targetReel.quiz.correct_index : 0;
-      const isCorrect = optionIndex === correctIdx;
-      const explanation = targetReel?.quiz.explanation || "To'g'ri javob belgilandi.";
-
-      setAnsweredQuizzes((prev) => ({
-        ...prev,
-        [reelId]: {
-          selectedIndex: optionIndex,
-          isCorrect,
-          correctIndex: correctIdx,
-          explanation,
-        },
-      }));
-
-      if (isCorrect) {
-        if (soundEnabled) soundFX.correct();
-        tgHaptic('success');
-        celebrate();
-        const nextCombo = comboStreak + 1;
-        setComboStreak(nextCombo);
-        setTodayXpEarned((prev) => prev + 5);
-        toast.success(nextCombo >= 2 ? `🔥 ${nextCombo}x Combo! +5 XP` : "To'g'ri javob! +5 XP 🔥", { duration: 2500 });
-      } else {
-        if (soundEnabled) soundFX.incorrect();
-        tgHaptic('error');
-        setComboStreak(0);
-      }
+      // Javob kaliti klientda yo'q (serverda tekshiriladi) — xatoda soxta natija ko'rsatilmaydi.
+      toast.error("Javobni tekshirib bo'lmadi. Qayta urinib ko'ring.");
     }
   };
 

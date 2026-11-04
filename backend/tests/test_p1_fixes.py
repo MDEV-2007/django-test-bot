@@ -44,6 +44,11 @@ class TargetedOfferTests(TestCase):
         campaign = EduCenterCampaign.objects.create(center_name='Markaz', title='Kurs')
         res = self.client.get('/api/v1/system/ads/targeted-offer/?subject=Tarix&score=42')
         self.assertEqual(res.json()['id'], campaign.id)
+        # API so'rovi impression emas: u reklama ekranda ko'ringanda /track/ orqali sanaladi.
+        campaign.refresh_from_db()
+        self.assertEqual(campaign.impressions_count, 0)
+        self.client.post('/api/v1/b2b/track/', {'campaign_id': campaign.id, 'event': 'impression'},
+                         content_type='application/json')
         campaign.refresh_from_db()
         self.assertEqual(campaign.impressions_count, 1)
 

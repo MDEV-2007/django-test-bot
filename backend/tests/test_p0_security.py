@@ -43,6 +43,7 @@ class LeadCoinFarmTests(TestCase):
     def _submit(self):
         return self.client.post('/api/v1/b2b/submit-lead/', {
             'campaign_id': self.campaign.id, 'full_name': 'Ali', 'phone_number': '+998901234567',
+            'consent': True,
         }, content_type='application/json')
 
     def test_coins_are_granted_only_for_the_first_lead_per_campaign(self):

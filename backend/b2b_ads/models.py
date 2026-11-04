@@ -16,7 +16,14 @@ class EduCenterCampaign(models.Model):
     story_video_url = models.URLField(max_length=500, blank=True, help_text="Promo Story uchun video/media URL")
     telegram_webhook_or_chat_id = models.CharField(max_length=100, blank=True, help_text="O'quv markaz Telegram Chat ID yoki guruhi")
     is_active = models.BooleanField(default=True, db_index=True)
-    impressions_count = models.IntegerField(default=0, help_text="Feed'da necha marta ko'rsatilgan")
+    impressions_count = models.IntegerField(default=0, help_text="Reklama haqiqatan ko'rsatilgan (foydalanuvchi/kun bo'yicha takrorsiz)")
+    clicks_count = models.IntegerField(default=0, help_text="CTA bosilgan (foydalanuvchi/kun bo'yicha takrorsiz)")
+    # Lifecycle: is_active=False — to'xtatilgan; starts_at kelajakda — rejalashtirilgan;
+    # ends_at o'tgan — tugagan; max_leads to'lgan — byudjet (lid limiti) tugagan.
+    starts_at = models.DateTimeField(null=True, blank=True, help_text="Boshlanish vaqti (bo'sh — darhol)")
+    ends_at = models.DateTimeField(null=True, blank=True, help_text="Tugash vaqti (bo'sh — muddatsiz)")
+    max_leads = models.PositiveIntegerField(null=True, blank=True,
+                                            help_text="Lid limiti (byudjet). Bo'sh — cheklanmagan")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -26,6 +33,22 @@ class EduCenterCampaign(models.Model):
 
     def __str__(self):
         return f"{self.center_name} - {self.target_subject} (<{self.max_score_threshold}%)"
+
+    def lifecycle_status(self, leads_count=None, now=None):
+        """'paused' | 'scheduled' | 'ended' | 'exhausted' | 'active'."""
+        from django.utils import timezone as tz
+        now = now or tz.now()
+        if not self.is_active:
+            return 'paused'
+        if self.starts_at and self.starts_at > now:
+            return 'scheduled'
+        if self.ends_at and self.ends_at <= now:
+            return 'ended'
+        if self.max_leads is not None:
+            count = leads_count if leads_count is not None else self.leads.count()
+            if count >= self.max_leads:
+                return 'exhausted'
+        return 'active'
 
 
 class StudentLeadSubmission(models.Model):
@@ -48,6 +71,8 @@ class StudentLeadSubmission(models.Model):
         db_index=True,
     )
     coins_rewarded = models.IntegerField(default=50)
+    # O'quvchi telefon va ma'lumotlarini markazga uzatishga aniq rozilik bergan vaqt.
+    consent_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

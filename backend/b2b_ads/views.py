@@ -9,9 +9,11 @@ from b2b_ads.services import (
     LeadError,
     campaign_payload,
     has_submitted,
+    TRACK_EVENTS,
+    live_campaigns,
     pick_campaign,
-    record_impression,
     submit_lead,
+    track_event,
 )
 from tests_app.models import Attempt, AIFeedback
 
@@ -43,8 +45,8 @@ def active_campaign_api(request):
     if not campaign:
         return Response({'campaign': None, 'diagnosis': diagnosis})
 
-    record_impression(campaign)
-
+    # Impression bu yerda sanalmaydi: API so'rovi ≠ reklama ko'rsatildi. Klient reklama
+    # ekranda ko'ringanda POST /track/ yuboradi.
     return Response({
         'campaign': campaign_payload(campaign),
         'diagnosis': diagnosis,
@@ -73,9 +75,27 @@ def submit_lead_api(request):
             full_name=str(data.get('full_name') or ''),
             phone_number=str(data.get('phone_number') or ''),
             telegram_username=str(data.get('telegram_username') or ''),
-            weakest_topics=str(data.get('weakest_topics') or ''),
-            predicted_dtm_score=str(data.get('predicted_dtm_score') or ''),
+            consent=data.get('consent') is True,
         )
     except LeadError as exc:
         return Response({'success': False, 'error': str(exc)}, status=400)
     return Response(result)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def track_campaign_event_api(request):
+    """POST /api/v1/b2b/track/  Body: {campaign_id, event: 'impression'|'click'}.
+    Faqat ko'rsatilayotgan (jonli) kampaniya uchun; user+kampaniya+kun bo'yicha bir marta."""
+    event = request.data.get('event')
+    if event not in TRACK_EVENTS:
+        return Response({'ok': False, 'error': "event 'impression' yoki 'click' bo'lishi kerak."}, status=400)
+    try:
+        campaign_id = int(request.data.get('campaign_id'))
+    except (TypeError, ValueError):
+        return Response({'ok': False, 'error': 'campaign_id noto\'g\'ri.'}, status=400)
+    campaign = live_campaigns().filter(pk=campaign_id).first()
+    if campaign is None:
+        return Response({'ok': False, 'error': 'Kampaniya faol emas.'}, status=404)
+    counted = track_event(campaign, event, request.user.id)
+    return Response({'ok': True, 'counted': counted})

@@ -14,10 +14,12 @@ import { cn } from '@/lib/utils';
 export type SosPollData = {
   question_text: string;
   options: string[];
-  correct_option: string;
-  explanation: string;
+  /** Faqat ovoz bergandan keyin (yoki muallifga) keladi. */
+  correct_option?: string;
+  explanation?: string;
   votes: Record<string, number>;
-  voted_users?: Record<string, string>;
+  /** Joriy foydalanuvchining tanlovi (server beradi; boshqalarning ovozlari yashirin). */
+  user_choice?: string | null;
 };
 
 interface SosQuestionCardProps {
@@ -50,7 +52,7 @@ export default function SosQuestionCard({
 }: SosQuestionCardProps) {
   const [poll, setPoll] = useState<SosPollData>(initialPollData);
   const [userChoice, setUserChoice] = useState<string | null>(
-    (currentUserId && initialPollData.voted_users?.[String(currentUserId)]) || null
+    initialPollData.user_choice || null
   );
   const [voting, setVoting] = useState(false);
   const [showExplanation, setShowExplanation] = useState(Boolean(userChoice));

@@ -89,7 +89,8 @@ class B2BLeadTests(TestCase):
         auth(self.client, self.user)
 
     def _submit(self, **overrides):
-        body = {'campaign_id': self.local.id, 'full_name': 'Ali Valiyev', 'phone_number': '+998 90 123-45-67'}
+        body = {'campaign_id': self.local.id, 'full_name': 'Ali Valiyev', 'phone_number': '+998 90 123-45-67',
+                'consent': True}
         body.update(overrides)
         return self.client.post('/api/v1/b2b/submit-lead/', body, content_type='application/json')
 

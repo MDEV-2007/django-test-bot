@@ -814,7 +814,7 @@ def reels_feed_api(request):
         if subject_slug and subject_slug not in ('all', 'for_you'):
             qs = qs.filter(subject_slug=subject_slug)
 
-        reels_list = [r.to_dict() for r in qs]
+        reels_list = [r.to_dict(include_answer=False) for r in qs]
     except Exception as e:
         logger.warning("reels_feed_api query error: %s", e)
         reels_list = []

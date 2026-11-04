@@ -4909,7 +4909,13 @@ def panel_campaigns_api(request):
     from b2b_ads.models import EduCenterCampaign
     from django.db.models import Count
 
-    campaigns_qs = EduCenterCampaign.objects.annotate(leads_count=Count('leads')).order_by('-created_at')
+    from django.db.models import Q
+    from b2b_ads.services import campaign_metrics
+
+    campaigns_qs = EduCenterCampaign.objects.annotate(
+        leads_count=Count('leads'),
+        enrolled_count=Count('leads', filter=Q(leads__status='ENROLLED')),
+    ).order_by('-created_at')
 
     campaigns_data = []
     for c in campaigns_qs:
@@ -4927,7 +4933,14 @@ def panel_campaigns_api(request):
             'story_video_url': c.story_video_url,
             'telegram_webhook_or_chat_id': c.telegram_webhook_or_chat_id,
             'is_active': c.is_active,
+            'status': c.lifecycle_status(leads_count=c.leads_count),
+            'starts_at': c.starts_at.isoformat() if c.starts_at else None,
+            'ends_at': c.ends_at.isoformat() if c.ends_at else None,
+            'max_leads': c.max_leads,
             'leads_count': c.leads_count,
+            # Faqat haqiqiy tracking: impressions/clicks/CTR/leads/enrolled. Narx modeli
+            # yo'q — spent/CPL null (UI "—" ko'rsatadi, soxta raqam emas).
+            'metrics': campaign_metrics(c, c.leads_count, c.enrolled_count),
             'created_at': c.created_at.strftime('%Y-%m-%d %H:%M'),
         })
 
@@ -4936,6 +4949,27 @@ def panel_campaigns_api(request):
         'total': len(campaigns_data),
         'active_count': sum(1 for c in campaigns_data if c['is_active']),
     })
+
+
+def _campaign_lifecycle_fields(data):
+    """starts_at / ends_at (ISO sana-vaqt yoki bo'sh) va max_leads (son yoki bo'sh) —
+    faqat so'rovda kelganlari qaytariladi."""
+    from django.utils.dateparse import parse_datetime
+    out = {}
+    for field in ('starts_at', 'ends_at'):
+        if field in data:
+            raw = data.get(field)
+            dt = parse_datetime(raw) if raw else None
+            if dt is not None and timezone.is_naive(dt):
+                dt = timezone.make_aware(dt)
+            out[field] = dt
+    if 'max_leads' in data:
+        raw = data.get('max_leads')
+        try:
+            out['max_leads'] = max(0, int(raw)) if raw not in (None, '') else None
+        except (TypeError, ValueError):
+            out['max_leads'] = None
+    return out
 
 
 @api_view(['POST'])
@@ -4962,6 +4996,7 @@ def panel_campaign_create_api(request):
         story_video_url=request.data.get('story_video_url', ''),
         telegram_webhook_or_chat_id=request.data.get('telegram_webhook_or_chat_id', ''),
         is_active=bool(request.data.get('is_active', True)),
+        **_campaign_lifecycle_fields(request.data),
     )
 
     return Response({
@@ -5007,6 +5042,8 @@ def panel_campaign_edit_api(request, campaign_id):
         campaign.telegram_webhook_or_chat_id = request.data['telegram_webhook_or_chat_id'].strip()
     if 'is_active' in request.data:
         campaign.is_active = bool(request.data['is_active'])
+    for field, value in _campaign_lifecycle_fields(request.data).items():
+        setattr(campaign, field, value)
 
     campaign.save()
 
@@ -5074,6 +5111,8 @@ def panel_campaign_leads_api(request):
             'campaign_id': l.campaign_id,
             'campaign_name': l.campaign.center_name if l.campaign else "Umumiy",
             'coins_rewarded': l.coins_rewarded,
+            'status': l.status,
+            'consent_at': l.consent_at.strftime('%Y-%m-%d %H:%M') if l.consent_at else None,
             'created_at': l.created_at.strftime('%Y-%m-%d %H:%M'),
         })
 
@@ -5081,3 +5120,29 @@ def panel_campaign_leads_api(request):
         'leads': leads_data,
         'total': qs.count(),
     })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_lead_status_api(request, lead_id):
+    """Lid CRM holati: NEW -> CONTACTED -> ENROLLED / REJECTED. Har o'zgarish audit
+    jurnaliga yoziladi (kim, qachon, eskisi -> yangisi)."""
+    from b2b_ads.models import StudentLeadSubmission
+    from django.shortcuts import get_object_or_404
+
+    lead = get_object_or_404(StudentLeadSubmission, id=lead_id)
+    new_status = str(request.data.get('status') or '').upper()
+    valid = {value for value, _ in StudentLeadSubmission._meta.get_field('status').choices}
+    if new_status not in valid:
+        return Response({'error': f"status quyidagilardan biri bo'lishi kerak: {', '.join(sorted(valid))}"},
+                        status=400)
+    old_status = lead.status
+    if old_status != new_status:
+        lead.status = new_status
+        lead.save(update_fields=['status'])
+        AuditLog.objects.create(
+            user=request.user, action='update', model_name='StudentLeadSubmission',
+            object_id=str(lead.id), object_repr=f"Lid #{lead.id} holati",
+            changes={'status': [old_status, new_status]},
+        )
+    return Response({'success': True, 'id': lead.id, 'status': lead.status})

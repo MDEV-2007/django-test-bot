@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PhoneCall, Sparkles, Building2, CheckCircle2, ChevronRight, X, Coins, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/lib/auth-store';
+import { trackAd, useAdImpression } from '@/lib/adTracking';
 
 export type TargetedOfferData = {
   id: number;
@@ -24,8 +25,9 @@ export type TargetedOfferData = {
   badge_text: string;
   banner_url?: string;
   video_url?: string;
-  score_received?: number;
   subject?: string;
+  is_sponsored?: boolean;
+  sponsored_label?: string;
 };
 
 interface TargetedAdBannerProps {
@@ -47,9 +49,12 @@ export default function TargetedAdBanner({
   const [phone, setPhone] = useState('+998 ');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  useAdImpression(bannerRef, offer.id);
 
   function handleOpenModal() {
     tgHaptic('medium');
+    trackAd(offer.id, 'click');
     setModalOpen(true);
   }
 
@@ -70,9 +75,9 @@ export default function TargetedAdBanner({
             campaign_id: offer.id,
             name: name.trim(),
             phone: phone.trim(),
-            subject: offer.subject || 'Umumiy',
-            score: offer.score_received || 0,
-            weak_topics: weakTopics,
+            // Tasdiqlash tugmasi — ma'lumotni markazga yuborishga aniq rozilik.
+            // Zaif mavzu va ball serverda haqiqiy natijalardan olinadi.
+            consent: true,
           }),
         }
       );
@@ -89,8 +94,9 @@ export default function TargetedAdBanner({
 
   return (
     <>
-      {/* Native Ad Banner */}
+      {/* Native Ad Banner — "Reklama" deb aniq belgilangan */}
       <div
+        ref={bannerRef}
         className={cn(
           'relative w-full overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/40 via-zinc-900 to-[#0A0C12] p-4 sm:p-5 md:p-6 shadow-2xl backdrop-blur-xl',
           className
@@ -103,6 +109,9 @@ export default function TargetedAdBanner({
           {/* Header Badges */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-zinc-200">
+                {offer.sponsored_label || 'Reklama'}
+              </span>
               <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[12px] sm:text-xs font-bold uppercase tracking-wider shrink-0 px-2.5 py-1 rounded-xl">
                 <Sparkles className="size-3 mr-1 inline" />
                 {offer.badge_text || "Homiylik Taklifi"}
@@ -114,7 +123,7 @@ export default function TargetedAdBanner({
             </div>
             <span className="text-[12px] text-zinc-400 font-medium hidden sm:inline-flex items-center gap-1">
               <ShieldCheck className="size-3.5 text-amber-400" />
-              Tasdiqlangan Hamkor
+              Homiy kontent
             </span>
           </div>
 
@@ -186,7 +195,7 @@ export default function TargetedAdBanner({
                     {offer.title}
                   </h3>
                   <p className="text-xs text-zinc-300 mb-5 leading-relaxed">
-                    Telefon raqamingizni qoldiring. O'quv markaz siz bilan 10 daqiqada bog'lanadi va IlmIldizi uchun ajratilgan 20% chegirmani faollashtiradi!
+                    Tasdiqlasangiz, ismingiz, telefon raqamingiz va zaif mavzuingiz shu o&apos;quv markazga yuboriladi va markaz siz bilan bog&apos;lanadi. Ma&apos;lumotlar faqat sizning roziligingiz bilan uzatiladi.
                   </p>
 
                   <div className="space-y-3.5 mb-6">

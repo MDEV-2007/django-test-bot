@@ -422,12 +422,13 @@ def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float =
 
     Tanlash mantiqi `b2b_ads.services.pick_campaign` da — dashboard kartasi bilan bir xil manba.
     """
-    from b2b_ads.services import campaign_payload, pick_campaign, record_impression
+    from b2b_ads.services import campaign_payload, pick_campaign
 
-    campaign = pick_campaign(profile, subject=subject, score=score, region=region)
+    # Nishonlash faqat serverdagi haqiqiy natijalardan (klient subject/score yubora
+    # olmaydi — ilgari feed doim `subject=Tarix&score=42` yuborardi). Impression — /track/.
+    campaign = pick_campaign(profile, region=region)
     if not campaign:
         return None
-    record_impression(campaign)
 
     payload = campaign_payload(campaign)
     payload.update({
@@ -437,13 +438,12 @@ def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float =
         'badge_text': campaign.offer_badge,
         'banner_url': campaign.logo,
         'video_url': campaign.story_video_url,
-        'score_received': score,
-        'subject': subject or campaign.target_subject,
+        'subject': campaign.target_subject,
     })
     return payload
 
 
-def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str = "", subject: str = "", score: float = 0.0, weak_topics: str = ""):
+def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str = "", subject: str = "", score: float = 0.0, weak_topics: str = "", consent: bool = False):
     """Feed banneridan lid. Atomik va bir kampaniyaga bir marta mukofotli —
     `b2b_ads.services.submit_lead` ga topshiriladi. Xato bo'lsa `LeadError` ko'tariladi."""
     from b2b_ads.services import submit_lead
@@ -454,8 +454,7 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
         campaign_id=campaign_id,
         full_name=lead_name,
         phone_number=phone,
-        weakest_topics=weak_topics or subject,
-        predicted_dtm_score=str(score or ''),
+        consent=consent,
     )
 
 
