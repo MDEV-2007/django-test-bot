@@ -149,13 +149,12 @@ export default function SprintPage() {
         setQuestions(res.questions.map(toQuestionItem));
         setIsSprintActive(true);
       } else {
-        setQuestions(FALLBACK_QUESTIONS);
-        setIsSprintActive(true);
+        setQuestions(null);
+        toast.error("Tanlangan fan bo'yicha hozircha savollar topilmadi. Boshqa fan yoki mavzuni tanlang.");
       }
     } catch (err) {
-      toast.error("Savollarni yuklashda uzilish bo'ldi. Zaxira savollar ishga tushirildi.");
-      setQuestions(FALLBACK_QUESTIONS);
-      setIsSprintActive(true);
+      setQuestions(null);
+      toast.error("Savollarni yuklab bo'lmadi. Internet aloqasini tekshirib, qayta urinib ko'ring.");
     } finally {
       setLoadingQuestions(false);
     }
