@@ -19,7 +19,6 @@ type SprintApiQuestion = {
   id: number;
   body: string;
   topic_title: string;
-  correct_option_id: number;
   difficulty?: QuestionItem['difficulty'];
   options: { id: number; text: string }[];
 };
