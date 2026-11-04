@@ -104,7 +104,7 @@ def approve_payment(payment, reviewer=None, moment=None):
 
     with transaction.atomic():
         # Qulf: shu qator ustida bir vaqtda ikkita tasdiqlash ketmasin.
-        payment = type(payment).objects.select_for_update().select_related(
+        payment = type(payment).objects.select_for_update(of=('self',)).select_related(
             'subscription__teacher').get(pk=payment.pk)
 
         existing = PayoutEntry.objects.filter(payment=payment).first()

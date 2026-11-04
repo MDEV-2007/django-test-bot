@@ -115,7 +115,10 @@ def finalize(mock_attempt, moment=None):
     moment = moment or timezone.now()
 
     with transaction.atomic():
-        mock_attempt = (MockAttempt.objects.select_for_update()
+        # of=('self',): PostgreSQL nullable (LEFT JOIN) tomonni FOR UPDATE qila olmaydi —
+        # `attempt` OneToOne null=True. Ilgari bu yerda "FOR UPDATE cannot be applied to the
+        # nullable side of an outer join" xatosi bilan topshirish productionda yiqilardi.
+        mock_attempt = (MockAttempt.objects.select_for_update(of=('self',))
                         .select_related('attempt', 'mock', 'student')
                         .get(pk=mock_attempt.pk))
         if mock_attempt.submitted_at is not None:
@@ -221,7 +224,7 @@ def _refund_ai_quota(student, count, moment=None):
 def _recompute_score(mock_attempt_id):
     """AI baholari kelgandan keyin ballni yangilaydi."""
     with transaction.atomic():
-        mock_attempt = (MockAttempt.objects.select_for_update()
+        mock_attempt = (MockAttempt.objects.select_for_update(of=('self',))
                         .select_related('attempt').get(pk=mock_attempt_id))
         attempt = mock_attempt.attempt
         if attempt is None:
