@@ -9,11 +9,8 @@ import {
   CheckCircle2,
   XCircle,
   ArrowRight,
-  TrendingUp,
   Target,
   Award,
-  Flame,
-  Check,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { soundFX } from '@/lib/soundFX';
@@ -59,21 +56,27 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
 
   // Backenddan 7 ta savol olish (agar mavjud bo'lsa)
   useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    setLoadError(null);
     async function loadQuestions() {
       try {
         const query = subject ? `?subject=${encodeURIComponent(subject)}` : '';
         const res = await apiFetch<{ ok: boolean; questions: BlitzQuestion[] }>(`/api/growth/onboarding/blitz/${query}`);
         if (!res?.ok || res.questions?.length !== 7) throw new Error('Diagnostika savollari hozircha mavjud emas.');
+        if (cancelled) return;
         setQuestions(res.questions);
         setLoadError(null);
       } catch {
+        if (cancelled) return;
         setQuestions([]);
         setLoadError("Diagnostika savollarini yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.");
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
     loadQuestions();
+    return () => { cancelled = true; };
   }, [subject]);
 
   const handleSelect = async (choice: BlitzChoice) => {
