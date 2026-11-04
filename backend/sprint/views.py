@@ -279,6 +279,56 @@ class ResolveRevengeMistakeAPIView(APIView):
         })
 
 
+class SprintAnswerAPIView(APIView):
+    """POST /api/v1/sprint/answer/ — javobni serverda tekshiradi.
+
+    To'g'ri variant ID si savollar ro'yxati bilan yuborilmaydi; faqat javob
+    yuborilgandan keyin natija qaytariladi.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        question_id = request.data.get('question_id')
+        option_id = request.data.get('option_id')
+
+        try:
+            question_id = int(question_id)
+            option_id = int(option_id)
+        except (TypeError, ValueError):
+            return Response(
+                {'ok': False, 'error': "Savol yoki javob ID noto'g'ri."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        question = Question.objects.filter(pk=question_id).first()
+        if question is None:
+            return Response(
+                {'ok': False, 'error': "Savol topilmadi."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        selected = question.choices.filter(pk=option_id).first()
+        if selected is None:
+            return Response(
+                {'ok': False, 'error': "Tanlangan variant ushbu savolga tegishli emas."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        correct = question.choices.filter(is_correct=True).first()
+        if correct is None:
+            return Response(
+                {'ok': False, 'error': "Savol uchun to'g'ri javob belgilanmagan."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response({
+            'ok': True,
+            'is_correct': selected.is_correct,
+            'correct_option_id': correct.id,
+            'correct_option_text': correct.text,
+        })
+
+
 class SprintQuestionsAPIView(APIView):
     """GET /api/v1/sprint/questions/?count=10&subject_id=1
     Fokus Sprinti uchun bazadan tasodifiy 10-30 ta variantli savollarni yuklaydi.
@@ -348,7 +398,6 @@ class SprintQuestionsAPIView(APIView):
                 'id': q.id,
                 'body': q.body,
                 'topic_title': topic_str,
-                'correct_option_id': corr.id,
                 'difficulty': q.difficulty,
                 'options': [{'id': c.id, 'text': c.text} for c in choices],
             })
