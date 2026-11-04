@@ -152,14 +152,34 @@ export function useNeuralSprint({
   const selectOption = useCallback(async (optionId: string | number) => {
     if (isVerifying || feedbackStatus !== 'idle' || !currentQuestion) return;
 
-    // Telegram Haptika: Variant bosilganda engil tebranish
-    tgHaptic('select');
-
+    // Javobni brauzerdagi yashirin kalit bilan emas, server bilan tekshiramiz.
     setSelectedOptionId(optionId);
     setIsVerifying(true);
+    tgHaptic('select');
 
-    const isCorrect = optionId === currentQuestion.correctOptionId;
-    const isRevenge = !!currentQuestion.isRevenge;
+    let verification: { ok: boolean; is_correct: boolean; correct_option_id: number; correct_option_text: string };
+    try {
+      verification = await apiFetch<typeof verification>('/api/v1/sprint/answer/', {
+        method: 'POST',
+        body: JSON.stringify({
+          question_id: currentQuestion.originalQuestionId ?? currentQuestion.id,
+          option_id: optionId,
+        }),
+      });
+      if (!verification?.ok) throw new Error("Javobni tekshirib bo'lmadi.");
+    } catch {
+      setIsVerifying(false);
+      setSelectedOptionId(null);
+      tgHaptic('error');
+      return;
+    }
+
+    const question = { ...question, correctOptionId: verification.correct_option_id };
+    setQuestionsQueue((prev) => prev.map((item, index) =>
+      index === currentIndex ? question : item
+    ));
+    const isCorrect = verification.is_correct;
+    const isRevenge = !!question.isRevenge;
 
     if (isCorrect) {
       // ─── TO'G'RI JAVOB ─────────────────────────────────────────
@@ -204,10 +224,10 @@ export function useNeuralSprint({
 
       // Agar bu Qasos savoli bo'lsa:
       if (isRevenge) {
-        setRevengeQueue((prev: RevengeQueueItem[]) => prev.filter((r) => r.questionId !== currentQuestion.originalQuestionId && r.questionId !== currentQuestion.id));
+        setRevengeQueue((prev: RevengeQueueItem[]) => prev.filter((r) => r.questionId !== question.originalQuestionId && r.questionId !== question.id));
 
         // Django backendga xatoni yechildi deb belgilash signali
-        const targetQId = currentQuestion.originalQuestionId || currentQuestion.id;
+        const targetQId = question.originalQuestionId || question.id;
         // apiFetch: token bilan. Oddiy fetch sarlavhasiz ketib, har doim 401 olardi.
         apiFetch('/api/v1/sprint/resolve-revenge/', {
           method: 'POST',
@@ -215,7 +235,7 @@ export function useNeuralSprint({
         }).catch(() => {});
       }
 
-      onAnswerCorrect?.(currentQuestion, combo.multiplier);
+      onAnswerCorrect?.(question, combo.multiplier);
 
       // 1.2 soniyadan so'ng silliq keyingi savolga o'tish (Autoplay)
       autoAdvanceTimerRef.current = setTimeout(() => {
@@ -247,12 +267,12 @@ export function useNeuralSprint({
 
       // ─── QASOS SAVOLI (Redemption Loop): Variantlarni Fisher-Yates bilan aralashtirib currentIndex + 3 ga joylash ───
       const targetIndex = Math.min(currentIndex + 3, questionsQueue.length);
-      const shuffledOptions = shuffleArray(currentQuestion.options);
+      const shuffledOptions = shuffleArray(question.options);
 
       const revengeQuestion: QuestionItem = {
-        ...currentQuestion,
-        id: `revenge_${currentQuestion.id}_${Date.now()}`,
-        originalQuestionId: currentQuestion.id,
+        ...question,
+        id: `revenge_${question.id}_${Date.now()}`,
+        originalQuestionId: question.id,
         isRevenge: true,
         failedOptionId: optionId,
         options: shuffledOptions,
@@ -267,7 +287,7 @@ export function useNeuralSprint({
       setRevengeQueue((prev) => [
         ...prev,
         {
-          questionId: currentQuestion.id,
+          questionId: question.id,
           scheduledIndex: targetIndex,
           originalMistakeOptionId: optionId,
           addedAtStep: currentIndex,
@@ -279,20 +299,20 @@ export function useNeuralSprint({
       setIsExplainingLoading(true);
       setIsExplanationOpen(true);
 
-      const selectedOpt = currentQuestion.options.find((o: QuestionOption) => o.id === optionId);
-      const correctOpt = currentQuestion.options.find((o: QuestionOption) => o.id === currentQuestion.correctOptionId);
+      const selectedOpt = question.options.find((o: QuestionOption) => o.id === optionId);
+      const correctOpt = question.options.find((o: QuestionOption) => o.id === question.correctOptionId);
 
       // Haqiqiy database savol ID si (Qasos savoli bo'lsa, originalQuestionId olinadi)
-      const realQuestionId = currentQuestion.originalQuestionId ?? currentQuestion.id;
+      const realQuestionId = question.originalQuestionId ?? question.id;
 
       const payload = {
         question_id: realQuestionId,
-        question_body: currentQuestion.body,
+        question_body: question.body,
         selected_option_id: optionId,
         selected_option_text: selectedOpt?.text || '',
-        correct_option_id: currentQuestion.correctOptionId,
+        correct_option_id: question.correctOptionId,
         correct_option_text: correctOpt?.text || '',
-        topic_title: currentQuestion.topicTitle || topicTitle,
+        topic_title: question.topicTitle || topicTitle,
       };
 
       try {
@@ -312,7 +332,7 @@ export function useNeuralSprint({
               modelName: json.data.model_name,
             };
             setActiveExplanation(expData);
-            onAnswerWrong?.(currentQuestion, expData);
+            onAnswerWrong?.(question, expData);
           } else {
             setActiveExplanation({
               questionId: realQuestionId,
@@ -347,7 +367,7 @@ export function useNeuralSprint({
   }, [
     isVerifying,
     feedbackStatus,
-    currentQuestion,
+    question,
     combo.multiplier,
     currentIndex,
     questionsQueue.length,
