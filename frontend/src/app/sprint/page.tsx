@@ -13,34 +13,6 @@ import { Zap, Flame, Sparkles, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import GhostBattleArena from '@/components/arena/GhostBattleArena';
 
-// Zaxira savollar (tarmoq uzilib qolsa)
-const FALLBACK_QUESTIONS: QuestionItem[] = [
-  {
-    id: 101,
-    topicTitle: "Amir Temur davlati",
-    body: "Amir Temur qaysi yili Balx shahrini egallab, markazlashgan davlatga asos solgan va buyuk amir deb e'lon qilingan?",
-    correctOptionId: 2,
-    options: [
-      { id: 1, text: "1365-yil" },
-      { id: 2, text: "1370-yil" },
-      { id: 3, text: "1385-yil" },
-      { id: 4, text: "1391-yil" },
-    ],
-  },
-  {
-    id: 102,
-    topicTitle: "Qadimgi Baqtriya",
-    body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi arxeologik yodgorlikdan topilgan?",
-    correctOptionId: 3,
-    options: [
-      { id: 1, text: "Dalvarzintepa" },
-      { id: 2, text: "Xolchayon" },
-      { id: 3, text: "Taxiti Sangin" },
-      { id: 4, text: "Qoratepa" },
-    ],
-  },
-];
-
 /* Server snake_case qaytaradi. Ilgari javob to'g'ridan-to'g'ri `QuestionItem` deb
    olinardi — `correctOptionId` undefined bo'lib, HAR BIR javob xato deb baholanardi. */
 type SprintApiQuestion = {
