@@ -29,7 +29,6 @@ function toQuestionItem(q: SprintApiQuestion): QuestionItem {
     id: q.id,
     body: q.body,
     topicTitle: q.topic_title,
-    correctOptionId: q.correct_option_id,
     difficulty: q.difficulty,
     options: q.options,
   };
