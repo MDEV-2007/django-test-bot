@@ -21,50 +21,56 @@ type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; tone
 
 /* Bo'limlar guruhlangan: ilgari 13 ta havola bitta tekis qatorda turardi va qaysi biri
    qayerga tegishli ekani ko'rinmasdi. Guruhlash admin uchun skanerlashni tezlashtiradi. */
+// Rejadagi 6 guruh. Hech bir sahifa olib tashlanmagan — faqat qayta guruhlangan.
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
-    label: 'Umumiy',
+    label: 'Dashboard',
     items: [
       { href: '/panel', label: 'Dashboard', icon: LayoutDashboard, tone: 'indigo' },
-      { href: '/panel/marketing', label: 'Marketing & Voronka', icon: Flame, tone: 'rose' },
     ],
   },
   {
-    label: 'Odamlar',
+    label: 'Foydalanuvchilar va rollar',
     items: [
       { href: '/panel/users', label: 'Foydalanuvchilar', icon: Users, tone: 'indigo' },
       { href: '/panel/teachers', label: "O'qituvchilar", icon: GraduationCap, tone: 'emerald' },
     ],
   },
   {
-    label: 'Kontent',
+    label: "Ta'lim kontenti",
     items: [
-      { href: '/panel/community', label: 'Hamjamiyat & Stories', icon: MessageSquareHeart, tone: 'rose' },
-      { href: '/panel/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'purple' },
       { href: '/panel/subjects', label: 'Fanlar', icon: BookMarked, tone: 'purple' },
       { href: '/panel/tests', label: 'Testlar', icon: FileCheck2, tone: 'emerald' },
       { href: '/panel/stress-exam', label: 'BMB Stress Simulyatori', icon: Flame, tone: 'rose' },
       { href: '/panel/lessons', label: 'Darslar', icon: BookOpen, tone: 'sky' },
       { href: '/panel/games', label: "O'yinlar", icon: Gamepad2, tone: 'amber' },
+      { href: '/panel/reels', label: 'Bilim Reels', icon: Sparkles, tone: 'purple' },
+      { href: '/panel/community', label: 'Hamjamiyat & Stories', icon: MessageSquareHeart, tone: 'rose' },
+      { href: '/panel/mocks', label: 'Mock Natijalari', icon: Award, tone: 'gold' },
+      { href: '/panel/attempts', label: 'Barcha Natijalar', icon: ClipboardList, tone: 'indigo' },
+      { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart, tone: 'rose' },
+    ],
+  },
+  {
+    label: 'Growth va marketing',
+    items: [
+      { href: '/panel/marketing', label: 'Marketing & Voronka', icon: Flame, tone: 'rose' },
+      { href: '/panel/growth', label: "O'sish metrikalari", icon: Activity, tone: 'indigo' },
+      { href: '/panel/campaigns', label: "O'quv Markazlari (B2B Ads)", icon: Megaphone, tone: 'amber' },
+      { href: '/panel/broadcast', label: 'Xabarlar & Rejalashtirish', icon: Megaphone, tone: 'sky' },
+      { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent, tone: 'cyan' },
       { href: '/panel/shop', label: "Do'kon", icon: ShoppingBag, tone: 'purple' },
     ],
   },
   {
-    label: 'Operatsiyalar & Moliya',
+    label: 'Moliya',
     items: [
-      { href: '/panel/campaigns', label: "O'quv Markazlari (B2B Ads)", icon: Megaphone, tone: 'amber' },
-      { href: '/panel/mocks', label: 'Mock Natijalari', icon: Award, tone: 'gold' },
-      { href: '/panel/attempts', label: 'Barcha Natijalar', icon: ClipboardList, tone: 'indigo' },
       { href: '/panel/finance', label: 'Moliya & Tushum', icon: TrendingUp, tone: 'emerald' },
-      { href: '/panel/growth', label: "O'sish metrikalari", icon: Activity, tone: 'indigo' },
       { href: '/panel/payments', label: "To'lovlar", icon: CreditCard, tone: 'amber' },
-      { href: '/panel/promocodes', label: 'Promokodlar', icon: TicketPercent, tone: 'cyan' },
-      { href: '/panel/surveys', label: 'Sharhlar & Fikrlar', icon: MessageSquareHeart, tone: 'rose' },
-      { href: '/panel/broadcast', label: 'Xabarlar & Rejalashtirish', icon: Megaphone, tone: 'sky' },
     ],
   },
   {
-    label: 'Xavfsizlik & Tizim',
+    label: 'Tizim va xavfsizlik',
     items: [
       { href: '/panel/system?tab=anticheat', label: 'Anti-Cheat Nazorati', icon: ShieldAlert, tone: 'amber' },
       { href: '/panel/system?tab=backup', label: 'Baza Zaxirasi (Backup)', icon: HardDrive, tone: 'emerald' },

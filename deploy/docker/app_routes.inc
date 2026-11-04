@@ -45,6 +45,13 @@ location ^~ /media/payment_screenshots/ {
     return 404;
 }
 
+# Sinf to'lov cheklari (karta o'tkazmasi skrinshoti — shaxsiy moliyaviy ma'lumot) ommaviy
+# emas: faqat Django admin ichidagi /admin/classroom/payment/<id>/receipt/ orqali (sinf
+# bo'yicha ruxsat tekshiriladi).
+location ^~ /media/classroom/receipts/ {
+    return 404;
+}
+
 # Ma'lumotlar bazasi zaxiralari (to'liq dump: parol hashlari, telefonlar) — hech qachon
 # ommaviy berilmaydi. Faqat /api/panel/system/backups/download/<fayl>/ (superadmin) orqali.
 location ^~ /media/backups/ {

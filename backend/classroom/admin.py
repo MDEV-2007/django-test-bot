@@ -15,6 +15,8 @@ O'qituvchi obunani tahrirlay olmasligining sababi: status'ni qo'lda 'active' qil
 to'lovsiz kirish berish degani va u defterda hech qanday iz qoldirmaydi.
 """
 from django.contrib import admin, messages
+from django.http import FileResponse, Http404
+from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
 
@@ -161,18 +163,53 @@ class PaymentAdmin(TeacherScopedAdmin):
     def amount_display(self, obj):
         return som(obj.amount_tiyin)
 
+    # Chek (karta o'tkazmasi skrinshoti — shaxsiy moliyaviy ma'lumot) endi ochiq /media/
+    # havolasi bilan emas, admin ichidagi himoyalangan view orqali beriladi: kirish shu
+    # ModelAdmin'ning sinf bo'yicha filtrlangan get_queryset'i bilan tekshiriladi.
+    def _receipt_url(self, obj):
+        return reverse('admin:classroom_payment_receipt', args=[obj.pk])
+
     @admin.display(description='Chek')
     def receipt_link(self, obj):
         if not obj.receipt:
             return '—'
-        return format_html('<a href="{}" target="_blank">ochish</a>', obj.receipt.url)
+        return format_html('<a href="{}" target="_blank">ochish</a>', self._receipt_url(obj))
 
     @admin.display(description='Chek')
     def receipt_preview(self, obj):
         if not obj.receipt:
             return "Chek yuklanmagan"
         return format_html('<a href="{0}" target="_blank"><img src="{0}" style="max-height:320px"></a>',
-                           obj.receipt.url)
+                           self._receipt_url(obj))
+
+    def get_urls(self):
+        custom = [path('<int:pk>/receipt/', self.admin_site.admin_view(self.receipt_view),
+                       name='classroom_payment_receipt')]
+        return custom + super().get_urls()
+
+    def receipt_view(self, request, pk):
+        payment = self.get_queryset(request).filter(pk=pk).first()
+        if payment is None or not payment.receipt or not self.has_view_permission(request, payment):
+            raise Http404
+        from premium.services import ALLOWED_IMAGE_FORMATS
+        from PIL import Image, UnidentifiedImageError
+        fh = payment.receipt.open('rb')
+        try:
+            with Image.open(fh) as img:
+                img.verify()
+            fh.seek(0)
+            with Image.open(fh) as img:
+                fmt = img.format
+            fh.seek(0)
+        except (UnidentifiedImageError, OSError, ValueError):
+            fh.seek(0)
+            return FileResponse(fh, as_attachment=True, filename='receipt.bin')
+        safe_type = ALLOWED_IMAGE_FORMATS.get(fmt)
+        if not safe_type:
+            return FileResponse(fh, as_attachment=True, filename='receipt.bin')
+        response = FileResponse(fh, content_type=safe_type[1])
+        response['Cache-Control'] = 'private, no-store'
+        return response
 
     @admin.display(description='Sana (Toshkent)', ordering='created_at')
     def created_display(self, obj):

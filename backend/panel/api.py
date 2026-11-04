@@ -686,16 +686,28 @@ def user_edit_api(request, pk):
                 except Exception as e:
                     logger.warning("Error cleaning class battle rooms for user %s: %s", u.id, e)
 
+                deleted_repr = f"{u.username} (id={u.id}, rol={getattr(getattr(u, 'profile', None), 'role', '-')})"
+                deleted_id = u.id
                 u.delete()
+                _audit(request, 'delete', 'User', deleted_id, deleted_repr)
             return Response({'deleted': True})
         except Exception as e:
             logger.exception("Failed to delete user %s: %s", u.id, e)
             return Response({'error': f"Foydalanuvchini o'chirishda xatolik yuz berdi: {str(e)}"}, status=400)
 
+    old_role = getattr(getattr(u, 'profile', None), 'role', None)
+    old_values = {'username': u.username, 'email': u.email, 'is_active': u.is_active}
     form = UserForm(request.data, instance=u)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     form.save()
+    u.refresh_from_db()
+    new_role = getattr(getattr(u, 'profile', None), 'role', None)
+    changes = {k: [v, getattr(u, k)] for k, v in old_values.items() if getattr(u, k) != v}
+    if old_role != new_role:
+        changes['role'] = [old_role, new_role]
+    if changes:
+        _audit(request, 'update', 'User', u.id, f"{u.username}: profil tahrirlandi", changes)
     return Response({'ok': True})
 
 
@@ -711,6 +723,8 @@ def user_toggle_block_api(request, pk):
         return Response({'error': "Oxirgi faol super adminni bloklab bo'lmaydi."}, status=400)
     u.is_active = not u.is_active
     u.save(update_fields=['is_active'])
+    _audit(request, 'update', 'User', u.id, f"{u.username}: {'blokdan chiqarildi' if u.is_active else 'bloklandi'}",
+           {'is_active': [not u.is_active, u.is_active]})
     return Response({'is_active': u.is_active})
 
 
@@ -727,6 +741,7 @@ def user_reset_password_api(request, pk):
         new_password = secrets.token_urlsafe(8)
     u.set_password(new_password)
     u.save()
+    _audit(request, 'update', 'User', u.id, f"{u.username}: parol tiklandi")  # parolning o'zi yozilmaydi
     return Response({'new_password': new_password})
 
 
@@ -745,6 +760,7 @@ def user_adjust_api(request, pk):
         except (TypeError, ValueError):
             return current
 
+    before = {'xp': profile.xp, 'coins': profile.coins, 'elo_rating': profile.elo_rating}
     if profile.is_privileged:
         profile.xp = 0
         profile.level = 1
@@ -754,7 +770,31 @@ def user_adjust_api(request, pk):
     profile.coins = _clean_int('coins', profile.coins)
     profile.elo_rating = _clean_int('elo_rating', profile.elo_rating, lo=100, hi=5000)
     profile.save()
+    changes = {k: [v, getattr(profile, k)] for k, v in before.items() if getattr(profile, k) != v}
+    if changes:
+        _audit(request, 'update', 'Profile', profile.id, f"{u.username}: balans o'zgartirildi", changes)
     return Response({'xp': profile.xp, 'coins': profile.coins, 'elo_rating': profile.elo_rating, 'level': profile.level})
+
+
+def _teacher_owns_attempt(user, teacher_profile, attempt):
+    """O'qituvchi bu urinishga aloqadormi: o'zi yaratgan test yoki o'z sinfidagi o'quvchi."""
+    if attempt.test_id and attempt.test.created_by_id == user.id:
+        return True
+    from teacher.models import TeacherStudent
+    return TeacherStudent.objects.filter(teacher=teacher_profile, student_id=attempt.profile_id).exists()
+
+
+def _audit(request, action, model_name, object_id, object_repr, changes=None):
+    """Super Admin'ning xavfli (o'chirish, rol, balans, premium, impersonatsiya) amallari
+    uchun audit yozuvi. Audit xatosi asosiy amalni to'xtatmaydi."""
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            action=action, model_name=model_name, object_id=str(object_id),
+            object_repr=str(object_repr)[:300], changes=changes or {},
+        )
+    except Exception:
+        logger.exception("AuditLog yozilmadi: %s %s", model_name, object_id)
 
 
 @api_view(['POST'])
@@ -768,6 +808,8 @@ def user_set_premium_api(request, pk):
     if grant:
         profile.premium_expires_at = timezone.now() + timedelta(days=30)
     profile.save()
+    _audit(request, 'update', 'Profile', profile.id, f"{u.username}: premium {'berildi' if grant else 'olib tashlandi'}",
+           {'is_premium': [not grant, grant]})
     Notification.objects.create(
         profile=profile, type='system', title="Premium holati o'zgardi",
         message=("Sizga premium kirish berildi!" if grant else "Premium kirishingiz to'xtatildi."),
@@ -788,6 +830,7 @@ def user_impersonate_api(request, pk):
     refresh['impersonator_id'] = request.user.id
     access = refresh.access_token
     access['impersonator_id'] = request.user.id
+    _audit(request, 'update', 'User', target.id, f"Impersonatsiya boshlandi: {request.user.username} -> {target.username}")
     return Response({'access': str(access), 'refresh': str(refresh), 'username': target.username})
 
 
@@ -3316,7 +3359,16 @@ def generate_certificate_api(request, attempt_pk):
         )
 
         req_profile = getattr(request.user, 'profile', None)
-        if not (request.user.is_staff or (req_profile and (req_profile.id == a.profile_id or req_profile.is_teacher))):
+        # Ilgari HAR QANDAY o'qituvchi (o'qituvchilik o'z-o'ziga xizmat — moderatsiyasiz)
+        # istalgan o'quvchining sertifikatini (ism + ball) attempt ID'ni almashtirib olardi.
+        # Endi: o'quvchining o'zi, super admin, yoki testni yaratgan / o'quvchi sinfidagi o'qituvchi.
+        allowed = bool(req_profile) and (
+            req_profile.id == a.profile_id
+            or req_profile.is_superadmin
+            or request.user.is_superuser
+            or (req_profile.is_teacher and _teacher_owns_attempt(request.user, req_profile, a))
+        )
+        if not allowed:
             return HttpResponse("Ruxsat berilmagan.", status=403, content_type="text/plain; charset=utf-8")
 
         profile = a.profile
@@ -3408,7 +3460,8 @@ def generate_certificate_api(request, attempt_pk):
         page.draw_circle(pymupdf.Point(badge_cx, badge_cy), badge_r, color=c_gold_light, width=0.8)
 
         logo_inserted = False
-        import os
+        # `import os` shu yerda edi: u `os`ni butun funksiya uchun lokal qilib, yuqoridagi
+        # shrift qidiruvida NameError berardi — sertifikat har doim 500 qaytarardi.
         from django.conf import settings
         logo_paths = [
             os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'ilmildizi-logo.png'),
@@ -5063,6 +5116,8 @@ def panel_campaign_toggle_api(request, campaign_id):
     campaign = get_object_or_404(EduCenterCampaign, id=campaign_id)
     campaign.is_active = not campaign.is_active
     campaign.save(update_fields=['is_active'])
+    _audit(request, 'update', 'EduCenterCampaign', campaign.pk, f"Kampaniya {campaign.center_name}",
+           {'is_active': [not campaign.is_active, campaign.is_active]})
 
     status_str = "faollashtirildi" if campaign.is_active else "to'xtatildi"
     return Response({
@@ -5083,7 +5138,9 @@ def panel_campaign_delete_api(request, campaign_id):
         return Response({'success': True, 'message': "Kampaniya topilmadi."})
 
     name = campaign.center_name
+    campaign_pk = campaign.pk
     campaign.delete()
+    _audit(request, 'delete', 'EduCenterCampaign', campaign_pk, f"Kampaniya o'chirildi: {name}")
     return Response({'success': True, 'message': f"{name} kampaniyasi o'chirildi."})
 
 

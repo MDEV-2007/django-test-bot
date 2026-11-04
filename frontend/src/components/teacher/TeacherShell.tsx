@@ -18,10 +18,15 @@ import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon'
 /* O'qituvchi panelining karkasi — chapda sobit sidebar, tepada breadcrumb & mavzu tugmasi, mobilda drawer menyu. */
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; tone?: PremiumIconTone };
 
+// Rejadagi 5 guruh. Sahifalar o'zgarmagan — faqat guruhlangan.
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Umumiy',
     items: [{ href: '/teacher', label: 'Dashboard', icon: LayoutDashboard, tone: 'indigo' }],
+  },
+  {
+    label: "Sinflar va o'quvchilar",
+    items: [{ href: '/teacher/class', label: 'Mening sinfim', icon: Users, tone: 'purple' }],
   },
   {
     label: 'Kontent',
@@ -32,11 +37,15 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
-    label: 'Jonli Janglar & Sinf',
+    label: 'Baholash va analitika',
+    items: [
+      { href: '/teacher/surveys', label: 'Sharh va Baholar', icon: MessageSquareQuote, tone: 'rose' },
+    ],
+  },
+  {
+    label: 'Jonli dars / Arena',
     items: [
       { href: '/teacher/battles', label: 'Sinf Janglari (Live Quiz)', icon: Swords, tone: 'amber' },
-      { href: '/teacher/class', label: 'Mening sinfim', icon: Users, tone: 'purple' },
-      { href: '/teacher/surveys', label: 'Sharh va Baholar', icon: MessageSquareQuote, tone: 'rose' },
     ],
   },
 ];

@@ -656,11 +656,26 @@ def attempt_grade_api(request, pk, attempt_id):
 
     if request.method == 'POST':
         grades = request.data.get('grades') or {}
+        if not isinstance(grades, dict):
+            return Response({'error': "grades {answer_id: true/false} ko'rinishida bo'lishi kerak."}, status=400)
+        changes = {}
+        old_score = attempt.score
         for ans in open_answers:
             if str(ans.id) in grades:
-                ans.is_correct = bool(grades[str(ans.id)])
+                new_value = bool(grades[str(ans.id)])
+                if ans.is_correct != new_value:
+                    changes[f'answer:{ans.id}'] = [ans.is_correct, new_value]
+                ans.is_correct = new_value
                 ans.save(update_fields=['is_correct'])
         _recompute_attempt(attempt)
+        if changes:
+            # Baholash audit jurnaliga: kim, qaysi urinish, qaysi javob eski -> yangi, ball.
+            from panel.models import AuditLog
+            changes['score'] = [old_score, attempt.score]
+            AuditLog.objects.create(
+                user=request.user, action='update', model_name='Attempt', object_id=str(attempt.id),
+                object_repr=f"O'qituvchi baholadi: {test.title[:120]}", changes=changes,
+            )
         return Response({'ok': True})
 
     return Response({'answers': [{
@@ -674,7 +689,9 @@ def attempt_grade_api(request, pk, attempt_id):
 
 
 def _recompute_attempt(attempt):
-    answers = list(attempt.answers.all())
+    # finish_api bilan bir xil: writing_task to'g'ri/xato deb sanalmaydi (alohida baholanadi).
+    # Ilgari bu yerda u maxrajga kirib, o'qituvchi baholagach ball pasayib ketardi.
+    answers = [a for a in attempt.answers.select_related('question') if a.question.question_type != 'writing_task']
     total = len(answers)
     correct = sum(1 for a in answers if a.is_correct)
     skipped = sum(1 for a in answers if a.is_skipped)
