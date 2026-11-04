@@ -92,6 +92,13 @@ export default function SprintPage() {
   const [isSprintActive, setIsSprintActive] = useState(false);
   const [questions, setQuestions] = useState<QuestionItem[] | null>(null);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  // Haqiqiy DTM prognozi (yetarli natija bo'lmasa null — barometr "—" ko'rsatadi).
+  const [predictedDtm, setPredictedDtm] = useState<number | null>(null);
+  useEffect(() => {
+    apiFetch<{ ready: boolean; predicted_dtm: number | null }>('/api/analytics/predicted-score/')
+      .then((r) => setPredictedDtm(r?.ready && typeof r.predicted_dtm === 'number' ? r.predicted_dtm : null))
+      .catch(() => setPredictedDtm(null));
+  }, []);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [activeTab, setActiveTab] = useState<'sprint' | 'arena'>(() => {
     return searchParams.get('tab') === 'arena' ? 'arena' : 'sprint';
@@ -167,7 +174,8 @@ export default function SprintPage() {
   };
 
   const handleFinish = (summary: SprintSessionSummary) => {
-    toast.success(`Tezkor test yakunlandi! +${summary.totalXpEarned} XP to'plandi`);
+    const acc = summary.totalAnswered ? Math.round((summary.correctCount / summary.totalAnswered) * 100) : 0;
+    toast.success(`Sprint yakunlandi! Aniqlik: ${acc}% (${summary.correctCount}/${summary.totalAnswered})`);
   };
 
   const handleExitSprint = () => {
@@ -232,8 +240,7 @@ export default function SprintPage() {
           key={sessionId ?? 'offline'}
           questions={questions}
           sessionId={sessionId}
-          initialDtmScore={178.4}
-          initialTopicMastery={45}
+          initialDtmScore={predictedDtm}
           topicTitle={sprintTitle}
           onExit={handleExitSprint}
           onFinish={handleFinish}

@@ -53,8 +53,8 @@ export default function LandingNav() {
           </div>
         </Link>
 
-        {/* Central Pill Navigation Links */}
-        <nav className="hidden items-center gap-0.5 lg:gap-1 md:flex">
+        {/* Markaziy havolalar faqat lg (1024px+) dan: 768px planshetda ular sig'masdan sahifani gorizontal surardi. */}
+        <nav className="hidden items-center gap-0.5 lg:gap-1 lg:flex">
           {LINKS.map((l) => (
             <a
               key={l.href}
@@ -99,7 +99,7 @@ export default function LandingNav() {
             onClick={() => setOpen((v) => !v)}
             aria-label="Menyu"
             aria-expanded={open}
-            className="ios-spring flex size-9 items-center justify-center rounded-full bg-black/[0.05] text-[#1C1C1E] md:hidden hover:bg-black/[0.08] cursor-pointer"
+            className="ios-spring flex size-9 items-center justify-center rounded-full bg-black/[0.05] text-[#1C1C1E] lg:hidden hover:bg-black/[0.08] cursor-pointer"
           >
             {open ? <X className="size-4.5" /> : <Menu className="size-4.5" />}
           </button>
@@ -108,7 +108,7 @@ export default function LandingNav() {
 
       {/* iOS Inset Grouped Sheet Dropdown for Mobile */}
       {open && (
-        <div className="mx-auto mt-2 max-w-7xl rounded-2xl border border-black/[0.08] bg-white/92 p-3 ios-glass shadow-[0_20px_50px_rgba(0,0,0,0.14)] md:hidden animate-scaleIn">
+        <div className="mx-auto mt-2 max-w-7xl rounded-2xl border border-black/[0.08] bg-white/92 p-3 ios-glass shadow-[0_20px_50px_rgba(0,0,0,0.14)] lg:hidden animate-scaleIn">
           <div className="divide-y divide-black/[0.06] rounded-xl bg-[#F2F2F7]/80 px-3">
             {LINKS.map((l) => (
               <a

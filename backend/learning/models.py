@@ -215,10 +215,13 @@ class Reel(models.Model):
     def to_dict(self, include_answer=True):
         """`include_answer=False` — o'quvchi lentasi uchun: to'g'ri variant va izoh faqat
         javob yuborilgandan keyin (/reels/answer/) qaytadi (javob +XP beradi)."""
-        try:
-            c_count = self.comments.count()
-        except Exception:
-            c_count = 0
+        # Ro'yxatda `comments_total` annotatsiyasi bo'lsa — qo'shimcha so'rovsiz (N+1 yo'q).
+        c_count = getattr(self, 'comments_total', None)
+        if c_count is None:
+            try:
+                c_count = self.comments.count()
+            except Exception:
+                c_count = 0
 
         v_url = ''
         if self.video_file:
@@ -387,19 +390,19 @@ class CommunityPost(models.Model):
         author_is_superadmin = getattr(profile, 'is_superadmin', self.author.is_superuser) if profile else self.author.is_superuser
         author_is_teacher = getattr(profile, 'is_teacher', False) if profile else False
 
+        # `.all()` — lenta `prefetch_related('reactions')` qiladi, shuning uchun bu yerda
+        # qo'shimcha so'rov yo'q. Ilgari `.filter(...)` prefetch'ni chetlab o'tib, har post
+        # uchun 5 ta so'rov yuborardi (50 post = 250+ so'rov).
+        reactions = list(self.reactions.all())
         user_reaction = None
         if current_user and current_user.is_authenticated:
-            reaction = self.reactions.filter(user=current_user).first()
-            if reaction:
-                user_reaction = reaction.reaction_type
+            user_reaction = next((r.reaction_type for r in reactions if r.user_id == current_user.id), None)
 
         # Reaksiyalar hisobi turlari bo'yicha
-        reaction_counts = {
-            'fire': self.reactions.filter(reaction_type='fire').count(),
-            'clap': self.reactions.filter(reaction_type='clap').count(),
-            'trophy': self.reactions.filter(reaction_type='trophy').count(),
-            'heart': self.reactions.filter(reaction_type='heart').count(),
-        }
+        reaction_counts = {kind: 0 for kind in ('fire', 'clap', 'trophy', 'heart')}
+        for r in reactions:
+            if r.reaction_type in reaction_counts:
+                reaction_counts[r.reaction_type] += 1
 
         img = self.image_url
         custom_img = getattr(self, 'custom_image', None)

@@ -203,33 +203,9 @@ def landing_reviews_api(request):
             'avatar_letter': first_char,
         })
 
-    DEFAULT_REVIEWS = [
-        {
-            'id': -1,
-            'author': 'Mubina Karimova',
-            'role': 'Toshkent Davlat Yuridik Universiteti talabasi',
-            'tag': 'Ona tili A+ (92 ball)',
-            'quote': "Ilm Ildizi botidagi qat'iy vaqt hisoblagichi va xatolar tahlili bo'lmaganida bunchalik yuqori ololmasdim. Ayniqsa matnli savollarda vaqtni to'g'ri taqsimlashni shu bot orqali o'rgandim.",
-            'rating': 5,
-            'avatar_letter': 'M',
-        },
-        {
-            'id': -2,
-            'author': 'Davronbek Qodirov',
-            'role': "O'zMU Matematika fakulteti 1-kurs",
-            'tag': 'DTM: 184.2 Ball (Grant)',
-            'quote': "Avval repetitorga borib qog'ozda test yechardik, tekshirishga 2 kun ketardi. Ilm Ildizi botida esa tugatishingiz bilanoq qaysi mavzudan oqsayotganingizni ko'rsatib beradi. Tavsiya qilaman!",
-            'rating': 5,
-            'avatar_letter': 'D',
-        },
-    ]
-
-    for d in DEFAULT_REVIEWS:
-        if len(reviews) >= 2:
-            break
-        if not any(r['author'] == d['author'] for r in reviews):
-            reviews.append(d)
-
+    # Ilgari admin 2 tadan kam sharh tanlagan bo'lsa, to'qima ism va natijali
+    # ("Mubina Karimova, Ona tili 92 ball") sharhlar haqiqiy sharh sifatida qo'shilardi.
+    # Endi faqat haqiqiy (admin tanlagan) sharhlar; bo'lmasa — bo'sh ro'yxat.
     return Response({
         'reviews': reviews[:6],
         'total_featured': len(reviews),

@@ -65,7 +65,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const tabs: TabItem[] = [
     {
       href: '/dashboard',
-      label: t('Bosh sahifa'),
+      label: t('Asosiy'),  // 6 tab 360px'da sig'ishi uchun qisqa yorliq
       icon: LayoutDashboard,
       api: '/api/dashboard/home/',
       activeBg: 'bg-gradient-to-b from-[var(--brand-hover)] to-[var(--brand)]',
@@ -75,7 +75,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/study',
-      label: t("O'rganish"),
+      label: t("O'qish"),
       icon: Brain,
       matchPrefixes: STUDY_PREFIXES,
       featureKey: 'learning',
@@ -99,7 +99,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     },
     {
       href: '/feed',
-      label: t('Hamjamiyat'),
+      label: t('Jamiyat'),
       icon: MessageCircle,
       matchPrefixes: ['/feed', '/reels'],
       api: '/api/learning/feed/',
@@ -204,7 +204,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
               <span
                 className={cn(
-                  'relative z-10 mt-1 max-w-full truncate text-[12px] leading-none tracking-[-0.01em] transition-colors',
+                  'relative z-10 mt-1 max-w-full truncate text-[11px] min-[400px]:text-[12px] leading-none tracking-[-0.01em] transition-colors',
                   active
                     ? cn('font-bold', tab.activeLabelText)
                     : isDark
@@ -271,7 +271,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
           <span
             className={cn(
-              'relative z-10 mt-1 max-w-full truncate text-[12px] leading-none tracking-[-0.01em] transition-colors',
+              'relative z-10 mt-1 max-w-full truncate text-[11px] min-[400px]:text-[12px] leading-none tracking-[-0.01em] transition-colors',
               isProfileActive
                 ? 'font-bold text-[#007AFF] dark:text-[#409CFF]'
                 : isDark

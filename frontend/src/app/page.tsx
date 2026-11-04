@@ -119,7 +119,7 @@ const FAQ = [
   },
   {
     q: "DTM ball bashorati qanday ishlaydi?",
-    a: "Hisob yechilgan savollar soni, ularning qiyinlik darajasi, fanlar kesimidagi xatolar va so'nggi natijalarga asoslanadi. Test yechganingiz sayin bashorat aniqligi 96% gacha yetadi.",
+    a: "Hisob yechilgan savollar soni, ularning qiyinlik darajasi, fanlar kesimidagi xatolar va so'nggi natijalarga asoslanadi. Bu taxminiy ko'rsatkich: test qancha ko'p yechilsa, bashorat shuncha barqaror bo'ladi.",
   },
   {
     q: "O'qituvchilar uchun qanday qulayliklar bor?",
@@ -244,10 +244,9 @@ export default async function LandingPage() {
                       </div>
                     ))}
                   </div>
+                  {/* Ilgari bu yerda tasdiqlanmagan "4.9 / 5" reyting qattiq yozilgan edi. */}
                   <div className="flex items-center gap-1 ml-1 text-[#1C1C1E] font-bold">
-                    <Star className="size-3.5 fill-[#FF9500] text-[#FF9500]" />
-                    <span>4.9 / 5</span>
-                    <span className="text-[#8E8E93] font-normal">(O'quvchilar e'tirofi)</span>
+                    <span>Ro&apos;yxatdan o&apos;tish bepul</span>
                   </div>
                 </div>
 

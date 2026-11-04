@@ -26,7 +26,7 @@ interface NeuralSprintViewProps {
   questions: QuestionItem[];
   /** Server sprint sessiyasi; null bo'lsa oflayn zaxira rejimi. */
   sessionId?: number | null;
-  initialDtmScore?: number;
+  initialDtmScore?: number | null;
   initialTopicMastery?: number;
   topicTitle?: string;
   onExit?: () => void;
@@ -38,7 +38,7 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 export default function NeuralSprintView({
   questions,
   sessionId = null,
-  initialDtmScore = 178.4,
+  initialDtmScore = null,
   initialTopicMastery = 45,
   topicTitle = "O'zbekiston Tarixi",
   onExit,
@@ -192,12 +192,12 @@ export default function NeuralSprintView({
               <p className="text-xl font-bold text-amber-500 mt-0.5">+{stats.revengeSolved}</p>
             </div>
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60">
-              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">DTM Ball</span>
-              <p className="text-xl font-bold text-primary mt-0.5">{scorePredictor.currentScore}</p>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">DTM prognoz</span>
+              <p className="text-xl font-bold text-primary mt-0.5">{scorePredictor.currentScore ?? '—'}</p>
             </div>
             <div className="p-3 rounded-2xl bg-muted/40 border border-border/60">
-              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Mukofot</span>
-              <p className="text-xl font-bold text-amber-400 mt-0.5">+{stats.totalXp} XP</p>
+              <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Aniqlik</span>
+              <p className="text-xl font-bold text-amber-400 mt-0.5">{scorePredictor.topicMasteryPercentage}%</p>
             </div>
           </div>
 
@@ -312,7 +312,7 @@ export default function NeuralSprintView({
             {/* 1. DTM Kutilayotgan Ball */}
             <div className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary shadow-2xs">
               <Award className="size-3.5 text-primary" />
-              <span>Prognoz: <b className="font-mono">{scorePredictor.currentScore}</b> / {scorePredictor.maxScore}</span>
+              <span title="Yakunlangan testlaringiz asosidagi prognoz">Prognoz: <b className="font-mono">{scorePredictor.currentScore ?? '—'}</b> / {scorePredictor.maxScore}</span>
               {scorePredictor.deltaScore !== null && (
                 <span className={cn(
                   'text-[12px] font-bold animate-pulse',
@@ -347,7 +347,7 @@ export default function NeuralSprintView({
         <div className="space-y-1">
           <div className="flex items-center justify-between text-[12px] font-medium text-muted-foreground px-0.5">
             <span className="truncate max-w-[200px]">{scorePredictor.topicName}</span>
-            <span className="font-mono font-bold text-primary">{scorePredictor.topicMasteryPercentage}%</span>
+            <span className="font-mono font-bold text-primary" title="Shu sprintdagi aniqlik">{scorePredictor.topicMasteryPercentage}% aniqlik</span>
           </div>
           <Progress value={scorePredictor.topicMasteryPercentage} className="h-1.5 rounded-full" />
         </div>
@@ -376,7 +376,7 @@ export default function NeuralSprintView({
           >
             <div className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-amber-500">
               <Flame className="size-4 fill-current text-amber-500 animate-bounce" />
-              QASOS SAVOLI (2x Ball & XP)
+              QASOS SAVOLI
             </div>
             <p className="text-[12px] font-semibold text-foreground/80">
               Boyagi xatoyingizni ildizi bilan yo&apos;q qiling!
@@ -525,7 +525,7 @@ export default function NeuralSprintView({
                   onClick={dismissExplanation}
                   className="w-full rounded-2xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm h-11 shadow-lg shadow-rose-600/20 gap-2 cursor-pointer active:scale-[0.99] transition-all"
                 >
-                  <span>Tushundim, davom etamiz (+5 XP)</span>
+                  <span>Tushundim, davom etamiz</span>
                   <ChevronRight className="size-4 shrink-0" />
                 </Button>
 

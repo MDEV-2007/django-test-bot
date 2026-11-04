@@ -64,9 +64,12 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
     })
     .join(' ');
 
-  const measured = AXES.map((a) => ({ ...a, value: axisValue(radar, a.key) })).filter(
-    (a): a is typeof a & { value: number } => a.value !== null,
-  );
+  // "Eng kuchli / zaif tomon" faqat test natijasi bo'lganda (bitta streak o'qidan xulosa yo'q).
+  const measured = radar?.has_data
+    ? AXES.map((a) => ({ ...a, value: axisValue(radar, a.key) })).filter(
+        (a): a is typeof a & { value: number } => a.value !== null,
+      )
+    : [];
   const strongest = measured.length ? measured.reduce((a, b) => (b.value > a.value ? b : a)) : null;
   const weakest = measured.length > 1 ? measured.reduce((a, b) => (b.value < a.value ? b : a)) : null;
   const overall = radar?.overall ?? null;

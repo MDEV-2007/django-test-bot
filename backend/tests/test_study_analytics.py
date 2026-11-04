@@ -77,6 +77,7 @@ class MasteryRadarTests(_Base):
     def test_new_student_radar_has_no_fabricated_values(self):
         radar = compute_skill_radar(self.profile)
         self.assertFalse(radar['has_data'])
+        self.assertIsNone(radar['overall'])
         for key in ('subject_mastery', 'accuracy', 'speed', 'writing', 'logic'):
             self.assertIsNone(radar['axes'][key]['value'], key)
 

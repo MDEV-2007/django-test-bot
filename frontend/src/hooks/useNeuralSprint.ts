@@ -36,7 +36,8 @@ export type UseNeuralSprintOptions = {
   initialQuestions: QuestionItem[];
   /** Server bergan sprint sessiyasi. Bo'lmasa (oflayn zaxira) javob lokal tekshiriladi. */
   sessionId?: number | null;
-  initialDtmScore?: number;
+  /** Serverdagi haqiqiy prognoz; null — ko'rsatilmaydi (soxta 178.4 emas). */
+  initialDtmScore?: number | null;
   maxDtmScore?: number;
   initialTopicMastery?: number;
   topicTitle?: string;
@@ -56,7 +57,7 @@ type SprintAnswerResponse = {
 export function useNeuralSprint({
   initialQuestions,
   sessionId = null,
-  initialDtmScore = 178.4,
+  initialDtmScore = null,
   maxDtmScore = 189.0,
   initialTopicMastery = 45,
   topicTitle = "Umumiy Tayyorgarlik",
@@ -82,9 +83,11 @@ export function useNeuralSprint({
   const [revengeQueue, setRevengeQueue] = useState<RevengeQueueItem[]>([]);
 
   // Jonli Barometr: Kutilayotgan DTM ball va Mavzu o'zlashtirish
-  const [dtmScore, setDtmScore] = useState(initialDtmScore);
+  // Prognoz sprint davomida o'zgarmaydi: bitta to'g'ri javob DTM ballini oshirmaydi
+  // (ilgari har javobga +0.2 ball qo'shib ko'rsatilardi). Ball — server prognozi.
+  const dtmScore = initialDtmScore;
   const [scoreDelta, setScoreDelta] = useState<number | null>(null);
-  const [topicMastery, setTopicMastery] = useState(initialTopicMastery);
+  void initialTopicMastery;
 
   // 🔥 Combo Multiplier
   const [combo, setCombo] = useState<ComboState>({
@@ -113,8 +116,13 @@ export function useNeuralSprint({
 
   const currentQuestion = questionsQueue[currentIndex] || null;
 
+  // "Mavzu o'zlashtirish" o'rniga — shu sprintdagi haqiqiy aniqlik (to'g'ri / javob berilgan).
+  const answeredCount = stats.correct + stats.wrong;
+  const topicMastery = answeredCount ? (stats.correct / answeredCount) * 100 : 0;
+
   // Rasmiy DTM / Sertifikat darajasini baholash
   const predictedGrade = useMemo(() => {
+    if (dtmScore === null) return '';
     const ratio = dtmScore / maxDtmScore;
     if (ratio >= 0.94) return 'A+ (100% OTM Imtiyozi)';
     if (ratio >= 0.88) return "A (A'lo Sertifikat)";
@@ -126,7 +134,7 @@ export function useNeuralSprint({
 
   // Jonli Header Barometri ob'ekti
   const scorePredictor: LiveScorePredictor = useMemo(() => ({
-    currentScore: Math.round(dtmScore * 10) / 10,
+    currentScore: dtmScore === null ? null : Math.round(dtmScore * 10) / 10,
     maxScore: maxDtmScore,
     deltaScore: scoreDelta,
     predictedGrade,
@@ -232,22 +240,12 @@ export function useNeuralSprint({
         };
       });
 
-      // Ball va Mavzu o'sishi (Qasos savoli bo'lsa 2x)
-      const baseScoreDelta = 0.2;
-      const appliedDelta = isRevenge ? baseScoreDelta * 2 : baseScoreDelta * combo.multiplier;
-      const xpEarned = isRevenge ? 40 : Math.round(15 * combo.multiplier);
-      const coinsEarned = isRevenge ? 10 : Math.round(3 * combo.multiplier);
-
-      setDtmScore((prev) => Math.min(maxDtmScore, Math.round((prev + appliedDelta) * 10) / 10));
-      setScoreDelta(appliedDelta);
-      setTopicMastery((prev) => Math.min(100, prev + (isRevenge ? 5 : 3)));
-
+      // Sprint mashq rejimi: server XP/tanga bermaydi, shuning uchun klient ham
+      // "+15 XP" kabi mukofot hisoblamaydi (ilgari ko'rsatilardi, lekin hech qachon berilmasdi).
       setStats((prev) => ({
         ...prev,
         correct: prev.correct + 1,
         revengeSolved: isRevenge ? prev.revengeSolved + 1 : prev.revengeSolved,
-        totalXp: prev.totalXp + xpEarned,
-        totalCoins: prev.totalCoins + coinsEarned,
       }));
 
       // Agar bu Qasos savoli bo'lsa:
@@ -451,7 +449,6 @@ export function useNeuralSprint({
    */
   const dismissExplanation = useCallback(() => {
     tgHaptic('light');
-    setStats((prev) => ({ ...prev, totalXp: prev.totalXp + 5 }));
     goToNext();
   }, [goToNext]);
 

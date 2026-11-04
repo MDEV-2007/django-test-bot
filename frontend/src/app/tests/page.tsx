@@ -845,7 +845,7 @@ export default function TestsPage() {
                           </Badge>
                         )}
                         <Badge variant="outline" className="border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[12px] gap-1">
-                          <Users className="size-3" /> {data.pinned_mock.waiting_participants_count || 32}+ abituriyent
+                          <Users className="size-3" /> {data.pinned_mock.waiting_participants_count ?? 0} abituriyent
                         </Badge>
                       </div>
                       <h3 className="text-[17px] sm:text-[19px] font-bold tracking-tight text-foreground truncate">

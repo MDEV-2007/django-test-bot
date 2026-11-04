@@ -177,10 +177,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const msg = (body && typeof body === 'object' && (body.error || body.detail || body.message))
-      || (res.statusText && res.statusText.trim())
-      || `Server ${res.status} xato qaytardi`;
-    throw new ApiError(res.status, String(msg), body);
+    throw new ApiError(res.status, httpErrorMessage(res, body), body);
   }
   return res.json() as Promise<T>;
 }
@@ -215,10 +212,7 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const msg = (body && typeof body === 'object' && (body.error || body.detail || body.message))
-      || (res.statusText && res.statusText.trim())
-      || `Server ${res.status} xato qaytardi`;
-    throw new ApiError(res.status, String(msg), body);
+    throw new ApiError(res.status, httpErrorMessage(res, body), body);
   }
   return res.json() as Promise<T>;
 }
@@ -268,3 +262,23 @@ export async function loginWithTelegram(initData: string, startParam?: string) {
 }
 
 export { refreshAccessToken, API_URL };
+
+/** Foydalanuvchiga ko'rinadigan xabar. 429 va 5xx uchun DRF/serverning inglizcha yoki HTML
+ *  matni ("Request was throttled...", "Internal Server Error") o'rniga o'zbekcha xabar. */
+function httpErrorMessage(res: Response, body: unknown): string {
+  if (res.status === 429) {
+    const retry = Number(res.headers.get('Retry-After'));
+    return retry > 0
+      ? `Juda ko'p so'rov yuborildi. ${Math.ceil(retry)} soniyadan so'ng qayta urinib ko'ring.`
+      : "Juda ko'p so'rov yuborildi. Birozdan so'ng qayta urinib ko'ring.";
+  }
+  const b = body && typeof body === 'object' ? (body as Record<string, unknown>) : {};
+  const serverMsg = b.error || b.detail || b.message;
+  // 503 — bizning o'zbekcha xabarlarimiz (masalan "AI hozir ishlamayapti"); 500 — ichki xato matni ko'rsatilmaydi.
+  if (serverMsg && (res.status < 500 || res.status === 503)) return String(serverMsg);
+  if (res.status >= 500) return "Serverda vaqtinchalik xatolik. Birozdan so'ng qayta urinib ko'ring.";
+  if (res.status === 401) return "Sessiya tugadi. Iltimos, qayta kiring.";
+  if (res.status === 403) return "Bu amalga ruxsatingiz yo'q.";
+  if (res.status === 404) return "Ma'lumot topilmadi.";
+  return (res.statusText && res.statusText.trim()) || `Server ${res.status} xato qaytardi`;
+}

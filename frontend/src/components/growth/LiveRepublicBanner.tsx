@@ -30,7 +30,7 @@ const PARTICIPANT_AVATARS = [
 
 export default function LiveRepublicBanner({
   initialTargetHour = 20,
-  registeredCount = 142,
+  registeredCount,
   onRegisterClick,
 }: LiveRepublicBannerProps) {
   const router = useRouter();
@@ -158,7 +158,9 @@ export default function LiveRepublicBanner({
         {/* ── O'ngda: Avatarlar + Teskari taymer + Harakat tugmasi ── */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between xl:justify-end gap-2.5 sm:gap-3 w-full xl:w-auto shrink-0 pt-2.5 xl:pt-0 border-t xl:border-t-0 border-white/10">
           <div className="flex items-center justify-between sm:justify-start gap-2.5 shrink-0">
-            {/* Ustma-ust joylashgan avatarlar */}
+            {/* Ustma-ust avatarlar va "kutishda" soni — faqat haqiqiy son berilganda
+                (ilgari standart qiymat soxta 142 edi). */}
+            {typeof registeredCount === 'number' && (
             <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-zinc-950/70 border border-white/10 shadow-xs">
               <div className="flex items-center -space-x-2">
                 {PARTICIPANT_AVATARS.slice(0, 3).map((url, i) => (
@@ -171,9 +173,10 @@ export default function LiveRepublicBanner({
                 ))}
               </div>
               <span className="text-[12px] font-bold text-zinc-300 whitespace-nowrap">
-                +{registeredCount} kutishda
+                {registeredCount} kutishda
               </span>
             </div>
+            )}
 
             {/* Monospace taymer */}
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950/80 border border-orange-500/30 text-xs font-mono font-bold text-orange-400 shadow-xs whitespace-nowrap">

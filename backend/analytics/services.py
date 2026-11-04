@@ -141,7 +141,9 @@ def compute_skill_radar(profile, mastery=None):
     measured = [a['value'] for a in axes.values() if a['value'] is not None]
     return {
         'axes': axes,
-        'overall': round(sum(measured) / len(measured)) if measured else None,
+        # Test natijasi bo'lmasa umumiy ball yo'q: faqat streak (taxminiy) o'qidan "OVR 3"
+        # chiqib, o'quvchini chalg'itardi.
+        'overall': round(sum(measured) / len(measured)) if (measured and has_tests) else None,
         'answered': total,
         'has_data': has_tests,
     }

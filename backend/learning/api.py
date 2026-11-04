@@ -623,6 +623,8 @@ def study_session_complete_api(request):
     })
 
 # ============================================================ BILIM REELS (SCROLL-LEARNING)
+REELS_FEED_LIMIT = 100
+
 REELS_DATA = [
     {
         'id': 1,
@@ -810,11 +812,14 @@ def reels_feed_api(request):
             pass
 
     try:
-        qs = Reel.objects.filter(is_published=True).order_by('-order', '-id')
+        qs = (Reel.objects.filter(is_published=True)
+              .annotate(comments_total=Count('comments'))
+              .order_by('-order', '-id'))
         if subject_slug and subject_slug not in ('all', 'for_you'):
             qs = qs.filter(subject_slug=subject_slug)
 
-        reels_list = [r.to_dict(include_answer=False) for r in qs]
+        # Har reel uchun alohida comments.count() so'rovi bor edi va ro'yxat cheklanmagan edi.
+        reels_list = [r.to_dict(include_answer=False) for r in qs[:REELS_FEED_LIMIT]]
     except Exception as e:
         logger.warning("reels_feed_api query error: %s", e)
         reels_list = []

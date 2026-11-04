@@ -24,77 +24,13 @@ interface ReviewItem {
   avatarLetter: string;
 }
 
-const FALLBACK_LEADERBOARD: LeaderboardItem[] = [
-  {
-    rank: 1,
-    name: "Azizbek Yo'ldoshev",
-    gradeBadge: 'A+',
-    regionAndSubject: "Farg'ona viloyati • Ona tili",
-    score: '29 / 30',
-    xp: '4 920 XP',
-    badgeType: 'gold',
-  },
-  {
-    rank: 2,
-    name: 'Zilola Qosimova',
-    gradeBadge: 'A+',
-    regionAndSubject: 'Toshkent shahri • Matematika',
-    score: '30 / 30',
-    xp: '4 810 XP',
-    badgeType: 'silver',
-  },
-  {
-    rank: 3,
-    name: 'Javohirbek Ergashov',
-    gradeBadge: 'A',
-    regionAndSubject: 'Samarqand viloyati • Tarix',
-    score: '28 / 30',
-    xp: '4 650 XP',
-    badgeType: 'bronze',
-  },
-  {
-    rank: 4,
-    name: 'Maftuna Saidova',
-    regionAndSubject: 'Buxoro • Biologiya',
-    score: '28 / 30',
-    xp: '4 380 XP',
-    badgeType: 'number',
-  },
-  {
-    rank: 5,
-    name: 'Shoxrux Abdullayev',
-    regionAndSubject: 'Namangan • DTM Kompleks',
-    score: '86 / 90',
-    xp: '4 210 XP',
-    badgeType: 'number',
-  },
-];
-
-const FALLBACK_REVIEWS: ReviewItem[] = [
-  {
-    rating: 5,
-    tag: 'Ona tili A+ (92 ball)',
-    quote:
-      "Ilm Ildizi platformasidagi qat'iy vaqt hisoblagichi va xatolar tahlili bo'lmaganida bunchalik yuqori ololmasdim. Ayniqsa matnli savollarda vaqtni to'g'ri taqsimlashni shu yerda o'rgandim.",
-    author: 'Mubina Karimova',
-    role: 'Toshkent Davlat Yuridik Universiteti talabasi',
-    avatarLetter: 'M',
-  },
-  {
-    rating: 5,
-    tag: 'DTM: 184.2 Ball (Grant)',
-    quote:
-      "Avval repetitorga borib qog'ozda test yechardik, tekshirishga 2 kun ketardi. Ilm Ildizi ilovasida esa tugatishingiz bilanoq qaysi mavzudan oqsayotganingizni ko'rsatib beradi.",
-    author: 'Davronbek Qodirov',
-    role: "O'zMU Matematika fakulteti 1-kurs",
-    avatarLetter: 'D',
-  },
-];
-
+// Zaxira (to'qima ism va XP'li) reyting va sharhlar olib tashlandi: ma'lumot bo'lmasa
+// bo'sh holat ko'rsatiladi — soxta "Azizbek Yo'ldoshev 4 920 XP" emas.
 export default function WeeklyLeaderboardSection() {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>(FALLBACK_LEADERBOARD);
-  const [reviews, setReviews] = useState<ReviewItem[]>(FALLBACK_REVIEWS);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const fetchData = useCallback(async () => {
     setIsRefreshing(true);
@@ -134,6 +70,7 @@ export default function WeeklyLeaderboardSection() {
       // Fallback
     } finally {
       setIsRefreshing(false);
+      setLoaded(true);
     }
   }, []);
 
@@ -181,6 +118,14 @@ export default function WeeklyLeaderboardSection() {
           </div>
 
           <div className="divide-y divide-black/[0.06]">
+            {loaded && leaderboard.length === 0 && (
+              <p className="py-6 text-center text-xs text-[#6C6C70]">
+                Bu hafta hali natija yo&apos;q — birinchi bo&apos;lib test yeching!
+              </p>
+            )}
+            {!loaded && leaderboard.length === 0 && (
+              <p className="py-6 text-center text-xs text-[#8E8E93]" aria-busy="true">Yuklanmoqda...</p>
+            )}
             {leaderboard.map((row) => (
               <div
                 key={row.rank}

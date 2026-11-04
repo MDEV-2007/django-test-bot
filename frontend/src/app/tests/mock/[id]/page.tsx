@@ -410,7 +410,7 @@ export default function MockLobbyPage() {
                       </span>
                       <span className="text-xs sm:text-sm font-bold text-foreground">
                         <strong className="text-emerald-400 font-mono text-sm sm:text-base mr-1">
-                          {data.waiting_participants_count || 38}+
+                          {data.waiting_participants_count ?? 0}
                         </strong>
                         abituriyent ayni daqiqalarda kutish zalida
                       </span>

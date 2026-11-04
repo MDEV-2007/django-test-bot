@@ -296,14 +296,9 @@ class UserGrowthStatusAPIView(APIView):
                 'is_lobby_open': live_event.status in ['lobby', 'active'],
             }
         else:
-            event_data = {
-                'title': "20:30 Jonli Respublika Sprinti",
-                'scheduled_time': target_2030.isoformat(),
-                'status': 'scheduled',
-                'participants_count': 128,
-                'rewards_description': "👑 Top-3 g'olibga 1 haftalik VIP va +500 Tanga!",
-                'is_lobby_open': False,
-            }
+            # Bugun admin tadbir yaratmagan: ilgari bu yerda soxta "128 ishtirokchi" va hech
+            # kim bermaydigan "Top-3 ga VIP va +500 tanga" sovrini ko'rsatilardi.
+            event_data = None
 
         return Response({
             'ok': True,

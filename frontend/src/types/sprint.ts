@@ -75,7 +75,8 @@ export interface ComboState {
 }
 
 export interface LiveScorePredictor {
-  currentScore: number; // masalan 178.4 / 189.0
+  /** Haqiqiy prognoz (/api/analytics/predicted-score/); null — hali yetarli ma'lumot yo'q. */
+  currentScore: number | null;
   maxScore: number; // 189.0
   deltaScore: number | null; // animatsiya uchun +0.2 yoki -0.1
   predictedGrade: string; // A+, A, B+, B, C+, C
@@ -98,8 +99,8 @@ export interface SprintSessionSummary {
   revengeSolvedCount: number;
   totalXpEarned: number;
   totalCoinsEarned: number;
-  finalScore: number;
-  initialScore: number;
+  finalScore: number | null;
+  initialScore: number | null;
   finalTopicMastery: number;
   timeSpentSeconds: number;
   highestCombo: number;

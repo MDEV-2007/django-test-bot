@@ -242,7 +242,8 @@ def center_api(request):
             'is_live_mock': pinned_mock.is_live_mock,
             'is_reminded': pinned_mock.remind_users.filter(id=request.user.id).exists() if request.user.is_authenticated else False,
             'remind_users_count': pinned_mock.remind_users.count(),
-            'waiting_participants_count': max(pinned_mock.remind_users.count() * 3 + 18, 24),
+            # Haqiqiy son (ilgari `count*3+18`, kamida 24 — sun'iy oshirilgan edi).
+            'waiting_participants_count': pinned_mock.remind_users.count(),
             'author': _author_payload(getattr(pinned_mock, 'created_by', None)),
         }
 
@@ -385,7 +386,7 @@ def mock_lobby_api(request, test_id):
         'server_now': now.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%dT%H:%M:%S+05:00'),
         'is_reminded': is_reminded,
         'remind_users_count': test.remind_users.count(),
-        'waiting_participants_count': max(test.remind_users.count() * 3 + 18, 28),
+        'waiting_participants_count': test.remind_users.count(),  # haqiqiy son
         'has_active_attempt': active_attempt is not None,
         'active_attempt_id': active_attempt.id if active_attempt else None,
         'has_completed': completed_attempt is not None,
