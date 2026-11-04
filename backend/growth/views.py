@@ -229,12 +229,24 @@ class AdaptiveOnboardingAnswerAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Bir foydalanuvchi bir savolga 24 soat ichida faqat bir marta javob bera oladi.
-        # Cache.add atomik ishlaydi (Redis yoki Django cache backend).
+        # Bir foydalanuvchi bir savolga kuniga faqat bir marta javob bera oladi.
+        # Aynan bir xil so'rov qayta yuborilsa (masalan, tarmoq timeout), natija takrorlanadi.
         attempt_key = f"blitz_answer:{request.user.pk}:{question.pk}:{timezone.localdate().isoformat()}"
-        if not cache.add(attempt_key, True, timeout=24 * 60 * 60):
+        existing = cache.get(attempt_key)
+        if existing:
+            if existing.get('choice_id') == choice_id and existing.get('response'):
+                return Response(existing['response'])
             return Response(
                 {'ok': False, 'error': "Bu savolga javob allaqachon yuborilgan."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        if not cache.add(attempt_key, {'state': 'processing'}, timeout=24 * 60 * 60):
+            existing = cache.get(attempt_key) or {}
+            if existing.get('choice_id') == choice_id and existing.get('response'):
+                return Response(existing['response'])
+            return Response(
+                {'ok': False, 'error': "Bu savolga javob yuborilmoqda yoki allaqachon yuborilgan."},
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -254,11 +266,17 @@ class AdaptiveOnboardingAnswerAPIView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
-        return Response({
+        result = {
             'ok': True,
             'is_correct': selected.is_correct,
             'correct_choice_id': correct.id,
-        })
+        }
+        cache.set(
+            attempt_key,
+            {'choice_id': choice_id, 'response': result},
+            timeout=24 * 60 * 60,
+        )
+        return Response(result)
 
 
 class UserGrowthStatusAPIView(APIView):
