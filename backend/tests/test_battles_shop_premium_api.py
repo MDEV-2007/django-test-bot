@@ -5,6 +5,7 @@ import io
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from rest_framework.test import APIClient
 from PIL import Image
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -144,20 +145,22 @@ class PremiumApiTests(TestCase):
         response = self.client.post(f'/api/premium/checkout/{self.plan.id}/', {}, format='multipart')
         self.assertEqual(response.status_code, 400)
 
-    def test_payment_screenshot_requires_token_and_ownership(self):
+    def test_payment_screenshot_requires_auth_header_and_ownership(self):
         checkout = self.client.post(f'/api/premium/checkout/{self.plan.id}/', {
             'screenshot': self._fake_screenshot(),
         }, format='multipart')
         payment_id = checkout.json()['payment_id']
+        url = f'/api/premium/payments/{payment_id}/screenshot/'
 
-        no_token = self.client.get(f'/api/premium/payments/{payment_id}/screenshot/')
-        self.assertEqual(no_token.status_code, 404)
+        # Egasi (Authorization header bilan) ko'radi.
+        self.assertEqual(self.client.get(url).status_code, 200)
 
+        # JWT endi URL'da qabul qilinmaydi (log/tarixga tushardi): header'siz — 401.
         access = str(RefreshToken.for_user(self.user).access_token)
-        ok = self.client.get(f'/api/premium/payments/{payment_id}/screenshot/?token={access}')
-        self.assertEqual(ok.status_code, 200)
+        anon = APIClient()
+        self.assertEqual(anon.get(f'{url}?token={access}').status_code, 401)
 
         other_user, _ = make_user('someone_else_premium')
-        other_access = str(RefreshToken.for_user(other_user).access_token)
-        forbidden = self.client.get(f'/api/premium/payments/{payment_id}/screenshot/?token={other_access}')
-        self.assertEqual(forbidden.status_code, 404)
+        other = APIClient()
+        other.force_authenticate(other_user)
+        self.assertEqual(other.get(url).status_code, 404)

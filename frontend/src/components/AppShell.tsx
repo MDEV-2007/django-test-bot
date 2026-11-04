@@ -218,7 +218,10 @@ export default function AppShell({
             </>
           )}
 
-          <ScriptToggle />
+          {/* 400px dan tor ekranda topbarga sig'masdi (kesilib qolardi) — u mobil menyuda (Sidebar) bor. */}
+          <div className="hidden min-[400px]:block">
+            <ScriptToggle />
+          </div>
 
           {/* Telefonda (<sm) yashirin: 360-375px kenglikda topbar sig'masdan shu tugma
               ekrandan chiqib ketardi. Mavzu Profil sahifasidagi sozlamalarda ham bor. */}

@@ -110,7 +110,7 @@ export default function HeroInteractiveQuiz() {
             </div>
             <div>
               <span className="text-[12px] text-[#6C6C70] font-medium block leading-none">
-                Kutilayotgan DTM ball
+                Kutilayotgan DTM ball (namuna)
               </span>
               <strong className="font-mono text-base font-bold text-[#1C1C1E] tracking-tight">
                 {hasAnswered && isCorrect ? '181.5' : '178.4'}{' '}

@@ -282,3 +282,28 @@ function httpErrorMessage(res: Response, body: unknown): string {
   if (res.status === 404) return "Ma'lumot topilmadi.";
   return (res.statusText && res.statusText.trim()) || `Server ${res.status} xato qaytardi`;
 }
+
+/** Himoyalangan faylni (rasm, zaxira) Authorization header bilan yuklaydi va Blob qaytaradi.
+ *  Ilgari JWT `?token=` sifatida URL'ga qo'yilardi — u server loglari, brauzer tarixi va
+ *  Referer orqali chiqib ketishi mumkin edi. */
+export async function apiFetchBlob(path: string): Promise<Blob> {
+  let { access } = useAuthStore.getState();
+  if (!access && typeof window !== 'undefined') {
+    access = localStorage.getItem(ACCESS_KEY);
+  }
+  const doFetch = (token: string | null) =>
+    fetch(`${API_URL}${path}`, {
+      signal: timeoutSignal(),
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...miniAppHeader() },
+    });
+  let res = await doFetch(access);
+  if (res.status === 401) {
+    access = await refreshAccessToken();
+    if (access) res = await doFetch(access);
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, httpErrorMessage(res, body), body);
+  }
+  return res.blob();
+}

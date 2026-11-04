@@ -355,6 +355,8 @@ class CommunityPost(models.Model):
     likes_count = models.PositiveIntegerField(default=0)
     comments_count = models.PositiveIntegerField(default=0)
     is_pinned = models.BooleanField(default=False)
+    # Moderatsiya: yetarli shikoyatdan keyin avtomatik yashiriladi; admin qaytara oladi.
+    is_hidden = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
@@ -455,6 +457,25 @@ class CommunityPost(models.Model):
             'linked_quiz_question_ids': getattr(self, 'linked_quiz_question_ids', []),
             'created_at': self.created_at.strftime('%d.%m.%Y %H:%M') if self.created_at else '',
         }
+
+
+class CommunityPostReport(models.Model):
+    """Postga shikoyat. Bitta foydalanuvchi bitta postga bir marta."""
+    REASONS = (
+        ('spam', 'Spam / reklama'),
+        ('abuse', "Haqorat / zo'ravonlik"),
+        ('cheating', "Javob tarqatish / ko'chirish"),
+        ('other', 'Boshqa'),
+    )
+    post = models.ForeignKey('CommunityPost', on_delete=models.CASCADE, related_name='reports')
+    reporter = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='post_reports')
+    reason = models.CharField(max_length=20, choices=REASONS, default='other')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('post', 'reporter')
+        verbose_name = "Post shikoyati"
+        verbose_name_plural = "Post shikoyatlari"
 
 
 class CommunityPostReaction(models.Model):

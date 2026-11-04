@@ -638,6 +638,15 @@ def user_edit_api(request, pk):
             return Response({'error': "O'zingizni o'chira olmaysiz."}, status=400)
         if is_last_active_superadmin(u):
             return Response({'error': "Oxirgi faol super adminni o'chirib bo'lmaydi."}, status=400)
+        # Moliyaviy tarix (to'lovlar, obunalar, o'qituvchi daromadi) bo'lgan foydalanuvchi
+        # o'chirilmaydi: ilgari o'chirish bu yozuvlarni ham butunlay yo'q qilardi (hisob-kitob
+        # va nizolar uchun iz qolmasdi). Bunday foydalanuvchini bloklash kerak.
+        if _has_financial_history(u):
+            return Response({
+                'error': "Bu foydalanuvchida to'lov/obuna tarixi bor — o'chirib bo'lmaydi. "
+                         "Moliyaviy yozuvlar saqlanishi uchun uni bloklang.",
+                'code': 'financial_history',
+            }, status=409)
         try:
             with transaction.atomic():
                 profile = getattr(u, 'profile', None)
@@ -784,6 +793,21 @@ def _teacher_owns_attempt(user, teacher_profile, attempt):
     return TeacherStudent.objects.filter(teacher=teacher_profile, student_id=attempt.profile_id).exists()
 
 
+def _has_financial_history(user):
+    """Premium to'lovi, sinf obunasi/to'lovi yoki o'qituvchi daromad yozuvi bormi."""
+    profile = getattr(user, 'profile', None)
+    if profile is None:
+        return False
+    from premium.models import Payment as PremPay
+    from classroom.models import PayoutEntry, Subscription as ClassSub
+    if PremPay.objects.filter(profile=profile).exists():
+        return True
+    if ClassSub.objects.filter(student=profile).exists():
+        return True
+    return (ClassSub.objects.filter(teacher__profile=profile).exists()
+            or PayoutEntry.objects.filter(teacher__profile=profile).exists())
+
+
 def _audit(request, action, model_name, object_id, object_repr, changes=None):
     """Super Admin'ning xavfli (o'chirish, rol, balans, premium, impersonatsiya) amallari
     uchun audit yozuvi. Audit xatosi asosiy amalni to'xtatmaydi."""
@@ -859,7 +883,7 @@ def stop_impersonation_api(request):
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def teachers_api(request):
-    qs = (User.objects.select_related('profile').filter(profile__role='teacher')
+    qs = (User.objects.select_related('profile', 'profile__teacher_profile').filter(profile__role='teacher')
           .annotate(testsets_count=Count('test_sets', distinct=True),
                     lessons_count=Count('lessons', distinct=True),
                     games_count=Count('games', distinct=True)))
@@ -867,7 +891,10 @@ def teachers_api(request):
         request, queryset=qs, search_fields=['username', 'first_name', 'last_name', 'email'],
         sortable_fields=['username'], default_order='-date_joined',
         row_fn=lambda u: {**_user_row(u), 'testsets_count': u.testsets_count,
-                           'lessons_count': u.lessons_count, 'games_count': u.games_count},
+                           'lessons_count': u.lessons_count, 'games_count': u.games_count,
+                           # None — TeacherProfile'siz (admin tayinlagan) o'qituvchi.
+                           'is_verified': (u.profile.teacher_profile.is_verified
+                                           if hasattr(u.profile, 'teacher_profile') else None)},
     )
 
 
@@ -3741,18 +3768,9 @@ def backup_list_api(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def backup_download_api(request, filename):
-    """Zaxira faylini serverdan yuklab olish (superadmin)."""
+    """Zaxira faylini serverdan yuklab olish (superadmin). Faqat Authorization header —
+    `?token=` URL parametri endi qabul qilinmaydi (log va brauzer tarixiga tushardi)."""
     user = request.user
-    if not (user and user.is_authenticated and (user.is_superuser or getattr(getattr(user, 'profile', None), 'role', None) == 'superadmin')):
-        token_str = request.GET.get('token')
-        if token_str:
-            try:
-                from rest_framework_simplejwt.authentication import JWTAuthentication
-                jwt_auth = JWTAuthentication()
-                validated_token = jwt_auth.get_validated_token(token_str)
-                user = jwt_auth.get_user(validated_token)
-            except Exception:
-                user = None
 
     if not (user and user.is_authenticated and (user.is_superuser or getattr(getattr(user, 'profile', None), 'role', None) == 'superadmin')):
         return HttpResponse("Ruxsat berilmagan (Superadmin talab qilinadi)", status=403)
@@ -4390,9 +4408,15 @@ def panel_community_posts_api(request):
         from learning.models import CommunityPost
         from django.db.models import Q
 
-        qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt')
+        from django.db.models import Count
+        qs = (CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt')
+              .prefetch_related('reactions').annotate(reports_count=Count('reports', distinct=True)))
+        # ?moderation=1 — shikoyat qilingan yoki yashirilgan postlar (eng ko'p shikoyat birinchi).
+        if request.GET.get('moderation'):
+            qs = qs.filter(Q(reports_count__gt=0) | Q(is_hidden=True)).order_by('-reports_count', '-created_at')
         try:
-            qs = qs.order_by('-is_pinned', '-created_at')
+            if not request.GET.get('moderation'):
+                qs = qs.order_by('-is_pinned', '-created_at')
         except Exception:
             qs = qs.order_by('-created_at')
 
@@ -4417,7 +4441,10 @@ def panel_community_posts_api(request):
         posts_data = []
         for p in posts:
             try:
-                posts_data.append(p.to_dict(current_user=request.user))
+                row = p.to_dict(current_user=request.user)
+                row['reports_count'] = getattr(p, 'reports_count', 0)
+                row['is_hidden'] = p.is_hidden
+                posts_data.append(row)
             except Exception as e:
                 logger.warning("Error serializing post %s: %s", getattr(p, 'id', None), e)
 
@@ -5203,3 +5230,40 @@ def panel_lead_status_api(request, lead_id):
             changes={'status': [old_status, new_status]},
         )
     return Response({'success': True, 'id': lead.id, 'status': lead.status})
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def teacher_verify_api(request, pk):
+    """O'qituvchini tasdiqlash / tasdiqni bekor qilish (moderatsiya). Audit jurnaliga yoziladi."""
+    from teacher.models import TeacherProfile
+    u = get_object_or_404(User.objects.select_related('profile'), pk=pk)
+    tp = TeacherProfile.objects.filter(profile=u.profile).first()
+    if tp is None:
+        return Response({'error': "Bu foydalanuvchining o'qituvchi profili yo'q."}, status=404)
+    verify = request.data.get('verify', True) in (True, 'true', '1', 1)
+    old = tp.is_verified
+    tp.is_verified = verify
+    tp.verified_at = timezone.now() if verify else None
+    tp.save(update_fields=['is_verified', 'verified_at'])
+    if old != verify:
+        _audit(request, 'update', 'TeacherProfile', tp.id,
+               f"{u.username}: o'qituvchi {'tasdiqlandi' if verify else 'tasdig\'i bekor qilindi'}",
+               {'is_verified': [old, verify]})
+    return Response({'is_verified': tp.is_verified})
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def panel_community_post_visibility_api(request, post_id):
+    """Moderatsiya: postni yashirish / qayta ko'rsatish (audit jurnaliga yoziladi)."""
+    from learning.models import CommunityPost
+    post = get_object_or_404(CommunityPost, id=post_id)
+    hidden = request.data.get('hidden') in (True, 'true', '1', 1)
+    old = post.is_hidden
+    post.is_hidden = hidden
+    post.save(update_fields=['is_hidden'])
+    if old != hidden:
+        _audit(request, 'update', 'CommunityPost', post.id,
+               f"Post #{post.id} {'yashirildi' if hidden else 'qayta ko\'rsatildi'}", {'is_hidden': [old, hidden]})
+    return Response({'success': True, 'is_hidden': post.is_hidden})

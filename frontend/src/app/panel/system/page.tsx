@@ -9,7 +9,7 @@ import {
   Download, Bot, AlertTriangle, Activity, BarChart3, Eye, FileDown
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch, API_URL } from '@/lib/api-client';
+import { apiFetch, apiFetchBlob, API_URL } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
 import PageHeader from '@/components/panel/PageHeader';
@@ -198,19 +198,8 @@ function SystemHealthContent() {
 
   async function handleDownloadBackup(filename: string) {
     try {
-      const state = useAuthStore.getState();
-      const token = state.access || (typeof window !== 'undefined' ? (localStorage.getItem('ilmildizi_access') || '') : '');
-      const downloadPath = `/api/panel/system/backups/download/${encodeURIComponent(filename)}/`;
-      const urlWithToken = token ? `${downloadPath}?token=${encodeURIComponent(token)}` : downloadPath;
-
-      const res = await fetch(urlWithToken, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        throw new Error(errText || "Faylni yuklab bo'lmadi");
-      }
-      const blob = await res.blob();
+      // Token faqat Authorization header'da (URL'da emas — log va tarixga tushmasin).
+      const blob = await apiFetchBlob(`/api/panel/system/backups/download/${encodeURIComponent(filename)}/`);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

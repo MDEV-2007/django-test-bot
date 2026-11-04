@@ -73,6 +73,9 @@ class StudentLeadSubmission(models.Model):
     coins_rewarded = models.IntegerField(default=50)
     # O'quvchi telefon va ma'lumotlarini markazga uzatishga aniq rozilik bergan vaqt.
     consent_at = models.DateTimeField(null=True, blank=True)
+    # Profilda yosh yo'q: o'quvchi "18 yoshdan kattaman yoki ota-onam/vasiyim roziligi bor"
+    # deb aniq tasdiqlaydi (voyaga yetmaganlar telefoni markazga shunchaki uzatilmasin).
+    guardian_confirmed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -37,7 +37,7 @@ class _Base(TestCase):
 
     def lead(self, client=None, **extra):
         body = {'campaign_id': self.campaign.id, 'full_name': 'Ali Valiyev',
-                'phone_number': '+998901234567', 'consent': True}
+                'phone_number': '+998901234567', 'consent': True, 'guardian_confirmed': True}
         body.update(extra)
         return (client or self.client).post(LEAD, body, format='json')
 
@@ -112,9 +112,16 @@ class LeadPiiTests(_Base):
         self.assertEqual(res.status_code, 400)
         self.assertFalse(StudentLeadSubmission.objects.exists())
 
+    def test_lead_requires_adult_or_guardian_confirmation(self):
+        res = self.lead(guardian_confirmed=False)
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(StudentLeadSubmission.objects.exists())
+
     def test_consent_time_is_recorded(self):
         self.lead()
-        self.assertIsNotNone(StudentLeadSubmission.objects.get().consent_at)
+        lead = StudentLeadSubmission.objects.get()
+        self.assertIsNotNone(lead.consent_at)
+        self.assertTrue(lead.guardian_confirmed)
 
     def test_client_cannot_inject_score_or_topics(self):
         self.lead(weakest_topics='SOXTA', predicted_dtm_score='189')

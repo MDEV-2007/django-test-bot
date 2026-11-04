@@ -28,6 +28,7 @@ urlpatterns = [
     path('feed/<int:post_id>/delete/', api.community_post_delete_api, name='community_post_delete'),
     path('feed/<int:post_id>/pin/', api.community_post_pin_api, name='community_post_pin'),
     path('feed/<int:post_id>/vote-poll/', api.community_post_vote_poll_api, name='community_post_vote_poll'),
+    path('feed/<int:post_id>/report/', api.community_post_report_api, name='community_post_report'),
     path('stories/', api.community_stories_api, name='community_stories'),
     path('stories/create/', api.community_story_create_api, name='community_story_create'),
     # Kutubxona (Library)

@@ -16,6 +16,7 @@ urlpatterns = [
     path('users/<int:pk>/adjust/', api.user_adjust_api, name='user_adjust'),
     path('users/<int:pk>/set-premium/', api.user_set_premium_api, name='user_set_premium'),
     path('users/<int:pk>/impersonate/', api.user_impersonate_api, name='user_impersonate'),
+    path('teachers/<int:pk>/verify/', api.teacher_verify_api, name='teacher_verify'),
     path('stop-impersonation/', api.stop_impersonation_api, name='stop_impersonation'),
 
     path('teachers/', api.teachers_api, name='teachers'),
@@ -119,6 +120,7 @@ urlpatterns = [
     path('community/<int:post_id>/delete/', api.panel_community_post_delete_api, name='panel_community_post_delete'),
     path('community/<int:post_id>/delete', api.panel_community_post_delete_api),
     path('community/<int:post_id>/pin/', api.panel_community_post_pin_api, name='panel_community_post_pin'),
+    path('community/<int:post_id>/visibility/', api.panel_community_post_visibility_api, name='panel_community_post_visibility'),
     path('community/<int:post_id>/pin', api.panel_community_post_pin_api),
 
     # 24 soatlik Hikoyalar (Community Stories) Moderatsiyasi

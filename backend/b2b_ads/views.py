@@ -76,6 +76,7 @@ def submit_lead_api(request):
             phone_number=str(data.get('phone_number') or ''),
             telegram_username=str(data.get('telegram_username') or ''),
             consent=data.get('consent') is True,
+            guardian_confirmed=data.get('guardian_confirmed') is True,
         )
     except LeadError as exc:
         return Response({'success': False, 'error': str(exc)}, status=400)

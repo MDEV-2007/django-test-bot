@@ -19,6 +19,8 @@ import {
 type TeacherRow = {
   id: number; full_name: string; username: string;
   testsets_count: number; lessons_count: number; games_count: number;
+  /** null — admin tayinlagan (moderatsiya talab qilinmaydi). */
+  is_verified?: boolean | null;
 };
 
 export default function PanelTeachersPage() {
@@ -36,7 +38,33 @@ export default function PanelTeachersPage() {
     { key: 'tests', label: 'Testlar', render: (t) => <Badge variant="secondary">{t.testsets_count}</Badge> },
     { key: 'lessons', label: 'Darslar', render: (t) => <Badge variant="secondary">{t.lessons_count}</Badge> },
     { key: 'games', label: "O'yinlar", render: (t) => <Badge variant="secondary">{t.games_count}</Badge> },
+    {
+      key: 'verified', label: 'Moderatsiya', render: (t) => t.is_verified === null || t.is_verified === undefined
+        ? <span className="text-xs text-muted-foreground">—</span>
+        : (
+          <Button
+            size="sm"
+            variant={t.is_verified ? 'outline' : 'default'}
+            onClick={(e) => { e.stopPropagation(); toggleVerify(t); }}
+          >
+            {t.is_verified ? 'Tasdiqlangan (bekor qilish)' : 'Tasdiqlash'}
+          </Button>
+        ),
+    },
   ];
+
+  async function toggleVerify(t: TeacherRow) {
+    try {
+      await apiFetch(`/api/panel/teachers/${t.id}/verify/`, {
+        method: 'POST',
+        body: JSON.stringify({ verify: !t.is_verified }),
+      });
+      toast.success(t.is_verified ? 'Tasdiq bekor qilindi' : "O'qituvchi tasdiqlandi");
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Xatolik');
+    }
+  }
 
   async function createTeacher() {
     if (!username.trim() || !password.trim()) {

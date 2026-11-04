@@ -624,6 +624,8 @@ def study_session_complete_api(request):
 
 # ============================================================ BILIM REELS (SCROLL-LEARNING)
 REELS_FEED_LIMIT = 100
+FEED_PAGE_SIZE = 20
+POST_REPORT_HIDE_THRESHOLD = 5
 
 REELS_DATA = [
     {
@@ -1051,7 +1053,9 @@ def community_feed_api(request):
     user_track = getattr(profile, 'exam_track', 'DTM_SERTIFIKAT') if profile else 'DTM_SERTIFIKAT'
     active_track = track if track and track != 'all' else user_track
 
-    qs = CommunityPost.objects.select_related('author', 'author__profile', 'test', 'attempt').prefetch_related('reactions')
+    # Yashirilgan (moderatsiyadagi) postlar lentada ko'rinmaydi.
+    qs = (CommunityPost.objects.filter(is_hidden=False)
+          .select_related('author', 'author__profile', 'test', 'attempt').prefetch_related('reactions'))
 
     # 1. Track bo'yicha izolyatsiya (DTM o'quvchisi Koreys yoki Arab tili postlarini ko'rmaydi!)
     if active_track and active_track != 'all':
@@ -1093,7 +1097,13 @@ def community_feed_api(request):
         qs = qs.order_by('-id')
 
     total = qs.count()
-    posts = qs[:50]
+    # Sahifalash: ilgari har doim faqat oxirgi 50 ta post qaytardi (eskilariga yetib bo'lmasdi).
+    try:
+        page = max(1, int(request.GET.get('page', 1)))
+    except (TypeError, ValueError):
+        page = 1
+    start = (page - 1) * FEED_PAGE_SIZE
+    posts = qs[start:start + FEED_PAGE_SIZE]
 
     posts_list = [p.to_dict(current_user=request.user) for p in posts]
 
@@ -1109,6 +1119,8 @@ def community_feed_api(request):
     return Response({
         'posts': posts_list,
         'total': total,
+        'page': page,
+        'has_more': start + FEED_PAGE_SIZE < total,
         'subjects': subjects,
         'user_track': active_track,
         'user_attempted_slugs': user_attempted_slugs,
@@ -1861,3 +1873,33 @@ def community_story_create_api(request):
             'badge': story.badge,
         }
     })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_post_report_api(request, post_id):
+    """Postga shikoyat. Bir foydalanuvchi — bir shikoyat; o'z postiga shikoyat qilib bo'lmaydi.
+    POST_REPORT_HIDE_THRESHOLD ta turli foydalanuvchi shikoyat qilsa, post lentadan
+    avtomatik yashiriladi va Super Admin ko'rib chiqadi (panel: moderatsiya)."""
+    from django.db import IntegrityError, transaction
+    from .models import CommunityPostReport
+
+    post = CommunityPost.objects.filter(id=post_id).first()
+    if not post:
+        return Response({'error': "Post topilmadi."}, status=404)
+    if post.author_id == request.user.id:
+        return Response({'error': "O'z postingizga shikoyat qila olmaysiz."}, status=400)
+    reason = request.data.get('reason') or 'other'
+    if reason not in dict(CommunityPostReport.REASONS):
+        reason = 'other'
+    created = True
+    try:
+        with transaction.atomic():
+            CommunityPostReport.objects.create(post=post, reporter=request.user, reason=reason)
+    except IntegrityError:
+        created = False
+    count = post.reports.count()
+    if count >= POST_REPORT_HIDE_THRESHOLD and not post.is_hidden:
+        CommunityPost.objects.filter(pk=post.pk).update(is_hidden=True)
+    return Response({'success': True, 'already_reported': not created,
+                     'message': "Shikoyatingiz qabul qilindi. Moderator ko'rib chiqadi."})

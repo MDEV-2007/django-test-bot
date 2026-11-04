@@ -443,7 +443,7 @@ def get_hyper_targeted_offer(profile: Profile, subject: str = "", score: float =
     return payload
 
 
-def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str = "", subject: str = "", score: float = 0.0, weak_topics: str = "", consent: bool = False):
+def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str = "", subject: str = "", score: float = 0.0, weak_topics: str = "", consent: bool = False, guardian_confirmed: bool = False):
     """Feed banneridan lid. Atomik va bir kampaniyaga bir marta mukofotli —
     `b2b_ads.services.submit_lead` ga topshiriladi. Xato bo'lsa `LeadError` ko'tariladi."""
     from b2b_ads.services import submit_lead
@@ -455,6 +455,7 @@ def submit_center_lead(profile: Profile, campaign_id: int, phone: str, name: str
         full_name=lead_name,
         phone_number=phone,
         consent=consent,
+        guardian_confirmed=guardian_confirmed,
     )
 
 

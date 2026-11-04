@@ -417,7 +417,25 @@ const STRESS_SUBJECT_DETAILS: Record<string, { desc: string; questionsCount: num
   },
 };
 
+/** Stress bonusi — serverdagi StressExamConfig'dan (admin o'zgartirishi mumkin). XP bonus
+ *  `bonus_xp_multiplier`, tanga — finish_api'dagi qat'iy 1.5x. Ilgari bu yerda "Temir Asab"
+ *  nishoni, "+200 tanga", "+100% Super Bonus XP", "+500 tanga · Oltin Nomzod" kabi hech
+ *  qachon berilmaydigan sovrinlar yozilgan edi. */
+function useStressBonusLabel(): string {
+  const [label, setLabel] = useState('XP bonusi');
+  useEffect(() => {
+    apiFetch<{ bonus_xp_multiplier?: number }>('/api/tests/stress-config/')
+      .then((cfg) => {
+        const m = Number(cfg?.bonus_xp_multiplier);
+        setLabel(m > 1 ? `+${Math.round((m - 1) * 100)}% XP` : 'XP bonusi yo\'q');
+      })
+      .catch(() => {});
+  }, []);
+  return label;
+}
+
 export default function TestsPage() {
+  const stressXpLabel = useStressBonusLabel();
   const router = useRouter();
   const { t } = useTransliterate();
   const searchParams = useSearchParams();
@@ -787,7 +805,7 @@ export default function TestsPage() {
                           📝 Titul Varaqasi
                         </Badge>
                         <Badge variant="outline" className="border-amber-400/40 bg-amber-400/10 text-amber-200 text-[12px] sm:text-[12px] font-bold shrink-0">
-                          ⚡ +50% XP
+                          ⚡ {stressXpLabel}
                         </Badge>
                       </div>
                       <h3 className="text-base sm:text-xl font-bold tracking-tight text-white leading-tight">
@@ -1154,17 +1172,17 @@ export default function TestsPage() {
                   <span className="truncate">+50% Bonus XP</span>
                 </div>
                 <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
-                  Har bir to&apos;g&apos;ri javob uchun 1.5 baravar ko&apos;p tajriba bali.
+                  To&apos;g&apos;ri javoblar uchun {stressXpLabel} va 1.5 baravar tanga (birinchi urinishda).
                 </p>
               </div>
 
               <div className="p-3 sm:p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs">
                   <Shield className="size-4 shrink-0" />
-                  <span className="truncate">Temir Asab</span>
+                  <span className="truncate">Titul varaqasi</span>
                 </div>
                 <p className="text-[12px] sm:text-[12px] text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-none">
-                  Stress zalini yenggan abituriyentlarga profil maxsus nishoni.
+                  Javoblarni vaqt ichida titulga ko&apos;chirish mashqi — xuddi haqiqiy imtihondagidek.
                 </p>
               </div>
             </div>
@@ -1218,7 +1236,7 @@ export default function TestsPage() {
                             🔥 STRESS
                           </Badge>
                           <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-500 text-[12px] font-bold">
-                            +50% XP
+                            {stressXpLabel}
                           </Badge>
                         </div>
                       </div>
@@ -1245,7 +1263,7 @@ export default function TestsPage() {
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Trophy className="size-3 text-amber-500" /> Sovrin:
                           </span>
-                          <span className="text-amber-500 font-mono font-bold">+50% XP · +{details.coins} 🪙 · &quot;Temir Asab&quot;</span>
+                          <span className="text-amber-500 font-mono font-bold">{stressXpLabel} · tanga ×1.5</span>
                         </div>
                       </div>
                     </div>
@@ -1291,10 +1309,7 @@ export default function TestsPage() {
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs">
-                      Sovrin: +100% Super Bonus XP
-                    </Badge>
-                    <Badge className="bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-xs">
-                      +500 🪙 Tanga · &quot;Oltin Nomzod&quot;
+                      {stressXpLabel} · tanga ×1.5
                     </Badge>
                   </div>
                 </div>

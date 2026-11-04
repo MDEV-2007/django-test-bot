@@ -102,6 +102,7 @@ export default function SmartB2BSuggestionCard() {
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
+  const [guardianConfirmed, setGuardianConfirmed] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -158,6 +159,10 @@ export default function SmartB2BSuggestionCard() {
       toast.error(t('Ism-familiyangizni kiriting'));
       return;
     }
+    if (!guardianConfirmed) {
+      toast.error(t("18 yoshdan kattaligingizni yoki ota-onangiz roziligi borligini tasdiqlang"));
+      return;
+    }
 
     setSubmitting(true);
     tgHaptic('medium');
@@ -172,6 +177,7 @@ export default function SmartB2BSuggestionCard() {
           // Rozilik oynasidagi tasdiqlash — aniq rozilik. Zaif mavzu/prognoz ball
           // klientdan yuborilmaydi: server haqiqiy natijalardan oladi.
           consent: true,
+          guardian_confirmed: guardianConfirmed,
         }),
       });
 
@@ -347,6 +353,15 @@ export default function SmartB2BSuggestionCard() {
               )}
             </div>
 
+            <label className="flex items-start gap-2 text-xs text-zinc-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={guardianConfirmed}
+                onChange={(e) => setGuardianConfirmed(e.target.checked)}
+                className="mt-0.5 size-4 accent-amber-500"
+              />
+              <span>{t("Men 18 yoshdan kattaman yoki ota-onam (vasiyim) roziligi bor.")}</span>
+            </label>
             <p className="p-3 rounded-xl bg-black/40 border border-white/5 text-[11px] text-zinc-400 leading-relaxed">
               {t("Tasdiqlash orqali o'quv markaz mutaxassisi siz bilan bog'lanib, bepul dars vaqtini belgilashiga rozilik bildirasiz.")}
             </p>

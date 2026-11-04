@@ -21,6 +21,7 @@ import {
   CornerDownRight,
   Pin,
   Loader2,
+  Flag,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -102,6 +103,8 @@ type PostComment = {
 type FeedResponse = {
   posts: PostItem[];
   total: number;
+  page?: number;
+  has_more?: boolean;
   subjects: { slug: string; name: string }[];
   user_track?: string;
   user_attempted_slugs?: string[];
@@ -147,6 +150,10 @@ export default function CommunityFeedPage() {
   const [subjects, setSubjects] = useState<{ slug: string; name: string }[]>([]);
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  // Sahifalash (server 20 tadan beradi).
+  const [feedPage, setFeedPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [reactions, setReactions] = useState<
     Record<number, { user_reaction: string | null; counts: Record<string, number> }>
@@ -267,8 +274,10 @@ export default function CommunityFeedPage() {
     }
   }
 
-  const loadFeed = useCallback(async (filter = 'all') => {
-    setLoading(true);
+  const loadFeed = useCallback(async (filter = 'all', page = 1) => {
+    const append = page > 1;
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     try {
       let query = '';
       if (filter === 'certificate') {
@@ -279,9 +288,12 @@ export default function CommunityFeedPage() {
         query = `?subject=${encodeURIComponent(filter)}`;
       }
 
-      const res = await apiFetch<FeedResponse>(`/api/learning/feed/${query}`);
+      const pageParam = `${query ? '&' : '?'}page=${page}`;
+      const res = await apiFetch<FeedResponse>(`/api/learning/feed/${query}${pageParam}`);
       if (res && res.posts) {
-        setPosts(res.posts);
+        setPosts((prev) => (append ? [...prev, ...res.posts.filter((p) => !prev.some((x) => x.id === p.id))] : res.posts));
+        setFeedPage(page);
+        setHasMore(Boolean(res.has_more));
         if (res.subjects) setSubjects(res.subjects);
         if (res.user_attempted_slugs) setUserAttemptedSlugs(res.user_attempted_slugs);
         if (res.user_track) setUserTrack(res.user_track);
@@ -296,18 +308,32 @@ export default function CommunityFeedPage() {
             counts: p.reaction_counts || { fire: 0, clap: 0, trophy: 0, heart: 0 },
           };
         });
-        setReactions(initialReactions);
+        setReactions((prev) => (append ? { ...prev, ...initialReactions } : initialReactions));
       }
     } catch {
       toast.error("Hamjamiyat lentasini yuklab bo'lmadi");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
 
   useEffect(() => {
     loadFeed(selectedFilter);
   }, [selectedFilter, loadFeed]);
+
+  async function handleReportPost(postId: number) {
+    if (!window.confirm("Bu postga shikoyat qilinsinmi? (spam, haqorat yoki javob tarqatish)")) return;
+    try {
+      const res = await apiFetch<{ message: string; already_reported: boolean }>(
+        `/api/learning/feed/${postId}/report/`,
+        { method: 'POST', body: JSON.stringify({ reason: 'other' }) },
+      );
+      toast.success(res.already_reported ? 'Siz bu postga allaqachon shikoyat qilgansiz.' : res.message);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Shikoyat yuborilmadi");
+    }
+  }
 
   async function handleReact(postId: number, reactionType: 'fire' | 'clap' | 'trophy' | 'heart') {
     if (!user) {
@@ -808,6 +834,18 @@ export default function CommunityFeedPage() {
                               : '📝 Sinov Testi'}
                           </span>
 
+                          {!canDelete && user && (
+                            <button
+                              type="button"
+                              onClick={() => handleReportPost(post.id)}
+                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[#FF9500] hover:bg-[#FF9500]/12 transition-colors cursor-pointer"
+                              title="Shikoyat qilish"
+                              aria-label="Postga shikoyat qilish"
+                            >
+                              <Flag className="size-3.5" />
+                            </button>
+                          )}
+
                           {canDelete && (
                             <button
                               type="button"
@@ -1086,6 +1124,18 @@ export default function CommunityFeedPage() {
                   </Reveal>
                 );
               })
+            )}
+            {hasMore && posts.length > 0 && (
+              <div className="flex justify-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => loadFeed(selectedFilter, feedPage + 1)}
+                  disabled={loadingMore}
+                  className="rounded-full border border-border bg-card px-5 py-2 text-xs font-semibold text-foreground hover:bg-muted disabled:opacity-60 cursor-pointer"
+                >
+                  {loadingMore ? 'Yuklanmoqda...' : "Ko'proq ko'rsatish"}
+                </button>
+              </div>
             )}
           </div>
         </div>

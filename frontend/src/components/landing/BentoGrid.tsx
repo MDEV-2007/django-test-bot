@@ -65,7 +65,8 @@ export default function BentoGrid() {
             {/* iOS Inset Grouped Score Widget */}
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-5 gap-4 rounded-xl border border-black/[0.05] bg-[#F2F2F7] p-4 sm:p-5">
               <div className="sm:col-span-2 flex flex-col justify-center border-b sm:border-b-0 sm:border-r border-black/[0.08] pb-3 sm:pb-0 sm:pr-4">
-                <span className="text-xs text-[#6C6C70] font-medium">Kutilayotgan ball:</span>
+                {/* Landing namoyishi: haqiqiy foydalanuvchi natijasi emasligi aniq yozilgan. */}
+                <span className="text-xs text-[#6C6C70] font-medium">Kutilayotgan ball (namuna):</span>
                 <div className="mt-1 flex items-baseline gap-1.5">
                   <span className="font-mono text-4xl sm:text-5xl font-bold tracking-tight text-[#1C1C1E]">178.4</span>
                   <span className="font-mono text-xs text-[#8E8E93]">/ 189.0</span>

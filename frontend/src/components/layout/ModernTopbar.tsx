@@ -167,7 +167,10 @@ export default function ModernTopbar({
         )}
 
         {/* 5. SCRIPT TOGGLE (O'z / Ўз) */}
-        <ScriptToggle />
+        {/* 400px dan tor ekranda topbarga sig'masdi (kesilib qolardi) — u mobil menyuda (Sidebar) bor. */}
+        <div className="hidden min-[400px]:block">
+          <ScriptToggle />
+        </div>
 
         {/* 6. THEME TOGGLE (Sun / Moon) */}
         <Tooltip>

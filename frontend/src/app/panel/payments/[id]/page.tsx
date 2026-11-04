@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Check, X, Loader2, ImageOff, Wallet, CalendarDays, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, API_URL } from '@/lib/api-client';
+import AuthImage from '@/components/common/AuthImage';
 import { useAuthStore } from '@/lib/auth-store';
 import PanelShell from '@/components/panel/PanelShell';
 import PageHeader from '@/components/panel/PageHeader';
@@ -99,18 +100,12 @@ export default function PanelPaymentDetailPage() {
           <CardHeader><CardTitle className="text-base">To&apos;lov cheki</CardTitle></CardHeader>
           <CardContent>
             {data.screenshot ? (
-              <a
-                href={`${API_URL}/api/premium/payments/${data.id}/screenshot/?token=${access}`}
-                target="_blank" rel="noreferrer"
-                className="block overflow-hidden rounded-lg border transition-colors hover:border-[var(--border-strong)]"
-                title="To'liq o'lchamda ochish"
-              >
-                <img
-                  src={`${API_URL}/api/premium/payments/${data.id}/screenshot/?token=${access}`}
-                  alt="To'lov skrinshoti"
-                  className="max-h-[520px] w-full object-contain"
-                />
-              </a>
+              <AuthImage
+                path={`/api/premium/payments/${data.id}/screenshot/`}
+                alt="To'lov skrinshoti"
+                className="max-h-[520px] w-full object-contain"
+                openOnClick
+              />
             ) : (
               <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
                 <ImageOff className="size-8 opacity-50" />

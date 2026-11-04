@@ -10,11 +10,9 @@ from django.http import FileResponse, Http404
 from PIL import Image, UnidentifiedImageError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import InvalidToken
 
 from accounts.models import ensure_profile_for_user
 from .models import Payment, SubscriptionPlan
@@ -205,20 +203,12 @@ def my_payments_api(request):
 
 
 class PaymentScreenshotAPI(APIView):
-    """Auth via `?token=` (see module docstring) instead of the default header-based
-    JWTAuthentication, since this is loaded as a plain <img src>."""
-    authentication_classes = []
-    permission_classes = [AllowAny]
+    """Oddiy header-JWT autentifikatsiya. Ilgari rasm <img src> bilan yuklangani uchun JWT
+    `?token=` sifatida URL'da yuborilardi; endi frontend uni header bilan blob qilib oladi."""
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, payment_id):
-        token = request.query_params.get('token')
-        if not token:
-            raise Http404
-        try:
-            auth = JWTAuthentication()
-            user = auth.get_user(auth.get_validated_token(token))
-        except InvalidToken:
-            raise Http404
+        user = request.user
 
         payment = Payment.objects.filter(id=payment_id).select_related('profile__user').first()
         if not payment:

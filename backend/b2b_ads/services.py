@@ -222,6 +222,7 @@ def submit_lead(
     weakest_topics: str = '',
     predicted_dtm_score: str = '',
     consent: bool = False,
+    guardian_confirmed: bool = False,
 ) -> dict:
     """O'quvchi tasdiqlagan ism va telefon bilan lid yaratadi.
 
@@ -235,6 +236,8 @@ def submit_lead(
     """
     if consent is not True:
         raise LeadError("Ma'lumotlaringizni markazga yuborishga rozilik bering.")
+    if guardian_confirmed is not True:
+        raise LeadError("18 yoshdan kattaligingizni yoki ota-onangiz (vasiyingiz) roziligi borligini tasdiqlang.")
     phone = normalize_uz_phone(phone_number)
     if phone is None:
         raise LeadError("Telefon raqamini +998 XX XXX XX XX formatida kiriting.")
@@ -277,6 +280,7 @@ def submit_lead(
             weakest_topics=(weakest_topics or '')[:1000],
             coins_rewarded=LEAD_REWARD_COINS,
             consent_at=timezone.now(),
+            guardian_confirmed=True,
         )
         Profile.objects.filter(pk=locked.pk).update(coins=F('coins') + LEAD_REWARD_COINS)
         locked.refresh_from_db(fields=['coins'])

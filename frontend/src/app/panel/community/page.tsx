@@ -39,6 +39,8 @@ type CommunityPost = {
   likes_count: number;
   comments_count: number;
   is_pinned: boolean;
+  reports_count?: number;
+  is_hidden?: boolean;
   created_at: string;
 };
 
@@ -96,7 +98,8 @@ export default function PanelCommunityPage() {
     setLoadingPosts(true);
     try {
       const q = new URLSearchParams();
-      if (postFilter !== 'all') q.set('type', postFilter);
+      if (postFilter === 'moderation') q.set('moderation', '1');
+      else if (postFilter !== 'all') q.set('type', postFilter);
       if (postSearch.trim()) q.set('q', postSearch.trim());
       const res = await apiFetch<{ posts: CommunityPost[]; total: number }>(`/api/panel/community/?${q.toString()}`);
       if (res?.posts) {
@@ -159,6 +162,19 @@ export default function PanelCommunityPage() {
       );
     } catch (e) {
       toast.error("Pin qilishda xatolik");
+    }
+  }
+
+  // Moderatsiya: yashirish / qayta ko'rsatish (server audit jurnaliga yozadi).
+  async function handleToggleHidden(id: number, hidden: boolean) {
+    try {
+      const res = await apiFetch<{ is_hidden: boolean }>(`/api/panel/community/${id}/visibility/`, {
+        method: 'POST', body: JSON.stringify({ hidden }),
+      });
+      toast.success(res.is_hidden ? 'Post lentadan yashirildi' : "Post lentada qayta ko'rsatildi");
+      setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, is_hidden: res.is_hidden } : p)));
+    } catch {
+      toast.error("Holatni o'zgartirib bo'lmadi");
     }
   }
 
@@ -294,6 +310,7 @@ export default function PanelCommunityPage() {
                   { id: 'test_result', label: '🎯 Natijalar' },
                   { id: 'certificate', label: '🏆 Sertifikatlar' },
                   { id: 'sos_question', label: '🙋 SOS Savollar' },
+                  { id: 'moderation', label: '🚩 Shikoyatlar' },
                 ].map((f) => (
                   <button
                     key={f.id}
@@ -361,6 +378,14 @@ export default function PanelCommunityPage() {
                         </div>
 
                         <div className="flex items-center gap-1 shrink-0">
+                          {(post.reports_count ?? 0) > 0 && (
+                            <Badge className="bg-rose-500/15 text-rose-500 border-rose-500/30 text-[12px] px-1.5 py-0">
+                              🚩 {post.reports_count}
+                            </Badge>
+                          )}
+                          {post.is_hidden && (
+                            <Badge variant="outline" className="text-[12px] px-1.5 py-0">Yashirin</Badge>
+                          )}
                           {post.is_pinned && (
                             <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30 text-[12px] px-1.5 py-0">
                               <Pin className="size-2.5 mr-0.5 fill-current" /> Pin
@@ -424,6 +449,14 @@ export default function PanelCommunityPage() {
                       </Button>
 
                       <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-xs"
+                          onClick={() => handleToggleHidden(post.id, !post.is_hidden)}
+                        >
+                          {post.is_hidden ? "Ko'rsatish" : 'Yashirish'}
+                        </Button>
                         <Button asChild size="sm" variant="outline" className="h-8 text-xs">
                           <Link href="/feed" target="_blank">
                             <ExternalLink className="size-3 mr-1" /> Lentada

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Receipt } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, API_URL } from '@/lib/api-client';
+import AuthImage from '@/components/common/AuthImage';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import PageHero from '@/components/student/PageHero';
@@ -76,8 +77,8 @@ export default function MyPaymentsPage() {
             <Link key={p.id} href={`/premium/payment/${p.id}`} className="group block">
               <Card className="gap-0 py-0 transition-colors group-hover:border-[var(--accent)]/40">
                 <CardContent className="flex items-center gap-4 p-4">
-                  <img
-                    src={`${API_URL}/api/premium/payments/${p.id}/screenshot/?token=${access}`}
+                  <AuthImage
+                    path={`/api/premium/payments/${p.id}/screenshot/`}
                     alt="" className="size-12 rounded-xl border object-cover"
                   />
                   <div className="min-w-0 flex-1">

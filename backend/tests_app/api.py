@@ -748,7 +748,9 @@ def finish_api(request, attempt_id):
 
     # ─── BMB Titul Varaqasi (Bubble Sheet) va Stress Tahlili ────────
     client_titul = request.data.get('titul_answers') if (hasattr(request, 'data') and isinstance(request.data, dict)) else None
-    if client_titul and isinstance(client_titul, dict):
+    # Vaqt tugaganidan keyin yuborilgan titul qabul qilinmaydi — serverda vaqt ichida
+    # (/bubble-answer/) saqlangan titul hisoblanadi.
+    if client_titul and isinstance(client_titul, dict) and not attempt.is_time_up:
         current_titul = attempt.titul_answers or {}
         current_titul.update({str(k): str(v).upper() for k, v in client_titul.items()})
         attempt.titul_answers = current_titul
@@ -1437,6 +1439,10 @@ def bubble_answer_api(request, attempt_id):
     attempt = get_object_or_404(Attempt, id=attempt_id, profile=request.user.profile)
     if attempt.is_completed:
         return Response({'error': 'attempt already finished', 'completed': True}, status=409)
+    # Vaqt tugagach titul varaqasiga yozish yo'q (javob endpointi bilan bir xil qoida):
+    # ilgari javob kalitini ko'rgach yoki vaqtdan keyin titulni to'ldirib ball olish mumkin edi.
+    if attempt.is_time_up:
+        return Response({'error': 'time_up', 'time_up': True, 'message': "Test vaqti tugadi."}, status=409)
 
     q_idx = request.data.get('q_idx')
     letter = request.data.get('letter')

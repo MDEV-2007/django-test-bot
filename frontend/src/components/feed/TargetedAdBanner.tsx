@@ -49,6 +49,7 @@ export default function TargetedAdBanner({
   const [phone, setPhone] = useState('+998 ');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [guardianConfirmed, setGuardianConfirmed] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
   useAdImpression(bannerRef, offer.id);
 
@@ -61,6 +62,10 @@ export default function TargetedAdBanner({
   async function handleSubmitLead() {
     if (!phone || phone.trim().length < 9) {
       toast.error("Iltimos, telefon raqamingizni to'liq kiriting!");
+      return;
+    }
+    if (!guardianConfirmed) {
+      toast.error("18 yoshdan kattaligingizni yoki ota-onangiz roziligi borligini tasdiqlang.");
       return;
     }
     setSubmitting(true);
@@ -78,6 +83,7 @@ export default function TargetedAdBanner({
             // Tasdiqlash tugmasi — ma'lumotni markazga yuborishga aniq rozilik.
             // Zaif mavzu va ball serverda haqiqiy natijalardan olinadi.
             consent: true,
+            guardian_confirmed: guardianConfirmed,
           }),
         }
       );
@@ -212,6 +218,15 @@ export default function TargetedAdBanner({
                     </div>
 
                     <div>
+                      <label className="mb-3 flex items-start gap-2 text-xs text-zinc-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={guardianConfirmed}
+                          onChange={(e) => setGuardianConfirmed(e.target.checked)}
+                          className="mt-0.5 size-4 accent-amber-500"
+                        />
+                        <span>Men 18 yoshdan kattaman yoki ota-onam (vasiyim) roziligi bor.</span>
+                      </label>
                       <label className="text-xs font-semibold text-zinc-300 block mb-1">
                         Telefon raqamingiz:
                       </label>

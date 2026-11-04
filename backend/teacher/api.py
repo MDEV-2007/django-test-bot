@@ -35,6 +35,32 @@ from .models import TeacherProfile, TeacherStudent
 
 
 # ---- IDOR helpers: everything is scoped to the current user's own content ----
+def _can_publish(request):
+    """Kontentni ommaviy nashr qilish huquqi: super admin yoki tasdiqlangan o'qituvchi.
+    TeacherProfile'siz (admin panelda rol berilgan) o'qituvchi — admin tomonidan
+    tayinlangan, shuning uchun ishonchli hisoblanadi."""
+    profile = getattr(request.user, 'profile', None)
+    if profile is None:
+        return False
+    if profile.is_superadmin or request.user.is_superuser:
+        return True
+    tp = getattr(profile, 'teacher_profile', None)
+    return tp is None or tp.is_verified
+
+
+UNVERIFIED_MSG = ("Hisobingiz hali Super Admin tomonidan tasdiqlanmagan: kontentni ommaviy nashr qilish "
+                  "va barcha o'quvchilarga xabar yuborish tasdiqdan keyin ochiladi.")
+
+
+def _gate_test_flags(request, data):
+    """Tasdiqlanmagan o'qituvchi uchun jonli mock va 'hammaga xabar' bayroqlarini o'chiradi."""
+    if not _can_publish(request):
+        for key in ('notify_all', 'is_live_mock'):
+            if key in data:
+                data[key] = False
+    return data
+
+
 def _own_test(request, pk):
     return get_object_or_404(TestSet, pk=pk, created_by=request.user)
 
@@ -107,7 +133,7 @@ def test_create_api(request):
     data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
     if 'scheduled_at' in data and not data['scheduled_at']:
         data['scheduled_at'] = None
-    form = TestInfoForm(data)
+    form = TestInfoForm(_gate_test_flags(request, data))
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     test = form.save(commit=False)
@@ -134,7 +160,7 @@ def test_info_api(request, pk):
     data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
     if 'scheduled_at' in data and not data['scheduled_at']:
         data['scheduled_at'] = None
-    form = TestInfoForm(data, instance=test)
+    form = TestInfoForm(_gate_test_flags(request, data), instance=test)
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     form.save()
@@ -511,6 +537,8 @@ def test_preview_api(request, pk):
 @permission_classes([IsTeacher])
 def test_publish_api(request, pk):
     test = _own_test(request, pk)
+    if not test.is_published and not _can_publish(request):
+        return Response({'error': UNVERIFIED_MSG, 'code': 'teacher_not_verified'}, status=403)
     if test.questions.count() == 0:
         return Response({'error': "Bo'sh testni nashr etib bo'lmaydi — avval savol qo'shing."}, status=400)
     test.is_published = not test.is_published
@@ -730,7 +758,7 @@ def lesson_create_api(request):
         return Response({'errors': _form_errors(form)}, status=400)
     lesson = form.save(commit=False)
     lesson.created_by = request.user
-    lesson.is_published = bool(request.data.get('publish'))
+    lesson.is_published = bool(request.data.get('publish')) and _can_publish(request)
     lesson.save()
     return Response({'id': lesson.id})
 
@@ -752,7 +780,7 @@ def lesson_edit_api(request, pk):
     if not form.is_valid():
         return Response({'errors': _form_errors(form)}, status=400)
     lesson = form.save(commit=False)
-    lesson.is_published = bool(request.data.get('publish'))
+    lesson.is_published = bool(request.data.get('publish')) and _can_publish(request)
     lesson.save()
     return Response({'ok': True})
 

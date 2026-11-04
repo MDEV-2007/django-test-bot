@@ -37,6 +37,12 @@ class TeacherProfile(models.Model):
                    "To'liq raqam saqlanmaydi.",
     )
 
+    # Moderatsiya: o'z-o'ziga ro'yxatdan o'tgan o'qituvchi Super Admin tasdiqlaguncha
+    # kontentni ommaviy nashr eta olmaydi va "hammaga xabar" (notify_all) yubora olmaydi.
+    # Mavjud o'qituvchilar migratsiyada tasdiqlangan deb belgilanadi.
+    is_verified = models.BooleanField(default=False, db_index=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
