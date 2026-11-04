@@ -59,11 +59,7 @@ def _pick_sprint_questions(topic, subject, count, rng):
 
 def _loop_sprint_question_ids(loop: DailyLearningLoop) -> list:
     """Shu siklning sprint savollari ID'lari (_build_stage_data bilan bir xil urug')."""
-    topic = loop.topic
-    subject = loop.subject or (topic.subject if topic else None)
-    picked = _pick_sprint_questions(topic, subject, SPRINT_QUESTION_COUNT + ARENA_QUESTION_COUNT,
-                                    random.Random(loop.id))
-    return [q.id for q in picked[:SPRINT_QUESTION_COUNT]]
+    return [q.id for q in _loop_question_sets(loop)[0]]
 
 
 def _as_int(value, default=0):
@@ -74,22 +70,11 @@ def _as_int(value, default=0):
 
 
 def _format_question_dict(q: Question) -> dict:
-    """Savol va uning variantlarini qulay JSON formatiga o'tkazish."""
-    options = []
-    for opt in q.choices.all():
-        options.append({
-            'id': opt.id,
-            'text': opt.text,
-            'is_correct': opt.is_correct,
-        })
+    """Savol va variantlar — javob kalitisiz. To'g'ri javob va izoh (u ko'pincha javobni
+    aytadi) faqat POST /api/v1/loop/answer/ javobida qaytadi."""
+    options = [{'id': opt.id, 'text': opt.text} for opt in q.choices.all()]
     # Variantlar tartibini aralashtiramiz
     random.shuffle(options)
-
-    # AI Mentor tahlili va eslab qolish kodi
-    explanation_text = q.explanation or (
-        f"Ushbu savolda asosiy kalit so'zga e'tibor qarating. "
-        f"To'g'ri javob variantini mavzuning qoidasi bilan bog'lab yodda saqlang."
-    )
 
     return {
         'id': q.id,
@@ -98,11 +83,78 @@ def _format_question_dict(q: Question) -> dict:
         'options': options,
         'ai_hint': {
             'aha_moment': "Nega adashdingiz: Diqqat qiling, savoldagi chalg'ituvchi terminlar bir-biriga yaqin!",
-            'memory_code': explanation_text,
+            'memory_code': "To'g'ri javob variantini mavzuning qoidasi bilan bog'lab yodda saqlang.",
             'analysis_time': '10s tahlil',
         },
-        'explanation': explanation_text,
     }
+
+
+def _explanation_for(q: Question) -> str:
+    return q.explanation or (
+        "Ushbu savolda asosiy kalit so'zga e'tibor qarating. "
+        "To'g'ri javob variantini mavzuning qoidasi bilan bog'lab yodda saqlang."
+    )
+
+
+GHOST_ACCURACY = 0.55
+LOOP_SESSION_TTL = timedelta(hours=30)
+
+
+def _questions_by_ids(ids):
+    by_id = Question.objects.prefetch_related('choices').in_bulk(ids)
+    return [by_id[i] for i in ids if i in by_id]
+
+
+def _loop_question_sets(loop: DailyLearningLoop):
+    """(sprint savollari, arena savollari). Sessiya yaratilgan bo'lsa — aynan uning
+    savollari (bank o'zgarsa ham klient ko'rgan savollar sessiyaga mos qoladi); aks holda
+    sikl id'si bilan urug'langan tanlov."""
+    if loop.sprint_session_id and loop.arena_session_id:
+        return (_questions_by_ids(loop.sprint_session.question_ids),
+                _questions_by_ids(loop.arena_session.question_ids))
+    topic = loop.topic
+    subject = loop.subject or (topic.subject if topic else None)
+    picked = _pick_sprint_questions(topic, subject, SPRINT_QUESTION_COUNT + ARENA_QUESTION_COUNT,
+                                    random.Random(loop.id))
+    sprint_qs = picked[:SPRINT_QUESTION_COUNT]
+    # Arena dueli sprintdagi savollarni takrorlamaydi (savol kam bo'lsa — sprintdan oladi).
+    arena_pool = picked[SPRINT_QUESTION_COUNT:]
+    arena_qs = arena_pool if len(arena_pool) >= ARENA_QUESTION_COUNT else sprint_qs[:ARENA_QUESTION_COUNT]
+    return sprint_qs, arena_qs
+
+
+def _ghost_moves(loop: DailyLearningLoop, count: int) -> list:
+    """Ghost raqibning har savoldagi natijasi — serverda, sikl bo'yicha deterministik.
+    Ilgari ghost bali klient taymerida tasodifiy o'sardi va g'alabani klient e'lon qilardi."""
+    rng = random.Random(f"ghost:{loop.id}")
+    return [rng.random() < GHOST_ACCURACY for _ in range(count)]
+
+
+def _ensure_loop_sessions(loop: DailyLearningLoop):
+    """Sprint va arena uchun server sessiyalarini (bir marta) yaratadi."""
+    from sprint.models import QuizSession
+    from sprint.services import create_quiz_session
+
+    if loop.sprint_session_id and loop.arena_session_id:
+        return
+    sprint_qs, arena_qs = _loop_question_sets(loop)
+    fields = []
+    if not loop.sprint_session_id:
+        loop.sprint_session = create_quiz_session(loop.user, QuizSession.MODE_LOOP_SPRINT,
+                                                  [q.id for q in sprint_qs], ttl=LOOP_SESSION_TTL)
+        fields.append('sprint_session')
+    if not loop.arena_session_id:
+        loop.arena_session = create_quiz_session(loop.user, QuizSession.MODE_LOOP_ARENA,
+                                                 [q.id for q in arena_qs], ttl=LOOP_SESSION_TTL)
+        fields.append('arena_session')
+    DailyLearningLoop.objects.filter(pk=loop.pk).update(**{f: getattr(loop, f) for f in fields})
+
+
+def _session_results(session):
+    """{question_id: is_correct} — faqat birinchi (serverda tekshirilgan) javoblar."""
+    if session is None:
+        return {}
+    return dict(session.answers.values_list('question_id', 'is_correct'))
 
 
 def _get_or_create_today_loop(user) -> DailyLearningLoop:
@@ -162,6 +214,7 @@ def _get_or_create_today_loop(user) -> DailyLearningLoop:
 
 def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     """Har bir bosqich uchun boy ma'lumotlar to'plami."""
+    _ensure_loop_sessions(loop)
     topic = loop.topic
     subject = loop.subject or (topic.subject if topic else None)
 
@@ -189,11 +242,9 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     }
 
     # 2. STAGE 2: SPRINT SAVOLLARI (mavzu -> fan -> umumiy, tasodifiy)
-    picked = _pick_sprint_questions(topic, subject, SPRINT_QUESTION_COUNT + ARENA_QUESTION_COUNT,
-                                    random.Random(loop.id))
-    sprint_questions = [_format_question_dict(q) for q in picked[:SPRINT_QUESTION_COUNT]]
-    # Arena dueli sprintdagi savollarni takrorlamaydi (savol kam bo'lsa — sprintdan oladi).
-    arena_pool = [_format_question_dict(q) for q in picked[SPRINT_QUESTION_COUNT:]]
+    sprint_qs, arena_qs = _loop_question_sets(loop)
+    sprint_questions = [_format_question_dict(q) for q in sprint_qs]
+    arena_questions = [_format_question_dict(q) for q in arena_qs]
 
     # 3. STAGE 3: CLEANUP (Flashcards for Session Mistakes)
     cleanup_cards = []
@@ -217,8 +268,6 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     ghost_avatar = f"https://api.dicebear.com/7.x/adventurer/svg?seed={ghost_name.replace(' ', '')}"
     ghost_elo = max(900, user_elo + random.randint(-30, 30))
 
-    arena_questions = arena_pool if len(arena_pool) >= ARENA_QUESTION_COUNT else sprint_questions[:ARENA_QUESTION_COUNT]
-
     arena_data = {
         'opponent': {
             'name': ghost_name,
@@ -228,12 +277,19 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
         },
         'duration_seconds': 60,
         'questions': arena_questions,
+        # Ghostning har savoldagi natijasi (server hal qiladi; klient faqat ko'rsatadi).
+        'ghost_moves': _ghost_moves(loop, len(arena_questions)),
+        'points_per_correct': 20,
     }
 
     # 5. STAGE 5: COMPLETED (Sirli Sandiq & Eco-Daraxt)
+    # Yakunlangan siklda — aynan berilgan mukofot (arena yutqazilgan bo'lsa 1.0x);
+    # yakunlanmagan siklda — g'alaba holatidagi potentsial mukofot.
+    reward_multiplier = 1.0 if (loop.current_stage == DailyLearningLoop.STAGE_5_COMPLETED
+                                and not loop.arena_won) else loop.combo_multiplier
     rewards_data = {
-        'coins': int(200 * loop.combo_multiplier),
-        'xp': int(100 * loop.combo_multiplier),
+        'coins': int(200 * reward_multiplier),
+        'xp': int(100 * reward_multiplier),
         'free_essay_credits': 1,
         'dtm_score_delta': loop.dtm_score_delta,
         'water_reward': 35,
@@ -318,27 +374,74 @@ class CurrentLoopView(APIView):
         })
 
 
+class LoopAnswerView(APIView):
+    """
+    POST /api/v1/loop/answer/
+    Body: {stage: 'sprint'|'arena', question_id, option_id, revenge?: bool}
+
+    Avtopilot sprinti va arena javoblarini serverda tekshiradi. Faqat joriy bosqichdagi
+    savollarga javob qabul qilinadi; bir savolga birinchi javob bir marta yoziladi.
+    """
+    permission_classes = [IsAuthenticated]
+
+    STAGE_MODES = {
+        'sprint': (DailyLearningLoop.STAGE_2_SPRINT, 'loop_sprint', 'sprint_session_id'),
+        'arena': (DailyLearningLoop.STAGE_4_ARENA, 'loop_arena', 'arena_session_id'),
+    }
+
+    def post(self, request):
+        from sprint.services import QuizAnswerError, submit_quiz_answer
+
+        stage_key = request.data.get('stage')
+        if stage_key not in self.STAGE_MODES:
+            return Response({'ok': False, 'error': "stage 'sprint' yoki 'arena' bo'lishi kerak."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        required_stage, mode, session_field = self.STAGE_MODES[stage_key]
+
+        loop = _get_or_create_today_loop(request.user)
+        _ensure_loop_sessions(loop)
+        loop.refresh_from_db()
+        if loop.current_stage != required_stage:
+            return Response({'ok': False, 'error': "Bu bosqich hozir faol emas.", 'current_stage': loop.current_stage},
+                            status=status.HTTP_409_CONFLICT)
+
+        revenge = stage_key == 'sprint' and request.data.get('revenge') in (True, 'true', '1', 1)
+        try:
+            result = submit_quiz_answer(
+                request.user, mode, getattr(loop, session_field),
+                request.data.get('question_id'), request.data.get('option_id'), revenge=revenge,
+            )
+        except QuizAnswerError as exc:
+            return Response({'ok': False, 'error': exc.message, 'code': exc.code}, status=exc.status_code)
+
+        question = Question.objects.filter(pk=result['question_id']).first()
+        return Response({
+            'ok': True,
+            'is_correct': result['is_correct'],
+            'correct_option_id': result['correct_option_id'],
+            'duplicate': result['duplicate'],
+            'explanation': _explanation_for(question) if question else '',
+        })
+
+
 class AdvanceStageView(APIView):
     """
     POST /api/v1/loop/advance-stage/
     Zanjirni oldinga siljitish (State transition).
     1-bosqich -> 2-bosqich -> (agar xato bo'lsa 3-bosqich, yo'qsa 4-bosqich) -> 5-bosqich
+
+    Natijalar (to'g'ri javoblar, xatolar, arena g'alabasi) klient payload'idan emas,
+    POST /loop/answer/ orqali serverda tekshirilgan javoblardan hisoblanadi.
     """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        from django.db import transaction
+
         user = request.user
         loop = _get_or_create_today_loop(user)
+        _ensure_loop_sessions(loop)
         eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
-
-        # Bosqich faqat serverdagi joriy holatdan keyingisiga o'tadi. Ilgari klient
-        # `from_stage=STAGE_4_ARENA` yuborib, sprint va duelsiz to'g'ridan-to'g'ri sandiq
-        # mukofotini olardi (restart-cycle bilan birga — cheksiz tanga).
-        from_stage = loop.current_stage
-        requested = request.data.get('from_stage')
-        if requested and requested != from_stage:
-            return Response({'ok': False, 'error': "Bosqich ketma-ketligi buzildi", 'current_stage': from_stage},
-                            status=status.HTTP_409_CONFLICT)
         payload = request.data.get('payload', {})
         if not isinstance(payload, dict):
             payload = {}
@@ -346,80 +449,89 @@ class AdvanceStageView(APIView):
         water_result = None
         rewards_awarded = None
 
-        if from_stage == DailyLearningLoop.STAGE_1_WARMUP:
-            # 1-bosqich tugadi -> 2-bosqich (Sprint) boshlanadi
-            loop.current_stage = DailyLearningLoop.STAGE_2_SPRINT
-            # Combo tushirilmaydi: 2/3-sikl 2.0x/2.5x bilan boshlanadi (restart-cycle).
-            loop.dtm_score_delta = round(loop.dtm_score_delta + 0.4, 2)
-            loop.save()
+        # Butun o'tish qulf ostida: parallel so'rovlar bosqichni ikki marta siljitmaydi
+        # va mukofotni ikki marta bermaydi.
+        with transaction.atomic():
+            loop = DailyLearningLoop.objects.select_for_update().get(pk=loop.pk)
 
-        elif from_stage == DailyLearningLoop.STAGE_2_SPRINT:
-            # 2-bosqich (Sprint) yakunlandi
-            # Klientga ko'r-ko'rona ishonilmaydi: xatolar faqat shu sprint savollaridan,
-            # to'g'ri javoblar soni esa sprint hajmi bilan cheklanadi. Ilgari istalgan savol
-            # ID'si yuborilib, 3-bosqich kartasida uning to'g'ri javobi ochilardi.
-            sprint_ids = _loop_sprint_question_ids(loop)
-            raw_mistakes = payload.get('mistake_question_ids', [])
-            if not isinstance(raw_mistakes, list):
-                raw_mistakes = []
-            allowed = set(sprint_ids)
-            mistake_ids = []
-            for qid in raw_mistakes:
-                qid = _as_int(qid, None)
-                if qid in allowed and qid not in mistake_ids:
-                    mistake_ids.append(qid)
-            total_count = len(sprint_ids)
-            correct_count = max(0, min(_as_int(payload.get('correct_count')), total_count - len(mistake_ids)))
+            # Bosqich faqat serverdagi joriy holatdan keyingisiga o'tadi. Ilgari klient
+            # `from_stage=STAGE_4_ARENA` yuborib, sprint va duelsiz to'g'ridan-to'g'ri sandiq
+            # mukofotini olardi (restart-cycle bilan birga — cheksiz tanga).
+            from_stage = loop.current_stage
+            requested = request.data.get('from_stage')
+            if requested and requested != from_stage:
+                return Response({'ok': False, 'error': "Bosqich ketma-ketligi buzildi", 'current_stage': from_stage},
+                                status=status.HTTP_409_CONFLICT)
 
-            loop.sprint_score = correct_count
-            loop.sprint_total = total_count
-            loop.dtm_score_delta = round(loop.dtm_score_delta + (correct_count * 0.15), 2)
+            if from_stage == DailyLearningLoop.STAGE_1_WARMUP:
+                # 1-bosqich tugadi -> 2-bosqich (Sprint) boshlanadi
+                loop.current_stage = DailyLearningLoop.STAGE_2_SPRINT
+                # Combo tushirilmaydi: 2/3-sikl 2.0x/2.5x bilan boshlanadi (restart-cycle).
+                loop.dtm_score_delta = round(loop.dtm_score_delta + 0.4, 2)
+                loop.save()
 
-            if len(mistake_ids) > 0:
-                # Xatolar bor -> 3-bosqichga (Flashcard tozalash) o'tkazamiz
-                loop.session_mistakes_ids = mistake_ids
-                loop.current_stage = DailyLearningLoop.STAGE_3_CLEANUP
-                loop.combo_multiplier = max(loop.combo_multiplier, 1.5)
-            else:
-                # 0 ta xato! Mukammal sprint -> 3-bosqichdan sakrab, 2.0x Combo bilan to'g'ri Arenaga!
-                loop.session_mistakes_ids = []
+            elif from_stage == DailyLearningLoop.STAGE_2_SPRINT:
+                # Natija faqat serverda tekshirilgan javoblardan: javobsiz qolgan savol ham
+                # xato sanaladi (aks holda hech narsa yechmay "mukammal sprint" bo'lardi).
+                sprint_ids = list(loop.sprint_session.question_ids) if loop.sprint_session_id else []
+                results = _session_results(loop.sprint_session)
+                mistake_ids = [qid for qid in sprint_ids if results.get(qid) is not True]
+                correct_count = sum(1 for qid in sprint_ids if results.get(qid) is True)
+                total_count = len(sprint_ids)
+
+                loop.sprint_score = correct_count
+                loop.sprint_total = total_count
+                loop.dtm_score_delta = round(loop.dtm_score_delta + (correct_count * 0.15), 2)
+
+                if mistake_ids:
+                    # Xatolar bor -> 3-bosqichga (Flashcard tozalash) o'tkazamiz
+                    loop.session_mistakes_ids = mistake_ids
+                    loop.current_stage = DailyLearningLoop.STAGE_3_CLEANUP
+                    loop.combo_multiplier = max(loop.combo_multiplier, 1.5)
+                else:
+                    # 0 ta xato! Mukammal sprint -> 3-bosqichdan sakrab, 2.0x Combo bilan to'g'ri Arenaga!
+                    loop.session_mistakes_ids = []
+                    loop.current_stage = DailyLearningLoop.STAGE_4_ARENA
+                    loop.combo_multiplier = max(loop.combo_multiplier, 2.0)
+
+                loop.save()
+
+            elif from_stage == DailyLearningLoop.STAGE_3_CLEANUP:
+                # 3-bosqich (Xatolar Dueli) yakunlandi. cleared_count faqat statistika.
+                cleared_count = _as_int(payload.get('cleared_count'), len(loop.session_mistakes_ids))
+                loop.cleanup_cleared = max(0, min(cleared_count, len(loop.session_mistakes_ids)))
+                loop.dtm_score_delta = round(loop.dtm_score_delta + 0.6, 2)
                 loop.current_stage = DailyLearningLoop.STAGE_4_ARENA
                 loop.combo_multiplier = max(loop.combo_multiplier, 2.0)
+                loop.save()
 
-            loop.save()
+            elif from_stage == DailyLearningLoop.STAGE_4_ARENA:
+                # 4-bosqich (1v1 Ghost Duel) yakunlandi -> Sikl to'liq yopildi!
+                from core.rewards import grant_rewards_atomic
 
-        elif from_stage == DailyLearningLoop.STAGE_3_CLEANUP:
-            # 3-bosqich (Xatolar Dueli) yakunlandi
-            cleared_count = _as_int(payload.get('cleared_count'), len(loop.session_mistakes_ids))
-            loop.cleanup_cleared = max(0, min(cleared_count, len(loop.session_mistakes_ids)))
-            loop.dtm_score_delta = round(loop.dtm_score_delta + 0.6, 2)
-            loop.current_stage = DailyLearningLoop.STAGE_4_ARENA
-            loop.combo_multiplier = max(loop.combo_multiplier, 2.0)
-            loop.save()
-
-        elif from_stage == DailyLearningLoop.STAGE_4_ARENA:
-            # 4-bosqich (1v1 Ghost Duel) yakunlandi -> Sikl to'liq yopildi!
-            from core.rewards import grant_rewards_atomic
-            from django.db import transaction
-
-            with transaction.atomic():
-                locked_loop = DailyLearningLoop.objects.select_for_update().get(pk=loop.pk)
-                arena_won = payload.get('arena_won') is True
-                locked_loop.arena_won = arena_won
+                arena_ids = list(loop.arena_session.question_ids) if loop.arena_session_id else []
+                results = _session_results(loop.arena_session)
+                player_correct = sum(1 for qid in arena_ids if results.get(qid) is True)
+                ghost_correct = sum(_ghost_moves(loop, len(arena_ids)))
+                # Kamida bitta savolga javob berib, ghostdan kam bo'lmagan natija — g'alaba.
+                arena_won = bool(results) and player_correct >= ghost_correct
+                loop.arena_won = arena_won
                 if arena_won:
-                    locked_loop.dtm_score_delta = round(locked_loop.dtm_score_delta + 0.8, 2)
-                    locked_loop.combo_multiplier = min(2.5, round(locked_loop.combo_multiplier + 0.5, 1))
+                    loop.dtm_score_delta = round(loop.dtm_score_delta + 0.8, 2)
+                    loop.combo_multiplier = min(2.5, round(loop.combo_multiplier + 0.5, 1))
 
-                locked_loop.current_stage = DailyLearningLoop.STAGE_5_COMPLETED
+                loop.current_stage = DailyLearningLoop.STAGE_5_COMPLETED
 
                 # Agar sandiq ochilmagan bo'lsa mukofot beriladi (Double-spend oldini olish)
-                if not locked_loop.is_chest_claimed:
+                if not loop.is_chest_claimed:
                     # 1. Eco-Daraxtga suv quyiladi (+35%)
                     water_result = eco_tree.water(35)
 
-                    # 2. Atomik tanga va XP
-                    coins = int(200 * locked_loop.combo_multiplier)
-                    xp = int(100 * locked_loop.combo_multiplier)
+                    # 2. Atomik tanga va XP. Sikl yopilsa mukofot beriladi; combo
+                    # ko'paytirgichi esa faqat arena g'alabasida (yutqazsa — 1.0x).
+                    reward_multiplier = loop.combo_multiplier if arena_won else 1.0
+                    coins = int(200 * reward_multiplier)
+                    xp = int(100 * reward_multiplier)
                     profile = ensure_profile_for_user(user)
                     grant_rewards_atomic(profile.id, coins_delta=coins, xp_delta=xp)
 
@@ -428,22 +540,24 @@ class AdvanceStageView(APIView):
                     quota.free_essay_credits = (quota.free_essay_credits or 0) + 1
                     quota.save(update_fields=['free_essay_credits'])
 
-                    locked_loop.is_chest_claimed = True
+                    loop.is_chest_claimed = True
                 else:
                     water_result = {'water_level': eco_tree.water_level, 'grew': False}
                     coins = 0
                     xp = 0
 
-                locked_loop.save()
-                loop = locked_loop
+                loop.save()
 
-            rewards_awarded = {
-                'coins': coins,
-                'xp': xp,
-                'free_essay_credits': 1,
-                'dtm_score_delta': loop.dtm_score_delta,
-                'water_result': water_result,
-            }
+                rewards_awarded = {
+                    'coins': coins,
+                    'xp': xp,
+                    'free_essay_credits': 1 if coins else 0,
+                    'dtm_score_delta': loop.dtm_score_delta,
+                    'water_result': water_result,
+                    'arena_won': arena_won,
+                    'player_correct': player_correct,
+                    'ghost_correct': ghost_correct,
+                }
 
         # Keyingi yangilangan ma'lumotlar
         stage_data = _build_stage_data(loop, user)
@@ -526,9 +640,18 @@ class RestartCycleView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        from django.db import transaction
+
         user = request.user
         today = timezone.localdate()
+        with transaction.atomic():
+            # Foydalanuvchi qatorini qulflaymiz: ikki parallel restart bir xil cycle_number
+            # bilan ikkita sikl yaratib, kunlik MAX_CYCLES_PER_DAY limitini chetlab o'tmasin.
+            type(user).objects.select_for_update().filter(pk=user.pk).first()
+            response = self._restart(user, today)
+        return response
 
+    def _restart(self, user, today):
         last_loop = DailyLearningLoop.objects.filter(
             user=user,
             date=today

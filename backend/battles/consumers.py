@@ -23,12 +23,14 @@ from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import F, Q, Value
+from django.db.models.functions import Greatest
 from django.utils import timezone
 
 from accounts.models import Profile
 from core.missions import advance_missions
 from core.models import Notification
+from core.reward_caps import claim_daily_reward
 from tests_app.models import AnswerOption, Question, Subject
 from .models import Battle, BattlePlayerAnswer, BattleRound
 
@@ -426,13 +428,14 @@ class BattleConsumer(AsyncWebsocketConsumer):
             ).count() * POINTS_PER_CORRECT
 
         p1_score, p2_score = score_for(battle.player1_id), score_for(battle.player2_id)
-        battle.status = 'finished'
-        battle.finished_at = timezone.now()
-        if p1_score > p2_score:
-            battle.winner = battle.player1
-        elif p2_score > p1_score:
-            battle.winner = battle.player2
-        battle.save()
+        winner = battle.player1 if p1_score > p2_score else (battle.player2 if p2_score > p1_score else None)
+        # Atomik "egallash": ikkala o'yinchining consumer'i bir vaqtda yakunlasa ham
+        # mukofot faqat bir marta beriladi.
+        now = timezone.now()
+        if not Battle.objects.filter(pk=battle.pk).exclude(status='finished').update(
+                status='finished', finished_at=now, winner=winner):
+            return None
+        battle.status, battle.finished_at, battle.winner = 'finished', now, winner
 
         results = {}
         for profile, my_score, opp_score in (
@@ -445,10 +448,14 @@ class BattleConsumer(AsyncWebsocketConsumer):
             else:
                 result, xp, coins, elo = 'draw', 50, 5, 0
 
+            # Kunlik limit: ikki akkaunt o'zaro "jang" qilib cheksiz XP yig'masin (ELO baribir o'zgaradi).
+            if not claim_daily_reward(profile.id, 'battle_pvp'):
+                xp, coins = 0, 0
             profile.add_xp(xp)
             profile.add_coins(coins)
-            profile.elo_rating = max(500, profile.elo_rating + elo)
-            profile.save()
+            Profile.objects.filter(pk=profile.pk).update(
+                elo_rating=Greatest(Value(500), F('elo_rating') + elo))
+            profile.refresh_from_db(fields=['elo_rating'])
 
             # Qatnashish yetarli — g'alaba sharti emas (battles/api.py bilan bir xil).
             advance_missions(profile, 'battle')

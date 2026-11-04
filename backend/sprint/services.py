@@ -30,12 +30,12 @@ class QuizAnswerError(Exception):
         self.code = code
 
 
-def create_quiz_session(user, mode, question_ids):
+def create_quiz_session(user, mode, question_ids, ttl=SESSION_TTL):
     return QuizSession.objects.create(
         user=user,
         mode=mode,
         question_ids=[int(q) for q in question_ids],
-        expires_at=timezone.now() + SESSION_TTL,
+        expires_at=timezone.now() + ttl,
     )
 
 

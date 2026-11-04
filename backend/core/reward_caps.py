@@ -21,6 +21,8 @@ DAILY_REWARD_LIMITS = {
     'flashcards': 5,
     'study_session': 6,
     'battle_bot': 15,
+    # Jonli PvP jang (ikki akkaunt bilan o'zaro farm qilinmasin).
+    'battle_pvp': 20,
     # Mukofot emas, AI xarajati: ochiq javobni Groq bilan baholash (user.id bo'yicha).
     'open_question_ai': 60,
     # Esse tekshiruvi: qulflangan (bepul) natija ham to'liq Groq chaqiruvi. Limitsiz bo'lsa,
@@ -28,6 +30,13 @@ DAILY_REWARD_LIMITS = {
     'essay_ai': 10,
     # Fokus Sprint xato tushuntirishi: kesh topilmaganda pullik LLM chaqiruvi (user.id).
     'sprint_explain_ai': 40,
+    # Ijtimoiy XP: lenta posti, natija ulashish, story va reel savoli — har POST uchun
+    # XP berilardi (cheksiz, skript bilan reytingni ko'tarish mumkin edi). Umumiy limit.
+    'social_post': 3,
+    # Lentadagi SOS so'rovnomasini to'g'ri topish.
+    'poll_vote': 10,
+    # Viral duel: taklif qilgan o'quvchiga +100 tanga (ikkinchi akkaunt bilan farm qilinardi).
+    'duel_invite_bonus': 5,
 }
 
 _DAY_SECONDS = 60 * 60 * 26
@@ -49,3 +58,14 @@ def claim_daily_reward(profile_id, source):
 def claim_once(profile_id, source, item_id, ttl_days=30):
     """Bitta element (masalan, bitta reel savoli) uchun mukofot faqat bir marta."""
     return cache.add(f"reward_once:{source}:{profile_id}:{item_id}", 1, ttl_days * 24 * 60 * 60)
+
+
+def award_capped_xp(profile, source, amount):
+    """Kunlik limit ichida bo'lsa XP'ni atomik qo'shadi (daraja ham qayta hisoblanadi).
+    Qaytaradi: haqiqatda berilgan XP (limitdan oshsa 0)."""
+    if profile is None or amount <= 0:
+        return 0
+    if not claim_daily_reward(profile.id, source):
+        return 0
+    profile.add_xp(amount)
+    return 0 if profile.is_privileged else amount

@@ -147,12 +147,11 @@ export default function FlashcardsPage() {
     tgHaptic('success');
     celebrate();
 
-    const xpEarned = activeDeck.xp_reward || 25;
-    const coinsEarned = Math.round(xpEarned / 2);
-    setEarnedReward({ xp: xpEarned, coins: coinsEarned });
+    // Mukofot faqat server javobidan (kunlik limit / takroriy to'plamda 0 bo'ladi).
+    setEarnedReward({ xp: 0, coins: 0 });
 
     try {
-      await apiFetch('/api/learning/flashcards/complete/', {
+      const res = await apiFetch<{ xp_earned?: number; coins_earned?: number }>('/api/learning/flashcards/complete/', {
         method: 'POST',
         body: JSON.stringify({
           deck_id: activeDeck.id,
@@ -160,6 +159,7 @@ export default function FlashcardsPage() {
           total_cards: activeDeck.cards.length,
         }),
       });
+      setEarnedReward({ xp: res?.xp_earned ?? 0, coins: res?.coins_earned ?? 0 });
     } catch {
       // offline fallback
     }

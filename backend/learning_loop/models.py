@@ -77,6 +77,15 @@ class DailyLearningLoop(models.Model):
     arena_won = models.BooleanField(default=False)
 
     is_chest_claimed = models.BooleanField(default=False)
+
+    # Server tomonidan tekshiriladigan javoblar (sprint va arena alohida — savol kam
+    # bo'lsa arena sprint savollarini qayta ishlatadi, natijalar aralashmasin).
+    sprint_session = models.ForeignKey(
+        'sprint.QuizSession', on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
+    )
+    arena_session = models.ForeignKey(
+        'sprint.QuizSession', on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

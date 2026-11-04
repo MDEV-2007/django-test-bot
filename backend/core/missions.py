@@ -6,6 +6,7 @@ bildirishnoma yuborilardi, arena uchun yo'q; arena esa progressni FAQAT g'alaba
 holatida oshirardi, holbuki vazifa matni "1 ta jangda qatnashish" deydi — ya'ni
 yutqazgan o'quvchi jangda qatnashsa ham vazifasi bajarilmay qolardi.
 """
+from django.db.models import F
 from django.utils import timezone
 
 from .models import Notification, ProfileMission
@@ -24,8 +25,13 @@ def advance_missions(profile, action_type, amount=1):
     for pm in (ProfileMission.objects
                .filter(profile=profile, date=today, mission__action_type=action_type)
                .select_related('mission')):
-        pm.current_count += amount
-        if pm.current_count >= pm.mission.target_count and not pm.is_completed:
+        ProfileMission.objects.filter(pk=pm.pk).update(current_count=F('current_count') + amount)
+        pm.refresh_from_db(fields=['current_count', 'is_completed'])
+        if pm.current_count < pm.mission.target_count or pm.is_completed:
+            continue
+        # Atomik "egallash": parallel so'rovlar (masalan ikki test bir vaqtda yakunlansa)
+        # vazifa mukofotini ikki marta bermasin — faqat False -> True qilgan so'rov beradi.
+        if ProfileMission.objects.filter(pk=pm.pk, is_completed=False).update(is_completed=True):
             pm.is_completed = True
             profile.add_xp(pm.mission.xp_reward)
             profile.add_coins(pm.mission.coin_reward)
@@ -37,6 +43,5 @@ def advance_missions(profile, action_type, amount=1):
                 type='mission',
             )
             completed.append(pm)
-        pm.save(update_fields=['current_count', 'is_completed'])
 
     return completed

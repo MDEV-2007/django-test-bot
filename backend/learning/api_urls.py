@@ -9,8 +9,11 @@ urlpatterns = [
     path('toggle-bookmark/<int:lesson_id>/', api.toggle_bookmark_api, name='toggle_bookmark'),
     path('mentor/stream/', api.MentorStreamAPI.as_view(), name='mentor_stream'),
     path('flashcards/', api.flashcards_decks_api, name='flashcards_decks'),
-    path('flashcards/<str:deck_id>/', api.flashcards_deck_detail_api, name='flashcards_deck_detail'),
+    # `complete/` <str:deck_id> dan OLDIN: aks holda POST deck-detail (faqat GET) ga
+    # tushib 405 qaytarardi — flashcard mukofoti hech qachon berilmagan.
     path('flashcards/complete/', api.flashcards_complete_api, name='flashcards_complete'),
+    path('flashcards/<str:deck_id>/', api.flashcards_deck_detail_api, name='flashcards_deck_detail'),
+    path('study/start/', api.study_session_start_api, name='study_session_start'),
     path('study/complete/', api.study_session_complete_api, name='study_session_complete'),
     path('reels/', api.reels_feed_api, name='reels_feed'),
     path('reels/create/', api.reels_create_user_question_api, name='reels_create_user_question'),

@@ -6,16 +6,20 @@ challenge/character id, and the client echoes it back in the POST body — same 
 tests_app.api's revision deck (server never reveals the correct answer up front)."""
 import random
 
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from core.models import Notification
-from core.reward_caps import claim_daily_reward
+from core.reward_caps import claim_daily_reward, claim_once
 from tests_app.subject_utils import resolve_subject
 
 from .models import HistoricalCharacter, HistoricalEvent, MapChallenge
 from .services import seed_games_if_needed
+
+TIMELINE_SERVED_KEY = 'games:timeline_served:{pid}'
 
 
 @api_view(['GET', 'POST'])
@@ -29,6 +33,15 @@ def timeline_api(request):
             ordered_ids = [int(x) for x in ordered_ids]
         except (TypeError, ValueError):
             return Response({'error': "Noto'g'ri format"}, status=400)
+
+        # Faqat oxirgi GET bergan 4 ta voqea qabul qilinadi va har to'plamga bitta urinish.
+        # Ilgari istalgan (masalan, yillari oldingi xato javobdan ma'lum) 4 ta voqeani
+        # tartiblab yuborib, limit tugaguncha mukofot olish mumkin edi.
+        served_key = TIMELINE_SERVED_KEY.format(pid=profile.id)
+        served = cache.get(served_key)
+        if not served or sorted(set(ordered_ids)) != sorted(served):
+            return Response({'error': "Bu voqealar sizga berilmagan. Yangi o'yin boshlang."}, status=400)
+        cache.delete(served_key)
 
         events = {e.id: e for e in HistoricalEvent.objects.filter(id__in=ordered_ids)}
         ordered_events = [events[eid] for eid in ordered_ids if eid in events]
@@ -59,6 +72,8 @@ def timeline_api(request):
     all_events = list(HistoricalEvent.objects.filter(subject=subject) if subject else HistoricalEvent.objects.all())
     selected = random.sample(all_events, 4) if len(all_events) >= 4 else []
     random.shuffle(selected)
+    if selected:
+        cache.set(TIMELINE_SERVED_KEY.format(pid=profile.id), [e.id for e in selected], 60 * 60)
     return Response({
         'events': [{'id': e.id, 'title': e.title} for e in selected],
         'subjects': [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in subjects],
@@ -76,6 +91,12 @@ def map_api(request):
         region = request.data.get('region', '')
         challenge = get_object_or_404(MapChallenge, id=challenge_id)
         is_correct = region == challenge.correct_location
+        # Xato javob to'g'ri joyni ochib beradi — shu sababli mukofotni faqat shu kungi
+        # BIRINCHI urinish hal qiladi (xato -> javobni ko'rib qayta yuborish ishlamaydi).
+        first_try = claim_once(profile.id, 'game_map_try', f"{challenge.id}:{timezone.localdate()}", ttl_days=1)
+        if is_correct and not first_try:
+            return Response({'correct': True, 'xp': 0, 'coins': 0, 'already_attempted': True,
+                             'correct_location': challenge.correct_location})
         if is_correct and not claim_daily_reward(profile.id, 'game_map'):
             return Response({'correct': True, 'xp': 0, 'coins': 0, 'daily_limit_reached': True,
                              'correct_location': challenge.correct_location})
@@ -111,6 +132,11 @@ def character_api(request):
         # Bo'sh yoki 1-2 harfli taxmin ("a") ham ilgari "to'g'ri" sanalardi: har qanday
         # ism ichida u bor.
         is_correct = len(guess) >= 3 and (guess.lower() in char.name.lower() or char.name.lower() in guess.lower())
+        # Xato javob ismni ochib beradi — mukofotni shu kungi birinchi urinish hal qiladi.
+        first_try = claim_once(profile.id, 'game_character_try', f"{char.id}:{timezone.localdate()}", ttl_days=1)
+        if is_correct and not first_try:
+            return Response({'correct': True, 'xp': 0, 'coins': 0, 'already_attempted': True,
+                             'name': char.name, 'avatar_url': char.avatar_url})
         if is_correct and not claim_daily_reward(profile.id, 'game_character'):
             return Response({'correct': True, 'xp': 0, 'coins': 0, 'daily_limit_reached': True,
                              'name': char.name, 'avatar_url': char.avatar_url})

@@ -38,6 +38,8 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
     stageData,
     fetchLoop,
     advanceStage,
+    submitLoopAnswer,
+    isOffline,
     autoplayActive,
     autoplaySecondsLeft,
     startAutoplayTransition,
@@ -111,8 +113,9 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             if (arenaTimerRef.current) clearInterval(arenaTimerRef.current);
             return 0;
           }
-          // Ghost bot sekin-asta ball yig'adi
-          if (Math.random() > 0.65) {
+          // Oflayn demoda ghost tasodifiy ball yig'adi. Onlayn rejimda ghost natijasini
+          // server belgilaydi (ghost_moves) va u har savoldan keyin ko'rsatiladi.
+          if (isOffline && Math.random() > 0.65) {
             setGhostScore((g) => g + 10);
           }
           return prev - 1;
@@ -132,7 +135,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   };
 
   // ── STAGE 2 HARAKATI: JAVOBNI TANLASH ──
-  const handleSelectSprintOption = (optId: number) => {
+  const handleSelectSprintOption = async (optId: number) => {
     if (isAnswerChecked) return;
     const currentQ = sprintQuestions[sprintIndex];
     if (!currentQ) return;
@@ -140,8 +143,28 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
     setSelectedOptionId(optId);
     setIsAnswerChecked(true);
 
-    const chosen = currentQ.options.find((o) => o.id === optId);
-    const isCorrect = chosen?.is_correct ?? false;
+    let isCorrect: boolean;
+    let explanation = currentQ.explanation;
+    if (isOffline) {
+      const chosen = currentQ.options.find((o) => o.id === optId);
+      isCorrect = chosen?.is_correct ?? false;
+    } else {
+      // Javob serverda tekshiriladi; to'g'ri variant faqat shundan keyin ma'lum bo'ladi.
+      const result = await submitLoopAnswer('sprint', currentQ.id, optId, !!currentQ.isRevenge);
+      if (!result) {
+        setSelectedOptionId(null);
+        setIsAnswerChecked(false);
+        return;
+      }
+      isCorrect = result.is_correct;
+      explanation = result.explanation || explanation;
+      const markOptions = (q: SprintQuestion): SprintQuestion => ({
+        ...q,
+        explanation,
+        options: q.options.map((o) => ({ ...o, is_correct: o.id === result.correct_option_id })),
+      });
+      setSprintQuestions((prev) => prev.map((q, i) => (i === sprintIndex ? markOptions(q) : q)));
+    }
 
     if (isCorrect) {
       soundFX.correct();
@@ -157,11 +180,14 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
         setMistakeIds((prev) => [...prev, currentQ.id]);
       }
 
-      // Qasos savolini currentIndex + 3 ga navbatga qo'yamiz
+      // Qasos savolini currentIndex + 3 ga navbatga qo'yamiz. Javob kaliti nusxaga
+      // o'tmaydi — qasos javobi ham serverda qayta tekshiriladi.
       const revengeQ: SprintQuestion = {
         ...currentQ,
         isRevenge: true,
-        options: [...currentQ.options].sort(() => Math.random() - 0.5),
+        options: [...currentQ.options]
+          .map((o) => (isOffline ? o : { id: o.id, text: o.text }))
+          .sort(() => Math.random() - 0.5),
       };
 
       setSprintQuestions((prev) => {
@@ -172,9 +198,9 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
       });
 
       // AI Mentor Bottom Sheet ochamiz
-      setActiveHint(currentQ.ai_hint || {
-        aha_moment: "Nega adashdingiz: Diqqat qiling, savoldagi nozik farqqa e'tibor bering!",
-        memory_code: currentQ.explanation || "Mavzuning asosiy formulasini yodda saqlang.",
+      setActiveHint({
+        aha_moment: currentQ.ai_hint?.aha_moment || "Nega adashdingiz: Diqqat qiling, savoldagi nozik farqqa e'tibor bering!",
+        memory_code: explanation || currentQ.ai_hint?.memory_code || "Mavzuning asosiy formulasini yodda saqlang.",
       });
       setShowAiMentorSheet(true);
     }
@@ -226,28 +252,47 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   };
 
   // ── STAGE 4 HARAKATI: ARENA SAVOLIGA JAVOB BERISH ──
-  const handleArenaAnswer = (isCorrect: boolean) => {
+  const [isArenaSubmitting, setIsArenaSubmitting] = useState(false);
+  const handleArenaAnswer = async (optId: number) => {
+    const currentQ = arenaQuestions[arenaIndex];
+    if (!currentQ || isArenaSubmitting) return;
+
+    let isCorrect: boolean;
+    if (isOffline) {
+      isCorrect = currentQ.options.find((o) => o.id === optId)?.is_correct ?? false;
+    } else {
+      setIsArenaSubmitting(true);
+      const result = await submitLoopAnswer('arena', currentQ.id, optId);
+      setIsArenaSubmitting(false);
+      if (!result) return;
+      isCorrect = result.is_correct;
+    }
+
+    const points = stageData?.arena?.points_per_correct || 20;
+    const nextUserScore = userScore + (isCorrect ? points : 0);
     if (isCorrect) {
       soundFX.correct();
       tgHaptic('medium');
-      setUserScore((s) => s + 20);
     } else {
       soundFX.incorrect();
       tgHaptic('error');
+    }
+    setUserScore(nextUserScore);
+
+    // Onlayn: ghost bali server bergan natijalardan (shu savolgacha).
+    const ghostMoves = stageData?.arena?.ghost_moves;
+    if (!isOffline && ghostMoves) {
+      setGhostScore(ghostMoves.slice(0, arenaIndex + 1).filter(Boolean).length * points);
     }
 
     if (arenaIndex + 1 < arenaQuestions.length) {
       setArenaIndex((i) => i + 1);
     } else {
-      // Arena tugadi!
-      const won = userScore >= ghostScore;
-      if (won) soundFX.fanfare();
+      // Arena tugadi! G'olibni server hal qiladi; bu yerdagi taxmin faqat ovoz effekti uchun.
+      const ghostFinal = !isOffline && ghostMoves ? ghostMoves.filter(Boolean).length * points : ghostScore;
+      if (nextUserScore >= ghostFinal) soundFX.fanfare();
       startAutoplayTransition('STAGE_5_COMPLETED', async () => {
-        await advanceStage('STAGE_4_ARENA', {
-          arena_won: won,
-          player_score: userScore,
-          ghost_score: ghostScore,
-        });
+        await advanceStage('STAGE_4_ARENA', isOffline ? { arena_won: nextUserScore >= ghostFinal } : {});
       });
     }
   };
@@ -672,7 +717,8 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                     <button
                       key={opt.id}
                       type="button"
-                      onClick={() => handleArenaAnswer(opt.is_correct)}
+                      onClick={() => handleArenaAnswer(opt.id)}
+                      disabled={isArenaSubmitting}
                       className="p-4 rounded-2xl border border-white/10 bg-zinc-900 hover:border-orange-500/50 hover:bg-orange-500/10 font-bold text-sm text-left transition-all active:scale-95 cursor-pointer"
                     >
                       {opt.text}

@@ -133,11 +133,18 @@ class MiniGameFarmTests(TestCase):
     def test_single_event_is_not_a_free_win(self):
         self.assertEqual(self._post_timeline([self.events[0].id]).status_code, 400)
 
+    def _play_round(self):
+        # Har urinish yangi GET'dan boshlanadi: server faqat o'zi bergan to'plamni qabul qiladi.
+        subject = make_subject()
+        HistoricalEvent.objects.filter(pk__in=[e.pk for e in self.events]).update(subject=subject)
+        served = self.client.get(f'/api/games/timeline/?subject={subject.slug}').json()['events']
+        years = {e.id: e.year for e in self.events}
+        return self._post_timeline(sorted((e['id'] for e in served), key=years.get))
+
     def test_rewards_stop_after_the_daily_limit(self):
-        ids = [e.id for e in self.events]
         for _ in range(DAILY_REWARD_LIMITS['game_timeline']):
-            self.assertEqual(self._post_timeline(ids).json()['xp'], 100)
-        over = self._post_timeline(ids).json()
+            self.assertEqual(self._play_round().json()['xp'], 100)
+        over = self._play_round().json()
         self.assertTrue(over['correct'])
         self.assertEqual(over['coins'], 0)
         self.profile.refresh_from_db()

@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from b2b_ads.models import EduCenterCampaign
 from tests.factories import make_attempt, make_question, make_subject, make_test_set, make_user
+from tests.loop_helpers import answer_loop_questions, stage_question_ids
 from tests_app.models import Attempt
 
 
@@ -95,8 +96,12 @@ class LearningLoopFlowTests(TestCase):
                                 content_type='application/json')
 
     def _complete_cycle(self):
-        for stage in ('STAGE_1_WARMUP', 'STAGE_2_SPRINT', 'STAGE_4_ARENA'):
-            self.assertEqual(self._advance(stage, {'mistake_question_ids': []}).status_code, 200, stage)
+        current = self.client.get('/api/v1/loop/current/').json()
+        self.assertEqual(self._advance('STAGE_1_WARMUP').status_code, 200)
+        answer_loop_questions(self.client, 'sprint', stage_question_ids(current, 'sprint'))
+        self.assertEqual(self._advance('STAGE_2_SPRINT').status_code, 200)
+        answer_loop_questions(self.client, 'arena', stage_question_ids(current, 'arena'))
+        self.assertEqual(self._advance('STAGE_4_ARENA').status_code, 200)
 
     def test_cannot_jump_straight_to_the_chest(self):
         self.assertEqual(self._advance('STAGE_4_ARENA').status_code, 409)

@@ -107,9 +107,13 @@ class QuizSession(models.Model):
     """
     MODE_SPRINT = 'sprint'
     MODE_BLITZ = 'blitz'
+    MODE_LOOP_SPRINT = 'loop_sprint'
+    MODE_LOOP_ARENA = 'loop_arena'
     MODE_CHOICES = [
         (MODE_SPRINT, 'Fokus Sprint'),
         (MODE_BLITZ, '7-savollik Blitz'),
+        (MODE_LOOP_SPRINT, 'Avtopilot: Sprint'),
+        (MODE_LOOP_ARENA, 'Avtopilot: Arena'),
     ]
 
     user = models.ForeignKey(

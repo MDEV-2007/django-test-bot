@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db import transaction
+from core.reward_caps import claim_daily_reward
 from django.db.models import F
 from django.utils import timezone
 from accounts.models import ensure_profile_for_user
@@ -315,6 +316,11 @@ class SubmitDuelResultAPIView(APIView):
             duel.completed_at = timezone.now()
 
             award_bonus = not duel.bonus_awarded
+            # Kunlik limit: har yangi duel uchun +100 tanga — boshqa akkaunt bilan o'z
+            # duellarini topshirib cheksiz tanga yig'ish mumkin edi.
+            if award_bonus and not claim_daily_reward(duel.creator_id, 'duel_invite_bonus'):
+                duel.bonus_awarded = True
+                award_bonus = False
             if award_bonus:
                 duel.bonus_awarded = True
                 duel.creator.add_coins(100)

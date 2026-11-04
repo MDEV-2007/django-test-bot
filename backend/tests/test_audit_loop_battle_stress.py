@@ -9,6 +9,7 @@ from learning.models import CommunityPost
 from learning_loop.models import DailyLearningLoop
 from tests_app.models import Attempt, TestSet
 from tests.factories import make_question, make_subject, make_test_set, make_topic, make_user
+from tests.loop_helpers import answer_loop_questions, stage_question_ids
 
 
 def auth(client, user):
@@ -155,6 +156,9 @@ class DailyLoopTests(TestCase):
     def test_sprint_payload_is_bounded_by_the_real_sprint(self):
         sprint_ids = [q['id'] for q in self._current()['stage_data']['sprint']['questions']]
         self._advance('STAGE_1_WARMUP')
+        # Natija serverda tekshirilgan javoblardan olinadi; payload'dagi soxta qiymatlar
+        # (begona savol ID'si, 999 ta to'g'ri javob) e'tiborsiz qoladi.
+        answer_loop_questions(self.client, 'sprint', sprint_ids, wrong_ids={sprint_ids[0]})
         res = self._advance('STAGE_2_SPRINT', {
             'mistake_question_ids': [self.secret.id, sprint_ids[0]],
             'correct_count': 999, 'total_count': 999,
@@ -167,10 +171,12 @@ class DailyLoopTests(TestCase):
         self.assertEqual(loop.sprint_score, len(sprint_ids) - 1)
 
     def _complete_cycle(self):
-        self._current()
+        current = self._current()
         self._advance('STAGE_1_WARMUP')
-        self._advance('STAGE_2_SPRINT', {'mistake_question_ids': [], 'correct_count': 12})
-        return self._advance('STAGE_4_ARENA', {'arena_won': True})
+        answer_loop_questions(self.client, 'sprint', stage_question_ids(current, 'sprint'))
+        self._advance('STAGE_2_SPRINT')
+        answer_loop_questions(self.client, 'arena', stage_question_ids(current, 'arena'))
+        return self._advance('STAGE_4_ARENA')
 
     def test_share_post_needs_a_finished_cycle_and_pays_once(self):
         self._current()

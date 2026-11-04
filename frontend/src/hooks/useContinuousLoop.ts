@@ -31,7 +31,14 @@ export interface EcoTreeState {
 export interface SprintQuestionOption {
   id: number;
   text: string;
+  /** Server savollarida faqat javobdan keyin to'ldiriladi; oflayn demo savollarda oldindan bor. */
+  is_correct?: boolean;
+}
+
+export interface LoopAnswerResult {
   is_correct: boolean;
+  correct_option_id: number | null;
+  explanation: string;
 }
 
 export interface SprintQuestion {
@@ -44,7 +51,7 @@ export interface SprintQuestion {
     memory_code: string;
     analysis_time: string;
   };
-  explanation: string;
+  explanation?: string;
   isRevenge?: boolean;
 }
 
@@ -84,6 +91,9 @@ export interface LoopStageData {
     opponent: ArenaOpponent;
     duration_seconds: number;
     questions: SprintQuestion[];
+    /** Ghostning har savoldagi natijasi (server hal qiladi). Oflayn demoda yo'q. */
+    ghost_moves?: boolean[];
+    points_per_correct?: number;
   };
   rewards: {
     coins: number;
@@ -465,6 +475,9 @@ export function useContinuousLoop() {
     needs_water: false,
   });
   const [stageData, setStageData] = useState<LoopStageData>(DEFAULT_FALLBACK_STAGE_DATA);
+  // true — server javob bermadi va demo savollar ko'rsatilmoqda (javob lokal tekshiriladi,
+  // hech narsa saqlanmaydi). false — javoblar serverda tekshiriladi.
+  const [isOffline, setIsOffline] = useState(true);
 
   // 3-Soniyalik Avtopilot Ko'prigi (Autoplay Transition Bridge)
   const [autoplayActive, setAutoplayActive] = useState(false);
@@ -490,18 +503,21 @@ export function useContinuousLoop() {
       }>('/api/v1/loop/current/');
 
       if (res?.ok && res.loop && res.stage_data) {
+        setIsOffline(false);
         setLoop(res.loop);
         setTopic(res.topic);
         setEcoTree(res.eco_tree);
         setStageData(res.stage_data);
       } else {
         // Fallback default
+        setIsOffline(true);
         setLoop(DEFAULT_FALLBACK_LOOP);
         setTopic({ id: 1, title: "O'zbekiston tarixi & DTM Standartlari", subject_name: "Tarix" });
         setStageData(DEFAULT_FALLBACK_STAGE_DATA);
       }
     } catch {
       // Fallback default
+      setIsOffline(true);
       setLoop(DEFAULT_FALLBACK_LOOP);
       setTopic({ id: 1, title: "O'zbekiston tarixi & DTM Standartlari", subject_name: "Tarix" });
       setStageData(DEFAULT_FALLBACK_STAGE_DATA);
@@ -596,6 +612,36 @@ export function useContinuousLoop() {
       return null;
     },
     [fetchLoop]
+  );
+
+  // Javobni serverga yuborish (sprint yoki arena). Xatoda null — chaqiruvchi holatni tiklaydi.
+  const submitLoopAnswer = useCallback(
+    async (
+      stage: 'sprint' | 'arena',
+      questionId: number,
+      optionId: number,
+      revenge = false,
+    ): Promise<LoopAnswerResult | null> => {
+      try {
+        const res = await apiFetch<{ ok: boolean } & LoopAnswerResult>('/api/v1/loop/answer/', {
+          method: 'POST',
+          body: JSON.stringify({ stage, question_id: questionId, option_id: optionId, revenge }),
+        });
+        return {
+          is_correct: !!res.is_correct,
+          correct_option_id: res.correct_option_id ?? null,
+          explanation: res.explanation || '',
+        };
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 409) {
+          // Bosqich serverda allaqachon o'zgargan — holatni qayta olamiz.
+          await fetchLoop();
+        }
+        toast.error(err instanceof Error && err.message ? err.message : "Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
+        return null;
+      }
+    },
+    [fetchLoop],
   );
 
   // 3-Soniyalik Avtopilotni ishga tushirish (Bridge Tramplin)
@@ -750,6 +796,8 @@ export function useContinuousLoop() {
     stageData,
     fetchLoop,
     advanceStage,
+    submitLoopAnswer,
+    isOffline,
     // Autoplay
     autoplayActive,
     autoplaySecondsLeft,

@@ -173,6 +173,8 @@ export default function StudyRoomPage() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const noiseNodeRef = useRef<AudioNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
+  // Server sessiya boshlanishini qayd etdimi (mukofot server o'lchagan vaqtga qarab beriladi).
+  const studyStartedRef = useRef(false);
 
   // Onlayn hamrohlar
 
@@ -291,6 +293,7 @@ export default function StudyRoomPage() {
     soundFX.fanfare();
     setIsRunning(false);
     setSessionsCompleted((prev) => prev + 1);
+    studyStartedRef.current = false;
 
     // Mukofot faqat server javobiga ko'ra ko'rsatiladi (kunlik limit / xato bo'lsa 0 XP).
     let xpEarned = 0;
@@ -329,6 +332,12 @@ export default function StudyRoomPage() {
       // Default yomg'ir ovozini ishga tushiramiz
       setActiveSound('rain');
       startAmbientSound('rain');
+    }
+    if (!isRunning && !studyStartedRef.current) {
+      studyStartedRef.current = true;
+      apiFetch('/api/learning/study/start/', { method: 'POST' }).catch(() => {
+        studyStartedRef.current = false;
+      });
     }
     setIsRunning(!isRunning);
   };

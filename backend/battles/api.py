@@ -3,12 +3,13 @@ the overall JWT-API pattern. Live PvP itself stays on the WebSocket consumers
 (battles/consumers.py); these endpoints cover the arena page and the AI-bot battle flow."""
 import random
 
-from django.db.models import Q
+from django.db.models import F, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from accounts.models import Profile
 from core.missions import advance_missions
 from core.models import Notification
 from core.reward_caps import claim_daily_reward
@@ -186,8 +187,13 @@ def finish_battle_api(request):
 
     profile.add_xp(xp_gained)
     profile.add_coins(coins_gained)
-    profile.elo_rating = max(500, profile.elo_rating + elo_change)
-    profile.save()
+    # ELO atomik: to'liq profile.save() boshqa so'rov yozgan tanga/XP'ni eski qiymat
+    # bilan ustidan yozib yuborishi mumkin edi (lost update).
+    from django.db.models import Value
+    from django.db.models.functions import Greatest
+    Profile.objects.filter(pk=profile.pk).update(
+        elo_rating=Greatest(Value(500), F('elo_rating') + elo_change))
+    profile.refresh_from_db(fields=['elo_rating'])
 
     # Vazifa "1 ta jangda QATNASHISH" deydi, shuning uchun natijadan qat'i nazar
     # hisoblanadi. Ilgari faqat g'alaba sanalardi va yutqazgan o'quvchi jang qilsa ham

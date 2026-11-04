@@ -9,6 +9,7 @@ import json
 from django.db.models import Prefetch, Count
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -514,10 +515,19 @@ def flashcards_deck_detail_api(request, deck_id):
 def flashcards_complete_api(request):
     """Awards XP, coins, and updates streak upon completing a flashcard study session."""
     profile = request.user.profile
-    deck_id = request.data.get('deck_id')
-    learned_count = int(request.data.get('learned_count') or 5)
+    deck_id = str(request.data.get('deck_id') or '').strip()
 
-    xp_gain, coin_gain = (25, 10) if claim_daily_reward(profile.id, 'flashcards') else (0, 0)
+    # To'plam haqiqatan mavjud bo'lishi kerak va bitta to'plam kuniga bir marta mukofot
+    # beradi. Ilgari istalgan deck_id bilan (yoki umuman yo'q bo'lsa ham) bir xil to'plamni
+    # qayta-qayta "yakunlab" kunlik limitni to'ldirish mumkin edi.
+    deck_exists = any(str(d['id']) == deck_id for d in CURATED_DECKS) or (
+        deck_id.isdigit() and Lesson.objects.filter(id=int(deck_id), is_published=True).exists()
+    )
+    if not deck_exists:
+        return Response({'error': "To'plam topilmadi"}, status=404)
+
+    first_today = claim_once(profile.id, 'flashcards_deck', f"{deck_id}:{timezone.localdate()}", ttl_days=1)
+    xp_gain, coin_gain = (25, 10) if first_today and claim_daily_reward(profile.id, 'flashcards') else (0, 0)
 
     leveled_up = profile.add_xp(xp_gain)
     profile.add_coins(coin_gain)
@@ -536,10 +546,31 @@ def flashcards_complete_api(request):
     })
 
 
+STUDY_SESSION_KEY = 'study_session_started:{pid}'
+STUDY_MIN_MINUTES = 5
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def study_session_start_api(request):
+    """Fokus sessiyasi boshlanganini serverda qayd etadi. Mukofot shu vaqtdan beri
+    haqiqatan o'tgan daqiqalar bo'yicha hisoblanadi."""
+    from django.core.cache import cache
+    profile = request.user.profile
+    key = STUDY_SESSION_KEY.format(pid=profile.id)
+    # Ochiq sessiya bo'lsa uni yangilamaymiz (pauza/davom ettirish vaqtni nolga tushirmasin).
+    started = cache.get(key)
+    if started is None:
+        started = timezone.now().timestamp()
+        cache.set(key, started, 3 * 60 * 60)
+    return Response({'success': True, 'started_at': started})
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def study_session_complete_api(request):
     """O'quvchi Pomodoro fokus dars sessiyasini yakunlaganda XP, tanga va streak beradi."""
+    from django.core.cache import cache
     profile = request.user.profile
     try:
         duration_minutes = int(request.data.get('duration_minutes', 25))
@@ -554,21 +585,30 @@ def study_session_complete_api(request):
     duration_minutes = max(1, min(60, duration_minutes))
     goals_done = max(0, min(5, goals_done))
 
+    # Davomiylik server qayd etgan boshlanish vaqtidan: klient "60 daqiqa" deb darhol
+    # yakunlab, kuniga 6 marta to'liq mukofot olardi. Sessiya bir marta yopiladi.
+    key = STUDY_SESSION_KEY.format(pid=profile.id)
+    started = cache.get(key)
+    cache.delete(key)
+    elapsed_minutes = int((timezone.now().timestamp() - started) // 60) if started else 0
+    duration_minutes = min(duration_minutes, elapsed_minutes)
+
     # Har 25 daqiqa dars uchun 25 XP va 10 tanga
     xp_gain = max(10, min(150, int((duration_minutes / 25) * 25) + goals_done * 5))
     coin_gain = max(5, min(50, int((duration_minutes / 25) * 10)))
-    if not claim_daily_reward(profile.id, 'study_session'):
+    if duration_minutes < STUDY_MIN_MINUTES or not claim_daily_reward(profile.id, 'study_session'):
         xp_gain = coin_gain = 0
 
     leveled_up = profile.add_xp(xp_gain)
     profile.add_coins(coin_gain)
-    profile.update_streak()
-
-    try:
-        from core.missions import advance_missions
-        advance_missions(profile, 'lesson')
-    except Exception:
-        pass
+    if duration_minutes >= STUDY_MIN_MINUTES:
+        # Streak va kunlik vazifa ham faqat haqiqiy (kamida 5 daqiqalik) sessiyadan.
+        profile.update_streak()
+        try:
+            from core.missions import advance_missions
+            advance_missions(profile, 'lesson')
+        except Exception:
+            pass
 
     return Response({
         'success': True,
@@ -969,13 +1009,14 @@ def reels_create_user_question_api(request):
         is_published=True,
     )
 
-    profile = getattr(request.user, 'profile', None)
-    if profile:
-        profile.add_xp(20)
+    from core.reward_caps import award_capped_xp
+    xp_earned = award_capped_xp(getattr(request.user, 'profile', None), 'social_post', 20)
 
     return Response({
         'success': True,
-        'message': "Savolingiz Bilim Reels lentasiga muvaffaqiyatli qo'shildi! (+20 XP) 🔥",
+        'message': (f"Savolingiz Bilim Reels lentasiga muvaffaqiyatli qo'shildi! (+{xp_earned} XP) 🔥"
+                    if xp_earned else "Savolingiz Bilim Reels lentasiga muvaffaqiyatli qo'shildi!"),
+        'xp_earned': xp_earned,
         'reel': reel.to_dict(),
     }, status=201)
 
@@ -1098,15 +1139,15 @@ def community_post_create_api(request):
             custom_image=custom_img,
         )
 
-        profile = request.user.profile
-        profile.xp += 15
-        profile.save(update_fields=['xp'])
+        from core.reward_caps import award_capped_xp
+        xp_earned = award_capped_xp(request.user.profile, 'social_post', 15)
 
         return Response({
             'success': True,
-            'message': "Yutug'ingiz muvaffaqiyatli hamjamiyat lentasiga joylandi! +15 XP berildi 🔥",
+            'message': (f"Yutug'ingiz muvaffaqiyatli hamjamiyat lentasiga joylandi! +{xp_earned} XP berildi 🔥"
+                        if xp_earned else "Yutug'ingiz muvaffaqiyatli hamjamiyat lentasiga joylandi!"),
             'post': post.to_dict(current_user=request.user),
-            'xp_earned': 15,
+            'xp_earned': xp_earned,
         })
 
     # 2. Agar test natijasi bo'lsa:
@@ -1195,16 +1236,16 @@ def community_post_create_api(request):
     except Exception:
         pass
 
-    # O'quvchiga +15 XP bonus beramiz
-    profile = request.user.profile
-    profile.xp += 15
-    profile.save(update_fields=['xp'])
+    # O'quvchiga +15 XP bonus (kunlik limit bilan — test qayta topshirilib cheksiz ulashilardi)
+    from core.reward_caps import award_capped_xp
+    xp_earned = award_capped_xp(request.user.profile, 'social_post', 15)
 
     return Response({
         'success': True,
-        'message': "Natijangiz muvaffaqiyatli hamjamiyat lentasiga joylandi! +15 XP berildi 🔥",
+        'message': (f"Natijangiz muvaffaqiyatli hamjamiyat lentasiga joylandi! +{xp_earned} XP berildi 🔥"
+                    if xp_earned else "Natijangiz muvaffaqiyatli hamjamiyat lentasiga joylandi!"),
         'post': post.to_dict(current_user=request.user),
-        'xp_earned': 15,
+        'xp_earned': xp_earned,
     })
 
 
@@ -1645,14 +1686,15 @@ def community_auto_post_api(request):
         except Exception:
             pass
 
-    # Foydalanuvchiga +15 XP bonus
-    if profile:
-        profile.xp += 15
-        profile.save(update_fields=['xp'])
+    # Foydalanuvchiga +15 XP bonus (kunlik limit bilan)
+    from core.reward_caps import award_capped_xp
+    xp_earned = award_capped_xp(profile, 'social_post', 15)
 
     return Response({
         'success': True,
-        'message': "Natijangiz Lenta va Story'ga muvaffaqiyatli joylandi! (+15 XP berildi 🔥)",
+        'xp_earned': xp_earned,
+        'message': (f"Natijangiz Lenta va Story'ga muvaffaqiyatli joylandi! (+{xp_earned} XP berildi 🔥)"
+                    if xp_earned else "Natijangiz Lenta va Story'ga muvaffaqiyatli joylandi!"),
         'post': post.to_dict(current_user=user),
     })
 
@@ -1661,10 +1703,23 @@ def community_auto_post_api(request):
 @permission_classes([IsAuthenticated])
 def community_post_vote_poll_api(request, post_id):
     """Lentadagi SOS savoliga A/B/C/D bosib javob berish (real vaqtda foizlarni ko'rsatadi)."""
-    post = CommunityPost.objects.filter(id=post_id).first()
-    if not post:
-        return Response({'error': "Post topilmadi."}, status=404)
+    from django.db import transaction
+    from core.reward_caps import award_capped_xp
 
+    selected_option = request.data.get('selected_option')
+    if not selected_option:
+        return Response({'error': "Variant tanlanmadi."}, status=400)
+
+    with transaction.atomic():
+        # Qulf: parallel ovozlar poll_data JSON'ini bir-birining ustidan yozib yubormasin
+        # (va bir foydalanuvchi ikki marta "birinchi" ovoz bera olmasin).
+        post = CommunityPost.objects.select_for_update().filter(id=post_id).first()
+        if not post:
+            return Response({'error': "Post topilmadi."}, status=404)
+        return _vote_poll_locked(request, post, selected_option, award_capped_xp)
+
+
+def _vote_poll_locked(request, post, selected_option, award_capped_xp):
     poll_data = post.poll_data or {}
     options = poll_data.get('options', [])
     votes = poll_data.get('votes', {})
@@ -1673,10 +1728,9 @@ def community_post_vote_poll_api(request, post_id):
     explanation = poll_data.get('explanation', '')
 
     user_id_str = str(request.user.id)
-    selected_option = request.data.get('selected_option')
-
-    if not selected_option:
-        return Response({'error': "Variant tanlanmadi."}, status=400)
+    # Variant harf ('A') yoki matn bo'lishi mumkin (ikki xil klient) — faqat hajmni cheklaymiz.
+    if not isinstance(selected_option, str) or len(selected_option) > 500:
+        return Response({'error': "Noto'g'ri variant."}, status=400)
 
     # Agar foydalanuvchi hali ovoz bermagan bo'lsa
     if user_id_str not in voted_users:
@@ -1687,12 +1741,9 @@ def community_post_vote_poll_api(request, post_id):
         post.poll_data = poll_data
         post.save(update_fields=['poll_data'])
 
-        # To'g'ri topgan bo'lsa +5 XP rag'bat
-        if selected_option == correct_option:
-            prof = getattr(request.user, 'profile', None)
-            if prof:
-                prof.xp += 5
-                prof.save(update_fields=['xp'])
+        # To'g'ri topgan bo'lsa +5 XP rag'bat. Post muallifi javobni biladi — unga berilmaydi.
+        if selected_option == correct_option and post.author_id != request.user.id:
+            award_capped_xp(getattr(request.user, 'profile', None), 'poll_vote', 5)
 
     is_correct = (selected_option == correct_option)
     total_votes = sum(votes.values())
@@ -1790,14 +1841,14 @@ def community_story_create_api(request):
         expires_at=timezone.now() + timedelta(hours=24),
     )
 
-    profile = getattr(user, 'profile', None)
-    if profile:
-        profile.xp += 15
-        profile.save(update_fields=['xp'])
+    from core.reward_caps import award_capped_xp
+    xp_earned = award_capped_xp(getattr(user, 'profile', None), 'social_post', 15)
 
     return Response({
         'success': True,
-        'message': "Story muvaffaqiyatli joylandi! (+15 XP berildi 🔥)",
+        'xp_earned': xp_earned,
+        'message': (f"Story muvaffaqiyatli joylandi! (+{xp_earned} XP berildi 🔥)"
+                    if xp_earned else "Story muvaffaqiyatli joylandi!"),
         'story': {
             'id': story.id,
             'title': story.title,
