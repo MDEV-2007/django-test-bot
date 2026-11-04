@@ -1,4 +1,5 @@
 import random
+from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -148,7 +149,7 @@ class AdaptiveOnboardingAPIView(APIView):
     Yangi ro'yxatdan o'tgan o'quvchilar uchun 7-savollik Dofamin Blitz to'plami.
     1-4: EASY (dofamin), 5-6: MEDIUM, 7: HARD (zaif nuqtani aniqlash).
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         subject_slug = request.GET.get('subject', '')
@@ -178,14 +179,14 @@ class AdaptiveOnboardingAPIView(APIView):
 
         payload = []
         for idx, q in enumerate(selected):
-            choices = [{'id': c.id, 'text': c.text, 'is_correct': c.is_correct} for c in q.choices.all()]
+            choices = [{'id': c.id, 'text': c.text} for c in q.choices.all()]
             # Shuffle choices
             random.shuffle(choices)
             payload.append({
                 'index': idx + 1,
                 'id': q.id,
                 'body': q.body,
-                'difficulty': q.difficulty,
+                'difficulty': (q.difficulty or 'easy').upper(),
                 'topic': q.topic.title if q.topic else (q.subject.name if q.subject else "Umumiy"),
                 'choices': choices,
             })
@@ -201,6 +202,62 @@ class AdaptiveOnboardingAPIView(APIView):
                 'next_step_route': "/sprint",
                 'cta_text': "🚀 A darajaga chiqish: 3 daqiqalik 2-bosqichni boshlash (+100 Tanga Bonus)"
             }
+        })
+
+
+class AdaptiveOnboardingAnswerAPIView(APIView):
+    """POST /api/growth/onboarding/blitz/answer/ — javobni serverda tekshiradi."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            question_id = int(request.data.get('question_id'))
+            choice_id = int(request.data.get('choice_id'))
+        except (TypeError, ValueError):
+            return Response(
+                {'ok': False, 'error': "Savol yoki variant ID noto'g'ri."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        question = Question.objects.filter(
+            pk=question_id,
+            question_type__in=Question.SINGLE_ANSWER_TYPES,
+        ).prefetch_related('choices', 'topic', 'subject').first()
+        if question is None:
+            return Response(
+                {'ok': False, 'error': "Savol topilmadi."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Bir foydalanuvchi bir savolga 24 soat ichida faqat bir marta javob bera oladi.
+        # Cache.add atomik ishlaydi (Redis yoki Django cache backend).
+        attempt_key = f"blitz_answer:{request.user.pk}:{question.pk}:{timezone.localdate().isoformat()}"
+        if not cache.add(attempt_key, True, timeout=24 * 60 * 60):
+            return Response(
+                {'ok': False, 'error': "Bu savolga javob allaqachon yuborilgan."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        selected = question.choices.filter(pk=choice_id).first()
+        if selected is None:
+            cache.delete(attempt_key)
+            return Response(
+                {'ok': False, 'error': "Tanlangan variant ushbu savolga tegishli emas."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        correct = question.choices.filter(is_correct=True).first()
+        if correct is None:
+            cache.delete(attempt_key)
+            return Response(
+                {'ok': False, 'error': "Savol uchun to'g'ri javob belgilanmagan."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response({
+            'ok': True,
+            'is_correct': selected.is_correct,
+            'correct_choice_id': correct.id,
         })
 
 
