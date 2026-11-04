@@ -15,7 +15,7 @@ export interface QuestionItem {
   topicTitle: string;
   body: string;
   options: QuestionOption[];
-  correctOptionId: string | number;
+  correctOptionId?: string | number;
   difficulty?: 'easy' | 'medium' | 'hard';
   /* Qasos savoli parametrlari */
   isRevenge?: boolean;
