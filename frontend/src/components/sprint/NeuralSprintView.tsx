@@ -24,6 +24,8 @@ import { useNeuralSprint } from '@/hooks/useNeuralSprint';
 
 interface NeuralSprintViewProps {
   questions: QuestionItem[];
+  /** Server sprint sessiyasi; null bo'lsa oflayn zaxira rejimi. */
+  sessionId?: number | null;
   initialDtmScore?: number;
   initialTopicMastery?: number;
   topicTitle?: string;
@@ -35,6 +37,7 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function NeuralSprintView({
   questions,
+  sessionId = null,
   initialDtmScore = 178.4,
   initialTopicMastery = 45,
   topicTitle = "O'zbekiston Tarixi",
@@ -131,6 +134,7 @@ export default function NeuralSprintView({
     selectOption,
   } = useNeuralSprint({
     initialQuestions: questions,
+    sessionId,
     initialDtmScore,
     initialTopicMastery,
     topicTitle,

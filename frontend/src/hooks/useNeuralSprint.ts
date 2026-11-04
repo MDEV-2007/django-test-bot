@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { tgHaptic, useTelegramBackButton } from '@/lib/telegram';
 import { apiFetch } from '@/lib/api-client';
+import { toast } from 'sonner';
 import type {
   QuestionItem,
   QuestionOption,
@@ -33,6 +34,8 @@ export function shuffleArray<T>(items: T[]): T[] {
 
 export type UseNeuralSprintOptions = {
   initialQuestions: QuestionItem[];
+  /** Server bergan sprint sessiyasi. Bo'lmasa (oflayn zaxira) javob lokal tekshiriladi. */
+  sessionId?: number | null;
   initialDtmScore?: number;
   maxDtmScore?: number;
   initialTopicMastery?: number;
@@ -42,8 +45,17 @@ export type UseNeuralSprintOptions = {
   onAnswerWrong?: (q: QuestionItem, explanation: MistakeExplanationCache | null) => void;
 };
 
+type SprintAnswerResponse = {
+  ok: boolean;
+  is_correct: boolean;
+  correct_option_id: number | null;
+  duplicate?: boolean;
+  error?: string;
+};
+
 export function useNeuralSprint({
   initialQuestions,
+  sessionId = null,
   initialDtmScore = 178.4,
   maxDtmScore = 189.0,
   initialTopicMastery = 45,
@@ -158,8 +170,44 @@ export function useNeuralSprint({
     setSelectedOptionId(optionId);
     setIsVerifying(true);
 
-    const isCorrect = optionId === currentQuestion.correctOptionId;
     const isRevenge = !!currentQuestion.isRevenge;
+    const realQuestionId = currentQuestion.originalQuestionId ?? currentQuestion.id;
+
+    // Javob serverda tekshiriladi: savollar GET javobida kalit yo'q. Faqat oflayn
+    // zaxira savollari (sessiyasiz) lokal kalit bilan tekshiriladi.
+    let isCorrect: boolean;
+    let correctOptionId: string | number | undefined = currentQuestion.correctOptionId;
+    if (sessionId && !currentQuestion.isOffline) {
+      try {
+        const res = await apiFetch<SprintAnswerResponse>('/api/v1/sprint/answer/', {
+          method: 'POST',
+          body: JSON.stringify({
+            session_id: sessionId,
+            question_id: realQuestionId,
+            option_id: optionId,
+            revenge: isRevenge,
+          }),
+        });
+        isCorrect = !!res.is_correct;
+        correctOptionId = res.correct_option_id ?? undefined;
+      } catch (err) {
+        // Javob qabul qilinmadi — holatni tiklaymiz, o'quvchi qayta bosishi mumkin
+        // (server takroriy yuborishni bir marta hisoblaydi).
+        tgHaptic('warning');
+        setSelectedOptionId(null);
+        setIsVerifying(false);
+        toast.error(err instanceof Error && err.message ? err.message : "Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
+        return;
+      }
+    } else {
+      isCorrect = correctOptionId !== undefined && optionId === correctOptionId;
+    }
+
+    // To'g'ri variant endi ma'lum — UI (yashil belgi) va qasos nusxasi uchun saqlaymiz.
+    const answeredQuestion: QuestionItem = { ...currentQuestion, correctOptionId };
+    setQuestionsQueue((prev: QuestionItem[]) =>
+      prev.map((q, i) => (i === currentIndex ? answeredQuestion : q)),
+    );
 
     if (isCorrect) {
       // ─── TO'G'RI JAVOB ─────────────────────────────────────────
@@ -205,14 +253,7 @@ export function useNeuralSprint({
       // Agar bu Qasos savoli bo'lsa:
       if (isRevenge) {
         setRevengeQueue((prev: RevengeQueueItem[]) => prev.filter((r) => r.questionId !== currentQuestion.originalQuestionId && r.questionId !== currentQuestion.id));
-
-        // Django backendga xatoni yechildi deb belgilash signali
-        const targetQId = currentQuestion.originalQuestionId || currentQuestion.id;
-        // apiFetch: token bilan. Oddiy fetch sarlavhasiz ketib, har doim 401 olardi.
-        apiFetch('/api/v1/sprint/resolve-revenge/', {
-          method: 'POST',
-          body: JSON.stringify({ question_id: targetQId }),
-        }).catch(() => {});
+        // Xatolar daftaridagi yozuv serverda /answer/ (revenge=true) ichida yopiladi.
       }
 
       onAnswerCorrect?.(currentQuestion, combo.multiplier);
@@ -250,7 +291,7 @@ export function useNeuralSprint({
       const shuffledOptions = shuffleArray(currentQuestion.options);
 
       const revengeQuestion: QuestionItem = {
-        ...currentQuestion,
+        ...answeredQuestion,
         id: `revenge_${currentQuestion.id}_${Date.now()}`,
         originalQuestionId: currentQuestion.id,
         isRevenge: true,
@@ -280,17 +321,14 @@ export function useNeuralSprint({
       setIsExplanationOpen(true);
 
       const selectedOpt = currentQuestion.options.find((o: QuestionOption) => o.id === optionId);
-      const correctOpt = currentQuestion.options.find((o: QuestionOption) => o.id === currentQuestion.correctOptionId);
-
-      // Haqiqiy database savol ID si (Qasos savoli bo'lsa, originalQuestionId olinadi)
-      const realQuestionId = currentQuestion.originalQuestionId ?? currentQuestion.id;
+      const correctOpt = currentQuestion.options.find((o: QuestionOption) => o.id === correctOptionId);
 
       const payload = {
         question_id: realQuestionId,
         question_body: currentQuestion.body,
         selected_option_id: optionId,
         selected_option_text: selectedOpt?.text || '',
-        correct_option_id: currentQuestion.correctOptionId,
+        correct_option_id: correctOptionId ?? null,
         correct_option_text: correctOpt?.text || '',
         topic_title: currentQuestion.topicTitle || topicTitle,
       };
@@ -345,6 +383,7 @@ export function useNeuralSprint({
       }
     }
   }, [
+    sessionId,
     isVerifying,
     feedbackStatus,
     currentQuestion,

@@ -25,8 +25,16 @@ import { toast } from 'sonner';
 interface BlitzChoice {
   id: number;
   text: string;
-  is_correct: boolean;
+  /** Server savollarida javob berilgandan keyingina to'ldiriladi (GET'da kalit yo'q).
+      Faqat oflayn DEFAULT_BLITZ_QUESTIONS da oldindan bor. */
+  is_correct?: boolean;
 }
+
+type BlitzAnswerResponse = {
+  ok: boolean;
+  is_correct: boolean;
+  correct_choice_id: number | null;
+};
 
 interface BlitzQuestion {
   id: number;
@@ -133,6 +141,8 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
   const router = useRouter();
 
   const [questions, setQuestions] = useState<BlitzQuestion[]>(DEFAULT_BLITZ_QUESTIONS);
+  // Server sessiyasi: bo'lsa javoblar serverda tekshiriladi, bo'lmasa oflayn savollar lokal.
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
@@ -148,9 +158,13 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
     async function loadQuestions() {
       try {
         const query = subject ? `?subject=${encodeURIComponent(subject)}` : '';
-        const res = await apiFetch<{ ok: boolean; questions: BlitzQuestion[] }>(`/api/growth/onboarding/blitz/${query}`);
-        if (res && res.ok && res.questions?.length === 7) {
+        const res = await apiFetch<{ ok: boolean; session_id: number | null; questions: BlitzQuestion[] }>(
+          `/api/growth/onboarding/blitz/${query}`,
+        );
+        // Server savollarida kalit yo'q — ular faqat sessiya bilan ishlatiladi.
+        if (res && res.ok && res.session_id && res.questions?.length === 7) {
           setQuestions(res.questions);
+          setSessionId(res.session_id);
         }
       } catch {
         // Fallback ishlaydi
@@ -159,12 +173,35 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
     loadQuestions();
   }, [subject]);
 
-  const handleSelect = (choice: BlitzChoice) => {
+  const handleSelect = async (choice: BlitzChoice) => {
     if (isAnswered) return;
     setIsAnswered(true);
     setSelectedId(choice.id);
 
-    const isCorrect = choice.is_correct;
+    const question = questions[currentIndex];
+    let isCorrect = !!choice.is_correct;
+    if (sessionId && question) {
+      try {
+        const res = await apiFetch<BlitzAnswerResponse>('/api/growth/onboarding/blitz/answer/', {
+          method: 'POST',
+          body: JSON.stringify({ session_id: sessionId, question_id: question.id, choice_id: choice.id }),
+        });
+        isCorrect = !!res.is_correct;
+        // To'g'ri variantni faqat endi (javobdan keyin) belgilaymiz — UI yashil/qizil ko'rsatadi.
+        setQuestions((prev) =>
+          prev.map((q, i) =>
+            i === currentIndex
+              ? { ...q, choices: q.choices.map((c) => ({ ...c, is_correct: c.id === res.correct_choice_id })) }
+              : q,
+          ),
+        );
+      } catch (err) {
+        setIsAnswered(false);
+        setSelectedId(null);
+        toast.error(err instanceof Error && err.message ? err.message : "Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
+        return;
+      }
+    }
     setAnswersStatus((prev) => [...prev, isCorrect]);
 
     if (isCorrect) {

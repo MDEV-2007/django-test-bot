@@ -26,6 +26,8 @@ DAILY_REWARD_LIMITS = {
     # Esse tekshiruvi: qulflangan (bepul) natija ham to'liq Groq chaqiruvi. Limitsiz bo'lsa,
     # bitta o'quvchi bepul kvotani tugatib, AI'ni hamma uchun o'chirib qo'yishi mumkin edi.
     'essay_ai': 10,
+    # Fokus Sprint xato tushuntirishi: kesh topilmaganda pullik LLM chaqiruvi (user.id).
+    'sprint_explain_ai': 40,
 }
 
 _DAY_SECONDS = 60 * 60 * 26

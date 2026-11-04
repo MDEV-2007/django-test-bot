@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.throttling import ScopedRateThrottle
 
 from .models import MistakeExplanationCache, UserMistakeNotebook
 from .serializers import (
@@ -17,6 +18,9 @@ from .serializers import (
     UserMistakeNotebookSerializer,
 )
 from .ai_service import generate_mistake_explanation
+from .models import QuizSession
+from .services import QuizAnswerError, create_quiz_session, submit_quiz_answer
+from core.reward_caps import claim_daily_reward
 from tests_app.models import Question, Subject
 
 logger = logging.getLogger(__name__)
@@ -92,6 +96,35 @@ class ExplainMistakeAPIView(APIView):
         question_body = data.get('question_body') or ''
         topic_title = data.get('topic_title') or ''
 
+        if question_id > 0:
+            # Haqiqiy savol uchun matnlar faqat bazadan olinadi. Ilgari client yuborgan
+            # `correct_option_text`/`question_body` LLMga berilib, natija hamma uchun
+            # umumiy keshga yozilardi (kesh "zaharlanishi").
+            q_obj = (Question.objects.select_related('topic', 'subject')
+                     .prefetch_related('choices').filter(pk=question_id).first())
+            if q_obj is None:
+                return Response({'ok': False, 'error': "Savol topilmadi."}, status=status.HTTP_404_NOT_FOUND)
+            choices = list(q_obj.choices.all())
+            sel_opt = next((c for c in choices if c.id == selected_option_id), None)
+            if sel_opt is None:
+                return Response({'ok': False, 'error': "Tanlangan variant bu savolga tegishli emas."},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if sel_opt.is_correct:
+                return Response({'ok': False, 'error': "Bu variant to'g'ri javob — tushuntirish kerak emas."},
+                                status=status.HTTP_400_BAD_REQUEST)
+            # Tushuntirish to'g'ri javobni ochib beradi: faqat shu savolda haqiqatan xato
+            # qilgan (server qayd etgan) foydalanuvchiga beriladi — javob berishdan oldin
+            # kalitni olib qo'yish mumkin bo'lmasin.
+            if not UserMistakeNotebook.objects.filter(user=request.user, question_id=question_id).exists():
+                return Response({'ok': False, 'error': "Avval savolga javob bering."},
+                                status=status.HTTP_403_FORBIDDEN)
+            corr_opt = next((c for c in choices if c.is_correct), None)
+            question_body = q_obj.body
+            topic_title = q_obj.topic.title if q_obj.topic else (q_obj.subject.name if q_obj.subject else "")
+            selected_option_text = sel_opt.text
+            correct_option_id = corr_opt.id if corr_opt else None
+            correct_option_text = corr_opt.text if corr_opt else ''
+
         # ─── 1-QADAM: Cache Check (PostgreSQL) ────────────────────────
         cached_entry = None
         if question_id > 0:
@@ -110,10 +143,6 @@ class ExplainMistakeAPIView(APIView):
             MistakeExplanationCache.objects.filter(pk=cached_entry.pk).update(hit_count=F('hit_count') + 1)
             cached_entry.refresh_from_db(fields=['hit_count'])
 
-            # Agar foydalanuvchi tizimga kirgan bo'lsa, Xatolar Daftarchasiga yozish
-            if request.user.is_authenticated and question_id > 0:
-                self._record_user_mistake(request.user, question_id, selected_option_id)
-
             latency_ms = int((time.time() - start_time) * 1000)
             return Response({
                 'ok': True,
@@ -129,27 +158,22 @@ class ExplainMistakeAPIView(APIView):
                 }
             })
 
-        # ─── 2-QADAM: Cache Miss -> Bazadan savol va to'g'ri variantni to'ldirish ───
-        if (not question_body or not correct_option_text) and question_id > 0:
-            try:
-                q_obj = Question.objects.select_related('topic', 'subject').prefetch_related('choices').get(pk=question_id)
-                if not question_body:
-                    question_body = q_obj.body
-                if not topic_title:
-                    topic_title = q_obj.topic.title if q_obj.topic else (q_obj.subject.name if q_obj.subject else "")
-
-                if not selected_option_text:
-                    sel_opt = q_obj.choices.filter(pk=selected_option_id).first()
-                    if sel_opt:
-                        selected_option_text = sel_opt.text
-
-                if not correct_option_text:
-                    corr_opt = q_obj.choices.filter(is_correct=True).first()
-                    if corr_opt:
-                        correct_option_id = corr_opt.id
-                        correct_option_text = corr_opt.text
-            except Question.DoesNotExist:
-                pass
+        # ─── 2-QADAM: Cache Miss -> pullik LLM so'rovi, kunlik limit bilan ───
+        if not claim_daily_reward(request.user.id, 'sprint_explain_ai'):
+            latency_ms = int((time.time() - start_time) * 1000)
+            return Response({
+                'ok': True,
+                'cached': False,
+                'latency_ms': latency_ms,
+                'data': {
+                    'question_id': question_id,
+                    'selected_option_id': selected_option_id,
+                    'why_wrong': f"Siz tanlagan \"{selected_option_text or 'variant'}\" to'g'ri javob emas.",
+                    'memory_hack': f"To'g'ri javob: \"{correct_option_text or '-'}\".",
+                    'hit_count': 0,
+                    'model_name': 'limit',
+                },
+            })
 
         # ─── 3-QADAM: LLM orqali yangi layfxak generatsiya qilish ─────
         ai_result = generate_mistake_explanation(
@@ -177,15 +201,12 @@ class ExplainMistakeAPIView(APIView):
                         'memory_hack': memory_hack,
                         'hit_count': 1,
                         'model_name': getattr(settings, 'GROQ_MODEL', 'qwen/qwen3.8-27b'),
-                        'is_ai_generated': True,
+                        # `is_ai_generated` modelda yo'q edi: update_or_create har safar
+                        # FieldError berib, kesh hech qachon saqlanmasdi (har xato = LLM chaqiruvi).
                     }
                 )
             except Exception as e:
                 logger.error(f"MistakeExplanationCache saqlashda xatolik: {e}")
-
-        # Foydalanuvchi xatolar daftariga qayd etish
-        if request.user.is_authenticated and question_id > 0:
-            self._record_user_mistake(request.user, question_id, selected_option_id)
 
         latency_ms = int((time.time() - start_time) * 1000)
         return Response({
@@ -201,40 +222,6 @@ class ExplainMistakeAPIView(APIView):
                 'model_name': getattr(settings, 'GROQ_MODEL', 'qwen/qwen3.8-27b'),
             }
         })
-
-    def _record_user_mistake(self, user, question_id, selected_option_id):
-        try:
-            UserMistakeNotebook.objects.update_or_create(
-                user=user,
-                question_id=question_id,
-                defaults={
-                    'failed_option_id': selected_option_id,
-                    'is_resolved': False,
-                }
-            )
-        except Exception as e:
-            logger.debug(f"UserMistakeNotebook yozishda xatolik: {e}")
-
-        # Daily chain step 1 -> step 2: sprint mistakes must land in the same
-        # spaced-repetition deck that /tests/revision reads (RevisionItem).
-        try:
-            from tests_app.models import RevisionItem
-            profile = getattr(user, 'profile', None)
-            question = Question.objects.only('id', 'subject_id').filter(pk=question_id).first()
-            if profile is not None and question is not None:
-                item, created = RevisionItem.objects.get_or_create(
-                    profile=profile,
-                    question=question,
-                    defaults={'subject_id': question.subject_id, 'times_wrong': 1, 'mastered': False},
-                )
-                if not created:
-                    RevisionItem.objects.filter(pk=item.pk).update(
-                        times_wrong=F('times_wrong') + 1,
-                        mastered=False,
-                        updated_at=timezone.now(),
-                    )
-        except Exception as e:
-            logger.debug(f"RevisionItem yozishda xatolik: {e}")
 
 
 class ResolveRevengeMistakeAPIView(APIView):
@@ -281,12 +268,20 @@ class ResolveRevengeMistakeAPIView(APIView):
 
 class SprintQuestionsAPIView(APIView):
     """GET /api/v1/sprint/questions/?count=10&subject_id=1
-    Fokus Sprinti uchun bazadan tasodifiy 10-30 ta variantli savollarni yuklaydi.
+    Fokus Sprinti uchun bazadan tasodifiy 5-30 ta variantli savollarni yuklaydi.
+
+    Har chaqiruv foydalanuvchi uchun yangi `QuizSession` yaratadi. Javob kaliti
+    (`correct_option_id`) qaytarilmaydi — javob POST /answer/ orqali serverda tekshiriladi.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'quiz_session'
 
     def get(self, request, *args, **kwargs):
-        count = min(30, max(5, int(request.query_params.get('count', 10))))
+        try:
+            count = min(30, max(5, int(request.query_params.get('count', 10))))
+        except (ValueError, TypeError):
+            count = 10
         raw_subject_id = request.query_params.get('subject_id')
         raw_topic_id = request.query_params.get('topic_id')
 
@@ -329,7 +324,7 @@ class SprintQuestionsAPIView(APIView):
             total_available = qs.count()
 
         if total_available == 0:
-            return Response({'ok': True, 'count': 0, 'questions': []})
+            return Response({'ok': True, 'count': 0, 'questions': [], 'session_id': None})
 
         all_ids = list(qs.values_list('id', flat=True))
         selected_ids = random.sample(all_ids, min(count, len(all_ids)))
@@ -337,24 +332,55 @@ class SprintQuestionsAPIView(APIView):
         questions = qs.filter(id__in=selected_ids)
         result = []
         for q in questions:
-            choices = list(q.choices.all().order_by('id'))
+            choices = sorted(q.choices.all(), key=lambda c: c.id)
             if len(choices) < 2:
                 continue
-            corr = next((c for c in choices if c.is_correct), None)
-            if not corr:
+            if not any(c.is_correct for c in choices):
                 continue
             topic_str = q.topic.title if q.topic else (q.subject.name if q.subject else "Umumiy Tayyorgarlik")
             result.append({
                 'id': q.id,
                 'body': q.body,
                 'topic_title': topic_str,
-                'correct_option_id': corr.id,
                 'difficulty': q.difficulty,
                 'options': [{'id': c.id, 'text': c.text} for c in choices],
             })
 
+        session = None
+        if result:
+            session = create_quiz_session(request.user, QuizSession.MODE_SPRINT, [q['id'] for q in result])
+
         return Response({
             'ok': True,
             'count': len(result),
+            'session_id': session.id if session else None,
+            'expires_at': session.expires_at.isoformat() if session else None,
             'questions': result,
         })
+
+
+class SprintAnswerAPIView(APIView):
+    """POST /api/v1/sprint/answer/
+    Body: {session_id, question_id, option_id, revenge?: bool}
+
+    Javobni serverda tekshiradi. To'g'ri variant faqat shu javobdan keyin qaytadi.
+    Bir savolga birinchi javob bir marta yoziladi (takroriy/parallel so'rov idempotent).
+    """
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'quiz_answer'
+
+    def post(self, request, *args, **kwargs):
+        revenge = request.data.get('revenge') in (True, 'true', 'True', '1', 1)
+        try:
+            result = submit_quiz_answer(
+                request.user,
+                QuizSession.MODE_SPRINT,
+                request.data.get('session_id'),
+                request.data.get('question_id'),
+                request.data.get('option_id'),
+                revenge=revenge,
+            )
+        except QuizAnswerError as exc:
+            return Response({'ok': False, 'error': exc.message, 'code': exc.code}, status=exc.status_code)
+        return Response({'ok': True, **result})

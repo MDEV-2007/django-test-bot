@@ -460,6 +460,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
+    # Faqat `throttle_scope` belgilangan viewlarga ta'sir qiladi (global throttle yo'q).
+    'DEFAULT_THROTTLE_RATES': {
+        'quiz_session': '30/min',
+        'quiz_answer': '120/min',
+    },
 }
 
 SIMPLE_JWT = {

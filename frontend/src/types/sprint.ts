@@ -15,7 +15,10 @@ export interface QuestionItem {
   topicTitle: string;
   body: string;
   options: QuestionOption[];
-  correctOptionId: string | number;
+  /** Serverdan faqat javob yuborilgandan keyin keladi. Faqat oflayn zaxira savollarda oldindan bor. */
+  correctOptionId?: string | number;
+  /** true — serverda tekshirib bo'lmaydigan oflayn zaxira savoli (mukofot/qayd yo'q). */
+  isOffline?: boolean;
   difficulty?: 'easy' | 'medium' | 'hard';
   /* Qasos savoli parametrlari */
   isRevenge?: boolean;

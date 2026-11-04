@@ -97,3 +97,62 @@ class UserMistakeNotebook(models.Model):
         status = "Hal qilingan" if self.is_resolved else "Faol xato"
         return f"User:{self.user_id} - Q:{self.question_id} [{status}]"
 
+
+
+class QuizSession(models.Model):
+    """Server tomonidan berilgan savollar to'plami (Fokus Sprint yoki 7-savollik Blitz).
+
+    Javob kalitlari clientga yuborilmaydi: foydalanuvchi faqat shu sessiyaga kirgan
+    savollarga, sessiya muddati ichida va faqat o'z sessiyasida javob bera oladi.
+    """
+    MODE_SPRINT = 'sprint'
+    MODE_BLITZ = 'blitz'
+    MODE_CHOICES = [
+        (MODE_SPRINT, 'Fokus Sprint'),
+        (MODE_BLITZ, '7-savollik Blitz'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='quiz_sessions',
+    )
+    mode = models.CharField(max_length=16, choices=MODE_CHOICES, db_index=True)
+    question_ids = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        db_table = 'sprint_quiz_session'
+        indexes = [
+            models.Index(fields=['user', 'mode', 'created_at'], name='sprint_qs_user_mode_idx'),
+        ]
+
+    def __str__(self):
+        return f"QuizSession#{self.pk} {self.mode} user:{self.user_id}"
+
+
+class QuizSessionAnswer(models.Model):
+    """Sessiyadagi bitta savolga berilgan birinchi javob (serverda tekshirilgan).
+
+    (session, question) noyob: takroriy yoki parallel so'rov natijani ikkinchi marta
+    yozmaydi. Qasos (revenge) urinishlari alohida maydonlarda hisoblanadi.
+    """
+    session = models.ForeignKey(QuizSession, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey('tests_app.Question', on_delete=models.CASCADE, related_name='+')
+    selected_option = models.ForeignKey(
+        'tests_app.AnswerOption', on_delete=models.SET_NULL, null=True, related_name='+',
+    )
+    is_correct = models.BooleanField(default=False)
+    revenge_attempts = models.PositiveSmallIntegerField(default=0)
+    revenge_correct = models.BooleanField(default=False)
+    answered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'sprint_quiz_session_answer'
+        constraints = [
+            models.UniqueConstraint(fields=['session', 'question'], name='sprint_qsa_unique_session_question'),
+        ]
+
+    def __str__(self):
+        return f"Session:{self.session_id} Q:{self.question_id} correct={self.is_correct}"

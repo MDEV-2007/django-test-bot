@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.throttling import ScopedRateThrottle
 from django.utils import timezone
 from accounts.models import ensure_profile_for_user
 from core.reward_caps import claim_daily_reward
@@ -177,10 +178,15 @@ class AdaptiveOnboardingAPIView(APIView):
         selected.extend(random.sample(hard_qs, min(1, len(hard_qs))))
 
         payload = []
-        for idx, q in enumerate(selected):
-            choices = [{'id': c.id, 'text': c.text, 'is_correct': c.is_correct} for c in q.choices.all()]
+        for q in selected:
+            all_choices = list(q.choices.all())
+            if len(all_choices) < 2 or not any(c.is_correct for c in all_choices):
+                continue
+            # Javob kaliti (`is_correct`) clientga yuborilmaydi — POST .../blitz/answer/ tekshiradi.
+            choices = [{'id': c.id, 'text': c.text} for c in all_choices]
             # Shuffle choices
             random.shuffle(choices)
+            idx = len(payload)
             payload.append({
                 'index': idx + 1,
                 'id': q.id,
@@ -190,9 +196,16 @@ class AdaptiveOnboardingAPIView(APIView):
                 'choices': choices,
             })
 
+        session = None
+        if payload and request.user and request.user.is_authenticated:
+            from sprint.models import QuizSession
+            from sprint.services import create_quiz_session
+            session = create_quiz_session(request.user, QuizSession.MODE_BLITZ, [p['id'] for p in payload])
+
         return Response({
             'ok': True,
             'title': "7-Savollik Dofamin Blitz Diagnostika",
+            'session_id': session.id if session else None,
             'total_questions': len(payload),
             'questions': payload,
             'tramplin_bonus': {
@@ -201,6 +214,41 @@ class AdaptiveOnboardingAPIView(APIView):
                 'next_step_route': "/sprint",
                 'cta_text': "🚀 A darajaga chiqish: 3 daqiqalik 2-bosqichni boshlash (+100 Tanga Bonus)"
             }
+        })
+
+
+class BlitzAnswerAPIView(APIView):
+    """POST /api/growth/onboarding/blitz/answer/
+    Body: {session_id, question_id, choice_id}
+
+    Blitz javobini serverda tekshiradi va natijani saqlaydi. Javob kaliti faqat
+    javob yuborilgandan keyin (`correct_choice_id`) qaytadi. Blitz XP/tanga bermaydi;
+    takroriy so'rov birinchi saqlangan natijani qaytaradi.
+    """
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'quiz_answer'
+
+    def post(self, request, *args, **kwargs):
+        from sprint.models import QuizSession
+        from sprint.services import QuizAnswerError, submit_quiz_answer
+        try:
+            result = submit_quiz_answer(
+                request.user,
+                QuizSession.MODE_BLITZ,
+                request.data.get('session_id'),
+                request.data.get('question_id'),
+                request.data.get('choice_id'),
+            )
+        except QuizAnswerError as exc:
+            return Response({'ok': False, 'error': exc.message, 'code': exc.code}, status=exc.status_code)
+        return Response({
+            'ok': True,
+            'question_id': result['question_id'],
+            'choice_id': result['selected_option_id'],
+            'is_correct': result['is_correct'],
+            'correct_choice_id': result['correct_option_id'],
+            'duplicate': result['duplicate'],
         })
 
 

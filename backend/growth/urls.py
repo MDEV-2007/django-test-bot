@@ -3,6 +3,7 @@ from .views import (
     EvaluateOpenQuestionAPIView,
     EvaluateEssayAPIView,
     AdaptiveOnboardingAPIView,
+    BlitzAnswerAPIView,
     UserGrowthStatusAPIView,
 )
 from .arena_views import (
@@ -19,6 +20,7 @@ urlpatterns = [
     path('essay/evaluate/', EvaluateEssayAPIView.as_view(), name='growth-essay-eval'),
     path('onboarding-blitz/', AdaptiveOnboardingAPIView.as_view(), name='growth-onboarding-blitz'),
     path('onboarding/blitz/', AdaptiveOnboardingAPIView.as_view(), name='growth-onboarding-blitz-slash'),
+    path('onboarding/blitz/answer/', BlitzAnswerAPIView.as_view(), name='growth-onboarding-blitz-answer'),
     path('status/', UserGrowthStatusAPIView.as_view(), name='growth-status'),
 
     # 2. Ghost PvP Arena & Viral Duels

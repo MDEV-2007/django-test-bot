@@ -13,10 +13,12 @@ import { Zap, Flame, Sparkles, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import GhostBattleArena from '@/components/arena/GhostBattleArena';
 
-// Zaxira savollar (tarmoq uzilib qolsa)
+// Zaxira savollar (tarmoq uzilib qolsa). Oflayn: serverda tekshirilmaydi va hech narsa
+// (xato daftari, mukofot) yozilmaydi — shuning uchun ularda kalit lokal turadi.
 const FALLBACK_QUESTIONS: QuestionItem[] = [
   {
     id: 101,
+    isOffline: true,
     topicTitle: "Amir Temur davlati",
     body: "Amir Temur qaysi yili Balx shahrini egallab, markazlashgan davlatga asos solgan va buyuk amir deb e'lon qilingan?",
     correctOptionId: 2,
@@ -29,6 +31,7 @@ const FALLBACK_QUESTIONS: QuestionItem[] = [
   },
   {
     id: 102,
+    isOffline: true,
     topicTitle: "Qadimgi Baqtriya",
     body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi arxeologik yodgorlikdan topilgan?",
     correctOptionId: 3,
@@ -41,13 +44,12 @@ const FALLBACK_QUESTIONS: QuestionItem[] = [
   },
 ];
 
-/* Server snake_case qaytaradi. Ilgari javob to'g'ridan-to'g'ri `QuestionItem` deb
-   olinardi — `correctOptionId` undefined bo'lib, HAR BIR javob xato deb baholanardi. */
+/* Server snake_case qaytaradi. Javob kaliti endi GET javobida YO'Q: har bir javob
+   POST /api/v1/sprint/answer/ orqali sessiya (session_id) doirasida serverda tekshiriladi. */
 type SprintApiQuestion = {
   id: number;
   body: string;
   topic_title: string;
-  correct_option_id: number;
   difficulty?: QuestionItem['difficulty'];
   options: { id: number; text: string }[];
 };
@@ -57,7 +59,6 @@ function toQuestionItem(q: SprintApiQuestion): QuestionItem {
     id: q.id,
     body: q.body,
     topicTitle: q.topic_title,
-    correctOptionId: q.correct_option_id,
     difficulty: q.difficulty,
     options: q.options,
   };
@@ -90,6 +91,7 @@ export default function SprintPage() {
 
   const [isSprintActive, setIsSprintActive] = useState(false);
   const [questions, setQuestions] = useState<QuestionItem[] | null>(null);
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [activeTab, setActiveTab] = useState<'sprint' | 'arena'>(() => {
     return searchParams.get('tab') === 'arena' ? 'arena' : 'sprint';
@@ -141,19 +143,22 @@ export default function SprintPage() {
       } else if (subjectId > 0) {
         qParam = `&subject_id=${subjectId}`;
       }
-      const res = await apiFetch<{ ok: boolean; questions: SprintApiQuestion[] }>(
+      const res = await apiFetch<{ ok: boolean; session_id: number | null; questions: SprintApiQuestion[] }>(
         `/api/v1/sprint/questions/?count=${count}${qParam}`
       );
 
-      if (res?.ok && res.questions?.length > 0) {
+      if (res?.ok && res.session_id && res.questions?.length > 0) {
+        setSessionId(res.session_id);
         setQuestions(res.questions.map(toQuestionItem));
         setIsSprintActive(true);
       } else {
+        setSessionId(null);
         setQuestions(FALLBACK_QUESTIONS);
         setIsSprintActive(true);
       }
     } catch (err) {
       toast.error("Savollarni yuklashda uzilish bo'ldi. Zaxira savollar ishga tushirildi.");
+      setSessionId(null);
       setQuestions(FALLBACK_QUESTIONS);
       setIsSprintActive(true);
     } finally {
@@ -172,6 +177,7 @@ export default function SprintPage() {
     }
     setIsSprintActive(false);
     setQuestions(null);
+    setSessionId(null);
   };
 
   const customTopicTitle = searchParams.get('topic_title');
@@ -223,7 +229,9 @@ export default function SprintPage() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <NeuralSprintView
+          key={sessionId ?? 'offline'}
           questions={questions}
+          sessionId={sessionId}
           initialDtmScore={178.4}
           initialTopicMastery={45}
           topicTitle={sprintTitle}

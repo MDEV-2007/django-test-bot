@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     ExplainMistakeAPIView,
     ResolveRevengeMistakeAPIView,
+    SprintAnswerAPIView,
     SprintQuestionsAPIView,
     SprintSubjectsAPIView,
 )
@@ -9,6 +10,7 @@ from .views import (
 urlpatterns = [
     path('subjects/', SprintSubjectsAPIView.as_view(), name='sprint-subjects'),
     path('questions/', SprintQuestionsAPIView.as_view(), name='sprint-questions'),
+    path('answer/', SprintAnswerAPIView.as_view(), name='sprint-answer'),
     path('explain-mistake/', ExplainMistakeAPIView.as_view(), name='sprint-explain-mistake'),
     path('resolve-revenge/', ResolveRevengeMistakeAPIView.as_view(), name='sprint-resolve-revenge'),
 ]
