@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, Zap } from 'lucide-react';
+import { BookOpen, Brain, Flame, PenLine, Sparkles, Target, Zap, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type RadarAxisKey = 'subject_mastery' | 'logic' | 'speed' | 'accuracy' | 'writing' | 'consistency';
@@ -26,13 +26,14 @@ interface StudentSpiderRadarProps {
   className?: string;
 }
 
-const AXES: { key: RadarAxisKey; label: string; icon: string }[] = [
-  { key: 'subject_mastery', label: 'Fan Bilimi', icon: '📚' },
-  { key: 'logic', label: 'Mantiq (ELO)', icon: '🧠' },
-  { key: 'speed', label: 'Tezlik', icon: '⚡' },
-  { key: 'accuracy', label: 'Aniqlik', icon: '🎯' },
-  { key: 'writing', label: 'Esse (Writing)', icon: '✍️' },
-  { key: 'consistency', label: 'Barqarorlik', icon: '🔥' },
+/* Har bir o'q — o'z rangidagi doira ichida chiziqli belgi (emoji o'rniga). */
+const AXES: { key: RadarAxisKey; label: string; icon: LucideIcon; color: string; ink: string }[] = [
+  { key: 'subject_mastery', label: 'Fan bilimi', icon: BookOpen, color: '#70B5D5', ink: '#080808' },
+  { key: 'logic', label: 'Mantiq (ELO)', icon: Brain, color: '#7659C7', ink: '#FFFFFF' },
+  { key: 'speed', label: 'Tezlik', icon: Zap, color: '#FFB82E', ink: '#080808' },
+  { key: 'accuracy', label: 'Aniqlik', icon: Target, color: '#4C806B', ink: '#FFFFFF' },
+  { key: 'writing', label: 'Esse (Writing)', icon: PenLine, color: '#E6B5F2', ink: '#080808' },
+  { key: 'consistency', label: 'Barqarorlik', icon: Flame, color: '#F0523D', ink: '#FFFFFF' },
 ];
 
 function axisValue(radar: SkillRadar | null | undefined, key: RadarAxisKey): number | null {
@@ -108,7 +109,7 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
         </div>
       </div>
 
-      <div className="relative w-full max-w-[300px] aspect-square flex items-center justify-center my-1 select-none">
+      <div className="relative my-6 flex aspect-square w-full max-w-[300px] select-none items-center justify-center sm:my-8">
         <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full overflow-visible text-[var(--text-primary)]" role="img"
              aria-label="Ko'nikmalar radari">
           <defs>
@@ -158,23 +159,30 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
             if (axisValue(radar, axis.key) === null) return null;
             const { x, y } = getCoordinates(i, ratios[i]);
             return (
-              <circle key={axis.key} cx={x} cy={y} r="5" fill="#FFB82E" stroke="#080808" strokeWidth="2" />
+              <circle key={axis.key} cx={x} cy={y} r="5.5" fill={axis.color} stroke="#FFFCF7" strokeWidth="2" />
             );
           })}
 
           {AXES.map((axis, i) => {
-            const { x, y } = getCoordinates(i, 1.26);
+            const { x, y } = getCoordinates(i, 1.36);
             const val = axisValue(radar, axis.key);
             const isProxy = !!radar?.axes?.[axis.key]?.is_proxy;
+            const Icon = axis.icon;
+            const valueText = val === null ? '—' : `${isProxy ? '≈' : ''}${val}%`;
             return (
-              <g key={axis.key} transform={`translate(${x}, ${y})`}>
+              <g key={axis.key} transform={`translate(${x}, ${y - 14})`}>
                 <title>{radar?.axes?.[axis.key]?.basis || axis.label}</title>
-                <text textAnchor="middle" dominantBaseline="central" className="fill-current text-[12px] font-bold select-none">
-                  {axis.icon} {axis.label}
+                <circle r="15" fill={axis.color} />
+                <circle r="15" fill="none" stroke="currentColor" strokeOpacity="0.12" strokeWidth="3" />
+                <Icon x={-8} y={-8} width={16} height={16} color={axis.ink} strokeWidth={2.4} />
+                <text y="29" textAnchor="middle" dominantBaseline="central" className="fill-current text-[11.5px] font-bold select-none">
+                  {axis.label}
                 </text>
-                <text y="12" textAnchor="middle" dominantBaseline="central"
-                      className="fill-[var(--ps-purple,#7659C7)] text-[11px] font-bold select-none">
-                  {val === null ? '—' : `${isProxy ? '≈' : ''}${val}%`}
+                <rect x={-21} y={38} width={42} height={17} rx={8.5} fill={val === null ? 'currentColor' : axis.color}
+                      fillOpacity={val === null ? 0.08 : 0.22} />
+                <text y="46.5" textAnchor="middle" dominantBaseline="central"
+                      className={cn('text-[10.5px] font-bold select-none tabular-nums', val === null ? 'fill-current opacity-50' : 'fill-current')}>
+                  {valueText}
                 </text>
               </g>
             );
