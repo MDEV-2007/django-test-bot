@@ -845,3 +845,18 @@ html:has(.theme-pastel) body { scrollbar-width: none; }
 @media (prefers-reduced-motion: reduce) {
   .ps-gold-shine { animation: none; opacity: 0; }
 }
+
+/* ═══ Butun sayt: scrollbarlar ko'rinmaydi (aylantirish sichqoncha/touch/klaviatura bilan ishlayveradi) ═══ */
+html,
+body,
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
