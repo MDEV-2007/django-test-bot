@@ -1,20 +1,21 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { BrandMark } from '@/components/BrandMark';
 import { ChevronLeft, ShieldCheck, type LucideIcon } from 'lucide-react';
-import AuthBackground from './AuthBackground';
 import { dur, easeOut } from '@/lib/motion';
 
-const SQUIRCLE_COLORS = [
-  'bg-[#007AFF]',
-  'bg-[#34C759]',
-  'bg-[#FF9500]',
-  'bg-[#5856D6]',
+/* Har bir afzallik — o'z rangidagi doira (pastel palitra) */
+const POINT_TONES = [
+  'bg-[var(--ps-purple)] text-white',
+  'bg-[var(--ps-orange)] text-[#080808]',
+  'bg-[var(--ps-green)] text-white',
+  'bg-[var(--ps-coral)] text-white',
 ];
 
-/* Apple ID / iCloud Sign-In Experience Shell */
+/* Kirish / ro'yxatdan o'tish qobig'i — dashboard bilan bir xil "Pastel Studio" uslubi */
 export default function AuthShell({
   title,
   description,
@@ -29,114 +30,100 @@ export default function AuthShell({
   footer?: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-[100svh] flex-1 flex-col justify-between p-4 sm:p-6">
-      <AuthBackground />
-
-      {/* Top iOS Navigation Bar */}
-      <header className="mx-auto flex w-full max-w-5xl items-center justify-between py-2">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 rounded-full bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl px-3.5 py-2 text-[13px] font-semibold text-[#007AFF] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs hover:bg-white dark:hover:bg-[#2C2C2E] active:scale-95 transition-all"
-        >
-          <ChevronLeft className="size-4 stroke-[2.5]" />
-          <span>Bosh sahifa</span>
+    <div className="theme-pastel relative flex min-h-[100svh] flex-1 flex-col justify-between overflow-x-clip p-4 sm:p-6">
+      {/* Yuqori qator */}
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 py-2">
+        <Link href="/" className="ps-chip transition-transform hover:-translate-x-0.5">
+          <ChevronLeft className="size-4" /> Bosh sahifa
         </Link>
-
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-xl px-3 py-1.5 text-[12px] font-semibold text-[#8E8E93] border border-black/[0.05] dark:border-white/[0.08]">
-          <ShieldCheck className="size-3.5 text-[#34C759]" />
-          <span>IlmIldizi ID • Xavfsiz kirish</span>
-        </div>
+        <span className="ps-chip">
+          <ShieldCheck className="size-3.5 text-[var(--ps-green)]" /> IlmIldizi ID · xavfsiz kirish
+        </span>
       </header>
 
-      {/* Main Content Grid */}
-      <div className="mx-auto my-auto grid w-full max-w-5xl items-center gap-10 py-6 lg:grid-cols-12 lg:gap-12">
-        {/* Left Column — Apple Keynote Product Showcase (Desktop) */}
+      <div className="mx-auto my-auto grid w-full max-w-6xl items-center gap-10 py-6 lg:grid-cols-12 lg:gap-14">
+        {/* Chap ustun — brend kompozitsiyasi (desktop) */}
         <motion.div
-          className="hidden lg:col-span-6 lg:flex lg:flex-col lg:justify-between space-y-8"
+          className="hidden lg:col-span-6 lg:block"
           initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: dur.slow, ease: easeOut }}
         >
-          <div>
-            <div className="mb-6 inline-flex items-center gap-3 rounded-xl bg-white/85 dark:bg-[#1C1C1E]/85 p-2.5 pr-4 border border-black/[0.06] dark:border-white/[0.08] shadow-sm backdrop-blur-xl">
-              <div className="flex size-11 items-center justify-center rounded-lg bg-gradient-to-b from-[#34C759]/15 to-[#34C759]/5 border border-[#34C759]/25">
-                <BrandMark size={30} />
-              </div>
-              <div>
-                <p className="text-[16px] font-bold tracking-tight text-foreground leading-none">
-                  Ilm<span className="text-[#34C759]">Ildizi</span>
-                </p>
-                <p className="mt-1 text-[12px] font-medium text-[#8E8E93]">
-                  Milliy Sertifikat va BBA/DTM 2026 platformasi
-                </p>
+          <span className="ps-chip">
+            <BrandMark size={22} rounded="rounded-full" />
+            Ilm<span className="-ml-1.5 text-[var(--ps-purple)]">Ildizi</span>
+            <span className="text-[var(--text-muted)]">· Milliy sertifikat va DTM 2026</span>
+          </span>
+
+          <h2 className="ps-display mt-6 text-[52px] xl:text-[64px]">
+            Bitta hisob.
+            <br />
+            Barcha{' '}
+            <span className="relative inline-block text-[var(--ps-purple)]">
+              imtihonlar
+              <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)] sm:-bottom-3 sm:h-4">
+                <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+              </svg>
+            </span>
+            <span className="text-[var(--ps-coral)]">.</span>
+          </h2>
+          <p className="mt-7 max-w-md text-[15px] leading-relaxed text-[var(--text-secondary)]">
+            DTM ball bashorati, Milliy sertifikat diagnostikasi, 1v1 bilim arenasi va 24/7 AI mentor — barchasi shaxsiy kabinetingizda.
+          </p>
+
+          <div className="mt-8 grid grid-cols-[auto_1fr] items-center gap-6">
+            {/* Maskot doirada */}
+            <div className="relative size-40 xl:size-44">
+              <div aria-hidden className="absolute inset-0 rounded-full bg-[var(--ps-orange)]" />
+              <div aria-hidden className="absolute -bottom-1 -left-3 size-14 rounded-tr-full bg-[var(--ps-purple)]" />
+              <div className="absolute inset-[9%] overflow-hidden rounded-full border-[5px] border-[#FFFCF7] bg-[var(--ps-sky)]">
+                <Image src="/images/mascot-hero.jpg" alt="IlmIldizi maskoti" fill sizes="176px" className="scale-[1.35] object-cover object-[52%_40%]" />
               </div>
             </div>
-
-            <h2 className="text-[34px] xl:text-[38px] font-bold tracking-[-0.035em] leading-[1.1] text-foreground">
-              Bitta hisob. Barcha imtihon va darslarga to&apos;liq kirish.
-            </h2>
-            <p className="mt-3.5 max-w-md text-[15px] leading-relaxed text-[#8E8E93]">
-              Real vaqtdagi DTM ball bashorati, Milliy sertifikat diagnostikasi, 1v1 Bilim Arenasi va 24/7 AI Mentor — barchasi sizning shaxsiy kabinetingizda.
-            </p>
+            {/* Afzalliklar */}
+            <ul className="space-y-2.5">
+              {points.map((p, i) => {
+                const Icon = p.icon;
+                return (
+                  <li key={p.text} className="flex items-center gap-3 rounded-full bg-[var(--ps-paper)] py-1.5 pl-1.5 pr-4 shadow-[var(--ds-panel-shadow)]">
+                    <span className={`flex size-9 shrink-0 items-center justify-center rounded-full ${POINT_TONES[i % POINT_TONES.length]}`}>
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="text-[13px] font-semibold leading-snug">{p.text}</span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-
-          {/* iOS Inset Grouped Feature List */}
-          <div className="rounded-2xl bg-white/90 dark:bg-[#1C1C1E]/90 border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.05] dark:divide-white/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
-            {points.map((p, i) => {
-              const Icon = p.icon;
-              const sqColor = SQUIRCLE_COLORS[i % SQUIRCLE_COLORS.length];
-              return (
-                <div
-                  key={p.text}
-                  className="flex items-center gap-3.5 px-4 py-3.5 text-[13.5px] font-medium text-foreground"
-                >
-                  <span
-                    className={`flex size-8 shrink-0 items-center justify-center rounded-sm ${sqColor} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]`}
-                  >
-                    <Icon className="size-4 stroke-[2.2]" />
-                  </span>
-                  <span className="leading-snug">{p.text}</span>
-                </div>
-              );
-            })}
-          </div>
-
-
         </motion.div>
 
-        {/* Right Column — Apple ID Sign-In Card */}
+        {/* O'ng ustun — forma kartasi */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: dur.slow, ease: easeOut, delay: 0.05 }}
-          className="mx-auto w-full max-w-[430px] lg:col-span-6"
+          className="mx-auto w-full max-w-[460px] lg:col-span-6"
         >
-          <div className="rounded-3xl bg-white dark:bg-[#1C1C1E] border border-black/[0.06] dark:border-white/[0.08] p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.6)]">
-            {/* Apple ID Style App Squircle Header */}
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-3.5 flex size-16 items-center justify-center rounded-xl bg-gradient-to-b from-[#F2F2F7] to-white dark:from-[#2C2C2E] dark:to-[#1C1C1E] border border-black/[0.08] dark:border-white/[0.1] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.08)]">
-                <BrandMark size={40} />
-              </div>
-              <h1 className="text-[24px] font-bold tracking-[-0.025em] text-foreground">
-                {title}
-              </h1>
-              <p className="mt-1 text-[13.5px] text-[#8E8E93]">{description}</p>
+          <div className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+            <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-40 rounded-full bg-[var(--ps-purple)] opacity-15" />
+            <div className="relative mb-6">
+              <span className="inline-flex size-14 items-center justify-center rounded-[18px] bg-[var(--ps-neutral)] ring-4 ring-[var(--ps-lilac)]">
+                <BrandMark size={40} rounded="rounded-[14px]" />
+              </span>
+              <h1 className="ps-display mt-5 text-[32px] sm:text-[38px]">{title}</h1>
+              <p className="mt-2 text-[14px] text-[var(--text-muted)]">{description}</p>
             </div>
-
-            {children}
+            <div className="relative">{children}</div>
           </div>
 
           {footer && (
-            <div className="mt-5 text-center text-[13.5px] font-medium text-[#8E8E93]">
-              {footer}
-            </div>
+            <div className="mt-5 text-center text-[13.5px] font-medium text-[var(--text-secondary)]">{footer}</div>
           )}
         </motion.div>
       </div>
 
-      {/* Bottom Copyright */}
-      <footer className="mx-auto w-full max-w-5xl py-2 text-center text-[12px] text-[#8E8E93]">
-        © 2026 IlmIldizi EdTech • Barcha ma&apos;lumotlar shifrlangan holda saqlanadi
+      <footer className="mx-auto w-full max-w-6xl py-2 text-center text-[12px] text-[var(--text-muted)]">
+        © 2026 IlmIldizi EdTech · Barcha ma&apos;lumotlar shifrlangan holda saqlanadi
       </footer>
     </div>
   );

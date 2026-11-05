@@ -65,7 +65,7 @@ function RegisterPageInner() {
           Hisobingiz bormi?{' '}
           <Link
             href={targetNext ? `/login?next=${encodeURIComponent(targetNext)}` : '/login'}
-            className="font-semibold text-[#007AFF] hover:underline"
+            className="font-bold text-[var(--ps-purple)] underline-offset-4 hover:underline"
           >
             Hisobga kirish →
           </Link>
@@ -74,17 +74,17 @@ function RegisterPageInner() {
     >
       <div className="space-y-5">
         {refCode && (
-          <div className="flex items-start gap-2.5 rounded-lg border border-[#FF9500]/30 bg-[#FF9500]/10 p-3.5 text-[13px] leading-snug text-foreground">
-            <Gift className="mt-0.5 size-4 shrink-0 text-[#FF9500]" />
+          <div className="flex items-start gap-2.5 rounded-[20px] bg-[var(--ps-orange)] p-3.5 text-[13px] leading-snug text-[#080808]">
+            <Gift className="mt-0.5 size-4 shrink-0" />
             <span>
-              <strong className="text-[#FF9500]">Taklif bonusi:</strong> sizga va do&apos;stingizga ro&apos;yxatdan o&apos;tishda{' '}
+              <strong>Taklif bonusi:</strong> sizga va do&apos;stingizga ro&apos;yxatdan o&apos;tishda{' '}
               <strong>bonus tanga</strong> taqdim etiladi.
             </span>
           </div>
         )}
 
         {error && (
-          <div className="flex items-center gap-2.5 rounded-lg border border-[#FF3B30]/25 bg-[#FF3B30]/10 p-3.5 text-[13px] font-medium text-[#FF3B30]">
+          <div className="flex items-center gap-2.5 rounded-[18px] bg-[var(--ps-coral)] p-3.5 text-[13px] font-semibold text-white">
             <AlertCircle className="size-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -93,18 +93,18 @@ function RegisterPageInner() {
         <SocialLogin refCode={refCode} onSuccess={handleSocialSuccess} />
 
         <div className="relative flex items-center justify-center py-1">
-          <div className="h-px w-full bg-black/[0.06] dark:bg-white/[0.08]" />
-          <span className="absolute bg-white dark:bg-[#1C1C1E] px-3 text-[12px] font-semibold uppercase tracking-wider text-[#8E8E93]">
+          <div className="h-px w-full bg-[var(--border-card)]" />
+          <span className="absolute bg-[var(--ps-paper)] px-3 text-[12px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             yoki ma&apos;lumotlar bilan
           </span>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* iOS Settings Inset Grouped Form */}
-          <div className="overflow-hidden rounded-xl bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.06] dark:divide-white/[0.08]">
-            <label htmlFor="first_name" className="flex items-center gap-3 px-4 py-3 cursor-text">
-              <User className="size-4 shrink-0 text-[#8E8E93]" />
-              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+          <div className="space-y-2.5">
+            <label htmlFor="first_name" className="flex cursor-text items-center gap-3 rounded-full bg-[var(--ps-neutral)] px-4 py-3.5 ring-2 ring-transparent transition focus-within:bg-[var(--ps-paper)] focus-within:ring-[var(--ps-purple)]">
+              <User className="size-4 shrink-0 text-[var(--text-muted)]" />
+              <span className="w-20 shrink-0 text-[13px] font-bold text-foreground">
                 Ism
               </span>
               <input
@@ -114,13 +114,13 @@ function RegisterPageInner() {
                 placeholder="Azizbek"
                 autoComplete="given-name"
                 required
-                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[var(--text-faint)] focus:outline-none"
               />
             </label>
 
-            <label htmlFor="last_name" className="flex items-center gap-3 px-4 py-3 cursor-text">
-              <User className="size-4 shrink-0 text-[#8E8E93]" />
-              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+            <label htmlFor="last_name" className="flex cursor-text items-center gap-3 rounded-full bg-[var(--ps-neutral)] px-4 py-3.5 ring-2 ring-transparent transition focus-within:bg-[var(--ps-paper)] focus-within:ring-[var(--ps-purple)]">
+              <User className="size-4 shrink-0 text-[var(--text-muted)]" />
+              <span className="w-20 shrink-0 text-[13px] font-bold text-foreground">
                 Familiya
               </span>
               <input
@@ -130,13 +130,13 @@ function RegisterPageInner() {
                 placeholder="Qodirov"
                 autoComplete="family-name"
                 required
-                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[var(--text-faint)] focus:outline-none"
               />
             </label>
 
-            <label htmlFor="username" className="flex items-center gap-3 px-4 py-3 cursor-text">
-              <AtSign className="size-4 shrink-0 text-[#8E8E93]" />
-              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+            <label htmlFor="username" className="flex cursor-text items-center gap-3 rounded-full bg-[var(--ps-neutral)] px-4 py-3.5 ring-2 ring-transparent transition focus-within:bg-[var(--ps-paper)] focus-within:ring-[var(--ps-purple)]">
+              <AtSign className="size-4 shrink-0 text-[var(--text-muted)]" />
+              <span className="w-20 shrink-0 text-[13px] font-bold text-foreground">
                 Login
               </span>
               <input
@@ -146,13 +146,13 @@ function RegisterPageInner() {
                 placeholder="azizbek_dtm"
                 autoComplete="username"
                 required
-                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[var(--text-faint)] focus:outline-none"
               />
             </label>
 
-            <label htmlFor="password" className="flex items-center gap-3 px-4 py-3 cursor-text">
-              <Lock className="size-4 shrink-0 text-[#8E8E93]" />
-              <span className="w-24 shrink-0 text-[13px] font-semibold text-foreground">
+            <label htmlFor="password" className="flex cursor-text items-center gap-3 rounded-full bg-[var(--ps-neutral)] px-4 py-3.5 ring-2 ring-transparent transition focus-within:bg-[var(--ps-paper)] focus-within:ring-[var(--ps-purple)]">
+              <Lock className="size-4 shrink-0 text-[var(--text-muted)]" />
+              <span className="w-20 shrink-0 text-[13px] font-bold text-foreground">
                 Parol
               </span>
               <input
@@ -163,7 +163,7 @@ function RegisterPageInner() {
                 placeholder="Kamida 8 belgi"
                 autoComplete="new-password"
                 required
-                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[#8E8E93] focus:outline-none"
+                className="w-full bg-transparent text-[14px] font-medium text-foreground placeholder:text-[var(--text-faint)] focus:outline-none"
               />
             </label>
           </div>
@@ -171,7 +171,7 @@ function RegisterPageInner() {
           <button
             type="submit"
             disabled={loading}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#007AFF] px-6 text-[15px] font-semibold text-white shadow-[0_8px_20px_-4px_rgba(0,122,255,0.45)] hover:bg-[#0071EB] active:scale-[0.98] disabled:opacity-50 transition-all cursor-pointer"
+            className="ps-btn ps-btn-ink h-13 w-full !min-h-13 justify-center !text-[15px] disabled:opacity-50"
           >
             {loading ? <Loader2 className="size-4 animate-spin" /> : null}
             <span>{loading ? 'Yaratilmoqda...' : "Bepul ro'yxatdan o'tish"}</span>
