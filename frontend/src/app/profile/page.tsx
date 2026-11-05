@@ -333,42 +333,42 @@ export default function ProfilePage() {
 
   if (authReady && !access) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <div className="flex min-h-[60vh] w-full items-center justify-center bg-[var(--bg-page)]">
+        <div className="flex min-h-[60vh] w-full items-center justify-center">
           <Loader2 className="size-8 animate-spin text-primary" />
         </div>
-      </>
+      </div>
     );
   }
 
   if (error && !data) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6 flex flex-col items-center justify-center min-h-[50vh]">
+        <main className="page-shell flex-1 space-y-6 p-4 pb-12 sm:p-6 flex flex-col items-center justify-center min-h-[50vh]">
           <div className="text-center space-y-4 max-w-md">
-            <p className="text-red-400 font-medium">{error}</p>
+            <p className="text-[var(--ps-coral)] font-medium">{error}</p>
             <Button onClick={() => refresh()} variant="outline">
               Qayta urinish
             </Button>
           </div>
         </main>
-      </>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+        <main className="page-shell flex-1 space-y-6 p-4 pb-12 sm:p-6">
           <Skeleton className="h-44 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-12 w-full rounded-2xl" />
           <Skeleton className="h-64 w-full rounded-2xl" />
         </main>
-      </>
+      </div>
     );
   }
 
@@ -398,220 +398,149 @@ export default function ProfilePage() {
   ] as const;
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-24 sm:p-6">
-        {/* ========================================================================= */}
-        {/* 1. ASOSIY PROFILE CARD (Apple ID Style Anchor) */}
-        {/* ========================================================================= */}
-        <div className="ds-panel relative overflow-hidden">
-          <div className="h-24 sm:h-28" style={{ background: 'var(--ds-hero-bg)' }} />
-          <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-          <div className="relative flex flex-col items-center gap-4 pt-3 text-center sm:flex-row sm:items-start sm:text-left">
-            <div className="relative shrink-0 group -mt-14 sm:-mt-16">
-              <div
-                onClick={handleOpenEdit}
-                className="cursor-pointer relative rounded-full transition-transform hover:scale-105"
-                title="Profilni tahrirlash"
-              >
-                <CosmeticAvatar
-                  className="size-22 sm:size-24 ring-4 ring-[var(--surface-card)]"
-                  src={p.avatar_url}
-                  name={p.first_name || p.username}
-                  cosmetics={p.cosmetics}
-                  fallbackClassName="text-xl font-bold"
-                />
-                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white pointer-events-none">
-                  <Camera className="size-5" />
-                </div>
-              </div>
-              {p.is_premium ? (
-                <span className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-[#FF9500] text-white shadow-md ring-2 ring-white dark:ring-[#1C1C1E]">
-                  <Crown className="size-4 fill-current" />
+      <main className="page-shell flex-1 space-y-6 p-4 pb-24 sm:p-6">
+        {/* ── 1. Hero: avatar kompozitsiyasi + ism + asosiy ko'rsatkichlar ── */}
+        <section className="relative grid items-center gap-8 pt-2 lg:grid-cols-[0.8fr_1.2fr]">
+          {/* Avatar kompozitsiyasi */}
+          <div className="relative mx-auto aspect-square w-full max-w-[240px] sm:max-w-[300px]">
+            <div aria-hidden className="absolute inset-[4%] rounded-full bg-[var(--ps-orange)]" />
+            <div aria-hidden className="absolute -left-2 bottom-[4%] size-[32%] rounded-tr-full bg-[var(--ps-purple)]" />
+            <div aria-hidden className="ps-dots absolute right-0 top-0 size-[26%] rounded-2xl text-[var(--ps-ink)] opacity-25" />
+            <div aria-hidden className="ps-spin absolute -right-1 bottom-[12%] size-[18%] text-[var(--ps-ink)]">
+              <svg viewBox="0 0 100 100" className="size-full"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z" fill="currentColor" /></svg>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenEdit}
+              title="Profilni tahrirlash"
+              className="group absolute inset-[13%] cursor-pointer rounded-full transition-transform hover:scale-[1.02]"
+            >
+              <CosmeticAvatar
+                className="size-full ring-[6px] ring-[#FFFCF7]"
+                src={p.avatar_url}
+                name={p.first_name || p.username}
+                cosmetics={p.cosmetics}
+                fallbackClassName="text-5xl font-bold"
+              />
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                <Camera className="size-7" />
+              </span>
+            </button>
+            {p.is_premium && (
+              <span className="absolute right-[10%] top-[8%] flex size-12 items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)] ring-4 ring-[#FFFCF7]">
+                <Crown className="size-6 fill-current" />
+              </span>
+            )}
+            <div className="ps-float absolute -left-3 top-[40%] sm:-left-6">
+              <span className="ps-chip text-[13px]">
+                <Flame className="size-4 text-[var(--ps-coral)]" /> {p.streak} kun
+              </span>
+            </div>
+          </div>
+
+          {/* Ism va tugmalar */}
+          <div className="min-w-0 text-center lg:text-left">
+            <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              <span className="ps-chip">
+                <span className="size-2 rounded-full bg-[var(--ps-orange)]" /> {p.level}-daraja
+              </span>
+              <span className="ps-chip">{rankInfo.title}</span>
+              {p.cosmetics?.title?.payload?.title && <span className="ps-chip">👑 {p.cosmetics.title.payload.title}</span>}
+              {p.cosmetics?.frame?.name && <span className="ps-chip">{p.cosmetics.frame.name}</span>}
+              {p.cosmetics?.theme?.name && (
+                <span className="ps-chip">
+                  <span className="size-2 rounded-full" style={{ backgroundColor: p.cosmetics.theme.payload.accent || '#10b981' }} />
+                  {p.cosmetics.theme.name}
                 </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleOpenEdit}
-                  title="Rasmni o'zgartirish"
-                  aria-label="Rasmni o'zgartirish"
-                  className="absolute -bottom-1 -right-1 size-7 rounded-full bg-primary text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform ring-2 ring-white dark:ring-[#1C1C1E]"
-                >
-                  <Camera className="size-3.5" />
-                </button>
               )}
             </div>
-
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <h1 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-foreground flex items-center gap-2 flex-wrap">
-                  <span>{fullName}</span>
-                  <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
-                </h1>
-                <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
-                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--reward-border)] bg-[var(--reward-soft)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--reward-text)]">
-                  <span className="size-1.5 rounded-full bg-[var(--reward)]" /> {p.level}-daraja
-                </span>
-                {p.cosmetics?.title?.payload?.title && (
-                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400">
-                    👑 {p.cosmetics.title.payload.title}
-                  </span>
-                )}
-                {p.cosmetics?.frame?.name && (
-                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                    <span className="size-1.5 rounded-full bg-amber-500 inline-block animate-pulse" />
-                    {p.cosmetics.frame.name}
-                  </span>
-                )}
-                {p.cosmetics?.theme?.name && (
-                  <span className="rounded-full bg-emerald-500/12 border border-emerald-500/30 px-2.5 py-0.5 text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    <span className="size-1.5 rounded-full inline-block" style={{ backgroundColor: p.cosmetics.theme.payload.accent || '#10b981' }} />
-                    {p.cosmetics.theme.name}
-                  </span>
-                )}
-              </div>
-              <p className="font-mono text-[13px] text-muted-foreground">@{p.username} • IlmIldizi ID</p>
-
-              {/* Dynamic Island Metric Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 sm:justify-start">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/12 px-3 py-1 text-[12px] font-bold text-amber-600 dark:text-amber-400">
-                  <Flame className="size-3.5 fill-current" /> {p.streak} kun streak
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-3 py-1 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
-                  <Coins className="size-3.5" /> {p.coins.toLocaleString('uz-UZ')} tanga
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-3 py-1 text-[12px] font-bold text-primary">
-                  <Zap className="size-3.5 fill-current" /> {p.xp.toLocaleString('uz-UZ')} XP
-                </span>
-              </div>
+            <h1 className="ps-display mt-5 break-words text-[44px] sm:text-[64px]">
+              {fullName}
+              <span className="text-[var(--ps-coral)]">.</span>
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              <span className="font-mono text-[13px] text-[var(--text-muted)]">@{p.username} • IlmIldizi ID</span>
+              <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
+              <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
             </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:flex-col sm:items-end sm:shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleOpenEdit}
-                className="rounded-lg gap-1.5"
-              >
-                <Pencil className="size-3.5 text-primary" />
-                Tahrirlash
-              </Button>
-              <Link
-                href="/premium"
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-hover)] px-4 text-[13px] font-semibold text-white active:scale-95 transition-all"
-              >
-                {p.is_premium ? <Crown className="size-4 fill-current" /> : <Lock className="size-3.5" />}
-                <span>{p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}</span>
+            <div className="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start">
+              <button type="button" onClick={handleOpenEdit} className="ps-btn ps-btn-ink">
+                <Pencil className="size-4 text-[var(--ps-orange)]" /> Tahrirlash
+                <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+              </button>
+              <Link href="/premium" className="ps-btn ps-btn-ghost">
+                {p.is_premium ? <Crown className="size-4 fill-current text-[var(--ps-orange)]" /> : <Lock className="size-4" />}
+                {p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}
               </Link>
             </div>
           </div>
-          </div>
-        </div>
+        </section>
 
-        {/* ========================================================================= */}
-        {/* 2. GLANCEABLE QUICK WIDGETS ROW */}
-        {/* ========================================================================= */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="ios-card rounded-2xl p-4 flex items-center gap-3">
-            <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                Bugun yechildi
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
-                {data.solved_today || 0} <span className="text-xs font-normal text-muted-foreground">test</span>
-              </p>
+        {/* ── 2. Ko'rsatkichlar bento ── */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-12">
+          <div className="ps-ink relative col-span-2 overflow-hidden rounded-[28px] p-6 lg:col-span-4">
+            <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full bg-[var(--ps-purple)] opacity-50" />
+            <p className="ps-eyebrow relative text-white/60">Tajriba</p>
+            <p className="ps-num relative mt-2 text-[52px] sm:text-[64px]">{p.xp.toLocaleString('uz-UZ')}</p>
+            <p className="relative text-[12px] text-white/60">XP · {p.level + 1}-darajagacha {xpProgress}%</p>
+            <div className="relative mt-4 h-2.5 overflow-hidden rounded-full bg-white/12">
+              <div className="h-full rounded-full bg-gradient-to-r from-[var(--ps-orange)] to-[var(--ps-coral)]" style={{ width: `${Math.max(2, xpProgress)}%` }} />
             </div>
           </div>
-
-          <div className="ios-card rounded-2xl p-4 flex items-center gap-3">
-            <PremiumIcon icon={Flame} tone="amber" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                Uzluksiz Streak
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
-                {p.streak || 0} <span className="text-xs font-normal text-muted-foreground">kun 🔥</span>
-              </p>
-            </div>
+          <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-green)] p-5 text-white lg:col-span-2">
+            <CheckCircle2 className="size-5" />
+            <p className="ps-num mt-4 text-[44px]">{data.solved_today || 0}</p>
+            <p className="text-[12px] font-semibold text-white/75">Bugun yechildi</p>
           </div>
-
-          <Link href="/shop" className="ios-card ios-card-interactive rounded-2xl p-4 flex items-center gap-3">
-            <PremiumIcon icon={Coins} tone="gold" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                Tanga balansi
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
-                {(p.coins || 0).toLocaleString()}
-              </p>
-            </div>
+          <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-coral)] p-5 text-white lg:col-span-2">
+            <Flame className="size-5" />
+            <p className="ps-num mt-4 text-[44px]">{p.streak || 0}</p>
+            <p className="text-[12px] font-semibold text-white/75">Kunlik seriya</p>
+          </div>
+          <Link href="/shop" className="relative overflow-hidden rounded-[28px] bg-[var(--ps-orange)] p-5 text-[#080808] transition-transform hover:-translate-y-1 lg:col-span-2">
+            <Coins className="size-5" />
+            <p className="ps-num mt-4 text-[36px]">{(p.coins || 0).toLocaleString('uz-UZ')}</p>
+            <p className="text-[12px] font-semibold text-black/65">Tanga</p>
           </Link>
-
-          <Link
-            href="/battles"
-            className="ios-card ios-card-interactive rounded-2xl p-4 flex items-center gap-3 text-left cursor-pointer"
-          >
-            <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                {rankInfo.title}
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-primary leading-tight">
-                {p.elo_rating || 1200} <span className="text-[12px] font-normal text-muted-foreground">ELO</span>
-              </p>
-            </div>
+          <Link href="/battles" className="relative overflow-hidden rounded-[28px] bg-[var(--ps-purple)] p-5 text-white transition-transform hover:-translate-y-1 lg:col-span-2">
+            <Swords className="size-5" />
+            <p className="ps-num mt-4 text-[44px]">{p.elo_rating || 1200}</p>
+            <p className="text-[12px] font-semibold text-white/75">ELO · {rankInfo.title}</p>
           </Link>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 3. ULTRA-MODERN SEGMENTED TAB BAR (4-Col Responsive Grid) */}
-        {/* ========================================================================= */}
-        <div className="sticky top-16 z-20 -mx-4 px-4 py-2 sm:mx-0 sm:px-0 bg-background/85 backdrop-blur-md transition-all">
-          <div className="w-full grid grid-cols-4 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
-            {TABS.map((tab) => {
-              const active = activeTab === tab.id;
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => {
-                    tgHaptic('select');
-                    soundFX.click();
-                    setActiveTab(tab.id);
-                  }}
-                  className={cn(
-                    'flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-2 px-1 sm:px-2 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
-                    active
-                      ? 'bg-card text-foreground shadow-sm border border-border/60 scale-[1.01]'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
-                  )}
-                >
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Icon className={cn('size-3.5 sm:size-4 transition-colors', active ? 'text-primary' : 'text-muted-foreground')} />
-                    {tab.count !== null && tab.count > 0 && (
-                      <span className="sm:hidden px-1 py-0.2 rounded-full text-[11px] font-mono font-bold leading-none bg-primary/15 text-primary">
-                        {tab.count}
-                      </span>
-                    )}
-                  </div>
-                  <span className="truncate max-w-full">
-                    <span className="inline sm:hidden">{tab.shortLabel}</span>
-                    <span className="hidden sm:inline">{tab.label}</span>
+        {/* ── 3. Bo'limlar ── */}
+        <div className="ds-seg sticky top-20 z-20 grid w-full grid-cols-4 gap-1">
+          {TABS.map((tab) => {
+            const active = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                data-active={active ? 'true' : undefined}
+                onClick={() => {
+                  tgHaptic('select');
+                  soundFX.click();
+                  setActiveTab(tab.id);
+                }}
+                className="ds-seg-item flex cursor-pointer select-none flex-col items-center justify-center gap-0.5 !px-1 font-bold sm:flex-row sm:gap-1.5"
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="truncate">
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </span>
+                {tab.count !== null && tab.count > 0 && (
+                  <span className="hidden rounded-full bg-[var(--ps-orange)] px-1.5 py-0.5 text-[11px] font-bold leading-none text-[#080808] sm:inline-flex">
+                    {tab.count}
                   </span>
-                  {tab.count !== null && tab.count > 0 && (
-                    <span className={cn(
-                      'hidden sm:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
-                      active ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
-                    )}>
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* ========================================================================= */}
@@ -653,7 +582,7 @@ export default function ProfilePage() {
                     <span className="text-[12px] font-semibold text-muted-foreground">O&apos;rtacha aniqlik</span>
                   </div>
                   <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-emerald-500">
+                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-[var(--ps-green)]">
                       {analyticsData?.accuracy || 0}%
                     </p>
                     <p className="text-[12px] text-muted-foreground mt-0.5">To&apos;g&apos;ri javoblar ulushi</p>
@@ -666,7 +595,7 @@ export default function ProfilePage() {
                     <span className="text-[12px] font-semibold text-muted-foreground">DTM Tayyorgarlik</span>
                   </div>
                   <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-amber-500">
+                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-[var(--reward-text)]">
                       {analyticsData?.readiness_estimate || 0}%
                     </p>
                     <p className="text-[12px] text-muted-foreground mt-0.5">Imtihon bashorat darajasi</p>
@@ -679,7 +608,7 @@ export default function ProfilePage() {
                     <span className="text-[12px] font-semibold text-muted-foreground">Faol mashq vaqti</span>
                   </div>
                   <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-indigo-500">
+                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-[var(--ps-purple)]">
                       {analyticsData?.time_minutes || 0} <span className="text-sm font-semibold text-muted-foreground">daq</span>
                     </p>
                     <p className="text-[12px] text-muted-foreground mt-0.5">Fokus dars vaqti</p>
@@ -690,16 +619,16 @@ export default function ProfilePage() {
               {/* 2. KUCHLI VA QIYNOLGAN (ZAIF) MAVZULAR (DIAGNOSTIKA) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* A. Kuchli Mavzular (80%+ Aniqlik) */}
-                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.07] p-5 space-y-3.5 shadow-xs">
+                <div className="rounded-2xl border border-[var(--ps-green)]/30 bg-[var(--ps-green)]/[0.04] dark:bg-[var(--ps-green)]/[0.07] p-5 space-y-3.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0">
+                      <div className="size-8 rounded-xl bg-[var(--ps-green)]/15 text-[var(--ps-green)] flex items-center justify-center shrink-0">
                         <ThumbsUp className="size-4" />
                       </div>
                       <div>
                         <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
                           <span>Kuchli mavzularingiz</span>
-                          <span className="text-[12px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.2 rounded-full">
+                          <span className="text-[12px] font-mono font-bold bg-[var(--ps-green)]/20 text-[var(--ps-green)] px-2 py-0.2 rounded-full">
                             {analyticsData?.mastery?.strong?.length || 0} ta
                           </span>
                         </h3>
@@ -715,11 +644,11 @@ export default function ProfilePage() {
                       analyticsData.mastery.strong.map((topicName, idx) => (
                         <span
                           key={`strong-${idx}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--ps-green)]/10 border border-[var(--ps-green)]/25 text-[var(--ps-green)] shadow-2xs"
                         >
-                          <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="size-3.5 text-[var(--ps-green)] shrink-0" />
                           <span>{topicName}</span>
-                          <span className="text-[12px] font-mono text-emerald-600 dark:text-emerald-400 ml-1 font-bold">
+                          <span className="text-[12px] font-mono text-[var(--ps-green)] ml-1 font-bold">
                             ✓ Mustahkam
                           </span>
                         </span>
@@ -735,16 +664,16 @@ export default function ProfilePage() {
                 </div>
 
                 {/* B. Qiynalgan / Zaif Mavzular (<50% Aniqlik) */}
-                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/[0.04] dark:bg-rose-500/[0.07] p-5 space-y-3.5 shadow-xs">
+                <div className="rounded-2xl border border-[var(--ps-coral)]/30 bg-[var(--ps-coral)]/[0.04] dark:bg-[var(--ps-coral)]/[0.07] p-5 space-y-3.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
+                      <div className="size-8 rounded-xl bg-[var(--ps-coral)]/15 text-[var(--ps-coral)] flex items-center justify-center shrink-0">
                         <AlertTriangle className="size-4" />
                       </div>
                       <div>
                         <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
                           <span>Qiynalgan mavzularingiz</span>
-                          <span className="text-[12px] font-mono font-bold bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2 py-0.2 rounded-full">
+                          <span className="text-[12px] font-mono font-bold bg-[var(--ps-coral)]/20 text-[var(--ps-coral)] px-2 py-0.2 rounded-full">
                             {analyticsData?.mastery?.weak?.length || 0} ta
                           </span>
                         </h3>
@@ -762,11 +691,11 @@ export default function ProfilePage() {
                           key={`weak-${idx}`}
                           href="/sprint"
                           onClick={() => { soundFX.click(); tgHaptic('medium'); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/10 border border-rose-500/25 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer group shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--ps-coral)]/10 border border-[var(--ps-coral)]/25 text-[var(--ps-coral)] hover:bg-[var(--ps-coral)]/20 transition-all cursor-pointer group shadow-2xs"
                         >
-                          <AlertTriangle className="size-3.5 text-rose-500 shrink-0" />
+                          <AlertTriangle className="size-3.5 text-[var(--ps-coral)] shrink-0" />
                           <span>{topicName}</span>
-                          <span className="text-[12px] font-bold text-rose-500 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                          <span className="text-[12px] font-bold text-[var(--ps-coral)] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
                             Qasos <ArrowRight className="size-2.5" />
                           </span>
                         </Link>
@@ -820,7 +749,7 @@ export default function ProfilePage() {
                             <div className="flex items-center gap-2 min-w-0">
                               <span
                                 className="size-3 rounded-full shrink-0 shadow-2xs"
-                                style={{ backgroundColor: sub.color || '#007AFF' }}
+                                style={{ backgroundColor: sub.color || 'var(--ps-purple)' }}
                               />
                               <span className="font-bold text-foreground truncate">{sub.name}</span>
                             </div>
@@ -849,7 +778,7 @@ export default function ProfilePage() {
                   <div className="mt-4 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-3 text-xs">
                     <Button asChild variant="outline" size="sm" className="rounded-xl gap-1.5 font-bold">
                       <Link href="/sprint">
-                        <Zap className="size-3.5 text-amber-500" />
+                        <Zap className="size-3.5 text-[var(--reward-text)]" />
                         <span>Fokus &amp; Qasos Mashqi</span>
                       </Link>
                     </Button>
@@ -889,12 +818,12 @@ export default function ProfilePage() {
                           <div className="h-3 w-full rounded-full bg-muted overflow-hidden flex">
                             <div
                               style={{ width: `${correctPct}%` }}
-                              className="bg-emerald-500 transition-all duration-500"
+                              className="bg-[var(--ps-green)] transition-all duration-500"
                               title={`To'g'ri: ${correct} ta (${correctPct}%)`}
                             />
                             <div
                               style={{ width: `${wrongPct}%` }}
-                              className="bg-rose-500 transition-all duration-500"
+                              className="bg-[var(--ps-coral)] transition-all duration-500"
                               title={`Xato: ${wrong} ta (${wrongPct}%)`}
                             />
                             <div
@@ -905,12 +834,12 @@ export default function ProfilePage() {
                           </div>
 
                           <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                              <p className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">To&apos;g&apos;ri</p>
+                            <div className="p-2.5 rounded-xl bg-[var(--ps-green)]/10 border border-[var(--ps-green)]/20">
+                              <p className="text-[12px] font-semibold text-[var(--ps-green)]">To&apos;g&apos;ri</p>
                               <p className="font-mono font-bold text-sm text-foreground mt-0.5">{correct} ta</p>
                             </div>
-                            <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
-                              <p className="text-[12px] font-semibold text-rose-600 dark:text-rose-400">Xato</p>
+                            <div className="p-2.5 rounded-xl bg-[var(--ps-coral)]/10 border border-[var(--ps-coral)]/20">
+                              <p className="text-[12px] font-semibold text-[var(--ps-coral)]">Xato</p>
                               <p className="font-mono font-bold text-sm text-foreground mt-0.5">{wrong} ta</p>
                             </div>
                             <div className="p-2.5 rounded-xl bg-muted/60 border border-border/60">
@@ -940,15 +869,15 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-3 py-1 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
-                    <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)]/12 px-3 py-1 text-[12px] font-bold text-[var(--ps-green)]">
+                    <span className="size-2 rounded-full bg-[var(--ps-green)] animate-ping" />
                     Faol o&apos;sishda
                   </span>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-12 items-center">
                   {/* Organic Tree */}
-                  <div className="lg:col-span-5 flex items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.05] p-4">
+                  <div className="lg:col-span-5 flex items-center justify-center rounded-2xl border border-[var(--ps-green)]/20 bg-[var(--ps-green)]/[0.05] p-4">
                     <KnowledgeTree
                       level={p.level}
                       xpProgress={xpProgress}
@@ -1006,7 +935,7 @@ export default function ProfilePage() {
                         </div>
                         <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-700"
+                            className="h-full bg-gradient-to-r from-primary to-[var(--ps-green)] rounded-full transition-all duration-700"
                             style={{ width: `${Math.max(4, Math.min(100, xpProgress))}%` }}
                           />
                         </div>
@@ -1016,7 +945,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="rounded-xl bg-emerald-500/[0.08] border border-emerald-500/20 p-3.5 text-[12.5px] text-foreground leading-relaxed flex items-start gap-2.5">
+                    <div className="rounded-xl bg-[var(--ps-green)]/[0.08] border border-[var(--ps-green)]/20 p-3.5 text-[12.5px] text-foreground leading-relaxed flex items-start gap-2.5">
                       <PremiumIcon icon={Sprout} tone="emerald" size="2xs" solid className="mt-0.5" />
                       <span>
                         <strong>Har bir yechilgan test</strong>, ko&apos;rilgan dars va tuzatilgan xato bu daraxt ildizini chuqurlashtirib, unga yangi shoxlar qo&apos;shadi.
@@ -1192,7 +1121,7 @@ export default function ProfilePage() {
                             {post.title}
                           </h4>
                           {post.score > 0 && (
-                            <span className="shrink-0 rounded-xl bg-emerald-500/12 border border-emerald-500/25 px-2.5 py-1 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            <span className="shrink-0 rounded-xl bg-[var(--ps-green)]/12 border border-[var(--ps-green)]/25 px-2.5 py-1 text-xs font-mono font-bold text-[var(--ps-green)]">
                               {post.score.toFixed(0)}%
                             </span>
                           )}
@@ -1221,11 +1150,11 @@ export default function ProfilePage() {
                       <div className="pt-2 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
                         <div className="flex items-center gap-3">
                           <span className="flex items-center gap-1">
-                            <Heart className="size-3.5 text-rose-500" />
+                            <Heart className="size-3.5 text-[var(--ps-coral)]" />
                             <span>{post.reactions_count || 0}</span>
                           </span>
                           <span className="flex items-center gap-1">
-                            <MessageCircle className="size-3.5 text-sky-500" />
+                            <MessageCircle className="size-3.5 text-[var(--ps-purple)]" />
                             <span>{post.comments_count || 0}</span>
                           </span>
                         </div>
@@ -1327,7 +1256,7 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-2">
                           <Button asChild variant="outline" size="sm" className="rounded-xl gap-1.5 text-xs font-semibold shadow-2xs hover:bg-muted">
                             <Link href="/shop">
-                              <Coins className="size-3.5 text-amber-500" />
+                              <Coins className="size-3.5 text-[var(--reward-text)]" />
                               <span>Do&apos;konga o&apos;tish</span>
                             </Link>
                           </Button>
@@ -1376,7 +1305,7 @@ export default function ProfilePage() {
                     <CardContent className="pt-1">
                       {allItems.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center space-y-3">
-                          <div className="size-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+                          <div className="size-12 rounded-2xl bg-[var(--ps-orange)]/10 text-[var(--reward-text)] flex items-center justify-center mx-auto">
                             <ShoppingBag className="size-6" />
                           </div>
                           <div className="space-y-1">
@@ -1407,7 +1336,7 @@ export default function ProfilePage() {
                                 className={cn(
                                   'group relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 shadow-2xs',
                                   isEquipped
-                                    ? 'border-emerald-500/40 bg-gradient-to-b from-emerald-500/[0.08] via-emerald-500/[0.02] to-transparent dark:from-emerald-950/30'
+                                    ? 'border-[var(--ps-green)]/40 bg-gradient-to-b from-[var(--ps-green)]/[0.08] via-[var(--ps-green)]/[0.02] to-transparent dark:from-[var(--ps-green)]/30'
                                     : 'border-border/80 bg-card hover:border-border hover:bg-muted/20'
                                 )}
                               >
@@ -1424,7 +1353,7 @@ export default function ProfilePage() {
                                             boxShadow: `0 0 12px ${ring || '#f59e0b'}55`,
                                           }}
                                         >
-                                          <div className="size-full rounded-full bg-slate-900 dark:bg-slate-950 flex items-center justify-center text-amber-400">
+                                          <div className="size-full rounded-full bg-slate-900 dark:bg-slate-950 flex items-center justify-center text-[var(--reward-text)]">
                                             <Award className="size-5" />
                                           </div>
                                         </div>
@@ -1440,11 +1369,11 @@ export default function ProfilePage() {
                                         <Palette className="size-5" />
                                       </div>
                                     ) : item.category === 'title' ? (
-                                      <div className="size-11 rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-purple-500/20 border border-amber-500/30 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-xs transition-transform group-hover:scale-105">
+                                      <div className="size-11 rounded-2xl bg-gradient-to-br from-[var(--ps-orange)]/20 via-[var(--ps-orange)]/10 to-[var(--ps-purple)]/20 border border-[var(--ps-orange)]/30 flex items-center justify-center text-[var(--reward-text)] shadow-xs transition-transform group-hover:scale-105">
                                         <Crown className="size-5" />
                                       </div>
                                     ) : item.category === 'consumable' ? (
-                                      <div className="size-11 rounded-2xl bg-gradient-to-br from-sky-500/20 via-sky-500/10 to-blue-500/20 border border-sky-500/30 flex items-center justify-center text-sky-500 dark:text-sky-400 shadow-xs transition-transform group-hover:scale-105">
+                                      <div className="size-11 rounded-2xl bg-gradient-to-br from-[var(--ps-blue)]/20 via-[var(--ps-blue)]/10 to-[var(--ps-blue)]/20 border border-[var(--ps-blue)]/30 flex items-center justify-center text-[var(--ps-purple)] shadow-xs transition-transform group-hover:scale-105">
                                         <Shield className="size-5" />
                                       </div>
                                     ) : item.category === 'avatar' && item.payload?.avatar_url ? (
@@ -1467,7 +1396,7 @@ export default function ProfilePage() {
                                         {item.name}
                                       </span>
                                       {isEquipped && (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.2 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-green)]/15 border border-[var(--ps-green)]/30 px-2 py-0.2 text-[12px] font-bold text-[var(--ps-green)]">
                                           <Check className="size-2.5 stroke-[2.5]" />
                                           Taqilgan
                                         </span>
@@ -1492,8 +1421,8 @@ export default function ProfilePage() {
                                     <>
                                       <div className="flex items-center gap-1.5 text-xs">
                                         {isEquipped ? (
-                                          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 text-[12px]">
-                                            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                          <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--ps-green)] text-[12px]">
+                                            <span className="size-1.5 rounded-full bg-[var(--ps-green)] animate-pulse" />
                                             Faol profilga ulangan
                                           </span>
                                         ) : (
@@ -1526,12 +1455,12 @@ export default function ProfilePage() {
                                     </>
                                   ) : (
                                     <>
-                                      <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-sky-600 dark:text-sky-400">
+                                      <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--ps-purple)]">
                                         <Shield className="size-3.5" />
                                         Avtomatik amal qiladi
                                       </span>
 
-                                      <span className="px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-bold font-mono">
+                                      <span className="px-2.5 py-0.5 rounded-full bg-[var(--ps-blue)]/10 border border-[var(--ps-blue)]/20 text-[var(--ps-purple)] text-xs font-bold font-mono">
                                         {item.quantity ? `${item.quantity} ta zaxirada` : '1 ta faol'}
                                       </span>
                                     </>
@@ -1622,8 +1551,8 @@ export default function ProfilePage() {
                           variant="outline"
                           className={
                             b.won
-                              ? 'border-emerald-500/30 bg-emerald-500/12 text-emerald-600 dark:text-emerald-400'
-                              : 'border-rose-500/30 bg-rose-500/12 text-rose-600 dark:text-rose-400'
+                              ? 'border-[var(--ps-green)]/30 bg-[var(--ps-green)]/12 text-[var(--ps-green)]'
+                              : 'border-[var(--ps-coral)]/30 bg-[var(--ps-coral)]/12 text-[var(--ps-coral)]'
                           }
                         >
                           {b.won ? "G'alaba" : "Mag'lubiyat"}
@@ -1644,7 +1573,7 @@ export default function ProfilePage() {
                     </h3>
                     <p className="text-[12.5px] text-muted-foreground mt-0.5">
                       {data.referral_stats.referral_count} ta do&apos;st taklif qildingiz ·{' '}
-                      <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">{data.referral_stats.coins_earned} tanga</strong> ishladingiz
+                      <strong className="text-[var(--ps-green)] font-semibold">{data.referral_stats.coins_earned} tanga</strong> ishladingiz
                     </p>
                   </div>
                 </div>
@@ -1654,7 +1583,7 @@ export default function ProfilePage() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant="outline" size="icon" onClick={handleCopy} aria-label="Havolani nusxalash">
-                        {copied ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4" />}
+                        {copied ? <Check className="size-4 text-[var(--ps-green)]" /> : <Copy className="size-4" />}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>{copied ? 'Nusxalandi!' : 'Havolani nusxalash'}</TooltipContent>
@@ -1797,7 +1726,7 @@ export default function ProfilePage() {
                       variant="ghost"
                       size="sm"
                       onClick={handleRemoveAvatar}
-                      className="h-8 rounded-full text-xs text-rose-500 hover:bg-rose-500/10 gap-1.5"
+                      className="h-8 rounded-full text-xs text-[var(--ps-coral)] hover:bg-[var(--ps-coral)]/10 gap-1.5"
                     >
                       <Trash2 className="size-3.5" />
                       O&apos;chirish
@@ -1875,6 +1804,6 @@ export default function ProfilePage() {
           </DialogContent>
         </Dialog>
       </main>
-    </>
+    </div>
   );
 }
