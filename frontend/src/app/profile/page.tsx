@@ -955,62 +955,70 @@ export default function ProfilePage() {
                 </div>
 
                 {/* 6 burchakli Radar-Analitika (Spider Chart) — Haqiqiy statistika bilan */}
-                <div className="mt-6 pt-6 border-t border-border/60">
+                <div className="mt-6">
                   <StudentSpiderRadar radar={skillRadar} />
                 </div>
               </div>
 
               {/* 6. PLATFORMA YUTUQLARI & NISHONLAR */}
-              <Card className="rounded-2xl border-border/80 shadow-md">
-                <CardHeader>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <PremiumIcon icon={Award} tone="amber" size="xs" solid />
-                      <span>Platforma Yutuqlari & Nishonlar</span>
-                    </CardTitle>
-                    <span className="font-mono text-xs font-semibold text-muted-foreground">
-                      {data.badges.length} / {data.total_badges} ochilgan ({badgePct}%)
-                    </span>
+              <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-orange)] opacity-20" />
+                <div className="relative flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="ps-eyebrow text-[var(--text-muted)]">Yutuqlar</p>
+                    <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                      Platforma <span className="text-[var(--ps-orange)]">nishonlari</span>
+                    </h3>
                   </div>
-                  <Progress value={badgePct} className="mt-2 h-2" />
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-                    {data.badges.map((b, idx) => {
-                      const Icon = RARITY_ICON[b.rarity] || Medal;
-                      return (
-                        <Tooltip key={idx}>
-                          <TooltipTrigger asChild>
-                            <div className="rounded-xl border border-border/60 bg-muted/40 p-4 text-center space-y-2.5 transition-all hover:scale-[1.02] cursor-pointer">
-                              <PremiumIcon
-                                icon={Icon}
-                                tone={RARITY_TONE_KEY[b.rarity] || 'emerald'}
-                                size="lg"
-                                solid
-                                className="mx-auto"
-                              />
-                              <p className="text-[12.5px] font-bold text-foreground leading-tight">{b.name}</p>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-56">{b.description}</TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                    {(data.locked_badges ?? []).map((b) => (
-                      <Tooltip key={`locked-${b.name}`}>
+                  <div className="text-right">
+                    <p className="ps-num text-[40px] sm:text-[48px]">
+                      {data.badges.length}<span className="text-[0.5em] text-[var(--text-faint)]">/{data.total_badges}</span>
+                    </p>
+                    <p className="text-[11px] font-semibold text-[var(--text-muted)]">{badgePct}% ochilgan</p>
+                  </div>
+                </div>
+                <div className="relative mt-4 h-3 overflow-hidden rounded-full bg-[var(--ds-track)]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--ps-orange)] to-[var(--ps-coral)] transition-[width] duration-700"
+                    style={{ width: `${Math.max(2, badgePct)}%` }}
+                  />
+                </div>
+
+                <div className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {data.badges.map((b, idx) => {
+                    const Icon = RARITY_ICON[b.rarity] || Medal;
+                    const tone = ['bg-[var(--ps-orange)] text-[#080808]', 'bg-[var(--ps-purple)] text-white', 'bg-[var(--ps-green)] text-white', 'bg-[var(--ps-coral)] text-white', 'bg-[var(--ps-blue)] text-[#080808]'][idx % 5];
+                    return (
+                      <Tooltip key={idx}>
                         <TooltipTrigger asChild>
-                          <div className="rounded-xl border border-dashed border-border p-4 text-center space-y-2 opacity-65">
-                            <PremiumIcon icon={Lock} tone="zinc" size="lg" className="mx-auto" />
-                            <p className="text-[12px] font-bold leading-tight text-muted-foreground">{b.name}</p>
-                            <p className="line-clamp-2 text-[12px] leading-snug text-muted-foreground">{b.description}</p>
+                          <div className={cn('relative flex cursor-pointer flex-col items-center gap-3 overflow-hidden rounded-[24px] p-5 text-center transition-transform hover:-translate-y-1', tone)}>
+                            <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/20" />
+                            <span className="relative inline-flex size-14 items-center justify-center rounded-full bg-black/15">
+                              <Icon className="size-7" />
+                            </span>
+                            <p className="relative text-[14px] font-bold leading-tight">{b.name}</p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-56">Hali ochilmagan — {b.description}</TooltipContent>
+                        <TooltipContent className="max-w-56">{b.description}</TooltipContent>
                       </Tooltip>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    );
+                  })}
+                  {(data.locked_badges ?? []).map((b) => (
+                    <Tooltip key={`locked-${b.name}`}>
+                      <TooltipTrigger asChild>
+                        <div className="flex flex-col items-center gap-2.5 rounded-[24px] bg-[var(--ps-neutral)] p-5 text-center transition-transform hover:-translate-y-0.5">
+                          <span className="inline-flex size-14 items-center justify-center rounded-full bg-[var(--ps-paper)] text-[var(--text-faint)] border-2 border-dashed border-[var(--border-strong)]">
+                            <Lock className="size-6" />
+                          </span>
+                          <p className="text-[13px] font-bold leading-tight text-[var(--text-secondary)]">{b.name}</p>
+                          <p className="line-clamp-2 text-[11.5px] leading-snug text-[var(--text-muted)]">{b.description}</p>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-56">Hali ochilmagan — {b.description}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+              </section>
             </motion.div>
           )}
 

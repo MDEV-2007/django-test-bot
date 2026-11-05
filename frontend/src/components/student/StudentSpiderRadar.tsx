@@ -78,19 +78,20 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
   return (
     <div
       className={cn(
-        'relative flex flex-col items-center justify-center p-5 rounded-3xl bg-zinc-900/65 border border-white/[0.08] backdrop-blur-xl shadow-xl overflow-hidden',
+        'relative flex flex-col items-center justify-center overflow-hidden rounded-[28px] bg-[var(--ps-paper,var(--surface-card))] p-6 text-[var(--text-primary)] shadow-[var(--ds-panel-shadow)] sm:p-7',
         className,
       )}
     >
-      <div className="absolute inset-0 bg-radial from-blue-500/10 via-transparent to-transparent pointer-events-none" />
+      <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-purple,#7659C7)] opacity-15" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-12 size-40 rounded-full bg-[var(--ps-orange,#FFB82E)] opacity-15" />
 
-      <div className="w-full flex items-center justify-between mb-2 z-10">
+      <div className="relative z-10 mb-2 flex w-full items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-            <Sparkles className="size-4 text-blue-400" />
-            Radar-Analitika
+          <h3 className="flex items-center gap-2 text-[22px] font-bold tracking-[-0.035em] [font-family:var(--font-grotesk),var(--font-sans),sans-serif]">
+            <span className="inline-flex size-9 items-center justify-center rounded-full bg-[var(--ps-purple,#7659C7)] text-white"><Sparkles className="size-4" /></span>
+            Radar-analitika
           </h3>
-          <p className="text-[12px] text-zinc-400">
+          <p className="mt-1 text-[12px] text-[var(--text-muted)]">
             {radar === undefined
               ? 'Yuklanmoqda...'
               : radar === null
@@ -101,23 +102,23 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1 rounded-xl shadow-md shadow-blue-500/25">
-          <Zap className="size-3.5 fill-current" />
-          <span className="text-xs font-bold tracking-wider">{overall !== null ? `${overall} OVR` : '— OVR'}</span>
+        <div className="flex items-center gap-1.5 rounded-full bg-[#080808] py-1.5 pl-1.5 pr-3.5 text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+          <span className="flex size-6 items-center justify-center rounded-full bg-[var(--ps-orange,#FFB82E)] text-[#080808]"><Zap className="size-3.5 fill-current" /></span>
+          <span className="text-[13px] font-bold tabular-nums">{overall !== null ? `${overall} OVR` : '— OVR'}</span>
         </div>
       </div>
 
       <div className="relative w-full max-w-[300px] aspect-square flex items-center justify-center my-1 select-none">
-        <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full overflow-visible" role="img"
+        <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full overflow-visible text-[var(--text-primary)]" role="img"
              aria-label="Ko'nikmalar radari">
           <defs>
             <linearGradient id="radarFillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.45" />
-              <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.25" />
+              <stop offset="0%" stopColor="#7659C7" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#F0523D" stopOpacity="0.25" />
             </linearGradient>
             <linearGradient id="radarStrokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#60A5FA" />
-              <stop offset="100%" stopColor="#A78BFA" />
+              <stop offset="0%" stopColor="#7659C7" />
+              <stop offset="100%" stopColor="#F0523D" />
             </linearGradient>
           </defs>
 
@@ -131,7 +132,7 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
                 })
                 .join(' ')}
               fill="none"
-              stroke="rgba(255, 255, 255, 0.08)"
+              stroke="currentColor" strokeOpacity="0.12"
               strokeWidth="1"
               strokeDasharray={lIdx === levels.length - 1 ? undefined : '2,2'}
             />
@@ -139,7 +140,7 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
 
           {Array.from({ length: numAxes }).map((_, i) => {
             const { x, y } = getCoordinates(i, 1);
-            return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1" />;
+            return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="currentColor" strokeOpacity="0.16" strokeWidth="1" />;
           })}
 
           {measured.length > 0 && (
@@ -157,8 +158,7 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
             if (axisValue(radar, axis.key) === null) return null;
             const { x, y } = getCoordinates(i, ratios[i]);
             return (
-              <circle key={axis.key} cx={x} cy={y} r="4.5" fill="#60A5FA" stroke="#FFFFFF" strokeWidth="1.5"
-                      className="drop-shadow-[0_0_6px_rgba(96,165,250,0.8)]" />
+              <circle key={axis.key} cx={x} cy={y} r="5" fill="#FFB82E" stroke="#080808" strokeWidth="2" />
             );
           })}
 
@@ -169,11 +169,11 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
             return (
               <g key={axis.key} transform={`translate(${x}, ${y})`}>
                 <title>{radar?.axes?.[axis.key]?.basis || axis.label}</title>
-                <text textAnchor="middle" dominantBaseline="central" className="fill-zinc-300 text-[12px] font-bold select-none">
+                <text textAnchor="middle" dominantBaseline="central" className="fill-current text-[12px] font-bold select-none">
                   {axis.icon} {axis.label}
                 </text>
                 <text y="12" textAnchor="middle" dominantBaseline="central"
-                      className="fill-blue-400 text-[11px] font-bold font-mono select-none">
+                      className="fill-[var(--ps-purple,#7659C7)] text-[11px] font-bold select-none">
                   {val === null ? '—' : `${isProxy ? '≈' : ''}${val}%`}
                 </text>
               </g>
@@ -182,18 +182,18 @@ export default function StudentSpiderRadar({ radar, className }: StudentSpiderRa
         </svg>
       </div>
 
-      <div className="w-full pt-3 mt-1 border-t border-white/[0.06] space-y-1 text-[12px] text-zinc-400">
+      <div className="relative mt-2 w-full space-y-1.5 rounded-[20px] bg-[var(--ps-neutral,var(--surface-input))] p-4 text-[12px] text-[var(--text-muted)]">
         {strongest ? (
           <div className="flex items-center justify-between gap-2">
             <span>Eng kuchli tomon: <b>{strongest.label} ({strongest.value}%)</b></span>
             {weakest && weakest.key !== strongest.key && (
-              <span className="text-amber-400">O&apos;sish talab: <b>{weakest.label} ({weakest.value}%)</b></span>
+              <span className="font-semibold text-[var(--ps-coral,#F0523D)]">O&apos;sish talab: <b>{weakest.label} ({weakest.value}%)</b></span>
             )}
           </div>
         ) : (
           <span>Test yeching — radar haqiqiy natijalaringiz asosida to&apos;ladi.</span>
         )}
-        {hasProxy && <p className="text-[11px] text-zinc-500">≈ — taxminiy ko&apos;rsatkich (bevosita o&apos;lchanmaydi). &quot;—&quot; — ma&apos;lumot yo&apos;q.</p>}
+        {hasProxy && <p className="text-[11px] text-[var(--text-faint)]">≈ — taxminiy ko&apos;rsatkich (bevosita o&apos;lchanmaydi). &quot;—&quot; — ma&apos;lumot yo&apos;q.</p>}
       </div>
     </div>
   );
