@@ -7,9 +7,8 @@ import {
   Brain, Zap, Sparkles, Trophy, X, Flame,
   Clock, ArrowRight, CheckCircle2, AlertCircle,
   HelpCircle, Swords, Check, RotateCw, Lightbulb,
-  ShieldAlert, BookOpen, ChevronRight, Droplets
+  ShieldAlert, TrendingUp
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { toast } from 'sonner';
@@ -315,114 +314,103 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   const stageIdx = STEPS.findIndex((s) => s.id === currentStage);
   const currentStageIndex = stageIdx >= 0 ? stageIdx : 0;
 
+  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const warmupPct = Math.max(0, Math.min(100, (warmupSecondsLeft / 90) * 100));
+
   if (loading && !loop) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md">
+      <div className="theme-pastel ps-shell fixed inset-0 z-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="size-12 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
-          <p className="text-sm font-bold text-zinc-300">Avtopilot Konveyeri yuklanmoqda...</p>
+          <span className="inline-flex size-14 items-center justify-center rounded-full bg-[var(--ps-paper)] shadow-lg">
+            <RotateCw className="size-6 animate-spin text-[var(--ps-purple)]" />
+          </span>
+          <p className="text-[14px] font-bold text-[var(--text-primary)]">Avtopilot konveyeri yuklanmoqda...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950 text-white select-none overflow-y-auto">
-      {/* ========================================================================= */}
-      {/* 1. TOP CHAIN STEPPER HUD (Neon Pipeline Header) */}
-      {/* ========================================================================= */}
-      <header className="sticky top-0 z-30 flex flex-col border-b border-white/10 bg-zinc-950/90 backdrop-blur-md px-3 sm:px-6 py-2.5">
-        <div className="flex items-center justify-between gap-2">
-          {/* Chapda: Mavzu va Uzluksizlik nishoni */}
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-bold uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
-              Avtopilot • #{loop?.cycle_number || 1}
-            </span>
-            <h1 className="text-xs sm:text-sm font-bold text-zinc-200 truncate">
-              {topic?.title || "Kunlik Zanjir"}
-            </h1>
+    <div className="theme-pastel ps-shell fixed inset-0 z-50 flex select-none flex-col overflow-y-auto text-[var(--text-primary)]">
+      {/* ── 1. Sarlavha va bosqichlar zanjiri ── */}
+      <header className="sticky top-0 z-30 px-3 pt-3 sm:px-6 sm:pt-4">
+        <div className="mx-auto w-full max-w-5xl rounded-[28px] bg-[var(--ps-paper)]/90 p-3 shadow-[0_20px_40px_-28px_rgba(40,20,80,0.6)] backdrop-blur-xl sm:p-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#080808] px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+                <Zap className="size-3 fill-[var(--ps-orange)] text-[var(--ps-orange)]" />
+                Avtopilot · #{loop?.cycle_number || 1}
+              </span>
+              <h1 className="truncate font-[family-name:var(--font-grotesk)] text-[14px] font-bold sm:text-[17px]">
+                {topic?.title || 'Kunlik zanjir'}
+              </h1>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="hidden items-center gap-1 rounded-full bg-[var(--ps-green)] px-3 py-1.5 text-[12px] font-bold text-white sm:inline-flex">
+                <TrendingUp className="size-3.5" /> +{(loop?.dtm_score_delta ?? 0.4).toFixed(1)} DTM
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-[12px] font-bold text-[#080808]">
+                <Flame className="size-3.5 fill-current" /> {(loop?.combo_multiplier ?? 1.0).toFixed(1)}x
+              </span>
+              <button
+                type="button"
+                onClick={() => handleRequestExit(onClose)}
+                className="inline-flex size-9 cursor-pointer items-center justify-center rounded-full bg-[var(--ps-neutral)] text-[var(--text-secondary)] transition-colors hover:bg-[#080808] hover:text-[#FFFCF7] dark:hover:bg-[#FFFCF7] dark:hover:text-[#080808]"
+                title="Chiqish"
+                aria-label="Chiqish"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
           </div>
 
-          {/* O'ngda: DTM Ball + Combo Badge + Chiqish tugmasi */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-zinc-900 border border-white/10 text-xs font-mono font-bold text-emerald-400">
-              <Trophy className="size-3 text-emerald-400" />
-              <span>+{(loop?.dtm_score_delta ?? 0.4).toFixed(1)} DTM</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-orange-500/20 to-rose-500/20 border border-orange-500/40 text-xs font-mono font-bold text-orange-400 shadow-sm animate-pulse">
-              <Flame className="size-3.5 fill-current" />
-              <span>{(loop?.combo_multiplier ?? 1.0).toFixed(1)}x</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handleRequestExit(onClose)}
-              className="size-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition cursor-pointer"
-              title="Chiqish"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* 4 ta ulangan neon halqa zanjiri */}
-        <div className="flex items-center justify-between gap-1 mt-2.5 max-w-2xl mx-auto w-full">
-          {STEPS.map((step, idx) => {
-            const isDone = idx < currentStageIndex;
-            const isCurrent = idx === currentStageIndex;
-            const StepIcon = step.icon;
-
-            return (
-              <React.Fragment key={step.id}>
-                <div className="flex items-center gap-1.5">
+          <div className="mt-3 flex items-center gap-1">
+            {STEPS.map((step, idx) => {
+              const isDone = idx < currentStageIndex;
+              const isCurrent = idx === currentStageIndex;
+              const StepIcon = step.icon;
+              return (
+                <React.Fragment key={step.id}>
                   <div
-                    className={`size-7 sm:size-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                      isCurrent
-                        ? 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-lg shadow-orange-500/30 ring-2 ring-orange-400'
-                        : isDone
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                        : 'bg-zinc-900 text-zinc-600 border border-white/5'
+                    className={`flex shrink-0 items-center gap-1.5 rounded-full p-1 transition-all ${
+                      isCurrent ? 'bg-[#080808] pr-3 text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]' : ''
                     }`}
                   >
-                    {isDone ? <Check className="size-3.5" /> : <StepIcon className="size-3.5" />}
+                    <span
+                      className={`inline-flex size-7 items-center justify-center rounded-full sm:size-8 ${
+                        isCurrent
+                          ? 'bg-[var(--ps-orange)] text-[#080808]'
+                          : isDone
+                            ? 'bg-[var(--ps-green)] text-white'
+                            : 'bg-[var(--ps-neutral)] text-[var(--text-muted)]'
+                      }`}
+                    >
+                      {isDone ? <Check className="size-3.5 stroke-[3]" /> : <StepIcon className="size-3.5" />}
+                    </span>
+                    {isCurrent && (
+                      <span className="whitespace-nowrap text-[12px] font-bold">
+                        <span className="sm:hidden">{idx + 1}-bosqich</span>
+                        <span className="hidden sm:inline">{step.label}</span>
+                      </span>
+                    )}
                   </div>
-                  <span
-                    className={`hidden md:inline text-[12px] font-bold ${
-                      isCurrent ? 'text-white' : isDone ? 'text-zinc-400' : 'text-zinc-600'
-                    }`}
-                  >
-                    {step.label}
-                  </span>
-                </div>
-
-                {idx < STEPS.length - 1 && (
-                  <div
-                    className={`flex-1 h-0.5 mx-1 transition-all ${
-                      idx < currentStageIndex
-                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                        : idx === currentStageIndex
-                        ? 'bg-gradient-to-r from-orange-500 to-zinc-700'
-                        : 'bg-zinc-800'
-                    }`}
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
+                  {idx < STEPS.length - 1 && (
+                    <span className={`h-1 min-w-2 flex-1 rounded-full ${idx < currentStageIndex ? 'bg-[var(--ps-green)]' : 'bg-[var(--ds-track)]'}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
         </div>
       </header>
 
-      {/* ========================================================================= */}
-      {/* 2. BOSQICHLARNING ASOSIY MAYDONI (Single Container Focus View) */}
-      {/* ========================================================================= */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-3xl mx-auto w-full">
-        {/* Avtopilot Ko'prigi (3s Transition Bridge) */}
+      {/* ── 2. Bosqich maydoni ── */}
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center p-4 pb-10 sm:p-6">
         {autoplayActive ? (
           <AutoplayTransitionBridge
             currentStageNumber={currentStageIndex}
             nextStageNumber={currentStageIndex + 1}
-            nextStageTitle={STEPS[currentStageIndex]?.label || "Keyingi bosqich"}
+            nextStageTitle={STEPS[currentStageIndex]?.label || 'Keyingi bosqich'}
             nextStageBenefit={
               // 1 — sprint tugadi, keyingisi xatolar flashcardi. Ilgari `=== 2` edi va bu
               // xabar flashcardlardan KEYIN chiqardi; combo esa oshmasa ham "oshdi" deyilardi.
@@ -436,145 +424,137 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
           />
         ) : loading ? (
           <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
-            <RotateCw className="size-9 text-orange-500 animate-spin" />
-            <div className="space-y-1">
-              <p className="text-sm font-bold text-zinc-200">Avtopilot sikli yuklanmoqda...</p>
-              <p className="text-xs text-zinc-400">Kunlik shpargalka va qasos savollari tayyorlanmoqda</p>
+            <span className="inline-flex size-14 items-center justify-center rounded-full bg-[var(--ps-paper)] shadow-lg">
+              <RotateCw className="size-6 animate-spin text-[var(--ps-purple)]" />
+            </span>
+            <div>
+              <p className="text-[14px] font-bold">Avtopilot sikli yuklanmoqda...</p>
+              <p className="mt-1 text-[12.5px] text-[var(--text-muted)]">Kunlik shpargalka va qasos savollari tayyorlanmoqda</p>
             </div>
           </div>
         ) : (
           <AnimatePresence mode="wait">
-            {/* ── 1-BOSQICH: 60s ANTI-DARSLIK SHPARGALKA ── */}
+            {/* ── 1-BOSQICH: 90s SHPARGALKA ── */}
             {currentStage === 'STAGE_1_WARMUP' && (
-              <motion.div
-                key="stage_1"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                className="w-full space-y-5"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase">
-                    <Brain className="size-3.5" />
-                    <span>1-Bosqich: 90s Shpargalka</span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-white/10 text-xs font-mono font-bold text-amber-400">
-                    <Clock className="size-3.5 animate-pulse" />
-                    <span>{warmupSecondsLeft}s qoldi</span>
-                  </div>
+              <motion.div key="stage_1" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} className="w-full space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-purple)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-white">
+                    <Brain className="size-3.5" /> 1-bosqich · 90s shpargalka
+                  </span>
+                  <span className="relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-[var(--ps-paper)] py-1.5 pl-1.5 pr-3.5 text-[12.5px] font-bold shadow-sm">
+                    <span
+                      className="inline-flex size-6 items-center justify-center rounded-full"
+                      style={{ background: `conic-gradient(var(--ps-orange) ${warmupPct}%, var(--ps-neutral) 0)` }}
+                    >
+                      <span className="size-3.5 rounded-full bg-[var(--ps-paper)]" />
+                    </span>
+                    <span className="tabular-nums">{warmupSecondsLeft}s qoldi</span>
+                  </span>
                 </div>
 
-                <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-5 sm:p-7 shadow-xl space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">
-                    {stageData?.warmup?.title || topic?.title || "Oltin Qoidalar & BMB Qopqonlari"}
+                <section className="ps-card relative overflow-hidden !rounded-[32px] p-5 sm:p-8">
+                  <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-purple)] opacity-10" />
+                  <h2 className="ps-display relative text-[26px] sm:text-[34px]">
+                    {stageData?.warmup?.title || topic?.title || 'Oltin qoidalar & BMB qopqonlari'}
                   </h2>
-                  <p className="text-xs sm:text-sm text-zinc-300 whitespace-pre-line leading-relaxed">
+                  <p className="relative mt-3 whitespace-pre-line text-[14px] leading-relaxed text-[var(--text-secondary)] sm:text-[15px]">
                     {stageData?.warmup?.cheat_sheet_content ||
                       "1. Savol shartini diqqat bilan o'qing: 'emas', 'noto'g'ri', 'mos kelmaydi' inkor so'zlariga urg'u bering.\n2. Birinchi taassurotga ishonmang: chalg'ituvchi variantlar odatda eng tanish tuyuladi.\n3. Istisno usulini qo'llang: mutlaqo noto'g'ri bo'lgan 2 ta javobni darhol chiqarib tashlang."}
                   </p>
 
-                  <div className="space-y-2 pt-2">
-                    <h3 className="text-xs font-bold uppercase text-rose-400 tracking-wider flex items-center gap-1.5">
-                      <ShieldAlert className="size-3.5" />
-                      <span>BMB / DTM Qopqonlari:</span>
-                    </h3>
-                    <div className="grid grid-cols-1 gap-2">
+                  <div className="relative mt-5">
+                    <p className="flex items-center gap-1.5 text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-coral)]">
+                      <ShieldAlert className="size-4" /> BMB / DTM qopqonlari
+                    </p>
+                    <div className="mt-2.5 grid gap-2">
                       {(stageData?.warmup?.bmb_traps && stageData.warmup.bmb_traps.length > 0
                         ? stageData.warmup.bmb_traps
                         : [
                             "Mavzudagi o'xshash atamalar va yillarni aralashtirib yuborish",
                             "Savol oxiridagi 'emas' qo'shimchasini e'tibordan chetda qoldirish",
-                            "Tarixiy shaxslar yoki ilmiy tushunchalarning davrini xato tanlash",
+                            'Tarixiy shaxslar yoki ilmiy tushunchalarning davrini xato tanlash',
                           ]
                       ).map((trap, idx) => (
-                        <div
-                          key={idx}
-                          className="p-2.5 rounded-xl bg-zinc-950/80 border border-rose-500/20 text-xs text-rose-300 flex items-start gap-2"
-                        >
-                          <span className="size-1.5 rounded-full bg-rose-500 shrink-0 mt-1.5" />
-                          <span>{trap}</span>
+                        <div key={idx} className="flex items-center gap-3 rounded-[20px] bg-[var(--ps-neutral)] p-2 pr-4">
+                          <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--ps-coral)] font-[family-name:var(--font-grotesk)] text-[13px] font-bold text-white">
+                            {idx + 1}
+                          </span>
+                          <span className="text-[13.5px] font-semibold leading-snug">{trap.replace(/^\d+\s*-\s*Qopqon:\s*/i, '')}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-                </div>
+                </section>
 
-                <Button
-                  type="button"
-                  onClick={handleStartSprint}
-                  className="w-full h-13 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-bold text-base shadow-xl shadow-rose-600/30 cursor-pointer"
-                >
-                  <Zap className="size-5 fill-current" />
-                  <span>Tayyorman, Sprintga start! ⚡</span>
-                </Button>
+                <button type="button" onClick={handleStartSprint} className="ps-btn ps-btn-ink w-full !min-h-14 text-[15px]">
+                  <Zap className="size-4 fill-[var(--ps-orange)] text-[var(--ps-orange)]" />
+                  Tayyorman, sprintga start!
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </button>
               </motion.div>
             )}
 
-            {/* ── 2-BOSQICH: JONLI QASOS SPRINTI ── */}
+            {/* ── 2-BOSQICH: QASOS SPRINTI ── */}
             {currentStage === 'STAGE_2_SPRINT' && sprintQuestions[sprintIndex] && (
-              <motion.div
-                key={`stage_2_${sprintIndex}`}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="w-full space-y-5"
-              >
-                {/* Savol tepasidagi indikatorlar */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-zinc-900 border border-white/10 text-xs font-mono font-bold text-zinc-300">
+              <motion.div key={`stage_2_${sprintIndex}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="w-full space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="rounded-full bg-[var(--ps-paper)] px-3 py-1.5 text-[12.5px] font-bold tabular-nums shadow-sm">
                       Savol {sprintIndex + 1} / {Math.min(12, sprintQuestions.length)}
                     </span>
                     {sprintQuestions[sprintIndex].isRevenge && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold animate-pulse">
-                        <Flame className="size-3.5 fill-current text-orange-400" />
-                        <span>QASOS SAVOLI (2x Ball)</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-coral)] px-3 py-1.5 text-[12px] font-bold text-white">
+                        <Flame className="size-3.5 fill-current" /> Qasos savoli · 2x
                       </span>
                     )}
                   </div>
-
                   {pendingRevengeCount > 0 && (
-                    <span className="text-xs font-bold text-orange-400 flex items-center gap-1">
-                      <Clock className="size-3.5" />
-                      <span>{pendingRevengeCount} ta Qasos savoli kutmoqda</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-[12px] font-bold text-[#080808]">
+                      <Clock className="size-3.5" /> {pendingRevengeCount} ta qasos kutmoqda
                     </span>
                   )}
                 </div>
 
-                {/* Savol Matni */}
-                <div className="rounded-3xl border border-white/10 bg-zinc-900/70 p-5 sm:p-7 shadow-xl">
-                  <p className="text-base sm:text-lg font-bold text-white leading-relaxed">
-                    {sprintQuestions[sprintIndex].text}
-                  </p>
+                <div className="h-2 overflow-hidden rounded-full bg-[var(--ds-track)]">
+                  <div
+                    className="h-full rounded-full bg-[var(--ps-purple)] transition-all duration-500"
+                    style={{ width: `${((sprintIndex + 1) / Math.max(1, Math.min(12, sprintQuestions.length))) * 100}%` }}
+                  />
                 </div>
 
-                {/* Variantlar */}
-                <div className="grid grid-cols-1 gap-2.5">
-                  {sprintQuestions[sprintIndex].options.map((opt) => {
+                <section className="ps-card !rounded-[32px] p-5 sm:p-7">
+                  <div className="text-[16px] font-bold leading-relaxed sm:text-[18px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: sprintQuestions[sprintIndex].text }} />
+                </section>
+
+                <div className="grid gap-2.5">
+                  {sprintQuestions[sprintIndex].options.map((opt, oi) => {
                     const isSelected = selectedOptionId === opt.id;
                     const showCorrect = isAnswerChecked && opt.is_correct;
                     const showWrong = isAnswerChecked && isSelected && !opt.is_correct;
-
                     return (
                       <button
                         key={opt.id}
                         type="button"
                         onClick={() => handleSelectSprintOption(opt.id)}
                         disabled={isAnswerChecked}
-                        className={`w-full p-4 rounded-2xl border text-left font-semibold text-sm transition-all cursor-pointer flex items-center justify-between ${
+                        className={`flex w-full cursor-pointer items-center gap-3 rounded-[22px] p-2.5 pr-4 text-left text-[14.5px] font-semibold transition-all active:scale-[0.99] ${
                           showCorrect
-                            ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/20'
+                            ? 'bg-[var(--ps-green)] text-white'
                             : showWrong
-                            ? 'bg-rose-500/20 border-rose-500 text-rose-300'
-                            : isSelected
-                            ? 'bg-primary/20 border-primary text-white'
-                            : 'bg-zinc-900/60 border-white/5 hover:border-white/20 text-zinc-200 hover:bg-zinc-900'
+                              ? 'bg-[var(--ps-coral)] text-white'
+                              : isSelected
+                                ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                                : 'bg-[var(--ps-paper)] shadow-sm hover:-translate-y-0.5'
                         }`}
                       >
-                        <span>{opt.text}</span>
-                        {showCorrect && <CheckCircle2 className="size-5 text-emerald-400 shrink-0" />}
-                        {showWrong && <AlertCircle className="size-5 text-rose-400 shrink-0" />}
+                        <span
+                          className={`inline-flex size-9 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[14px] font-bold ${
+                            showCorrect || showWrong ? 'bg-white/25' : isSelected ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-neutral)]'
+                          }`}
+                        >
+                          {showCorrect ? <Check className="size-4 stroke-[3]" /> : showWrong ? <X className="size-4 stroke-[3]" /> : LETTERS[oi] || oi + 1}
+                        </span>
+                        <span className="flex-1">{opt.text}</span>
                       </button>
                     );
                   })}
@@ -582,153 +562,111 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
               </motion.div>
             )}
 
-            {/* ── 3-BOSQICH: XATOLAR DUELI (FLASHCARDS) ── */}
+            {/* ── 3-BOSQICH: XATOLAR FLASHCARDI ── */}
             {currentStage === 'STAGE_3_CLEANUP' && stageData?.cleanup?.cards && (
-              <motion.div
-                key="stage_3"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full space-y-5"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase">
-                    <Swords className="size-3.5" />
-                    <span>3-Bosqich: Xatolar Flashcardi ({cleanupIndex + 1}/{stageData.cleanup.cards.length})</span>
-                  </div>
-
-                  <span className="text-xs font-mono font-bold text-orange-400">
-                    🔥 1.5x Combo Faol
+              <motion.div key="stage_3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-coral)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-white">
+                    <Swords className="size-3.5" /> 3-bosqich · xatolar {cleanupIndex + 1}/{stageData.cleanup.cards.length}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-[12px] font-bold text-[#080808]">
+                    <Flame className="size-3.5 fill-current" /> 1.5x combo faol
                   </span>
                 </div>
 
                 {stageData.cleanup.cards[cleanupIndex] && (
                   <div
                     onClick={handleFlipCard}
-                    className="relative min-h-[220px] rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900 via-zinc-950 to-zinc-900 p-6 sm:p-8 shadow-2xl cursor-pointer flex flex-col justify-between"
+                    className={`relative flex min-h-[240px] cursor-pointer flex-col justify-between overflow-hidden rounded-[32px] p-6 shadow-[0_30px_60px_-34px_rgba(40,20,80,0.7)] transition-colors sm:p-8 ${
+                      isCardFlipped ? 'bg-[var(--ps-green)] text-white' : 'bg-[var(--ps-paper)]'
+                    }`}
                   >
+                    <span aria-hidden className={`pointer-events-none absolute -right-12 -top-12 size-40 rounded-full ${isCardFlipped ? 'bg-white/15' : 'bg-[var(--ps-coral)] opacity-10'}`} />
                     {!isCardFlipped ? (
-                      <div className="space-y-4">
-                        <span className="text-[12px] font-bold uppercase tracking-wider text-zinc-400">
-                          Xato qilingan savol (Bosing va to'g'ri javobni ko'ring):
-                        </span>
-                        <p className="text-base sm:text-lg font-bold text-white">
-                          {stageData.cleanup.cards[cleanupIndex].front}
-                        </p>
+                      <div className="relative space-y-3">
+                        <span className="text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-coral)]">Xato qilingan savol</span>
+                        <div className="text-[17px] font-bold leading-relaxed sm:text-[19px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: stageData.cleanup.cards[cleanupIndex].front }} />
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        <span className="text-[12px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
-                          <Check className="size-3.5" />
-                          <span>To'g'ri Javob va Layfxak:</span>
+                      <div className="relative space-y-3">
+                        <span className="inline-flex items-center gap-1 text-[11.5px] font-black uppercase tracking-wider text-white/80">
+                          <Check className="size-3.5 stroke-[3]" /> To&apos;g&apos;ri javob va layfxak
                         </span>
-                        <p className="text-lg sm:text-xl font-bold text-emerald-300">
-                          {stageData.cleanup.cards[cleanupIndex].back}
-                        </p>
-                        <p className="text-xs text-zinc-300 bg-zinc-950 p-3 rounded-xl border border-white/5">
-                          💡 {stageData.cleanup.cards[cleanupIndex].tip}
+                        <p className="font-[family-name:var(--font-grotesk)] text-[20px] font-bold sm:text-[24px]">{stageData.cleanup.cards[cleanupIndex].back}</p>
+                        <p className="flex items-start gap-2 rounded-[18px] bg-white/15 p-3 text-[13px] font-medium">
+                          <Lightbulb className="mt-0.5 size-4 shrink-0" /> {stageData.cleanup.cards[cleanupIndex].tip}
                         </p>
                       </div>
                     )}
-
-                    <div className="text-center text-[12px] text-zinc-500 pt-3 border-t border-white/5">
-                      {isCardFlipped ? "Yana bosib savolga qayting" : "Karta orqasini o'qish uchun bosing"}
-                    </div>
+                    <p className={`relative mt-5 text-center text-[12px] font-semibold ${isCardFlipped ? 'text-white/75' : 'text-[var(--text-muted)]'}`}>
+                      {isCardFlipped ? 'Yana bosib savolga qayting' : "Karta orqasini o'qish uchun bosing"}
+                    </p>
                   </div>
                 )}
 
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    onClick={handleFlipCard}
-                    variant="outline"
-                    className="flex-1 h-12 rounded-2xl border-white/10 text-zinc-300"
-                  >
-                    <RotateCw className="size-4 mr-1.5" />
-                    <span>Kartani Aylantirish</span>
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleClearCard}
-                    className="flex-1 h-12 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold"
-                  >
-                    <CheckCircle2 className="size-4 mr-1.5" />
-                    <span>Tushundim, Xatoni Yopish</span>
-                  </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={handleFlipCard} className="ps-btn ps-btn-ghost">
+                    <RotateCw className="size-4" /> Aylantirish
+                  </button>
+                  <button type="button" onClick={handleClearCard} className="ps-btn !bg-[var(--ps-green)] !text-white">
+                    <CheckCircle2 className="size-4" /> Xatoni yopish
+                  </button>
                 </div>
               </motion.div>
             )}
 
-            {/* ── 4-BOSQICH: 1v1 GHOST ARENA DUEL ── */}
+            {/* ── 4-BOSQICH: 1v1 ARENA ── */}
             {currentStage === 'STAGE_4_ARENA' && stageData?.arena && arenaQuestions[arenaIndex] && (
-              <motion.div
-                key="stage_4"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full space-y-5"
-              >
-                {/* 1v1 Header: Siz vs Raqib */}
-                <div className="rounded-3xl border border-orange-500/30 bg-zinc-900/80 p-4 sm:p-5 shadow-xl flex items-center justify-between gap-4">
-                  {/* Siz */}
-                  <div className="flex items-center gap-2.5">
-                    <div className="size-11 rounded-full bg-primary/20 border border-primary flex items-center justify-center font-bold text-sm text-primary">
-                      SIZ
-                    </div>
-                    <div>
-                      <div className="text-xs text-zinc-400">Sizning ballingiz</div>
-                      <div className="text-lg font-bold text-white font-mono">{userScore}</div>
+              <motion.div key="stage_4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full space-y-4">
+                <section className="ps-card grid grid-cols-[1fr_auto_1fr] items-center gap-3 !rounded-[32px] p-4 sm:p-5">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ps-purple)] text-[13px] font-black text-white">SIZ</span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[11.5px] font-bold text-[var(--text-muted)]">Sizning ballingiz</p>
+                      <p className="ps-num text-[26px] leading-none">{userScore}</p>
                     </div>
                   </div>
-
-                  <div className="text-center font-mono font-bold text-orange-400 text-sm">
-                    VS
-                    <div className="text-[12px] text-zinc-500">⏱ {arenaTimeLeft}s</div>
+                  <div className="flex flex-col items-center">
+                    <span className="inline-flex size-12 items-center justify-center rounded-full bg-[#080808] font-[family-name:var(--font-grotesk)] text-[15px] font-bold text-[var(--ps-orange)] dark:bg-[#FFFCF7]">VS</span>
+                    <span className="mt-1 text-[11.5px] font-bold tabular-nums text-[var(--text-muted)]">{arenaTimeLeft}s</span>
                   </div>
-
-                  {/* Arvoh Raqib */}
-                  <div className="flex items-center gap-2.5 text-right">
-                    <div>
-                      <div className="text-xs text-zinc-400">{stageData.arena.opponent.name}</div>
-                      <div className="text-lg font-bold text-orange-400 font-mono">{ghostScore}</div>
+                  <div className="flex min-w-0 items-center justify-end gap-2.5 text-right">
+                    <div className="min-w-0">
+                      <p className="truncate text-[11.5px] font-bold text-[var(--text-muted)]">{stageData.arena.opponent.name}</p>
+                      <p className="ps-num text-[26px] leading-none text-[var(--ps-coral)]">{ghostScore}</p>
                     </div>
-                    <img
-                      src={stageData.arena.opponent.avatar_url}
-                      alt="Raqib"
-                      className="size-11 rounded-full border border-orange-500/40 bg-zinc-800 object-cover"
-                    />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={stageData.arena.opponent.avatar_url} alt="Raqib" className="size-12 shrink-0 rounded-full bg-[var(--ps-neutral)] object-cover ring-4 ring-[var(--ps-coral)]/30" />
                   </div>
-                </div>
+                </section>
 
-                {/* Savol */}
-                <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-5 sm:p-7 shadow-xl">
-                  <span className="text-[12px] font-bold uppercase text-orange-400 tracking-wider">
-                    Tezkor Duel Savoli ({arenaIndex + 1}/{arenaQuestions.length})
+                <section className="ps-card !rounded-[32px] p-5 sm:p-7">
+                  <span className="text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-coral)]">
+                    Tezkor duel savoli · {arenaIndex + 1}/{arenaQuestions.length}
                   </span>
-                  <p className="text-base sm:text-lg font-bold text-white mt-1.5">
-                    {arenaQuestions[arenaIndex].text}
-                  </p>
-                </div>
+                  <div className="mt-2 text-[16px] font-bold leading-relaxed sm:text-[18px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: arenaQuestions[arenaIndex].text }} />
+                </section>
 
-                {/* Variantlar */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {arenaQuestions[arenaIndex].options.map((opt) => (
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  {arenaQuestions[arenaIndex].options.map((opt, oi) => (
                     <button
                       key={opt.id}
                       type="button"
                       onClick={() => handleArenaAnswer(opt.id)}
                       disabled={isArenaSubmitting}
-                      className="p-4 rounded-2xl border border-white/10 bg-zinc-900 hover:border-orange-500/50 hover:bg-orange-500/10 font-bold text-sm text-left transition-all active:scale-95 cursor-pointer"
+                      className="group flex cursor-pointer items-center gap-3 rounded-[22px] bg-[var(--ps-paper)] p-2.5 pr-4 text-left text-[14.5px] font-semibold shadow-sm transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60"
                     >
-                      {opt.text}
+                      <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ps-neutral)] font-[family-name:var(--font-grotesk)] text-[14px] font-bold transition-colors group-hover:bg-[var(--ps-orange)] group-hover:text-[#080808]">
+                        {LETTERS[oi] || oi + 1}
+                      </span>
+                      <span className="flex-1">{opt.text}</span>
                     </button>
                   ))}
                 </div>
               </motion.div>
             )}
 
-            {/* ── 5-BOSQICH: SIRLI SANDIQ & ECO-DARAXT KULMINATSIYASI ── */}
+            {/* ── 5-BOSQICH: SANDIQ & DARAXT ── */}
             {currentStage === 'STAGE_5_COMPLETED' && (
               <Stage5RewardCeremony
                 comboMultiplier={loop.combo_multiplier}
@@ -747,23 +685,22 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
               />
             )}
 
-            {/* Fallback: agar noma'lum holat bo'lsa yoki bosqich ma'lumotlari kutilayotgan bo'lsa */}
             {(!loop || !stageData || !['STAGE_1_WARMUP', 'STAGE_2_SPRINT', 'STAGE_3_CLEANUP', 'STAGE_4_ARENA', 'STAGE_5_COMPLETED'].includes(loop.current_stage)) && (
-              <div className="p-8 text-center space-y-4">
-                <Brain className="size-12 text-orange-400 mx-auto animate-bounce" />
-                <p className="text-zinc-300 font-bold">Avtopilot zanjiri yuklanmoqda...</p>
-                <Button onClick={() => fetchLoop()} variant="outline" className="rounded-xl border-white/10 text-white">
-                  Qayta yuklash
-                </Button>
+              <div className="flex flex-col items-center gap-4 p-8 text-center">
+                <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-purple)] text-white">
+                  <Brain className="size-8" />
+                </span>
+                <p className="text-[15px] font-bold">Avtopilot zanjiri yuklanmoqda...</p>
+                <button type="button" onClick={() => fetchLoop()} className="ps-btn ps-btn-ink">
+                  <RotateCw className="size-4" /> Qayta yuklash
+                </button>
               </div>
             )}
           </AnimatePresence>
         )}
       </main>
 
-      {/* ========================================================================= */}
-      {/* 3. AI MENTOR LAYFXAK (BOTTOM SHEET) */}
-      {/* ========================================================================= */}
+      {/* ── 3. AI mentor layfxagi (pastki oyna) ── */}
       <AnimatePresence>
         {showAiMentorSheet && activeHint && (
           <motion.div
@@ -771,42 +708,32 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 z-40 rounded-t-3xl border-t border-rose-500/40 bg-zinc-950/95 backdrop-blur-xl p-5 sm:p-7 shadow-2xl max-w-2xl mx-auto"
+            className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-2xl rounded-t-[32px] bg-[var(--ps-paper)] p-5 shadow-[0_-30px_60px_-30px_rgba(40,20,80,0.7)] sm:p-7"
           >
-            <div className="mx-auto size-1.5 w-12 rounded-full bg-zinc-700 mb-4" />
-
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
-                <Lightbulb className="size-4 animate-pulse" />
-                <span>AI Mentor Layfxaki (Aha Moment)</span>
-              </div>
-              <span className="text-[12px] font-mono text-zinc-400">10s tahlil</span>
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[var(--ds-track)]" />
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-2 text-[12px] font-black uppercase tracking-wider text-[var(--ps-coral)]">
+                <span className="inline-flex size-8 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                  <Lightbulb className="size-4" />
+                </span>
+                AI mentor layfxagi
+              </span>
+              <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[11px] font-bold text-[var(--text-muted)]">Aha moment</span>
             </div>
-
-            <div className="space-y-3 bg-rose-950/20 border border-rose-500/30 p-4 rounded-2xl text-xs sm:text-sm text-rose-200">
-              <p className="font-bold text-white">
-                {activeHint.aha_moment}
-              </p>
-              <p className="text-zinc-300">
-                <strong className="text-amber-400">Eslab Qolish Kodi:</strong> {activeHint.memory_code}
+            <div className="space-y-2.5 rounded-[22px] bg-[var(--ps-neutral)] p-4">
+              <p className="text-[14.5px] font-bold leading-snug">{activeHint.aha_moment}</p>
+              <p className="text-[13.5px] leading-relaxed text-[var(--text-secondary)]">
+                <strong className="text-[var(--ps-purple)]">Eslab qolish kodi:</strong> {activeHint.memory_code}
               </p>
             </div>
-
-            <Button
-              type="button"
-              onClick={proceedSprintToNext}
-              className="w-full h-12 mt-4 rounded-2xl bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-400 text-white font-bold text-sm cursor-pointer"
-            >
-              <span>Tushundim, davom etamiz (+5 XP)</span>
-              <ArrowRight className="size-4 ml-1.5" />
-            </Button>
+            <button type="button" onClick={proceedSprintToNext} className="ps-btn ps-btn-ink mt-4 w-full">
+              Tushundim, davom etamiz · +5 XP
+              <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ========================================================================= */}
-      {/* 4. CHIQISHDAN HIMOYALASH MODALI (Loss Aversion Exit Modal) */}
-      {/* ========================================================================= */}
       <LossAversionExitModal
         open={showExitModal}
         comboMultiplier={loop?.combo_multiplier || 1.0}

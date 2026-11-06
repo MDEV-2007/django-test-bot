@@ -93,7 +93,7 @@ export default function CertificateCard({ compact, qrImgUrl, footerHint, classNa
       {/* Binafsha lenta */}
       <div className={cn('relative overflow-hidden bg-[#7659C7] px-5 text-white sm:px-8', compact ? 'pb-12 pt-5' : 'pb-14 pt-6')}>
         <span aria-hidden className="absolute -right-10 -top-12 size-40 rounded-full bg-white/15 sm:size-44" />
-        <span aria-hidden className="absolute -bottom-7 right-6 size-14 rounded-full bg-[#FFB82E] opacity-80 sm:right-10 sm:size-16" />
+        <span aria-hidden className="absolute -bottom-7 right-20 size-14 rounded-full bg-[#FFB82E] opacity-80 sm:right-32 sm:size-16" />
         <div className="relative flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1 sm:size-12">

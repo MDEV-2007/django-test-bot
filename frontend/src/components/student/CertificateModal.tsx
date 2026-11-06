@@ -133,7 +133,7 @@ export default function CertificateModal({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success('Rasmiy PDF sertifikat muvaffaqiyatli yuklab olindi!');
+      toast.success('Natija kartasi PDF shaklida yuklab olindi!');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Yuklab olishda xatolik yuz berdi');
     } finally {
@@ -141,231 +141,29 @@ export default function CertificateModal({
     }
   };
 
-  // Sariq-oq rasmiy sertifikatni yuqori aniqlikda (A4 Portrait) Canvas orqali PNG yuklab olish
+  // Natija kartasini PNG qilib yuklab olish. Rasmni backend chizadi
+  // (tests_app/certificate_render.py) — saytdagi karta, PDF va Telegram Story bilan bir xil.
   const handleDownloadPng = async () => {
+    if (!attemptId) return;
     setDownloading(true);
     try {
-      const canvas = document.createElement('canvas');
-      const width = 1240;
-      const height = 1754; // A4 150 DPI
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Canvas not supported');
-
-      // 1. Fon (Qaymoqrang / sariq-oq iliq qog'oz)
-      ctx.fillStyle = '#fefcf6';
-      ctx.fillRect(0, 0, width, height);
-
-      // 2. Hashamatli tilla hoshiyalar
-      const goldMain = '#c59b27';
-      const goldLight = '#e2c275';
-
-      // Tashqi hoshiya
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = goldMain;
-      ctx.strokeRect(35, 35, width - 70, height - 70);
-
-      // Ichki hoshiya
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = goldLight;
-      ctx.strokeRect(45, 45, width - 90, height - 90);
-
-      // 3. Burchakdagi sharqona girih naqshlari
-      const drawGirihCorner = (cx: number, cy: number, size: number) => {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.strokeStyle = '#d4af37';
-        ctx.lineWidth = 1.8;
-        // 8 qirrali yulduz naqshi
-        for (let i = 0; i < 4; i++) {
-          ctx.rotate(Math.PI / 4);
-          ctx.strokeRect(-size / 2, -size / 2, size, size);
-        }
-        ctx.restore();
-      };
-      drawGirihCorner(90, height - 90, 70);
-      drawGirihCorner(width - 90, 90, 70);
-
-      // 4. Yuqori Gerb / Logo
-      const logoY = 130;
-      const logoImg = new Image();
-      logoImg.crossOrigin = 'anonymous';
-      logoImg.src = '/icon-192.png';
-      await new Promise((res) => {
-        logoImg.onload = res;
-        logoImg.onerror = res;
+      const res = await fetch(`${API_URL}/api/panel/certificate/${attemptId}/?kind=png`, {
+        headers: access ? { Authorization: `Bearer ${access}` } : {},
       });
-
-      // Gerb doirasi va hoshiyasi
-      ctx.beginPath();
-      ctx.arc(width / 2, logoY, 48, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
-      ctx.lineWidth = 2.8;
-      ctx.strokeStyle = goldMain;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(width / 2, logoY, 43, 0, Math.PI * 2);
-      ctx.lineWidth = 1.2;
-      ctx.strokeStyle = goldLight;
-      ctx.stroke();
-
-      if (logoImg.complete && logoImg.naturalWidth > 0) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(width / 2, logoY, 40, 0, Math.PI * 2);
-        ctx.clip();
-        ctx.drawImage(logoImg, width / 2 - 40, logoY - 40, 80, 80);
-        ctx.restore();
-      }
-
-      // Sarlavha. Davlat organi (BMB) nomi, "respublika markazi", imzo va muhr ataylab
-      // yo'q: bu platformaning mashq natijasi — davlat hujjatiga o'xshatish noqonuniy.
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#065f46';
-      ctx.font = 'bold 22px "Times New Roman", serif';
-      ctx.fillText("ILMILDIZI · ONLAYN MASHQ PLATFORMASI", width / 2, 226);
-      ctx.fillStyle = '#1c3c87';
-      ctx.font = 'bold 18px "Arial", sans-serif';
-      ctx.fillText("RASMIY HUJJAT EMAS · BMB FORMATIDAGI MASHQ TESTI", width / 2, 256);
-
-      // Asosiy Sarlavha
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 32px "Times New Roman", serif';
-      ctx.fillText("MASHQ TESTI", width / 2, 330);
-      ctx.fillText("NATIJA KARTASI", width / 2, 372);
-
-      // 5. Ma'lumotlar jadvali qatorlari
-      const startY = 460;
-      const rowGap = 48;
-      const leftX = 130;
-      const rightX = 480;
-      const lineEndX = width - 130;
-
-      const drawDataRow = (y: number, label: string, val: string, isBlueLabel = true, rightAlign = false) => {
-        ctx.textAlign = 'left';
-        ctx.fillStyle = isBlueLabel ? '#1c3c87' : '#0f172a';
-        ctx.font = 'bold 20px "Arial", sans-serif';
-        ctx.fillText(label, leftX, y);
-
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 20px "Arial", sans-serif';
-        if (rightAlign) {
-          ctx.textAlign = 'right';
-          ctx.fillText(val, lineEndX, y);
-        } else {
-          ctx.textAlign = 'left';
-          ctx.fillText(val, rightX, y);
-        }
-      };
-
-      const drawDivider = (y: number) => {
-        ctx.strokeStyle = '#e2c275';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(leftX, y);
-        ctx.lineTo(lineEndX, y);
-        ctx.stroke();
-      };
-
-      // Qatorlar 1: Talabgor
-      drawDataRow(startY, 'Natija raqami:', certNumber);
-      drawDataRow(startY + rowGap, 'Talabgorning shaxsiy kodi:', personalCode);
-      drawDataRow(startY + rowGap * 2, 'Familiyasi:', lastName);
-      drawDataRow(startY + rowGap * 3, 'Ismi:', firstName);
-      drawDivider(startY + rowGap * 3.7);
-
-      // Qatorlar 2: Fan va Ball
-      const sec2Y = startY + rowGap * 4.6;
-      drawDataRow(sec2Y, "Umumta'lim fani:", testTitle || 'Tarix Milliy Sertifikat');
-      drawDataRow(sec2Y + rowGap, "Umumiy to'plagan bali:", scaledScoreStr);
-      drawDataRow(sec2Y + rowGap * 2, "Umumiy ballga nisbatan foiz ko'rsatkichi:", pctStr, true, true);
-      drawDataRow(sec2Y + rowGap * 3, 'Taxminiy daraja:', certGrade);
-      drawDivider(sec2Y + rowGap * 3.7);
-
-      // Qatorlar 3: Sinov natijasi
-      const sec3Y = sec2Y + rowGap * 4.6;
-      drawDataRow(sec3Y, 'Test sinovi natijasi:', scaledScoreComma, true, true);
-      drawDivider(sec3Y + rowGap * 0.8);
-
-      // Qatorlar 4: Muddatlar
-      const sec4Y = sec3Y + rowGap * 1.7;
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#1e3a8a';
-      ctx.font = 'bold 20px "Arial", sans-serif';
-      ctx.fillText('Berilgan sanasi:', leftX, sec4Y);
-      ctx.fillStyle = '#0f172a';
-      ctx.fillText(givenDate, leftX + 165, sec4Y);
-
-      ctx.fillStyle = '#1e3a8a';
-      ctx.fillText('Amal qilish muddati:', width / 2 + 50, sec4Y);
-      ctx.fillStyle = '#0f172a';
-      ctx.fillText(expireDate, width / 2 + 265, sec4Y);
-
-      // O'rta oltin gul/barg bezak chizig'i
-      const ornamentY = sec4Y + 65;
-      ctx.strokeStyle = goldMain;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(leftX, ornamentY);
-      ctx.lineTo(width / 2 - 40, ornamentY);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(width / 2 + 40, ornamentY);
-      ctx.lineTo(lineEndX, ornamentY);
-      ctx.stroke();
-
-      ctx.fillStyle = goldMain;
-      ctx.font = '22px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('❖ ✦ ❖', width / 2, ornamentY + 8);
-
-      // 6. Pastki QR Kod va Imzo
-      const footerY = height - 200;
-
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 22px "Times New Roman", serif';
-
-      // Markazda: QR Kod
-      const qrImg = new Image();
-      qrImg.crossOrigin = 'anonymous';
-      qrImg.onload = () => {
-        const qrSize = 130;
-        ctx.drawImage(qrImg, width / 2 - qrSize / 2, footerY, qrSize, qrSize);
-
-        // QR hoshiyasi
-        ctx.strokeStyle = goldMain;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(width / 2 - qrSize / 2 - 4, footerY - 4, qrSize + 8, qrSize + 8);
-
-        finishDownload();
-      };
-      qrImg.onerror = () => {
-        // Fallback agar internet yo'q bo'lsa
-        ctx.strokeStyle = '#0f172a';
-        ctx.strokeRect(width / 2 - 60, footerY, 120, 120);
-        ctx.textAlign = 'center';
-        ctx.font = '12px sans-serif';
-        ctx.fillText("NATIJANI KO'RISH", width / 2, footerY + 65);
-        finishDownload();
-      };
-      qrImg.src = qrImgUrl;
-
-      function finishDownload() {
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = `Milliy_Sertifikat_${lastName}_${firstName}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        toast.success("Sariq-oq rasmiy sertifikat rasm shaklida yuklab olindi!");
-        setDownloading(false);
-      }
+      if (!res.ok) throw new Error("Natija kartasini yuklab olishda xatolik yuz berdi");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Natija_kartasi_${lastName}_${firstName}_${cleanAttemptId}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Natija kartasi rasm shaklida yuklab olindi!');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Xatolik yuz berdi');
+    } finally {
       setDownloading(false);
     }
   };

@@ -1301,8 +1301,14 @@ def story_link_api(request, attempt_id):
 @authentication_classes([])
 @permission_classes([AllowAny])
 def story_image_api(request, attempt_id):
-    """Natija kartasi (PNG). Imzo to'g'ri bo'lmasa — 404."""
-    from .story import render_story_png, signature_ok
+    """Natija kartasi (PNG) — saytdagi Pastel Studio kartasi bilan bir xil.
+
+    `?kind=story` (standart) — Telegram Story uchun 1080x1920; `?kind=card` — karta.
+    (`format` emas: DRF uni renderer tanlash uchun ishlatadi.)
+    Imzo to'g'ri bo'lmasa — 404.
+    """
+    from .certificate_render import certificate_data, render_certificate_png
+    from .story import signature_ok
 
     if not signature_ok(attempt_id, request.GET.get('sig')):
         raise Http404
@@ -1311,18 +1317,8 @@ def story_image_api(request, attempt_id):
         Attempt.objects.select_related('test', 'profile__user'),
         id=attempt_id, is_completed=True,
     )
-    total = attempt.correct_answers + attempt.wrong_answers + attempt.skipped_answers
-    user = attempt.profile.user
-    png = render_story_png(
-        score=attempt.score,
-        correct=attempt.correct_answers,
-        total=total or 1,
-        test_title=attempt.test.title if attempt.test else 'Tasodifiy test',
-        display_name=(user.first_name or user.username),
-        # Fon ildizi urinish id'sidan chiziladi: har bir natijaning o'z shakli bo'ladi,
-        # lekin bitta natija qayta so'ralganda aynan o'sha rasm qaytadi (rasm keshlanadi).
-        seed=attempt.id,
-    )
+    fmt = 'card' if request.GET.get('kind') == 'card' else 'story'
+    png = render_certificate_png(certificate_data(attempt), fmt)
     response = HttpResponse(png, content_type='image/png')
     # Telegram rasmni bir necha marta so'rashi mumkin; natija o'zgarmaydi.
     response['Cache-Control'] = 'public, max-age=86400'

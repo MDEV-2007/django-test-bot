@@ -5,9 +5,8 @@ import { motion } from 'framer-motion';
 import {
   Gift, Trophy, Sparkles, Coins, Zap, Droplets,
   Share2, ArrowRight, RotateCcw, CheckCircle2,
-  TreeDeciduous, Sprout, Check, Flame, Swords, ShieldAlert
+  Check, Flame, Swords, ShieldAlert
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 
@@ -100,362 +99,208 @@ export default function Stage5RewardCeremony({
 
   // Suv hisobi (Raund 1: 35%, Raund 2: 70%, Raund 3: 100%)
   const waterLevel = cycleNumber >= 3 ? 100 : cycleNumber === 2 ? 70 : 35;
-  const stageName = cycleNumber >= 3 ? "Chinor" : cycleNumber === 2 ? "Ko'chat" : "Nihol";
+  const stageName = cycleNumber >= 3 ? 'Chinor' : cycleNumber === 2 ? "Ko'chat" : 'Nihol';
+  const treeArt = cycleNumber >= 3 ? 'tree-5-chinor.svg' : cycleNumber === 2 ? 'tree-3-kochat.svg' : 'tree-2-nihol.svg';
+
+  const nextRound =
+    cycleNumber === 1
+      ? { tone: 'bg-[var(--ps-orange)] text-[#080808]', chip: '2.0x super-combo', text: <>Daraxtingiz <b>35% suv</b> oldi. Hoziroq 2-raundni <b>2 barobar ko&apos;p XP</b> bilan boshlaymizmi?</>, cta: '2-raundni boshlash' }
+      : cycleNumber === 2
+        ? { tone: 'bg-[var(--ps-coral)] text-white', chip: '2.5x ultra-combo', text: <>Daraxtingiz <b>70% suv</b> oldi. 100% ga chiqib, daraxtni chinorga aylantirish va <b>kunlik boss sinovini</b> ochish uchun 3-raundni boshlang!</>, cta: '3-raundni boshlash' }
+        : null;
+
+  const rewards = [
+    { icon: Coins, tone: 'bg-[var(--ps-orange)] text-[#080808]', value: `+${coinsEarned}`, label: 'Tanga' },
+    { icon: Zap, tone: 'bg-[var(--ps-purple)] text-white', value: `+${xpEarned}`, label: 'XP' },
+    { icon: Trophy, tone: 'bg-[var(--ps-green)] text-white', value: `+${dtmScoreDelta.toFixed(1)}`, label: 'DTM ball' },
+    { icon: Sparkles, tone: 'bg-[var(--ps-lilac)] text-[#080808]', value: '+1', label: 'AI esse krediti' },
+  ];
 
   return (
-    <div className="relative w-full max-w-xl mx-auto py-4 px-3 sm:px-6 text-center">
-      {/* Orqa fon zarhal nur */}
-      <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 size-72 rounded-full bg-amber-500/25 blur-[90px]" />
-
+    <div className="relative mx-auto w-full max-w-xl px-1 py-2 text-center">
       {!chestOpened ? (
-        /* ── 1. SANDIQNI OCHISH BOSQICHI ── */
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="space-y-6"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
-            <Trophy className="size-4 animate-bounce" />
-            <span>Raund #{cycleNumber} To'liq Yopildi!</span>
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            🎁 Tabriklaymiz! Oltin Sandiq Tayyor!
+        /* ── 1. Sandiqni ochish ── */
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
+          <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-orange)] opacity-20" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 size-44 rounded-full bg-[var(--ps-purple)] opacity-10" />
+          <span className="relative inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-white">
+            <Check className="size-3.5 stroke-[3]" /> Raund #{cycleNumber} yopildi
+          </span>
+          <h2 className="ps-display relative mt-4 text-[28px] sm:text-[36px]">
+            Tabriklaymiz! <span className="text-[var(--ps-orange)]">Sandiq</span> tayyor
           </h2>
-          <p className="text-sm text-zinc-300 max-w-md mx-auto">
-            Siz ushbu 4 bosqichni uzluksiz bajardingiz. Sandiqni oching va Daraxtingizga suv quying!
+          <p className="relative mx-auto mt-2 max-w-md text-[14px] text-[var(--text-secondary)]">
+            4 bosqichni uzluksiz bajardingiz. Sandiqni oching va daraxtingizga suv quying!
           </p>
 
-          {/* Titrab turuvchi Oltin Sandiq */}
-          <motion.div
-            animate={{
-              rotate: [-2, 2, -2],
-              scale: [1, 1.05, 1],
-            }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-            onClick={handleOpenChest}
-            className="mx-auto size-36 sm:size-44 rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 p-1 shadow-2xl shadow-amber-500/30 cursor-pointer flex items-center justify-center group active:scale-95 transition-transform"
-          >
-            <div className="size-full rounded-xl bg-zinc-950/80 flex flex-col items-center justify-center gap-2">
-              <Gift className="size-16 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">
-                Bosing va Oching!
-              </span>
-            </div>
-          </motion.div>
-
-          <Button
+          <motion.button
             type="button"
+            animate={{ rotate: [-3, 3, -3], scale: [1, 1.04, 1] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
             onClick={handleOpenChest}
-            className="h-13 px-8 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-base shadow-xl shadow-amber-500/30 cursor-pointer"
+            aria-label="Sandiqni ochish"
+            className="relative mx-auto mt-6 grid size-40 cursor-pointer place-items-center rounded-full bg-[var(--ps-orange)] shadow-[0_30px_60px_-30px_rgba(255,184,46,0.9)] sm:size-48"
           >
-            <Sparkles className="size-5 fill-current" />
-            <span>Sandiqni Ochish (+{coinsEarned} Tanga)</span>
-          </Button>
+            <span className="absolute inset-3 rounded-full bg-[#FFFCF7]" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/gamification/chest-closed.svg" alt="" className="relative size-24 object-contain sm:size-28" />
+          </motion.button>
+
+          <button type="button" onClick={handleOpenChest} className="ps-btn ps-btn-ink relative mt-6 w-full !min-h-14">
+            <Gift className="size-4 text-[var(--ps-orange)]" />
+            Sandiqni ochish · +{coinsEarned} tanga
+            <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+          </button>
         </motion.div>
       ) : (
-        /* ── 2. SANDIQ OCHILDI, SUV QUYILDI VA KEYINGI RAUND AVTOPILOTI ── */
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-          className="space-y-5"
-        >
-          {/* Kulminatsiya Sarlavhasi */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
-              <Sparkles className="size-3.5" />
-              <span>Sandiq Ochildi • Raund #{cycleNumber} Yopildi</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-              G'alaba va Rivojlanish! 🌳✨
+        /* ── 2. Sandiq ochildi ── */
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }} className="space-y-3 text-left">
+          <div className="text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-white">
+              <Sparkles className="size-3.5" /> Sandiq ochildi · raund #{cycleNumber}
+            </span>
+            <h2 className="ps-display mt-3 text-[28px] sm:text-[36px]">
+              G&apos;alaba va <span className="text-[var(--ps-green)]">rivojlanish</span>
+              <span className="text-[var(--ps-coral)]">!</span>
             </h2>
           </div>
 
-          {/* Eco-Tree Sug'orish Animatsiyasi */}
-          <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-b from-emerald-950/40 via-zinc-950 to-zinc-900 p-4 sm:p-5 shadow-xl text-left">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="size-13 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-inner shrink-0">
-                  <TreeDeciduous className="size-7 animate-pulse text-emerald-400" />
+          {/* Daraxt */}
+          <section className="relative overflow-hidden rounded-[28px] bg-[var(--ps-green)] p-5 text-white">
+            <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+            <div className="relative flex items-center gap-3.5">
+              <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-full bg-[#FFFCF7]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/brand/gamification/${treeArt}`} alt="" className="size-12 object-contain" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[12px] font-bold text-white/80">Ilm Ildizi daraxti</span>
+                  <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-black uppercase">{stageName}</span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-zinc-400">Ilm Ildizi Daraxti</span>
-                    <span className="text-[12px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                      {stageName}
-                    </span>
-                  </div>
-                  <p className="text-sm font-bold text-white mt-0.5">
-                    +35% Suv Quyildi! (Jami: {waterLevel}%) 💧
-                  </p>
-                </div>
-              </div>
-
-              {/* Suv Bar */}
-              <div className="w-full sm:w-44 text-right">
-                <div className="flex justify-between text-xs font-bold text-zinc-300 mb-1">
-                  <span>Namlik</span>
-                  <span className="text-sky-400 font-mono font-bold">{waterLevel}%</span>
-                </div>
-                <div className="h-2.5 w-full bg-zinc-800 rounded-full overflow-hidden border border-white/5">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-sky-500 via-teal-400 to-emerald-400 rounded-full"
-                    initial={{ width: `${Math.max(0, waterLevel - 35)}%` }}
-                    animate={{ width: `${waterLevel}%` }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                  />
-                </div>
+                <p className="mt-0.5 font-[family-name:var(--font-grotesk)] text-[22px] font-bold leading-tight">
+                  +35% suv · jami {waterLevel}%
+                </p>
               </div>
             </div>
-
-            {/* 3 ta Oltin Tomchi Holati */}
-            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2">
-                <span className={`size-2.5 rounded-full ${cycleNumber >= 1 ? 'bg-sky-400 shadow-sm shadow-sky-400' : 'bg-zinc-700'}`} />
-                <span className={cycleNumber >= 1 ? 'text-sky-300 font-bold' : 'text-zinc-500'}>1-Raund (35%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`size-2.5 rounded-full ${cycleNumber >= 2 ? 'bg-sky-400 shadow-sm shadow-sky-400' : 'bg-zinc-700'}`} />
-                <span className={cycleNumber >= 2 ? 'text-sky-300 font-bold' : 'text-zinc-500'}>2-Raund (70%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`size-2.5 rounded-full ${cycleNumber >= 3 ? 'bg-amber-400 shadow-sm shadow-amber-400' : 'bg-zinc-700'}`} />
-                <span className={cycleNumber >= 3 ? 'text-amber-300 font-bold' : 'text-zinc-500'}>3-Raund (100% 👑)</span>
-              </div>
+            <div className="relative mt-4 h-3 overflow-hidden rounded-full bg-white/20">
+              <motion.div
+                className="h-full rounded-full bg-[#FFFCF7]"
+                initial={{ width: `${Math.max(0, waterLevel - 35)}%` }}
+                animate={{ width: `${waterLevel}%` }}
+                transition={{ duration: 1, ease: 'easeOut' }}
+              />
             </div>
+            <div className="relative mt-3 grid grid-cols-3 gap-1.5">
+              {[1, 2, 3].map((r) => (
+                <span
+                  key={r}
+                  className={`inline-flex items-center justify-center gap-1 rounded-full py-1.5 text-[12px] font-bold ${
+                    cycleNumber >= r ? (r === 3 ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[#FFFCF7] text-[var(--ps-green)]') : 'bg-white/15 text-white/75'
+                  }`}
+                >
+                  <Droplets className="size-3.5" /> {r}-raund
+                </span>
+              ))}
+            </div>
+          </section>
+
+          {/* Mukofotlar */}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {rewards.map((r) => {
+              const Icon = r.icon;
+              return (
+                <div key={r.label} className="rounded-[22px] bg-[var(--ps-paper)] p-3 text-center shadow-sm">
+                  <span className={`mx-auto inline-flex size-9 items-center justify-center rounded-full ${r.tone}`}>
+                    <Icon className="size-4" />
+                  </span>
+                  <p className="ps-num mt-1.5 text-[20px] leading-none">{r.value}</p>
+                  <p className="mt-1 text-[11.5px] font-bold text-[var(--text-muted)]">{r.label}</p>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Olingan mukofotlar kartochkalari */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <div className="p-3 rounded-2xl bg-zinc-900/80 border border-amber-500/20 text-center">
-              <Coins className="size-4.5 text-amber-400 mx-auto mb-1 fill-amber-400/20" />
-              <div className="text-base font-bold text-amber-300 font-mono">
-                +{coinsEarned}
+          {/* Lentaga ulashish */}
+          <section className="flex flex-col items-start justify-between gap-3 rounded-[24px] bg-[var(--ps-paper)] p-4 shadow-sm sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--ps-blue)] text-[#080808]">
+                <Share2 className="size-4" />
+              </span>
+              <div>
+                <p className="text-[14px] font-bold">Hamjamiyatga ulashish</p>
+                <p className="text-[12.5px] text-[var(--text-muted)]">Bugungi g&apos;alabangizni e&apos;lon qiling va bonus XP oling.</p>
               </div>
-              <div className="text-[12px] font-bold text-zinc-400">Tanga</div>
             </div>
-
-            <div className="p-3 rounded-2xl bg-zinc-900/80 border border-indigo-500/20 text-center">
-              <Zap className="size-4.5 text-indigo-400 mx-auto mb-1 fill-indigo-400/20" />
-              <div className="text-base font-bold text-indigo-300 font-mono">
-                +{xpEarned}
-              </div>
-              <div className="text-[12px] font-bold text-zinc-400">XP Tajriba</div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-zinc-900/80 border border-emerald-500/20 text-center">
-              <Trophy className="size-4.5 text-emerald-400 mx-auto mb-1" />
-              <div className="text-base font-bold text-emerald-300 font-mono">
-                +{dtmScoreDelta.toFixed(1)}
-              </div>
-              <div className="text-[12px] font-bold text-zinc-400">DTM Ball</div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-zinc-900/80 border border-purple-500/20 text-center">
-              <Sparkles className="size-4.5 text-purple-400 mx-auto mb-1" />
-              <div className="text-base font-bold text-purple-300 font-mono">
-                +1 Bepul
-              </div>
-              <div className="text-[12px] font-bold text-zinc-400">AI Esse Krediti</div>
-            </div>
-          </div>
-
-          {/* Strava 1-Click Auto-Post to Community Feed */}
-          <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-white/10 text-left flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-orange-400 uppercase tracking-wide">
-                <Share2 className="size-3.5" />
-                <span>Strava Rejimi: Hamjamiyatga Ulashish</span>
-              </div>
-              <p className="text-xs text-zinc-300 mt-0.5">
-                Bugungi g'alabangizni do'stlaringizga e'lon qiling va bonus XP oling.
-              </p>
-            </div>
-
-            <Button
+            <button
               type="button"
               onClick={handleShare}
               disabled={shared || sharing}
-              className={`h-9 px-3.5 rounded-xl font-bold text-xs shrink-0 cursor-pointer transition-all ${
-                shared
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                  : 'bg-gradient-to-r from-orange-500 to-rose-600 text-white shadow-md'
+              className={`inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-4 text-[12.5px] font-bold transition-all ${
+                shared ? 'bg-[var(--ps-green)] text-white' : 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
               }`}
             >
-              {shared ? (
-                <>
-                  <Check className="size-3.5 mr-1 text-emerald-400" />
-                  <span>Ulashildi (+15 XP)</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="size-3 mr-1" />
-                  <span>{sharing ? "Chiqarilmoqda..." : "Lentaga Ulashish (+15 XP)"}</span>
-                </>
-              )}
-            </Button>
-          </div>
+              {shared ? <><Check className="size-4 stroke-[3]" /> Ulashildi · +15 XP</> : <><Share2 className="size-3.5" /> {sharing ? 'Chiqarilmoqda...' : 'Lentaga ulashish · +15 XP'}</>}
+            </button>
+          </section>
 
-          {/* ─────────────────────────────────────────────────────────────
-              3. KEYINGI RAUND AVTOPILOTI (Loop Chaining Tramplin)
-             ───────────────────────────────────────────────────────────── */}
-          {cycleNumber === 1 && (
-            <div className="p-4 rounded-2xl border border-orange-500/40 bg-gradient-to-r from-orange-500/15 via-rose-500/10 to-amber-500/15 text-left space-y-3 shadow-xl">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-bold uppercase bg-orange-500/25 text-orange-300 border border-orange-500/40">
-                  <Flame className="size-3.5 fill-current" />
-                  <span>🔥 2.0x SUPER-COMBO YOQILDI!</span>
+          {/* Keyingi raund avtopiloti */}
+          {nextRound && (
+            <section className="ps-card space-y-3 !rounded-[28px] p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-2">
+                <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11.5px] font-black uppercase ${nextRound.tone}`}>
+                  <Flame className="size-3.5 fill-current" /> {nextRound.chip}
                 </span>
                 {timerActive && (
-                  <span className="font-mono text-xs font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-500/30">
-                    Avtostart: {countdown}s
-                  </span>
+                  <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[12px] font-bold tabular-nums">Avtostart: {countdown}s</span>
                 )}
               </div>
-
-              <p className="text-xs sm:text-sm text-zinc-200 leading-snug">
-                Daraxtingiz <strong>35% suv</strong> oldi. Hoziroq 2-Raundni (Keyingi mavzu / Majburiy fan) <strong>2 barobar ko'p XP</strong> bilan boshlaymizmi?
-              </p>
-
+              <p className="text-[13.5px] leading-snug text-[var(--text-secondary)]">{nextRound.text}</p>
               {timerActive && (
-                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-orange-500 to-rose-500 rounded-full"
-                    initial={{ width: '100%' }}
-                    animate={{ width: '0%' }}
-                    transition={{ duration: 5, ease: 'linear' }}
-                  />
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--ds-track)]">
+                  <motion.div className="h-full rounded-full bg-[var(--ps-purple)]" initial={{ width: '100%' }} animate={{ width: '0%' }} transition={{ duration: 5, ease: 'linear' }} />
                 </div>
               )}
-
-              <div className="flex items-center gap-2 pt-1">
-                <Button
-                  type="button"
-                  onClick={onRestartCycle}
-                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-orange-500 via-rose-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
-                >
-                  <Flame className="size-4 fill-current" />
-                  <span>🔥 2-Raundni Boshlash (2.0x Super-Combo) {timerActive ? `(${countdown}s)` : ''}</span>
-                  <ArrowRight className="size-4" />
-                </Button>
-
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={onRestartCycle} className="ps-btn ps-btn-ink flex-1">
+                  {nextRound.cta}{timerActive ? ` · ${countdown}s` : ''}
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </button>
                 {timerActive && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={cancelTimer}
-                    className="h-12 px-3 rounded-xl border-white/10 text-zinc-400 text-xs hover:text-white hover:bg-white/5"
-                  >
-                    To'xtatish
-                  </Button>
+                  <button type="button" onClick={cancelTimer} className="ps-btn ps-btn-ghost !px-4">
+                    To&apos;xtatish
+                  </button>
                 )}
               </div>
-            </div>
-          )}
-
-          {cycleNumber === 2 && (
-            <div className="p-4 rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-500/15 via-purple-500/10 to-amber-500/15 text-left space-y-3 shadow-xl">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-bold uppercase bg-rose-500/25 text-rose-300 border border-rose-500/40">
-                  <Zap className="size-3.5 fill-current" />
-                  <span>⚡ 2.5x ULTRA-COMBO!</span>
-                </span>
-                {timerActive && (
-                  <span className="font-mono text-xs font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
-                    Avtostart: {countdown}s
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xs sm:text-sm text-zinc-200 leading-snug">
-                Daraxtingiz <strong>70% suv</strong> oldi. To'liq 100% ga chiqish, Daraxtni Chinorga aylantirish va <strong>Kunlik Boss Sinovini</strong> ochish uchun 3-Raundni boshlang!
-              </p>
-
-              {timerActive && (
-                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-rose-500 to-purple-500 rounded-full"
-                    initial={{ width: '100%' }}
-                    animate={{ width: '0%' }}
-                    transition={{ duration: 5, ease: 'linear' }}
-                  />
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 pt-1">
-                <Button
-                  type="button"
-                  onClick={onRestartCycle}
-                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
-                >
-                  <Zap className="size-4 fill-current" />
-                  <span>🚀 3-Raundni Boshlash (2.5x Ultra-Combo) {timerActive ? `(${countdown}s)` : ''}</span>
-                  <ArrowRight className="size-4" />
-                </Button>
-
-                {timerActive && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={cancelTimer}
-                    className="h-12 px-3 rounded-xl border-white/10 text-zinc-400 text-xs hover:text-white hover:bg-white/5"
-                  >
-                    To'xtatish
-                  </Button>
-                )}
-              </div>
-            </div>
+            </section>
           )}
 
           {cycleNumber >= 3 && (
-            <div className="p-4 rounded-2xl border border-amber-500/50 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-emerald-500/20 text-left space-y-3 shadow-2xl">
-              <div className="flex items-center gap-2">
-                <span className="size-7 rounded-xl bg-amber-500/30 border border-amber-500/50 flex items-center justify-center text-amber-300">
-                  <Trophy className="size-4" />
+            <section className="relative space-y-3 overflow-hidden rounded-[28px] bg-[var(--ps-purple)] p-4 text-white sm:p-5">
+              <span aria-hidden className="absolute -right-10 -top-10 size-32 rounded-full bg-white/15" />
+              <div className="relative flex items-center gap-3">
+                <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                  <Trophy className="size-5" />
                 </span>
                 <div>
-                  <h4 className="text-sm font-bold text-amber-300 uppercase tracking-wide">
-                    👑 DARAХT 100% SUG'ORILDI VA CHINORGA AYLANDI!
-                  </h4>
-                  <p className="text-[12px] text-zinc-300">
-                    Siz bugungi 60 daqiqalik marafonning barcha 3 ta raundini to'liq yopdingiz!
-                  </p>
+                  <p className="font-[family-name:var(--font-grotesk)] text-[17px] font-bold leading-tight">Daraxt 100% sug&apos;orildi va chinorga aylandi!</p>
+                  <p className="mt-0.5 text-[12.5px] text-white/80">Bugungi 60 daqiqalik marafonning 3 ta raundini to&apos;liq yopdingiz.</p>
                 </div>
               </div>
-
-              <div className="p-3 rounded-xl bg-zinc-950/70 border border-rose-500/30 flex items-center gap-3">
-                <ShieldAlert className="size-6 text-rose-400 shrink-0 animate-pulse" />
-                <div className="text-xs">
-                  <strong className="text-rose-300 block">KUNLIK BOSS SINTOVI QULFDAN OCHILDI!</strong>
-                  <span className="text-zinc-400">15 daqiqalik Mini-BMB Stress Sinovi orqali super-reyting oling.</span>
-                </div>
+              <div className="relative flex items-center gap-3 rounded-[20px] bg-white/15 p-3">
+                <ShieldAlert className="size-5 shrink-0" />
+                <p className="text-[12.5px]"><b className="block">Kunlik boss sinovi ochildi!</b> 15 daqiqalik mini-BMB stress sinovi orqali super-reyting oling.</p>
               </div>
-
-              <Button
-                type="button"
-                onClick={onStartBoss || onRestartCycle}
-                className="w-full h-13 rounded-xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-rose-600/40 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
-              >
-                <Swords className="size-4" />
-                <span>⚔️ 15 Daqiqalik Kunlik Boss: Mini-BMB Stress Sinovini Boshlash</span>
-                <ArrowRight className="size-4" />
-              </Button>
-            </div>
+              <button type="button" onClick={onStartBoss || onRestartCycle} className="ps-btn ps-btn-light relative w-full">
+                <Swords className="size-4" /> Boss sinovini boshlash
+                <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+              </button>
+            </section>
           )}
 
-          {/* Pastki Chiqish Tugmasi */}
-          <div className="pt-2">
-            <Button
-              type="button"
-              onClick={onFinishToDashboard}
-              variant="outline"
-              className="w-full h-11 rounded-xl border-white/10 hover:bg-white/5 text-zinc-300 font-bold text-xs cursor-pointer"
-            >
-              <CheckCircle2 className="size-4 mr-1.5 text-emerald-400" />
-              <span>✅ Dashboardga Qaytish</span>
-            </Button>
-          </div>
+          <button type="button" onClick={onFinishToDashboard} className="ps-btn ps-btn-ghost w-full">
+            <CheckCircle2 className="size-4 text-[var(--ps-green)]" /> Dashboardga qaytish
+          </button>
         </motion.div>
       )}
     </div>
