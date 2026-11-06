@@ -96,6 +96,11 @@ TELEGRAM_WEBHOOK_MAX_CONNECTIONS = int(os.environ.get('TELEGRAM_WEBHOOK_MAX_CONN
 _raw_pay_chan = (os.environ.get('PAYMENT_CHANNEL_ID') or '').strip()
 PAYMENT_CHANNEL_ID = _raw_pay_chan if (_raw_pay_chan and _raw_pay_chan.lstrip('-').isdigit()) else '-1004317888253'
 ADMIN_TELEGRAM_CHAT_ID = (os.environ.get('ADMIN_TELEGRAM_CHAT_ID') or '').strip() or '-1004317888253'
+# Telegram user ids allowed to approve/reject payments from the payment channel, in
+# addition to superadmin/staff accounts that have a linked telegram_id. Comma-separated.
+PAYMENT_REVIEWER_TELEGRAM_IDS = [
+    i.strip() for i in os.environ.get('PAYMENT_REVIEWER_TELEGRAM_IDS', '').split(',') if i.strip().isdigit()
+]
 
 # Channel the bot posts the daily "qiyin savol" to (numeric id, e.g. -100123456789, or
 # @channelusername for a public channel). The bot must be an admin of this channel.

@@ -182,13 +182,48 @@ def send_payment_review_notification(payment):
         return False
 
 
+def is_payment_reviewer(telegram_user_id) -> bool:
+    """Telegram foydalanuvchisi to'lovlarni ko'rib chiqa oladimi.
+
+    Ruxsat: settings.PAYMENT_REVIEWER_TELEGRAM_IDS ro'yxatidagilar, hamda Telegram'i
+    bog'langan superadmin yoki staff hisoblari (notify_admins bilan bir xil auditoriya).
+    """
+    from django.db.models import Q
+
+    from accounts.models import Profile
+
+    tg_id = str(telegram_user_id or '').strip()
+    if not tg_id.isdigit():
+        return False
+    if tg_id in set(getattr(settings, 'PAYMENT_REVIEWER_TELEGRAM_IDS', []) or []):
+        return True
+    return (Profile.objects
+            .filter(telegram_id=tg_id, user__is_active=True)
+            .filter(Q(role='superadmin') | Q(user__is_superuser=True) | Q(user__is_staff=True))
+            .exists())
+
+
 def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, callback_data):
-    """Admin kanalida 'Qabul qilish' yoki 'Rad etish' tugmasi bosilganda ishlaydi."""
+    """Admin kanalida 'Qabul qilish' yoki 'Rad etish' tugmasi bosilganda ishlaydi.
+
+    Telegram mijozi istalgan bot xabari uchun ixtiyoriy `callback_data` yubora oladi —
+    shuning uchun tugma matniga emas, QAYERDAN (to'lov kanali) va KIM (to'lov
+    tekshiruvchisi) bosganiga qaraymiz. Qaror atomik "egallash" bilan bir marta qo'llanadi.
+    """
+    from django.db import transaction
+
     from premium.models import Payment
 
     parts = callback_data.split('_')
-    if len(parts) < 3:
+    if len(parts) < 3 or parts[1] not in ('approve', 'reject'):
         answer_callback(callback_query_id, "Xato buyruq.")
+        return
+
+    from_id = (admin_user or {}).get('id')
+    if str(chat_id) not in get_payment_channel_ids() or not is_payment_reviewer(from_id):
+        logger.warning("Ruxsatsiz to'lov callback'i rad etildi: chat_id=%s from_id=%s data=%s",
+                       chat_id, from_id, callback_data)
+        answer_callback(callback_query_id, "Ruxsat yo'q.")
         return
 
     action_type = parts[1]  # "approve" yoki "reject"
@@ -198,21 +233,34 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
         answer_callback(callback_query_id, "Noto'g'ri to'lov ID.")
         return
 
-    try:
-        payment = Payment.objects.select_related('profile', 'profile__user', 'plan', 'test').get(id=payment_id)
-    except Payment.DoesNotExist:
-        answer_callback(callback_query_id, "To'lov bazadan topilmadi!")
-        return
-
     admin_username = admin_user.get('username')
     raw_admin_name = f"@{admin_username}" if admin_username else (admin_user.get('first_name') or 'Admin')
     admin_name = html.escape(str(raw_admin_name))
 
-    if payment.status == 'approved':
-        answer_callback(callback_query_id, "⚠️ Bu to'lov allaqachon tasdiqlangan!")
+    # Atomik "egallash": faqat 'pending' holatidagi to'lovni birinchi bo'lib o'zgartirgan
+    # so'rov davom etadi. Ikki admin bir vaqtda bossa ham obuna muddati bir marta qo'shiladi.
+    verb = "tasdiqlandi" if action_type == 'approve' else "rad etildi"
+    with transaction.atomic():
+        claimed = Payment.objects.filter(id=payment_id, status='pending').update(
+            status='approved' if action_type == 'approve' else 'rejected',
+            reviewed_at=timezone.now(),
+            admin_note=f"Telegram kanalida {raw_admin_name} tomonidan {verb}.",
+        )
+        payment = (Payment.objects.select_related('profile', 'profile__user', 'plan', 'test')
+                   .filter(id=payment_id).first())
+        if claimed and action_type == 'approve':
+            payment.apply_to_profile()
+
+    if payment is None:
+        answer_callback(callback_query_id, "To'lov bazadan topilmadi!")
         return
-    elif payment.status == 'rejected':
-        answer_callback(callback_query_id, "⚠️ Bu to'lov allaqachon rad etilgan!")
+    if not claimed:
+        if payment.status == 'approved':
+            answer_callback(callback_query_id, "⚠️ Bu to'lov allaqachon tasdiqlangan!")
+        elif payment.status == 'rejected':
+            answer_callback(callback_query_id, "⚠️ Bu to'lov allaqachon rad etilgan!")
+        else:
+            answer_callback(callback_query_id, "⚠️ Bu to'lov hali ko'rib chiqishga tayyor emas.")
         return
 
     is_course_or_pro = bool(payment.plan and payment.plan.plan_type == 'lessons' and not payment.test_id)
@@ -231,12 +279,6 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
     now_time = timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M")
 
     if action_type == 'approve':
-        payment.status = 'approved'
-        payment.reviewed_at = timezone.now()
-        payment.admin_note = f"Telegram kanalida {raw_admin_name} tomonidan tasdiqlandi."
-        payment.apply_to_profile()
-        payment.save()
-
         answer_callback(callback_query_id, f"✅ To'lov #{payment.id} tasdiqlandi!")
 
         unlocked_note = (
@@ -279,11 +321,6 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
             send_message(payment.profile.telegram_id, student_msg)
 
     elif action_type == 'reject':
-        payment.status = 'rejected'
-        payment.reviewed_at = timezone.now()
-        payment.admin_note = f"Telegram kanalida {raw_admin_name} tomonidan rad etildi."
-        payment.save()
-
         answer_callback(callback_query_id, f"❌ To'lov #{payment.id} rad etildi.")
 
         rejected_caption = (
