@@ -51,7 +51,7 @@ _INSECURE_SECRET_KEYS = {'change-me-to-a-random-value', 'changeme', 'secret'}
 # Local development explicitly sets DEBUG=True in .env (see .env.example).
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'web']
 # Dev tunnels only in development — anyone can register these subdomains, so they must not
 # be trusted hosts/CSRF origins in production (audit AUTH-013).
 _DEV_TUNNEL_HOSTS = ['.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io']
