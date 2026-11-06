@@ -26,32 +26,32 @@ export default function CharacterCard({
   const initial = name.trim().charAt(0).toUpperCase();
 
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-medium)]">
+    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[28px] bg-[var(--ps-purple)]">
       {imageUrl ? (
-        /* Ataylab `next/image` EMAS, oddiy `<img>`. `avatar_url` — admin kiritadigan
-           ixtiyoriy tashqi manzil, `next/image` esa har bir hostni `next.config.ts`
-           dagi ruxsat ro'yxatida talab qiladi. Ya'ni birinchi rasm qo'shilgan kuni
-           sahifa ishlamay qolardi. Ilovaning qolgan qismi (avatarlar) ham shu
-           sababdan oddiy `<img>` ishlatadi. */
+        /* Ataylab `next/image` EMAS, oddiy `<img>`: `avatar_url` — admin kiritadigan
+           ixtiyoriy tashqi manzil, `next/image` esa har bir hostni ruxsat ro'yxatida talab qiladi. */
         // eslint-disable-next-line @next/next/no-img-element
         <img src={imageUrl} alt={name} className="absolute inset-0 size-full object-cover" />
       ) : (
-        /* Rasmsiz holat — bo'sh kulrang quti emas, ataylab tuzilgan ko'rinish:
-           bosh harf va yumshoq gradient. */
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[var(--surface-card-strong)] to-[var(--surface-hover)]">
-          <span className="font-voice text-7xl font-bold text-[var(--text-faint)]">{initial}</span>
+        /* Rasmsiz holat — pastel kompozitsiya va bosh harf. */
+        <div className="absolute inset-0">
+          <span aria-hidden className="absolute -right-10 -top-12 size-48 rounded-full bg-white/15" />
+          <span aria-hidden className="absolute -bottom-10 -left-6 size-36 rounded-tr-full bg-[var(--ps-orange)]" />
+          <span aria-hidden className="ps-dots absolute right-6 top-6 h-14 w-24 opacity-25" />
+          <span className="absolute left-1/2 top-[42%] grid size-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[6px] border-[#FFFCF7] bg-[#FFFCF7] font-[family-name:var(--font-grotesk)] text-[52px] font-bold text-[var(--ps-purple)] shadow-[0_24px_48px_-24px_rgba(40,20,80,0.8)] sm:size-32">
+            {initial}
+          </span>
         </div>
       )}
 
-      {/* Scrim — matn o'qilishi uchun. Rasm bo'lmasa ham qoladi: matn baribir
-          gradient ustida turadi. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+      {/* Scrim — matn o'qilishi uchun */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 p-4">
+      <div className="absolute inset-x-0 bottom-0 p-5">
         {caption && (
-          <p className="font-mono text-xs uppercase tracking-wider text-white/70">{caption}</p>
+          <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white">{caption}</span>
         )}
-        <p className="font-voice text-2xl font-bold leading-tight text-white">{name}</p>
+        <p className="mt-2 font-[family-name:var(--font-grotesk)] text-[26px] font-bold leading-tight tracking-[-0.02em] text-white sm:text-[30px]">{name}</p>
       </div>
     </div>
   );
