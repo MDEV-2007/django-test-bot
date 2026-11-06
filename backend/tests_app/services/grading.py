@@ -214,31 +214,44 @@ _FENCE_TAG_RE = re.compile(
     r'</?(?:javob|savol|etalon|esse|system|assistant|user|instruction|prompt|tool_call)\b[^>]*>',
     re.IGNORECASE,
 )
-_CTRL_CHARS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
+_CTRL_CHARS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\u200e\u200f\u202a-\u202e\u2066-\u2069]')
 _INJECTION_PATTERNS = [
     re.compile(r'ignore\s+(?:all\s+|previous\s+|above\s+|prior\s+)*(?:instructions|rules|prompts)', re.IGNORECASE),
     re.compile(r'disregard\s+(?:all\s+|previous\s+|above\s+)*(?:instructions|rules)', re.IGNORECASE),
-    re.compile(r'(?:system\s+prompt|developer\s+message|hidden\s+instructions)', re.IGNORECASE),
+    re.compile(r'(?:system\s+prompt|developer\s+message|hidden\s+instructions|api[_-]?key|secret[_-]?key)', re.IGNORECASE),
+    re.compile(r'(?:reveal|leak|print|show|output|echo)\s+(?:the\s+)?(?:system\s+prompt|instructions|developer\s+message|secret|api[_-]?key)', re.IGNORECASE),
     re.compile(r'(?:oldingi|yuqoridagi|barcha)(?:\s+\w+)*\s+(?:qoida|ko[\'`ʻʼ]?rsatma|instruksiya)\w*\s+(?:unut|bekor\s+qil|inkor\s+qil|e[\'`ʻʼ]?tiborsiz)', re.IGNORECASE),
-    re.compile(r'(?:to[\'`ʻʼ]?g[\'`ʻʼ]?ri\s+deb\s+(?:belgila|qabul\s+qil|hisobla)|100\s*(?:ball|foiz|%)\s+qo[\'`ʻʼ]?y)', re.IGNORECASE),
+    re.compile(r'(?:to[\'`ʻʼ]?g[\'`ʻʼ]?ri\s+deb\s+(?:belgila|qabul\s+qil|hisobla)|100\s*(?:ball|foiz|%)\s+qo[\'`ʻʼ]?y|maksimal\s+ball\s+qo[\'`ʻʼ]?y)', re.IGNORECASE),
+    re.compile(r'(?:tizim\s+ko[\'`ʻʼ]?rsatmasi|api\s+kalit|maxfiy\s+kalit)\w*\s+(?:ko[\'`ʻʼ]?rsat|chiqar|chop\s+et)', re.IGNORECASE),
     re.compile(r'игнорируй(?:те)?\s+(?:все\s+|предыдущие\s+)*(?:инструкции|правила)', re.IGNORECASE),
     re.compile(r'забудь(?:те)?\s+(?:все\s+|предыдущие\s+)*(?:инструкции|правила)', re.IGNORECASE),
-    re.compile(r'поставь(?:те)?\s+(?:максимальный\s+балл|100\s+баллов|правильно)', re.IGNORECASE),
-    re.compile(r'"is_correct"\s*:\s*true', re.IGNORECASE),
-    re.compile(r'"score_pct"\s*:\s*100', re.IGNORECASE),
+    re.compile(r'(?:поставь(?:те)?|считай(?:те)?)\s+(?:максимальный\s+балл|100\s+баллов|правильно|зачти)', re.IGNORECASE),
+    re.compile(r'(?:покажи|выведи|раскрой)\s+(?:системный\s+промпт|инструкци[ию]|ключ|пароль)', re.IGNORECASE),
+    # Role-play & Jailbreak (EN, RU, UZ)
+    re.compile(r'\b(?:act\s+as|pretend\s+you\s+are|you\s+are\s+now|DAN\s+mode|jailbreak|developer\s+mode)\b', re.IGNORECASE),
+    re.compile(r'\b(?:режим\s+разработчика|действуй\s+как|представь,\s+что\s+ты|ты\s+теперь|джейлбрейк)\b', re.IGNORECASE),
+    re.compile(r'(?:o[\'`ʻʼ]?zingni\s+(?:\w+\s+)*(?:deb\s+tasavvur\s+qil|sifatida\s+tut|rolda\s+tasavvur\s+qil)|ishlab\s+chiquvchi\s+rejimi|boshqa\s+rolda)', re.IGNORECASE),
+    # Fake JSON payloads
+    re.compile(r'"is_correct"\s*:\s*(?:true|1)', re.IGNORECASE),
+    re.compile(r'"score_pct"\s*:\s*\d+', re.IGNORECASE),
     re.compile(r'"mazmun_ball"\s*:\s*\d+', re.IGNORECASE),
-    re.compile(r'(?:<\|im_start\|>|<\|im_end\|>|\[INST\]|\[/INST\]|<<SYS>>)', re.IGNORECASE),
+    re.compile(r'"results"\s*:\s*\[', re.IGNORECASE),
+    re.compile(r'(?:<\|im_start\|>|<\|im_end\|>|\[INST\]|\[/INST\]|<<SYS>>|<</SYS>>)', re.IGNORECASE),
     re.compile(r'(?:tool_call|function_call|exec\s*\(|import\s+os|DROP\s+TABLE)', re.IGNORECASE),
 ]
 
 
 def sanitize_prompt_field(text: str, *, max_chars: int = 2000) -> str:
-    """Strips XML delimiter tags, role-boundary tokens, and control characters from untrusted input."""
+    """Strips XML delimiter tags, role-boundary tokens, control characters, and bidi overrides from untrusted input."""
     if not text:
         return ''
-    cleaned = _CTRL_CHARS_RE.sub('', str(text))
+    try:
+        raw_str = str(text).encode('utf-8', 'replace').decode('utf-8', 'replace')
+    except Exception:
+        raw_str = str(text)
+    cleaned = _CTRL_CHARS_RE.sub('', raw_str)
     cleaned = _FENCE_TAG_RE.sub('', cleaned)
-    cleaned = re.sub(r'(?:<\|im_start\|>|<\|im_end\|>|<<SYS>>|<</SYS>>)', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'(?:<\|im_start\|>|<\|im_end\|>|<<SYS>>|<</SYS>>|\[INST\]|\[/INST\])', '', cleaned, flags=re.IGNORECASE)
     return cleaned[:max_chars]
 
 
@@ -247,6 +260,8 @@ def is_prompt_injection_attempt(student_text: str, reference_text: str = '') -> 
     if not student_text:
         return False
     raw = str(student_text)
+    if '\x00' in raw:
+        return True
     if reference_text and is_deterministic_match(raw, reference_text):
         return False
     # If the reference answer itself contains all words of the student answer, it is not an attack

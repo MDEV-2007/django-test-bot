@@ -27,6 +27,16 @@ media/
 !backend/media/tests/
 staticfiles/
 backups/
+*.dump
+*.dump.enc
+*.dump.sha256
+*.dump.part
+*.tgz
+*.tgz.enc
+*.tgz.sha256
+*.tgz.part
+*.sqlite3.gz*
+*backup*.lock*
 
 # Logs
 *.log

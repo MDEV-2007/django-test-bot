@@ -348,30 +348,49 @@ docker compose logs -f nginx      # kirish so'rovlari
 ```
 
 Baza va media zaxirasi: `deploy/scripts/backup.sh` (har kuni 03:15, 14 kun saqlanadi,
-`/opt/ilmildizi-backups` papkasiga). Cron jadvali bitta faylda — `deploy/scripts/crontab.example`:
+`/opt/ilmildizi-backups` papkasiga).
+
+### Zaxira shifrlash (AES-256) va xavfsizlik:
+Production rejimida backup shifrlash MAJBURIY:
+1. Shifrlash parolini xavfsiz faylga yozing:
+```bash
+echo "KUCHLI_MAXFIY_PAROL_2026_xYz!" > /opt/ilmildizi/.backup_passphrase
+chmod 0600 /opt/ilmildizi/.backup_passphrase
+```
+2. Muhit o'zgaruvchisini o'rnating:
+```bash
+export BACKUP_PASSPHRASE_FILE="/opt/ilmildizi/.backup_passphrase"
+```
+3. Off-site ko'chirish sozlamalari (ixtiyoriy, S3/B2 yoki tashqi server):
+```bash
+export BACKUP_OFFSITE_DIR="/mnt/offsite-storage" # yoki BACKUP_RCLONE_DEST="remote:ilmildizi-backups"
+```
+
+Cron jadvali bitta faylda — `deploy/scripts/crontab.example`:
 
 ```bash
 crontab -l > /root/crontab.old            # eski jadvalning nusxasi
 crontab /opt/ilmildizi/deploy/scripts/crontab.example
-/opt/ilmildizi/deploy/scripts/backup.sh   # birinchi zaxirani hozir yaratib tekshirish
+/opt/ilmildizi/deploy/scripts/backup.sh   # birinchi shifrlangan zaxirani hozir yaratib tekshirish
 ls -lh /opt/ilmildizi-backups
 ```
 
-Zaxira shu serverning o'zida turadi: server yo'qolsa, u ham yo'qoladi. Haftada bir marta
-nusxasini boshqa joyga oling, masalan o'z kompyuteringizga:
-
+### Xavfsiz tiklash (Restore drill):
+Hech qachon to'g'ridan-to'g'ri ishlab turgan bazani ustidan yozmang!
+Avval izolyatsiyalangan sinov bazasida tekshiring:
 ```bash
-scp root@SERVER:/opt/ilmildizi-backups/db-*.dump ./
-```
+# 1. Sinov bazasiga (ilmildizi_restore_test) tiklash (avtomatik SHA-256 va decrypt tekshiriladi):
+export BACKUP_PASSPHRASE_FILE="/opt/ilmildizi/.backup_passphrase"
+/opt/ilmildizi/deploy/scripts/restore.sh \
+  --db-file /opt/ilmildizi-backups/db-YYYYmmdd-HHMMSS.dump.enc
 
-Zaxiradan tiklash (avval ilovani to'xtating, baza ichidagi joriy ma'lumot almashtiriladi):
-
-```bash
+# 2. Agar jonli production bazani tiklash haqiqatdan ham zarur bo'lsa (katastrofik holat):
 docker compose stop web
-docker compose exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists' \
-  < /opt/ilmildizi-backups/db-YYYYmmdd-HHMM.dump
-docker run --rm -v ilmildizi_media:/media -v /opt/ilmildizi-backups:/backup alpine \
-  tar xzf /backup/media-YYYYmmdd-HHMM.tgz -C /media
+/opt/ilmildizi/deploy/scripts/restore.sh \
+  --db-file /opt/ilmildizi-backups/db-YYYYmmdd-HHMMSS.dump.enc \
+  --media-file /opt/ilmildizi-backups/media-YYYYmmdd-HHMMSS.tgz.enc \
+  --target-db ilmildizi \
+  --allow-production-overwrite
 docker compose start web
 ```
 

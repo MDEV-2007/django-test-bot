@@ -533,8 +533,11 @@ export function useContinuousLoop() {
   }, [fetchLoop]);
 
   // Bosqichni oldinga surish (Advance Stage)
+  const isAdvancingRef = useRef(false);
   const advanceStage = useCallback(
     async (fromStage: LoopStage, payload: Record<string, any> = {}) => {
+      if (isAdvancingRef.current) return null;
+      isAdvancingRef.current = true;
       try {
         const res = await apiFetch<{
           ok: boolean;
@@ -571,12 +574,12 @@ export function useContinuousLoop() {
           await fetchLoop();
           return null;
         }
-        // Tarmoq / server xatosi: bosqich lokal SOXTA siljitilmaydi — ilgari bu yerda
-        // STAGE_5, 2.5x combo va "sandiq ochildi" ko'rsatilardi, server esa hech narsa
-        // bermagan bo'lardi (audit LOOP-004). Holat o'zgarmaydi, foydalanuvchi qayta uradi.
+        // Tarmoq / server xatosi: bosqich lokal SOXTA siljitilmaydi (LOOP-NEW-001)
         toast.error(err instanceof Error && err.message
           ? err.message
           : "Bosqichni saqlab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.");
+      } finally {
+        isAdvancingRef.current = false;
       }
       return null;
     },
@@ -584,6 +587,7 @@ export function useContinuousLoop() {
   );
 
   // Javobni serverga yuborish (sprint yoki arena). Xatoda null — chaqiruvchi holatni tiklaydi.
+  const isSubmittingAnswerRef = useRef(false);
   const submitLoopAnswer = useCallback(
     async (
       stage: 'sprint' | 'arena',
@@ -591,6 +595,8 @@ export function useContinuousLoop() {
       optionId: number,
       revenge = false,
     ): Promise<LoopAnswerResult | null> => {
+      if (isSubmittingAnswerRef.current) return null;
+      isSubmittingAnswerRef.current = true;
       try {
         const res = await apiFetch<{ ok: boolean } & LoopAnswerResult>('/api/v1/loop/answer/', {
           method: 'POST',
@@ -608,6 +614,8 @@ export function useContinuousLoop() {
         }
         toast.error(err instanceof Error && err.message ? err.message : "Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
         return null;
+      } finally {
+        isSubmittingAnswerRef.current = false;
       }
     },
     [fetchLoop],
@@ -680,9 +688,10 @@ export function useContinuousLoop() {
   );
 
   // 2.0x / 2.5x Super-Combo bilan keyingi siklni boshlash (Multi-cycle marafon)
+  const isRestartingRef = useRef(false);
   const restartCycle = useCallback(async () => {
-    tgHaptic('success');
-    soundFX.celebrate();
+    if (isRestartingRef.current) return false;
+    isRestartingRef.current = true;
     try {
       const res = await apiFetch<{
         ok: boolean;
@@ -691,60 +700,80 @@ export function useContinuousLoop() {
         message: string;
       }>('/api/v1/loop/restart-cycle/', { method: 'POST' });
 
-      if (res?.ok) {
+      if (res?.ok && res.loop) {
+        tgHaptic('success');
+        soundFX.celebrate();
         setLoop((prev) => (prev ? { ...prev, ...res.loop } : res.loop));
         setStageData(res.stage_data);
         toast.success(res.message);
         return true;
       }
+      toast.error("Serverdan noto'g'ri javob keldi.");
+      return false;
     } catch (err) {
-      // Server yangi siklni rad etdi (joriy sikl tugamagan / kunlik limit) — xabar
-      // ko'rsatiladi; lokal "soxta" sikl ochilmaydi.
+      // Server yangi siklni rad etdi (409: sikl tugamagan; 429: kunlik limit) — xabar ko'rsatiladi;
+      // lokal "soxta" sikl ochilmaydi.
       if (err instanceof ApiError && (err.status === 409 || err.status === 429)) {
         toast.error(err.message);
         return false;
       }
-      // Fallback local multi-cycle transition (Offline / 404 da ham ishlaydi)
-      let nextCycle = 2;
-      setLoop((prev) => {
-        nextCycle = (prev?.cycle_number || 1) + 1;
-        const combo = nextCycle === 2 ? 2.0 : 2.5;
-        return {
-          id: (prev?.id || 1) + 1,
-          date: new Date().toISOString().split('T')[0],
-          cycle_number: nextCycle,
-          current_stage: 'STAGE_1_WARMUP',
-          combo_multiplier: combo,
-          dtm_score_delta: (prev?.dtm_score_delta || 0) + 0.4,
-          session_mistakes_ids: [],
-          is_chest_claimed: false,
-        };
-      });
 
-      setEcoTree((prev) => {
-        const nextWater = Math.min(100, (prev?.water_level || 35) + 35);
-        const stageName = nextWater >= 100 ? 'Chinor' : nextWater >= 70 ? "Ko'chat" : "Nihol";
-        const growthStage = nextWater >= 100 ? 4 : nextWater >= 70 ? 2 : 1;
-        return {
-          ...prev,
-          water_level: nextWater,
-          stage_name: stageName,
-          growth_stage: growthStage,
-          total_cycles_completed: (prev?.total_cycles_completed || 0) + 1,
-          needs_water: false,
-        };
-      });
+      // Offline / demo fallback FAQAT explicit development flag yoqilganda ishlaydi (LOOP-NEW-001).
+      // Production muhitida hech qachon avtomatik yoqilmaydi!
+      const allowOfflineDemo =
+        process.env.NEXT_PUBLIC_ENABLE_LOOP_OFFLINE_DEMO === 'true' &&
+        process.env.NODE_ENV !== 'production';
 
-      // Keyingi raund uchun yangi mavzu
-      const nextTopicTitle = nextCycle === 2
-        ? "Amir Temur va Temuriylar saltanati (BMB Standarti)"
-        : "O'zbekiston tarixi: Xonliklar davri va DTM Qopqonlari";
-      setTopic({ id: nextCycle, title: nextTopicTitle, subject_name: "Tarix" });
+      if (allowOfflineDemo) {
+        let nextCycle = 2;
+        setLoop((prev) => {
+          nextCycle = (prev?.cycle_number || 1) + 1;
+          const combo = nextCycle === 2 ? 2.0 : 2.5;
+          return {
+            id: (prev?.id || 1) + 1,
+            date: new Date().toISOString().split('T')[0],
+            cycle_number: nextCycle,
+            current_stage: 'STAGE_1_WARMUP',
+            combo_multiplier: combo,
+            dtm_score_delta: (prev?.dtm_score_delta || 0) + 0.4,
+            session_mistakes_ids: [],
+            is_chest_claimed: false,
+          };
+        });
 
-      toast.success(`🔥 ${nextCycle}-Raund Super-Combo bilan boshlandi! (+35% suv)`);
-      return true;
+        setEcoTree((prev) => {
+          const nextWater = Math.min(100, (prev?.water_level || 35) + 35);
+          const stageName = nextWater >= 100 ? 'Chinor' : nextWater >= 70 ? "Ko'chat" : "Nihol";
+          const growthStage = nextWater >= 100 ? 4 : nextWater >= 70 ? 2 : 1;
+          return {
+            ...prev,
+            water_level: nextWater,
+            stage_name: stageName,
+            growth_stage: growthStage,
+            total_cycles_completed: (prev?.total_cycles_completed || 0) + 1,
+            needs_water: false,
+          };
+        });
+
+        const nextTopicTitle = nextCycle === 2
+          ? "Amir Temur va Temuriylar saltanati (BMB Standarti)"
+          : "O'zbekiston tarixi: Xonliklar davri va DTM Qopqonlari";
+        setTopic({ id: nextCycle, title: nextTopicTitle, subject_name: "Tarix" });
+
+        toast.success(`[DEMO] 🔥 ${nextCycle}-Raund boshlandi (+35% suv)`);
+        return true;
+      }
+
+      // Production rejimida va server/tarmoq xatosida: HECH QACHON soxta success yoki mukofot berilmaydi!
+      const errorMsg =
+        err instanceof Error && err.message
+          ? err.message
+          : "Tarmoq xatosi: keyingi siklni boshlab bo'lmadi. Qayta urinib ko'ring.";
+      toast.error(errorMsg);
+      return false;
+    } finally {
+      isRestartingRef.current = false;
     }
-    return false;
   }, []);
 
   // Chiqishni boshqarish

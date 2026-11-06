@@ -128,12 +128,24 @@ class Command(BaseCommand):
             '--offsite-dir', default=None,
             help="Copy completed backup artifacts and .sha256 sidecars to an off-site directory.",
         )
+        parser.add_argument(
+            '--allow-unencrypted', action='store_true',
+            help="Allow unencrypted backup in development/testing only.",
+        )
 
     def handle(self, *args, **options):
         backup_dir = Path(options['dir'] or os.environ.get('BACKUP_DIR', '') or (settings.BASE_DIR / 'backups'))
         backup_dir.mkdir(parents=True, exist_ok=True)
         passphrase = options['passphrase'] if options['passphrase'] is not None else os.environ.get('BACKUP_PASSPHRASE', '')
         offsite_raw = options['offsite_dir'] or os.environ.get('BACKUP_OFFSITE_DIR', '')
+
+        allow_unencrypted = options.get('allow_unencrypted') or os.environ.get('ALLOW_UNENCRYPTED_BACKUP') == '1'
+        if not getattr(settings, 'DEBUG', False) and not passphrase and not allow_unencrypted:
+            raise CommandError(
+                "Production muhitida (DEBUG=False) zaxira shifrlanishi shart: "
+                "--passphrase yoki BACKUP_PASSPHRASE ni o'rnating (fail-closed). "
+                "Faqat lokal test muhitida --allow-unencrypted ishlatish mumkin."
+            )
 
         stamp = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')
         artifacts = []
@@ -144,6 +156,11 @@ class Command(BaseCommand):
             db_path = encrypt_backup_file(db_path, passphrase)
         db_sha = write_sha256_sidecar(db_path)
         verify_sha256_sidecar(db_path)
+        for p in (db_path, db_sha):
+            try:
+                os.chmod(p, 0o600)
+            except OSError:
+                pass
         artifacts.extend([db_path, db_sha])
         self.stdout.write(self.style.SUCCESS(f"Baza zaxirasi: {db_path} (SHA-256 OK)"))
 
@@ -154,6 +171,11 @@ class Command(BaseCommand):
                 media_path = encrypt_backup_file(media_path, passphrase)
             media_sha = write_sha256_sidecar(media_path)
             verify_sha256_sidecar(media_path)
+            for p in (media_path, media_sha):
+                try:
+                    os.chmod(p, 0o600)
+                except OSError:
+                    pass
             artifacts.extend([media_path, media_sha])
             self.stdout.write(self.style.SUCCESS(f"Media zaxirasi: {media_path} (SHA-256 OK)"))
         else:
@@ -163,7 +185,12 @@ class Command(BaseCommand):
             offsite_dir = Path(offsite_raw)
             offsite_dir.mkdir(parents=True, exist_ok=True)
             for item in artifacts:
-                shutil.copy2(item, offsite_dir / item.name)
+                dest = offsite_dir / item.name
+                shutil.copy2(item, dest)
+                try:
+                    os.chmod(dest, 0o600)
+                except OSError:
+                    pass
             self.stdout.write(self.style.SUCCESS(f"Off-site nusxa ko'chirildi: {offsite_dir}"))
 
         removed = self._prune_old(backup_dir, options['keep_days'])

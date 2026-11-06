@@ -48,6 +48,9 @@ def _tokens_for(user):
 
 def _auth_response(user):
     profile = ensure_profile_for_user(user)
+    if user.is_staff or user.is_superuser or getattr(profile, 'is_superadmin', False):
+        from .admin_mfa import clear_panel_mfa_verified
+        clear_panel_mfa_verified(user)
     # Login streakni oshirmaydi — faqat o'qish amallari (audit ECON-002).
     return Response({**_tokens_for(user), 'user': ProfileSerializer(profile).data})
 

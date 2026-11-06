@@ -376,6 +376,12 @@ if not DEBUG:
         )
     validate_production_database_config(DATABASES.get('default', {}))
 
+# Dedicated Admin MFA encryption key settings (SEC-NEW-001).
+# Separate from SECRET_KEY so rotating Django's SECRET_KEY never breaks MFA enrollments.
+ADMIN_MFA_ENCRYPTION_KEY = os.environ.get('ADMIN_MFA_ENCRYPTION_KEY', '')
+ADMIN_MFA_ENCRYPTION_KEY_ID = os.environ.get('ADMIN_MFA_ENCRYPTION_KEY_ID', 'v1')
+ADMIN_MFA_PREVIOUS_ENCRYPTION_KEYS = os.environ.get('ADMIN_MFA_PREVIOUS_ENCRYPTION_KEYS', '')
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
