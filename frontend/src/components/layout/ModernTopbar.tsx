@@ -145,7 +145,7 @@ export default function ModernTopbar({
         <button
           type="button"
           onClick={search}
-          className="ps-tb-search tg-hidden hidden md:flex w-56 lg:w-64 items-center gap-2 rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs text-muted-foreground hover:border-[var(--brand-border)] transition-colors cursor-pointer"
+          className="ps-tb-search hidden md:flex w-56 lg:w-64 items-center gap-2 rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] px-3 py-1.5 text-xs text-muted-foreground hover:border-[var(--brand-border)] transition-colors cursor-pointer"
         >
           <Search className="size-3.5" />
           <span className="truncate">Dars, test, odamlarni qidirish…</span>
@@ -154,7 +154,7 @@ export default function ModernTopbar({
         <button
           type="button"
           onClick={search}
-          className="ps-tb-icon md:hidden tg-hidden tap-44 flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--ds-subtle)] cursor-pointer"
+          className="ps-tb-icon md:hidden tap-44 flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--ds-subtle)] cursor-pointer"
           aria-label="Qidirish"
         >
           <Search className="size-4" />
@@ -167,7 +167,7 @@ export default function ModernTopbar({
                 <button
                   type="button"
                   onClick={onStreakClick}
-                  className="ps-tb-streak tg-hidden tap-44 flex h-8 items-center gap-1.5 rounded-lg border border-[var(--reward-border)] bg-[var(--reward-soft)] px-2.5 text-xs font-bold text-[var(--reward-text)] cursor-pointer"
+                  className="ps-tb-streak tap-44 flex h-8 items-center gap-1.5 rounded-lg border border-[var(--reward-border)] bg-[var(--reward-soft)] px-2.5 text-xs font-bold text-[var(--reward-text)] cursor-pointer"
                 >
                   <Flame className="ps-tb-flame size-3.5 text-[#E07A1F]" strokeWidth={2.4} />
                   <span className="tabular-nums">{user.streak || 0}</span>
