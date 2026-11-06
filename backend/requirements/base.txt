@@ -1,8 +1,8 @@
 # Runtime dependencies needed everywhere (dev and production).
 # djangorestframework requires Django>=5.2 — this also aligns the pin with the Django 6
 # docs/URLs already referenced throughout config/settings.py's comments.
-Django==6.1
-Pillow==12.2.0
+Django==6.1.3
+Pillow==13.0.0
 requests==2.34.2
 python-dotenv==1.2.2
 django-ckeditor-5==0.2.20
@@ -27,6 +27,6 @@ pymupdf==1.28.2
 # the frontend renders it with dangerouslySetInnerHTML (see core/html_sanitize.py).
 nh3==0.3.7
 
-djangorestframework==3.18.0
+djangorestframework==3.18.3
 django-cors-headers==4.9.0
 djangorestframework-simplejwt==5.5.1

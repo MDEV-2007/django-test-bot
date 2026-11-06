@@ -1,39 +1,45 @@
+# Build context is the repo root and the Dockerfile copies the backend/ subtree, so every
+# pattern below uses **/ — a bare `.env` only matches the repo root, not backend/.env
+# (audit PROD-002: secrets, the local SQLite DB and payment screenshots ended up in the image).
+
 # Version control / IDE
-.git
-.gitignore
-.vscode
-.idea
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
 
 # Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
-venv/
-env/
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+**/.venv/
+**/venv/
+**/env/
 
-# Node (only used at build time on the host to compile Tailwind; not needed in the image)
-node_modules/
+# Node (only used at build time on the host; not needed in the image)
+**/node_modules/
 
-# Local dev artifacts that must never leak into the image
-.env
-db.sqlite3
-media/
-backups/
-staticfiles/
+# Secrets and local data that must never leak into the image
+**/.env
+**/.env.*
+!**/.env.example
+**/db.sqlite3
+**/db.sqlite3-*
+**/*.sqlite3
+**/media/
+**/backups/
+**/staticfiles/
+**/logs/
 
 # Docker / CI meta
-Dockerfile
-docker-compose*.yml
-.dockerignore
+**/Dockerfile
+**/docker-compose*.yml
+**/.dockerignore
 
 # Misc
-*.log
-.DS_Store
-
+**/*.log
+**/.DS_Store
 
 # Heavy PDF fixtures and imports (must never bloat production Docker images)
-backend/tests.pdf
-tests.pdf
+**/*.pdf
 backend/tests_app/fixtures/pdf_imports/
-*.pdf

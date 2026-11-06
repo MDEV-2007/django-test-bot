@@ -86,6 +86,22 @@ location /ws/ {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_read_timeout 3600s;   # jang davomida ulanish uzilmasin
+    # Ulanish URL'ida `?token=<JWT>` bor — access log'ga yozilsa, logni o'qigan har kim
+    # tokenni qayta ishlata oladi (audit AUTH-011).
+    access_log off;
+}
+
+# Django admin login — parol terib ko'rishni sekinlashtirish (audit PROD-009).
+location = /admin/login/ {
+    limit_req zone=admin_login burst=5 nodelay;
+    limit_req_status 429;
+    proxy_pass http://backend;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 
 # API, Telegram webhook va Django admin.

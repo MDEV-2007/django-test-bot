@@ -31,8 +31,18 @@ COPY backend/ .
 # is a throwaway used only by this one command: settings.py refuses to start with
 # DEBUG=False and no DATABASE_URL/REDIS_URL (a deliberate production guard), and
 # collectstatic touches neither the database nor Redis.
-RUN DEBUG=False     SECRET_KEY=build-only     DATABASE_URL=sqlite:///build-only.db     REDIS_URL=redis://127.0.0.1:6379/0     python manage.py collectstatic --noinput
+RUN DEBUG=False     SECRET_KEY=build-only     DATABASE_URL=sqlite:///build-only.db     REDIS_URL=redis://127.0.0.1:6379/0     python manage.py collectstatic --noinput \
+    && rm -f build-only.db
 
+# Unprivileged runtime user (audit PROD-003). The entrypoint starts as root only to hand
+# the mounted media/static volumes to `app`, then drops privileges with setpriv
+# (util-linux, already in the base image) before running the command.
+RUN groupadd --system app && useradd --system --gid app --home-dir /app --no-create-home app \
+    && mkdir -p /app/media /app/staticfiles \
+    && chown -R app:app /app/media /app/staticfiles
+COPY deploy/docker/web-entrypoint.sh /usr/local/bin/web-entrypoint.sh
+RUN chmod 0755 /usr/local/bin/web-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/web-entrypoint.sh"]
 
 # docker-compose.yml overrides this with its own `command:` (runs migrate first), but a
 # default CMD means the image still does something sane under a plain `docker run` too.

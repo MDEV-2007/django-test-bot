@@ -1,12 +1,12 @@
-# Runs on every push and pull request to main: backend test suite, frontend typecheck
-# and production build. A red check means "do not deploy this commit".
+# Backend test suite, frontend build + typecheck, dependency and image hygiene checks.
+# A red check means "do not deploy this commit".
 name: CI
 
 on:
   push:
     branches: [main]
+  # Every PR (not only PRs into main), so feature/fix branches are checked before merge.
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -37,10 +37,14 @@ jobs:
       - name: Check for missing migrations
         run: python manage.py makemigrations --check --dry-run
       - name: Run tests
-        run: python manage.py test --noinput
+        run: python manage.py test --noinput --parallel 2
+      - name: Known-vulnerable Python dependencies
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements/prod.txt
 
   frontend:
-    name: Frontend typecheck and build
+    name: Frontend build and typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -54,7 +58,30 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - name: Typecheck
-        run: npm run typecheck
+      # Build first: it generates the route types (LayoutProps, PageProps) that tsc needs.
       - name: Production build
         run: npm run build
+      - name: Typecheck
+        run: npm run typecheck
+      # Critical advisories in runtime dependencies block the merge (audit PROD-001).
+      - name: Known-vulnerable npm dependencies
+        run: npm audit --omit=dev --audit-level=critical
+
+  image-hygiene:
+    name: Docker build context has no secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # Plant the files that must never reach the image, then export what `COPY backend/`
+      # would see (audit PROD-002).
+      - name: Probe the web image build context
+        run: |
+          echo 'SECRET=x' > backend/.env
+          echo 'x' > backend/db.sqlite3
+          mkdir -p backend/media/payment_screenshots && echo 'x' > backend/media/payment_screenshots/a.png
+          printf 'FROM scratch\nCOPY backend/ /app/\n' > /tmp/Probe.Dockerfile
+          docker build -q -f /tmp/Probe.Dockerfile --output type=local,dest=/tmp/ctx .
+          if ls -a /tmp/ctx/app | grep -qxE '\.env|db\.sqlite3|media'; then
+            echo "Secrets or local data leak into the image:"; ls -a /tmp/ctx/app; exit 1
+          fi

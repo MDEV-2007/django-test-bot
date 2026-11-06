@@ -1,19 +1,22 @@
 # IlmIldizi — root crontab on the VPS (Docker deploy). Install with: crontab deploy/scripts/crontab.example
 # One line per job. Every job runs inside the running `web` container via `docker compose exec -T`.
+# Har bir topshiriq `flock -n` bilan: oldingi ishga tushirish hali tugamagan bo'lsa
+# (sekin Telegram, ko'p qabul qiluvchi), keyingisi o'tkazib yuboriladi — ustma-ust
+# ishlab bir xabarni ikki marta yubormaydi (audit PROD-008).
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Paid classes: mock windows, expired attempts, results (every 5 minutes)
-*/5 * * * * cd /opt/ilmildizi && docker compose exec -T web sh -c "python manage.py sync_mock_statuses && python manage.py close_expired_mock_attempts && python manage.py publish_mock_results" >> /var/log/ilmildizi-classroom.log 2>&1
+*/5 * * * * flock -n /tmp/ilmildizi-sync_mock_statuses.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web sh -c "python manage.py sync_mock_statuses && python manage.py close_expired_mock_attempts && python manage.py publish_mock_results"' >> /var/log/ilmildizi-classroom.log 2>&1
 
 # Mock reminders and scheduled broadcasts (every minute)
-* * * * * cd /opt/ilmildizi && docker compose exec -T web python manage.py check_and_notify_mocks >> /var/log/mock_notify.log 2>&1
-* * * * * cd /opt/ilmildizi && docker compose exec -T web python manage.py send_scheduled_broadcasts >> /var/log/broadcasts.log 2>&1
+* * * * * flock -n /tmp/ilmildizi-check_and_notify_mocks.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web python manage.py check_and_notify_mocks' >> /var/log/mock_notify.log 2>&1
+* * * * * flock -n /tmp/ilmildizi-send_scheduled_broadcasts.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web python manage.py send_scheduled_broadcasts' >> /var/log/broadcasts.log 2>&1
 
 # Daily Telegram nudges — exactly ONE line each
-0 12 * * * cd /opt/ilmildizi && docker compose exec -T web python manage.py send_daily_chest_reminders >> /var/log/chest_reminders.log 2>&1
-0 19 * * * cd /opt/ilmildizi && docker compose exec -T web python manage.py send_daily_quiz >> /var/log/daily_quiz.log 2>&1
-0 20 * * * cd /opt/ilmildizi && docker compose exec -T web python manage.py send_streak_reminders --mode=all >> /var/log/streak_reminders.log 2>&1
+0 12 * * * flock -n /tmp/ilmildizi-send_daily_chest_reminders.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web python manage.py send_daily_chest_reminders' >> /var/log/chest_reminders.log 2>&1
+0 19 * * * flock -n /tmp/ilmildizi-send_daily_quiz.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web python manage.py send_daily_quiz' >> /var/log/daily_quiz.log 2>&1
+0 20 * * * flock -n /tmp/ilmildizi-send_streak_reminders.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web python manage.py send_streak_reminders --mode=all' >> /var/log/streak_reminders.log 2>&1
 
 # Database + media backup (03:15) and certificate renewal (twice a day)
 15 3 * * * /opt/ilmildizi/deploy/scripts/backup.sh >> /var/log/ilmildizi-backup.log 2>&1

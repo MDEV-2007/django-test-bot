@@ -4,3 +4,6 @@
 # Installed locally too so `DATABASE_URL`/`REDIS_URL` can be tested before deploying.
 psycopg[binary]==3.2.3
 redis==5.2.1
+
+# Lets `manage.py test --parallel` report failures instead of crashing on unpicklable tracebacks.
+tblib==3.2.2
