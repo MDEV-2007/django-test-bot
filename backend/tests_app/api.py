@@ -134,7 +134,8 @@ def center_api(request):
     answer_mode = request.GET.get('answer_mode', 'all')
     search_query = request.GET.get('search', '')
 
-    tests = TestSet.objects.filter(is_random=False, is_archived=False, is_published=True)
+    tests = (TestSet.objects.filter(is_random=False, is_archived=False, is_published=True)
+             .exclude(id__in=_classroom_locked_test_ids()))
     if subject:
         tests = tests.filter(subject=subject)
 
@@ -303,6 +304,14 @@ def _new_attempt(profile, test, is_stress=False):
     return attempt
 
 
+
+def _classroom_locked_test_ids():
+    """Pullik sinf mock'larida ishlatilayotgan test to'plamlari (bepul reklama mock'idan
+    tashqari). Ular faqat sinf oqimi orqali (obuna + jadval) ochiladi — umumiy katalog va
+    /tests/<id>/start/ orqali emas (audit API-002)."""
+    from classroom.models import MockTest
+    return set(MockTest.objects.filter(is_free_preview=False).values_list('test_set_id', flat=True))
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsChannelSubscribed])
 def start_test_api(request, test_id):
@@ -314,6 +323,10 @@ def start_test_api(request, test_id):
     if ((not test.is_published or test.is_archived)
             and test.created_by_id != request.user.id and not profile.is_superadmin):
         return Response({'error': 'Test topilmadi'}, status=404)
+    if (test.id in _classroom_locked_test_ids()
+            and test.created_by_id != request.user.id and not profile.is_superadmin):
+        return Response({'error': "Bu sinf imtihoni — uni sinf sahifasidan, jadval bo'yicha boshlang."},
+                        status=403)
     now = timezone.now()
 
     # Jonli Mock Imtihon vaqti tekshiruvi
@@ -940,8 +953,13 @@ def finish_api(request, attempt_id):
     from analytics.services import bust_cache as _bust_analytics
     _bust_analytics(profile.pk)
 
-    from core.missions import advance_missions
-    advance_missions(profile, 'test')
+    # "Test yechish" vazifasi faqat haqiqatan yechilgan test uchun: kamida yarmiga javob
+    # berilgan va hech bo'lmasa bitta to'g'ri. Ilgari 1 ta xato javob bilan tugatilgan test
+    # ham vazifa mukofotini (+150 XP) berardi (audit FE-005). Takroriy test hisobga olinmaydi.
+    answered = correct + wrong
+    if not is_repeat and correct > 0 and scored_total and answered * 2 >= scored_total:
+        from core.missions import advance_missions
+        advance_missions(profile, 'test')
 
     _dispatch_ai_feedback(attempt.id)
 
@@ -1189,6 +1207,13 @@ def revision_check_api(request, item_id):
     action = request.data.get('action', '')
 
     if action == 'master':
+        is_inline = (q.question_type in Question.SINGLE_ANSWER_TYPES
+                     or q.question_type in Question.TEXT_INPUT_TYPES)
+        if is_inline:
+            return Response(
+                {'ok': False, 'error': "Bu savolni o'zlashtirish uchun to'g'ri javobni belgilang."},
+                status=400,
+            )
         item.mastered = True
         item.times_reviewed = F('times_reviewed') + 1
         item.last_reviewed_at = timezone.now()
@@ -1276,8 +1301,14 @@ def story_link_api(request, attempt_id):
 @authentication_classes([])
 @permission_classes([AllowAny])
 def story_image_api(request, attempt_id):
-    """Natija kartasi (PNG). Imzo to'g'ri bo'lmasa — 404."""
-    from .story import render_story_png, signature_ok
+    """Natija kartasi (PNG) — saytdagi Pastel Studio kartasi bilan bir xil.
+
+    `?kind=story` (standart) — Telegram Story uchun 1080x1920; `?kind=card` — karta.
+    (`format` emas: DRF uni renderer tanlash uchun ishlatadi.)
+    Imzo to'g'ri bo'lmasa — 404.
+    """
+    from .certificate_render import certificate_data, render_certificate_png
+    from .story import signature_ok
 
     if not signature_ok(attempt_id, request.GET.get('sig')):
         raise Http404
@@ -1286,18 +1317,8 @@ def story_image_api(request, attempt_id):
         Attempt.objects.select_related('test', 'profile__user'),
         id=attempt_id, is_completed=True,
     )
-    total = attempt.correct_answers + attempt.wrong_answers + attempt.skipped_answers
-    user = attempt.profile.user
-    png = render_story_png(
-        score=attempt.score,
-        correct=attempt.correct_answers,
-        total=total or 1,
-        test_title=attempt.test.title if attempt.test else 'Tasodifiy test',
-        display_name=(user.first_name or user.username),
-        # Fon ildizi urinish id'sidan chiziladi: har bir natijaning o'z shakli bo'ladi,
-        # lekin bitta natija qayta so'ralganda aynan o'sha rasm qaytadi (rasm keshlanadi).
-        seed=attempt.id,
-    )
+    fmt = 'card' if request.GET.get('kind') == 'card' else 'story'
+    png = render_certificate_png(certificate_data(attempt), fmt)
     response = HttpResponse(png, content_type='image/png')
     # Telegram rasmni bir necha marta so'rashi mumkin; natija o'zgarmaydi.
     response['Cache-Control'] = 'public, max-age=86400'

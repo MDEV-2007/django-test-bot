@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Flame, Droplets, Lock, Play, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Flame, Droplets, Lock, Play, AlertTriangle } from 'lucide-react';
 
 interface LossAversionExitModalProps {
   open: boolean;
@@ -20,71 +19,69 @@ export default function LossAversionExitModal({
 }: LossAversionExitModalProps) {
   if (!open) return null;
 
+  const losses = [
+    {
+      icon: Flame,
+      tone: 'bg-[var(--ps-orange)] text-[#080808]',
+      text: <>Yig&apos;ilgan <b>{comboMultiplier.toFixed(1)}x combo</b> bonusingiz bekor bo&apos;ladi.</>,
+    },
+    {
+      icon: Droplets,
+      tone: 'bg-[var(--ps-blue)] text-[#080808]',
+      text: <><b>Ilm Ildizi daraxtingiz</b> bugun suv olmaydi.</>,
+    },
+    {
+      icon: Lock,
+      tone: 'bg-[var(--ps-purple)] text-white',
+      text: <><b>Sirli sandiq</b> qulflangan holda qoladi.</>,
+    },
+  ];
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="ps-shell fixed inset-0 z-[60] flex items-center justify-center bg-[#0B0814]/55 p-4 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-md overflow-hidden rounded-2xl border border-rose-500/40 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black p-6 sm:p-7 shadow-2xl text-center"
+          role="dialog"
+          aria-label="Chiqishni tasdiqlash"
+          className="relative w-full max-w-md overflow-hidden rounded-[32px] bg-[var(--ps-paper)] text-[var(--text-primary)] shadow-[0_40px_80px_-30px_rgba(40,20,80,0.7)]"
         >
-          {/* Orqa fon qizil nuri */}
-          <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-48 rounded-full bg-rose-600/25 blur-[70px]" />
-
-          {/* Ogohlantirish ikonchasi */}
-          <div className="mx-auto size-16 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 mb-4 shadow-lg shadow-rose-500/20">
-            <AlertTriangle className="size-8 animate-bounce" />
+          <div className="relative overflow-hidden bg-[var(--ps-coral)] px-6 pb-6 pt-6 text-white">
+            <span aria-hidden className="absolute -right-10 -top-12 size-40 rounded-full bg-white/15" />
+            <span className="relative inline-flex size-12 items-center justify-center rounded-full bg-[#FFFCF7] text-[var(--ps-coral)]">
+              <AlertTriangle className="size-6" />
+            </span>
+            <h3 className="ps-display relative mt-3 text-[26px] text-white sm:text-[30px]">To&apos;xtang! Zanjir uzilmasin</h3>
+            <p className="relative mt-1.5 text-[13.5px] text-white/85">Sikl hali yakunlanmadi. Hozir chiqsangiz:</p>
           </div>
 
-          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            ⚠️ To'xtang! Zanjir uzilmasin!
-          </h3>
+          <div className="space-y-2 p-5 sm:p-6">
+            {losses.map((l, i) => {
+              const Icon = l.icon;
+              return (
+                <div key={i} className="flex items-center gap-3 rounded-[20px] bg-[var(--ps-neutral)] p-2 pr-4">
+                  <span className={`inline-flex size-9 shrink-0 items-center justify-center rounded-full ${l.tone}`}>
+                    <Icon className="size-4" />
+                  </span>
+                  <span className="text-[13.5px] leading-snug text-[var(--text-secondary)]">{l.text}</span>
+                </div>
+              );
+            })}
 
-          <p className="text-sm text-zinc-300 mt-2.5 leading-relaxed">
-            Siklni to'liq yakunlashingizga atigi <strong className="text-white">2 daqiqa</strong> qoldi. Hozir chiqib ketsangiz:
-          </p>
-
-          {/* Yo'qotishlar ro'yxati (Loss Aversion triggers) */}
-          <div className="my-4 space-y-2.5 text-left bg-zinc-950/80 p-3.5 rounded-2xl border border-white/5 text-xs text-zinc-300">
-            <div className="flex items-center gap-2.5 text-rose-300">
-              <Flame className="size-4 shrink-0 text-orange-400 fill-orange-400" />
-              <span>
-                Yig'ilgan <strong className="text-white font-mono">{comboMultiplier.toFixed(1)}x Combo</strong> bonusingiz bekor bo'ladi.
-              </span>
-            </div>
-            <div className="flex items-center gap-2.5 text-amber-300">
-              <Droplets className="size-4 shrink-0 text-sky-400" />
-              <span>
-                <strong>Ilm Ildizi Daraxtingiz</strong> suvsiz qoladi va sarg'ayish xavfi ortadi.
-              </span>
-            </div>
-            <div className="flex items-center gap-2.5 text-zinc-400">
-              <Lock className="size-4 shrink-0 text-amber-400" />
-              <span>
-                <strong>Sirli Sandiq (+200 Tanga & AI Krediti)</strong> qulflanadi.
-              </span>
-            </div>
+            <button type="button" onClick={onContinue} className="ps-btn ps-btn-ink !mt-5 w-full">
+              <Play className="size-4 fill-current" />
+              Siklni davom ettirish
+            </button>
+            <button
+              type="button"
+              onClick={onConfirmExit}
+              className="w-full cursor-pointer py-2 text-[12.5px] font-semibold text-[var(--text-muted)] underline-offset-4 transition-colors hover:text-[var(--ps-coral)] hover:underline"
+            >
+              Baribir chiqish va bonuslarni yo&apos;qotish
+            </button>
           </div>
-
-          {/* Asosiy Davom Ettirish tugmasi */}
-          <Button
-            type="button"
-            onClick={onContinue}
-            className="w-full h-12 sm:h-13 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold text-sm shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] mb-3"
-          >
-            <Play className="size-4 fill-current" />
-            <span>Siklni Davom Ettirish (2 daqiqa)</span>
-          </Button>
-
-          {/* Baribir chiqish kichik xira tugmasi */}
-          <button
-            type="button"
-            onClick={onConfirmExit}
-            className="text-xs text-zinc-500 hover:text-zinc-400 transition underline underline-offset-4 cursor-pointer py-1"
-          >
-            Baribir chiqish va bonuslarni yo'qotish
-          </button>
         </motion.div>
       </div>
     </AnimatePresence>

@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap, ArrowRight, Flame, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowRight, Flame, Check } from 'lucide-react';
 
 interface AutoplayTransitionBridgeProps {
   currentStageNumber: number;
@@ -18,7 +17,6 @@ interface AutoplayTransitionBridgeProps {
 export default function AutoplayTransitionBridge({
   currentStageNumber,
   nextStageNumber,
-  nextStageTitle,
   nextStageBenefit,
   comboMultiplier,
   secondsLeft,
@@ -32,61 +30,44 @@ export default function AutoplayTransitionBridge({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="relative w-full max-w-lg mx-auto overflow-hidden rounded-3xl border border-orange-500/30 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black p-6 sm:p-8 shadow-2xl text-center"
+      className="ps-card relative mx-auto w-full max-w-lg overflow-hidden !rounded-[36px] p-6 text-center sm:p-8"
     >
-      {/* Orqa fon nur effekti */}
-      <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 size-56 rounded-full bg-orange-500/20 blur-[80px]" />
+      <span aria-hidden className="pointer-events-none absolute -left-12 -top-12 size-40 rounded-full bg-[var(--ps-green)] opacity-15" />
+      <span aria-hidden className="pointer-events-none absolute -bottom-14 -right-10 size-40 rounded-full bg-[var(--ps-orange)] opacity-20" />
 
-      {/* Bosqich nishoni */}
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider mb-4">
-        <Sparkles className="size-3.5 animate-pulse" />
-        <span>Avtopilot Ko'prigi ({secondsLeft}s)</span>
-      </div>
+      <span className="relative mx-auto inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-green)] text-white">
+        <Check className="size-8 stroke-[3]" />
+      </span>
 
-      {/* Sarlavha */}
-      <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-        🎉 {currentStageNumber}-Bosqich Muvaffaqiyatli Yakunlandi!
+      <h3 className="ps-display relative mt-4 text-[26px] sm:text-[32px]">
+        {currentStageNumber}-bosqich yakunlandi!
       </h3>
 
-      {/* Combo badge */}
-      <div className="my-4 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-500/20 to-rose-500/20 border border-orange-500/40 text-orange-300 font-bold text-sm sm:text-base shadow-lg">
-        <Flame className="size-5 text-orange-400 fill-orange-400 animate-bounce" />
-        <span>Sizning Combo Bonusingiz:</span>
-        <span className="text-white bg-orange-500 px-2 py-0.5 rounded-lg font-bold font-mono">
-          {comboMultiplier.toFixed(1)}x
+      <div className="relative mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--ps-orange)] py-1.5 pl-2 pr-4 text-[13.5px] font-bold text-[#080808]">
+        <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#FFFCF7]">
+          <Flame className="size-4 fill-[var(--ps-coral)] text-[var(--ps-coral)]" />
         </span>
+        Combo bonusingiz: {comboMultiplier.toFixed(1)}x
       </div>
 
-      {/* Izoh / Micro-copy */}
-      <p className="text-sm text-zinc-300 leading-relaxed max-w-md mx-auto mb-6">
-        {nextStageBenefit}
-      </p>
+      <p className="relative mx-auto mt-4 max-w-md text-[14px] leading-relaxed text-[var(--text-secondary)]">{nextStageBenefit}</p>
 
-      {/* To'luvchi taymer progress-bari */}
-      <div className="w-full bg-zinc-800/80 h-2 rounded-full overflow-hidden mb-6 border border-white/5">
+      <div className="relative mt-6 h-2.5 w-full overflow-hidden rounded-full bg-[var(--ds-track)]">
         <motion.div
-          className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full"
+          className="h-full rounded-full bg-[var(--ps-purple)]"
           initial={{ width: '0%' }}
           animate={{ width: `${progressPercent}%` }}
           transition={{ ease: 'linear', duration: 1 }}
         />
       </div>
 
-      {/* Katta Avto-Start tugmasi */}
-      <Button
-        type="button"
-        onClick={onSkip}
-        className="w-full h-13 sm:h-14 rounded-2xl bg-gradient-to-r from-orange-500 via-rose-500 to-rose-600 hover:from-orange-400 hover:to-rose-500 text-white font-bold text-sm sm:text-base shadow-xl shadow-rose-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
-      >
-        <Zap className="size-5 fill-current animate-pulse text-amber-300" />
-        <span>
-          {nextStageNumber}-Bosqichga O'tish ({secondsLeft}s)
-        </span>
-        <ArrowRight className="size-5 ml-1" />
-      </Button>
+      <button type="button" onClick={onSkip} className="ps-btn ps-btn-ink relative mt-5 w-full !min-h-14">
+        {nextStageNumber}-bosqichga o&apos;tish · {secondsLeft}s
+        <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+      </button>
 
-      <p className="text-[12px] text-zinc-500 mt-3 font-medium">
-        Uzluksiz fokus rejimi • Avtomatik keyingi bosqich ochiladi
+      <p className="relative mt-3 text-[12px] font-semibold text-[var(--text-muted)]">
+        Uzluksiz fokus rejimi · keyingi bosqich avtomatik ochiladi
       </p>
     </motion.div>
   );
