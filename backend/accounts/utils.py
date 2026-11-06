@@ -105,14 +105,22 @@ def _bump(key, ttl):
         cache.add(key, 0, ttl)
         cache.incr(key)
     except ValueError:
-        cache.set(key, 1, ttl)
+        try:
+            cache.set(key, 1, ttl)
+        except Exception:
+            pass
+    except Exception:
+        pass
 
 
 def login_is_locked(request, username):
     ip_key = _login_throttle_key(username, client_ip(request))
-    if (cache.get(ip_key, 0) or 0) >= LOGIN_MAX_FAILURES:
-        return True
-    return (cache.get(_login_username_key(username), 0) or 0) >= LOGIN_MAX_FAILURES_PER_USERNAME
+    try:
+        if (cache.get(ip_key, 0) or 0) >= LOGIN_MAX_FAILURES:
+            return True
+        return (cache.get(_login_username_key(username), 0) or 0) >= LOGIN_MAX_FAILURES_PER_USERNAME
+    except Exception:
+        return False
 
 
 def login_record_failure(request, username):
@@ -121,8 +129,11 @@ def login_record_failure(request, username):
 
 
 def login_clear_failures(request, username):
-    cache.delete(_login_throttle_key(username, client_ip(request)))
-    cache.delete(_login_username_key(username))
+    try:
+        cache.delete(_login_throttle_key(username, client_ip(request)))
+        cache.delete(_login_username_key(username))
+    except Exception:
+        pass
 
 
 def send_telegram_message(chat_id: str, text: str) -> bool:
@@ -436,6 +447,53 @@ def sync_telegram_avatar(tg_id: str) -> str | None:
 TELEGRAM_INITDATA_MAX_AGE_SECONDS = int(os.environ.get('TELEGRAM_INITDATA_MAX_AGE_SECONDS', str(15 * 60)))
 
 
+def cleanup_expired_telegram_initdata(now_ts: float | int | None = None) -> int:
+    """Delete expired Telegram initData replay ledger rows (SEC-002).
+
+    Only rows whose `auth_date` (or `created_at` for legacy rows) is older than the
+    `TELEGRAM_INITDATA_MAX_AGE_SECONDS` window + 60s clock-skew buffer are pruned, so:
+      - Active `initData` within the 15-minute window is never deleted.
+      - Any `initData` whose ledger row was deleted is already older than 15 minutes and
+        is unconditionally rejected by the `auth_date` age check.
+    """
+    import time as _time
+    from datetime import timedelta
+    from django.db.models import Q
+    from django.utils import timezone
+    from core.models import RewardClaim
+
+    now = int(now_ts if now_ts is not None else _time.time())
+    retention_seconds = TELEGRAM_INITDATA_MAX_AGE_SECONDS + 60
+    cutoff_ts = now - retention_seconds
+    cutoff_dt = timezone.now() - timedelta(seconds=retention_seconds)
+    deleted, _ = (
+        RewardClaim.objects.filter(source='tg_initdata_hash')
+        .filter(
+            Q(count__gt=1, count__lt=cutoff_ts)
+            | Q(count__lte=1, created_at__lt=cutoff_dt)
+        )
+        .delete()
+    )
+    return deleted
+
+
+def _claim_telegram_initdata_once(received_hash: str, auth_date: int) -> bool:
+    """Atomically record `received_hash` in the durable replay ledger with its `auth_date`."""
+    from django.db import IntegrityError, transaction
+    from core.models import RewardClaim
+    from core.reward_caps import _ONCE_DAY
+
+    key = dict(subject_id=0, source='tg_initdata_hash', day=_ONCE_DAY, item=str(received_hash)[:128])
+    if RewardClaim.objects.filter(**key).exists():
+        return False
+    try:
+        with transaction.atomic():
+            RewardClaim.objects.create(**key, count=int(auth_date))
+        return True
+    except IntegrityError:
+        return False
+
+
 def verify_telegram_webapp_data(init_data_str: str, bot_token: str) -> bool:
     """
     Verifies the data received from the Telegram Web App.
@@ -485,8 +543,8 @@ def verify_telegram_webapp_data(init_data_str: str, bot_token: str) -> bool:
             return False
 
         # --- Replay himoyasi (SEC-002): bir xil imzolangan initData ikkinchi marta qabul qilinmaydi ---
-        from core.reward_caps import claim_once
-        if not claim_once(0, 'tg_initdata_hash', received_hash):
+        cleanup_expired_telegram_initdata(now)
+        if not _claim_telegram_initdata_once(received_hash, auth_date):
             logger.warning("Telegram initData rad etildi: replay aniqlandi")
             return False
 

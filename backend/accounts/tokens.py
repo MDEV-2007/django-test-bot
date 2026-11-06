@@ -30,6 +30,8 @@ def _access_lifetime_seconds():
 
 def revoke_user_tokens(user):
     """Blacklist every outstanding refresh token of `user` and invalidate their access tokens."""
+    from django.db import IntegrityError, models, transaction
+    from django.db.models import Case, F, Value, When
     from core.models import RewardClaim
     from core.reward_caps import _ONCE_DAY
     from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
@@ -38,39 +40,59 @@ def revoke_user_tokens(user):
         BlacklistedToken.objects.get_or_create(token=token)
     # `iat` has whole-second resolution: tokens issued in an EARLIER second are refused, so a
     # fresh login right after "log out everywhere" keeps working. Stored durably in DB so
-    # Redis restart/eviction cannot resurrect revoked access tokens (SEC-001).
+    # Redis restart/eviction or outage cannot resurrect revoked access tokens (SEC-001).
     now_ts = int(time.time())
-    RewardClaim.objects.update_or_create(
-        subject_id=user.pk,
-        source='jwt_revoked_at',
-        day=_ONCE_DAY,
-        item='',
-        defaults={'count': now_ts},
+    key = dict(subject_id=user.pk, source='jwt_revoked_at', day=_ONCE_DAY, item='')
+    if not RewardClaim.objects.filter(**key).exists():
+        try:
+            with transaction.atomic():
+                RewardClaim.objects.create(**key, count=now_ts)
+        except IntegrityError:
+            pass
+    RewardClaim.objects.filter(**key).update(
+        count=Case(
+            When(count__lt=now_ts, then=Value(now_ts, output_field=models.PositiveBigIntegerField())),
+            default=F('count'),
+            output_field=models.PositiveBigIntegerField(),
+        )
     )
-    cache.set(_revoked_key(user.pk), now_ts, _access_lifetime_seconds() + 60)
+    try:
+        cache.set(_revoked_key(user.pk), now_ts, _access_lifetime_seconds() + 60)
+    except Exception:
+        pass
 
 
 def token_is_revoked(user_id, payload) -> bool:
     """True if this (validated) token must be refused for a non-signature reason."""
-    revoked_at = cache.get(_revoked_key(user_id))
-    if revoked_at is None:
-        from core.models import RewardClaim
-        from core.reward_caps import _ONCE_DAY
+    from core.models import RewardClaim
+    from core.reward_caps import _ONCE_DAY
 
-        revoked_at = (
-            RewardClaim.objects.filter(
-                subject_id=user_id,
-                source='jwt_revoked_at',
-                day=_ONCE_DAY,
-                item='',
-            )
-            .values_list('count', flat=True)
-            .first()
-            or 0
+    db_revoked_at = int(
+        RewardClaim.objects.filter(
+            subject_id=user_id,
+            source='jwt_revoked_at',
+            day=_ONCE_DAY,
+            item='',
         )
-        cache.set(_revoked_key(user_id), int(revoked_at), _access_lifetime_seconds() + 60)
+        .values_list('count', flat=True)
+        .first()
+        or 0
+    )
+    try:
+        cached = cache.get(_revoked_key(user_id))
+        cached_revoked_at = int(cached) if cached is not None else 0
+    except Exception:
+        cached_revoked_at = 0
+
+    revoked_at = max(db_revoked_at, cached_revoked_at)
+    if db_revoked_at and cached_revoked_at < db_revoked_at:
+        try:
+            cache.set(_revoked_key(user_id), db_revoked_at, _access_lifetime_seconds() + 60)
+        except Exception:
+            pass
+
     issued_at = payload.get('iat')
-    if revoked_at and issued_at is not None and int(issued_at) < int(revoked_at):
+    if revoked_at and issued_at is not None and int(issued_at) < revoked_at:
         return True
     imp_exp = payload.get('imp_exp')
     if imp_exp is not None and time.time() > float(imp_exp):

@@ -106,18 +106,52 @@ class TokenRevocationTests(_Base):
         cache.clear()
         self.assertEqual(client.get('/api/auth/me/').status_code, 401)
 
+    def test_revocation_works_when_redis_cache_raises_error(self):
+        tokens = self.login().json()
+        time.sleep(1.1)
+        client = self.bearer(tokens['access'])
+        with mock.patch('accounts.tokens.cache.get', side_effect=RuntimeError('Redis down')), \
+             mock.patch('accounts.tokens.cache.set', side_effect=RuntimeError('Redis down')):
+            self.assertEqual(client.post('/api/auth/logout/', {'all_devices': True}, format='json').status_code, 200)
+            self.assertEqual(client.get('/api/auth/me/').status_code, 401)
+            self.assertEqual(self.c.post('/api/auth/refresh/', {'refresh': tokens['refresh']}, format='json').status_code, 401)
+            fresh = self.login().json()
+            self.assertEqual(self.bearer(fresh['access']).get('/api/auth/me/').status_code, 200)
+
+    def test_stale_cache_does_not_hide_db_revocation(self):
+        from accounts.tokens import revoke_user_tokens
+        tokens = self.login().json()
+        time.sleep(1.1)
+        revoke_user_tokens(self.user)
+        # Simulate stale cache holding 0 (unrevoked) or an older timestamp
+        cache.set(f'jwt_revoked_at:{self.user.pk}', 0, timeout=3600)
+        self.assertEqual(self.bearer(tokens['access']).get('/api/auth/me/').status_code, 401)
+        self.assertEqual(self.c.post('/api/auth/refresh/', {'refresh': tokens['refresh']}, format='json').status_code, 401)
+
+    def test_jwt_revocation_handles_64bit_post_2038_timestamps(self):
+        from accounts.tokens import revoke_user_tokens, token_is_revoked
+        from core.models import RewardClaim
+        post_2038_ts = 2_500_000_000  # 2049-03-22 (> 2**31 - 1)
+        with mock.patch('accounts.tokens.time.time', return_value=float(post_2038_ts)):
+            revoke_user_tokens(self.user)
+        claim = RewardClaim.objects.get(subject_id=self.user.pk, source='jwt_revoked_at')
+        self.assertEqual(claim.count, post_2038_ts)
+        cache.clear()
+        self.assertTrue(token_is_revoked(self.user.pk, {'iat': post_2038_ts - 1}))
+        self.assertFalse(token_is_revoked(self.user.pk, {'iat': post_2038_ts}))
+
 
 class WebSocketAuthTests(_Base):
     def test_banned_user_token_is_anonymous_on_websocket(self):
         from config.ws_auth import _user_from_token
         tokens = self.login().json()
-        self.assertTrue(async_to_sync(_user_from_token)(tokens['access']).is_authenticated)
+        self.assertTrue(_user_from_token.__wrapped__(tokens['access']).is_authenticated)
         User.objects.filter(pk=self.user.pk).update(is_active=False)
-        self.assertFalse(async_to_sync(_user_from_token)(tokens['access']).is_authenticated)
+        self.assertFalse(_user_from_token.__wrapped__(tokens['access']).is_authenticated)
 
     def test_garbage_token_is_anonymous_not_an_error(self):
         from config.ws_auth import _user_from_token
-        self.assertFalse(async_to_sync(_user_from_token)('not-a-jwt').is_authenticated)
+        self.assertFalse(_user_from_token.__wrapped__('not-a-jwt').is_authenticated)
 
 
 class ImpersonationTests(_Base):

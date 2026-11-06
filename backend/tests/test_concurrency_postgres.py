@@ -9,6 +9,7 @@ balans, mukofot) faqat bir marta yozilganini tekshiradi.
 """
 import threading
 import unittest
+from unittest import mock
 
 from django.db import connection
 from django.test import TransactionTestCase
@@ -182,3 +183,30 @@ class ConcurrencyTests(TransactionTestCase):
         self.assertEqual(errors, [])
         self.assertEqual(sum(results), 1)
         self.assertEqual(Profile.objects.get(pk=profile.pk).coins, 10)
+
+    def test_parallel_telegram_initdata_replay_accepted_once(self):
+        from django.test import override_settings
+        from tests.test_auth_p2 import TOKEN, init_data
+        payload = init_data({'id': 888000111, 'first_name': 'Par', 'username': 'par_tg'})
+        with override_settings(TELEGRAM_BOT_TOKEN=TOKEN, REQUIRE_CHANNEL_SUBSCRIPTION=False), \
+             mock.patch('accounts.api.sync_telegram_avatar', return_value=None):
+            def attempt():
+                c = APIClient()
+                c.raise_request_exception = False
+                return c.post('/api/auth/telegram/', {'initData': payload}, format='json').status_code
+            results, errors = run_parallel(attempt)
+        self.assertEqual(errors, [])
+        self.assertEqual(results.count(200), 1, results)
+        self.assertEqual(results.count(401), 7, results)
+
+    def test_post_2038_timestamp_in_reward_claim_on_postgres(self):
+        from accounts.tokens import revoke_user_tokens, token_is_revoked
+        from core.models import RewardClaim
+        user, _ = make_user('par_2038')
+        post_2038_ts = 2_500_000_000  # > 32-bit signed int max (2_147_483_647)
+        with mock.patch('accounts.tokens.time.time', return_value=float(post_2038_ts)):
+            revoke_user_tokens(user)
+        claim = RewardClaim.objects.get(subject_id=user.pk, source='jwt_revoked_at')
+        self.assertEqual(claim.count, post_2038_ts)
+        self.assertTrue(token_is_revoked(user.pk, {'iat': post_2038_ts - 1}))
+        self.assertFalse(token_is_revoked(user.pk, {'iat': post_2038_ts}))

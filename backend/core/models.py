@@ -480,7 +480,7 @@ class RewardClaim(models.Model):
     source = models.CharField(max_length=64)
     day = models.DateField()
     item = models.CharField(max_length=128, blank=True, default='')
-    count = models.PositiveIntegerField(default=0)
+    count = models.PositiveBigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

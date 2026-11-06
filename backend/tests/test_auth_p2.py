@@ -75,6 +75,51 @@ class TelegramLoginTests(TestCase):
         self.assertNotEqual(res.json()['user']['username'], 'legacy_web')
         self.assertIsNone(Profile.objects.get(user=legacy).telegram_id)
 
+    def test_cleanup_removes_expired_ledger_rows_without_breaking_active_replay_guard(self):
+        from datetime import date
+        from accounts.utils import TELEGRAM_INITDATA_MAX_AGE_SECONDS, cleanup_expired_telegram_initdata
+        from core.models import RewardClaim
+
+        now = int(time.time())
+        expired_auth_date = now - TELEGRAM_INITDATA_MAX_AGE_SECONDS - 120
+        expired_payload = signed({
+            'auth_date': str(expired_auth_date),
+            'user': json.dumps(self.TG, separators=(',', ':')),
+        })
+        expired_hash = dict(urllib.parse.parse_qsl(expired_payload))['hash']
+        RewardClaim.objects.create(
+            subject_id=0,
+            source='tg_initdata_hash',
+            day=date(1970, 1, 1),
+            item=expired_hash,
+            count=expired_auth_date,
+        )
+
+        active_payload = init_data({'id': 555000222, 'first_name': 'Vali', 'username': 'vali_tg'}, age_seconds=60)
+        active_hash = dict(urllib.parse.parse_qsl(active_payload))['hash']
+        self.assertEqual(self.post(active_payload).status_code, 200)
+
+        # Automatic cleanup inside verify_telegram_webapp_data already pruned the expired row;
+        # insert another expired row to also verify direct cleanup_expired_telegram_initdata() call.
+        self.assertFalse(RewardClaim.objects.filter(source='tg_initdata_hash', item=expired_hash).exists())
+        RewardClaim.objects.create(
+            subject_id=0,
+            source='tg_initdata_hash',
+            day=date(1970, 1, 1),
+            item=expired_hash,
+            count=expired_auth_date,
+        )
+        deleted = cleanup_expired_telegram_initdata(now_ts=now)
+        self.assertGreaterEqual(deleted, 1)
+        self.assertFalse(RewardClaim.objects.filter(source='tg_initdata_hash', item=expired_hash).exists())
+        self.assertTrue(RewardClaim.objects.filter(source='tg_initdata_hash', item=active_hash).exists())
+
+        # Expired initData is still rejected even after its ledger row was cleaned up
+        self.assertEqual(self.post(expired_payload).status_code, 401)
+        # Active initData within 15-minute window is still protected against replay
+        cache.clear()
+        self.assertEqual(self.post(active_payload).status_code, 401)
+
 
 class AuthThrottleTests(TestCase):
     def setUp(self):

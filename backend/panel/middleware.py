@@ -79,11 +79,17 @@ class MaintenanceModeMiddleware:
         self.get_response = get_response
 
     def _maintenance_on(self):
-        val = cache.get('maintenance_mode')
+        try:
+            val = cache.get('maintenance_mode')
+        except Exception:
+            val = None
         if val is None:
             from .models import SiteSettings
             val = SiteSettings.load().maintenance_mode
-            cache.set('maintenance_mode', val, 30)
+            try:
+                cache.set('maintenance_mode', val, 30)
+            except Exception:
+                pass
         return val
 
     def _is_superadmin(self, request):

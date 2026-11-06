@@ -7,16 +7,26 @@ Rates are generous because schools put many students behind one NAT address.
 from rest_framework.throttling import AnonRateThrottle, SimpleRateThrottle
 
 
-class AuthThrottle(AnonRateThrottle):
+class _CacheResilientThrottleMixin:
+    """When Redis is down, rate-limit cache reads/writes must not crash auth endpoints with 500."""
+
+    def allow_request(self, request, view):
+        try:
+            return super().allow_request(request, view)
+        except Exception:
+            return True
+
+
+class AuthThrottle(_CacheResilientThrottleMixin, AnonRateThrottle):
     """login / Google / Telegram login."""
     scope = 'auth'
 
 
-class RegisterThrottle(AnonRateThrottle):
+class RegisterThrottle(_CacheResilientThrottleMixin, AnonRateThrottle):
     scope = 'register'
 
 
-class RefreshThrottle(SimpleRateThrottle):
+class RefreshThrottle(_CacheResilientThrottleMixin, SimpleRateThrottle):
     """Token refresh is anonymous by nature (the refresh token is the credential)."""
     scope = 'auth_refresh'
 
