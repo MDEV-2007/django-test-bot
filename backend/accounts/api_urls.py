@@ -11,6 +11,7 @@ urlpatterns = [
     path('google/', api.google_login_api, name='google'),
     path('telegram/', api.telegram_login_api, name='telegram'),
     path('refresh/', api.SafeTokenRefreshView.as_view(), name='refresh'),
+    path('logout/', api.logout_api, name='logout'),
     path('me/', api.me_api, name='me'),
     path('profile/', api.profile_api, name='profile'),
     path('subscription/', api.subscription_api, name='subscription'),

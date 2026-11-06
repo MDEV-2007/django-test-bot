@@ -21,12 +21,21 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 @database_sync_to_async
 def _user_from_token(token):
+    # Imported here (apps must be ready) but BEFORE the try: the except clause below
+    # references User, which used to raise NameError when AccessToken() failed first.
+    from django.contrib.auth.models import User
+
+    from accounts.tokens import token_is_revoked
+
     try:
         validated = AccessToken(token)
-        from django.contrib.auth.models import User
-        return User.objects.get(id=validated['user_id'])
+        user = User.objects.get(id=validated['user_id'])
     except (TokenError, User.DoesNotExist, KeyError):
         return AnonymousUser()
+    # Banned users and revoked tokens must not keep live sockets (audit AUTH-004).
+    if not user.is_active or token_is_revoked(user.pk, validated.payload):
+        return AnonymousUser()
+    return user
 
 
 class JWTAuthMiddleware:

@@ -29,6 +29,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from core.parsers import ObjectJSONParser
 
 from b2b_ads.advertiser import IsApprovedAdvertiser, audit, center_for, lead_row
 from b2b_ads.models import AdCreative, AdEvent, EduCenterCampaign, StudentLeadSubmission
@@ -408,7 +409,7 @@ def _apply_campaign_fields(campaign, data, center):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsApprovedAdvertiser])
-@parser_classes([JSONParser])
+@parser_classes([ObjectJSONParser])
 def campaigns_api(request):
     center = request.ad_center
     if request.method == 'POST':
@@ -444,7 +445,7 @@ def campaigns_api(request):
 
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsApprovedAdvertiser])
-@parser_classes([JSONParser])
+@parser_classes([ObjectJSONParser])
 def campaign_detail_api(request, pk):
     campaign = _get_campaign(request, pk)
     if campaign is None:
@@ -628,7 +629,7 @@ def _campaign_usage(center):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsApprovedAdvertiser])
-@parser_classes([MultiPartParser, JSONParser])
+@parser_classes([MultiPartParser, ObjectJSONParser])
 def creatives_api(request):
     center = request.ad_center
     if request.method == 'GET':

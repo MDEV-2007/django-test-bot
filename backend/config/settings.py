@@ -20,6 +20,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / '.env')
 
+# `manage.py test` also loads the developer's .env, which holds the REAL bot token, AI keys
+# and payment-channel id — an unmocked code path in a test could then post to the real
+# admin channel or spend real AI credit (audit QA-003). Blank every outbound credential
+# for test runs; tests that need one set it with override_settings.
+import sys as _sys
+
+if len(_sys.argv) > 1 and _sys.argv[1] == 'test':
+    for _outbound in ('TELEGRAM_BOT_TOKEN', 'TELEGRAM_WEBHOOK_SECRET', 'PAYMENT_CHANNEL_ID',
+                      'ADMIN_TELEGRAM_CHAT_ID', 'TELEGRAM_CHANNEL_ID', 'GROQ_API_KEY',
+                      'OLLAMA_API_URL', 'SENTRY_DSN'):
+        os.environ[_outbound] = ''
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -39,20 +51,17 @@ _INSECURE_SECRET_KEYS = {'change-me-to-a-random-value', 'changeme', 'secret'}
 # Local development explicitly sets DEBUG=True in .env (see .env.example).
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    '127.0.0.1', 'localhost',
-    '.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io',  # dev tunnels
-]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+# Dev tunnels only in development — anyone can register these subdomains, so they must not
+# be trusted hosts/CSRF origins in production (audit AUTH-013).
+_DEV_TUNNEL_HOSTS = ['.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io']
+if DEBUG:
+    ALLOWED_HOSTS += _DEV_TUNNEL_HOSTS
 
 # Needed because tunnels and PythonAnywhere serve over HTTPS while proxying to plain HTTP —
 # Django's CSRF middleware checks the browser's Origin header against this list for any
 # secure (HTTPS) request, and rejects it (403) if the domain isn't trusted.
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.loca.lt',
-    'https://*.ngrok-free.dev',
-    'https://*.ngrok-free.app',
-    'https://*.ngrok.io',
-]
+CSRF_TRUSTED_ORIGINS = [f'https://*{h}' for h in _DEV_TUNNEL_HOSTS] if DEBUG else []
 
 # Moving to a custom domain later needs no code change — set EXTRA_ALLOWED_HOSTS in the
 # environment (comma-separated, e.g. "ilmildizi.uz,www.ilmildizi.uz") and both lists pick
@@ -158,6 +167,8 @@ INSTALLED_APPS = [
     'channels',
     'corsheaders',
     'rest_framework',
+    # Refresh-token revocation: logout, rotation, password reset (audit AUTH-002).
+    'rest_framework_simplejwt.token_blacklist',
     'adminsortable2',
     'django_ckeditor_5',
     'django.contrib.admin',
@@ -457,6 +468,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    # JSON body must be an object — a bare array crashed views with a 500 (audit API-003).
+    'DEFAULT_PARSER_CLASSES': (
+        'core.parsers.ObjectJSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ),
     # Production (DEBUG=False) paytida Browsable API'ni butunlay o'chirish:
     # Brauzer orqali ochilganda ham faqat toza JSON qaytadi, ichki docstringlar va formalar ko'rinmaydi.
     'DEFAULT_RENDERER_CLASSES': (
@@ -469,13 +486,25 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'quiz_session': '30/min',
         'quiz_answer': '120/min',
+        # Auth endpoints (audit AUTH-008). Per client IP; schools share NAT addresses, so
+        # these are generous — they stop scripts, not classrooms.
+        'auth': os.environ.get('THROTTLE_AUTH', '60/min'),
+        'register': os.environ.get('THROTTLE_REGISTER', '120/hour'),
+        'auth_refresh': os.environ.get('THROTTLE_AUTH_REFRESH', '240/min'),
     },
+    # One trusted proxy (our nginx): DRF takes the client IP from the X-Forwarded-For entry
+    # nginx appended, not from a value the client sent (audit AUTH-001 / AUTH-008).
+    'NUM_PROXIES': int(os.environ.get('NUM_PROXIES', '1')),
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': False,
+    # Audit AUTH-002: refresh tokens used to live 30 days, were never rotated and could
+    # not be revoked (no logout, survived a password reset). Now every refresh returns a
+    # new refresh token, the old one is blacklisted, and logout/password reset revoke them.
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get('JWT_REFRESH_DAYS', '14'))),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 

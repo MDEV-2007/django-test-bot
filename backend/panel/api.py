@@ -33,6 +33,7 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from core.parsers import ObjectJSONParser
 
 logger = logging.getLogger(__name__)
 
@@ -531,7 +532,11 @@ def users_api(request):
 
     def perform(action, queryset):
         if action == 'block':
-            return queryset.exclude(is_superuser=True).update(is_active=False)
+            from accounts.tokens import revoke_user_tokens
+            targets = list(queryset.exclude(is_superuser=True))
+            for target in targets:
+                revoke_user_tokens(target)
+            return queryset.filter(pk__in=[t.pk for t in targets]).update(is_active=False)
         if action == 'unblock':
             return queryset.update(is_active=True)
         return 0
@@ -732,6 +737,9 @@ def user_toggle_block_api(request, pk):
         return Response({'error': "Oxirgi faol super adminni bloklab bo'lmaydi."}, status=400)
     u.is_active = not u.is_active
     u.save(update_fields=['is_active'])
+    if not u.is_active:
+        from accounts.tokens import revoke_user_tokens
+        revoke_user_tokens(u)  # a ban ends live sessions immediately (audit AUTH-004)
     _audit(request, 'update', 'User', u.id, f"{u.username}: {'blokdan chiqarildi' if u.is_active else 'bloklandi'}",
            {'is_active': [not u.is_active, u.is_active]})
     return Response({'is_active': u.is_active})
@@ -750,6 +758,9 @@ def user_reset_password_api(request, pk):
         new_password = secrets.token_urlsafe(8)
     u.set_password(new_password)
     u.save()
+    # Kick every existing session of this account out (audit AUTH-002).
+    from accounts.tokens import revoke_user_tokens
+    revoke_user_tokens(u)
     _audit(request, 'update', 'User', u.id, f"{u.username}: parol tiklandi")  # parolning o'zi yozilmaydi
     return Response({'new_password': new_password})
 
@@ -850,10 +861,10 @@ def user_impersonate_api(request, pk):
     if not target.is_active:
         return Response({'error': "Bloklangan foydalanuvchi sifatida kirib bo'lmaydi."}, status=400)
 
-    refresh = RefreshToken.for_user(target)
-    refresh['impersonator_id'] = request.user.id
-    access = refresh.access_token
-    access['impersonator_id'] = request.user.id
+    # Short-lived pair: stop-impersonation turns it back into superadmin tokens, so it must
+    # not live (or be renewable) for the normal refresh lifetime (audit API-007).
+    from accounts.tokens import impersonation_tokens
+    refresh, access = impersonation_tokens(target, request.user)
     _audit(request, 'update', 'User', target.id, f"Impersonatsiya boshlandi: {request.user.username} -> {target.username}")
     return Response({'access': str(access), 'refresh': str(refresh), 'username': target.username})
 
@@ -1584,7 +1595,7 @@ def _audience_profiles(audience):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsSuperAdmin])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def broadcast_api(request):
     if request.method == 'GET':
         return Response({
@@ -3788,42 +3799,6 @@ def backup_download_api(request, filename):
 
 
 # ============================================================ AI TOKEN & USAGE MONITOR
-def _ensure_initial_ai_logs():
-    """AI loglari bo'sh bo'lganda dastlabki ko'rgazmali va realistik loglar yaratish."""
-    if AIUsageLog.objects.exists():
-        return
-    import random
-    now = timezone.now()
-    models = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']
-    endpoints = ['ask_groq', 'generate_feedback', 'grade_open_answers', 'ai_mentor']
-    logs = []
-    for day_offset in range(14, -1, -1):
-        day_date = now - timedelta(days=day_offset)
-        calls_count = random.randint(4, 9)
-        for _ in range(calls_count):
-            model = random.choices(models, weights=[0.8, 0.2])[0]
-            prompt = random.randint(400, 1900)
-            comp = random.randint(150, 700)
-            total = prompt + comp
-            cost = round((prompt * 0.00000059) + (comp * 0.00000079), 6)
-            resp_ms = random.randint(290, 880)
-            success = random.random() > 0.03
-            err = '' if success else 'Rate limit reached (429: Too Many Requests)'
-            created_at = day_date - timedelta(hours=random.randint(1, 20), minutes=random.randint(0, 59))
-            logs.append(AIUsageLog(
-                provider='groq',
-                model_name=model,
-                endpoint=random.choice(endpoints),
-                prompt_tokens=prompt,
-                completion_tokens=comp,
-                total_tokens=total,
-                estimated_cost_usd=cost,
-                response_time_ms=resp_ms,
-                success=success,
-                error_message=err,
-                created_at=created_at,
-            ))
-    AIUsageLog.objects.bulk_create(logs)
 
 
 @api_view(['GET'])
@@ -3831,8 +3806,9 @@ def _ensure_initial_ai_logs():
 def ai_usage_api(request):
     """AI token sarfi va narx nazorati."""
     try:
-        if not AIUsageLog.objects.exists():
-            _ensure_initial_ai_logs()
+        # Bo'sh bo'lsa — bo'sh holat ko'rsatiladi. Ilgari bu yerda production jadvaliga
+        # tasodifiy "namuna" loglar yozilardi va admin soxta xarajat raqamlarini ko'rardi
+        # (audit PROD-010).
 
         now = timezone.now()
         tz = timezone.get_current_timezone()
@@ -3941,7 +3917,7 @@ def ai_usage_api(request):
 # ============================================================ BROADCAST SCHEDULER
 @api_view(['POST'])
 @permission_classes([IsSuperAdmin])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def broadcast_schedule_api(request):
     """Xabarni kelajakda yuborish uchun rejalashtirish."""
     form = BroadcastForm(request.data, request.FILES)
