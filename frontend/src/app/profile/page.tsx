@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Gift, Copy, Check, Award, Crown, Swords, FileCheck2, Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout, Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, Sparkles, CheckCircle2, BarChart3, Newspaper, History, PlusCircle, MessageCircle, Heart, Share2, ExternalLink, AlertTriangle, Target, ThumbsUp, Clock, BookOpen, ArrowRight, GraduationCap, type LucideIcon, ArrowUpRight, Sun, Moon, TrendingUp, X,
+  Gift, Copy, Check, Award, Crown, Swords, FileCheck2, Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout, Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, Sparkles, CheckCircle2, BarChart3, Newspaper, History, PlusCircle, MessageCircle, Heart, Share2, ExternalLink, AlertTriangle, Target, ThumbsUp, Clock, BookOpen, ArrowRight, GraduationCap, type LucideIcon, ArrowUpRight, Sun, Moon, TrendingUp, X, LogOut,
 } from 'lucide-react';
 import { getRankInfo } from '@/lib/rank';
 import { toast } from 'sonner';
@@ -165,6 +165,7 @@ export default function ProfilePage() {
 
   // Edit profile state
   const [editOpen, setEditOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -1600,6 +1601,50 @@ export default function ProfilePage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ── Tizimdan chiqish (mobil va Telegram Web App'da yon panel yo'q — shu yerda) ── */}
+        <section className="ps-card flex flex-col gap-3 !rounded-[28px] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+              <LogOut className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[15px] font-bold">Tizimdan chiqish</p>
+              <p className="text-[12.5px] text-[var(--text-muted)]">
+                {confirmLogout ? 'Rostdan ham hisobdan chiqmoqchimisiz?' : `@${p.username} hisobidan chiqish`}
+              </p>
+            </div>
+          </div>
+          {confirmLogout ? (
+            <div className="grid grid-cols-2 gap-2 sm:flex">
+              <button type="button" onClick={() => setConfirmLogout(false)} className="ps-btn ps-btn-ghost !min-h-11">
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  tgHaptic('medium');
+                  useAuthStore.getState().logout();
+                  router.replace('/login');
+                }}
+                className="ps-btn !min-h-11 !bg-[var(--ps-coral)] !text-white"
+              >
+                <LogOut className="size-4" /> Ha, chiqish
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                tgHaptic('light');
+                setConfirmLogout(true);
+              }}
+              className="ps-btn ps-btn-ghost !min-h-11 !border-[var(--ps-coral)]/40 !text-[var(--ps-coral)] hover:!bg-[var(--ps-coral)]/10"
+            >
+              <LogOut className="size-4" /> Chiqish
+            </button>
+          )}
+        </section>
 
         {/* ========================================================================= */}
         {/* 5. PROFILNI TAHRIRLASH MODALI */}
