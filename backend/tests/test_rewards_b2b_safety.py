@@ -50,8 +50,15 @@ class DailyChestGateTests(TestCase):
         self.assertEqual(DailyChestClaim.objects.filter(profile=self.profile).count(), 1)
 
     def test_completed_marathon_loop_unlocks(self):
-        DailyLearningLoop.objects.create(user=self.user, current_stage=DailyLearningLoop.STAGE_5_COMPLETED)
+        # Sikl haqiqatan yechilgan (mukofoti berilgan) bo'lsagina sandiq ochiladi.
+        DailyLearningLoop.objects.create(user=self.user, current_stage=DailyLearningLoop.STAGE_5_COMPLETED,
+                                         is_chest_claimed=True)
         self.assertTrue(daily_chain_completed(self.profile))
+
+    def test_loop_closed_without_answers_does_not_unlock(self):
+        # Audit ECON-001: javobsiz yopilgan sikl (mukofotsiz) sandiqni ochmaydi.
+        DailyLearningLoop.objects.create(user=self.user, current_stage=DailyLearningLoop.STAGE_5_COMPLETED)
+        self.assertFalse(daily_chain_completed(self.profile))
 
     def test_yesterdays_battle_does_not_count(self):
         Battle.objects.create(

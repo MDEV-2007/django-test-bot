@@ -42,6 +42,9 @@ def daily_chain_completed(profile: Profile, today=None) -> bool:
             user_id=profile.user_id,
             date=today,
             current_stage=DailyLearningLoop.STAGE_5_COMPLETED,
+            # Faqat haqiqatan yechilgan (mukofoti berilgan) sikl — javobsiz yopilgan sikl
+            # sandiqni ochmaydi (audit ECON-001).
+            is_chest_claimed=True,
         ).exists():
             return True
     except Exception:

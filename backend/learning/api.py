@@ -5,6 +5,7 @@ Next.js client never has (see accounts/api.py's module docstring for why the who
 JWT instead of session cookies). The frontend keeps its own chat history and only needs
 the model's reply, so no session and no new DB model are needed."""
 import json
+import logging
 
 from django.db.models import Prefetch, Count
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
@@ -15,12 +16,15 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from core.parsers import ObjectJSONParser
 
 from accounts.permissions import IsChannelSubscribed
 from core.ai_client import ask_groq_stream
 from core.reward_caps import claim_daily_reward, claim_once
 from tests_app.models import Subject
 from tests_app.subject_utils import resolve_subject
+
+logger = logging.getLogger(__name__)
 
 from .models import Bookmark, Lesson, Topic, Reel, ReelComment, CommunityPost, CommunityPostReaction, CommunityPostComment
 from .services import (
@@ -160,13 +164,11 @@ def center_api(request):
     # "Read a lesson" daily mission — was request.session-keyed (no session for JWT
     # clients), so a cache key (profile+lesson+day) does the same once-per-day job.
     if lesson and lesson_id:
-        from datetime import date
-
         from django.core.cache import cache
 
         from core.missions import advance_missions
 
-        cache_key = f'viewed_lesson:{profile.id}:{lesson.id}:{date.today().isoformat()}'
+        cache_key = f'viewed_lesson:{profile.id}:{lesson.id}:{timezone.localdate().isoformat()}'
         if cache.add(cache_key, True, 60 * 60 * 26):
             advance_missions(profile, 'lesson')
 
@@ -867,32 +869,30 @@ def reels_feed_api(request):
 @permission_classes([AllowAny])
 def reels_quiz_answer_api(request):
     """Reeldagi mini-savolga javob berilganda +5 XP beradi va streakni oshiradi."""
-    reel_id = request.data.get('reel_id')
+    if not isinstance(request.data, dict):
+        return Response({'success': False, 'error': "JSON obyekt kutilgan."}, status=400)
+    try:
+        reel_id = int(request.data.get('reel_id'))
+    except (TypeError, ValueError):
+        return Response({'success': False, 'error': "reel_id noto'g'ri."}, status=400)
     answer_index = request.data.get('answer_index')
 
-    correct_index = 0
-    explanation = ""
-
-    try:
-        reel = Reel.objects.filter(id=reel_id).first()
-        if reel:
-            correct_index = reel.quiz_correct_index
-            explanation = reel.quiz_explanation
-        else:
-            target_reel = next((r for r in REELS_DATA if r['id'] == reel_id), None)
-            if target_reel:
-                correct_index = target_reel['quiz']['correct_index']
-                explanation = target_reel['quiz']['explanation']
-    except Exception:
+    # Noma'lum reel uchun "to'g'ri javob = 0" deb taxmin qilinmaydi: ilgari istalgan
+    # mavjud bo'lmagan reel_id + answer_index=0 XP va streak berardi (audit API-001).
+    reel = Reel.objects.filter(id=reel_id).first()
+    if reel:
+        correct_index, explanation = reel.quiz_correct_index, reel.quiz_explanation
+    else:
         target_reel = next((r for r in REELS_DATA if r['id'] == reel_id), None)
-        if target_reel:
-            correct_index = target_reel['quiz']['correct_index']
-            explanation = target_reel['quiz']['explanation']
+        if not target_reel:
+            return Response({'success': False, 'error': "Reel topilmadi."}, status=404)
+        correct_index = target_reel['quiz']['correct_index']
+        explanation = target_reel['quiz']['explanation']
 
     is_correct = (answer_index == correct_index)
     xp_earned = 0
     total_xp = 0
-    streak_days = 1
+    streak_days = 0
 
     if request.user and request.user.is_authenticated:
         profile = getattr(request.user, 'profile', None)
@@ -903,8 +903,16 @@ def reels_quiz_answer_api(request):
                     xp_earned = 5
                     profile.add_xp(xp_earned)
             total_xp = profile.xp
-            streak_days = profile.streak_days
+            # Maydon `streak` — `streak_days` yo'q edi va har bir login qilgan javob 500
+            # qaytarardi (XP allaqachon yozilganidan keyin).
+            streak_days = profile.streak
 
+    if is_correct and xp_earned:
+        message = f"Tabriklaymiz! +{xp_earned} XP hisobingizga qo'shildi! 🔥"
+    elif is_correct:
+        message = "To'g'ri javob! 🔥"
+    else:
+        message = "Qayta urinib ko'ring!"
     return Response({
         'success': True,
         'is_correct': is_correct,
@@ -913,7 +921,7 @@ def reels_quiz_answer_api(request):
         'xp_earned': xp_earned,
         'total_xp': total_xp,
         'streak_days': streak_days,
-        'message': "Tabriklaymiz! +5 XP hisobingizga qo'shildi! 🔥" if is_correct else "Qayta urinib ko'ring!"
+        'message': message,
     })
 
 
@@ -972,8 +980,10 @@ def reels_comments_api(request, reel_id):
                 'comments_count': count,
                 'message': 'Izohingiz muvaffaqiyatli qoldirildi!',
             }, status=201)
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
+    except Exception:
+        # Ichki xato matni klientga chiqmaydi (audit API-006).
+        logger.exception("Reel izohlarida xatolik")
+        return Response({'error': "Serverda xatolik. Birozdan so'ng qayta urinib ko'ring."}, status=500)
 
 
 @api_view(['POST'])
@@ -982,10 +992,18 @@ def reels_create_user_question_api(request):
     """O'quvchi tomonidan qiyin savol yaratish va Reels lentasiga chiqarish."""
     subject_slug = request.data.get('subject_slug', 'tarix')
     subject_name = request.data.get('subject_name', 'Tarix')
-    quiz_question = (request.data.get('quiz_question') or '').strip()
+    # O'quvchi UI'si `question` yuborardi, API `quiz_question` kutardi — har doim 400 (FE-001).
+    # Ikkalasini ham qabul qilamiz: eski frontend versiyasi ham ishlaydi.
+    quiz_question = str(request.data.get('quiz_question') or request.data.get('question') or '').strip()[:500]
     options = request.data.get('options') or []
-    correct_index = int(request.data.get('correct_index', 0))
-    explanation = (request.data.get('explanation') or '').strip()
+    if not isinstance(options, list) or len(options) > 6:
+        return Response({'error': "Variantlar ro'yxati noto'g'ri."}, status=400)
+    options = [str(o).strip()[:200] for o in options]
+    try:
+        correct_index = int(request.data.get('correct_index', 0))
+    except (TypeError, ValueError):
+        return Response({'error': "To'g'ri javob indeksi noto'g'ri."}, status=400)
+    explanation = str(request.data.get('explanation') or '').strip()[:1000]
 
     if not quiz_question:
         return Response({'error': 'Savol matni kiritilishi shart'}, status=400)
@@ -1129,20 +1147,20 @@ def community_feed_api(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def community_post_create_api(request):
     """Test natijasi yoki sertifikatni hamjamiyat lentasiga chiqarish."""
     from tests_app.models import Attempt
     from tests_app.story import sign_attempt
 
     attempt_id = request.data.get('attempt_id')
-    caption = (request.data.get('caption') or '').strip()
+    caption = str(request.data.get('caption') or '').strip()[:1000]  # API-004: model max_length
     post_type = request.data.get('post_type', 'test_result')
     custom_img = request.FILES.get('image') or request.FILES.get('custom_image')
 
     # 1. Agar erkin yutuq yoki konspekt posti bo'lsa (attempt_id yo'q):
     if not attempt_id:
-        title = (request.data.get('title') or "Mening Yutug'im").strip()
+        title = str(request.data.get('title') or "Mening Yutug'im").strip()[:200]
         subject_name = request.data.get('subject_name') or "Asosiy"
         subject_slug = request.data.get('subject_slug') or "tarix"
 
@@ -1292,7 +1310,7 @@ def community_post_delete_api(request, post_id):
         return Response({'success': True, 'message': "Post muvaffaqiyatli o'chirildi."})
     except Exception as e:
         logger.exception("Error deleting community post: %s", e)
-        return Response({'error': f"O'chirishda xatolik: {str(e)}"}, status=500)
+        return Response({'error': "O'chirishda xatolik yuz berdi."}, status=500)
 
 
 @api_view(['POST'])

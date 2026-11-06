@@ -239,6 +239,10 @@ def class_battle_join_api(request, pin_code):
 def class_battle_state_api(request, room_id):
     """Xona holatini (qatnashchilar, reyting, savollar) kuzatish."""
     room = get_object_or_404(ClassBattleRoom, id=room_id)
+    # Faqat xona egasi (o'qituvchi) va ishtirokchilar — ID ketma-ket, begona o'quvchi
+    # boshqa sinfning reytingini ko'rib yurardi (audit API-008).
+    if room.teacher_id != request.user.id and not room.participants.filter(profile__user=request.user).exists():
+        return Response({'error': 'Xona topilmadi.'}, status=404)
     participants = list(room.participants.all().order_by('-score', '-correct_count'))
 
     # Savollar faqat jang boshlanganda beriladi

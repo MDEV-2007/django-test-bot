@@ -10,7 +10,7 @@ mashq davom etadi, faqat mukofot berilmaydi.
 """
 from datetime import date
 
-from django.core.cache import cache
+from django.utils import timezone
 
 # Manba -> kuniga necha marta mukofot beriladi.
 DAILY_REWARD_LIMITS = {
@@ -37,27 +37,47 @@ DAILY_REWARD_LIMITS = {
     'poll_vote': 10,
     # Viral duel: taklif qilgan o'quvchiga +100 tanga (ikkinchi akkaunt bilan farm qilinardi).
     'duel_invite_bonus': 5,
+    # Referral: taklif qiluvchiga kuniga shuncha bonus (audit AUTH-009).
+    'referral_bonus': 10,
 }
 
-_DAY_SECONDS = 60 * 60 * 26
+# "Bir marta" (claim_once) yozuvlari uchun sana belgisi: ular kunga bog'lanmaydi.
+_ONCE_DAY = date(1970, 1, 1)
+
+
+def _claim(subject_id, source, day, item, limit):
+    """Atomik: (subject, source, day, item) hisoblagichi limitdan past bo'lsa oshiradi."""
+    from django.db import IntegrityError, transaction
+    from django.db.models import F
+
+    from .models import RewardClaim
+
+    lookup = {'subject_id': int(subject_id), 'source': source, 'day': day, 'item': str(item)[:128]}
+    for _ in range(2):  # birinchi qator parallel yaratilsa — bir marta qayta urinamiz
+        try:
+            with transaction.atomic():
+                row, _created = RewardClaim.objects.select_for_update().get_or_create(**lookup)
+                if row.count >= limit:
+                    return False
+                RewardClaim.objects.filter(pk=row.pk).update(count=F('count') + 1)
+                return True
+        except IntegrityError:
+            continue
+    return False
 
 
 def claim_daily_reward(profile_id, source):
-    """Shu manbadan bugungi mukofot hali limit ichidami. Har chaqiruv bitta urinishni sarflaydi."""
-    limit = DAILY_REWARD_LIMITS[source]
-    key = f"reward_cap:{source}:{profile_id}:{date.today().isoformat()}"
-    cache.add(key, 0, _DAY_SECONDS)
-    try:
-        count = cache.incr(key)
-    except ValueError:
-        cache.set(key, 1, _DAY_SECONDS)
-        count = 1
-    return count <= limit
+    """Shu manbadan bugungi (Toshkent sanasi) mukofot hali limit ichidami. Har chaqiruv
+    bitta urinishni sarflaydi. Hisob DB'da — Redis o'chsa ham limit saqlanadi (audit
+    ECON-005), kun esa server soati (UTC) emas, `timezone.localdate()` (ECON-004)."""
+    return _claim(profile_id, source, timezone.localdate(), '', DAILY_REWARD_LIMITS[source])
 
 
 def claim_once(profile_id, source, item_id, ttl_days=30):
-    """Bitta element (masalan, bitta reel savoli) uchun mukofot faqat bir marta."""
-    return cache.add(f"reward_once:{source}:{profile_id}:{item_id}", 1, ttl_days * 24 * 60 * 60)
+    """Bitta element (masalan, bitta reel savoli) uchun mukofot faqat bir marta. Kunlik
+    takror kerak bo'lsa, chaqiruvchi sanani item_id ichiga qo'shadi. `ttl_days` eski
+    kesh API'si bilan moslik uchun qoldirilgan."""
+    return _claim(profile_id, source, _ONCE_DAY, item_id, 1)
 
 
 def award_capped_xp(profile, source, amount):

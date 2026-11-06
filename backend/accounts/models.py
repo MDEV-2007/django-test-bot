@@ -190,8 +190,11 @@ class Profile(models.Model):
                 else:
                     self.streak = 1   # not enough freezes -> reset
         self.last_active_date = today
-        self.save()
-        
+        # Only the two fields this method owns: a full save() wrote back every column from
+        # this possibly-stale instance and silently reverted coins spent / premium granted by
+        # a concurrent request (audit ECON-003).
+        self.save(update_fields=['streak', 'last_active_date'])
+
     @property
     def xp_progress(self):
         """Calculates percentage progress towards the next level."""

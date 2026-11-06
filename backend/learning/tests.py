@@ -1,10 +1,19 @@
+from datetime import timedelta
+from unittest import mock
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 
 class StudyCompleteTests(TestCase):
+    """Focus-session rewards. The duration is measured by the server from /study/start/
+    (since the 2026-11 anti-cheat fix), so every rewarded case starts a session first and
+    moves the server clock forward instead of trusting the client's duration."""
+
+    START = '/api/learning/study/start/'
     URL = '/api/learning/study/complete/'
 
     def setUp(self):
@@ -16,8 +25,14 @@ class StudyCompleteTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user)
 
+    def session(self, minutes, **body):
+        self.client.post(self.START)
+        later = timezone.now() + timedelta(minutes=minutes, seconds=5)
+        with mock.patch('learning.api.timezone.now', return_value=later):
+            return self.client.post(self.URL, body, format='json')
+
     def test_standard_session_rewards_25xp_10coins_and_streak(self):
-        r = self.client.post(self.URL, {'duration_minutes': 25, 'goals_done': 0}, format='json')
+        r = self.session(25, duration_minutes=25, goals_done=0)
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data['xp_earned'], 25)
         self.assertEqual(r.data['coins_earned'], 10)
@@ -27,20 +42,20 @@ class StudyCompleteTests(TestCase):
         self.assertEqual(self.profile.coins, 10)
 
     def test_client_values_are_clamped(self):
-        r = self.client.post(self.URL, {'duration_minutes': 99999, 'goals_done': 999}, format='json')
+        r = self.session(60, duration_minutes=99999, goals_done=999)
         self.assertLessEqual(r.data['xp_earned'], 85)
         self.assertLessEqual(r.data['coins_earned'], 24)
 
     def test_daily_cap_blocks_farming(self):
         for _ in range(6):
-            self.client.post(self.URL, {'duration_minutes': 25, 'goals_done': 0}, format='json')
-        r = self.client.post(self.URL, {'duration_minutes': 25, 'goals_done': 0}, format='json')
+            self.session(25, duration_minutes=25, goals_done=0)
+        r = self.session(25, duration_minutes=25, goals_done=0)
         self.assertEqual(r.data['xp_earned'], 0)
         self.assertEqual(r.data['coins_earned'], 0)
 
     def test_streak_counted_once_per_day(self):
-        self.client.post(self.URL, {}, format='json')
-        r = self.client.post(self.URL, {}, format='json')
+        self.session(10)
+        r = self.session(10)
         self.assertEqual(r.data['streak'], 1)
 
     def test_requires_auth(self):

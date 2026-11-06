@@ -109,16 +109,26 @@ class Payment(models.Model):
         to'lovning o'zidan kelib chiqadi. Test bog'lanmagan bo'lsa (eski to'lovlar va bot
         orqali xaridlar) eski xulq saqlanadi: barcha mock testlar ochiladi.
         """
-        profile = self.profile
-        if self.plan.plan_type == 'mock_test':
-            if self.test_id:
-                return
-            profile.premium_mock_test_unlocked = True
-        else:
-            base = profile.premium_expires_at if profile.has_active_premium_lessons and profile.premium_expires_at else timezone.now()
-            profile.is_premium = True
-            profile.premium_expires_at = base + timezone.timedelta(days=self.plan.duration_days)
-        profile.save()
+        from django.db import transaction
+
+        from accounts.models import Profile
+
+        if self.plan.plan_type == 'mock_test' and self.test_id:
+            return
+        # Fresh, locked row: the cached self.profile may be stale, and a full save() of a
+        # stale instance reverted concurrent coin/XP changes (audit ECON-003).
+        with transaction.atomic():
+            profile = Profile.objects.select_for_update().get(pk=self.profile_id)
+            if self.plan.plan_type == 'mock_test':
+                profile.premium_mock_test_unlocked = True
+                profile.save(update_fields=['premium_mock_test_unlocked'])
+            else:
+                base = (profile.premium_expires_at
+                        if profile.has_active_premium_lessons and profile.premium_expires_at else timezone.now())
+                profile.is_premium = True
+                profile.premium_expires_at = base + timezone.timedelta(days=self.plan.duration_days)
+                profile.save(update_fields=['is_premium', 'premium_expires_at'])
+        self.profile = profile
 
 
 def unlocked_test_ids(profile) -> set:

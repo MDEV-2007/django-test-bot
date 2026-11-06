@@ -466,3 +466,28 @@ class CenterLead(models.Model):
 
     def __str__(self):
         return f"{self.student_name} ({self.subject_name} {self.score_percentage}%) -> {self.center.name}"
+
+
+class RewardClaim(models.Model):
+    """Durable daily reward caps and "pay once" markers (audit ECON-005).
+
+    These used to live only in the cache (Redis), so a Redis restart, eviction or FLUSHALL
+    reset every daily cap and every "first try" guard. `subject_id` is a Profile id for
+    rewards and a User id for AI-cost limits (the caller decides); no FK on purpose — the
+    table is an append-mostly ledger that must stay cheap to write.
+    """
+    subject_id = models.BigIntegerField()
+    source = models.CharField(max_length=64)
+    day = models.DateField()
+    item = models.CharField(max_length=128, blank=True, default='')
+    count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['subject_id', 'source', 'day', 'item'], name='reward_claim_unique'),
+        ]
+        indexes = [models.Index(fields=['day'], name='reward_claim_day_idx')]
+
+    def __str__(self):
+        return f"{self.source}:{self.subject_id}:{self.day}:{self.item}={self.count}"

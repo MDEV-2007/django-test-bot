@@ -2,6 +2,7 @@ import random
 from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Count, Q
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -150,6 +151,18 @@ def _ensure_loop_sessions(loop: DailyLearningLoop):
     DailyLearningLoop.objects.filter(pk=loop.pk).update(**{f: getattr(loop, f) for f in fields})
 
 
+def _cleared_mistakes(loop: DailyLearningLoop) -> int:
+    """Shu siklning sprint xatolaridan nechtasi qasos savolida to'g'ri yechildi."""
+    from sprint.models import QuizSessionAnswer
+
+    mistakes = list(loop.session_mistakes_ids or [])
+    if not mistakes or not loop.sprint_session_id:
+        return 0
+    return QuizSessionAnswer.objects.filter(
+        session_id=loop.sprint_session_id, question_id__in=mistakes, revenge_correct=True,
+    ).count()
+
+
 def _session_results(session):
     """{question_id: is_correct} — faqat birinchi (serverda tekshirilgan) javoblar."""
     if session is None:
@@ -160,7 +173,7 @@ def _session_results(session):
 def _get_or_create_today_loop(user) -> DailyLearningLoop:
     """Bugungi kunlik yopiq siklni topish yoki eng zaif mavzu asosida yaratish."""
     today = timezone.localdate()
-    
+
     # 1. Hali tugallanmagan yoki bugungi eng oxirgi siklni qidiramiz
     loop = DailyLearningLoop.objects.filter(
         user=user,
@@ -169,6 +182,20 @@ def _get_or_create_today_loop(user) -> DailyLearningLoop:
 
     if loop:
         return loop
+
+    # Ikki parallel birinchi so'rov (ikki tab, mobil + veb) ikkita 1-sikl yaratardi va
+    # restart-cycle eski, tugallanmaganini tanlab foydalanuvchini bloklardi (audit LOOP-003).
+    # Foydalanuvchi qatori qulfi ostida qayta tekshirib, faqat bittasini yaratamiz.
+    from django.db import transaction
+    with transaction.atomic():
+        type(user).objects.select_for_update().filter(pk=user.pk).first()
+        loop = DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
+        if loop:
+            return loop
+        return _create_first_loop(user, today)
+
+
+def _create_first_loop(user, today) -> DailyLearningLoop:
 
     # 2. Yangi sikl: O'quvchining eng zaif mavzusini yoki fanni aniqlaymiz
     weak_subject = None
@@ -383,6 +410,9 @@ class LoopAnswerView(APIView):
     savollarga javob qabul qilinadi; bir savolga birinchi javob bir marta yoziladi.
     """
     permission_classes = [IsAuthenticated]
+    # Sprint javob endpointi bilan bir xil limit (audit LOOP-007).
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'quiz_answer'
 
     STAGE_MODES = {
         'sprint': (DailyLearningLoop.STAGE_2_SPRINT, 'loop_sprint', 'sprint_session_id'),
@@ -392,6 +422,8 @@ class LoopAnswerView(APIView):
     def post(self, request):
         from sprint.services import QuizAnswerError, submit_quiz_answer
 
+        if not isinstance(request.data, dict):
+            return Response({'ok': False, 'error': "JSON obyekt kutilgan."}, status=status.HTTP_400_BAD_REQUEST)
         stage_key = request.data.get('stage')
         if stage_key not in self.STAGE_MODES:
             return Response({'ok': False, 'error': "stage 'sprint' yoki 'arena' bo'lishi kerak."},
@@ -438,13 +470,17 @@ class AdvanceStageView(APIView):
     def post(self, request):
         from django.db import transaction
 
+        if not isinstance(request.data, dict):
+            return Response({'ok': False, 'error': "JSON obyekt kutilgan."}, status=status.HTTP_400_BAD_REQUEST)
+        # from_stage majburiy (audit LOOP-006): busiz har POST bosqichni ko'r-ko'rona siljitardi.
+        requested = request.data.get('from_stage')
+        if not requested:
+            return Response({'ok': False, 'error': "from_stage majburiy."}, status=status.HTTP_400_BAD_REQUEST)
+
         user = request.user
         loop = _get_or_create_today_loop(user)
         _ensure_loop_sessions(loop)
         eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
-        payload = request.data.get('payload', {})
-        if not isinstance(payload, dict):
-            payload = {}
 
         water_result = None
         rewards_awarded = None
@@ -458,8 +494,7 @@ class AdvanceStageView(APIView):
             # `from_stage=STAGE_4_ARENA` yuborib, sprint va duelsiz to'g'ridan-to'g'ri sandiq
             # mukofotini olardi (restart-cycle bilan birga — cheksiz tanga).
             from_stage = loop.current_stage
-            requested = request.data.get('from_stage')
-            if requested and requested != from_stage:
+            if requested != from_stage:
                 return Response({'ok': False, 'error': "Bosqich ketma-ketligi buzildi", 'current_stage': from_stage},
                                 status=status.HTTP_409_CONFLICT)
 
@@ -497,9 +532,9 @@ class AdvanceStageView(APIView):
                 loop.save()
 
             elif from_stage == DailyLearningLoop.STAGE_3_CLEANUP:
-                # 3-bosqich (Xatolar Dueli) yakunlandi. cleared_count faqat statistika.
-                cleared_count = _as_int(payload.get('cleared_count'), len(loop.session_mistakes_ids))
-                loop.cleanup_cleared = max(0, min(cleared_count, len(loop.session_mistakes_ids)))
+                # 3-bosqich (Xatolar Dueli) yakunlandi. Tozalangan xatolar soni klientdan emas,
+                # serverda tekshirilgan qasos javoblaridan (audit LOOP-005).
+                loop.cleanup_cleared = _cleared_mistakes(loop)
                 loop.dtm_score_delta = round(loop.dtm_score_delta + 0.6, 2)
                 loop.current_stage = DailyLearningLoop.STAGE_4_ARENA
                 loop.combo_multiplier = max(loop.combo_multiplier, 2.0)
@@ -523,13 +558,28 @@ class AdvanceStageView(APIView):
                 loop.current_stage = DailyLearningLoop.STAGE_5_COMPLETED
 
                 # Agar sandiq ochilmagan bo'lsa mukofot beriladi (Double-spend oldini olish)
-                if not loop.is_chest_claimed:
+                # Mukofot faqat haqiqiy ish uchun (audit ECON-001): sprint va arenaning har bir
+                # savoliga (to'g'ri yoki xato) javob berilgan bo'lishi shart. Ilgari 4 ta bo'sh
+                # POST bilan kuniga 3 sikl x 200 tanga + AI krediti olinardi.
+                sprint_ids = list(loop.sprint_session.question_ids) if loop.sprint_session_id else []
+                sprint_answered = set(_session_results(loop.sprint_session))
+                effort_ok = (bool(arena_ids) and all(qid in results for qid in arena_ids)
+                             and all(qid in sprint_answered for qid in sprint_ids))
+
+                if not loop.is_chest_claimed and not effort_ok:
+                    water_result = {'water_level': eco_tree.water_level, 'grew': False}
+                    coins = 0
+                    xp = 0
+                elif not loop.is_chest_claimed:
                     # 1. Eco-Daraxtga suv quyiladi (+35%)
                     water_result = eco_tree.water(35)
 
                     # 2. Atomik tanga va XP. Sikl yopilsa mukofot beriladi; combo
                     # ko'paytirgichi esa faqat arena g'alabasida (yutqazsa — 1.0x).
-                    reward_multiplier = loop.combo_multiplier if arena_won else 1.0
+                    # Savol banki kichik bo'lsa arena sprint savollarini qayta ishlatadi — ularning
+                    # javobi sprintda allaqachon ko'rsatilgan, shuning uchun combo berilmaydi (LOOP-001).
+                    reused = bool(set(arena_ids) & set(sprint_ids))
+                    reward_multiplier = loop.combo_multiplier if (arena_won and not reused) else 1.0
                     coins = int(200 * reward_multiplier)
                     xp = int(100 * reward_multiplier)
                     profile = ensure_profile_for_user(user)
@@ -655,7 +705,7 @@ class RestartCycleView(APIView):
         last_loop = DailyLearningLoop.objects.filter(
             user=user,
             date=today
-        ).order_by('-cycle_number').first()
+        ).order_by('-cycle_number', '-id').first()
 
         # Yangi sikl faqat oldingisi yakunlangandan keyin va kuniga MAX_CYCLES_PER_DAY
         # martagacha: har sikl sandiq mukofoti beradi.

@@ -19,7 +19,8 @@ from tests_app.subject_utils import current_subject
 @api_view(['GET'])
 def home_api(request):
     profile = ensure_profile_for_user(request.user)
-    profile.update_streak()
+    # Streak faqat haqiqiy o'qish amalidan oshadi (test, sikl, dars sessiyasi) — dashboardni
+    # ochishning o'zi uni oshirmaydi (audit ECON-002).
 
     today = timezone.localdate()
     missions_today = ProfileMission.objects.filter(profile=profile, date=today).select_related('mission')

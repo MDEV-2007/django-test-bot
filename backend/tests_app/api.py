@@ -134,7 +134,8 @@ def center_api(request):
     answer_mode = request.GET.get('answer_mode', 'all')
     search_query = request.GET.get('search', '')
 
-    tests = TestSet.objects.filter(is_random=False, is_archived=False, is_published=True)
+    tests = (TestSet.objects.filter(is_random=False, is_archived=False, is_published=True)
+             .exclude(id__in=_classroom_locked_test_ids()))
     if subject:
         tests = tests.filter(subject=subject)
 
@@ -303,6 +304,14 @@ def _new_attempt(profile, test, is_stress=False):
     return attempt
 
 
+
+def _classroom_locked_test_ids():
+    """Pullik sinf mock'larida ishlatilayotgan test to'plamlari (bepul reklama mock'idan
+    tashqari). Ular faqat sinf oqimi orqali (obuna + jadval) ochiladi — umumiy katalog va
+    /tests/<id>/start/ orqali emas (audit API-002)."""
+    from classroom.models import MockTest
+    return set(MockTest.objects.filter(is_free_preview=False).values_list('test_set_id', flat=True))
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsChannelSubscribed])
 def start_test_api(request, test_id):
@@ -314,6 +323,10 @@ def start_test_api(request, test_id):
     if ((not test.is_published or test.is_archived)
             and test.created_by_id != request.user.id and not profile.is_superadmin):
         return Response({'error': 'Test topilmadi'}, status=404)
+    if (test.id in _classroom_locked_test_ids()
+            and test.created_by_id != request.user.id and not profile.is_superadmin):
+        return Response({'error': "Bu sinf imtihoni — uni sinf sahifasidan, jadval bo'yicha boshlang."},
+                        status=403)
     now = timezone.now()
 
     # Jonli Mock Imtihon vaqti tekshiruvi
@@ -940,8 +953,13 @@ def finish_api(request, attempt_id):
     from analytics.services import bust_cache as _bust_analytics
     _bust_analytics(profile.pk)
 
-    from core.missions import advance_missions
-    advance_missions(profile, 'test')
+    # "Test yechish" vazifasi faqat haqiqatan yechilgan test uchun: kamida yarmiga javob
+    # berilgan va hech bo'lmasa bitta to'g'ri. Ilgari 1 ta xato javob bilan tugatilgan test
+    # ham vazifa mukofotini (+150 XP) berardi (audit FE-005). Takroriy test hisobga olinmaydi.
+    answered = correct + wrong
+    if not is_repeat and correct > 0 and scored_total and answered * 2 >= scored_total:
+        from core.missions import advance_missions
+        advance_missions(profile, 'test')
 
     _dispatch_ai_feedback(attempt.id)
 
