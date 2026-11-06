@@ -17,13 +17,27 @@ jobs:
     name: Backend tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ilmildizi
+          POSTGRES_PASSWORD: ilmildizi
+          POSTGRES_DB: ilmildizi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ilmildizi -d ilmildizi"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
     defaults:
       run:
         working-directory: backend
     env:
       # Tests run on SQLite and the local-memory cache, same as local development.
       DEBUG: 'True'
-      SECRET_KEY: ci-only-not-a-real-secret
+      SECRET_KEY: ci-only-not-a-real-secret-32-bytes-min!
       PYTHONUNBUFFERED: '1'
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +52,11 @@ jobs:
         run: python manage.py makemigrations --check --dry-run
       - name: Run tests
         run: python manage.py test --noinput --parallel 2
+      - name: Run PostgreSQL concurrency tests
+        env:
+          DATABASE_URL: postgres://ilmildizi:ilmildizi@127.0.0.1:5432/ilmildizi
+          CONN_MAX_AGE: '0'
+        run: python manage.py test tests.test_concurrency_postgres --noinput
       - name: Known-vulnerable Python dependencies
         run: |
           pip install pip-audit

@@ -476,11 +476,18 @@ def verify_telegram_webapp_data(init_data_str: str, bot_token: str) -> bool:
 
         # --- auth_date muddati: imzo to'g'ri, lekin juda eski bo'lsa ham rad etamiz ---
         import time as _time
+        now = _time.time()
         auth_date = int(parsed.get('auth_date', ['0'])[0])
-        if auth_date <= 0:
+        if auth_date <= 0 or auth_date > now + 60:
             return False
-        if _time.time() - auth_date > TELEGRAM_INITDATA_MAX_AGE_SECONDS:
+        if now - auth_date > TELEGRAM_INITDATA_MAX_AGE_SECONDS:
             logger.warning("Telegram initData rad etildi: auth_date juda eski (%s)", auth_date)
+            return False
+
+        # --- Replay himoyasi (SEC-002): bir xil imzolangan initData ikkinchi marta qabul qilinmaydi ---
+        from core.reward_caps import claim_once
+        if not claim_once(0, 'tg_initdata_hash', received_hash):
+            logger.warning("Telegram initData rad etildi: replay aniqlandi")
             return False
 
         return True

@@ -310,16 +310,21 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     }
 
     # 5. STAGE 5: COMPLETED (Sirli Sandiq & Eco-Daraxt)
-    # Yakunlangan siklda — aynan berilgan mukofot (arena yutqazilgan bo'lsa 1.0x);
-    # yakunlanmagan siklda — g'alaba holatidagi potentsial mukofot.
-    reward_multiplier = 1.0 if (loop.current_stage == DailyLearningLoop.STAGE_5_COMPLETED
-                                and not loop.arena_won) else loop.combo_multiplier
+    # Yakunlangan siklda — aynan berilgan mukofot (arena yutqazilgan bo'lsa 1.0x,
+    # savollar yechilmagan bo'lsa 0); yakunlanmagan siklda — potentsial mukofot.
+    if loop.current_stage == DailyLearningLoop.STAGE_5_COMPLETED and not loop.is_chest_claimed:
+        reward_multiplier = 0.0
+    elif loop.current_stage == DailyLearningLoop.STAGE_5_COMPLETED and not loop.arena_won:
+        reward_multiplier = 1.0
+    else:
+        reward_multiplier = loop.combo_multiplier
+    paid = reward_multiplier > 0
     rewards_data = {
         'coins': int(200 * reward_multiplier),
         'xp': int(100 * reward_multiplier),
-        'free_essay_credits': 1,
+        'free_essay_credits': 1 if paid else 0,
         'dtm_score_delta': loop.dtm_score_delta,
-        'water_reward': 35,
+        'water_reward': 35 if paid else 0,
         'share_caption': (
             f"🚀 Bugungi 4-bosqichli Avtopilot Marafonini 100% yopdim! "
             f"DTM ballimga +{loop.dtm_score_delta} qo'shildi, Eco-Daraxtim o'sdi va Sirli Sandiq ochildi! 🎁🔥"
@@ -563,7 +568,8 @@ class AdvanceStageView(APIView):
                 # POST bilan kuniga 3 sikl x 200 tanga + AI krediti olinardi.
                 sprint_ids = list(loop.sprint_session.question_ids) if loop.sprint_session_id else []
                 sprint_answered = set(_session_results(loop.sprint_session))
-                effort_ok = (bool(arena_ids) and all(qid in results for qid in arena_ids)
+                effort_ok = (bool(sprint_ids) and bool(arena_ids)
+                             and all(qid in results for qid in arena_ids)
                              and all(qid in sprint_answered for qid in sprint_ids))
 
                 if not loop.is_chest_claimed and not effort_ok:
@@ -638,41 +644,46 @@ class ShareLoopPostView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        from django.db import transaction
+        from core.reward_caps import claim_once
         from core.rewards import grant_rewards_atomic
 
         user = request.user
         loop = _get_or_create_today_loop(user)
-
-        # Faqat yakunlangan sikl va har sikl uchun bitta post. Ilgari har bosishda +15 XP
-        # berilardi (va `content` maydoni yo'qligi sabab endpoint doim 500 qaytarardi).
-        if loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED:
-            return Response({'ok': False, 'error': "Avval kunlik siklni yakunlang."},
-                            status=status.HTTP_409_CONFLICT)
-        if CommunityPost.objects.filter(author=user, post_type='achievement',
-                                        created_at__gte=loop.created_at).exists():
-            return Response({'ok': False, 'error': "Bu sikl natijasi allaqachon lentaga chiqarilgan."},
-                            status=status.HTTP_409_CONFLICT)
-
-        caption = str(request.data.get('caption') or (
-            f"🚀 Bugungi 4-bosqichli Marafonni 100% yopdim (+{loop.dtm_score_delta} DTM Ball)! "
-            f"Sirli Sandiq ochildi va Ilm Ildizi Daraxtimga suv quydim! 🔥🎁"
-        ))[:1000]
-
         profile = ensure_profile_for_user(user)
-        subject = loop.subject or (loop.topic.subject if loop.topic else None)
-        post = CommunityPost.objects.create(
-            author=user,
-            post_type='achievement',
-            title="Kunlik Avtopilot Marafoni Yakunlandi! 🎯",
-            caption=caption,
-            subject_name=subject.name if subject else 'Asosiy',
-            subject_slug=subject.slug if subject else 'tarix',
-            correct_count=loop.sprint_score,
-            total_questions=loop.sprint_total,
-            exam_track=profile.exam_track,
-        )
 
-        grant_rewards_atomic(profile.id, xp_delta=15)
+        with transaction.atomic():
+            loop = DailyLearningLoop.objects.select_for_update().get(pk=loop.pk)
+
+            # Faqat haqiqatan yakunlangan (mukofoti olingan) sikl va har sikl uchun bitta post.
+            if loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED or not loop.is_chest_claimed:
+                return Response({'ok': False, 'error': "Avval kunlik siklni yakunlang."},
+                                status=status.HTTP_409_CONFLICT)
+            if (CommunityPost.objects.filter(author=user, post_type='achievement',
+                                             created_at__gte=loop.created_at).exists()
+                    or not claim_once(profile.id, 'loop_share_post', loop.id)):
+                return Response({'ok': False, 'error': "Bu sikl natijasi allaqachon lentaga chiqarilgan."},
+                                status=status.HTTP_409_CONFLICT)
+
+            caption = str(request.data.get('caption') or (
+                f"🚀 Bugungi 4-bosqichli Marafonni 100% yopdim (+{loop.dtm_score_delta} DTM Ball)! "
+                f"Sirli Sandiq ochildi va Ilm Ildizi Daraxtimga suv quydim! 🔥🎁"
+            ))[:1000]
+
+            subject = loop.subject or (loop.topic.subject if loop.topic else None)
+            post = CommunityPost.objects.create(
+                author=user,
+                post_type='achievement',
+                title="Kunlik Avtopilot Marafoni Yakunlandi! 🎯",
+                caption=caption,
+                subject_name=subject.name if subject else 'Asosiy',
+                subject_slug=subject.slug if subject else 'tarix',
+                correct_count=loop.sprint_score,
+                total_questions=loop.sprint_total,
+                exam_track=profile.exam_track,
+            )
+
+            grant_rewards_atomic(profile.id, xp_delta=15)
 
         return Response({
             'ok': True,
@@ -707,9 +718,10 @@ class RestartCycleView(APIView):
             date=today
         ).order_by('-cycle_number', '-id').first()
 
-        # Yangi sikl faqat oldingisi yakunlangandan keyin va kuniga MAX_CYCLES_PER_DAY
+        # Yangi sikl faqat oldingisi haqiqatan yakunlangandan keyin va kuniga MAX_CYCLES_PER_DAY
         # martagacha: har sikl sandiq mukofoti beradi.
-        if last_loop and last_loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED:
+        if last_loop and (last_loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED
+                          or not last_loop.is_chest_claimed):
             return Response({'ok': False, 'error': "Avval joriy siklni yakunlang"}, status=status.HTTP_409_CONFLICT)
         if last_loop and last_loop.cycle_number >= MAX_CYCLES_PER_DAY:
             return Response({'ok': False, 'error': "Bugungi sikllar limiti tugadi. Ertaga davom etamiz!"},

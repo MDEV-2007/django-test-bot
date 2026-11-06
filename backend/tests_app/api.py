@@ -1207,6 +1207,13 @@ def revision_check_api(request, item_id):
     action = request.data.get('action', '')
 
     if action == 'master':
+        is_inline = (q.question_type in Question.SINGLE_ANSWER_TYPES
+                     or q.question_type in Question.TEXT_INPUT_TYPES)
+        if is_inline:
+            return Response(
+                {'ok': False, 'error': "Bu savolni o'zlashtirish uchun to'g'ri javobni belgilang."},
+                status=400,
+            )
         item.mastered = True
         item.times_reviewed = F('times_reviewed') + 1
         item.last_reviewed_at = timezone.now()

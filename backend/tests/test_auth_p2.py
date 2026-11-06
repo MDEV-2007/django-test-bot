@@ -50,6 +50,12 @@ class TelegramLoginTests(TestCase):
     def test_fresh_init_data_logs_in(self):
         self.assertEqual(self.post(init_data(self.TG)).status_code, 200)
 
+    def test_replayed_init_data_is_rejected_even_after_cache_flush(self):
+        payload = init_data(self.TG)
+        self.assertEqual(self.post(payload).status_code, 200)
+        cache.clear()
+        self.assertEqual(self.post(payload).status_code, 401)
+
     def test_init_data_older_than_15_minutes_is_rejected(self):
         self.assertEqual(self.post(init_data(self.TG, age_seconds=20 * 60)).status_code, 401)
 

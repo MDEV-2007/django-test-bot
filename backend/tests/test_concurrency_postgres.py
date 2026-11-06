@@ -147,6 +147,29 @@ class ConcurrencyTests(TransactionTestCase):
         gained = Profile.objects.get(pk=profile.pk).coins - coins_before
         self.assertIn(gained, (200, 400, 500))  # bir marta: 1.0x / 2.0x / 2.5x
 
+    def test_parallel_loop_share_post_pays_once(self):
+        from accounts.models import Profile
+        from learning.models import CommunityPost
+        from tests.loop_helpers import answer_loop_questions, stage_question_ids
+        user, profile = make_user('par_loop_share')
+        subject = make_subject()
+        for i in range(20):
+            make_question(subject=subject, body=f'ls{i}')
+        c = self.client_for(user)
+        cur = c.get('/api/v1/loop/current/').json()
+        c.post('/api/v1/loop/advance-stage/', {'from_stage': 'STAGE_1_WARMUP'}, format='json')
+        answer_loop_questions(c, 'sprint', stage_question_ids(cur, 'sprint'))
+        c.post('/api/v1/loop/advance-stage/', {'from_stage': 'STAGE_2_SPRINT'}, format='json')
+        answer_loop_questions(c, 'arena', stage_question_ids(cur, 'arena'))
+        c.post('/api/v1/loop/advance-stage/', {'from_stage': 'STAGE_4_ARENA'}, format='json')
+        xp_before = Profile.objects.get(pk=profile.pk).xp
+        results, errors = run_parallel(lambda: self.client_for(user).post(
+            '/api/v1/loop/share-post/', {}, format='json').status_code)
+        self.assertEqual(errors, [])
+        self.assertEqual(results.count(200), 1, results)
+        self.assertEqual(CommunityPost.objects.filter(author=user, post_type='achievement').count(), 1)
+        self.assertEqual(Profile.objects.get(pk=profile.pk).xp, xp_before + 15)
+
     def test_parallel_mission_reward_once(self):
         from accounts.models import Profile
         from core.missions import advance_missions

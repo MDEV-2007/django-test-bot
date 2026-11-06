@@ -30,18 +30,45 @@ def _access_lifetime_seconds():
 
 def revoke_user_tokens(user):
     """Blacklist every outstanding refresh token of `user` and invalidate their access tokens."""
+    from core.models import RewardClaim
+    from core.reward_caps import _ONCE_DAY
     from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
     for token in OutstandingToken.objects.filter(user=user).exclude(blacklistedtoken__isnull=False):
         BlacklistedToken.objects.get_or_create(token=token)
     # `iat` has whole-second resolution: tokens issued in an EARLIER second are refused, so a
-    # fresh login right after "log out everywhere" keeps working.
-    cache.set(_revoked_key(user.pk), int(time.time()), _access_lifetime_seconds() + 60)
+    # fresh login right after "log out everywhere" keeps working. Stored durably in DB so
+    # Redis restart/eviction cannot resurrect revoked access tokens (SEC-001).
+    now_ts = int(time.time())
+    RewardClaim.objects.update_or_create(
+        subject_id=user.pk,
+        source='jwt_revoked_at',
+        day=_ONCE_DAY,
+        item='',
+        defaults={'count': now_ts},
+    )
+    cache.set(_revoked_key(user.pk), now_ts, _access_lifetime_seconds() + 60)
 
 
 def token_is_revoked(user_id, payload) -> bool:
     """True if this (validated) token must be refused for a non-signature reason."""
     revoked_at = cache.get(_revoked_key(user_id))
+    if revoked_at is None:
+        from core.models import RewardClaim
+        from core.reward_caps import _ONCE_DAY
+
+        revoked_at = (
+            RewardClaim.objects.filter(
+                subject_id=user_id,
+                source='jwt_revoked_at',
+                day=_ONCE_DAY,
+                item='',
+            )
+            .values_list('count', flat=True)
+            .first()
+            or 0
+        )
+        cache.set(_revoked_key(user_id), int(revoked_at), _access_lifetime_seconds() + 60)
     issued_at = payload.get('iat')
     if revoked_at and issued_at is not None and int(issued_at) < int(revoked_at):
         return True

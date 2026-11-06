@@ -98,6 +98,14 @@ class TokenRevocationTests(_Base):
         fresh = self.login().json()
         self.assertEqual(self.bearer(fresh['access']).get('/api/auth/me/').status_code, 200)
 
+    def test_revocation_survives_cache_flush(self):
+        tokens = self.login().json()
+        time.sleep(1.1)
+        client = self.bearer(tokens['access'])
+        self.assertEqual(client.post('/api/auth/logout/', {'all_devices': True}, format='json').status_code, 200)
+        cache.clear()
+        self.assertEqual(client.get('/api/auth/me/').status_code, 401)
+
 
 class WebSocketAuthTests(_Base):
     def test_banned_user_token_is_anonymous_on_websocket(self):

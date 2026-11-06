@@ -89,3 +89,18 @@ class RevisionDeckTests(TestCase):
                               {'choice_id': 1}, format='json')
 
         self.assertEqual(response.status_code, 404)
+
+    def test_master_action_blocked_on_inline_questions_but_allowed_on_non_inline(self):
+        self._finish_attempt(answer_correctly=False)
+        item = RevisionItem.objects.filter(profile=self.profile, mastered=False).first()
+        res = self.client.post(f'/api/tests/revision/{item.id}/check/', {'action': 'master'}, format='json')
+        self.assertEqual(res.status_code, 400)
+        item.refresh_from_db()
+        self.assertFalse(item.mastered)
+
+        item.question.question_type = 'open_written'
+        item.question.save(update_fields=['question_type'])
+        res_ok = self.client.post(f'/api/tests/revision/{item.id}/check/', {'action': 'master'}, format='json')
+        self.assertEqual(res_ok.status_code, 200)
+        item.refresh_from_db()
+        self.assertTrue(item.mastered)

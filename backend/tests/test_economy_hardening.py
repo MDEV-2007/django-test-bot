@@ -51,6 +51,20 @@ class LoopRewardRequiresWorkTests(_LoopBase):
         self.assertEqual(self.coins(), 0)
         from core.rewards import daily_chain_completed
         self.assertFalse(daily_chain_completed(Profile.objects.get(pk=self.profile.pk)))
+        self.assertEqual(res['stage_data']['rewards']['coins'], 0)
+        self.assertEqual(res['stage_data']['rewards']['xp'], 0)
+        self.assertEqual(res['stage_data']['rewards']['free_essay_credits'], 0)
+
+    def test_zero_answer_cycle_cannot_share_post_or_restart_cycle(self):
+        self.cur()
+        for stage in (L.STAGE_1_WARMUP, L.STAGE_2_SPRINT, L.STAGE_3_CLEANUP, L.STAGE_4_ARENA):
+            self.assertEqual(self.adv(stage).status_code, 200)
+        xp_before = Profile.objects.get(pk=self.profile.pk).xp
+        share_res = self.c.post(URL + 'share-post/', {}, format='json')
+        self.assertEqual(share_res.status_code, 409)
+        self.assertEqual(Profile.objects.get(pk=self.profile.pk).xp, xp_before)
+        restart_res = self.c.post(URL + 'restart-cycle/', {}, format='json')
+        self.assertEqual(restart_res.status_code, 409)
 
     def test_partly_answered_sprint_pays_nothing(self):
         cur = self.cur()
@@ -102,6 +116,20 @@ class LoopRewardRequiresWorkTests(_LoopBase):
         answer_loop_questions(self.c, 'arena', stage_question_ids(cur, 'arena'))
         self.adv(L.STAGE_4_ARENA)
         self.assertEqual(self.c.post(URL + 'restart-cycle/', {}, format='json').status_code, 200)
+
+    def test_share_post_pays_once_even_if_post_deleted(self):
+        from learning.models import CommunityPost
+        cur = self.cur()
+        self.adv(L.STAGE_1_WARMUP)
+        answer_loop_questions(self.c, 'sprint', stage_question_ids(cur, 'sprint'))
+        self.adv(L.STAGE_2_SPRINT)
+        answer_loop_questions(self.c, 'arena', stage_question_ids(cur, 'arena'))
+        self.adv(L.STAGE_4_ARENA)
+        xp_before = Profile.objects.get(pk=self.profile.pk).xp
+        self.assertEqual(self.c.post(URL + 'share-post/', {}, format='json').status_code, 200)
+        CommunityPost.objects.filter(author=self.user).delete()
+        self.assertEqual(self.c.post(URL + 'share-post/', {}, format='json').status_code, 409)
+        self.assertEqual(Profile.objects.get(pk=self.profile.pk).xp, xp_before + 15)
 
 
 class SmallBankComboTests(_LoopBase):
