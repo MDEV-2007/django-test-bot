@@ -16,7 +16,6 @@ import {
   Calculator,
   Globe,
   Check,
-  Clock,
   Loader2,
   Flame,
   HelpCircle,
@@ -255,347 +254,251 @@ export default function FocusSprintSetup({
   const isHeroSelected = selectedSubjectId === 0 || selectedSubjectId === heroSubject.id;
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto flex flex-col justify-between space-y-5 sm:space-y-6 pb-36 sm:pb-40 lg:pb-6">
-      {/* ── Mayin radial yuqori nur ── */}
-      <div className="pointer-events-none absolute -inset-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent rounded-3xl" />
-
-      {/* ── Cockpit Container ── */}
-      <div className="relative w-full space-y-5 sm:space-y-6">
-        {/* ─────────────────────────────────────────────────────────────
-            1. HEADER & COMPACT HERO (3 ta Feature Badge bilan)
-           ───────────────────────────────────────────────────────────── */}
-        <div className="space-y-3 sm:space-y-4">
-          {/* Yuqori qator: Orqaga qaytish & Qo'llanma & Flow State Badge */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => router.push('/dashboard')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
-            >
-              <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
-              <span>Dashboardga qaytish</span>
-            </button>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  soundFX.click();
-                  setGuideModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] sm:text-xs font-semibold bg-accent hover:bg-accent/80 text-foreground border border-border shadow-2xs transition-colors cursor-pointer"
-              >
-                <HelpCircle className="size-3.5 text-primary" />
-                <span>Qo&apos;llanma</span>
-              </button>
-
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] sm:text-xs font-semibold bg-primary/10 text-primary border border-primary/20 shadow-xs">
-                <Zap className="size-3.5 fill-primary text-primary" />
-                <span className="tracking-wide uppercase">15 Daqiqalik Flow State</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sarlavha & Kunlik 3 ta Mashq Qurollari Hubi */}
-          <div className="space-y-3.5">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-                <span className="inline-flex items-center justify-center size-9 sm:size-10 rounded-2xl bg-amber-500/15 text-amber-500 shadow-xs">
-                  <Zap className="size-5 fill-amber-500" />
-                </span>
-                <span>Mashq Markazi (Fokus &amp; Qasos)</span>
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                Kunlik neyron mashqi: Qasos savollari bilan mustahkamlash, 60s shpargalkalar va 1v1 Arena.
-              </p>
-            </div>
-
-            {/* ─── 3 TA MASHQ QUROLI (Bento Mode Hub) ─── */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-              {/* 1. Fokus & Qasos Sprinti (Faol Rejim) */}
-              <div className="p-3.5 rounded-2xl border-2 border-amber-500 bg-amber-500/10 shadow-md relative overflow-hidden">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="size-8 rounded-xl bg-amber-500 text-black flex items-center justify-center font-bold shadow-xs">
-                    <Zap className="size-4 fill-black" />
-                  </div>
-                  <span className="bg-amber-500 text-black text-[12px] font-bold uppercase px-2 py-0.5 rounded-full">
-                    FAOL MASHQ
-                  </span>
-                </div>
-                <h4 className="font-bold text-sm text-foreground">Fokus &amp; Qasos Sprinti</h4>
-                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                  Neyron zanjiri, 3 qadamli Qasos savollari va 2.0x Combo.
-                </p>
-              </div>
-
-              {/* 2. Anti-Darslik: 60s Shpargalkalar */}
-              <Link
-                href="/learning"
-                onClick={() => { soundFX.click(); tgHaptic('medium'); }}
-                className="group p-3.5 rounded-2xl border border-border/80 bg-card hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all shadow-xs block cursor-pointer"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
-                    <FileSpreadsheet className="size-4" />
-                  </div>
-                  <span className="text-[12px] font-bold text-emerald-500 flex items-center gap-0.5">
-                    Ochish <ArrowRight className="size-3" />
-                  </span>
-                </div>
-                <h4 className="font-bold text-sm text-foreground group-hover:text-emerald-500 transition-colors">
-                  60s Anti-Darslik
-                </h4>
-                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                  800 betlik kitob o&apos;rniga 15 ta BMB qopqoni &amp; shpargalkasi.
-                </p>
-              </Link>
-
-              {/* 3. 1v1 Ghost Arena (Tab trigger) */}
-              <button
-                type="button"
-                onClick={() => {
-                  soundFX.click();
-                  tgHaptic('medium');
-                  if (onSelectArena) {
-                    onSelectArena();
-                  } else {
-                    router.push('/sprint?tab=arena');
-                  }
-                }}
-                className="group p-3.5 rounded-2xl border border-border/80 bg-card hover:border-rose-500/60 hover:bg-rose-500/5 transition-all shadow-xs block cursor-pointer text-left w-full active:scale-[0.98]"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
-                    <Swords className="size-4" />
-                  </div>
-                  <span className="text-[12px] font-bold text-rose-500 flex items-center gap-0.5">
-                    Arenaga kirish <ArrowRight className="size-3" />
-                  </span>
-                </div>
-                <h4 className="font-bold text-sm text-foreground group-hover:text-rose-500 transition-colors">
-                  1v1 Ghost Arena
-                </h4>
-                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                  Jonli bilimdon yoki Ghost replika bilan 60s duel &amp; ELO reyting.
-                </p>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* ─────────────────────────────────────────────────────────────
-            2. FAN TANLASH SETKASI: "1 HERO + 6 GRID"
-           ───────────────────────────────────────────────────────────── */}
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <BookOpen className="size-3.5 text-primary" />
-              <span>1. Fanni tanlang:</span>
-            </span>
-            <span className="text-[12px] text-muted-foreground">
-              {gridCards.filter((c) => c.is_available).length + 1} ta fan faol
-            </span>
-          </div>
-
-          <div className="space-y-2.5">
-            {/* ── A. HERO BANNER: "Barcha fanlar (Aralash — AI Smart Mix)" ── */}
-            <motion.div
-              whileTap={{ scale: 0.99 }}
-              onClick={() => handleSubjectClick(heroSubject.id, true, heroSubject.name)}
-              className={cn(
-                'relative rounded-2xl p-3.5 sm:p-4 border transition-all duration-200 select-none cursor-pointer flex items-center justify-between gap-3 overflow-hidden',
-                isHeroSelected
-                  ? 'border-primary bg-primary/10 shadow-[0_4px_20px_-4px_rgba(0,122,255,0.25)] ring-1 ring-primary/40'
-                  : 'border-border bg-card hover:bg-accent/40 hover:border-border/80 shadow-xs'
-              )}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="size-10 sm:size-11 rounded-xl bg-gradient-to-br from-primary/20 via-indigo-500/20 to-purple-500/20 border border-primary/30 flex items-center justify-center shrink-0 shadow-xs">
-                  <Sparkles className="size-5 text-primary" />
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-sm sm:text-base text-foreground truncate">
-                      Barcha fanlar (Aralash)
-                    </p>
-                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-semibold bg-primary/15 text-primary border border-primary/25">
-                      AI Smart Mix
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                    AI zaif mavzularingizni avtomatik tanlaydi • {heroSubject.questions_count || 1671} ta test
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5 shrink-0">
-                <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-primary/15 text-primary border border-primary/25">
-                  AI Tavsiyasi
-                </span>
-
-                <div
-                  className={cn(
-                    'size-5 rounded-full flex items-center justify-center transition-all',
-                    isHeroSelected
-                      ? 'bg-primary text-white shadow-[0_0_12px_rgba(0,122,255,0.8)]'
-                      : 'border border-border'
-                  )}
-                >
-                  {isHeroSelected && <Check className="size-3 stroke-[3]" />}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ── B. 6 TA ANIQ FAN ── */}
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-              {gridCards.map((subj) => {
-                const isSelected = selectedSubjectId === subj.id && subj.id !== -1;
-                const IconComponent = subj.icon;
-
-                return (
-                  <motion.div
-                    key={subj.slug}
-                    whileTap={subj.is_available ? { scale: 0.98 } : {}}
-                    onClick={() => handleSubjectClick(subj.id, subj.is_available, subj.name)}
-                    className={cn(
-                      'relative rounded-2xl p-3 border transition-all duration-200 select-none flex items-center justify-between gap-2.5 text-left',
-                      subj.is_available ? 'cursor-pointer' : 'cursor-not-allowed opacity-45 bg-muted/30 border-border/60',
-                      isSelected && subj.is_available
-                        ? 'border-primary bg-primary/10 shadow-[0_4px_18px_-4px_rgba(0,122,255,0.25)] ring-1 ring-primary/40'
-                        : subj.is_available && 'border-border bg-card hover:bg-accent/40 hover:border-border/80 shadow-xs'
-                    )}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className={cn(
-                          'size-9 rounded-xl flex items-center justify-center border shrink-0',
-                          subj.iconBg
-                        )}
-                      >
-                        <IconComponent className={cn('size-4.5', subj.iconColor)} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="font-semibold text-xs sm:text-sm text-foreground truncate leading-snug">
-                          {subj.name}
-                        </p>
-                        <p className="text-[12px] text-muted-foreground mt-0.5 truncate">
-                          {subj.is_available ? `${subj.questions_count} ta test` : 'Tez kunda'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="shrink-0">
-                      {isSelected ? (
-                        <div className="size-4.5 rounded-full bg-primary flex items-center justify-center text-white shadow-xs">
-                          <Check className="size-2.5 stroke-[3]" />
-                        </div>
-                      ) : (
-                        <div className="size-4.5 rounded-full border border-border" />
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* ─────────────────────────────────────────────────────────────
-            3. SPRINT DAVOMIYLIGI (Segmented Intensity Cards)
-           ───────────────────────────────────────────────────────────── */}
-        <div className="space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Clock className="size-3.5 text-primary" />
-            <span>2. Test davomiyligi:</span>
+    <div className="relative mx-auto flex w-full max-w-5xl flex-col space-y-8 pb-36 sm:pb-40 lg:pb-6">
+      {/* ── Yuqori qator ── */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => router.push('/dashboard')}
+          className="ps-chip cursor-pointer transition-transform hover:-translate-x-0.5"
+        >
+          <ArrowLeft className="size-4" /> Dashboard
+        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              soundFX.click();
+              setGuideModalOpen(true);
+            }}
+            className="ps-chip cursor-pointer"
+          >
+            <HelpCircle className="size-3.5 text-[var(--ps-purple)]" /> Qo&apos;llanma
+          </button>
+          <span className="ps-chip !bg-[#080808] !text-[#FFFCF7]">
+            <Zap className="size-3.5 text-[var(--ps-orange)]" /> 15 daqiqalik flow state
           </span>
+        </div>
+      </div>
 
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-            {DURATION_OPTIONS.map((item) => {
-              const isSelected = questionCount === item.count;
-              return (
-                <button
-                  key={item.count}
-                  type="button"
-                  onClick={() => handleCountClick(item.count)}
-                  className={cn(
-                    'relative rounded-2xl p-3 sm:p-3.5 border text-center transition-all duration-200 select-none cursor-pointer flex flex-col items-center justify-between',
-                    isSelected
-                      ? 'border-primary bg-primary/10 shadow-[0_4px_18px_-4px_rgba(0,122,255,0.25)] ring-1 ring-primary/40'
-                      : 'border-border bg-card hover:bg-accent/40 hover:border-border/80 shadow-xs'
-                  )}
-                >
-                  {/* Eng ommabop yorlig'i */}
-                  {item.isPopular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40 shadow-xs">
-                      Ommabop
-                    </span>
-                  )}
+      {/* ── Hero ── */}
+      <section>
+        <p className="ps-eyebrow text-[var(--text-muted)]">Kunlik neyron mashqi</p>
+        <h1 className="ps-display mt-3 text-[44px] sm:text-[64px] xl:text-[76px]">
+          Mashq{' '}
+          <span className="relative inline-block text-[var(--ps-orange)]">
+            markazi
+            <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-purple)] sm:-bottom-3 sm:h-4">
+              <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+            </svg>
+          </span>
+          <span className="text-[var(--ps-coral)]">.</span>
+        </h1>
+        <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-[var(--text-secondary)]">
+          Qasos savollari bilan mustahkamlash, 60 soniyalik shpargalkalar va 1v1 arena — bir joyda.
+        </p>
+      </section>
 
-                  <p className="text-xs sm:text-sm font-bold text-foreground">
-                    {item.count} ta savol
-                  </p>
-                  <p className="text-[12px] text-muted-foreground mt-0.5">{item.time}</p>
-
-                  <span
-                    className={cn(
-                      'mt-1.5 text-[9.5px] sm:text-[12px] font-semibold px-2 py-0.5 rounded-md border truncate max-w-full',
-                      item.badgeColor
-                    )}
-                  >
-                    {item.badge}
-                  </span>
-
-                  <span className={cn('mt-1 text-[12px] font-bold', item.xpColor)}>
-                    {item.xpText}
-                  </span>
-                </button>
-              );
-            })}
+      {/* ── 3 ta mashq quroli ── */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="ps-mode-active relative overflow-hidden rounded-[28px] bg-[var(--ps-orange)] p-5 text-[#080808] sm:p-6">
+          <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/25" />
+          <div className="relative flex items-center justify-between">
+            <span className="inline-flex size-11 items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)]">
+              <Zap className="size-5" />
+            </span>
+            <span className="rounded-full bg-[#080808] px-2.5 py-1 text-[11px] font-bold text-white">Faol mashq</span>
           </div>
+          <h4 className="ps-display relative mt-5 text-[22px]">Fokus &amp; qasos sprinti</h4>
+          <p className="relative mt-1.5 text-[12px] leading-snug text-black/65">Neyron zanjiri, 3 qadamli qasos savollari va 2.0x combo.</p>
         </div>
 
-        {/* ─────────────────────────────────────────────────────────────
-            4. PREMIUM CTA BUTTON (Desktop: Static in-flow, Mobile: Floating & In-flow)
-           ───────────────────────────────────────────────────────────── */}
-        <div className="pt-2 pb-6 lg:p-0">
-          <div className="max-w-4xl mx-auto backdrop-blur-xl bg-background/95 p-1 sm:p-2 lg:p-0 rounded-2xl border border-border/80 lg:border-none shadow-lg lg:shadow-none">
-            <button
-              type="button"
-              disabled={loading}
-              onClick={handleStartClick}
-              className={cn(
-                'w-full h-13 sm:h-14 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all active:scale-[0.99] flex items-center justify-between px-4 sm:px-5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
-              )}
-            >
-              {loading ? (
-                <div className="w-full flex items-center justify-center gap-2">
-                  <Loader2 className="size-5 animate-spin" />
-                  <span className="text-sm font-bold">Savollar tayyorlanmoqda...</span>
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-center gap-2 text-sm sm:text-base font-bold">
-                    <Zap className="size-5 fill-white text-white shrink-0" />
-                    <span>Testni Boshlash</span>
-                    <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[12px] font-mono font-medium text-white/70 bg-white/10 rounded border border-white/20 ml-1.5">
-                      ↵ Enter
-                    </kbd>
-                  </div>
-
-                  {/* Toza ajratilgan pill: [Fan] • [N] ta savol -> */}
-                  <div className="bg-white/20 px-2.5 sm:px-3 py-1 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-1.5 backdrop-blur-sm shrink-0">
-                    <span>
-                      {shortSubjectLabel} • {questionCount} ta savol
-                    </span>
-                    <ArrowRight className="size-3.5 sm:size-4" />
-                  </div>
-                </>
-              )}
-            </button>
+        <Link
+          href="/learning"
+          onClick={() => { soundFX.click(); tgHaptic('medium'); }}
+          className="group relative block overflow-hidden rounded-[28px] bg-[var(--ps-green)] p-5 text-white transition-transform hover:-translate-y-1 sm:p-6"
+        >
+          <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+          <div className="relative flex items-center justify-between">
+            <span className="inline-flex size-11 items-center justify-center rounded-full bg-black/15">
+              <FileSpreadsheet className="size-5" />
+            </span>
+            <span className="flex size-9 items-center justify-center rounded-full bg-[#080808] transition-transform group-hover:-rotate-45">
+              <ArrowRight className="size-4" />
+            </span>
           </div>
+          <h4 className="ps-display relative mt-5 text-[22px]">60s anti-darslik</h4>
+          <p className="relative mt-1.5 text-[12px] leading-snug text-white/75">800 betlik kitob o&apos;rniga 15 ta BMB qopqoni va shpargalkasi.</p>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => {
+            soundFX.click();
+            tgHaptic('medium');
+            if (onSelectArena) {
+              onSelectArena();
+            } else {
+              router.push('/sprint?tab=arena');
+            }
+          }}
+          className="group relative block w-full cursor-pointer overflow-hidden rounded-[28px] bg-[var(--ps-coral)] p-5 text-left text-white transition-transform hover:-translate-y-1 sm:p-6"
+        >
+          <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+          <div className="relative flex items-center justify-between">
+            <span className="inline-flex size-11 items-center justify-center rounded-full bg-black/15">
+              <Swords className="size-5" />
+            </span>
+            <span className="flex size-9 items-center justify-center rounded-full bg-[#080808] transition-transform group-hover:-rotate-45">
+              <ArrowRight className="size-4" />
+            </span>
+          </div>
+          <h4 className="ps-display relative mt-5 text-[22px]">1v1 Ghost arena</h4>
+          <p className="relative mt-1.5 text-[12px] leading-snug text-white/75">Jonli bilimdon yoki ghost replika bilan 60s duel va ELO reyting.</p>
+        </button>
+      </div>
+
+      {/* ── 1. Fan tanlash ── */}
+      <section className="space-y-4">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="ps-eyebrow text-[var(--text-muted)]">1-qadam</p>
+            <h2 className="ps-display mt-2 text-[28px] sm:text-[34px]">Fanni <span className="text-[var(--ps-purple)]">tanlang</span></h2>
+          </div>
+          <span className="ps-chip">{gridCards.filter((c) => c.is_available).length + 1} ta fan faol</span>
         </div>
+
+        {/* Aralash — AI smart mix */}
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.99 }}
+          onClick={() => handleSubjectClick(heroSubject.id, true, heroSubject.name)}
+          className={cn(
+            'relative flex w-full cursor-pointer select-none items-center justify-between gap-4 overflow-hidden rounded-[28px] p-5 text-left transition-all sm:p-6',
+            isHeroSelected ? 'bg-[#080808] text-[#FFFCF7]' : 'bg-[var(--ps-paper)] text-[var(--text-primary)] shadow-[var(--ds-panel-shadow)] hover:-translate-y-0.5',
+          )}
+        >
+          <span aria-hidden className={cn('absolute -right-10 -top-10 size-36 rounded-full', isHeroSelected ? 'bg-[var(--ps-purple)] opacity-60' : 'bg-[var(--ps-purple)] opacity-15')} />
+          <span className="relative flex min-w-0 items-center gap-4">
+            <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--ps-purple)] text-white">
+              <Sparkles className="size-6" />
+            </span>
+            <span className="min-w-0">
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="ps-display text-[22px] sm:text-[26px]">Barcha fanlar (aralash)</span>
+                <span className="rounded-full bg-[var(--ps-orange)] px-2.5 py-0.5 text-[11px] font-bold text-[#080808]">AI smart mix</span>
+              </span>
+              <span className={cn('mt-1 block truncate text-[12px]', isHeroSelected ? 'text-white/65' : 'text-[var(--text-muted)]')}>
+                AI zaif mavzularingizni avtomatik tanlaydi • {heroSubject.questions_count || 1671} ta test
+              </span>
+            </span>
+          </span>
+          <span className={cn('relative flex size-7 shrink-0 items-center justify-center rounded-full', isHeroSelected ? 'bg-[var(--ps-orange)] text-[#080808]' : 'ring-2 ring-[var(--border-strong)]')}>
+            {isHeroSelected && <Check className="size-4 stroke-[3]" />}
+          </span>
+        </motion.button>
+
+        {/* 6 ta fan */}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          {gridCards.map((subj, i) => {
+            const isSelected = selectedSubjectId === subj.id && subj.id !== -1;
+            const IconComponent = subj.icon;
+            const tone = ['bg-[var(--ps-purple)] text-white', 'bg-[var(--ps-orange)] text-[#080808]', 'bg-[var(--ps-green)] text-white', 'bg-[var(--ps-coral)] text-white', 'bg-[var(--ps-blue)] text-[#080808]', 'bg-[#080808] text-[#FFFCF7]'][i % 6];
+            return (
+              <motion.button
+                type="button"
+                key={subj.slug}
+                whileTap={subj.is_available ? { scale: 0.98 } : {}}
+                onClick={() => handleSubjectClick(subj.id, subj.is_available, subj.name)}
+                className={cn(
+                  'relative flex select-none items-center justify-between gap-3 rounded-[24px] p-3.5 text-left transition-all sm:p-4',
+                  !subj.is_available && 'cursor-not-allowed bg-[var(--ps-paper)] opacity-45',
+                  subj.is_available && !isSelected && 'cursor-pointer bg-[var(--ps-paper)] shadow-[var(--ds-panel-shadow)] hover:-translate-y-0.5',
+                  isSelected && 'cursor-pointer bg-[var(--ps-paper)] ring-[3px] ring-[#080808] dark:ring-[#FFFCF7]',
+                )}
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-2xl', tone)}>
+                    <IconComponent className="size-5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[14px] font-bold">{subj.name}</span>
+                    <span className="block truncate text-[11px] text-[var(--text-muted)]">
+                      {subj.is_available ? `${subj.questions_count} ta test` : 'Tez kunda'}
+                    </span>
+                  </span>
+                </span>
+                <span className={cn('flex size-6 shrink-0 items-center justify-center rounded-full', isSelected ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]' : 'ring-2 ring-[var(--border-strong)]')}>
+                  {isSelected && <Check className="size-3.5 stroke-[3]" />}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── 2. Davomiylik ── */}
+      <section className="space-y-4">
+        <div>
+          <p className="ps-eyebrow text-[var(--text-muted)]">2-qadam</p>
+          <h2 className="ps-display mt-2 text-[28px] sm:text-[34px]">Test <span className="text-[var(--ps-green)]">davomiyligi</span></h2>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {DURATION_OPTIONS.map((item) => {
+            const isSelected = questionCount === item.count;
+            return (
+              <button
+                key={item.count}
+                type="button"
+                onClick={() => handleCountClick(item.count)}
+                className={cn(
+                  'relative flex cursor-pointer select-none flex-col items-center rounded-[24px] p-4 text-center transition-all sm:p-5',
+                  isSelected ? 'bg-[var(--ps-purple)] text-white shadow-[0_18px_34px_-20px_rgba(118,89,199,0.9)]' : 'bg-[var(--ps-paper)] shadow-[var(--ds-panel-shadow)] hover:-translate-y-0.5',
+                )}
+              >
+                {item.isPopular && (
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[var(--ps-orange)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#080808]">
+                    Ommabop
+                  </span>
+                )}
+                <span className="ps-num text-[34px] sm:text-[44px]">{item.count}</span>
+                <span className={cn('text-[11px] font-semibold', isSelected ? 'text-white/75' : 'text-[var(--text-muted)]')}>ta savol · {item.time}</span>
+                <span className={cn('mt-2 max-w-full truncate rounded-full px-2.5 py-0.5 text-[10.5px] font-bold', isSelected ? 'bg-white/20' : 'bg-[var(--ps-neutral)] text-[var(--text-secondary)]')}>
+                  {item.badge}
+                </span>
+                <span className={cn('mt-1.5 text-[12px] font-bold', isSelected ? 'text-[var(--ps-orange)]' : 'text-[var(--ps-green)]')}>{item.xpText}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Boshlash ── */}
+      <div className="fixed inset-x-3 bottom-24 z-30 sm:bottom-24 lg:static lg:inset-auto">
+        <button
+          type="button"
+          disabled={loading}
+          onClick={handleStartClick}
+          className="ps-btn ps-btn-ink h-16 w-full justify-between !rounded-full !px-6 !text-base disabled:opacity-60"
+        >
+          {loading ? (
+            <span className="flex w-full items-center justify-center gap-2">
+              <Loader2 className="size-5 animate-spin" /> Savollar tayyorlanmoqda...
+            </span>
+          ) : (
+            <>
+              <span className="flex items-center gap-2">
+                <Zap className="size-5 text-[var(--ps-orange)]" />
+                Testni boshlash
+                <kbd className="ml-1 hidden rounded-full bg-white/15 px-2 py-0.5 font-mono text-[11px] lg:inline-flex dark:bg-black/10">↵ Enter</kbd>
+              </span>
+              <span className="flex items-center gap-2 text-sm font-semibold">
+                <span className="hidden sm:inline">{shortSubjectLabel} • {questionCount} ta savol</span>
+                <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+              </span>
+            </>
+          )}
+        </button>
       </div>
 
       <SprintGuideModal
@@ -605,4 +508,3 @@ export default function FocusSprintSetup({
     </div>
   );
 }
-

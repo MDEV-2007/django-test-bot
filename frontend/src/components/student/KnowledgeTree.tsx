@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useMemo, useState } from 'react';
 
 interface KnowledgeTreeProps {
   level: number;
@@ -11,399 +10,352 @@ interface KnowledgeTreeProps {
 }
 
 /**
- * Bilim Ildizi — IlmIldizi brendining tirik daraxt metaforasi.
- * Har bir element o'quvchining haqiqiy mehnati asosida dinamik shakllanadi:
- * - `level`: Daraxtning asosiy shoxlari soni va baquvvatligi
- * - `xpProgress`: Tananing o'sish balandligi va novdalar cho'zilishi (0-100%)
- * - `streak`: Barglar toji zichligi, yashillik yorqinligi va to'kilmasligi
- * - `badges`: Daraxt shoxlaridagi yaraqlagan oltin mevalar (erishilgan yutuqlar)
+ * Bilim Ildizi — o'quvchi darajasi bilan o'sadigan tirik daraxt.
+ *
+ * - `level` (1–50) + `xpProgress`: o'sish bosqichi. 1-darajada yangi nihol, 50-darajada
+ *   keng tojli chinor. Shox tarmoqlanishi, tana uzunligi va qalinligi shunga qarab o'sadi.
+ * - `streak`: barglar yashilligi va zichligi. Seriya 0 bo'lsa barglar sarg'ayadi.
+ * - `badges`: shox uchlaridagi oltin mevalar (ochilgan nishonlar).
+ *
+ * Shakl deterministik (bir xil seed): sahifa yangilanganda daraxt "sakrab" o'zgarmaydi,
+ * faqat daraja oshganda o'sadi. Shamol — SVG `animateTransform` (har bir shox o'z
+ * asosida tebranadi, uchlari ko'proq siljiydi); "kamroq harakat" sozlamasida o'chadi.
  */
-export default function KnowledgeTree({
-  level = 1,
-  xpProgress = 0,
-  streak = 0,
-  badges = 0,
-}: KnowledgeTreeProps) {
 
-  // Dinamik hisob-kitoblar
-  const safeLevel = Math.max(1, level);
-  const branchCount = Math.min(8, Math.max(2, safeLevel));
-  const trunkGrowth = Math.min(30, Math.round((xpProgress / 100) * 30)); // 0 - 30px o'sish
-  const trunkTopY = 160 - trunkGrowth;
+const MAX_LEVEL = 50;
+const GROUND_Y = 262;
+const BASE_X = 160;
 
-  // Streak asosida barglar jozibadorligi (0-20 kun)
-  const isWilted = streak === 0;
-  const vitality = Math.min(1, Math.max(0.2, streak / 14));
-  const foliageScale = 0.85 + Math.min(0.35, (streak / 20) * 0.35); // streak qancha ko'p bo'lsa, toj shunchalik qalin
-  const leafCount = Math.min(16, Math.max(6, streak + 4));
+type Branch = {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  cx: number;
+  cy: number;
+  width: number;
+  depth: number;
+  children: Branch[];
+  leaves: Leaf[];
+  sway: number;
+  dur: number;
+  terminal: boolean;
+};
 
-  // Shoxlar konfiguratsiyasi (tabiiy, daraxtsimon egri chiziqlar)
-  const branches = [
-    { id: 1, d: `M 160 ${trunkTopY + 45} Q 130 ${trunkTopY + 30} 105 ${trunkTopY + 15}`, cx: 105, cy: trunkTopY + 15, delay: 0.2 },
-    { id: 2, d: `M 160 ${trunkTopY + 40} Q 190 ${trunkTopY + 25} 215 ${trunkTopY + 10}`, cx: 215, cy: trunkTopY + 10, delay: 0.25 },
-    { id: 3, d: `M 160 ${trunkTopY + 20} Q 135 ${trunkTopY + 5} 120 ${trunkTopY - 15}`, cx: 120, cy: trunkTopY - 15, delay: 0.3 },
-    { id: 4, d: `M 160 ${trunkTopY + 15} Q 185 ${trunkTopY} 200 ${trunkTopY - 20}`, cx: 200, cy: trunkTopY - 20, delay: 0.35 },
-    { id: 5, d: `M 160 ${trunkTopY} Q 145 ${trunkTopY - 25} 135 ${trunkTopY - 45}`, cx: 135, cy: trunkTopY - 45, delay: 0.4 },
-    { id: 6, d: `M 160 ${trunkTopY} Q 175 ${trunkTopY - 25} 185 ${trunkTopY - 45}`, cx: 185, cy: trunkTopY - 45, delay: 0.45 },
-    { id: 7, d: `M 160 ${trunkTopY - 10} Q 150 ${trunkTopY - 35} 150 ${trunkTopY - 60}`, cx: 150, cy: trunkTopY - 60, delay: 0.5 },
-    { id: 8, d: `M 160 ${trunkTopY - 10} Q 170 ${trunkTopY - 35} 170 ${trunkTopY - 60}`, cx: 170, cy: trunkTopY - 60, delay: 0.55 },
-  ].slice(0, branchCount);
+type Leaf = { x: number; y: number; angle: number; size: number; color: string; dur: number };
 
-  // Meva joylashuvlari (shoxlar uchlarida)
-  const fruitPositions = [
-    { x: 105, y: trunkTopY + 15 },
-    { x: 215, y: trunkTopY + 10 },
-    { x: 120, y: trunkTopY - 15 },
-    { x: 200, y: trunkTopY - 20 },
-    { x: 135, y: trunkTopY - 45 },
-    { x: 185, y: trunkTopY - 45 },
-    { x: 150, y: trunkTopY - 60 },
-    { x: 170, y: trunkTopY - 60 },
-    { x: 150, y: trunkTopY - 20 },
-    { x: 170, y: trunkTopY - 25 },
-    { x: 130, y: trunkTopY },
-    { x: 190, y: trunkTopY },
-  ];
-  const activeFruits = fruitPositions.slice(0, Math.min(12, badges));
+function mulberry32(seed: number) {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function stageOf(level: number) {
+  if (level <= 3) return 'Nihol';
+  if (level <= 9) return "Ko'chat";
+  if (level <= 19) return 'Yosh daraxt';
+  if (level <= 34) return 'Daraxt';
+  return 'Chinor';
+}
+
+function useReducedMotion() {
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduce(mq.matches);
+    const on = () => setReduce(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return reduce;
+}
+
+/** Shox atrofida (o'z asosida) tebranish. */
+function Sway({ x, y, deg, dur, enabled }: { x: number; y: number; deg: number; dur: number; enabled: boolean }) {
+  if (!enabled || deg === 0) return null;
+  return (
+    <animateTransform
+      attributeName="transform"
+      type="rotate"
+      values={`${-deg} ${x} ${y}; ${deg} ${x} ${y}; ${-deg} ${x} ${y}`}
+      keyTimes="0; 0.5; 1"
+      calcMode="spline"
+      keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"
+      dur={`${dur}s`}
+      repeatCount="indefinite"
+    />
+  );
+}
+
+export default function KnowledgeTree({ level = 1, xpProgress = 0, streak = 0, badges = 0 }: KnowledgeTreeProps) {
+  const reduce = useReducedMotion();
+  const animate = !reduce;
+
+  const safeLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(level)));
+  const xp = Math.max(0, Math.min(100, xpProgress));
+  // 0 (yangi nihol) .. 1 (50-daraja chinor)
+  const g = Math.max(0, Math.min(1, (safeLevel - 1 + xp / 100) / (MAX_LEVEL - 1)));
+  const stage = stageOf(safeLevel);
+
+  const wilted = streak <= 0;
+  const vitality = Math.max(0.25, Math.min(1, streak / 10));
+
+  const tree = useMemo(() => {
+    const rnd = mulberry32(1337);
+    const greens = wilted
+      ? ['#8C9A4A', '#A4A956', '#B7A65A', '#7E8E45']
+      : vitality > 0.7
+        ? ['#2E7D4F', '#3C9A5E', '#56B26E', '#79C67C', '#3A8C57']
+        : ['#3F8A57', '#55A266', '#76B874', '#94C482'];
+
+    // Erta darajalarda o'sish tezroq ko'rinsin (sqrt egri chizig'i), keyin sekinlashadi
+    const s = Math.sqrt(g);
+    const maxDepth = Math.min(7, 1 + Math.floor(s * 6.2));
+    const trunkLen = 34 + s * 50;
+    const trunkW = 2.4 + g * 12 + s * 2;
+    const leafSize = 10 - s * 2.5;
+    const leavesPerTip = Math.round(3 + s * 3 + vitality * 2);
+
+    let counter = 0;
+    const tips: { x: number; y: number }[] = [];
+
+    function grow(x: number, y: number, angle: number, len: number, width: number, depth: number): Branch {
+      const id = `b${counter++}`;
+      const x2 = x + Math.cos(angle) * len;
+      const y2 = y + Math.sin(angle) * len;
+      // Egri, tabiiy shox: o'rtadagi nuqta perpendikulyar bo'ylab biroz siljiydi
+      const bend = (rnd() - 0.5) * len * 0.28;
+      const mx = (x + x2) / 2 + Math.cos(angle + Math.PI / 2) * bend;
+      const my = (y + y2) / 2 + Math.sin(angle + Math.PI / 2) * bend;
+
+      const children: Branch[] = [];
+      const leaves: Leaf[] = [];
+      const terminal = depth >= maxDepth;
+
+      if (!terminal) {
+        const count = depth === 1 && maxDepth > 3 ? 2 : depth > 1 && g > 0.45 && rnd() < 0.4 ? 3 : 2;
+        const spread = (0.34 + rnd() * 0.16) * (depth <= 2 ? 1 : 0.82);
+        for (let i = 0; i < count; i++) {
+          const t = i / (count - 1) - 0.5;
+          const a = angle + t * spread * 2 + (rnd() - 0.5) * 0.22;
+          const l = len * (0.68 + rnd() * 0.12);
+          children.push(grow(x2, y2, a, l, Math.max(0.8, width * (0.62 + rnd() * 0.06)), depth + 1));
+        }
+        // Tabiiyroq ko'rinish: ichki shoxlarda ham bir oz barg
+        if (depth >= maxDepth - 1 && maxDepth > 2) {
+          for (let k = 0; k < Math.max(1, leavesPerTip - 2); k++) {
+            leaves.push({
+              x: mx + (rnd() - 0.5) * 6,
+              y: my + (rnd() - 0.5) * 6,
+              angle: (angle * 180) / Math.PI + 90 + (rnd() - 0.5) * 120,
+              size: leafSize * (0.75 + rnd() * 0.35),
+              color: greens[Math.floor(rnd() * greens.length)],
+              dur: 2.2 + rnd() * 1.6,
+            });
+          }
+        }
+      } else {
+        tips.push({ x: x2, y: y2 });
+        for (let k = 0; k < leavesPerTip; k++) {
+          const r = rnd() * (4 + g * 7);
+          const th = rnd() * Math.PI * 2;
+          leaves.push({
+            x: x2 + Math.cos(th) * r,
+            y: y2 + Math.sin(th) * r,
+            angle: (angle * 180) / Math.PI + 90 + (rnd() - 0.5) * 150,
+            size: leafSize * (0.8 + rnd() * 0.45),
+            color: greens[Math.floor(rnd() * greens.length)],
+            dur: 2 + rnd() * 1.8,
+          });
+        }
+      }
+
+      return {
+        id,
+        x1: x,
+        y1: y,
+        x2,
+        y2,
+        cx: mx,
+        cy: my,
+        width,
+        depth,
+        children,
+        leaves,
+        terminal,
+        // Tana deyarli qimirlamaydi, ingichka shoxlar ko'proq tebranadi
+        sway: depth === 1 ? 0.6 + g * 0.3 : 1 + depth * 0.55 + rnd() * 0.6,
+        dur: 3.4 + rnd() * 1.8,
+      };
+    }
+
+    const root = grow(BASE_X, GROUND_Y, -Math.PI / 2 + (rnd() - 0.5) * 0.06, trunkLen, trunkW, 1);
+
+    // Daraxtni ko'rinish oynasiga sig'dirish (yuqori chegarasi va kengligi bo'yicha)
+    let minX = BASE_X, maxX = BASE_X, minY = GROUND_Y;
+    const walk = (b: Branch) => {
+      minX = Math.min(minX, b.x2, b.x1);
+      maxX = Math.max(maxX, b.x2, b.x1);
+      minY = Math.min(minY, b.y2);
+      b.leaves.forEach((l) => { minY = Math.min(minY, l.y - l.size); minX = Math.min(minX, l.x - l.size); maxX = Math.max(maxX, l.x + l.size); });
+      b.children.forEach(walk);
+    };
+    walk(root);
+    const availH = 218;
+    const availW = 292;
+    const scale = Math.min(1, availH / Math.max(1, GROUND_Y - minY), availW / Math.max(1, (Math.max(maxX - BASE_X, BASE_X - minX)) * 2));
+
+    // Mevalar: nishonlar soni bo'yicha, yetarli o'sgan daraxtda
+    const fruitCount = maxDepth >= 3 ? Math.min(badges, 10, tips.length) : 0;
+    const fruits: { x: number; y: number }[] = [];
+    for (let i = 0; i < fruitCount; i++) {
+      const tip = tips[Math.floor((i * tips.length) / Math.max(1, fruitCount) + tips.length / (2 * fruitCount)) % tips.length];
+      fruits.push({ x: tip.x + (rnd() - 0.5) * 4, y: tip.y + 5 + rnd() * 3 });
+    }
+
+    // Uchib yuruvchi barglar (shamol) — faqat barg ko'p bo'lsa
+    const drifting = g > 0.18 && !wilted ? 3 : wilted && g > 0.18 ? 4 : 0;
+
+    return { root, scale, fruits, maxDepth, drifting, greens };
+  }, [g, wilted, vitality, badges]);
+
+  const { root, scale, fruits, drifting, greens } = tree;
+  const rootSpread = 14 + g * 46;
+
+  const renderBranch = (b: Branch): React.ReactNode => (
+    <g key={b.id}>
+      <Sway x={b.x1} y={b.y1} deg={b.sway} dur={b.dur} enabled={animate} />
+      <path
+        d={`M ${b.x1} ${b.y1} Q ${b.cx} ${b.cy} ${b.x2} ${b.y2}`}
+        stroke={b.depth <= 2 ? 'url(#kt-bark)' : '#7A5236'}
+        strokeWidth={b.width}
+        strokeLinecap="round"
+        fill="none"
+      />
+      {b.children.map(renderBranch)}
+      {/* Barg massasi: toj to'liq va yumaloq ko'rinsin */}
+      {b.terminal && g > 0.15 && (
+        <>
+          <circle cx={b.x2} cy={b.y2} r={7 + g * 11} fill={greens[0]} opacity={0.92} />
+          <circle cx={b.x2 + 4} cy={b.y2 - 4} r={5 + g * 8} fill={greens[2 % greens.length]} opacity={0.9} />
+        </>
+      )}
+      {b.leaves.map((l, i) => (
+        <g key={i} transform={`translate(${l.x} ${l.y}) rotate(${l.angle})`}>
+          <g>
+            {/* Barglar alohida animatsiyasiz — o'z shoxi bilan birga tebranadi (yengil ishlashi uchun) */}
+            {/* Barg: uchli ellips + markaziy tomir */}
+            <path
+              d={`M 0 0 C ${l.size * 0.55} ${-l.size * 0.35}, ${l.size * 0.55} ${-l.size * 1.05}, 0 ${-l.size * 1.4} C ${-l.size * 0.55} ${-l.size * 1.05}, ${-l.size * 0.55} ${-l.size * 0.35}, 0 0 Z`}
+              fill={l.color}
+            />
+            <path d={`M 0 0 L 0 ${-l.size * 1.25}`} stroke="#000" strokeOpacity="0.12" strokeWidth="0.6" />
+          </g>
+        </g>
+      ))}
+    </g>
+  );
 
   return (
-    <div className="relative flex flex-col items-center justify-center select-none py-2">
+    <div className="relative flex select-none flex-col items-center justify-center py-2">
       <svg
         viewBox="0 0 320 300"
-        className="h-64 sm:h-72 w-full max-w-[320px] overflow-visible drop-shadow-xl"
+        className="h-64 w-full max-w-[320px] overflow-visible sm:h-72"
         role="img"
-        aria-label="Bilim Ildizi interaktiv daraxti"
+        aria-label={`Bilim daraxti: ${stage}, ${safeLevel}-daraja`}
       >
         <defs>
-          {/* Daraxt tanasining tirik yog'och gradienti */}
-          <linearGradient id="trunkGradient" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="#3E2723" />
-            <stop offset="40%" stopColor="#4E342E" />
-            <stop offset="80%" stopColor="#5D4037" />
-            <stop offset="100%" stopColor="#2E7D32" />
+          <linearGradient id="kt-bark" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#5B3A24" />
+            <stop offset="55%" stopColor="#8A5A3B" />
+            <stop offset="100%" stopColor="#6B4429" />
           </linearGradient>
-
-          {/* Ildizlar gradienti */}
-          <linearGradient id="rootGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4E342E" />
-            <stop offset="60%" stopColor="#2E7D32" />
-            <stop offset="100%" stopColor="#10B981" />
+          <radialGradient id="kt-glow" cx="50%" cy="55%" r="55%">
+            <stop offset="0%" stopColor={wilted ? '#B7A65A' : '#56B26E'} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={wilted ? '#B7A65A' : '#56B26E'} stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="kt-soil" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#7A5236" />
+            <stop offset="100%" stopColor="#4E321F" />
           </linearGradient>
-
-          {/* Asosiy barglar toji uchun chuqur smaragd yoki sarg'aygan gradient */}
-          <radialGradient id="foliageDark" cx="40%" cy="35%" r="65%">
-            <stop offset="0%" stopColor={isWilted ? "#D97706" : "#10B981"} />
-            <stop offset="60%" stopColor={isWilted ? "#B45309" : "#059669"} />
-            <stop offset="100%" stopColor={isWilted ? "#78350F" : "#047857"} />
-          </radialGradient>
-
-          {/* O'rta qatlam barglar toji */}
-          <radialGradient id="foliageMid" cx="45%" cy="30%" r="65%">
-            <stop offset="0%" stopColor={isWilted ? "#FBBF24" : "#34D399"} />
-            <stop offset="50%" stopColor={isWilted ? "#F59E0B" : "#10B981"} />
-            <stop offset="100%" stopColor={isWilted ? "#D97706" : "#059669"} />
-          </radialGradient>
-
-          {/* Yuqori yorqin quyoshli barglar */}
-          <radialGradient id="foliageLight" cx="40%" cy="30%" r="60%">
-            <stop offset="0%" stopColor={isWilted ? "#FDE68A" : "#6EE7B7"} />
-            <stop offset="60%" stopColor={isWilted ? "#FCD34D" : "#34D399"} />
-            <stop offset="100%" stopColor={isWilted ? "#F59E0B" : "#10B981"} />
-          </radialGradient>
-
-          {/* Oltin meva radial 3D gradienti */}
-          <radialGradient id="fruit3D" cx="35%" cy="30%" r="65%">
-            <stop offset="0%" stopColor="#FEF08A" />
-            <stop offset="30%" stopColor="#FBBF24" />
-            <stop offset="75%" stopColor="#F59E0B" />
-            <stop offset="100%" stopColor="#B45309" />
-          </radialGradient>
-
-          {/* Yer/Tepalik gradienti */}
-          <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#10B981" stopOpacity="0.4" />
-            <stop offset="40%" stopColor="#059669" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#047857" stopOpacity="0" />
-          </linearGradient>
-
-          {/* Orqa fon nur aurası */}
-          <radialGradient id="treeAura" cx="50%" cy="45%" r="50%">
-            <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
-            <stop offset="60%" stopColor="#34D399" stopOpacity="0.06" />
-            <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-          </radialGradient>
-
-          {/* Meva nuri filtri */}
-          <filter id="fruitGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
         </defs>
 
-        {/* 1. SEHRLI AURA (ORQA FONDA) */}
-        <circle cx="160" cy="130" r="110" fill="url(#treeAura)" />
+        {/* Orqa nur */}
+        <ellipse cx={BASE_X} cy={GROUND_Y - 90 * Math.max(0.4, g)} rx={60 + g * 90} ry={60 + g * 80} fill="url(#kt-glow)" />
 
-        {/* 2. YER VA TEPALIK (BILIM ZAMINI) */}
-        <ellipse cx="160" cy="245" rx="80" ry="14" fill="url(#groundGrad)" />
-        <ellipse cx="160" cy="244" rx="60" ry="8" fill="#10B981" fillOpacity="0.25" />
-        <path
-          d="M 80 245 Q 160 236 240 245"
-          fill="none"
-          stroke="#10B981"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
-
-        {/* 3. ILDIZLAR (BREND ASOSI — "ILM ILDIZI") */}
-        {/* Chuqur mustahkam ildizlar tarmog'i */}
-        <g id="roots">
-          {/* Chap ildizlar */}
-          <motion.path
-            d="M 154 242 Q 135 255 110 265 Q 95 270 80 274"
-            fill="none"
-            stroke="url(#rootGradient)"
-            strokeWidth="4"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-          />
-          <motion.path
-            d="M 140 252 Q 125 268 115 285"
-            fill="none"
-            stroke="url(#rootGradient)"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-          />
-
-          {/* Markaziy chuqur ildiz */}
-          <motion.path
-            d="M 160 244 Q 158 265 160 290"
-            fill="none"
-            stroke="url(#rootGradient)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-          />
-
-          {/* O'ng ildizlar */}
-          <motion.path
-            d="M 166 242 Q 185 255 210 265 Q 225 270 240 274"
-            fill="none"
-            stroke="url(#rootGradient)"
-            strokeWidth="4"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-          />
-          <motion.path
-            d="M 180 252 Q 195 268 205 285"
-            fill="none"
-            stroke="url(#rootGradient)"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-          />
-
-          {/* Ildizlardagi energiya nuqtalari (Bilim nuri) */}
-          <circle cx="110" cy="265" r="2.5" fill="#34D399" className="animate-pulse" />
-          <circle cx="160" cy="275" r="2.5" fill="#34D399" className="animate-pulse" />
-          <circle cx="210" cy="265" r="2.5" fill="#34D399" className="animate-pulse" />
-        </g>
-
-        {/* 4. TANA (TRUNK) — EGRI-BUG'RI TABIIY DARAXT TANASI */}
-        <motion.path
-          d={`M 148 244 C 148 210, 152 ${trunkTopY + 50}, 154 ${trunkTopY} L 166 ${trunkTopY} C 168 ${trunkTopY + 50}, 172 210, 172 244 Z`}
-          fill="url(#trunkGradient)"
-          initial={{ scaleY: 0, originY: 1 }}
-          animate={{ scaleY: 1 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-        />
-
-        {/* Yog'och to'qimasi chiziqlari */}
-        <path
-          d={`M 156 240 Q 158 200 159 ${trunkTopY + 20}`}
-          fill="none"
-          stroke="#3E2723"
-          strokeWidth="1.5"
-          opacity="0.45"
-        />
-        <path
-          d={`M 163 240 Q 164 195 162 ${trunkTopY + 25}`}
-          fill="none"
-          stroke="#2E7D32"
-          strokeWidth="1.5"
-          opacity="0.5"
-        />
-
-        {/* 5. SHOXLAR (BRANCHES) — DARAJA BILAN KO'PAYADI */}
-        <g id="branches">
-          {branches.map((b) => (
-            <motion.path
-              key={b.id}
-              d={b.d}
-              fill="none"
-              stroke="url(#trunkGradient)"
-              strokeWidth="4"
+        {/* Ildizlar (yer ostida, daraxt bilan birga kattalashadi) */}
+        <g opacity={0.55 + g * 0.3}>
+          {[-1, -0.45, 0.4, 1].map((s, i) => (
+            <path
+              key={i}
+              d={`M ${BASE_X + s * 2} ${GROUND_Y + 2} Q ${BASE_X + s * rootSpread * 0.5} ${GROUND_Y + 10 + g * 6} ${BASE_X + s * rootSpread} ${GROUND_Y + 16 + g * 10}`}
+              stroke="#6B4429"
+              strokeWidth={1 + g * 3.2}
               strokeLinecap="round"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ duration: 0.6, delay: b.delay, ease: 'easeOut' }}
+              fill="none"
             />
           ))}
         </g>
 
-        {/* 6. TOJ VA BARGLAR (LUSH FOLIAGE CLOUDS) — STREAK BILAN QALINLASHADI */}
-        <motion.g
-          id="canopy"
-          initial={{ scale: 0.3, opacity: 0 }}
-          animate={{ scale: foliageScale, opacity: 1 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: 'easeOut' }}
-          style={{ transformOrigin: '160px 120px' }}
-        >
-          {/* Orqa quyuq qatlam */}
-          <circle cx="120" cy="115" r="38" fill="url(#foliageDark)" />
-          <circle cx="200" cy="110" r="38" fill="url(#foliageDark)" />
-          <circle cx="160" cy="75" r="42" fill="url(#foliageDark)" />
+        {/* Tuproq tepaligi */}
+        <ellipse cx={BASE_X} cy={GROUND_Y + 4} rx={34 + g * 70} ry={7 + g * 4} fill="#000" opacity="0.18" />
+        <path
+          d={`M ${BASE_X - 30 - g * 62} ${GROUND_Y + 4} Q ${BASE_X} ${GROUND_Y - 10 - g * 4} ${BASE_X + 30 + g * 62} ${GROUND_Y + 4} Z`}
+          fill="url(#kt-soil)"
+        />
 
-          {/* O'rta boy qatlam */}
-          <circle cx="135" cy="90" r="36" fill="url(#foliageMid)" />
-          <circle cx="185" cy="85" r="36" fill="url(#foliageMid)" />
-          <circle cx="110" cy="140" r="28" fill="url(#foliageMid)" />
-          <circle cx="210" cy="135" r="28" fill="url(#foliageMid)" />
-
-          {/* Yuqori yorug'lik tushgan qatlam */}
-          <circle cx="160" cy="100" r="44" fill="url(#foliageLight)" />
-          <circle cx="145" cy="75" r="30" fill="url(#foliageLight)" />
-          <circle cx="175" cy="70" r="30" fill="url(#foliageLight)" />
-
-          {/* Kichik barg klasterlari (Tafsilotlar) */}
-          <circle cx="95" cy="125" r="16" fill="#10B981" />
-          <circle cx="225" cy="120" r="16" fill="#10B981" />
-          <circle cx="160" cy="50" r="18" fill="#34D399" />
-        </motion.g>
-
-        {/* 7. UCHUVCHI TIRIK BARGLAR (STREAK DYNAMICS) */}
-        <g id="floating-leaves">
-          {Array.from({ length: leafCount }).map((_, i) => {
-            const angle = (i / leafCount) * Math.PI * 2;
-            const dist = 65 + ((i * 19) % 35);
-            const lx = 160 + Math.cos(angle) * dist;
-            const ly = 105 + Math.sin(angle) * (dist * 0.75);
-            return (
-              <motion.circle
-                key={i}
-                cx={lx}
-                cy={ly}
-                r={3.5 + ((i * 2) % 3)}
-                fill={i % 2 === 0 ? '#34D399' : '#10B981'}
-                initial={{ scale: 0 }}
-                animate={{
-                  scale: [1, 1.25, 1],
-                  y: [0, -3, 0],
-                }}
-                transition={{
-                  duration: 2.5 + (i % 3),
-                  repeat: Infinity,
-                  delay: i * 0.15,
-                  ease: 'easeInOut',
-                }}
-              />
-            );
-          })}
-        </g>
-
-        {/* 8. OLTIN MEVALAR (YUTUQLAR — BADGES) */}
-        <g id="fruits">
-          {activeFruits.map((f, i) => (
-            <motion.g
-              key={i}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{
-                type: 'spring',
-                stiffness: 260,
-                damping: 18,
-                delay: 0.6 + i * 0.08,
-              }}
-              style={{ transformOrigin: `${f.x}px ${f.y}px` }}
-            >
-              {/* Meva orqasidagi porlash */}
-              <circle
-                cx={f.x}
-                cy={f.y}
-                r="7"
-                fill="#FBBF24"
-                opacity="0.3"
-                filter="url(#fruitGlow)"
-                className="animate-pulse"
-              />
-
-              {/* Oltin olma mevasi */}
-              <circle
-                cx={f.x}
-                cy={f.y}
-                r="5.5"
-                fill="url(#fruit3D)"
-                stroke="#B45309"
-                strokeWidth="0.8"
-              />
-
-              {/* Meva bandi va kichik bargchasi */}
-              <path
-                d={`M ${f.x} ${f.y - 5.5} Q ${f.x + 1} ${f.y - 8} ${f.x + 2.5} ${f.y - 9}`}
-                fill="none"
-                stroke="#3E2723"
-                strokeWidth="1"
-              />
-              <circle cx={f.x + 2.5} cy={f.y - 8.5} r="1.5" fill="#10B981" />
-
-              {/* 3D yorug'lik nuqtasi */}
-              <circle cx={f.x - 1.8} cy={f.y - 1.8} r="1.5" fill="#FFFFFF" opacity="0.85" />
-            </motion.g>
+        {/* Daraxt (oynaga sig'dirilgan) */}
+        <g transform={`translate(${BASE_X} ${GROUND_Y}) scale(${scale}) translate(${-BASE_X} ${-GROUND_Y})`}>
+          {renderBranch(root)}
+          {fruits.map((f, i) => (
+            <g key={`f${i}`}>
+              <line x1={f.x} y1={f.y - 5} x2={f.x} y2={f.y - 1} stroke="#5B3A24" strokeWidth="1" />
+              <circle cx={f.x} cy={f.y + 2.5} r="4.6" fill="#FFB82E" stroke="#C47F00" strokeWidth="0.8" />
+              <circle cx={f.x - 1.4} cy={f.y + 1.2} r="1.3" fill="#FFF3C4" />
+            </g>
           ))}
         </g>
 
-        {/* 9. SUZIB YURUVCHI SEHRLI TOZONLAR (FIREFLIES/SPORES) */}
-        <motion.circle
-          cx="115"
-          cy="150"
-          r="2"
-          fill="#FEF08A"
-          animate={{ y: [-4, 4, -4], opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
-        <motion.circle
-          cx="205"
-          cy="140"
-          r="2.5"
-          fill="#6EE7B7"
-          animate={{ y: [4, -4, 4], opacity: [0.4, 0.9, 0.4] }}
-          transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }}
-        />
-        <motion.circle
-          cx="160"
-          cy="45"
-          r="2"
-          fill="#FDE047"
-          animate={{ scale: [0.8, 1.3, 0.8], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2.8, repeat: Infinity, delay: 1 }}
-        />
+        {/* O't-o'lan (shamolda egiladi) */}
+        {Array.from({ length: 9 }).map((_, i) => {
+          const x = BASE_X - 28 - g * 58 + i * ((56 + g * 116) / 8);
+          const h = 6 + ((i * 37) % 5);
+          return (
+            <g key={`grass${i}`}>
+              <Sway x={x} y={GROUND_Y + 2} deg={9} dur={2.2 + (i % 3) * 0.4} enabled={animate} />
+              <path d={`M ${x} ${GROUND_Y + 2} q 1 ${-h / 2} ${i % 2 ? 2.5 : -2.5} ${-h}`} stroke={greens[i % greens.length]} strokeWidth="1.6" strokeLinecap="round" fill="none" />
+            </g>
+          );
+        })}
+
+        {/* Shamolda uchayotgan barglar */}
+        {animate &&
+          Array.from({ length: drifting }).map((_, i) => (
+            <g key={`drift${i}`} opacity="0">
+              <path d="M 0 0 C 3 -2, 3 -6, 0 -8 C -3 -6, -3 -2, 0 0 Z" fill={greens[(i + 1) % greens.length]} />
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                values={`${BASE_X - 30 + i * 22} ${GROUND_Y - 150 * Math.max(0.5, g)}; ${BASE_X + 70 + i * 18} ${GROUND_Y - 60}; ${BASE_X + 140 + i * 10} ${GROUND_Y - 4}`}
+                dur={`${7 + i * 1.7}s`}
+                begin={`${i * 2.3}s`}
+                repeatCount="indefinite"
+              />
+              <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.15;0.8;1" dur={`${7 + i * 1.7}s`} begin={`${i * 2.3}s`} repeatCount="indefinite" />
+            </g>
+          ))}
       </svg>
 
-      {/* Daraxt osti maqom tegi */}
-      <div className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[12px] font-bold text-emerald-400">
-        <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" />
-        <span>Tirik Bilim Ildizi · {safeLevel}-bosqich</span>
+      <div className="mt-1 inline-flex items-center gap-2 rounded-full bg-[var(--ps-green,#4C806B)] px-3.5 py-1.5 text-[12px] font-bold text-white">
+        <span className="size-1.5 animate-pulse rounded-full bg-white" />
+        {stage} · {safeLevel}-daraja
+        <span className="opacity-70">/ {MAX_LEVEL}</span>
       </div>
     </div>
   );

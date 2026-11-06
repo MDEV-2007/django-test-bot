@@ -9,7 +9,7 @@ import {
   Trophy,
   MessageCircle,
   ArrowRight,
-  CheckCircle2,
+  Check,
   Send,
   ExternalLink,
   BookOpen,
@@ -26,24 +26,27 @@ import {
 import { toast } from 'sonner';
 
 import AppShell from '@/components/AppShell';
+import SmartB2BSuggestionCard from '@/components/dashboard/SmartB2BSuggestionCard';
+import { Panel, PanelLabel, PanelLink, Initials } from '@/components/design/kit';
+import { useApiQuery } from '@/lib/api-cache';
+import { TrendingUp } from 'lucide-react';
 import Reveal from '@/components/motion/Reveal';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import { celebrate } from '@/lib/confetti';
 import PremiumIcon from '@/components/ui/premium-icon';
+import { IlmIcon, ILM_STICKERS, withIlmIcons, type IlmIconName } from '@/components/brand/IlmIcons';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import { cn } from '@/lib/utils';
 import FeedStoriesBar from '@/components/feed/FeedStoriesBar';
 import SosQuestionCard from '@/components/feed/SosQuestionCard';
 import TargetedAdBanner, { type TargetedOfferData } from '@/components/feed/TargetedAdBanner';
 import AutoShareModal from '@/components/feed/AutoShareModal';
+import ImageLightbox from '@/components/feed/ImageLightbox';
+import ReportPostDialog from '@/components/feed/ReportPostDialog';
 import { useTransliterate } from '@/lib/transliterate';
 
 type PostItem = {
@@ -110,36 +113,76 @@ type FeedResponse = {
   user_attempted_slugs?: string[];
 };
 
-const REACTION_EMOJIS: Record<string, { icon: string; label: string; activeClass: string }> = {
-  fire: {
-    icon: '🔥',
-    label: 'Olov',
-    activeClass: 'bg-[#FF9500]/15 border-[#FF9500]/45 text-[#C93400] dark:text-[#FF9F0A]',
-  },
-  clap: {
-    icon: '👏',
-    label: 'Qarsak',
-    activeClass: 'bg-[#34C759]/15 border-[#34C759]/45 text-[#248A3D] dark:text-[#30D158]',
-  },
-  trophy: {
-    icon: '🏆',
-    label: 'Kubok',
-    activeClass: 'bg-[#FFCC00]/20 border-[#FF9500]/45 text-[#B25000] dark:text-[#FFD60A]',
-  },
-  heart: {
-    icon: '❤️',
-    label: 'Yurak',
-    activeClass: 'bg-[#FF2D55]/15 border-[#FF2D55]/45 text-[#D70015] dark:text-[#FF375F]',
-  },
+const REACTION_EMOJIS: Record<string, { icon: IlmIconName; label: string; activeClass: string }> = {
+  fire: { icon: 'fire', label: 'Olov', activeClass: 'bg-[var(--ps-orange)] text-[#080808]' },
+  clap: { icon: 'clap', label: 'Qarsak', activeClass: 'bg-[var(--ps-green)] text-white' },
+  trophy: { icon: 'trophy', label: 'Kubok', activeClass: 'bg-[var(--ps-purple)] text-white' },
+  heart: { icon: 'heart', label: 'Yurak', activeClass: 'bg-[var(--ps-coral)] text-white' },
 };
 
-const STUDY_MEMES = [
-  { label: 'Daho 🧠', text: '🧠 Daho rejim yoqildi!' },
-  { label: 'Grand 🎯', text: "🎯 Grand kutmoqda, olg'a!" },
-  { label: 'Kofe ☕', text: "☕ Abituriyent kofesi kuch bag'ishlasin!" },
-  { label: 'Kitob 📚', text: '📚 Kitoblar titilgan, natija esa bomba!' },
-  { label: 'Chempion 🏆', text: '🏆 Haqiqiy chempionlik natijasi!' },
-];
+type LbRow = { profile_id: number; username: string; first_name: string; last_name: string; avatar_url: string; xp: number };
+
+/* Right rail of the community page: trending subjects (counted from the posts actually
+   loaded), this week's top learners (leaderboard API) and the native sponsored slot. */
+function FeedSidebar({ posts }: { posts: PostItem[] }) {
+  const { data: lb } = useApiQuery<{ podium?: LbRow[]; rankings?: LbRow[]; top?: LbRow[] }>('/api/leaderboard/?timeframe=weekly');
+  const leaders = [...(lb?.podium || []), ...(lb?.rankings || []), ...(lb?.top || [])].slice(0, 4);
+
+  const trending = React.useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of posts) {
+      const key = (p.subject_name || '').trim();
+      if (!key) continue;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [posts]);
+
+  return (
+    <aside className="hidden xl:block space-y-4 xl:sticky xl:top-20 self-start">
+      <Panel>
+        <PanelLabel icon={TrendingUp}>Trendda</PanelLabel>
+        {trending.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Hozircha postlar kam.</p>
+        ) : (
+          <ul className="space-y-3">
+            {trending.map(([name, n]) => (
+              <li key={name}>
+                <p className="text-[13px] font-bold text-foreground">#{name.replace(/\s+/g, '')}</p>
+                <p className="text-[11px] text-muted-foreground">{n} ta post</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+
+      <Panel>
+        <PanelLabel icon={Trophy} right={<PanelLink href="/leaderboard">Reyting</PanelLink>}>
+          Hafta yetakchilari
+        </PanelLabel>
+        {leaders.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Bu hafta hali natija yo&apos;q.</p>
+        ) : (
+          <ul className="space-y-3">
+            {leaders.map((r, i) => (
+              <li key={r.profile_id} className="flex items-center gap-2.5">
+                <Initials name={`${r.first_name || r.username} ${r.last_name || ''}`} src={r.avatar_url} size={30} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-foreground truncate">
+                    {[r.first_name, r.last_name].filter(Boolean).join(' ') || r.username}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">#{i + 1} · {r.xp.toLocaleString('uz-UZ')} XP</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+
+      <SmartB2BSuggestionCard />
+    </aside>
+  );
+}
 
 export default function CommunityFeedPage() {
   const router = useRouter();
@@ -169,6 +212,8 @@ export default function CommunityFeedPage() {
   >({});
 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const closePreview = useCallback(() => setPreviewImage(null), []);
+  const [reportPostId, setReportPostId] = useState<number | null>(null);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -322,16 +367,21 @@ export default function CommunityFeedPage() {
     loadFeed(selectedFilter);
   }, [selectedFilter, loadFeed]);
 
-  async function handleReportPost(postId: number) {
-    if (!window.confirm("Bu postga shikoyat qilinsinmi? (spam, haqorat yoki javob tarqatish)")) return;
+  function handleReportPost(postId: number) {
+    setReportPostId(postId);
+  }
+
+  async function submitReport(reason: string, details: string) {
+    if (reportPostId === null) return;
     try {
       const res = await apiFetch<{ message: string; already_reported: boolean }>(
-        `/api/learning/feed/${postId}/report/`,
-        { method: 'POST', body: JSON.stringify({ reason: 'other' }) },
+        `/api/learning/feed/${reportPostId}/report/`,
+        { method: 'POST', body: JSON.stringify({ reason, details }) },
       );
       toast.success(res.already_reported ? 'Siz bu postga allaqachon shikoyat qilgansiz.' : res.message);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Shikoyat yuborilmadi");
+      throw e;
     }
   }
 
@@ -545,51 +595,48 @@ export default function CommunityFeedPage() {
   }
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 bg-[var(--bg-page)] w-full max-w-full min-w-0 overflow-x-hidden p-4 sm:p-6 pb-28">
+      <main className="page-shell flex-1 w-full max-w-full min-w-0 overflow-x-hidden p-4 sm:p-6 pb-28">
+        <div className="mx-auto grid w-full max-w-[1180px] gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="mx-auto max-w-2xl space-y-5 w-full min-w-0">
           {/* 0. Kunlik Streak & O'quv Markaz Stories */}
           <FeedStoriesBar examTrack={examTrack} />
 
 
-          {/* 1. iOS 18 Top Segmented Bar & Action Button */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5">
-            <div className="ios-segmented inline-flex items-center">
-              <div className="ios-segmented-thumb flex items-center gap-2 px-3.5 sm:px-5 py-1.5 text-xs sm:text-[13px] font-bold select-none">
-                <PremiumIcon icon={Sparkles} tone="emerald" size="2xs" />
-                <span>Hamjamiyat</span>
+          {/* 1. Sarlavha */}
+          <section className="pt-2">
+            <span className="ps-chip">
+              <TrendingUp className="size-3.5 text-[var(--ps-purple)]" /> Hamjamiyat lentasi
+            </span>
+            <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
+              <h1 className="ps-display text-[48px] sm:text-[68px]">
+                Nima{' '}
+                <span className="relative inline-block text-[var(--ps-purple)]">
+                  gap
+                  <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)] sm:-bottom-3 sm:h-4">
+                    <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+                  </svg>
+                </span>
+                <span className="text-[var(--ps-coral)]">?</span>
+              </h1>
+              <div className="flex items-center gap-2">
+                <Link href="/tests/history" className="ps-chip hidden sm:inline-flex">
+                  <Award className="size-3.5 text-[var(--ps-orange)]" /> Natijalarim
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModalTab('result');
+                    setIsCreateModalOpen(true);
+                  }}
+                  className="ps-btn ps-btn-ink !min-h-11"
+                >
+                  <Plus className="size-4 stroke-[2.5]" /> Yangi post
+                </button>
               </div>
-              <Link
-                href="/leaderboard"
-                className="flex items-center gap-2 px-3.5 sm:px-5 py-1.5 text-xs sm:text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <PremiumIcon icon={Trophy} tone="amber" size="2xs" />
-                <span>Liderlar Ligasi</span>
-              </Link>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Link
-                href="/tests/history"
-                className="ios-spring hidden sm:inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground shadow-2xs hover:bg-muted/70"
-              >
-                <PremiumIcon icon={Award} tone="amber" size="2xs" />
-                <span>Natijalarim</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveModalTab('result');
-                  setIsCreateModalOpen(true);
-                }}
-                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs sm:text-[13px] font-bold text-white shadow-[0_6px_16px_rgba(0,122,255,0.34)] cursor-pointer"
-              >
-                <Plus className="size-4 stroke-[2.5]" />
-                <span>Yangi post</span>
-              </button>
-            </div>
-          </div>
+          </section>
 
           {/* 2. iOS 18 Quick Composer Card */}
           <div
@@ -597,7 +644,7 @@ export default function CommunityFeedPage() {
               setActiveModalTab('result');
               setIsCreateModalOpen(true);
             }}
-            className="ios-card ios-card-interactive rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer"
+            className="ps-card ps-lift flex cursor-pointer items-center justify-between gap-3 !rounded-full p-2.5 pl-3 sm:p-3 sm:pl-3.5"
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <Avatar className="size-10 border border-border shrink-0">
@@ -626,7 +673,7 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('result');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 border border-[#FF9500]/25 px-3 py-1.5 text-[12px] font-bold text-[#C93400] dark:text-[#FF9F0A] cursor-pointer"
+                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-orange)]/14 border border-[var(--ps-orange)]/25 px-3 py-1.5 text-[12px] font-bold text-[#8A5A00] dark:text-[var(--ps-orange)] cursor-pointer"
               >
                 <PremiumIcon icon={Award} tone="amber" size="2xs" />
                 <span>Natija</span>
@@ -638,7 +685,7 @@ export default function CommunityFeedPage() {
                   setActiveModalTab('custom');
                   setIsCreateModalOpen(true);
                 }}
-                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#34C759]/14 border border-[#34C759]/25 px-3 py-1.5 text-[12px] font-bold text-[#248A3D] dark:text-[#30D158] cursor-pointer"
+                className="ios-spring hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)]/14 border border-[var(--ps-green)]/25 px-3 py-1.5 text-[12px] font-bold text-[var(--ps-green)] cursor-pointer"
               >
                 <PremiumIcon icon={Camera} tone="emerald" size="2xs" />
                 <span>Rasm</span>
@@ -680,10 +727,10 @@ export default function CommunityFeedPage() {
                   type="button"
                   onClick={() => setSelectedFilter(tab.slug)}
                   className={cn(
-                    'ios-spring shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer border',
+                    'ios-spring shrink-0 rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer',
                     isSel
-                      ? 'bg-primary text-white border-primary shadow-[0_4px_12px_rgba(0,122,255,0.3)]'
-                      : 'bg-card text-muted-foreground border-border hover:text-foreground'
+                      ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                      : 'bg-[var(--ps-paper)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                   )}
                 >
                   {t(tab.label)}
@@ -725,7 +772,7 @@ export default function CommunityFeedPage() {
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-[0_6px_16px_rgba(0,122,255,0.32)] cursor-pointer"
+                    className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-[0_6px_16px_rgba(118,89,199,0.45)] cursor-pointer"
                   >
                     <Plus className="size-4" />
                     <span>Birinchi postni qoldirish</span>
@@ -741,8 +788,149 @@ export default function CommunityFeedPage() {
                 const comments = postComments[post.id] || [];
                 const isCommentsOpen = expandedComments[post.id] || false;
                 const isCommentsLoading = loadingComments[post.id] || false;
-                const isCert = post.post_type === 'certificate' || (post.score && post.score >= 60);
                 const postReplying = replyingTo[post.id];
+
+                const commentsSheet = (
+                  <div className="pt-3 space-y-3 border-t border-border">
+                    {isCommentsLoading ? (
+                      <div className="text-center py-4 text-xs text-muted-foreground animate-pulse">
+                        Izohlar yuklanmoqda...
+                      </div>
+                    ) : comments.length === 0 ? (
+                      <div className="flex items-center justify-center gap-2.5 rounded-[22px] bg-[var(--ps-neutral)] px-4 py-3.5 text-[13px] font-semibold text-[var(--text-secondary)]">
+                        <IlmIcon name="party" className="size-7 shrink-0" />
+                        Hozircha izohlar yo&apos;q. Birinchi bo&apos;lib tabriklang!
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                        {comments.map((c) => {
+                          const isReply = Boolean(c.parent_id);
+                          return (
+                            <div
+                              key={c.id}
+                              className={cn(
+                                'flex items-start gap-2.5 text-xs p-2.5 rounded-lg transition-all',
+                                isReply
+                                  ? 'ml-6 bg-muted/40 border-l-2 border-primary/50'
+                                  : 'bg-muted/55'
+                              )}
+                            >
+                              {isReply && (
+                                <CornerDownRight className="size-3 text-muted-foreground shrink-0 mt-1" />
+                              )}
+                              <Avatar className="size-6.5 shrink-0 mt-0.5">
+                                {c.user_avatar && (
+                                  <AvatarImage src={c.user_avatar} alt={c.user_name} />
+                                )}
+                                <AvatarFallback className="text-[11px] font-bold bg-primary/12 text-primary">
+                                  {c.user_name.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-baseline justify-between gap-2">
+                                  <div className="flex items-center gap-1 min-w-0">
+                                    <span className="font-bold text-foreground truncate">
+                                      {c.user_name}
+                                    </span>
+                                    <VerifiedBadge
+                                      role={c.role}
+                                      isSuperadmin={c.is_superadmin}
+                                      isTeacher={c.is_teacher}
+                                      size="xs"
+                                    />
+                                  </div>
+                                  <span className="text-[12px] text-muted-foreground shrink-0">
+                                    {c.created_at}
+                                  </span>
+                                </div>
+                                <p className="text-foreground/90 mt-0.5 leading-snug">{withIlmIcons(c.text)}</p>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setReplyingTo((prev) => ({
+                                      ...prev,
+                                      [post.id]: { commentId: c.id, userName: c.user_name },
+                                    }));
+                                    setCommentInputs((prev) => ({
+                                      ...prev,
+                                      [post.id]: `@${c.user_name} `,
+                                    }));
+                                  }}
+                                  className="mt-1 text-[12px] font-bold text-primary hover:underline cursor-pointer"
+                                >
+                                  Javob berish
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Quick Reaction Phrases */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                      {ILM_STICKERS.map((m) => (
+                        <button
+                          key={m.label}
+                          type="button"
+                          onClick={() => {
+                            setCommentInputs((prev) => ({
+                              ...prev,
+                              [post.id]: (prev[post.id] ? prev[post.id] + ' ' : '') + m.text,
+                            }));
+                          }}
+                          className="group/st inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-[var(--ps-neutral)] pl-1.5 pr-3.5 text-[13px] font-bold text-[var(--text-primary)] transition-all hover:bg-[#080808] hover:text-[#FFFCF7] active:scale-95 dark:hover:bg-[#FFFCF7] dark:hover:text-[#080808]"
+                        >
+                          <span className="inline-flex size-7 items-center justify-center rounded-full bg-[var(--ps-paper)] transition-transform group-hover/st:-rotate-12 group-hover/st:scale-110">
+                            <IlmIcon name={m.icon} className="size-5" />
+                          </span>
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {postReplying && (
+                      <div className="flex items-center justify-between text-xs px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary">
+                        <span className="truncate">
+                          💬 <b>@{postReplying.userName}</b> ga javob yozilmoqda
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setReplyingTo((prev) => ({ ...prev, [post.id]: null }))}
+                          className="text-muted-foreground hover:text-foreground ml-2 cursor-pointer"
+                        >
+                          <X className="size-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* iOS Messages Style Input Pill */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={commentInputs[post.id] || ''}
+                        onChange={(e) =>
+                          setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleAddComment(post.id);
+                        }}
+                        placeholder="Izoh yozing..."
+                        className="flex-1 rounded-full border border-border bg-muted/60 px-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        maxLength={1000}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddComment(post.id)}
+                        disabled={submittingComment[post.id] || !commentInputs[post.id]?.trim()}
+                        className="ios-spring flex size-8.5 shrink-0 items-center justify-center rounded-full bg-primary text-white disabled:opacity-40 cursor-pointer"
+                      >
+                        <Send className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+                const isCert = post.post_type === 'certificate' || (post.score && post.score >= 60);
                 const canDelete = Boolean(
                   post.can_delete ||
                     (user &&
@@ -767,6 +955,11 @@ export default function CommunityFeedPage() {
                         onOpenComments={() => toggleComments(post.id)}
                         currentUserId={user?.id}
                       />
+                      {isCommentsOpen && (
+                        <div className="ps-card mt-2 !rounded-[28px] p-4 sm:p-5 [&>div]:border-t-0 [&>div]:pt-0">
+                          {commentsSheet}
+                        </div>
+                      )}
                     </Reveal>
                   );
                 }
@@ -805,7 +998,7 @@ export default function CommunityFeedPage() {
                                 Lvl {post.author.level}
                               </span>
                               {post.is_pinned && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-[#FF2D55]/14 px-2 py-0.5 text-[12px] font-bold text-[#D70015] dark:text-[#FF375F]">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-coral)]/14 px-2 py-0.5 text-[12px] font-bold text-[var(--ps-coral)]">
                                   <Pin className="size-2.5" /> Qadalgan
                                 </span>
                               )}
@@ -821,10 +1014,10 @@ export default function CommunityFeedPage() {
                             className={cn(
                               'rounded-full px-2.5 py-1 text-[10.5px] font-bold border',
                               post.post_type === 'achievement'
-                                ? 'border-[#AF52DE]/30 bg-[#AF52DE]/12 text-[#8944AB] dark:text-[#BF5AF2]'
+                                ? 'border-[var(--ps-purple)]/30 bg-[var(--ps-purple)]/12 text-[var(--ps-purple)]'
                                 : isCert
-                                ? 'border-[#FF9500]/30 bg-[#FF9500]/14 text-[#C93400] dark:text-[#FF9F0A]'
-                                : 'border-[#007AFF]/30 bg-[#007AFF]/12 text-[#007AFF] dark:text-[#409CFF]'
+                                ? 'border-[var(--ps-orange)]/30 bg-[var(--ps-orange)]/14 text-[#8A5A00] dark:text-[var(--ps-orange)]'
+                                : 'border-[var(--ps-purple)]/30 bg-[var(--ps-purple)]/12 text-[var(--ps-purple)]'
                             )}
                           >
                             {post.post_type === 'achievement'
@@ -838,7 +1031,7 @@ export default function CommunityFeedPage() {
                             <button
                               type="button"
                               onClick={() => handleReportPost(post.id)}
-                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[#FF9500] hover:bg-[#FF9500]/12 transition-colors cursor-pointer"
+                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[var(--ps-orange)] hover:bg-[var(--ps-orange)]/12 transition-colors cursor-pointer"
                               title="Shikoyat qilish"
                               aria-label="Postga shikoyat qilish"
                             >
@@ -850,7 +1043,7 @@ export default function CommunityFeedPage() {
                             <button
                               type="button"
                               onClick={() => handleDeletePost(post.id)}
-                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[#FF3B30] hover:bg-[#FF3B30]/12 transition-colors cursor-pointer"
+                              className="ios-spring flex size-7.5 items-center justify-center rounded-full text-muted-foreground hover:text-[var(--ps-coral)] hover:bg-[var(--ps-coral)]/12 transition-colors cursor-pointer"
                               title="Postni o'chirish"
                             >
                               <Trash2 className="size-3.5" />
@@ -861,7 +1054,7 @@ export default function CommunityFeedPage() {
 
                       {/* 2. Result / Subject Summary Block */}
                       {post.score > 0 || post.total_questions > 0 || post.grade ? (
-                        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3.5 sm:p-4 min-w-0">
+                        <div className="flex items-center justify-between gap-3 rounded-[22px] bg-[var(--ps-neutral)] p-4 min-w-0">
                           <div className="space-y-1 min-w-0 flex-1">
                             <span className="inline-block rounded-full bg-card border border-border px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground">
                               {post.subject_name}
@@ -879,12 +1072,12 @@ export default function CommunityFeedPage() {
                           </div>
 
                           {post.score > 0 && (
-                            <div className="flex flex-col items-end shrink-0 rounded-lg bg-[#34C759]/14 border border-[#34C759]/25 px-3.5 py-2">
-                              <span className="text-lg sm:text-2xl font-bold font-mono tracking-tight text-[#248A3D] dark:text-[#30D158] leading-none">
+                            <div className="flex flex-col items-end shrink-0 rounded-[18px] bg-[var(--ps-green)] px-4 py-2.5 text-white">
+                              <span className="ps-num text-[26px] sm:text-[32px] leading-none">
                                 {post.score?.toFixed(0)}%
                               </span>
                               {post.grade && (
-                                <span className="mt-0.5 text-[12px] font-bold uppercase text-[#C93400] dark:text-[#FF9F0A]">
+                                <span className="mt-1 text-[11px] font-bold uppercase text-[var(--ps-orange)]">
                                   Daraja: {post.grade}
                                 </span>
                               )}
@@ -915,7 +1108,7 @@ export default function CommunityFeedPage() {
                       {post.image_url && (
                         <div
                           onClick={() => setPreviewImage(post.image_url)}
-                          className="relative overflow-hidden rounded-xl border border-border bg-[#F2F2F7] dark:bg-[#1C1C1E] group cursor-pointer flex items-center justify-center max-h-[500px] w-full"
+                          className="relative overflow-hidden rounded-xl border border-border bg-[var(--ps-neutral)] group cursor-pointer flex items-center justify-center max-h-[500px] w-full"
                         >
                           <img
                             src={post.image_url}
@@ -933,7 +1126,7 @@ export default function CommunityFeedPage() {
                       {post.test_id && (
                         <Link
                           href={`/tests/mock/${post.test_id}`}
-                          className="ios-spring flex items-center justify-between rounded-lg bg-primary/10 hover:bg-primary/15 border border-primary/20 px-4 py-2.5 text-xs font-bold text-primary transition-colors"
+                          className="ios-spring flex items-center justify-between rounded-full bg-[#080808] px-5 py-3 text-xs font-bold text-[#FFFCF7] transition-transform hover:-translate-y-0.5 dark:bg-[#FFFCF7] dark:text-[#080808]"
                         >
                           <span>Shu testni siz ham yechib ko&apos;ring</span>
                           <ArrowRight className="size-3.5" />
@@ -954,15 +1147,20 @@ export default function CommunityFeedPage() {
                                 type="button"
                                 onClick={() => handleReact(post.id, rKey)}
                                 className={cn(
-                                  'ios-spring flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold transition-all border cursor-pointer',
+                                  'group/react ios-spring flex h-10 cursor-pointer items-center gap-1.5 rounded-full pl-1.5 text-[13px] font-bold transition-all active:scale-90',
+                                  count > 0 ? 'pr-3' : 'pr-1.5',
                                   isMyReaction
                                     ? meta.activeClass
-                                    : 'bg-muted/70 text-muted-foreground border-transparent hover:bg-muted hover:text-foreground'
+                                    : 'bg-[var(--ps-neutral)] text-[var(--text-secondary)] hover:-translate-y-0.5'
                                 )}
                                 title={meta.label}
+                                aria-label={meta.label}
+                                aria-pressed={isMyReaction}
                               >
-                                <span>{meta.icon}</span>
-                                {count > 0 && <span className="font-mono text-[12px]">{count}</span>}
+                                <span className={cn('inline-flex size-7 items-center justify-center rounded-full transition-transform group-hover/react:scale-110', isMyReaction ? 'bg-[#FFFCF7]' : 'bg-[var(--ps-paper)]')}>
+                                  <IlmIcon name={meta.icon} className="size-5" />
+                                </span>
+                                {count > 0 && <span className="font-[family-name:var(--font-grotesk)] tabular-nums">{count}</span>}
                               </button>
                             );
                           })}
@@ -983,143 +1181,8 @@ export default function CommunityFeedPage() {
                         </button>
                       </div>
 
-                      {/* 7. Collapsible iOS Comments Sheet */}
-                      {isCommentsOpen && (
-                        <div className="pt-3 space-y-3 border-t border-border">
-                          {isCommentsLoading ? (
-                            <div className="text-center py-4 text-xs text-muted-foreground animate-pulse">
-                              Izohlar yuklanmoqda...
-                            </div>
-                          ) : comments.length === 0 ? (
-                            <p className="text-xs text-muted-foreground text-center py-2">
-                              Hozircha izohlar yo&apos;q. Birinchi bo&apos;lib tabriklang! 🎉
-                            </p>
-                          ) : (
-                            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                              {comments.map((c) => {
-                                const isReply = Boolean(c.parent_id);
-                                return (
-                                  <div
-                                    key={c.id}
-                                    className={cn(
-                                      'flex items-start gap-2.5 text-xs p-2.5 rounded-lg transition-all',
-                                      isReply
-                                        ? 'ml-6 bg-muted/40 border-l-2 border-primary/50'
-                                        : 'bg-muted/55'
-                                    )}
-                                  >
-                                    {isReply && (
-                                      <CornerDownRight className="size-3 text-muted-foreground shrink-0 mt-1" />
-                                    )}
-                                    <Avatar className="size-6.5 shrink-0 mt-0.5">
-                                      {c.user_avatar && (
-                                        <AvatarImage src={c.user_avatar} alt={c.user_name} />
-                                      )}
-                                      <AvatarFallback className="text-[11px] font-bold bg-primary/12 text-primary">
-                                        {c.user_name.charAt(0).toUpperCase()}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-baseline justify-between gap-2">
-                                        <div className="flex items-center gap-1 min-w-0">
-                                          <span className="font-bold text-foreground truncate">
-                                            {c.user_name}
-                                          </span>
-                                          <VerifiedBadge
-                                            role={c.role}
-                                            isSuperadmin={c.is_superadmin}
-                                            isTeacher={c.is_teacher}
-                                            size="xs"
-                                          />
-                                        </div>
-                                        <span className="text-[12px] text-muted-foreground shrink-0">
-                                          {c.created_at}
-                                        </span>
-                                      </div>
-                                      <p className="text-foreground/90 mt-0.5 leading-snug">{c.text}</p>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setReplyingTo((prev) => ({
-                                            ...prev,
-                                            [post.id]: { commentId: c.id, userName: c.user_name },
-                                          }));
-                                          setCommentInputs((prev) => ({
-                                            ...prev,
-                                            [post.id]: `@${c.user_name} `,
-                                          }));
-                                        }}
-                                        className="mt-1 text-[12px] font-bold text-primary hover:underline cursor-pointer"
-                                      >
-                                        Javob berish
-                                      </button>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          {/* Quick Reaction Phrases */}
-                          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-                            {STUDY_MEMES.map((m, mIdx) => (
-                              <button
-                                key={mIdx}
-                                type="button"
-                                onClick={() => {
-                                  setCommentInputs((prev) => ({
-                                    ...prev,
-                                    [post.id]: (prev[post.id] ? prev[post.id] + ' ' : '') + m.text,
-                                  }));
-                                }}
-                                className="rounded-full px-2.5 py-1 text-[12px] font-semibold bg-muted/70 border border-border text-foreground/85 hover:border-primary/40 shrink-0 transition-colors cursor-pointer"
-                              >
-                                {m.label}
-                              </button>
-                            ))}
-                          </div>
-
-                          {postReplying && (
-                            <div className="flex items-center justify-between text-xs px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary">
-                              <span className="truncate">
-                                💬 <b>@{postReplying.userName}</b> ga javob yozilmoqda
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => setReplyingTo((prev) => ({ ...prev, [post.id]: null }))}
-                                className="text-muted-foreground hover:text-foreground ml-2 cursor-pointer"
-                              >
-                                <X className="size-3.5" />
-                              </button>
-                            </div>
-                          )}
-
-                          {/* iOS Messages Style Input Pill */}
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={commentInputs[post.id] || ''}
-                              onChange={(e) =>
-                                setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleAddComment(post.id);
-                              }}
-                              placeholder="Izoh yozing..."
-                              className="flex-1 rounded-full border border-border bg-muted/60 px-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                              maxLength={1000}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleAddComment(post.id)}
-                              disabled={submittingComment[post.id] || !commentInputs[post.id]?.trim()}
-                              className="ios-spring flex size-8.5 shrink-0 items-center justify-center rounded-full bg-primary text-white disabled:opacity-40 cursor-pointer"
-                            >
-                              <Send className="size-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      {/* 7. Izohlar */}
+                      {isCommentsOpen && commentsSheet}
                     </article>
                   </Reveal>
                 );
@@ -1139,331 +1202,310 @@ export default function CommunityFeedPage() {
             )}
           </div>
         </div>
+        <FeedSidebar posts={posts} />
+        </div>
       </main>
 
       {/* Lightbox Modal */}
-      {previewImage && (
-        <div
-          onClick={() => setPreviewImage(null)}
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
-        >
-          <div className="relative max-w-3xl w-full max-h-[90vh] overflow-hidden rounded-2xl border border-white/15 shadow-2xl flex items-center justify-center bg-black/60">
-            <button
-              type="button"
-              onClick={() => setPreviewImage(null)}
-              className="absolute top-4 right-4 z-10 size-9 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90 transition-all cursor-pointer"
-            >
-              <X className="size-4" />
-            </button>
-            <img
-              src={previewImage}
-              alt="Post rasmi"
-              className="w-auto h-auto max-h-[85vh] max-w-full object-contain"
-            />
-          </div>
-        </div>
-      )}
+      <ImageLightbox src={previewImage} onClose={closePreview} />
+
+      {/* Shikoyat modali */}
+      <ReportPostDialog
+        open={reportPostId !== null}
+        onOpenChange={(o) => { if (!o) setReportPostId(null); }}
+        onSubmit={submitReport}
+      />
 
       {/* Create New Post Dialog Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="w-[calc(100%-1.25rem)] sm:w-full sm:max-w-lg bg-card text-card-foreground border border-border p-0 rounded-2xl max-h-[85svh] flex flex-col overflow-hidden shadow-2xl">
-          <div className="p-4 sm:p-5 pb-3.5 border-b border-border shrink-0 bg-muted/25">
-            <div className="flex items-center gap-2.5 pr-8">
-              <PremiumIcon icon={Plus} tone="emerald" size="sm" solid />
-              <div>
-                <h3 className="text-base font-bold text-foreground">
-                  Hamjamiyatga Post Qo&apos;yish
-                </h3>
-                <p className="text-[12px] text-muted-foreground">
-                  Test natijangizni yoki fikringizni do&apos;stlaringiz bilan ulashing (+15 XP)
-                </p>
+        <DialogContent
+          showCloseButton={false}
+          className="ps-shell flex max-h-[90svh] w-[calc(100%-1rem)] flex-col gap-0 overflow-hidden rounded-[32px] border-0 bg-[var(--ps-paper)] p-0 text-[var(--text-primary)] shadow-[0_40px_80px_-30px_rgba(40,20,80,0.7)] sm:w-full sm:max-w-lg sm:p-0 dark:bg-[var(--ps-paper)]"
+        >
+          {/* Sarlavha lentasi */}
+          <div className="relative shrink-0 overflow-hidden bg-[var(--ps-green)] px-5 pb-5 pt-5 text-white sm:px-6">
+            <span aria-hidden className="absolute -right-10 -top-12 size-40 rounded-full bg-white/15" />
+            <span aria-hidden className="absolute -bottom-8 right-24 size-16 rounded-full bg-[var(--ps-orange)] opacity-80" />
+            <span aria-hidden className="ps-dots absolute bottom-3 left-1/2 h-10 w-24 opacity-25" />
+            <div className="relative flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[#FFFCF7] text-[var(--ps-green)]">
+                  <Plus className="size-5 stroke-[3]" />
+                </span>
+                <div className="min-w-0">
+                  <DialogTitle className="ps-display text-[22px] text-white sm:text-[26px]">
+                    Hamjamiyatga post
+                  </DialogTitle>
+                  <DialogDescription className="mt-1 text-[12.5px] !text-white/85">
+                    Test natijangizni yoki fikringizni do&apos;stlaringiz bilan ulashing
+                    <span className="ml-1.5 inline-flex rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[11px] font-black text-[#080808]">+15 XP</span>
+                  </DialogDescription>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                aria-label="Yopish"
+                className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white hover:text-[#080808]"
+              >
+                <X className="size-4" />
+              </button>
             </div>
+          </div>
 
-            <div className="mt-3.5 grid grid-cols-2 gap-1.5 rounded-lg bg-muted p-1">
-              <button
-                type="button"
-                onClick={() => setActiveModalTab('result')}
-                className={cn(
-                  'py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
-                  activeModalTab === 'result'
-                    ? 'bg-card text-foreground shadow-2xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <PremiumIcon icon={Award} tone="amber" size="2xs" />
-                <span>Natijani Ulashish</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveModalTab('custom')}
-                className={cn(
-                  'py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer',
-                  activeModalTab === 'custom'
-                    ? 'bg-card text-foreground shadow-2xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                <PremiumIcon icon={UploadCloud} tone="emerald" size="2xs" />
-                <span>Erkin Post &amp; Rasm</span>
-              </button>
+          {/* Tablar */}
+          <div className="shrink-0 px-5 pt-4 sm:px-6">
+            <div className="grid grid-cols-2 gap-1 rounded-full bg-[var(--ps-neutral)] p-1">
+              {([
+                ['result', Award, 'Natijani ulashish'],
+                ['custom', UploadCloud, 'Erkin post & rasm'],
+              ] as const).map(([key, Icon, label]) => {
+                const active = activeModalTab === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setActiveModalTab(key)}
+                    className={cn(
+                      'flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 py-2.5 text-[12.5px] font-bold transition-all sm:text-[13px]',
+                      active
+                        ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    )}
+                  >
+                    <Icon className={cn('size-4 shrink-0', active && 'text-[var(--ps-orange)]')} />
+                    {label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {activeModalTab === 'result' && (
             <>
-              <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-3.5">
+              <div className="flex-1 space-y-3.5 overflow-y-auto px-5 py-4 sm:px-6">
                 {loadingAttempts ? (
-                  <div className="py-10 text-center space-y-2">
-                    <Loader2 className="size-6 animate-spin mx-auto text-primary" />
-                    <p className="text-xs text-muted-foreground">Test natijalaringiz yuklanmoqda...</p>
+                  <div className="flex flex-col items-center gap-2 py-10 text-center">
+                    <Loader2 className="size-6 animate-spin text-[var(--ps-purple)]" />
+                    <p className="text-[12.5px] font-semibold text-[var(--text-muted)]">Test natijalaringiz yuklanmoqda...</p>
                   </div>
                 ) : userAttempts.length === 0 ? (
-                  <div className="py-8 text-center space-y-3 p-4 rounded-xl bg-muted/30 border border-dashed border-border">
-                    <PremiumIcon icon={Award} tone="amber" size="lg" className="mx-auto" />
+                  <div className="relative flex flex-col items-center gap-3 overflow-hidden rounded-[26px] bg-[var(--ps-neutral)] px-5 py-8 text-center">
+                    <span aria-hidden className="ps-dots absolute right-4 top-4 h-10 w-16 opacity-20" />
+                    <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                      <Award className="size-7" />
+                    </span>
                     <div>
-                      <p className="text-xs font-bold text-foreground">
-                        Hali topshirilgan testlar yo&apos;q
-                      </p>
-                      <p className="text-[12px] text-muted-foreground mt-0.5 max-w-xs mx-auto">
+                      <p className="ps-display text-[20px]">Hali topshirilgan testlar yo&apos;q</p>
+                      <p className="mx-auto mt-1 max-w-xs text-[13px] text-[var(--text-secondary)]">
                         Avval birorta test yeching, so&apos;ng natijangizni bu yerda ulashing.
                       </p>
                     </div>
-                    <Button asChild size="sm" className="rounded-full font-bold text-xs">
-                      <Link href="/tests">Test Ishlash</Link>
-                    </Button>
+                    <Link href="/tests" className="ps-btn ps-btn-ink mt-1">
+                      Test ishlash
+                      <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                    </Link>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-foreground">Ulashish uchun natijani tanlang:</span>
-                      <span className="text-muted-foreground font-mono text-[12px]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] font-black uppercase tracking-wider text-[var(--text-muted)]">Natijani tanlang</span>
+                      <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[11.5px] font-bold text-[var(--text-secondary)]">
                         {userAttempts.length} ta natija
                       </span>
                     </div>
 
-                    <div className="space-y-2 max-h-56 overflow-y-auto pr-0.5">
+                    <div className="max-h-60 space-y-2 overflow-y-auto pr-0.5">
                       {userAttempts.map((att) => {
                         const isSelected = selectedAttemptId === att.id;
                         const scoreVal = att.score || 0;
                         const isCert = scoreVal >= 60;
+                        const tone =
+                          scoreVal >= 80
+                            ? 'bg-[var(--ps-green)] text-white'
+                            : scoreVal >= 60
+                              ? 'bg-[var(--ps-orange)] text-[#080808]'
+                              : 'bg-[var(--ps-coral)] text-white';
                         return (
-                          <div
+                          <button
+                            type="button"
                             key={att.id}
                             onClick={() => setSelectedAttemptId(att.id)}
                             className={cn(
-                              'p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 text-xs',
+                              'flex w-full cursor-pointer items-center gap-3 rounded-[22px] p-2 pr-3 text-left transition-colors',
                               isSelected
-                                ? 'bg-primary/10 border-primary ring-1 ring-primary/30 text-foreground'
-                                : 'bg-card border-border hover:bg-muted/40 text-foreground'
+                                ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                                : 'bg-[var(--ps-neutral)] text-[var(--text-primary)] hover:bg-[var(--ps-cream)]'
                             )}
                           >
-                            <div className="min-w-0 flex-1 space-y-0.5">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="font-bold text-foreground text-xs sm:text-sm truncate block">
-                                  {att.test_title}
-                                </span>
+                            <span className={cn('inline-flex size-12 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[14px] font-bold', tone)}>
+                              {scoreVal.toFixed(0)}%
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="flex min-w-0 items-center gap-1.5">
+                                <span className="truncate text-[14px] font-bold">{att.test_title}</span>
                                 {isCert && (
-                                  <Badge className="bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A] text-[11px] px-1.5 py-0.5 shrink-0 border border-[#FF9500]/30 font-bold">
-                                    🏆 Sertifikat
-                                  </Badge>
+                                  <span className="shrink-0 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10.5px] font-black text-[#080808]">
+                                    Sertifikat
+                                  </span>
                                 )}
-                              </div>
-                              <p className="text-[12px] text-muted-foreground truncate">
-                                {att.correct_answers} to&apos;g&apos;ri • {att.wrong_answers} xato •{' '}
-                                {new Date(att.completed_at).toLocaleDateString('uz-UZ')}
-                              </p>
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span
-                                className={cn(
-                                  'font-mono font-bold text-xs px-2.5 py-1 rounded-full border',
-                                  scoreVal >= 80
-                                    ? 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] border-[#34C759]/30'
-                                    : scoreVal >= 60
-                                    ? 'bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A] border-[#FF9500]/30'
-                                    : 'bg-[#FF3B30]/15 text-[#D70015] dark:text-[#FF6961] border-[#FF3B30]/30'
-                                )}
-                              >
-                                {scoreVal.toFixed(0)}%
                               </span>
-                              <div
-                                className={cn(
-                                  'size-5 rounded-full border flex items-center justify-center transition-colors',
-                                  isSelected
-                                    ? 'bg-primary border-primary text-white'
-                                    : 'border-border bg-muted/40'
-                                )}
-                              >
-                                {isSelected && <CheckCircle2 className="size-3.5 text-white" />}
-                              </div>
-                            </div>
-                          </div>
+                              <span className={cn('mt-0.5 block truncate text-[12px] font-medium', isSelected ? 'opacity-70' : 'text-[var(--text-muted)]')}>
+                                {att.correct_answers} to&apos;g&apos;ri · {att.wrong_answers} xato · {new Date(att.completed_at).toLocaleDateString('uz-UZ')}
+                              </span>
+                            </span>
+                            <span
+                              className={cn(
+                                'inline-flex size-7 shrink-0 items-center justify-center rounded-full transition-all',
+                                isSelected ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-paper)]'
+                              )}
+                            >
+                              {isSelected && <Check className="size-4 stroke-[3]" />}
+                            </span>
+                          </button>
                         );
                       })}
                     </div>
 
-                    <div>
-                      <label className="text-xs font-bold text-foreground mb-1 block">
-                        Izoh yoki maslahat (ixtiyoriy)
-                      </label>
-                      <Textarea
+                    <label className="block rounded-[22px] bg-[var(--ps-neutral)] px-5 pb-3 pt-2.5 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                      <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Izoh yoki maslahat · ixtiyoriy</span>
+                      <textarea
                         value={attemptCaption}
                         onChange={(e) => setAttemptCaption(e.target.value)}
                         placeholder="Masalan: Mehnat o'z mevasini berdi! 88% natija oldim..."
-                        className="rounded-lg text-xs sm:text-sm bg-background border-border min-h-[64px] resize-none"
+                        className="mt-1 min-h-[60px] w-full resize-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none placeholder:text-[var(--text-faint)]"
                         maxLength={500}
                       />
-                    </div>
+                    </label>
                   </div>
                 )}
               </div>
 
-              <div className="p-4 bg-muted/25 border-t border-border flex items-center justify-end gap-2.5 shrink-0">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="rounded-full text-xs font-semibold h-10 px-4"
-                >
+              <div className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-[var(--border-card)] px-5 py-4 sm:px-6">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="ps-btn ps-btn-ghost">
                   Bekor qilish
-                </Button>
-                <Button
+                </button>
+                <button
                   type="button"
                   disabled={!selectedAttemptId || isSharingAttempt}
                   onClick={() => {
                     const att = userAttempts.find((a) => a.id === selectedAttemptId);
                     if (att) handleShareAttempt(att.id, att.score);
                   }}
-                  className="rounded-full text-xs font-bold bg-primary text-white hover:bg-primary/90 h-10 px-5"
+                  className="ps-btn ps-btn-ink"
                 >
                   {isSharingAttempt ? (
                     <>
-                      <Loader2 className="size-4 animate-spin mr-1.5" /> Joylanmoqda...
+                      <Loader2 className="size-4 animate-spin" /> Joylanmoqda...
                     </>
                   ) : (
-                    '🚀 Hamjamiyatga Joylash (+15 XP)'
+                    <>
+                      Joylash · +15 XP
+                      <span className="ps-btn-arrow"><Send className="size-4" /></span>
+                    </>
                   )}
-                </Button>
+                </button>
               </div>
             </>
           )}
 
           {activeModalTab === 'custom' && (
-            <form onSubmit={handleCreatePost} className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-3.5">
-                <div>
-                  <label className="text-xs font-bold text-foreground mb-1 block">
-                    Mavzu yoki Sarlavha
-                  </label>
-                  <Input
+            <form onSubmit={handleCreatePost} className="flex flex-1 flex-col overflow-hidden">
+              <div className="flex-1 space-y-2.5 overflow-y-auto px-5 py-4 sm:px-6">
+                <label className="block rounded-[22px] bg-[var(--ps-neutral)] px-5 pb-2.5 pt-2 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                  <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Mavzu yoki sarlavha</span>
+                  <input
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="Masalan: Bugun 50 ta tarix testi yechdim!"
-                    className="rounded-lg text-xs sm:text-sm bg-background border-border h-10"
+                    className="mt-0.5 w-full bg-transparent text-[15px] font-semibold text-[var(--text-primary)] outline-none placeholder:font-medium placeholder:text-[var(--text-faint)]"
                     maxLength={150}
                   />
-                </div>
+                </label>
 
-                <div>
-                  <label className="text-xs font-bold text-foreground mb-1 block">
-                    Fan / Yo&apos;nalish
-                  </label>
-                  <Input
+                <label className="block rounded-[22px] bg-[var(--ps-neutral)] px-5 pb-2.5 pt-2 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                  <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Fan / yo&apos;nalish</span>
+                  <input
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
                     placeholder="Tarix, Ona tili, Matematika, Biologiya..."
-                    className="rounded-lg text-xs sm:text-sm bg-background border-border h-10"
+                    className="mt-0.5 w-full bg-transparent text-[15px] font-semibold text-[var(--text-primary)] outline-none placeholder:font-medium placeholder:text-[var(--text-faint)]"
                     maxLength={60}
                   />
-                </div>
+                </label>
 
-                <div>
-                  <label className="text-xs font-bold text-foreground mb-1 block">
-                    Fikr yoki Taassurot
-                  </label>
-                  <Textarea
+                <label className="block rounded-[22px] bg-[var(--ps-neutral)] px-5 pb-3 pt-2 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                  <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Fikr yoki taassurot</span>
+                  <textarea
                     value={newCaption}
                     onChange={(e) => setNewCaption(e.target.value)}
                     placeholder="Do'stlaringizga foydali maslahat yoki motivatsiya yozing..."
-                    className="rounded-lg text-xs sm:text-sm bg-background border-border min-h-[70px] resize-none"
+                    className="mt-1 min-h-[72px] w-full resize-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none placeholder:text-[var(--text-faint)]"
                     maxLength={1000}
                   />
-                </div>
+                </label>
 
-                <div>
-                  <label className="text-xs font-bold text-foreground mb-1 block">
-                    Rasm (Ixtiyoriy)
-                  </label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
 
-                  {imagePreviewUrl ? (
-                    <div className="relative rounded-xl overflow-hidden border border-border bg-muted/40 p-2 flex items-center justify-center">
-                      <img
-                        src={imagePreviewUrl}
-                        alt="Preview"
-                        className="max-h-40 rounded-md object-contain"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedImageFile(null);
-                          setImagePreviewUrl(null);
-                        }}
-                        className="absolute top-2.5 right-2.5 size-7 rounded-full bg-black/75 text-white flex items-center justify-center hover:bg-[#FF3B30] transition-colors cursor-pointer"
-                      >
-                        <X className="size-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-4 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 bg-muted/25"
+                {imagePreviewUrl ? (
+                  <div className="relative flex items-center justify-center overflow-hidden rounded-[22px] bg-[var(--ps-neutral)] p-2">
+                    <img src={imagePreviewUrl} alt="Preview" className="max-h-44 rounded-[16px] object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedImageFile(null);
+                        setImagePreviewUrl(null);
+                      }}
+                      aria-label="Rasmni olib tashlash"
+                      className="absolute right-3 top-3 inline-flex size-8 cursor-pointer items-center justify-center rounded-full bg-[#080808]/75 text-white transition-colors hover:bg-[var(--ps-coral)]"
                     >
-                      <PremiumIcon icon={UploadCloud} tone="emerald" size="md" solid />
-                      <span className="text-xs font-bold text-foreground">Rasm yuklash</span>
-                      <span className="text-[12px] text-muted-foreground">
-                        PNG, JPG, WebP (maks. 5MB)
-                      </span>
-                    </div>
-                  )}
-                </div>
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="group flex w-full cursor-pointer items-center gap-3 rounded-[22px] border-2 border-dashed border-[var(--border-card)] p-3 text-left transition-colors hover:border-[var(--ps-green)]"
+                  >
+                    <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ps-green)] text-white transition-transform group-hover:scale-105">
+                      <UploadCloud className="size-5" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[14px] font-bold">Rasm qo&apos;shish · ixtiyoriy</span>
+                      <span className="block text-[12px] font-medium text-[var(--text-muted)]">PNG, JPG, WebP · maks. 5 MB</span>
+                    </span>
+                  </button>
+                )}
               </div>
 
-              <div className="p-4 bg-muted/25 border-t border-border flex items-center justify-end gap-2.5 shrink-0">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="rounded-full text-xs font-semibold h-10 px-4"
-                >
+              <div className="grid shrink-0 grid-cols-[auto_1fr] gap-2 border-t border-[var(--border-card)] px-5 py-4 sm:px-6">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="ps-btn ps-btn-ghost">
                   Bekor qilish
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmittingPost}
-                  className="rounded-full text-xs font-bold bg-primary text-white hover:bg-primary/90 h-10 px-5"
-                >
+                </button>
+                <button type="submit" disabled={isSubmittingPost} className="ps-btn ps-btn-ink">
                   {isSubmittingPost ? (
                     <>
-                      <Loader2 className="size-4 animate-spin mr-1.5" /> E&apos;lon qilinmoqda...
+                      <Loader2 className="size-4 animate-spin" /> E&apos;lon qilinmoqda...
                     </>
                   ) : (
-                    "E'lon qilish 🚀"
+                    <>
+                      E&apos;lon qilish
+                      <span className="ps-btn-arrow"><Send className="size-4" /></span>
+                    </>
                   )}
-                </Button>
+                </button>
               </div>
             </form>
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

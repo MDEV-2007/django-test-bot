@@ -5,8 +5,6 @@ import {
   Flame, Volume2, VolumeX, Mic, MicOff, AlertTriangle,
   Megaphone, Bell, ShieldAlert, Sparkles, FileSpreadsheet,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { stressAudio } from '@/lib/stressAudio';
 import { cn } from '@/lib/utils';
@@ -117,59 +115,53 @@ export default function BmbStressBar({
   }
 
   return (
-    <div className="w-full space-y-2 mb-4">
-      {/* Top Banner Bar */}
-      <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-rose-950/80 via-slate-900 to-amber-950/70 border border-rose-500/30 text-white shadow-lg backdrop-blur-md">
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <div className="relative flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-xl bg-rose-600/30 border border-rose-500/50">
-            <Flame className="size-4 sm:size-4.5 text-rose-400 animate-pulse" />
-            <span className="absolute -top-1 -right-1 size-2 rounded-full bg-rose-500 animate-ping" />
-          </div>
-
+    <div className="w-full space-y-2">
+      {/* Stress zali paneli — marjon pill (pastel tema bilan bir xil) */}
+      <div className="relative flex items-center justify-between gap-2 overflow-hidden rounded-[28px] bg-[#F0523D] p-2.5 pl-3 text-white shadow-[0_18px_36px_-22px_rgba(240,82,61,0.9)] sm:gap-3 sm:p-3 sm:pl-4">
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-10 size-28 rounded-full bg-white/15" />
+        <div className="relative flex min-w-0 items-center gap-2.5">
+          <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-[#080808] text-[#FFB82E]">
+            <Flame className="size-5" />
+            <span className="absolute -right-0.5 -top-0.5 size-2.5 animate-ping rounded-full bg-[#FFB82E]" />
+          </span>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[12px] sm:text-xs font-bold tracking-wide text-rose-300 uppercase">
-                Real BMB Imtihon Zali
-              </span>
-              <Badge variant="outline" className="text-[11px] sm:text-[12px] border-rose-500/40 text-rose-200 py-0 px-1.5 bg-rose-500/10 font-bold">
-                STRESS
-              </Badge>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[13px] font-bold sm:text-sm">Real BMB imtihon zali</span>
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">Stress</span>
             </div>
-            <p className="text-[12px] text-slate-300 truncate hidden md:block">
+            <p className="hidden truncate text-[12px] text-white/75 md:block">
               500 kishilik zal shovqini, parta shitirlashi va nazoratchi ovozi faol
             </p>
           </div>
         </div>
 
-        {/* Audio controls & Mobile Titul drawer button */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="relative flex shrink-0 items-center gap-1.5 sm:gap-2">
           {onOpenBubbleDrawer && (
-            <Button
-              size="sm"
+            <button
+              type="button"
               onClick={onOpenBubbleDrawer}
-              className="lg:hidden text-[12px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs px-2.5 sm:px-3 h-8"
+              className="flex h-10 cursor-pointer items-center gap-1.5 rounded-full bg-[#FFFCF7] px-3.5 text-xs font-bold text-[#080808] lg:hidden"
             >
-              <FileSpreadsheet className="size-3.5 mr-1" />
+              <FileSpreadsheet className="size-3.5" />
               Titul
               {uncopiedCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-[12px] font-bold">
+                <span className="flex size-5 items-center justify-center rounded-full bg-[#F0523D] text-[11px] font-bold text-white">
                   {uncopiedCount}
                 </span>
               )}
-            </Button>
+            </button>
           )}
 
-          <div className="flex items-center gap-1.5 bg-black/40 rounded-xl px-2 py-1 border border-white/10">
+          <div className="flex h-10 items-center gap-1.5 rounded-full bg-black/25 px-1.5 sm:pr-3">
             <button
               onClick={handleToggleMute}
-              className="size-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer"
+              className="flex size-7 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
               title={isMuted ? "Ovozni yoqish" : "Ovozni o'chirish"}
               aria-label="Ovoz"
             >
-              {isMuted ? <VolumeX className="size-4 text-rose-400" /> : <Volume2 className="size-4 text-emerald-400" />}
+              {isMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
             </button>
-
-            <div className="w-14 sm:w-20 hidden sm:block">
+            <div className="hidden w-16 sm:block sm:w-20">
               <Slider
                 value={[isMuted ? 0 : volume * 100]}
                 max={100}
@@ -183,19 +175,17 @@ export default function BmbStressBar({
         </div>
       </div>
 
-      {/* Live Loudspeaker Supervisor Announcement Notification */}
+      {/* Nazoratchi e'loni */}
       {activeAnnouncement && (
-        <div className="animate-in fade-in slide-in-from-top duration-300 rounded-xl border border-rose-500/50 bg-rose-950/90 p-3 text-white shadow-xl flex items-start gap-3">
-          <div className="size-8 rounded-lg bg-rose-600 flex items-center justify-center shrink-0 animate-bounce">
+        <div className="animate-in fade-in slide-in-from-top flex items-start gap-3 rounded-[24px] bg-[#080808] p-3.5 text-[#FFFCF7] shadow-xl duration-300">
+          <span className="flex size-9 shrink-0 animate-bounce items-center justify-center rounded-full bg-[#F0523D]">
             <Megaphone className="size-4 text-white" />
-          </div>
-          <div className="space-y-0.5 min-w-0 flex-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-rose-300">
+          </span>
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#FFB82E]">
               {announcementTitle || "Nazoratchi e'loni"}
             </p>
-            <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed">
-              &ldquo;{activeAnnouncement}&rdquo;
-            </p>
+            <p className="text-xs font-medium leading-relaxed sm:text-sm">&ldquo;{activeAnnouncement}&rdquo;</p>
           </div>
         </div>
       )}

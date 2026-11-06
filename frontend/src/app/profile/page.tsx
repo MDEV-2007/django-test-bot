@@ -5,12 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Gift, Copy, Check, Award, Crown, Swords, FileCheck2,
-  Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout,
-  Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, Sparkles, CheckCircle2,
-  BarChart3, Newspaper, History, PlusCircle, MessageCircle, Heart, Share2, ExternalLink,
-  TrendingUp, AlertTriangle, Target, ThumbsUp, Clock, Percent, BookOpen, ArrowRight, GraduationCap,
-  type LucideIcon,
+  Gift, Copy, Check, Award, Crown, Swords, FileCheck2, Medal, Flame, ScrollText, Zap, Coins, Lock, Send, Sprout, Pencil, Camera, Trash2, Loader2, ChevronRight, ShoppingBag, Palette, Shield, Sparkles, CheckCircle2, BarChart3, Newspaper, History, PlusCircle, MessageCircle, Heart, Share2, ExternalLink, AlertTriangle, Target, ThumbsUp, Clock, BookOpen, ArrowRight, GraduationCap, type LucideIcon, ArrowUpRight, Sun, Moon, TrendingUp, X,
 } from 'lucide-react';
 import { getRankInfo } from '@/lib/rank';
 import { toast } from 'sonner';
@@ -18,21 +13,18 @@ import { apiUpload, apiFetch, fetchMe } from '@/lib/api-client';
 import { useApiQuery, invalidateApi } from '@/lib/api-cache';
 import { useAuthStore, type Profile, type Cosmetics } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
-import { cn } from '@/lib/utils';
+import { cn, formatCompact } from '@/lib/utils';
+import { useTheme } from '@/hooks/useTheme';
+import ScriptToggle from '@/components/ScriptToggle';
 import KnowledgeTree from '@/components/student/KnowledgeTree';
 import StudentSpiderRadar, { type SkillRadar } from '@/components/student/StudentSpiderRadar';
 import { AudioToggle, ThemeToggle } from '@/components/SettingsToggles';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import CosmeticAvatar from '@/components/student/CosmeticAvatar';
 import CosmeticBadge from '@/components/student/CosmeticBadge';
 import VerifiedBadge from '@/components/ui/verified-badge';
-import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
+import { type PremiumIconTone } from '@/components/ui/premium-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
@@ -41,8 +33,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 
@@ -153,6 +143,7 @@ const RARITY_TONE_KEY: Record<string, PremiumIconTone> = {
 const SHARE_TEXT = "IlmIldizi'da bilim sinovidan o'ting va men bilan bonus tanga yutib oling!";
 
 export default function ProfilePage() {
+  const { isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const { access, authReady } = useAuthStore();
   const [origin, setOrigin] = useState('');
@@ -333,42 +324,42 @@ export default function ProfilePage() {
 
   if (authReady && !access) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <div className="flex min-h-[60vh] w-full items-center justify-center bg-[var(--bg-page)]">
+        <div className="flex min-h-[60vh] w-full items-center justify-center">
           <Loader2 className="size-8 animate-spin text-primary" />
         </div>
-      </>
+      </div>
     );
   }
 
   if (error && !data) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6 flex flex-col items-center justify-center min-h-[50vh]">
+        <main className="page-shell flex-1 space-y-6 p-4 pb-12 sm:p-6 flex flex-col items-center justify-center min-h-[50vh]">
           <div className="text-center space-y-4 max-w-md">
-            <p className="text-red-400 font-medium">{error}</p>
+            <p className="text-[var(--ps-coral)] font-medium">{error}</p>
             <Button onClick={() => refresh()} variant="outline">
               Qayta urinish
             </Button>
           </div>
         </main>
-      </>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
+        <main className="page-shell flex-1 space-y-6 p-4 pb-12 sm:p-6">
           <Skeleton className="h-44 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-12 w-full rounded-2xl" />
           <Skeleton className="h-64 w-full rounded-2xl" />
         </main>
-      </>
+      </div>
     );
   }
 
@@ -398,218 +389,219 @@ export default function ProfilePage() {
   ] as const;
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-6 bg-[var(--bg-page)] p-4 pb-24 sm:p-6">
-        {/* ========================================================================= */}
-        {/* 1. ASOSIY PROFILE CARD (Apple ID Style Anchor) */}
-        {/* ========================================================================= */}
-        <div className="ios-card relative overflow-hidden rounded-2xl p-6 sm:p-7 shadow-lg border border-border/80">
-          <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/[0.08] blur-[70px]" />
-          <div className="relative flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
-            <div className="relative shrink-0 group">
-              <div
-                onClick={handleOpenEdit}
-                className="cursor-pointer relative rounded-full transition-transform hover:scale-105"
-                title="Profilni tahrirlash"
-              >
-                <CosmeticAvatar
-                  className="size-22 sm:size-24"
-                  src={p.avatar_url}
-                  name={p.first_name || p.username}
-                  cosmetics={p.cosmetics}
-                  fallbackClassName="text-xl font-bold"
-                />
-                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white pointer-events-none">
-                  <Camera className="size-5" />
-                </div>
-              </div>
-              {p.is_premium ? (
-                <span className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-[#FF9500] text-white shadow-md ring-2 ring-white dark:ring-[#1C1C1E]">
-                  <Crown className="size-4 fill-current" />
+      <main className="page-shell flex-1 space-y-6 p-4 pb-24 sm:p-6">
+        {/* Mobil: til va tungi rejim (headerda faqat katta ekranda ko'rinadi) */}
+        <div className="flex items-center justify-end gap-2 sm:hidden">
+          <ScriptToggle />
+          <button
+            type="button"
+            onClick={() => { tgHaptic('light'); toggleTheme(); }}
+            className="inline-flex h-[34px] cursor-pointer items-center gap-1.5 rounded-full bg-[var(--ps-paper)] px-3 text-[12px] font-bold text-[var(--text-primary)] shadow-[var(--ds-panel-shadow)] transition-transform active:scale-95"
+            aria-label={isDark ? "Yorug' rejimga o'tish" : "Qorong'i rejimga o'tish"}
+          >
+            {isDark ? <Sun className="size-4 text-[var(--ps-orange)]" /> : <Moon className="size-4 text-[var(--ps-purple)]" />}
+            {isDark ? "Yorug'" : 'Tungi'}
+          </button>
+        </div>
+
+        {/* ── 1. Hero: avatar kompozitsiyasi + ism + asosiy ko'rsatkichlar ── */}
+        <section className="relative grid items-center gap-8 pt-2 lg:grid-cols-[0.8fr_1.2fr]">
+          {/* Avatar kompozitsiyasi */}
+          <div className="relative mx-auto aspect-square w-full max-w-[240px] sm:max-w-[300px]">
+            <div aria-hidden className="absolute inset-[4%] rounded-full bg-[var(--ps-orange)]" />
+            <div aria-hidden className="absolute -left-2 bottom-[4%] size-[32%] rounded-tr-full bg-[var(--ps-purple)]" />
+            <div aria-hidden className="ps-dots absolute right-0 top-0 size-[26%] rounded-2xl text-[var(--ps-ink)] opacity-25" />
+            <div aria-hidden className="ps-spin absolute -right-1 bottom-[12%] size-[18%] text-[var(--ps-ink)]">
+              <svg viewBox="0 0 100 100" className="size-full"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z" fill="currentColor" /></svg>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenEdit}
+              title="Profilni tahrirlash"
+              className="group absolute inset-[13%] cursor-pointer rounded-full transition-transform hover:scale-[1.02]"
+            >
+              <CosmeticAvatar
+                className="size-full ring-[6px] ring-[#FFFCF7]"
+                src={p.avatar_url}
+                name={p.first_name || p.username}
+                cosmetics={p.cosmetics}
+                fallbackClassName="text-5xl font-bold"
+              />
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                <Camera className="size-7" />
+              </span>
+            </button>
+            {p.is_premium && (
+              <span className="absolute right-[10%] top-[8%] flex size-12 items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)] ring-4 ring-[#FFFCF7]">
+                <Crown className="size-6 fill-current" />
+              </span>
+            )}
+            <div className="ps-float absolute -left-3 top-[40%] sm:-left-6">
+              <span className="ps-chip text-[13px]">
+                <Flame className="size-4 text-[var(--ps-coral)]" /> {p.streak} kun
+              </span>
+            </div>
+          </div>
+
+          {/* Ism va tugmalar */}
+          <div className="min-w-0 text-center lg:text-left">
+            <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              <span className="ps-chip">
+                <span className="size-2 rounded-full bg-[var(--ps-orange)]" /> {p.level}-daraja
+              </span>
+              <span className="ps-chip">{rankInfo.title}</span>
+              {p.cosmetics?.title?.payload?.title && <span className="ps-chip">👑 {p.cosmetics.title.payload.title}</span>}
+              {p.cosmetics?.frame?.name && <span className="ps-chip">{p.cosmetics.frame.name}</span>}
+              {p.cosmetics?.theme?.name && (
+                <span className="ps-chip">
+                  <span className="size-2 rounded-full" style={{ backgroundColor: p.cosmetics.theme.payload.accent || '#10b981' }} />
+                  {p.cosmetics.theme.name}
                 </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleOpenEdit}
-                  title="Rasmni o'zgartirish"
-                  aria-label="Rasmni o'zgartirish"
-                  className="absolute -bottom-1 -right-1 size-7 rounded-full bg-primary text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform ring-2 ring-white dark:ring-[#1C1C1E]"
-                >
-                  <Camera className="size-3.5" />
-                </button>
               )}
             </div>
-
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <h1 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-foreground flex items-center gap-2 flex-wrap">
-                  <span>{fullName}</span>
-                  <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
-                </h1>
-                <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
-                <span className="rounded-full bg-primary/12 px-2.5 py-0.5 font-mono text-[12px] font-bold text-primary">
-                  Daraja {p.level}
-                </span>
-                {p.cosmetics?.title?.payload?.title && (
-                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400">
-                    👑 {p.cosmetics.title.payload.title}
-                  </span>
-                )}
-                {p.cosmetics?.frame?.name && (
-                  <span className="rounded-full bg-amber-500/12 border border-amber-500/30 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                    <span className="size-1.5 rounded-full bg-amber-500 inline-block animate-pulse" />
-                    {p.cosmetics.frame.name}
-                  </span>
-                )}
-                {p.cosmetics?.theme?.name && (
-                  <span className="rounded-full bg-emerald-500/12 border border-emerald-500/30 px-2.5 py-0.5 text-[12px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    <span className="size-1.5 rounded-full inline-block" style={{ backgroundColor: p.cosmetics.theme.payload.accent || '#10b981' }} />
-                    {p.cosmetics.theme.name}
-                  </span>
-                )}
-              </div>
-              <p className="font-mono text-[13px] text-muted-foreground">@{p.username} • IlmIldizi ID</p>
-
-              {/* Dynamic Island Metric Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 sm:justify-start">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/12 px-3 py-1 text-[12px] font-bold text-amber-600 dark:text-amber-400">
-                  <Flame className="size-3.5 fill-current" /> {p.streak} kun streak
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-3 py-1 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
-                  <Coins className="size-3.5" /> {p.coins.toLocaleString('uz-UZ')} tanga
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-3 py-1 text-[12px] font-bold text-primary">
-                  <Zap className="size-3.5 fill-current" /> {p.xp.toLocaleString('uz-UZ')} XP
-                </span>
-              </div>
+            <h1 className="ps-display mt-5 break-words text-[44px] sm:text-[64px]">
+              {fullName}
+              <span className="text-[var(--ps-coral)]">.</span>
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              <span className="font-mono text-[13px] text-[var(--text-muted)]">@{p.username} • IlmIldizi ID</span>
+              <VerifiedBadge role={p.role} isSuperadmin={p.is_superadmin} isTeacher={p.is_teacher} size="md" showLabel />
+              <CosmeticBadge cosmetics={p.cosmetics} className="size-4" />
             </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:flex-col sm:items-end sm:shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleOpenEdit}
-                className="rounded-full gap-1.5"
-              >
-                <Pencil className="size-3.5 text-primary" />
-                Tahrirlash
-              </Button>
-              <Link
-                href="/premium"
-                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 text-[13px] font-semibold text-white shadow-md hover:opacity-95 active:scale-95 transition-all"
-              >
-                {p.is_premium ? <Crown className="size-4 fill-current" /> : <Lock className="size-3.5" />}
-                <span>{p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}</span>
+            <div className="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start">
+              <button type="button" onClick={handleOpenEdit} className="ps-btn ps-btn-ink">
+                <Pencil className="size-4 text-[var(--ps-orange)]" /> Tahrirlash
+                <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+              </button>
+              <Link href="/premium" className="ps-btn ps-btn-ghost">
+                {p.is_premium ? <Crown className="size-4 fill-current text-[var(--ps-orange)]" /> : <Lock className="size-4" />}
+                {p.is_premium ? 'PRO obuna faol' : "PRO-ga o'tish"}
               </Link>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* ========================================================================= */}
-        {/* 2. GLANCEABLE QUICK WIDGETS ROW */}
-        {/* ========================================================================= */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="ios-card rounded-2xl p-4 flex items-center gap-3">
-            <PremiumIcon icon={CheckCircle2} tone="emerald" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                Bugun yechildi
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
-                {data.solved_today || 0} <span className="text-xs font-normal text-muted-foreground">test</span>
-              </p>
+        {/* ── 2. Ko'rsatkichlar bento ── */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-12">
+          <div className="ps-ink relative col-span-2 overflow-hidden rounded-[28px] p-6 lg:col-span-4">
+            <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full bg-[var(--ps-purple)] opacity-50" />
+            <p className="ps-eyebrow relative text-white/60">Tajriba</p>
+            <p className="ps-num relative mt-2 text-[52px] sm:text-[64px]"><span title={p.xp.toLocaleString('uz-UZ')}>{formatCompact(p.xp)}</span></p>
+            <p className="relative text-[12px] text-white/60">XP · {p.level + 1}-darajagacha {xpProgress}%</p>
+            <div className="relative mt-4 h-2.5 overflow-hidden rounded-full bg-white/12">
+              <div className="h-full rounded-full bg-gradient-to-r from-[var(--ps-orange)] to-[var(--ps-coral)]" style={{ width: `${Math.max(2, xpProgress)}%` }} />
             </div>
           </div>
-
-          <div className="ios-card rounded-2xl p-4 flex items-center gap-3">
-            <PremiumIcon icon={Flame} tone="amber" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                Uzluksiz Streak
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
-                {p.streak || 0} <span className="text-xs font-normal text-muted-foreground">kun 🔥</span>
-              </p>
-            </div>
+          <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-green)] p-5 text-white lg:col-span-2">
+            <CheckCircle2 className="size-5" />
+            <p className="ps-num mt-4 text-[44px]">{data.solved_today || 0}</p>
+            <p className="text-[12px] font-semibold text-white/75">Bugun yechildi</p>
           </div>
-
-          <Link href="/shop" className="ios-card ios-card-interactive rounded-2xl p-4 flex items-center gap-3">
-            <PremiumIcon icon={Coins} tone="gold" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                Tanga balansi
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-foreground leading-tight">
-                {(p.coins || 0).toLocaleString()}
-              </p>
-            </div>
+          <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-coral)] p-5 text-white lg:col-span-2">
+            <Flame className="size-5" />
+            <p className="ps-num mt-4 text-[44px]">{p.streak || 0}</p>
+            <p className="text-[12px] font-semibold text-white/75">Kunlik seriya</p>
+          </div>
+          <Link href="/shop" className="relative overflow-hidden rounded-[28px] bg-[var(--ps-orange)] p-5 text-[#080808] transition-transform hover:-translate-y-1 lg:col-span-2">
+            <Coins className="size-5" />
+            <p className="ps-num mt-4 text-[44px]" title={(p.coins || 0).toLocaleString('uz-UZ')}>{formatCompact(p.coins)}</p>
+            <p className="text-[12px] font-semibold text-black/65">Tanga</p>
           </Link>
-
-          <Link
-            href="/battles"
-            className="ios-card ios-card-interactive rounded-2xl p-4 flex items-center gap-3 text-left cursor-pointer"
-          >
-            <PremiumIcon icon={Swords} tone="indigo" size="md" solid />
-            <div className="min-w-0">
-              <span className="text-[12px] font-semibold text-muted-foreground block truncate">
-                {rankInfo.title}
-              </span>
-              <p className="text-base sm:text-lg font-bold font-mono text-primary leading-tight">
-                {p.elo_rating || 1200} <span className="text-[12px] font-normal text-muted-foreground">ELO</span>
-              </p>
-            </div>
+          <Link href="/battles" className="relative overflow-hidden rounded-[28px] bg-[var(--ps-purple)] p-5 text-white transition-transform hover:-translate-y-1 lg:col-span-2">
+            <Swords className="size-5" />
+            <p className="ps-num mt-4 text-[44px]">{formatCompact(p.elo_rating || 1200)}</p>
+            <p className="text-[12px] font-semibold text-white/75">ELO · {rankInfo.title}</p>
           </Link>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 3. ULTRA-MODERN SEGMENTED TAB BAR (4-Col Responsive Grid) */}
-        {/* ========================================================================= */}
-        <div className="sticky top-16 z-20 -mx-4 px-4 py-2 sm:mx-0 sm:px-0 bg-background/85 backdrop-blur-md transition-all">
-          <div className="w-full grid grid-cols-4 p-1 rounded-2xl bg-muted/80 border border-border/80 shadow-xs gap-1">
-            {TABS.map((tab) => {
-              const active = activeTab === tab.id;
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => {
-                    tgHaptic('select');
-                    soundFX.click();
-                    setActiveTab(tab.id);
-                  }}
-                  className={cn(
-                    'flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-2 px-1 sm:px-2 rounded-xl text-[12px] sm:text-xs md:text-sm font-bold transition-all duration-200 cursor-pointer select-none text-center',
-                    active
-                      ? 'bg-card text-foreground shadow-sm border border-border/60 scale-[1.01]'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
-                  )}
-                >
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Icon className={cn('size-3.5 sm:size-4 transition-colors', active ? 'text-primary' : 'text-muted-foreground')} />
-                    {tab.count !== null && tab.count > 0 && (
-                      <span className="sm:hidden px-1 py-0.2 rounded-full text-[11px] font-mono font-bold leading-none bg-primary/15 text-primary">
-                        {tab.count}
-                      </span>
-                    )}
-                  </div>
-                  <span className="truncate max-w-full">
-                    <span className="inline sm:hidden">{tab.shortLabel}</span>
-                    <span className="hidden sm:inline">{tab.label}</span>
+        {/* ── Taklif dasturi (har doim ko'rinadi) ── */}
+        <section className="relative overflow-hidden rounded-[32px] bg-[var(--ps-purple)] p-6 text-white sm:p-8">
+          <span aria-hidden className="absolute -right-14 -top-14 size-48 rounded-full bg-white/15" />
+          <span aria-hidden className="absolute -bottom-10 right-40 size-24 rounded-full bg-[var(--ps-orange)] opacity-80" />
+          <span aria-hidden className="ps-dots absolute bottom-0 left-0 h-24 w-48 opacity-20" />
+
+          <div className="relative grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+            <div>
+              <p className="ps-eyebrow text-white/70">Taklif dasturi</p>
+              <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                Do&apos;stlarni taklif qiling — <span className="text-[var(--ps-orange)]">tanga</span> oling
+              </h3>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <div className="rounded-[20px] bg-white/15 px-4 py-3">
+                  <p className="ps-num text-[30px] leading-none">{data.referral_stats.referral_count}</p>
+                  <p className="mt-1 text-[11.5px] font-semibold text-white/75">taklif qilingan do&apos;st</p>
+                </div>
+                <div className="rounded-[20px] bg-[var(--ps-orange)] px-4 py-3 text-[#080808]">
+                  <p className="ps-num text-[30px] leading-none">{data.referral_stats.coins_earned}</p>
+                  <p className="mt-1 text-[11.5px] font-semibold opacity-75">ishlangan tanga</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 rounded-full bg-white/15 p-1.5 pl-4">
+                <Gift className="size-4 shrink-0 text-[var(--ps-orange)]" />
+                <input
+                  readOnly
+                  value={referralUrl}
+                  aria-label="Taklif havolasi"
+                  className="min-w-0 flex-1 bg-transparent font-mono text-[12px] text-white outline-none"
+                />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      aria-label="Havolani nusxalash"
+                      className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#FFFCF7] text-[#080808] transition-transform hover:scale-105"
+                    >
+                      {copied ? <Check className="size-4 text-[var(--ps-green)]" /> : <Copy className="size-4" />}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>{copied ? 'Nusxalandi!' : 'Havolani nusxalash'}</TooltipContent>
+                </Tooltip>
+              </div>
+              <a href={telegramShareHref} target="_blank" rel="noopener noreferrer" className="ps-btn ps-btn-light w-full">
+                <Send className="size-4" />
+                Telegramda ulashish
+                <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 3. Bo'limlar ── */}
+        <div className="ds-seg sticky top-20 z-20 grid w-full grid-cols-4 gap-1">
+          {TABS.map((tab) => {
+            const active = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                data-active={active ? 'true' : undefined}
+                onClick={() => {
+                  tgHaptic('select');
+                  soundFX.click();
+                  setActiveTab(tab.id);
+                }}
+                className="ds-seg-item flex cursor-pointer select-none flex-col items-center justify-center gap-0.5 !px-1 font-bold sm:flex-row sm:gap-1.5"
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="truncate">
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </span>
+                {tab.count !== null && tab.count > 0 && (
+                  <span className="hidden rounded-full bg-[var(--ps-orange)] px-1.5 py-0.5 text-[11px] font-bold leading-none text-[#080808] sm:inline-flex">
+                    {tab.count}
                   </span>
-                  {tab.count !== null && tab.count > 0 && (
-                    <span className={cn(
-                      'hidden sm:inline-flex px-1.5 py-0.5 rounded-full text-[12px] font-mono font-bold leading-none shrink-0',
-                      active ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
-                    )}>
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* ========================================================================= */}
@@ -630,323 +622,274 @@ export default function ProfilePage() {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* 1. AKADEMIK ASOSIY KPI METRIKALARI (4 ta Bento Card) */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
-                  <div className="flex items-center justify-between">
-                    <PremiumIcon icon={FileCheck2} tone="sky" size="xs" solid />
-                    <span className="text-[12px] font-semibold text-muted-foreground">Jami testlar</span>
-                  </div>
-                  <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-foreground">
-                      {analyticsData?.total_tests || 0} <span className="text-sm font-semibold text-muted-foreground">ta</span>
-                    </p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">Yechilgan to&apos;liq testlar</p>
-                  </div>
-                </div>
-
-                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
-                  <div className="flex items-center justify-between">
-                    <PremiumIcon icon={Target} tone="emerald" size="xs" solid />
-                    <span className="text-[12px] font-semibold text-muted-foreground">O&apos;rtacha aniqlik</span>
-                  </div>
-                  <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-emerald-500">
-                      {analyticsData?.accuracy || 0}%
-                    </p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">To&apos;g&apos;ri javoblar ulushi</p>
-                  </div>
-                </div>
-
-                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
-                  <div className="flex items-center justify-between">
-                    <PremiumIcon icon={GraduationCap} tone="amber" size="xs" solid />
-                    <span className="text-[12px] font-semibold text-muted-foreground">DTM Tayyorgarlik</span>
-                  </div>
-                  <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-amber-500">
-                      {analyticsData?.readiness_estimate || 0}%
-                    </p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">Imtihon bashorat darajasi</p>
-                  </div>
-                </div>
-
-                <div className="ios-card rounded-xl p-4 flex flex-col justify-between gap-3 border border-border/80 bg-card/60">
-                  <div className="flex items-center justify-between">
-                    <PremiumIcon icon={Clock} tone="indigo" size="xs" solid />
-                    <span className="text-[12px] font-semibold text-muted-foreground">Faol mashq vaqti</span>
-                  </div>
-                  <div>
-                    <p className="font-mono text-[22px] sm:text-[26px] font-bold tracking-tight tabular-nums text-indigo-500">
-                      {analyticsData?.time_minutes || 0} <span className="text-sm font-semibold text-muted-foreground">daq</span>
-                    </p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">Fokus dars vaqti</p>
-                  </div>
-                </div>
+              {/* 1. AKADEMIK ASOSIY KPI METRIKALARI — rangli plitkalar */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+                {[
+                  { icon: FileCheck2, label: 'Jami testlar', value: analyticsData?.total_tests || 0, unit: 'ta', hint: "Yechilgan to'liq testlar", tone: 'bg-[var(--ps-blue)] text-[#080808]' },
+                  { icon: Target, label: "O'rtacha aniqlik", value: analyticsData?.accuracy || 0, unit: '%', hint: "To'g'ri javoblar ulushi", tone: 'bg-[var(--ps-green)] text-white' },
+                  { icon: GraduationCap, label: 'DTM tayyorgarlik', value: analyticsData?.readiness_estimate || 0, unit: '%', hint: 'Imtihon bashorat darajasi', tone: 'bg-[var(--ps-orange)] text-[#080808]' },
+                  { icon: Clock, label: 'Mashq vaqti', value: analyticsData?.time_minutes || 0, unit: 'daq', hint: 'Fokus dars vaqti', tone: 'bg-[var(--ps-purple)] text-white' },
+                ].map((k) => {
+                  const Icon = k.icon;
+                  return (
+                    <div key={k.label} className={cn('relative flex min-h-[170px] flex-col justify-between overflow-hidden rounded-[28px] p-5 transition-transform hover:-translate-y-1', k.tone)}>
+                      <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/20" />
+                      <span aria-hidden className="ps-dots absolute bottom-0 right-0 h-16 w-24 opacity-25" />
+                      <div className="relative flex items-center justify-between gap-2">
+                        <span className="inline-flex size-10 items-center justify-center rounded-full bg-black/15">
+                          <Icon className="size-5" />
+                        </span>
+                        <span className="text-right text-[12px] font-bold leading-tight opacity-80">{k.label}</span>
+                      </div>
+                      <div className="relative">
+                        <p className="ps-num text-[40px] leading-none sm:text-[46px]">
+                          {k.value}
+                          <span className="ml-1 text-[0.4em] font-bold opacity-70">{k.unit}</span>
+                        </p>
+                        <p className="mt-1.5 text-[12px] font-semibold opacity-75">{k.hint}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* 2. KUCHLI VA QIYNOLGAN (ZAIF) MAVZULAR (DIAGNOSTIKA) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* A. Kuchli Mavzular (80%+ Aniqlik) */}
-                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.07] p-5 space-y-3.5 shadow-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="size-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0">
-                        <ThumbsUp className="size-4" />
-                      </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* A. Kuchli mavzular */}
+                <section className="ps-card relative overflow-hidden !rounded-[32px] p-6">
+                  <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[var(--ps-green)] opacity-15" />
+                  <div className="relative flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ps-green)] text-white">
+                        <ThumbsUp className="size-5" />
+                      </span>
                       <div>
-                        <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
-                          <span>Kuchli mavzularingiz</span>
-                          <span className="text-[12px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.2 rounded-full">
-                            {analyticsData?.mastery?.strong?.length || 0} ta
-                          </span>
-                        </h3>
-                        <p className="text-[12px] text-muted-foreground">
-                          80%+ aniqlik bilan mustahkam o&apos;zlashtirilgan
-                        </p>
+                        <h3 className="ps-display text-[22px]">Kuchli mavzular</h3>
+                        <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">80%+ aniqlik bilan o&apos;zlashtirilgan</p>
                       </div>
                     </div>
+                    <p className="ps-num text-[40px] leading-none text-[var(--ps-green)]">{analyticsData?.mastery?.strong?.length || 0}</p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="relative mt-5 flex flex-wrap gap-2">
                     {analyticsData?.mastery?.strong && analyticsData.mastery.strong.length > 0 ? (
                       analyticsData.mastery.strong.map((topicName, idx) => (
                         <span
                           key={`strong-${idx}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 shadow-2xs"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)] py-1.5 pl-1.5 pr-3.5 text-[12.5px] font-bold text-white"
                         >
-                          <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-                          <span>{topicName}</span>
-                          <span className="text-[12px] font-mono text-emerald-600 dark:text-emerald-400 ml-1 font-bold">
-                            ✓ Mustahkam
+                          <span className="inline-flex size-6 items-center justify-center rounded-full bg-white/25">
+                            <Check className="size-3.5 stroke-[3]" />
                           </span>
+                          {topicName}
                         </span>
                       ))
                     ) : (
-                      <div className="w-full py-4 text-center rounded-xl bg-background/40 border border-dashed border-border/80">
-                        <p className="text-xs text-muted-foreground">
-                          Hozircha aniqlanmagan. Testlar yechib, kuchli mavzularingizni shakllantiring!
-                        </p>
-                      </div>
+                      <p className="w-full rounded-[20px] bg-[var(--ps-neutral)] px-4 py-5 text-center text-[13px] text-[var(--text-muted)]">
+                        Hozircha aniqlanmagan. Testlar yechib, kuchli mavzularingizni shakllantiring!
+                      </p>
                     )}
                   </div>
-                </div>
+                </section>
 
-                {/* B. Qiynalgan / Zaif Mavzular (<50% Aniqlik) */}
-                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/[0.04] dark:bg-rose-500/[0.07] p-5 space-y-3.5 shadow-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
-                        <AlertTriangle className="size-4" />
-                      </div>
+                {/* B. Qiynalgan mavzular */}
+                <section className="ps-card relative overflow-hidden !rounded-[32px] p-6">
+                  <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[var(--ps-coral)] opacity-15" />
+                  <div className="relative flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                        <AlertTriangle className="size-5" />
+                      </span>
                       <div>
-                        <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
-                          <span>Qiynalgan mavzularingiz</span>
-                          <span className="text-[12px] font-mono font-bold bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2 py-0.2 rounded-full">
-                            {analyticsData?.mastery?.weak?.length || 0} ta
-                          </span>
-                        </h3>
-                        <p className="text-[12px] text-muted-foreground">
-                          BMB testlarida ko&apos;p xato qilingan va takrorlash zarur bo&apos;lgan mavzular
-                        </p>
+                        <h3 className="ps-display text-[22px]">Qiynalgan mavzular</h3>
+                        <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">Ko&apos;p xato qilingan, takrorlash zarur</p>
                       </div>
                     </div>
+                    <p className="ps-num text-[40px] leading-none text-[var(--ps-coral)]">{analyticsData?.mastery?.weak?.length || 0}</p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="relative mt-5 flex flex-wrap gap-2">
                     {analyticsData?.mastery?.weak && analyticsData.mastery.weak.length > 0 ? (
                       analyticsData.mastery.weak.map((topicName, idx) => (
                         <Link
                           key={`weak-${idx}`}
                           href="/sprint"
                           onClick={() => { soundFX.click(); tgHaptic('medium'); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/10 border border-rose-500/25 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer group shadow-2xs"
+                          className="group inline-flex cursor-pointer items-center gap-2 rounded-full bg-[var(--ps-neutral)] py-1.5 pl-3.5 pr-1.5 text-[12.5px] font-bold text-[var(--text-primary)] transition-transform hover:-translate-y-0.5"
                         >
-                          <AlertTriangle className="size-3.5 text-rose-500 shrink-0" />
-                          <span>{topicName}</span>
-                          <span className="text-[12px] font-bold text-rose-500 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-                            Qasos <ArrowRight className="size-2.5" />
+                          {topicName}
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-coral)] px-2.5 py-1 text-[11px] text-white">
+                            Qasos <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
                           </span>
                         </Link>
                       ))
                     ) : (
-                      <div className="w-full py-4 text-center rounded-xl bg-background/40 border border-dashed border-border/80">
-                        <p className="text-xs text-muted-foreground">
-                          Ajoyib natija! Hozircha jiddiy oqsayotgan zaif mavzular aniqlanmadi.
-                        </p>
-                      </div>
+                      <p className="w-full rounded-[20px] bg-[var(--ps-neutral)] px-4 py-5 text-center text-[13px] text-[var(--text-muted)]">
+                        Ajoyib natija! Hozircha jiddiy oqsayotgan zaif mavzular aniqlanmadi.
+                      </p>
                     )}
                   </div>
-                </div>
+                </section>
               </div>
 
-              {/* 3. FANLAR BO'YICHA UMUMIY O'SISH (PROGRESS & MASTERY) */}
-              <Card className="rounded-2xl border-border/80 shadow-md">
-                <CardHeader className="pb-3">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <PremiumIcon icon={BookOpen} tone="sky" size="xs" solid />
-                      <span>Fanlar bo&apos;yicha Umumiy O&apos;sish</span>
-                    </CardTitle>
-                    <span className="font-mono text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
-                      {analyticsData?.mastery?.subjects?.length || 0} ta fan faol
-                    </span>
+              {/* 3. FANLAR BO'YICHA UMUMIY O'SISH */}
+              <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-blue)] opacity-20" />
+                <div className="relative flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="ps-eyebrow text-[var(--text-muted)]">Fanlar</p>
+                    <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                      Fanlar bo&apos;yicha <span className="text-[var(--ps-purple)]">o&apos;sish</span>
+                    </h3>
+                    <p className="mt-2 text-[13px] text-[var(--text-muted)]">Har bir fan bo&apos;yicha o&apos;zlashtirish foizi va yechilgan savollar.</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Har bir fan bo&apos;yicha real o&apos;zlashtirish foizi va yechilgan savollar hajmi
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  <div className="text-right">
+                    <p className="ps-num text-[40px] sm:text-[48px]">{analyticsData?.mastery?.subjects?.length || 0}</p>
+                    <p className="text-[11px] font-semibold text-[var(--text-muted)]">ta fan faol</p>
+                  </div>
+                </div>
+
+                <div className="relative mt-6">
                   {(!analyticsData?.mastery?.subjects || analyticsData.mastery.subjects.length === 0) ? (
-                    <div className="text-center py-8 space-y-3 rounded-2xl bg-muted/30 border border-dashed border-border/80 p-4">
-                      <p className="text-sm font-semibold text-foreground">Hali fanlar bo&apos;yicha ma&apos;lumot yo&apos;q</p>
-                      <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                    <div className="flex flex-col items-center gap-3 rounded-[28px] bg-[var(--ps-neutral)] p-8 text-center">
+                      <span className="inline-flex size-14 items-center justify-center rounded-full bg-[var(--ps-blue)] text-[#080808]">
+                        <BookOpen className="size-6" />
+                      </span>
+                      <p className="text-[15px] font-bold">Hali fanlar bo&apos;yicha ma&apos;lumot yo&apos;q</p>
+                      <p className="max-w-md text-[13px] text-[var(--text-muted)]">
                         Test yoki sprintlarni yechishni boshlang — har bir fanning o&apos;zlashtirilish dinamikasi bu yerda aks etadi.
                       </p>
-                      <Button asChild size="sm" className="rounded-xl mt-1">
-                        <Link href="/sprint">Birinchi mashqni boshlash</Link>
-                      </Button>
+                      <Link href="/sprint" className="ps-btn ps-btn-ink mt-1">
+                        Birinchi mashqni boshlash
+                        <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
+                      </Link>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      {analyticsData.mastery.subjects.map((sub, idx) => (
-                        <div
-                          key={`sub-${idx}`}
-                          className="p-3.5 rounded-2xl border border-border/70 bg-muted/30 hover:bg-muted/50 transition-colors space-y-2"
-                        >
-                          <div className="flex items-center justify-between text-xs sm:text-sm">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span
-                                className="size-3 rounded-full shrink-0 shadow-2xs"
-                                style={{ backgroundColor: sub.color || '#007AFF' }}
-                              />
-                              <span className="font-bold text-foreground truncate">{sub.name}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <span className="font-mono font-bold text-sm text-primary">
-                                {sub.mastery}%
-                              </span>
-                              <span className="text-[12px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-primary/10 text-primary border border-primary/20">
-                                {getGradeLetter(sub.mastery)}
-                              </span>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {analyticsData.mastery.subjects.map((sub, idx) => {
+                        const color = sub.color || 'var(--ps-purple)';
+                        const status = sub.mastery >= 75 ? 'Yuqori daraja' : sub.mastery >= 50 ? "O'rtacha" : "E'tibor zarur";
+                        const statusTone = sub.mastery >= 75 ? 'bg-[var(--ps-green)] text-white' : sub.mastery >= 50 ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-coral)] text-white';
+                        return (
+                          <div
+                            key={`sub-${idx}`}
+                            className="flex items-center gap-4 rounded-[24px] bg-[var(--ps-neutral)] p-4 transition-transform hover:-translate-y-0.5"
+                          >
+                            <span
+                              className="relative inline-flex size-14 shrink-0 items-center justify-center rounded-full text-[20px] font-black text-white"
+                              style={{ backgroundColor: color }}
+                            >
+                              {getGradeLetter(sub.mastery)}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="truncate text-[15px] font-bold">{sub.name}</p>
+                                <p className="ps-num shrink-0 text-[22px] leading-none">{sub.mastery}<span className="text-[0.55em] text-[var(--text-faint)]">%</span></p>
+                              </div>
+                              <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--ds-track)]">
+                                <div
+                                  className="h-full rounded-full transition-[width] duration-700"
+                                  style={{ width: `${Math.max(3, Math.min(100, sub.mastery))}%`, backgroundColor: color }}
+                                />
+                              </div>
+                              <div className="mt-2 flex items-center justify-between gap-2 text-[11.5px]">
+                                <span className="font-semibold text-[var(--text-muted)]">{sub.answered || 0} ta savol</span>
+                                <span className={cn('rounded-full px-2 py-0.5 font-bold', statusTone)}>{status}</span>
+                              </div>
                             </div>
                           </div>
-
-                          <Progress value={sub.mastery} className="h-2 rounded-full" />
-
-                          <div className="flex items-center justify-between text-[12px] text-muted-foreground pt-0.5">
-                            <span>{sub.answered || 0} ta savol ishlangan</span>
-                            <span>{sub.mastery >= 75 ? 'Yuqori daraja' : sub.mastery >= 50 ? "O'rtacha" : "E'tibor zarur"}</span>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
-                  {/* Pastki tezkor boshqaruv */}
-                  <div className="mt-4 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <Button asChild variant="outline" size="sm" className="rounded-xl gap-1.5 font-bold">
-                      <Link href="/sprint">
-                        <Zap className="size-3.5 text-amber-500" />
-                        <span>Fokus &amp; Qasos Mashqi</span>
-                      </Link>
-                    </Button>
-
-                    <Button asChild variant="ghost" size="sm" className="rounded-xl gap-1.5 font-bold text-primary hover:text-primary">
-                      <Link href="/analytics">
-                        <TrendingUp className="size-3.5" />
-                        <span>Batafsil OTM va CEFR tahlili</span>
-                        <ChevronRight className="size-3.5" />
-                      </Link>
-                    </Button>
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-[12.5px] text-[var(--text-muted)]">Zaif fanlarni tezkor mashq bilan mustahkamlang.</p>
+                    <Link href="/sprint" className="ps-btn ps-btn-ink">
+                      <Zap className="size-4 text-[var(--ps-orange)]" />
+                      Fokus &amp; Qasos mashqi
+                      <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
+                    </Link>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </section>
 
-              {/* 4. JAVOBLAR NISBATI (ACCURACY BREAKDOWN) */}
-              {analyticsData && analyticsData.total_tests > 0 && (
-                <Card className="rounded-2xl border-border/80 shadow-md">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                      <PremiumIcon icon={Percent} tone="sky" size="xs" solid />
-                      <span>Javoblar Nisbati va To&apos;g&apos;rilik Balansi</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {(() => {
-                      const correct = analyticsData.accuracy_breakdown?.correct || 0;
-                      const wrong = analyticsData.accuracy_breakdown?.wrong || 0;
-                      const skipped = analyticsData.accuracy_breakdown?.skipped || 0;
-                      const totalAnswers = correct + wrong + skipped || 1;
-                      const correctPct = Math.round((correct / totalAnswers) * 100);
-                      const wrongPct = Math.round((wrong / totalAnswers) * 100);
-                      const skippedPct = 100 - correctPct - wrongPct;
+              {/* 4. JAVOBLAR NISBATI */}
+              {analyticsData && analyticsData.total_tests > 0 && (() => {
+                const correct = analyticsData.accuracy_breakdown?.correct || 0;
+                const wrong = analyticsData.accuracy_breakdown?.wrong || 0;
+                const skipped = analyticsData.accuracy_breakdown?.skipped || 0;
+                const totalAnswers = correct + wrong + skipped || 1;
+                const correctPct = Math.round((correct / totalAnswers) * 100);
+                const wrongPct = Math.round((wrong / totalAnswers) * 100);
+                const skippedPct = Math.max(0, 100 - correctPct - wrongPct);
 
-                      return (
-                        <div className="space-y-3">
-                          <div className="h-3 w-full rounded-full bg-muted overflow-hidden flex">
-                            <div
-                              style={{ width: `${correctPct}%` }}
-                              className="bg-emerald-500 transition-all duration-500"
-                              title={`To'g'ri: ${correct} ta (${correctPct}%)`}
-                            />
-                            <div
-                              style={{ width: `${wrongPct}%` }}
-                              className="bg-rose-500 transition-all duration-500"
-                              title={`Xato: ${wrong} ta (${wrongPct}%)`}
-                            />
-                            <div
-                              style={{ width: `${Math.max(0, skippedPct)}%` }}
-                              className="bg-zinc-400 dark:bg-zinc-600 transition-all duration-500"
-                              title={`Qoldirilgan: ${skipped} ta`}
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                              <p className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">To&apos;g&apos;ri</p>
-                              <p className="font-mono font-bold text-sm text-foreground mt-0.5">{correct} ta</p>
-                            </div>
-                            <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
-                              <p className="text-[12px] font-semibold text-rose-600 dark:text-rose-400">Xato</p>
-                              <p className="font-mono font-bold text-sm text-foreground mt-0.5">{wrong} ta</p>
-                            </div>
-                            <div className="p-2.5 rounded-xl bg-muted/60 border border-border/60">
-                              <p className="text-[12px] font-semibold text-muted-foreground">O&apos;tkazilgan</p>
-                              <p className="font-mono font-bold text-sm text-foreground mt-0.5">{skipped} ta</p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* 5. BILIM ILDIZI — Apple Health / Home Ecological Widget */}
-              <div className="ios-card overflow-hidden rounded-2xl p-6 sm:p-7 space-y-5 border border-border/80">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <PremiumIcon icon={Sprout} tone="emerald" size="md" solid />
-                    <div>
-                      <h2 className="text-[18px] font-bold text-foreground leading-tight">
-                        Shaxsiy Bilim Ildizingiz
-                      </h2>
-                      <p className="text-[12.5px] text-muted-foreground">
-                        Dars faolligingiz va muvaffaqiyatlaringizdan unib o&apos;suvchi jonli daraxt
-                      </p>
+                return (
+                  <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                    <div aria-hidden className="pointer-events-none absolute -left-12 -bottom-12 size-40 rounded-full bg-[var(--ps-green)] opacity-15" />
+                    <div className="relative flex flex-wrap items-end justify-between gap-4">
+                      <div>
+                        <p className="ps-eyebrow text-[var(--text-muted)]">Javoblar</p>
+                        <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                          To&apos;g&apos;rilik <span className="text-[var(--ps-green)]">balansi</span>
+                        </h3>
+                      </div>
+                      <div className="text-right">
+                        <p className="ps-num text-[40px] text-[var(--ps-green)] sm:text-[48px]">{correctPct}%</p>
+                        <p className="text-[11px] font-semibold text-[var(--text-muted)]">{correct + wrong + skipped} ta javobdan</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-3 py-1 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
-                    <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
+                    <div className="relative mt-6 flex h-5 w-full gap-1 overflow-hidden rounded-full">
+                      {correctPct > 0 && <div style={{ width: `${correctPct}%` }} className="rounded-full bg-[var(--ps-green)] transition-all duration-500" title={`To'g'ri: ${correct} ta (${correctPct}%)`} />}
+                      {wrongPct > 0 && <div style={{ width: `${wrongPct}%` }} className="rounded-full bg-[var(--ps-coral)] transition-all duration-500" title={`Xato: ${wrong} ta (${wrongPct}%)`} />}
+                      {skippedPct > 0 && <div style={{ width: `${skippedPct}%` }} className="rounded-full bg-[var(--ds-track)] transition-all duration-500" title={`Qoldirilgan: ${skipped} ta`} />}
+                    </div>
+
+                    <div className="relative mt-5 grid grid-cols-3 gap-3">
+                      {[
+                        { label: "To'g'ri", value: correct, pct: correctPct, icon: CheckCircle2, tone: 'bg-[var(--ps-green)] text-white' },
+                        { label: 'Xato', value: wrong, pct: wrongPct, icon: AlertTriangle, tone: 'bg-[var(--ps-coral)] text-white' },
+                        { label: "O'tkazilgan", value: skipped, pct: skippedPct, icon: Clock, tone: 'bg-[var(--ps-neutral)] text-[var(--text-primary)]' },
+                      ].map((r) => {
+                        const Icon = r.icon;
+                        return (
+                          <div key={r.label} className={cn('relative overflow-hidden rounded-[24px] p-4', r.tone)}>
+                            <span aria-hidden className="absolute -right-5 -top-5 size-16 rounded-full bg-white/15" />
+                            <div className="relative flex items-center justify-between">
+                              <span className="text-[12px] font-bold opacity-85">{r.label}</span>
+                              <Icon className="size-4 opacity-80" />
+                            </div>
+                            <p className="ps-num relative mt-2 text-[30px] leading-none sm:text-[34px]">{r.value}</p>
+                            <p className="relative mt-1 text-[11.5px] font-semibold opacity-70">{r.pct}% ulush</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              })()}
+
+              {/* 5. BILIM ILDIZI — jonli daraxt */}
+              <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-green)] opacity-15" />
+                <div className="relative flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="ps-eyebrow text-[var(--text-muted)]">Bilim ildizi</p>
+                    <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                      Shaxsiy bilim <span className="text-[var(--ps-green)]">daraxtingiz</span>
+                    </h3>
+                    <p className="mt-2 text-[13px] text-[var(--text-muted)]">Dars faolligingiz va yutuqlaringizdan unib o&apos;suvchi jonli daraxt.</p>
+                  </div>
+                  <span className="ps-chip">
+                    <span className="size-2 animate-pulse rounded-full bg-[var(--ps-green)]" />
                     Faol o&apos;sishda
                   </span>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-12 items-center">
-                  {/* Organic Tree */}
-                  <div className="lg:col-span-5 flex items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.05] p-4">
+                <div className="relative mt-6 grid items-stretch gap-5 lg:grid-cols-12">
+                  {/* Daraxt sahnasi */}
+                  <div className="relative flex items-center justify-center overflow-hidden rounded-[28px] bg-gradient-to-b from-[#DDEEF7] to-[#E2F0E6] p-4 dark:from-[#1F2733] dark:to-[#1C2A23] lg:col-span-5">
                     <KnowledgeTree
                       level={p.level}
                       xpProgress={xpProgress}
@@ -955,131 +898,127 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* 4 Apple Health Sub-cards */}
-                  <div className="lg:col-span-7 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[12px] font-semibold text-muted-foreground">Daraxt kuchi</span>
-                          <PremiumIcon icon={Sprout} tone="emerald" size="2xs" solid />
-                        </div>
-                        <p className="text-[16px] font-bold text-foreground">
-                          {p.level} ta mustahkam shox
-                        </p>
-                        <p className="text-[11.5px] text-muted-foreground">
-                          Erishilgan intellektual darajangiz
-                        </p>
-                      </div>
+                  {/* Ko'rsatkichlar */}
+                  <div className="flex flex-col gap-3 lg:col-span-7">
+                    <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+                      {[
+                        { icon: Sprout, label: 'Daraxt kuchi', value: p.level, unit: 'shox', hint: 'Erishilgan darajangiz', tone: 'bg-[var(--ps-green)] text-white' },
+                        { icon: Flame, label: 'Barglar zichligi', value: p.streak, unit: 'kun', hint: 'Uzluksiz dars seriyasi', tone: 'bg-[var(--ps-orange)] text-[#080808]' },
+                        { icon: Award, label: 'Tojdagi mevalar', value: data.badges.length, unit: 'meva', hint: 'Ochilgan yutuqlar', tone: 'bg-[var(--ps-coral)] text-white' },
+                      ].map((m) => {
+                        const Icon = m.icon;
+                        return (
+                          <div key={m.label} className={cn('relative overflow-hidden rounded-[24px] p-4', m.tone)}>
+                            <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/20" />
+                            <div className="relative flex items-center justify-between">
+                              <span className="text-[12px] font-bold opacity-85">{m.label}</span>
+                              <span className="inline-flex size-8 items-center justify-center rounded-full bg-black/15">
+                                <Icon className="size-4" />
+                              </span>
+                            </div>
+                            <p className="ps-num relative mt-2 text-[32px] leading-none">
+                              {m.value}
+                              <span className="ml-1 text-[0.42em] font-bold opacity-75">{m.unit}</span>
+                            </p>
+                            <p className="relative mt-1 text-[11.5px] font-semibold opacity-75">{m.hint}</p>
+                          </div>
+                        );
+                      })}
 
-                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[12px] font-semibold text-muted-foreground">Barglar zichligi</span>
-                          <PremiumIcon icon={Flame} tone="amber" size="2xs" solid />
+                      <div className="relative overflow-hidden rounded-[24px] bg-[#080808] p-4 text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+                        <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-[var(--ps-purple)] opacity-60" />
+                        <div className="relative flex items-center justify-between">
+                          <span className="text-[12px] font-bold opacity-80">O&apos;sish sur&apos;ati</span>
+                          <TrendingUp className="size-4 opacity-80" />
                         </div>
-                        <p className="text-[16px] font-bold text-foreground">
-                          {p.streak} kunlik yashillik
+                        <p className="ps-num relative mt-2 text-[32px] leading-none">
+                          {xpProgress}<span className="text-[0.5em] opacity-60">%</span>
                         </p>
-                        <p className="text-[11.5px] text-muted-foreground">
-                          Uzluksiz dars seriyasi
-                        </p>
-                      </div>
-
-                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[12px] font-semibold text-muted-foreground">Tojdagi mevalar</span>
-                          <PremiumIcon icon={Award} tone="rose" size="2xs" solid />
-                        </div>
-                        <p className="text-[16px] font-bold text-foreground">
-                          {data.badges.length} ta oltin meva
-                        </p>
-                        <p className="text-[11.5px] text-muted-foreground">
-                          Ochilgan maxsus yutuqlar
-                        </p>
-                      </div>
-
-                      <div className="rounded-xl border border-border/60 bg-muted/40 p-4 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[12px] font-semibold text-muted-foreground">O&apos;sish sur&apos;ati</span>
-                          <span className="font-mono text-[12px] font-bold text-primary">{xpProgress}%</span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div className="relative mt-2.5 h-2 overflow-hidden rounded-full bg-white/15 dark:bg-black/10">
                           <div
-                            className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-700"
+                            className="h-full rounded-full bg-gradient-to-r from-[var(--ps-orange)] to-[var(--ps-green)] transition-all duration-700"
                             style={{ width: `${Math.max(4, Math.min(100, xpProgress))}%` }}
                           />
                         </div>
-                        <p className="text-[11.5px] text-muted-foreground">
-                          Keyingi darajagacha progress
-                        </p>
                       </div>
                     </div>
 
-                    <div className="rounded-xl bg-emerald-500/[0.08] border border-emerald-500/20 p-3.5 text-[12.5px] text-foreground leading-relaxed flex items-start gap-2.5">
-                      <PremiumIcon icon={Sprout} tone="emerald" size="2xs" solid className="mt-0.5" />
-                      <span>
-                        <strong>Har bir yechilgan test</strong>, ko&apos;rilgan dars va tuzatilgan xato bu daraxt ildizini chuqurlashtirib, unga yangi shoxlar qo&apos;shadi.
+                    <div className="flex items-start gap-3 rounded-[22px] bg-[var(--ps-neutral)] p-4 text-[12.5px] leading-relaxed">
+                      <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--ps-green)] text-white">
+                        <Sprout className="size-4" />
+                      </span>
+                      <span className="text-[var(--text-secondary)]">
+                        <strong className="text-[var(--text-primary)]">Har bir yechilgan test</strong>, ko&apos;rilgan dars va tuzatilgan xato daraxt ildizini chuqurlashtirib, unga yangi shoxlar qo&apos;shadi.
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 6 burchakli Radar-Analitika (Spider Chart) — Haqiqiy statistika bilan */}
-                <div className="mt-6 pt-6 border-t border-border/60">
+                {/* 6 burchakli Radar-Analitika */}
+                <div className="relative mt-6">
                   <StudentSpiderRadar radar={skillRadar} />
                 </div>
-              </div>
+              </section>
 
               {/* 6. PLATFORMA YUTUQLARI & NISHONLAR */}
-              <Card className="rounded-2xl border-border/80 shadow-md">
-                <CardHeader>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <PremiumIcon icon={Award} tone="amber" size="xs" solid />
-                      <span>Platforma Yutuqlari & Nishonlar</span>
-                    </CardTitle>
-                    <span className="font-mono text-xs font-semibold text-muted-foreground">
-                      {data.badges.length} / {data.total_badges} ochilgan ({badgePct}%)
-                    </span>
+              <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-orange)] opacity-20" />
+                <div className="relative flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="ps-eyebrow text-[var(--text-muted)]">Yutuqlar</p>
+                    <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                      Platforma <span className="text-[var(--ps-orange)]">nishonlari</span>
+                    </h3>
                   </div>
-                  <Progress value={badgePct} className="mt-2 h-2" />
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-                    {data.badges.map((b, idx) => {
-                      const Icon = RARITY_ICON[b.rarity] || Medal;
-                      return (
-                        <Tooltip key={idx}>
-                          <TooltipTrigger asChild>
-                            <div className="rounded-xl border border-border/60 bg-muted/40 p-4 text-center space-y-2.5 transition-all hover:scale-[1.02] cursor-pointer">
-                              <PremiumIcon
-                                icon={Icon}
-                                tone={RARITY_TONE_KEY[b.rarity] || 'emerald'}
-                                size="lg"
-                                solid
-                                className="mx-auto"
-                              />
-                              <p className="text-[12.5px] font-bold text-foreground leading-tight">{b.name}</p>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-56">{b.description}</TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                    {(data.locked_badges ?? []).map((b) => (
-                      <Tooltip key={`locked-${b.name}`}>
+                  <div className="text-right">
+                    <p className="ps-num text-[40px] sm:text-[48px]">
+                      {data.badges.length}<span className="text-[0.5em] text-[var(--text-faint)]">/{data.total_badges}</span>
+                    </p>
+                    <p className="text-[11px] font-semibold text-[var(--text-muted)]">{badgePct}% ochilgan</p>
+                  </div>
+                </div>
+                <div className="relative mt-4 h-3 overflow-hidden rounded-full bg-[var(--ds-track)]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--ps-orange)] to-[var(--ps-coral)] transition-[width] duration-700"
+                    style={{ width: `${Math.max(2, badgePct)}%` }}
+                  />
+                </div>
+
+                <div className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {data.badges.map((b, idx) => {
+                    const Icon = RARITY_ICON[b.rarity] || Medal;
+                    const tone = ['bg-[var(--ps-orange)] text-[#080808]', 'bg-[var(--ps-purple)] text-white', 'bg-[var(--ps-green)] text-white', 'bg-[var(--ps-coral)] text-white', 'bg-[var(--ps-blue)] text-[#080808]'][idx % 5];
+                    return (
+                      <Tooltip key={idx}>
                         <TooltipTrigger asChild>
-                          <div className="rounded-xl border border-dashed border-border p-4 text-center space-y-2 opacity-65">
-                            <PremiumIcon icon={Lock} tone="zinc" size="lg" className="mx-auto" />
-                            <p className="text-[12px] font-bold leading-tight text-muted-foreground">{b.name}</p>
-                            <p className="line-clamp-2 text-[12px] leading-snug text-muted-foreground">{b.description}</p>
+                          <div className={cn('relative flex cursor-pointer flex-col items-center gap-3 overflow-hidden rounded-[24px] p-5 text-center transition-transform hover:-translate-y-1', tone)}>
+                            <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/20" />
+                            <span className="relative inline-flex size-14 items-center justify-center rounded-full bg-black/15">
+                              <Icon className="size-7" />
+                            </span>
+                            <p className="relative text-[14px] font-bold leading-tight">{b.name}</p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-56">Hali ochilmagan — {b.description}</TooltipContent>
+                        <TooltipContent className="max-w-56">{b.description}</TooltipContent>
                       </Tooltip>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    );
+                  })}
+                  {(data.locked_badges ?? []).map((b) => (
+                    <Tooltip key={`locked-${b.name}`}>
+                      <TooltipTrigger asChild>
+                        <div className="flex flex-col items-center gap-2.5 rounded-[24px] bg-[var(--ps-neutral)] p-5 text-center transition-transform hover:-translate-y-0.5">
+                          <span className="inline-flex size-14 items-center justify-center rounded-full bg-[var(--ps-paper)] text-[var(--text-faint)] border-2 border-dashed border-[var(--border-strong)]">
+                            <Lock className="size-6" />
+                          </span>
+                          <p className="text-[13px] font-bold leading-tight text-[var(--text-secondary)]">{b.name}</p>
+                          <p className="line-clamp-2 text-[11.5px] leading-snug text-[var(--text-muted)]">{b.description}</p>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-56">Hali ochilmagan — {b.description}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+              </section>
             </motion.div>
           )}
 
@@ -1095,151 +1034,132 @@ export default function ProfilePage() {
               transition={{ duration: 0.2 }}
               className="space-y-4"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 border border-border/60 rounded-2xl p-4">
-                <div className="space-y-0.5">
-                  <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                    <Newspaper className="size-4 text-primary" />
-                    <span>Hamjamiyatdagi Postlarim</span>
-                    {userPosts.length > 0 && (
-                      <span className="text-xs font-mono font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                        {userPosts.length} ta
-                      </span>
-                    )}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Siz tomondan IlmIldizi lentasiga ulashilgan natijalar, yutuqlar va savollar
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button asChild size="sm" className="rounded-xl gap-1.5 font-bold shadow-xs">
-                    <Link href="/feed">
-                      <PlusCircle className="size-4" />
-                      <span>Lentaga o&apos;tish</span>
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-
-              {userPosts.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border/80 bg-card p-8 sm:p-12 text-center space-y-4 shadow-sm">
-                  <div className="size-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-inner">
-                    <Share2 className="size-8" />
-                  </div>
-                  <div className="space-y-1.5 max-w-md mx-auto">
-                    <h4 className="text-lg font-bold text-foreground">
-                      Siz hali post ulashmadingiz
-                    </h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      Test natijalaringiz, erishgan sertifikatlaringiz yoki bilim yutuqlaringizni hamjamiyatdagi tengdoshlaringiz bilan baham ko&apos;ring va qo&apos;shimcha XP yutib oling!
+              <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-coral)] opacity-15" />
+                <div className="relative flex flex-wrap items-end justify-between gap-5">
+                  <div className="max-w-xl">
+                    <p className="ps-eyebrow text-[var(--text-muted)]">Hamjamiyat</p>
+                    <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                      Mening <span className="text-[var(--ps-coral)]">postlarim</span>
+                      <span className="text-[var(--ps-purple)]">.</span>
+                    </h3>
+                    <p className="mt-2 text-[13.5px] text-[var(--text-muted)]">
+                      IlmIldizi lentasiga ulashgan natijalaringiz, yutuqlaringiz va savollaringiz.
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                    <Button asChild className="rounded-xl font-bold shadow-xs">
-                      <Link href="/tests">
-                        <Zap className="size-4 mr-1.5" />
-                        Test yechib ulashish
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="rounded-xl font-semibold">
-                      <Link href="/feed">
-                        <ExternalLink className="size-4 mr-1.5" />
-                        Hamjamiyat lentasini ko&apos;rish
-                      </Link>
-                    </Button>
+                  <div className="flex items-end gap-5">
+                    <div className="text-right">
+                      <p className="ps-num text-[40px] sm:text-[48px]">{userPosts.length}</p>
+                      <p className="text-[11px] font-semibold text-[var(--text-muted)]">ta post</p>
+                    </div>
+                    <Link href="/feed" className="ps-btn ps-btn-ink">
+                      <PlusCircle className="size-4 text-[var(--ps-orange)]" />
+                      Lentaga
+                      <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
+                    </Link>
                   </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {userPosts.map((post) => (
-                    <article
-                      key={post.id}
-                      className="ios-card rounded-2xl p-5 border border-border/80 space-y-3.5 flex flex-col justify-between transition-all hover:border-primary/40 shadow-xs"
-                    >
-                      <div className="space-y-3">
-                        {/* Header: Subject + Post Type + Delete */}
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[12px] font-bold text-primary">
-                              {post.subject_name || 'Fan'}
-                            </span>
-                            <span className="text-[12px] text-muted-foreground">
-                              {new Date(post.created_at).toLocaleDateString('uz-UZ')}
-                            </span>
-                          </div>
 
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={deletingPostId === post.id}
-                            onClick={() => handleDeletePost(post.id)}
-                            className="size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            title="Postni o'chirish"
-                          >
-                            {deletingPostId === post.id ? (
-                              <Loader2 className="size-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="size-3.5" />
-                            )}
-                          </Button>
-                        </div>
-
-                        {/* Title & Score Pill */}
-                        <div className="flex items-start justify-between gap-3">
-                          <h4 className="font-bold text-sm sm:text-base text-foreground leading-snug line-clamp-2">
-                            {post.title}
-                          </h4>
-                          {post.score > 0 && (
-                            <span className="shrink-0 rounded-xl bg-emerald-500/12 border border-emerald-500/25 px-2.5 py-1 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                              {post.score.toFixed(0)}%
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Caption */}
-                        {post.caption && (
-                          <p className="text-xs text-foreground/80 line-clamp-3 leading-relaxed">
-                            {post.caption}
-                          </p>
-                        )}
-
-                        {/* Image Preview */}
-                        {post.image_url && (
-                          <div className="relative overflow-hidden rounded-xl border border-border bg-muted/40 max-h-48 flex items-center justify-center">
-                            <img
-                              src={post.image_url}
-                              alt={post.title}
-                              className="w-full h-auto max-h-48 object-cover"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Footer: Reactions & Comments summary */}
-                      <div className="pt-2 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1">
-                            <Heart className="size-3.5 text-rose-500" />
-                            <span>{post.reactions_count || 0}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageCircle className="size-3.5 text-sky-500" />
-                            <span>{post.comments_count || 0}</span>
-                          </span>
-                        </div>
-
-                        <Link
-                          href={`/feed?post=${post.id}`}
-                          className="font-semibold text-primary hover:underline flex items-center gap-1"
-                        >
-                          <span>Lentada ko&apos;rish</span>
-                          <ChevronRight className="size-3.5" />
+                <div className="relative mt-6">
+                  {userPosts.length === 0 ? (
+                    <div className="flex flex-col items-center gap-3 rounded-[28px] bg-[var(--ps-neutral)] p-10 text-center">
+                      <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                        <Share2 className="size-7" />
+                      </span>
+                      <h4 className="ps-display text-[22px]">Siz hali post ulashmadingiz</h4>
+                      <p className="max-w-md text-[13px] leading-relaxed text-[var(--text-muted)]">
+                        Test natijalaringiz, sertifikatlaringiz yoki bilim yutuqlaringizni tengdoshlaringiz bilan baham ko&apos;ring va qo&apos;shimcha XP yutib oling!
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
+                        <Link href="/tests" className="ps-btn ps-btn-ink">
+                          <Zap className="size-4 text-[var(--ps-orange)]" />
+                          Test yechib ulashish
+                        </Link>
+                        <Link href="/feed" className="ps-btn ps-btn-ghost">
+                          <ExternalLink className="size-4" />
+                          Lentani ko&apos;rish
                         </Link>
                       </div>
-                    </article>
-                  ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {userPosts.map((post, idx) => {
+                        const tone = ['bg-[var(--ps-purple)] text-white', 'bg-[var(--ps-orange)] text-[#080808]', 'bg-[var(--ps-green)] text-white', 'bg-[var(--ps-blue)] text-[#080808]'][idx % 4];
+                        return (
+                          <article
+                            key={post.id}
+                            className="group flex flex-col overflow-hidden rounded-[28px] bg-[var(--ps-neutral)] transition-transform duration-300 hover:-translate-y-1"
+                          >
+                            {/* Rangli sarlavha */}
+                            <div className={cn('relative overflow-hidden p-5', tone)}>
+                              <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/20" />
+                              <div className="relative flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="rounded-full bg-black/15 px-2.5 py-1 text-[11.5px] font-bold">
+                                    {post.subject_name || 'Fan'}
+                                  </span>
+                                  <span className="text-[11.5px] font-semibold opacity-75">
+                                    {new Date(post.created_at).toLocaleDateString('uz-UZ')}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  disabled={deletingPostId === post.id}
+                                  onClick={() => handleDeletePost(post.id)}
+                                  className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/15 transition-colors hover:bg-[#080808] hover:text-white disabled:opacity-60"
+                                  title="Postni o'chirish"
+                                  aria-label="Postni o'chirish"
+                                >
+                                  {deletingPostId === post.id ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
+                                </button>
+                              </div>
+                              <div className="relative mt-4 flex items-end justify-between gap-3">
+                                <h4 className="line-clamp-2 text-[18px] font-bold leading-snug">{post.title}</h4>
+                                {post.score > 0 && (
+                                  <p className="ps-num shrink-0 text-[34px] leading-none">
+                                    {post.score.toFixed(0)}<span className="text-[0.5em] opacity-70">%</span>
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex flex-1 flex-col gap-3 p-5">
+                              {post.caption && (
+                                <p className="line-clamp-3 text-[13px] leading-relaxed text-[var(--text-secondary)]">{post.caption}</p>
+                              )}
+                              {post.image_url && (
+                                <div className="overflow-hidden rounded-[20px]">
+                                  <img src={post.image_url} alt={post.title} className="h-auto max-h-48 w-full object-cover" />
+                                </div>
+                              )}
+
+                              <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-paper)] px-3 py-1.5 text-[12px] font-bold">
+                                    <Heart className="size-3.5 text-[var(--ps-coral)]" />
+                                    {post.reactions_count || 0}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-paper)] px-3 py-1.5 text-[12px] font-bold">
+                                    <MessageCircle className="size-3.5 text-[var(--ps-purple)]" />
+                                    {post.comments_count || 0}
+                                  </span>
+                                </div>
+                                <Link
+                                  href={`/feed?post=${post.id}`}
+                                  className="ps-arrow-host inline-flex items-center gap-2 text-[12.5px] font-bold text-[var(--text-primary)]"
+                                >
+                                  Lentada
+                                  <span className="ps-btn-arrow !mr-0"><ArrowUpRight className="size-4" /></span>
+                                </Link>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
+              </section>
             </motion.div>
           )}
 
@@ -1301,247 +1221,231 @@ export default function ProfilePage() {
                   ? allItems
                   : allItems.filter((i) => i.category === inventoryTab);
 
-                return (
-                  <Card className="overflow-hidden border border-border/80 shadow-md rounded-2xl">
-                    <CardHeader className="pb-3.5">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5">
-                          <PremiumIcon icon={ShoppingBag} tone="amber" size="xs" solid />
-                          <div>
-                            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                              <span>Mening buyumlarim & Inventar</span>
-                              {allItems.length > 0 && (
-                                <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">
-                                  {allItems.length}
-                                </span>
-                              )}
-                            </CardTitle>
-                            <p className="text-xs text-muted-foreground">
-                              Do&apos;kondan xarid qilgan barcha ramkalar, mavzular va seriya himoyalaringiz
-                            </p>
-                          </div>
-                        </div>
+                /* Har bir toifa — o'z pastel "sahnasi" */
+                const CATEGORY_TONE: Record<string, { stage: string; text: string; tag: string }> = {
+                  frame: { stage: 'bg-[var(--ps-orange)]', text: 'text-[#080808]', tag: 'bg-[var(--ps-orange)] text-[#080808]' },
+                  theme: { stage: 'bg-[var(--ps-green)]', text: 'text-white', tag: 'bg-[var(--ps-green)] text-white' },
+                  title: { stage: 'bg-[var(--ps-purple)]', text: 'text-white', tag: 'bg-[var(--ps-purple)] text-white' },
+                  consumable: { stage: 'bg-[var(--ps-blue)]', text: 'text-[#080808]', tag: 'bg-[var(--ps-blue)] text-[#080808]' },
+                  avatar: { stage: 'bg-[var(--ps-coral)]', text: 'text-white', tag: 'bg-[var(--ps-coral)] text-white' },
+                  badge: { stage: 'bg-[var(--ps-lilac)]', text: 'text-[#080808]', tag: 'bg-[var(--ps-lilac)] text-[#080808]' },
+                };
+                const DEFAULT_TONE = CATEGORY_TONE.title;
+                const equippedCount = allItems.filter((i) => i.equipped).length;
 
-                        <div className="flex items-center gap-2">
-                          <Button asChild variant="outline" size="sm" className="rounded-xl gap-1.5 text-xs font-semibold shadow-2xs hover:bg-muted">
-                            <Link href="/shop">
-                              <Coins className="size-3.5 text-amber-500" />
-                              <span>Do&apos;konga o&apos;tish</span>
-                            </Link>
-                          </Button>
-                        </div>
+                return (
+                  <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                    <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-purple)] opacity-15" />
+                    <div aria-hidden className="pointer-events-none absolute -left-10 bottom-10 size-24 rounded-full bg-[var(--ps-orange)] opacity-15" />
+
+                    {/* Sarlavha */}
+                    <div className="relative flex flex-wrap items-end justify-between gap-5">
+                      <div className="max-w-xl">
+                        <p className="ps-eyebrow text-[var(--text-muted)]">Inventar</p>
+                        <h3 className="ps-display mt-2 text-[28px] sm:text-[36px]">
+                          Mening <span className="text-[var(--ps-purple)]">buyumlarim</span>
+                          <span className="text-[var(--ps-coral)]">.</span>
+                        </h3>
+                        <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--text-muted)]">
+                          Do&apos;kondan xarid qilgan ramkalar, mavzular, unvonlar va seriya himoyalaringiz.
+                        </p>
                       </div>
 
-                      {/* Kategoriya filtri */}
-                      {availableCategories.length > 1 && (
-                        <div className="flex items-center gap-1.5 pt-3 overflow-x-auto no-scrollbar">
-                          <button
-                            type="button"
-                            onClick={() => setInventoryTab('all')}
-                            className={cn(
-                              'rounded-xl px-3 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
-                              inventoryTab === 'all'
-                                ? 'bg-primary text-primary-foreground shadow-2xs'
-                                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-                            )}
-                          >
-                            Barchasi ({allItems.length})
-                          </button>
-                          {availableCategories.map((cat) => {
-                            const count = allItems.filter((i) => i.category === cat).length;
-                            const label = categoryLabels[cat] || cat;
-                            const active = inventoryTab === cat;
-                            return (
-                              <button
-                                key={cat}
-                                type="button"
-                                onClick={() => setInventoryTab(cat)}
+                      <div className="flex items-end gap-5">
+                        <div className="text-right">
+                          <p className="ps-num text-[40px] sm:text-[48px]">
+                            {allItems.length}
+                          </p>
+                          <p className="text-[11px] font-semibold text-[var(--text-muted)]">
+                            {equippedCount} tasi taqilgan
+                          </p>
+                        </div>
+                        <Link href="/shop" className="ps-btn ps-btn-ink">
+                          <Coins className="size-4 text-[var(--ps-orange)]" />
+                          Do&apos;kon
+                          <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Kategoriya filtri */}
+                    {availableCategories.length > 1 && (
+                      <div className="relative mt-6 flex items-center gap-2 overflow-x-auto pb-1">
+                        {[{ key: 'all', label: 'Barchasi', count: allItems.length }, ...availableCategories.map((cat) => ({
+                          key: cat,
+                          label: categoryLabels[cat] || cat,
+                          count: allItems.filter((i) => i.category === cat).length,
+                        }))].map((f) => {
+                          const active = inventoryTab === f.key;
+                          return (
+                            <button
+                              key={f.key}
+                              type="button"
+                              onClick={() => setInventoryTab(f.key)}
+                              className={cn(
+                                'inline-flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full py-1.5 pl-4 pr-1.5 text-[13px] font-bold transition-all',
+                                active
+                                  ? 'bg-[#080808] text-[#FFFCF7] shadow-[0_10px_22px_-12px_rgba(8,8,8,0.7)] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                                  : 'bg-[var(--ps-neutral)] text-[var(--text-secondary)] hover:-translate-y-0.5 hover:text-[var(--text-primary)]'
+                              )}
+                            >
+                              {f.label}
+                              <span
                                 className={cn(
-                                  'rounded-xl px-3 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
-                                  active
-                                    ? 'bg-primary text-primary-foreground shadow-2xs'
-                                    : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                  'inline-flex min-w-7 items-center justify-center rounded-full px-2 py-0.5 text-[11.5px] tabular-nums',
+                                  active ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-paper)] text-[var(--text-muted)]'
                                 )}
                               >
-                                {label} ({count})
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </CardHeader>
+                                {f.count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
 
-                    <CardContent className="pt-1">
+                    <div className="relative mt-6">
                       {allItems.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-8 text-center space-y-3">
-                          <div className="size-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
-                            <ShoppingBag className="size-6" />
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-bold text-foreground">Sizda hali xarid qilingan buyumlar yo&apos;q</p>
-                            <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                              Do&apos;kondan tangalaringiz evaziga oltin ramka, maxsus zumrad mavzu, bilimdon unvoni yoki seriya himoyasini sotib olishingiz mumkin.
-                            </p>
-                          </div>
-                          <Button asChild size="sm" className="rounded-xl mt-1 font-semibold">
-                            <Link href="/shop">Do&apos;kondan tanlash</Link>
-                          </Button>
+                        <div className="flex flex-col items-center gap-3 rounded-[28px] bg-[var(--ps-neutral)] p-10 text-center">
+                          <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                            <ShoppingBag className="size-7" />
+                          </span>
+                          <p className="text-[15px] font-bold text-[var(--text-primary)]">Sizda hali xarid qilingan buyumlar yo&apos;q</p>
+                          <p className="max-w-sm text-[13px] leading-relaxed text-[var(--text-muted)]">
+                            Do&apos;kondan tangalaringiz evaziga oltin ramka, maxsus zumrad mavzu, bilimdon unvoni yoki seriya himoyasini sotib olishingiz mumkin.
+                          </p>
+                          <Link href="/shop" className="ps-btn ps-btn-ink mt-1">
+                            Do&apos;kondan tanlash
+                            <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
+                          </Link>
                         </div>
                       ) : filteredItems.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+                        <div className="rounded-[24px] bg-[var(--ps-neutral)] p-6 text-center text-[13px] text-[var(--text-muted)]">
                           Ushbu toifada buyumlar mavjud emas.
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                           {filteredItems.map((item) => {
                             const isBusy = equipBusy === item.slug;
                             const ring = item.payload?.ring;
                             const accent = item.payload?.accent;
                             const isEquipped = !!item.equipped;
+                            const tone = CATEGORY_TONE[item.category] || DEFAULT_TONE;
 
                             return (
                               <div
                                 key={item.id}
                                 className={cn(
-                                  'group relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 shadow-2xs',
-                                  isEquipped
-                                    ? 'border-emerald-500/40 bg-gradient-to-b from-emerald-500/[0.08] via-emerald-500/[0.02] to-transparent dark:from-emerald-950/30'
-                                    : 'border-border/80 bg-card hover:border-border hover:bg-muted/20'
+                                  'group relative flex flex-col overflow-hidden rounded-[28px] bg-[var(--ps-neutral)] transition-transform duration-300 hover:-translate-y-1',
+                                  isEquipped && 'ring-[3px] ring-[var(--ps-green)] ring-offset-2 ring-offset-[var(--ps-paper)]'
                                 )}
                               >
-                                {/* Yuqori qator: Icon + Matnlar */}
-                                <div className="flex items-start gap-3">
-                                  {/* Icon / Preview */}
-                                  <div className="shrink-0 pt-0.5">
+                                {/* Sahna — buyum ko'rinishi */}
+                                <div className={cn('relative flex h-32 items-center justify-center overflow-hidden', tone.stage, tone.text)}>
+                                  <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/20" />
+                                  <span aria-hidden className="absolute -bottom-10 -left-6 size-24 rounded-full bg-black/10" />
+                                  <span aria-hidden className="ps-dots absolute inset-0 opacity-20" />
+
+                                  <span className={cn('absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur-sm', tone.text === 'text-white' ? 'bg-white/20' : 'bg-black/10')}>
+                                    {getCategoryTag(item)}
+                                  </span>
+                                  {isEquipped && (
+                                    <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#080808] px-2.5 py-1 text-[11px] font-bold text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+                                      <Check className="size-3 stroke-[3]" />
+                                      Taqilgan
+                                    </span>
+                                  )}
+
+                                  <div className="relative transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
                                     {item.category === 'frame' ? (
-                                      <div className="relative size-12 flex items-center justify-center">
-                                        <div
-                                          className="size-11 rounded-full p-[2.5px] flex items-center justify-center shadow-xs transition-transform group-hover:scale-105"
-                                          style={{
-                                            background: `linear-gradient(135deg, ${ring || '#f59e0b'}, #ffffff 50%, ${ring || '#f59e0b'})`,
-                                            boxShadow: `0 0 12px ${ring || '#f59e0b'}55`,
-                                          }}
-                                        >
-                                          <div className="size-full rounded-full bg-slate-900 dark:bg-slate-950 flex items-center justify-center text-amber-400">
-                                            <Award className="size-5" />
-                                          </div>
+                                      <div
+                                        className="flex size-[72px] items-center justify-center rounded-full p-[4px]"
+                                        style={{
+                                          background: `linear-gradient(135deg, ${ring || '#f59e0b'}, #ffffff 50%, ${ring || '#f59e0b'})`,
+                                          boxShadow: `0 0 22px ${ring || '#f59e0b'}88`,
+                                        }}
+                                      >
+                                        <div className="flex size-full items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)]">
+                                          <Award className="size-7" />
                                         </div>
                                       </div>
                                     ) : item.category === 'theme' ? (
                                       <div
-                                        className="size-11 rounded-2xl flex items-center justify-center text-white shadow-xs transition-transform group-hover:scale-105"
-                                        style={{
-                                          background: `linear-gradient(135deg, ${accent || '#10b981'}, ${accent || '#10b981'}dd)`,
-                                          boxShadow: `0 4px 12px ${accent || '#10b981'}40`,
-                                        }}
+                                        className="flex size-[72px] items-center justify-center rounded-[22px] border-4 border-white/70 text-white shadow-lg"
+                                        style={{ background: `linear-gradient(135deg, ${accent || '#10b981'}, ${accent || '#10b981'}bb)` }}
                                       >
-                                        <Palette className="size-5" />
-                                      </div>
-                                    ) : item.category === 'title' ? (
-                                      <div className="size-11 rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-purple-500/20 border border-amber-500/30 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-xs transition-transform group-hover:scale-105">
-                                        <Crown className="size-5" />
-                                      </div>
-                                    ) : item.category === 'consumable' ? (
-                                      <div className="size-11 rounded-2xl bg-gradient-to-br from-sky-500/20 via-sky-500/10 to-blue-500/20 border border-sky-500/30 flex items-center justify-center text-sky-500 dark:text-sky-400 shadow-xs transition-transform group-hover:scale-105">
-                                        <Shield className="size-5" />
+                                        <Palette className="size-8" />
                                       </div>
                                     ) : item.category === 'avatar' && item.payload?.avatar_url ? (
                                       <img
                                         src={item.payload.avatar_url}
                                         alt=""
-                                        className="size-11 rounded-2xl object-cover border border-border shadow-xs transition-transform group-hover:scale-105"
+                                        className="size-[72px] rounded-full border-4 border-[#FFFCF7] bg-[#FFFCF7] object-cover shadow-lg"
                                       />
                                     ) : (
-                                      <div className="size-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
-                                        <Sparkles className="size-5" />
-                                      </div>
+                                      <span className="flex size-[72px] items-center justify-center rounded-full border-4 border-white/60 bg-black/15 shadow-lg">
+                                        {item.category === 'title' ? (
+                                          <Crown className="size-8" />
+                                        ) : item.category === 'consumable' ? (
+                                          <Shield className="size-8" />
+                                        ) : (
+                                          <Sparkles className="size-8" />
+                                        )}
+                                      </span>
                                     )}
-                                  </div>
-
-                                  {/* Matn qismi */}
-                                  <div className="min-w-0 flex-1 space-y-1">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-bold text-sm text-foreground truncate">
-                                        {item.name}
-                                      </span>
-                                      {isEquipped && (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.2 text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
-                                          <Check className="size-2.5 stroke-[2.5]" />
-                                          Taqilgan
-                                        </span>
-                                      )}
-                                    </div>
-
-                                    <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-                                      <span className="font-semibold text-foreground/70">
-                                        {getCategoryTag(item)}
-                                      </span>
-                                    </div>
-
-                                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                      {getItemSubtitle(item)}
-                                    </p>
                                   </div>
                                 </div>
 
-                                {/* Pastki qator: Holat & Tugma */}
-                                <div className="mt-3.5 pt-3 border-t border-border/50 flex items-center justify-between gap-2 text-xs">
-                                  {item.is_equippable ? (
-                                    <>
-                                      <div className="flex items-center gap-1.5 text-xs">
+                                {/* Matn */}
+                                <div className="flex flex-1 flex-col p-5">
+                                  <p className="truncate text-[17px] font-bold leading-tight text-[var(--text-primary)]">{item.name}</p>
+                                  <p className="mt-1.5 line-clamp-2 min-h-[2.6em] text-[13px] leading-snug text-[var(--text-muted)]">
+                                    {getItemSubtitle(item)}
+                                  </p>
+
+                                  <div className="mt-4 flex items-center justify-between gap-2">
+                                    {item.is_equippable ? (
+                                      <>
                                         {isEquipped ? (
-                                          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 text-[12px]">
-                                            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                            Faol profilga ulangan
+                                          <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[var(--ps-green)]">
+                                            <span className="size-2 animate-pulse rounded-full bg-[var(--ps-green)]" />
+                                            Faol profilda
                                           </span>
                                         ) : (
-                                          <span className="text-[12px] text-muted-foreground">
-                                            Inventarda mavjud
-                                          </span>
+                                          <span className="text-[12px] font-semibold text-[var(--text-muted)]">Inventarda</span>
                                         )}
-                                      </div>
-
-                                      <Button
-                                        size="sm"
-                                        variant={isEquipped ? 'outline' : 'default'}
-                                        disabled={isBusy}
-                                        onClick={() => handleToggleEquip(item.slug, isEquipped, item.name)}
-                                        className={cn(
-                                          'h-8 px-3.5 rounded-xl text-xs font-semibold cursor-pointer transition-all',
-                                          isEquipped
-                                            ? 'text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/10'
-                                            : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs active:scale-95'
-                                        )}
-                                      >
-                                        {isBusy ? (
-                                          <Loader2 className="size-3.5 animate-spin" />
-                                        ) : isEquipped ? (
-                                          'Yechish'
-                                        ) : (
-                                          'Taqish'
-                                        )}
-                                      </Button>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-sky-600 dark:text-sky-400">
-                                        <Shield className="size-3.5" />
-                                        Avtomatik amal qiladi
-                                      </span>
-
-                                      <span className="px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-bold font-mono">
-                                        {item.quantity ? `${item.quantity} ta zaxirada` : '1 ta faol'}
-                                      </span>
-                                    </>
-                                  )}
+                                        <button
+                                          type="button"
+                                          disabled={isBusy}
+                                          onClick={() => handleToggleEquip(item.slug, isEquipped, item.name)}
+                                          className={cn(
+                                            'ps-btn !min-h-10 !px-5 !text-[13px]',
+                                            isEquipped ? 'ps-btn-ghost hover:!border-[var(--ps-coral)] hover:!text-[var(--ps-coral)]' : 'ps-btn-ink'
+                                          )}
+                                        >
+                                          {isBusy ? <Loader2 className="size-4 animate-spin" /> : isEquipped ? 'Yechish' : 'Taqish'}
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[var(--ps-purple)]">
+                                          <Shield className="size-3.5" />
+                                          Avtomatik amal qiladi
+                                        </span>
+                                        <span className="rounded-full bg-[var(--ps-paper)] px-3 py-1 text-[12px] font-bold tabular-nums text-[var(--text-primary)]">
+                                          {item.quantity ? `${item.quantity} ta zaxirada` : '1 ta faol'}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             );
                           })}
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </section>
                 );
               })()}
             </motion.div>
@@ -1561,156 +1465,133 @@ export default function ProfilePage() {
             >
               {/* So'nggi test natijalari & So'nggi Arena duellari */}
               <div className="grid gap-5 md:grid-cols-2">
-                <Card className="rounded-2xl border-border/80 shadow-md">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <PremiumIcon icon={FileCheck2} tone="sky" size="xs" solid />
-                      <span>So&apos;nggi test natijalari</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="divide-y divide-border/60">
-                    {data.recent_attempts.length === 0 && (
-                      <p className="py-4 text-[13px] text-muted-foreground">Hali test yechilmagan.</p>
-                    )}
-                    {data.recent_attempts.map((t) => (
-                      <Link
-                        key={t.id}
-                        href={`/tests/${t.id}/feedback`}
-                        className="flex items-center justify-between gap-3 py-3 transition-colors hover:text-primary group"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-[13.5px] font-semibold text-foreground group-hover:text-primary">
-                            {t.test_title}
-                          </p>
-                          <span className="text-[11.5px] text-muted-foreground">
-                            {new Date(t.started_at).toLocaleDateString('uz-UZ')}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-mono text-[12.5px] font-bold text-primary">
-                            {t.score !== null ? `${t.score.toFixed(0)}%` : '—'}
-                          </span>
-                          <ChevronRight className="size-4 text-muted-foreground" />
-                        </div>
-                      </Link>
-                    ))}
-                  </CardContent>
-                </Card>
+                <section className="ps-card relative overflow-hidden !rounded-[32px] p-6">
+                  <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[var(--ps-blue)] opacity-20" />
+                  <div className="relative flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--ps-blue)] text-[#080808]">
+                        <FileCheck2 className="size-5" />
+                      </span>
+                      <div>
+                        <p className="ps-eyebrow text-[var(--text-muted)]">Testlar</p>
+                        <h3 className="ps-display text-[22px]">So&apos;nggi natijalar</h3>
+                      </div>
+                    </div>
+                    <p className="ps-num text-[34px] leading-none">{data.recent_attempts.length}</p>
+                  </div>
 
-                <Card className="rounded-2xl border-border/80 shadow-md">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <PremiumIcon icon={Swords} tone="rose" size="xs" solid />
-                      <span>So&apos;nggi Arena duellari</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="divide-y divide-border/60">
+                  <div className="relative mt-5 space-y-2">
+                    {data.recent_attempts.length === 0 && (
+                      <p className="rounded-[20px] bg-[var(--ps-neutral)] px-4 py-5 text-center text-[13px] text-[var(--text-muted)]">Hali test yechilmagan.</p>
+                    )}
+                    {data.recent_attempts.map((t) => {
+                      const sc = t.score;
+                      const scoreTone = sc === null ? 'bg-[var(--ps-paper)] text-[var(--text-muted)]' : sc >= 80 ? 'bg-[var(--ps-green)] text-white' : sc >= 50 ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-coral)] text-white';
+                      return (
+                        <Link
+                          key={t.id}
+                          href={`/tests/${t.id}/feedback`}
+                          className="group flex items-center gap-3 rounded-[20px] bg-[var(--ps-neutral)] p-2.5 pr-4 transition-transform hover:-translate-y-0.5"
+                        >
+                          <span className={cn('inline-flex size-12 shrink-0 items-center justify-center rounded-full font-mono text-[13px] font-black', scoreTone)}>
+                            {sc !== null ? `${sc.toFixed(0)}%` : '—'}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[13.5px] font-bold text-[var(--text-primary)]">{t.test_title}</p>
+                            <span className="text-[11.5px] font-semibold text-[var(--text-muted)]">
+                              {new Date(t.started_at).toLocaleDateString('uz-UZ')}
+                            </span>
+                          </div>
+                          <ChevronRight className="size-4 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="ps-card relative overflow-hidden !rounded-[32px] p-6">
+                  <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 size-36 rounded-full bg-[var(--ps-coral)] opacity-15" />
+                  <div className="relative flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                        <Swords className="size-5" />
+                      </span>
+                      <div>
+                        <p className="ps-eyebrow text-[var(--text-muted)]">Arena</p>
+                        <h3 className="ps-display text-[22px]">So&apos;nggi duellar</h3>
+                      </div>
+                    </div>
+                    <p className="ps-num text-[34px] leading-none">
+                      {data.recent_battles.filter((b) => b.won).length}
+                      <span className="text-[0.5em] text-[var(--text-faint)]">/{data.recent_battles.length}</span>
+                    </p>
+                  </div>
+
+                  <div className="relative mt-5 space-y-2">
                     {data.recent_battles.length === 0 && (
-                      <p className="py-4 text-[13px] text-muted-foreground">Hali arena jangi yo&apos;q.</p>
+                      <p className="rounded-[20px] bg-[var(--ps-neutral)] px-4 py-5 text-center text-[13px] text-[var(--text-muted)]">Hali arena jangi yo&apos;q.</p>
                     )}
                     {data.recent_battles.map((b) => (
-                      <div key={b.id} className="flex items-center justify-between gap-3 py-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-[13.5px] font-semibold text-foreground">vs {b.opponent}</p>
-                          <span className="text-[11.5px] text-muted-foreground">
+                      <div key={b.id} className="flex items-center gap-3 rounded-[20px] bg-[var(--ps-neutral)] p-2.5 pr-3">
+                        <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ps-paper)] text-[15px] font-black uppercase text-[var(--ps-purple)]">
+                          {(b.opponent || '?').slice(0, 1)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[13.5px] font-bold text-[var(--text-primary)]">vs {b.opponent}</p>
+                          <span className="text-[11.5px] font-semibold text-[var(--text-muted)]">
                             {new Date(b.created_at).toLocaleDateString('uz-UZ')}
                           </span>
                         </div>
-                        <Badge
-                          variant="outline"
-                          className={
-                            b.won
-                              ? 'border-emerald-500/30 bg-emerald-500/12 text-emerald-600 dark:text-emerald-400'
-                              : 'border-rose-500/30 bg-rose-500/12 text-rose-600 dark:text-rose-400'
-                          }
+                        <span
+                          className={cn(
+                            'shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold',
+                            b.won ? 'bg-[var(--ps-green)] text-white' : 'bg-[var(--ps-coral)] text-white'
+                          )}
                         >
                           {b.won ? "G'alaba" : "Mag'lubiyat"}
-                        </Badge>
+                        </span>
                       </div>
                     ))}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Referral Card */}
-              <div className="ios-card rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-between gap-4 sm:flex-row border border-border/80 shadow-md">
-                <div className="flex items-center gap-3.5 text-center sm:text-left">
-                  <PremiumIcon icon={Gift} tone="sky" size="md" solid className="hidden sm:inline-flex" />
-                  <div>
-                    <h3 className="text-[15px] font-bold text-foreground">
-                      Do&apos;stlarni taklif qiling va bonus tanga oling
-                    </h3>
-                    <p className="text-[12.5px] text-muted-foreground mt-0.5">
-                      {data.referral_stats.referral_count} ta do&apos;st taklif qildingiz ·{' '}
-                      <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">{data.referral_stats.coins_earned} tanga</strong> ishladingiz
-                    </p>
                   </div>
-                </div>
-
-                <div className="flex w-full items-center gap-2 sm:w-auto">
-                  <Input readOnly value={referralUrl} className="flex-1 font-mono text-xs sm:w-56 h-10" />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" onClick={handleCopy} aria-label="Havolani nusxalash">
-                        {copied ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4" />}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{copied ? 'Nusxalandi!' : 'Havolani nusxalash'}</TooltipContent>
-                  </Tooltip>
-                  <Button asChild className="rounded-full px-4">
-                    <a href={telegramShareHref} target="_blank" rel="noopener noreferrer">
-                      <Send className="size-4 mr-1.5" /> Ulashish
-                    </a>
-                  </Button>
-                </div>
+                </section>
               </div>
 
               {/* Ilova sozlamalari */}
-              <div className="space-y-2">
-                <p className="px-2 text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Ilova sozlamalari
-                </p>
-                <div className="ios-card overflow-hidden rounded-xl divide-y divide-border/60 border border-border/80">
-                  <div className="flex items-center justify-between p-4">
+              <section className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-8">
+                <p className="ps-eyebrow text-[var(--text-muted)]">Sozlamalar</p>
+                <h3 className="ps-display mt-2 text-[24px] sm:text-[30px]">Ilova sozlamalari</h3>
+                <div className="mt-5 divide-y divide-[var(--border-card)] overflow-hidden rounded-[24px] bg-[var(--ps-neutral)]">
+                  <div className="flex items-center justify-between gap-3 p-4">
                     <div className="space-y-0.5">
-                      <div className="text-sm font-semibold text-foreground">Alifbo (Yozuv turi)</div>
-                      <div className="text-xs text-muted-foreground">O&apos;zbek tili: Lotin yoki Kirill yozuvi</div>
+                      <div className="text-sm font-bold text-[var(--text-primary)]">Alifbo (Yozuv turi)</div>
+                      <div className="text-xs text-[var(--text-muted)]">O&apos;zbek tili: Lotin yoki Kirill yozuvi</div>
                     </div>
-                    <div className="flex items-center rounded-xl bg-muted/60 p-1 border border-border/40">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setScript('latin');
-                          tgHaptic('light');
-                          toast.success("Lotin yozuviga o'tkazildi");
-                        }}
-                        className={cn(
-                          'px-3 py-1.5 text-xs font-bold rounded-lg transition-all',
-                          script === 'latin' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                        )}
-                      >
-                        Lotin
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setScript('cyrillic');
-                          tgHaptic('light');
-                          toast.success("Кирилл ёзувига ўтказилди");
-                        }}
-                        className={cn(
-                          'px-3 py-1.5 text-xs font-bold rounded-lg transition-all',
-                          script === 'cyrillic' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'
-                        )}
-                      >
-                        Кирилл
-                      </button>
+                    <div className="flex items-center rounded-full bg-[var(--ps-paper)] p-1">
+                      {([['latin', 'Lotin', "Lotin yozuviga o'tkazildi"], ['cyrillic', 'Кирилл', 'Кирилл ёзувига ўтказилди']] as const).map(([key, label, msg]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setScript(key);
+                            tgHaptic('light');
+                            toast.success(msg);
+                          }}
+                          className={cn(
+                            'cursor-pointer rounded-full px-4 py-1.5 text-xs font-bold transition-all',
+                            script === key
+                              ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                              : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                          )}
+                        >
+                          {label}
+                        </button>
+                      ))}
                     </div>
                   </div>
                   <AudioToggle />
                   <ThemeToggle />
                 </div>
-              </div>
+              </section>
             </motion.div>
           )}
         </AnimatePresence>
@@ -1719,29 +1600,51 @@ export default function ProfilePage() {
         {/* 5. PROFILNI TAHRIRLASH MODALI */}
         {/* ========================================================================= */}
         <Dialog open={editOpen} onOpenChange={(open) => { if (!saving) setEditOpen(open); }}>
-          <DialogContent className="sm:max-w-md rounded-2xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-                <Pencil className="size-5 text-primary" />
-                Profilni tahrirlash
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Ism, familiya va profilingiz rasmini o&apos;zgartirishingiz mumkin.
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent
+            showCloseButton={false}
+            className="ps-shell max-h-[94vh] w-[calc(100%-1rem)] gap-0 overflow-y-auto rounded-[32px] border-0 bg-[var(--ps-paper)] p-0 text-[var(--text-primary)] shadow-[0_40px_80px_-30px_rgba(40,20,80,0.7)] sm:w-full sm:max-w-md sm:p-0 dark:bg-[var(--ps-paper)]"
+          >
+            {/* Sarlavha lentasi */}
+            <div className="relative overflow-hidden bg-[var(--ps-purple)] px-6 pb-20 pt-6 text-white">
+              <span aria-hidden className="absolute -right-10 -top-12 size-40 rounded-full bg-white/15" />
+              <span aria-hidden className="ps-dots absolute bottom-4 left-4 h-12 w-24 opacity-25" />
+              <div className="relative flex items-start justify-between gap-3">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-wider">
+                    <Pencil className="size-3" /> Profil
+                  </span>
+                  <DialogTitle className="ps-display mt-3 text-[28px] text-white sm:text-[32px]">
+                    Profilni tahrirlash
+                  </DialogTitle>
+                  <DialogDescription className="mt-1.5 text-[13px] !text-white/85">
+                    Ism, familiya va profilingiz rasmini o&apos;zgartirishingiz mumkin.
+                  </DialogDescription>
+                </div>
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => setEditOpen(false)}
+                  aria-label="Yopish"
+                  className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white hover:text-[#080808]"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
 
-            <form onSubmit={handleSaveProfile} className="space-y-5 py-2">
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative group">
+            <form onSubmit={handleSaveProfile} className="px-6 pb-6">
+              {/* Avatar — lenta ustiga chiqib turadi */}
+              <div className="-mt-16 flex flex-col items-center gap-3">
+                <div className="group relative">
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="relative size-24 sm:size-28 rounded-full overflow-hidden border-2 border-primary shadow-md cursor-pointer bg-muted flex items-center justify-center transition-all hover:opacity-90"
-                    title="Rasmni o'zgartirish"
+                    className="relative flex size-28 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[var(--ps-neutral)] ring-[6px] ring-[var(--ps-paper)] shadow-[0_20px_40px_-20px_rgba(40,20,80,0.7)]"
+                    title="Rasmni o&apos;zgartirish"
                   >
                     {avatarPreview ? (
                       <img src={avatarPreview} alt="Preview" className="size-full object-cover" />
                     ) : removeAvatar ? (
-                      <div className="size-full flex items-center justify-center text-2xl font-bold text-primary bg-primary/10">
+                      <div className="flex size-full items-center justify-center bg-[var(--ps-lilac)] font-[family-name:var(--font-grotesk)] text-[40px] font-bold text-[#080808]">
                         {(firstName[0] || p.username[0] || '?').toUpperCase()}
                       </div>
                     ) : (
@@ -1753,18 +1656,16 @@ export default function ProfilePage() {
                         fallbackClassName="text-2xl"
                       />
                     )}
-
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs gap-1">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[#080808]/45 text-[11px] font-bold text-white opacity-0 transition-opacity group-hover:opacity-100">
                       <Camera className="size-5" />
                       <span>O&apos;zgartirish</span>
                     </div>
                   </div>
-
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Rasmni yangilash"
-                    className="absolute -bottom-1 -right-1 size-8 rounded-full bg-primary text-white shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                    className="absolute bottom-0 right-0 inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808] ring-4 ring-[var(--ps-paper)] transition-transform hover:scale-110 active:scale-95"
                   >
                     <Camera className="size-4" />
                   </button>
@@ -1778,101 +1679,91 @@ export default function ProfilePage() {
                   onChange={handleFileChange}
                 />
 
-                <div className="flex items-center gap-2">
-                  <Button
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <button
                     type="button"
-                    variant="outline"
-                    size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-8 rounded-full text-xs gap-1.5"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[var(--ps-neutral)] px-4 py-2 text-[12.5px] font-bold transition-colors hover:bg-[#080808] hover:text-[#FFFCF7] dark:hover:bg-[#FFFCF7] dark:hover:text-[#080808]"
                   >
                     <Camera className="size-3.5" />
                     Rasm yuklash
-                  </Button>
+                  </button>
                   {(avatarPreview || (!removeAvatar && (p.base_avatar_url || p.avatar_url))) && (
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
                       onClick={handleRemoveAvatar}
-                      className="h-8 rounded-full text-xs text-rose-500 hover:bg-rose-500/10 gap-1.5"
+                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[var(--ps-coral)]/12 px-4 py-2 text-[12.5px] font-bold text-[var(--ps-coral)] transition-colors hover:bg-[var(--ps-coral)] hover:text-white"
                     >
                       <Trash2 className="size-3.5" />
                       O&apos;chirish
-                    </Button>
+                    </button>
                   )}
                 </div>
-                <p className="text-[12px] text-muted-foreground">PNG, JPG yoki WebP (maks. 10 MB)</p>
+                <p className="text-[11.5px] font-semibold text-[var(--text-muted)]">PNG, JPG yoki WebP · maks. 10 MB</p>
               </div>
 
-              <div className="space-y-3.5">
-                <div className="space-y-1.5">
-                  <Label htmlFor="edit-first-name" className="text-xs font-semibold">
-                    Ism
-                  </Label>
-                  <Input
+              {/* Maydonlar */}
+              <div className="mt-6 space-y-3">
+                <label htmlFor="edit-first-name" className="block rounded-[22px] bg-[var(--ps-neutral)] px-5 pb-2.5 pt-2 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                  <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Ism</span>
+                  <input
                     id="edit-first-name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Ismingizni kiriting"
                     maxLength={50}
+                    className="mt-0.5 w-full bg-transparent text-[15px] font-semibold text-[var(--text-primary)] outline-none placeholder:font-medium placeholder:text-[var(--text-faint)]"
                   />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="edit-last-name" className="text-xs font-semibold">
-                    Familiya
-                  </Label>
-                  <Input
+                </label>
+                <label htmlFor="edit-last-name" className="block rounded-[22px] bg-[var(--ps-neutral)] px-5 pb-2.5 pt-2 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                  <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Familiya</span>
+                  <input
                     id="edit-last-name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Familiyangizni kiriting"
                     maxLength={50}
+                    className="mt-0.5 w-full bg-transparent text-[15px] font-semibold text-[var(--text-primary)] outline-none placeholder:font-medium placeholder:text-[var(--text-faint)]"
                   />
-                </div>
+                </label>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Foydalanuvchi nomi
-                  </Label>
-                  <Input
-                    disabled
-                    value={`@${p.username}`}
-                    className="font-mono opacity-75"
-                  />
+                <div className="flex items-center justify-between gap-3 rounded-[22px] border-2 border-dashed border-[var(--border-card)] px-5 py-3">
+                  <div className="min-w-0">
+                    <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Foydalanuvchi nomi</span>
+                    <span className="mt-0.5 block truncate font-mono text-[14px] font-semibold text-[var(--text-secondary)]">@{p.username}</span>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[10.5px] font-bold text-[var(--text-muted)]">o&apos;zgarmaydi</span>
                 </div>
               </div>
 
-              <DialogFooter className="gap-2 sm:gap-0 pt-2">
-                <Button
+              {/* Tugmalar */}
+              <div className="mt-6 grid grid-cols-[auto_1fr] gap-2">
+                <button
                   type="button"
-                  variant="outline"
                   disabled={saving}
                   onClick={() => setEditOpen(false)}
-                  className="rounded-full"
+                  className="ps-btn ps-btn-ghost"
                 >
                   Bekor qilish
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-full"
-                >
+                </button>
+                <button type="submit" disabled={saving} className="ps-btn ps-btn-ink">
                   {saving ? (
                     <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      <Loader2 className="size-4 animate-spin" />
                       Saqlanmoqda...
                     </>
                   ) : (
-                    'Saqlash'
+                    <>
+                      Saqlash
+                      <span className="ps-btn-arrow"><Check className="size-4 stroke-[3]" /></span>
+                    </>
                   )}
-                </Button>
-              </DialogFooter>
+                </button>
+              </div>
             </form>
           </DialogContent>
         </Dialog>
       </main>
-    </>
+    </div>
   );
 }

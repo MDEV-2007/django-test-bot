@@ -117,6 +117,27 @@ class PostReportTests(TestCase):
         feed = api(reporters[0]).get('/api/learning/feed/').json()
         self.assertNotIn(self.post.id, [p['id'] for p in feed['posts']])
 
+    def test_child_safety_report_hides_immediately_and_keeps_details(self):
+        reporter, _ = make_user('bola_himoya')
+        res = api(reporter).post(
+            f'/api/learning/feed/{self.post.id}/report/',
+            {'reason': 'child_safety', 'details': 'x' * 600},
+            format='json',
+        )
+        self.assertEqual(res.status_code, 200)
+        self.post.refresh_from_db()
+        self.assertTrue(self.post.is_hidden)
+        report = self.post.reports.get()
+        self.assertEqual(report.reason, 'child_safety')
+        self.assertEqual(len(report.details), 500)
+
+    def test_single_ordinary_report_does_not_hide(self):
+        reporter, _ = make_user('oddiy_shikoyat')
+        api(reporter).post(f'/api/learning/feed/{self.post.id}/report/', {'reason': 'adult'}, format='json')
+        self.post.refresh_from_db()
+        self.assertFalse(self.post.is_hidden)
+        self.assertEqual(self.post.reports.get().reason, 'adult')
+
     def test_admin_can_restore_with_audit(self):
         CommunityPost.objects.filter(pk=self.post.pk).update(is_hidden=True)
         admin, _ = make_user('mod_admin2', role='superadmin')

@@ -16,7 +16,6 @@ import { soundFX } from '@/lib/soundFX';
 import { HelpCircle, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { QuestionItem, QuestionOption, SprintSessionSummary } from '@/types/sprint';
@@ -295,14 +294,14 @@ export default function NeuralSprintView({
   return (
     <div className="relative min-h-[92vh] flex flex-col justify-between max-w-2xl mx-auto px-3.5 py-2.5 sm:py-4">
       {/* ─── A. JONLI BAROMETR HEADER (Top HUD) ─── */}
-      <header className="sticky top-0 z-30 mb-4 pb-2 bg-background/80 backdrop-blur-md border-b border-border/40">
+      <header className="ps-runner-bar sticky top-2 z-30 mb-5 rounded-[28px] p-3 sm:top-3">
         <div className="flex items-center justify-between gap-2.5 mb-2.5">
           {/* Chiqish tugmasi */}
           <button
             type="button"
             onClick={handleSafeExit}
             aria-label="Sprintdan chiqish"
-            className="size-8 rounded-full border border-border/60 bg-muted/40 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="ps-runner-icon flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:rotate-90"
           >
             <X className="size-4" />
           </button>
@@ -310,7 +309,7 @@ export default function NeuralSprintView({
           {/* Markaziy Barometr Pillslari */}
           <div className="flex items-center gap-2 flex-wrap justify-center">
             {/* 1. DTM Kutilayotgan Ball */}
-            <div className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary shadow-2xs">
+            <div className="ps-runner-chip relative inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold">
               <Award className="size-3.5 text-primary" />
               <span title="Yakunlangan testlaringiz asosidagi prognoz">Prognoz: <b className="font-mono">{scorePredictor.currentScore ?? '—'}</b> / {scorePredictor.maxScore}</span>
               {scorePredictor.deltaScore !== null && (
@@ -325,12 +324,12 @@ export default function NeuralSprintView({
 
             {/* 2. Combo Multiplier */}
             <div className={cn(
-              'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-300',
+              'inline-flex h-9 items-center gap-1 px-3 rounded-full text-xs font-bold transition-all duration-300',
               combo.multiplier >= 2.0
-                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30 scale-105'
+                ? 'bg-[var(--ps-orange)] text-[#080808] scale-105'
                 : combo.multiplier >= 1.5
                 ? 'bg-amber-500/15 border border-amber-500/40 text-amber-600 dark:text-amber-400'
-                : 'bg-muted text-muted-foreground'
+                : 'ps-runner-chip'
             )}>
               <Flame className={cn('size-3.5', combo.multiplier >= 1.5 && 'fill-current animate-bounce')} />
               <span>{combo.multiplier.toFixed(1)}x Combo</span>
@@ -338,8 +337,8 @@ export default function NeuralSprintView({
           </div>
 
           {/* Savol sanog'i */}
-          <div className="text-xs font-mono font-bold text-muted-foreground shrink-0">
-            {currentIndex + 1} / {totalQuestions}
+          <div className="ps-runner-count flex h-10 shrink-0 items-center rounded-full px-3.5 text-sm font-bold tabular-nums">
+            {currentIndex + 1}<span className="opacity-50">/{totalQuestions}</span>
           </div>
         </div>
 
@@ -349,7 +348,9 @@ export default function NeuralSprintView({
             <span className="truncate max-w-[200px]">{scorePredictor.topicName}</span>
             <span className="font-mono font-bold text-primary" title="Shu sprintdagi aniqlik">{scorePredictor.topicMasteryPercentage}% aniqlik</span>
           </div>
-          <Progress value={scorePredictor.topicMasteryPercentage} className="h-1.5 rounded-full" />
+          <div className="ps-runner-track h-2 overflow-hidden rounded-full">
+            <div className="h-full rounded-full bg-gradient-to-r from-[var(--ps-purple)] to-[var(--ps-coral)] transition-[width] duration-500" style={{ width: `${Math.max(2, scorePredictor.topicMasteryPercentage)}%` }} />
+          </div>
         </div>
 
         {/* Qasos savoli bildirishnomasi (Open Loop) */}
@@ -372,13 +373,13 @@ export default function NeuralSprintView({
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="rounded-2xl p-3 bg-gradient-to-r from-rose-500/20 via-amber-500/20 to-rose-500/20 border-2 border-amber-500/50 shadow-md text-center space-y-0.5"
+            className="rounded-[24px] p-4 bg-[var(--ps-coral)] text-white text-center space-y-0.5"
           >
-            <div className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-amber-500">
-              <Flame className="size-4 fill-current text-amber-500 animate-bounce" />
+            <div className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[var(--ps-orange)]">
+              <Flame className="size-4 fill-current animate-bounce" />
               QASOS SAVOLI
             </div>
-            <p className="text-[12px] font-semibold text-foreground/80">
+            <p className="text-[12px] font-semibold text-white/85">
               Boyagi xatoyingizni ildizi bilan yo&apos;q qiling!
             </p>
           </motion.div>
@@ -395,9 +396,9 @@ export default function NeuralSprintView({
               transition={{ duration: 0.25 }}
               className="space-y-4"
             >
-              <div className="rounded-xl border border-white/10 bg-zinc-900/70 p-4 sm:p-5 shadow-sm">
+              <div className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-9">
                 <div
-                  className="text-base sm:text-lg font-bold text-foreground leading-relaxed prose dark:prose-invert max-w-none [&_p]:my-0"
+                  className="reading-block font-bold text-foreground max-w-none [&_p]:my-0"
                   dangerouslySetInnerHTML={{ __html: currentQuestion.body }}
                 />
               </div>
@@ -409,16 +410,7 @@ export default function NeuralSprintView({
                   const isCorrect = opt.id === currentQuestion.correctOptionId;
                   const showResult = feedbackStatus !== 'idle';
 
-                  let btnStyle = 'border-border/70 bg-card hover:border-primary/50 hover:bg-muted/40 text-foreground';
-                  if (showResult) {
-                    if (isCorrect) {
-                      btnStyle = 'border-emerald-500 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold shadow-md shadow-emerald-500/20 ring-1 ring-emerald-500';
-                    } else if (isSelected && !isCorrect) {
-                      btnStyle = 'border-rose-500 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold animate-shake ring-1 ring-rose-500';
-                    } else {
-                      btnStyle = 'border-border/40 opacity-50 bg-muted/20 text-muted-foreground';
-                    }
-                  }
+                  const state = !showResult ? undefined : isCorrect ? 'correct' : isSelected ? 'wrong' : 'muted';
 
                   return (
                     <motion.button
@@ -427,20 +419,11 @@ export default function NeuralSprintView({
                       disabled={isVerifying || feedbackStatus !== 'idle'}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => selectOption(opt.id)}
-                      className={cn(
-                        'w-full p-4 rounded-2xl border text-left transition-all duration-150 flex items-center justify-between gap-3 text-sm sm:text-base cursor-pointer select-none',
-                        btnStyle
-                      )}
+                      data-state={state}
+                      className={cn('ps-choice reading-scale flex w-full cursor-pointer select-none items-center justify-between gap-3.5 p-4 text-left font-medium disabled:cursor-default', state === 'wrong' && 'animate-shake')}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className={cn(
-                          'size-7 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs border transition-colors',
-                          showResult && isCorrect
-                            ? 'bg-emerald-500 text-white border-emerald-500'
-                            : showResult && isSelected && !isCorrect
-                            ? 'bg-rose-500 text-white border-rose-500'
-                            : 'bg-muted/60 text-muted-foreground border-border/80'
-                        )}>
+                        <span className="ps-choice-letter flex shrink-0 items-center justify-center font-bold">
                           {OPTION_LABELS[idx] || (idx + 1)}
                         </span>
                         <span
@@ -451,10 +434,10 @@ export default function NeuralSprintView({
 
                       {/* Icon */}
                       {showResult && isCorrect && (
-                        <CheckCircle2 className="size-5 text-emerald-500 shrink-0" />
+                        <CheckCircle2 className="size-5 shrink-0" />
                       )}
                       {showResult && isSelected && !isCorrect && (
-                        <XCircle className="size-5 text-rose-500 shrink-0" />
+                        <XCircle className="size-5 shrink-0" />
                       )}
                     </motion.button>
                   );
@@ -475,7 +458,7 @@ export default function NeuralSprintView({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed inset-0 z-50 p-3 sm:p-4 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center"
           >
-            <div className="w-full max-w-lg rounded-3xl border border-rose-500/40 bg-zinc-950 p-4 sm:p-5 shadow-2xl space-y-3.5 max-h-[85vh] overflow-y-auto overflow-x-hidden">
+            <div className="w-full max-w-lg rounded-[30px] bg-[var(--ps-paper)] p-5 sm:p-6 shadow-2xl space-y-3.5 max-h-[85vh] overflow-y-auto overflow-x-hidden">
               {/* Sarlavha */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-wider">

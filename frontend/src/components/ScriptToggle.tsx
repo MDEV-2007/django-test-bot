@@ -33,7 +33,7 @@ export default function ScriptToggle({ className }: ScriptToggleProps) {
           type="button"
           onClick={handleToggle}
           className={cn(
-            'ios-spring tap-44 flex h-8.5 px-2.5 items-center justify-center gap-1 rounded-full border border-border bg-card text-xs font-bold shadow-2xs cursor-pointer select-none transition-all active:scale-95',
+            'ps-script ios-spring tap-44 flex h-8.5 px-2.5 items-center justify-center gap-1 rounded-full border border-border bg-card text-xs font-bold shadow-2xs cursor-pointer select-none transition-all active:scale-95',
             script === 'cyrillic'
               ? 'text-primary border-primary/40 bg-primary/10'
               : 'text-muted-foreground hover:text-foreground',

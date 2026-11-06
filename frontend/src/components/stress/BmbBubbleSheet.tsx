@@ -69,13 +69,13 @@ export default function BmbBubbleSheet({
 
   return (
     <div className={cn(
-      "flex flex-col bg-[#fffef9] dark:bg-[#15171e] border-2 rounded-2xl shadow-xl transition-all duration-300 font-sans select-none overflow-hidden",
+      "ps-titul flex flex-col bg-[#fffef9] dark:bg-[#15171e] border-2 rounded-2xl shadow-xl transition-all duration-300 font-sans select-none overflow-hidden",
       isTimePanic ? "border-rose-600 shadow-rose-500/20 animate-pulse" :
       isTimeCritical ? "border-amber-500 shadow-amber-500/15" : "border-slate-300 dark:border-slate-700"
     )}>
       {/* BMB titul varaqasiga o'xshatilgan MASHQ nusxasi — davlat organi nomi bilan
           "rasmiy" ko'rinish berilmaydi. */}
-      <div className="border-b-2 border-slate-300 dark:border-slate-700 p-3 sm:p-4 bg-[#f8f6ee] dark:bg-[#1a1c24] rounded-t-2xl">
+      <div className="ps-titul-head border-b-2 border-slate-300 dark:border-slate-700 p-3 sm:p-4 bg-[#f8f6ee] dark:bg-[#1a1c24] rounded-t-2xl">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
@@ -166,9 +166,9 @@ export default function BmbBubbleSheet({
               key={idx}
               onClick={() => onJumpToQuestion && onJumpToQuestion(idx)}
               className={cn(
-                "flex items-center justify-between px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all text-xs cursor-pointer",
+                "ps-titul-row flex items-center justify-between px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all text-xs cursor-pointer",
                 isCurrent
-                  ? "bg-blue-50 dark:bg-blue-950/40 border-blue-400 dark:border-blue-700 shadow-xs"
+                  ? "ps-titul-current bg-blue-50 dark:bg-blue-950/40 border-blue-400 dark:border-blue-700 shadow-xs"
                   : isDraftedNotBubbled
                   ? "bg-amber-50/70 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800"
                   : "bg-white/80 dark:bg-[#181a22] border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700"
@@ -202,9 +202,9 @@ export default function BmbBubbleSheet({
                       onClick={() => handleSelect(idx, isSelected ? '' : letter)}
                       aria-label={`${idx}-savol ${letter} varianti`}
                       className={cn(
-                        "size-7 sm:size-7.5 rounded-full font-mono text-[11px] font-bold flex items-center justify-center transition-transform active:scale-90 cursor-pointer border-2",
+                        "ps-bubble size-7 sm:size-7.5 rounded-full font-mono text-[11px] font-bold flex items-center justify-center transition-transform active:scale-90 cursor-pointer border-2",
                         isSelected
-                          ? "bg-slate-900 dark:bg-blue-600 border-slate-950 dark:border-blue-500 text-white shadow-inner scale-105"
+                          ? "ps-bubble-on bg-slate-900 dark:bg-blue-600 border-slate-950 dark:border-blue-500 text-white shadow-inner scale-105"
                           : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30"
                       )}
                       style={{
@@ -238,13 +238,13 @@ export default function BmbBubbleSheet({
       </div>
 
       {/* Titul Footer Instructions & Sync Button */}
-      <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-[#f8f6ee] dark:bg-[#1a1c24] rounded-b-2xl space-y-2">
+      <div className="ps-titul-foot p-3 border-t border-slate-200 dark:border-slate-800 bg-[#f8f6ee] dark:bg-[#1a1c24] rounded-b-2xl space-y-2">
         {onSyncAllDrafts && uncopiedCount > 0 && (
           <Button
             size="sm"
             onClick={handleBatchSync}
             disabled={isSyncing}
-            className="w-full text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            className="ps-titul-sync w-full text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
           >
             <Sparkles className="size-3.5 mr-1.5" />
             {isSyncing ? "Ko'chirilmoqda..." : `Barcha qoralamalarni Titulga ko'chirish (${uncopiedCount})`}

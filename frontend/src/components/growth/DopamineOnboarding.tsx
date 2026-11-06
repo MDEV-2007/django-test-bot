@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   XCircle,
   ArrowRight,
+  X,
   TrendingUp,
   Target,
   Award,
@@ -140,7 +141,12 @@ const DEFAULT_BLITZ_QUESTIONS: BlitzQuestion[] = [
 export default function DopamineOnboarding({ onComplete, subject }: DopamineOnboardingProps) {
   const router = useRouter();
 
-  const [questions, setQuestions] = useState<BlitzQuestion[]>(DEFAULT_BLITZ_QUESTIONS);
+  // Zaxira (oflayn) savollar faqat Tarixdan. Boshqa fan tanlangan bo'lsa, tarix savollarini
+  // ko'rsatib yubormaslik uchun faqat server savollari ishlatiladi.
+  const serverOnly = Boolean(subject) && subject !== 'tarix';
+  const [questions, setQuestions] = useState<BlitzQuestion[]>(serverOnly ? [] : DEFAULT_BLITZ_QUESTIONS);
+  const [loadingQs, setLoadingQs] = useState<boolean>(serverOnly);
+  const [noQuestions, setNoQuestions] = useState<boolean>(false);
   // Server sessiyasi: bo'lsa javoblar serverda tekshiriladi, bo'lmasa oflayn savollar lokal.
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -162,16 +168,22 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
           `/api/growth/onboarding/blitz/${query}`,
         );
         // Server savollarida kalit yo'q — ular faqat sessiya bilan ishlatiladi.
-        if (res && res.ok && res.session_id && res.questions?.length === 7) {
+        // Fanda 7 tadan kam savol bo'lsa ham (kamida 3 ta) — o'sha fandan savollar beriladi.
+        if (res && res.ok && res.session_id && (res.questions?.length ?? 0) >= 3) {
           setQuestions(res.questions);
           setSessionId(res.session_id);
+        } else if (serverOnly) {
+          setNoQuestions(true);
         }
       } catch {
-        // Fallback ishlaydi
+        // Tarix uchun zaxira savollar ishlaydi; boshqa fan uchun — "savol yetarli emas"
+        if (serverOnly) setNoQuestions(true);
+      } finally {
+        setLoadingQs(false);
       }
     }
     loadQuestions();
-  }, [subject]);
+  }, [subject, serverOnly]);
 
   const handleSelect = async (choice: BlitzChoice) => {
     if (isAnswered) return;
@@ -240,7 +252,7 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
     if (onComplete) {
       onComplete();
     } else {
-      router.push('/sprint?subject=tarix&count=10');
+      router.push(`/sprint?subject=${subject || 'tarix'}&count=10`);
     }
   };
 
@@ -252,176 +264,272 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
   const total = questions.length;
   const level =
     correctAnswersCount >= total - 1
-      ? { label: 'Kuchli boshlanish', tone: 'text-emerald-300', note: "Asosiy bilimlar mustahkam. Endi rasmiy formatdagi to'liq testlar bilan darajangizni aniqlang." }
+      ? { label: 'Kuchli boshlanish', tone: 'text-[var(--ps-green)]', note: "Asosiy bilimlar mustahkam. Endi rasmiy formatdagi to'liq testlar bilan darajangizni aniqlang." }
       : correctAnswersCount >= Math.ceil(total / 2)
-      ? { label: "O'rtacha", tone: 'text-blue-300', note: "Yaxshi asos bor. Quyidagi mavzularni mustahkamlasangiz, natija tez o'sadi." }
-      : { label: "Boshlang'ich", tone: 'text-amber-300', note: "Hammasi oldinda — kunlik qisqa mashqlar bilan bilimlar tez to'planadi." };
+      ? { label: "O'rtacha", tone: 'text-[var(--ps-purple)]', note: "Yaxshi asos bor. Quyidagi mavzularni mustahkamlasangiz, natija tez o'sadi." }
+      : { label: "Boshlang'ich", tone: 'text-[var(--ps-coral)]', note: "Hammasi oldinda — kunlik qisqa mashqlar bilan bilimlar tez to'planadi." };
   const DIFFICULTY_UZ: Record<BlitzQuestion['difficulty'], string> = { EASY: 'Oson', MEDIUM: "O'rta", HARD: 'Qiyin' };
+  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+  // API qiyinlikni kichik harfda ham yuborishi mumkin ("easy") — bir xil ko'rinishga keltiramiz.
+  const diff = String(currentQ?.difficulty ?? '').toUpperCase() as BlitzQuestion['difficulty'];
 
-  return (
-    <div className="relative w-full max-w-xl mx-auto min-h-[580px] flex flex-col justify-between p-4 sm:p-5 bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-white/[0.07] shadow-2xl select-none overflow-hidden">
-      <AnimatePresence mode="wait">
-        {!isCompleted && currentQ && (
-          <motion.div
-            key="blitz_quiz"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col justify-between space-y-4"
-          >
-            {/* ── 1. SEGMENTED STEP BAR (7 ta Kapsula) ── */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-400 flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-blue-400" />
-                  <span>Bilim darajasini aniqlash</span>
+  /* ── Natija: alohida markazlashgan karta ── */
+  if (isCompleted) {
+    return (
+      <motion.section
+        key="blitz_result"
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="ps-card relative mx-auto flex w-full max-w-2xl flex-col items-center gap-6 overflow-hidden !rounded-[32px] p-6 text-center sm:p-10"
+      >
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-purple)] opacity-20" />
+        <span className="ps-chip relative">
+          <Award className="size-3.5 text-[var(--ps-orange)]" />
+          Diagnostika natijasi
+        </span>
+
+        <div className="relative size-44 sm:size-52">
+          <div aria-hidden className="absolute inset-0 rounded-full bg-[var(--ps-orange)]" />
+          <div aria-hidden className="absolute -bottom-1 -left-3 size-16 rounded-tr-full bg-[var(--ps-purple)]" />
+          <div className="absolute inset-[12%] flex flex-col items-center justify-center rounded-full border-[5px] border-[#FFFCF7] bg-[#080808] text-[#FFFCF7]">
+            <span className="ps-num text-[44px] sm:text-[52px]">
+              {correctAnswersCount}
+              <span className="text-[0.5em] text-[var(--ps-orange)]">/{total}</span>
+            </span>
+            <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/60">to&apos;g&apos;ri javob</span>
+          </div>
+        </div>
+
+        <div className="relative">
+          <h2 className={cn('ps-display text-[34px] sm:text-[44px]', level.tone)}>{level.label}</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">{level.note}</p>
+        </div>
+
+        {weakTopics.length > 0 && (
+          <div className="relative w-full max-w-md rounded-[24px] bg-[var(--ps-neutral)] p-4 text-left">
+            <p className="flex items-center gap-2 text-sm font-bold">
+              <span className="flex size-7 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                <Target className="size-3.5" />
+              </span>
+              Takrorlash kerak bo&apos;lgan mavzular
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {weakTopics.map((t) => (
+                <span key={t} className="rounded-full bg-[var(--ps-paper)] px-3 py-1 text-[12px] font-semibold">
+                  {t}
                 </span>
-                <span className="font-mono text-zinc-300 font-bold">
-                  {currentIndex + 1} / 7
-                </span>
-              </div>
-
-              {/* 7 ta kichik kapsula */}
-              <div className="grid grid-cols-7 gap-1.5 h-2">
-                {questions.map((_, idx) => {
-                  const status = answersStatus[idx];
-                  let capBg = 'bg-zinc-800';
-
-                  if (status === true) {
-                    capBg = 'bg-emerald-400 shadow-[0_0_10px_#34d399]';
-                  } else if (status === false) {
-                    capBg = 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]';
-                  } else if (idx === currentIndex) {
-                    capBg = 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse';
-                  }
-
-                  return (
-                    <div
-                      key={idx}
-                      className={cn('rounded-full transition-all duration-300', capBg)}
-                    />
-                  );
-                })}
-              </div>
+              ))}
             </div>
+          </div>
+        )}
 
-            {/* Qiyinlik darajasi & Mavzu */}
-            <div className="flex items-center gap-2 pt-1">
+        <button type="button" onClick={handleStartSprintTramplin} className="ps-btn ps-btn-ink relative w-full max-w-md justify-between">
+          <span className="inline-flex items-center gap-2">
+            <Zap className="size-4 text-[var(--ps-orange)]" />
+            Mashqni boshlash
+          </span>
+          <span className="ps-btn-arrow">
+            <ArrowRight className="size-4" />
+          </span>
+        </button>
+      </motion.section>
+    );
+  }
+
+  if (!currentQ) {
+    return (
+      <div className="space-y-5">
+        <div className="h-[86px] animate-pulse rounded-[28px] bg-white/40" />
+        <div className="h-96 animate-pulse rounded-[32px] bg-white/40" />
+      </div>
+    );
+  }
+
+  /* Savollar yuklanmoqda (tanlangan fan bo'yicha) */
+  if (loadingQs) {
+    return (
+      <div className="ps-card mx-auto flex max-w-xl flex-col items-center gap-3 !rounded-[32px] p-10 text-center">
+        <span className="inline-flex size-14 animate-pulse items-center justify-center rounded-full bg-[var(--ps-purple)] text-white">
+          <Sparkles className="size-6" />
+        </span>
+        <p className="text-[15px] font-bold">Savollar tayyorlanmoqda…</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Tanlangan fan bo&apos;yicha diagnostika yig&apos;ilmoqda</p>
+      </div>
+    );
+  }
+
+  /* Tanlangan fanda hali yetarli savol yo'q */
+  if (noQuestions || questions.length === 0) {
+    return (
+      <div className="ps-card mx-auto flex max-w-xl flex-col items-center gap-3 !rounded-[32px] p-10 text-center">
+        <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+          <Zap className="size-7" />
+        </span>
+        <h3 className="ps-display text-[26px]">Bu fanda savollar hali yetarli emas</h3>
+        <p className="max-w-sm text-[13.5px] leading-relaxed text-[var(--text-muted)]">
+          Diagnostika uchun kamida 3 ta savol kerak. Boshqa fanni tanlang yoki testlar bo&apos;limiga o&apos;ting.
+        </p>
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          <button type="button" onClick={() => router.push('/onboarding')} className="ps-btn ps-btn-ink">
+            Boshqa fan tanlash
+          </button>
+          <button type="button" onClick={() => router.push('/tests')} className="ps-btn ps-btn-ghost">
+            Testlar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const answeredCount = answersStatus.length;
+  const totalQ = questions.length;
+
+  /* ── Savol: standart test ekrani bilan bir xil tuzilish ── */
+  return (
+    <div className="space-y-5 select-none sm:space-y-6">
+      {/* Yuqori panel */}
+      <div className="ps-runner-bar sticky top-2 z-30 rounded-[28px] p-2.5 sm:top-3 sm:p-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              type="button"
+              title="Blitsdan chiqish"
+              aria-label="Blitsdan chiqish"
+              onClick={() => router.push(subject ? '/tests?mode=blitz' : '/tests')}
+              className="ps-runner-icon flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:rotate-90"
+            >
+              <X className="size-4" />
+            </button>
+            <span className="ps-runner-count flex h-10 shrink-0 items-center gap-2 rounded-full pl-1.5 pr-3.5 text-sm font-bold">
+              <span className="flex size-7 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                <Zap className="size-3.5" />
+              </span>
+              <span className="tabular-nums">
+                {currentIndex + 1}<span className="opacity-50">/{totalQ}</span>
+              </span>
+            </span>
+            <span className="ps-runner-chip hidden h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold min-[420px]:flex">
+              <Sparkles className="size-3.5 text-[var(--ps-purple)]" />
+              {totalQ}-savol blits
+            </span>
+          </div>
+          <span className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-3.5 text-sm font-bold text-white">
+            <CheckCircle2 className="size-4" />
+            <span className="tabular-nums">{correctAnswersCount}</span>
+          </span>
+        </div>
+
+        {/* Bosqichlar */}
+        <div className="mt-2.5 flex items-center gap-3 px-1">
+          <div className="grid h-2 flex-1 gap-1" style={{ gridTemplateColumns: `repeat(${Math.max(1, totalQ)}, minmax(0, 1fr))` }}>
+            {questions.map((_, idx) => {
+              const status = answersStatus[idx];
+              return (
+                <div
+                  key={idx}
+                  className={cn(
+                    'rounded-full transition-all duration-300',
+                    status === true
+                      ? 'bg-[var(--ps-green)]'
+                      : status === false
+                        ? 'bg-[var(--ps-coral)]'
+                        : idx === currentIndex
+                          ? 'animate-pulse bg-[var(--ps-purple)]'
+                          : 'ps-runner-track',
+                  )}
+                />
+              );
+            })}
+          </div>
+          <span className="shrink-0 text-[11px] font-bold tabular-nums opacity-70">
+            {answeredCount}/{totalQ} yechildi
+          </span>
+        </div>
+      </div>
+
+      {/* Savol kartasi */}
+      <AnimatePresence mode="wait">
+        <motion.section
+          key={currentQ.id ?? currentIndex}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25 }}
+          className="ps-card relative overflow-hidden !rounded-[32px] p-5 sm:p-9"
+        >
+          <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-purple)] opacity-20" />
+
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex items-end gap-3">
+              <span className="ps-num text-[56px] text-[var(--ps-purple)] sm:text-[72px]">
+                {String(currentIndex + 1).padStart(2, '0')}
+              </span>
+              <span className="mb-2 sm:mb-3">
+                <span className="ps-eyebrow block text-[var(--text-muted)]">Savol</span>
+                <span className="text-sm font-bold text-[var(--text-muted)]">/ {totalQ}</span>
+              </span>
+            </div>
+            <div className="flex flex-col items-end gap-1.5">
               <span
                 className={cn(
-                  'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border',
-                  currentQ.difficulty === 'EASY' && 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                  currentQ.difficulty === 'MEDIUM' && 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                  currentQ.difficulty === 'HARD' && 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                  'rounded-full px-3 py-1 text-[11px] font-bold',
+                  diff === 'EASY' && 'bg-[var(--ps-green)] text-white',
+                  diff === 'MEDIUM' && 'bg-[var(--ps-orange)] text-[#080808]',
+                  diff === 'HARD' && 'bg-[var(--ps-coral)] text-white',
                 )}
               >
-                {DIFFICULTY_UZ[currentQ.difficulty] ?? currentQ.difficulty}
+                {DIFFICULTY_UZ[diff] ?? currentQ.difficulty}
               </span>
-              <span className="text-xs text-zinc-400 truncate">{currentQ.topic}</span>
+              {currentQ.topic && (
+                <span className="max-w-[200px] truncate rounded-full bg-[var(--ps-neutral)] px-3 py-1 text-[11px] font-semibold text-[var(--text-muted)]">
+                  {currentQ.topic}
+                </span>
+              )}
             </div>
+          </div>
 
-            {/* Savol Matni */}
-            <div className="py-2">
-              <h3 className="text-sm sm:text-base font-semibold text-white leading-relaxed">
-                {currentQ.body}
-              </h3>
-            </div>
+          <div className="relative mt-6 space-y-6">
+            {/* Savol matni HTML bo'lib keladi (<p>, <b>…) — oddiy test ekranidagidek chiziladi */}
+            <div
+              role="heading"
+              aria-level={2}
+              className="reading-block font-bold [&_p]:m-0 [&_p+p]:mt-2"
+              dangerouslySetInnerHTML={{ __html: currentQ.body }}
+            />
 
-            {/* Variantlar */}
-            <div className="space-y-2 pt-2">
-              {currentQ.choices.map((choice) => {
+            <div className="space-y-3 pt-2">
+              {currentQ.choices.map((choice, ci) => {
                 const isSelected = selectedId === choice.id;
-                let choiceStyle = 'border-white/10 bg-zinc-950/60 hover:bg-zinc-800/70 hover:border-white/20 text-zinc-200';
-
-                if (isAnswered) {
-                  if (choice.is_correct) {
-                    choiceStyle = 'border-emerald-500 bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
-                  } else if (isSelected && !choice.is_correct) {
-                    choiceStyle = 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.3)]';
-                  } else {
-                    choiceStyle = 'opacity-40 border-white/5 bg-zinc-950/30 text-zinc-500';
-                  }
-                }
-
+                const state = !isAnswered ? undefined : choice.is_correct ? 'correct' : isSelected ? 'wrong' : 'muted';
                 return (
                   <button
                     key={choice.id}
                     type="button"
                     disabled={isAnswered}
                     onClick={() => handleSelect(choice)}
-                    className={cn(
-                      'w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all duration-150 flex items-center justify-between cursor-pointer disabled:cursor-default',
-                      choiceStyle
-                    )}
+                    data-state={state}
+                    className="ps-choice reading-scale flex w-full cursor-pointer items-center justify-between gap-3.5 p-4 text-left font-medium leading-relaxed disabled:cursor-default sm:p-4.5"
                   >
-                    <span>{choice.text}</span>
-                    {isAnswered && choice.is_correct && <CheckCircle2 className="size-4 text-emerald-400 shrink-0 ml-2" />}
-                    {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-4 text-rose-400 shrink-0 ml-2" />}
+                    <span className="flex items-center gap-3.5">
+                      <span className="ps-choice-letter flex shrink-0 items-center justify-center font-bold">
+                        {LETTERS[ci] || ci + 1}
+                      </span>
+                      <span className="leading-snug">{choice.text}</span>
+                    </span>
+                    {state === 'correct' && <CheckCircle2 className="size-5 shrink-0" />}
+                    {state === 'wrong' && <XCircle className="size-5 shrink-0" />}
                   </button>
                 );
               })}
             </div>
-          </motion.div>
-        )}
 
-        {/* ── 2. NATIJA KARTASI (haqiqiy javoblardan) ── */}
-        {isCompleted && (
-          <motion.div
-            key="blitz_result"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="my-auto flex flex-col justify-between space-y-5 py-4 text-center"
-          >
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <Award className="size-3.5" />
-                <span>Diagnostika Natijasi</span>
-              </div>
-
-              <div className="relative mx-auto size-28 sm:size-32 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-emerald-500 p-[2px] shadow-[0_0_35px_rgba(59,130,246,0.45)]">
-                <div className="size-full bg-[#07090E] rounded-2xl flex flex-col items-center justify-center p-3">
-                  <span className="text-3xl sm:text-4xl font-black text-white font-mono">
-                    {correctAnswersCount}/{total}
-                  </span>
-                  <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase mt-1">
-                    to&apos;g&apos;ri javob
-                  </span>
-                </div>
-              </div>
-
-              <h2 className={cn('text-lg sm:text-xl font-bold pt-1', level.tone)}>{level.label}</h2>
-              <p className="text-xs text-zinc-300 max-w-md mx-auto">{level.note}</p>
+            <div className="hidden items-center justify-between gap-3 border-t border-[var(--border-card)] pt-4 text-[12px] font-medium text-[var(--text-muted)] sm:flex">
+              <span>Variantni tanlang — javob darhol tekshiriladi.</span>
+              <span className="tabular-nums">{correctAnswersCount} ta to&apos;g&apos;ri · {answeredCount - correctAnswersCount} ta xato</span>
             </div>
-
-            {weakTopics.length > 0 && (
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-left max-w-md mx-auto w-full space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
-                  <Target className="size-4 text-amber-400 shrink-0" />
-                  <span>Takrorlash kerak bo&apos;lgan mavzular:</span>
-                </div>
-                <ul className="text-xs text-zinc-200 pl-5 list-disc space-y-0.5">
-                  {weakTopics.map((t) => (
-                    <li key={t}>{t}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleStartSprintTramplin}
-                className="w-full h-13 sm:h-14 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-[0_0_30px_-5px_rgba(37,99,235,0.5)] transition-all active:scale-[0.99] flex items-center justify-center gap-2 px-4 sm:px-5 cursor-pointer"
-              >
-                <Zap className="size-4.5 fill-white text-white shrink-0" />
-                <span>Mashqni boshlash</span>
-                <ArrowRight className="size-3.5" />
-              </button>
-            </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.section>
       </AnimatePresence>
     </div>
   );
 }
-

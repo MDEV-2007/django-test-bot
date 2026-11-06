@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { celebrate } from '@/lib/confetti';
-import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut, Wifi, WifiOff, RefreshCw, Check, Flame, FileSpreadsheet, Sparkles } from 'lucide-react';
+import { Clock, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, AlertTriangle, Layers, X, Volume2, LogOut, WifiOff, RefreshCw, Check, FileSpreadsheet, Sparkles } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { useExamAntiCheat } from '@/hooks/useExamAntiCheat';
 import {
@@ -19,22 +19,13 @@ import GroupedItemQuestion from '@/components/questions/GroupedItemQuestion';
 import OpenWrittenQuestion from '@/components/questions/OpenWrittenQuestion';
 import BmbStressBar from '@/components/stress/BmbStressBar';
 import BmbBubbleSheet from '@/components/stress/BmbBubbleSheet';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const DIFFICULTY_LABEL: Record<string, string> = { easy: 'Oson', medium: "O'rta", hard: 'Qiyin' };
-const DIFFICULTY_TONE: Record<string, string> = {
-  easy: 'border-[var(--accent)]/25 bg-primary/15 text-[var(--accent-text)]',
-  medium: 'border-amber-500/25 bg-amber-500/15 text-amber-300',
-  hard: 'border-rose-500/25 bg-rose-500/15 text-rose-300',
-};
 
 /* O'quvchi tanlaydigan o'qish o'lchamlari. rem qiymatlari --reading-size CSS o'zgaruvchisiga
    beriladi, tanlov localStorage da saqlanadi — keyingi testda ham o'sha o'lcham qoladi. */
@@ -538,26 +529,29 @@ export default function TestScreenPage() {
 
   if (error) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <main className="page-shell-focus flex-1 p-6">
-          <Card className="border-rose-500/25 bg-rose-500/10">
-            <CardContent className="pt-6 text-sm text-rose-300">{error}</CardContent>
-          </Card>
+          <div className="ps-card flex items-start gap-3 p-6">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+              <AlertCircle className="size-5" />
+            </span>
+            <p className="pt-2 text-sm font-semibold">{error}</p>
+          </div>
         </main>
-      </>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <main className="page-shell-focus flex-1 space-y-5 p-4 sm:p-6">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-96 w-full" />
+          <Skeleton className="h-20 w-full rounded-[28px] bg-white/40" />
+          <Skeleton className="h-96 w-full rounded-[32px] bg-white/40" />
         </main>
-      </>
+      </div>
     );
   }
 
@@ -568,10 +562,10 @@ export default function TestScreenPage() {
   const uncopiedCount = Object.entries(draftAnswersMap).filter(([k, v]) => v && !titulAnswers[k]).length;
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
       <main className={cn(
-        "flex-1 space-y-5 sm:space-y-6 bg-[var(--bg-page)] p-3 sm:p-5 lg:p-6 pb-28 sm:pb-14 mx-auto w-full",
+        "flex-1 space-y-5 sm:space-y-6 p-3 sm:p-5 lg:p-6 pb-28 sm:pb-14 mx-auto w-full",
         isStressMode ? "page-shell-wide" : "page-shell-focus"
       )}>
         {/* Real BMB Imtihon Zali Audio-bosim boshqaruv paneli */}
@@ -582,292 +576,324 @@ export default function TestScreenPage() {
             uncopiedCount={uncopiedCount}
           />
         )}
-        {/* Sticky boshqaruv paneli - mobilda ustiga chiqib qolmasligi uchun toza qattiq fon va to'liq kenglik */}
-        <Card className="sticky top-0 z-30 -mx-4 -mt-4 sm:mx-0 sm:mt-0 rounded-none sm:rounded-2xl border-x-0 border-t-0 sm:border border-b border-[var(--border-card)] bg-[#0B0F17] sm:bg-[var(--surface-card-strong)] py-0 shadow-md">
-          <CardContent className="space-y-2 p-3 sm:p-4">
-            <div className="flex items-center justify-between gap-2 sm:gap-3">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost" size="icon" className="size-8 rounded-xl text-muted-foreground hover:bg-rose-500/20 hover:text-rose-400 shrink-0"
-                  title="Imtihondan chiqish" onClick={() => setShowExitModal(true)}
-                >
-                  <X className="size-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowJumpDrawer(!showJumpDrawer)}
-                  className="h-8 rounded-xl px-2.5 sm:px-3 text-xs font-semibold gap-1.5 shrink-0"
-                >
-                  <Layers className="size-3.5 text-primary" />
-                  <span>Savol <span className="font-mono tabular-nums text-primary">{data.q_idx}</span>/{data.total_questions}</span>
-                </Button>
-              </div>
 
-              {/* Status badges: Doimiy Offline Resilience himoyasi */}
+        {/* ── Yuqori boshqaruv paneli: suzuvchi pill ─────────────────── */}
+        <div className="ps-runner-bar sticky top-2 z-30 rounded-[28px] p-2.5 sm:top-3 sm:p-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                title="Imtihondan chiqish"
+                aria-label="Imtihondan chiqish"
+                onClick={() => setShowExitModal(true)}
+                className="ps-runner-icon flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-transform hover:rotate-90"
+              >
+                <X className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowJumpDrawer(!showJumpDrawer)}
+                aria-expanded={showJumpDrawer}
+                className="ps-runner-count flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-full pl-1.5 pr-3.5 text-sm font-bold"
+              >
+                <span className="flex size-7 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                  <Layers className="size-3.5" />
+                </span>
+                <span className="tabular-nums">
+                  {data.q_idx}<span className="opacity-50">/{data.total_questions}</span>
+                </span>
+              </button>
+
+              {/* Holat: oflayn himoya / sinxron */}
               {!isOnline ? (
-                <div
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-bold animate-pulse shrink-0"
+                <span
+                  className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-[var(--ps-orange)] px-3 text-xs font-bold text-[#080808] animate-pulse"
                   title="Internet aloqasi yo'q. Belgilangan javoblaringiz xavfsiz saqlanmoqda."
                 >
                   <WifiOff className="size-3.5" />
                   <span>Oflayn{pendingCount > 0 ? ` (${pendingCount})` : ''}</span>
-                </div>
+                </span>
               ) : syncStatus === 'syncing' ? (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-sky-500/40 bg-sky-500/15 text-sky-600 dark:text-sky-400 text-xs font-bold shrink-0">
-                  <RefreshCw className="size-3.5 animate-spin" />
+                <span className="ps-runner-chip flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold">
+                  <RefreshCw className="size-3.5 animate-spin text-[var(--ps-blue)]" />
                   <span className="hidden sm:inline">Sinxronlanmoqda...</span>
-                </div>
+                </span>
               ) : syncStatus === 'synced' ? (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0">
-                  <Check className="size-3.5" />
+                <span className="ps-runner-chip flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold">
+                  <Check className="size-3.5 text-[var(--ps-green)]" />
                   <span className="hidden sm:inline">Saqlandi</span>
-                </div>
+                </span>
               ) : (
-                <div
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold shrink-0"
+                <span
+                  className="ps-runner-chip hidden h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold min-[420px]:flex"
                   title="Offline himoya faol: har bir belgilagan javobingiz lokal xotiraga zaxiralanadi va internet uzilsa ham saqlanadi"
                 >
-                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[12px] font-bold">Himoyalangan</span>
-                </div>
+                  <span className="size-2 rounded-full bg-[var(--ps-green)] animate-pulse" />
+                  Himoyalangan
+                </span>
               )}
+            </div>
 
-              <span className="hidden font-mono text-xs text-[var(--text-faint)] xl:inline">A-D tanlash • Keyingi: Enter / O'ng strelka</span>
-
-              {/* O'ng tomon: Matn o'lchami va Taymer */}
-              <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-                {/* Mobilda: ixcham 1 ta harf tugmasi (bosganda A- -> A -> A+ aylanadi) */}
-                <button
-                  type="button"
-                  onClick={() => setFontKey((prev) => (prev === 'sm' ? 'md' : prev === 'md' ? 'lg' : 'sm'))}
-                  className="sm:hidden flex size-8 items-center justify-center rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)] font-mono text-xs font-bold text-muted-foreground hover:text-foreground active:scale-95 transition-all"
-                  title="Matn o'lchamini almashtirish"
-                >
-                  {fontKey === 'sm' ? 'A-' : fontKey === 'lg' ? 'A+' : 'A'}
-                </button>
-
-                {/* Desktopda: 3 ta alohida tugma */}
-                <div className="hidden sm:flex items-center gap-0.5 rounded-xl border bg-[var(--surface-hover)] p-0.5" title="Matn o'lchami">
-                  {FONT_STEPS.map((s) => (
-                    <button
-                      key={s.key}
-                      onClick={() => setFontKey(s.key)}
-                      aria-pressed={fontKey === s.key}
-                      className={cn(
-                        'rounded-lg px-2 py-1 font-mono text-xs font-bold transition-colors',
-                        fontKey === s.key ? 'bg-primary text-[var(--on-accent)]' : 'text-muted-foreground hover:text-foreground',
-                      )}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Taymer nishoni — chiroyli, mutanosib va sig'adigan */}
-                {typeof timeLeft === 'number' && (
-                  <div
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Mobilda: bitta harf tugmasi (A- → A → A+) */}
+              <button
+                type="button"
+                onClick={() => setFontKey((prev) => (prev === 'sm' ? 'md' : prev === 'md' ? 'lg' : 'sm'))}
+                className="ps-runner-icon flex size-10 items-center justify-center rounded-full text-xs font-bold active:scale-95 sm:hidden"
+                title="Matn o'lchamini almashtirish"
+              >
+                {fontKey === 'sm' ? 'A-' : fontKey === 'lg' ? 'A+' : 'A'}
+              </button>
+              {/* Desktopda: 3 ta tugma */}
+              <div className="ps-runner-chip hidden h-10 items-center gap-0.5 rounded-full p-1 sm:flex" title="Matn o'lchami">
+                {FONT_STEPS.map((s) => (
+                  <button
+                    key={s.key}
+                    onClick={() => setFontKey(s.key)}
+                    aria-pressed={fontKey === s.key}
                     className={cn(
-                      'flex items-center gap-1.5 rounded-xl px-2.5 sm:px-3 h-8 text-xs font-mono font-bold tabular-nums border transition-colors shrink-0 shadow-sm',
-                      timeLeft < 300
-                        ? 'animate-pulse border-rose-500/30 bg-rose-500/15 text-rose-500'
-                        : 'border-primary/25 bg-primary/10 text-primary',
+                      'h-8 min-w-8 cursor-pointer rounded-full px-2 text-xs font-bold transition-colors',
+                      fontKey === s.key ? 'ps-runner-seg-on' : 'opacity-60 hover:opacity-100',
                     )}
                   >
-                    <Clock className="size-3.5" />
-                    <span>{formatTime(timeLeft)}</span>
-                  </div>
-                )}
+                    {s.label}
+                  </button>
+                ))}
               </div>
+
+              {typeof timeLeft === 'number' && (
+                <span
+                  className={cn(
+                    'flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold tabular-nums',
+                    timeLeft < 300
+                      ? 'animate-pulse bg-[var(--ps-coral)] text-white'
+                      : 'bg-[var(--ps-orange)] text-[#080808]',
+                  )}
+                >
+                  <Clock className="size-4" />
+                  <span className="ps-num !leading-none">{formatTime(timeLeft)}</span>
+                </span>
+              )}
             </div>
+          </div>
 
-            <Progress value={progress} className="h-1 sm:h-1.5" />
-          </CardContent>
-        </Card>
-
-        {showJumpDrawer && (
-          <Card className="animate-fadeIn">
-            <CardContent className="space-y-3 pt-6">
-              <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
-                <span>Barcha savollar bo&apos;yicha tezkor o&apos;tish:</span>
-                <span>{answeredIdxs.size} / {data.total_questions} ta yechildi</span>
-              </div>
-              <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
-                {Array.from({ length: data.total_questions }, (_, i) => i + 1).map((n) => {
-                  const isAnswered = answeredIdxs.has(n);
-                  return (
-                    <Button
-                      key={n}
-                      size="sm"
-                      variant={n === data.q_idx ? 'default' : isAnswered ? 'secondary' : 'outline'}
-                      className={cn('h-9 px-0 text-xs font-bold', isAnswered && n !== data.q_idx && 'text-[var(--accent-text)]')}
-                      onClick={() => { load(n); setShowJumpDrawer(false); }}
-                    >
-                      {n}
-                    </Button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Savol */}
-        <div className={cn("space-y-6", isStressMode && "lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0")}>
-          <div className={cn(isStressMode ? "lg:col-span-8 space-y-6" : "space-y-6")}>
-            <Card>
-              <CardContent className="space-y-6 p-5 sm:p-8">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="secondary">Savol {data.q_idx}</Badge>
-                {data.q_idx >= 36 && (
-                  <Badge variant="outline" className="border-amber-500/40 bg-amber-500/15 text-amber-400 text-[12px] font-bold">
-                    ⚡ AI BMB Ekspert tekshiruvi
-                  </Badge>
-                )}
-              </div>
-              <Badge variant="outline" className={DIFFICULTY_TONE[q.difficulty] || DIFFICULTY_TONE.medium}>
-                {DIFFICULTY_LABEL[q.difficulty] || q.difficulty}
-              </Badge>
-            </div>
-            <Separator />
-
-            {/* reading-block: 70ch measure + 1.65 line-height + A-/A/A+ boshqaradigan
-                --reading-size. Ilgari o'lcham qattiq yozilgan (text-base/sm:text-lg) edi.
-                Teg <h2> emas, <div>: PDF dan import qilingan savol matni bir nechta <p>
-                dan va jadvaldan iborat bo'lishi mumkin, brauzer esa <table> ni ko'rgan
-                zahoti <h2> ni yopib yuboradi va jadval savoldan tashqarida qolib ketardi. */}
-            <div
-              role="heading"
-              aria-level={2}
-              className="reading-block font-bold"
-              dangerouslySetInnerHTML={{ __html: q.body }}
-            />
-
-            {q.image && (
-              <div className="overflow-hidden rounded-2xl border bg-black/20">
-                <img src={q.image} alt="" className="max-h-72 w-full object-contain" />
-              </div>
-            )}
-
-            {q.audio_url && (
-              <div className="flex items-center gap-3 rounded-2xl border bg-[var(--surface-input)] p-3">
-                <Volume2 className="size-4 text-muted-foreground" />
-                <audio src={q.audio_url} controls className="h-8 w-full text-xs" />
-              </div>
-            )}
-
-            {(q.type === 'single_choice' || q.type === 'image_based' || q.type === 'table_based' || (q.type as string) === 'mcq') && (
-              <SingleChoiceQuestion data={data} onSelect={(choiceId) => submit({ choice_id: choiceId })} />
-            )}
-            {q.type === 'matching' && (
-              <MatchingQuestion
-                data={data}
-                onChange={(leftKey, rightKey) => {
-                  const matches = Object.fromEntries((data.matching_rows || []).map((r) => [r.left_key, r.selected_right_key]));
-                  matches[leftKey] = rightKey;
-                  submit({ matches });
-                }}
+          {/* Jarayon */}
+          <div className="mt-2.5 flex items-center gap-3 px-1">
+            <div className="ps-runner-track h-2 flex-1 overflow-hidden rounded-full">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[var(--ps-purple)] to-[var(--ps-coral)] transition-[width] duration-500"
+                style={{ width: `${Math.max(2, progress)}%` }}
               />
-            )}
-            {q.type === 'grouped_item' && (
-              <GroupedItemQuestion data={data} onSelect={(optionId) => submit({ group_option_id: optionId })} />
-            )}
-            {q.type === 'open_written' && (
-              <OpenWrittenQuestion data={data} onSave={(payload) => submit(payload)} />
-            )}
-
-            {/* Desktop klaviatura eslatmasi */}
-            <div className="hidden sm:flex items-center justify-between border-t border-[var(--border-card)] pt-3 text-[12px] text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">A-D</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">1-4</kbd> — variantni tanlash
-              </span>
-              <span className="flex items-center gap-1.5">
-                <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">Enter</kbd> yoki <kbd className="rounded border border-[var(--border-strong)] bg-[var(--surface-hover)] px-1.5 py-0.5 font-mono text-[12px]">→</kbd> — keyingi savol
-              </span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Desktop BMB Titul Varaqasi (Bubble Sheet) ustuni */}
-      {isStressMode && (
-        <div className="hidden lg:block lg:col-span-4">
-          <div className="sticky top-20">
-            <BmbBubbleSheet
-              totalQuestions={data.total_questions}
-              currentQIdx={data.q_idx}
-              titulAnswers={titulAnswers}
-              draftAnswers={draftAnswersMap}
-              onBubbleSelect={handleBubbleSelect}
-              onJumpToQuestion={(idx) => load(idx)}
-              onSyncAllDrafts={syncAllDraftsToTitul}
-              secondsLeft={timeLeft ?? null}
-              subjectName={data.subject_name || data.test_title || 'BMB Rasmiy Blok'}
-              attemptId={attemptId}
-            />
+            <span className="shrink-0 text-[11px] font-bold tabular-nums opacity-70">
+              {answeredIdxs.size}/{data.total_questions} yechildi
+            </span>
           </div>
         </div>
-      )}
-    </div>
 
-        {/* Navigatsiya — mobilda pastga yopishtirilgan */}
-        <div className="exam-bottom-bar fixed bottom-0 left-0 right-0 z-30 flex items-center justify-between gap-2 border-t bg-[var(--surface-card-strong)]/95 p-2.5 sm:p-3 backdrop-blur-lg sm:static sm:border-t-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-          <Button
-            variant="outline"
-            size="lg"
+        {/* ── Savollar xaritasi ─────────────────────────────────────── */}
+        {showJumpDrawer && (
+          <div className="ps-card animate-fadeIn p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <p className="ps-display text-[22px]">Savollar xaritasi</p>
+              <span className="ps-chip">{answeredIdxs.size} / {data.total_questions} yechildi</span>
+            </div>
+            <div className="mt-4 grid grid-cols-6 gap-2 sm:grid-cols-10">
+              {Array.from({ length: data.total_questions }, (_, i) => i + 1).map((n) => {
+                const isAnswered = answeredIdxs.has(n);
+                const isCurrent = n === data.q_idx;
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => { load(n); setShowJumpDrawer(false); }}
+                    className={cn(
+                      'h-10 cursor-pointer rounded-full text-xs font-bold tabular-nums transition-transform hover:-translate-y-0.5',
+                      isCurrent
+                        ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                        : isAnswered
+                          ? 'bg-[var(--ps-purple)] text-white'
+                          : 'bg-[var(--ps-neutral)] text-[var(--text-muted)]',
+                    )}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 text-[11px] font-semibold text-[var(--text-muted)]">
+              <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--ps-purple)]" /> Yechilgan</span>
+              <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--ps-neutral)] ring-1 ring-[var(--border-card)]" /> Yechilmagan</span>
+              <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[#080808] dark:bg-[#FFFCF7]" /> Hozirgi</span>
+            </div>
+          </div>
+        )}
+
+        {/* ── Savol ────────────────────────────────────────────────── */}
+        <div className={cn("space-y-6", isStressMode && "lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0")}>
+          <div className={cn(isStressMode ? "lg:col-span-8 space-y-6" : "space-y-6")}>
+            <section className="ps-card relative overflow-hidden !rounded-[32px] p-5 sm:p-9">
+              <div aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-purple)] opacity-20" />
+              <div aria-hidden className="ps-dots pointer-events-none absolute right-8 top-8 hidden size-16 text-[var(--ps-purple)] opacity-30 sm:block" />
+
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex items-end gap-3">
+                  <span className="ps-num text-[56px] text-[var(--ps-purple)] sm:text-[72px]">
+                    {String(data.q_idx).padStart(2, '0')}
+                  </span>
+                  <span className="mb-2 sm:mb-3">
+                    <span className="ps-eyebrow block text-[var(--text-muted)]">Savol</span>
+                    <span className="text-sm font-bold text-[var(--text-muted)]">/ {data.total_questions}</span>
+                  </span>
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  <span
+                    className={cn(
+                      'rounded-full px-3 py-1 text-[11px] font-bold',
+                      q.difficulty === 'easy'
+                        ? 'bg-[var(--ps-green)] text-white'
+                        : q.difficulty === 'hard'
+                          ? 'bg-[var(--ps-coral)] text-white'
+                          : 'bg-[var(--ps-orange)] text-[#080808]',
+                    )}
+                  >
+                    {DIFFICULTY_LABEL[q.difficulty] || q.difficulty}
+                  </span>
+                  {data.q_idx >= 36 && (
+                    <span className="rounded-full bg-[#080808] px-3 py-1 text-[11px] font-bold text-[var(--ps-orange)]">
+                      ⚡ AI BMB ekspert tekshiruvi
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="relative mt-6 space-y-6">
+                {/* reading-block: 70ch o'lchov + A-/A/A+ boshqaradigan --reading-size.
+                    Teg <div>: PDF dan kelgan savol matnida <table> bo'lishi mumkin. */}
+                <div
+                  role="heading"
+                  aria-level={2}
+                  className="reading-block font-bold"
+                  dangerouslySetInnerHTML={{ __html: q.body }}
+                />
+
+                {q.image && (
+                  <div className="overflow-hidden rounded-[24px] bg-[var(--ps-neutral)]">
+                    <img src={q.image} alt="" className="max-h-72 w-full object-contain" />
+                  </div>
+                )}
+
+                {q.audio_url && (
+                  <div className="flex items-center gap-3 rounded-full bg-[var(--ps-neutral)] p-2 pl-4">
+                    <Volume2 className="size-4 text-[var(--ps-purple)]" />
+                    <audio src={q.audio_url} controls className="h-8 w-full text-xs" />
+                  </div>
+                )}
+
+                {(q.type === 'single_choice' || q.type === 'image_based' || q.type === 'table_based' || (q.type as string) === 'mcq') && (
+                  <SingleChoiceQuestion data={data} onSelect={(choiceId) => submit({ choice_id: choiceId })} />
+                )}
+                {q.type === 'matching' && (
+                  <MatchingQuestion
+                    data={data}
+                    onChange={(leftKey, rightKey) => {
+                      const matches = Object.fromEntries((data.matching_rows || []).map((r) => [r.left_key, r.selected_right_key]));
+                      matches[leftKey] = rightKey;
+                      submit({ matches });
+                    }}
+                  />
+                )}
+                {q.type === 'grouped_item' && (
+                  <GroupedItemQuestion data={data} onSelect={(optionId) => submit({ group_option_id: optionId })} />
+                )}
+                {q.type === 'open_written' && (
+                  <OpenWrittenQuestion data={data} onSave={(payload) => submit(payload)} />
+                )}
+
+                {/* Desktop klaviatura eslatmasi */}
+                <div className="hidden items-center justify-between gap-3 border-t border-[var(--border-card)] pt-4 text-[12px] font-medium text-[var(--text-muted)] sm:flex">
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="ps-kbd">A–D</kbd> yoki <kbd className="ps-kbd">1–4</kbd> variantni tanlash
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="ps-kbd">Enter</kbd> yoki <kbd className="ps-kbd">→</kbd> keyingi savol
+                  </span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Desktop BMB Titul Varaqasi (Bubble Sheet) ustuni */}
+          {isStressMode && (
+            <div className="hidden lg:block lg:col-span-4">
+              <div className="sticky top-24">
+                <BmbBubbleSheet
+                  totalQuestions={data.total_questions}
+                  currentQIdx={data.q_idx}
+                  titulAnswers={titulAnswers}
+                  draftAnswers={draftAnswersMap}
+                  onBubbleSelect={handleBubbleSelect}
+                  onJumpToQuestion={(idx) => load(idx)}
+                  onSyncAllDrafts={syncAllDraftsToTitul}
+                  secondsLeft={timeLeft ?? null}
+                  subjectName={data.subject_name || data.test_title || 'BMB Rasmiy Blok'}
+                  attemptId={attemptId}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Navigatsiya — mobilda pastga yopishtirilgan ───────────── */}
+        <div className="exam-bottom-bar ps-runner-nav fixed bottom-0 left-0 right-0 z-30 flex items-center justify-between gap-2 p-3 sm:static sm:p-0">
+          <button
+            type="button"
             disabled={!data.has_prev}
             onClick={() => load(data.prev_idx)}
-            className="h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold"
+            className="ps-btn ps-btn-ghost disabled:opacity-40"
           >
-            <ArrowLeft className="size-4 mr-1" /> Oldingi
-          </Button>
+            <ArrowLeft className="size-4" /> Oldingi
+          </button>
 
-          {/* Mobilda tezkor Titul varaqasini ochish tugmasi */}
           {isStressMode && (
-            <Button
+            <button
               type="button"
-              variant="outline"
-              size="lg"
               onClick={() => setShowTitulDrawer(true)}
-              className="lg:hidden relative rounded-xl border-blue-500/40 bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 font-bold text-xs gap-1.5 px-3 h-10 shadow-xs"
+              className="ps-btn relative bg-[var(--ps-blue)] text-[#080808] lg:hidden"
             >
-              <FileSpreadsheet className="size-4 text-blue-400" />
+              <FileSpreadsheet className="size-4" />
               <span>Titul ({Object.keys(titulAnswers).length}/{data.total_questions})</span>
               {uncopiedCount > 0 && (
-                <span className="flex size-4 items-center justify-center rounded-full bg-rose-500 text-[11px] font-bold text-white animate-pulse">
+                <span className="flex size-5 items-center justify-center rounded-full bg-[var(--ps-coral)] text-[11px] font-bold text-white animate-pulse">
                   {uncopiedCount}
                 </span>
               )}
-            </Button>
+            </button>
           )}
 
           {data.has_next ? (
-            <Button
-              size="lg"
-              onClick={() => load(data.next_idx)}
-              className="h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold"
-            >
-              Keyingi <ArrowRight className="size-4 ml-1" />
-            </Button>
+            <button type="button" onClick={() => load(data.next_idx)} className="ps-btn ps-btn-ink">
+              Keyingi
+              <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+            </button>
           ) : inTelegram ? (
             /* Telegram'da yakunlash Telegram'ning o'z pastki tugmasi orqali */
             null
           ) : (
-            <Button
-              size="lg"
+            <button
+              type="button"
               onClick={requestFinish}
               disabled={finishing}
-              className="animate-pulse bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/35 hover:bg-[var(--success)]/90 h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold"
+              className="ps-btn bg-[var(--ps-green)] text-white shadow-[0_12px_24px_-12px_rgba(76,128,107,0.9)]"
             >
-              <CheckCircle2 className="size-4 mr-1" /> {finishing ? 'Yakunlanmoqda...' : 'Yakunlash'}
-            </Button>
+              <CheckCircle2 className="size-4" /> {finishing ? 'Yakunlanmoqda...' : 'Yakunlash'}
+            </button>
           )}
         </div>
 
         {/* Mobilda BMB Titul Varaqasi Dialogi */}
         <Dialog open={showTitulDrawer} onOpenChange={setShowTitulDrawer}>
-          <DialogContent className="w-[96vw] max-w-md max-h-[92vh] p-0 bg-transparent border-0 shadow-none overflow-hidden flex flex-col">
+          <DialogContent className="ps-shell ps-dialog-bare w-[96vw] max-w-md max-h-[92vh] p-0 bg-transparent border-0 shadow-none overflow-hidden flex flex-col">
             <BmbBubbleSheet
               totalQuestions={data.total_questions}
               currentQIdx={data.q_idx}
@@ -889,7 +915,7 @@ export default function TestScreenPage() {
 
         {/* Titulga ko'chirilmagan javoblar haqida qat'iy BMB ogohlantirish modali */}
         <Dialog open={showUncopiedWarningModal} onOpenChange={setShowUncopiedWarningModal}>
-          <DialogContent className="sm:max-w-md border-2 border-rose-500/50 bg-card">
+          <DialogContent className="ps-shell ps-dialog sm:max-w-md border-2 border-rose-500/50 bg-card">
             <DialogHeader className="space-y-2">
               <div className="flex items-center gap-2 text-rose-500">
                 <AlertTriangle className="size-6 animate-bounce" />
@@ -937,7 +963,7 @@ export default function TestScreenPage() {
         </Dialog>
 
         <Dialog open={showFinishConfirm} onOpenChange={setShowFinishConfirm}>
-          <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--surface-card-strong)] p-6 shadow-2xl mx-auto">
+          <DialogContent className="ps-shell ps-dialog w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--surface-card-strong)] p-6 shadow-2xl mx-auto">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
                 <AlertTriangle className="size-7" />
@@ -970,7 +996,7 @@ export default function TestScreenPage() {
         </Dialog>
 
         <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-          <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--surface-card-strong)] p-6 shadow-2xl mx-auto">
+          <DialogContent className="ps-shell ps-dialog w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--surface-card-strong)] p-6 shadow-2xl mx-auto">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-lg shadow-amber-500/10">
                 <AlertTriangle className="size-7" />
@@ -1017,6 +1043,6 @@ export default function TestScreenPage() {
           </DialogContent>
         </Dialog>
       </main>
-    </>
+    </div>
   );
 }

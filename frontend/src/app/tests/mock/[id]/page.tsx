@@ -283,20 +283,20 @@ export default function MockLobbyPage() {
 
   if (loading) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <div className="flex min-h-[60vh] items-center justify-center">
           <BrandLoader />
         </div>
-      </>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <div className="mx-auto max-w-xl py-20 text-center">
+        <div className="ps-scope mx-auto max-w-xl py-20 text-center">
           <AlertCircle className="mx-auto size-12 text-rose-500" />
           <h2 className="mt-4 text-xl font-bold">Mock imtihon topilmadi</h2>
           <p className="mt-2 text-sm text-muted-foreground">Bu imtihon hali nashr etilmagan yoki muddati o&apos;tgan bo&apos;lishi mumkin.</p>
@@ -304,7 +304,7 @@ export default function MockLobbyPage() {
             <Link href="/tests">Testlar ro&apos;yxatiga qaytish</Link>
           </Button>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -324,22 +324,20 @@ export default function MockLobbyPage() {
   const scheduledClock = getScheduledClock(data.scheduled_at);
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-24 pt-4">
+      <main className="ps-scope mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-24 pt-4">
         {/* Navigation Breadcrumb */}
         <div className="mb-5 flex items-center justify-between">
-          <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2">
-            <Link href="/tests">
-              <ChevronLeft className="size-4" /> Barcha testlar
-            </Link>
-          </Button>
+          <Link href="/tests" className="ps-chip transition-transform hover:-translate-x-0.5">
+            <ChevronLeft className="size-4" /> Barcha testlar
+          </Link>
 
           <Button
             variant="outline"
             size="sm"
             onClick={copyShareLink}
-            className="gap-1.5 text-xs rounded-xl border-[var(--border-strong)]"
+            className="ps-chip !h-auto gap-1.5 !border-0 text-xs"
           >
             {copied ? <Check className="size-3.5 text-emerald-500" /> : <Share2 className="size-3.5" />}
             {copied ? 'Nusxalandi!' : 'Ulashish'}
@@ -354,10 +352,10 @@ export default function MockLobbyPage() {
               ========================================================= */}
           <div className="lg:col-span-7 xl:col-span-7 space-y-6">
             <Reveal>
-              <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-gradient-to-br from-[var(--surface-card-medium)] via-[var(--surface-card-soft)] to-amber-500/[0.04] p-6 sm:p-8 shadow-xl">
+              <div className="relative overflow-hidden ps-card !rounded-[32px] p-6 sm:p-9">
                 {/* Decorative background ambient glows */}
-                <div className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-amber-500/10 blur-3xl" />
-                <div className="pointer-events-none absolute -left-20 -bottom-20 size-60 rounded-full bg-sky-500/10 blur-3xl" />
+                <div className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-[var(--ps-orange)] opacity-30" />
+                <div className="pointer-events-none absolute -left-16 -bottom-16 size-40 rounded-tr-full bg-[var(--ps-purple)] opacity-20" />
 
                 <div className="relative z-10 space-y-6">
                   {/* Badges */}
@@ -402,11 +400,11 @@ export default function MockLobbyPage() {
                   </div>
 
                   {/* Live Waiting Room Participants Social Proof */}
-                  <div className="flex items-center justify-between p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent border border-emerald-500/30 backdrop-blur-md">
+                  <div className="flex items-center justify-between p-3 sm:p-4 rounded-full bg-[var(--ps-green)]/15">
                     <div className="flex items-center gap-2.5">
                       <span className="relative flex size-3">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex size-3 rounded-full bg-emerald-500" />
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                        <span className="relative inline-flex size-3 rounded-full bg-[var(--ps-orange)]" />
                       </span>
                       <span className="text-xs sm:text-sm font-bold text-foreground">
                         <strong className="text-emerald-400 font-mono text-sm sm:text-base mr-1">
@@ -441,25 +439,25 @@ export default function MockLobbyPage() {
                       </Button>
                     </div>
                   ) : isLiveNow || data.has_active_attempt ? (
-                    <div className="rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent p-4 sm:p-5 space-y-4">
+                    <div className="rounded-[26px] bg-[var(--ps-green)] text-white p-5 sm:p-6 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="relative flex size-3">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                            <span className="relative inline-flex size-3 rounded-full bg-emerald-500" />
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                            <span className="relative inline-flex size-3 rounded-full bg-[var(--ps-orange)]" />
                           </span>
-                          <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-400">
+                          <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
                             {data.has_active_attempt ? "Imtihoningiz davom etmoqda" : "Imtihon ochiq — Hoziroq boshlang!"}
                           </span>
                         </div>
-                        <Badge className="bg-emerald-500 text-white font-bold text-xs">JONLI EFIR</Badge>
+                        <Badge className="rounded-full bg-[#080808] text-[var(--ps-orange)] font-bold text-xs">JONLI EFIR</Badge>
                       </div>
 
                       <Button
                         size="lg"
                         onClick={startTest}
                         disabled={starting}
-                        className="w-full rounded-2xl font-bold text-base sm:text-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/25 h-14"
+                        className="w-full rounded-full font-bold text-base sm:text-lg bg-[#080808] hover:bg-black text-[#FFFCF7] h-14 dark:bg-[#FFFCF7] dark:text-[#080808]"
                       >
                         {starting ? 'Boshlanmoqda...' : data.has_active_attempt ? 'Davom ettirish 🚀' : 'Imtihonni boshlash 🚀'}
                         <ArrowRight className="size-5 ml-2" />
@@ -708,7 +706,7 @@ export default function MockLobbyPage() {
 
             {/* Telegram Info Card */}
             <Reveal delay={0.2}>
-              <div className="rounded-2xl border border-sky-500/25 bg-gradient-to-br from-sky-500/10 via-[var(--surface-card-soft)] to-transparent p-4 space-y-2.5 shadow-sm">
+              <div className="rounded-[26px] bg-[var(--ps-blue)] text-[#080808] p-5 space-y-2.5">
                 <div className="flex items-center gap-2 text-sky-400 font-bold text-xs sm:text-sm">
                   <Send className="size-4" /> Telegram Bot xabarnomasi
                 </div>
@@ -734,6 +732,6 @@ export default function MockLobbyPage() {
           onClose={() => setShareModalOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 }

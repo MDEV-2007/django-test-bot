@@ -47,32 +47,32 @@ export default function GroupOptionsPanel({
         return (
           <div
             key={group.id}
-            className="rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] overflow-hidden shadow-md transition-all"
+            className="overflow-hidden rounded-[32px] bg-[var(--ps-paper,var(--surface-card))] shadow-[var(--ds-panel-shadow)] transition-all"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border-card)] bg-[var(--surface-hover)]/30">
+            <div className="flex items-center justify-between bg-[var(--ps-purple,#7659C7)] p-5 text-white sm:p-6">
               <div className="space-y-1 min-w-0 flex-1 pr-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 text-blue-400 font-bold text-xs">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[var(--ps-purple,#7659C7)]">
                     <FileText className="size-4" />
                   </span>
-                  <h3 className="text-sm sm:text-base font-bold text-foreground truncate">
+                  <h3 className="truncate font-[family-name:var(--font-grotesk)] text-[17px] font-bold tracking-[-0.02em] text-white sm:text-[19px]">
                     {groupTitle}
                   </h3>
                   <Badge
                     variant="outline"
                     className={cn(
-                      'text-[12px] font-bold px-2 py-0.5 rounded-full shrink-0',
+                      'shrink-0 rounded-full border-0 px-2.5 py-0.5 text-[12px] font-bold',
                       usedOptionsCount === totalOptions
-                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
-                        : 'border-blue-500/40 bg-blue-500/10 text-blue-400'
+                        ? 'bg-[var(--ps-green,#4C806B)] text-white'
+                        : 'bg-white/20 text-white'
                     )}
                   >
                     {usedOptionsCount} / {totalOptions} ta ishlatildi
                   </Badge>
                 </div>
                 {group.instruction && (
-                  <p className="text-xs text-muted-foreground leading-relaxed pt-0.5">
+                  <p className="pt-1 text-[12.5px] leading-relaxed text-white/80">
                     {group.instruction}
                   </p>
                 )}
@@ -82,7 +82,7 @@ export default function GroupOptionsPanel({
               <button
                 type="button"
                 onClick={() => setExpanded(!expanded)}
-                className="lg:hidden flex size-8 shrink-0 items-center justify-center rounded-xl border border-[var(--border-card)] hover:bg-[var(--surface-hover)] text-muted-foreground transition"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30 lg:hidden"
                 aria-label={expanded ? "Yopish" : "Ochish"}
               >
                 {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
@@ -91,7 +91,7 @@ export default function GroupOptionsPanel({
 
             {/* Content List */}
             {expanded && (
-              <div className="p-3.5 sm:p-4 space-y-2.5 max-h-[500px] lg:max-h-[calc(100vh-16rem)] overflow-y-auto divide-y divide-[var(--border-card)]/40">
+              <div className="max-h-[500px] space-y-2 overflow-y-auto p-3 sm:p-4 lg:max-h-[calc(100vh-16rem)]">
                 {group.options.map((option) => {
                   // Bu variant qaysi savolda tanlangan?
                   const matchedQuestion = questions.find(
@@ -107,19 +107,19 @@ export default function GroupOptionsPanel({
                     <div
                       key={option.id}
                       className={cn(
-                        'pt-2.5 first:pt-0 rounded-2xl p-2.5 transition-all flex items-start gap-3 group',
+                        'group flex items-start gap-3 rounded-[20px] p-3 transition-all',
                         isUsed
-                          ? 'bg-[var(--surface-hover)]/40 border border-border/40 opacity-90'
-                          : 'hover:bg-blue-500/5 border border-transparent hover:border-blue-500/20'
+                          ? 'bg-[var(--ps-neutral,var(--surface-input))] opacity-75'
+                          : 'bg-[var(--ps-neutral,var(--surface-input))] hover:-translate-y-0.5'
                       )}
                     >
                       {/* Option Letter Badge */}
                       <span
                         className={cn(
-                          'flex size-7 shrink-0 items-center justify-center rounded-xl font-bold text-xs transition-all',
+                          'flex size-9 shrink-0 items-center justify-center rounded-full text-[13px] font-black transition-all',
                           isUsed
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 group-hover:scale-105'
+                            ? 'bg-[var(--ps-green,#4C806B)] text-white'
+                            : 'bg-[var(--ps-paper,var(--surface-card))] text-[var(--ps-purple,#7659C7)] group-hover:scale-105'
                         )}
                       >
                         {option.label}
@@ -129,8 +129,8 @@ export default function GroupOptionsPanel({
                       <div className="min-w-0 flex-1 space-y-1">
                         <p
                           className={cn(
-                            'text-xs sm:text-sm leading-relaxed text-foreground font-medium',
-                            isUsed && 'text-muted-foreground'
+                            'text-[13.5px] font-semibold leading-relaxed text-[var(--text-primary)]',
+                            isUsed && 'line-through decoration-[var(--text-faint)]'
                           )}
                         >
                           {option.text}
@@ -141,7 +141,7 @@ export default function GroupOptionsPanel({
                           {isUsed ? (
                             <a
                               href={`#q-${matchedQuestion?.id}`}
-                              className="inline-flex items-center gap-1 text-[12px] font-bold text-emerald-400 hover:underline"
+                              className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-green,#4C806B)] px-2 py-0.5 text-[11.5px] font-bold text-white hover:underline"
                             >
                               <Check className="size-3" />
                               <span>
@@ -151,7 +151,7 @@ export default function GroupOptionsPanel({
                               </span>
                             </a>
                           ) : (
-                            <span className="text-[12px] text-muted-foreground/70 font-mono">
+                            <span className="text-[11.5px] font-semibold text-[var(--text-faint)]">
                               Ishlatilmagan (bo&apos;sh)
                             </span>
                           )}
@@ -170,10 +170,10 @@ export default function GroupOptionsPanel({
                             }
                           }}
                           className={cn(
-                            'shrink-0 text-[12px] font-bold px-2 py-1 rounded-lg transition',
+                            'shrink-0 rounded-full px-3 py-1.5 text-[12px] font-bold transition',
                             isForActiveQuestion
-                              ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
-                              : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'
+                              ? 'bg-[var(--ps-coral,#F0523D)] text-white'
+                              : 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
                           )}
                         >
                           {isForActiveQuestion ? 'Bekor' : 'Tanlash'}
@@ -186,8 +186,8 @@ export default function GroupOptionsPanel({
             )}
 
             {/* Footer tip */}
-            <div className="px-4 py-2.5 bg-[var(--surface-hover)]/20 border-t border-[var(--border-card)] text-[12px] text-muted-foreground flex items-center gap-1.5">
-              <Info className="size-3.5 text-blue-400 shrink-0" />
+            <div className="flex items-center gap-1.5 border-t border-[var(--border-card)] px-5 py-3 text-[12px] font-semibold text-[var(--text-muted)]">
+              <Info className="size-3.5 shrink-0 text-[var(--ps-purple,#7659C7)]" />
               <span>Har bir variant faqat 1 ta savolga mos keladi. Ortiqcha variantlar bo&apos;lishi mumkin.</span>
             </div>
           </div>

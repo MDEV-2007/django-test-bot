@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   Zap,
   Flame,
@@ -12,11 +13,13 @@ import {
   ArrowRight,
   ShieldCheck,
   Brain,
+  BookOpen,
+  type LucideIcon,
 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
+  DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { soundFX } from '@/lib/soundFX';
@@ -28,8 +31,90 @@ interface SprintGuideModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type TabKey = 'flow' | 'mechanics' | 'hints';
+type GuideItem = { icon: LucideIcon; tone: string; title: string; body: React.ReactNode };
+
+const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
+  { key: 'flow', label: 'Tartib', icon: Clock },
+  { key: 'mechanics', label: 'Mexanizm', icon: Flame },
+  { key: 'hints', label: 'AI hintlar', icon: Lightbulb },
+];
+
+const Kbd = ({ children }: { children: React.ReactNode }) => (
+  <kbd className="rounded-md bg-[var(--ps-paper)] px-1.5 py-0.5 font-mono text-[11.5px] font-bold text-[var(--text-primary)]">{children}</kbd>
+);
+
+const CONTENT: Record<TabKey, GuideItem[]> = {
+  flow: [
+    {
+      icon: BookOpen,
+      tone: 'bg-[var(--ps-purple)] text-white',
+      title: 'Fanni tanlang',
+      body: <>Barcha fanlar aralashmasi (<b>AI Smart Mix</b>) yoki maxsus fan (Tarix, Ingliz tili va b.) ni belgilang.</>,
+    },
+    {
+      icon: Clock,
+      tone: 'bg-[var(--ps-orange)] text-[#080808]',
+      title: 'Davomiylik va intensivlik',
+      body: (
+        <span className="mt-1 flex flex-wrap gap-1.5">
+          <span className="rounded-full bg-[var(--ps-paper)] px-2.5 py-1 text-[12px] font-bold">10 savol · ~5 daq · isinish</span>
+          <span className="rounded-full bg-[var(--ps-orange)] px-2.5 py-1 text-[12px] font-bold text-[#080808]">20 savol · ~10 daq · tavsiya</span>
+          <span className="rounded-full bg-[var(--ps-paper)] px-2.5 py-1 text-[12px] font-bold">30 savol · ~15 daq · Deep Flow</span>
+        </span>
+      ),
+    },
+    {
+      icon: Zap,
+      tone: 'bg-[var(--ps-green)] text-white',
+      title: 'Tezkor oqim va natija',
+      body: <>Variantni bosing yoki klaviaturadan tez javob bering. Yakunda to&apos;plangan XP va oshgan DTM balingiz saqlanadi.</>,
+    },
+  ],
+  mechanics: [
+    {
+      icon: Flame,
+      tone: 'bg-[var(--ps-orange)] text-[#080808]',
+      title: '2.0x combo va ko‘proq XP',
+      body: <>Ketma-ket to&apos;g&apos;ri javoblarda combo ko&apos;paytirgich (1.5x va 2.0x) faollashadi — har to&apos;g&apos;ri javob uchun ko&apos;proq XP va tanga.</>,
+    },
+    {
+      icon: TrendingUp,
+      tone: 'bg-[var(--ps-purple)] text-white',
+      title: 'Jonli DTM prognoz',
+      body: <>Har to&apos;g&apos;ri javob DTM kirish imtihonidagi ehtimoliy balingizni real vaqtda o&apos;stiradi — natija jonli barometrda ko&apos;rinadi.</>,
+    },
+    {
+      icon: Target,
+      tone: 'bg-[var(--ps-coral)] text-white',
+      title: 'AI qasos savoli',
+      body: <>Xato qilgan mavzuingizni tizim eslab qoladi va bilimni mustahkamlash uchun test davomida qayta beradi.</>,
+    },
+  ],
+  hints: [
+    {
+      icon: Lightbulb,
+      tone: 'bg-[var(--ps-green)] text-white',
+      title: 'AI tushuntirish va mnemonika',
+      body: <>Savol ostidagi AI layfxak qoidalar va sanalarni oson eslab qolish yo&apos;lini ko&apos;rsatadi.</>,
+    },
+    {
+      icon: Brain,
+      tone: 'bg-[var(--ps-purple)] text-white',
+      title: 'Aqlli daftar',
+      body: <>Barcha xatolar avtomatik <b>Aqlli daftar</b>ga tushadi — istalgan vaqt ular ustida ishlab, tozalashingiz mumkin.</>,
+    },
+    {
+      icon: ShieldCheck,
+      tone: 'bg-[var(--ps-blue)] text-[#080808]',
+      title: 'Klaviatura tugmalari',
+      body: <>Kompyuterda <Kbd>1–4</Kbd> yoki <Kbd>A–D</Kbd> bilan javob tanlang, <Kbd>Enter</Kbd> bilan keyingisiga o&apos;ting.</>,
+    },
+  ],
+};
+
 export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModalProps) {
-  const [activeTab, setActiveTab] = useState<'flow' | 'mechanics' | 'hints'>('flow');
+  const [activeTab, setActiveTab] = useState<TabKey>('flow');
 
   const handleClose = () => {
     soundFX.click();
@@ -42,231 +127,98 @@ export default function SprintGuideModal({ open, onOpenChange }: SprintGuideModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-1rem)] sm:w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-3xl sm:rounded-2xl border border-border bg-card p-4 sm:p-6 text-card-foreground shadow-2xl">
-        <DialogHeader className="space-y-1.5 sm:space-y-2 text-left">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center size-8 sm:size-9 rounded-xl bg-amber-500/15 text-amber-500 shadow-xs">
-              <Zap className="size-4 sm:size-5 fill-amber-500" />
+      <DialogContent
+        showCloseButton={false}
+        className="ps-shell max-h-[92vh] w-[calc(100%-1rem)] max-w-xl gap-0 overflow-y-auto rounded-[32px] border-0 bg-[var(--ps-paper)] p-0 text-[var(--text-primary)] shadow-[0_40px_80px_-30px_rgba(40,20,80,0.7)] sm:w-full sm:p-0 dark:bg-[var(--ps-paper)]"
+      >
+        {/* Sarlavha — rangli lenta */}
+        <div className="relative overflow-hidden bg-[var(--ps-purple)] px-6 pb-6 pt-6 text-white sm:px-8">
+          <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-white/15" />
+          <span aria-hidden className="absolute -bottom-10 -right-4 size-20 rounded-full bg-[var(--ps-orange)] opacity-80" />
+          <span aria-hidden className="ps-dots absolute bottom-3 left-1/2 h-12 w-28 opacity-25" />
+          <div className="relative flex items-center gap-2">
+            <span className="inline-flex size-10 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+              <Zap className="size-5 fill-current" />
             </span>
-            <span className="text-[12px] sm:text-[12px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
-              Qo&apos;llanma &amp; Yo&apos;riqnoma
-            </span>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-wider">Qo&apos;llanma</span>
           </div>
-
-          <DialogTitle className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
-            Tezkor Test qanday ishlaydi?
+          <DialogTitle className="ps-display relative mt-4 text-[30px] text-white sm:text-[38px]">
+            Tezkor test qanday ishlaydi?
           </DialogTitle>
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            10–15 daqiqada diqqatni jamlab, testlarni tezkor ishlash tartibi, AI hintlar va rivojlanish mexanizmi:
-          </p>
-        </DialogHeader>
-
-        {/* 3 ta Kategoriya Tablari (Responsive: no awkward wrapping) */}
-        <div className="grid grid-cols-3 gap-1 p-1 bg-muted/60 rounded-xl sm:rounded-2xl border border-border/60 my-1.5 sm:my-2">
-          <button
-            type="button"
-            onClick={() => {
-              soundFX.click();
-              setActiveTab('flow');
-            }}
-            className={cn(
-              'py-2 px-1 sm:px-2.5 text-[12px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
-              activeTab === 'flow'
-                ? 'bg-card text-foreground shadow-xs border border-border'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <Clock className="size-3 sm:size-3.5 text-primary shrink-0" />
-            <span>1. Tartib</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              soundFX.click();
-              setActiveTab('mechanics');
-            }}
-            className={cn(
-              'py-2 px-1 sm:px-2.5 text-[12px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
-              activeTab === 'mechanics'
-                ? 'bg-card text-foreground shadow-xs border border-border'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <Flame className="size-3 sm:size-3.5 text-amber-500 shrink-0" />
-            <span>2. Mexanizm</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              soundFX.click();
-              setActiveTab('hints');
-            }}
-            className={cn(
-              'py-2 px-1 sm:px-2.5 text-[12px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap select-none',
-              activeTab === 'hints'
-                ? 'bg-card text-foreground shadow-xs border border-border'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <Lightbulb className="size-3 sm:size-3.5 text-emerald-500 shrink-0" />
-            <span>3. AI Hintlar</span>
-          </button>
+          <DialogDescription className="relative mt-2 text-[13.5px] !text-white/85">
+            10–15 daqiqada diqqatni jamlab ishlash tartibi, AI hintlar va rivojlanish mexanizmi.
+          </DialogDescription>
         </div>
 
-        {/* TAB 1: ISHLASH TARTIBI */}
-        {activeTab === 'flow' && (
-          <div className="space-y-2.5 sm:space-y-3 py-1 text-xs sm:text-sm">
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-accent/30 border border-border/80">
-              <div className="size-7 sm:size-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold text-xs sm:text-sm">
-                1
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm">Fanni tanlang</h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Barcha fanlar aralashmasi (<b>AI Smart Mix</b>) yoki maxsus fan (Tarix, Ingliz tili va b.) ni belgilang.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-accent/30 border border-border/80">
-              <div className="size-7 sm:size-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 font-bold text-xs sm:text-sm">
-                2
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm">Davomiylik va intensivlik</h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  <b>10 ta savol (~5 daq)</b>: Tezkor isinish mashqi.<br />
-                  <b>20 ta savol (~10 daq)</b>: Optimal o&apos;quv zanjiri (Tavsiya etiladi).<br />
-                  <b>30 ta savol (~15 daq)</b>: Chuqur diqqat (Deep Flow).
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-accent/30 border border-border/80">
-              <div className="size-7 sm:size-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 font-bold text-xs sm:text-sm">
-                3
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm">Tezkor oqim va natija</h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Savollarga variantlarni bosish yoki klaviatura orqali tezda javob bering. Yakunda to&apos;plangan XP va oshgan DTM balingiz saqlanadi.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: ISHLASH MEXANIZMI */}
-        {activeTab === 'mechanics' && (
-          <div className="space-y-2.5 sm:space-y-3 py-1 text-xs sm:text-sm">
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/20">
-              <div className="size-7 sm:size-8 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-                <Flame className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
-                  <span>2.0x Combo &amp; Ko&apos;proq XP</span>
-                </h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Ketma-ket to&apos;g&apos;ri javob berganingizda Combo ko&apos;paytirgich faollashadi (1.5x va 2.0x). Har bir to&apos;g&apos;ri javob uchun ikki barobar ko&apos;p XP va tanga olasiz!
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-primary/5 border border-primary/20">
-              <div className="size-7 sm:size-8 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
-                <TrendingUp className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
-                  <span>Jonli DTM Prognoz (+0.2 ball)</span>
-                </h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Har bir to&apos;g&apos;ri javob real vaqt rejimida DTM kirish imtihoni ehtimoliy balingizni o&apos;stiradi. Natijangiz jonli barometrda aks etadi.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-rose-500/5 border border-rose-500/20">
-              <div className="size-7 sm:size-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
-                <Target className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
-                  <span>0.2s AI Qasos Savoli (Revenge)</span>
-                </h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Agar biron savolda xatoga yo&apos;l qo&apos;ysangiz, tizim bu mavzuni eslab qoladi va test davomida bilimingizni mustahkamlash uchun yana qaytarib beradi.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: HINTLAR VA LAYFXAKLAR */}
-        {activeTab === 'hints' && (
-          <div className="space-y-2.5 sm:space-y-3 py-1 text-xs sm:text-sm">
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
-              <div className="size-7 sm:size-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0">
-                <Lightbulb className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
-                  <span>AI Tushuntirish &amp; Mnemonika</span>
-                </h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Savol ostidagi AI layfxak orqali qoidalar va sanalarni oson eslab qolish yo&apos;llarini ko&apos;rishingiz mumkin.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20">
-              <div className="size-7 sm:size-8 rounded-xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center shrink-0">
-                <Brain className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
-                  <span>Aqlli Daftar sinxronizatsiyasi</span>
-                </h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Barcha xatolar avtomatik profilingizdagi <b>Aqlli Daftar</b>ga tushadi, shunda istalgan vaqt xatolar ustida ishlab, ularni tozalashingiz mumkin.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-2xl bg-sky-500/5 border border-sky-500/20">
-              <div className="size-7 sm:size-8 rounded-xl bg-sky-500/15 text-sky-500 flex items-center justify-center shrink-0">
-                <ShieldCheck className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5">
-                  <span>Klaviatura Tezkor Tugmalari</span>
-                </h4>
-                <p className="text-muted-foreground text-[12px] sm:text-xs mt-0.5 leading-relaxed">
-                  Desktopda <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[12px] sm:text-[12px] font-mono">1-4</kbd> yoki <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[12px] sm:text-[12px] font-mono">A-D</kbd> orqali javoblarni tezkor tanlashingiz va <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[12px] sm:text-[12px] font-mono">Enter</kbd> bosishingiz mumkin.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal Pastki Harakat Tugmasi (Responsive: Clean button and helper tip) */}
-        <div className="pt-3 flex flex-col sm:flex-row gap-2.5 sm:gap-3 sm:items-center justify-between border-t border-border/70 mt-2 sm:mt-3">
-          <div className="text-[12px] text-muted-foreground flex items-center gap-1.5 order-2 sm:order-1">
-            <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-            <span className="leading-tight">Istalgan vaqt tepadagi <b>&quot;Qo&apos;llanma&quot;</b> orqali qayta ochishingiz mumkin</span>
+        <div className="p-5 sm:p-7">
+          {/* Tablar */}
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-[var(--ps-neutral)] p-1">
+            {TABS.map((tab, i) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    soundFX.click();
+                    setActiveTab(tab.key);
+                  }}
+                  className={cn(
+                    'flex cursor-pointer select-none items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 py-2.5 text-[12.5px] font-bold transition-all sm:text-[13px]',
+                    active
+                      ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                  )}
+                >
+                  <Icon className={cn('size-3.5 shrink-0', active && 'text-[var(--ps-orange)]')} />
+                  <span><span className="hidden sm:inline">{i + 1}. </span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          <button
-            type="button"
-            onClick={handleClose}
-            className="w-full sm:w-auto shrink-0 whitespace-nowrap px-6 py-3 sm:py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs sm:text-sm hover:opacity-90 shadow-md shadow-primary/25 transition-all cursor-pointer flex items-center justify-center gap-2 order-1 sm:order-2 active:scale-[0.99]"
-          >
-            <span>Tushundim, Boshlaymiz!</span>
-            <ArrowRight className="size-4 shrink-0" />
-          </button>
+          {/* Kontent */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18 }}
+              className="mt-4 space-y-2.5"
+            >
+              {CONTENT[activeTab].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.title} className="flex gap-3.5 rounded-[24px] bg-[var(--ps-neutral)] p-4">
+                    <span className={cn('relative inline-flex size-11 shrink-0 items-center justify-center rounded-full', item.tone)}>
+                      <Icon className="size-5" />
+                      <span className="absolute -right-1 -top-1 inline-flex size-5 items-center justify-center rounded-full bg-[var(--ps-paper)] text-[10px] font-black text-[var(--text-primary)]">
+                        {idx + 1}
+                      </span>
+                    </span>
+                    <div className="min-w-0">
+                      <h4 className="text-[15px] font-bold leading-tight">{item.title}</h4>
+                      <div className="mt-1 text-[13px] leading-relaxed text-[var(--text-secondary)]">{item.body}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Pastki qism */}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="order-2 flex items-center gap-1.5 text-[12px] font-semibold text-[var(--text-muted)] sm:order-1">
+              <CheckCircle2 className="size-4 shrink-0 text-[var(--ps-green)]" />
+              Tepadagi &quot;Qo&apos;llanma&quot; orqali qayta ochish mumkin
+            </p>
+            <button type="button" onClick={handleClose} className="ps-btn ps-btn-ink order-1 w-full shrink-0 sm:order-2 sm:w-auto">
+              Tushundim, boshlaymiz
+              <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

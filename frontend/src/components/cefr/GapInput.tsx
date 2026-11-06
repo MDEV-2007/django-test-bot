@@ -29,8 +29,8 @@ export default function GapInput({ number, value, maxWords, active, onChange, on
       {number !== null && (
         <span
           className={cn(
-            'inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[12px] font-semibold tabular-nums transition',
-            active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+            'inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[12px] font-black tabular-nums transition',
+            active ? 'bg-[var(--ps-purple,#7659C7)] text-white' : 'bg-[var(--ps-neutral,var(--surface-input))] text-[var(--text-secondary)]',
           )}
         >
           {number}
@@ -46,9 +46,9 @@ export default function GapInput({ number, value, maxWords, active, onChange, on
         spellCheck={false}
         style={{ width: `${width}ch` }}
         className={cn(
-          'border-0 border-b-2 bg-transparent px-1 pb-0.5 text-center text-[0.95em] font-medium outline-none transition',
-          'focus:border-primary focus:bg-primary/5',
-          draft.trim() ? 'border-emerald-500/70 text-foreground' : 'border-dashed border-muted-foreground/50 text-foreground',
+          'rounded-t-[8px] border-0 border-b-[2.5px] bg-transparent px-1 pb-0.5 text-center text-[0.95em] font-bold outline-none transition',
+          'focus:border-[var(--ps-purple,#7659C7)] focus:bg-[var(--ps-lilac,#E6B5F2)]/30',
+          draft.trim() ? 'border-[var(--ps-green,#4C806B)] text-[var(--text-primary)]' : 'border-dashed border-[var(--text-faint)] text-[var(--text-primary)]',
         )}
       />
     </span>

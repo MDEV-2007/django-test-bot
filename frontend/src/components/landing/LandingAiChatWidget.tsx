@@ -125,17 +125,17 @@ export default function LandingAiChatWidget() {
           whileTap={{ scale: 0.96 }}
           onClick={() => setIsOpen((v) => !v)}
           aria-label={isOpen ? "Chatni yopish" : "AI Yordamchi bilan suhbatlashish"}
-          className="flex items-center gap-2.5 rounded-full bg-[#1C1C1E]/92 backdrop-blur-xl px-4 py-3 text-white shadow-[0_14px_34px_-6px_rgba(0,0,0,0.3)] border border-white/15 transition-all"
+          className="flex items-center gap-2.5 rounded-full bg-[#080808] py-2 pl-2 pr-4 text-[#FFFCF7] shadow-[0_18px_40px_-16px_rgba(8,8,8,0.7)] transition-all"
         >
           {isOpen ? (
-            <X className="size-5 text-white/80" />
+            <span className="inline-flex size-8 items-center justify-center rounded-full bg-[#FFB82E] text-[#080808]"><X className="size-4" /></span>
           ) : (
             <>
-              <div className="relative flex size-6 items-center justify-center rounded-full bg-gradient-to-tr from-[#007AFF] via-[#5856D6] to-[#AF52DE] text-white shadow-xs">
-                <Sparkles className="size-3.5" />
-                <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-[#34C759] ring-2 ring-[#1C1C1E]" />
+              <div className="relative flex size-8 items-center justify-center rounded-full bg-[#7659C7] text-white">
+                <Sparkles className="size-4" />
+                <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-[#4C806B] ring-2 ring-[#080808]" />
               </div>
-              <span className="hidden sm:inline-block text-[13px] font-semibold tracking-tight">
+              <span className="hidden text-[13px] font-bold tracking-tight sm:inline-block">
                 AI Yordamchi
               </span>
             </>
@@ -143,7 +143,7 @@ export default function LandingAiChatWidget() {
         </motion.button>
       </div>
 
-      {/* 2. iOS iMessage / Apple Intelligence Sheet */}
+      {/* 2. Chat paneli — Pastel Studio */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -151,79 +151,82 @@ export default function LandingAiChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 18, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-20 right-4 sm:right-6 z-50 flex h-[500px] w-[calc(100vw-2rem)] sm:w-[380px] flex-col overflow-hidden rounded-2xl border border-black/[0.08] bg-white/95 backdrop-blur-2xl shadow-[0_24px_64px_-12px_rgba(0,0,0,0.22)]"
+            className="fixed bottom-36 right-4 z-50 flex h-[520px] max-h-[calc(100svh-10rem)] w-[calc(100vw-2rem)] origin-bottom-right flex-col overflow-hidden rounded-[32px] bg-[#FFFCF7] shadow-[0_30px_70px_-24px_rgba(40,20,80,0.6)] sm:bottom-24 sm:right-6 sm:w-[390px]"
           >
-            {/* iOS Navigation Bar Header */}
-            <div className="flex items-center justify-between border-b border-black/[0.06] bg-[#F2F2F7]/80 px-4 py-3.5 backdrop-blur-xl">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-9 items-center justify-center rounded-md bg-gradient-to-tr from-[#007AFF] via-[#5856D6] to-[#AF52DE] text-white shadow-sm">
-                  <Sparkles className="size-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h4 className="text-[14px] font-bold text-[#1C1C1E] tracking-tight">IlmIldizi AI</h4>
-                    <span className="rounded-full bg-[#007AFF]/10 px-1.5 py-0.5 text-[11px] font-bold text-[#007AFF] uppercase">
-                      Beta
-                    </span>
+            {/* Sarlavha */}
+            <div className="relative overflow-hidden bg-[#7659C7] px-5 pb-4 pt-5 text-white">
+              <span aria-hidden className="absolute -right-8 -top-10 size-32 rounded-full bg-white/15" />
+              <span aria-hidden className="absolute -bottom-8 right-24 size-14 rounded-full bg-[#FFB82E] opacity-80" />
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="relative inline-flex size-11 items-center justify-center rounded-full bg-white text-[#7659C7]">
+                    <Sparkles className="size-5" />
+                    <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-[#4C806B] ring-2 ring-[#7659C7]" />
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="font-[family-name:var(--font-grotesk)] text-[18px] font-bold tracking-[-0.02em]">
+                        <span data-no-translit>IlmIldizi</span> AI
+                      </h4>
+                      <span className="rounded-full bg-[#FFB82E] px-2 py-0.5 text-[10.5px] font-black uppercase text-[#080808]">Beta</span>
+                    </div>
+                    <p className="text-[12px] font-semibold text-white/80">AI mentor · 24/7 onlayn</p>
                   </div>
-                  <div className="flex items-center gap-1 text-[12px] text-[#34C759] font-medium">
-                    <span className="size-1.5 rounded-full bg-[#34C759]" />
-                    <span>iMessage AI • 24/7 onlayn</span>
-                  </div>
                 </div>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  aria-label="Yopish"
+                  className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-black/15 text-white transition-colors hover:bg-black/30"
+                >
+                  <X className="size-4" />
+                </button>
               </div>
-
-              <button
-                onClick={() => setIsOpen(false)}
-                aria-label="Yopish"
-                className="flex size-7 items-center justify-center rounded-full bg-[#E5E5EA] text-[#8E8E93] hover:text-[#1C1C1E] transition-colors"
-              >
-                <X className="size-4" />
-              </button>
             </div>
 
-            {/* iMessage Conversation Stream */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 text-[13px] bg-white">
-              <div className="text-center text-[12px] font-medium text-[#8E8E93] pb-1">
-                Bugun • AI Mentor
+            {/* Suhbat */}
+            <div className="flex-1 space-y-3 overflow-y-auto bg-[#FFFCF7] p-4 text-[13.5px]">
+              <div className="flex justify-center">
+                <span className="rounded-full bg-[#F7F4EF] px-3 py-1 text-[11.5px] font-bold text-[#8A8494]">Bugun · AI mentor</span>
               </div>
               {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex gap-2 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+                <div key={m.id} className={`flex items-end gap-2 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {m.sender !== 'user' && (
+                    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-[#7659C7] text-white">
+                      <Sparkles className="size-3.5" />
+                    </span>
+                  )}
                   <div
-                    className={`max-w-[82%] rounded-xl px-3.5 py-2.5 leading-relaxed ${
+                    className={`max-w-[80%] rounded-[20px] px-4 py-2.5 leading-relaxed ${
                       m.sender === 'user'
-                        ? 'bg-[#007AFF] text-white rounded-br-sm font-medium shadow-xs'
-                        : 'bg-[#F2F2F7] text-[#1C1C1E] rounded-bl-sm'
+                        ? 'rounded-br-md bg-[#080808] font-medium text-[#FFFCF7]'
+                        : 'rounded-bl-md bg-[#F2EADF] text-[#080808]'
                     }`}
                   >
                     <p>{m.text}</p>
-
                     {m.action && (
-                      <div className="mt-2 pt-2 border-t border-black/[0.06]">
-                        <a
-                          href={m.action.href}
-                          target={m.action.href.startsWith('http') ? '_blank' : '_self'}
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 font-semibold text-[#007AFF] hover:underline text-[12px]"
-                        >
-                          {m.action.text} <ArrowRight className="size-3" />
-                        </a>
-                      </div>
+                      <a
+                        href={m.action.href}
+                        target={m.action.href.startsWith('http') ? '_blank' : '_self'}
+                        rel="noopener noreferrer"
+                        className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#7659C7] px-3 py-1.5 text-[12px] font-bold text-white transition-transform hover:-translate-y-0.5"
+                      >
+                        {m.action.text} <ArrowRight className="size-3.5" />
+                      </a>
                     )}
                   </div>
                 </div>
               ))}
 
               {isTyping && (
-                <div className="flex items-center gap-2">
-                  <div className="rounded-xl rounded-bl-sm bg-[#F2F2F7] px-3.5 py-2.5">
-                    <span className="inline-flex gap-1 items-center">
-                      <span className="size-1.5 rounded-full bg-[#8E8E93] animate-bounce" />
-                      <span className="size-1.5 rounded-full bg-[#8E8E93] animate-bounce [animation-delay:0.2s]" />
-                      <span className="size-1.5 rounded-full bg-[#8E8E93] animate-bounce [animation-delay:0.4s]" />
+                <div className="flex items-end gap-2">
+                  <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-[#7659C7] text-white">
+                    <Sparkles className="size-3.5" />
+                  </span>
+                  <div className="rounded-[20px] rounded-bl-md bg-[#F2EADF] px-4 py-3">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="size-1.5 animate-bounce rounded-full bg-[#7659C7]" />
+                      <span className="size-1.5 animate-bounce rounded-full bg-[#7659C7] [animation-delay:0.2s]" />
+                      <span className="size-1.5 animate-bounce rounded-full bg-[#7659C7] [animation-delay:0.4s]" />
                     </span>
                   </div>
                 </div>
@@ -232,44 +235,42 @@ export default function LandingAiChatWidget() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Suggestion Pills */}
-            <div className="border-t border-black/[0.05] bg-[#F2F2F7]/60 px-3 py-2">
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
-                {QUICK_PROMPTS.map((prompt) => (
-                  <button
-                    key={prompt}
-                    onClick={() => handleSend(prompt)}
-                    className="shrink-0 rounded-full border border-black/[0.06] bg-white px-3 py-1 text-[12px] font-medium text-[#1C1C1E] hover:border-[#007AFF]/40 hover:text-[#007AFF] transition-colors shadow-2xs"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
+            {/* Tezkor savollar */}
+            <div className="flex gap-1.5 overflow-x-auto px-3 pb-2 pt-1">
+              {QUICK_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt}
+                  onClick={() => handleSend(prompt)}
+                  className="shrink-0 cursor-pointer rounded-full bg-[#E6B5F2]/50 px-3 py-1.5 text-[12px] font-bold text-[#080808] transition-colors hover:bg-[#E6B5F2]"
+                >
+                  {prompt}
+                </button>
+              ))}
             </div>
 
-            {/* iMessage Input Bar */}
+            {/* Kiritish */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSend();
               }}
-              className="flex items-center gap-2 border-t border-black/[0.06] bg-white p-2.5"
+              className="p-3 pt-1"
             >
-              <div className="relative flex flex-1 items-center">
+              <div className="flex items-center gap-2 rounded-full bg-[#F7F4EF] p-1.5 pl-4 ring-2 ring-transparent transition focus-within:ring-[#7659C7]">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="iMessage..."
-                  className="w-full rounded-full border border-black/[0.1] bg-[#F2F2F7]/70 pl-3.5 pr-9 py-2 text-[13px] text-[#1C1C1E] placeholder:text-[#8E8E93] focus:border-[#007AFF] focus:bg-white focus:outline-hidden transition-colors"
+                  placeholder="Savolingizni yozing…"
+                  className="min-w-0 flex-1 bg-transparent text-[13.5px] font-medium text-[#080808] placeholder:text-[#8A8494] focus:outline-none"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim()}
                   aria-label="Yuborish"
-                  className="absolute right-1.5 flex size-6 items-center justify-center rounded-full bg-[#007AFF] text-white disabled:bg-[#C7C7CC] transition-all"
+                  className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#080808] text-[#FFB82E] transition-all hover:-translate-y-0.5 disabled:cursor-default disabled:bg-[#CFC8D8] disabled:text-white"
                 >
-                  <ArrowUp className="size-3.5 stroke-[2.5]" />
+                  <ArrowUp className="size-4 stroke-[2.5]" />
                 </button>
               </div>
             </form>

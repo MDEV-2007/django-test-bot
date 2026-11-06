@@ -8,8 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  AlertCircle, AlertTriangle, ArrowRight, BookOpen, CheckCircle2, ChevronLeft, ChevronRight,
-  Clock, FileEdit, Headphones, LayoutGrid, Loader2, LogOut, ShieldAlert, Sparkles, X,
+  AlertCircle, AlertTriangle, ArrowRight, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Clock, FileEdit, Headphones, LayoutGrid, Loader2, LogOut, ShieldAlert, Sparkles, X, GraduationCap, Flag,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { useExamAntiCheat } from '@/hooks/useExamAntiCheat';
@@ -481,20 +480,20 @@ export default function CefrExamPage() {
 
   if (error && !exam) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
-        <div className="mx-auto max-w-md p-6 text-center">
+        <div className="ps-scope mx-auto max-w-md p-6 text-center">
           <AlertCircle className="mx-auto mb-3 h-8 w-8 text-rose-400" />
           <p className="text-sm text-muted-foreground">{error}</p>
           <Button className="mt-4" onClick={() => router.push('/tests')}>Testlarga qaytish</Button>
         </div>
-      </>
+      </div>
     );
   }
 
   if (!exam) {
     return (
-      <>
+      <div className="theme-pastel min-h-screen w-full">
         <AppShell />
         <div className="mx-auto max-w-5xl space-y-4 p-4">
           <Skeleton className="h-14 w-full rounded-2xl" />
@@ -504,7 +503,7 @@ export default function CefrExamPage() {
             <Skeleton className="h-[50vh] rounded-2xl" />
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -512,14 +511,14 @@ export default function CefrExamPage() {
   const currentWritingSection = writingSections[writingPartIndex] || writingSections[0];
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="mx-auto w-full max-w-[1440px] flex-1 px-2.5 pb-24 pt-2.5 sm:px-6 min-w-0 max-w-full overflow-x-hidden">
+      <main className="ps-scope mx-auto w-full max-w-[1440px] flex-1 px-2.5 pb-24 pt-2.5 sm:px-6 min-w-0 max-w-full overflow-x-hidden">
         
         {/* =========================================================
             TOP HEADER BAR (Timer, Mode Switch, Palette, Submit)
             ========================================================= */}
-        <header className="sticky top-0 z-30 mb-4 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-base)]/95 px-3 py-2 sm:px-4 sm:py-2.5 backdrop-blur-md shadow-md min-w-0 max-w-full">
+        <header className="ps-runner-bar sticky top-2 z-30 mb-5 rounded-[28px] px-3 py-2.5 sm:top-3 sm:px-4 sm:py-3 min-w-0 max-w-full">
           <div className="flex items-center justify-between gap-2 min-w-0">
             
             {/* Left: Exit or Back to Hub */}
@@ -563,7 +562,7 @@ export default function CefrExamPage() {
                 'flex items-center gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-bold font-mono tracking-wider shrink-0',
                 secondsLeft <= 300
                   ? 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/40'
-                  : 'bg-[var(--surface-card-medium)] border border-[var(--border-card)] text-foreground',
+                  : 'bg-[var(--ps-orange)] text-[#080808]',
               )}>
                 <Clock className="size-3 sm:size-3.5" />
                 {formatTime(secondsLeft)}
@@ -607,7 +606,7 @@ export default function CefrExamPage() {
                 size="sm"
                 variant="destructive"
                 onClick={() => setShowFinishConfirm(true)}
-                className="rounded-xl font-bold text-xs shadow-md bg-rose-600 hover:bg-rose-700 text-white h-8 px-2.5 sm:px-3.5"
+                className="rounded-full font-bold text-xs bg-[var(--ps-coral)] hover:bg-[var(--ps-coral)]/90 text-white h-9 px-3.5 sm:px-4"
               >
                 Tugatish
               </Button>
@@ -632,281 +631,130 @@ export default function CefrExamPage() {
         {/* =========================================================
             1. HUB MODE: 3 TA CARD (LISTENING, READING, WRITING)
             ========================================================= */}
-        {viewMode === 'hub' && (
-          <div className="space-y-6 max-w-5xl mx-auto py-2">
-            
-            {/* Hub Banner */}
-            <div className="rounded-3xl border border-[var(--border-card)] bg-gradient-to-br from-indigo-500/10 via-[var(--surface-card)] to-purple-500/5 p-6 sm:p-8 shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1.5">
-                  <Badge className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold px-3 py-1">
-                    CEFR MULTI-LEVEL MOCK
-                  </Badge>
-                  <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-                    Imtihon Bo&apos;limlari (3 Skills)
+        {viewMode === 'hub' && (() => {
+          const pct = Math.round((totals.answered / Math.max(1, totals.total)) * 100);
+          const SKILLS = [
+            { key: 'listening' as const, n: 1, title: 'Listening', sub: 'Tinglab tushunish', desc: 'Audio asosida monolog, suhbatlar va xaritani belgilash.', icon: Headphones, tone: 'bg-[var(--ps-purple)] text-white', bar: 'bg-white', unit: 'savol' },
+            { key: 'reading' as const, n: 2, title: 'Reading', sub: "O'qish", desc: "Split-screen: chapda matn, o'ngda savollar va bo'shliqlar.", icon: BookOpen, tone: 'bg-[var(--ps-blue)] text-[#080808]', bar: 'bg-[#080808]', unit: 'savol' },
+            { key: 'writing' as const, n: 3, title: 'Writing', sub: 'Yozma ish', desc: "Task 1.1 (xat), Task 1.2 (rasmiy xat), Task 2 (insho). Jonli so'z sanagich bilan.", icon: FileEdit, tone: 'bg-[var(--ps-orange)] text-[#080808]', bar: 'bg-[#080808]', unit: 'topshiriq' },
+          ];
+          return (
+            <div className="mx-auto max-w-6xl space-y-5 py-2">
+              {/* Banner */}
+              <section className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+                <div className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
+                  <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-48 rounded-full bg-[var(--ps-purple)] opacity-15" />
+                  <span className="ps-chip relative"><GraduationCap className="size-3.5 text-[var(--ps-purple)]" /> CEFR Multi-Level mock</span>
+                  <h1 className="ps-display relative mt-5 text-[38px] sm:text-[52px]">
+                    Imtihon <span className="text-[var(--ps-purple)]">bo&apos;limlari</span>
+                    <span className="text-[var(--ps-coral)]">.</span>
                   </h1>
-                  <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
+                  <p className="relative mt-3 max-w-xl text-[14px] leading-relaxed text-[var(--text-secondary)]">
                     Imtihon 3 ta mustaqil ko&apos;nikma bo&apos;yicha topshiriladi. Har bir bo&apos;limga kirib, vazifalarni bajaring va yakunlang.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-3.5 shrink-0">
-                  <div className="text-right">
-                    <span className="text-[12px] text-muted-foreground uppercase font-bold block">Umumiy progress</span>
-                    <span className="text-lg font-bold text-foreground">
-                      {totals.answered} <span className="text-xs text-muted-foreground">/ {totals.total} ta</span>
-                    </span>
+                <div className="relative flex items-center justify-between gap-4 overflow-hidden rounded-[36px] bg-[#080808] p-6 text-[#FFFCF7] sm:p-8 dark:bg-[#FFFCF7] dark:text-[#080808]">
+                  <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full bg-[var(--ps-purple)] opacity-50" />
+                  <div className="relative">
+                    <p className="ps-eyebrow opacity-60">Umumiy progress</p>
+                    <p className="ps-num mt-2 text-[52px] leading-none">
+                      {totals.answered}<span className="text-[0.4em] opacity-50"> / {totals.total}</span>
+                    </p>
+                    <p className="mt-2 text-[12.5px] font-semibold opacity-70">ta savolga javob berildi</p>
                   </div>
-                  <div className="size-10 rounded-full border-2 border-indigo-500/40 flex items-center justify-center font-bold text-xs text-indigo-400">
-                    {Math.round((totals.answered / Math.max(1, totals.total)) * 100)}%
+                  <div
+                    className="relative grid size-24 shrink-0 place-items-center rounded-full"
+                    style={{ background: `conic-gradient(var(--ps-orange) ${pct * 3.6}deg, rgba(255,255,255,0.12) 0deg)` }}
+                  >
+                    <span className="grid size-[76px] place-items-center rounded-full bg-[#080808] font-mono text-[18px] font-black dark:bg-[#FFFCF7]">{pct}%</span>
                   </div>
                 </div>
-              </div>
-            </div>
+              </section>
 
-            {/* 3 ta Katta Card (L, R, W) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-              
-              {/* CARD 1: LISTENING (L) */}
-              <Card className={cn(
-                'group relative rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col',
-                completedSkills.has('listening')
-                  ? 'border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500/60 shadow-lg'
-                  : 'border-violet-500/30 bg-[var(--surface-card-medium)] hover:border-violet-500/60 hover:shadow-xl hover:-translate-y-1'
-              )}>
-                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex size-12 items-center justify-center rounded-2xl bg-violet-500/20 text-violet-400">
-                        <Headphones className="size-6" />
+              {/* 3 ta ko'nikma */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {SKILLS.map((sk) => {
+                  const Icon = sk.icon;
+                  const st = skillStats[sk.key];
+                  const done = completedSkills.has(sk.key);
+                  const started = st.answered > 0;
+                  const tone = done ? 'bg-[var(--ps-green)] text-white' : sk.tone;
+                  return (
+                    <div key={sk.key} className="group flex flex-col overflow-hidden rounded-[32px] bg-[var(--ps-paper)] shadow-[var(--ds-panel-shadow)] transition-transform duration-300 hover:-translate-y-1">
+                      {/* Rangli sahna */}
+                      <div className={cn('relative overflow-hidden p-6', tone)}>
+                        <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/20" />
+                        <span aria-hidden className="ps-dots absolute bottom-0 right-0 h-14 w-28 opacity-25" />
+                        <div className="relative flex items-start justify-between gap-2">
+                          <span className="inline-flex size-14 items-center justify-center rounded-full bg-black/15 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105">
+                            <Icon className="size-7" />
+                          </span>
+                          <span className="rounded-full bg-black/15 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider">
+                            {done ? (
+                              <span className="inline-flex items-center gap-1"><CheckCircle2 className="size-3.5" /> Tugallandi</span>
+                            ) : started ? 'Davom etmoqda' : 'Boshlanmagan'}
+                          </span>
+                        </div>
+                        <p className="relative mt-5 text-[11px] font-black uppercase tracking-wider opacity-75">Skill {sk.n}</p>
+                        <h3 className="ps-display relative mt-1 text-[30px] leading-none">{sk.title}</h3>
+                        <p className="relative mt-1 text-[13px] font-semibold opacity-80">{sk.sub}</p>
                       </div>
-                      {completedSkills.has('listening') ? (
-                        <Badge className="bg-emerald-500 text-white font-bold text-xs gap-1">
-                          <CheckCircle2 className="size-3.5" /> Tugallandi
-                        </Badge>
-                      ) : skillStats.listening.answered > 0 ? (
-                        <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-400 font-bold text-xs">
-                          Davom etmoqda
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-[var(--border-card)] text-muted-foreground font-bold text-xs">
-                          Boshlanmagan
-                        </Badge>
-                      )}
-                    </div>
 
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-violet-400">Skill 1</div>
-                      <h3 className="text-lg font-bold text-foreground group-hover:text-violet-400 transition-colors">
-                        Listening (Tinglab tushunish)
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        6 ta qism, 35 ta savol. Audio asosida monolog, suhbatlar va xaritani belgilash.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-                      <span>Javoblar:</span>
-                      <strong className="text-foreground">{skillStats.listening.answered} / {skillStats.listening.total} ta</strong>
-                    </div>
-
-                    <div className="h-1.5 w-full bg-[var(--surface-hover)] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-violet-500 rounded-full transition-all duration-300"
-                        style={{ width: `${(skillStats.listening.answered / Math.max(1, skillStats.listening.total)) * 100}%` }}
-                      />
-                    </div>
-
-                    <Button
-                      onClick={() => setViewMode('listening')}
-                      className={cn(
-                        'w-full rounded-2xl font-bold h-12 shadow-md transition-all gap-2',
-                        completedSkills.has('listening')
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                          : 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white'
-                      )}
-                    >
-                      {completedSkills.has('listening')
-                        ? "Ko'rish / Tahrirlash"
-                        : skillStats.listening.answered > 0
-                          ? 'Davom ettirish 🚀'
-                          : 'Listeningni boshlash 🚀'}
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-
-              {/* CARD 2: READING (R) */}
-              <Card className={cn(
-                'group relative rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col',
-                completedSkills.has('reading')
-                  ? 'border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500/60 shadow-lg'
-                  : 'border-blue-500/30 bg-[var(--surface-card-medium)] hover:border-blue-500/60 hover:shadow-xl hover:-translate-y-1'
-              )}>
-                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex size-12 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-400">
-                        <BookOpen className="size-6" />
+                      {/* Tafsilot */}
+                      <div className="flex flex-1 flex-col p-6">
+                        <p className="text-[13px] leading-relaxed text-[var(--text-secondary)]">{sk.desc}</p>
+                        <div className="mt-5 flex items-end justify-between">
+                          <span className="text-[12px] font-bold text-[var(--text-muted)]">Javoblar</span>
+                          <span className="ps-num text-[26px] leading-none">
+                            {st.answered}<span className="text-[0.5em] text-[var(--text-faint)]"> / {st.total} {sk.unit}</span>
+                          </span>
+                        </div>
+                        <div className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-[var(--ds-track)]">
+                          <div
+                            className={cn('h-full rounded-full transition-all duration-500', done ? 'bg-[var(--ps-green)]' : 'bg-[var(--ps-purple)]')}
+                            style={{ width: `${(st.answered / Math.max(1, st.total)) * 100}%` }}
+                          />
+                        </div>
+                        <div className="mt-auto pt-5">
+                          <button
+                            type="button"
+                            onClick={() => setViewMode(sk.key)}
+                            className={cn('ps-btn w-full', done ? 'ps-btn-ghost' : 'ps-btn-ink')}
+                          >
+                            {done ? "Ko'rish / tahrirlash" : started ? 'Davom ettirish' : `${sk.title}ni boshlash`}
+                            <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                          </button>
+                        </div>
                       </div>
-                      {completedSkills.has('reading') ? (
-                        <Badge className="bg-emerald-500 text-white font-bold text-xs gap-1">
-                          <CheckCircle2 className="size-3.5" /> Tugallandi
-                        </Badge>
-                      ) : skillStats.reading.answered > 0 ? (
-                        <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-400 font-bold text-xs">
-                          Davom etmoqda
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-[var(--border-card)] text-muted-foreground font-bold text-xs">
-                          Boshlanmagan
-                        </Badge>
-                      )}
                     </div>
-
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-blue-400">Skill 2</div>
-                      <h3 className="text-lg font-bold text-foreground group-hover:text-blue-400 transition-colors">
-                        Reading (O&apos;qish)
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        5 ta qism, 35 ta savol. Split-screen: chapda matn, o&apos;ngda savollar va bo&apos;shliqlar.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-                      <span>Javoblar:</span>
-                      <strong className="text-foreground">{skillStats.reading.answered} / {skillStats.reading.total} ta</strong>
-                    </div>
-
-                    <div className="h-1.5 w-full bg-[var(--surface-hover)] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                        style={{ width: `${(skillStats.reading.answered / Math.max(1, skillStats.reading.total)) * 100}%` }}
-                      />
-                    </div>
-
-                    <Button
-                      onClick={() => setViewMode('reading')}
-                      className={cn(
-                        'w-full rounded-2xl font-bold h-12 shadow-md transition-all gap-2',
-                        completedSkills.has('reading')
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                          : 'bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white'
-                      )}
-                    >
-                      {completedSkills.has('reading')
-                        ? "Ko'rish / Tahrirlash"
-                        : skillStats.reading.answered > 0
-                          ? 'Davom ettirish 🚀'
-                          : 'Readingni boshlash 🚀'}
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-
-              {/* CARD 3: WRITING (W) */}
-              <Card className={cn(
-                'group relative rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col',
-                completedSkills.has('writing')
-                  ? 'border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500/60 shadow-lg'
-                  : 'border-amber-500/30 bg-[var(--surface-card-medium)] hover:border-amber-500/60 hover:shadow-xl hover:-translate-y-1'
-              )}>
-                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400">
-                        <FileEdit className="size-6" />
-                      </div>
-                      {completedSkills.has('writing') ? (
-                        <Badge className="bg-emerald-500 text-white font-bold text-xs gap-1">
-                          <CheckCircle2 className="size-3.5" /> Tugallandi
-                        </Badge>
-                      ) : skillStats.writing.answered > 0 ? (
-                        <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-400 font-bold text-xs">
-                          Davom etmoqda
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-[var(--border-card)] text-muted-foreground font-bold text-xs">
-                          Boshlanmagan
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-amber-400">Skill 3</div>
-                      <h3 className="text-lg font-bold text-foreground group-hover:text-amber-400 transition-colors">
-                        Writing (Yozma ish)
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        Task 1.1 (xat), Task 1.2 (rasmiy xat), Task 2 (insho). Jonli so&apos;z sanagich bilan.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-                      <span>Topshiriqlar:</span>
-                      <strong className="text-foreground">{skillStats.writing.answered} / {skillStats.writing.total} ta</strong>
-                    </div>
-
-                    <div className="h-1.5 w-full bg-[var(--surface-hover)] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-amber-500 rounded-full transition-all duration-300"
-                        style={{ width: `${(skillStats.writing.answered / Math.max(1, skillStats.writing.total)) * 100}%` }}
-                      />
-                    </div>
-
-                    <Button
-                      onClick={() => setViewMode('writing')}
-                      className={cn(
-                        'w-full rounded-2xl font-bold h-12 shadow-md transition-all gap-2',
-                        completedSkills.has('writing')
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                          : 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white'
-                      )}
-                    >
-                      {completedSkills.has('writing')
-                        ? "Ko'rish / Tahrirlash"
-                        : skillStats.writing.answered > 0
-                          ? 'Davom ettirish 🚀'
-                          : 'Writingni boshlash 🚀'}
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-
-            </div>
-
-            {/* Yakuniy Topshirish Kartasi */}
-            <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="space-y-1 text-center sm:text-left">
-                <h4 className="text-base sm:text-lg font-bold text-foreground">
-                  Imtihonni topshirishga tayyormisiz?
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  Barcha savollar bo&apos;yicha javoblaringiz serverga saqlangan. Tugatish tugmasini bosgach, test yakunlanadi va to&apos;liq tahlil beriladi.
-                </p>
+                  );
+                })}
               </div>
 
-              <Button
-                size="lg"
-                onClick={() => setShowFinishConfirm(true)}
-                className="w-full sm:w-auto rounded-2xl font-bold text-sm sm:text-base px-8 h-13 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl shadow-emerald-600/25 shrink-0"
-              >
-                Imtihonni yakunlash 🏁
-              </Button>
+              {/* Yakunlash */}
+              <section className="relative flex flex-col items-center justify-between gap-4 overflow-hidden rounded-[32px] bg-[var(--ps-green)] p-6 text-white sm:flex-row sm:p-7">
+                <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full bg-white/15" />
+                <span aria-hidden className="absolute -bottom-10 left-1/3 size-24 rounded-full bg-[var(--ps-orange)] opacity-70" />
+                <div className="relative flex items-center gap-4 text-center sm:text-left">
+                  <span className="hidden size-12 shrink-0 items-center justify-center rounded-full bg-white text-[var(--ps-green)] sm:inline-flex">
+                    <Flag className="size-5" />
+                  </span>
+                  <div>
+                    <h4 className="ps-display text-[22px] text-white sm:text-[26px]">Imtihonni topshirishga tayyormisiz?</h4>
+                    <p className="mt-1 text-[13px] text-white/85">
+                      Javoblaringiz serverga saqlangan. Yakunlagach test tugaydi va to&apos;liq tahlil beriladi.
+                    </p>
+                  </div>
+                </div>
+                <button type="button" onClick={() => setShowFinishConfirm(true)} className="ps-btn ps-btn-light relative w-full shrink-0 sm:w-auto">
+                  Imtihonni yakunlash
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </button>
+              </section>
             </div>
-
-          </div>
-        )}
+          );
+        })()}
 
         {/* =========================================================
             2. LISTENING MODE: HAMMA SAVOLLAR BITTA PAGEDA + TOP AUDIO
@@ -1126,15 +974,15 @@ export default function CefrExamPage() {
           <div className="space-y-4">
             
             {/* Reading Part Navigation Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[var(--surface-card-medium)] border border-[var(--border-card)] rounded-2xl p-2.5 sm:p-4 shadow-sm min-w-0 max-w-full">
+            <div className="flex min-w-0 max-w-full flex-col justify-between gap-2.5 rounded-[28px] bg-[var(--ps-paper,var(--surface-card))] p-2.5 shadow-[var(--ds-panel-shadow)] sm:flex-row sm:items-center sm:p-3">
               <div className="flex items-center justify-between gap-2 min-w-0 w-full sm:w-auto">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setViewMode('hub')}
-                  className="rounded-xl font-bold gap-1 text-xs shrink-0 h-8 px-2.5"
+                  className="h-9 shrink-0 gap-1 rounded-full bg-[var(--ps-neutral,var(--surface-input))] px-3.5 text-xs font-bold"
                 >
-                  <ChevronLeft className="size-4" /> Bo&apos;limlar (Hub)
+                  <ChevronLeft className="size-4" /> Bo&apos;limlar
                 </Button>
 
                 <Button
@@ -1143,7 +991,7 @@ export default function CefrExamPage() {
                     markSkillCompleted('reading');
                     setViewMode('hub');
                   }}
-                  className="sm:hidden rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md gap-1 shrink-0 h-8 px-2.5"
+                  className="h-9 shrink-0 gap-1 rounded-full bg-[var(--ps-green,#4C806B)] px-3.5 text-xs font-bold text-white hover:bg-[var(--ps-green,#4C806B)]/90 sm:hidden"
                 >
                   <CheckCircle2 className="size-3.5" />
                   Yakunlash
@@ -1161,15 +1009,24 @@ export default function CefrExamPage() {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     className={cn(
-                      'shrink-0 rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-bold transition-all cursor-pointer select-none',
+                      'inline-flex shrink-0 cursor-pointer select-none items-center gap-1.5 rounded-full py-1.5 pl-3.5 pr-1.5 text-[13px] font-bold transition-all',
                       idx === readingPartIndex
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'border border-[var(--border-card)] bg-[var(--surface-hover)]/50 text-muted-foreground hover:text-foreground'
+                        ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                        : 'bg-[var(--ps-neutral,var(--surface-input))] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     )}
                   >
                     Part {sec.part_number}
-                    <span className="ml-1 text-[12px] opacity-80">
-                      ({sec.questions.filter((q) => q.answered).length}/{sec.questions.length})
+                    <span
+                      className={cn(
+                        'rounded-full px-2 py-0.5 text-[11px] tabular-nums',
+                        sec.questions.length > 0 && sec.questions.every((q) => q.answered)
+                          ? 'bg-[var(--ps-green,#4C806B)] text-white'
+                          : idx === readingPartIndex
+                            ? 'bg-[var(--ps-orange,#FFB82E)] text-[#080808]'
+                            : 'bg-[var(--ps-paper,var(--surface-card))]'
+                      )}
+                    >
+                      {sec.questions.filter((q) => q.answered).length}/{sec.questions.length}
                     </span>
                   </button>
                 ))}
@@ -1181,7 +1038,7 @@ export default function CefrExamPage() {
                   markSkillCompleted('reading');
                   setViewMode('hub');
                 }}
-                className="hidden sm:inline-flex rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-md gap-1"
+                className="hidden h-10 gap-1.5 rounded-full bg-[var(--ps-green,#4C806B)] px-4 text-[13px] font-bold text-white hover:bg-[var(--ps-green,#4C806B)]/90 sm:inline-flex"
               >
                 <CheckCircle2 className="size-4" />
                 Readingni yakunlash
@@ -1190,8 +1047,11 @@ export default function CefrExamPage() {
 
             {/* Instruction if any */}
             {currentReadingSection.instruction && (
-              <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] p-3.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                {currentReadingSection.instruction}
+              <div className="flex items-start gap-3 rounded-[24px] bg-[var(--ps-lilac,#E6B5F2)]/45 p-4 text-[13.5px] font-semibold leading-relaxed text-[var(--text-primary)] dark:bg-[var(--ps-purple,#7659C7)]/20">
+                <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--ps-purple,#7659C7)] text-white">
+                  <BookOpen className="size-4" />
+                </span>
+                <span className="pt-1">{currentReadingSection.instruction}</span>
               </div>
             )}
 
@@ -1226,19 +1086,30 @@ export default function CefrExamPage() {
               const isTwoColumn = hasPassage || hasGroups;
 
               return (
-                <div className={cn('grid gap-6', isTwoColumn ? 'lg:grid-cols-12 items-start' : 'max-w-3xl mx-auto')}>
+              <>
+                <div className={cn('grid gap-6', isTwoColumn && hasSide ? 'items-start lg:grid-cols-12' : 'mx-auto max-w-4xl')}>
                   
                   {/* Left Column: Passage OR Sticky Group Options (Statements / Headings) */}
                   {hasPassage ? (
-                    <div className="lg:col-span-6 rounded-3xl border border-[var(--border-card)] bg-[var(--surface-card-medium)] p-5 sm:p-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto space-y-4 shadow-sm">
+                    <div
+                      className={cn(
+                        'space-y-4 rounded-[32px] bg-[var(--ps-paper,var(--surface-card))] p-6 shadow-[var(--ds-panel-shadow)] sm:p-8',
+                        hasSide ? 'lg:sticky lg:top-24 lg:col-span-6 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto' : 'lg:col-span-12'
+                      )}
+                    >
                       {sec.title && (
-                        <h2 className="text-lg sm:text-xl font-bold text-foreground border-b border-[var(--border-card)] pb-3">
-                          {sec.title}
-                        </h2>
+                        <div className="flex items-center justify-between gap-3 border-b border-[var(--border-card)] pb-4">
+                          <h2 className="font-[family-name:var(--font-grotesk)] text-[24px] font-bold tracking-[-0.03em] text-[var(--text-primary)] sm:text-[30px]">
+                            {sec.title}
+                          </h2>
+                          <span className="shrink-0 rounded-full bg-[var(--ps-neutral,var(--surface-input))] px-3 py-1 text-[12px] font-bold text-[var(--text-secondary)]">
+                            Part {sec.part_number}
+                          </span>
+                        </div>
                       )}
 
                       {sec.image && (
-                        <img src={sec.image} alt="" className="w-full rounded-2xl border border-[var(--border-card)]" />
+                        <img src={sec.image} alt="" className="w-full rounded-[22px]" />
                       )}
 
                       {sec.passage && (
@@ -1292,8 +1163,13 @@ export default function CefrExamPage() {
                         </div>
                       ))}
 
+                    </div>
+                  )}
+
+                </div>
+                <div className={cn(isTwoColumn && hasSide ? '' : 'mx-auto max-w-4xl')}>
                       {/* Part Switcher & End Button */}
-                      <div className="flex items-center justify-between pt-4">
+                      <div className="flex items-center justify-between gap-3 pt-2">
                         <Button
                           variant="outline"
                           disabled={readingPartIndex === 0}
@@ -1301,9 +1177,9 @@ export default function CefrExamPage() {
                             setReadingPartIndex((prev) => Math.max(0, prev - 1));
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="rounded-xl font-bold"
+                          className="h-11 rounded-full border-0 bg-[var(--ps-paper,var(--surface-card))] px-5 font-bold shadow-[var(--ds-panel-shadow)]"
                         >
-                          <ChevronLeft className="size-4 mr-1" /> Oldingi part
+                          <ChevronLeft className="mr-1 size-4" /> Oldingi part
                         </Button>
 
                         {readingPartIndex < readingSections.length - 1 ? (
@@ -1312,7 +1188,7 @@ export default function CefrExamPage() {
                               setReadingPartIndex((prev) => prev + 1);
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
-                            className="rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white"
+                            className="h-11 rounded-full bg-[#080808] px-5 font-bold text-[#FFFCF7] hover:bg-[#080808]/90 dark:bg-[#FFFCF7] dark:text-[#080808]"
                           >
                             Keyingi part <ChevronRight className="size-4 ml-1" />
                           </Button>
@@ -1322,16 +1198,14 @@ export default function CefrExamPage() {
                               markSkillCompleted('reading');
                               setViewMode('hub');
                             }}
-                            className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className="h-11 rounded-full bg-[var(--ps-green,#4C806B)] px-5 font-bold text-white hover:bg-[var(--ps-green,#4C806B)]/90"
                           >
                             Readingni yakunlash <CheckCircle2 className="size-4 ml-1" />
                           </Button>
                         )}
                       </div>
-                    </div>
-                  )}
-
                 </div>
+              </>
               );
             })()}
 
@@ -1453,7 +1327,7 @@ export default function CefrExamPage() {
 
       {/* Savollar Palitrasi (Modal) */}
       <Dialog open={showPalette} onOpenChange={setShowPalette}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6 mx-auto">
+        <DialogContent className="ps-shell ps-dialog max-h-[85vh] overflow-y-auto w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6 mx-auto">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg font-bold">Savollar xaritasi</DialogTitle>
             <DialogDescription className="text-xs">
@@ -1476,7 +1350,7 @@ export default function CefrExamPage() {
 
       {/* Chiqish Ogohlantirish Modali */}
       <Dialog open={showExit} onOpenChange={setShowExit}>
-        <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+        <DialogContent className="ps-shell ps-dialog w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-amber-500/30 bg-[var(--ps-paper)] p-6 shadow-2xl mx-auto">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-lg shadow-amber-500/10">
               <AlertTriangle className="size-7" />
@@ -1533,7 +1407,7 @@ export default function CefrExamPage() {
 
       {/* Yakuniy Tasdiqlash Modal */}
       <Dialog open={showFinishConfirm} onOpenChange={setShowFinishConfirm}>
-        <DialogContent className="w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-emerald-500/30 bg-[#0f121d] p-6 shadow-2xl mx-auto">
+        <DialogContent className="ps-shell ps-dialog w-[calc(100%-1.5rem)] max-w-md rounded-3xl border border-emerald-500/30 bg-[var(--ps-paper)] p-6 shadow-2xl mx-auto">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/10">
               <CheckCircle2 className="size-7" />
@@ -1607,6 +1481,6 @@ export default function CefrExamPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

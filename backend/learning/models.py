@@ -463,13 +463,24 @@ class CommunityPostReport(models.Model):
     """Postga shikoyat. Bitta foydalanuvchi bitta postga bir marta."""
     REASONS = (
         ('spam', 'Spam / reklama'),
-        ('abuse', "Haqorat / zo'ravonlik"),
+        ('abuse', "Haqorat / so'kinish"),
+        ('harassment', "Ta'qib / bezorilik"),
+        ('hate', 'Nafrat / kamsitish'),
+        ('violence', "Zo'ravonlik / tahdid"),
+        ('adult', '18+ kontent'),
+        ('child_safety', 'Bolalar xavfsizligi (pedofiliya)'),
+        ('self_harm', "O'z-o'ziga zarar / suitsid"),
+        ('privacy', "Shaxsiy ma'lumotlar oshkor"),
+        ('misinformation', "Yolg'on ma'lumot"),
         ('cheating', "Javob tarqatish / ko'chirish"),
         ('other', 'Boshqa'),
     )
+    # Darhol yashiriladigan (moderator ko'rib chiqquncha) og'ir sabablar
+    SEVERE_REASONS = ('child_safety',)
     post = models.ForeignKey('CommunityPost', on_delete=models.CASCADE, related_name='reports')
     reporter = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='post_reports')
     reason = models.CharField(max_length=20, choices=REASONS, default='other')
+    details = models.TextField(blank=True, default='', max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

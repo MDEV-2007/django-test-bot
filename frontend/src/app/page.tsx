@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-  FileCheck2, Bot, Swords, BarChart3, ArrowRight,
+  FileCheck2, Bot, Swords, BarChart3, ArrowUpRight,
   Sprout, Send, Sparkles, CheckCircle2,
   Star, Film
 } from 'lucide-react';
 import LandingNav from '@/components/landing/LandingNav';
-import RootsBackground from '@/components/landing/RootsBackground';
 import RevealOnScroll from '@/components/landing/RevealOnScroll';
 import HeroInteractiveQuiz from '@/components/landing/HeroInteractiveQuiz';
 import ResultsTicker from '@/components/landing/ResultsTicker';
@@ -22,6 +22,7 @@ import ProductWorkflow from '@/components/landing/ProductWorkflow';
 import WeeklyLeaderboardSection from '@/components/landing/WeeklyLeaderboardSection';
 import TelegramBannerCta from '@/components/landing/TelegramBannerCta';
 import { AuthRedirect } from '@/components/landing/AuthRedirect';
+import LandingForceLight from '@/components/landing/LandingForceLight';
 import { BrandMark } from '@/components/BrandMark';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
@@ -160,134 +161,136 @@ export default async function LandingPage() {
   const plans = await loadPlans();
 
   return (
-    <div className="relative min-h-screen bg-[#F2F2F7] text-[#1C1C1E] selection:bg-[#007AFF]/15 selection:text-[#007AFF] font-sans antialiased">
+    <div className="theme-pastel ps-landing relative min-h-screen font-sans antialiased selection:bg-[#BFA6F0]/50">
       <AuthRedirect />
+      <LandingForceLight />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <RootsBackground />
       <LandingNav />
       <MobileStickyCta />
       <LandingAiChatWidget />
 
       <main className="relative z-10 flex-1">
-        
         {/* =========================================================
-            HERO SECTION (Hero Section & Interactive Widget)
+            HERO — dashboard uslubidagi editorial kompozitsiya
             ========================================================= */}
-        <section className="relative mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 sm:pb-20 sm:pt-12 lg:pt-14">
+        <section className="relative mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 sm:pb-16 sm:pt-14 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
-            
-            {/* Left: Apple Editorial Value Proposition */}
-            <div className="lg:col-span-6 text-center lg:text-left space-y-6">
-              
-              {/* iOS Dynamic Island Style Badge */}
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-black/[0.08] bg-white/85 ios-glass px-4 py-1.5 text-xs font-semibold text-[#1C1C1E] shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-[#34C759]" />
+            {/* Chap: matn */}
+            <div className="space-y-7 text-center lg:col-span-7 lg:text-left">
+              <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                <span className="ps-chip">
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--ps-green)] opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-[var(--ps-green)]" />
+                  </span>
+                  BMB va Milliy sertifikat formati · 2026
                 </span>
-                <span>BMB va Milliy sertifikat rasmiy formati · 2026</span>
+                <span className="ps-chip !bg-[#080808] !text-[#FFFCF7]">Bepul boshlash</span>
               </div>
 
-              {/* Apple Keynote Headline */}
-              <h1 className="text-4xl font-bold leading-[1.06] tracking-[-0.035em] sm:text-5xl md:text-[58px] text-[#1C1C1E]">
+              <h1 className="ps-display text-[44px] sm:text-[64px] lg:text-[76px]">
                 Milliy sertifikat va DTMga{' '}
-                <span className="bg-gradient-to-r from-[#007AFF] via-[#5856D6] to-[#34C759] bg-clip-text text-transparent">
+                <span className="relative inline-block text-[var(--ps-purple)]">
                   AI bilan
+                  <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)] sm:-bottom-3 sm:h-4">
+                    <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+                  </svg>
                 </span>{' '}
-                tayyorlaning.
+                tayyorlaning<span className="text-[var(--ps-coral)]">.</span>
               </h1>
 
-              {/* Subhead */}
-              <p className="max-w-xl text-base text-[#3A3A3C] sm:text-[18px] leading-[1.55] mx-auto lg:mx-0 font-normal">
-                Rasmiy formatdagi mock testlar, 24/7 AI mentor va har bir savoldan keyingi darslik sahifasi tahlili.
-                <strong className="text-[#1C1C1E] font-semibold block mt-1">
-                  Kuchsiz mavzuni toping, ildizidan yo&apos;q qiling.
-                </strong>
+              <p className="mx-auto max-w-xl text-[16px] leading-relaxed text-[var(--text-secondary)] sm:text-[18px] lg:mx-0">
+                Rasmiy formatdagi mock testlar, 24/7 AI mentor va har bir savoldan keyingi darslik sahifasi tahlili.{' '}
+                <strong className="font-bold text-[var(--text-primary)]">Kuchsiz mavzuni toping, ildizidan yo&apos;q qiling.</strong>
               </p>
 
-              {/* iOS Pill CTAs */}
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start pt-1">
-                <Link
-                  href="/register"
-                  className="ios-spring group inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full bg-[#007AFF] hover:bg-[#0062CC] text-white font-semibold h-13 px-8 text-sm sm:text-[15px] shadow-[0_8px_24px_rgba(0,122,255,0.32),inset_0_1px_0_rgba(255,255,255,0.25)]"
-                >
-                  <span>Hoziroq bepul boshlash</span>
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+                <Link href="/register" className="ps-btn ps-btn-ink w-full sm:w-auto">
+                  Hoziroq bepul boshlash
+                  <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
                 </Link>
-
-                <a
-                  href={BOT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ios-spring inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full border border-black/[0.08] bg-white/85 hover:bg-white text-[#1C1C1E] font-semibold h-13 px-6 text-sm sm:text-[15px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] ios-glass"
-                >
-                  <Send className="size-4 text-[#007AFF]" />
-                  <span>Telegram bot orqali</span>
+                <a href={BOT_URL} target="_blank" rel="noopener noreferrer" className="ps-btn ps-btn-ghost w-full sm:w-auto">
+                  <Send className="size-4 text-[var(--ps-blue)]" />
+                  Telegram bot orqali
                 </a>
               </div>
 
-              {/* Social Proof & App Store Rating Bar */}
-              <div className="pt-1 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-xs text-[#6C6C70]">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {['#007AFF', '#34C759', '#5856D6', '#FF9500'].map((col, i) => (
-                      <div
-                        key={i}
-                        className="size-6.5 rounded-full border-2 border-[#F2F2F7] flex items-center justify-center text-[12px] font-bold text-white shadow-2xs"
-                        style={{ backgroundColor: col }}
-                      >
-                        ✓
-                      </div>
-                    ))}
-                  </div>
-                  {/* Ilgari bu yerda tasdiqlanmagan "4.9 / 5" reyting qattiq yozilgan edi. */}
-                  <div className="flex items-center gap-1 ml-1 text-[#1C1C1E] font-bold">
-                    <span>Ro&apos;yxatdan o&apos;tish bepul</span>
-                  </div>
-                </div>
-
-                <span className="hidden sm:inline-block text-[#C7C7CC]">•</span>
-
-                <div className="flex items-center gap-1.5 text-[#3A3A3C] font-medium">
-                  <CheckCircle2 className="size-4 text-[#34C759] shrink-0" />
-                  <span>Karta kiritish talab etilmaydi</span>
-                </div>
+              <div className="flex flex-col items-center gap-3 text-[13px] font-semibold text-[var(--text-secondary)] sm:flex-row sm:justify-center lg:justify-start">
+                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-[var(--ps-green)]" /> Ro&apos;yxatdan o&apos;tish bepul</span>
+                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-[var(--ps-green)]" /> Karta kiritish talab etilmaydi</span>
               </div>
 
-              {/* iOS Control Center Style Quick Modules */}
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 pt-4 border-t border-black/[0.06]">
+              {/* Tezkor modullar */}
+              <div className="grid grid-cols-2 gap-2.5 pt-2 sm:grid-cols-3">
                 {[
-                  { icon: FileCheck2, label: 'Mock Testlar', href: '/tests', color: 'from-[#34C759] to-[#28A745]' },
-                  { icon: Bot, label: '24/7 AI Mentor', href: '#imkoniyatlar', color: 'from-[#5856D6] to-[#4644B5]' },
-                  { icon: BarChart3, label: 'OTM Bashorati', href: '/analytics', color: 'from-[#007AFF] to-[#0062CC]' },
-                  { icon: Film, label: 'Bilim Reels', href: '/reels', color: 'from-[#FF2D55] to-[#D70015]' },
-                  { icon: Sparkles, label: 'Kutubxona 5–11', href: '/library', color: 'from-[#AF52DE] to-[#8E3CBE]' },
-                  { icon: Swords, label: '1v1 Arena', href: '/battles', color: 'from-[#FF9500] to-[#E08600]' },
+                  { icon: FileCheck2, label: 'Mock testlar', href: '/tests', tone: 'bg-[var(--ps-green)] text-white' },
+                  { icon: Bot, label: '24/7 AI Mentor', href: '#imkoniyatlar', tone: 'bg-[var(--ps-purple)] text-white' },
+                  { icon: BarChart3, label: 'OTM bashorati', href: '/profile', tone: 'bg-[var(--ps-blue)] text-[#080808]' },
+                  { icon: Film, label: 'Bilim Reels', href: '/reels', tone: 'bg-[var(--ps-coral)] text-white' },
+                  { icon: Sparkles, label: 'Kutubxona 5–11', href: '/library', tone: 'bg-[var(--ps-lilac)] text-[#080808]' },
+                  { icon: Swords, label: '1v1 Arena', href: '/battles', tone: 'bg-[var(--ps-orange)] text-[#080808]' },
                 ].map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="ios-spring flex items-center gap-2.5 rounded-xl border border-black/[0.06] bg-white/85 ios-glass p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:bg-white hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)] group"
+                    className="group flex items-center gap-2.5 rounded-full bg-[var(--ps-paper)] p-1.5 pr-4 shadow-[var(--ds-panel-shadow)] transition-transform hover:-translate-y-0.5"
                   >
-                    <span className={`flex size-7.5 shrink-0 items-center justify-center rounded-md bg-gradient-to-b ${item.color} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] group-hover:scale-105 transition-transform`}>
-                      <item.icon className="size-3.5" />
+                    <span className={`inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-transform group-hover:-rotate-6 ${item.tone}`}>
+                      <item.icon className="size-4" />
                     </span>
-                    <span className="text-xs font-semibold text-[#1C1C1E] truncate">{item.label}</span>
+                    <span className="truncate text-[13px] font-bold text-[var(--text-primary)]">{item.label}</span>
                   </Link>
                 ))}
               </div>
-
             </div>
 
-            {/* Right: iOS 18 Interactive Quiz Window */}
-            <div className="lg:col-span-6">
+            {/* O'ng: jamoa rasmi kompozitsiyasi (dashboard hero bilan bir xil) */}
+            <div className="relative mx-auto aspect-square w-full max-w-[420px] lg:col-span-5 lg:max-w-none">
+              <div aria-hidden className="absolute inset-[6%] rounded-full bg-[var(--ps-orange)]" />
+              <div aria-hidden className="absolute -left-2 bottom-[4%] size-[34%] rounded-tl-full bg-[var(--ps-coral)] sm:-left-4" />
+              <div aria-hidden className="ps-dots absolute right-[2%] top-[2%] size-[26%] rounded-2xl text-[var(--ps-ink)] opacity-25" />
+              <div aria-hidden className="absolute -right-1 bottom-[16%] h-[13%] w-[38%] rotate-[-18deg] rounded-full bg-[var(--ps-green)]" />
+              <div className="absolute inset-[12%] overflow-hidden rounded-full border-[6px] border-[#FFFCF7] bg-[var(--ps-sky)] shadow-[0_30px_60px_-30px_rgba(40,20,80,0.7)]">
+                <Image
+                  src="/images/dashboard-hero-team.webp"
+                  alt="IlmIldizi jamoasi"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 360px, 480px"
+                  className="object-cover object-[50%_32%]"
+                />
+              </div>
+              <svg aria-hidden viewBox="0 0 100 100" className="ps-spin absolute left-[4%] top-[6%] size-[16%] text-[#080808]">
+                <path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z" fill="currentColor" />
+              </svg>
+              <span className="ps-chip ps-float absolute left-0 top-[44%]"><Star className="size-3.5 fill-[var(--ps-orange)] text-[var(--ps-orange)]" /> Rasmiy format</span>
+              <span className="ps-chip ps-float-slow absolute right-0 top-[10%] !bg-[#080808] !text-[#FFFCF7]"><Bot className="size-3.5 text-[var(--ps-orange)]" /> 24/7 AI mentor</span>
+              <span className="ps-chip ps-float absolute bottom-[4%] right-[10%]"><Swords className="size-3.5 text-[var(--ps-purple)]" /> 1v1 Arena</span>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================
+            INTERAKTIV SINOV — 3 savolda darajangizni tekshiring
+            ========================================================= */}
+        <section className="relative mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-8 rounded-[40px] bg-[var(--ps-paper)] p-6 shadow-[var(--ds-panel-shadow)] sm:p-10 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <span className="ps-chip !bg-[var(--ps-neutral)]"><Sparkles className="size-3.5 text-[var(--ps-purple)]" /> Interaktiv sinov</span>
+              <h2 className="ps-display mt-5 text-[34px] sm:text-[44px]">
+                Darajangizni <span className="text-[var(--ps-purple)]">hoziroq</span> tekshiring
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[var(--text-secondary)]">
+                Ro&apos;yxatdan o&apos;tmasdan namuna savolni yechib ko&apos;ring — javobdan keyin darslik manbasi bilan izoh chiqadi.
+              </p>
+            </div>
+            <div className="lg:col-span-7">
               <HeroInteractiveQuiz />
             </div>
-
           </div>
         </section>
 
@@ -358,58 +361,47 @@ export default async function LandingPage() {
         </RevealOnScroll>
 
         {/* =========================================================
-            YAKUNIY CHAQIRIQ (Yakuniy Chaqiriq Kartasi)
+            YAKUNIY CHAQIRIQ
             ========================================================= */}
         <section className="relative mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
           <RevealOnScroll>
-            <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-[#1C1C1E] p-8 text-center shadow-[0_24px_60px_rgba(0,0,0,0.18)] sm:p-14 text-white">
-              {/* Apple Intelligence Ambient Glows */}
-              <div className="absolute -right-20 -top-20 size-80 rounded-full bg-[#007AFF]/25 blur-3xl pointer-events-none" />
-              <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-[#34C759]/20 blur-3xl pointer-events-none" />
+            <div className="relative overflow-hidden rounded-[40px] bg-[#080808] p-8 text-center text-[#FFFCF7] sm:p-14">
+              <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-72 rounded-full bg-[var(--ps-purple)] opacity-60" />
+              <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-16 size-64 rounded-full bg-[var(--ps-orange)] opacity-80" />
+              <span aria-hidden className="ps-dots pointer-events-none absolute bottom-6 right-10 h-20 w-36 opacity-30" />
 
               <div className="relative z-10 mx-auto max-w-2xl">
-                <span className="inline-flex size-14 items-center justify-center rounded-xl bg-gradient-to-b from-[#34C759] to-[#28A745] text-white shadow-[0_8px_20px_rgba(52,199,89,0.35),inset_0_1px_0_rgba(255,255,255,0.35)]">
-                  <Sprout className="size-7 text-white" />
+                <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-green)] text-white">
+                  <Sprout className="size-8" />
                 </span>
 
-                <h2 className="mt-6 text-3xl font-bold tracking-[-0.03em] text-white sm:text-4xl md:text-5xl leading-tight">
+                <h2 className="ps-display mt-6 text-[34px] text-[#FFFCF7] sm:text-[48px]">
                   Bugun bitta test — imtihonda esa{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#64D2FF] via-[#30D158] to-[#5E5CE6]">
-                    Grant va Kontrakt
-                  </span>{' '}
-                  farqi!
+                  <span className="text-[var(--ps-orange)]">grant va kontrakt</span> farqi!
                 </h2>
 
-                <p className="mt-4 text-sm text-[#AEAEB2] sm:text-base leading-relaxed">
+                <p className="mt-4 text-[15px] leading-relaxed text-white/70">
                   O&apos;z bilimingizni hoziroq sinab ko&apos;ring. Hech qanday to&apos;lovsiz, Telegram orqali 10 soniyada kiring va diagnostik testni yeching.
                 </p>
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <Link
-                    href="/register"
-                    className="ios-spring inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[#007AFF] hover:bg-[#0A84FF] text-white font-semibold h-12 px-8 text-sm sm:text-base shadow-[0_6px_20px_rgba(10,132,255,0.4)]"
-                  >
-                    Bepul boshlash <ArrowRight className="size-4" />
+                  <Link href="/register" className="ps-btn ps-btn-light w-full sm:w-auto">
+                    Bepul boshlash
+                    <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
                   </Link>
                   <a
                     href={BOT_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ios-spring inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-white/15 bg-white/10 hover:bg-white/15 text-white font-semibold h-12 px-7 text-sm sm:text-base backdrop-blur-xl"
+                    className="ps-btn w-full border-[1.5px] border-white/20 text-[#FFFCF7] hover:bg-white/10 sm:w-auto"
                   >
-                    <Send className="size-4 text-[#64D2FF]" /> Telegram bot
+                    <Send className="size-4 text-[var(--ps-blue)]" /> Telegram bot
                   </a>
                 </div>
 
-                <div className="mt-8 flex items-center justify-center gap-6 text-xs text-[#8E8E93]">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="size-3.5 text-[#30D158]" />
-                    Karta talab etilmaydi
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="size-3.5 text-[#30D158]" />
-                    10 soniyada tayyor
-                  </span>
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[12.5px] font-semibold text-white/70">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5"><CheckCircle2 className="size-3.5 text-[var(--ps-green)]" /> Karta talab etilmaydi</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5"><CheckCircle2 className="size-3.5 text-[var(--ps-green)]" /> 10 soniyada tayyor</span>
                 </div>
               </div>
             </div>
@@ -418,39 +410,40 @@ export default async function LandingPage() {
       </main>
 
       {/* =========================================================
-          FOOTER (Sayt Yakuniy Footer)
+          FOOTER
           ========================================================= */}
-      <footer className="border-t border-black/[0.06] bg-white/80 ios-glass py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-2.5">
-              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-md overflow-hidden border border-black/[0.08] bg-white shadow-2xs">
-                <BrandMark size={28} rounded="rounded-sm" />
-              </div>
-              <span className="text-base font-bold tracking-tight text-[#1C1C1E]">
-                Ilm<span className="text-[#007AFF]">Ildizi</span>
+      <footer className="relative z-10 px-4 pb-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-[36px] bg-[var(--ps-paper)] p-6 shadow-[var(--ds-panel-shadow)] sm:p-8">
+          <div className="flex flex-col items-center justify-between gap-6 lg:flex-row">
+            <div className="flex items-center gap-3">
+              <BrandMark size={40} rounded="rounded-full" />
+              <span className="font-[family-name:var(--font-grotesk)] text-[20px] font-bold tracking-[-0.03em] text-[#080808]">
+                <span data-no-translit>Ilm<span className="text-[var(--ps-purple)]">Ildizi</span></span>
               </span>
             </div>
 
-            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-[#6C6C70] font-medium">
-              <a href="#imkoniyatlar" className="transition-colors hover:text-[#1C1C1E]">Imkoniyatlar</a>
-              <a href="#qanday" className="transition-colors hover:text-[#1C1C1E]">Qanday ishlaydi</a>
-              <a href="#narxlar" className="transition-colors hover:text-[#1C1C1E]">Narxlar</a>
-              <a href="#savollar" className="transition-colors hover:text-[#1C1C1E]">Savollar</a>
-              <Link href="/dtm-test" className="transition-colors hover:text-[#1C1C1E]">DTM test yechish</Link>
-              <Link href="/milliy-sertifikat" className="transition-colors hover:text-[#1C1C1E]">Milliy sertifikat testlari</Link>
-              <Link href="/login" className="transition-colors hover:text-[#1C1C1E]">Kirish</Link>
-              <Link href="/register" className="transition-colors hover:text-[#1C1C1E]">Ro&apos;yxatdan o&apos;tish</Link>
+            <nav className="flex flex-wrap items-center justify-center gap-2 text-[13px] font-bold text-[var(--text-secondary)]">
+              {[
+                ['#imkoniyatlar', 'Imkoniyatlar'],
+                ['#qanday', 'Qanday ishlaydi'],
+                ['#narxlar', 'Narxlar'],
+                ['#savollar', 'Savollar'],
+                ['/dtm-test', 'DTM test yechish'],
+                ['/milliy-sertifikat', 'Milliy sertifikat testlari'],
+                ['/login', 'Kirish'],
+                ['/register', "Ro'yxatdan o'tish"],
+              ].map(([href, label]) =>
+                href.startsWith('#') ? (
+                  <a key={href} href={href} className="rounded-full px-3 py-1.5 transition-colors hover:bg-[var(--ps-neutral)] hover:text-[var(--text-primary)]">{label}</a>
+                ) : (
+                  <Link key={href} href={href} className="rounded-full px-3 py-1.5 transition-colors hover:bg-[var(--ps-neutral)] hover:text-[var(--text-primary)]">{label}</Link>
+                )
+              )}
             </nav>
-
-            <div className="flex items-center gap-2 rounded-full bg-[#F2F2F7] px-3 py-1 text-xs text-[#3A3A3C] font-medium">
-              <span className="size-2 rounded-full bg-[#34C759] animate-pulse" />
-              <span>Barcha tizimlar barqaror</span>
-            </div>
           </div>
 
-          <div className="mt-8 border-t border-black/[0.06] pt-6 text-center text-xs text-[#8E8E93]">
-            © {new Date().getFullYear()} IlmIldizi. Barcha huquqlar himoyalangan.
+          <div className="mt-6 border-t border-[var(--border-card)] pt-5 text-center text-[12px] font-semibold text-[var(--text-muted)]">
+            © {new Date().getFullYear()} <span data-no-translit>IlmIldizi</span>. Barcha huquqlar himoyalangan.
           </div>
         </div>
       </footer>

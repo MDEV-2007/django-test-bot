@@ -197,12 +197,12 @@ export default function SprintPage() {
   if (loadingQuestions && isAutostart) {
     const displayTitle = customTopicTitle || "Fokus Sprinti";
     return (
-      <div className="min-h-screen bg-[#07090E] flex flex-col items-center justify-center p-6 text-center text-white relative overflow-hidden">
+      <div className="theme-pastel min-h-screen flex flex-col items-center justify-center p-6 text-center text-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08)_0%,transparent_70%)] pointer-events-none" />
         
         <div className="relative size-24 mb-6 flex items-center justify-center">
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-600 animate-spin blur-md opacity-60" />
-          <div className="relative size-20 rounded-full bg-zinc-950 border border-amber-500/40 flex items-center justify-center shadow-2xl">
+          <div className="relative size-20 rounded-full bg-[#080808] flex items-center justify-center shadow-2xl">
             <Zap className="size-9 text-amber-400 animate-pulse" />
           </div>
         </div>
@@ -211,15 +211,15 @@ export default function SprintPage() {
           ⚡ 3 Daqiqalik Fokus Sprint
         </Badge>
 
-        <h2 className="text-xl sm:text-2xl font-bold text-white max-w-md mb-2 leading-snug">
+        <h2 className="ps-display text-[28px] sm:text-[36px] max-w-md mb-2">
           &ldquo;{displayTitle}&rdquo;
         </h2>
 
-        <p className="text-xs sm:text-sm text-zinc-400 max-w-sm leading-relaxed mb-6">
+        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-sm leading-relaxed mb-6">
           Shpargalkadagi fakt va qopqonlar asosida 10 ta maxsus saralangan savol tayyorlanmoqda...
         </p>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
+        <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)]">
           <Loader2 className="size-3.5 animate-spin text-amber-400" />
           <span>Neyron savollar saralanmoqda...</span>
         </div>
@@ -235,7 +235,7 @@ export default function SprintPage() {
     const sprintTitle = customTopicTitle || chosenSubject?.name || questions[0]?.topicTitle || "Fokus Sprinti";
 
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="theme-pastel min-h-screen text-foreground">
         <NeuralSprintView
           key={sessionId ?? 'offline'}
           questions={questions}
@@ -257,7 +257,7 @@ export default function SprintPage() {
     const slug = chosenSubject?.slug && chosenSubject.slug !== 'all' ? chosenSubject.slug : 'tarix';
 
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="theme-pastel flex min-h-screen flex-col items-center justify-center p-3 text-foreground sm:p-6">
         <GhostBattleArena
           subjectSlug={slug}
           onExit={() => {
@@ -273,7 +273,7 @@ export default function SprintPage() {
   // 4. FANNI TANLASH VA SPRINTNI SOZLASH EKRANI (Bento Cockpit UI)
   // ─────────────────────────────────────────────────────────────
   return (
-    <ModernAppLayout user={user}>
+    <ModernAppLayout variant="pastel" user={user}>
       <FocusSprintSetup
         subjects={subjects}
         selectedSubjectId={selectedSubjectId}

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileCheck2, BookOpen, Swords, Bot, ShoppingBag, Crown,
-  BarChart3, Trophy, User, Search, RotateCcw, Map, Sprout, ScrollText,
+  Trophy, User, Search, RotateCcw, Map, Sprout, ScrollText, CornerDownLeft,
 } from 'lucide-react';
 import { soundFX } from '@/lib/soundFX';
 import { useFeatureFlags } from '@/lib/features';
@@ -23,9 +23,18 @@ const ITEMS: Item[] = [
   { href: '/mentor', label: 'AI Mentor 24/7', hint: 'Savol-javob', icon: Bot, featureKey: 'ai_mentor' },
   { href: '/shop', label: "Do'kon & Sovg'a", hint: 'Artefaktlar', icon: ShoppingBag, featureKey: 'shop' },
   { href: '/premium', label: 'Premium PRO', hint: 'Tariflar', icon: Crown },
-  { href: '/analytics', label: 'Analitika', hint: "O'sish va natijalar", icon: BarChart3, featureKey: 'otm_predictor' },
   { href: '/leaderboard', label: 'Liderlar Ligasi', hint: 'Respublika reytingi', icon: Trophy, featureKey: 'leaderboard' },
   { href: '/profile', label: 'Mening Profilim', hint: 'Sozlamalar, referral', icon: User },
+];
+
+/* Har bir sahifa — o'z rangli doirasi (pastel palitra) */
+const TONES = [
+  'bg-[var(--ps-blue)] text-[#080808]',
+  'bg-[var(--ps-purple)] text-white',
+  'bg-[var(--ps-coral)] text-white',
+  'bg-[var(--ps-orange)] text-[#080808]',
+  'bg-[var(--ps-green)] text-white',
+  'bg-[var(--ps-lilac)] text-[#080808]',
 ];
 
 export default function CommandPalette() {
@@ -72,42 +81,93 @@ export default function CommandPalette() {
   if (!open) return null;
 
   return (
-    <div className="animate-fadeIn fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-24 backdrop-blur-sm" onClick={() => setOpen(false)}>
+    <div
+      className="ps-shell animate-fadeIn fixed inset-0 z-[60] flex items-start justify-center bg-[#0B0814]/45 px-3 pt-20 backdrop-blur-md sm:pt-28"
+      onClick={() => setOpen(false)}
+    >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="animate-scaleIn w-full max-w-lg overflow-hidden border border-[var(--border-card)] bg-[var(--surface-card-strong)] shadow-2xl bento-card"
+        role="dialog"
+        aria-label="Sahifa qidirish"
+        className="animate-scaleIn w-full max-w-xl overflow-hidden rounded-[32px] bg-[var(--ps-paper)] text-[var(--text-primary)] shadow-[0_40px_80px_-30px_rgba(40,20,80,0.7)]"
       >
-        <div className="flex items-center gap-3 border-b border-[var(--border-soft)] px-4 py-3.5">
-          <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setActive(0); }}
-            onKeyDown={onKeyDown}
-            placeholder="Sahifa qidirish..."
-            className="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
-          />
-          <kbd className="rounded-md border border-[var(--border-card)] px-1.5 py-0.5 font-mono text-xs text-[var(--text-faint)]">ESC</kbd>
+        {/* Qidiruv maydoni */}
+        <div className="p-3 pb-2">
+          <div className="flex items-center gap-3 rounded-full bg-[var(--ps-neutral)] py-1.5 pl-1.5 pr-2 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--ps-purple)] text-white">
+              <Search className="size-[18px]" />
+            </span>
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setActive(0); }}
+              onKeyDown={onKeyDown}
+              placeholder="Sahifa yoki bo'lim qidirish…"
+              className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold text-[var(--text-primary)] placeholder:font-medium placeholder:text-[var(--text-faint)] focus:outline-none"
+            />
+            <kbd className="shrink-0 rounded-full bg-[var(--ps-paper)] px-2.5 py-1 font-mono text-[11px] font-bold text-[var(--text-muted)]">ESC</kbd>
+          </div>
         </div>
-        <div className="max-h-80 overflow-y-auto p-2">
-          {filtered.length === 0 && <p className="px-3 py-4 text-center text-xs text-[var(--text-faint)]">Hech narsa topilmadi.</p>}
+
+        {/* Natijalar */}
+        <div className="max-h-[min(420px,60svh)] space-y-1 overflow-y-auto px-3 pb-3">
+          {filtered.length === 0 && (
+            <div className="flex flex-col items-center gap-2 rounded-[22px] bg-[var(--ps-neutral)] px-4 py-8 text-center">
+              <span className="inline-flex size-11 items-center justify-center rounded-full bg-[var(--ps-paper)] text-[var(--text-muted)]">
+                <Search className="size-5" />
+              </span>
+              <p className="text-[13px] font-semibold text-[var(--text-muted)]">Hech narsa topilmadi.</p>
+            </div>
+          )}
           {filtered.map((item, i) => {
             const Icon = item.icon;
+            const isActive = active === i;
+            const tone = TONES[ITEMS.indexOf(item) % TONES.length];
             return (
               <button
                 key={item.href}
                 onClick={() => go(item)}
                 onMouseEnter={() => setActive(i)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
-                  active === i ? 'bg-[var(--accent)] text-[var(--on-accent)]' : 'text-[var(--text-secondary)]'
+                className={`flex w-full cursor-pointer items-center gap-3 rounded-[22px] p-2 pr-3 text-left transition-colors ${
+                  isActive
+                    ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                    : 'text-[var(--text-primary)] hover:bg-[var(--ps-neutral)]'
                 }`}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${active === i ? 'text-[var(--on-accent)]' : 'text-[var(--text-muted)]'}`} />
-                <span className="font-medium">{item.label}</span>
-                <span className={`ml-auto truncate text-xs ${active === i ? 'text-[var(--on-accent)]/70' : 'text-[var(--text-faint)]'}`}>{item.hint}</span>
+                <span className={`inline-flex size-10 shrink-0 items-center justify-center rounded-full ${tone}`}>
+                  <Icon className="size-[18px]" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[14.5px] font-bold">{item.label}</span>
+                  <span className={`block truncate text-[12px] font-medium ${isActive ? 'opacity-65' : 'text-[var(--text-muted)]'}`}>{item.hint}</span>
+                </span>
+                <span
+                  className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full transition-all ${
+                    isActive ? 'bg-[var(--ps-orange)] text-[#080808]' : 'scale-75 opacity-0'
+                  }`}
+                >
+                  <CornerDownLeft className="size-4" />
+                </span>
               </button>
             );
           })}
+        </div>
+
+        {/* Klaviatura ko'rsatmalari */}
+        <div className="flex items-center justify-between gap-3 border-t border-[var(--border-card)] px-5 py-3 text-[11.5px] font-semibold text-[var(--text-muted)]">
+          <span className="inline-flex items-center gap-1.5">
+            <kbd className="rounded-md bg-[var(--ps-neutral)] px-1.5 py-0.5 font-mono">↑</kbd>
+            <kbd className="rounded-md bg-[var(--ps-neutral)] px-1.5 py-0.5 font-mono">↓</kbd>
+            tanlash
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <kbd className="rounded-md bg-[var(--ps-neutral)] px-1.5 py-0.5 font-mono">Enter</kbd>
+            ochish
+          </span>
+          <span className="hidden items-center gap-1.5 sm:inline-flex">
+            <kbd className="rounded-md bg-[var(--ps-neutral)] px-1.5 py-0.5 font-mono">Ctrl K</kbd>
+            yopish
+          </span>
         </div>
       </div>
     </div>

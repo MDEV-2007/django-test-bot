@@ -30,11 +30,11 @@ export default function MobileStickyCta() {
         >
           <div className="flex items-center justify-between gap-3 rounded-full border border-black/[0.08] bg-white/88 px-4 py-2.5 shadow-[0_14px_38px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] ios-glass">
             <div className="flex flex-col pl-1">
-              <span className="flex items-center gap-1 text-xs font-bold text-[#1C1C1E]">
-                <Sparkles className="size-3.5 text-[#007AFF]" />
+              <span className="flex items-center gap-1 text-xs font-bold text-[#080808]">
+                <Sparkles className="size-3.5 text-[#7659C7]" />
                 1-test mutlaqo bepul
               </span>
-              <span className="text-[12px] text-[#6C6C70]">
+              <span className="text-[12px] text-[#6B6577]">
                 Telegram yoki Google orqali
               </span>
             </div>
@@ -45,14 +45,14 @@ export default function MobileStickyCta() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Telegram botda ochish"
-                className="ios-spring flex size-9 items-center justify-center rounded-full bg-[#F2F2F7] text-[#007AFF]"
+                className="ios-spring flex size-9 items-center justify-center rounded-full bg-[#F7F4EF] text-[#7659C7]"
               >
                 <Send className="size-4" />
               </a>
 
               <Link
                 href="/register"
-                className="ios-spring flex items-center gap-1 rounded-full bg-[#007AFF] px-4 py-2 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,122,255,0.3)]"
+                className="ios-spring flex items-center gap-1 rounded-full bg-[#7659C7] px-4 py-2 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(118,89,199,0.3)]"
               >
                 Boshlash <ArrowRight className="size-3.5" />
               </Link>
