@@ -1,11 +1,16 @@
 from django.urls import path
 
+from accounts import admin_mfa
 from . import api, marketing_api
 
 app_name = 'panel_api'
 
 urlpatterns = [
     path('', api.dashboard_api, name='dashboard'),
+    path('mfa/status/', admin_mfa.panel_mfa_status_api, name='mfa_status'),
+    path('mfa/enroll/', admin_mfa.panel_mfa_enroll_api, name='mfa_enroll'),
+    path('mfa/verify/', admin_mfa.panel_mfa_verify_api, name='mfa_verify'),
+    path('mfa/lock/', admin_mfa.panel_mfa_lock_api, name='mfa_lock'),
 
     path('users/', api.users_api, name='users'),
     path('users/create/', api.user_create_api, name='user_create'),

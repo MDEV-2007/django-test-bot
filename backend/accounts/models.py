@@ -347,15 +347,17 @@ def sync_role_to_groups(sender, instance, **kwargs):
 
 
 class AdminMFADevice(models.Model):
-    """RFC 6238 TOTP device + single-use recovery codes for Django Admin (/admin/) accounts."""
+    """RFC 6238 TOTP device + single-use recovery codes for Django Admin (/admin/) and Super Admin (/panel/) accounts."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_mfa_device')
-    secret = models.CharField(max_length=128)
+    secret = models.CharField(max_length=255)
+    key_version = models.CharField(max_length=32, default='v1')
     is_confirmed = models.BooleanField(default=False, db_index=True)
     recovery_code_hashes = models.JSONField(default=list, blank=True)
     last_used_timestep = models.BigIntegerField(default=0)
     failed_attempts = models.PositiveIntegerField(default=0)
     locked_until = models.DateTimeField(null=True, blank=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

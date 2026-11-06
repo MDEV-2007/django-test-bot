@@ -175,6 +175,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setOrigin(window.location.origin);
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && ['stats', 'posts', 'inventory', 'activity'].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
   }, []);
 
   useEffect(() => {

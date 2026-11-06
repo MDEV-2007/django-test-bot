@@ -135,9 +135,23 @@ Talabgor javobining to'g'ri javobga semantik mosligini 0 dan 100 gacha foizda ba
                     'evaluation_method': 'ai_semantic',
                 }
             raw_score = data.get('score_pct', 0)
-            score_pct = max(0, min(100, int(float(raw_score if raw_score is not None else 0))))
+            try:
+                score_val = float(raw_score if raw_score is not None else 0)
+                if score_val != score_val or score_val == float('inf') or score_val == float('-inf'):
+                    score_pct = 0
+                else:
+                    score_pct = max(0, min(100, int(round(score_val))))
+            except (ValueError, TypeError):
+                score_pct = 0
+
             strict_flag = parse_strict_bool(data.get('is_correct', False))
-            is_corr = bool((strict_flag and score_pct >= 50) or score_pct >= 75)
+            # GRADE-NEW-001: Resolve contradiction. Both explicit model agreement (strict_flag)
+            # and passing threshold (>= 70%) are mandatory. An LLM returning is_correct=False
+            # with high score MUST NOT pass, and score must be clamped below passing (< 50).
+            is_corr = bool(strict_flag and score_pct >= 70)
+            if not is_corr and score_pct >= 70:
+                score_pct = min(score_pct, 49)
+
             return {
                 'is_correct': is_corr,
                 'score_pct': score_pct,
@@ -150,10 +164,11 @@ Talabgor javobining to'g'ri javobga semantik mosligini 0 dan 100 gacha foizda ba
     # Fallback: AI ishlamasa, deterministik moslik topilmagan javob qabul qilinmaydi
     # (ilgari 70% o'xshashlik "Samarra" ni "Samarqand" deb qabul qilardi).
     is_pass = False
+    is_inj = is_prompt_injection_attempt(student_answer, reference_answer)
     return {
         'is_correct': is_pass,
-        'score_pct': int(best_sim * 100),
-        'feedback': "Javob to'g'ri deb qabul qilindi" if is_pass else "Javob etalonga mos kelmadi",
+        'score_pct': 0 if is_inj else int(best_sim * 100),
+        'feedback': "Javob etalonga mos kelmadi",
         'evaluation_method': 'fallback_ratio'
     }
 

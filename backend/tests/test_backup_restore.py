@@ -1,4 +1,5 @@
 """Tests for Task 4 (Backup & Restore + SHA-256 + Encryption + Offsite) and Task 6 (DB Password Guard)."""
+import os
 import tempfile
 from pathlib import Path
 
@@ -64,6 +65,7 @@ class BackupAndRestoreCommandTests(SimpleTestCase):
                 'backup_data',
                 dir=str(self.backup_dir),
                 offsite_dir=str(self.offsite_dir),
+                allow_unencrypted=True,
             )
             db_backups = list(self.backup_dir.glob('db-*.sqlite3.gz'))
             media_backups = list(self.backup_dir.glob('media-*.tar.gz'))
@@ -137,3 +139,44 @@ class BackupAndRestoreCommandTests(SimpleTestCase):
                     passphrase=secret_pass,
                     target_sqlite=str(restored_sqlite),
                 )
+
+    def test_production_backup_fails_closed_without_passphrase(self):
+        with override_settings(DEBUG=False, DATABASES=self._db_settings(), MEDIA_ROOT=self.media_src):
+            # Without passphrase or --allow-unencrypted, production backup fails
+            with self.assertRaises(CommandError) as ctx:
+                call_command(
+                    'backup_data',
+                    dir=str(self.backup_dir),
+                    passphrase='',
+                )
+            self.assertIn("fail-closed", str(ctx.exception))
+
+            # With --allow-unencrypted explicitly passed, it passes in test
+            call_command(
+                'backup_data',
+                dir=str(self.backup_dir),
+                passphrase='',
+                allow_unencrypted=True,
+            )
+            self.assertTrue(list(self.backup_dir.glob('db-*.sqlite3.gz')))
+
+    def test_retention_pruning_policy(self):
+        import time
+        with override_settings(DATABASES=self._db_settings(), MEDIA_ROOT=self.media_src):
+            self.backup_dir.mkdir(parents=True, exist_ok=True)
+            old_file = self.backup_dir / 'db-20261001-000000.sqlite3.gz'
+            old_file.write_bytes(b'dummy-old-backup')
+            # Artificially age the file to 20 days ago
+            past_time = time.time() - (20 * 86400)
+            os.utime(old_file, (past_time, past_time))
+            self.assertTrue(old_file.exists())
+
+            # Run backup with keep_days=14 -> old file must be pruned
+            call_command(
+                'backup_data',
+                dir=str(self.backup_dir),
+                keep_days=14,
+                allow_unencrypted=True,
+            )
+            self.assertFalse(old_file.exists())
+

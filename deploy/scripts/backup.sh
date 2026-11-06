@@ -11,12 +11,31 @@
 #   4. Off-site copy support via BACKUP_RCLONE_DEST, BACKUP_SCP_DEST, or BACKUP_OFFSITE_DIR
 #   5. Retention policy (KEEP_DAYS, default 14)
 set -eu
+umask 0077
 
 PROJECT_DIR="${PROJECT_DIR:-/opt/ilmildizi}"
 BACKUP_DIR="${BACKUP_DIR:-/opt/ilmildizi-backups}"
 KEEP_DAYS="${KEEP_DAYS:-14}"
 MEDIA_VOLUME="${MEDIA_VOLUME:-ilmildizi_media}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
+ALLOW_UNENCRYPTED_BACKUP="${ALLOW_UNENCRYPTED_BACKUP:-0}"
+
+# 0. Single-instance lock to prevent concurrent backup jobs
+LOCK_FILE="${BACKUP_LOCK_FILE:-/tmp/ilmildizi-backup.lock}"
+if command -v flock >/dev/null 2>&1; then
+    exec 9>"$LOCK_FILE"
+    if ! flock -n 9; then
+        echo "[$(date -Iseconds)] ERROR: Another backup job is already running (locked on $LOCK_FILE), aborting" >&2
+        exit 1
+    fi
+else
+    LOCK_DIR="${LOCK_FILE}.lockdir"
+    if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+        echo "[$(date -Iseconds)] ERROR: Another backup job is already running (locked by $LOCK_DIR), aborting" >&2
+        exit 1
+    fi
+    trap 'rm -rf "$LOCK_DIR"' EXIT
+fi
 
 mkdir -p "$BACKUP_DIR"
 chmod 0700 "$BACKUP_DIR" 2>/dev/null || true
@@ -49,7 +68,7 @@ docker run --rm -v "$MEDIA_VOLUME":/media:ro -v "$BACKUP_DIR":/backup alpine \
 gzip -t "$MEDIA_RAW.part"
 mv "$MEDIA_RAW.part" "$MEDIA_RAW"
 
-# 3. Optional encryption (AES-256-CBC with PBKDF2 100k iterations)
+# 3. Mandatory encryption (AES-256-CBC with PBKDF2 100k iterations)
 encrypt_if_configured() {
     src_file="$1"
     if [ -n "${BACKUP_PASSPHRASE_FILE:-}" ] && [ -f "$BACKUP_PASSPHRASE_FILE" ]; then
@@ -68,8 +87,12 @@ encrypt_if_configured() {
         mv "$enc_file.part" "$enc_file"
         rm -f "$src_file"
         echo "$enc_file"
-    else
+    elif [ "$ALLOW_UNENCRYPTED_BACKUP" = "1" ]; then
+        echo "[$(date -Iseconds)] WARNING: writing UNENCRYPTED backup (ALLOW_UNENCRYPTED_BACKUP=1)" >&2
         echo "$src_file"
+    else
+        echo "[$(date -Iseconds)] ERROR: BACKUP_PASSPHRASE or BACKUP_PASSPHRASE_FILE is required for production backups (fail-closed). Set ALLOW_UNENCRYPTED_BACKUP=1 for testing only." >&2
+        exit 1
     fi
 }
 
@@ -86,6 +109,7 @@ write_and_verify_sha256() {
         sha256sum "$base_name" > "${base_name}.sha256"
         sha256sum -c "${base_name}.sha256" >/dev/null
     )
+    chmod 0600 "$target" "${target}.sha256" 2>/dev/null || true
 }
 
 write_and_verify_sha256 "$DB_FINAL"
@@ -95,7 +119,17 @@ write_and_verify_sha256 "$MEDIA_FINAL"
 OFFSITE_STATUS="skipped(not_configured)"
 if [ -n "${BACKUP_OFFSITE_DIR:-}" ]; then
     mkdir -p "$BACKUP_OFFSITE_DIR"
+    chmod 0700 "$BACKUP_OFFSITE_DIR" 2>/dev/null || true
     cp -f "$DB_FINAL" "${DB_FINAL}.sha256" "$MEDIA_FINAL" "${MEDIA_FINAL}.sha256" "$BACKUP_OFFSITE_DIR/"
+    (
+        cd "$BACKUP_OFFSITE_DIR"
+        sha256sum -c "$(basename "${DB_FINAL}.sha256")" >/dev/null
+        sha256sum -c "$(basename "${MEDIA_FINAL}.sha256")" >/dev/null
+    )
+    chmod 0600 "$BACKUP_OFFSITE_DIR"/* 2>/dev/null || true
+    find "$BACKUP_OFFSITE_DIR" -maxdepth 1 -type f \
+        \( -name 'db-*.dump*' -o -name 'media-*.tgz*' \) \
+        -mtime +"$KEEP_DAYS" -delete 2>/dev/null || true
     OFFSITE_STATUS="ok(dir:$BACKUP_OFFSITE_DIR)"
 fi
 if [ -n "${BACKUP_RCLONE_DEST:-}" ]; then
@@ -103,6 +137,7 @@ if [ -n "${BACKUP_RCLONE_DEST:-}" ]; then
     rclone copy "${DB_FINAL}.sha256" "$BACKUP_RCLONE_DEST"
     rclone copy "$MEDIA_FINAL" "$BACKUP_RCLONE_DEST"
     rclone copy "${MEDIA_FINAL}.sha256" "$BACKUP_RCLONE_DEST"
+    rclone delete --min-age "${KEEP_DAYS}d" "$BACKUP_RCLONE_DEST" 2>/dev/null || true
     OFFSITE_STATUS="ok(rclone:$BACKUP_RCLONE_DEST)"
 fi
 if [ -n "${BACKUP_SCP_DEST:-}" ]; then
