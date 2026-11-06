@@ -22,7 +22,7 @@ type HistoryResponse = {
 };
 
 export default function HistoryPage() {
-  const { access } = useAuthStore();
+  const { access, user } = useAuthStore();
   const [data, setData] = useState<HistoryResponse | null>(null);
   const [page, setPage] = useState(1);
   const [sharingAttempt, setSharingAttempt] = useState<HistoryEntry | null>(null);
@@ -148,7 +148,10 @@ export default function HistoryPage() {
             }}
             attemptId={sharingAttempt.id}
             testTitle={sharingAttempt.test_title}
-            score={sharingAttempt.score || 0}
+            score={((sharingAttempt.score || 0) / 100) * 70}
+            percentage={sharingAttempt.score || 0}
+            studentName={`${user?.first_name || user?.username || ''} ${user?.last_name || ''}`.trim()}
+            date={sharingAttempt.completed_at}
             correctCount={sharingAttempt.correct_answers}
             totalQuestions={(sharingAttempt.correct_answers || 0) + (sharingAttempt.wrong_answers || 0) + (sharingAttempt.skipped_answers || 0)}
           />

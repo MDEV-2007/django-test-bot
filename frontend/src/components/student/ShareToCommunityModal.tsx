@@ -2,24 +2,26 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Trophy, Award, CheckCircle2, ArrowRight, Loader2, Send } from 'lucide-react';
+import { Sparkles, Loader2, Send, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { apiFetch } from '@/lib/api-client';
 import { soundFX } from '@/lib/soundFX';
 import { celebrate } from '@/lib/confetti';
+import CertificateCard from './CertificateCard';
 
 interface ShareToCommunityModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   attemptId: string | number;
   testTitle: string;
+  /** Natija kartasidagi bilan bir xil ball (70 ballik Rasch) */
   score: number;
-  grade?: string;
+  percentage?: number | null;
+  grade?: string | null;
+  studentName?: string;
+  date?: string | null;
   correctCount?: number;
   totalQuestions?: number;
   postType?: 'test_result' | 'certificate';
@@ -32,7 +34,10 @@ export default function ShareToCommunityModal({
   attemptId,
   testTitle,
   score,
+  percentage,
   grade,
+  studentName,
+  date,
   correctCount,
   totalQuestions,
   postType = 'test_result',
@@ -42,7 +47,7 @@ export default function ShareToCommunityModal({
   const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const isCert = postType === 'certificate' || score >= 60;
+  const isCert = postType === 'certificate';
 
   async function handleShare() {
     setLoading(true);
@@ -70,7 +75,6 @@ export default function ShareToCommunityModal({
         toast.success(res.message || "Natijangiz Lenta va Story'ga muvaffaqiyatli joylandi! (+15 XP)");
         onOpenChange(false);
         if (onSuccess) onSuccess();
-        // Hamjamiyat sahifasiga o'tish taklifi
         router.push('/feed');
       }
     } catch (e) {
@@ -82,99 +86,74 @@ export default function ShareToCommunityModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl border border-[var(--border-strong)] bg-[var(--surface-card)] p-6 shadow-2xl">
-        <DialogHeader className="space-y-1.5 text-center sm:text-left">
-          <div className="mx-auto sm:mx-0 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 text-white shadow-md shadow-amber-500/25 mb-1">
-            <Sparkles className="size-6" />
-          </div>
-          <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-            Hamjamiyatga ulashish
-          </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-            O&apos;z natijangiz bilan boshqa abituriyentlarni ilhomlantiring va <b>+15 XP</b> oling!
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Natija kartochkasi preview */}
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 via-[var(--surface-hover)] to-teal-500/10 p-4 space-y-3 shadow-inner">
-          <div className="flex items-center justify-between">
-            <Badge className="bg-emerald-600 text-white text-[12px] font-bold uppercase tracking-wider">
-              {isCert ? '🏆 Milliy Sertifikat' : '📝 Test Natijasi'}
-            </Badge>
-            <span className="text-[12px] font-mono font-bold text-amber-400 flex items-center gap-1">
-              <Sparkles className="size-3" /> +15 XP Bonus
+      <DialogContent
+        showCloseButton={false}
+        className="ps-shell max-h-[94svh] w-[calc(100%-1rem)] gap-0 overflow-y-auto rounded-[32px] border-0 bg-[var(--ps-paper)] p-0 text-[var(--text-primary)] shadow-[0_40px_80px_-30px_rgba(40,20,80,0.7)] sm:w-full sm:max-w-md sm:p-0 dark:bg-[var(--ps-paper)]"
+      >
+        {/* Sarlavha */}
+        <div className="flex items-start justify-between gap-3 px-5 pb-3 pt-5 sm:px-6">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-orange)] px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#080808]">
+              <Sparkles className="size-3" /> +15 XP
             </span>
+            <DialogTitle className="ps-display mt-2.5 text-[24px] sm:text-[28px]">Hamjamiyatga ulashish</DialogTitle>
+            <DialogDescription className="mt-1 text-[13px] text-[var(--text-secondary)]">
+              Natijangiz bilan boshqa abituriyentlarni ilhomlantiring.
+            </DialogDescription>
           </div>
-
-          <div className="space-y-1">
-            <h4 className="font-bold text-foreground text-sm leading-snug line-clamp-1">
-              {testTitle}
-            </h4>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold font-mono tracking-tight text-emerald-400">
-                {score.toFixed(0)}%
-              </span>
-              {grade && (
-                <span className="text-xs font-bold text-foreground/80 px-2 py-0.5 rounded-md bg-white/10 border border-white/10">
-                  {grade}
-                </span>
-              )}
-            </div>
-            {totalQuestions && (
-              <p className="text-[12px] text-muted-foreground">
-                To&apos;g&apos;ri javoblar: <b>{correctCount}</b> / {totalQuestions} ta
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Fikr / Izoh matni */}
-        <div className="space-y-1.5 pt-1">
-          <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-            <span>Taassurotingiz yoki fikringiz:</span>
-            <span className="text-[12px] text-muted-foreground font-normal">Ixtiyoriy</span>
-          </label>
-          <Textarea
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="Qanday tayyorlandingiz? Boshqa abituriyentlarga maslahatingiz yoki taassurotingiz..."
-            className="rounded-xl border-[var(--border-strong)] bg-[var(--surface-hover)]/40 text-xs sm:text-sm min-h-[85px] resize-none"
-            maxLength={1000}
-          />
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
             onClick={() => onOpenChange(false)}
-            disabled={loading}
-            className="rounded-xl text-xs"
+            aria-label="Yopish"
+            className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[var(--ps-neutral)] text-[var(--text-secondary)] transition-colors hover:bg-[#080808] hover:text-[#FFFCF7] dark:hover:bg-[#FFFCF7] dark:hover:text-[#080808]"
           >
-            Bekor qilish
-          </Button>
+            <X className="size-4" />
+          </button>
+        </div>
 
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleShare}
-            disabled={loading}
-            className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md shadow-amber-500/20 px-4"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="size-3.5 mr-1.5 animate-spin" />
-                Ulashilmoqda...
-              </>
-            ) : (
-              <>
-                <Send className="size-3.5 mr-1.5" />
-                Hamjamiyatga chiqarish 🚀
-              </>
-            )}
-          </Button>
+        <div className="space-y-3 px-5 pb-5 sm:px-6">
+          {/* Lentada ko'rinadigan karta — natija sahifasidagi bilan bir xil */}
+          <CertificateCard
+            compact
+            attemptId={attemptId}
+            studentName={studentName || "O'quvchi"}
+            testTitle={testTitle}
+            score={score}
+            correctCount={correctCount}
+            totalQuestions={totalQuestions}
+            percentage={percentage}
+            grade={grade}
+            date={date}
+          />
+
+          <label className="block rounded-[22px] bg-[var(--ps-neutral)] px-5 pb-3 pt-2.5 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+            <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Taassurotingiz · ixtiyoriy</span>
+            <textarea
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              placeholder="Qanday tayyorlandingiz? Boshqa abituriyentlarga maslahatingiz..."
+              className="mt-1 min-h-[72px] w-full resize-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none placeholder:text-[var(--text-faint)]"
+              maxLength={1000}
+            />
+          </label>
+
+          <div className="grid grid-cols-[auto_1fr] gap-2 pt-1">
+            <button type="button" onClick={() => onOpenChange(false)} disabled={loading} className="ps-btn ps-btn-ghost">
+              Bekor qilish
+            </button>
+            <button type="button" onClick={handleShare} disabled={loading} className="ps-btn ps-btn-ink">
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Ulashilmoqda...
+                </>
+              ) : (
+                <>
+                  Lentaga chiqarish
+                  <span className="ps-btn-arrow"><Send className="size-4" /></span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
