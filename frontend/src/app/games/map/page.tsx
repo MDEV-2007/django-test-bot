@@ -2,17 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { celebrate } from '@/lib/confetti';
-import { MapPin, RotateCcw, Coins, CheckCircle2, XCircle, Zap } from 'lucide-react';
+import { MapPin, RotateCcw, Check, X, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import AppShell from '@/components/AppShell';
-import PageHero from '@/components/student/PageHero';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { GameHero, SubjectChips, GameEmpty, GameSkeleton, ResultBanner, LETTERS } from '@/components/games/GameKit';
 import { cn } from '@/lib/utils';
 
 type Challenge = { id: number; title: string; description: string; map_image_url: string; options: string[] };
@@ -44,115 +40,111 @@ export default function MapGamePage() {
   async function answer(region: string) {
     if (!challenge || selected) return;
     setSelected(region);
-    const res = await apiFetch<Result>('/api/games/map/', {
-      method: 'POST', body: JSON.stringify({ challenge_id: challenge.id, region }),
-    });
-    setResult(res);
-    if (res.correct) {
-      soundFX.correct();
-      try { celebrate({ particleCount: 60, spread: 60, origin: { y: 0.6 } }); } catch { /* noop */ }
-    } else {
-      soundFX.incorrect();
+    try {
+      const res = await apiFetch<Result>('/api/games/map/', {
+        method: 'POST', body: JSON.stringify({ challenge_id: challenge.id, region }),
+      });
+      setResult(res);
+      if (res.correct) {
+        soundFX.correct();
+        try { celebrate({ particleCount: 60, spread: 60, origin: { y: 0.6 } }); } catch { /* noop */ }
+      } else {
+        soundFX.incorrect();
+      }
+    } catch (e) {
+      setSelected(null);
+      toast.error(e instanceof Error ? e.message : 'Javobni yuborib bo‘lmadi');
     }
   }
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell-focus flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-        <PageHero
-          tone="accent"
-          eyebrow="Mini o'yin"
-          eyebrowIcon={MapPin}
-          title="Tarixiy Xarita Challenge"
-          description="Xarita orqali qadimiy davlatlar va joylashuvlarni aniqlang."
-          actions={
-            <Badge variant="outline" className="border-emerald-500/25 bg-emerald-500/10 text-emerald-400">
-              <Zap className="size-3" /> +80 XP · <Coins className="size-3" /> 8
-            </Badge>
-          }
+      <main className="page-shell flex-1 space-y-6 p-4 pb-28 sm:p-6">
+        <GameHero
+          tone="green"
+          icon={MapPin}
+          eyebrow="Mini o'yin · xarita"
+          title="Tarixiy xarita"
+          accent="challenge"
+          description="Xarita va ta'rif orqali qadimiy davlatlar, shaharlar va hududlarning joylashuvini aniqlang."
+          xp={80}
+          coins={8}
         />
 
-        {subjects.length > 0 && (
-          <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
-            {subjects.map((s) => (
-              <Button
-                key={s.slug}
-                size="sm"
-                variant="outline"
-                className={cn('shrink-0 rounded-full', subject === s.slug && 'chip-active')}
-                onClick={() => setSubject(s.slug)}
-              >
-                {s.name}
-              </Button>
-            ))}
-          </div>
-        )}
+        <SubjectChips subjects={subjects} value={subject} onChange={setSubject} />
 
-        {!loaded && <Skeleton className="h-80 w-full" />}
-        {loaded && !challenge && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <MapPin className="mx-auto mb-2 size-8 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">Bu fanda hozircha challenge yo&apos;q.</p>
-            </CardContent>
-          </Card>
-        )}
+        {!loaded && <GameSkeleton />}
+        {loaded && !challenge && <GameEmpty icon={MapPin} text="Bu fanda hozircha challenge yo'q." />}
 
         {challenge && (
-          <Card>
-            <CardContent className="space-y-4 pt-6">
-              <h2 className="text-base font-bold">{challenge.title}</h2>
-              <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{challenge.description}</p>
+          <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+            <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-green)] opacity-10" />
+            <span className="relative inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-white">
+              <MapPin className="size-3.5" /> Joylashuvni toping
+            </span>
+            <h2 className="ps-display relative mt-3 text-[24px] sm:text-[30px]">{challenge.title}</h2>
+            <p className="relative mt-2 text-[14.5px] leading-relaxed text-[var(--text-secondary)]">{challenge.description}</p>
 
-              {challenge.map_image_url && (
-                <div className="overflow-hidden rounded-xl border bg-black/40">
-                  <img src={challenge.map_image_url} alt="" className="max-h-64 w-full object-cover" />
-                </div>
-              )}
-
-              <div className="grid gap-2.5 pt-2 sm:grid-cols-2">
-                {challenge.options.map((o) => {
-                  const isCorrect = result && o === result.correct_location;
-                  const isSelected = selected === o;
-                  let cls = 'border bg-[var(--surface-input)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]';
-                  if (result) {
-                    if (isCorrect) cls = 'border-2 border-[var(--success)] bg-[var(--success)]/20 font-bold text-[var(--success-text)]';
-                    else if (isSelected) cls = 'border-2 border-rose-500 bg-rose-500/20 font-bold text-rose-300';
-                    else cls = 'border bg-[var(--surface-input)]/50 text-[var(--text-faint)] opacity-60';
-                  }
-                  return (
-                    <button
-                      key={o}
-                      disabled={!!result}
-                      onClick={() => answer(o)}
-                      className={cn('tactile-btn rounded-xl p-3.5 text-left text-sm transition-all', cls)}
-                    >
-                      {o}
-                    </button>
-                  );
-                })}
+            {challenge.map_image_url && (
+              <div className="relative mt-5 overflow-hidden rounded-[24px] bg-[var(--ps-neutral)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={challenge.map_image_url} alt="Xarita" className="max-h-80 w-full object-cover" />
               </div>
+            )}
 
-              {result && (
-                <Card className={cn(result.correct ? 'border-[var(--success)]/30 bg-[var(--success)]/[0.06]' : 'border-rose-500/30 bg-rose-500/[0.06]')}>
-                  <CardContent className="space-y-2 pt-6">
-                    <p className="flex items-center gap-1.5 text-sm font-bold">
-                      {result.correct
-                        ? <><CheckCircle2 className="size-4 text-[var(--success-text)]" /> To&apos;g&apos;ri javob! (+{result.xp} XP, +{result.coins} tanga)</>
-                        : <><XCircle className="size-4 text-rose-400" /> Noto&apos;g&apos;ri javob.</>}
-                    </p>
-                    <p className="text-sm text-muted-foreground">To&apos;g&apos;ri javob: {result.correct_location}</p>
-                    <Button variant="outline" size="sm" onClick={load}>
-                      <RotateCcw className="size-3.5" /> Yana o&apos;ynash
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </CardContent>
-          </Card>
+            <div className="relative mt-5 grid gap-2.5 sm:grid-cols-2">
+              {challenge.options.map((o, i) => {
+                const isCorrect = !!result && o === result.correct_location;
+                const isSelected = selected === o;
+                const wrong = !!result && isSelected && !isCorrect;
+                return (
+                  <button
+                    key={o}
+                    type="button"
+                    disabled={!!selected}
+                    onClick={() => answer(o)}
+                    className={cn(
+                      'flex w-full cursor-pointer items-center gap-3 rounded-[22px] p-2.5 pr-4 text-left text-[14.5px] font-semibold transition-all active:scale-[0.99]',
+                      isCorrect
+                        ? 'bg-[var(--ps-green)] text-white'
+                        : wrong
+                          ? 'bg-[var(--ps-coral)] text-white'
+                          : result
+                            ? 'bg-[var(--ps-neutral)] opacity-55'
+                            : isSelected
+                              ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                              : 'bg-[var(--ps-neutral)] hover:-translate-y-0.5',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'inline-flex size-9 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[14px] font-bold',
+                        isCorrect || wrong ? 'bg-white/25' : 'bg-[var(--ps-paper)]',
+                      )}
+                    >
+                      {isCorrect ? <Check className="size-4 stroke-[3]" /> : wrong ? <X className="size-4 stroke-[3]" /> : LETTERS[i] || i + 1}
+                    </span>
+                    <span className="flex-1">{o}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {result && (
+              <div className="relative mt-5 space-y-3">
+                <ResultBanner correct={result.correct} title={result.correct ? "To'g'ri javob!" : "Noto'g'ri javob"} xp={result.xp} coins={result.coins}>
+                  {!result.correct && <>To&apos;g&apos;ri javob: <b>{result.correct_location}</b></>}
+                </ResultBanner>
+                <button type="button" onClick={load} className="ps-btn ps-btn-ink w-full">
+                  <RotateCcw className="size-4" /> Yana o&apos;ynash
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </button>
+              </div>
+            )}
+          </section>
         )}
       </main>
-    </>
+    </div>
   );
 }

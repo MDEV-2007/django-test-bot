@@ -2,24 +2,25 @@
 
 import { useEffect, useState } from 'react';
 import { celebrate } from '@/lib/confetti';
-import { HelpCircle, Coins, CheckCircle2, XCircle, Zap, ArrowRight } from 'lucide-react';
+import { HelpCircle, ArrowRight, RotateCcw, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import AppShell from '@/components/AppShell';
 import CharacterCard from '@/components/student/CharacterCard';
-import PageHero from '@/components/student/PageHero';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+import { GameHero, SubjectChips, GameEmpty, GameSkeleton, ResultBanner } from '@/components/games/GameKit';
 import { cn } from '@/lib/utils';
 
 type Character = { id: number; clue_1: string; clue_2: string; clue_3: string };
 type Subject = { id: number; name: string; slug: string };
 type Result = { correct: boolean; xp?: number; coins?: number; name: string; avatar_url?: string | null };
+
+const CLUE_TONES = [
+  'bg-[var(--ps-orange)] text-[#080808]',
+  'bg-[var(--ps-purple)] text-white',
+  'bg-[var(--ps-coral)] text-white',
+];
 
 export default function CharacterGamePage() {
   const { access } = useAuthStore();
@@ -29,6 +30,7 @@ export default function CharacterGamePage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subject, setSubject] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const load = () => {
     setResult(null);
@@ -45,119 +47,103 @@ export default function CharacterGamePage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!character || !guess.trim()) return;
-    const res = await apiFetch<Result>('/api/games/character/', {
-      method: 'POST', body: JSON.stringify({ character_id: character.id, guess }),
-    });
-    setResult(res);
-    if (res.correct) {
-      soundFX.correct();
-      try { celebrate({ particleCount: 75, spread: 60, origin: { y: 0.6 } }); } catch { /* noop */ }
-    } else {
-      soundFX.incorrect();
+    if (!character || !guess.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await apiFetch<Result>('/api/games/character/', {
+        method: 'POST', body: JSON.stringify({ character_id: character.id, guess }),
+      });
+      setResult(res);
+      if (res.correct) {
+        soundFX.correct();
+        try { celebrate({ particleCount: 75, spread: 60, origin: { y: 0.6 } }); } catch { /* noop */ }
+      } else {
+        soundFX.incorrect();
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Javobni yuborib bo‘lmadi');
+    } finally {
+      setSubmitting(false);
     }
   }
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell-focus flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-        <PageHero
-          tone="amber"
-          eyebrow="Mini o'yin"
-          eyebrowIcon={HelpCircle}
-          title="Tarixiy Shaxsni Toping"
-          description="3 ta sirli maslahat orqali buyuk ajdodimizni aniqlang."
-          actions={
-            <Badge variant="outline" className="border-amber-500/25 bg-amber-500/10 text-amber-400">
-              <Zap className="size-3" /> +120 XP · <Coins className="size-3" /> 12
-            </Badge>
-          }
+      <main className="page-shell flex-1 space-y-6 p-4 pb-28 sm:p-6">
+        <GameHero
+          tone="orange"
+          icon={HelpCircle}
+          eyebrow="Mini o'yin · topishmoq"
+          title="Tarixiy shaxsni"
+          accent="toping"
+          description="3 ta sirli maslahat orqali buyuk ajdodimizni aniqlang va ismini yozing."
+          xp={120}
+          coins={12}
         />
 
-        {subjects.length > 0 && (
-          <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
-            {subjects.map((s) => (
-              <Button
-                key={s.slug}
-                size="sm"
-                variant="outline"
-                className={cn('shrink-0 rounded-full', subject === s.slug && 'chip-active')}
-                onClick={() => setSubject(s.slug)}
-              >
-                {s.name}
-              </Button>
-            ))}
-          </div>
-        )}
+        <SubjectChips subjects={subjects} value={subject} onChange={setSubject} />
 
-        {!loaded && <Skeleton className="h-80 w-full" />}
-        {loaded && !character && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <HelpCircle className="mx-auto mb-2 size-8 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">Bu fanda hozircha shaxs yo&apos;q.</p>
-            </CardContent>
-          </Card>
-        )}
+        {!loaded && <GameSkeleton />}
+        {loaded && !character && <GameEmpty icon={HelpCircle} text="Bu fanda hozircha shaxs yo'q." />}
 
         {character && (
-          <Card>
-            <CardContent className="space-y-5 pt-6">
-              <h2 className="text-base font-bold">Kim bu tarixiy shaxs?</h2>
+          <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+            <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-orange)] opacity-15" />
+            <span className="relative inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-[#080808]">
+              <Search className="size-3.5" /> 3 ta maslahat
+            </span>
+            <h2 className="ps-display relative mt-3 text-[26px] sm:text-[32px]">Kim bu tarixiy shaxs?</h2>
 
-              <div className="space-y-2.5">
-                {[character.clue_1, character.clue_2, character.clue_3].map((clue, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 rounded-xl border bg-[var(--surface-input)] p-3.5 text-sm leading-relaxed">
-                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-amber-500/20 text-xs font-bold text-amber-300">
-                      {idx + 1}
-                    </span>
-                    <span>{clue}</span>
-                  </div>
-                ))}
+            <ol className="relative mt-5 space-y-2.5">
+              {[character.clue_1, character.clue_2, character.clue_3].map((clue, idx) => (
+                <li key={idx} className="flex items-start gap-3 rounded-[22px] bg-[var(--ps-neutral)] p-3 pr-4">
+                  <span className={cn('inline-flex size-9 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[15px] font-bold', CLUE_TONES[idx])}>
+                    {idx + 1}
+                  </span>
+                  <span className="pt-1.5 text-[14.5px] leading-relaxed">{clue}</span>
+                </li>
+              ))}
+            </ol>
+
+            {!result ? (
+              <form onSubmit={submit} className="relative mt-5 flex items-center gap-2 rounded-full bg-[var(--ps-neutral)] p-1.5 pl-5 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                <input
+                  value={guess}
+                  onChange={(e) => setGuess(e.target.value)}
+                  placeholder="Tarixiy shaxs ismini yozing..."
+                  aria-label="Javob"
+                  className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold text-[var(--text-primary)] outline-none placeholder:font-medium placeholder:text-[var(--text-faint)]"
+                />
+                <button type="submit" disabled={!guess.trim() || submitting} className="ps-btn ps-btn-ink !min-h-11 shrink-0 !px-4 sm:!px-5">
+                  <span className="hidden sm:inline">Tekshirish</span>
+                  <span className="ps-btn-arrow !mr-0 sm:!-mr-3"><ArrowRight className="size-4" /></span>
+                </button>
+              </form>
+            ) : (
+              <div className="relative mt-5 space-y-3">
+                <CharacterCard
+                  name={result.name}
+                  imageUrl={result.avatar_url}
+                  caption={result.correct ? "To'g'ri topdingiz" : "To'g'ri javob"}
+                />
+                <ResultBanner
+                  correct={result.correct}
+                  title={result.correct ? "Barakalla, to'g'ri topdingiz!" : "Afsus, noto'g'ri"}
+                  xp={result.xp}
+                  coins={result.coins}
+                >
+                  {!result.correct && <>Sizning javobingiz: <b>{guess}</b></>}
+                </ResultBanner>
+                <button type="button" onClick={load} className="ps-btn ps-btn-ink w-full">
+                  <RotateCcw className="size-4" /> Keyingi shaxsni topish
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </button>
               </div>
-
-              {!result ? (
-                <form onSubmit={submit} className="flex gap-2 pt-2">
-                  <Input
-                    value={guess}
-                    onChange={(e) => setGuess(e.target.value)}
-                    placeholder="Tarixiy shaxs ismini yozing..."
-                    className="flex-1"
-                  />
-                  <Button type="submit" disabled={!guess.trim()} className="shrink-0">
-                    Tekshirish <ArrowRight className="size-4" />
-                  </Button>
-                </form>
-              ) : (
-                <div className="space-y-3 pt-2">
-                  {/* Javob ochilgan lahza — sahifadagi YAGONA "jasur" joy: personaj
-                      kartasi (rasm hukmron, matn scrim ustida). Qolgan hamma karta
-                      jim turadi. */}
-                  <CharacterCard
-                    name={result.name}
-                    imageUrl={result.avatar_url}
-                    caption={result.correct ? "To'g'ri topdingiz" : "To'g'ri javob"}
-                  />
-                  <Card className={cn(result.correct ? 'border-[var(--success)]/30 bg-[var(--success)]/[0.06]' : 'border-rose-500/30 bg-rose-500/[0.06]')}>
-                    <CardContent className="space-y-1 pt-6">
-                      <p className="flex items-center gap-1.5 text-sm font-bold">
-                        {result.correct
-                          ? <><CheckCircle2 className="size-4 text-[var(--success-text)]" /> Barakalla, to&apos;g&apos;ri topdingiz!</>
-                          : <><XCircle className="size-4 text-rose-400" /> Afsus, noto&apos;g&apos;ri.</>}
-                      </p>
-                      {result.correct && (
-                        <p className="text-xs text-muted-foreground">+{result.xp} XP, +{result.coins} tanga</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                  <Button onClick={load} className="w-full">Keyingi shaxsni topish</Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            )}
+          </section>
         )}
       </main>
-    </>
+    </div>
   );
 }

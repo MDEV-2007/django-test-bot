@@ -3,20 +3,14 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { celebrate } from '@/lib/confetti';
-import {
-  History, ArrowUp, ArrowDown, CheckCircle2, RotateCcw, Coins,
-  Calendar, PartyPopper, XCircle, Zap,
-} from 'lucide-react';
+import { History, ArrowUp, ArrowDown, CheckCircle2, RotateCcw, Calendar, ArrowRight } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import AppShell from '@/components/AppShell';
-import PageHero from '@/components/student/PageHero';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { GameHero, SubjectChips, GameEmpty, GameSkeleton, ResultBanner } from '@/components/games/GameKit';
 import { cn } from '@/lib/utils';
 import { spring } from '@/lib/motion';
 
@@ -31,6 +25,8 @@ export default function TimelineGamePage() {
   const [result, setResult] = useState<Result | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subject, setSubject] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const reduce = useReducedMotion();
 
   const load = () => {
@@ -40,6 +36,7 @@ export default function TimelineGamePage() {
       setEvents(d.events);
       setSubjects(d.subjects);
       setSubject((prev) => prev ?? d.selected_subject);
+      setLoaded(true);
     }).catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   };
   useEffect(() => { if (access) load(); }, [access, subject]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -54,137 +51,150 @@ export default function TimelineGamePage() {
   }
 
   async function submit() {
-    const res = await apiFetch<Result>('/api/games/timeline/', {
-      method: 'POST', body: JSON.stringify({ event_ids: events.map((e) => e.id) }),
-    });
-    setResult(res);
-    if (res.correct) {
-      soundFX.correct();
-      try { celebrate({ particleCount: 80, spread: 60, origin: { y: 0.6 } }); } catch { /* noop */ }
-    } else {
-      soundFX.incorrect();
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await apiFetch<Result>('/api/games/timeline/', {
+        method: 'POST', body: JSON.stringify({ event_ids: events.map((e) => e.id) }),
+      });
+      setResult(res);
+      if (res.correct) {
+        soundFX.correct();
+        try { celebrate({ particleCount: 80, spread: 60, origin: { y: 0.6 } }); } catch { /* noop */ }
+      } else {
+        soundFX.incorrect();
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Javobni yuborib bo‘lmadi');
+    } finally {
+      setSubmitting(false);
     }
   }
 
   const yearOf = (id: number) => result?.correct_order?.find((e) => e.id === id)?.year;
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell-focus flex-1 space-y-8 bg-[var(--bg-page)] p-4 pb-12 sm:p-6">
-        <PageHero
-          tone="sky"
-          eyebrow="Xronologik ketma-ketlik"
-          eyebrowIcon={History}
-          title="Tarixiy Voqealar Zanjiri"
-          description="Voqealarni eng qadimgisidan boshlab to'g'ri xronologik tartibda (yuqoridan pastga) joylashtiring."
-          actions={
-            <Badge variant="outline" className="border-amber-500/25 bg-amber-500/10 text-amber-400">
-              <Zap className="size-3" /> +100 XP · <Coins className="size-3" /> 10
-            </Badge>
-          }
+      <main className="page-shell flex-1 space-y-6 p-4 pb-28 sm:p-6">
+        <GameHero
+          tone="blue"
+          icon={History}
+          eyebrow="Mini o'yin · xronologiya"
+          title="Tarixiy voqealar"
+          accent="zanjiri"
+          description="Voqealarni eng qadimgisidan boshlab to'g'ri tartibda (yuqoridan pastga) joylashtiring."
+          xp={100}
+          coins={10}
         />
 
-        {subjects.length > 0 && (
-          <div className="scroll-fade scroll-row flex items-center gap-2 overflow-x-auto pb-1">
-            {subjects.map((s) => (
-              <Button
-                key={s.slug}
-                size="sm"
-                variant="outline"
-                className={cn('shrink-0 rounded-full', subject === s.slug && 'chip-active')}
-                onClick={() => setSubject(s.slug)}
-              >
-                {s.name}
-              </Button>
-            ))}
-          </div>
-        )}
+        <SubjectChips subjects={subjects} value={subject} onChange={setSubject} />
 
-        {events.length < 4 && !result && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <History className="mx-auto mb-2 size-8 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">Bu fanda hozircha yetarli voqea yo&apos;q.</p>
-            </CardContent>
-          </Card>
-        )}
+        {!loaded && <GameSkeleton />}
+        {loaded && events.length < 4 && !result && <GameEmpty icon={History} text="Bu fanda hozircha yetarli voqea yo'q." />}
 
-        {/* `layout` — element joyini almashtirganda FIZIK ravishda ko'chadi (sakramaydi).
-            Xronologiya o'yinining butun mohiyati tartibni o'zgartirish bo'lgani uchun
-            bu yerdagi eng sezilarli yaxshilanish shu. */}
-        <motion.div layout className="space-y-3">
-          <AnimatePresence initial={false}>
-          {events.map((e, i) => {
-            const year = yearOf(e.id);
-            const correctOrder = result?.correct_order;
-            const isCorrectPos = correctOrder ? correctOrder[i]?.id === e.id : null;
-            return (
-              <motion.div key={e.id} layout={!reduce} transition={spring}>
-              <Card
-                className={cn(
-                  'gap-0 py-4 transition-colors',
-                  result && (isCorrectPos
-                    ? 'border-[var(--success)]/40 bg-[var(--success)]/[0.08]'
-                    : 'border-rose-500/40 bg-rose-500/[0.08]'),
-                )}
-              >
-                <CardContent className="flex items-center justify-between gap-4 px-4">
-                  <div className="flex min-w-0 items-center gap-3.5">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border bg-[var(--surface-input)] font-mono text-xs font-bold text-[var(--accent-text)]">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium leading-snug">{e.title}</p>
-                      {result && year && (
-                        <p className="mt-1 flex items-center gap-1 font-mono text-xs font-bold text-[var(--accent-text)]">
-                          <Calendar className="size-3" /> {year}-yil
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {!result && (
-                    <div className="flex shrink-0 flex-col gap-1">
-                      <Button variant="outline" size="icon" className="size-8" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Yuqoriga">
-                        <ArrowUp className="size-4" />
-                      </Button>
-                      <Button variant="outline" size="icon" className="size-8" disabled={i === events.length - 1} onClick={() => move(i, 1)} aria-label="Pastga">
-                        <ArrowDown className="size-4" />
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              </motion.div>
-            );
-          })}
-          </AnimatePresence>
-        </motion.div>
-
-        {events.length >= 4 && !result && (
-          <Button onClick={submit} className="w-full" size="lg">
-            <CheckCircle2 className="size-4" /> Ketma-ketlikni tekshirish
-          </Button>
-        )}
-
-        {result && (
-          <div className="space-y-4">
-            <Card className={cn(result.correct ? 'border-[var(--success)]/30 bg-[var(--success)]/[0.08]' : 'border-rose-500/30 bg-rose-500/[0.08]')}>
-              <CardContent className="flex items-center justify-center gap-2 py-5 text-center text-sm font-semibold">
-                {result.correct
-                  ? <><PartyPopper className="size-4 shrink-0 text-[var(--success-text)]" /> <span className="text-[var(--success-text)]">Barakalla! To&apos;g&apos;ri tartib topildi! +{result.xp} XP, +{result.coins} tanga</span></>
-                  : <><XCircle className="size-4 shrink-0 text-rose-300" /> <span className="text-rose-300">Ketma-ketlikda xatolik bor. Yillar ko&apos;rsatildi, qayta urinib ko&apos;ring!</span></>}
-              </CardContent>
-            </Card>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" className="flex-1" onClick={load}>
-                <RotateCcw className="size-4" /> Qayta o&apos;ynash
-              </Button>
-              <Button asChild><Link href="/dashboard">Bosh sahifa</Link></Button>
+        {events.length >= 4 && (
+          <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+            <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-44 rounded-full bg-[var(--ps-blue)] opacity-20" />
+            <div className="relative flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-blue)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-[#080808]">
+                <History className="size-3.5" /> {events.length} ta voqea
+              </span>
+              <span className="text-[12px] font-bold text-[var(--text-muted)]">↑ eng qadimgi · eng yangi ↓</span>
             </div>
-          </div>
+
+            {/* `layout` — element joyini almashtirganda fizik ravishda ko'chadi (sakramaydi). */}
+            <motion.ol layout className="relative mt-5 space-y-2.5">
+              <span aria-hidden className="absolute bottom-6 left-[1.4rem] top-6 w-1 rounded-full bg-[var(--ds-track)]" />
+              <AnimatePresence initial={false}>
+                {events.map((e, i) => {
+                  const year = yearOf(e.id);
+                  const correctOrder = result?.correct_order;
+                  const isCorrectPos = correctOrder ? correctOrder[i]?.id === e.id : null;
+                  return (
+                    <motion.li
+                      key={e.id}
+                      layout={!reduce}
+                      transition={spring}
+                      className={cn(
+                        'relative flex items-center gap-3 rounded-[22px] p-2 pr-2.5 transition-colors',
+                        result
+                          ? isCorrectPos
+                            ? 'bg-[var(--ps-green)] text-white'
+                            : 'bg-[var(--ps-coral)] text-white'
+                          : 'bg-[var(--ps-neutral)]',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'relative inline-flex size-11 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[15px] font-bold',
+                          result ? 'bg-white/25' : 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]',
+                        )}
+                      >
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0 flex-1 py-1">
+                        <p className="text-[14.5px] font-semibold leading-snug">{e.title}</p>
+                        {result && year && (
+                          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[12px] font-bold tabular-nums">
+                            <Calendar className="size-3" /> {year}-yil
+                          </span>
+                        )}
+                      </div>
+                      {!result && (
+                        <div className="flex shrink-0 flex-col gap-1">
+                          <button
+                            type="button"
+                            disabled={i === 0}
+                            onClick={() => move(i, -1)}
+                            aria-label="Yuqoriga"
+                            className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full bg-[var(--ps-paper)] transition-colors hover:bg-[var(--ps-purple)] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--ps-paper)] disabled:hover:text-current"
+                          >
+                            <ArrowUp className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={i === events.length - 1}
+                            onClick={() => move(i, 1)}
+                            aria-label="Pastga"
+                            className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full bg-[var(--ps-paper)] transition-colors hover:bg-[var(--ps-purple)] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--ps-paper)] disabled:hover:text-current"
+                          >
+                            <ArrowDown className="size-4" />
+                          </button>
+                        </div>
+                      )}
+                    </motion.li>
+                  );
+                })}
+              </AnimatePresence>
+            </motion.ol>
+
+            {!result ? (
+              <button type="button" onClick={submit} disabled={submitting} className="ps-btn ps-btn-ink relative mt-5 w-full !min-h-14">
+                <CheckCircle2 className="size-4 text-[var(--ps-orange)]" /> Ketma-ketlikni tekshirish
+                <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+              </button>
+            ) : (
+              <div className="relative mt-5 space-y-3">
+                <ResultBanner
+                  correct={result.correct}
+                  title={result.correct ? "Barakalla! To'g'ri tartib topildi" : 'Ketma-ketlikda xatolik bor'}
+                  xp={result.xp}
+                  coins={result.coins}
+                >
+                  {!result.correct && 'Har voqeaning yili ko‘rsatildi — qayta urinib ko‘ring!'}
+                </ResultBanner>
+                <div className="grid grid-cols-[1fr_auto] gap-2">
+                  <button type="button" onClick={load} className="ps-btn ps-btn-ink">
+                    <RotateCcw className="size-4" /> Qayta o&apos;ynash
+                  </button>
+                  <Link href="/dashboard" className="ps-btn ps-btn-ghost">Bosh sahifa</Link>
+                </div>
+              </div>
+            )}
+          </section>
         )}
       </main>
-    </>
+    </div>
   );
 }
