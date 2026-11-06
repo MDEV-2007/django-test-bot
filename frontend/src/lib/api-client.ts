@@ -54,6 +54,30 @@ function miniAppHeader(): Record<string, string> {
 // sessiya o'chib ketishining oldini oladi.
 let refreshPromise: Promise<string | null> | null = null;
 
+/* Refresh vaqtinchalik (tarmoq / 5xx) sabab bajarilmadi — sessiya YAROQLI, faqat hozir
+   yangilab bo'lmadi. Bunday holatda foydalanuvchi chiqarib yuborilmaydi (audit FE-002):
+   ilgari mobil tarmoq bir lahza uzilsa, token muddati tugagan zahoti hisobdan chiqib ketardi. */
+class RefreshUnavailableError extends Error {}
+
+function storedTokens(): { access: string | null; refresh: string | null } {
+  if (typeof window === 'undefined') return { access: null, refresh: null };
+  try {
+    return { access: localStorage.getItem(ACCESS_KEY), refresh: localStorage.getItem(REFRESH_KEY) };
+  } catch {
+    return { access: null, refresh: null };
+  }
+}
+
+function saveTokens(access: string, refresh?: string) {
+  useAuthStore.getState().setAccess(access);
+  if (refresh) useAuthStore.setState({ refresh });
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(ACCESS_KEY, access);
+    if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+  } catch { /* storage */ }
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) {
     return refreshPromise;
@@ -62,9 +86,11 @@ async function refreshAccessToken(): Promise<string | null> {
   refreshPromise = (async () => {
     try {
       const state = useAuthStore.getState();
-      const currentRefresh = state.refresh || (typeof window !== 'undefined' ? localStorage.getItem(REFRESH_KEY) : null);
+      const currentRefresh = state.refresh || storedTokens().refresh;
+      let transient = false;
 
-      // 1. Birinchi navbatda Refresh Token orqali yangilab ko'ramiz
+      // 1. Refresh token orqali yangilash. Server endi har refreshda YANGI refresh token
+      //    beradi (rotation) va eskisini bekor qiladi — yangisi albatta saqlanadi.
       if (currentRefresh) {
         try {
           const res = await fetch(`${API_URL}/api/auth/refresh/`, {
@@ -76,25 +102,31 @@ async function refreshAccessToken(): Promise<string | null> {
           if (res.ok) {
             const data = await res.json();
             if (data.access) {
-              useAuthStore.getState().setAccess(data.access);
-              if (typeof window !== 'undefined') {
-                try {
-                  localStorage.setItem(ACCESS_KEY, data.access);
-                  if (data.refresh) {
-                    localStorage.setItem(REFRESH_KEY, data.refresh);
-                    useAuthStore.setState({ refresh: data.refresh });
-                  }
-                } catch { /* storage */ }
-              }
+              saveTokens(data.access as string, data.refresh as string | undefined);
               return data.access as string;
             }
+          } else if (res.status === 400 || res.status === 401) {
+            // Boshqa tab shu refresh tokenni allaqachon almashtirgan bo'lishi mumkin —
+            // u holda yangi juftlik localStorage'da turibdi.
+            const stored = storedTokens();
+            if (stored.refresh && stored.refresh !== currentRefresh && stored.access) {
+              useAuthStore.setState({ access: stored.access, refresh: stored.refresh });
+              return stored.access;
+            }
+          } else {
+            transient = true; // 429 / 5xx — server vaqtincha javob bermadi
           }
         } catch (err) {
           console.warn('Token refresh network error:', err);
+          transient = true;
         }
       }
 
-      // 2. Agar refresh_token eskirgan yoki mavjud bo'lmasa, Telegram Mini App ichida avtomatik re-auth
+      if (transient) {
+        throw new RefreshUnavailableError('refresh temporarily unavailable');
+      }
+
+      // 2. Refresh yaroqsiz yoki yo'q: Telegram Mini App ichida avtomatik qayta kirish
       if (typeof window !== 'undefined' && isTelegramEnv()) {
         try {
           const tg = (window as unknown as { Telegram?: { WebApp?: { initData?: string; initDataUnsafe?: { start_param?: string } } } }).Telegram?.WebApp;
@@ -118,11 +150,8 @@ async function refreshAccessToken(): Promise<string | null> {
         }
       }
 
-      // 3. Ikkala yo'l ham natija bermasa va refresh aniq yaroqsiz bo'lsa logout
+      // 3. Refresh aniq yaroqsiz va qayta kirish ham bo'lmadi — chiqish
       useAuthStore.getState().logout();
-      return null;
-    } catch (err) {
-      console.warn('Token refresh fatal error:', err);
       return null;
     } finally {
       refreshPromise = null;
@@ -168,6 +197,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     }
   } catch (err: unknown) {
     if (err instanceof ApiError) throw err;
+    if (err instanceof RefreshUnavailableError) {
+      throw new ApiError(0, "Internet aloqasi yoki server bilan bog'lanishda uzilish yuz berdi. Iltimos qayta urinib ko'ring.");
+    }
     if (err instanceof DOMException && err.name === 'TimeoutError') {
       throw new ApiError(0, "Server javob bermadi. Birozdan so'ng qayta urinib ko'ring.");
     }
@@ -298,7 +330,11 @@ export async function apiFetchBlob(path: string): Promise<Blob> {
     });
   let res = await doFetch(access);
   if (res.status === 401) {
-    access = await refreshAccessToken();
+    try {
+      access = await refreshAccessToken();
+    } catch {
+      throw new ApiError(0, "Internet aloqasi yoki server bilan bog'lanishda uzilish yuz berdi. Iltimos qayta urinib ko'ring.");
+    }
     if (access) res = await doFetch(access);
   }
   if (!res.ok) {

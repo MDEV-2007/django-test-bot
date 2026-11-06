@@ -107,6 +107,19 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     if (typeof window !== 'undefined') {
+      // Serverda ham refresh tokenni bekor qilamiz (audit AUTH-002) — javobini kutmaymiz:
+      // tarmoq bo'lmasa ham foydalanuvchi baribir chiqadi.
+      try {
+        const refresh = localStorage.getItem(REFRESH_KEY);
+        if (refresh) {
+          void fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/auth/logout/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh }),
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch { /* storage */ }
       try {
         localStorage.removeItem(ACCESS_KEY);
         localStorage.removeItem(REFRESH_KEY);

@@ -467,7 +467,7 @@ function ReelsInner() {
         method: 'POST',
         body: JSON.stringify({
           subject_slug: createSubject,
-          question: createQuestion.trim(),
+          quiz_question: createQuestion.trim(),
           options: createOptions.map((o) => o.trim()),
           correct_index: createCorrectIndex,
           explanation: createExplanation.trim(),
@@ -478,8 +478,9 @@ function ReelsInner() {
         if (soundEnabled) soundFX.correct();
         celebrate();
         tgHaptic('success');
-        toast.success(res.message || "Savolingiz muvaffaqiyatli qo'shildi! +20 XP berildi 🔥", { duration: 4000 });
-        setTodayXpEarned((prev) => prev + (res.xp_earned || 20));
+        // Faqat server bergan XP ko'rsatiladi (audit FE-004): kunlik limit tugagan bo'lsa 0.
+        toast.success(res.message || "Savolingiz muvaffaqiyatli qo'shildi!", { duration: 4000 });
+        setTodayXpEarned((prev) => prev + (res.xp_earned ?? 0));
 
         if (res.reel) {
           setReels((prev) => [res.reel, ...prev]);

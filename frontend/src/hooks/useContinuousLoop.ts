@@ -569,45 +569,12 @@ export function useContinuousLoop() {
           await fetchLoop();
           return null;
         }
-        // Fallback optimistic local transition
-        setLoop((prev) => {
-          if (!prev) return prev;
-          let nextStage: LoopStage = 'STAGE_2_SPRINT';
-          let combo = prev.combo_multiplier;
-          let dtm = prev.dtm_score_delta;
-
-          if (fromStage === 'STAGE_1_WARMUP') {
-            nextStage = 'STAGE_2_SPRINT';
-            dtm += 0.4;
-          } else if (fromStage === 'STAGE_2_SPRINT') {
-            const mistakes = payload?.mistake_question_ids || [];
-            if (mistakes.length > 0) {
-              nextStage = 'STAGE_3_CLEANUP';
-              combo = 1.5;
-            } else {
-              nextStage = 'STAGE_4_ARENA';
-              combo = 2.0;
-            }
-            dtm += 1.2;
-          } else if (fromStage === 'STAGE_3_CLEANUP') {
-            nextStage = 'STAGE_4_ARENA';
-            combo = 2.0;
-            dtm += 0.6;
-          } else if (fromStage === 'STAGE_4_ARENA') {
-            nextStage = 'STAGE_5_COMPLETED';
-            combo = 2.5;
-            dtm += 0.8;
-          }
-
-          return {
-            ...prev,
-            current_stage: nextStage,
-            combo_multiplier: combo,
-            dtm_score_delta: dtm,
-            session_mistakes_ids: payload?.mistake_question_ids || prev.session_mistakes_ids,
-            is_chest_claimed: nextStage === 'STAGE_5_COMPLETED',
-          };
-        });
+        // Tarmoq / server xatosi: bosqich lokal SOXTA siljitilmaydi — ilgari bu yerda
+        // STAGE_5, 2.5x combo va "sandiq ochildi" ko'rsatilardi, server esa hech narsa
+        // bermagan bo'lardi (audit LOOP-004). Holat o'zgarmaydi, foydalanuvchi qayta uradi.
+        toast.error(err instanceof Error && err.message
+          ? err.message
+          : "Bosqichni saqlab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.");
       }
       return null;
     },
