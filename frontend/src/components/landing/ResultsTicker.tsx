@@ -18,7 +18,7 @@ const RESULTS: ResultItem[] = [
     result: 'TDYU Davlat Granti (Tarix A+)',
     badge: '186.4 ball',
     tag: 'Tarix',
-    color: 'from-[#007AFF] to-[#0062CC]',
+    color: 'from-[#7659C7] to-[#5E45A8]',
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const RESULTS: ResultItem[] = [
     result: "O'zMU Xalqaro munosabatlar",
     badge: '184.2 ball',
     tag: 'Davlat Granti',
-    color: 'from-[#34C759] to-[#28A745]',
+    color: 'from-[#4C806B] to-[#3A6654]',
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ const RESULTS: ResultItem[] = [
     result: 'Milliy Sertifikat A+ (Oltin)',
     badge: '96.2 ball',
     tag: 'Tarix A+',
-    color: 'from-[#FF9500] to-[#E08600]',
+    color: 'from-[#FFB82E] to-[#E89B10]',
   },
   {
     id: 4,
@@ -42,7 +42,7 @@ const RESULTS: ResultItem[] = [
     result: 'TDShU Sharqshunoslik (Grant)',
     badge: '179.8 ball',
     tag: 'Ona tili A',
-    color: 'from-[#5856D6] to-[#4644B5]',
+    color: 'from-[#7659C7] to-[#5E45A8]',
   },
   {
     id: 5,
@@ -50,7 +50,7 @@ const RESULTS: ResultItem[] = [
     result: 'Toshkent Davlat Iqtisodiyot (TDIU)',
     badge: '181.5 ball',
     tag: 'Davlat Granti',
-    color: 'from-[#007AFF] to-[#0062CC]',
+    color: 'from-[#7659C7] to-[#5E45A8]',
   },
   {
     id: 6,
@@ -58,7 +58,7 @@ const RESULTS: ResultItem[] = [
     result: "JIDU Xalqaro Huquq (1-o'rin)",
     badge: '188.0 ball',
     tag: 'Grant',
-    color: 'from-[#AF52DE] to-[#8E3CBE]',
+    color: 'from-[#9B7FE0] to-[#7659C7]',
   },
   {
     id: 7,
@@ -66,7 +66,7 @@ const RESULTS: ResultItem[] = [
     result: 'Biologiya Milliy Sertifikat A+',
     badge: '94.5 ball',
     tag: 'TTA Grant',
-    color: 'from-[#34C759] to-[#28A745]',
+    color: 'from-[#4C806B] to-[#3A6654]',
   },
   {
     id: 8,
@@ -74,7 +74,7 @@ const RESULTS: ResultItem[] = [
     result: 'CEFR Multi-Level C1 Sertifikat',
     badge: "C1 Ilg'or",
     tag: 'Ingliz tili',
-    color: 'from-[#FF2D55] to-[#D70015]',
+    color: 'from-[#F0523D] to-[#C93A28]',
   },
 ];
 
@@ -82,8 +82,8 @@ export default function ResultsTicker() {
   return (
     <div className="relative w-full overflow-hidden border-y border-black/[0.06] bg-white/45 py-4 sm:py-5 backdrop-blur-md">
       {/* Gradient Fades on edges */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 sm:w-32 bg-gradient-to-r from-[#F2F2F7] to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-32 bg-gradient-to-l from-[#F2F2F7] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 sm:w-32 bg-gradient-to-r from-[#F7F4EF] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-32 bg-gradient-to-l from-[#F7F4EF] to-transparent" />
 
       {/* Infinite scrolling track */}
       <div className="animate-marquee-continuous items-center gap-3.5" style={{ animation: 'marquee 35s linear infinite' }}>
@@ -101,14 +101,14 @@ export default function ResultsTicker() {
             {/* Info */}
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-[#1C1C1E] tracking-tight">{item.name}</span>
-                <CheckCircle2 className="size-3.5 text-[#007AFF] fill-[#007AFF]/10" />
+                <span className="text-xs font-bold text-[#080808] tracking-tight">{item.name}</span>
+                <CheckCircle2 className="size-3.5 text-[#7659C7] fill-[#7659C7]/10" />
               </div>
-              <span className="text-[12px] font-medium text-[#6C6C70]">{item.result}</span>
+              <span className="text-[12px] font-medium text-[#6B6577]">{item.result}</span>
             </div>
 
             {/* Score pill */}
-            <span className="ml-2 rounded-full bg-[#34C759]/12 px-2.5 py-1 font-mono text-[12px] font-bold text-[#248A3D] whitespace-nowrap">
+            <span className="ml-2 rounded-full bg-[#4C806B]/12 px-2.5 py-1 font-mono text-[12px] font-bold text-[#3A6654] whitespace-nowrap">
               {item.badge}
             </span>
           </div>

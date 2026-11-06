@@ -141,7 +141,12 @@ const DEFAULT_BLITZ_QUESTIONS: BlitzQuestion[] = [
 export default function DopamineOnboarding({ onComplete, subject }: DopamineOnboardingProps) {
   const router = useRouter();
 
-  const [questions, setQuestions] = useState<BlitzQuestion[]>(DEFAULT_BLITZ_QUESTIONS);
+  // Zaxira (oflayn) savollar faqat Tarixdan. Boshqa fan tanlangan bo'lsa, tarix savollarini
+  // ko'rsatib yubormaslik uchun faqat server savollari ishlatiladi.
+  const serverOnly = Boolean(subject) && subject !== 'tarix';
+  const [questions, setQuestions] = useState<BlitzQuestion[]>(serverOnly ? [] : DEFAULT_BLITZ_QUESTIONS);
+  const [loadingQs, setLoadingQs] = useState<boolean>(serverOnly);
+  const [noQuestions, setNoQuestions] = useState<boolean>(false);
   // Server sessiyasi: bo'lsa javoblar serverda tekshiriladi, bo'lmasa oflayn savollar lokal.
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -163,16 +168,22 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
           `/api/growth/onboarding/blitz/${query}`,
         );
         // Server savollarida kalit yo'q — ular faqat sessiya bilan ishlatiladi.
-        if (res && res.ok && res.session_id && res.questions?.length === 7) {
+        // Fanda 7 tadan kam savol bo'lsa ham (kamida 3 ta) — o'sha fandan savollar beriladi.
+        if (res && res.ok && res.session_id && (res.questions?.length ?? 0) >= 3) {
           setQuestions(res.questions);
           setSessionId(res.session_id);
+        } else if (serverOnly) {
+          setNoQuestions(true);
         }
       } catch {
-        // Fallback ishlaydi
+        // Tarix uchun zaxira savollar ishlaydi; boshqa fan uchun — "savol yetarli emas"
+        if (serverOnly) setNoQuestions(true);
+      } finally {
+        setLoadingQs(false);
       }
     }
     loadQuestions();
-  }, [subject]);
+  }, [subject, serverOnly]);
 
   const handleSelect = async (choice: BlitzChoice) => {
     if (isAnswered) return;
@@ -241,7 +252,7 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
     if (onComplete) {
       onComplete();
     } else {
-      router.push('/sprint?subject=tarix&count=10');
+      router.push(`/sprint?subject=${subject || 'tarix'}&count=10`);
     }
   };
 
@@ -334,6 +345,42 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
     );
   }
 
+  /* Savollar yuklanmoqda (tanlangan fan bo'yicha) */
+  if (loadingQs) {
+    return (
+      <div className="ps-card mx-auto flex max-w-xl flex-col items-center gap-3 !rounded-[32px] p-10 text-center">
+        <span className="inline-flex size-14 animate-pulse items-center justify-center rounded-full bg-[var(--ps-purple)] text-white">
+          <Sparkles className="size-6" />
+        </span>
+        <p className="text-[15px] font-bold">Savollar tayyorlanmoqda…</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Tanlangan fan bo&apos;yicha diagnostika yig&apos;ilmoqda</p>
+      </div>
+    );
+  }
+
+  /* Tanlangan fanda hali yetarli savol yo'q */
+  if (noQuestions || questions.length === 0) {
+    return (
+      <div className="ps-card mx-auto flex max-w-xl flex-col items-center gap-3 !rounded-[32px] p-10 text-center">
+        <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+          <Zap className="size-7" />
+        </span>
+        <h3 className="ps-display text-[26px]">Bu fanda savollar hali yetarli emas</h3>
+        <p className="max-w-sm text-[13.5px] leading-relaxed text-[var(--text-muted)]">
+          Diagnostika uchun kamida 3 ta savol kerak. Boshqa fanni tanlang yoki testlar bo&apos;limiga o&apos;ting.
+        </p>
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          <button type="button" onClick={() => router.push('/onboarding')} className="ps-btn ps-btn-ink">
+            Boshqa fan tanlash
+          </button>
+          <button type="button" onClick={() => router.push('/tests')} className="ps-btn ps-btn-ghost">
+            Testlar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const answeredCount = answersStatus.length;
   const totalQ = questions.length;
 
@@ -363,7 +410,7 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
             </span>
             <span className="ps-runner-chip hidden h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold min-[420px]:flex">
               <Sparkles className="size-3.5 text-[var(--ps-purple)]" />
-              7-savol blits
+              {totalQ}-savol blits
             </span>
           </div>
           <span className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-3.5 text-sm font-bold text-white">
@@ -442,9 +489,13 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
           </div>
 
           <div className="relative mt-6 space-y-6">
-            <div role="heading" aria-level={2} className="reading-block font-bold">
-              {currentQ.body}
-            </div>
+            {/* Savol matni HTML bo'lib keladi (<p>, <b>…) — oddiy test ekranidagidek chiziladi */}
+            <div
+              role="heading"
+              aria-level={2}
+              className="reading-block font-bold [&_p]:m-0 [&_p+p]:mt-2"
+              dangerouslySetInnerHTML={{ __html: currentQ.body }}
+            />
 
             <div className="space-y-3 pt-2">
               {currentQ.choices.map((choice, ci) => {

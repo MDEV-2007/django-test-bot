@@ -12,6 +12,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import TelegramProvider from "@/components/TelegramProvider";
 import SubscriptionGate from "@/components/SubscriptionGate";
 import CosmeticTheme from "@/components/student/CosmeticTheme";
+import ScriptDomSync from "@/components/ScriptDomSync";
 import { FeatureFlagProvider } from "@/context/FeatureFlagContext";
 
 const sans = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext"], variable: "--font-sans", display: "swap" });
@@ -56,7 +57,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       {/* Pastdagi mavzu skripti `dark` klassini gidratatsiyadan oldin body ga ham qo'shadi. */}
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <Script id="ilm-theme" strategy="beforeInteractive">
-          {`(function(){try{var h=window.location.hash||'';var s=window.location.search||'';var isTg=(h.indexOf('tgWebAppData')!==-1||h.indexOf('tgWebAppPlatform')!==-1||h.indexOf('tgWebAppThemeParams')!==-1||s.indexOf('tgWebAppData')!==-1||window.TelegramWebviewProxy||window.TelegramWebview||sessionStorage.getItem('ilm_tg_env')==='1');if(isTg){document.documentElement.dataset.tg='on';sessionStorage.setItem('ilm_tg_env','1');}var saved=localStorage.getItem('ilm_theme_v3');var isDark=false;if(saved==='dark'){isDark=true;}else if(saved==='light'){isDark=false;}else if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.colorScheme){isDark=(window.Telegram.WebApp.colorScheme==='dark');}else if(h.indexOf('tgWebAppThemeParams')!==-1){try{var m=h.match(/tgWebAppThemeParams=([^&]+)/);if(m&&m[1]){var p=JSON.parse(decodeURIComponent(m[1]));if(p&&p.bg_color){var hex=p.bg_color.replace('#','');if(hex.length===6){var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);if((r*0.299+g*0.587+b*0.114)<128){isDark=true;}}}}}catch(e){}}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){isDark=true;}var theme=isDark?'dark':'light';document.documentElement.dataset.theme=theme;if(isDark){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');if(document.body){document.body.classList.add('dark');}}else{document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');if(document.body){document.body.classList.remove('dark');}}}catch(e){}})();`}
+          {`(function(){try{var h=window.location.hash||'';var s=window.location.search||'';var isTg=(h.indexOf('tgWebAppData')!==-1||h.indexOf('tgWebAppPlatform')!==-1||h.indexOf('tgWebAppThemeParams')!==-1||s.indexOf('tgWebAppData')!==-1||window.TelegramWebviewProxy||window.TelegramWebview||sessionStorage.getItem('ilm_tg_env')==='1');if(isTg){document.documentElement.dataset.tg='on';sessionStorage.setItem('ilm_tg_env','1');}var saved=localStorage.getItem('ilm_theme_v3');var isDark=false;if(saved==='dark'){isDark=true;}else if(saved==='light'){isDark=false;}else if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.colorScheme){isDark=(window.Telegram.WebApp.colorScheme==='dark');}else if(h.indexOf('tgWebAppThemeParams')!==-1){try{var m=h.match(/tgWebAppThemeParams=([^&]+)/);if(m&&m[1]){var p=JSON.parse(decodeURIComponent(m[1]));if(p&&p.bg_color){var hex=p.bg_color.replace('#','');if(hex.length===6){var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);if((r*0.299+g*0.587+b*0.114)<128){isDark=true;}}}}}catch(e){}}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){isDark=true;}if(window.location.pathname==='/'){isDark=false;}var theme=isDark?'dark':'light';document.documentElement.dataset.theme=theme;if(isDark){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light');if(document.body){document.body.classList.add('dark');}}else{document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');if(document.body){document.body.classList.remove('dark');}}}catch(e){}})();`}
         </Script>
         <ServiceWorkerRegister />
         <SourceCapture />
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AuthProvider>
               <FeatureFlagProvider>
                 <CosmeticTheme />
+                <ScriptDomSync />
                 {children}
                 <SubscriptionGate />
               </FeatureFlagProvider>

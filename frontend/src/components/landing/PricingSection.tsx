@@ -126,16 +126,16 @@ export default function PricingSection({ plans }: PricingSectionProps) {
     <section id="narxlar" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mx-auto max-w-3xl text-center">
-        <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
+        <div className="text-xs font-bold uppercase tracking-widest text-[#7659C7]">
           Oddiy va Shaffof Tariflar
         </div>
-        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
+        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#080808] sm:text-4xl md:text-5xl">
           Natijaga mos,{' '}
-          <span className="bg-gradient-to-r from-[#007AFF] to-[#34C759] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#7659C7] to-[#4C806B] bg-clip-text text-transparent">
             hamyonbop obuna
           </span>
         </h2>
-        <p className="mt-4 text-sm text-[#6C6C70] sm:text-base leading-relaxed">
+        <p className="mt-4 text-sm text-[#6B6577] sm:text-base leading-relaxed">
           Kundalik mashqlar, arena va diagnostika mutlaqo bepul. Rasmiy to&apos;liq mock testlar va cheklovsiz AI Mentor uchun qulay tarifni tanlang.
         </p>
 
@@ -151,8 +151,8 @@ export default function PricingSection({ plans }: PricingSectionProps) {
               onClick={() => setFilter(tab.id as any)}
               className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                 filter === tab.id
-                  ? 'bg-white text-[#1C1C1E] shadow-[0_3px_8px_rgba(0,0,0,0.12),0_3px_1px_rgba(0,0,0,0.04)]'
-                  : 'text-[#3A3A3C] hover:text-[#1C1C1E]'
+                  ? 'bg-white text-[#080808] shadow-[0_3px_8px_rgba(0,0,0,0.12),0_3px_1px_rgba(0,0,0,0.04)]'
+                  : 'text-[#3D3846] hover:text-[#080808]'
               }`}
             >
               {tab.label}
@@ -162,52 +162,53 @@ export default function PricingSection({ plans }: PricingSectionProps) {
       </div>
 
       {/* Pricing Cards Grid */}
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch">
+      {/* Flex-wrap: oxirgi qatorda yolg'iz qolgan karta markazga tushadi */}
+      <div className="mt-12 flex flex-wrap items-stretch justify-center gap-5">
         {filteredPlans.map((plan) => {
           const isPro = plan.highlight;
 
           return (
             <div
               key={plan.name}
-              className={`relative flex flex-col justify-between rounded-3xl border p-6 sm:p-7 transition-all duration-200 ${
+              className={`relative flex w-full flex-col justify-between rounded-[32px] p-6 transition-all duration-200 sm:w-[calc(50%-10px)] sm:p-7 lg:w-[calc(33.333%-14px)] xl:w-[calc(25%-15px)] ${
                 isPro
-                  ? 'border-[#007AFF] bg-white shadow-[0_20px_50px_-10px_rgba(0,122,255,0.18)] ring-2 ring-[#007AFF]/20 lg:-translate-y-2'
-                  : 'border-black/[0.07] bg-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_14px_34px_-6px_rgba(0,0,0,0.08)]'
+                  ? 'bg-[#080808] text-[#FFFCF7] shadow-[0_30px_60px_-30px_rgba(8,8,8,0.8)] lg:-translate-y-2 [&_h3]:!text-[#FFFCF7] [&_p]:!text-white/70 [&_li]:!text-white/85 [&_.font-mono]:!text-[#FFFCF7] [&_.border-y]:!border-white/10'
+                  : 'bg-[#FFFCF7] shadow-[0_18px_40px_-24px_rgba(60,30,110,0.45)] hover:-translate-y-1'
               }`}
             >
               {plan.ribbon && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#007AFF] px-3.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_4px_10px_rgba(0,122,255,0.3)] whitespace-nowrap">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#7659C7] px-3.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-[0_4px_10px_rgba(118,89,199,0.3)] whitespace-nowrap">
                   {plan.ribbon}
                 </div>
               )}
 
               <div>
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-base font-bold text-[#1C1C1E]">{plan.name}</h3>
+                  <h3 className="text-base font-bold text-[#080808]">{plan.name}</h3>
                   {plan.perDay && (
-                    <span className="rounded-full bg-[#34C759]/12 px-2.5 py-0.5 text-[12px] font-mono font-bold text-[#248A3D]">
+                    <span className="rounded-full bg-[#4C806B]/12 px-2.5 py-0.5 text-[12px] font-mono font-bold text-[#3A6654]">
                       {plan.perDay}
                     </span>
                   )}
                 </div>
 
-                <p className="mt-2 text-xs leading-relaxed text-[#6C6C70] min-h-[36px]">
+                <p className="mt-2 text-xs leading-relaxed text-[#6B6577] min-h-[36px]">
                   {plan.text}
                 </p>
 
                 <div className="mt-4 border-y border-black/[0.06] py-4">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-mono text-3xl font-bold tracking-tight text-[#1C1C1E]">
+                    <span className="font-mono text-[34px] font-bold tracking-tight text-[#080808]">
                       {plan.price}
                     </span>
-                    <span className="text-xs text-[#6C6C70] font-medium">{plan.unit}</span>
+                    <span className="text-xs text-[#6B6577] font-medium">{plan.unit}</span>
                   </div>
                 </div>
 
-                <ul className="mt-5 space-y-2.5 text-xs text-[#3A3A3C]">
+                <ul className="mt-5 space-y-2.5 text-xs text-[#3D3846]">
                   {plan.features.map((feat) => (
                     <li key={feat} className="flex items-start gap-2.5">
-                      <span className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-[#34C759]/15 text-[#248A3D] mt-0.5">
+                      <span className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-[#4C806B]/15 text-[#3A6654] mt-0.5">
                         <Check className="size-3 stroke-[2.5]" />
                       </span>
                       <span className="leading-snug">{feat}</span>
@@ -221,8 +222,8 @@ export default function PricingSection({ plans }: PricingSectionProps) {
                   href={plan.href}
                   className={`ios-spring flex w-full items-center justify-center gap-1.5 rounded-full font-semibold text-xs h-11 ${
                     isPro
-                      ? 'bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-[0_6px_18px_rgba(0,122,255,0.32)]'
-                      : 'bg-[#1C1C1E] hover:bg-[#2C2C2E] text-white'
+                      ? 'bg-[#7659C7] hover:bg-[#5E45A8] text-white shadow-[0_6px_18px_rgba(118,89,199,0.32)]'
+                      : 'bg-[#080808] hover:bg-[#1F1B26] text-white'
                   }`}
                 >
                   <span>{plan.cta}</span>
@@ -234,8 +235,8 @@ export default function PricingSection({ plans }: PricingSectionProps) {
         })}
       </div>
 
-      <div className="mt-12 text-center text-xs text-[#6C6C70] flex items-center justify-center gap-2">
-        <ShieldCheck className="size-4 text-[#34C759]" />
+      <div className="mt-12 text-center text-xs text-[#6B6577] flex items-center justify-center gap-2">
+        <ShieldCheck className="size-4 text-[#4C806B]" />
         <span>100% xavfsiz to&apos;lov (Payme, Click va Uzum orqali). Yashirin to&apos;lovlar yo&apos;q.</span>
       </div>
     </section>

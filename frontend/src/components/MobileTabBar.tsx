@@ -8,23 +8,23 @@ import {
   LayoutDashboard,
   Brain,
   Landmark,
-  MessageCircle,
+  Flame,
   Swords,
   User,
+  type LucideIcon,
 } from 'lucide-react';
-import { useAuthStore } from '@/lib/auth-store';
 import { useFeatureFlags } from '@/lib/features';
 import { prefetchApi } from '@/lib/api-cache';
 import { tgHaptic } from '@/lib/telegram';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
 import { useTransliterate } from '@/lib/transliterate';
+import PremiumIcon, { type PremiumIconTone } from '@/components/ui/premium-icon';
 
 type TabItem = {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   matchPrefixes?: string[];
   api?: string;
   activeBg: string;
@@ -36,6 +36,17 @@ type TabItem = {
   isCentral?: boolean;
 };
 
+/* Sidebar'dagi bilan bir xil rang tonlari */
+const TAB_TONES: Record<string, PremiumIconTone> = {
+  '/dashboard': 'sky',
+  '/study': 'amber',
+  '/tests': 'purple',
+  '/feed': 'rose',
+  '/battles': 'rose',
+};
+
+const TONE_HEX: Record<string, string> = { sky: '#007AFF', amber: '#FF9500', purple: '#AF52DE', rose: '#FF2D55' };
+
 const STUDY_PREFIXES = ['/study', '/learning', '/library', '/mentor', '/flashcards', '/games',
                         '/tests/revision', '/tests/mistakes'];
 const TESTS_PREFIXES = ['/tests', '/sprint', '/dtm-test', '/milliy-sertifikat', '/onboarding'];
@@ -46,7 +57,6 @@ interface MobileTabBarProps {
 
 export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
   const pathname = usePathname();
-  const { user } = useAuthStore();
   const { isDark: systemIsDark } = useTheme();
   const isDark = propTheme !== undefined ? propTheme === 'dark' : systemIsDark;
   const { isEnabled, refresh } = useFeatureFlags();
@@ -100,7 +110,7 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
     {
       href: '/feed',
       label: t('Jamiyat'),
-      icon: MessageCircle,
+      icon: Flame,
       matchPrefixes: ['/feed', '/reels'],
       api: '/api/learning/feed/',
       activeBg: 'bg-gradient-to-b from-[#34C759] to-[#248A3D]',
@@ -131,21 +141,45 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
 
   const isProfileActive = ['/profile', '/shop', '/premium', '/analytics'].some((p) => pathname.startsWith(p));
 
+  /* Faol tab: pastda ikonka rangidagi chiziq (tablar orasida sirpanadi) */
+  const indicator = (hex: string) => (
+    <motion.span
+      layoutId="ps-mobile-tab-dot"
+      transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+      aria-hidden
+      className="pointer-events-none absolute -bottom-[4px] left-1/2 z-10 -ml-[8px] h-[3px] w-[16px] rounded-full"
+      style={{ backgroundColor: hex }}
+    />
+  );
+
+  /* Faol ikonka atrofidagi halo — ikonka bilan bir konteynerda, shuning uchun aniq markazda turadi */
+  const halo = (hex: string) => (
+    <motion.span
+      layoutId="ps-mobile-tab-halo"
+      transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+      aria-hidden
+      className="pointer-events-none absolute -inset-[5px] rounded-[15px]"
+      style={{
+        backgroundColor: `${hex}${isDark ? '33' : '22'}`,
+        boxShadow: `inset 0 0 0 1.5px ${hex}66, 0 8px 18px -8px ${hex}aa`,
+      }}
+    />
+  );
+
   return (
-    <div className="ilm-mobile-tabbar fixed inset-x-0 bottom-2.5 z-40 flex justify-center px-2.5 sm:px-5 lg:hidden pointer-events-none select-none pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="ilm-mobile-tabbar pointer-events-none fixed inset-x-0 bottom-2.5 z-40 flex select-none justify-center px-2.5 pb-[env(safe-area-inset-bottom,0px)] sm:px-5 lg:hidden">
       <nav
         aria-label="Mobil navigatsiya"
         className={cn(
-          'ps-tabbar ilm-mobile-tabbar pointer-events-auto flex w-full max-w-[440px] items-center justify-between gap-1 rounded-2xl p-1.5 backdrop-blur-2xl saturate-[190%] transition-all duration-300',
+          'ilm-mobile-tabbar pointer-events-auto flex w-full max-w-[400px] items-center justify-between gap-1 rounded-full p-1.5 backdrop-blur-xl',
           isDark
-            ? 'border border-white/[0.14] bg-[#1C1C1E]/88 shadow-[0_18px_44px_rgba(0,0,0,0.68),inset_0_1px_0_rgba(255,255,255,0.12)]'
-            : 'border border-black/[0.08] bg-white/86 shadow-[0_14px_38px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.95)]'
+            ? 'border border-white/[0.08] bg-[#1C1726]/92 shadow-[0_18px_44px_-14px_rgba(0,0,0,0.75)]'
+            : 'border border-black/[0.05] bg-[#FFFCF7]/92 shadow-[0_18px_40px_-18px_rgba(60,30,110,0.55)]'
         )}
       >
         {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const active = isActive(tab.href, tab.matchPrefixes);
-          const isCentral = Boolean(tab.isCentral);
 
           return (
             <Link
@@ -153,133 +187,48 @@ export default function MobileTabBar({ theme: propTheme }: MobileTabBarProps) {
               href={tab.href}
               onClick={() => tgHaptic('select')}
               onTouchStart={() => tab.api && prefetchApi(tab.api)}
-              className={cn(
-                'group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl py-1 px-0.5 transition-transform active:scale-92',
-                isCentral && '-mt-2'
-              )}
+              aria-label={tab.label}
+              title={tab.label}
+              aria-current={active ? 'page' : undefined}
+              className="group relative flex h-14 min-w-0 flex-1 items-center justify-center rounded-full transition-transform active:scale-90"
             >
-              {active && (
-                <motion.span
-                  layoutId="ios-mobile-tab-pill"
-                  transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                  className={cn(
-                    'ps-tab-pill inset-0 absolute rounded-xl',
-                    isDark
-                      ? 'bg-white/[0.10] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]'
-                      : 'bg-[#007AFF]/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'
-                  )}
-                />
-              )}
-
-              {/* Icon Container */}
-              <div className="relative z-10 flex items-center justify-center">
-                <div
-                  className={cn(
-                    'flex items-center justify-center rounded-md transition-all duration-200',
-                    isCentral ? 'size-9 shadow-md' : 'size-7.5 rounded-md',
-                    active
-                      ? cn(tab.activeBg, tab.activeShadow, '!text-white scale-105')
-                      : cn(
-                          isDark ? 'bg-white/[0.06]' : 'bg-black/[0.04]',
-                          tab.inactiveIconText,
-                          'group-hover:scale-105'
-                        )
-                  )}
-                >
-                  <Icon
-                    className={cn(
-                      'transition-transform duration-200',
-                      isCentral ? 'size-5' : 'size-4',
-                      active ? 'stroke-[2.4] !text-white' : 'stroke-[2.1]'
-                    )}
-                  />
-                </div>
-
+              {active && indicator(TONE_HEX[TAB_TONES[tab.href]] || '#7659C7')}
+              <span
+                className={cn(
+                  'relative z-10 flex transition-all duration-300',
+                  active ? 'scale-105' : 'opacity-75 saturate-[0.8] group-hover:opacity-100 group-hover:saturate-100'
+                )}
+              >
+                {active && halo(TONE_HEX[TAB_TONES[tab.href]] || '#7659C7')}
+                <PremiumIcon icon={Icon} tone={TAB_TONES[tab.href] || 'primary'} size="md" solid />
                 {tab.badge && !active && (
-                  <span className="absolute -right-1.5 -top-1 rounded-full bg-[#D70015] px-1 py-[1px] text-[10px] font-bold leading-none text-white shadow-2xs">
+                  <span className="absolute -right-1.5 -top-1 rounded-full bg-[#F0523D] px-1 py-[1px] text-[9px] font-bold leading-none text-white">
                     {tab.badge}
                   </span>
                 )}
-              </div>
-
-              <span
-                className={cn(
-                  'relative z-10 mt-1 max-w-full truncate text-[11px] min-[400px]:text-[12px] leading-none tracking-[-0.01em] transition-colors',
-                  active
-                    ? cn('font-bold', tab.activeLabelText)
-                    : isDark
-                    ? 'font-semibold text-[#8E8E93] group-hover:text-white/90'
-                    : 'font-semibold text-[#6C6C70] group-hover:text-[#1C1C1E]'
-                )}
-              >
-                {tab.label}
               </span>
             </Link>
           );
         })}
 
-        {/* 6-Tab: Profil (statistika, analitika, inventar) */}
+        {/* Profil — sidebar'dagi kabi ikonka */}
         <Link
           href="/profile"
           onClick={() => tgHaptic('select')}
-          className="group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl py-1 px-0.5 transition-transform active:scale-92"
+          aria-label={t('Profil')}
+          title={t('Profil')}
+          aria-current={isProfileActive ? 'page' : undefined}
+          className="group relative flex h-14 min-w-0 flex-1 items-center justify-center rounded-full transition-transform active:scale-90"
         >
-          {isProfileActive && (
-            <motion.span
-              layoutId="ios-mobile-tab-pill"
-              transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-              className={cn(
-                'inset-0 absolute rounded-xl',
-                isDark
-                  ? 'bg-white/[0.10] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]'
-                  : 'bg-[#007AFF]/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'
-              )}
-            />
-          )}
-
-          <div className="relative z-10 flex items-center justify-center">
-            <div
-              className={cn(
-                'flex size-7.5 items-center justify-center rounded-md p-[1.5px] transition-all duration-200',
-                isProfileActive
-                  ? 'bg-gradient-to-b from-[#2E96FF] to-[#007AFF] shadow-[0_4px_12px_rgba(0,122,255,0.42)] scale-105'
-                  : cn(isDark ? 'bg-white/[0.06]' : 'bg-black/[0.04]', 'group-hover:scale-105')
-              )}
-            >
-              <Avatar className="size-full rounded-sm">
-                <AvatarImage src={user?.avatar_url || ''} alt={user?.username || 'User'} />
-                <AvatarFallback
-                  className={cn(
-                    'rounded-sm text-[12px] font-bold',
-                    isProfileActive
-                      ? 'bg-white text-[#007AFF]'
-                      : isDark
-                      ? 'bg-white/10 text-white'
-                      : 'bg-black/5 text-[#1C1C1E]'
-                  )}
-                >
-                  {user?.username ? user.username.slice(0, 2).toUpperCase() : <User className="size-3.5" />}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-
-            {/* Eco-tree status sprout badge */}
-            <span className="absolute -right-1 -top-1 rounded-full bg-[var(--brand)] px-0.5 py-[1px] text-[10px] leading-none text-white shadow-2xs">
-              🌳
-            </span>
-          </div>
-
+          {isProfileActive && indicator(TONE_HEX.sky)}
           <span
             className={cn(
-              'relative z-10 mt-1 max-w-full truncate text-[11px] min-[400px]:text-[12px] leading-none tracking-[-0.01em] transition-colors',
-              isProfileActive
-                ? 'font-bold text-[#007AFF] dark:text-[#409CFF]'
-                : isDark
-                ? 'font-semibold text-[#8E8E93] group-hover:text-white/90'
-                : 'font-semibold text-[#6C6C70] group-hover:text-[#1C1C1E]'
+              'relative z-10 flex transition-all duration-300',
+              isProfileActive ? 'scale-105' : 'opacity-75 saturate-[0.8] group-hover:opacity-100 group-hover:saturate-100'
             )}
           >
-            {t('Profil')}
+            {isProfileActive && halo(TONE_HEX.sky)}
+            <PremiumIcon icon={User} tone="sky" size="md" solid />
           </span>
         </Link>
       </nav>

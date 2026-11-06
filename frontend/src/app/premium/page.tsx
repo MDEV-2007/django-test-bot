@@ -13,11 +13,7 @@ import { apiFetch } from '@/lib/api-client';
 import { trackEvent } from '@/lib/analytics';
 import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
-import PageHero from '@/components/student/PageHero';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import PremiumIcon from '@/components/ui/premium-icon';
 import { cn } from '@/lib/utils';
 
 type Plan = {
@@ -102,16 +98,16 @@ function DiscountCountdownPill() {
   }, []);
 
   return (
-    <div className="flex items-center gap-2 rounded-full bg-[#1C1C1E] px-4 py-2 text-white shadow-md shrink-0 border border-white/10">
-      <Clock className="size-4 text-[#FF9500]" />
+    <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#080808] px-4 py-2.5 text-[#FFFCF7]">
+      <Clock className="size-4 text-[var(--ps-orange,#FFB82E)]" />
       <div className="flex items-center gap-1 font-mono text-[14px] font-bold tabular-nums">
         <span>{String(timeLeft.hours).padStart(2, '0')}</span>
         <span className="text-white/40">:</span>
         <span>{String(timeLeft.minutes).padStart(2, '0')}</span>
         <span className="text-white/40">:</span>
-        <span className="text-[#FF9500]">{String(timeLeft.seconds).padStart(2, '0')}</span>
+        <span className="text-[var(--ps-orange,#FFB82E)]">{String(timeLeft.seconds).padStart(2, '0')}</span>
       </div>
-      <span className="text-[12px] font-semibold uppercase tracking-wider text-[#8E8E93]">
+      <span className="text-[12px] font-semibold uppercase tracking-wider text-white/55">
         qoldi
       </span>
     </div>
@@ -162,412 +158,370 @@ export default function PremiumPage() {
       : 'sm:grid-cols-2 xl:grid-cols-4';
 
   return (
-    <>
+    <div className="theme-pastel min-h-screen w-full">
       <AppShell />
-      <main className="page-shell flex-1 space-y-7 bg-[var(--bg-page)] p-4 pb-20 sm:p-6">
-        {/* iOS Live Activity Offer Banner */}
-        <div className="ios-card relative overflow-hidden rounded-2xl p-4 sm:p-5 border border-[#FF9500]/25 bg-gradient-to-r from-[#FF9500]/[0.08] via-transparent to-[#FF3B30]/[0.06]">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-            <div className="flex flex-col sm:flex-row items-center gap-3.5">
-              <PremiumIcon icon={Flame} tone="amber" size="md" solid />
-              <div>
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <span className="font-bold text-[13px] text-[#FF9500] uppercase tracking-wider">
-                    Mavsumiy Aksiya • 50% gacha chegirma
-                  </span>
-                  <span className="rounded-full bg-[#FF3B30] px-2 py-0.5 text-[12px] font-bold text-white uppercase">
-                    Cheklangan vaqt
-                  </span>
-                </div>
-                <p className="text-[13px] text-[#8E8E93] mt-0.5">
-                  Barcha rasmiy Milliy Sertifikat va BBA mock testlari hamda 24/7 AI Mentor bitta obunada.
-                </p>
-              </div>
-            </div>
-
-            {/* Dynamic Island Countdown Pill (izolyatsiya qilingan komponent) */}
-            <DiscountCountdownPill />
-          </div>
-        </div>
-
-        {/* Hero */}
-        <PageHero
-          tone="amber"
-          eyebrow="IlmIldizi One PRO"
-          eyebrowIcon={Crown}
-          title="Maksimal ball uchun to'liq ekotizim"
-          description="Rasmiy formatdagi barcha mock testlar, cheklovsiz AI Mentor, chuqur xatolar tahlili va rasmiy sertifikatlar."
-          actions={
-            <Button asChild variant="outline" size="sm" className="rounded-full">
-              <Link href="/premium/payments">
-                <Receipt className="size-4 text-[#007AFF]" /> To&apos;lovlar tarixi
-              </Link>
-            </Button>
-          }
-        />
-
-        {/* 4 iOS Widget Trust Tiles */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {[
-            { icon: ShieldCheck, tone: 'emerald' as const, title: '100% Rasmiy Format', sub: 'Milliy Sertifikat va BBA' },
-            { icon: Users, tone: 'amber' as const, title: '4,300+ Abituriyent', sub: 'Faol tayyorlanmoqda' },
-            { icon: Zap, tone: 'sky' as const, title: 'Tezkor Faollashuv', sub: 'To\'lovdan so\'ng 5 daqiqada' },
-            { icon: Award, tone: 'indigo' as const, title: 'QR Sertifikat', sub: 'Tasdiqlangan natija hujjati' },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="ios-card flex items-center gap-3.5 rounded-xl p-4"
-            >
-              <PremiumIcon icon={item.icon} tone={item.tone} size="md" solid />
-              <div className="min-w-0">
-                <p className="text-[13px] font-bold text-foreground truncate">{item.title}</p>
-                <p className="text-[11.5px] text-[#8E8E93] truncate">{item.sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Active Subscription Status Cards */}
-        {data && (data.has_active_premium_lessons || data.premium_mock_test_unlocked) && (
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-            {[
-              {
-                label: 'IlmIldizi PRO Obuna',
-                on: data.has_active_premium_lessons,
-                note: data.has_active_premium_lessons
-                  ? `Faol${
-                      data.premium_expires_at
-                        ? ` — ${new Date(data.premium_expires_at).toLocaleDateString('uz-UZ')} gacha`
-                        : ''
-                    }`
-                  : 'Faol emas',
-              },
-              {
-                label: 'Mock Imtihon Ruxsati',
-                on: data.premium_mock_test_unlocked,
-                note: data.premium_mock_test_unlocked ? 'Ochilgan (muddatsiz)' : 'Qulflangan',
-              },
-            ].map((s) => (
-              <div key={s.label} className="ios-card flex items-center gap-4 rounded-xl p-4">
-                <div
-                  className={cn(
-                    'flex size-10 shrink-0 items-center justify-center rounded-md text-white',
-                    s.on ? 'bg-[#34C759]' : 'bg-[#8E8E93]/30 text-[#8E8E93]'
-                  )}
-                >
-                  {s.on ? <CheckCircle2 className="size-5" /> : <Lock className="size-5" />}
-                </div>
+      <main className="page-shell flex-1 p-4 pb-20 sm:p-6">
+        <div className="mx-auto max-w-6xl space-y-6">
+          {/* 1. Aksiya banneri */}
+          <section className="relative overflow-hidden rounded-[32px] bg-[var(--ps-coral)] p-5 text-white sm:p-6">
+            <span aria-hidden className="absolute -right-10 -top-10 size-40 rounded-full bg-white/15" />
+            <span aria-hidden className="absolute -bottom-14 -left-6 size-24 rounded-full bg-[var(--ps-orange)] opacity-70" />
+            <span aria-hidden className="ps-dots absolute bottom-0 right-1/4 h-14 w-32 opacity-25" />
+            <div className="relative flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+              <div className="flex flex-col items-center gap-3.5 sm:flex-row">
+                <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-[var(--ps-coral)]">
+                  <Flame className="size-6" />
+                </span>
                 <div>
-                  <h4 className="text-[14px] font-bold text-foreground">{s.label}</h4>
-                  <p className={cn('text-[12px] font-medium', s.on ? 'text-[#34C759]' : 'text-[#8E8E93]')}>
-                    {s.note}
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                    <span className="text-[14px] font-black uppercase tracking-wider">Mavsumiy aksiya · 50% gacha</span>
+                    <span className="rounded-full bg-[#080808] px-2.5 py-0.5 text-[11px] font-bold uppercase text-[var(--ps-orange)]">Cheklangan vaqt</span>
+                  </div>
+                  <p className="mt-1 text-[13px] text-white/85">
+                    Barcha rasmiy Milliy Sertifikat va BBA mock testlari hamda 24/7 AI Mentor bitta obunada.
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              <DiscountCountdownPill />
+            </div>
+          </section>
 
-        {!data && (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-96 w-full rounded-2xl" />
-            ))}
-          </div>
-        )}
+          {/* 2. Hero */}
+          <section className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <div className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-9">
+              <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-[var(--ps-orange)] opacity-20" />
+              <span className="ps-chip relative">
+                <Crown className="size-3.5 text-[var(--ps-orange)]" />
+                IlmIldizi One PRO
+              </span>
+              <h1 className="ps-display relative mt-5 text-[40px] sm:text-[56px]">
+                Maksimal ball uchun{' '}
+                <span className="relative inline-block text-[var(--ps-purple)]">
+                  to&apos;liq
+                  <svg aria-hidden viewBox="0 0 300 24" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-3 w-full text-[var(--ps-orange)]">
+                    <path className="ps-draw" d="M4 16 C 60 4, 120 22, 180 10 S 270 8, 296 14" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" pathLength={1} />
+                  </svg>
+                </span>{' '}
+                ekotizim<span className="text-[var(--ps-coral)]">.</span>
+              </h1>
+              <p className="relative mt-5 max-w-lg text-[14.5px] leading-relaxed text-[var(--text-secondary)]">
+                Rasmiy formatdagi barcha mock testlar, cheklovsiz AI Mentor, chuqur xatolar tahlili va rasmiy sertifikatlar.
+              </p>
+              <div className="relative mt-6 flex flex-wrap items-center gap-3">
+                <a href="#tariflar" className="ps-btn ps-btn-ink">
+                  Tarifni tanlash
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </a>
+                <Link href="/premium/payments" className="ps-btn ps-btn-ghost">
+                  <Receipt className="size-4" /> To&apos;lovlar tarixi
+                </Link>
+              </div>
+            </div>
 
-        {/* Apple One Style Plan Cards */}
-        <div className={cn('grid grid-cols-1 gap-5 items-stretch', planGridCols)}>
-          {data?.plans.map((p) => {
-            const isSelected = selectedPlanId === p.id;
-            const active = isPlanActive(p);
-            const mConfig = MARKETING_CONFIG[p.duration_days] || MARKETING_CONFIG[0];
-            const isSingleTestPlan = p.plan_type === 'mock_test' || p.duration_days === 0;
-
-            return (
-              <div
-                key={p.id}
-                onClick={() => setSelectedPlanId(p.id)}
-                className={cn(
-                  'relative cursor-pointer flex flex-col justify-between rounded-2xl p-6 transition-all duration-300',
-                  mConfig.isSuper
-                    ? 'bg-[#1C1C1E] text-white ring-2 ring-[#007AFF] shadow-[0_24px_48px_-12px_rgba(0,122,255,0.28)]'
-                    : isSelected
-                    ? 'ios-card ring-2 ring-[#007AFF]'
-                    : 'ios-card hover:border-black/15 dark:hover:border-white/15'
-                )}
-              >
-                <div className="space-y-4">
-                  {/* Top Badge Row */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={cn(
-                        'rounded-full px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider',
-                        mConfig.isSuper
-                          ? 'bg-[#007AFF] text-white'
-                          : isSingleTestPlan
-                          ? 'bg-[#8E8E93]/15 text-[#8E8E93]'
-                          : 'bg-[#FF9500]/15 text-[#FF9500]'
-                      )}
-                    >
-                      {mConfig.ribbon}
+            {/* Ishonch plitkalari */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: ShieldCheck, title: '100% rasmiy format', sub: 'Milliy Sertifikat va BBA', tone: 'bg-[var(--ps-green)] text-white' },
+                { icon: Users, title: '4,300+ abituriyent', sub: 'Faol tayyorlanmoqda', tone: 'bg-[var(--ps-orange)] text-[#080808]' },
+                { icon: Zap, title: 'Tezkor faollashuv', sub: "To'lovdan so'ng 5 daqiqada", tone: 'bg-[var(--ps-blue)] text-[#080808]' },
+                { icon: Award, title: 'QR sertifikat', sub: 'Tasdiqlangan natija hujjati', tone: 'bg-[var(--ps-purple)] text-white' },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.title} className={cn('relative flex flex-col justify-between overflow-hidden rounded-[28px] p-5 transition-transform hover:-translate-y-1', item.tone)}>
+                    <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/20" />
+                    <span className="relative inline-flex size-10 items-center justify-center rounded-full bg-black/15">
+                      <Icon className="size-5" />
                     </span>
-
-                    {mConfig.discountPercent && (
-                      <span className="rounded-full bg-[#34C759]/15 px-2.5 py-0.5 font-mono text-[12px] font-bold text-[#34C759]">
-                        {mConfig.discountPercent}
-                      </span>
-                    )}
+                    <div className="relative mt-6">
+                      <p className="text-[15px] font-bold leading-tight">{item.title}</p>
+                      <p className="mt-1 text-[12px] font-semibold opacity-75">{item.sub}</p>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </section>
 
-                  {/* Title & Subtitle */}
+          {/* 3. Faol obuna holati */}
+          {data && (data.has_active_premium_lessons || data.premium_mock_test_unlocked) && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {[
+                {
+                  label: 'IlmIldizi PRO obuna',
+                  on: data.has_active_premium_lessons,
+                  note: data.has_active_premium_lessons
+                    ? `Faol${data.premium_expires_at ? ` — ${new Date(data.premium_expires_at).toLocaleDateString('uz-UZ')} gacha` : ''}`
+                    : 'Faol emas',
+                },
+                {
+                  label: 'Mock imtihon ruxsati',
+                  on: data.premium_mock_test_unlocked,
+                  note: data.premium_mock_test_unlocked ? 'Ochilgan (muddatsiz)' : 'Qulflangan',
+                },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className={cn(
+                    'flex items-center gap-4 rounded-[26px] p-4',
+                    s.on ? 'bg-[var(--ps-green)] text-white' : 'bg-[var(--ps-paper)] text-[var(--text-primary)]'
+                  )}
+                >
+                  <span className={cn('inline-flex size-11 shrink-0 items-center justify-center rounded-full', s.on ? 'bg-white/25' : 'bg-[var(--ps-neutral)] text-[var(--text-muted)]')}>
+                    {s.on ? <CheckCircle2 className="size-5" /> : <Lock className="size-5" />}
+                  </span>
                   <div>
-                    <h3
-                      className={cn(
-                        'text-[20px] font-bold tracking-tight',
-                        mConfig.isSuper ? 'text-white' : 'text-foreground'
-                      )}
-                    >
-                      {p.name}
-                    </h3>
-                    <p
-                      className={cn(
-                        'mt-1 text-[13px] leading-relaxed',
-                        mConfig.isSuper ? 'text-white/65' : 'text-[#8E8E93]'
-                      )}
-                    >
-                      {p.description}
-                    </p>
+                    <h4 className="text-[14.5px] font-bold">{s.label}</h4>
+                    <p className={cn('text-[12.5px] font-semibold', s.on ? 'text-white/85' : 'text-[var(--text-muted)]')}>{s.note}</p>
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-                  {/* Price Block */}
-                  <div className="pt-1">
-                    {mConfig.originalPrice && (
-                      <div className="flex items-center gap-2 mb-0.5">
+          {/* 4. Tariflar */}
+          <section id="tariflar" className="scroll-mt-24 space-y-5">
+            <div className="flex flex-wrap items-end justify-between gap-3 px-1">
+              <div>
+                <p className="ps-eyebrow text-[var(--text-muted)]">Tariflar</p>
+                <h2 className="ps-display mt-2 text-[30px] sm:text-[40px]">
+                  O&apos;zingizga mos <span className="text-[var(--ps-orange)]">tarif</span>
+                </h2>
+              </div>
+              <span className="ps-chip">
+                <ShieldCheck className="size-3.5 text-[var(--ps-green)]" /> Xavfsiz to&apos;lov · Click, Payme, Uzum
+              </span>
+            </div>
+
+            {!data && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-[440px] w-full rounded-[32px]" />
+                ))}
+              </div>
+            )}
+
+            <div className={cn('grid grid-cols-1 items-stretch gap-4', planGridCols)}>
+              {data?.plans.map((p) => {
+                const isSelected = selectedPlanId === p.id;
+                const active = isPlanActive(p);
+                const mConfig = MARKETING_CONFIG[p.duration_days] || MARKETING_CONFIG[0];
+                const isSingleTestPlan = p.plan_type === 'mock_test' || p.duration_days === 0;
+                const dark = mConfig.isSuper;
+
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => setSelectedPlanId(p.id)}
+                    className={cn(
+                      'relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-[32px] p-6 transition-all duration-300 hover:-translate-y-1',
+                      dark
+                        ? 'bg-[#080808] text-[#FFFCF7] shadow-[0_30px_60px_-30px_rgba(8,8,8,0.8)] lg:-translate-y-2 dark:bg-[#FFFCF7] dark:text-[#080808]'
+                        : 'bg-[var(--ps-paper)] text-[var(--text-primary)] shadow-[var(--ds-panel-shadow)]',
+                      isSelected && 'ring-[3px] ring-[var(--ps-purple)] ring-offset-4 ring-offset-transparent'
+                    )}
+                  >
+                    {dark && <span aria-hidden className="absolute -right-12 -top-12 size-40 rounded-full bg-[var(--ps-purple)] opacity-50" />}
+                    {!dark && <span aria-hidden className="absolute -right-10 -top-10 size-32 rounded-full bg-[var(--ps-orange)] opacity-15" />}
+
+                    <div className="relative space-y-4">
+                      {/* Yorliqlar */}
+                      <div className="flex items-center justify-between gap-2">
                         <span
                           className={cn(
-                            'text-[12px] line-through font-mono',
-                            mConfig.isSuper ? 'text-white/40' : 'text-[#8E8E93]'
+                            'rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wider',
+                            dark ? 'bg-[var(--ps-orange)] text-[#080808]' : isSingleTestPlan ? 'bg-[var(--ps-neutral)] text-[var(--text-muted)]' : 'bg-[var(--ps-lilac)] text-[#080808]'
                           )}
                         >
-                          {mConfig.originalPrice} so&apos;m
+                          {mConfig.ribbon}
                         </span>
-                      </div>
-                    )}
-                    <div className="flex items-baseline gap-1.5">
-                      <span
-                        className={cn(
-                          'font-mono text-[32px] font-bold tracking-tight tabular-nums leading-none',
-                          mConfig.isSuper ? 'text-white' : 'text-foreground'
-                        )}
-                      >
-                        {Number(p.price).toLocaleString()}
-                      </span>
-                      <span
-                        className={cn(
-                          'text-[12px] font-medium',
-                          mConfig.isSuper ? 'text-white/65' : 'text-[#8E8E93]'
-                        )}
-                      >
-                        so&apos;m{p.duration_days > 0 ? ` / ${p.duration_days} kun` : ' (1 ta test)'}
-                      </span>
-                    </div>
-
-                    {mConfig.perMonthText && (
-                      <p
-                        className={cn(
-                          'mt-1.5 text-[12px] font-semibold',
-                          mConfig.isSuper ? 'text-[#5AC8FA]' : 'text-[#007AFF]'
-                        )}
-                      >
-                        {mConfig.perMonthText}
-                      </p>
-                    )}
-                  </div>
-
-                  {isSingleTestPlan && (
-                    <div className="rounded-lg bg-[#FF9500]/10 border border-[#FF9500]/25 p-3 text-[11.5px] text-foreground leading-snug">
-                      <strong className="text-[#FF9500]">Eslatma:</strong> Ushbu tarif faqat siz tanlagan 1 ta mock imtihonni ochadi.
-                    </div>
-                  )}
-
-                  <div
-                    className={cn(
-                      'h-px w-full',
-                      mConfig.isSuper ? 'bg-white/10' : 'bg-black/[0.06] dark:bg-white/[0.08]'
-                    )}
-                  />
-
-                  {/* Features List */}
-                  <ul className="space-y-2.5 text-[13px]">
-                    {p.features.map((f, i) => {
-                      const isNegative =
-                        f.toLowerCase().includes('kirmaydi') || f.toLowerCase().includes('emas');
-                      return (
-                        <li key={i} className="flex items-start gap-2.5">
-                          {isNegative ? (
-                            <XCircle
-                              className={cn(
-                                'size-4 shrink-0 mt-0.5',
-                                mConfig.isSuper ? 'text-white/30' : 'text-[#8E8E93]/60'
-                              )}
-                            />
-                          ) : (
-                            <CheckCircle2 className="size-4 shrink-0 text-[#34C759] mt-0.5" />
-                          )}
-                          <span
-                            className={cn(
-                              'leading-snug',
-                              isNegative
-                                ? mConfig.isSuper
-                                  ? 'text-white/40 line-through'
-                                  : 'text-[#8E8E93] line-through'
-                                : mConfig.isSuper
-                                ? 'text-white/90 font-medium'
-                                : 'text-foreground font-medium'
-                            )}
-                          >
-                            {f}
+                        {mConfig.discountPercent && (
+                          <span className="rounded-full bg-[var(--ps-green)] px-2.5 py-1 font-mono text-[12px] font-bold text-white">
+                            {mConfig.discountPercent}
                           </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
+                        )}
+                      </div>
 
-                {/* Action Button */}
-                <div className="pt-6 mt-4">
-                  {active ? (
-                    <button
-                      disabled
-                      className="flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-[#34C759]/15 text-[#34C759] text-[13px] font-bold"
-                    >
-                      <CheckCircle2 className="size-4" /> Sizda faol
-                    </button>
-                  ) : isSingleTestPlan ? (
-                    <div className="space-y-2">
-                      <Link
-                        href="/tests"
-                        className="flex h-11 w-full items-center justify-center gap-1.5 rounded-full bg-[#767680]/[0.14] dark:bg-[#767680]/[0.28] text-foreground text-[13.5px] font-semibold hover:bg-[#767680]/[0.22] transition-all"
-                      >
-                        <span>Test tanlab ochish</span>
-                        <ArrowRight className="size-4" />
-                      </Link>
-                      <p className="text-[12px] text-center text-[#8E8E93]">
-                        Yoki{' '}
-                        <Link href={`/premium/checkout/${p.id}`} className="text-[#007AFF] font-semibold hover:underline">
-                          to&apos;g&apos;ridan-to&apos;g&apos;ri to&apos;lash
-                        </Link>
-                      </p>
-                    </div>
-                  ) : (
-                    <Link
-                      href={`/premium/checkout/${p.id}`}
-                      className={cn(
-                        'flex h-12 w-full items-center justify-center gap-2 rounded-full text-[14px] font-semibold transition-all active:scale-[0.98]',
-                        mConfig.isSuper || isSelected
-                          ? 'bg-[#007AFF] text-white shadow-[0_8px_20px_-4px_rgba(0,122,255,0.45)] hover:bg-[#0071EB]'
-                          : 'bg-[#767680]/[0.14] dark:bg-[#767680]/[0.28] text-foreground hover:bg-[#007AFF] hover:text-white'
+                      <div>
+                        <h3 className="ps-display text-[24px]">{p.name}</h3>
+                        <p className={cn('mt-1.5 text-[13px] leading-relaxed', dark ? 'opacity-70' : 'text-[var(--text-muted)]')}>{p.description}</p>
+                      </div>
+
+                      {/* Narx */}
+                      <div>
+                        {mConfig.originalPrice && (
+                          <span className={cn('font-mono text-[12.5px] line-through', dark ? 'opacity-45' : 'text-[var(--text-faint)]')}>
+                            {mConfig.originalPrice} so&apos;m
+                          </span>
+                        )}
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="ps-num text-[40px] leading-none">{Number(p.price).toLocaleString()}</span>
+                          <span className={cn('text-[12.5px] font-semibold', dark ? 'opacity-65' : 'text-[var(--text-muted)]')}>
+                            so&apos;m{p.duration_days > 0 ? ` / ${p.duration_days} kun` : ' (1 ta test)'}
+                          </span>
+                        </div>
+                        {mConfig.perMonthText && (
+                          <p className={cn('mt-2 inline-block rounded-full px-3 py-1 text-[12px] font-bold', dark ? 'bg-white/10 text-[var(--ps-orange)] dark:bg-black/10' : 'bg-[var(--ps-neutral)] text-[var(--ps-purple)]')}>
+                            {mConfig.perMonthText}
+                          </p>
+                        )}
+                      </div>
+
+                      {isSingleTestPlan && (
+                        <p className="rounded-[18px] bg-[var(--ps-orange)] p-3 text-[12px] font-semibold leading-snug text-[#080808]">
+                          <strong>Eslatma:</strong> bu tarif faqat siz tanlagan 1 ta mock imtihonni ochadi.
+                        </p>
                       )}
-                    >
-                      <span>Obunani boshlash</span>
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  )}
-                </div>
+
+                      <div className={cn('h-px w-full', dark ? 'bg-white/10 dark:bg-black/10' : 'bg-[var(--border-card)]')} />
+
+                      {/* Imkoniyatlar */}
+                      <ul className="space-y-2.5 text-[13px]">
+                        {p.features.map((f, i) => {
+                          const isNegative = f.toLowerCase().includes('kirmaydi') || f.toLowerCase().includes('emas');
+                          return (
+                            <li key={i} className="flex items-start gap-2.5">
+                              <span
+                                className={cn(
+                                  'mt-px inline-flex size-5 shrink-0 items-center justify-center rounded-full',
+                                  isNegative ? (dark ? 'bg-white/10 dark:bg-black/10' : 'bg-[var(--ps-neutral)]') : 'bg-[var(--ps-green)] text-white'
+                                )}
+                              >
+                                {isNegative ? <XCircle className="size-3 opacity-50" /> : <CheckCircle2 className="size-3" />}
+                              </span>
+                              <span className={cn('leading-snug', isNegative ? 'line-through opacity-45' : 'font-semibold')}>{f}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+
+                    {/* Tugma */}
+                    <div className="relative mt-6 pt-2">
+                      {active ? (
+                        <button disabled className="flex h-12 w-full items-center justify-center gap-1.5 rounded-full bg-[var(--ps-green)] text-[13.5px] font-bold text-white">
+                          <CheckCircle2 className="size-4" /> Sizda faol
+                        </button>
+                      ) : isSingleTestPlan ? (
+                        <div className="space-y-2">
+                          <Link href="/tests" className="ps-btn ps-btn-ghost w-full">
+                            Test tanlab ochish <ArrowRight className="size-4" />
+                          </Link>
+                          <p className="text-center text-[12px] text-[var(--text-muted)]">
+                            Yoki{' '}
+                            <Link href={`/premium/checkout/${p.id}`} className="font-bold text-[var(--ps-purple)] hover:underline">
+                              to&apos;g&apos;ridan-to&apos;g&apos;ri to&apos;lash
+                            </Link>
+                          </p>
+                        </div>
+                      ) : (
+                        <Link
+                          href={`/premium/checkout/${p.id}`}
+                          className={cn('ps-btn w-full', dark ? 'bg-[var(--ps-orange)] text-[#080808]' : isSelected ? 'ps-btn-ink' : 'ps-btn-ghost')}
+                        >
+                          Obunani boshlash
+                          <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 5. Taqqoslash */}
+          <section className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-9">
+            <span aria-hidden className="pointer-events-none absolute -left-16 -top-16 size-48 rounded-full bg-[var(--ps-purple)] opacity-10" />
+            <div className="relative mx-auto max-w-2xl text-center">
+              <span className="ps-chip"><Sparkles className="size-3.5 text-[var(--ps-purple)]" /> Taqqoslash</span>
+              <h2 className="ps-display mt-4 text-[28px] sm:text-[38px]">
+                Nega PRO <span className="text-[var(--ps-green)]">10 barobar</span> tejamkor?
+              </h2>
+              <p className="mt-2 text-[13.5px] text-[var(--text-muted)]">An&apos;anaviy kurslar va bir martalik testlar bilan taqqoslang</p>
+            </div>
+
+            <div className="relative mx-auto mt-8 grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-3 md:items-end">
+              <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-neutral)] p-6">
+                <p className="text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-coral)]">Oddiy repetitor</p>
+                <p className="ps-num mt-2 text-[30px] leading-none">400,000+</p>
+                <p className="mt-1 text-[12px] font-semibold text-[var(--text-muted)]">so&apos;m · har oy to&apos;lanadi</p>
+                <ul className="mt-4 space-y-2 border-t border-[var(--border-card)] pt-4 text-[12.5px] text-[var(--text-secondary)]">
+                  <li>• Haftada atigi 3 kun dars</li>
+                  <li>• Qog&apos;oz testlar sekin tekshiriladi</li>
+                  <li>• Yiliga 4,000,000+ so&apos;m xarajat</li>
+                </ul>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Apple Keynote Comparison Section */}
-        <div className="ios-card rounded-2xl p-6 sm:p-8 space-y-6">
-          <div className="max-w-2xl mx-auto text-center space-y-2">
-            <Badge variant="outline" className="border-[#007AFF]/25 text-[#007AFF] bg-[#007AFF]/10">
-              <Sparkles className="size-3 mr-1" /> TAQQOSLASH
-            </Badge>
-            <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-foreground">
-              Nega IlmIldizi PRO 10 barobar tejamkor?
-            </h2>
-            <p className="text-[13.5px] text-[#8E8E93]">
-              An&apos;anaviy kurslar va bir martalik testlar bilan taqqoslang
-            </p>
-          </div>
+              <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-neutral)] p-6">
+                <p className="text-[11.5px] font-black uppercase tracking-wider text-[var(--text-muted)]">Alohida 1 ta test</p>
+                <p className="ps-num mt-2 text-[30px] leading-none">15,000</p>
+                <p className="mt-1 text-[12px] font-semibold text-[var(--text-muted)]">so&apos;m · har bir imtihon uchun</p>
+                <ul className="mt-4 space-y-2 border-t border-[var(--border-card)] pt-4 text-[12.5px] text-[var(--text-secondary)]">
+                  <li>• Faqat tanlangan 1 ta test ochiladi</li>
+                  <li>• Boshqa 50+ testlar yopiq qoladi</li>
+                  <li>• 24/7 AI Mentor kirmaydi</li>
+                </ul>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            <div className="rounded-xl border border-[#FF3B30]/20 bg-[#FF3B30]/[0.04] p-5 space-y-3">
-              <p className="text-[12px] font-bold text-[#FF3B30] uppercase tracking-wider">Oddiy Repetitor</p>
-              <p className="text-[24px] font-bold text-foreground">400,000+ so&apos;m</p>
-              <p className="text-[12px] text-[#8E8E93]">Har oy to&apos;lanadi</p>
-              <ul className="text-[12.5px] space-y-2 text-[#8E8E93] pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
-                <li>• Haftada atigi 3 kun dars</li>
-                <li>• Qog&apos;oz testlar sekin tekshiriladi</li>
-                <li>• Yiliga 4,000,000+ so&apos;m xarajat</li>
-              </ul>
+              <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-purple)] p-6 text-white md:-translate-y-3">
+                <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+                <span className="absolute right-4 top-4 rounded-full bg-[var(--ps-orange)] px-3 py-1 text-[10.5px] font-black uppercase text-[#080808]">Eng to&apos;g&apos;ri tanlov</span>
+                <p className="relative text-[11.5px] font-black uppercase tracking-wider text-white/75">IlmIldizi PRO (yillik)</p>
+                <p className="ps-num relative mt-2 text-[30px] leading-none">12,500</p>
+                <p className="relative mt-1 text-[12px] font-semibold text-white/80">so&apos;m/oy · yiliga 150,000 so&apos;m</p>
+                <ul className="relative mt-4 space-y-2 border-t border-white/20 pt-4 text-[12.5px] font-semibold">
+                  {['Barcha 50+ rasmiy mock testlar', "Yangi qo'shiladigan testlar bepul", '24/7 AI Mentor va tahlillar'].map((t) => (
+                    <li key={t} className="flex items-center gap-2">
+                      <span className="inline-flex size-5 items-center justify-center rounded-full bg-white/25"><CheckCircle2 className="size-3" /></span>
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
+          </section>
 
-            <div className="rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.03] p-5 space-y-3">
-              <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-wider">Alohida 1 ta test</p>
-              <p className="text-[24px] font-bold text-foreground">15,000 so&apos;m</p>
-              <p className="text-[12px] text-[#8E8E93]">Har bir imtihon uchun alohida</p>
-              <ul className="text-[12.5px] space-y-2 text-[#8E8E93] pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
-                <li>• Faqat tanlangan 1 ta test ochiladi</li>
-                <li>• Boshqa 50+ testlar yopiq qoladi</li>
-                <li>• 24/7 AI Mentor kirmaydi</li>
-              </ul>
-            </div>
-
-            <div className="rounded-xl border-2 border-[#007AFF] bg-[#007AFF]/[0.06] p-5 space-y-3 relative">
-              <span className="absolute -top-3 right-4 rounded-full bg-[#007AFF] text-white font-bold text-[12px] px-3 py-0.5 uppercase shadow-xs">
-                Eng to&apos;g&apos;ri tanlov
+          {/* 6. FAQ */}
+          <section className="grid gap-4 lg:grid-cols-[1fr_1.6fr]">
+            <div className="relative overflow-hidden rounded-[36px] bg-[var(--ps-orange)] p-6 text-[#080808] sm:p-8">
+              <span aria-hidden className="absolute -bottom-10 -right-10 size-40 rounded-full bg-white/25" />
+              <span className="relative inline-flex size-12 items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)]">
+                <HelpCircle className="size-6" />
               </span>
-              <p className="text-[12px] font-bold text-[#007AFF] uppercase tracking-wider">ILMILDIZI PRO (YILLIK)</p>
-              <p className="text-[24px] font-bold text-foreground">12,500 so&apos;m/oy</p>
-              <p className="text-[12px] text-[#007AFF] font-semibold">Butun o&apos;quv yili uchun 150,000 so&apos;m</p>
-              <ul className="text-[12.5px] space-y-2 text-foreground font-medium pt-3 border-t border-[#007AFF]/20">
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-[#34C759]" /> Barcha 50+ rasmiy mock testlar</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-[#34C759]" /> Yangi qo&apos;shiladigan testlar bepul</li>
-                <li className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-[#34C759]" /> 24/7 AI Mentor va tahlillar</li>
-              </ul>
+              <h3 className="ps-display relative mt-5 text-[30px] sm:text-[36px]">Ko&apos;p beriladigan savollar</h3>
+              <p className="relative mt-2 text-[13.5px] font-semibold opacity-75">To&apos;lov va obunalar bo&apos;yicha ma&apos;lumot</p>
             </div>
-          </div>
-        </div>
 
-        {/* iOS Settings Inset Grouped FAQ */}
-        <div className="max-w-3xl mx-auto space-y-3 pt-2">
-          <div className="px-1">
-            <h3 className="text-[18px] font-bold text-foreground">Ko&apos;p beriladigan savollar</h3>
-            <p className="text-[13px] text-[#8E8E93]">To&apos;lov va obunalar bo&apos;yicha ma&apos;lumot</p>
-          </div>
-
-          <div className="ios-card rounded-2xl divide-y divide-black/[0.06] dark:divide-white/[0.08] overflow-hidden">
-            {[
-              {
-                q: "To'lov qilgandan keyin obuna qachon faollashadi?",
-                a: "To'lov chekini (skrinshot) yuklaganingizdan so'ng moderatorlarimiz 5–15 daqiqa ichida tekshirib, hisobingizni to'liq faollashtiradi.",
-              },
-              {
-                q: "Bir martalik test bilan PRO obunaning farqi nimada?",
-                a: "Bir martalik to'lov faqat siz tanlagan 1 ta mock imtihonni ochadi. PRO obunada esa platformadagi barcha mavjud va yangi qo'shiladigan mock testlar hamda 24/7 AI Mentor to'liq ochiladi.",
-              },
-              {
-                q: "Qanday usulda to'lov qilish mumkin?",
-                a: "Click, Payme, Uzum Bank yoki istalgan bank ilovasi (Uzcard / Humo) orqali ko'rsatilgan kartaga o'tkazib, chek skrinshotini yuklashingiz kifoya.",
-              },
-            ].map((faq, i) => (
-              <div key={i} className="p-5 space-y-1.5">
-                <div className="text-[14px] font-bold text-foreground flex items-center gap-2">
-                  <PremiumIcon icon={HelpCircle} tone="sky" size="2xs" solid />
-                  <span>{faq.q}</span>
+            <div className="ps-card space-y-2.5 !rounded-[36px] p-4 sm:p-5">
+              {[
+                {
+                  q: "To'lov qilgandan keyin obuna qachon faollashadi?",
+                  a: "To'lov chekini (skrinshot) yuklaganingizdan so'ng moderatorlarimiz 5–15 daqiqa ichida tekshirib, hisobingizni to'liq faollashtiradi.",
+                },
+                {
+                  q: "Bir martalik test bilan PRO obunaning farqi nimada?",
+                  a: "Bir martalik to'lov faqat siz tanlagan 1 ta mock imtihonni ochadi. PRO obunada esa platformadagi barcha mavjud va yangi qo'shiladigan mock testlar hamda 24/7 AI Mentor to'liq ochiladi.",
+                },
+                {
+                  q: "Qanday usulda to'lov qilish mumkin?",
+                  a: "Click, Payme, Uzum Bank yoki istalgan bank ilovasi (Uzcard / Humo) orqali ko'rsatilgan kartaga o'tkazib, chek skrinshotini yuklashingiz kifoya.",
+                },
+              ].map((faq, i) => (
+                <div key={i} className="flex gap-3.5 rounded-[24px] bg-[var(--ps-neutral)] p-4 sm:p-5">
+                  <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--ps-purple)] font-mono text-[13px] font-black text-white">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="text-[14.5px] font-bold text-[var(--text-primary)]">{faq.q}</p>
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-secondary)]">{faq.a}</p>
+                  </div>
                 </div>
-                <p className="text-[13px] text-[#8E8E93] leading-relaxed pl-7">
-                  {faq.a}
-                </p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
-    </>
+    </div>
   );
 }

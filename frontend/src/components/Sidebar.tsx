@@ -185,8 +185,9 @@ export default function Sidebar({
               </span>
             </span>
             <span className="flex min-w-0 flex-col">
-              <span className="ps-sb-name truncate text-[15px] font-bold leading-tight tracking-[-0.02em] text-foreground">
-                {t('Ilm')}<span className="text-primary">{t('Ildizi')}</span>
+              {/* Brend nomi alifbo almashganda ham o'zgarmaydi */}
+              <span data-no-translit className="ps-sb-name truncate text-[15px] font-bold leading-tight tracking-[-0.02em] text-foreground">
+                Ilm<span className="text-primary">Ildizi</span>
               </span>
               <span className="ps-sb-sub mt-0.5 truncate text-[12px] font-medium text-muted-foreground">
                 {t("Intellektual Ta'lim")}

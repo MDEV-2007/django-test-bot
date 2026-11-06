@@ -51,7 +51,7 @@ export default function AuthShell({
         >
           <span className="ps-chip">
             <BrandMark size={22} rounded="rounded-full" />
-            Ilm<span className="-ml-1.5 text-[var(--ps-purple)]">Ildizi</span>
+            <span data-no-translit>Ilm<span className="text-[var(--ps-purple)]">Ildizi</span></span>
             <span className="text-[var(--text-muted)]">· Milliy sertifikat va DTM 2026</span>
           </span>
 
@@ -72,12 +72,12 @@ export default function AuthShell({
           </p>
 
           <div className="mt-8 grid grid-cols-[auto_1fr] items-center gap-6">
-            {/* Maskot doirada */}
+            {/* Jamoa rasmi doirada (dashboard bilan bir xil) */}
             <div className="relative size-40 xl:size-44">
               <div aria-hidden className="absolute inset-0 rounded-full bg-[var(--ps-orange)]" />
               <div aria-hidden className="absolute -bottom-1 -left-3 size-14 rounded-tr-full bg-[var(--ps-purple)]" />
               <div className="absolute inset-[9%] overflow-hidden rounded-full border-[5px] border-[#FFFCF7] bg-[var(--ps-sky)]">
-                <Image src="/images/mascot-hero.jpg" alt="IlmIldizi maskoti" fill sizes="176px" className="scale-[1.35] object-cover object-[52%_40%]" />
+                <Image src="/images/dashboard-hero-team.webp" alt="IlmIldizi jamoasi" fill sizes="176px" className="object-cover object-[50%_32%]" />
               </div>
             </div>
             {/* Afzalliklar */}

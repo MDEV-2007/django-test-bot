@@ -44,7 +44,7 @@ const DEFAULT_FEATURES: Record<string, FeatureItem> = {
   sprint: { key: 'sprint', name: 'Tezkor Test', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'HOT', target_route: '/sprint', icon_name: 'Zap' },
   games: { key: 'games', name: "Tarixiy Mini O'yinlar", is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Bonus XP', target_route: '/games/timeline', icon_name: 'Gamepad2' },
   ai_mentor: { key: 'ai_mentor', name: 'AI Shaxsiy Mentor', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'AI', target_route: '/tests', icon_name: 'Bot' },
-  otm_predictor: { key: 'otm_predictor', name: 'OTM Qabul Bashorati', is_enabled: true, admin_only: false, is_beta: false, badge_text: '2025/2026', target_route: '/analytics', icon_name: 'GraduationCap' },
+  otm_predictor: { key: 'otm_predictor', name: 'OTM Qabul Bashorati', is_enabled: true, admin_only: false, is_beta: false, badge_text: '2025/2026', target_route: '/profile', icon_name: 'GraduationCap' },
   shop: { key: 'shop', name: "Tangalar Do'koni", is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Coin', target_route: '/shop', icon_name: 'ShoppingBag' },
   leaderboard: { key: 'leaderboard', name: 'Reyting & Peshqadamlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'Top', target_route: '/leaderboard', icon_name: 'Trophy' },
   tests: { key: 'tests', name: 'BBA & Testlar', is_enabled: true, admin_only: false, is_beta: false, badge_text: 'BBA', target_route: '/tests', icon_name: 'FileCheck2' },

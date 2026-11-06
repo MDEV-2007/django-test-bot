@@ -33,16 +33,16 @@ export default function ExamQuestion({
       onFocusCapture={onActivate}
       onMouseDown={onActivate}
       className={cn(
-        'scroll-mt-28 rounded-2xl border p-4 transition',
-        active ? 'border-primary/60 bg-primary/5 shadow-sm' : 'border-border/60 bg-card/40',
+        'scroll-mt-28 rounded-[26px] bg-[var(--ps-paper,var(--surface-card))] p-5 shadow-[var(--ds-panel-shadow)] transition',
+        active ? 'ring-[3px] ring-[var(--ps-purple,#7659C7)]' : 'ring-0',
       )}
     >
       <div className="mb-2 flex items-start gap-3">
         {question.exam_number !== null && (
           <span
             className={cn(
-              'mt-0.5 flex h-6 min-w-6 items-center justify-center rounded-lg px-1 text-xs font-bold tabular-nums',
-              answered ? 'bg-emerald-500/20 text-emerald-400' : 'bg-muted text-muted-foreground',
+              'flex h-8 min-w-8 shrink-0 items-center justify-center rounded-full px-1.5 text-[13px] font-black tabular-nums',
+              answered ? 'bg-[var(--ps-green,#4C806B)] text-white' : 'bg-[var(--ps-neutral,var(--surface-input))] text-[var(--text-secondary)]',
             )}
           >
             {answered ? <Check className="h-3.5 w-3.5" /> : question.exam_number}
@@ -103,10 +103,10 @@ function Body({ question, group, onAnswer, onActivate, hideInlineGap }: Omit<Pro
                 type="button"
                 onClick={() => onAnswer({ text_answer: option })}
                 className={cn(
-                  'rounded-full border px-4 py-2 text-sm font-medium transition',
+                  'rounded-full px-5 py-2.5 text-sm font-bold transition',
                   selected
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border/70 bg-card/60 hover:border-primary/50 hover:bg-primary/5',
+                    ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                    : 'bg-[var(--ps-neutral,var(--surface-input))] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac,#E6B5F2)] hover:text-[#080808]',
                 )}
               >
                 {option}
@@ -161,10 +161,10 @@ function Body({ question, group, onAnswer, onActivate, hideInlineGap }: Omit<Pro
                       onAnswer({ matches });
                     }}
                     className={cn(
-                      'h-8 w-8 rounded-lg border text-xs font-bold transition',
+                      'size-9 rounded-full text-xs font-black transition',
                       row.selected_right_key === option.right_key
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border/70 bg-card/60 hover:border-primary/50',
+                        ? 'bg-[var(--ps-purple,#7659C7)] text-white'
+                        : 'bg-[var(--ps-neutral,var(--surface-input))] hover:bg-[var(--ps-lilac,#E6B5F2)] hover:text-[#080808]',
                     )}
                   >
                     {option.right_key}
@@ -187,19 +187,19 @@ function Choice({ text, selected, onClick }: { text: string; selected: boolean; 
       type="button"
       onClick={onClick}
       className={cn(
-        'flex w-full items-start gap-3 rounded-xl border p-3 text-left text-[0.95rem] leading-relaxed transition',
+        'flex w-full items-start gap-3 rounded-[20px] p-3.5 text-left text-[0.95rem] leading-relaxed transition',
         selected
-          ? 'border-primary bg-primary/10'
-          : 'border-border/70 bg-card/50 hover:border-primary/40 hover:bg-primary/5',
+          ? 'bg-[var(--ps-purple,#7659C7)] text-white'
+          : 'bg-[var(--ps-neutral,var(--surface-input))] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac,#E6B5F2)] hover:text-[#080808]',
       )}
     >
       <span
         className={cn(
           'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition',
-          selected ? 'border-primary bg-primary' : 'border-muted-foreground/50',
+          selected ? 'border-white bg-white' : 'border-current opacity-50',
         )}
       >
-        {selected && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
+        {selected && <span className="h-1.5 w-1.5 rounded-full bg-[var(--ps-purple,#7659C7)]" />}
       </span>
       <span>{text}</span>
     </button>
@@ -234,10 +234,10 @@ function GroupedItemSelector({
               title={option.text}
               onClick={() => onAnswer({ group_option_id: selected ? null : option.id })}
               className={cn(
-                'flex h-9 min-w-9 sm:h-10 sm:min-w-10 px-2 items-center justify-center rounded-xl border text-xs sm:text-sm font-bold transition-all cursor-pointer select-none active:scale-95',
+                'flex h-10 min-w-10 cursor-pointer select-none items-center justify-center rounded-full px-2 text-sm font-black transition-all active:scale-95',
                 selected
-                  ? 'border-blue-500 bg-blue-600 text-white shadow-md ring-2 ring-blue-500/30 scale-105'
-                  : 'border-border/80 bg-card/70 hover:border-blue-500/50 hover:bg-blue-500/10 text-foreground'
+                  ? 'scale-105 bg-[var(--ps-purple,#7659C7)] text-white shadow-[0_8px_18px_-8px_rgba(118,89,199,0.9)]'
+                  : 'bg-[var(--ps-neutral,var(--surface-input))] text-[var(--text-primary)] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac,#E6B5F2)] hover:text-[#080808]'
               )}
             >
               {option.label}
@@ -250,7 +250,7 @@ function GroupedItemSelector({
           <button
             type="button"
             onClick={() => setShowOptionsList(!showOptionsList)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-border/70 bg-card/50 hover:bg-[var(--surface-hover)] text-[12px] font-bold text-muted-foreground hover:text-foreground transition ml-auto cursor-pointer"
+            className="ml-auto inline-flex cursor-pointer items-center gap-1 rounded-full bg-[var(--ps-neutral,var(--surface-input))] px-3 py-2 text-[12px] font-bold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
           >
             <span>{showOptionsList ? "Variantlarni yashirish" : "Variantlar matni"}</span>
             {showOptionsList ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
@@ -260,13 +260,13 @@ function GroupedItemSelector({
 
       {/* Selected Option Preview Card */}
       {selectedOption && (
-        <div className="flex items-start justify-between gap-2.5 rounded-2xl border border-blue-500/40 bg-blue-500/10 p-3 text-xs text-blue-300 shadow-xs animate-in fade-in-50">
+        <div className="flex animate-in items-start justify-between gap-2.5 rounded-[20px] bg-[var(--ps-lilac,#E6B5F2)]/45 p-3.5 text-xs fade-in-50 dark:bg-[var(--ps-purple,#7659C7)]/25">
           <div className="flex items-start gap-2.5 min-w-0 flex-1">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white text-[12px] font-bold mt-0.5">
+            <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--ps-purple,#7659C7)] text-[12px] font-black text-white">
               {selectedOption.label}
             </span>
             <div className="min-w-0 flex-1">
-              <span className="text-[12px] font-bold uppercase tracking-wider text-blue-400 block">
+              <span className="block text-[11px] font-black uppercase tracking-wider text-[var(--ps-purple,#7659C7)]">
                 Tanlangan javob
               </span>
               <p className="font-semibold text-foreground leading-relaxed mt-0.5">
@@ -277,7 +277,7 @@ function GroupedItemSelector({
           <button
             type="button"
             onClick={() => onAnswer({ group_option_id: null })}
-            className="text-[12px] text-muted-foreground hover:text-rose-400 font-bold shrink-0 px-2 py-1 rounded-lg hover:bg-rose-500/10 transition cursor-pointer"
+            className="shrink-0 cursor-pointer rounded-full px-2.5 py-1 text-[12px] font-bold text-[var(--text-muted)] transition hover:bg-[var(--ps-coral,#F0523D)] hover:text-white"
             title="Bekor qilish"
           >
             Bekor qilish ✕
@@ -287,7 +287,7 @@ function GroupedItemSelector({
 
       {/* Expandable Options List */}
       {showOptionsList && group && (
-        <div className="rounded-2xl border border-border/80 bg-card/90 p-3 space-y-1.5 animate-in fade-in-50">
+        <div className="animate-in space-y-1.5 rounded-[20px] bg-[var(--ps-neutral,var(--surface-input))] p-3 fade-in-50">
           <p className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider pb-1">
             Mavjud variantlardan birini tanlang:
           </p>
@@ -300,20 +300,20 @@ function GroupedItemSelector({
                   type="button"
                   onClick={() => onAnswer({ group_option_id: isSelected ? null : opt.id })}
                   className={cn(
-                    'w-full flex items-start gap-2.5 p-2 rounded-xl text-left text-xs transition-all cursor-pointer',
+                    'flex w-full cursor-pointer items-start gap-2.5 rounded-[14px] p-2 text-left text-xs transition-all',
                     isSelected
-                      ? 'bg-blue-600/20 border border-blue-500/40 font-bold text-foreground'
-                      : 'hover:bg-[var(--surface-hover)] text-muted-foreground hover:text-foreground border border-transparent'
+                      ? 'bg-[var(--ps-purple,#7659C7)] font-bold text-white'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--ps-paper,var(--surface-card))] hover:text-[var(--text-primary)]'
                   )}
                 >
                   <span className={cn(
-                    'flex size-5 shrink-0 items-center justify-center rounded text-[12px] font-bold',
-                    isSelected ? 'bg-blue-600 text-white' : 'bg-muted text-foreground border border-border/60'
+                    'flex size-6 shrink-0 items-center justify-center rounded-full text-[12px] font-black',
+                    isSelected ? 'bg-white text-[var(--ps-purple,#7659C7)]' : 'bg-[var(--ps-paper,var(--surface-card))] text-[var(--text-primary)]'
                   )}>
                     {opt.label}
                   </span>
                   <span className="leading-relaxed flex-1">{opt.text}</span>
-                  {isSelected && <Check className="size-4 text-blue-400 shrink-0 ml-1 mt-0.5" />}
+                  {isSelected && <Check className="ml-1 mt-0.5 size-4 shrink-0" />}
                 </button>
               );
             })}

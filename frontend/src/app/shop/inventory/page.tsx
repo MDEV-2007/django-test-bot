@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatCompact } from '@/lib/utils';
 
 type InventoryData = {
   coins: number; freeze_count: number;
@@ -82,7 +83,7 @@ export default function InventoryPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Tangalar</p>
-                    <p className="font-mono text-lg font-bold tabular-nums text-[var(--tone-premium-text)]">{data.coins.toLocaleString('uz-UZ')}</p>
+                    <p className="font-mono text-lg font-bold tabular-nums text-[var(--tone-premium-text)]">{formatCompact(data.coins)}</p>
                   </div>
                 </CardContent>
               </Card>

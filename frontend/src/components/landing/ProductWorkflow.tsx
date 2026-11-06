@@ -17,7 +17,7 @@ const WORKFLOW_STEPS = [
     tag: 'Imtihon muhiti',
     desc: 'BMB va Milliy sertifikat rasmiy formati, standart taymer va haqiqiy imtihon qiyinlik darajasidagi testlar.',
     icon: FileCheck2,
-    squircle: 'from-[#007AFF] to-[#0062CC]',
+    squircle: 'from-[#7659C7] to-[#5E45A8]',
     preview: {
       header: "1-Asosiy Fan · O'zbekiston Tarixi",
       badge: '30 ta savol · 60 daqiqa',
@@ -33,7 +33,7 @@ const WORKFLOW_STEPS = [
     tag: 'Tezkor natija',
     desc: "Test yakunlanishi bilan har bir javob tahlil qilinadi: qayerda to'g'ri, qayerda adashganingiz soniyalarda ko'rinadi.",
     icon: AlertCircle,
-    squircle: 'from-[#FF3B30] to-[#D70015]',
+    squircle: 'from-[#F0523D] to-[#C93A28]',
     preview: {
       header: '14-savol natijasi',
       badge: 'Xato javob berildi',
@@ -49,7 +49,7 @@ const WORKFLOW_STEPS = [
     tag: 'Diagnostika',
     desc: "Sun'iy intellekt shunchaki ball chiqarmaydi — aynan qaysi mavzu, davr yoki qoidada bo'shliq borligini xaritalashtiradi.",
     icon: MapPin,
-    squircle: 'from-[#FF9500] to-[#E08600]',
+    squircle: 'from-[#FFB82E] to-[#E89B10]',
     preview: {
       header: 'Zaif mavzular xaritasi',
       badge: "O'zlashtirish: 54%",
@@ -65,7 +65,7 @@ const WORKFLOW_STEPS = [
     tag: 'Noyob imkoniyat',
     desc: "AI Mentor savol xatosini tushuntiradi va rasmiy maktab darsligining aynan qaysi kitob, bob va betida yozilganini ko'rsatadi.",
     icon: BookMarked,
-    squircle: 'from-[#5856D6] to-[#4644B5]',
+    squircle: 'from-[#7659C7] to-[#5E45A8]',
     preview: {
       header: 'AI Mentor tushuntirishi',
       badge: 'Darslikka havola',
@@ -81,7 +81,7 @@ const WORKFLOW_STEPS = [
     tag: 'Mustahkamlash',
     desc: "Butun fanni qaytadan emas — faqat xato qilingan zaif mavzu bo'yicha adaptiv mini-mashqlar beriladi.",
     icon: RotateCcw,
-    squircle: 'from-[#AF52DE] to-[#8E3CBE]',
+    squircle: 'from-[#9B7FE0] to-[#7659C7]',
     preview: {
       header: 'Kuchsiz mavzuni mustahkamlash',
       badge: '3 ta maqsadli savol',
@@ -97,7 +97,7 @@ const WORKFLOW_STEPS = [
     tag: 'Natija',
     desc: "Bo'shliqlar yopilgan sari kutilayotgan DTM ballingiz oshadi, streak olovlanadi va rasmiy sertifikatga ega bo'lasiz.",
     icon: TrendingUp,
-    squircle: 'from-[#34C759] to-[#28A745]',
+    squircle: 'from-[#4C806B] to-[#3A6654]',
     preview: {
       header: 'Imtihonga tayyorgarlik darajasi',
       badge: 'A+ Daraja (184+ ball)',
@@ -143,17 +143,17 @@ export default function ProductWorkflow() {
     <section id="qanday" className="relative mx-auto max-w-7xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mx-auto max-w-3xl text-center">
-        <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
+        <div className="text-xs font-bold uppercase tracking-widest text-[#7659C7]">
           Natija Beruvchi Tizim
         </div>
-        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl md:text-5xl">
+        <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#080808] sm:text-4xl md:text-5xl">
           IlmIldizi qanday qilib{' '}
-          <span className="bg-gradient-to-r from-[#007AFF] via-[#5856D6] to-[#34C759] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#7659C7] via-[#7659C7] to-[#4C806B] bg-clip-text text-transparent">
             xatoni ildizidan
           </span>{' '}
           yo&apos;qotadi?
         </h2>
-        <p className="mt-4 text-sm text-[#6C6C70] sm:text-base leading-relaxed">
+        <p className="mt-4 text-sm text-[#6B6577] sm:text-base leading-relaxed">
           Oddiy test botlarida siz faqat to&apos;g&apos;ri yoki xato javobni ko&apos;rasiz. IlmIldizida esa har bir xato — darslik betigacha tahlil qilinib, to&apos;liq o&apos;zlashtirilmaguncha mustahkamlanadi.
         </p>
       </div>
@@ -178,25 +178,25 @@ export default function ProductWorkflow() {
               className={cn(
                 'ios-spring relative flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold shrink-0 cursor-pointer border overflow-hidden',
                 isActive
-                  ? 'bg-[#1C1C1E] text-white border-[#1C1C1E] shadow-[0_6px_18px_rgba(0,0,0,0.14)]'
-                  : 'bg-white text-[#3A3A3C] border-black/[0.07] hover:bg-white/90 hover:text-[#1C1C1E]'
+                  ? 'bg-[#080808] text-white border-[#080808] shadow-[0_6px_18px_rgba(0,0,0,0.14)]'
+                  : 'bg-white text-[#3D3846] border-black/[0.07] hover:bg-white/90 hover:text-[#080808]'
               )}
             >
               <span
                 className={cn(
                   'flex size-5 items-center justify-center rounded-full font-mono text-[12px] font-bold',
-                  isActive ? 'bg-[#007AFF] text-white' : 'bg-[#F2F2F7] text-[#6C6C70]'
+                  isActive ? 'bg-[#7659C7] text-white' : 'bg-[#F7F4EF] text-[#6B6577]'
                 )}
               >
                 {step.step}
               </span>
-              <Icon className={cn('size-3.5', isActive ? 'text-[#64D2FF]' : 'text-[#8E8E93]')} />
+              <Icon className={cn('size-3.5', isActive ? 'text-[#70B5D5]' : 'text-[#8A8494]')} />
               <span>{step.title}</span>
 
               {isActive && !isHovered && (
                 <span
                   key={`progress-${activeIdx}`}
-                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#007AFF] animate-step-progress"
+                  className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#7659C7] animate-step-progress"
                 />
               )}
             </button>
@@ -211,28 +211,28 @@ export default function ProductWorkflow() {
           {/* Left: Explanation */}
           <div className="lg:col-span-6 space-y-4">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold uppercase text-[#007AFF] bg-[#007AFF]/10 px-3 py-1 rounded-full">
+              <span className="font-mono text-xs font-bold uppercase text-[#7659C7] bg-[#7659C7]/10 px-3 py-1 rounded-full">
                 Bosqich {activeStep.step} / 06
               </span>
-              <span className="text-[12px] font-semibold text-[#6C6C70] bg-[#F2F2F7] px-3 py-1 rounded-full">
+              <span className="text-[12px] font-semibold text-[#6B6577] bg-[#F7F4EF] px-3 py-1 rounded-full">
                 {activeStep.tag}
               </span>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl font-bold text-[#1C1C1E] tracking-[-0.02em]">
+            <h3 className="text-2xl sm:text-3xl font-bold text-[#080808] tracking-[-0.02em]">
               {activeStep.title}
             </h3>
 
-            <p className="text-sm sm:text-base text-[#6C6C70] leading-relaxed font-normal">
+            <p className="text-sm sm:text-base text-[#6B6577] leading-relaxed font-normal">
               {activeStep.desc}
             </p>
 
             <div className="pt-4 border-t border-black/[0.06]">
-              <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider mb-2">
+              <p className="text-xs font-bold text-[#8A8494] uppercase tracking-wider mb-2">
                 Ushbu bosqichdagi asosiy vazifa:
               </p>
-              <div className="flex items-start gap-2.5 text-xs text-[#3A3A3C]">
-                <CheckCircle2 className="size-4 text-[#34C759] shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 text-xs text-[#3D3846]">
+                <CheckCircle2 className="size-4 text-[#4C806B] shrink-0 mt-0.5" />
                 <span className="leading-relaxed">{activeStep.preview.detailSub}</span>
               </div>
             </div>
@@ -240,18 +240,18 @@ export default function ProductWorkflow() {
             <div className="pt-3 flex items-center gap-3">
               <Link
                 href="/register"
-                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#007AFF] hover:bg-[#0062CC] px-6 py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_6px_18px_rgba(0,122,255,0.3)]"
+                className="ios-spring inline-flex items-center gap-1.5 rounded-full bg-[#7659C7] hover:bg-[#5E45A8] px-6 py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_6px_18px_rgba(118,89,199,0.3)]"
               >
                 <span>O&apos;zingizda sinab ko&apos;ring</span>
                 <ArrowRight className="size-4" />
               </Link>
-              <span className="text-xs text-[#8E8E93]">Karta talab etilmaydi</span>
+              <span className="text-xs text-[#8A8494]">Karta talab etilmaydi</span>
             </div>
           </div>
 
           {/* Right: macOS / iPadOS Window Preview */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-2xl border border-black/[0.08] bg-[#F2F2F7] p-5 sm:p-6 shadow-inner space-y-4">
+            <div className="relative rounded-2xl border border-black/[0.08] bg-[#F7F4EF] p-5 sm:p-6 shadow-inner space-y-4">
               {/* macOS Window Traffic Lights */}
               <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
                 <div className="flex items-center gap-2">
@@ -260,11 +260,11 @@ export default function ProductWorkflow() {
                     <span className="size-3 rounded-full bg-[#FEBC2E] border border-black/10" />
                     <span className="size-3 rounded-full bg-[#28C840] border border-black/10" />
                   </div>
-                  <span className="text-xs font-mono font-medium text-[#8E8E93] ml-2">
+                  <span className="text-xs font-mono font-medium text-[#8A8494] ml-2">
                     ilmildizi.uz/{activeStep.id}
                   </span>
                 </div>
-                <span className="rounded-full bg-white px-2.5 py-0.5 text-[12px] font-semibold text-[#1C1C1E] shadow-2xs">
+                <span className="rounded-full bg-white px-2.5 py-0.5 text-[12px] font-semibold text-[#080808] shadow-2xs">
                   {activeStep.preview.chip}
                 </span>
               </div>
@@ -272,24 +272,24 @@ export default function ProductWorkflow() {
               {/* Inner White iOS Card */}
               <div className="rounded-xl bg-white p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-bold text-[#1C1C1E]">{activeStep.preview.header}</p>
-                  <span className="text-[12px] font-mono font-bold text-[#248A3D] bg-[#34C759]/12 px-2.5 py-0.5 rounded-full">
+                  <p className="text-xs font-bold text-[#080808]">{activeStep.preview.header}</p>
+                  <span className="text-[12px] font-mono font-bold text-[#3A6654] bg-[#4C806B]/12 px-2.5 py-0.5 rounded-full">
                     {activeStep.preview.badge}
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-lg bg-[#F2F2F7] space-y-1.5">
-                  <p className="text-xs font-bold text-[#1C1C1E] flex items-center gap-1.5">
-                    <Sparkles className="size-3.5 text-[#FF9500]" />
+                <div className="p-3.5 rounded-lg bg-[#F7F4EF] space-y-1.5">
+                  <p className="text-xs font-bold text-[#080808] flex items-center gap-1.5">
+                    <Sparkles className="size-3.5 text-[#FFB82E]" />
                     {activeStep.preview.detailTitle}
                   </p>
-                  <p className="text-xs text-[#6C6C70] leading-relaxed">
+                  <p className="text-xs text-[#6B6577] leading-relaxed">
                     {activeStep.preview.detailSub}
                   </p>
                 </div>
 
                 {/* Page Control Dots */}
-                <div className="pt-1 flex items-center justify-between text-[12px] text-[#8E8E93]">
+                <div className="pt-1 flex items-center justify-between text-[12px] text-[#8A8494]">
                   <span>Sikldagi o&apos;rni:</span>
                   <div className="flex items-center gap-1.5">
                     {WORKFLOW_STEPS.map((_, i) => (
@@ -298,7 +298,7 @@ export default function ProductWorkflow() {
                         onClick={() => setActiveIdx(i)}
                         className={cn(
                           'h-1.5 rounded-full transition-all cursor-pointer',
-                          i === activeIdx ? 'w-6 bg-[#007AFF]' : 'w-2 bg-black/15 hover:bg-black/25'
+                          i === activeIdx ? 'w-6 bg-[#7659C7]' : 'w-2 bg-black/15 hover:bg-black/25'
                         )}
                         aria-label={`Bosqich ${i + 1}`}
                       />

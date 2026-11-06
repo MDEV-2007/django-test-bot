@@ -1,18 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Trophy,
-  ChevronRight,
   Sparkles,
   Bell,
-  CheckCheck,
   Heart,
   MessageCircle,
   Swords,
-  X,
   BookOpen,
   Brain,
 } from 'lucide-react';
@@ -23,8 +20,9 @@ import { apiFetch } from '@/lib/api-client';
 import Celebration from '@/components/student/Celebration';
 import DailyChestModal, { DailyChestStatus } from '@/components/student/DailyChestModal';
 import ModernAppLayout from '@/components/layout/ModernAppLayout';
+import MagneticLoopCard from '@/components/dashboard/MagneticLoopCard';
+import NotificationsPanel from '@/components/NotificationsPanel';
 import PremiumIcon from '@/components/ui/premium-icon';
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { greeting, relativeTime } from '@/components/design/kit';
@@ -232,36 +230,10 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access]);
 
+  const closeNotifications = useCallback(() => setShowNotifications(false), []);
+
   const handleOpenNotifications = () => {
-    const nextState = !showNotifications;
-    setShowNotifications(nextState);
-    if (nextState) loadNotifications();
-  };
-
-  const handleMarkAllRead = async () => {
-    try {
-      await apiFetch('/api/dashboard/notifications/', {
-        method: 'POST',
-        body: JSON.stringify({ action: 'mark_all_read' }),
-      });
-      setUnreadCount(0);
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    } catch (err) {
-      console.error('Failed to mark all as read', err);
-    }
-  };
-
-  const handleMarkSingleRead = async (id: number) => {
-    try {
-      await apiFetch('/api/dashboard/notifications/', {
-        method: 'POST',
-        body: JSON.stringify({ id }),
-      });
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
-      setUnreadCount((c) => Math.max(0, c - 1));
-    } catch (err) {
-      console.error('Failed to mark notification as read', err);
-    }
+    setShowNotifications((v) => !v);
   };
 
   useEffect(() => {
@@ -371,6 +343,10 @@ export default function DashboardPage() {
           elo={p.elo_rating}
         />
 
+        <InView>
+          <MagneticLoopCard userName={firstName} userStreak={p.streak} />
+        </InView>
+
         <StatBento
           streak={p.streak}
           freezeCount={data.freeze_count}
@@ -433,110 +409,13 @@ export default function DashboardPage() {
         </InView>
       </div>
 
-      {/* iOS NOTIFICATION CENTER SHEET POPOVER */}
-      {showNotifications && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/35 backdrop-blur-xs"
-            onClick={() => setShowNotifications(false)}
-          />
-          <div className="fixed right-4 sm:right-8 top-18 w-[calc(100vw-2rem)] max-w-sm sm:w-96 rounded-[28px] border border-border bg-card/90 ios-glass-heavy shadow-2xl z-50 overflow-hidden animate-scaleIn text-card-foreground">
-            <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
-              <div className="flex items-center gap-2">
-                <PremiumIcon icon={Bell} tone="sky" size="2xs" />
-                <h3 className="text-sm font-bold text-foreground">Bildirishnomalar</h3>
-                {unreadCount > 0 && (
-                  <Badge className="text-[10px] px-2 py-0 h-4.5 rounded-full bg-primary/12 text-primary font-bold border-0">
-                    {unreadCount} yangi
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                {unreadCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleMarkAllRead}
-                    className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1 px-1.5 py-1 rounded cursor-pointer"
-                    title="Barchasini o'qilgan deb belgilash"
-                  >
-                    <CheckCheck className="size-3.5" />
-                    <span>O&apos;qildi</span>
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowNotifications(false)}
-                  className="size-7 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                  aria-label="Yopish"
-                >
-                  <X className="size-3.5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="max-h-[380px] overflow-y-auto divide-y divide-border">
-              {loadingNotifs && notifications.length === 0 ? (
-                <div className="p-6 space-y-3">
-                  <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
-                  <Skeleton className="h-14 w-full rounded-2xl bg-muted" />
-                </div>
-              ) : notifications.length === 0 ? (
-                <div className="p-8 text-center space-y-2.5">
-                  <PremiumIcon icon={Bell} tone="zinc" size="lg" className="mx-auto" />
-                  <p className="text-sm font-bold text-foreground">Yangi bildirishnoma yo&apos;q</p>
-                  <p className="text-xs text-muted-foreground max-w-[240px] mx-auto">
-                    Hamjamiyatda post yozing, darslarni bajaring yoki bellashuvlarda qatnashing!
-                  </p>
-                </div>
-              ) : (
-                notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    onClick={() => !n.is_read && handleMarkSingleRead(n.id)}
-                    className={cn(
-                      'flex items-start gap-3 p-3.5 transition-colors cursor-pointer',
-                      n.is_read ? 'hover:bg-muted/50' : 'bg-primary/6 hover:bg-primary/10'
-                    )}
-                  >
-                    <div className="shrink-0 pt-0.5">
-                      {getNotifIcon(n.type, n.title)}
-                    </div>
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className={cn('text-xs font-bold truncate', n.is_read ? 'text-foreground' : 'text-primary')}>
-                          {n.title}
-                        </p>
-                        {!n.is_read && (
-                          <span className="size-2 rounded-full bg-primary shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                        {n.message}
-                      </p>
-                      {n.created_at && (
-                        <p className="text-[10px] text-muted-foreground font-mono pt-0.5 opacity-80">
-                          {n.created_at}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="p-3 border-t border-border bg-muted/40 text-center">
-              <Link
-                href="/feed"
-                onClick={() => setShowNotifications(false)}
-                className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
-              >
-                <span>Hamjamiyat muhokamalariga o&apos;tish</span>
-                <ChevronRight className="size-3.5" />
-              </Link>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Bildirishnomalar paneli (header bilan umumiy komponent) */}
+      <NotificationsPanel
+        open={showNotifications}
+        onClose={closeNotifications}
+        onUnreadChange={setUnreadCount}
+        onChanged={loadNotifications}
+      />
 
       {/* Daily Mystery Chest Modal */}
       <DailyChestModal

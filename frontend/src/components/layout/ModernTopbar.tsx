@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Flame, Bell, Search, Sun, Moon, ChevronDown } from 'lucide-react';
+import { Flame, Bell, Search, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useTransliterate } from '@/lib/transliterate';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { BrandMark } from '@/components/BrandMark';
 import ScriptToggle from '@/components/ScriptToggle';
+import NotificationsPanel from '@/components/NotificationsPanel';
 import { Initials, greeting } from '@/components/design/kit';
 import { cn } from '@/lib/utils';
 
@@ -47,7 +48,8 @@ function titleFor(pathname: string | null) {
 }
 
 interface ModernTopbarProps {
-  onMenuClick: () => void;
+  /** Eski burger tugmasi uchun edi — endi ishlatilmaydi (mobilda pastki tab bar bor). */
+  onMenuClick?: () => void;
   user?: {
     username: string;
     first_name?: string;
@@ -69,7 +71,6 @@ interface ModernTopbarProps {
 }
 
 export default function ModernTopbar({
-  onMenuClick,
   user,
   unreadCount = 0,
   onNotificationsClick,
@@ -86,12 +87,26 @@ export default function ModernTopbar({
   const displayName = user
     ? [user.first_name, user.last_name ? `${user.last_name[0]}.` : ''].filter(Boolean).join(' ') || user.username
     : '';
+  // Sahifa tepasida header shaffof; ozgina pastga aylantirilganda fon silliq paydo bo'ladi.
+  const [scrolled, setScrolled] = useState(false);
+  // Bildirishnomalar paneli shu sahifaning o'zida ochiladi (dashboard'ga o'tib ketmaydi).
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [unreadLocal, setUnreadLocal] = useState<number | null>(null);
+  const closeNotif = useCallback(() => setNotifOpen(false), []);
+  const unread = unreadLocal ?? unreadCount;
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const search = onSearchClick ?? (() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true })));
 
   const bellInner = (
     <>
       <Bell className="size-[18px]" strokeWidth={1.9} />
-      {unreadCount > 0 && (
+      {unread > 0 && (
         <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[var(--danger)] ring-2 ring-[var(--surface-card)]" />
       )}
     </>
@@ -101,26 +116,21 @@ export default function ModernTopbar({
 
   return (
     <header
+      data-scrolled={scrolled ? 'true' : 'false'}
       className={cn(
-        'ds-topbar sticky top-0 z-20 flex h-14 w-full items-center justify-between gap-3 border-b border-[var(--ds-panel-border)] bg-[var(--surface-card)]/85 px-3 sm:px-6 ios-glass',
+        'ds-topbar sticky top-0 z-20 flex h-14 w-full items-center justify-between gap-3 border-b border-[var(--ds-panel-border)] bg-[var(--surface-card)]/85 px-3 sm:px-6',
+        // Blur faqat aylantirilganda (CSS kompilyatori theme faylidagi backdrop-filter'ni tashlab yuboradi)
+        scrolled && 'backdrop-blur-xl backdrop-saturate-150',
         className,
       )}
     >
-      {/* Left: menu (mobile) + brand (mobile) + page title (desktop) */}
+      {/* Left: brand (mobile) + page title (desktop) */}
       <div className="flex items-center gap-2.5 min-w-0">
-        <button
-          type="button"
-          onClick={onMenuClick}
-          className="ps-tb-menu lg:hidden flex size-9 shrink-0 items-center justify-center rounded-lg border border-[var(--ds-panel-border)] bg-[var(--surface-card)] text-foreground cursor-pointer"
-          aria-label="Menyu ochish"
-        >
-          <Menu className="size-4" />
-        </button>
 
         <Link href="/dashboard" className="lg:hidden flex items-center gap-2 min-w-0">
           <BrandMark size={26} rounded="rounded-md" />
-          <span className="font-bold text-sm tracking-tight text-foreground truncate">
-            {t('Ilm')}<span className="text-[var(--brand-text)]">{t('Ildizi')}</span>
+          <span data-no-translit className="font-bold text-sm tracking-tight text-foreground truncate">
+            Ilm<span className="text-[var(--brand-text)]">Ildizi</span>
           </span>
         </Link>
 
@@ -175,14 +185,21 @@ export default function ModernTopbar({
                 {bellInner}
               </button>
             ) : (
-              <Link href={notificationsHref || '/dashboard?notifications=1'} className={bellCls} aria-label="Bildirishnomalar">
-                {bellInner}
-              </Link>
+              notificationsHref ? (
+                <Link href={notificationsHref} className={bellCls} aria-label="Bildirishnomalar">
+                  {bellInner}
+                </Link>
+              ) : (
+                <button type="button" onClick={() => setNotifOpen((v) => !v)} className={bellCls} aria-label="Bildirishnomalar">
+                  {bellInner}
+                </button>
+              )
             )}
           </>
         )}
 
-        <div className="hidden min-[400px]:block">
+        {/* Mobilda til va tungi rejim profil sahifasida turadi */}
+        <div className="hidden sm:block">
           <ScriptToggle />
         </div>
 
@@ -205,10 +222,12 @@ export default function ModernTopbar({
               <span className="text-xs font-bold text-foreground truncate max-w-[110px]">{displayName}</span>
               <span className="text-[10px] text-muted-foreground">{greeting()}</span>
             </span>
-            <ChevronDown className="hidden lg:block size-3.5 text-muted-foreground" />
           </Link>
         )}
       </div>
+      {!onNotificationsClick && !notificationsHref && (
+        <NotificationsPanel open={notifOpen} onClose={closeNotif} onUnreadChange={setUnreadLocal} />
+      )}
     </header>
   );
 }

@@ -1892,14 +1892,18 @@ def community_post_report_api(request, post_id):
     reason = request.data.get('reason') or 'other'
     if reason not in dict(CommunityPostReport.REASONS):
         reason = 'other'
+    details = str(request.data.get('details') or '').strip()[:500]
     created = True
     try:
         with transaction.atomic():
-            CommunityPostReport.objects.create(post=post, reporter=request.user, reason=reason)
+            CommunityPostReport.objects.create(post=post, reporter=request.user, reason=reason, details=details)
     except IntegrityError:
         created = False
     count = post.reports.count()
-    if count >= POST_REPORT_HIDE_THRESHOLD and not post.is_hidden:
+    # Bolalar xavfsizligi bo'yicha shikoyat — post
+    # moderator ko'rib chiqquncha darhol yashiriladi.
+    severe = created and reason in CommunityPostReport.SEVERE_REASONS
+    if (severe or count >= POST_REPORT_HIDE_THRESHOLD) and not post.is_hidden:
         CommunityPost.objects.filter(pk=post.pk).update(is_hidden=True)
     return Response({'success': True, 'already_reported': not created,
                      'message': "Shikoyatingiz qabul qilindi. Moderator ko'rib chiqadi."})

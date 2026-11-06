@@ -828,122 +828,108 @@ export default function FeedbackPage() {
           const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrUrl)}&color=0f172a&bgcolor=fefcf6`;
 
           return (
-            <div className="relative overflow-hidden rounded-3xl border-2 border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-amber-100/5 to-amber-500/10 p-5 sm:p-7 shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-amber-300/30">
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-                    <Award className="size-3.5" /> Natija kartasi
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-black text-foreground">
-                    Natijangiz kartasi tayyor! 📜
+            <section className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
+              <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[var(--ps-orange)] opacity-20" />
+              {/* Sarlavha */}
+              <div className="relative mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div>
+                  <span className="ps-chip"><Award className="size-3.5 text-[var(--ps-orange)]" /> Natija kartasi</span>
+                  <h3 className="ps-display mt-4 text-[28px] sm:text-[36px]">
+                    Kartangiz <span className="text-[var(--ps-orange)]">tayyor</span>
+                    <span className="text-[var(--ps-coral)]">.</span>
                   </h3>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-[var(--text-muted)]">
                     Natijangizni rasm yoki PDF qilib saqlang va ulashing. Bu IlmIldizi mashq testi natijasi — rasmiy BMB sertifikati emas.
                   </p>
                 </div>
-                <Button
-                  onClick={() => setCertOpen(true)}
-                  className="rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold shadow-lg shadow-amber-500/20 gap-2 shrink-0 h-11 px-5"
-                >
-                  <Award className="size-4" /> To&apos;liq ochish va yuklab olish (PNG/PDF)
-                </Button>
+                <button type="button" onClick={() => setCertOpen(true)} className="ps-btn ps-btn-ink shrink-0">
+                  <Award className="size-4 text-[var(--ps-orange)]" />
+                  Ochish va yuklab olish
+                  <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                </button>
               </div>
 
-              {/* Natija kartasi (qaymoqrang, tilla hoshiya, IlmIldizi logosi, natijaga QR havola) */}
-              <div 
+              {/* Karta */}
+              <div
                 onClick={() => setCertOpen(true)}
-                className="cursor-pointer group relative mx-auto w-full max-w-[580px] bg-[#fefcf6] border-[3px] border-[#c59b27] p-2.5 sm:p-3.5 shadow-xl rounded-sm transition-all hover:scale-[1.01] hover:shadow-2xl overflow-hidden"
+                className="group relative mx-auto w-full max-w-[620px] cursor-pointer overflow-hidden rounded-[32px] bg-[#FFFCF7] text-[#080808] shadow-[0_30px_60px_-30px_rgba(60,30,110,0.6)] transition-transform duration-300 hover:-translate-y-1"
               >
-                {/* Orqa fon: Nozik IlmIldizi Watermark */}
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.035] select-none">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icon-192.png" alt="" className="size-64 object-contain grayscale" />
+                {/* Yuqori binafsha lenta */}
+                <div className="relative overflow-hidden bg-[#7659C7] px-6 pb-14 pt-6 text-white sm:px-8">
+                  <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-white/15" />
+                  <span aria-hidden className="absolute bottom-6 left-1/2 size-16 rounded-full bg-[#FFB82E] opacity-80" />
+                  <span aria-hidden className="ps-dots absolute bottom-4 right-6 h-14 w-28 opacity-25" />
+                  <div className="relative flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 items-center justify-center overflow-hidden rounded-full bg-white p-1">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icon-192.png" alt="IlmIldizi" className="size-full rounded-full object-contain" />
+                      </span>
+                      <div>
+                        <p className="font-[family-name:var(--font-grotesk)] text-[18px] font-bold leading-none tracking-[-0.02em]">
+                          <span data-no-translit>IlmIldizi</span>
+                        </p>
+                        <p className="mt-1 text-[10.5px] font-bold uppercase tracking-wider text-white/75">Onlayn mashq platformasi</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-black/20 px-3 py-1 font-mono text-[11px] font-bold">{certNumber}</span>
+                  </div>
+                  <h4 className="relative mt-6 font-[family-name:var(--font-grotesk)] text-[30px] font-bold leading-none tracking-[-0.03em] sm:text-[38px]">
+                    Mashq testi<br />natija kartasi
+                  </h4>
                 </div>
 
-                <div className="relative border border-[#d4af37] p-4 sm:p-6 bg-[#fdfbf7]/90 flex flex-col items-center text-[#0f172a]">
-                  
-                  {/* Top Emblem: Official IlmIldizi Logo with Gold Medallion Ring */}
-                  <div className="relative size-16 sm:size-18 rounded-full border-2 border-[#c59b27] bg-white flex items-center justify-center p-1.5 mb-2 shadow-sm ring-4 ring-[#e5c158]/30">
+                {/* Ball doirasi — lentadan chiqib turadi */}
+                <div className="relative -mt-8 flex items-end justify-between gap-4 px-6 sm:px-8">
+                  <div className="flex items-end gap-3">
+                    <span className="grid size-24 shrink-0 place-items-center rounded-full border-[6px] border-[#FFFCF7] bg-[#FFB82E] text-[#080808] shadow-lg">
+                      <span className="text-center leading-none">
+                        <span className="block font-[family-name:var(--font-grotesk)] text-[30px] font-bold">{scaledScoreStr}</span>
+                        <span className="mt-0.5 block text-[10px] font-black uppercase">ball</span>
+                      </span>
+                    </span>
+                    <div className="pb-1">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-[#8A8494]">Talabgor</p>
+                      <p className="max-w-[220px] truncate font-[family-name:var(--font-grotesk)] text-[20px] font-bold tracking-[-0.02em]">{fullName}</p>
+                    </div>
+                  </div>
+                  <span className="mb-2 inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-[#080808] font-[family-name:var(--font-grotesk)] text-[20px] font-bold text-[#FFB82E]">
+                    {certGrade}
+                  </span>
+                </div>
+
+                {/* Ma'lumotlar */}
+                <div className="grid grid-cols-2 gap-2.5 px-6 pt-5 sm:px-8">
+                  {[
+                    { label: 'Fan / test', value: data?.attempt?.test_title || 'Tarix Milliy Sertifikat', wide: true },
+                    { label: 'Foiz ko‘rsatkichi', value: pctVal },
+                    { label: 'Test sinovi natijasi', value: scaledScoreComma },
+                    { label: 'Talabgor kodi', value: personalCode },
+                    { label: 'Taxminiy daraja', value: certGrade },
+                  ].map((row) => (
+                    <div key={row.label} className={cn('rounded-[18px] bg-[#F7F4EF] px-4 py-3', row.wide && 'col-span-2')}>
+                      <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#8A8494]">{row.label}</p>
+                      <p className={cn('mt-0.5 font-bold', row.wide ? 'text-[14px] leading-snug' : 'font-mono text-[16px]')}>{row.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pastki qism: ogohlantirish va QR */}
+                <div className="mt-5 flex items-center justify-between gap-4 border-t border-dashed border-[#E6DED2] px-6 py-5 sm:px-8">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black uppercase tracking-wider text-[#7659C7]">Rasmiy hujjat emas</p>
+                    <p className="mt-1 text-[12px] leading-snug text-[#6B6577]">BMB formatidagi mashq testi natijasi. QR orqali natija sahifasini oching.</p>
+                    <p className="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-[#080808] group-hover:underline">
+                      Bosing: to&apos;liq ochish va yuklab olish <ArrowRight className="size-3.5" />
+                    </p>
+                  </div>
+                  <div className="shrink-0 rounded-[18px] bg-white p-2 shadow-[0_10px_24px_-14px_rgba(60,30,110,0.6)]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="/icon-192.png"
-                      alt="IlmIldizi"
-                      className="size-full object-contain rounded-full"
-                    />
-                  </div>
-                  <p className="text-[10px] sm:text-xs font-bold text-[#065f46] uppercase tracking-wider font-serif text-center">
-                    ILMILDIZI · ONLAYN MASHQ PLATFORMASI
-                  </p>
-                  {/* Davlat organi (BMB) nomi va "rasmiy" so'zi ataylab ishlatilmaydi: bu
-                      platformaning mashq natijasi, davlat hujjatiga o'xshatish noqonuniy. */}
-                  <p className="text-[9px] sm:text-[10.5px] font-extrabold text-[#1c3c87] uppercase tracking-wide mb-2 text-center">
-                    Rasmiy hujjat emas · BMB formatidagi mashq testi
-                  </p>
-
-                  {/* Title */}
-                  <h4 className="font-serif text-sm sm:text-base font-black text-[#0f172a] uppercase tracking-wide text-center leading-snug">
-                    MASHQ TESTI<br />NATIJA KARTASI
-                  </h4>
-
-                  {/* Data Rows */}
-                  <div className="w-full mt-3 space-y-2 text-[11px] sm:text-xs">
-                    <div className="space-y-1 pb-1.5 border-b border-[#e5c158]">
-                      <div className="flex justify-between">
-                        <span className="font-bold text-[#1c3c87]">Natija raqami:</span>
-                        <span className="font-mono font-bold">{certNumber}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-bold text-[#1c3c87]">Talabgor kodi:</span>
-                        <span className="font-mono font-bold">{personalCode}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-bold text-[#1c3c87]">Talabgor:</span>
-                        <span className="font-bold tracking-wide">{fullName}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 pb-1.5 border-b border-[#e5c158]">
-                      <div className="flex justify-between">
-                        <span className="font-bold text-[#1c3c87]">Umumta&apos;lim fani:</span>
-                        <span className="font-bold">{data?.attempt?.test_title || "Tarix Milliy Sertifikat"}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-bold text-[#1c3c87]">Umumiy to&apos;plagan bali:</span>
-                        <span className="font-mono font-black text-sm">{scaledScoreStr}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="font-bold text-[#1c3c87]">Umumiy ballga nisbatan foiz ko&apos;rsatkichi:</span>
-                        <span className="font-mono font-bold">{pctVal}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-[#1c3c87]">Taxminiy daraja:</span>
-                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-300 font-black text-xs font-mono">
-                          {certGrade}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between pb-1.5 border-b border-[#e5c158]">
-                      <span className="font-bold text-[#1c3c87]">Test sinovi natijasi:</span>
-                      <span className="font-mono font-black">{scaledScoreComma}</span>
-                    </div>
-                  </div>
-
-                  {/* Pastda: natija sahifasiga QR havola (imzo/muhr yo'q — bu rasmiy hujjat emas) */}
-                  <div className="w-full flex items-center justify-center gap-3 mt-4 pt-2">
-                    <div className="shrink-0 p-1 border border-[#c59b27] bg-white rounded flex flex-col items-center shadow-xs">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={qrImgUrl} alt="Natija sahifasiga QR havola" className="size-14 sm:size-16 object-contain" />
-                      <span className="text-[7px] font-bold text-[#065f46] mt-0.5">NATIJANI KO&apos;RISH</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 text-[10px] text-amber-700 font-bold group-hover:underline flex items-center gap-1">
-                    Bosing: kartani to&apos;liq ochish va yuklab olish &rarr;
+                    <img src={qrImgUrl} alt="Natija sahifasiga QR havola" className="size-16 object-contain sm:size-20" />
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
           );
         })()}
 

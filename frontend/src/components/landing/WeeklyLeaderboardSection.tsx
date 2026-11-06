@@ -85,14 +85,14 @@ export default function WeeklyLeaderboardSection() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9500]/14 px-3.5 py-1 text-xs font-bold tracking-wider text-[#C93400] uppercase">
-            <Trophy className="size-3.5 text-[#FF9500]" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#FFB82E]/14 px-3.5 py-1 text-xs font-bold tracking-wider text-[#9A5A00] uppercase">
+            <Trophy className="size-3.5 text-[#FFB82E]" />
             <span>Game Center Peshqadamlari</span>
           </div>
-          <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#1C1C1E] sm:text-4xl lg:text-5xl">
+          <h2 className="mt-2.5 text-3xl font-bold tracking-[-0.03em] text-[#080808] sm:text-4xl lg:text-5xl">
             Haftalik Yetakchilar Reytingi
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-[#6C6C70] font-normal">
+          <p className="mt-2 text-sm sm:text-base text-[#6B6577] font-normal">
             Har hafta eng ko&apos;p test yechgan va yuqori foiz qayd etgan top o&apos;quvchilar
           </p>
         </div>
@@ -101,9 +101,9 @@ export default function WeeklyLeaderboardSection() {
         <button
           onClick={fetchData}
           title="Reytingni yangilash"
-          className="ios-spring inline-flex items-center gap-2 text-xs font-semibold text-[#007AFF] bg-white border border-black/[0.08] rounded-full px-4 py-2 self-start md:self-end shadow-2xs cursor-pointer"
+          className="ios-spring inline-flex items-center gap-2 text-xs font-semibold text-[#7659C7] bg-white border border-black/[0.08] rounded-full px-4 py-2 self-start md:self-end shadow-2xs cursor-pointer"
         >
-          <RotateCw className={`size-3.5 text-[#007AFF] ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RotateCw className={`size-3.5 text-[#7659C7] ${isRefreshing ? 'animate-spin' : ''}`} />
           <span>Jonli yangilanadi</span>
         </button>
       </div>
@@ -111,7 +111,7 @@ export default function WeeklyLeaderboardSection() {
       {/* Main Grid: Left = iOS Inset Grouped Leaderboard, Right = App Store Reviews */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
         <div className="lg:col-span-7 rounded-3xl border border-black/[0.07] bg-white p-5 sm:p-7 shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
-          <div className="grid grid-cols-12 pb-3 border-b border-black/[0.06] text-[12px] font-bold tracking-wider uppercase text-[#8E8E93]">
+          <div className="grid grid-cols-12 pb-3 border-b border-black/[0.06] text-[12px] font-bold tracking-wider uppercase text-[#8A8494]">
             <span className="col-span-7">O&apos;QUVCHI &amp; VILOYAT</span>
             <span className="col-span-3 text-right">NATIJA</span>
             <span className="col-span-2 text-right">XP BALL</span>
@@ -119,37 +119,37 @@ export default function WeeklyLeaderboardSection() {
 
           <div className="divide-y divide-black/[0.06]">
             {loaded && leaderboard.length === 0 && (
-              <p className="py-6 text-center text-xs text-[#6C6C70]">
+              <p className="py-6 text-center text-xs text-[#6B6577]">
                 Bu hafta hali natija yo&apos;q — birinchi bo&apos;lib test yeching!
               </p>
             )}
             {!loaded && leaderboard.length === 0 && (
-              <p className="py-6 text-center text-xs text-[#8E8E93]" aria-busy="true">Yuklanmoqda...</p>
+              <p className="py-6 text-center text-xs text-[#8A8494]" aria-busy="true">Yuklanmoqda...</p>
             )}
             {leaderboard.map((row) => (
               <div
                 key={row.rank}
-                className="grid grid-cols-12 items-center py-3.5 hover:bg-[#F2F2F7]/70 rounded-xl px-2.5 -mx-2.5 transition-colors group"
+                className="grid grid-cols-12 items-center py-3.5 hover:bg-[#F7F4EF]/70 rounded-xl px-2.5 -mx-2.5 transition-colors group"
               >
                 <div className="col-span-7 flex items-center gap-3">
                   <div className="shrink-0 size-9 rounded-full flex items-center justify-center font-bold text-xs">
                     {row.badgeType === 'gold' && (
-                      <span className="flex size-9 items-center justify-center rounded-full bg-[#FFCC00]/20 text-base">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#FFB82E]/20 text-base">
                         🥇
                       </span>
                     )}
                     {row.badgeType === 'silver' && (
-                      <span className="flex size-9 items-center justify-center rounded-full bg-[#8E8E93]/15 text-base">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#8A8494]/15 text-base">
                         🥈
                       </span>
                     )}
                     {row.badgeType === 'bronze' && (
-                      <span className="flex size-9 items-center justify-center rounded-full bg-[#FF9500]/18 text-base">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#FFB82E]/18 text-base">
                         🥉
                       </span>
                     )}
                     {row.badgeType === 'number' && (
-                      <span className="flex size-9 items-center justify-center rounded-full bg-[#F2F2F7] text-[#3A3A3C] font-mono font-bold">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-[#F7F4EF] text-[#3D3846] font-mono font-bold">
                         {row.rank}
                       </span>
                     )}
@@ -157,29 +157,29 @@ export default function WeeklyLeaderboardSection() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-bold text-[#1C1C1E] text-xs sm:text-sm truncate group-hover:text-[#007AFF] transition-colors">
+                      <span className="font-bold text-[#080808] text-xs sm:text-sm truncate group-hover:text-[#7659C7] transition-colors">
                         {row.name}
                       </span>
                       {row.gradeBadge && (
-                        <span className="inline-flex items-center rounded-full bg-[#34C759]/14 px-2 py-0.5 text-[12px] font-bold text-[#248A3D]">
+                        <span className="inline-flex items-center rounded-full bg-[#4C806B]/14 px-2 py-0.5 text-[12px] font-bold text-[#3A6654]">
                           {row.gradeBadge}
                         </span>
                       )}
                     </div>
-                    <p className="text-[12px] text-[#6C6C70] font-medium truncate mt-0.5">
+                    <p className="text-[12px] text-[#6B6577] font-medium truncate mt-0.5">
                       {row.regionAndSubject}
                     </p>
                   </div>
                 </div>
 
                 <div className="col-span-3 text-right">
-                  <span className="text-xs sm:text-sm font-mono font-semibold text-[#3A3A3C]">
+                  <span className="text-xs sm:text-sm font-mono font-semibold text-[#3D3846]">
                     {row.score}
                   </span>
                 </div>
 
                 <div className="col-span-2 text-right">
-                  <span className="text-xs sm:text-sm font-mono font-bold text-[#007AFF]">
+                  <span className="text-xs sm:text-sm font-mono font-bold text-[#7659C7]">
                     {row.xp}
                   </span>
                 </div>
@@ -192,7 +192,7 @@ export default function WeeklyLeaderboardSection() {
               href={BOT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#007AFF] hover:underline group"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#7659C7] hover:underline group"
             >
               <span>O&apos;z o&apos;rningizni to&apos;liq reytingda ko&apos;ring</span>
               <span className="transition-transform group-hover:translate-x-0.5">→</span>
@@ -202,6 +202,29 @@ export default function WeeklyLeaderboardSection() {
 
         {/* Right Column: App Store Style Review Cards */}
         <div className="lg:col-span-5 flex flex-col gap-5">
+          {/* Sharhlar hali yo'q bo'lsa — o'ng ustun bo'sh qolmasin: reytingga chorlovchi karta */}
+          {reviews.length === 0 && (
+            <div className="relative overflow-hidden rounded-[32px] bg-[#7659C7] p-7 text-white">
+              <span aria-hidden className="absolute -right-10 -top-10 size-40 rounded-full bg-white/15" />
+              <span aria-hidden className="absolute -bottom-10 -left-8 size-28 rounded-full bg-[#FFB82E] opacity-80" />
+              <span className="relative inline-flex size-12 items-center justify-center rounded-full bg-white text-[#7659C7]">
+                <Trophy className="size-6" />
+              </span>
+              <h3 className="relative mt-5 font-[family-name:var(--font-grotesk)] text-[30px] font-bold leading-[1.05] tracking-[-0.03em]">
+                Keyingi hafta jadvalda siz bo&apos;ling
+              </h3>
+              <p className="relative mt-3 text-[14px] leading-relaxed text-white/85">
+                Har yechilgan test va arena g&apos;alabasi XP beradi. Reyting har hafta yangilanadi.
+              </p>
+              <a
+                href="/register"
+                className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-[#FFFCF7] py-2 pl-5 pr-2 text-[14px] font-bold text-[#080808] transition-transform hover:-translate-y-0.5"
+              >
+                Bepul boshlash
+                <span className="inline-flex size-8 items-center justify-center rounded-full bg-[#FFB82E]">→</span>
+              </a>
+            </div>
+          )}
           {reviews.slice(0, 2).map((review, i) => (
             <div
               key={i}
@@ -213,29 +236,29 @@ export default function WeeklyLeaderboardSection() {
                     {Array.from({ length: review.rating }).map((_, starIdx) => (
                       <Star
                         key={starIdx}
-                        className="size-4 fill-[#FF9500] text-[#FF9500]"
+                        className="size-4 fill-[#FFB82E] text-[#FFB82E]"
                       />
                     ))}
                   </div>
-                  <span className="inline-flex items-center rounded-full bg-[#34C759]/14 px-3 py-1 text-xs font-bold text-[#248A3D]">
+                  <span className="inline-flex items-center rounded-full bg-[#4C806B]/14 px-3 py-1 text-xs font-bold text-[#3A6654]">
                     {review.tag}
                   </span>
                 </div>
 
-                <p className="mt-4 text-xs sm:text-sm text-[#3A3A3C] leading-relaxed font-normal">
+                <p className="mt-4 text-xs sm:text-sm text-[#3D3846] leading-relaxed font-normal">
                   &ldquo;{review.quote}&rdquo;
                 </p>
               </div>
 
               <div className="mt-5 flex items-center gap-3 pt-3.5 border-t border-black/[0.06]">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#007AFF] to-[#5856D6] text-white font-bold text-sm shadow-2xs">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#7659C7] to-[#7659C7] text-white font-bold text-sm shadow-2xs">
                   {review.avatarLetter}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-bold text-[#1C1C1E] text-xs sm:text-sm">
+                  <h4 className="font-bold text-[#080808] text-xs sm:text-sm">
                     {review.author}
                   </h4>
-                  <p className="text-[12px] sm:text-xs text-[#6C6C70] truncate">
+                  <p className="text-[12px] sm:text-xs text-[#6B6577] truncate">
                     {review.role}
                   </p>
                 </div>

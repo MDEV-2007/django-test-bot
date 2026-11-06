@@ -2,9 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HelpCircle, CheckCircle2, XCircle, MessageCircle, Share2, Sparkles, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { HelpCircle, CheckCircle2, XCircle, MessageCircle, Sparkles, Users } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { tgHaptic } from '@/lib/telegram';
 import { apiFetch } from '@/lib/api-client';
@@ -101,153 +99,156 @@ export default function SosQuestionCard({
   }
 
   return (
-    <div className="w-full rounded-3xl bg-zinc-900/65 border border-white/[0.08] backdrop-blur-xl p-5 shadow-xl transition-all hover:border-white/[0.14]">
-      {/* Post Author Header */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="relative w-full overflow-hidden rounded-[32px] bg-[var(--ps-paper)] text-[var(--text-primary)] shadow-[var(--ds-panel-shadow)]">
+      {/* SOS lentasi */}
+      <div className="relative flex items-center justify-between gap-3 overflow-hidden bg-[var(--ps-orange)] px-5 py-3 text-[#080808]">
+        <span aria-hidden className="ps-stripes absolute inset-0 opacity-15" />
+        <span className="relative inline-flex items-center gap-2 text-[12px] font-black uppercase tracking-wider">
+          <span className="relative inline-flex size-6 items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)]">
+            <span aria-hidden className="absolute inset-0 animate-ping rounded-full bg-[#080808] opacity-20" />
+            <HelpCircle className="relative size-3.5" />
+          </span>
+          SOS · Yordam so&apos;rovi
+        </span>
+        <span className="relative truncate rounded-full bg-[#080808]/10 px-3 py-1 text-[11.5px] font-bold">{subjectName}</span>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        {/* Muallif */}
         <div className="flex items-center gap-3">
-          <Avatar className="size-10 rounded-full border border-white/10">
+          <Avatar className="size-11 rounded-full ring-2 ring-[var(--ps-orange)] ring-offset-2 ring-offset-[var(--ps-paper)]">
             <AvatarImage src={author.avatar} />
-            <AvatarFallback className="bg-zinc-800 text-xs font-bold text-white">
+            <AvatarFallback className="bg-[var(--ps-neutral)] text-xs font-bold">
               {author.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-white leading-none">{author.name}</span>
-              <span className="text-xs text-zinc-400">@{author.username}</span>
-            </div>
-            <span className="text-[12px] text-zinc-500 font-medium">{subjectName} • SOS Savol</span>
+          <div className="min-w-0">
+            <p className="truncate text-[14.5px] font-bold leading-tight">{author.name}</p>
+            <p className="truncate text-[12px] font-semibold text-[var(--text-muted)]">@{author.username} · yordam so&apos;ramoqda</p>
           </div>
         </div>
 
-        <Badge className="bg-amber-500/15 border-amber-500/30 text-amber-400 text-xs font-bold flex items-center gap-1">
-          <HelpCircle className="size-3.5" />
-          Yordam so'rovi
-        </Badge>
-      </div>
+        {/* Sarlavha va izoh */}
+        <h3 className="mt-4 text-[18px] font-bold leading-snug sm:text-[20px]">{title}</h3>
+        {caption && <p className="mt-1.5 text-[13.5px] leading-relaxed text-[var(--text-secondary)]">{caption}</p>}
 
-      {/* Title & Caption */}
-      <h3 className="text-base sm:text-lg font-bold text-white mb-2 leading-snug">
-        {title}
-      </h3>
-      {caption && (
-        <p className="text-sm text-zinc-300 leading-relaxed mb-4">
-          {caption}
-        </p>
-      )}
+        {/* Savol */}
+        <div className="relative mt-4 overflow-hidden rounded-[24px] bg-[#080808] p-5 text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+          <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-[var(--ps-purple)] opacity-50" />
+          <span className="relative text-[11px] font-black uppercase tracking-wider text-[var(--ps-orange)]">Savol</span>
+          <p className="relative mt-1.5 whitespace-pre-wrap text-[15px] font-semibold leading-relaxed sm:text-[16px]">
+            {poll.question_text || 'Savol matni yuklanmoqda...'}
+          </p>
+        </div>
 
-      {/* The Question Text in stylized box */}
-      <div className="rounded-2xl bg-black/40 border border-white/[0.06] p-4 mb-4">
-        <p className="text-sm sm:text-base font-semibold text-zinc-100 whitespace-pre-wrap leading-relaxed">
-          {poll.question_text || "Savol matni yuklanmoqda..."}
-        </p>
-      </div>
+        {/* Variantlar */}
+        <div className="mt-4 space-y-2.5">
+          {(poll.options || ['A', 'B', 'C', 'D']).map((optText, index) => {
+            const letter = String.fromCharCode(65 + index);
+            const voteCount = poll.votes?.[letter] || 0;
+            const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+            const isSelected = userChoice === letter;
+            const isCorrect = poll.correct_option === letter;
+            const fill = isCorrect ? 'bg-[var(--ps-green)]' : isSelected ? 'bg-[var(--ps-coral)]' : 'bg-[var(--ps-lilac)]';
 
-      {/* Interactive Poll Options (A/B/C/D) */}
-      <div className="space-y-2.5 mb-4">
-        {(poll.options || ['A', 'B', 'C', 'D']).map((optText, index) => {
-          const letter = String.fromCharCode(65 + index); // 'A', 'B', 'C', 'D'
-          const voteCount = poll.votes?.[letter] || 0;
-          const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
-          const isSelected = userChoice === letter;
-          const isCorrect = poll.correct_option === letter;
-
-          return (
-            <button
-              key={letter}
-              onClick={() => handleVote(letter)}
-              disabled={hasVoted || voting}
-              className={cn(
-                'group relative w-full overflow-hidden rounded-2xl border p-3.5 text-left transition-all',
-                hasVoted
-                  ? isCorrect
-                    ? 'border-emerald-500/50 bg-emerald-950/25'
-                    : isSelected
-                    ? 'border-red-500/50 bg-red-950/25'
-                    : 'border-white/[0.06] bg-white/[0.02]'
-                  : 'border-white/[0.08] bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.99]'
-              )}
-            >
-              {/* Progress bar background when voted */}
-              {hasVoted && (
-                <div
-                  className={cn(
-                    'absolute inset-y-0 left-0 transition-all duration-700 opacity-25 rounded-2xl',
-                    isCorrect ? 'bg-emerald-500' : isSelected ? 'bg-red-500' : 'bg-zinc-600'
-                  )}
-                  style={{ width: `${percentage}%` }}
-                />
-              )}
-
-              <div className="relative z-10 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={cn(
-                      'size-7 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 transition-colors',
-                      hasVoted
-                        ? isCorrect
-                          ? 'bg-emerald-500 text-black'
-                          : isSelected
-                          ? 'bg-red-500 text-white'
-                          : 'bg-zinc-800 text-zinc-300'
-                        : 'bg-zinc-800 text-zinc-300 group-hover:bg-amber-500 group-hover:text-black'
-                    )}
-                  >
-                    {letter}
-                  </div>
-                  <span className="text-sm font-medium text-zinc-200">
-                    {optText}
-                  </span>
-                </div>
-
-                {hasVoted && (
-                  <div className="flex items-center gap-2 shrink-0">
-                    {isCorrect && <CheckCircle2 className="size-4 text-emerald-400" />}
-                    {!isCorrect && isSelected && <XCircle className="size-4 text-red-400" />}
-                    <span className="text-xs font-bold text-zinc-300">
-                      {percentage}%
-                    </span>
-                  </div>
+            return (
+              <button
+                key={letter}
+                type="button"
+                onClick={() => handleVote(letter)}
+                disabled={hasVoted || voting}
+                className={cn(
+                  'group relative w-full overflow-hidden rounded-full p-2 pr-5 text-left transition-all',
+                  hasVoted
+                    ? 'cursor-default bg-[var(--ps-neutral)]'
+                    : 'cursor-pointer bg-[var(--ps-neutral)] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac)] active:scale-[0.99]'
                 )}
+              >
+                {hasVoted && (
+                  <span
+                    aria-hidden
+                    className={cn('absolute inset-y-0 left-0 rounded-full transition-[width] duration-700', fill, isCorrect || isSelected ? 'opacity-90' : 'opacity-35')}
+                    style={{ width: `${Math.max(percentage, isCorrect || isSelected ? 12 : 0)}%` }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span
+                      className={cn(
+                        'inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-black transition-colors',
+                        hasVoted
+                          ? isCorrect
+                            ? 'bg-white text-[var(--ps-green)]'
+                            : isSelected
+                              ? 'bg-white text-[var(--ps-coral)]'
+                              : 'bg-[var(--ps-paper)] text-[var(--text-muted)]'
+                          : 'bg-[var(--ps-paper)] text-[var(--text-primary)] group-hover:bg-[#080808] group-hover:text-[var(--ps-orange)]'
+                      )}
+                    >
+                      {letter}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[14.5px] font-semibold',
+                        hasVoted && (isCorrect || isSelected) && percentage >= 40 ? 'text-white' : 'text-[var(--text-primary)]',
+                        hasVoted && !isCorrect && !isSelected && 'text-[var(--text-muted)]'
+                      )}
+                    >
+                      {optText}
+                    </span>
+                  </span>
+                  {hasVoted && (
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      {isCorrect && <CheckCircle2 className="size-5 text-[var(--ps-green)]" />}
+                      {!isCorrect && isSelected && <XCircle className="size-5 text-[var(--ps-coral)]" />}
+                      <span className="rounded-full bg-[var(--ps-paper)] px-2.5 py-0.5 font-mono text-[12px] font-black">{percentage}%</span>
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* AI tushuntirishi */}
+        <AnimatePresence>
+          {showExplanation && poll.explanation && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="relative mt-4 overflow-hidden rounded-[24px] bg-[var(--ps-purple)] p-5 text-white">
+                <span aria-hidden className="absolute -right-6 -top-6 size-24 rounded-full bg-white/15" />
+                <span aria-hidden className="ps-dots absolute bottom-0 right-0 h-12 w-24 opacity-25" />
+                <div className="relative flex items-center gap-2 text-[11.5px] font-black uppercase tracking-wider text-white/85">
+                  <span className="inline-flex size-7 items-center justify-center rounded-full bg-white/20">
+                    <Sparkles className="size-3.5" />
+                  </span>
+                  AI tushuntirishi · Oltin qoida
+                </div>
+                <p className="relative mt-2.5 whitespace-pre-wrap text-[14px] leading-relaxed">{poll.explanation}</p>
               </div>
-            </button>
-          );
-        })}
-      </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Post-Vote AI Explanation Card */}
-      <AnimatePresence>
-        {showExplanation && poll.explanation && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-zinc-900 border border-indigo-500/20 p-4 mb-4 overflow-hidden"
+        {/* Pastki qism */}
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--ps-neutral)] px-3.5 py-2 text-[12.5px] font-bold text-[var(--text-secondary)]">
+            <Users className="size-4 text-[var(--ps-purple)]" />
+            {totalVotes} nafar javob berdi
+          </span>
+          <button
+            type="button"
+            onClick={onOpenComments}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[#080808] px-4 py-2 text-[12.5px] font-bold text-[#FFFCF7] transition-transform hover:-translate-y-0.5 dark:bg-[#FFFCF7] dark:text-[#080808]"
           >
-            <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider mb-1.5">
-              <Sparkles className="size-4" />
-              IlmIldizi AI Tushuntirishi & Oltin Qoida
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap">
-              {poll.explanation}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Card Footer: Total votes & comments */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/[0.06] text-xs text-zinc-400">
-        <span className="font-medium">
-          {totalVotes} nafar o'quvchi javob berdi
-        </span>
-
-        <button
-          onClick={onOpenComments}
-          className="flex items-center gap-1.5 text-zinc-300 hover:text-white transition-colors"
-        >
-          <MessageCircle className="size-4" />
-          <span>{commentsCount} ta izoh</span>
-        </button>
+            <MessageCircle className="size-4 text-[var(--ps-orange)]" />
+            {commentsCount} ta izoh
+          </button>
+        </div>
       </div>
     </div>
   );

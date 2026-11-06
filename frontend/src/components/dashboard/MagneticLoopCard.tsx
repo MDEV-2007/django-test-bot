@@ -7,7 +7,6 @@ import {
   CheckCircle2, Droplets, Sparkles,
   ShieldCheck, Brain, Swords, Clock
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useContinuousLoop } from '@/hooks/useContinuousLoop';
 import ContinuousLoopController from '@/components/loop/ContinuousLoopController';
 import { useTransliterate } from '@/lib/transliterate';
@@ -25,7 +24,7 @@ export default function MagneticLoopCard({
   userStreak = 7,
 }: MagneticLoopCardProps) {
   const [controllerOpen, setControllerOpen] = useState(false);
-  const { loop, topic, ecoTree, loading, restartCycle } = useContinuousLoop();
+  const { loop, topic, ecoTree, loading, error, fetchLoop } = useContinuousLoop();
   const { t } = useTransliterate();
 
   // Multi-cycle marafon ko'rsatkichlari (3 raundlik marafon: 3x 18-20 daqiqa = 60 daqiqa)
@@ -123,196 +122,179 @@ export default function MagneticLoopCard({
     },
   ];
 
+  const STEP_TONES = [
+    'bg-[var(--ps-purple)] text-white',
+    'bg-[var(--ps-coral)] text-white',
+    'bg-[var(--ps-orange)] text-[#080808]',
+    'bg-[var(--ps-green)] text-white',
+  ];
+  const drops = [
+    { label: '35%', done: drop1Done, current: cycleNumber === 1 && !drop1Done, icon: Droplets },
+    { label: '70%', done: drop2Done, current: cycleNumber === 2 && !drop2Done, icon: Droplets },
+    { label: '100% 👑', done: drop3Done, current: cycleNumber >= 3 && !drop3Done, icon: Sparkles },
+  ];
+
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-card p-4 sm:p-6 shadow-[var(--shadow-card)]">
-        {/* Orqa fon nuri (brand) */}
-        <div className="pointer-events-none absolute -top-24 -left-20 size-64 rounded-full bg-[var(--brand-soft)] blur-[80px]" />
+      <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+        <span aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-[var(--ps-purple)] opacity-10" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 size-44 rounded-full bg-[var(--ps-orange)] opacity-10" />
 
-        {/* ── YUQORI BLOK: SALOMLASHISH VA ECO-DARAXT STATISTIKASI ── */}
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-border">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase bg-[var(--tone-streak-soft)] text-[var(--tone-streak-text)] border border-[var(--tone-streak)]/30">
+        {loading && (
+          <div className="relative mb-4 inline-flex animate-pulse items-center rounded-full bg-[var(--ps-neutral)] px-4 py-2 text-[12px] font-bold text-[var(--text-secondary)]">
+            {t("Kunlik marafon holati yuklanmoqda...")}
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="relative mb-4 flex items-center justify-between gap-2 rounded-full bg-[var(--ps-orange)] py-1.5 pl-4 pr-1.5 text-[12.5px] font-semibold text-[#080808]">
+            <span>{t("Server bilan aloqa uzildi — demo/oflayn rejim faol.")}</span>
+            <button
+              type="button"
+              onClick={() => fetchLoop()}
+              className="shrink-0 cursor-pointer rounded-full bg-[#080808] px-3 py-1.5 text-[12px] font-bold text-[#FFFCF7]"
+            >
+              {t("Qayta urinish")}
+            </button>
+          </div>
+        )}
+
+        {/* ── YUQORI BLOK ── */}
+        <div className="relative grid gap-5 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-coral)] px-3 py-1 text-[11.5px] font-black uppercase text-white">
                 <Flame className="size-3.5 fill-current" />
-                <span>{userStreak} {t("kunlik olovli zanjir")}</span>
+                {userStreak} {t("kunlik olovli zanjir")}
               </span>
-
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[var(--reward-soft)] text-[var(--reward-text)] border border-[var(--reward-border)]">
-                <span>{t('Raund')} {cycleNumber}/3</span>
-                <span className="text-[12px] opacity-75">({t('60 daqiqalik marafon')})</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-3 py-1 text-[11.5px] font-bold text-[#080808]">
+                {t('Raund')} {cycleNumber}/3 <span className="opacity-70">· {t('60 daqiqalik marafon')}</span>
               </span>
-
               {topic && (
-                <span className="text-xs font-semibold text-muted-foreground">
-                  • {t('Mavzu')}: <strong className="text-foreground">{t(topic.title)}</strong>
+                <span className="ps-chip">
+                  {t('Mavzu')}: <strong>{t(topic.title)}</strong>
                 </span>
               )}
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-              {t('Xayrli kun')}, {userName}! 🎯
+            <h2 className="ps-display mt-4 text-[32px] sm:text-[42px]">
+              {t('Xayrli kun')}, <span className="text-[var(--ps-purple)]">{userName}</span>
+              <span className="text-[var(--ps-coral)]">!</span>
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+            <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-[var(--text-secondary)]">
               {t("3 raundlik uzluksiz marafonni yoping, Sirli Sandiq oching va Chinor darajasiga yetib Boss sinovini oching!")}
             </p>
           </div>
 
-          {/* Eco-Tree Multi-Round Vidjeti */}
-          <div className="flex flex-col gap-2 p-3 sm:px-4 sm:py-3 rounded-xl bg-[var(--surface-input)] border border-[var(--brand-border)] shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="size-11 rounded-xl bg-[var(--brand-soft)] border border-[var(--brand-border)] flex items-center justify-center text-[var(--brand-text)]">
+          {/* Eco-daraxt vidjeti */}
+          <div className="relative overflow-hidden rounded-[28px] bg-[var(--ps-green)] p-5 text-white">
+            <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+            <span aria-hidden className="ps-dots absolute bottom-0 right-0 h-14 w-28 opacity-20" />
+            <div className="relative flex items-center gap-3">
+              <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-[#FFFCF7]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`/brand/gamification/${TREE_ART[Math.min(completedRounds, 3)]}`}
-                  alt=""
-                  className="size-10 object-contain"
-                />
-              </div>
-              <div className="text-left">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[12px] font-bold text-[var(--text-secondary)]">{t('Ilm Ildizi')}:</span>
-                  <span className="text-[12px] font-bold uppercase text-[var(--brand-text)] bg-[var(--brand-soft)] px-2 py-0.5 rounded-md border border-[var(--brand-border)]">
-                    {t(displayStageName)}
-                  </span>
+                <img src={`/brand/gamification/${TREE_ART[Math.min(completedRounds, 3)]}`} alt="" className="size-11 object-contain" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[12px] font-bold text-white/80">{t('Ilm Ildizi')}:</span>
+                  <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[11.5px] font-black uppercase">{t(displayStageName)}</span>
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs font-bold tabular-nums text-[var(--tone-lesson-text)] flex items-center gap-0.5">
-                    <Droplets className="size-3" />
-                    {displayWater}% suv
-                  </span>
-                  <span className="text-[12px] text-muted-foreground font-semibold">• Raund {cycleNumber}/3</span>
-                </div>
+                <p className="mt-1 font-[family-name:var(--font-grotesk)] text-[26px] font-bold leading-none">
+                  {displayWater}%<span className="ml-1 text-[13px] font-semibold opacity-80">suv · Raund {cycleNumber}/3</span>
+                </p>
               </div>
             </div>
 
-            {/* 3 ta Kichik Oltin Tomchi Indikatori */}
-            <div className="pt-2 border-t border-border space-y-1.5">
-              <div className="flex items-center gap-1.5">
-                {/* 1-Tomchi (Raund 1: 35%) */}
-                <div
-                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[12px] font-bold transition-all border ${
-                    drop1Done
-                      ? 'bg-[var(--tone-lesson-soft)] border-[var(--tone-lesson)]/40 text-[var(--tone-lesson-text)]'
-                      : cycleNumber === 1
-                      ? 'bg-[var(--reward-soft)] border-[var(--reward-border)] text-[var(--reward-text)]'
-                      : 'bg-card border-border text-muted-foreground'
-                  }`}
-                >
-                  <Droplets className={`size-3 ${drop1Done ? 'fill-current' : ''}`} />
-                  <span>35%</span>
-                </div>
-
-                {/* 2-Tomchi (Raund 2: 70%) */}
-                <div
-                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[12px] font-bold transition-all border ${
-                    drop2Done
-                      ? 'bg-[var(--tone-lesson-soft)] border-[var(--tone-lesson)]/40 text-[var(--tone-lesson-text)]'
-                      : cycleNumber === 2
-                      ? 'bg-[var(--reward-soft)] border-[var(--reward-border)] text-[var(--reward-text)]'
-                      : 'bg-card border-border text-muted-foreground'
-                  }`}
-                >
-                  <Droplets className={`size-3 ${drop2Done ? 'fill-current' : ''}`} />
-                  <span>70%</span>
-                </div>
-
-                {/* 3-Tomchi (Raund 3: 100% + Boss) */}
-                <div
-                  className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg text-[12px] font-bold transition-all border ${
-                    drop3Done
-                      ? 'bg-[var(--reward-soft)] border-[var(--reward-border)] text-[var(--reward-text)]'
-                      : cycleNumber >= 3
-                      ? 'bg-[var(--reward-soft)] border-[var(--reward-border)] text-[var(--reward-text)]'
-                      : 'bg-card border-border text-muted-foreground'
-                  }`}
-                >
-                  <Sparkles className={`size-3 ${drop3Done ? 'fill-current' : ''}`} />
-                  <span>100% 👑</span>
-                </div>
-              </div>
-
-              <p className="text-[12px] font-bold text-muted-foreground text-center leading-tight">
-                {dropletsText}
-              </p>
+            <div className="relative mt-4 grid grid-cols-3 gap-1.5">
+              {drops.map((d) => {
+                const Icon = d.icon;
+                return (
+                  <span
+                    key={d.label}
+                    className={`inline-flex items-center justify-center gap-1 rounded-full py-1.5 text-[12px] font-bold ${
+                      d.done
+                        ? 'bg-[#FFFCF7] text-[var(--ps-green)]'
+                        : d.current
+                          ? 'bg-[var(--ps-orange)] text-[#080808]'
+                          : 'bg-white/15 text-white/80'
+                    }`}
+                  >
+                    <Icon className={`size-3.5 ${d.done ? 'fill-current' : ''}`} />
+                    {d.label}
+                  </span>
+                );
+              })}
             </div>
+            <p className="relative mt-2.5 text-center text-[11.5px] font-semibold leading-snug text-white/85">{dropletsText}</p>
           </div>
         </div>
 
-        {/* ── O'RTA BLOK: 4 TA BOSQICHLI QU VUR (PIPELINE) ── */}
-        <div className="relative py-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {PIPELINE_STEPS.map((step, idx) => {
-              const StepIcon = step.icon;
-              return (
-                <div
-                  key={step.id}
-                  className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between ${
-                    step.isCurrent
-                      ? 'bg-card border-[var(--brand)] ring-1 ring-[var(--brand-border)]'
-                      : step.isDone
-                      ? 'bg-[var(--brand-soft)] border-[var(--brand-border)]'
-                      : 'bg-[var(--surface-input)] border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div
-                      className={`size-7 rounded-xl flex items-center justify-center text-xs font-bold ${
-                        step.isDone
-                          ? 'bg-[var(--brand-soft)] text-[var(--brand-text)]'
-                          : step.isCurrent
-                          ? 'bg-[var(--brand)] text-[var(--on-brand)]'
-                          : 'bg-card text-muted-foreground'
-                      }`}
-                    >
-                      {step.isDone ? <CheckCircle2 className="size-4" /> : <StepIcon className="size-3.5" />}
-                    </div>
-
-                    <span className="text-[12px] font-bold tabular-nums text-muted-foreground">
-                      #{idx + 1}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h4 className="text-xs font-bold text-foreground">{t(step.title)}</h4>
-                    <p className="text-[12px] text-muted-foreground mt-0.5 line-clamp-1">{t(step.desc)}</p>
-                  </div>
+        {/* ── 4 BOSQICH ── */}
+        <div className="relative mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {PIPELINE_STEPS.map((step, idx) => {
+            const StepIcon = step.icon;
+            return (
+              <div
+                key={step.id}
+                className={`relative flex min-h-[132px] flex-col justify-between overflow-hidden rounded-[24px] p-4 transition-transform hover:-translate-y-0.5 ${
+                  step.isCurrent
+                    ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                    : step.isDone
+                      ? 'bg-[var(--ps-green)] text-white'
+                      : 'bg-[var(--ps-neutral)] text-[var(--text-primary)]'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`inline-flex size-10 items-center justify-center rounded-full ${
+                      step.isDone ? 'bg-white/25' : step.isCurrent ? STEP_TONES[idx] : 'bg-[var(--ps-paper)] text-[var(--text-secondary)]'
+                    }`}
+                  >
+                    {step.isDone ? <CheckCircle2 className="size-5" /> : <StepIcon className="size-[18px]" />}
+                  </span>
+                  <span className={`font-[family-name:var(--font-grotesk)] text-[22px] font-bold leading-none ${step.isCurrent || step.isDone ? 'opacity-50' : 'text-[var(--text-faint)]'}`}>
+                    0{idx + 1}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+                <div className="mt-3">
+                  <h4 className="text-[14px] font-bold leading-tight">{t(step.title.replace(/^\d+\.\s*/, ''))}</h4>
+                  <p className={`mt-1 line-clamp-2 text-[12px] leading-snug ${step.isCurrent || step.isDone ? 'opacity-75' : 'text-[var(--text-muted)]'}`}>{t(step.desc)}</p>
+                </div>
+                {step.isCurrent && (
+                  <span className="absolute right-3 top-14 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10px] font-black uppercase text-[#080808]">
+                    Hozir
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* ── PASTKI BLOK: YAGONA MAGNIT PULSATSIYALANUVCHI CTA TUGMASI ── */}
-        <div className="relative pt-2">
-          <Button
-            type="button"
-            onClick={() => setControllerOpen(true)}
-            className={`w-full min-h-[58px] sm:min-h-[64px] h-auto py-2.5 sm:py-3 px-3.5 sm:px-6 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-[var(--on-brand)] font-bold shadow-[0_10px_24px_-10px_rgba(45,106,79,0.7)] flex items-center justify-between gap-2.5 cursor-pointer transition-all active:scale-[0.99] group whitespace-normal max-w-full overflow-hidden`}
-          >
-            <div className="text-left flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-              <div className="size-8 sm:size-9 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                <Play className="size-3.5 sm:size-4 fill-current" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm font-bold leading-tight tracking-tight break-words">
-                  {t(ctaTitle)}
-                </div>
-                <div className="text-[12px] text-white/90 font-normal leading-tight mt-0.5 break-words">
-                  {t(ctaSubtitle)}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 sm:gap-1.5 text-xs font-bold text-white/90 shrink-0">
-              <span className="hidden sm:inline">{t('Boshlash')}</span>
-              <div className="size-7 sm:size-auto rounded-lg bg-white/15 sm:bg-transparent flex items-center justify-center">
-                <ArrowRight className="size-3.5 sm:size-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          </Button>
-        </div>
-      </div>
+        {/* ── CTA ── */}
+        <button
+          type="button"
+          onClick={() => setControllerOpen(true)}
+          className="group relative mt-5 flex w-full cursor-pointer items-center justify-between gap-3 overflow-hidden rounded-[28px] bg-[var(--ps-purple)] p-3 pr-4 text-left text-white transition-transform hover:-translate-y-0.5 active:scale-[0.99] sm:p-4 sm:pr-5"
+        >
+          <span aria-hidden className="absolute -right-8 -top-10 size-32 rounded-full bg-white/10" />
+          <span className="relative flex min-w-0 items-center gap-3">
+            <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FFFCF7] text-[var(--ps-purple)] transition-transform group-hover:scale-110">
+              <Play className="size-5 fill-current" />
+            </span>
+            <span className="min-w-0">
+              <span className="block font-[family-name:var(--font-grotesk)] text-[17px] font-bold leading-tight sm:text-[19px]">{t(ctaTitle)}</span>
+              <span className="mt-0.5 block text-[12.5px] font-semibold text-white/80">{t(ctaSubtitle)}</span>
+            </span>
+          </span>
+          <span className="relative inline-flex shrink-0 items-center gap-2 text-[13px] font-bold">
+            <span className="hidden sm:inline">{t('Boshlash')}</span>
+            <span className="inline-flex size-10 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808] transition-transform group-hover:translate-x-1">
+              <ArrowRight className="size-4" />
+            </span>
+          </span>
+        </button>
+      </section>
 
       {/* Avtopilot Konveyerining to'liq ekranni qamrovchi fokus oynasi */}
       <AnimatePresence>

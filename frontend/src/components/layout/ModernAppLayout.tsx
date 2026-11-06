@@ -55,6 +55,8 @@ export default function ModernAppLayout({
         <div className="flex flex-1 flex-col min-w-0 lg:pl-64 pb-32 sm:pb-28 md:pb-12">
           {/* Topbar */}
           <ModernTopbar
+            // Header to'liq kenglikda (sidebar ostidan o'tadi), kontent esa sidebar'dan keyin boshlanadi.
+            className="lg:-ml-64 lg:w-[calc(100%+16rem)] lg:pl-[calc(16rem+1.75rem)]!"
             onMenuClick={() => setMobileMenuOpen(true)}
             user={user}
             unreadCount={unreadCount}

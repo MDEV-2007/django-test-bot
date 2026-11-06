@@ -78,7 +78,8 @@ export default function AppShell({
 
       <ModernTopbar
         className={cn(
-          'ilm-topbar lg:pl-[calc(16rem+1.5rem)]',
+          // Header to'liq kenglikda, sidebar (z-40) uning ustida turadi; kontent sidebar'dan keyin boshlanadi.
+          'ilm-topbar lg:pl-[calc(16rem+1.75rem)]!',
           isImmersiveMobile ? 'hidden lg:flex' : 'flex'
         )}
         onMenuClick={() => setMobileMenuOpen(true)}

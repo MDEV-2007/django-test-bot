@@ -12,8 +12,8 @@ const SUBJECTS = [
     badge: 'Milliy Sertifikat A+',
     syllabus: 'BMB 2026',
     desc: "Xronologiya, xaritalar, sulolalar va tarixiy manbalar tahlili bo'yicha to'liq test va flashcardlar bazasi.",
-    squircle: 'from-[#FF9500] to-[#E08600] shadow-[0_6px_16px_rgba(255,149,0,0.32)]',
-    pillTone: 'bg-[#FF9500]/14 text-[#C93400]',
+    squircle: 'from-[#FFB82E] to-[#E89B10] shadow-[0_6px_16px_rgba(255,149,0,0.32)]',
+    pillTone: 'bg-[#FFB82E]/14 text-[#9A5A00]',
     href: '/tests?subject=tarix',
   },
   {
@@ -24,8 +24,8 @@ const SUBJECTS = [
     badge: 'BBA & Sertifikat',
     syllabus: 'Yangi imlo',
     desc: "Morfologiya, sintaktik tahlil, mumtoz adabiyot matnlari, g'azallar tahlili va ochiq savollar.",
-    squircle: 'from-[#34C759] to-[#28A745] shadow-[0_6px_16px_rgba(52,199,89,0.32)]',
-    pillTone: 'bg-[#34C759]/12 text-[#248A3D]',
+    squircle: 'from-[#4C806B] to-[#3A6654] shadow-[0_6px_16px_rgba(76,128,107,0.32)]',
+    pillTone: 'bg-[#4C806B]/12 text-[#3A6654]',
     href: '/tests?subject=ona-tili',
   },
   {
@@ -36,8 +36,8 @@ const SUBJECTS = [
     badge: 'Asosiy & Majburiy',
     syllabus: 'Standart',
     desc: "Algebra, planimetriya, stereometriya, mantiqiy misollar va har bir masala uchun bosqichma-bosqich yechim.",
-    squircle: 'from-[#007AFF] to-[#0062CC] shadow-[0_6px_16px_rgba(0,122,255,0.32)]',
-    pillTone: 'bg-[#007AFF]/12 text-[#0066CC]',
+    squircle: 'from-[#7659C7] to-[#5E45A8] shadow-[0_6px_16px_rgba(118,89,199,0.32)]',
+    pillTone: 'bg-[#7659C7]/12 text-[#0066CC]',
     href: '/tests?subject=matematika',
   },
   {
@@ -48,8 +48,8 @@ const SUBJECTS = [
     badge: 'Tibbiyot & Sertifikat',
     syllabus: '5–11-sinf',
     desc: "Sitologiya, genetika masalalari, botanika, zoologiya va odam anatomiyasi bo'yicha rasmiy baza.",
-    squircle: 'from-[#30B0C7] to-[#2492A6] shadow-[0_6px_16px_rgba(48,176,199,0.32)]',
-    pillTone: 'bg-[#30B0C7]/12 text-[#1E7C8D]',
+    squircle: 'from-[#70B5D5] to-[#3E7F9C] shadow-[0_6px_16px_rgba(48,176,199,0.32)]',
+    pillTone: 'bg-[#70B5D5]/12 text-[#3E7F9C]',
     href: '/tests?subject=biologiya',
   },
   {
@@ -60,8 +60,8 @@ const SUBJECTS = [
     badge: 'B2 / C1 Tayyorgarlik',
     syllabus: 'Multi-Level',
     desc: "Listening audio partlar, Reading matnlari, gap-fill hamda TRUE/FALSE/NOT GIVEN imtihon simulyatori.",
-    squircle: 'from-[#5856D6] to-[#4644B5] shadow-[0_6px_16px_rgba(88,86,214,0.32)]',
-    pillTone: 'bg-[#5856D6]/12 text-[#3634A3]',
+    squircle: 'from-[#7659C7] to-[#5E45A8] shadow-[0_6px_16px_rgba(88,86,214,0.32)]',
+    pillTone: 'bg-[#7659C7]/12 text-[#3634A3]',
     href: '/tests?subject=ingliz-tili',
   },
   {
@@ -72,8 +72,8 @@ const SUBJECTS = [
     badge: 'Raqamli darslik',
     syllabus: 'PDF & Online',
     desc: "Maktab darsliklari, Milliy sertifikat qo'llanmalari, xronologiya jadvallari va spravochniklar jamlanmasi.",
-    squircle: 'from-[#FF2D55] to-[#D70015] shadow-[0_6px_16px_rgba(255,45,85,0.32)]',
-    pillTone: 'bg-[#FF2D55]/12 text-[#D70015]',
+    squircle: 'from-[#F0523D] to-[#C93A28] shadow-[0_6px_16px_rgba(255,45,85,0.32)]',
+    pillTone: 'bg-[#F0523D]/12 text-[#C93A28]',
     href: '/library',
   },
 ];
@@ -84,14 +84,14 @@ export default function SubjectsShowcase() {
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6">
         <div>
-          <div className="text-xs font-bold uppercase tracking-widest text-[#007AFF]">
+          <div className="text-xs font-bold uppercase tracking-widest text-[#7659C7]">
             Fanlar va Manbalar Katalogi
           </div>
-          <h2 className="mt-1.5 text-2xl font-bold tracking-[-0.025em] text-[#1C1C1E] sm:text-3xl lg:text-4xl">
+          <h2 className="mt-1.5 text-2xl font-bold tracking-[-0.025em] text-[#080808] sm:text-3xl lg:text-4xl">
             Qaysi yo&apos;nalishda imtihonga tayyorlanyapsiz?
           </h2>
         </div>
-        <p className="text-xs sm:text-sm text-[#6C6C70] max-w-md font-normal">
+        <p className="text-xs sm:text-sm text-[#6B6577] max-w-md font-normal">
           Har bir fan bo&apos;yicha BMB va Milliy sertifikat rasmiy dasturi asosida tuzilgan testlar, flashcardlar va darsliklar bazasi.
         </p>
       </div>
@@ -112,23 +112,23 @@ export default function SubjectsShowcase() {
                 >
                   <s.icon className="size-6 stroke-[2.2]" />
                 </span>
-                <span className="rounded-full bg-[#F2F2F7] px-3 py-1 text-[12px] font-semibold text-[#3A3A3C]">
+                <span className="rounded-full bg-[#F7F4EF] px-3 py-1 text-[12px] font-semibold text-[#3D3846]">
                   {s.syllabus}
                 </span>
               </div>
 
               {/* Title & Description */}
-              <h3 className="mt-5 text-[18px] font-bold tracking-[-0.015em] text-[#1C1C1E] group-hover:text-[#007AFF] transition-colors">
+              <h3 className="mt-5 text-[18px] font-bold tracking-[-0.015em] text-[#080808] group-hover:text-[#7659C7] transition-colors">
                 {s.title}
               </h3>
 
-              <p className="mt-2 text-[13px] leading-relaxed text-[#6C6C70] line-clamp-2">
+              <p className="mt-2 text-[13px] leading-relaxed text-[#6B6577] line-clamp-2">
                 {s.desc}
               </p>
 
               {/* Subject Mini-metrics */}
               <div className="mt-4 flex flex-wrap items-center gap-1.5 text-[12px] font-semibold pt-3.5 border-t border-black/[0.06]">
-                <span className="rounded-full bg-[#F2F2F7] px-2.5 py-0.5 text-[#3A3A3C]">
+                <span className="rounded-full bg-[#F7F4EF] px-2.5 py-0.5 text-[#3D3846]">
                   {s.count}
                 </span>
                 <span className={`rounded-full px-2.5 py-0.5 ${s.pillTone}`}>
@@ -139,8 +139,8 @@ export default function SubjectsShowcase() {
 
             {/* App Store Style Bottom Action Row */}
             <div className="mt-5 flex items-center justify-between pt-2">
-              <span className="text-xs font-semibold text-[#8E8E93]">Rasmiy baza</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#F2F2F7] group-hover:bg-[#007AFF] px-3.5 py-1.5 text-xs font-bold text-[#007AFF] group-hover:text-white transition-colors">
+              <span className="text-xs font-semibold text-[#8A8494]">Rasmiy baza</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#F7F4EF] group-hover:bg-[#7659C7] px-3.5 py-1.5 text-xs font-bold text-[#7659C7] group-hover:text-white transition-colors">
                 <span>OCHISH</span>
                 <ArrowRight className="size-3.5" />
               </span>

@@ -257,7 +257,7 @@ export default function SprintPage() {
     const slug = chosenSubject?.slug && chosenSubject.slug !== 'all' ? chosenSubject.slug : 'tarix';
 
     return (
-      <div className="theme-pastel min-h-screen text-foreground">
+      <div className="theme-pastel flex min-h-screen flex-col items-center justify-center p-3 text-foreground sm:p-6">
         <GhostBattleArena
           subjectSlug={slug}
           onExit={() => {

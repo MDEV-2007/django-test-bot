@@ -22,7 +22,7 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatCompact } from '@/lib/utils';
 import { formatMinutes } from '@/components/design/kit';
 
 /* ── Umumiy yordamchilar ─────────────────────────────────────────────── */
@@ -200,15 +200,15 @@ export function PastelHero({
           className="absolute -right-1 bottom-[16%] h-[13%] w-[38%] rotate-[-18deg] rounded-full bg-[var(--ps-green)]"
         />
 
-        {/* Maskot — doira ichida, pastdan kesilgan, tepasi doiradan chiqib turadi */}
+        {/* Jamoa rasmi — doira ichida */}
         <div className="absolute inset-[12%] overflow-hidden rounded-full border-[6px] border-[#FFFCF7] bg-[var(--ps-sky)] shadow-[0_30px_60px_-30px_rgba(40,20,80,0.7)]">
           <Image
-            src="/images/mascot-hero.jpg"
-            alt="IlmIldizi maskoti — bitiruvchi qushcha"
+            src="/images/dashboard-hero-team.webp"
+            alt="IlmIldizi jamoasi"
             fill
             priority
             sizes="(max-width: 640px) 260px, 360px"
-            className="object-cover object-[52%_40%] scale-[1.35]"
+            className="object-cover object-[50%_32%]"
           />
         </div>
 
@@ -293,8 +293,8 @@ export function StatBento({
           <div className="relative flex h-full flex-col justify-between gap-6">
             <p className="ps-eyebrow text-[#FFFCF7]/60">Jami XP</p>
             <div>
-              <p className="ps-num text-[38px] sm:text-[52px] break-all">{fmt(xp)}</p>
-              <p className="mt-2 text-xs text-[#FFFCF7]/60">{fmt(coins)} tanga hamyonda</p>
+              <p className="ps-num text-[38px] sm:text-[52px]" title={fmt(xp)}>{formatCompact(xp)}</p>
+              <p className="mt-2 text-xs text-[#FFFCF7]/60">{formatCompact(coins)} tanga hamyonda</p>
             </div>
           </div>
         </div>
@@ -670,7 +670,7 @@ export function SubjectsSection({
               Har bir fan bo&apos;yicha to&apos;g&apos;ri javoblar ulushi. 50% dan pasti — takrorlash vaqti.
             </p>
           </div>
-          <Link href="/analytics" className="ps-btn ps-btn-ink self-start">
+          <Link href="/profile" className="ps-btn ps-btn-ink self-start">
             Batafsil tahlil
             <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
           </Link>

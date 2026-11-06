@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Swords, Bot, Trophy, Shield, Users, Target, Flame, Zap, Play, Loader2, RotateCcw, Radio, Share2, Copy, MapPin, UserCheck, History, Sparkles, ArrowRight } from 'lucide-react';
+import {
+  Swords, Bot, Trophy, Shield, Users, Target, Flame, Zap, Play, Loader2, RotateCcw, Radio, Share2, Copy, MapPin, UserCheck, History, Sparkles, ArrowRight, Clock, CheckCircle2, XCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/auth-store';
@@ -26,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import GhostBattleArena from '@/components/arena/GhostBattleArena';
+import ArenaStage from '@/components/arena/ArenaStage';
 import ViralDuelModal from '@/components/growth/ViralDuelModal';
 import ClassBattleStudentModal from '@/components/arena/ClassBattleStudentModal';
 
@@ -730,152 +733,218 @@ export default function BattlesPage() {
         )}
 
         {mode === 'live-searching' && (
-          <div className="flex min-h-[50vh] items-center justify-center">
-            <Card className="w-full max-w-sm">
-              <CardContent className="flex flex-col items-center py-10 text-center">
-                <div className="relative mb-6">
-                  <div className="size-20 animate-spin rounded-full border-4 border-[var(--ps-coral)]/20 border-t-[var(--ps-coral)]" />
-                  <Swords className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 text-[var(--ps-coral)]" />
-                </div>
-                <h3 className="mb-1 text-lg font-bold">Raqib qidirilmoqda...</h3>
-                <p className="text-sm text-muted-foreground">Sizning darajangizga mos bilimdon ulanmoqda</p>
-              </CardContent>
-            </Card>
-          </div>
+          <ArenaStage>
+            <div className="relative my-auto flex flex-col items-center py-8 text-center">
+              <span className="ps-chip">
+                <Radio className="size-3.5 animate-pulse text-[var(--ps-coral)]" />
+                Jonli matchmaking
+              </span>
+              <h3 className="ps-display mt-5 text-[34px] sm:text-[44px]">
+                Raqib <span className="text-[var(--ps-coral)]">qidirilmoqda</span>
+                <span className="text-[var(--ps-purple)]">…</span>
+              </h3>
+              <p className="mt-2 max-w-xs text-[13px] text-[var(--text-muted)]">Sizning darajangizga mos bilimdon ulanmoqda</p>
+              <div className="relative mt-8 flex size-24 items-center justify-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-[var(--ps-coral)] opacity-25" />
+                <span className="absolute inset-2 rounded-full border-2 border-dashed border-[var(--ps-coral)] opacity-60" />
+                <span className="relative inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                  <Swords className="size-7 animate-spin [animation-duration:2.4s]" />
+                </span>
+              </div>
+              <button type="button" onClick={reset} className="ps-btn ps-btn-ghost mt-8">Bekor qilish</button>
+            </div>
+          </ArenaStage>
         )}
 
-        {(mode === 'ai' || mode === 'live') && currentQ && (
-          <div className="space-y-5">
-            <Card>
-              <CardContent className="flex items-center justify-between gap-3 pt-6">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <Avatar className="size-10 border border-[var(--accent)]">
-                    <AvatarImage src={user?.avatar_url || undefined} alt="" />
-                    <AvatarFallback className="text-xs">{(user?.first_name || user?.username || '?').slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-bold">Siz</p>
-                    <p className="font-mono text-sm font-bold text-[var(--accent-text)]">{myScore} ball</p>
+        {(mode === 'ai' || mode === 'live') && currentQ && (() => {
+          const meName = user?.first_name || user?.username || 'Siz';
+          const total = Math.max(1, questions.length);
+          const progress = Math.min(100, ((roundIdx + (selectedChoice !== null ? 1 : 0)) / total) * 100);
+          const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+          return (
+            <ArenaStage>
+              <div className="relative flex flex-1 flex-col gap-5">
+                {/* HUD */}
+                <div className="relative overflow-hidden rounded-[28px] bg-[#080808] p-4 text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+                  <span aria-hidden className="absolute -right-10 -top-10 size-32 rounded-full bg-[var(--ps-purple)] opacity-40" />
+                  <div className="relative">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Avatar className="size-8 border-2 border-[var(--ps-purple)]">
+                          <AvatarImage src={user?.avatar_url || undefined} alt="" />
+                          <AvatarFallback className="text-[11px] text-[#080808]">{meName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <span className="truncate text-[13.5px] font-bold">{meName}</span>
+                      </div>
+                      <span className="ps-num shrink-0 text-[24px] leading-none text-[var(--ps-lilac)]">
+                        {myScore}<span className="ml-1 text-[0.45em] opacity-60">ball</span>
+                      </span>
+                    </div>
+                    <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/10 dark:bg-black/10">
+                      <div className="h-full rounded-full bg-[var(--ps-purple)] transition-all duration-300" style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
+                  <div className="relative mt-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-[var(--ps-coral)] bg-[var(--ps-coral)] text-white">
+                          {mode === 'ai' ? <Bot className="size-4" /> : <Swords className="size-4" />}
+                        </span>
+                        <span className="truncate text-[13.5px] font-bold">{opponentName}</span>
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--ps-green)] px-2 py-0.5 text-[10.5px] font-bold text-white">
+                          <span className="size-1.5 rounded-full bg-white" /> {mode === 'ai' ? 'AI' : 'Jonli'}
+                        </span>
+                      </div>
+                      <span className="ps-num shrink-0 text-[24px] leading-none text-[var(--ps-coral)]">
+                        {oppScore}<span className="ml-1 text-[0.45em] opacity-60">ball</span>
+                      </span>
+                    </div>
+                    <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/10 dark:bg-black/10">
+                      <div className="h-full rounded-full bg-[var(--ps-coral)] transition-all duration-500" style={{ width: `${progress}%` }} />
+                    </div>
                   </div>
                 </div>
 
-                <div className="shrink-0 text-center">
-                  <span className="block font-mono text-xs font-bold uppercase text-muted-foreground">
-                    Raund {roundIdx + 1} / {questions.length}
-                  </span>
-                  <span className="text-xs font-bold text-[var(--ps-coral)]">VS</span>
-                </div>
-
-                <div className="flex min-w-0 items-center gap-2.5 text-right">
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-bold">{opponentName}</p>
-                    <p className="font-mono text-sm font-bold text-[var(--ps-coral)]">{oppScore} ball</p>
+                {/* Savol */}
+                <div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="ps-chip">
+                      <Clock className="size-3.5 text-[var(--ps-purple)]" />
+                      Raund {roundIdx + 1} / {questions.length}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {questions.map((_, i) => (
+                        <span
+                          key={i}
+                          className={cn(
+                            'h-2 rounded-full transition-all',
+                            i < roundIdx ? 'w-2 bg-[var(--ps-purple)]' : i === roundIdx ? 'w-6 bg-[var(--ps-orange)]' : 'w-2 bg-[var(--ds-track)]'
+                          )}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <Avatar className="size-10 border border-[var(--ps-coral)]">
-                    <AvatarFallback className="bg-[var(--surface-input)] text-[var(--ps-coral)]"><Bot className="size-5" /></AvatarFallback>
-                  </Avatar>
+                  <h2
+                    key={roundIdx}
+                    className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px]"
+                    dangerouslySetInnerHTML={{ __html: currentQ.text }}
+                  />
                 </div>
-              </CardContent>
-              <CardContent className="pt-0">
-                <Progress value={((roundIdx + 1) / Math.max(1, questions.length)) * 100} className="h-1.5" />
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="space-y-4 pt-6">
-                <Badge variant="outline" className="border-[var(--accent-border)] bg-primary/12 text-[var(--accent-text)]">
-                  Tezkor duel savoli
-                </Badge>
-                <h2
-                  className="font-voice text-lg font-bold leading-snug"
-                  dangerouslySetInnerHTML={{ __html: currentQ.text }}
-                />
-
+                {/* Variantlar */}
                 {waitingOpponent ? (
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin" /> Raqibning javobi kutilmoqda...
+                  <p className="mt-auto flex items-center justify-center gap-2 rounded-full bg-[var(--ps-neutral)] p-4 text-[13.5px] font-bold text-[var(--text-muted)]">
+                    <Loader2 className="size-4 animate-spin text-[var(--ps-purple)]" /> Raqibning javobi kutilmoqda…
                   </p>
                 ) : (
-                  <div className="space-y-2.5 pt-2">
-                    {currentQ.choices.map((c) => {
+                  <div className="mt-auto space-y-2.5">
+                    {currentQ.choices.map((c, i) => {
                       const isSelected = selectedChoice === c.id;
                       const isCorrect = correctChoiceId === c.id;
-                      let cls = 'border bg-[var(--surface-input)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]';
+                      // Variant matni o'z harfi bilan kelsa ("B) 3, 6") — harfni doiraga olamiz.
+                      const own = /^\s*([A-Fa-f])\s*[).]\s*([\s\S]*)$/.exec(c.text);
+                      const label = own ? own[1].toUpperCase() : LETTERS[i] || String(i + 1);
+                      const body = own ? own[2] : c.text;
+                      let row = 'bg-[var(--ps-neutral)] text-[var(--text-primary)] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac)] hover:text-[#080808]';
+                      let letter = 'bg-[var(--ps-paper)] text-[var(--text-primary)]';
                       if (selectedChoice !== null) {
-                        if (isCorrect) cls = 'border-2 border-[var(--success)] bg-[var(--success)]/20 font-bold text-[var(--success-text)]';
-                        else if (isSelected) cls = 'border-2 border-rose-500 bg-rose-500/20 font-bold text-[var(--ps-coral)]';
-                        else cls = 'border bg-[var(--surface-input)]/50 text-[var(--text-faint)] opacity-60';
+                        if (isCorrect) { row = 'bg-[var(--ps-green)] text-white'; letter = 'bg-white/25 text-white'; }
+                        else if (isSelected) { row = correctChoiceId === null ? 'bg-[var(--ps-purple)] text-white' : 'bg-[var(--ps-coral)] text-white'; letter = 'bg-white/25 text-white'; }
+                        else row = 'bg-[var(--ps-neutral)] text-[var(--text-muted)] opacity-50';
                       }
                       return (
                         <button
                           key={c.id}
+                          type="button"
                           disabled={selectedChoice !== null}
                           onClick={() => (mode === 'ai' ? answerAi(c.id) : answerLive(c.id))}
-                          className={cn('tactile-btn w-full rounded-xl p-4 text-left text-sm transition-all', cls)}
+                          className={cn(
+                            'flex w-full cursor-pointer items-center gap-3 rounded-full p-2 pr-5 text-left text-[14.5px] font-semibold transition-all duration-200 disabled:cursor-default',
+                            row
+                          )}
                         >
-                          {c.text}
+                          <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-black', letter)}>
+                            {label}
+                          </span>
+                          <span className="flex-1">{body}</span>
+                          {selectedChoice !== null && isCorrect && <CheckCircle2 className="size-5 shrink-0" />}
+                          {selectedChoice !== null && isSelected && correctChoiceId !== null && !isCorrect && <XCircle className="size-5 shrink-0" />}
                         </button>
                       );
                     })}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+              </div>
+            </ArenaStage>
+          );
+        })()}
 
         {(mode === 'ai' || mode === 'live') && !currentQ && (
-          <Card className="mx-auto max-w-md">
-            <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-              <Shield className="size-10 text-muted-foreground" />
-              <h2 className="font-voice text-lg font-bold">Jangni ko&apos;rsatib bo&apos;lmadi</h2>
-              <p className="text-sm text-muted-foreground">
-                Savollar yuklanmadi. Boshqa fanni tanlab qayta urinib ko&apos;ring.
-              </p>
-              <Button onClick={reset} className="w-full">
+          <ArenaStage className="min-h-[420px]">
+            <div className="relative my-auto flex flex-col items-center gap-4 text-center">
+              <span className="inline-flex size-20 items-center justify-center rounded-full bg-[var(--ps-neutral)] text-[var(--text-muted)]">
+                <Shield className="size-9" />
+              </span>
+              <h2 className="ps-display text-[28px]">Jangni ko&apos;rsatib bo&apos;lmadi</h2>
+              <p className="max-w-xs text-[13.5px] text-[var(--text-muted)]">Savollar yuklanmadi. Boshqa fanni tanlab qayta urinib ko&apos;ring.</p>
+              <button type="button" onClick={reset} className="ps-btn ps-btn-ink">
                 <RotateCcw className="size-4" /> Arenaga qaytish
-              </Button>
-            </CardContent>
-          </Card>
+              </button>
+            </div>
+          </ArenaStage>
         )}
 
         {mode === 'result' && (
-          <Card className="mx-auto max-w-md">
-            <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-              <div className={cn(
-                'flex size-16 items-center justify-center rounded-3xl',
-                isWin ? 'bg-[var(--tone-premium-soft)] text-[var(--tone-premium-text)]' : 'bg-[var(--surface-input)] text-muted-foreground',
-              )}>
-                {isWin ? <Trophy className="size-8" /> : <Shield className="size-8" />}
+          <ArenaStage>
+            <div className="relative my-auto flex flex-col items-center py-4 text-center">
+              <div className="relative">
+                <span className={cn('inline-flex size-24 items-center justify-center rounded-full', isWin ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-neutral)] text-[var(--text-muted)]')}>
+                  {isWin ? <Trophy className="size-11" /> : <Shield className="size-11" />}
+                </span>
+                {isWin && (
+                  <span className="absolute -right-3 -top-1 rotate-12 rounded-full bg-[var(--ps-green)] px-2.5 py-1 text-[11px] font-bold uppercase text-white">
+                    G&apos;alaba!
+                  </span>
+                )}
               </div>
-              <h2 className="font-voice text-2xl font-bold">{resultMsg}</h2>
-              <p className="font-mono text-sm text-muted-foreground">
-                Yakuniy hisob: <strong className="text-foreground">{myScore} — {oppScore}</strong>
-              </p>
 
-              {/* ELO o'zgarishi — raqam eski qiymatdan yangisiga aylanib o'tadi. */}
+              <h2 className="ps-display mt-5 max-w-md text-[26px] sm:text-[32px]">{resultMsg}</h2>
+
+              <div className="mt-5 flex items-center gap-4">
+                <div className="text-center">
+                  <p className="ps-num text-[44px] leading-none text-[var(--ps-purple)]">{myScore}</p>
+                  <p className="mt-1 text-[11.5px] font-semibold text-[var(--text-muted)]">Siz</p>
+                </div>
+                <span className="inline-flex size-10 items-center justify-center rounded-full bg-[#080808] text-[12px] font-black italic text-[var(--ps-orange)] dark:bg-[#FFFCF7]">VS</span>
+                <div className="text-center">
+                  <p className="ps-num text-[44px] leading-none text-[var(--ps-coral)]">{oppScore}</p>
+                  <p className="mt-1 max-w-[120px] truncate text-[11.5px] font-semibold text-[var(--text-muted)]">{opponentName || 'Raqib'}</p>
+                </div>
+              </div>
+
               {arena && (
-                <div className="w-full rounded-2xl border bg-[var(--surface-input)] px-4 py-3">
-                  <p className="font-mono text-xs uppercase text-muted-foreground">Arena reytingi</p>
-                  <p className="mt-0.5 flex items-center justify-center gap-2 font-mono text-xl font-bold">
-                    <StatNumber value={arena.elo_rating} />
+                <div className="relative mt-6 w-full max-w-sm overflow-hidden rounded-[26px] bg-[var(--ps-purple)] p-5 text-white">
+                  <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/20" />
+                  <p className="relative text-[11px] font-bold uppercase opacity-75">Arena reytingi</p>
+                  <div className="relative mt-1 flex items-center justify-center gap-3">
+                    <p className="ps-num text-[36px] leading-none">
+                      <StatNumber value={arena.elo_rating} />
+                    </p>
                     {prevElo !== null && prevElo !== arena.elo_rating && (
-                      <span className={cn(
-                        'text-sm font-bold',
-                        arena.elo_rating > prevElo ? 'text-[var(--success-text)]' : 'text-[var(--ps-coral)]',
-                      )}>
+                      <span className={cn('rounded-full px-3 py-1 font-mono text-[13px] font-bold', arena.elo_rating > prevElo ? 'bg-[var(--ps-green)]' : 'bg-[var(--ps-coral)]')}>
                         {arena.elo_rating > prevElo ? '+' : ''}{arena.elo_rating - prevElo}
                       </span>
                     )}
-                  </p>
-                  <p className="mt-0.5 text-xs font-semibold text-blue-300">{arenaRankTitle(arena.elo_rating)}</p>
+                  </div>
+                  <p className="relative mt-1.5 text-[12.5px] font-semibold text-white/85">{arenaRankTitle(arena.elo_rating)}</p>
                 </div>
               )}
-              <Button onClick={reset} className="w-full">
+
+              <button type="button" onClick={reset} className="ps-btn ps-btn-ink mt-5 w-full max-w-sm">
                 <RotateCcw className="size-4" /> Yana o&apos;ynash
-              </Button>
-            </CardContent>
-          </Card>
+              </button>
+            </div>
+          </ArenaStage>
         )}
 
         <Dialog open={!!incomingChallenge} onOpenChange={(open) => { if (!open) respondChallenge(false); }}>

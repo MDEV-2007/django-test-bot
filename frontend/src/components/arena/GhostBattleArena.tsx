@@ -5,14 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Swords,
   Zap,
-  Flame,
   Trophy,
   Sparkles,
   CheckCircle2,
   XCircle,
-  ArrowRight,
   RotateCcw,
-  Users,
   Shield,
   Clock,
   Send,
@@ -24,6 +21,7 @@ import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { celebrate } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
+import ArenaStage from './ArenaStage';
 import { toast } from 'sonner';
 
 interface Choice {
@@ -332,203 +330,206 @@ export default function GhostBattleArena({
   const opponentProgressPercent = Math.min(((currentQIndex + 1) / totalQuestions) * 100, 100);
   const isWinner = userScore >= opponentScore;
 
+  const meName = user?.first_name || user?.username || 'Siz';
+  const meAvatar = user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me';
+  const meElo = user?.elo_rating || 1200;
+  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
   return (
-    <div className="relative w-full max-w-xl mx-auto min-h-[580px] flex flex-col justify-between p-4 sm:p-5 bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-white/[0.07] shadow-2xl select-none overflow-hidden">
-      {/* ─────────────────────────────────────────────────────────────
-          A. 3-SONIYALIK MATCHMAKING RADAR (Kutish ekrani)
-         ───────────────────────────────────────────────────────────── */}
+    <ArenaStage>
       <AnimatePresence mode="wait">
+        {/* ─────────────────────────────────────────────────────────────
+            A. MATCHMAKING RADAR (Kutish ekrani)
+           ───────────────────────────────────────────────────────────── */}
         {phase === 'searching' && (
           <motion.div
             key="searching"
-            initial={{ opacity: 0, scale: 0.96 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            className="my-auto flex flex-col items-center justify-center text-center space-y-6 py-10"
+            exit={{ opacity: 0, scale: 0.97 }}
+            className="relative my-auto flex flex-col items-center py-8 text-center"
           >
-            {/* 2 Ta Karta: Siz VS Radar Raqib */}
-            <div className="flex items-center justify-center gap-4 sm:gap-6 w-full max-w-sm">
+            <span className="ps-chip">
+              <Radio className="size-3.5 animate-pulse text-[var(--ps-coral)]" />
+              Tezkor matchmaking · 3 soniya
+            </span>
+            <h3 className="ps-display mt-5 text-[34px] sm:text-[44px]">
+              Raqib <span className="text-[var(--ps-coral)]">qidirilmoqda</span>
+              <span className="text-[var(--ps-purple)]">…</span>
+            </h3>
+            <p className="mt-2 max-w-xs text-[13px] text-[var(--text-muted)]">
+              ELO reytingingizga yaqin kuchli raqib tanlanmoqda
+            </p>
+
+            <div className="mt-8 grid w-full max-w-md grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
               {/* Siz */}
-              <div className="flex-1 flex flex-col items-center p-3.5 rounded-xl bg-zinc-950/60 border border-blue-500/30 shadow-[0_0_20px_-5px_rgba(59,130,246,0.25)]">
+              <div className="relative flex flex-col items-center overflow-hidden rounded-[28px] bg-[var(--ps-purple)] p-5 text-white">
+                <span aria-hidden className="absolute -right-6 -top-6 size-20 rounded-full bg-white/20" />
                 <div className="relative">
-                  <img
-                    src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'}
-                    alt="Siz"
-                    className="size-14 rounded-full border-2 border-blue-500 bg-zinc-900 object-cover"
-                  />
-                  <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 border-2 border-zinc-900" />
+                  <img src={meAvatar} alt="Siz" className="size-16 rounded-full border-4 border-white/80 bg-white object-cover" />
+                  <span className="absolute bottom-0.5 right-0.5 size-4 rounded-full border-[3px] border-[var(--ps-purple)] bg-[var(--ps-green)]" />
                 </div>
-                <p className="mt-2 text-xs font-bold text-white truncate max-w-[100px]">{user?.first_name || user?.username || 'Siz'}</p>
-                <span className="text-[12px] font-mono text-blue-400 font-semibold">{user?.elo_rating || 1200} ELO</span>
+                <p className="relative mt-3 max-w-full truncate text-[14px] font-bold">{meName}</p>
+                <span className="relative mt-1 rounded-full bg-black/20 px-2.5 py-0.5 font-mono text-[11.5px] font-bold">{meElo} ELO</span>
               </div>
 
-              {/* VS Chaqmoq */}
-              <div className="flex flex-col items-center shrink-0">
-                <div className="size-10 rounded-full bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse">
-                  <Zap className="size-5 fill-white" />
+              {/* VS */}
+              <span className="relative inline-flex size-14 items-center justify-center rounded-full bg-[#080808] text-[var(--ps-orange)] dark:bg-[#FFFCF7]">
+                <span aria-hidden className="absolute inset-0 animate-ping rounded-full bg-[var(--ps-orange)] opacity-25" />
+                <Zap className="relative size-6 fill-current" />
+              </span>
+
+              {/* Radar */}
+              <div className="relative flex flex-col items-center overflow-hidden rounded-[28px] bg-[var(--ps-neutral)] p-5">
+                <div className="relative flex size-16 items-center justify-center">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-[var(--ps-coral)] opacity-25" />
+                  <span className="absolute inset-1.5 rounded-full border-2 border-dashed border-[var(--ps-coral)] opacity-60" />
+                  <span className="relative inline-flex size-11 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                    <Swords className="size-5 animate-spin [animation-duration:2.4s]" />
+                  </span>
                 </div>
-                <span className="mt-1 text-[12px] font-bold italic tracking-wider text-orange-400">VS</span>
+                <p className="mt-3 text-[14px] font-bold text-[var(--text-primary)]">Raqib…</p>
+                <span className="mt-1 rounded-full bg-[var(--ps-paper)] px-2.5 py-0.5 font-mono text-[11.5px] font-bold text-[var(--text-muted)]">qidirilmoqda</span>
               </div>
-
-              {/* Radar: Raqib qidirilmoqda */}
-              <div className="flex-1 flex flex-col items-center p-3.5 rounded-xl bg-zinc-950/60 border border-white/10 relative overflow-hidden">
-                <div className="relative flex items-center justify-center size-14">
-                  <span className="absolute inset-0 rounded-full bg-rose-500/20 animate-ping" />
-                  <span className="absolute inset-2 rounded-full bg-rose-500/30 animate-pulse" />
-                  <div className="relative size-12 rounded-full bg-zinc-800 border border-dashed border-rose-500/50 flex items-center justify-center text-rose-400">
-                    <Swords className="size-6 animate-spin text-rose-400" />
-                  </div>
-                </div>
-                <p className="mt-2 text-xs font-bold text-zinc-300">Raqib...</p>
-                <span className="text-[12px] font-mono text-zinc-500">Qidirilmoqda</span>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-bold text-white">Jonli Raqib Qidirilmoqda...</h3>
-              <p className="text-xs text-zinc-400 max-w-xs">
-                Sizning ELO ballingizga yaqin kuchli raqib tanlanmoqda
-              </p>
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.15)]">
-              <Radio className="size-3.5 animate-pulse text-rose-400" />
-              <span>Tezkor Matchmaking (3 soniya)</span>
             </div>
           </motion.div>
         )}
 
         {/* ─────────────────────────────────────────────────────────────
-            B. MATCH FOUND (3-Soniyada Raqib Topildi Chaqnashi)
+            B. MATCH FOUND — VS ekrani
            ───────────────────────────────────────────────────────────── */}
         {phase === 'match_found' && opponent && (
           <motion.div
             key="match_found"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.05, opacity: 0 }}
-            className="my-auto flex flex-col items-center justify-center py-10 space-y-6 text-center"
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.04 }}
+            className="relative my-auto flex flex-col items-center py-6 text-center"
           >
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.3)] animate-bounce">
-              <Sparkles className="size-3.5" />
-              <span>Raqib Topildi!</span>
-            </div>
+            <motion.span
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-4 py-1.5 text-[13px] font-bold text-white"
+            >
+              <Sparkles className="size-4" />
+              Raqib topildi!
+            </motion.span>
 
-            <div className="flex items-center justify-center gap-6 w-full max-w-sm">
+            <div className="relative mt-8 grid w-full grid-cols-2 gap-3">
               {/* Siz */}
-              <div className="flex flex-col items-center space-y-1.5">
-                <img
-                  src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'}
-                  alt="Siz"
-                  className="size-16 rounded-full border-2 border-blue-500 bg-zinc-900 object-cover shadow-[0_0_15px_rgba(59,130,246,0.4)]"
-                />
-                <span className="text-xs font-bold text-white">{user?.first_name || user?.username || 'Siz'}</span>
-                <span className="text-[12px] font-mono text-blue-400">{user?.elo_rating || 1200} ELO</span>
-              </div>
-
-              <div className="text-2xl font-bold italic text-orange-400 animate-pulse">VS</div>
-
-              {/* Raqib: scale-105 chaqnash */}
               <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1.05 }}
-                className="flex flex-col items-center space-y-1.5 p-3 rounded-xl bg-zinc-950/80 border border-rose-500/40 shadow-[0_0_25px_rgba(244,63,94,0.4)]"
+                initial={{ x: -40, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                className="relative flex flex-col items-center overflow-hidden rounded-[32px] bg-[var(--ps-purple)] px-4 py-7 text-white"
               >
-                <div className="relative">
-                  <img
-                    src={opponent.avatar_url}
-                    alt={opponent.name}
-                    className="size-16 rounded-full border-2 border-rose-500 bg-zinc-900 object-cover"
-                  />
-                  <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 border-2 border-zinc-900" />
-                </div>
-                <span className="text-xs font-bold text-white truncate max-w-[110px]">{opponent.name}</span>
-                <span className="text-[12px] text-zinc-400 truncate max-w-[110px]">{opponent.region}</span>
-                <span className="px-2 py-0.5 rounded text-[12px] font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
-                  {opponent.elo_rating} ELO
-                </span>
+                <span aria-hidden className="absolute -left-8 -top-8 size-28 rounded-full bg-white/15" />
+                <span aria-hidden className="ps-dots absolute bottom-0 left-0 h-16 w-28 opacity-25" />
+                <img src={meAvatar} alt="Siz" className="relative size-24 rounded-full border-[5px] border-white/85 bg-white object-cover" />
+                <p className="relative mt-4 max-w-full truncate text-[18px] font-bold">{meName}</p>
+                <span className="relative mt-2 rounded-full bg-black/20 px-3 py-1 font-mono text-[12.5px] font-bold">{meElo} ELO</span>
               </motion.div>
+
+              {/* Raqib */}
+              <motion.div
+                initial={{ x: 40, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                className="relative flex flex-col items-center overflow-hidden rounded-[32px] bg-[var(--ps-coral)] px-4 py-7 text-white"
+              >
+                <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
+                <span aria-hidden className="ps-dots absolute bottom-0 right-0 h-16 w-28 opacity-25" />
+                <div className="relative">
+                  <img src={opponent.avatar_url} alt={opponent.name} className="size-24 rounded-full border-[5px] border-white/85 bg-white object-cover" />
+                  <span className="absolute bottom-1 right-1 size-5 rounded-full border-[3px] border-[var(--ps-coral)] bg-[var(--ps-green)]" />
+                </div>
+                <p className="relative mt-4 max-w-full truncate text-[18px] font-bold">{opponent.name}</p>
+                {opponent.region && <p className="relative max-w-full truncate text-[12px] font-semibold text-white/80">{opponent.region}</p>}
+                <span className="relative mt-2 rounded-full bg-black/20 px-3 py-1 font-mono text-[12.5px] font-bold">{opponent.elo_rating} ELO</span>
+              </motion.div>
+
+              {/* VS markazda */}
+              <motion.span
+                initial={{ scale: 0, rotate: -30 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 14, delay: 0.15 }}
+                className="ps-display absolute left-1/2 top-1/2 inline-flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[5px] border-[var(--ps-paper)] bg-[#080808] text-[22px] italic text-[var(--ps-orange)] sm:size-20 sm:text-[26px] dark:bg-[#FFFCF7]"
+              >
+                VS
+              </motion.span>
             </div>
 
-            <p className="text-xs font-mono text-zinc-400 tracking-wider">Jang boshlanmoqda...</p>
+            <p className="mt-6 inline-flex items-center gap-2 text-[13px] font-bold text-[var(--text-muted)]">
+              <span className="size-2 animate-pulse rounded-full bg-[var(--ps-orange)]" />
+              Jang boshlanmoqda…
+            </p>
           </motion.div>
         )}
 
         {/* ─────────────────────────────────────────────────────────────
-            C. DUAL SPLIT-PROGRESS HUD & JANG MAYDONI
+            C. JANG MAYDONI — ikki qatorli HUD + savol
            ───────────────────────────────────────────────────────────── */}
         {phase === 'battle' && currentQ && (
           <motion.div
             key="battle"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex-1 flex flex-col justify-between space-y-4"
+            className="relative flex flex-1 flex-col gap-5"
           >
-            {/* Dual Split-Progress HUD (2 qatorli Tug-of-War progress bar) */}
-            <div className="space-y-2 p-3 rounded-xl bg-zinc-950/70 border border-white/[0.07]">
-              {/* 1-qator: Siz */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <img
-                      src={user?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=me'}
-                      alt="Siz"
-                      className="size-5 rounded-full border border-blue-400"
-                    />
-                    <span className="font-bold text-white text-[12px] truncate max-w-[100px]">{user?.first_name || user?.username || 'Siz'}</span>
+            {/* HUD */}
+            <div className="relative overflow-hidden rounded-[28px] bg-[#080808] p-4 text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+              <span aria-hidden className="absolute -right-10 -top-10 size-32 rounded-full bg-[var(--ps-purple)] opacity-40" />
+              {/* Siz */}
+              <div className="relative">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <img src={meAvatar} alt="Siz" className="size-8 rounded-full border-2 border-[var(--ps-purple)] bg-white object-cover" />
+                    <span className="truncate text-[13.5px] font-bold">{meName}</span>
                     {userCombo > 1 && (
-                      <span className="px-1.5 py-0.2 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
-                        🔥 {userCombo}x Combo
+                      <span className="shrink-0 animate-pulse rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[11px] font-bold text-[#080808]">
+                        🔥 {userCombo}x combo
                       </span>
                     )}
                   </div>
-                  <span className="font-mono font-bold text-blue-400 text-xs">{userScore} ball</span>
+                  <span className="ps-num shrink-0 text-[24px] leading-none text-[var(--ps-lilac)]">
+                    {userScore}<span className="ml-1 text-[0.45em] opacity-60">ball</span>
+                  </span>
                 </div>
-                {/* Ko'k progress bar */}
-                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all duration-300"
-                    style={{ width: `${userProgressPercent}%` }}
-                  />
+                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/10 dark:bg-black/10">
+                  <div className="h-full rounded-full bg-[var(--ps-purple)] transition-all duration-300" style={{ width: `${userProgressPercent}%` }} />
                 </div>
               </div>
 
-              {/* 2-qator: Raqib */}
-              <div className="space-y-1 pt-1 border-t border-white/5">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <div className="relative">
-                      <img
-                        src={opponent?.avatar_url}
-                        alt={opponent?.name}
-                        className="size-5 rounded-full border border-rose-500"
-                      />
-                      <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-emerald-400 animate-ping" />
+              {/* Raqib */}
+              <div className="relative mt-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <div className="relative shrink-0">
+                      <img src={opponent?.avatar_url} alt={opponent?.name} className="size-8 rounded-full border-2 border-[var(--ps-coral)] bg-white object-cover" />
+                      <span className="absolute -right-0.5 -top-0.5 size-2.5 animate-ping rounded-full bg-[var(--ps-green)]" />
                     </div>
-                    <span className="font-bold text-zinc-300 text-[12px] truncate max-w-[100px]">{opponent?.name}</span>
-                    <span className="text-[9.5px] font-medium text-emerald-400 flex items-center gap-0.5">
-                      <span className="size-1.5 rounded-full bg-emerald-400" /> Jonli
+                    <span className="truncate text-[13.5px] font-bold">{opponent?.name}</span>
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--ps-green)] px-2 py-0.5 text-[10.5px] font-bold text-white">
+                      <span className="size-1.5 rounded-full bg-white" /> Jonli
                     </span>
                   </div>
-                  <span className="font-mono font-bold text-rose-400 text-xs">{opponentScore} ball</span>
+                  <span className="ps-num shrink-0 text-[24px] leading-none text-[var(--ps-coral)]">
+                    {opponentScore}<span className="ml-1 text-[0.45em] opacity-60">ball</span>
+                  </span>
                 </div>
-                {/* Olovrang progress bar */}
-                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] transition-all duration-500"
-                    style={{ width: `${opponentProgressPercent}%` }}
-                  />
+                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/10 dark:bg-black/10">
+                  <div className="h-full rounded-full bg-[var(--ps-coral)] transition-all duration-500" style={{ width: `${opponentProgressPercent}%` }} />
                 </div>
               </div>
 
-              {/* Raqib Harakati Mikro-Toasti */}
+              {/* Raqib harakati */}
               <AnimatePresence>
                 {opponentToast && (
                   <motion.div
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
-                    className="text-[12px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-md px-2 py-0.5 text-center truncate"
+                    className="relative mt-3 truncate rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-center text-[12px] font-bold text-[#080808]"
                   >
                     {opponentToast}
                   </motion.div>
@@ -536,29 +537,53 @@ export default function GhostBattleArena({
               </AnimatePresence>
             </div>
 
-            {/* Savol Matni */}
-            <div className="py-2 space-y-1">
-              <span className="text-[12px] font-mono text-zinc-400 uppercase tracking-wider">
-                Savol {currentQIndex + 1} / {totalQuestions}
-              </span>
-              <p className="text-sm sm:text-base font-semibold text-white leading-relaxed">
-                {currentQ.body}
-              </p>
+            {/* Savol */}
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="ps-chip">
+                  <Clock className="size-3.5 text-[var(--ps-purple)]" />
+                  Savol {currentQIndex + 1} / {totalQuestions}
+                </span>
+                <div className="flex items-center gap-1">
+                  {questions.map((q, i) => (
+                    <span
+                      key={q.id}
+                      className={cn(
+                        'h-2 rounded-full transition-all',
+                        i < currentQIndex ? 'w-2 bg-[var(--ps-purple)]' : i === currentQIndex ? 'w-6 bg-[var(--ps-orange)]' : 'w-2 bg-[var(--ds-track)]'
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={currentQ.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px]"
+                >
+                  {currentQ.body}
+                </motion.p>
+              </AnimatePresence>
             </div>
 
             {/* Variantlar */}
-            <div className="space-y-2 pt-1">
-              {currentQ.choices.map((choice) => {
+            <div className="mt-auto space-y-2.5">
+              {currentQ.choices.map((choice, i) => {
                 const isSelected = selectedChoiceId === choice.id;
-                let choiceStyle = 'border-white/10 bg-zinc-950/60 hover:bg-zinc-800/70 hover:border-white/20 text-zinc-200';
-
+                let row = 'bg-[var(--ps-neutral)] text-[var(--text-primary)] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac)] hover:text-[#080808]';
+                let letter = 'bg-[var(--ps-paper)] text-[var(--text-primary)]';
                 if (isAnswered) {
                   if (choice.is_correct) {
-                    choiceStyle = 'border-emerald-500 bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
-                  } else if (isSelected && !choice.is_correct) {
-                    choiceStyle = 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.3)]';
+                    row = 'bg-[var(--ps-green)] text-white';
+                    letter = 'bg-white/25 text-white';
+                  } else if (isSelected) {
+                    row = 'bg-[var(--ps-coral)] text-white';
+                    letter = 'bg-white/25 text-white';
                   } else {
-                    choiceStyle = 'opacity-40 border-white/5 bg-zinc-950/30 text-zinc-500';
+                    row = 'bg-[var(--ps-neutral)] text-[var(--text-muted)] opacity-50';
                   }
                 }
 
@@ -569,13 +594,16 @@ export default function GhostBattleArena({
                     disabled={isAnswered}
                     onClick={() => handleSelectChoice(choice)}
                     className={cn(
-                      'w-full p-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all duration-150 flex items-center justify-between cursor-pointer disabled:cursor-default',
-                      choiceStyle
+                      'group flex w-full cursor-pointer items-center gap-3 rounded-full p-2 pr-5 text-left text-[14.5px] font-semibold transition-all duration-200 disabled:cursor-default',
+                      row
                     )}
                   >
-                    <span>{choice.text}</span>
-                    {isAnswered && choice.is_correct && <CheckCircle2 className="size-4 text-emerald-400 shrink-0 ml-2" />}
-                    {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-4 text-rose-400 shrink-0 ml-2" />}
+                    <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-black transition-colors', letter)}>
+                      {LETTERS[i] || i + 1}
+                    </span>
+                    <span className="flex-1">{choice.text}</span>
+                    {isAnswered && choice.is_correct && <CheckCircle2 className="size-5 shrink-0" />}
+                    {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-5 shrink-0" />}
                   </button>
                 );
               })}
@@ -584,103 +612,98 @@ export default function GhostBattleArena({
         )}
 
         {/* ─────────────────────────────────────────────────────────────
-            D. NATIJA EKRANI (G'oliblik & Duel Share)
+            D. NATIJA EKRANI
            ───────────────────────────────────────────────────────────── */}
         {phase === 'result' && (
           <motion.div
             key="result"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="my-auto flex flex-col items-center justify-center space-y-5 py-6 text-center"
+            className="relative my-auto flex flex-col items-center py-4 text-center"
           >
             <div className="relative">
-              <div
+              <span
                 className={cn(
-                  'size-20 rounded-2xl flex items-center justify-center text-white shadow-2xl',
-                  isWinner
-                    ? 'bg-gradient-to-tr from-amber-500 to-yellow-400 shadow-amber-500/40'
-                    : 'bg-zinc-800 border border-white/10'
+                  'inline-flex size-24 items-center justify-center rounded-full',
+                  isWinner ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-neutral)] text-[var(--text-muted)]'
                 )}
               >
-                {isWinner ? <Trophy className="size-10 fill-white" /> : <Shield className="size-10 text-zinc-400" />}
-              </div>
+                {isWinner ? <Trophy className="size-11" /> : <Shield className="size-11" />}
+              </span>
               {isWinner && (
-                <span className="absolute -top-1.5 -right-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold uppercase bg-emerald-500 text-white shadow">
+                <span className="absolute -right-3 -top-1 rotate-12 rounded-full bg-[var(--ps-green)] px-2.5 py-1 text-[11px] font-bold uppercase text-white">
                   G&apos;alaba!
                 </span>
               )}
             </div>
 
-            <div className="space-y-1">
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
-                {isWinner ? "G'alaba Qozondingiz!" : "Bu Gal Raqib Qo'li Baland Keldi"}
-              </h2>
-              <p className="text-xs text-zinc-400">
-                Yakuniy hisob: <span className="font-mono font-bold text-white">{userScore}</span> —{' '}
-                <span className="font-mono font-bold text-zinc-400">{opponentScore}</span>
-              </p>
-            </div>
+            <h2 className="ps-display mt-5 text-[30px] sm:text-[38px]">
+              {isWinner ? (
+                <>G&apos;alaba <span className="text-[var(--ps-orange)]">qozondingiz!</span></>
+              ) : (
+                <>Bu gal raqib <span className="text-[var(--ps-coral)]">kuchliroq</span></>
+              )}
+            </h2>
 
-            {/* Mukofotlar bloki */}
-            <div className="grid grid-cols-3 gap-2 w-full max-w-sm">
-              <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
-                <span className="text-[12px] text-zinc-400 uppercase font-semibold">Tajriba</span>
-                <p className="text-xs font-mono font-bold text-blue-400 mt-0.5">+50 XP</p>
+            {/* Yakuniy hisob */}
+            <div className="mt-5 flex items-center gap-4">
+              <div className="text-center">
+                <p className="ps-num text-[44px] leading-none text-[var(--ps-purple)]">{userScore}</p>
+                <p className="mt-1 text-[11.5px] font-semibold text-[var(--text-muted)]">Siz</p>
               </div>
-              <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
-                <span className="text-[12px] text-zinc-400 uppercase font-semibold">Tanga</span>
-                <p className="text-xs font-mono font-bold text-amber-400 mt-0.5">+25 🪙</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-white/10">
-                <span className="text-[12px] text-zinc-400 uppercase font-semibold">Reyting</span>
-                <p className="text-xs font-mono font-bold text-emerald-400 mt-0.5">
-                  {isWinner ? '+18 ELO' : '-10 ELO'}
-                </p>
+              <span className="inline-flex size-10 items-center justify-center rounded-full bg-[#080808] text-[12px] font-black italic text-[var(--ps-orange)] dark:bg-[#FFFCF7]">VS</span>
+              <div className="text-center">
+                <p className="ps-num text-[44px] leading-none text-[var(--ps-coral)]">{opponentScore}</p>
+                <p className="mt-1 max-w-[110px] truncate text-[11.5px] font-semibold text-[var(--text-muted)]">{opponent?.name || 'Raqib'}</p>
               </div>
             </div>
 
-            {/* Viral Duel Ticket UI */}
-            <div className="w-full max-w-sm p-3.5 rounded-xl bg-gradient-to-r from-blue-950/40 via-zinc-950 to-indigo-950/40 border border-blue-500/25 space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <div className="text-left">
-                  <span className="text-[12px] text-zinc-400 uppercase">Sizning Natijangiz</span>
-                  <p className="font-bold text-white">{userScore} ball</p>
+            {/* Mukofotlar */}
+            <div className="mt-6 grid w-full max-w-md grid-cols-3 gap-2.5">
+              {[
+                { label: 'Tajriba', value: '+50 XP', tone: 'bg-[var(--ps-purple)] text-white' },
+                { label: 'Tanga', value: '+25 🪙', tone: 'bg-[var(--ps-orange)] text-[#080808]' },
+                { label: 'Reyting', value: isWinner ? '+18 ELO' : '-10 ELO', tone: isWinner ? 'bg-[var(--ps-green)] text-white' : 'bg-[var(--ps-coral)] text-white' },
+              ].map((r) => (
+                <div key={r.label} className={cn('relative overflow-hidden rounded-[22px] p-3', r.tone)}>
+                  <span aria-hidden className="absolute -right-4 -top-4 size-12 rounded-full bg-white/20" />
+                  <p className="relative text-[11px] font-bold uppercase opacity-75">{r.label}</p>
+                  <p className="relative mt-1 font-mono text-[15px] font-black">{r.value}</p>
                 </div>
-                <div className="size-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
-                  VS
+              ))}
+            </div>
+
+            {/* Do'stni duelga chorlash */}
+            <div className="mt-4 w-full max-w-md rounded-[26px] bg-[var(--ps-neutral)] p-4">
+              <div className="flex items-center justify-between text-left">
+                <div>
+                  <p className="text-[11px] font-bold uppercase text-[var(--text-muted)]">Sizning natijangiz</p>
+                  <p className="text-[16px] font-bold">{userScore} ball</p>
                 </div>
+                <span className="inline-flex size-8 items-center justify-center rounded-full bg-[var(--ps-blue)] text-[11px] font-black text-[#080808]">VS</span>
                 <div className="text-right">
-                  <span className="text-[12px] text-zinc-400 uppercase">Do&apos;stingiz</span>
-                  <p className="font-bold text-zinc-500">? / 10</p>
+                  <p className="text-[11px] font-bold uppercase text-[var(--text-muted)]">Do&apos;stingiz</p>
+                  <p className="text-[16px] font-bold text-[var(--text-muted)]">? ball</p>
                 </div>
               </div>
-
               <button
                 type="button"
                 onClick={() => onOpenViralDuel?.(userScore, opponentScore)}
-                className="w-full h-10 rounded-lg bg-[#2AABEE] hover:bg-[#229ED9] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(42,171,238,0.4)] transition-all active:scale-[0.98] cursor-pointer"
+                className="mt-3 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#2AABEE] text-[13px] font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               >
-                <Send className="size-3.5 fill-white" />
-                <span>Do&apos;stni Telegramda Duelga Chorlash (+100 🪙)</span>
+                <Send className="size-4 fill-white" />
+                Do&apos;stni Telegramda duelga chorlash (+100 🪙)
               </button>
             </div>
 
             {/* Qayta o'ynash / Chiqish */}
-            <div className="flex items-center gap-2.5 w-full max-w-sm pt-1">
-              <button
-                type="button"
-                onClick={startMatchmaking}
-                className="flex-1 h-11 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-              >
-                <RotateCcw className="size-3.5" />
-                <span>Yana O&apos;ynash</span>
+            <div className="mt-4 flex w-full max-w-md items-center gap-2.5">
+              <button type="button" onClick={startMatchmaking} className="ps-btn ps-btn-ink flex-1">
+                <RotateCcw className="size-4" />
+                Yana o&apos;ynash
               </button>
               {onExit && (
-                <button
-                  type="button"
-                  onClick={onExit}
-                  className="px-4 h-11 rounded-xl bg-zinc-950 border border-white/10 hover:border-white/20 text-zinc-300 text-xs font-semibold cursor-pointer"
-                >
+                <button type="button" onClick={onExit} className="ps-btn ps-btn-ghost">
                   Chiqish
                 </button>
               )}
@@ -688,6 +711,6 @@ export default function GhostBattleArena({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </ArenaStage>
   );
 }

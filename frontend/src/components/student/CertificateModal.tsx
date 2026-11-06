@@ -372,7 +372,7 @@ export default function CertificateModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[94vh] max-w-4xl overflow-y-auto border border-amber-300 bg-[#fefcf6] text-[#0f172a] shadow-2xl p-4 sm:p-6 print:border-none print:p-0">
+        <DialogContent className="ps-shell max-h-[94vh] max-w-4xl overflow-y-auto rounded-[32px] border-0 bg-[#F2EADF] p-4 text-[#080808] shadow-2xl sm:p-6 print:border-none print:p-0">
           <DialogHeader className="no-print border-b border-amber-200/80 pb-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -432,151 +432,74 @@ export default function CertificateModal({
           {/* ═════════════════════════════════════════════════════════════
               RASMIY SARIQ-OQ SERTIFIKAT BLOKI (A4 PORTRAIT)
               ═════════════════════════════════════════════════════════════ */}
-          <div className="py-2 sm:py-4 flex justify-center">
+          <div className="flex justify-center py-2 sm:py-4">
             <div
               id="certificate-print-area"
-              className="relative w-full max-w-[680px] bg-[#fefcf6] border-[4px] border-[#c59b27] p-2 sm:p-3.5 shadow-2xl rounded-sm print:m-0 print:w-full print:border-none print:shadow-none"
+              className="relative w-full max-w-[640px] overflow-hidden rounded-[32px] bg-[#FFFCF7] text-[#080808] shadow-[0_30px_60px_-30px_rgba(60,30,110,0.6)] print:m-0 print:w-full print:shadow-none"
             >
-              {/* Ichki nozik tilla hoshiya */}
-              <div className="relative border-[1.5px] border-[#d4af37] p-5 sm:p-8 bg-[#fdfbf7] flex flex-col items-center">
-                
-                {/* Chap-pastki sharqona girih naqshi */}
-                <div className="pointer-events-none absolute bottom-3 left-3 size-24 sm:size-28 opacity-75">
-                  <svg viewBox="0 0 100 100" className="size-full stroke-[#d4af37] fill-none stroke-[1.5]">
-                    <rect x="20" y="20" width="60" height="60" />
-                    <rect x="20" y="20" width="60" height="60" transform="rotate(45 50 50)" />
-                    <circle cx="50" cy="50" r="16" />
-                    <circle cx="50" cy="50" r="30" strokeDasharray="3 3" />
-                  </svg>
-                </div>
-
-                {/* O'ng-yuqori sharqona girih naqshi */}
-                <div className="pointer-events-none absolute top-3 right-3 size-24 sm:size-28 opacity-75">
-                  <svg viewBox="0 0 100 100" className="size-full stroke-[#d4af37] fill-none stroke-[1.5]">
-                    <rect x="20" y="20" width="60" height="60" />
-                    <rect x="20" y="20" width="60" height="60" transform="rotate(45 50 50)" />
-                    <circle cx="50" cy="50" r="16" />
-                  </svg>
-                </div>
-
-                {/* Orqa fon: Nozik IlmIldizi Watermark */}
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.035] select-none">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icon-192.png" alt="" className="size-72 sm:size-88 object-contain grayscale" />
-                </div>
-
-                {/* 1. Gerb / Logo: Rasmiy IlmIldizi Medallion */}
-                <div className="relative flex flex-col items-center text-center mb-3 z-10">
-                  <div className="size-18 sm:size-22 rounded-full border-2 border-[#c59b27] bg-white flex items-center justify-center p-2 mb-2 shadow-md ring-4 ring-[#e5c158]/35">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="/icon-192.png"
-                      alt="IlmIldizi"
-                      className="size-full object-contain rounded-full"
-                    />
-                  </div>
-
-                  <p className="text-xs sm:text-sm font-bold text-[#065f46] uppercase tracking-wider font-serif">
-                    ILMILDIZI · ONLAYN MASHQ PLATFORMASI
-                  </p>
-                  <p className="text-[10px] sm:text-xs font-extrabold text-[#1c3c87] uppercase tracking-wide mt-0.5">
-                    Rasmiy hujjat emas · BMB formatidagi mashq testi
-                  </p>
-                </div>
-
-                {/* 2. Asosiy Sarlavha */}
-                <div className="text-center my-3 sm:my-4">
-                  <h2 className="font-serif text-lg sm:text-2xl font-black text-[#0f172a] uppercase tracking-wide leading-tight">
-                    MASHQ TESTI
-                  </h2>
-                  <h2 className="font-serif text-lg sm:text-2xl font-black text-[#0f172a] uppercase tracking-wide leading-tight">
-                    NATIJA KARTASI
-                  </h2>
-                </div>
-
-                {/* 3. Ma'lumotlar bloki (Qatorma-qator va tillarang chiziqlar) */}
-                <div className="w-full mt-3 space-y-4 text-xs sm:text-sm">
-                  {/* Blok 1 */}
-                  <div className="space-y-1.5 pb-2 border-b border-[#e5c158]/90">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Natija raqami:</span>
-                      <span className="font-mono font-bold text-[#0f172a] text-right">{certNumber}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Talabgorning shaxsiy kodi:</span>
-                      <span className="font-mono font-bold text-[#0f172a] text-right">{personalCode}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Familiyasi:</span>
-                      <span className="font-bold text-[#0f172a] tracking-wide text-right">{lastName}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Ismi:</span>
-                      <span className="font-bold text-[#0f172a] tracking-wide text-right">{firstName}</span>
-                    </div>
-                  </div>
-
-                  {/* Blok 2 */}
-                  <div className="space-y-1.5 pb-2 border-b border-[#e5c158]/90">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Umumta&apos;lim fani:</span>
-                      <span className="font-bold text-[#0f172a] text-right">{testTitle || "Tarix Milliy Sertifikat"}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Umumiy to&apos;plagan bali:</span>
-                      <span className="font-mono font-black text-[#0f172a] text-base text-right">{scaledScoreStr}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Umumiy ballga nisbatan foiz ko&apos;rsatkichi:</span>
-                      <span className="font-mono font-bold text-[#0f172a] text-right">{pctStr}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-[#1c3c87]">Taxminiy daraja:</span>
-                      <span className="font-mono font-black text-amber-700 text-base sm:text-lg text-right">{certGrade}</span>
-                    </div>
-                  </div>
-
-                  {/* Blok 3: Test sinovi natijasi */}
-                  <div className="flex items-center justify-between pb-2 border-b border-[#e5c158]/90">
-                    <span className="font-bold text-[#1c3c87]">Test sinovi natijasi:</span>
-                    <span className="font-mono font-black text-[#0f172a] text-base text-right">{scaledScoreComma}</span>
-                  </div>
-
-                  {/* Blok 4: Sanalar */}
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#1e3a8a]">Berilgan sanasi:</span>
-                      <span className="font-mono text-xs text-[#0f172a]">{givenDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#1e3a8a]">Amal qilish muddati:</span>
-                      <span className="font-mono text-xs text-[#0f172a]">{expireDate}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Markaziy oltin bezak ajratgich */}
-                <div className="w-full flex items-center justify-center gap-3 my-5 sm:my-6">
-                  <div className="h-[1.5px] flex-1 bg-gradient-to-r from-transparent via-[#c59b27] to-[#c59b27]" />
-                  <span className="text-[#c59b27] text-base font-serif">❖ ✦ ❖</span>
-                  <div className="h-[1.5px] flex-1 bg-gradient-to-l from-transparent via-[#c59b27] to-[#c59b27]" />
-                </div>
-
-                {/* 4. Pastki qism: natija sahifasiga QR havola (imzo/muhr yo'q) */}
-                <div className="w-full flex items-center justify-center mt-1 pt-1">
-                  <div className="shrink-0 flex flex-col items-center justify-center p-1.5 border-2 border-[#c59b27] rounded-md bg-white shadow-xs">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={qrImgUrl}
-                      alt="Natija sahifasiga QR havola"
-                      className="size-20 sm:size-24 object-contain"
-                    />
-                    <span className="text-[8px] font-mono font-bold text-[#1e3a8a] mt-0.5 tracking-tight">
-                      NATIJANI KO&apos;RISH
+              <div className="relative overflow-hidden bg-[#7659C7] px-7 pb-14 pt-7 text-white">
+                <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-white/15" />
+                <span aria-hidden className="absolute bottom-6 left-1/2 size-16 rounded-full bg-[#FFB82E] opacity-80" />
+                <div className="relative flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex size-12 items-center justify-center overflow-hidden rounded-full bg-white p-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/icon-192.png" alt="IlmIldizi" className="size-full rounded-full object-contain" />
                     </span>
+                    <div>
+                      <p className="font-[family-name:var(--font-grotesk)] text-[18px] font-bold leading-none"><span data-no-translit>IlmIldizi</span></p>
+                      <p className="mt-1 text-[10.5px] font-bold uppercase tracking-wider text-white/75">Onlayn mashq platformasi</p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-black/20 px-3 py-1 font-mono text-[11px] font-bold">{certNumber}</span>
+                </div>
+                <h2 className="relative mt-6 font-[family-name:var(--font-grotesk)] text-[32px] font-bold leading-none tracking-[-0.03em] sm:text-[40px]">
+                  Mashq testi<br />natija kartasi
+                </h2>
+              </div>
+
+              <div className="relative -mt-8 flex items-end justify-between gap-4 px-7">
+                <div className="flex items-end gap-3">
+                  <span className="grid size-24 shrink-0 place-items-center rounded-full border-[6px] border-[#FFFCF7] bg-[#FFB82E] shadow-lg">
+                    <span className="text-center leading-none">
+                      <span className="block font-[family-name:var(--font-grotesk)] text-[30px] font-bold">{scaledScoreStr}</span>
+                      <span className="mt-0.5 block text-[10px] font-black uppercase">ball</span>
+                    </span>
+                  </span>
+                  <div className="pb-1">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#8A8494]">Talabgor</p>
+                    <p className="font-[family-name:var(--font-grotesk)] text-[20px] font-bold">{lastName !== '—' ? `${lastName} ${firstName}` : firstName}</p>
                   </div>
                 </div>
+                <span className="mb-1 inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-[#080808] font-[family-name:var(--font-grotesk)] text-[20px] font-bold text-[#FFB82E]">
+                  {certGrade}
+                </span>
+              </div>
 
+              <div className="grid grid-cols-2 gap-2.5 px-7 pt-5">
+                {[
+                  { label: 'Fan / test', value: testTitle || 'Tarix Milliy Sertifikat', wide: true },
+                  { label: 'Foiz ko‘rsatkichi', value: pctStr },
+                  { label: 'Test sinovi natijasi', value: scaledScoreComma },
+                  { label: 'Talabgor kodi', value: personalCode },
+                  { label: 'Berilgan sana', value: givenDate },
+                ].map((row) => (
+                  <div key={row.label} className={`rounded-[18px] bg-[#F7F4EF] px-4 py-3 ${row.wide ? 'col-span-2' : ''}`}>
+                    <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#8A8494]">{row.label}</p>
+                    <p className={`mt-0.5 font-bold ${row.wide ? 'text-[14px] leading-snug' : 'font-mono text-[16px]'}`}>{row.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 flex items-center justify-between gap-4 border-t border-dashed border-[#E6DED2] px-7 py-5">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-wider text-[#7659C7]">Rasmiy hujjat emas</p>
+                  <p className="mt-1 text-[12px] leading-snug text-[#6B6577]">BMB formatidagi mashq testi natijasi. QR orqali natija sahifasini oching.</p>
+                </div>
+                <div className="shrink-0 rounded-[18px] bg-white p-2 shadow-[0_10px_24px_-14px_rgba(60,30,110,0.6)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrImgUrl} alt="Natija sahifasiga QR havola" className="size-20 object-contain" />
+                </div>
               </div>
             </div>
           </div>
