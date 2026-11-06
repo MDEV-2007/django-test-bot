@@ -9,7 +9,7 @@ import {
   Crown, Flame, Sparkles, XCircle, RotateCcw, Compass, Lightbulb, ThumbsUp,
   AlertTriangle, ChevronLeft, ChevronRight, Share2, Award,
   CheckCircle2, HelpCircle, Trophy, Gift, Swords, Film, BookOpen, Send, Gamepad2, Lock,
-  TrendingUp, ArrowRight,
+  TrendingUp, ArrowRight, Check, X, Minus,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { canShareToStory, shareToStory, tgHaptic, useIsTelegram } from '@/lib/telegram';
@@ -18,6 +18,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import AppShell from '@/components/AppShell';
 import CertificateModal from '@/components/student/CertificateModal';
 import ShareToCommunityModal from '@/components/student/ShareToCommunityModal';
+import CertificateCard from '@/components/student/CertificateCard';
 import DailyChestModal from '@/components/student/DailyChestModal';
 import ExamSurveyCard from '@/components/student/ExamSurveyCard';
 import { WritingReviewCard } from '@/components/cefr/WritingTask';
@@ -850,85 +851,25 @@ export default function FeedbackPage() {
               </div>
 
               {/* Karta */}
-              <div
+              <CertificateCard
                 onClick={() => setCertOpen(true)}
-                className="group relative mx-auto w-full max-w-[620px] cursor-pointer overflow-hidden rounded-[32px] bg-[#FFFCF7] text-[#080808] shadow-[0_30px_60px_-30px_rgba(60,30,110,0.6)] transition-transform duration-300 hover:-translate-y-1"
-              >
-                {/* Yuqori binafsha lenta */}
-                <div className="relative overflow-hidden bg-[#7659C7] px-6 pb-14 pt-6 text-white sm:px-8">
-                  <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-white/15" />
-                  <span aria-hidden className="absolute bottom-6 left-1/2 size-16 rounded-full bg-[#FFB82E] opacity-80" />
-                  <span aria-hidden className="ps-dots absolute bottom-4 right-6 h-14 w-28 opacity-25" />
-                  <div className="relative flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex size-12 items-center justify-center overflow-hidden rounded-full bg-white p-1">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/icon-192.png" alt="IlmIldizi" className="size-full rounded-full object-contain" />
-                      </span>
-                      <div>
-                        <p className="font-[family-name:var(--font-grotesk)] text-[18px] font-bold leading-none tracking-[-0.02em]">
-                          <span data-no-translit>IlmIldizi</span>
-                        </p>
-                        <p className="mt-1 text-[10.5px] font-bold uppercase tracking-wider text-white/75">Onlayn mashq platformasi</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-black/20 px-3 py-1 font-mono text-[11px] font-bold">{certNumber}</span>
-                  </div>
-                  <h4 className="relative mt-6 font-[family-name:var(--font-grotesk)] text-[30px] font-bold leading-none tracking-[-0.03em] sm:text-[38px]">
-                    Mashq testi<br />natija kartasi
-                  </h4>
-                </div>
-
-                {/* Ball doirasi — lentadan chiqib turadi */}
-                <div className="relative -mt-8 flex items-end justify-between gap-4 px-6 sm:px-8">
-                  <div className="flex items-end gap-3">
-                    <span className="grid size-24 shrink-0 place-items-center rounded-full border-[6px] border-[#FFFCF7] bg-[#FFB82E] text-[#080808] shadow-lg">
-                      <span className="text-center leading-none">
-                        <span className="block font-[family-name:var(--font-grotesk)] text-[30px] font-bold">{scaledScoreStr}</span>
-                        <span className="mt-0.5 block text-[10px] font-black uppercase">ball</span>
-                      </span>
-                    </span>
-                    <div className="pb-1">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-[#8A8494]">Talabgor</p>
-                      <p className="max-w-[220px] truncate font-[family-name:var(--font-grotesk)] text-[20px] font-bold tracking-[-0.02em]">{fullName}</p>
-                    </div>
-                  </div>
-                  <span className="mb-2 inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-[#080808] font-[family-name:var(--font-grotesk)] text-[20px] font-bold text-[#FFB82E]">
-                    {certGrade}
-                  </span>
-                </div>
-
-                {/* Ma'lumotlar */}
-                <div className="grid grid-cols-2 gap-2.5 px-6 pt-5 sm:px-8">
-                  {[
-                    { label: 'Fan / test', value: data?.attempt?.test_title || 'Tarix Milliy Sertifikat', wide: true },
-                    { label: 'Foiz ko‘rsatkichi', value: pctVal },
-                    { label: 'Test sinovi natijasi', value: scaledScoreComma },
-                    { label: 'Talabgor kodi', value: personalCode },
-                    { label: 'Taxminiy daraja', value: certGrade },
-                  ].map((row) => (
-                    <div key={row.label} className={cn('rounded-[18px] bg-[#F7F4EF] px-4 py-3', row.wide && 'col-span-2')}>
-                      <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#8A8494]">{row.label}</p>
-                      <p className={cn('mt-0.5 font-bold', row.wide ? 'text-[14px] leading-snug' : 'font-mono text-[16px]')}>{row.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Pastki qism: ogohlantirish va QR */}
-                <div className="mt-5 flex items-center justify-between gap-4 border-t border-dashed border-[#E6DED2] px-6 py-5 sm:px-8">
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-black uppercase tracking-wider text-[#7659C7]">Rasmiy hujjat emas</p>
-                    <p className="mt-1 text-[12px] leading-snug text-[#6B6577]">BMB formatidagi mashq testi natijasi. QR orqali natija sahifasini oching.</p>
-                    <p className="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-[#080808] group-hover:underline">
-                      Bosing: to&apos;liq ochish va yuklab olish <ArrowRight className="size-3.5" />
-                    </p>
-                  </div>
-                  <div className="shrink-0 rounded-[18px] bg-white p-2 shadow-[0_10px_24px_-14px_rgba(60,30,110,0.6)]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={qrImgUrl} alt="Natija sahifasiga QR havola" className="size-16 object-contain sm:size-20" />
-                  </div>
-                </div>
-              </div>
+                className="group mx-auto max-w-[620px]"
+                attemptId={cleanAttemptId}
+                studentName={fullName}
+                testTitle={data?.attempt?.test_title || 'Tarix Milliy Sertifikat'}
+                score={scaledScore}
+                correctCount={a.correct_answers || 0}
+                totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
+                percentage={isZeroCorrect ? 0 : rasch?.percentage}
+                grade={certGrade}
+                date={data?.attempt?.completed_at}
+                qrImgUrl={qrImgUrl}
+                footerHint={
+                  <p className="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-[#080808] group-hover:underline">
+                    Bosing: to&apos;liq ochish va yuklab olish <ArrowRight className="size-3.5" />
+                  </p>
+                }
+              />
             </section>
           );
         })()}
@@ -1144,11 +1085,11 @@ export default function FeedbackPage() {
                       <p className="font-semibold text-[var(--success-text)]">{m.togri_javob}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between gap-3 pt-1 border-t border-[var(--border-card)]">
-                    <p className="text-xs leading-relaxed text-muted-foreground flex-1">
+                  <div className="flex flex-col gap-2 border-t border-[var(--border-card)] pt-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
                       {m.nega_muhim ? <><strong>Izoh:</strong> {m.nega_muhim}</> : null}
                     </p>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0">
                       <MistakeSosButton mistake={m} />
                       <VoiceExplanationButton
                         text={m.nega_muhim || `Mavzu: ${m.mavzu}. Savol: ${m.savol_mazmuni}. To'g'ri javob: ${m.togri_javob}.`}
@@ -1216,7 +1157,24 @@ export default function FeedbackPage() {
               </Card>
             ) : (
             <>
-            <h2 className="section-title">Savollar tahlili</h2>
+            {(() => {
+              const items = data.review_items || [];
+              const correctN = items.filter((x) => x.is_correct).length;
+              const skippedN = items.filter((x) => !x.is_correct && x.is_skipped).length;
+              const wrongN = items.length - correctN - skippedN;
+              return (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="ps-display text-[26px] sm:text-[32px]">Savollar tahlili</h2>
+                  <div className="flex flex-wrap gap-1.5 text-[12px] font-bold">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-3 py-1.5 text-white"><Check className="size-3.5 stroke-[3]" /> {correctN} to&apos;g&apos;ri</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-coral)] px-3 py-1.5 text-white"><X className="size-3.5 stroke-[3]" /> {wrongN} xato</span>
+                    {skippedN > 0 && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-neutral)] px-3 py-1.5 text-[var(--text-secondary)]"><Minus className="size-3.5 stroke-[3]" /> {skippedN} belgilanmagan</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
             {data.review_items.map((r, index) => {
               // Part sarlavhasi faqat yangi partga o'tilganda chiziladi — CEFR natijasi
               // "Part 1 / Part 2 ..." bo'lib ajralib turadi, aralash ro'yxat bo'lmaydi.
@@ -1224,63 +1182,80 @@ export default function FeedbackPage() {
               const startsPart = Boolean(r.section) && (
                 previous?.skill !== r.section?.skill || previous?.part_number !== r.section?.part_number
               );
+              const status = r.is_correct ? 'correct' : r.is_skipped ? 'skipped' : 'wrong';
+              const tone = {
+                correct: { disc: 'bg-[var(--ps-green)] text-white', chip: 'bg-[var(--ps-green)]/15 text-[var(--ps-green)]', label: "To'g'ri", Icon: Check },
+                wrong: { disc: 'bg-[var(--ps-coral)] text-white', chip: 'bg-[var(--ps-coral)]/15 text-[var(--ps-coral)]', label: 'Xato', Icon: X },
+                skipped: { disc: 'bg-[var(--ps-neutral)] text-[var(--text-secondary)]', chip: 'bg-[var(--ps-neutral)] text-[var(--text-secondary)]', label: 'Belgilanmagan', Icon: Minus },
+              }[status];
+              const StatusIcon = tone.Icon;
               return (
               <div key={r.question_id}>
                 {startsPart && r.section && (
-                  <h3 className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                  <h3 className="ps-eyebrow mb-2 mt-6 text-[var(--text-muted)]">
                     {r.section.skill_label} — Part {r.section.part_number}
                     {r.section.title ? ` · ${r.section.title}` : ''}
                   </h3>
                 )}
-              <Card
-                className={cn(
-                  'gap-0 py-0',
-                  r.is_correct ? 'border-[var(--success)]/25 bg-[var(--success)]/10'
-                    : r.is_skipped ? '' : 'border-[var(--danger)]/25 bg-[var(--danger)]/10',
-                )}
-              >
-                <CardContent className="p-3 text-sm">
-                  <div className="flex items-start gap-2">
-                    {r.exam_number !== null && (
-                      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md bg-black/20 text-[11px] font-bold tabular-nums">
-                        {r.exam_number}
-                      </span>
-                    )}
-                    <div className="min-w-0 flex-1" dangerouslySetInnerHTML={{ __html: r.body }} />
+                <article className="ps-card relative overflow-hidden !rounded-[28px] p-4 sm:p-6">
+                  <span aria-hidden className={cn('absolute inset-y-0 left-0 w-1.5', status === 'correct' ? 'bg-[var(--ps-green)]' : status === 'wrong' ? 'bg-[var(--ps-coral)]' : 'bg-[var(--ds-track)]')} />
+
+                  {/* Sarlavha qatori */}
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[15px] font-bold tabular-nums', tone.disc)}>
+                      {r.exam_number ?? index + 1}
+                    </span>
+                    <span className={cn('inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-bold', tone.chip)}>
+                      <StatusIcon className="size-3.5 stroke-[3]" />
+                      {tone.label}
+                    </span>
                   </div>
-                  {r.your_answer && (
-                    <p className="mt-1 line-clamp-4 text-xs text-muted-foreground">
-                      Sizning javobingiz: {r.your_answer}
-                    </p>
-                  )}
-                  {!r.is_correct && r.correct_answer && (
-                    <p className="mt-1 text-xs text-muted-foreground">To&apos;g&apos;ri javob: {r.correct_answer}</p>
-                  )}
-                  {r.grading_note && <p className="mt-1 text-xs italic text-[var(--text-secondary)]">{r.grading_note}</p>}
-                  {/* Savol tushuntirishi va Ovozli tahlil — har bir savolda ko'rinadi */}
-                  <div className="mt-3 rounded-2xl border border-[var(--border-card)] bg-[var(--surface-input)] p-3">
-                    {r.explanation ? (
-                      <p className="flex items-start gap-1.5 text-xs text-[var(--text-secondary)] mb-2.5 leading-relaxed">
-                        <Lightbulb className="size-3.5 shrink-0 text-amber-500 mt-0.5" />
-                        <span>{r.explanation}</span>
-                      </p>
-                    ) : null}
-                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--border-card)]">
-                      <span className="text-[11px] font-medium text-muted-foreground">
-                        {r.is_correct ? "✅ To'g'ri javob" : "❌ Xato javob tahlili:"}
-                      </span>
-                      <VoiceExplanationButton
-                        text={
-                          r.explanation
-                            ? r.explanation
-                            : `Savol: ${r.body.replace(/<[^>]*>?/gm, ' ')}. To'g'ri javob: ${r.correct_answer}. Siz tanlagan javob: ${r.your_answer || "belgilanmagan"}.`
-                        }
-                        label="🎙️ Ovozli tushuntirish"
-                        size="sm"
-                        variant="outline"
-                        className="h-8 text-xs font-bold border-indigo-500/40 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
-                      />
+
+                  {/* Savol matni */}
+                  <div className="ps-review-body mt-3 text-[14.5px] leading-relaxed text-[var(--text-primary)] sm:text-[15px]" dangerouslySetInnerHTML={{ __html: r.body }} />
+
+                  {/* Javoblar */}
+                  {(r.your_answer || (!r.is_correct && r.correct_answer)) && (
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      {r.your_answer && (
+                        <div className={cn('rounded-[20px] px-4 py-3', r.is_correct ? 'bg-[var(--ps-green)]/12' : 'bg-[var(--ps-coral)]/12')}>
+                          <p className="text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">Sizning javobingiz</p>
+                          <p className={cn('mt-1 line-clamp-4 text-[14px] font-bold', r.is_correct ? 'text-[var(--ps-green)]' : 'text-[var(--ps-coral)]')}>{r.your_answer}</p>
+                        </div>
+                      )}
+                      {!r.is_correct && r.correct_answer && (
+                        <div className="rounded-[20px] bg-[var(--ps-green)]/12 px-4 py-3">
+                          <p className="text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">To&apos;g&apos;ri javob</p>
+                          <p className="mt-1 text-[14px] font-bold text-[var(--ps-green)]">{r.correct_answer}</p>
+                        </div>
+                      )}
                     </div>
+                  )}
+                  {r.grading_note && <p className="mt-2 text-[12.5px] italic text-[var(--text-secondary)]">{r.grading_note}</p>}
+
+                  {/* Tushuntirish va ovozli tahlil */}
+                  <div className="mt-4 flex flex-col gap-3 rounded-[22px] bg-[var(--ps-neutral)] p-3 sm:flex-row sm:items-center sm:justify-between sm:pl-4">
+                    <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-[var(--text-secondary)]">
+                      <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                        <Lightbulb className="size-3.5" />
+                      </span>
+                      <span className="pt-1">
+                        {r.explanation || (status === 'correct'
+                          ? "Barakalla! Ovozli tushuntirish bilan mavzuni yana mustahkamlang."
+                          : "Ovozli tushuntirishni tinglang — savol va to'g'ri javob o'qib beriladi.")}
+                      </span>
+                    </p>
+                    <VoiceExplanationButton
+                      text={
+                        r.explanation
+                          ? r.explanation
+                          : `Savol: ${r.body.replace(/<[^>]*>?/gm, ' ')}. To'g'ri javob: ${r.correct_answer}. Siz tanlagan javob: ${r.your_answer || "belgilanmagan"}.`
+                      }
+                      label="Ovozli tushuntirish"
+                      size="sm"
+                      variant="outline"
+                      className="h-10 shrink-0 rounded-full border-0 bg-[var(--ps-purple)] px-4 text-[12.5px] font-bold text-white hover:bg-[var(--ps-purple)]/90 dark:bg-[var(--ps-purple)] dark:hover:bg-[var(--ps-purple)]/90 hover:text-white [&_span]:!text-white [&_svg]:!text-white [&_span.rounded-full]:!bg-white"
+                    />
                   </div>
 
                   {/* Writing topshirig'i to'g'ri/xato emas — mezonlar bo'yicha baholanadi.
@@ -1295,8 +1270,7 @@ export default function FeedbackPage() {
                       Bu matn hali baholanmagan — AI tekshiruvi (ball va CEFR darajasi) premium orqali ochiladi.
                     </p>
                   )}
-                </CardContent>
-              </Card>
+                </article>
               </div>
               );
             })}
@@ -1324,7 +1298,11 @@ export default function FeedbackPage() {
               onOpenChange={setCommunityModalOpen}
               attemptId={attemptId}
               testTitle={data?.attempt?.test_title || "Rasmiy Formatdagi Sinov Testi"}
-              score={a.score || 0}
+              score={data?.rasch?.scaled_score ?? data?.attempt?.rasch?.scaled_score ?? a.score ?? 0}
+              percentage={data?.rasch?.percentage}
+              grade={data?.rasch?.grade}
+              studentName={`${user?.first_name || user?.username || ''} ${user?.last_name || ''}`.trim()}
+              date={data?.attempt?.completed_at}
               correctCount={a.correct_answers || 0}
               totalQuestions={(a.correct_answers || 0) + (a.wrong_answers || 0) + (a.skipped_answers || 0)}
               postType={a.score >= 60 ? 'certificate' : 'test_result'}

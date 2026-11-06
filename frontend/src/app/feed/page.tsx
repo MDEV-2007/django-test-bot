@@ -43,6 +43,7 @@ import VerifiedBadge from '@/components/ui/verified-badge';
 import { cn } from '@/lib/utils';
 import FeedStoriesBar from '@/components/feed/FeedStoriesBar';
 import SosQuestionCard from '@/components/feed/SosQuestionCard';
+import CertificateCard from '@/components/student/CertificateCard';
 import TargetedAdBanner, { type TargetedOfferData } from '@/components/feed/TargetedAdBanner';
 import AutoShareModal from '@/components/feed/AutoShareModal';
 import ImageLightbox from '@/components/feed/ImageLightbox';
@@ -75,6 +76,8 @@ type PostItem = {
   image_url: string;
   test_id: number | null;
   attempt_id: number | null;
+  rasch?: { scaled_score?: number | null; percentage?: number | null; grade?: string | null } | null;
+  completed_at?: string | null;
   likes_count: number;
   comments_count: number;
   reaction_counts: {
@@ -931,6 +934,7 @@ export default function CommunityFeedPage() {
                   </div>
                 );
                 const isCert = post.post_type === 'certificate' || (post.score && post.score >= 60);
+                const showCertCard = Boolean(post.attempt_id) && (post.post_type === 'certificate' || post.post_type === 'test_result');
                 const canDelete = Boolean(
                   post.can_delete ||
                     (user &&
@@ -1052,8 +1056,22 @@ export default function CommunityFeedPage() {
                         </div>
                       </div>
 
-                      {/* 2. Result / Subject Summary Block */}
-                      {post.score > 0 || post.total_questions > 0 || post.grade ? (
+                      {/* 2. Natija kartasi — natija sahifasidagi bilan bir xil dizayn va raqamlar */}
+                      {showCertCard ? (
+                        <CertificateCard
+                          compact
+                          className="mx-auto max-w-[560px]"
+                          attemptId={post.attempt_id ?? post.id}
+                          studentName={post.author.name}
+                          testTitle={post.title}
+                          score={post.rasch?.scaled_score ?? ((post.score || 0) / 100) * 70}
+                          percentage={post.rasch?.percentage ?? post.score ?? 0}
+                          grade={post.rasch?.grade ?? undefined}
+                          correctCount={post.correct_count}
+                          totalQuestions={post.total_questions}
+                          date={post.completed_at}
+                        />
+                      ) : post.score > 0 || post.total_questions > 0 || post.grade ? (
                         <div className="flex items-center justify-between gap-3 rounded-[22px] bg-[var(--ps-neutral)] p-4 min-w-0">
                           <div className="space-y-1 min-w-0 flex-1">
                             <span className="inline-block rounded-full bg-card border border-border px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground">
@@ -1104,8 +1122,8 @@ export default function CommunityFeedPage() {
                         </p>
                       )}
 
-                      {/* 4. Image Preview */}
-                      {post.image_url && (
+                      {/* 4. Image Preview (natija postlarida eski story rasmi o'rniga karta chiqadi) */}
+                      {post.image_url && !showCertCard && (
                         <div
                           onClick={() => setPreviewImage(post.image_url)}
                           className="relative overflow-hidden rounded-xl border border-border bg-[var(--ps-neutral)] group cursor-pointer flex items-center justify-center max-h-[500px] w-full"

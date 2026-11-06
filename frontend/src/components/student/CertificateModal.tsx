@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import ShareToCommunityModal from './ShareToCommunityModal';
+import CertificateCard from './CertificateCard';
 
 interface CertificateModalProps {
   open: boolean;
@@ -433,75 +434,20 @@ export default function CertificateModal({
               RASMIY SARIQ-OQ SERTIFIKAT BLOKI (A4 PORTRAIT)
               ═════════════════════════════════════════════════════════════ */}
           <div className="flex justify-center py-2 sm:py-4">
-            <div
+            <CertificateCard
               id="certificate-print-area"
-              className="relative w-full max-w-[640px] overflow-hidden rounded-[32px] bg-[#FFFCF7] text-[#080808] shadow-[0_30px_60px_-30px_rgba(60,30,110,0.6)] print:m-0 print:w-full print:shadow-none"
-            >
-              <div className="relative overflow-hidden bg-[#7659C7] px-7 pb-14 pt-7 text-white">
-                <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-white/15" />
-                <span aria-hidden className="absolute bottom-6 left-1/2 size-16 rounded-full bg-[#FFB82E] opacity-80" />
-                <div className="relative flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex size-12 items-center justify-center overflow-hidden rounded-full bg-white p-1">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/icon-192.png" alt="IlmIldizi" className="size-full rounded-full object-contain" />
-                    </span>
-                    <div>
-                      <p className="font-[family-name:var(--font-grotesk)] text-[18px] font-bold leading-none"><span data-no-translit>IlmIldizi</span></p>
-                      <p className="mt-1 text-[10.5px] font-bold uppercase tracking-wider text-white/75">Onlayn mashq platformasi</p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-black/20 px-3 py-1 font-mono text-[11px] font-bold">{certNumber}</span>
-                </div>
-                <h2 className="relative mt-6 font-[family-name:var(--font-grotesk)] text-[32px] font-bold leading-none tracking-[-0.03em] sm:text-[40px]">
-                  Mashq testi<br />natija kartasi
-                </h2>
-              </div>
-
-              <div className="relative -mt-8 flex items-end justify-between gap-4 px-7">
-                <div className="flex items-end gap-3">
-                  <span className="grid size-24 shrink-0 place-items-center rounded-full border-[6px] border-[#FFFCF7] bg-[#FFB82E] shadow-lg">
-                    <span className="text-center leading-none">
-                      <span className="block font-[family-name:var(--font-grotesk)] text-[30px] font-bold">{scaledScoreStr}</span>
-                      <span className="mt-0.5 block text-[10px] font-black uppercase">ball</span>
-                    </span>
-                  </span>
-                  <div className="pb-1">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#8A8494]">Talabgor</p>
-                    <p className="font-[family-name:var(--font-grotesk)] text-[20px] font-bold">{lastName !== '—' ? `${lastName} ${firstName}` : firstName}</p>
-                  </div>
-                </div>
-                <span className="mb-1 inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-[#080808] font-[family-name:var(--font-grotesk)] text-[20px] font-bold text-[#FFB82E]">
-                  {certGrade}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 px-7 pt-5">
-                {[
-                  { label: 'Fan / test', value: testTitle || 'Tarix Milliy Sertifikat', wide: true },
-                  { label: 'Foiz ko‘rsatkichi', value: pctStr },
-                  { label: 'Test sinovi natijasi', value: scaledScoreComma },
-                  { label: 'Talabgor kodi', value: personalCode },
-                  { label: 'Berilgan sana', value: givenDate },
-                ].map((row) => (
-                  <div key={row.label} className={`rounded-[18px] bg-[#F7F4EF] px-4 py-3 ${row.wide ? 'col-span-2' : ''}`}>
-                    <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#8A8494]">{row.label}</p>
-                    <p className={`mt-0.5 font-bold ${row.wide ? 'text-[14px] leading-snug' : 'font-mono text-[16px]'}`}>{row.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 flex items-center justify-between gap-4 border-t border-dashed border-[#E6DED2] px-7 py-5">
-                <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-wider text-[#7659C7]">Rasmiy hujjat emas</p>
-                  <p className="mt-1 text-[12px] leading-snug text-[#6B6577]">BMB formatidagi mashq testi natijasi. QR orqali natija sahifasini oching.</p>
-                </div>
-                <div className="shrink-0 rounded-[18px] bg-white p-2 shadow-[0_10px_24px_-14px_rgba(60,30,110,0.6)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrImgUrl} alt="Natija sahifasiga QR havola" className="size-20 object-contain" />
-                </div>
-              </div>
-            </div>
+              className="max-w-[640px] print:m-0 print:w-full print:shadow-none"
+              attemptId={attemptId}
+              studentName={lastName !== '—' ? `${lastName} ${firstName}` : firstName}
+              testTitle={testTitle || 'Tarix Milliy Sertifikat'}
+              score={score}
+              correctCount={correctCount}
+              totalQuestions={totalQuestions}
+              percentage={percentage}
+              grade={grade}
+              date={date}
+              qrImgUrl={qrImgUrl}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -512,6 +458,10 @@ export default function CertificateModal({
         attemptId={attemptId}
         testTitle={testTitle}
         score={score}
+        percentage={percentage}
+        grade={grade}
+        studentName={studentName}
+        date={date}
         correctCount={correctCount}
         totalQuestions={totalQuestions}
         postType="certificate"

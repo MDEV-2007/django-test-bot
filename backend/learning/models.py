@@ -420,8 +420,24 @@ class CommunityPost(models.Model):
 
         is_pinned = getattr(self, 'is_pinned', False)
 
+        # Sertifikat kartasi natija sahifasidagi bilan bir xil raqamlarni ko'rsatishi uchun
+        # urinishning Rasch natijasi (feed `select_related('attempt')` qiladi — qo'shimcha so'rov yo'q).
+        rasch = None
+        if self.attempt_id:
+            annotations = getattr(self.attempt, 'annotations', None)
+            raw_rasch = annotations.get('rasch') if isinstance(annotations, dict) else None
+            if isinstance(raw_rasch, dict):
+                rasch = {
+                    'scaled_score': raw_rasch.get('scaled_score'),
+                    'percentage': raw_rasch.get('percentage'),
+                    'grade': raw_rasch.get('grade'),
+                }
+
         return {
             'id': self.id,
+            'attempt_id': self.attempt_id,
+            'rasch': rasch,
+            'completed_at': self.attempt.completed_at.isoformat() if self.attempt_id and getattr(self.attempt, 'completed_at', None) else None,
             'author': {
                 'id': self.author_id,
                 'name': author_name,
