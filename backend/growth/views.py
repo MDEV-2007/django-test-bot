@@ -25,24 +25,27 @@ class EvaluateOpenQuestionAPIView(APIView):
         if not claim_daily_reward(request.user.id, 'open_question_ai'):
             return Response({'ok': False, 'error': "Bugungi AI baholash limiti tugadi. Ertaga qayta urinib ko'ring."},
                             status=status.HTTP_429_TOO_MANY_REQUESTS)
+        if not isinstance(request.data, dict):
+            return Response({'ok': False, 'error': "JSON obyekt kutilgan."}, status=status.HTTP_400_BAD_REQUEST)
         question_id = request.data.get('question_id')
-        student_answer = (request.data.get('student_answer') or '').strip()
-        reference_answer = (request.data.get('reference_answer') or '').strip()
+        student_answer = str(request.data.get('student_answer') or '').strip()[:2000]
+        reference_answer = str(request.data.get('reference_answer') or '').strip()[:2000]
 
         question_body = ""
         accepted_list = []
 
         if question_id:
+            # Savol bazada bo'lsa, etalon FAQAT bazadan: savolning namunaviy javobi va
+            # qabul qilinadigan variantlari. Ilgari `explanation` (izoh jumlasi) etalon
+            # bo'lib, to'g'ri javob ham rad etilardi; klient yuborgan etalon ham qabul
+            # qilinardi (audit API-005 / GRADE-008).
             try:
-                q = Question.objects.prefetch_related('accepted_answers').get(pk=question_id)
-                question_body = q.body
-                if not reference_answer and hasattr(q, 'explanation'):
-                    reference_answer = q.explanation or ""
-                accepted_list = [a.text for a in q.accepted_answers.all()]
-                if not reference_answer and accepted_list:
-                    reference_answer = accepted_list[0]
-            except Question.DoesNotExist:
-                pass
+                q = Question.objects.prefetch_related('accepted_answers').get(pk=int(question_id))
+            except (Question.DoesNotExist, TypeError, ValueError):
+                return Response({'ok': False, 'error': "Savol topilmadi."}, status=status.HTTP_404_NOT_FOUND)
+            question_body = q.body
+            accepted_list = [a.text for a in q.accepted_answers.all()]
+            reference_answer = (q.reference_answer or '').strip() or (accepted_list[0] if accepted_list else '')
 
         if not student_answer:
             return Response({

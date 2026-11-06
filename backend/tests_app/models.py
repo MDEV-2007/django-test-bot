@@ -657,7 +657,9 @@ def normalize_gap_answer(value):
     text = (value or '').strip().lower()
     for curly, plain in (('’', "'"), ('‘', "'"), ('“', '"'), ('”', '"')):
         text = text.replace(curly, plain)
-    text = re.sub(r"[^\w\s'\-]", ' ', text, flags=re.UNICODE)
+    # Valyuta va foiz belgilari ma'noni o'zgartiradi ("$50" != "£50"); chiziqcha esa yo'q
+    # ("NOT-GIVEN" == "NOT GIVEN") — audit GRADE-007. Ikkala tomon ham shu funksiyadan o'tadi.
+    text = re.sub(r"[^\w\s'£$€%]", ' ', text, flags=re.UNICODE)
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
