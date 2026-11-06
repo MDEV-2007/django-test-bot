@@ -411,20 +411,24 @@ def notify_admins(text):
 def process_update(update):
     """Entry point for a single Telegram update, from webhook or polling."""
     if 'callback_query' in update:
-        cq = update['callback_query']
-        chat_id = cq['message']['chat']['id']
-        data = cq.get('data', '')
+        cq = update['callback_query'] or {}
+        msg_obj = cq.get('message') or {}
+        chat_id = (msg_obj.get('chat') or {}).get('id')
+        data = cq.get('data', '') or ''
 
         # Yashirin kanaldan to'lovni tasdiqlash yoki rad etish
-        if data.startswith('pay_approve_') or data.startswith('pay_reject_'):
+        if data.startswith('pay_'):
             from .payment_review import handle_payment_callback
             handle_payment_callback(
                 chat_id=chat_id,
-                message_id=cq['message']['message_id'],
-                callback_query_id=cq['id'],
-                admin_user=cq.get('from', {}),
+                message_id=msg_obj.get('message_id'),
+                callback_query_id=cq.get('id'),
+                admin_user=cq.get('from') or {},
                 callback_data=data,
             )
+            return
+
+        if chat_id is None:
             return
 
         if data == 'check_subscription':

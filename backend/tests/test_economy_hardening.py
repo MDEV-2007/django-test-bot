@@ -104,12 +104,19 @@ class LoopRewardRequiresWorkTests(_LoopBase):
         self.assertEqual(L.objects.get(user=self.user).cleanup_cleared, 0)
 
     def test_duplicate_first_loops_do_not_block_restart(self):
+        from django.db import IntegrityError, transaction
         cur = self.cur()
         first = L.objects.get(user=self.user)
-        L.objects.create(user=self.user, date=first.date, cycle_number=1, topic=first.topic,
-                         subject=first.subject, current_stage=L.STAGE_1_WARMUP)
-        # newest row is the one the API drives
+        # DB UniqueConstraint(user, date, cycle_number) prevents creating a duplicate cycle 1 row
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                L.objects.create(
+                    user=self.user, date=first.date, cycle_number=1,
+                    topic=first.topic, subject=first.subject, current_stage=L.STAGE_1_WARMUP,
+                )
+        # Re-fetching current loop returns the existing cycle 1 row and allows completing + restarting
         cur = self.cur()
+        self.assertEqual(L.objects.filter(user=self.user, date=first.date, cycle_number=1).count(), 1)
         self.adv(L.STAGE_1_WARMUP)
         answer_loop_questions(self.c, 'sprint', stage_question_ids(cur, 'sprint'))
         self.adv(L.STAGE_2_SPRINT)

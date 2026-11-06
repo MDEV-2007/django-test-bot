@@ -203,6 +203,21 @@ def is_payment_reviewer(telegram_user_id) -> bool:
             .exists())
 
 
+def _resolve_reviewer_user(telegram_user_id):
+    """Agar tekshiruvchi Telegram ID Django foydalanuvchisiga bog'langan bo'lsa, uni qaytaradi."""
+    from accounts.models import Profile
+
+    tg_id = str(telegram_user_id or '').strip()
+    if not tg_id.isdigit():
+        return None
+    profile = (
+        Profile.objects.select_related('user')
+        .filter(telegram_id=tg_id, user__is_active=True)
+        .first()
+    )
+    return profile.user if profile else None
+
+
 def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, callback_data):
     """Admin kanalida 'Qabul qilish' yoki 'Rad etish' tugmasi bosilganda ishlaydi.
 
@@ -214,15 +229,28 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
 
     from premium.models import Payment
 
-    parts = callback_data.split('_')
-    if len(parts) < 3 or parts[1] not in ('approve', 'reject'):
+    if not isinstance(callback_data, str):
         answer_callback(callback_query_id, "Xato buyruq.")
         return
 
-    from_id = (admin_user or {}).get('id')
-    if str(chat_id) not in get_payment_channel_ids() or not is_payment_reviewer(from_id):
-        logger.warning("Ruxsatsiz to'lov callback'i rad etildi: chat_id=%s from_id=%s data=%s",
-                       chat_id, from_id, callback_data)
+    parts = callback_data.split('_')
+    if len(parts) != 3 or parts[0] != 'pay' or parts[1] not in ('approve', 'reject'):
+        answer_callback(callback_query_id, "Xato buyruq.")
+        return
+
+    admin_info = admin_user if isinstance(admin_user, dict) else {}
+    from_id = admin_info.get('id')
+    is_bot_sender = bool(admin_info.get('is_bot'))
+    if (
+        is_bot_sender
+        or chat_id is None
+        or str(chat_id) not in get_payment_channel_ids()
+        or not is_payment_reviewer(from_id)
+    ):
+        logger.warning(
+            "Ruxsatsiz to'lov callback'i rad etildi: chat_id=%s from_id=%s is_bot=%s data=%s",
+            chat_id, from_id, is_bot_sender, callback_data,
+        )
         answer_callback(callback_query_id, "Ruxsat yo'q.")
         return
 
@@ -232,24 +260,47 @@ def handle_payment_callback(chat_id, message_id, callback_query_id, admin_user, 
     except ValueError:
         answer_callback(callback_query_id, "Noto'g'ri to'lov ID.")
         return
+    if payment_id <= 0:
+        answer_callback(callback_query_id, "Noto'g'ri to'lov ID.")
+        return
 
-    admin_username = admin_user.get('username')
-    raw_admin_name = f"@{admin_username}" if admin_username else (admin_user.get('first_name') or 'Admin')
+    admin_username = admin_info.get('username')
+    raw_admin_name = f"@{admin_username}" if admin_username else (admin_info.get('first_name') or 'Admin')
     admin_name = html.escape(str(raw_admin_name))
+    reviewer_user = _resolve_reviewer_user(from_id)
 
-    # Atomik "egallash": faqat 'pending' holatidagi to'lovni birinchi bo'lib o'zgartirgan
-    # so'rov davom etadi. Ikki admin bir vaqtda bossa ham obuna muddati bir marta qo'shiladi.
+    # Atomik "egallash": qatorni select_for_update bilan qulflab, faqat 'pending' holatidagi
+    # to'lovni birinchi bo'lib o'zgartirgan so'rov davom etadi. Ikki admin bir vaqtda bossa ham
+    # obuna muddati faqat bir marta qo'shiladi.
     verb = "tasdiqlandi" if action_type == 'approve' else "rad etildi"
     with transaction.atomic():
-        claimed = Payment.objects.filter(id=payment_id, status='pending').update(
-            status='approved' if action_type == 'approve' else 'rejected',
-            reviewed_at=timezone.now(),
-            admin_note=f"Telegram kanalida {raw_admin_name} tomonidan {verb}.",
-        )
-        payment = (Payment.objects.select_related('profile', 'profile__user', 'plan', 'test')
-                   .filter(id=payment_id).first())
-        if claimed and action_type == 'approve':
-            payment.apply_to_profile()
+        locked = Payment.objects.select_for_update().filter(id=payment_id).first()
+        if locked is None:
+            payment = None
+            claimed = 0
+        elif locked.status != 'pending':
+            payment = (
+                Payment.objects.select_related('profile', 'profile__user', 'plan', 'test')
+                .filter(id=payment_id)
+                .first()
+            )
+            claimed = 0
+        else:
+            update_kwargs = {
+                'status': 'approved' if action_type == 'approve' else 'rejected',
+                'reviewed_at': timezone.now(),
+                'admin_note': f"Telegram kanalida {raw_admin_name} tomonidan {verb}.",
+            }
+            if reviewer_user is not None:
+                update_kwargs['reviewed_by'] = reviewer_user
+            claimed = Payment.objects.filter(id=payment_id, status='pending').update(**update_kwargs)
+            payment = (
+                Payment.objects.select_related('profile', 'profile__user', 'plan', 'test')
+                .filter(id=payment_id)
+                .first()
+            )
+            if claimed and action_type == 'approve':
+                payment.apply_to_profile()
 
     if payment is None:
         answer_callback(callback_query_id, "To'lov bazadan topilmadi!")

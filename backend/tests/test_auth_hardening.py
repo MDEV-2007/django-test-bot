@@ -140,6 +140,21 @@ class TokenRevocationTests(_Base):
         self.assertTrue(token_is_revoked(self.user.pk, {'iat': post_2038_ts - 1}))
         self.assertFalse(token_is_revoked(self.user.pk, {'iat': post_2038_ts}))
 
+    def test_same_second_token_revocation_invalidates_pre_revoke_token_and_allows_post_revoke_login(self):
+        # Task 11: no time.sleep() between login, revoke, and re-login (same wall-clock second!)
+        pre_revoke = self.login().json()
+        self.assertEqual(
+            self.bearer(pre_revoke['access']).post('/api/auth/logout/', {'all_devices': True}, format='json').status_code,
+            200,
+        )
+        # Pre-revoke access and refresh tokens issued in the exact same second must be rejected immediately
+        self.assertEqual(self.bearer(pre_revoke['access']).get('/api/auth/me/').status_code, 401)
+        self.assertEqual(self.c.post('/api/auth/refresh/', {'refresh': pre_revoke['refresh']}, format='json').status_code, 401)
+        # Post-revoke login in the exact same second must succeed
+        post_revoke = self.login().json()
+        self.assertEqual(self.bearer(post_revoke['access']).get('/api/auth/me/').status_code, 200)
+
+
 
 class WebSocketAuthTests(_Base):
     def test_banned_user_token_is_anonymous_on_websocket(self):

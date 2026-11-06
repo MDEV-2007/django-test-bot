@@ -25,7 +25,7 @@ export default function MagneticLoopCard({
   userStreak = 7,
 }: MagneticLoopCardProps) {
   const [controllerOpen, setControllerOpen] = useState(false);
-  const { loop, topic, ecoTree, loading, restartCycle } = useContinuousLoop();
+  const { loop, topic, ecoTree, loading, error, fetchLoop } = useContinuousLoop();
   const { t } = useTransliterate();
 
   // Multi-cycle marafon ko'rsatkichlari (3 raundlik marafon: 3x 18-20 daqiqa = 60 daqiqa)
@@ -128,6 +128,25 @@ export default function MagneticLoopCard({
       <div className="relative overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-card p-4 sm:p-6 shadow-[var(--shadow-card)]">
         {/* Orqa fon nuri (brand) */}
         <div className="pointer-events-none absolute -top-24 -left-20 size-64 rounded-full bg-[var(--brand-soft)] blur-[80px]" />
+
+        {loading && (
+          <div className="relative mb-3 flex items-center justify-between rounded-xl border border-[var(--brand-border)] bg-[var(--brand-soft)]/50 px-3 py-2 text-xs font-semibold text-[var(--brand-text)] animate-pulse">
+            <span>{t("Kunlik marafon holati yuklanmoqda...")}</span>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="relative mb-3 flex items-center justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-foreground">
+            <span>{t("Server bilan aloqa uzildi — demo/oflayn rejim faol.")}</span>
+            <button
+              type="button"
+              onClick={() => fetchLoop()}
+              className="shrink-0 rounded-lg bg-card px-2.5 py-1 font-bold text-[var(--brand-text)] border border-[var(--brand-border)] hover:bg-[var(--brand-soft)] transition-colors cursor-pointer"
+            >
+              {t("Qayta urinish")}
+            </button>
+          </div>
+        )}
 
         {/* ── YUQORI BLOK: SALOMLASHISH VA ECO-DARAXT STATISTIKASI ── */}
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-border">

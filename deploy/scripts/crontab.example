@@ -18,6 +18,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 0 19 * * * flock -n /tmp/ilmildizi-send_daily_quiz.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web python manage.py send_daily_quiz' >> /var/log/daily_quiz.log 2>&1
 0 20 * * * flock -n /tmp/ilmildizi-send_streak_reminders.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web python manage.py send_streak_reminders --mode=all' >> /var/log/streak_reminders.log 2>&1
 
-# Database + media backup (03:15) and certificate renewal (twice a day)
+# Database + media backup (03:15), RewardClaim/token cleanup (03:45), and certificate renewal (twice a day)
 15 3 * * * /opt/ilmildizi/deploy/scripts/backup.sh >> /var/log/ilmildizi-backup.log 2>&1
+45 3 * * * flock -n /tmp/ilmildizi-cleanup_reward_claims.lock sh -c 'cd /opt/ilmildizi && docker compose exec -T web sh -c "python manage.py cleanup_reward_claims --days 30 --batch-size 1000 && python manage.py flushexpiredtokens"' >> /var/log/ilmildizi-cleanup.log 2>&1
 40 4,16 * * * /opt/ilmildizi/deploy/scripts/renew-cert.sh >> /var/log/ilmildizi-cert.log 2>&1

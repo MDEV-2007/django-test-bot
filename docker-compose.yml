@@ -72,7 +72,7 @@ services:
     env_file: backend/.env
     environment:
       DEBUG: "False"
-      DATABASE_URL: postgres://${POSTGRES_USER:-ilmildizi}:${POSTGRES_PASSWORD:-ilmildizi}@db:5432/${POSTGRES_DB:-ilmildizi}
+      DATABASE_URL: postgres://${POSTGRES_USER:-ilmildizi}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in environment or .env}@db:5432/${POSTGRES_DB:-ilmildizi}
       # Channels layer ham shu Redis — bir nechta ASGI ishchisi bo'lganda Arena
       # jangidagi guruhlar barcha ishchilarga ko'rinishi uchun (settings.CHANNEL_LAYERS).
       REDIS_URL: redis://redis:6379/1
@@ -115,7 +115,7 @@ services:
     command: postgres -c max_connections=200 -c shared_buffers=256MB -c work_mem=16MB -c effective_cache_size=768MB -c maintenance_work_mem=64MB
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-ilmildizi}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ilmildizi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in environment or .env}
       POSTGRES_DB: ${POSTGRES_DB:-ilmildizi}
     volumes:
       - pgdata:/var/lib/postgresql/data

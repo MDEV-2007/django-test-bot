@@ -11,7 +11,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.cache import cache
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, Token
 
 # Impersonation sessions are a superadmin-level credential (stop-impersonation turns them
 # back into the admin's own tokens), so they get a short absolute lifetime that refresh
@@ -23,9 +23,57 @@ def _revoked_key(user_id):
     return f"jwt_revoked_at:{user_id}"
 
 
+def _rev_gen_key(user_id):
+    return f"jwt_rev_gen:{user_id}"
+
+
 def _access_lifetime_seconds():
     lifetime = settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME', timedelta(minutes=60))
     return int(lifetime.total_seconds())
+
+
+def get_user_rev_gen(user_id) -> int:
+    """Returns the monotonic revocation generation counter for `user_id`."""
+    from core.models import RewardClaim
+    from core.reward_caps import _ONCE_DAY
+
+    db_gen = int(
+        RewardClaim.objects.filter(
+            subject_id=user_id,
+            source='jwt_rev_gen',
+            day=_ONCE_DAY,
+            item='',
+        )
+        .values_list('count', flat=True)
+        .first()
+        or 0
+    )
+    try:
+        cached = cache.get(_rev_gen_key(user_id))
+        cached_gen = int(cached) if cached is not None else 0
+    except Exception:
+        cached_gen = 0
+    gen = max(db_gen, cached_gen)
+    if db_gen and cached_gen < db_gen:
+        try:
+            cache.set(_rev_gen_key(user_id), db_gen, _access_lifetime_seconds() + 60)
+        except Exception:
+            pass
+    return gen
+
+
+_ORIG_TOKEN_FOR_USER = Token.for_user.__func__
+
+
+@classmethod
+def _token_for_user_with_rev_gen(cls, user):
+    token = _ORIG_TOKEN_FOR_USER(cls, user)
+    if getattr(user, 'pk', None) is not None:
+        token['rev_gen'] = get_user_rev_gen(user.pk)
+    return token
+
+
+Token.for_user = _token_for_user_with_rev_gen
 
 
 def revoke_user_tokens(user):
@@ -38,9 +86,27 @@ def revoke_user_tokens(user):
 
     for token in OutstandingToken.objects.filter(user=user).exclude(blacklistedtoken__isnull=False):
         BlacklistedToken.objects.get_or_create(token=token)
-    # `iat` has whole-second resolution: tokens issued in an EARLIER second are refused, so a
-    # fresh login right after "log out everywhere" keeps working. Stored durably in DB so
-    # Redis restart/eviction or outage cannot resurrect revoked access tokens (SEC-001).
+
+    # 1. Monotonic revocation generation counter (TASK 11): closes the 1-second `iat` window so
+    # tokens minted earlier in the exact same wall-clock second are immediately invalidated,
+    # while tokens minted after `revoke_user_tokens` in that same second receive the new `rev_gen`.
+    gen_key = dict(subject_id=user.pk, source='jwt_rev_gen', day=_ONCE_DAY, item='')
+    if not RewardClaim.objects.filter(**gen_key).exists():
+        try:
+            with transaction.atomic():
+                RewardClaim.objects.create(**gen_key, count=0)
+        except IntegrityError:
+            pass
+    RewardClaim.objects.filter(**gen_key).update(count=F('count') + 1)
+    new_gen = int(
+        RewardClaim.objects.filter(**gen_key).values_list('count', flat=True).first() or 1
+    )
+    try:
+        cache.set(_rev_gen_key(user.pk), new_gen, _access_lifetime_seconds() + 60)
+    except Exception:
+        pass
+
+    # 2. Timestamp floor (`jwt_revoked_at`) kept for legacy/stateless tokens without `rev_gen`.
     now_ts = int(time.time())
     key = dict(subject_id=user.pk, source='jwt_revoked_at', day=_ONCE_DAY, item='')
     if not RewardClaim.objects.filter(**key).exists():
@@ -66,6 +132,15 @@ def token_is_revoked(user_id, payload) -> bool:
     """True if this (validated) token must be refused for a non-signature reason."""
     from core.models import RewardClaim
     from core.reward_caps import _ONCE_DAY
+
+    if 'rev_gen' in payload:
+        current_gen = get_user_rev_gen(user_id)
+        try:
+            token_gen = int(payload['rev_gen'])
+        except (TypeError, ValueError):
+            return True
+        if token_gen < current_gen:
+            return True
 
     db_revoked_at = int(
         RewardClaim.objects.filter(

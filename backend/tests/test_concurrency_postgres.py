@@ -210,3 +210,69 @@ class ConcurrencyTests(TransactionTestCase):
         self.assertEqual(claim.count, post_2038_ts)
         self.assertTrue(token_is_revoked(user.pk, {'iat': post_2038_ts - 1}))
         self.assertFalse(token_is_revoked(user.pk, {'iat': post_2038_ts}))
+
+    def test_parallel_payment_approval_grants_once(self):
+        from decimal import Decimal
+        from django.test import override_settings
+        from django.utils import timezone
+        from accounts.models import Profile
+        from premium.models import Payment, SubscriptionPlan
+        from telegrambot.handlers import process_update
+
+        channel = '-1009990001112'
+        admin_tg = '77001'
+        _, _admin = make_user('par_pay_admin', role='superadmin', telegram_id=admin_tg)
+        _, student = make_user('par_pay_student', telegram_id='77002')
+        plan = SubscriptionPlan.objects.create(
+            name='PRO 30', price=Decimal('49000'), duration_days=30, plan_type='lessons',
+        )
+        payment = Payment.objects.create(
+            profile=student, plan=plan, amount=plan.price, status='pending',
+        )
+        upd = {
+            'update_id': 1,
+            'callback_query': {
+                'id': 'cb-par-1',
+                'from': {'id': int(admin_tg), 'first_name': 'Admin', 'username': 'par_admin'},
+                'message': {'message_id': 10, 'chat': {'id': int(channel), 'type': 'channel'}},
+                'data': f'pay_approve_{payment.id}',
+            },
+        }
+        start_time = timezone.now()
+        with override_settings(
+            TELEGRAM_BOT_TOKEN='',
+            PAYMENT_CHANNEL_ID=channel,
+            PAYMENT_REVIEWER_TELEGRAM_IDS=[],
+            REQUIRE_CHANNEL_SUBSCRIPTION=False,
+        ), mock.patch('telegrambot.payment_review.answer_callback') as answer_mock:
+            _, errors = run_parallel(lambda: process_update(upd))
+            messages = [call.args[1] for call in answer_mock.call_args_list if len(call.args) > 1]
+
+        self.assertEqual(errors, [])
+        payment.refresh_from_db()
+        student.refresh_from_db()
+        self.assertEqual(payment.status, 'approved')
+        self.assertTrue(student.is_premium)
+        # Only 30 days should be granted (~30 days from start_time, never 60+ days)
+        remaining_days = (student.premium_expires_at - start_time).total_seconds() / 86400.0
+        self.assertGreater(remaining_days, 29.5)
+        self.assertLess(remaining_days, 30.5)
+        approved_toasts = [m for m in messages if 'tasdiqlandi' in m]
+        already_toasts = [m for m in messages if 'allaqachon' in m]
+        self.assertEqual(len(approved_toasts), 1, messages)
+        self.assertEqual(len(already_toasts), N_THREADS - 1, messages)
+
+    def test_parallel_loop_creation_creates_single_cycle_row(self):
+        from learning_loop.models import DailyLearningLoop
+        user, _ = make_user('par_loop_create')
+        subject = make_subject()
+        for i in range(15):
+            make_question(subject=subject, body=f'plc_{i}')
+        results, errors = run_parallel(
+            lambda: self.client_for(user).get('/api/v1/loop/current/').status_code
+        )
+        self.assertEqual(errors, [])
+        self.assertTrue(all(code == 200 for code in results), results)
+        self.assertEqual(DailyLearningLoop.objects.filter(user=user, cycle_number=1).count(), 1)
+
+

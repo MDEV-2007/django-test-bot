@@ -1,6 +1,10 @@
 # Local development. Install with:  pip install -r requirements/dev.txt
 -r base.txt
 
+# Local ASGI dev server hook so `manage.py runserver` serves WebSockets automatically.
+# Production uses gunicorn + uvicorn.workers.UvicornWorker (see requirements/prod.txt).
+daphne==4.1.2
+
 # Installed locally too so `DATABASE_URL`/`REDIS_URL` can be tested before deploying.
 psycopg[binary]==3.2.3
 redis==5.2.1

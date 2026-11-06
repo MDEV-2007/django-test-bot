@@ -185,14 +185,17 @@ def _get_or_create_today_loop(user) -> DailyLearningLoop:
 
     # Ikki parallel birinchi so'rov (ikki tab, mobil + veb) ikkita 1-sikl yaratardi va
     # restart-cycle eski, tugallanmaganini tanlab foydalanuvchini bloklardi (audit LOOP-003).
-    # Foydalanuvchi qatori qulfi ostida qayta tekshirib, faqat bittasini yaratamiz.
-    from django.db import transaction
-    with transaction.atomic():
-        type(user).objects.select_for_update().filter(pk=user.pk).first()
-        loop = DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
-        if loop:
-            return loop
-        return _create_first_loop(user, today)
+    # Foydalanuvchi qatori qulfi + DB UniqueConstraint(user, date, cycle_number) bilan himoyalangan.
+    from django.db import IntegrityError, transaction
+    try:
+        with transaction.atomic():
+            type(user).objects.select_for_update().filter(pk=user.pk).first()
+            loop = DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
+            if loop:
+                return loop
+            return _create_first_loop(user, today)
+    except IntegrityError:
+        return DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
 
 
 def _create_first_loop(user, today) -> DailyLearningLoop:
@@ -736,16 +739,24 @@ class RestartCycleView(APIView):
                                            exclude_id=last_loop.topic_id if last_loop else None)
                      or _topic_with_questions())
 
-        new_loop = DailyLearningLoop.objects.create(
-            user=user,
-            date=today,
-            cycle_number=new_cycle_number,
-            topic=new_topic,
-            subject=new_topic.subject if new_topic else None,
-            current_stage=DailyLearningLoop.STAGE_1_WARMUP,
-            combo_multiplier=combo,  # 2-raund 2.0x, 3-raund 2.5x Super-Combo!
-            dtm_score_delta=0.4,
-        )
+        from django.db import IntegrityError, transaction
+
+        try:
+            with transaction.atomic():
+                new_loop = DailyLearningLoop.objects.create(
+                    user=user,
+                    date=today,
+                    cycle_number=new_cycle_number,
+                    topic=new_topic,
+                    subject=new_topic.subject if new_topic else None,
+                    current_stage=DailyLearningLoop.STAGE_1_WARMUP,
+                    combo_multiplier=combo,  # 2-raund 2.0x, 3-raund 2.5x Super-Combo!
+                    dtm_score_delta=0.4,
+                )
+        except IntegrityError:
+            new_loop = DailyLearningLoop.objects.get(
+                user=user, date=today, cycle_number=new_cycle_number,
+            )
 
         eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
         stage_data = _build_stage_data(new_loop, user)

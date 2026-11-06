@@ -11,10 +11,9 @@ whitenoise==6.12.0
 dj-database-url==3.1.2
 # Verifies "Sign in with Google" ID tokens server-side (website login).
 google-auth==2.55.1
-# Realtime: Battle Arena PvP matchmaking (WebSockets) needs an ASGI stack everywhere,
-# not just in production, so `manage.py runserver` also serves WebSockets locally —
-# daphne in INSTALLED_APPS makes runserver ASGI-capable automatically.
-daphne==4.1.2
+# Realtime: Battle Arena PvP matchmaking (WebSockets) uses Channels. Production serves
+# ASGI via gunicorn + uvicorn.workers.UvicornWorker (requirements/prod.txt); daphne is
+# installed only in local development (requirements/dev.txt) for `manage.py runserver`.
 channels==4.1.0
 
 # Reads exam PDFs for the tests_app PDF importer: text with coordinates, table

@@ -210,13 +210,83 @@ def is_deterministic_match(student_text: str, reference_text: str) -> bool:
     return False
 
 
+_FENCE_TAG_RE = re.compile(
+    r'</?(?:javob|savol|etalon|esse|system|assistant|user|instruction|prompt|tool_call)\b[^>]*>',
+    re.IGNORECASE,
+)
+_CTRL_CHARS_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
+_INJECTION_PATTERNS = [
+    re.compile(r'ignore\s+(?:all\s+|previous\s+|above\s+|prior\s+)*(?:instructions|rules|prompts)', re.IGNORECASE),
+    re.compile(r'disregard\s+(?:all\s+|previous\s+|above\s+)*(?:instructions|rules)', re.IGNORECASE),
+    re.compile(r'(?:system\s+prompt|developer\s+message|hidden\s+instructions)', re.IGNORECASE),
+    re.compile(r'(?:oldingi|yuqoridagi|barcha)(?:\s+\w+)*\s+(?:qoida|ko[\'`ʻʼ]?rsatma|instruksiya)\w*\s+(?:unut|bekor\s+qil|inkor\s+qil|e[\'`ʻʼ]?tiborsiz)', re.IGNORECASE),
+    re.compile(r'(?:to[\'`ʻʼ]?g[\'`ʻʼ]?ri\s+deb\s+(?:belgila|qabul\s+qil|hisobla)|100\s*(?:ball|foiz|%)\s+qo[\'`ʻʼ]?y)', re.IGNORECASE),
+    re.compile(r'игнорируй(?:те)?\s+(?:все\s+|предыдущие\s+)*(?:инструкции|правила)', re.IGNORECASE),
+    re.compile(r'забудь(?:те)?\s+(?:все\s+|предыдущие\s+)*(?:инструкции|правила)', re.IGNORECASE),
+    re.compile(r'поставь(?:те)?\s+(?:максимальный\s+балл|100\s+баллов|правильно)', re.IGNORECASE),
+    re.compile(r'"is_correct"\s*:\s*true', re.IGNORECASE),
+    re.compile(r'"score_pct"\s*:\s*100', re.IGNORECASE),
+    re.compile(r'"mazmun_ball"\s*:\s*\d+', re.IGNORECASE),
+    re.compile(r'(?:<\|im_start\|>|<\|im_end\|>|\[INST\]|\[/INST\]|<<SYS>>)', re.IGNORECASE),
+    re.compile(r'(?:tool_call|function_call|exec\s*\(|import\s+os|DROP\s+TABLE)', re.IGNORECASE),
+]
+
+
+def sanitize_prompt_field(text: str, *, max_chars: int = 2000) -> str:
+    """Strips XML delimiter tags, role-boundary tokens, and control characters from untrusted input."""
+    if not text:
+        return ''
+    cleaned = _CTRL_CHARS_RE.sub('', str(text))
+    cleaned = _FENCE_TAG_RE.sub('', cleaned)
+    cleaned = re.sub(r'(?:<\|im_start\|>|<\|im_end\|>|<<SYS>>|<</SYS>>)', '', cleaned, flags=re.IGNORECASE)
+    return cleaned[:max_chars]
+
+
+def is_prompt_injection_attempt(student_text: str, reference_text: str = '') -> bool:
+    """Detects adversarial prompt-injection payloads that try to override grading rules."""
+    if not student_text:
+        return False
+    raw = str(student_text)
+    if reference_text and is_deterministic_match(raw, reference_text):
+        return False
+    # If the reference answer itself contains all words of the student answer, it is not an attack
+    for pattern in _INJECTION_PATTERNS:
+        if pattern.search(raw):
+            return True
+    if _FENCE_TAG_RE.search(raw):
+        return True
+    return False
+
+
+def parse_strict_bool(value) -> bool:
+    """Parses JSON booleans strictly so strings like 'false' or '0' never evaluate to True."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return value == 1
+    if isinstance(value, str):
+        return value.strip().lower() == 'true'
+    return False
+
+
+def sanitize_ai_note(note: str, max_chars: int = 300) -> str:
+    """Prevents system-prompt leakage or raw JSON/tag echo in grading notes."""
+    s = _CTRL_CHARS_RE.sub('', str(note or '')).strip()
+    if 'MUHIM QOIDALAR:' in s or 'GRADING_SYSTEM_PROMPT' in s or 'Sen ochiq javobli test savollarini' in s:
+        return "Namunaviy javobga mos kelmadi"
+    return s[:max_chars]
+
+
 def _format_items(items):
     lines = []
     for i, item in enumerate(items, start=1):
-        student_answer = (item['student_answer'] or "(bo'sh qoldirilgan)").replace('</javob>', '')
+        raw_student = item.get('student_answer') or "(bo'sh qoldirilgan)"
+        student_answer = sanitize_prompt_field(raw_student, max_chars=1500)
+        question_text = sanitize_prompt_field(item.get('question_text') or '', max_chars=1000)
+        reference_answer = sanitize_prompt_field(item.get('reference_answer') or '', max_chars=500)
         lines.append(
-            f"{i}) Savol: {item['question_text']}\n"
-            f"   Namunaviy to'g'ri javob: {item['reference_answer']}\n"
+            f"{i}) Savol: {question_text}\n"
+            f"   Namunaviy to'g'ri javob: {reference_answer}\n"
             f"   O'quvchi javobi: <javob>{student_answer}</javob>"
         )
     return "\n\n".join(lines)
@@ -268,15 +338,26 @@ def grade_open_answers(items):
     if raw:
         try:
             data = json.loads(raw)
-            raw_results = data.get('results', [])
+            raw_results = data.get('results', []) if isinstance(data, dict) else []
             if isinstance(raw_results, list) and raw_results:
-                by_ai_idx = {r['index']: r for r in raw_results if isinstance(r, dict) and 'index' in r}
+                by_ai_idx = {}
+                for r in raw_results:
+                    if isinstance(r, dict) and isinstance(r.get('index'), int) and not isinstance(r.get('index'), bool):
+                        by_ai_idx[r['index']] = r
                 for ai_idx, orig_idx in enumerate(ai_item_mapping, start=1):
+                    orig_item = items[orig_idx]
+                    student_ans = (orig_item.get('student_answer') or '').strip()
+                    ref_ans = (orig_item.get('reference_answer') or '').strip()
                     res = by_ai_idx.get(ai_idx)
-                    if res:
+                    if res and is_prompt_injection_attempt(student_ans, ref_ans):
                         results_by_index[orig_idx] = {
-                            'is_correct': bool(res.get('is_correct', False)),
-                            'note': str(res.get('note', ''))[:300],
+                            'is_correct': False,
+                            'note': "Namunaviy javobga mos kelmadi",
+                        }
+                    elif res:
+                        results_by_index[orig_idx] = {
+                            'is_correct': parse_strict_bool(res.get('is_correct', False)),
+                            'note': sanitize_ai_note(res.get('note', '')),
                         }
                     else:
                         # Agar bitta indeks AI javobida tushib qolgan bo'lsa

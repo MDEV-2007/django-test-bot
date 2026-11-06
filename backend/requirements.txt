@@ -2,5 +2,5 @@
 # The real, environment-split lists live in requirements/:
 #     requirements/base.txt  — shared runtime deps
 #     requirements/dev.txt   — local development
-#     requirements/prod.txt  — production (daphne, psycopg, redis)
+#     requirements/prod.txt  — production (gunicorn, uvicorn, psycopg, redis)
 -r requirements/prod.txt

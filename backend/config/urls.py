@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from accounts.admin_mfa import admin_mfa_enroll_view, admin_mfa_verify_view
 from config.health import healthz
 
 urlpatterns = [
@@ -27,6 +28,8 @@ urlpatterns = [
     path('healthz', healthz),
     path('api/health/', healthz),
 
+    path('admin/mfa/enroll/', admin_mfa_enroll_view, name='admin_mfa_enroll'),
+    path('admin/mfa/verify/', admin_mfa_verify_view, name='admin_mfa_verify'),
     path('admin/', admin.site.urls),
 
     # JSON API for the Next.js frontend (frontend/). Django endi FAQAT backend:

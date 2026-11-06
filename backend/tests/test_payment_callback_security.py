@@ -106,3 +106,39 @@ class PaymentCallbackSecurityTests(TestCase):
         student = self.run_update(callback(self.payment.id))
         self.assertEqual(self.payment.status, 'awaiting_screenshot')
         self.assertFalse(student.is_premium)
+
+    def test_non_existent_payment_id_is_handled_gracefully(self):
+        student = self.run_update(callback(99999999))
+        self.assertEqual(self.payment.status, 'pending')
+        self.assertFalse(student.is_premium)
+        self.answer.assert_called_with('cb-1', "To'lov bazadan topilmadi!")
+
+    def test_bot_sender_is_rejected_even_with_admin_id(self):
+        upd = callback(self.payment.id)
+        upd['callback_query']['from']['is_bot'] = True
+        student = self.run_update(upd)
+        self.assertEqual(self.payment.status, 'pending')
+        self.assertFalse(student.is_premium)
+        self.answer.assert_called_with('cb-1', "Ruxsat yo'q.")
+
+    def test_malformed_callback_payloads_are_rejected(self):
+        for raw_data in (
+            f'pay_approve_{self.payment.id}_extra',
+            'pay_approve_notanint',
+            'pay_approve_-5',
+            'pay_approve_0',
+            'pay_onlytwo',
+        ):
+            upd = callback(self.payment.id)
+            upd['callback_query']['data'] = raw_data
+            student = self.run_update(upd)
+            self.assertEqual(self.payment.status, 'pending', raw_data)
+            self.assertFalse(student.is_premium, raw_data)
+
+    def test_approved_payment_records_reviewer_user_and_timestamp(self):
+        self.run_update(callback(self.payment.id))
+        self.assertEqual(self.payment.status, 'approved')
+        self.assertEqual(self.payment.reviewed_by_id, self.admin.user_id)
+        self.assertIsNotNone(self.payment.reviewed_at)
+        self.assertIn('@reviewer', self.payment.admin_note)
+

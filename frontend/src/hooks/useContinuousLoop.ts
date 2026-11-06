@@ -511,13 +511,15 @@ export function useContinuousLoop() {
       } else {
         // Fallback default
         setIsOffline(true);
+        setError("Serverdan marafon ma'lumoti kelmadi (oflayn rejim).");
         setLoop(DEFAULT_FALLBACK_LOOP);
         setTopic({ id: 1, title: "O'zbekiston tarixi & DTM Standartlari", subject_name: "Tarix" });
         setStageData(DEFAULT_FALLBACK_STAGE_DATA);
       }
-    } catch {
+    } catch (err) {
       // Fallback default
       setIsOffline(true);
+      setError(err instanceof Error && err.message ? err.message : "Marafon holatini yuklab bo'lmadi.");
       setLoop(DEFAULT_FALLBACK_LOOP);
       setTopic({ id: 1, title: "O'zbekiston tarixi & DTM Standartlari", subject_name: "Tarix" });
       setStageData(DEFAULT_FALLBACK_STAGE_DATA);

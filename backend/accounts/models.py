@@ -344,3 +344,26 @@ def sync_role_to_groups(sender, instance, **kwargs):
         user.groups.remove(*stale)
     if not user.groups.filter(name=instance.role).exists():
         user.groups.add(desired)
+
+
+class AdminMFADevice(models.Model):
+    """RFC 6238 TOTP device + single-use recovery codes for Django Admin (/admin/) accounts."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_mfa_device')
+    secret = models.CharField(max_length=128)
+    is_confirmed = models.BooleanField(default=False, db_index=True)
+    recovery_code_hashes = models.JSONField(default=list, blank=True)
+    last_used_timestep = models.BigIntegerField(default=0)
+    failed_attempts = models.PositiveIntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Admin MFA Device'
+        verbose_name_plural = 'Admin MFA Devices'
+
+    def __str__(self):
+        status = 'confirmed' if self.is_confirmed else 'pending'
+        return f"AdminMFADevice({self.user.username}, {status})"
+

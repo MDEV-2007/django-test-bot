@@ -445,6 +445,8 @@ def sync_telegram_avatar(tg_id: str) -> str | None:
 # Mini App har ochilishda initData'ni qayta imzolaydi, shuning uchun uzoq muddat kerak emas.
 # 24 soat edi — o'g'irlangan initData bir kun davomida yangi 30 kunlik sessiya berardi (AUTH-005).
 TELEGRAM_INITDATA_MAX_AGE_SECONDS = int(os.environ.get('TELEGRAM_INITDATA_MAX_AGE_SECONDS', str(15 * 60)))
+TELEGRAM_AUTH_MAX_AGE_SECONDS = TELEGRAM_INITDATA_MAX_AGE_SECONDS
+_TG_REPLAY_SOURCE = 'tg_initdata_hash'
 
 
 def cleanup_expired_telegram_initdata(now_ts: float | int | None = None) -> int:
