@@ -169,17 +169,34 @@ export function PastelHero({
         </motion.p>
 
         <motion.div
-          className="mt-7 flex flex-wrap gap-3"
+          className="mt-6 sm:mt-7 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE, delay: 0.22 }}
         >
-          <Link href={isNewUser ? '/onboarding?mode=blitz' : '/tests'} className="ps-btn ps-btn-ink">
-            {isNewUser ? 'Ekspress testni boshlash' : 'Test yechish'}
-            <span className="ps-btn-arrow"><ArrowUpRight className="size-4" /></span>
+          <Link
+            href={isNewUser ? '/onboarding?mode=blitz' : '/tests'}
+            className="ps-btn ps-btn-ink !w-full sm:!w-auto !min-h-[44px] sm:!min-h-[48px] !px-2.5 sm:!px-[22px] !text-[12px] sm:!text-[14px] !gap-1.5 sm:!gap-[10px] text-center justify-center whitespace-nowrap"
+          >
+            <span className="truncate">
+              {isNewUser ? (
+                <>
+                  <span className="sm:hidden">Ekspress test</span>
+                  <span className="hidden sm:inline">Ekspress testni boshlash</span>
+                </>
+              ) : (
+                'Test yechish'
+              )}
+            </span>
+            <span className="ps-btn-arrow !size-[24px] sm:!size-[30px] shrink-0 !mr-0 sm:!-mr-3">
+              <ArrowUpRight className="size-3.5 sm:size-4" />
+            </span>
           </Link>
-          <Link href="/study" className="ps-btn ps-btn-ghost">
-            O&apos;qishni davom ettirish
+          <Link
+            href="/study"
+            className="ps-btn ps-btn-ghost !w-full sm:!w-auto !min-h-[44px] sm:!min-h-[48px] !px-2 sm:!px-[22px] !text-[12px] sm:!text-[14px] text-center justify-center whitespace-nowrap"
+          >
+            <span className="truncate">O&apos;qishni davom ettirish</span>
           </Link>
         </motion.div>
       </div>
