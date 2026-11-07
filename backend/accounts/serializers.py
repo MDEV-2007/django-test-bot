@@ -18,6 +18,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     # hammasi bitta maydonga qarab to'g'ri ishlaydi.
     avatar_url = serializers.SerializerMethodField()
     base_avatar_url = serializers.CharField(source='avatar_url', read_only=True)
+    target_subject = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -26,8 +27,17 @@ class ProfileSerializer(serializers.ModelSerializer):
             'is_superadmin', 'is_teacher', 'avatar_url', 'xp', 'level', 'coins',
             'streak', 'last_active_date', 'is_premium', 'has_seen_onboarding', 'elo_rating', 'next_level_xp',
             'freeze_count', 'cosmetics', 'base_avatar_url',
-            'exam_track', 'region', 'tree_stage', 'tree_health',
+            'exam_track', 'region', 'tree_stage', 'tree_health', 'target_subject',
         ]
+
+    def get_target_subject(self, obj):
+        if not obj.target_subject:
+            return None
+        return {
+            'id': obj.target_subject.id,
+            'name': obj.target_subject.name,
+            'slug': obj.target_subject.slug,
+        }
 
     def get_freeze_count(self, obj):
         from shop.services import available_freezes

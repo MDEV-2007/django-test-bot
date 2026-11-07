@@ -40,20 +40,41 @@ def _topic_with_questions(subject=None, exclude_id=None):
 
 
 def _pick_sprint_questions(topic, subject, count, rng):
-    """Avval mavzudan, yetmasa fandan, oxirida umumiy bankdan TASODIFIY savollar.
-    Ilgari mavzuda 15 tadan kam savol bo'lsa `Question.objects.all()[:20]` olinardi —
-    har kuni bir xil 20 ta savol (masalan, "Amir Temur qaysi yilda tug'ilgan?").
+    """Avval mavzudan, yetmasa fandan tasodifiy savollar.
+    Fanning o'zida savol kam bo'lsa, fanning o'z savollari ichida qayta aralashtirib to'ldiriladi,
+    lekin boshqa fan (masalan, Tarix) aralashib ketmaydi.
     `rng` sikl id'si bilan urug'langan: sahifa yangilansa ham savollar o'zgarmaydi."""
-    # Javoblar klientga is_correct bilan boradi — jonli mock va qoralama savollari chiqmasin.
     base = practice_question_pool().filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
     picked = []
-    for qs in (base.filter(topic=topic) if topic else None,
-               base.filter(subject=subject) if subject else None,
-               base):
-        if qs is None or len(picked) >= count:
-            continue
+    pools = []
+    if topic:
+        pools.append(base.filter(topic=topic))
+    if subject:
+        pools.append(base.filter(subject=subject))
+    elif not topic:
+        pools.append(base)
+
+    for qs in pools:
+        if len(picked) >= count:
+            break
         ids = list(qs.exclude(id__in=picked).order_by('id').values_list('id', flat=True))
-        picked += rng.sample(ids, min(count - len(picked), len(ids)))
+        if ids:
+            picked += rng.sample(ids, min(count - len(picked), len(ids)))
+
+    # Agar fanning o'zida savollar soni yetmasa, lekin fanda savol mavjud bo'lsa,
+    # boshqa fanga o'tib ketmaslik uchun o'sha fanning savollarini qayta aralashtiramiz:
+    if subject and len(picked) < count:
+        subject_ids = list(base.filter(subject=subject).order_by('id').values_list('id', flat=True))
+        if subject_ids:
+            while len(picked) < count:
+                picked.append(rng.choice(subject_ids))
+
+    # Agar umuman fanda savol bo'lmasa (va subject berilmagan bo'lsa), umumiy bankdan olamiz:
+    if len(picked) < count:
+        remaining_ids = list(base.exclude(id__in=picked).order_by('id').values_list('id', flat=True))
+        if remaining_ids:
+            picked += rng.sample(remaining_ids, min(count - len(picked), len(remaining_ids)))
+
     by_id = Question.objects.prefetch_related('choices').in_bulk(picked)
     return [by_id[i] for i in picked if i in by_id]
 
@@ -170,9 +191,73 @@ def _session_results(session):
     return dict(session.answers.values_list('question_id', 'is_correct'))
 
 
-def _get_or_create_today_loop(user) -> DailyLearningLoop:
+def _resolve_user_preferred_subject(user, request=None):
+    """Foydalanuvchi tanlagan maqsad fani: request query/body, sessiya yoki Profile.target_subject."""
+    if request:
+        slug = (
+            getattr(request, 'data', {}).get('subject_slug')
+            or getattr(request, 'data', {}).get('subject')
+            or request.GET.get('subject_slug')
+            or request.GET.get('subject')
+        ) if hasattr(request, 'GET') else None
+        if slug:
+            s = Subject.objects.filter(Q(slug=slug) | Q(name__iexact=slug)).first()
+            if s:
+                return s
+        sid = (
+            getattr(request, 'data', {}).get('subject_id')
+            or request.GET.get('subject_id')
+        ) if hasattr(request, 'GET') else None
+        if sid:
+            s = Subject.objects.filter(id=sid).first()
+            if s:
+                return s
+        if hasattr(request, 'session'):
+            sess_subj = request.session.get('selected_subject')
+            if sess_subj:
+                s = Subject.objects.filter(Q(slug=sess_subj) | Q(name__iexact=sess_subj)).first()
+                if s:
+                    return s
+
+    profile = getattr(user, 'profile', None)
+    if profile and profile.target_subject:
+        return profile.target_subject
+
+    return None
+
+
+def switch_today_loop_subject(user, subject: Subject, loop: DailyLearningLoop = None, force=False) -> DailyLearningLoop:
+    """Kunlik siklning fanini o'zgartiradi va unga mos mavzu va yangi sprint/arena sessiyalarini o'rnatadi.
+    Agar foydalanuvchi hali 1-bosqichda bo'lsa (yoki force=True bo'lsa), fan to'liq yangilanadi."""
+    today = timezone.localdate()
+    if not loop:
+        loop = DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
+    if not loop:
+        loop = _create_first_loop(user, today, preferred_subject=subject)
+        return loop
+
+    new_topic = _topic_with_questions(subject)
+    loop.subject = subject
+    loop.topic = new_topic
+
+    if loop.current_stage == DailyLearningLoop.STAGE_1_WARMUP or force:
+        loop.current_stage = DailyLearningLoop.STAGE_1_WARMUP
+        loop.sprint_session = None
+        loop.arena_session = None
+        loop.session_mistakes_ids = []
+        loop.sprint_score = 0
+        loop.sprint_total = 0
+        loop.cleanup_cleared = 0
+        loop.arena_won = False
+
+    loop.save()
+    return loop
+
+
+def _get_or_create_today_loop(user, request=None) -> DailyLearningLoop:
     """Bugungi kunlik yopiq siklni topish yoki eng zaif mavzu asosida yaratish."""
     today = timezone.localdate()
+    preferred_subject = _resolve_user_preferred_subject(user, request=request)
 
     # 1. Hali tugallanmagan yoki bugungi eng oxirgi siklni qidiramiz
     loop = DailyLearningLoop.objects.filter(
@@ -181,54 +266,60 @@ def _get_or_create_today_loop(user) -> DailyLearningLoop:
     ).order_by('-cycle_number', '-id').first()
 
     if loop:
+        if preferred_subject and loop.subject_id != preferred_subject.id and loop.current_stage == DailyLearningLoop.STAGE_1_WARMUP:
+            loop = switch_today_loop_subject(user, preferred_subject, loop=loop)
         return loop
 
-    # Ikki parallel birinchi so'rov (ikki tab, mobil + veb) ikkita 1-sikl yaratardi va
-    # restart-cycle eski, tugallanmaganini tanlab foydalanuvchini bloklardi (audit LOOP-003).
-    # Foydalanuvchi qatori qulfi + DB UniqueConstraint(user, date, cycle_number) bilan himoyalangan.
     from django.db import IntegrityError, transaction
     try:
         with transaction.atomic():
             type(user).objects.select_for_update().filter(pk=user.pk).first()
             loop = DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
             if loop:
+                if preferred_subject and loop.subject_id != preferred_subject.id and loop.current_stage == DailyLearningLoop.STAGE_1_WARMUP:
+                    loop = switch_today_loop_subject(user, preferred_subject, loop=loop)
                 return loop
-            return _create_first_loop(user, today)
+            return _create_first_loop(user, today, preferred_subject=preferred_subject)
     except IntegrityError:
-        return DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
+        loop = DailyLearningLoop.objects.filter(user=user, date=today).order_by('-cycle_number', '-id').first()
+        if loop and preferred_subject and loop.subject_id != preferred_subject.id and loop.current_stage == DailyLearningLoop.STAGE_1_WARMUP:
+            loop = switch_today_loop_subject(user, preferred_subject, loop=loop)
+        return loop
 
 
-def _create_first_loop(user, today) -> DailyLearningLoop:
-
-    # 2. Yangi sikl: O'quvchining eng zaif mavzusini yoki fanni aniqlaymiz
-    weak_subject = None
+def _create_first_loop(user, today, preferred_subject=None) -> DailyLearningLoop:
+    # 2. Yangi sikl: O'quvchining tanlagan/zaif mavzusini yoki fanni aniqlaymiz
+    weak_subject = preferred_subject
     weak_topic = None
 
-    # O'quvchining so'nggi noto'g'ri javoblarini tekshiramiz
-    # Attempt foydalanuvchiga Profile orqali bog'langan, Question esa fanga to'g'ridan-to'g'ri
-    # (`question.subject`). Ilgari bu yerda mavjud bo'lmagan `attempt__user` va
-    # `question.test` ishlatilgan edi — kunning birinchi so'rovi har doim 500 qaytarardi.
-    recent_wrong = (
-        AttemptAnswer.objects
-        .filter(attempt__profile__user=user, is_correct=False, question__subject__isnull=False)
-        .select_related('question__subject')
-        .order_by('-id')
-        .first()
-    )
-    if recent_wrong:
-        weak_subject = recent_wrong.question.subject
-        weak_topic = recent_wrong.question.topic
+    if not weak_subject:
+        profile = getattr(user, 'profile', None)
+        if profile and profile.target_subject:
+            weak_subject = profile.target_subject
 
     if not weak_subject:
-        # Eng ko'p savolga ega fanlardan birini tanlaymiz
+        # O'quvchining so'nggi noto'g'ri javoblarini tekshiramiz
+        recent_wrong = (
+            AttemptAnswer.objects
+            .filter(attempt__profile__user=user, is_correct=False, question__subject__isnull=False)
+            .select_related('question__subject')
+            .order_by('-id')
+            .first()
+        )
+        if recent_wrong:
+            weak_subject = recent_wrong.question.subject
+            weak_topic = recent_wrong.question.topic
+
+    if not weak_subject:
         weak_subject = Subject.objects.annotate(
             q_cnt=Count('questions')
         ).filter(q_cnt__gt=5).first() or Subject.objects.first()
 
+    if not weak_topic and weak_subject:
+        weak_topic = _topic_with_questions(weak_subject)
     if not weak_topic:
-        weak_topic = _topic_with_questions(weak_subject) or _topic_with_questions()
+        weak_topic = _topic_with_questions()
 
-    # Yangi loop yaratamiz
     loop = DailyLearningLoop.objects.create(
         user=user,
         date=today,
@@ -358,7 +449,7 @@ class CurrentLoopView(APIView):
 
     def get(self, request):
         user = request.user
-        loop = _get_or_create_today_loop(user)
+        loop = _get_or_create_today_loop(user, request=request)
 
         # Eco-Tree holatini tekshiramiz va kunlik susayishni (decay) bajaramiz
         eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
@@ -380,6 +471,9 @@ class CurrentLoopView(APIView):
                 'subject_name': loop.subject.name,
             }
 
+        active_subj = loop.subject or (loop.topic.subject if loop.topic and loop.topic.subject else None)
+        all_subjects = list(Subject.objects.values('id', 'name', 'slug', 'icon_name', 'color'))
+
         return Response({
             'ok': True,
             'loop': {
@@ -397,6 +491,12 @@ class CurrentLoopView(APIView):
                 'arena_won': loop.arena_won,
             },
             'topic': topic_data,
+            'subject': {
+                'id': active_subj.id if active_subj else None,
+                'name': active_subj.name if active_subj else "Biologiya",
+                'slug': active_subj.slug if active_subj else "biologiya",
+            },
+            'available_subjects': all_subjects,
             'eco_tree': {
                 'growth_stage': eco_tree.growth_stage,
                 'stage_name': eco_tree.stage_name,
@@ -571,10 +671,12 @@ class AdvanceStageView(APIView):
                 # Sprintda qasos savollari asl savollarni siqib chiqarishi mumkin, arenada vaqt tugashi mumkin,
                 # shuning uchun oqilona minimal harakat chegarasi tekshiriladi.
                 sprint_ids = list(loop.sprint_session.question_ids) if loop.sprint_session_id else []
+                unique_sprint_ids = set(sprint_ids)
+                unique_arena_ids = set(arena_ids)
                 sprint_answered = set(_session_results(loop.sprint_session))
                 effort_ok = (bool(sprint_ids) and bool(arena_ids)
-                             and len(results) >= max(1, min(len(arena_ids), 2))
-                             and len(sprint_answered) >= max(1, min(len(sprint_ids), 6)))
+                             and len(results) >= max(1, min(len(unique_arena_ids), 2))
+                             and len(sprint_answered) >= max(1, min(len(unique_sprint_ids), 6)))
 
                 if not loop.is_chest_claimed and not effort_ok:
                     water_result = {'water_level': eco_tree.water_level, 'grew': False}
@@ -750,10 +852,11 @@ class RestartCycleView(APIView):
         combo = 2.0 if new_cycle_number == 2 else 2.5
 
         # Keyingi yangi mavzuni tanlaymiz
-        # Keyingi raund — shu fandagi boshqa (savoli bor) mavzu.
-        new_topic = (_topic_with_questions(last_loop.subject if last_loop else None,
+        preferred_subject = (last_loop.subject if last_loop and last_loop.subject else None) or _resolve_user_preferred_subject(user)
+        new_topic = (_topic_with_questions(preferred_subject,
                                            exclude_id=last_loop.topic_id if last_loop else None)
-                     or _topic_with_questions())
+                     or _topic_with_questions(preferred_subject)
+                     or (None if preferred_subject else _topic_with_questions()))
 
         from django.db import IntegrityError, transaction
 
@@ -764,7 +867,7 @@ class RestartCycleView(APIView):
                     date=today,
                     cycle_number=new_cycle_number,
                     topic=new_topic,
-                    subject=new_topic.subject if new_topic else None,
+                    subject=preferred_subject or (new_topic.subject if new_topic else None),
                     current_stage=DailyLearningLoop.STAGE_1_WARMUP,
                     combo_multiplier=combo,  # 2-raund 2.0x, 3-raund 2.5x Super-Combo!
                     dtm_score_delta=0.4,
@@ -785,6 +888,9 @@ class RestartCycleView(APIView):
                 'subject_name': new_loop.subject.name if new_loop.subject else 'Asosiy',
             }
 
+        active_subj = new_loop.subject or (new_topic.subject if new_topic and new_topic.subject else None)
+        all_subjects = list(Subject.objects.values('id', 'name', 'slug', 'icon_name', 'color'))
+
         return Response({
             'ok': True,
             'loop': {
@@ -798,6 +904,12 @@ class RestartCycleView(APIView):
                 'is_chest_claimed': new_loop.is_chest_claimed,
             },
             'topic': topic_data,
+            'subject': {
+                'id': active_subj.id if active_subj else None,
+                'name': active_subj.name if active_subj else 'Asosiy',
+                'slug': active_subj.slug if active_subj else 'asosiy',
+            },
+            'available_subjects': all_subjects,
             'eco_tree': {
                 'growth_stage': eco_tree.growth_stage,
                 'stage_name': eco_tree.stage_name,
@@ -808,4 +920,85 @@ class RestartCycleView(APIView):
             },
             'stage_data': stage_data,
             'message': f"🔥 {new_cycle_number}-sikl {combo:.1f}x Super-Combo bilan boshlandi!",
+        })
+
+
+class SetLoopSubjectView(APIView):
+    """
+    POST /api/v1/loop/set-subject/
+    Siklning fanini tanlash yoki o'zgartirish.
+    Body:
+    { "subject_slug": "biologiya" } yoki { "subject_id": 4 } yoki { "subject": "Biologiya" }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        subject_slug = request.data.get('subject_slug') or request.data.get('slug')
+        subject_id = request.data.get('subject_id') or request.data.get('id')
+        subject_name = request.data.get('subject') or request.data.get('name')
+        force = bool(request.data.get('force', True))
+
+        target_subject = None
+        if subject_id:
+            target_subject = Subject.objects.filter(id=subject_id).first()
+        elif subject_slug:
+            target_subject = Subject.objects.filter(slug=subject_slug).first()
+        elif subject_name:
+            target_subject = Subject.objects.filter(Q(slug=subject_name) | Q(name__iexact=subject_name)).first()
+
+        if not target_subject:
+            return Response({'ok': False, 'error': "Fan topilmadi"}, status=status.HTTP_404_NOT_FOUND)
+
+        profile = getattr(user, 'profile', None)
+        if profile:
+            profile.target_subject = target_subject
+            profile.save(update_fields=['target_subject'])
+        if hasattr(request, 'session'):
+            request.session['selected_subject'] = target_subject.slug
+            request.session.modified = True
+
+        loop = switch_today_loop_subject(user, target_subject, force=force)
+        stage_data = _build_stage_data(loop, user)
+
+        topic_data = None
+        if loop.topic:
+            topic_data = {
+                'id': loop.topic.id,
+                'title': loop.topic.title,
+                'subject_name': loop.topic.subject.name if loop.topic.subject else target_subject.name,
+            }
+        else:
+            topic_data = {
+                'id': 0,
+                'title': f"{target_subject.name} (Aralash)",
+                'subject_name': target_subject.name,
+            }
+
+        all_subjects = list(Subject.objects.values('id', 'name', 'slug', 'icon_name', 'color'))
+
+        return Response({
+            'ok': True,
+            'subject': {
+                'id': target_subject.id,
+                'name': target_subject.name,
+                'slug': target_subject.slug,
+            },
+            'available_subjects': all_subjects,
+            'topic': topic_data,
+            'loop': {
+                'id': loop.id,
+                'date': str(loop.date),
+                'cycle_number': loop.cycle_number,
+                'current_stage': loop.current_stage,
+                'combo_multiplier': loop.combo_multiplier,
+                'dtm_score_delta': loop.dtm_score_delta,
+                'session_mistakes_ids': loop.session_mistakes_ids,
+                'is_chest_claimed': loop.is_chest_claimed,
+                'sprint_score': loop.sprint_score,
+                'sprint_total': loop.sprint_total,
+                'cleanup_cleared': loop.cleanup_cleared,
+                'arena_won': loop.arena_won,
+            },
+            'stage_data': stage_data,
         })

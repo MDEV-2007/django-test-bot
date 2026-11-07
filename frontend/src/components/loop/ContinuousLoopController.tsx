@@ -33,6 +33,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
     error,
     loop,
     topic,
+    subject,
     ecoTree,
     stageData,
     fetchLoop,
@@ -359,7 +360,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 Avtopilot · #{loop?.cycle_number || 1}
               </span>
               <h1 className="truncate font-[family-name:var(--font-grotesk)] text-[14px] font-bold sm:text-[17px]">
-                {topic?.title || 'Kunlik zanjir'}
+                {subject?.name ? `${subject.name} · ` : ''}{topic?.title || 'Kunlik zanjir'}
               </h1>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">

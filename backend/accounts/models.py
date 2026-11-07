@@ -74,6 +74,14 @@ class Profile(models.Model):
         default='',
         help_text="Viloyat/shahar (masalan: Farg'ona, Toshkent)",
     )
+    target_subject = models.ForeignKey(
+        'tests_app.Subject',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='target_profiles',
+        help_text="O'quvchining asosiy tayyorlanayotgan fani (Avtopilot va Sprint uchun)",
+    )
     tree_stage = models.IntegerField(default=1, help_text="Ilm Ildizi Daraxti bosqichi (1-5)")
     tree_health = models.IntegerField(default=100, help_text="Daraxt holati (3 kun kirmasa sarg'ayadi)")
 

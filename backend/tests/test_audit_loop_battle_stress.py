@@ -210,3 +210,47 @@ class DailyLoopTests(TestCase):
         self.assertTrue(res.json()['ok'])
         self.assertEqual(res.json()['loop']['cycle_number'], 2)
 
+
+    def test_set_subject_adapts_loop_and_sprint(self):
+        bio = make_subject(name='Biologiya', slug='biologiya')
+        bio_topic = make_topic(subject=bio, title='Hujayra')
+        for i in range(15):
+            make_question(subject=bio, topic=bio_topic, body=f'bio savol {i}')
+
+        initial = self._current()
+        self.assertEqual(initial['subject']['slug'], self.subject.slug)
+
+        res = self.client.post('/api/v1/loop/set-subject/', {'subject_slug': 'biologiya'}, content_type='application/json')
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data['ok'])
+        self.assertEqual(data['subject']['slug'], 'biologiya')
+        self.assertEqual(data['topic']['title'], 'Hujayra')
+
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.target_subject_id, bio.id)
+
+        sprint_bodies = [q['text'] for q in data['stage_data']['sprint']['questions']]
+        self.assertTrue(len(sprint_bodies) > 0)
+        for b in sprint_bodies:
+            self.assertTrue(b.startswith('bio savol'))
+
+    def test_loop_auto_adapts_to_user_target_subject(self):
+        bio = make_subject(name='Biologiya2', slug='biologiya2')
+        bio_topic = make_topic(subject=bio, title='Genetika')
+        for i in range(15):
+            make_question(subject=bio, topic=bio_topic, body=f'genetika savol {i}')
+
+        user2, profile2 = make_user('bio_student')
+        profile2.target_subject = bio
+        profile2.save(update_fields=['target_subject'])
+
+        auth(self.client, user2)
+        res = self.client.get('/api/v1/loop/current/')
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data['subject']['slug'], 'biologiya2')
+        self.assertEqual(data['topic']['title'], 'Genetika')
+        sprint_bodies = [q['text'] for q in data['stage_data']['sprint']['questions']]
+        for b in sprint_bodies:
+            self.assertTrue(b.startswith('genetika savol'))

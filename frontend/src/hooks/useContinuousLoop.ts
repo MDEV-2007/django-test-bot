@@ -13,6 +13,14 @@ export type LoopStage =
   | 'STAGE_4_ARENA'
   | 'STAGE_5_COMPLETED';
 
+export interface LoopSubject {
+  id: number | null;
+  name: string;
+  slug: string;
+  icon_name?: string | null;
+  color?: string | null;
+}
+
 export interface LoopTopic {
   id: number;
   title: string;
@@ -467,6 +475,8 @@ export function useContinuousLoop() {
     title: "O'zbekiston tarixi & DTM Standartlari",
     subject_name: "Tarix",
   });
+  const [subject, setSubject] = useState<LoopSubject | null>(null);
+  const [availableSubjects, setAvailableSubjects] = useState<LoopSubject[]>([]);
   const [ecoTree, setEcoTree] = useState<EcoTreeState>({
     growth_stage: 1,
     stage_name: 'Nihol',
@@ -498,6 +508,8 @@ export function useContinuousLoop() {
         ok: boolean;
         loop: LoopState;
         topic: LoopTopic;
+        subject?: LoopSubject;
+        available_subjects?: LoopSubject[];
         eco_tree: EcoTreeState;
         stage_data: LoopStageData;
       }>('/api/v1/loop/current/');
@@ -506,6 +518,8 @@ export function useContinuousLoop() {
         setIsOffline(false);
         setLoop(res.loop);
         setTopic(res.topic);
+        if (res.subject) setSubject(res.subject);
+        if (res.available_subjects) setAvailableSubjects(res.available_subjects);
         setEcoTree(res.eco_tree);
         setStageData(res.stage_data);
       } else {
@@ -687,6 +701,47 @@ export function useContinuousLoop() {
     []
   );
 
+  // Fan tanlash va siklni shu fanga moslashtirish (Subject Switcher)
+  const switchSubject = useCallback(
+    async (subjectSlugOrId: string | number) => {
+      try {
+        setLoading(true);
+        const payload = typeof subjectSlugOrId === 'number'
+          ? { subject_id: subjectSlugOrId, force: true }
+          : { subject_slug: subjectSlugOrId, force: true };
+        const res = await apiFetch<{
+          ok: boolean;
+          loop: LoopState;
+          topic: LoopTopic;
+          subject: LoopSubject;
+          available_subjects?: LoopSubject[];
+          stage_data: LoopStageData;
+        }>('/api/v1/loop/set-subject/', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        if (res?.ok && res.loop) {
+          setLoop(res.loop);
+          if (res.topic) setTopic(res.topic);
+          if (res.subject) setSubject(res.subject);
+          if (res.available_subjects) setAvailableSubjects(res.available_subjects);
+          if (res.stage_data) setStageData(res.stage_data);
+          soundFX.celebrate();
+          tgHaptic('success');
+          toast.success(`Fan tanlandi: ${res.subject?.name || ''}`);
+          return true;
+        }
+      } catch (err) {
+        toast.error(err instanceof Error && err.message ? err.message : "Fanni o'zgartirib bo'lmadi.");
+        return false;
+      } finally {
+        setLoading(false);
+      }
+      return false;
+    },
+    []
+  );
+
   // 2.0x / 2.5x Super-Combo bilan keyingi siklni boshlash (Multi-cycle marafon)
   const isRestartingRef = useRef(false);
   const restartCycle = useCallback(async () => {
@@ -794,6 +849,8 @@ export function useContinuousLoop() {
     error,
     loop,
     topic,
+    subject,
+    availableSubjects,
     ecoTree,
     stageData,
     fetchLoop,
@@ -810,6 +867,7 @@ export function useContinuousLoop() {
     // Actions
     shareToFeed,
     restartCycle,
+    switchSubject,
     // Loss Aversion Guard
     showExitModal,
     setShowExitModal,

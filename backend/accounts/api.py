@@ -393,6 +393,18 @@ def profile_api(request):
         if 'region' in request.data:
             profile.region = str(request.data.get('region', '')).strip()[:100]
             updated_profile_fields.append('region')
+        if 'target_subject_slug' in request.data or 'target_subject_id' in request.data or 'target_subject' in request.data:
+            from tests_app.models import Subject
+            subj_val = request.data.get('target_subject_slug') or request.data.get('target_subject_id') or request.data.get('target_subject')
+            subj = None
+            if isinstance(subj_val, int) or (isinstance(subj_val, str) and subj_val.isdigit()):
+                subj = Subject.objects.filter(pk=int(subj_val)).first()
+            elif isinstance(subj_val, str):
+                subj = Subject.objects.filter(slug=subj_val).first()
+            if subj:
+                profile.target_subject = subj
+                request.session['selected_subject'] = subj.slug
+                updated_profile_fields.append('target_subject')
         if updated_profile_fields:
             profile.save(update_fields=updated_profile_fields)
 
@@ -498,5 +510,25 @@ def profile_api(request):
 def onboarding_complete_api(request):
     profile = ensure_profile_for_user(request.user)
     profile.has_seen_onboarding = True
-    profile.save(update_fields=['has_seen_onboarding'])
+    update_fields = ['has_seen_onboarding']
+
+    subj_val = request.data.get('subject') or request.data.get('chosen_subject') or request.session.get('selected_subject')
+    if subj_val:
+        from tests_app.models import Subject
+        subj = None
+        if isinstance(subj_val, int) or (isinstance(subj_val, str) and str(subj_val).isdigit()):
+            subj = Subject.objects.filter(pk=int(subj_val)).first()
+        elif isinstance(subj_val, str):
+            subj = Subject.objects.filter(slug=subj_val).first()
+        if subj:
+            profile.target_subject = subj
+            request.session['selected_subject'] = subj.slug
+            update_fields.append('target_subject')
+            try:
+                from learning_loop.views import switch_today_loop_subject
+                switch_today_loop_subject(request.user, subj)
+            except Exception:
+                pass
+
+    profile.save(update_fields=update_fields)
     return Response({'ok': True})

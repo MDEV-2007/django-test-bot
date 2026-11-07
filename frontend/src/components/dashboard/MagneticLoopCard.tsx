@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Flame, Trophy, Gift, ArrowRight, Play,
   CheckCircle2, Droplets, Sparkles,
-  ShieldCheck, Brain, Swords, Clock
+  ShieldCheck, Brain, Swords, Clock, ChevronDown, Check
 } from 'lucide-react';
 import { useContinuousLoop } from '@/hooks/useContinuousLoop';
 import ContinuousLoopController from '@/components/loop/ContinuousLoopController';
@@ -24,7 +24,28 @@ export default function MagneticLoopCard({
   userStreak = 7,
 }: MagneticLoopCardProps) {
   const [controllerOpen, setControllerOpen] = useState(false);
-  const { loop, topic, ecoTree, loading, error, fetchLoop } = useContinuousLoop();
+  const [subjectDropdownOpen, setSubjectDropdownOpen] = useState(false);
+  const {
+    loop,
+    topic,
+    subject,
+    availableSubjects,
+    switchSubject,
+    ecoTree,
+    loading,
+    error,
+    fetchLoop,
+  } = useContinuousLoop();
+
+  const defaultSubjects = [
+    { id: 4, name: 'Biologiya', slug: 'biologiya' },
+    { id: 1, name: "O'zbekiston tarixi", slug: 'tarix' },
+    { id: 2, name: 'Ona tili', slug: 'ona-tili' },
+    { id: 3, name: 'Matematika', slug: 'matematika' },
+    { id: 6, name: 'Ingliz tili', slug: 'ingliz-tili' },
+    { id: 7, name: 'Rus tili', slug: 'rus-tili' },
+  ];
+  const displaySubjects = availableSubjects && availableSubjects.length > 0 ? availableSubjects : defaultSubjects;
   const { t } = useTransliterate();
 
   // Multi-cycle marafon ko'rsatkichlari (3 raundlik marafon: 3x 18-20 daqiqa = 60 daqiqa)
@@ -170,6 +191,58 @@ export default function MagneticLoopCard({
               <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-3 py-1 text-[11.5px] font-bold text-[#080808]">
                 {t('Raund')} {cycleNumber}/3 <span className="opacity-70">· {t('60 daqiqalik marafon')}</span>
               </span>
+
+              {/* Fan tanlash va almashtirish (Subject Switcher) */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setSubjectDropdownOpen(!subjectDropdownOpen)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[11.5px] font-bold text-[#080808] shadow-sm backdrop-blur transition hover:bg-white dark:border-white/10 dark:bg-black/60 dark:text-white"
+                  title={t("Marafon fanini o'zgartirish")}
+                >
+                  <span className="size-2 rounded-full bg-[var(--ps-purple)] animate-pulse" />
+                  <span>{subject?.name || topic?.subject_name || "Biologiya"}</span>
+                  <ChevronDown className={`size-3 text-current/70 transition-transform ${subjectDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {subjectDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setSubjectDropdownOpen(false)}
+                    />
+                    <div className="absolute left-0 top-full z-40 mt-1 min-w-[200px] overflow-hidden rounded-2xl border border-black/10 bg-[var(--ps-paper)] p-1.5 shadow-xl backdrop-blur-xl dark:border-white/10">
+                      <p className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-[var(--text-secondary)]">
+                        {t("Marafon fanini tanlang")}:
+                      </p>
+                      <div className="space-y-0.5">
+                        {displaySubjects.map((s: { id?: number | null; name: string; slug: string }) => {
+                          const isActive = subject?.slug === s.slug || (!subject && s.slug === 'biologiya');
+                          return (
+                            <button
+                              key={s.slug}
+                              type="button"
+                              onClick={() => {
+                                switchSubject(s.slug);
+                                setSubjectDropdownOpen(false);
+                              }}
+                              className={`flex w-full items-center justify-between rounded-xl px-2.5 py-1.5 text-left text-[12px] font-bold transition ${
+                                isActive
+                                  ? 'bg-[var(--ps-purple)] text-white'
+                                  : 'text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
+                              }`}
+                            >
+                              <span>{s.name}</span>
+                              {isActive && <Check className="size-3.5" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
               {topic && (
                 <span className="ps-chip">
                   {t('Mavzu')}: <strong>{t(topic.title)}</strong>
