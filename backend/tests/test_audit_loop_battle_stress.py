@@ -194,3 +194,19 @@ class DailyLoopTests(TestCase):
         self._complete_cycle()
         self.assertEqual(self.client.post('/api/v1/loop/restart-cycle/').status_code, 200)
         self.assertEqual(self._advance('STAGE_1_WARMUP').json()['combo_multiplier'], 2.0)
+
+    def test_cycle_restart_after_incomplete_sprint_answers(self):
+        current = self._current()
+        self._advance('STAGE_1_WARMUP')
+        sprint_ids = stage_question_ids(current, 'sprint')
+        answer_loop_questions(self.client, 'sprint', sprint_ids[:-1])
+        res_sprint = self._advance('STAGE_2_SPRINT')
+        if res_sprint.json().get('current_stage') == 'STAGE_3_CLEANUP':
+            self._advance('STAGE_3_CLEANUP')
+        answer_loop_questions(self.client, 'arena', stage_question_ids(current, 'arena'))
+        self._advance('STAGE_4_ARENA')
+        res = self.client.post('/api/v1/loop/restart-cycle/')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.json()['ok'])
+        self.assertEqual(res.json()['loop']['cycle_number'], 2)
+

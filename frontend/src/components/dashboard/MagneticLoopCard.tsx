@@ -299,7 +299,10 @@ export default function MagneticLoopCard({
       {/* Avtopilot Konveyerining to'liq ekranni qamrovchi fokus oynasi */}
       <AnimatePresence>
         {controllerOpen && (
-          <ContinuousLoopController onClose={() => setControllerOpen(false)} />
+          <ContinuousLoopController
+            key={`${loop?.id ?? 0}-${loop?.cycle_number ?? 1}`}
+            onClose={() => setControllerOpen(false)}
+          />
         )}
       </AnimatePresence>
     </>

@@ -566,19 +566,21 @@ class AdvanceStageView(APIView):
                 loop.current_stage = DailyLearningLoop.STAGE_5_COMPLETED
 
                 # Agar sandiq ochilmagan bo'lsa mukofot beriladi (Double-spend oldini olish)
-                # Mukofot faqat haqiqiy ish uchun (audit ECON-001): sprint va arenaning har bir
-                # savoliga (to'g'ri yoki xato) javob berilgan bo'lishi shart. Ilgari 4 ta bo'sh
-                # POST bilan kuniga 3 sikl x 200 tanga + AI krediti olinardi.
+                # Mukofot faqat haqiqiy ish uchun (audit ECON-001): sprint va arenaning savollariga
+                # javob berilgan bo'lishi shart. Ilgari 4 ta bo'sh POST bilan kuniga 3 sikl x 200 tanga olinardi.
+                # Sprintda qasos savollari asl savollarni siqib chiqarishi mumkin, arenada vaqt tugashi mumkin,
+                # shuning uchun oqilona minimal harakat chegarasi tekshiriladi.
                 sprint_ids = list(loop.sprint_session.question_ids) if loop.sprint_session_id else []
                 sprint_answered = set(_session_results(loop.sprint_session))
                 effort_ok = (bool(sprint_ids) and bool(arena_ids)
-                             and all(qid in results for qid in arena_ids)
-                             and all(qid in sprint_answered for qid in sprint_ids))
+                             and len(results) >= max(1, min(len(arena_ids), 2))
+                             and len(sprint_answered) >= max(1, min(len(sprint_ids), 6)))
 
                 if not loop.is_chest_claimed and not effort_ok:
                     water_result = {'water_level': eco_tree.water_level, 'grew': False}
                     coins = 0
                     xp = 0
+                    loop.is_chest_claimed = True
                 elif not loop.is_chest_claimed:
                     # 1. Eco-Daraxtga suv quyiladi (+35%)
                     water_result = eco_tree.water(35)
@@ -723,9 +725,23 @@ class RestartCycleView(APIView):
 
         # Yangi sikl faqat oldingisi haqiqatan yakunlangandan keyin va kuniga MAX_CYCLES_PER_DAY
         # martagacha: har sikl sandiq mukofoti beradi.
-        if last_loop and (last_loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED
-                          or not last_loop.is_chest_claimed):
+        if last_loop and last_loop.current_stage != DailyLearningLoop.STAGE_5_COMPLETED:
             return Response({'ok': False, 'error': "Avval joriy siklni yakunlang"}, status=status.HTTP_409_CONFLICT)
+
+        if last_loop and not last_loop.is_chest_claimed:
+            # Agar oldingi sikl STAGE_5_COMPLETED bo'lib, lekin is_chest_claimed False bo'lsa
+            # (eski qatorlar yoki effort_ok nosozligi), blokirovkadan chiqaramiz va haqli mukofotini beramiz.
+            sprint_ans = len(_session_results(last_loop.sprint_session)) if last_loop.sprint_session_id else 0
+            arena_ans = len(_session_results(last_loop.arena_session)) if last_loop.arena_session_id else 0
+            if sprint_ans >= 1 or arena_ans >= 1:
+                eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
+                eco_tree.water(35)
+                profile = ensure_profile_for_user(user)
+                from core.rewards import grant_rewards_atomic
+                grant_rewards_atomic(profile.id, coins_delta=200, xp_delta=100)
+            last_loop.is_chest_claimed = True
+            last_loop.save(update_fields=['is_chest_claimed'])
+
         if last_loop and last_loop.cycle_number >= MAX_CYCLES_PER_DAY:
             return Response({'ok': False, 'error': "Bugungi sikllar limiti tugadi. Ertaga davom etamiz!"},
                             status=status.HTTP_429_TOO_MANY_REQUESTS)
@@ -761,15 +777,35 @@ class RestartCycleView(APIView):
         eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
         stage_data = _build_stage_data(new_loop, user)
 
+        topic_data = None
+        if new_topic:
+            topic_data = {
+                'id': new_topic.id,
+                'title': new_topic.title,
+                'subject_name': new_loop.subject.name if new_loop.subject else 'Asosiy',
+            }
+
         return Response({
             'ok': True,
             'loop': {
                 'id': new_loop.id,
+                'date': str(new_loop.date),
                 'cycle_number': new_loop.cycle_number,
                 'current_stage': new_loop.current_stage,
                 'combo_multiplier': new_loop.combo_multiplier,
                 'dtm_score_delta': new_loop.dtm_score_delta,
+                'session_mistakes_ids': new_loop.session_mistakes_ids,
+                'is_chest_claimed': new_loop.is_chest_claimed,
+            },
+            'topic': topic_data,
+            'eco_tree': {
+                'growth_stage': eco_tree.growth_stage,
+                'stage_name': eco_tree.stage_name,
+                'water_level': eco_tree.water_level,
+                'root_depth_xp': eco_tree.root_depth_xp,
+                'total_cycles_completed': eco_tree.total_cycles_completed,
+                'needs_water': eco_tree.water_level < 25,
             },
             'stage_data': stage_data,
-            'message': f"🔥 {new_cycle_number}-sikl 2.5x Super-Combo bilan boshlandi!",
+            'message': f"🔥 {new_cycle_number}-sikl {combo:.1f}x Super-Combo bilan boshlandi!",
         })

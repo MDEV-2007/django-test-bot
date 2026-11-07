@@ -696,6 +696,8 @@ export function useContinuousLoop() {
       const res = await apiFetch<{
         ok: boolean;
         loop: LoopState;
+        topic?: LoopTopic;
+        eco_tree?: EcoTreeState;
         stage_data: LoopStageData;
         message: string;
       }>('/api/v1/loop/restart-cycle/', { method: 'POST' });
@@ -703,7 +705,9 @@ export function useContinuousLoop() {
       if (res?.ok && res.loop) {
         tgHaptic('success');
         soundFX.celebrate();
-        setLoop((prev) => (prev ? { ...prev, ...res.loop } : res.loop));
+        setLoop(res.loop);
+        if (res.topic) setTopic(res.topic);
+        if (res.eco_tree) setEcoTree(res.eco_tree);
         setStageData(res.stage_data);
         toast.success(res.message);
         return true;

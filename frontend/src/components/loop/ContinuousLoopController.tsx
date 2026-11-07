@@ -77,7 +77,24 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   const [arenaTimeLeft, setArenaTimeLeft] = useState(60);
   const arenaTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Savollarni stageData dan yuklash
+  // Yangi sikl boshlanganda yoki loop o'zgarganda ichki bosqich holatlarini boshlang'ichga qaytarish
+  useEffect(() => {
+    setWarmupSecondsLeft(90);
+    setSprintIndex(0);
+    setSelectedOptionId(null);
+    setIsAnswerChecked(false);
+    setMistakeIds([]);
+    setCorrectCount(0);
+    setShowAiMentorSheet(false);
+    setActiveHint(null);
+    setCleanupIndex(0);
+    setIsCardFlipped(false);
+    setClearedCount(0);
+    setArenaIndex(0);
+    setUserScore(0);
+    setGhostScore(0);
+    setArenaTimeLeft(60);
+  }, [loop?.id, loop?.cycle_number]);
   useEffect(() => {
     if (stageData?.sprint?.questions && stageData.sprint.questions.length > 0) {
       setSprintQuestions(stageData.sprint.questions);
