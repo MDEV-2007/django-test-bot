@@ -315,13 +315,14 @@ def verify_totp_code_with_timestep(
     code: str,
     *,
     for_time: int | float | None = None,
-    window: int = 2,
+    window: int = 4,
     last_used_timestep: int = 0,
 ) -> tuple[bool, int]:
     """Verifies a 6-digit TOTP code and prevents replay of any timestep <= `last_used_timestep`.
 
     RFC 6238 section 5.2 recommends a transmission latency / clock skew window of ±1 to ±2
     steps (±60 seconds). `last_used_timestep` strictly prevents replay within the window.
+    We default to window=4 (±120 seconds) to forgivingly accommodate cell-phone clock drift.
     """
     candidate = str(code or '').strip().replace(' ', '').replace('-', '')
     if len(candidate) != TOTP_DIGITS or not candidate.isdigit():

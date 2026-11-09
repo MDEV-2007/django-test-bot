@@ -225,15 +225,17 @@ export default function PanelShell({ children }: { children: React.ReactNode }) 
   const [copiedRecovery, setCopiedRecovery] = useState(false);
   const current = ALL_ITEMS.find((i) => isActive(pathname, i.href));
 
-  const fetchMfaStatus = async () => {
+  const fetchMfaStatus = async (reset = false) => {
     try {
       setMfa((prev) => ({ ...prev, loading: true }));
+      setErrorMsg('');
+      setCode('');
       const data = await apiFetch<{
         enrolled: boolean;
         verified: boolean;
         secret?: string;
         otpauth_uri?: string;
-      }>('/api/panel/mfa/status/');
+      }>(reset ? '/api/panel/mfa/status/?reset=1' : '/api/panel/mfa/status/');
       setMfa({
         loading: false,
         enrolled: data.enrolled,
@@ -241,6 +243,9 @@ export default function PanelShell({ children }: { children: React.ReactNode }) 
         secret: data.secret,
         otpauth_uri: data.otpauth_uri,
       });
+      if (reset) {
+        toast.info('Yangi QR kod va maxfiy kalit yaratildi');
+      }
     } catch {
       setMfa({ loading: false, enrolled: false, verified: false });
     }
@@ -430,8 +435,11 @@ export default function PanelShell({ children }: { children: React.ReactNode }) 
           )}
 
           {errorMsg && (
-            <div className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs font-medium text-rose-300">
-              {errorMsg}
+            <div className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs font-medium text-rose-300 space-y-1">
+              <p>{errorMsg}</p>
+              <p className="text-[11px] text-rose-200/80">
+                💡 Maslahat: Telefoningiz soati to&apos;g&apos;riligini tekshiring yoki Google Authenticator sozlamalaridan &quot;Vaqtni sinxronlash&quot; (Sync now) tugmasini bosing.
+              </p>
             </div>
           )}
 
@@ -450,6 +458,18 @@ export default function PanelShell({ children }: { children: React.ReactNode }) 
                 className="w-full rounded-xl border border-white/15 bg-black/50 px-4 py-2.5 text-center font-mono text-lg tracking-[0.35em] text-white outline-none focus:border-emerald-500"
                 required
               />
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-slate-400 pb-1">
+              <button
+                type="button"
+                onClick={() => fetchMfaStatus(true)}
+                className="text-xs text-emerald-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                title="Yangi QR kod yaratish"
+              >
+                🔄 Yangi QR kod olish
+              </button>
+              <span className="text-[11px] opacity-70">30 soniyada yangilanadi</span>
             </div>
 
             <div className="flex gap-2">
