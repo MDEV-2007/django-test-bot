@@ -2,25 +2,25 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { AEO_FAQ_ITEMS, type FaqItem } from '@/lib/faq-data';
 
-interface FaqItem {
-  q: string;
-  a: string;
-}
+export type { FaqItem };
 
 interface FaqAccordionProps {
-  items: FaqItem[];
+  items?: FaqItem[];
 }
 
-export default function FaqAccordion({ items }: FaqAccordionProps) {
+export default function FaqAccordion({ items = AEO_FAQ_ITEMS }: FaqAccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggle = (index: number) => {
     setOpenIndex((curr) => (curr === index ? null : index));
   };
 
+  const activeItems = items && items.length > 0 ? items : AEO_FAQ_ITEMS;
+
   return (
-    <section id="savollar" className="mx-auto max-w-4xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8">
+    <section id="savollar" aria-label="Ko'p so'raladigan savollar" className="mx-auto max-w-4xl scroll-mt-28 px-4 py-20 sm:px-6 lg:px-8">
       <div className="text-center">
         <div className="text-xs font-bold uppercase tracking-widest text-[#7659C7]">
           Savol-Javoblar
@@ -33,9 +33,9 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
         </p>
       </div>
 
-      {/* iOS Inset Grouped Accordion List */}
+      {/* iOS Inset Grouped Accordion List - SSR HTML DOM da doim mavjud */}
       <div className="mt-10 overflow-hidden rounded-2xl border border-black/[0.07] bg-white divide-y divide-black/[0.06] shadow-[0_4px_24px_-2px_rgba(0,0,0,0.04)]">
-        {items.map((item, index) => {
+        {activeItems.map((item, index) => {
           const isOpen = openIndex === index;
 
           return (
@@ -58,11 +58,19 @@ export default function FaqAccordion({ items }: FaqAccordionProps) {
                 </span>
               </button>
 
-              {isOpen && (
-                <div className="px-5 sm:px-6 pb-5 pt-1 text-xs sm:text-sm leading-relaxed text-[#6B6577]">
-                  {item.a}
+              {/* DOM da doim mavjud bo'lgan javob bloki — crawlerlar uchun to'liq ochiq */}
+              <div
+                className={`grid transition-all duration-200 ease-in-out ${
+                  isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                }`}
+                aria-hidden={!isOpen}
+              >
+                <div className="overflow-hidden">
+                  <div className="px-5 sm:px-6 pb-5 pt-1 text-xs sm:text-sm leading-relaxed text-[#6B6577]">
+                    {item.a}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           );
         })}
