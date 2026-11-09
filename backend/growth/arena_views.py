@@ -20,7 +20,16 @@ from telegrambot.client import send_message
 BOT_NAMES = [
     "Sardor Temurov", "Madina Karimova", "Javohir Aliyev", "Shahlo Mirzayeva",
     "Bekzod Rustamov", "Dilnoza Olimova", "Farrux Xolmatov", "Zilola Yusupova",
-    "Bobur Samadov", "Nilufar Rahimova", "Akmal Zokirov", "Gulbahor Toshmatova"
+    "Bobur Samadov", "Nilufar Rahimova", "Akmal Zokirov", "Gulbahor Toshmatova",
+    "Diyorbek Rahimov", "Nodira Qosimova", "Jasur Mahmudov", "Kamola Saidova",
+    "Azizbek Normatov", "Mohira Yoqubova", "Otabek Ergashev", "Malika Xalilova"
+]
+
+BOT_REGIONS = [
+    "Toshkent sh., 1-litsey", "Samarqand sh., 42-maktab", "Buxoro sh., 23-maktab",
+    "Farg'ona sh., 4-IDUM", "Andijon sh., 9-maktab", "Namangan sh., 15-maktab",
+    "Xorazm, Urganch 1-litsey", "Qashqadaryo, Qarshi 2-IDUM", "Navoiy sh., 11-maktab",
+    "Surxondaryo, Termiz 5-maktab", "Jizzax sh., 7-maktab", "Sirdaryo, Guliston litseyi"
 ]
 
 
@@ -183,18 +192,29 @@ class GhostMatchmakeAPIView(APIView):
                 subject = Subject.objects.filter(slug=subject_slug).first()
 
             # 1-QADAM: Bazadan foydalanuvchining darajasiga yaqin (ELO ± 150) Ghost Replay qidirish
+            last_opp_id = request.data.get('last_opponent_id')
             ghost = None
-            if subject:
-                ghost_qs = ArenaGhostReplay.objects.filter(subject=subject, is_active=True)
-                if profile:
-                    ghost_qs = ghost_qs.exclude(player=profile)
-                ghost = ghost_qs.filter(
-                    elo_rating__gte=user_elo - 150,
-                    elo_rating__lte=user_elo + 150
-                ).order_by('?').first()
+            ghost_qs = ArenaGhostReplay.objects.filter(is_active=True)
+            if profile:
+                ghost_qs = ghost_qs.exclude(player=profile)
+            if last_opp_id:
+                try:
+                    ghost_qs = ghost_qs.exclude(id=int(last_opp_id))
+                except (ValueError, TypeError):
+                    pass
 
-                if not ghost:
-                    ghost = ghost_qs.order_by('?').first()
+            if subject:
+                subj_qs = ghost_qs.filter(subject=subject)
+                if subj_qs.exists():
+                    ghost_qs = subj_qs
+
+            ghost = ghost_qs.filter(
+                elo_rating__gte=user_elo - 150,
+                elo_rating__lte=user_elo + 150
+            ).order_by('?').first()
+
+            if not ghost:
+                ghost = ghost_qs.order_by('?').first()
 
             if not ghost:
                 # Agar mos replay bo'lmasa — yangi realistik ghost replay yaratamiz
@@ -228,6 +248,8 @@ class GhostMatchmakeAPIView(APIView):
                 ]
 
             match_id = f"ghost_match_{uuid.uuid4().hex[:10]}"
+            opp_region = random.choice(BOT_REGIONS)
+            opp_avatar = ghost.avatar_url or f"https://api.dicebear.com/7.x/adventurer/svg?seed={abs(hash(ghost.player_name or 'bot')) % 1000}"
 
             return Response({
                 'ok': True,
@@ -235,8 +257,9 @@ class GhostMatchmakeAPIView(APIView):
                 'subject_name': subject.name if subject else "Aralash Fanlar",
                 'opponent': {
                     'id': ghost.id,
-                    'name': ghost.player_name or "Abituriyent",
-                    'avatar_url': ghost.avatar_url or "https://api.dicebear.com/7.x/adventurer/svg?seed=fighter",
+                    'name': ghost.player_name or random.choice(BOT_NAMES),
+                    'avatar_url': opp_avatar,
+                    'region': opp_region,
                     'elo_rating': ghost.elo_rating or 1000,
                     'is_ghost': True,
                 },
@@ -244,17 +267,20 @@ class GhostMatchmakeAPIView(APIView):
                 'ghost_moves': ghost.moves_log or [],
             })
         except Exception:
-            # 100% kafolatlangan failsafe fallback — hech qachon 500 bermaydi
+            # 100% kafolatlangan failsafe fallback — har gal turli raqib tanlaydi
+            bot_name = random.choice(BOT_NAMES)
+            seed_num = abs(hash(bot_name + str(random.random()))) % 1000
             match_id = f"ghost_match_{uuid.uuid4().hex[:10]}"
             return Response({
                 'ok': True,
                 'match_id': match_id,
                 'subject_name': "Aralash Fanlar",
                 'opponent': {
-                    'id': 7777,
-                    'name': "Sardor Temurov",
-                    'avatar_url': "https://api.dicebear.com/7.x/adventurer/svg?seed=fighter",
-                    'elo_rating': 1050,
+                    'id': random.randint(7000, 7999),
+                    'name': bot_name,
+                    'avatar_url': f"https://api.dicebear.com/7.x/adventurer/svg?seed={seed_num}",
+                    'region': random.choice(BOT_REGIONS),
+                    'elo_rating': random.randint(1020, 1260),
                     'is_ghost': True,
                 },
                 'questions': [

@@ -60,6 +60,21 @@ export interface GhostBattleArenaProps {
   onOpenViralDuel?: (userScore: number, opponentScore: number) => void;
 }
 
+const FALLBACK_OPPONENTS: OpponentData[] = [
+  { id: 8001, name: 'Shahlo Mirzayeva', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Shahlo', region: 'Toshkent sh., 1-litsey', elo_rating: 1180, is_ghost: true },
+  { id: 8002, name: 'Bekzod Rustamov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Bekzod', region: 'Buxoro sh., 23-maktab', elo_rating: 1220, is_ghost: true },
+  { id: 8003, name: 'Dilnoza Olimova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Dilnoza', region: 'Farg‘ona sh., 4-IDUM', elo_rating: 1150, is_ghost: true },
+  { id: 8004, name: 'Farrux Xolmatov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Farrux', region: 'Samarqand sh., 42-maktab', elo_rating: 1290, is_ghost: true },
+  { id: 8005, name: 'Zilola Yusupova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Zilola', region: 'Andijon sh., 9-maktab', elo_rating: 1110, is_ghost: true },
+  { id: 8006, name: 'Bobur Samadov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Bobur', region: 'Namangan sh., 15-maktab', elo_rating: 1260, is_ghost: true },
+  { id: 8007, name: 'Nilufar Rahimova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Nilufar', region: 'Xorazm, Urganch 1-litsey', elo_rating: 1200, is_ghost: true },
+  { id: 8008, name: 'Akmal Zokirov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Akmal', region: 'Qashqadaryo, Qarshi 2-IDUM', elo_rating: 1170, is_ghost: true },
+  { id: 8009, name: 'Madina Karimova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Madina', region: 'Navoiy sh., 11-maktab', elo_rating: 1240, is_ghost: true },
+  { id: 8010, name: 'Sardor Temurov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sardor', region: 'Surxondaryo, Termiz 5-maktab', elo_rating: 1190, is_ghost: true },
+  { id: 8011, name: 'Gulbahor Toshmatova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Gulbahor', region: 'Jizzax sh., 7-maktab', elo_rating: 1110, is_ghost: true },
+  { id: 8012, name: 'Jasur Mahmudov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Jasur', region: 'Sirdaryo, Guliston litseyi', elo_rating: 1240, is_ghost: true },
+];
+
 export default function GhostBattleArena({
   subjectSlug = 'tarix',
   incomingDuelToken = null,
@@ -136,6 +151,7 @@ export default function GhostBattleArena({
       }
 
       // Standart 1v1 Matchmaking (3 soniya radar effekti)
+      const lastOppId = typeof window !== 'undefined' ? sessionStorage.getItem('last_arena_opp_id') : null;
       const res = await apiFetch<{
         ok: boolean;
         match_id: string;
@@ -144,7 +160,7 @@ export default function GhostBattleArena({
         ghost_moves: GhostMove[];
       }>('/api/growth/arena/matchmake/', {
         method: 'POST',
-        body: JSON.stringify({ subject_slug: subjectSlug }),
+        body: JSON.stringify({ subject_slug: subjectSlug, last_opponent_id: lastOppId }),
       });
 
       if (res && res.ok && res.questions && res.questions.length > 0) {
@@ -157,6 +173,9 @@ export default function GhostBattleArena({
           elo_rating: res.opponent?.elo_rating || 1050,
           is_ghost: true,
         };
+        if (opp.id && typeof window !== 'undefined') {
+          sessionStorage.setItem('last_arena_opp_id', String(opp.id));
+        }
         setOpponent(opp);
         setQuestions(res.questions);
         setGhostMoves(res.ghost_moves || []);
@@ -165,17 +184,15 @@ export default function GhostBattleArena({
       }
       throw new Error("Bo'sh savollar");
     } catch {
-      // Fallback opponent agar server offline bo'lsa yoki savollar yetishmasa
-      const fallbackOpp: OpponentData = {
-        id: 8888,
-        name: 'Javohir Aliyev',
-        avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Javohir',
-        region: 'Samarqand sh., 42-maktab',
-        elo_rating: 1240,
-        is_ghost: true,
-      };
-      setOpponent(fallbackOpp);
-      setQuestions([
+      // Fallback opponent agar server offline bo'lsa yoki ulanishda xatolik bo'lsa — har safar turli raqib tanlanadi
+      const lastOppId = typeof window !== 'undefined' ? Number(sessionStorage.getItem('last_arena_opp_id')) : 0;
+      const candidates = FALLBACK_OPPONENTS.filter((o) => o.id !== lastOppId);
+      const chosenOpp = candidates[Math.floor(Math.random() * candidates.length)] || FALLBACK_OPPONENTS[0];
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('last_arena_opp_id', String(chosenOpp.id));
+      }
+      setOpponent(chosenOpp);
+      const fallbackQuestions = [
         {
           id: 1,
           body: "Amir Temur qaysi yili Balx shahrida buyuk amir deb e'lon qilingan?",
@@ -191,14 +208,14 @@ export default function GhostBattleArena({
           body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi yodgorlikdan topilgan?",
           choices: [
             { id: 5, text: 'Dalvarzintepa', is_correct: false },
-            { id: 6, text: 'Taxiti Sangin', is_correct: true },
+            { id: 6, text: 'Taxti Sangin', is_correct: true },
             { id: 7, text: 'Xolchayon', is_correct: false },
             { id: 8, text: 'Qoratepa', is_correct: false },
           ],
         },
         {
           id: 3,
-          body: 'Qadimgi Turon xalqlari qaysi din ta\'limotiga e\'tiqod qilgan?',
+          body: "Qadimgi Turon xalqlari qaysi din ta'limotiga e'tiqod qilgan?",
           choices: [
             { id: 9, text: 'Zardushtiylik', is_correct: true },
             { id: 10, text: 'Buddizm', is_correct: false },
@@ -206,14 +223,37 @@ export default function GhostBattleArena({
             { id: 12, text: 'Xristianlik', is_correct: false },
           ],
         },
-      ]);
+        {
+          id: 4,
+          body: "Al-Xorazmiyning 'Al-jabr val-muqobala' asari qaysi fanga asos solgan?",
+          choices: [
+            { id: 13, text: 'Algebra', is_correct: true },
+            { id: 14, text: 'Geometriya', is_correct: false },
+            { id: 15, text: 'Astronomiya', is_correct: false },
+            { id: 16, text: 'Fizika', is_correct: false },
+          ],
+        },
+        {
+          id: 5,
+          body: "Mirzo Ulug'bek rasadxonasi qaysi shahar yaqinida bunyod etilgan?",
+          choices: [
+            { id: 17, text: 'Samarqand', is_correct: true },
+            { id: 18, text: 'Buxoro', is_correct: false },
+            { id: 19, text: 'Xiva', is_correct: false },
+            { id: 20, text: 'Shahrisabz', is_correct: false },
+          ],
+        },
+      ];
+      setQuestions(fallbackQuestions);
       setGhostMoves([
-        { question_id: 1, selected_option_id: 2, is_correct: true, time_taken_ms: 3200, score: 10 },
-        { question_id: 2, selected_option_id: 6, is_correct: true, time_taken_ms: 2800, score: 10 },
-        { question_id: 3, selected_option_id: 9, is_correct: true, time_taken_ms: 3500, score: 10 },
+        { question_id: 1, selected_option_id: 2, is_correct: true, time_taken_ms: 3100, score: 10 },
+        { question_id: 2, selected_option_id: 6, is_correct: true, time_taken_ms: 2700, score: 10 },
+        { question_id: 3, selected_option_id: 9, is_correct: true, time_taken_ms: 3400, score: 10 },
+        { question_id: 4, selected_option_id: 13, is_correct: true, time_taken_ms: 2900, score: 10 },
+        { question_id: 5, selected_option_id: 17, is_correct: true, time_taken_ms: 3200, score: 10 },
       ]);
       setTimeout(() => {
-        triggerMatchFound(fallbackOpp);
+        triggerMatchFound(chosenOpp);
       }, 1500);
     }
   }, [incomingDuelToken, subjectSlug]);
