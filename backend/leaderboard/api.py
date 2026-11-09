@@ -1,6 +1,8 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from accounts.jwt_auth import OptionalAuditAwareJWTAuthentication
 from accounts.models import Profile, ensure_profile_for_user
 from tests_app.models import Subject
 
@@ -10,13 +12,20 @@ from . import services
 
 
 @api_view(['GET'])
+@authentication_classes([OptionalAuditAwareJWTAuthentication])
+@permission_classes([AllowAny])
 def rankings_api(request):
     subjects = list(Subject.objects.all())
     view = request.GET.get('subject', 'all')
     if view != 'all' and not any(s.slug == view for s in subjects):
         view = 'all'
 
-    profile = ensure_profile_for_user(request.user)
+    profile = None
+    if request.user and request.user.is_authenticated:
+        try:
+            profile = ensure_profile_for_user(request.user)
+        except Exception:
+            profile = None
 
     timeframe = request.GET.get('timeframe', 'all')
     top = services.get_top_ranking(view, timeframe=timeframe)
@@ -59,7 +68,7 @@ def rankings_api(request):
         if data is None:
             continue
         data['rank'] = n['rank']
-        data['is_me'] = n['profile_id'] == profile.id
+        data['is_me'] = bool(profile and n['profile_id'] == profile.id)
         my_group.append(data)
 
     return Response({

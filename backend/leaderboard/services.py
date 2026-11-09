@@ -105,7 +105,7 @@ def get_rank_and_neighbors(profile, view, window=5):
 
     Superadminlar va o'qituvchilar reytingda qatnashmaydi (0, [] qaytariladi).
     """
-    if profile.is_privileged or profile.role != 'student':
+    if not profile or profile.is_privileged or profile.role != 'student':
         return 0, []
 
     # DIQQAT: "oldinda nechta kishi bor" hisobi ro'yxat TARTIBI bilan aynan bir xil
@@ -237,11 +237,12 @@ def _seconds_until_sunday_2200() -> int:
     return max(0, int((target_dt - now).total_seconds()))
 
 
-def get_weekly_micro_league(profile: Profile) -> dict:
+def get_weekly_micro_league(profile: Profile = None) -> dict:
     """Har dushanba 30 nafar darajasi bir xil o'quvchi bitta mikro-ligaga tushadi.
     Top-5 keyingi ligaga o'tadi ('promotion'), oxirgi 5 kishi pastga tushadi ('demotion').
     """
-    my_tier = resolve_league_tier(profile.xp)
+    user_xp = getattr(profile, 'xp', 0) if profile else 0
+    my_tier = resolve_league_tier(user_xp)
     min_xp = my_tier['min_xp']
     max_xp = my_tier['max_xp']
 
@@ -256,7 +257,7 @@ def get_weekly_micro_league(profile: Profile) -> dict:
 
     # Agar shu divizionda 30 ta odam chiqmasa, eng yaqin XP egalari bilan 30 tagacha to'ldiramiz
     cohort_profiles = list(qs.select_related('user').order_by('-xp', 'id')[:30])
-    if profile.role == 'student' and not profile.is_privileged and all(p.id != profile.id for p in cohort_profiles):
+    if profile and profile.role == 'student' and not profile.is_privileged and all(p.id != profile.id for p in cohort_profiles):
         cohort_profiles.append(profile)
         cohort_profiles.sort(key=lambda p: (-p.xp, p.id))
         cohort_profiles = cohort_profiles[:30]
@@ -276,7 +277,7 @@ def get_weekly_micro_league(profile: Profile) -> dict:
     demotion_start = max(6, total_in_cohort - 4)  # Oxirgi 5 o'rin (agar guruhda yetarli odam bo'lsa)
 
     rows = []
-    my_cohort_rank = 1
+    my_cohort_rank = None
     for idx, p in enumerate(cohort_profiles, start=1):
         if idx <= 5:
             zone = 'promotion'
@@ -285,7 +286,8 @@ def get_weekly_micro_league(profile: Profile) -> dict:
         else:
             zone = 'safe'
 
-        if p.id == profile.id:
+        is_me = bool(profile and p.id == profile.id)
+        if is_me:
             my_cohort_rank = idx
 
         full_name = f"{p.user.first_name} {p.user.last_name}".strip() or p.user.username
@@ -299,7 +301,7 @@ def get_weekly_micro_league(profile: Profile) -> dict:
             'dtm_score': round(getattr(p, 'estimated_dtm_score', 94.5) or 94.5, 1),
             'streak': p.streak,
             'zone': zone,
-            'is_me': p.id == profile.id,
+            'is_me': is_me,
             'has_gold_border': my_tier['has_gold_border'] or idx <= 3,
         })
 
@@ -386,16 +388,18 @@ OTM_CATALOG = [
 ]
 
 
-def get_otm_mandat_simulator(profile: Profile, university_code: str = None) -> dict:
+def get_otm_mandat_simulator(profile: Profile = None, university_code: str = None) -> dict:
     """O'quvchining tanlagan OTM va yo'nalishi bo'yicha haqiqiy mandat simulyatsiyasi."""
-    code = (university_code or getattr(profile, 'target_university', '') or 'TATU').strip()
+    user_target = getattr(profile, 'target_university', '') if profile else ''
+    code = (university_code or user_target or 'TATU').strip()
     otm = next((item for item in OTM_CATALOG if item['code'].lower() == code.lower()), OTM_CATALOG[0])
 
-    my_dtm = round(float(getattr(profile, 'estimated_dtm_score', None) or 94.5), 1)
+    my_dtm = round(float(getattr(profile, 'estimated_dtm_score', None) or 94.5), 1) if profile else 94.5
+    user_xp = getattr(profile, 'xp', 0) if profile else 0
     # Agar o'quvchi XP to'plagan bo'lsa-yu, estimated_dtm_score hali boshlang'ich 94.5 da tursa,
     # XP va o'rtacha test natijasidan dinamik hisoblaymiz:
-    if my_dtm <= 95.0 and (profile.xp or 0) > 100:
-        my_dtm = round(min(189.0, 94.5 + min(75.0, (profile.xp / 180.0))), 1)
+    if my_dtm <= 95.0 and user_xp > 100:
+        my_dtm = round(min(189.0, 94.5 + min(75.0, (user_xp / 180.0))), 1)
 
     grant_cutoff = otm['grant_cutoff']
     contract_cutoff = otm['contract_cutoff']
@@ -447,6 +451,17 @@ def get_otm_mandat_simulator(profile: Profile, university_code: str = None) -> d
         )
 
     return {
+        # Frontend-kutgan maydonlar:
+        'catalog': OTM_CATALOG,
+        'selected_university': otm,
+        'my_dtm': my_dtm,
+        'max_dtm': 189.0,
+        'simulated_rank': my_rank,
+        'admission_probability_pct': probability,
+        'status': 'below' if status_zone == 'danger' else status_zone,
+        'status_label': headline,
+
+        # Backend va testlar uchun mavjud maydonlar:
         'selected_otm': otm,
         'available_otms': OTM_CATALOG,
         'my_dtm_score': my_dtm,
@@ -473,9 +488,13 @@ DEFAULT_UZ_REGIONS = [
 ]
 
 
-def get_clans_ranking(profile: Profile) -> dict:
+def get_clans_ranking(profile: Profile = None) -> dict:
     """Viloyatlar va maktablar o'rtasidagi oylik chempionat reytingi."""
     from django.db.models import Avg, Count, Sum
+
+    user_region = (getattr(profile, 'region', '') or '') if profile else ''
+    user_school = (getattr(profile, 'school', '') or '') if profile else ''
+    user_district = (getattr(profile, 'district', '') or '') if profile else ''
 
     # 1. Hududlar (Viloyatlar) jangi
     region_rows = list(
@@ -498,10 +517,12 @@ def get_clans_ranking(profile: Profile) -> dict:
         regions_ranking.append({
             'rank': idx,
             'region': reg_name,
+            'name': reg_name,
             'total_xp': int(r['total_xp'] or 0),
             'students_count': int(r['students_count'] or 0),
+            'students': int(r['students_count'] or 0),
             'avg_dtm': round(float(r['avg_dtm'] or 108.5), 1),
-            'is_my_region': bool(profile.region and profile.region.lower() == reg_name.lower()),
+            'is_my_region': bool(user_region and user_region.lower() == reg_name.lower()),
         })
 
     # Agar bazada hali viloyatlar kam bo'lsa, asosiy viloyatlarni ro'yxatda ko'rsatamiz
@@ -512,10 +533,12 @@ def get_clans_ranking(profile: Profile) -> dict:
             regions_ranking.append({
                 'rank': len(regions_ranking) + 1,
                 'region': reg_name,
+                'name': reg_name,
                 'total_xp': 0,
                 'students_count': 0,
+                'students': 0,
                 'avg_dtm': 94.5,
-                'is_my_region': bool(profile.region and profile.region.lower() == reg_name.lower()),
+                'is_my_region': bool(user_region and user_region.lower() == reg_name.lower()),
             })
 
     # 2. Maktablar chempionati
@@ -536,36 +559,58 @@ def get_clans_ranking(profile: Profile) -> dict:
         schools_ranking.append({
             'rank': idx,
             'school': s['school'],
+            'name': s['school'],
             'region': s['region'] or "O'zbekiston",
             'district': s['district'] or '',
             'total_xp': int(s['total_xp'] or 0),
             'students_count': int(s['students_count'] or 0),
+            'students': int(s['students_count'] or 0),
             'avg_dtm': round(float(s['avg_dtm'] or 112.0), 1),
-            'is_my_school': bool(profile.school and profile.school.lower() == s['school'].lower()),
+            'is_my_school': bool(user_school and user_school.lower() == s['school'].lower()),
         })
 
     # Oy derbisi (Top 2 viloyat jangi: masalan Samarqand vs Buxoro)
+    def _format_derby_region(item: dict) -> dict:
+        r_name = item.get('region') or item.get('name') or ''
+        r_xp = int(item.get('total_xp') or 0)
+        r_students = int(item.get('students') or item.get('students_count') or 0)
+        return {
+            'name': r_name,
+            'region': r_name,
+            'total_xp': r_xp,
+            'students': r_students,
+            'students_count': r_students,
+        }
+
     if len(regions_ranking) >= 2:
-        derby = {
-            'title': f"🔥 Oy Derbisi: {regions_ranking[0]['region']} vs {regions_ranking[1]['region']}",
-            'left': regions_ranking[0],
-            'right': regions_ranking[1],
-        }
+        reg1 = _format_derby_region(regions_ranking[0])
+        reg2 = _format_derby_region(regions_ranking[1])
     else:
-        derby = {
-            'title': "🔥 Oy Derbisi: Samarqand vs Buxoro",
-            'left': {'region': 'Samarqand', 'total_xp': 12500, 'students_count': 45},
-            'right': {'region': 'Buxoro', 'total_xp': 11800, 'students_count': 42},
-        }
+        reg1 = _format_derby_region({'region': 'Samarqand', 'total_xp': 12500, 'students_count': 45})
+        reg2 = _format_derby_region({'region': 'Buxoro', 'total_xp': 11800, 'students_count': 42})
+
+    xp_diff = abs(reg1['total_xp'] - reg2['total_xp'])
+    leader = reg1['name'] if reg1['total_xp'] >= reg2['total_xp'] else reg2['name']
+
+    derby = {
+        'title': f"🔥 Oy Derbisi: {reg1['name']} vs {reg2['name']}",
+        'description': f"{reg1['name']} va {reg2['name']} abituriyentlari o'rtasidagi shiddatli kurash. Qaysi hudud bu oy yetakchi bo'ladi?",
+        'region1': reg1,
+        'region2': reg2,
+        'left': reg1,
+        'right': reg2,
+        'leader_name': leader,
+        'xp_difference': xp_diff,
+    }
 
     return {
         'derby': derby,
         'regions': regions_ranking,
         'schools': schools_ranking,
         'my_clan': {
-            'region': profile.region or '',
-            'district': getattr(profile, 'district', '') or '',
-            'school': getattr(profile, 'school', '') or '',
+            'region': user_region,
+            'district': user_district,
+            'school': user_school,
         },
     }
 

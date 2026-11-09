@@ -165,3 +165,48 @@ class GamificationMasterTests(TestCase):
         res = open_daily_chest(self.p1.id)
         self.assertTrue(res['success'])
         self.assertIn(res['claim']['reward_type'], ('coins', 'xp', 'streak_freeze', 'cheat_sheet_pdf', 'vip_24h', 'legendary_bundle'))
+
+    def test_otm_simulator_and_clans_data_alignment(self):
+        from leaderboard.services import get_otm_mandat_simulator, get_clans_ranking
+
+        # 1. Authenticated profile
+        otm_data = get_otm_mandat_simulator(self.p1, 'TATU')
+        self.assertIn('catalog', otm_data)
+        self.assertIn('selected_university', otm_data)
+        self.assertIn('my_dtm', otm_data)
+        self.assertIn('max_dtm', otm_data)
+        self.assertIn('simulated_rank', otm_data)
+        self.assertIn('admission_probability_pct', otm_data)
+        self.assertIn('status', otm_data)
+        self.assertIn('name', otm_data['selected_university'])
+        self.assertIn('faculty', otm_data['selected_university'])
+
+        clans_data = get_clans_ranking(self.p1)
+        self.assertIn('derby', clans_data)
+        self.assertIn('region1', clans_data['derby'])
+        self.assertIn('region2', clans_data['derby'])
+        self.assertIn('name', clans_data['derby']['region1'])
+        self.assertIn('total_xp', clans_data['derby']['region1'])
+        self.assertIn('students', clans_data['derby']['region1'])
+        self.assertIn('description', clans_data['derby'])
+        self.assertIn('regions', clans_data)
+        self.assertIn('schools', clans_data)
+
+        # 2. Anonymous / None profile (guest visitor)
+        otm_anon = get_otm_mandat_simulator(None, 'TDYU')
+        self.assertIn('catalog', otm_anon)
+        self.assertEqual(otm_anon['selected_university']['code'], 'TDYU')
+
+        clans_anon = get_clans_ranking(None)
+        self.assertIn('region1', clans_anon['derby'])
+        self.assertIn('regions', clans_anon)
+
+        # 3. API endpoint works anonymously
+        self.client.logout()
+        res = self.client.get('/api/leaderboard/')
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn('otm_simulator', data)
+        self.assertIn('catalog', data['otm_simulator'])
+        self.assertIn('clans', data)
+        self.assertIn('region1', data['clans']['derby'])
