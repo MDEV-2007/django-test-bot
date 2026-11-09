@@ -12,6 +12,7 @@ import {
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { formatRichText } from '@/lib/utils';
+import { apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
 import {
   useContinuousLoop,
@@ -78,6 +79,39 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   const [ghostScore, setGhostScore] = useState(0);
   const [arenaTimeLeft, setArenaTimeLeft] = useState(60);
   const arenaTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ── BOSS SINOVI (STRESS MODE) STATE ──
+  const [startingBoss, setStartingBoss] = useState(false);
+
+  const handleStartBoss = async () => {
+    setStartingBoss(true);
+    soundFX.click();
+    tgHaptic('medium');
+    try {
+      const payload: { subject_slug?: string } = {};
+      if (subject?.slug && subject.slug !== 'all') {
+        payload.subject_slug = subject.slug;
+      }
+      const res = await apiFetch<{ attempt_id: number; mode?: string; is_stress_mode?: boolean }>(
+        '/api/tests/start-stress/',
+        {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        }
+      );
+      toast.success("Imtihon zali eshiklari ochildi! Omad!", { duration: 3000 });
+      onClose();
+      router.push(`/tests/${res.attempt_id}`);
+    } catch (e: any) {
+      const msg = e?.message || "Stress sinoviga o'tilmoqda...";
+      toast.info(msg);
+      onClose();
+      const targetUrl = subject?.slug ? `/tests?mode=stress&subject=${subject.slug}` : '/tests?mode=stress';
+      router.push(targetUrl);
+    } finally {
+      setStartingBoss(false);
+    }
+  };
 
   // Yangi sikl boshlanganda yoki loop o'zgarganda ichki bosqich holatlarini boshlang'ichga qaytarish
   useEffect(() => {
@@ -704,10 +738,8 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 onShareToFeed={shareToFeed}
                 onRestartCycle={restartCycle}
                 onFinishToDashboard={onClose}
-                onStartBoss={() => {
-                  onClose();
-                  router.push('/dtm-test');
-                }}
+                onStartBoss={handleStartBoss}
+                isStartingBoss={startingBoss}
               />
             )}
 
