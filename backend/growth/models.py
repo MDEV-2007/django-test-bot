@@ -21,7 +21,7 @@ class ArenaGhostReplay(models.Model):
         related_name='ghost_replays'
     )
     player_name = models.CharField(max_length=120, default="Abituriyent")
-    avatar_url = models.URLField(max_length=500, blank=True, default="https://api.dicebear.com/7.x/adventurer/svg?seed=fighter")
+    avatar_url = models.URLField(max_length=500, null=True, blank=True, default="https://api.dicebear.com/7.x/adventurer/svg?seed=fighter")
     elo_rating = models.IntegerField(default=1000, db_index=True)
     
     # Harakatlar jurnali: list of dicts:

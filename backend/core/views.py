@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from accounts.jwt_auth import OptionalAuditAwareJWTAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -19,6 +20,7 @@ from tests_app.models import Question
 
 # ─── 0-MODUL: Super Admin Feature Flags API ─────────────────────────────────
 @api_view(['GET'])
+@authentication_classes([OptionalAuditAwareJWTAuthentication])
 @permission_classes([AllowAny])
 def system_feature_flags_api(request):
     """Barcha foydalanuvchilar (Frontend) uchun tizimdagi global flaglar (Single Source of Truth)."""

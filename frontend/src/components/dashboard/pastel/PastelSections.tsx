@@ -223,7 +223,6 @@ export function PastelHero({
             src="/images/dashboard-hero-team.webp"
             alt="IlmIldizi jamoasi"
             fill
-            priority
             sizes="(max-width: 640px) 260px, 360px"
             className="object-cover object-[50%_32%]"
           />
@@ -447,8 +446,9 @@ type Mission = {
 };
 
 export function MissionsCard({ missions }: { missions: Mission[] }) {
-  const done = missions.filter((m) => m.is_completed).length;
-  const total = missions.length;
+  const safeMissions = missions || [];
+  const done = safeMissions.filter((m) => m?.is_completed).length;
+  const total = safeMissions.length;
   return (
     <div className="ps-card ps-ink relative h-full overflow-hidden !border-0 p-6 sm:p-7">
       <div aria-hidden className="absolute -right-12 -bottom-16 size-52 rounded-full bg-[var(--ps-purple)]/35 blur-2xl" />
@@ -480,7 +480,7 @@ export function MissionsCard({ missions }: { missions: Mission[] }) {
           </p>
         ) : (
           <ul className="mt-5 grid gap-2 sm:grid-cols-2">
-            {missions.slice(0, 4).map((m) => (
+            {safeMissions.slice(0, 4).map((m) => (
               <li
                 key={m.title}
                 className={cn(
@@ -746,7 +746,7 @@ export function SubjectsSection({
           </div>
         ) : (
           <ul className="divide-y divide-[var(--border-card)]">
-            {subjects.map((s, i) => (
+            {(subjects || []).map((s, i) => (
               <InView key={s.id} delay={i * 0.05} y={14}>
                 <li className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 py-4 sm:grid-cols-[auto_minmax(0,180px)_1fr_auto] sm:gap-x-5">
                   <span className="ps-num w-8 text-sm text-[var(--text-faint)]">{String(i + 1).padStart(2, '0')}</span>

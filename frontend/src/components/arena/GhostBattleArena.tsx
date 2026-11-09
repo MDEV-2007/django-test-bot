@@ -147,68 +147,74 @@ export default function GhostBattleArena({
         body: JSON.stringify({ subject_slug: subjectSlug }),
       });
 
-      if (res && res.ok) {
+      if (res && res.ok && res.questions && res.questions.length > 0) {
         setMatchId(res.match_id);
         const opp: OpponentData = {
           ...res.opponent,
-          region: res.opponent.region || 'Toshkent sh., 1-litsey',
+          name: res.opponent?.name || 'Sardor Temurov',
+          avatar_url: res.opponent?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=fighter',
+          region: res.opponent?.region || 'Toshkent sh., 1-litsey',
+          elo_rating: res.opponent?.elo_rating || 1050,
+          is_ghost: true,
         };
         setOpponent(opp);
         setQuestions(res.questions);
-        setGhostMoves(res.ghost_moves);
+        setGhostMoves(res.ghost_moves || []);
         triggerMatchFound(opp);
+        return;
       }
+      throw new Error("Bo'sh savollar");
     } catch {
-      // Fallback opponent agar server offline bo'lsa
+      // Fallback opponent agar server offline bo'lsa yoki savollar yetishmasa
+      const fallbackOpp: OpponentData = {
+        id: 8888,
+        name: 'Javohir Aliyev',
+        avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Javohir',
+        region: 'Samarqand sh., 42-maktab',
+        elo_rating: 1240,
+        is_ghost: true,
+      };
+      setOpponent(fallbackOpp);
+      setQuestions([
+        {
+          id: 1,
+          body: "Amir Temur qaysi yili Balx shahrida buyuk amir deb e'lon qilingan?",
+          choices: [
+            { id: 1, text: '1365-yil', is_correct: false },
+            { id: 2, text: '1370-yil', is_correct: true },
+            { id: 3, text: '1385-yil', is_correct: false },
+            { id: 4, text: '1391-yil', is_correct: false },
+          ],
+        },
+        {
+          id: 2,
+          body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi yodgorlikdan topilgan?",
+          choices: [
+            { id: 5, text: 'Dalvarzintepa', is_correct: false },
+            { id: 6, text: 'Taxiti Sangin', is_correct: true },
+            { id: 7, text: 'Xolchayon', is_correct: false },
+            { id: 8, text: 'Qoratepa', is_correct: false },
+          ],
+        },
+        {
+          id: 3,
+          body: 'Qadimgi Turon xalqlari qaysi din ta\'limotiga e\'tiqod qilgan?',
+          choices: [
+            { id: 9, text: 'Zardushtiylik', is_correct: true },
+            { id: 10, text: 'Buddizm', is_correct: false },
+            { id: 11, text: 'Monaviylik', is_correct: false },
+            { id: 12, text: 'Xristianlik', is_correct: false },
+          ],
+        },
+      ]);
+      setGhostMoves([
+        { question_id: 1, selected_option_id: 2, is_correct: true, time_taken_ms: 3200, score: 10 },
+        { question_id: 2, selected_option_id: 6, is_correct: true, time_taken_ms: 2800, score: 10 },
+        { question_id: 3, selected_option_id: 9, is_correct: true, time_taken_ms: 3500, score: 10 },
+      ]);
       setTimeout(() => {
-        const fallbackOpp: OpponentData = {
-          id: 8888,
-          name: 'Javohir Aliyev',
-          avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Javohir',
-          region: 'Samarqand sh., 42-maktab',
-          elo_rating: 1240,
-          is_ghost: true,
-        };
-        setOpponent(fallbackOpp);
-        setQuestions([
-          {
-            id: 1,
-            body: "Amir Temur qaysi yili Balx shahrida buyuk amir deb e'lon qilingan?",
-            choices: [
-              { id: 1, text: '1365-yil', is_correct: false },
-              { id: 2, text: '1370-yil', is_correct: true },
-              { id: 3, text: '1385-yil', is_correct: false },
-              { id: 4, text: '1391-yil', is_correct: false },
-            ],
-          },
-          {
-            id: 2,
-            body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi yodgorlikdan topilgan?",
-            choices: [
-              { id: 5, text: 'Dalvarzintepa', is_correct: false },
-              { id: 6, text: 'Taxiti Sangin', is_correct: true },
-              { id: 7, text: 'Xolchayon', is_correct: false },
-              { id: 8, text: 'Qoratepa', is_correct: false },
-            ],
-          },
-          {
-            id: 3,
-            body: 'Qadimgi Turon xalqlari qaysi din ta\'limotiga e\'tiqod qilgan?',
-            choices: [
-              { id: 9, text: 'Zardushtiylik', is_correct: true },
-              { id: 10, text: 'Buddizm', is_correct: false },
-              { id: 11, text: 'Monaviylik', is_correct: false },
-              { id: 12, text: 'Xristianlik', is_correct: false },
-            ],
-          },
-        ]);
-        setGhostMoves([
-          { question_id: 1, selected_option_id: 2, is_correct: true, time_taken_ms: 3200, score: 10 },
-          { question_id: 2, selected_option_id: 6, is_correct: true, time_taken_ms: 2800, score: 10 },
-          { question_id: 3, selected_option_id: 9, is_correct: true, time_taken_ms: 3500, score: 10 },
-        ]);
         triggerMatchFound(fallbackOpp);
-      }, 3000);
+      }, 1500);
     }
   }, [incomingDuelToken, subjectSlug]);
 
@@ -309,7 +315,7 @@ export default function GhostBattleArena({
         method: 'POST',
         body: JSON.stringify({
           moves_log: userMovesLogRef.current,
-          question_ids: questions.map((q) => q.id),
+          question_ids: (questions || []).map((q) => q.id),
         }),
       });
 
@@ -440,12 +446,12 @@ export default function GhostBattleArena({
                 <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
                 <span aria-hidden className="ps-dots absolute bottom-0 right-0 h-16 w-28 opacity-25" />
                 <div className="relative">
-                  <img src={opponent.avatar_url} alt={opponent.name} className="size-24 rounded-full border-[5px] border-white/85 bg-white object-cover" />
+                  <img src={opponent?.avatar_url || "https://api.dicebear.com/7.x/adventurer/svg?seed=fighter"} alt={opponent?.name || "Raqib"} className="size-24 rounded-full border-[5px] border-white/85 bg-white object-cover" />
                   <span className="absolute bottom-1 right-1 size-5 rounded-full border-[3px] border-[var(--ps-coral)] bg-[var(--ps-green)]" />
                 </div>
-                <p className="relative mt-4 max-w-full truncate text-[18px] font-bold">{opponent.name}</p>
+                <p className="relative mt-4 max-w-full truncate text-[18px] font-bold">{opponent?.name || "Raqib"}</p>
                 {opponent.region && <p className="relative max-w-full truncate text-[12px] font-semibold text-white/80">{opponent.region}</p>}
-                <span className="relative mt-2 rounded-full bg-black/20 px-3 py-1 font-mono text-[12.5px] font-bold">{opponent.elo_rating} ELO</span>
+                <span className="relative mt-2 rounded-full bg-black/20 px-3 py-1 font-mono text-[12.5px] font-bold">{opponent?.elo_rating || 1000} ELO</span>
               </motion.div>
 
               {/* VS markazda */}
@@ -545,7 +551,7 @@ export default function GhostBattleArena({
                   Savol {currentQIndex + 1} / {totalQuestions}
                 </span>
                 <div className="flex items-center gap-1">
-                  {questions.map((q, i) => (
+                  {(questions || []).map((q, i) => (
                     <span
                       key={q.id}
                       className={cn(
@@ -571,7 +577,7 @@ export default function GhostBattleArena({
 
             {/* Variantlar */}
             <div className="mt-auto space-y-2.5">
-              {currentQ.choices.map((choice, i) => {
+              {(currentQ?.choices || []).map((choice, i) => {
                 const isSelected = selectedChoiceId === choice.id;
                 let row = 'bg-[var(--ps-neutral)] text-[var(--text-primary)] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac)] hover:text-[#080808]';
                 let letter = 'bg-[var(--ps-paper)] text-[var(--text-primary)]';

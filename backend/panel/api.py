@@ -28,7 +28,8 @@ from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, parser_classes, permission_classes
+from accounts.jwt_auth import OptionalAuditAwareJWTAuthentication
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -4101,6 +4102,7 @@ def feature_toggle_api(request, key):
 
 
 @api_view(['GET'])
+@authentication_classes([OptionalAuditAwareJWTAuthentication])
 @permission_classes([AllowAny])
 def features_public_api(request):
     """Saytdagi o'quvchilar va mehmonlar uchun ochiq modul statuslari.

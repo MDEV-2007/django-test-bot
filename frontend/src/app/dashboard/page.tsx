@@ -304,11 +304,13 @@ export default function DashboardPage() {
 
   const p = data.profile;
   const firstName = p.first_name || p.username;
-  const doneMissions = data.missions.filter((m) => m.is_completed).length;
-  const remainingMissions = data.missions.length - doneMissions;
+  const missionsList = data.missions || [];
+  const doneMissions = missionsList.filter((m) => m?.is_completed).length;
+  const remainingMissions = missionsList.length - doneMissions;
   const xpRemaining = Math.max(0, (p.next_level_xp || p.level * 1000) - p.xp);
-  const lastAttempt = data.recent_attempts[0] || null;
-  const isNewUser = data.recent_attempts.length === 0;
+  const recentAttempts = data.recent_attempts || [];
+  const lastAttempt = recentAttempts[0] || null;
+  const isNewUser = recentAttempts.length === 0;
   const subjects = (data.subject_mastery || []).slice(0, 5);
   const upcoming = data.upcoming_mocks || [];
   const activity = notifications.slice(0, 4);

@@ -164,6 +164,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       access = await refreshAccessToken();
       if (access) {
         res = await doFetch(access);
+      } else {
+        // Eskirgan token rad etilganda, ochiq (public) API'lar uchun bir marta tokensiz so'rab ko'ramiz
+        res = await doFetch(null);
       }
     }
   } catch (err: unknown) {
@@ -299,7 +302,11 @@ export async function apiFetchBlob(path: string): Promise<Blob> {
   let res = await doFetch(access);
   if (res.status === 401) {
     access = await refreshAccessToken();
-    if (access) res = await doFetch(access);
+    if (access) {
+      res = await doFetch(access);
+    } else {
+      res = await doFetch(null);
+    }
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

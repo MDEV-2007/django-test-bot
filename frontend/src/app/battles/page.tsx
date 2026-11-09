@@ -210,7 +210,7 @@ export default function BattlesPage() {
     if (!ensurePlayable(data.questions)) return;
     setBattleId(data.battle_id);
     setQuestions(data.questions);
-    setOpponentName(data.opponent.name);
+    setOpponentName(data.opponent?.name || 'Raqib');
     setRoundIdx(0); setMyScore(0); setOppScore(0); setSelectedChoice(null); setCorrectChoiceId(null);
     setLastBattleData(null);
     setMode('ai');
@@ -535,9 +535,9 @@ export default function BattlesPage() {
             })()}
 
             {/* ── Fan filtri ── */}
-            {arena && arena.subjects.length > 0 && (
+            {arena && (arena.subjects || []).length > 0 && (
               <div className="ds-seg flex max-w-full gap-1 overflow-x-auto no-scrollbar sm:w-fit">
-                {arena.subjects.map((s) => (
+                {(arena.subjects || []).map((s) => (
                   <button
                     key={s.id}
                     type="button"
@@ -799,19 +799,19 @@ export default function BattlesPage() {
                   Onlayn ({onlineUsers.length})
                 </div>
                 <div className="space-y-2">
-                  {onlineUsers.map((u) => (
+                  {(onlineUsers || []).map((u) => (
                     <Card key={u.id}>
                       <CardContent className="flex items-center justify-between gap-3 py-3">
                         <div className="flex min-w-0 items-center gap-2.5">
                           <div className="relative shrink-0">
                             <Avatar className="size-9">
                               <AvatarImage src={u.avatar} alt="" />
-                              <AvatarFallback className="text-xs">{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                              <AvatarFallback className="text-xs">{u?.name ? u.name.slice(0, 2).toUpperCase() : 'U'}</AvatarFallback>
                             </Avatar>
                             <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[var(--bg-page)] bg-[var(--success)]" />
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-bold">{u.name}</p>
+                            <p className="truncate text-sm font-bold">{u?.name || "O'quvchi"}</p>
                             <p className="font-mono text-xs text-muted-foreground">{u.elo} ELO</p>
                           </div>
                         </div>
@@ -943,7 +943,7 @@ export default function BattlesPage() {
                       Raund {roundIdx + 1} / {questions.length}
                     </span>
                     <div className="flex items-center gap-1">
-                      {questions.map((_, i) => (
+                      {(questions || []).map((_, i) => (
                         <span
                           key={i}
                           className={cn(
@@ -968,7 +968,7 @@ export default function BattlesPage() {
                   </p>
                 ) : (
                   <div className="mt-auto space-y-2.5">
-                    {currentQ.choices.map((c, i) => {
+                    {(currentQ?.choices || []).map((c, i) => {
                       const isSelected = selectedChoice === c.id;
                       const isCorrect = correctChoiceId === c.id;
                       // Variant matni o'z harfi bilan kelsa ("B) 3, 6") — harfni doiraga olamiz.
@@ -1113,7 +1113,7 @@ export default function BattlesPage() {
                 <Swords className="size-5 text-[var(--ps-coral)]" /> Jang chaqiruvi
               </DialogTitle>
               <DialogDescription>
-                <strong className="text-foreground">{incomingChallenge?.from.name}</strong> sizni tezkor duelga chaqirmoqda. Jang qilasizmi?
+                <strong className="text-foreground">{incomingChallenge?.from?.name || 'Raqib'}</strong> sizni tezkor duelga chaqirmoqda. Jang qilasizmi?
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
