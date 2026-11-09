@@ -20,7 +20,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { celebrate } from '@/lib/confetti';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import ArenaStage from './ArenaStage';
 import { toast } from 'sonner';
 
@@ -603,15 +603,14 @@ export default function GhostBattleArena({
                 </div>
               </div>
               <AnimatePresence mode="wait">
-                <motion.p
+                <motion.div
                   key={currentQ.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
-                  className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px]"
-                >
-                  {currentQ.body}
-                </motion.p>
+                  className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px] [&_p]:m-0"
+                  dangerouslySetInnerHTML={{ __html: formatRichText(currentQ.body) }}
+                />
               </AnimatePresence>
             </div>
 
@@ -647,7 +646,7 @@ export default function GhostBattleArena({
                     <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-black transition-colors', letter)}>
                       {LETTERS[i] || i + 1}
                     </span>
-                    <span className="flex-1">{choice.text}</span>
+                    <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatRichText(choice.text) }} />
                     {isAnswered && choice.is_correct && <CheckCircle2 className="size-5 shrink-0" />}
                     {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-5 shrink-0" />}
                   </button>

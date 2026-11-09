@@ -24,3 +24,25 @@ export function formatCompact(value: number | null | undefined, fullBelow = 10_0
   }
   return n.toLocaleString('uz-UZ');
 }
+
+/**
+ * Matndagi <br/>, <br>, \n va HTML teglarni to'g'ri render qilish uchun
+ * formatlash (literal <br/> ko'rinib qolmasligi va qator tashlashlar
+ * bir-biriga yopishib ketmasligi uchun).
+ */
+export function formatRichText(content: string | null | undefined): string {
+  if (!content) return '';
+  let str = String(content);
+  // Double-escaped <br> larni tiklaymiz
+  str = str.replace(/&lt;br\s*\/?&gt;/gi, '<br />');
+  // <br>, <br/>, <br /> teglarni normallashtiramiz
+  str = str.replace(/<br\s*\/?>/gi, '<br />');
+  // <br /> ketidan kelgan \n ni yutamiz (takroriy qator tashlash bo'lmasligi uchun)
+  str = str.replace(/<br\s*\/>\s*\r?\n/gi, '<br />');
+  // Oddiy \r\n va \n larni <br /> ga aylantiramiz
+  str = str.replace(/\r?\n/g, '<br />');
+  // 3 va undan ortiq ketma-ket <br /> larni ko'pi bilan 2 taga qisqartiramiz
+  str = str.replace(/(<br\s*\/?>\s*){3,}/gi, '<br /><br />');
+  return str;
+}
+

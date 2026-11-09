@@ -17,7 +17,7 @@ import { HelpCircle, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import type { QuestionItem, QuestionOption, SprintSessionSummary } from '@/types/sprint';
 import { useNeuralSprint } from '@/hooks/useNeuralSprint';
 
@@ -485,13 +485,19 @@ export default function NeuralSprintView({
                   {/* Nega adashdingiz */}
                   <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300">
                     <p className="font-bold text-[12px] uppercase tracking-wider mb-0.5">❌ Nega adashdingiz:</p>
-                    <p className="leading-relaxed">{activeExplanation.whyWrong}</p>
+                    <div
+                      className="leading-relaxed [&_p]:m-0"
+                      dangerouslySetInnerHTML={{ __html: formatRichText(activeExplanation.whyWrong) }}
+                    />
                   </div>
 
                   {/* Eslab qolish kodi */}
                   <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300">
                     <p className="font-bold text-[12px] uppercase tracking-wider mb-0.5">🧠 Eslab qolish kodi:</p>
-                    <p className="font-semibold leading-relaxed">{activeExplanation.memoryHack}</p>
+                    <div
+                      className="font-semibold leading-relaxed [&_p]:m-0"
+                      dangerouslySetInnerHTML={{ __html: formatRichText(activeExplanation.memoryHack) }}
+                    />
                   </div>
                 </div>
               ) : (

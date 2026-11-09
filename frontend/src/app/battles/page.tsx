@@ -26,7 +26,7 @@ import PremiumIcon from '@/components/ui/premium-icon';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import GhostBattleArena from '@/components/arena/GhostBattleArena';
 import ArenaStage from '@/components/arena/ArenaStage';
 import ViralDuelModal from '@/components/growth/ViralDuelModal';
@@ -956,8 +956,8 @@ export default function BattlesPage() {
                   </div>
                   <h2
                     key={roundIdx}
-                    className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px]"
-                    dangerouslySetInnerHTML={{ __html: currentQ.text }}
+                    className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px] [&_p]:m-0"
+                    dangerouslySetInnerHTML={{ __html: formatRichText(currentQ.text) }}
                   />
                 </div>
 
@@ -996,7 +996,7 @@ export default function BattlesPage() {
                           <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-black', letter)}>
                             {label}
                           </span>
-                          <span className="flex-1">{body}</span>
+                          <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatRichText(body) }} />
                           {selectedChoice !== null && isCorrect && <CheckCircle2 className="size-5 shrink-0" />}
                           {selectedChoice !== null && isSelected && correctChoiceId !== null && !isCorrect && <XCircle className="size-5 shrink-0" />}
                         </button>

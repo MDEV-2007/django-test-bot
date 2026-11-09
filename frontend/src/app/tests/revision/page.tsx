@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import { dur, easeOut, shake, springBouncy } from '@/lib/motion';
 
 type DeckItem = {
@@ -344,9 +344,10 @@ export default function RevisionPage() {
                         To&apos;g&apos;ri javob: {result.correct_answer}
                       </p>
                     )}
-                    <p className="text-[13px] leading-relaxed text-[var(--text-secondary)]">
-                      {result.explanation || item.explanation}
-                    </p>
+                    <div
+                      className="text-[13px] leading-relaxed text-[var(--text-secondary)] [&_p]:m-0"
+                      dangerouslySetInnerHTML={{ __html: formatRichText(result.explanation || item.explanation) }}
+                    />
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-1">

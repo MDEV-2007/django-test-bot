@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
+import { formatRichText } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   useContinuousLoop,
@@ -541,7 +542,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 </div>
 
                 <section className="ps-card !rounded-[32px] p-5 sm:p-7">
-                  <div className="text-[16px] font-bold leading-relaxed sm:text-[18px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: sprintQuestions[sprintIndex].text }} />
+                  <div className="text-[16px] font-bold leading-relaxed sm:text-[18px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: formatRichText(sprintQuestions[sprintIndex].text) }} />
                 </section>
 
                 <div className="grid gap-2.5">
@@ -572,7 +573,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                         >
                           {showCorrect ? <Check className="size-4 stroke-[3]" /> : showWrong ? <X className="size-4 stroke-[3]" /> : LETTERS[oi] || oi + 1}
                         </span>
-                        <span className="flex-1">{opt.text}</span>
+                        <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatRichText(opt.text) }} />
                       </button>
                     );
                   })}
@@ -603,17 +604,24 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                     {!isCardFlipped ? (
                       <div className="relative space-y-3">
                         <span className="text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-coral)]">Xato qilingan savol</span>
-                        <div className="text-[17px] font-bold leading-relaxed sm:text-[19px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: stageData.cleanup.cards[cleanupIndex].front }} />
+                        <div className="text-[17px] font-bold leading-relaxed sm:text-[19px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: formatRichText(stageData.cleanup.cards[cleanupIndex].front) }} />
                       </div>
                     ) : (
                       <div className="relative space-y-3">
                         <span className="inline-flex items-center gap-1 text-[11.5px] font-black uppercase tracking-wider text-white/80">
                           <Check className="size-3.5 stroke-[3]" /> To&apos;g&apos;ri javob va layfxak
                         </span>
-                        <p className="font-[family-name:var(--font-grotesk)] text-[20px] font-bold sm:text-[24px]">{stageData.cleanup.cards[cleanupIndex].back}</p>
-                        <p className="flex items-start gap-2 rounded-[18px] bg-white/15 p-3 text-[13px] font-medium">
-                          <Lightbulb className="mt-0.5 size-4 shrink-0" /> {stageData.cleanup.cards[cleanupIndex].tip}
-                        </p>
+                        <div
+                          className="font-[family-name:var(--font-grotesk)] text-[20px] font-bold sm:text-[24px] [&_p]:m-0"
+                          dangerouslySetInnerHTML={{ __html: formatRichText(stageData.cleanup.cards[cleanupIndex].back) }}
+                        />
+                        <div className="flex items-start gap-2 rounded-[18px] bg-white/15 p-3 text-[13px] font-medium leading-relaxed">
+                          <Lightbulb className="mt-0.5 size-4 shrink-0" />
+                          <div
+                            className="flex-1 [&_p]:m-0"
+                            dangerouslySetInnerHTML={{ __html: formatRichText(stageData.cleanup.cards[cleanupIndex].tip) }}
+                          />
+                        </div>
                       </div>
                     )}
                     <p className={`relative mt-5 text-center text-[12px] font-semibold ${isCardFlipped ? 'text-white/75' : 'text-[var(--text-muted)]'}`}>
@@ -662,7 +670,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                   <span className="text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-coral)]">
                     Tezkor duel savoli · {arenaIndex + 1}/{arenaQuestions.length}
                   </span>
-                  <div className="mt-2 text-[16px] font-bold leading-relaxed sm:text-[18px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: arenaQuestions[arenaIndex].text }} />
+                  <div className="mt-2 text-[16px] font-bold leading-relaxed sm:text-[18px] [&_p]:m-0" dangerouslySetInnerHTML={{ __html: formatRichText(arenaQuestions[arenaIndex].text) }} />
                 </section>
 
                 <div className="grid gap-2.5 sm:grid-cols-2">
@@ -677,7 +685,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                       <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ps-neutral)] font-[family-name:var(--font-grotesk)] text-[14px] font-bold transition-colors group-hover:bg-[var(--ps-orange)] group-hover:text-[#080808]">
                         {LETTERS[oi] || oi + 1}
                       </span>
-                      <span className="flex-1">{opt.text}</span>
+                      <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatRichText(opt.text) }} />
                     </button>
                   ))}
                 </div>
@@ -739,10 +747,17 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
               <span className="rounded-full bg-[var(--ps-neutral)] px-2.5 py-1 text-[11px] font-bold text-[var(--text-muted)]">Aha moment</span>
             </div>
             <div className="space-y-2.5 rounded-[22px] bg-[var(--ps-neutral)] p-4">
-              <p className="text-[14.5px] font-bold leading-snug">{activeHint.aha_moment}</p>
-              <p className="text-[13.5px] leading-relaxed text-[var(--text-secondary)]">
-                <strong className="text-[var(--ps-purple)]">Eslab qolish kodi:</strong> {activeHint.memory_code}
-              </p>
+              <div
+                className="text-[14.5px] font-bold leading-snug [&_p]:m-0"
+                dangerouslySetInnerHTML={{ __html: formatRichText(activeHint.aha_moment) }}
+              />
+              <div className="text-[13.5px] leading-relaxed text-[var(--text-secondary)]">
+                <strong className="text-[var(--ps-purple)]">Eslab qolish kodi: </strong>
+                <span
+                  className="[&_p]:inline"
+                  dangerouslySetInnerHTML={{ __html: formatRichText(activeHint.memory_code) }}
+                />
+              </div>
             </div>
             <button type="button" onClick={proceedSprintToNext} className="ps-btn ps-btn-ink mt-4 w-full">
               Tushundim, davom etamiz · +5 XP

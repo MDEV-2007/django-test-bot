@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { tgHaptic } from '@/lib/telegram';
 import { apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 
 export type SosPollData = {
   question_text: string;
@@ -228,7 +228,10 @@ export default function SosQuestionCard({
                   </span>
                   AI tushuntirishi · Oltin qoida
                 </div>
-                <p className="relative mt-2.5 whitespace-pre-wrap text-[14px] leading-relaxed">{poll.explanation}</p>
+                <div
+                  className="relative mt-2.5 text-[14px] leading-relaxed [&_p]:m-0"
+                  dangerouslySetInnerHTML={{ __html: formatRichText(poll.explanation) }}
+                />
               </div>
             </motion.div>
           )}
