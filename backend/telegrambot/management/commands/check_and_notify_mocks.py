@@ -1,5 +1,5 @@
 """Django management command: Har qanday vaqti yetgan Jonli Mock imtihonlarni avtomatik aniqlab,
-Telegram orqali xabar yuboruvchi cron komandasi.
+15 daqiqa qolganda eslatma va boshlanish vaqtida start xabarini Telegram orqali yuboruvchi cron komandasi.
 
 Foydalanish (Cron orqali har 1 daqiqada ishga tushirish uchun):
     * * * * * cd /opt/ilmildizi && docker compose exec -T web python manage.py check_and_notify_mocks >> /var/log/mock_notify.log 2>&1
@@ -9,26 +9,50 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from tests_app.models import TestSet
-from telegrambot.mock_notifier import send_mock_announcement
+from telegrambot.mock_notifier import send_mock_announcement, send_mock_reminder_15m
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Vaqti yetib kelgan jonli mock imtihonlar uchun Telegram xabarnomalarini avtomatik jo'natadi."
+    help = "Vaqti yetib kelgan jonli mock imtihonlar uchun 15 daqiqalik eslatma va start xabarnomalarini avtomatik jo'natadi."
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--dry-run',
             action='store_true',
-            help="Haqiqiy xabar yubormasdan faqat navbatdagi mocklarni tekshiradi.",
+            help="Haqiqiy xabar yubormasdan va DB holatini o'zgartirmasdan faqat navbatdagi mocklarni tekshiradi.",
         )
 
     def handle(self, *args, **options):
         dry_run = options.get('dry_run', False)
         now = timezone.now()
 
-        # Oxirgi 24 soat ichida rejalashtirilgan, vaqti yetgan va hali xabar yuborilmagan jonli mocklar
+        # 1) Boshlanishiga 15 daqiqa (yoki undan kam, lekin hali boshlanmagan) qolgan mocklar
+        upcoming_15m = list(
+            TestSet.objects.filter(
+                is_published=True,
+                is_archived=False,
+                is_live_mock=True,
+                scheduled_at__gt=now,
+                scheduled_at__lte=now + timezone.timedelta(minutes=16),
+                reminder_15m_sent_at__isnull=True,
+            ).order_by('scheduled_at')
+        )
+
+        for test in upcoming_15m:
+            self.stdout.write(f"--> [15m Reminder] Mock #{test.id}: '{test.title}' eslatmasi yuborilmoqda...")
+            r_res = send_mock_reminder_15m(test, dry_run=dry_run)
+            if dry_run:
+                self.stdout.write(self.style.WARNING(f"    DRY RUN (15m): {r_res.get('total')} ta o'quvchiga yuboriladi."))
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"    15m eslatma: {r_res.get('sent_count')} ta yetdi, {r_res.get('fail_count', 0)} ta xato."
+                    )
+                )
+
+        # 2) Oxirgi 24 soat ichida rejalashtirilgan, vaqti yetgan va hali start xabari yuborilmagan jonli mocklar
         pending_mocks = list(
             TestSet.objects.filter(
                 is_published=True,
@@ -40,19 +64,22 @@ class Command(BaseCommand):
             ).order_by('scheduled_at')
         )
 
-        if not pending_mocks:
+        if not pending_mocks and not upcoming_15m:
             self.stdout.write(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] Xabar kutayotgan jonli mocklar yo'q.")
             return
 
-        self.stdout.write(
-            self.style.NOTICE(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {len(pending_mocks)} ta mock imtihon boshlandi!")
-        )
+        if pending_mocks:
+            self.stdout.write(
+                self.style.NOTICE(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {len(pending_mocks)} ta mock imtihon boshlandi!")
+            )
 
         for test in pending_mocks:
             self.stdout.write(f"--> Mock #{test.id}: '{test.title}' xabarnomasi yuborilmoqda...")
             res = send_mock_announcement(test, dry_run=dry_run)
             if dry_run:
                 self.stdout.write(self.style.WARNING(f"    DRY RUN: {res.get('total')} ta o'quvchiga yuboriladi."))
+            elif res.get('skipped'):
+                self.stdout.write(self.style.WARNING(f"    O'tkazib yuborildi ({res.get('reason')})."))
             else:
                 self.stdout.write(
                     self.style.SUCCESS(

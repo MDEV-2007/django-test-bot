@@ -28,4 +28,10 @@ urlpatterns = [
     path('ads/targeted-offer/', views.targeted_offer_api, name='targeted_offer'),
     path('ads/lead-submit/', views.lead_submit_api, name='lead_submit'),
     path('profile/radar/', views.student_radar_api, name='student_radar'),
+
+    # 5-MODUL: Do'stlik Streak'i (Juftlik Zanjiri)
+    path('buddy-streak/', views.buddy_streak_status_api, name='buddy_streak_status'),
+    path('buddy-streak/create/', views.buddy_streak_create_api, name='buddy_streak_create'),
+    path('buddy-streak/join/', views.buddy_streak_join_api, name='buddy_streak_join'),
+    path('buddy-streak/nudge/', views.buddy_streak_nudge_api, name='buddy_streak_nudge'),
 ]

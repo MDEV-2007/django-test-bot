@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from accounts.admin_mfa import admin_mfa_enroll_view, admin_mfa_verify_view
 from config.health import healthz
 
 urlpatterns = [
@@ -27,12 +28,15 @@ urlpatterns = [
     path('healthz', healthz),
     path('api/health/', healthz),
 
+    path('admin/mfa/enroll/', admin_mfa_enroll_view, name='admin_mfa_enroll'),
+    path('admin/mfa/verify/', admin_mfa_verify_view, name='admin_mfa_verify'),
     path('admin/', admin.site.urls),
 
     # JSON API for the Next.js frontend (frontend/). Django endi FAQAT backend:
     # shablonlar va sahifa marshrutlari olib tashlandi, butun UI Next.js tomonida.
     path('api/auth/', include('accounts.api_urls')),
     path('api/v1/b2b/', include('b2b_ads.urls')),
+    path('api/v1/advertiser/', include('b2b_ads.advertiser_urls')),
     path('api/v1/system/', include('core.urls')),
     path('api/core/', include('core.urls')),
     path('api/dashboard/', include('dashboard.api_urls')),

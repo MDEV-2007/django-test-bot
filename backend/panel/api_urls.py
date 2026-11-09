@@ -1,11 +1,16 @@
 from django.urls import path
 
+from accounts import admin_mfa
 from . import api, marketing_api
 
 app_name = 'panel_api'
 
 urlpatterns = [
     path('', api.dashboard_api, name='dashboard'),
+    path('mfa/status/', admin_mfa.panel_mfa_status_api, name='mfa_status'),
+    path('mfa/enroll/', admin_mfa.panel_mfa_enroll_api, name='mfa_enroll'),
+    path('mfa/verify/', admin_mfa.panel_mfa_verify_api, name='mfa_verify'),
+    path('mfa/lock/', admin_mfa.panel_mfa_lock_api, name='mfa_lock'),
 
     path('users/', api.users_api, name='users'),
     path('users/create/', api.user_create_api, name='user_create'),
@@ -66,6 +71,8 @@ urlpatterns = [
     path('surveys/create/', api.survey_create_api, name='survey_create'),
     path('surveys/<int:pk>/delete/', api.survey_delete_api, name='survey_delete'),
     path('mocks/', api.mock_attempts_api, name='mock_attempts'),
+    path('mocks/attempts/<int:attempt_id>/review/', api.mock_prize_review_api, name='mock_prize_review'),
+    path('mocks/registrations/<int:reg_id>/review/', api.mock_registration_review_api, name='mock_registration_review'),
     path('mocks/live/', api.live_mock_monitor_api, name='live_mock_monitor'),
     path('mocks/<int:pk>/remind/', api.trigger_mock_reminder_api, name='trigger_mock_reminder'),
     path('mocks/export/', api.mock_attempts_export_api, name='mock_attempts_export'),
@@ -145,6 +152,9 @@ urlpatterns = [
     path('campaigns/leads/', api.panel_campaign_leads_api, name='panel_campaign_leads'),
     path('campaigns/leads/<int:lead_id>/status/', api.panel_lead_status_api, name='panel_lead_status'),
     path('campaigns/leads', api.panel_campaign_leads_api),
+    path('campaigns/<int:campaign_id>/review/', api.panel_campaign_review_api, name='panel_campaign_review'),
+    path('advertisers/', api.panel_advertisers_api, name='panel_advertisers'),
+    path('advertisers/<int:center_id>/review/', api.panel_advertiser_review_api, name='panel_advertiser_review'),
 
     # BMB Real Imtihon Zali (Stress Mode) Super Admin
     path('stress-exam/', api.stress_exam_admin_api, name='stress_exam_admin'),

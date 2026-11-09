@@ -80,7 +80,10 @@ export default function OnboardingPage() {
   }, [searchParams]);
 
   async function complete() {
-    await apiFetch('/api/auth/onboarding-complete/', { method: 'POST' }).catch(() => {});
+    await apiFetch('/api/auth/onboarding-complete/', {
+      method: 'POST',
+      body: JSON.stringify({ subject: chosenSubject || searchParams.get('subject') || undefined }),
+    }).catch(() => {});
     router.push('/dashboard');
   }
 
@@ -102,7 +105,10 @@ export default function OnboardingPage() {
         <DopamineOnboarding
           subject={urlSubject}
           onComplete={async () => {
-            await apiFetch('/api/auth/onboarding-complete/', { method: 'POST' }).catch(() => {});
+            await apiFetch('/api/auth/onboarding-complete/', {
+              method: 'POST',
+              body: JSON.stringify({ subject: urlSubject }),
+            }).catch(() => {});
             router.push(urlSubject ? `/sprint?subject=${urlSubject}&count=10` : '/sprint?subject=tarix&count=10');
           }}
         />

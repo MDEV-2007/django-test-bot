@@ -100,7 +100,11 @@ def apply_referral(new_profile: Profile, code: str) -> Profile | None:
     new_profile.referred_by = referrer
     new_profile.save(update_fields=['referred_by'])
 
-    referrer.add_coins(REFERRAL_BONUS_COINS)
+    # Taklif qiluvchiga bonus kunlik limit bilan: ro'yxatdan o'tish skript bilan cheksiz
+    # takrorlanib, tanga "farm" qilinardi (audit AUTH-009). Bog'lanish baribir saqlanadi.
+    from core.reward_caps import claim_daily_reward
+    if claim_daily_reward(referrer.pk, 'referral_bonus'):
+        referrer.add_coins(REFERRAL_BONUS_COINS)
     new_profile.add_coins(REFERRAL_BONUS_COINS)
 
     ReferralBonus.objects.create(referrer=referrer, referred=new_profile, coins_awarded=REFERRAL_BONUS_COINS)

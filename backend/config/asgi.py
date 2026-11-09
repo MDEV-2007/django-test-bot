@@ -21,6 +21,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django_asgi_app = get_asgi_application()
 
 from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+from channels.security.websocket import AllowedHostsOriginValidator  # noqa: E402
 
 from config.ws_auth import JWTAuthMiddlewareStack  # noqa: E402
 import battles.routing  # noqa: E402
@@ -31,7 +32,9 @@ application = ProtocolTypeRouter({
     # JWTAuthMiddlewareStack tries a `?token=` JWT first (the Next.js frontend), falling
     # back to the session cookie (existing same-origin Django templates) — see
     # config/ws_auth.py for why both paths are needed.
-    'websocket': JWTAuthMiddlewareStack(
+    # Origin must be one of ALLOWED_HOSTS: blocks cross-site WebSocket hijacking with the
+    # session-cookie fallback (audit AUTH-013).
+    'websocket': AllowedHostsOriginValidator(JWTAuthMiddlewareStack(
         URLRouter(battles.routing.websocket_urlpatterns + panel.routing.websocket_urlpatterns)
-    ),
+    )),
 })

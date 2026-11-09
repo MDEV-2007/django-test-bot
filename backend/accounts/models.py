@@ -74,6 +74,42 @@ class Profile(models.Model):
         default='',
         help_text="Viloyat/shahar (masalan: Farg'ona, Toshkent)",
     )
+    district = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text="Tuman/shahar (masalan: Chilonzor, Urgut)",
+    )
+    school = models.CharField(
+        max_length=150,
+        blank=True,
+        default='',
+        help_text="Maktab/litsey nomi yoki raqami (masalan: 15-maktab)",
+    )
+    target_university = models.CharField(
+        max_length=150,
+        blank=True,
+        default='TATU',
+        help_text="Maqsad OTM (masalan: TATU, TDYU, TTA, O'zMU, TDIU)",
+    )
+    target_faculty = models.CharField(
+        max_length=150,
+        blank=True,
+        default='Dasturiy injiniring',
+        help_text="Tanlangan OTM yo'nalishi",
+    )
+    estimated_dtm_score = models.FloatField(
+        default=94.5,
+        help_text="Shaxsiy Dinamik DTM Balli (max 189.0 ball)",
+    )
+    target_subject = models.ForeignKey(
+        'tests_app.Subject',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='target_profiles',
+        help_text="O'quvchining asosiy tayyorlanayotgan fani (Avtopilot va Sprint uchun)",
+    )
     tree_stage = models.IntegerField(default=1, help_text="Ilm Ildizi Daraxti bosqichi (1-5)")
     tree_health = models.IntegerField(default=100, help_text="Daraxt holati (3 kun kirmasa sarg'ayadi)")
 
@@ -165,6 +201,48 @@ class Profile(models.Model):
             locked.refresh_from_db(fields=['coins'])
             self.coins = locked.coins
 
+    def add_dtm_score(self, delta: float):
+        """Dinamik DTM ballini (0.2 - 1.5 ball) atomik oshiradi (maksimal 189.0 ball)."""
+        if not delta or self.is_privileged:
+            return self.estimated_dtm_score
+        from django.db import transaction
+        with transaction.atomic():
+            locked = Profile.objects.select_for_update().get(pk=self.pk)
+            current = locked.estimated_dtm_score or 94.5
+            new_score = round(min(189.0, max(56.7, current + float(delta))), 1)
+            if new_score != current:
+                Profile.objects.filter(pk=self.pk).update(estimated_dtm_score=new_score)
+                self.estimated_dtm_score = new_score
+        return self.estimated_dtm_score
+
+    @property
+    def stability_multiplier(self) -> float:
+        """«Barqarorlik Koeffitsiyenti» — ketma-ket dars qilingan kunlar soniga qarab ichki tangalarga bonus."""
+        s = self.streak or 0
+        if s >= 30:
+            return 2.0
+        if s >= 14:
+            return 1.75
+        if s >= 7:
+            return 1.5
+        if s >= 3:
+            return 1.2
+        return 1.0
+
+    @property
+    def league_info(self) -> dict:
+        """5 bosqichli IlmIldizi Ligasi."""
+        xp = self.xp or 0
+        if xp >= 10000:
+            return {'tier': 'grant', 'level': 5, 'name': "Davlat Granti Ligasi", 'badge': '👑', 'has_gold_border': True}
+        if xp >= 5000:
+            return {'tier': 'kontrakt', 'level': 4, 'name': "Kuchli Kontrakt Ligasi", 'badge': '🎓', 'has_gold_border': False}
+        if xp >= 2500:
+            return {'tier': 'chinor', 'level': 3, 'name': "Chinor Ligasi", 'badge': '🌳', 'has_gold_border': False}
+        if xp >= 1000:
+            return {'tier': 'kurtak', 'level': 2, 'name': "Kurtak Ligasi", 'badge': '🌿', 'has_gold_border': False}
+        return {'tier': 'nihol', 'level': 1, 'name': "Nihol Ligasi", 'badge': '🌱', 'has_gold_border': False}
+
     def update_streak(self):
         """Updates the activity streak based on calendar days.
 
@@ -178,7 +256,7 @@ class Profile(models.Model):
         if self.last_active_date is None:
             self.streak = 1
         elif self.last_active_date == today:
-            return  # already counted today
+            pass  # already counted today
         else:
             missed = (today - self.last_active_date).days - 1  # full days with no activity
             if missed <= 0:
@@ -189,9 +267,20 @@ class Profile(models.Model):
                     self.streak += 1  # freezes bridged the gap; streak preserved
                 else:
                     self.streak = 1   # not enough freezes -> reset
-        self.last_active_date = today
-        self.save()
-        
+        if self.last_active_date != today:
+            self.last_active_date = today
+            # Only the two fields this method owns: a full save() wrote back every column from
+            # this possibly-stale instance and silently reverted coins spent / premium granted by
+            # a concurrent request (audit ECON-003).
+            self.save(update_fields=['streak', 'last_active_date'])
+
+        # Do'stlik Streak'ini (Juftlik Zanjiri) ham yangilaymiz
+        try:
+            from core.services import record_buddy_daily_activity
+            record_buddy_daily_activity(self)
+        except Exception:
+            pass
+
     @property
     def xp_progress(self):
         """Calculates percentage progress towards the next level."""
@@ -341,3 +430,28 @@ def sync_role_to_groups(sender, instance, **kwargs):
         user.groups.remove(*stale)
     if not user.groups.filter(name=instance.role).exists():
         user.groups.add(desired)
+
+
+class AdminMFADevice(models.Model):
+    """RFC 6238 TOTP device + single-use recovery codes for Django Admin (/admin/) and Super Admin (/panel/) accounts."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_mfa_device')
+    secret = models.CharField(max_length=255)
+    key_version = models.CharField(max_length=32, default='v1')
+    is_confirmed = models.BooleanField(default=False, db_index=True)
+    recovery_code_hashes = models.JSONField(default=list, blank=True)
+    last_used_timestep = models.BigIntegerField(default=0)
+    failed_attempts = models.PositiveIntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Admin MFA Device'
+        verbose_name_plural = 'Admin MFA Devices'
+
+    def __str__(self):
+        status = 'confirmed' if self.is_confirmed else 'pending'
+        return f"AdminMFADevice({self.user.username}, {status})"
+

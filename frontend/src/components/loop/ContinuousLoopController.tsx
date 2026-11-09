@@ -33,6 +33,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
     error,
     loop,
     topic,
+    subject,
     ecoTree,
     stageData,
     fetchLoop,
@@ -77,7 +78,24 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
   const [arenaTimeLeft, setArenaTimeLeft] = useState(60);
   const arenaTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Savollarni stageData dan yuklash
+  // Yangi sikl boshlanganda yoki loop o'zgarganda ichki bosqich holatlarini boshlang'ichga qaytarish
+  useEffect(() => {
+    setWarmupSecondsLeft(90);
+    setSprintIndex(0);
+    setSelectedOptionId(null);
+    setIsAnswerChecked(false);
+    setMistakeIds([]);
+    setCorrectCount(0);
+    setShowAiMentorSheet(false);
+    setActiveHint(null);
+    setCleanupIndex(0);
+    setIsCardFlipped(false);
+    setClearedCount(0);
+    setArenaIndex(0);
+    setUserScore(0);
+    setGhostScore(0);
+    setArenaTimeLeft(60);
+  }, [loop?.id, loop?.cycle_number]);
   useEffect(() => {
     if (stageData?.sprint?.questions && stageData.sprint.questions.length > 0) {
       setSprintQuestions(stageData.sprint.questions);
@@ -342,7 +360,7 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
                 Avtopilot · #{loop?.cycle_number || 1}
               </span>
               <h1 className="truncate font-[family-name:var(--font-grotesk)] text-[14px] font-bold sm:text-[17px]">
-                {topic?.title || 'Kunlik zanjir'}
+                {subject?.name ? `${subject.name} · ` : ''}{topic?.title || 'Kunlik zanjir'}
               </h1>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">

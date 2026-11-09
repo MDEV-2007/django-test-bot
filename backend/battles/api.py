@@ -67,8 +67,24 @@ def arena_api(request):
 
 @api_view(['POST'])
 def start_quiz_api(request):
+    from django.db import transaction
+
     profile = request.user.profile
     subject = current_subject(request)
+
+    raw_stake = request.data.get('stake_coins', 0) if isinstance(request.data, dict) else 0
+    try:
+        stake_coins = max(0, int(raw_stake or 0))
+    except (TypeError, ValueError):
+        stake_coins = 0
+    if stake_coins not in (0, 25, 50, 100):
+        return Response({'error': "Tikish miqdori faqat 0, 25, 50 yoki 100 tanga bo'lishi mumkin."}, status=400)
+
+    rematch_id = request.data.get('rematch_battle_id') if isinstance(request.data, dict) else None
+    rematch_battle = None
+    if rematch_id:
+        rematch_battle = Battle.objects.filter(pk=rematch_id, player1=profile).first()
+
     q_filter = Question.objects.filter(question_type__in=Question.SINGLE_ANSWER_TYPES)
     if subject:
         q_filter = q_filter.filter(subject=subject)
@@ -76,15 +92,30 @@ def start_quiz_api(request):
     if len(questions) < 2:
         return Response({'error': "Bu fanda jang uchun savollar yetarli emas."}, status=400)
 
-    bot_name = random.choice(BOT_NAMES)
+    if stake_coins > 0:
+        try:
+            profile.add_coins(-stake_coins)
+        except ValueError:
+            return Response(
+                {'error': f"Tikish uchun {stake_coins} ta Ildiz tangasi kerak. Balansingiz: {profile.coins} tanga."},
+                status=400,
+            )
+
+    bot_name = rematch_battle.bot_name if (rematch_battle and rematch_battle.bot_name) else random.choice(BOT_NAMES)
     elo_offset = random.randint(-80, 80)
-    bot_elo = max(500, profile.elo_rating + elo_offset)
+    bot_elo = (
+        rematch_battle.bot_elo_rating
+        if (rematch_battle and rematch_battle.bot_elo_rating)
+        else max(500, profile.elo_rating + elo_offset)
+    )
     bot_accuracy = min(0.92, max(0.35, 0.6 + (bot_elo - profile.elo_rating) / 400))
 
     battle = Battle.objects.create(
         player1=profile, status='active', is_vs_bot=True, bot_name=bot_name,
         bot_avatar_url=f'https://api.dicebear.com/7.x/adventurer/svg?seed={bot_name}',
         bot_elo_rating=bot_elo,
+        stake_coins=stake_coins,
+        rematch_of=rematch_battle,
     )
 
     questions_payload = []
@@ -106,8 +137,13 @@ def start_quiz_api(request):
         })
 
     return Response({
-        'battle_id': battle.id, 'questions': questions_payload,
+        'battle_id': battle.id,
+        'questions': questions_payload,
         'opponent': {'name': battle.bot_name, 'avatar': battle.bot_avatar_url, 'elo': battle.bot_elo_rating},
+        'stake_coins': stake_coins,
+        'pot_coins': stake_coins * 2,
+        'is_rematch': bool(rematch_battle),
+        'remaining_coins': profile.coins,
     })
 
 
@@ -185,30 +221,60 @@ def finish_battle_api(request):
     if not claim_daily_reward(profile.id, 'battle_bot'):
         xp_gained, coins_gained = 0, 0
 
+    # Stavka (Tikish) hisob-kitobi: g'olib 2x oladi, durangda tikilgan tanga qaytadi
+    stake = battle.stake_coins or 0
+    stake_payout = 0
+    if stake > 0:
+        if result == 'win':
+            stake_payout = stake * 2
+        elif result == 'draw':
+            stake_payout = stake
+
+    total_coins_awarded = coins_gained + stake_payout
     profile.add_xp(xp_gained)
-    profile.add_coins(coins_gained)
+    if total_coins_awarded > 0:
+        profile.add_coins(total_coins_awarded)
+    if result == 'win':
+        profile.add_dtm_score(0.2)
+
     # ELO atomik: to'liq profile.save() boshqa so'rov yozgan tanga/XP'ni eski qiymat
     # bilan ustidan yozib yuborishi mumkin edi (lost update).
     from django.db.models import Value
     from django.db.models.functions import Greatest
     Profile.objects.filter(pk=profile.pk).update(
         elo_rating=Greatest(Value(500), F('elo_rating') + elo_change))
-    profile.refresh_from_db(fields=['elo_rating'])
+    profile.refresh_from_db(fields=['elo_rating', 'coins', 'estimated_dtm_score'])
 
     # Vazifa "1 ta jangda QATNASHISH" deydi, shuning uchun natijadan qat'i nazar
     # hisoblanadi. Ilgari faqat g'alaba sanalardi va yutqazgan o'quvchi jang qilsa ham
     # vazifasi 0/1 bo'lib qolaverardi.
     advance_missions(profile, 'battle')
 
+    stake_note = f" (Tikish mukofoti: +{stake_payout} 🪙!)" if stake_payout > stake else (
+        f" (Tikilgan {stake} 🪙 qaytarildi)" if stake_payout == stake and stake > 0 else (
+            f" (-{stake} 🪙 tikish boy berildi)" if stake > 0 else ""
+        )
+    )
     result_messages = {
-        'win': ("Battle g'olibi!", f"Arena jangida g'olib bo'ldingiz! +{xp_gained} XP, +{coins_gained} tanga, +{elo_change} ELO balli berildi!"),
-        'loss': ("Battle yakunlandi", f"Arena jangida yutqazdingiz. ELO reytingingiz: {elo_change} balli o'zgardi."),
-        'draw': ("Battle durang!", f"Jang durang bilan yakunlandi. +{xp_gained} XP, +{coins_gained} tanga berildi."),
+        'win': ("Battle g'olibi!", f"Arena jangida g'olib bo'ldingiz! +{xp_gained} XP, +{total_coins_awarded} tanga, +{elo_change} ELO balli berildi!{stake_note}"),
+        'loss': ("Battle yakunlandi", f"Arena jangida yutqazdingiz. ELO reytingingiz: {elo_change} balli o'zgardi.{stake_note}"),
+        'draw': ("Battle durang!", f"Jang durang bilan yakunlandi. +{xp_gained} XP, +{coins_gained} tanga berildi.{stake_note}"),
     }
     title, message = result_messages[result]
     Notification.objects.create(profile=profile, title=title, message=message, type='battle')
 
     return Response({
-        'result': result, 'player_score': player_score, 'opponent_score': opponent_score,
-        'xp_gained': xp_gained, 'coins_gained': coins_gained, 'elo_change': elo_change, 'msg': message,
+        'result': result,
+        'player_score': player_score,
+        'opponent_score': opponent_score,
+        'xp_gained': xp_gained,
+        'coins_gained': total_coins_awarded,
+        'stake_coins': stake,
+        'stake_payout': stake_payout,
+        'elo_change': elo_change,
+        'msg': message,
+        'can_rematch': True,
+        'rematch_cta': "Yana bir marta kuch sinashamizmi? (Revansh)",
+        'battle_id': battle.id,
+        'remaining_coins': profile.coins,
     })

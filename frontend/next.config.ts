@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
 
+  experimental: {
+    cpus: 4,
+  },
+
   /* `next dev` begona (cross-origin) domendan kelgan ichki so'rovlarni (HMR, _next/*)
      bloklaydi, shuning uchun tunnel domeni ruxsat ro'yxatida bo'lishi kerak.
 
@@ -45,6 +49,8 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         { source: '/api/:path*', destination: `${backend}/api/:path*/` },
+        { source: '/admin/:path*', destination: `${backend}/admin/:path*/` },
+        { source: '/static/admin/:path*', destination: `${backend}/static/admin/:path*` },
         { source: '/media/:path*', destination: `${backend}/media/:path*` },
         { source: '/telegram/:path*', destination: `${backend}/telegram/:path*/` },
         { source: '/ws/:path*', destination: `${backend}/ws/:path*/` },

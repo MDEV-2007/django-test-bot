@@ -25,7 +25,8 @@ type QuestionChoice = {
 
 type BattleQuestion = {
   id: number;
-  text: string;
+  text?: string;
+  body?: string;
   choices: QuestionChoice[];
 };
 
@@ -33,7 +34,7 @@ type RoomState = {
   room_id: number;
   title: string;
   pin_code: string;
-  status: 'WAITING' | 'ACTIVE' | 'FINISHED' | 'EXPIRED';
+  status: 'WAITING' | 'ACTIVE' | 'FINISHED' | 'EXPIRED' | 'waiting' | 'live' | 'finished';
   is_teacher: boolean;
   participants_count: number;
   participants: { id: number; nickname: string; score: number; submitted: boolean }[];
@@ -207,6 +208,10 @@ export default function ClassBattleStudentModal({
   const questions = roomState?.questions || [];
   const currentQ = questions[currentQIdx];
   const allAnswered = questions.length > 0 && Object.keys(selectedAnswers).length >= questions.length;
+  const normalizedStatus = (roomState?.status || '').toUpperCase();
+  const isWaiting = normalizedStatus === 'WAITING';
+  const isActive = normalizedStatus === 'ACTIVE' || normalizedStatus === 'LIVE';
+  const isFinished = normalizedStatus === 'FINISHED';
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -284,7 +289,7 @@ export default function ClassBattleStudentModal({
         )}
 
         {/* ─── 2. WAITING LOBBY (Waiting for Teacher to Start) ─── */}
-        {roomId && roomState && roomState.status === 'WAITING' && (
+        {roomId && roomState && isWaiting && (
           <div className="p-6 sm:p-8 text-center space-y-6">
             <div className="size-20 rounded-3xl bg-amber-500/15 border-2 border-amber-500/30 flex items-center justify-center text-amber-500 mx-auto shadow-inner animate-pulse">
               <Users className="size-10" />
@@ -310,7 +315,7 @@ export default function ClassBattleStudentModal({
         )}
 
         {/* ─── 3. ACTIVE QUIZ (Kahoot-Style Question & Answers) ─── */}
-        {roomId && roomState && roomState.status === 'ACTIVE' && !submitted && currentQ && (
+        {roomId && roomState && isActive && !submitted && currentQ && (
           <div className="p-5 sm:p-6 space-y-5">
             {/* Question Progress bar */}
             <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
@@ -330,7 +335,7 @@ export default function ClassBattleStudentModal({
             {/* Question Box */}
             <div className="p-4 sm:p-5 rounded-2xl bg-muted/40 border border-border min-h-[90px] flex items-center justify-center text-center">
               <h4 className="text-base sm:text-lg font-bold text-foreground leading-snug">
-                {currentQ.text}
+                {currentQ.text || currentQ.body}
               </h4>
             </div>
 
@@ -393,7 +398,7 @@ export default function ClassBattleStudentModal({
         )}
 
         {/* ─── 4. SUBMITTED / RESULTS ─── */}
-        {roomId && (submitted || (roomState && roomState.status === 'FINISHED')) && (
+        {roomId && (submitted || (roomState && isFinished)) && (
           <div className="p-6 sm:p-8 text-center space-y-6">
             <div className="size-20 rounded-3xl bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center text-amber-500 mx-auto shadow-lg animate-bounce">
               <Trophy className="size-10" />

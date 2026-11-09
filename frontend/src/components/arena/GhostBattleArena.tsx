@@ -351,14 +351,14 @@ export default function GhostBattleArena({
           >
             <span className="ps-chip">
               <Radio className="size-3.5 animate-pulse text-[var(--ps-coral)]" />
-              Tezkor matchmaking · 3 soniya
+              Ghost Replay · Asinxron duel
             </span>
             <h3 className="ps-display mt-5 text-[34px] sm:text-[44px]">
-              Raqib <span className="text-[var(--ps-coral)]">qidirilmoqda</span>
+              Ghost yozuvi <span className="text-[var(--ps-coral)]">tanlanmoqda</span>
               <span className="text-[var(--ps-purple)]">…</span>
             </h3>
             <p className="mt-2 max-w-xs text-[13px] text-[var(--text-muted)]">
-              ELO reytingingizga yaqin kuchli raqib tanlanmoqda
+              ELO reytingingizga yaqin o&apos;quvchining saqlangan haqiqiy o&apos;yin yozuvi (Ghost Replay) yuklanmoqda
             </p>
 
             <div className="mt-8 grid w-full max-w-md grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
@@ -509,8 +509,8 @@ export default function GhostBattleArena({
                       <span className="absolute -right-0.5 -top-0.5 size-2.5 animate-ping rounded-full bg-[var(--ps-green)]" />
                     </div>
                     <span className="truncate text-[13.5px] font-bold">{opponent?.name}</span>
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--ps-green)] px-2 py-0.5 text-[10.5px] font-bold text-white">
-                      <span className="size-1.5 rounded-full bg-white" /> Jonli
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10.5px] font-bold text-[#080808]">
+                      <span className="size-1.5 rounded-full bg-[#080808]" /> {opponent?.is_ghost !== false ? 'Ghost yozuvi' : 'Jonli'}
                     </span>
                   </div>
                   <span className="ps-num shrink-0 text-[24px] leading-none text-[var(--ps-coral)]">

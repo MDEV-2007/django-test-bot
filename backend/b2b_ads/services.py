@@ -100,7 +100,11 @@ def live_campaigns():
     (byudjeti) tugamagan. Tugagan / to'xtatilgan kampaniya hech qayerda ko'rsatilmaydi."""
     from django.db.models import Count
     now = timezone.now()
-    return (EduCenterCampaign.objects.filter(is_active=True)
+    # Moderatsiyadan o'tmagan kampaniya va tasdiqlanmagan / to'xtatilgan advertiser
+    # kampaniyalari hech qayerda ko'rsatilmaydi (center bo'sh — Super Admin kampaniyasi).
+    return (EduCenterCampaign.objects.filter(is_active=True, review_status='approved',
+                                             ended_manually_at__isnull=True)
+            .filter(Q(center__isnull=True) | Q(center__status='approved'))
             .filter(Q(starts_at__isnull=True) | Q(starts_at__lte=now))
             .filter(Q(ends_at__isnull=True) | Q(ends_at__gt=now))
             .annotate(_leads=Count('leads'))
@@ -119,6 +123,8 @@ def campaign_payload(campaign: EduCenterCampaign) -> dict:
         'target_region': campaign.target_region,
         'rating': campaign.rating,
         'story_video_url': campaign.story_video_url,
+        'banner_url': campaign.banner_url or '',
+        'cta_text': campaign.cta_text or '',
         # Reklama ekanligi UI'da aniq ko'rsatilishi uchun.
         'is_sponsored': True,
         'sponsored_label': 'Reklama',
@@ -133,14 +139,27 @@ def track_event(campaign: EduCenterCampaign, event: str, user_id: int) -> bool:
     bir marta sanaladi (sahifani yangilash, takroriy va parallel so'rovlar, bot bosishlari
     hisobni sun'iy oshirmasin). Qaytaradi: hisoblandimi.
 
-    Ilgari impression reklama API'si har chaqirilganda (prefetch, anonim so'rov ham)
-    oshirilardi; click umuman yozilmasdi."""
+    Dedup ma'lumotlar bazasida: `AdEvent` jadvalidagi UniqueConstraint. Parallel ikki
+    so'rovdan faqat bittasi qator yarata oladi, ikkinchisi IntegrityError oladi va
+    sanalmaydi. Kesh faqat tez yo'l (bazaga keraksiz INSERT urinmasligi uchun) —
+    kesh tozalansa ham hisob ikki marta oshmaydi."""
     from django.core.cache import cache
+    from django.db import IntegrityError
+    from b2b_ads.models import AdEvent
+
     field = TRACK_EVENTS[event]
-    key = f"b2b_track:{event}:{campaign.pk}:{user_id}:{timezone.localdate().isoformat()}"
-    if not cache.add(key, 1, 26 * 60 * 60):
+    day = timezone.localdate()
+    key = f"b2b_track:{event}:{campaign.pk}:{user_id}:{day.isoformat()}"
+    if cache.get(key):
         return False
-    EduCenterCampaign.objects.filter(pk=campaign.pk).update(**{field: F(field) + 1})
+    try:
+        with transaction.atomic():
+            AdEvent.objects.create(campaign_id=campaign.pk, user_id=user_id, event=event, day=day)
+            EduCenterCampaign.objects.filter(pk=campaign.pk).update(**{field: F(field) + 1})
+    except IntegrityError:
+        cache.set(key, 1, 26 * 60 * 60)
+        return False
+    cache.set(key, 1, 26 * 60 * 60)
     return True
 
 
@@ -187,11 +206,18 @@ def _notify_center(lead_id: int) -> None:
     """Markazning Telegram chatiga lid xabari (fon vazifasi: so'rovni ushlab turmaydi)."""
     from telegrambot.client import send_message
 
-    lead = StudentLeadSubmission.objects.select_related('campaign').filter(pk=lead_id).first()
+    lead = StudentLeadSubmission.objects.select_related('campaign', 'campaign__center').filter(pk=lead_id).first()
     if lead is None or lead.campaign is None:
         return
     campaign = lead.campaign
     chat_id = (campaign.telegram_webhook_or_chat_id or '').strip()
+    center = campaign.center
+    if center is not None:
+        # Advertiser kampaniyasi: markaz sozlamasi xabarni o'chirib qo'ygan bo'lsa yubormaymiz;
+        # kampaniyada chat yo'q bo'lsa markaz profilidagi chat ishlatiladi.
+        if not center.notify_new_leads:
+            return
+        chat_id = chat_id or (center.telegram_chat_id or '').strip()
     if not chat_id:
         return
     tg_handle = f"@{lead.telegram_username}" if lead.telegram_username else "—"

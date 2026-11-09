@@ -1091,6 +1091,7 @@ def testset_edit_api(request, pk):
             'price': float(ts.price) if ts.price is not None else None,
             'is_published': ts.is_published, 'is_archived': ts.is_archived,
             'is_live_mock': ts.is_live_mock,
+            'prize_description': getattr(ts, 'prize_description', '') or '',
             'scheduled_at': (ts.scheduled_at.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%dT%H:%M') if timezone.is_aware(ts.scheduled_at) else ts.scheduled_at.strftime('%Y-%m-%dT%H:%M')) if ts.scheduled_at else '',
             'notify_all': ts.notify_all,
             'notified_at': ts.notified_at.isoformat() if ts.notified_at else None,
@@ -1161,6 +1162,13 @@ def testset_duplicate_api(request, pk):
 @api_view(['POST'])
 @permission_classes([IsSuperAdmin])
 def testset_toggle_publish_api(request, pk):
+    ts = get_object_or_404(TestSet, pk=pk)
+    if not ts.is_published:
+        if not ts.questions.exists():
+            return Response({'error': "Savollari bo'lmagan testni nashr etib bo'lmaydi."}, status=400)
+        if ts.is_live_mock and not ts.scheduled_at:
+            return Response({'error': "Jonli mock imtihonni nashr etishdan oldin boshlanish vaqtini belgilang."}, status=400)
+
     ts = get_object_or_404(TestSet, pk=pk)
     ts.is_published = not ts.is_published
     if ts.is_published:
@@ -2212,6 +2220,7 @@ def mock_attempts_api(request):
                 'completed_at': completed_local,
                 'raw_completed_at': a.completed_at.isoformat() if a.completed_at else None,
                 'started_at': started_local,
+                **_mock_attempt_registration_fields(a),
             })
 
         return Response({
@@ -2240,6 +2249,235 @@ def mock_attempts_api(request):
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['GET'])
+@permission_classes([IsSuperAdmin])
+def _unused_decorator_target_for_mock_export(request):
+    return Response({})
+
+
+def _mock_attempt_registration_fields(a):
+    from tests_app.models import MockRegistration
+    if not a.profile_id or not a.test_id:
+        return {
+            'registration_id': None,
+            'registration_status': None,
+            'prize_status': 'NOT_ELIGIBLE',
+            'prize_title': '',
+            'prize_amount': 0.0,
+            'admin_note': '',
+            'region': getattr(a.profile, 'region', '') if a.profile else '',
+        }
+    reg = MockRegistration.objects.filter(profile_id=a.profile_id, test_id=a.test_id).first()
+    return {
+        'registration_pk': reg.id if reg else None,
+        'registration_id': reg.registration_id if reg else None,
+        'registration_status': reg.status if reg else None,
+        'prize_status': reg.prize_status if reg else 'NOT_ELIGIBLE',
+        'prize_title': reg.prize_title if reg else '',
+        'prize_amount': float(reg.prize_amount or 0) if reg else 0.0,
+        'admin_note': reg.admin_note if reg else '',
+        'region': (reg.region if reg and reg.region else '') or (getattr(a.profile, 'region', '') if a.profile else ''),
+    }
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def mock_prize_review_api(request, attempt_id):
+    """SuperAdmin tomonidan mock urinishi uchun sovrin/chetlatish qarorini tasdiqlash (AuditLog bilan)."""
+    from tests_app.models import MockRegistration
+    a = get_object_or_404(Attempt.objects.select_related('profile__user', 'test'), pk=attempt_id)
+    data = dict(request.data or {})
+    note = str(data.get('note') or data.get('reason') or data.get('admin_note') or '').strip()
+    action = str(data.get('action') or '').strip().lower()
+    if action == 'disqualify':
+        data['status'] = 'DISQUALIFIED'
+        data['is_cheating_flagged'] = True
+    elif action == 'approve_prize':
+        data['prize_status'] = 'APPROVED'
+    elif action == 'mark_paid':
+        data['prize_status'] = 'PAID'
+
+    with transaction.atomic():
+        reg = None
+        if a.profile_id and a.test_id:
+            u = a.profile.user
+            full_name = f"{u.first_name} {u.last_name}".strip() or u.username
+            reg, _ = MockRegistration.objects.select_for_update().get_or_create(
+                profile_id=a.profile_id,
+                test_id=a.test_id,
+                defaults={
+                    'full_name': full_name,
+                    'phone': getattr(a.profile, 'phone', '') or '',
+                    'region': getattr(a.profile, 'region', '') or '',
+                    'status': 'CONFIRMED',
+                    'confirmed_at': a.started_at or timezone.now(),
+                    'checked_in_at': a.started_at,
+                },
+            )
+
+        changes = {}
+        if 'is_cheating_flagged' in data:
+            new_flag = bool(data['is_cheating_flagged'])
+            if new_flag and not note:
+                return Response({'error': "Chetlatish (disqualification) sababini yozish majburiy."}, status=400)
+            if a.is_cheating_flagged != new_flag:
+                changes['is_cheating_flagged'] = [a.is_cheating_flagged, new_flag]
+                a.is_cheating_flagged = new_flag
+                a.save(update_fields=['is_cheating_flagged'])
+            if reg and new_flag and reg.status != 'DISQUALIFIED':
+                changes['registration_status'] = [reg.status, 'DISQUALIFIED']
+                reg.status = 'DISQUALIFIED'
+
+        if reg:
+            if 'status' in data:
+                new_status = str(data['status']).upper()
+                valid_statuses = {k for k, _ in MockRegistration.STATUS_CHOICES}
+                if new_status not in valid_statuses:
+                    return Response({'error': "Noto'g'ri ro'yxatdan o'tish holati."}, status=400)
+                if new_status == 'DISQUALIFIED' and not note:
+                    return Response({'error': "Chetlatish sababini yozish majburiy."}, status=400)
+                if reg.status != new_status:
+                    changes['registration_status'] = [reg.status, new_status]
+                    reg.status = new_status
+                    if new_status == 'DISQUALIFIED' and not a.is_cheating_flagged:
+                        a.is_cheating_flagged = True
+                        a.save(update_fields=['is_cheating_flagged'])
+
+            if 'prize_status' in data:
+                new_prize_status = str(data['prize_status']).upper()
+                valid_p_statuses = {k for k, _ in MockRegistration.PRIZE_STATUS_CHOICES}
+                if new_prize_status not in valid_p_statuses:
+                    return Response({'error': "Noto'g'ri sovrin holati."}, status=400)
+                if reg.prize_status != new_prize_status:
+                    changes['prize_status'] = [reg.prize_status, new_prize_status]
+                    reg.prize_status = new_prize_status
+
+            if 'prize_title' in data:
+                new_title = str(data['prize_title'] or '').strip()[:200]
+                if reg.prize_title != new_title:
+                    changes['prize_title'] = [reg.prize_title, new_title]
+                    reg.prize_title = new_title
+
+            if 'prize_amount' in data:
+                try:
+                    from decimal import Decimal
+                    new_amt = Decimal(str(data['prize_amount'] or 0))
+                except Exception:
+                    return Response({'error': "Sovrin summasi noto'g'ri."}, status=400)
+                if reg.prize_amount != new_amt:
+                    changes['prize_amount'] = [str(reg.prize_amount), str(new_amt)]
+                    reg.prize_amount = new_amt
+
+            if note:
+                changes['note'] = note
+                reg.admin_note = note
+            reg.updated_by = request.user
+            reg.save()
+
+    if changes:
+        _audit(
+            request,
+            'update',
+            'MockRegistration',
+            reg.id if reg else a.id,
+            f"Mock sovrin/holat auditi: {reg.registration_id if reg else f'Attempt#{a.id}'}",
+            changes,
+        )
+
+    return Response({
+        'ok': True,
+        'attempt_id': a.id,
+        'is_cheating_flagged': a.is_cheating_flagged,
+        'registration_id': reg.registration_id if reg else None,
+        'registration_status': reg.status if reg else None,
+        'prize_status': reg.prize_status if reg else 'NOT_ELIGIBLE',
+        'prize_title': reg.prize_title if reg else '',
+        'prize_amount': float(reg.prize_amount or 0) if reg else 0.0,
+        'admin_note': reg.admin_note if reg else '',
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsSuperAdmin])
+def mock_registration_review_api(request, reg_id):
+    """SuperAdmin tomonidan MockRegistration ni to'g'ridan-to'g'ri ko'rib chiqish (AuditLog bilan)."""
+    from tests_app.models import MockRegistration
+    reg = get_object_or_404(MockRegistration.objects.select_related('profile__user', 'test'), pk=reg_id)
+    data = dict(request.data or {})
+    note = str(data.get('note') or data.get('reason') or data.get('admin_note') or '').strip()
+    action = str(data.get('action') or '').strip().lower()
+    if action == 'disqualify':
+        data['status'] = 'DISQUALIFIED'
+        data['is_cheating_flagged'] = True
+    elif action == 'approve_prize':
+        data['prize_status'] = 'APPROVED'
+    elif action == 'mark_paid':
+        data['prize_status'] = 'PAID'
+
+    with transaction.atomic():
+        reg = MockRegistration.objects.select_for_update().get(pk=reg.pk)
+        changes = {}
+        if 'status' in data:
+            new_status = str(data['status']).upper()
+            valid_statuses = {k for k, _ in MockRegistration.STATUS_CHOICES}
+            if new_status not in valid_statuses:
+                return Response({'error': "Noto'g'ri ro'yxatdan o'tish holati."}, status=400)
+            if new_status == 'DISQUALIFIED' and not note:
+                return Response({'error': "Chetlatish sababini yozish majburiy."}, status=400)
+            if reg.status != new_status:
+                changes['status'] = [reg.status, new_status]
+                reg.status = new_status
+                if new_status == 'CONFIRMED' and not reg.confirmed_at:
+                    reg.confirmed_at = timezone.now()
+                elif new_status == 'DISQUALIFIED':
+                    Attempt.objects.filter(profile_id=reg.profile_id, test_id=reg.test_id).update(is_cheating_flagged=True)
+
+        if 'prize_status' in data:
+            new_prize_status = str(data['prize_status']).upper()
+            valid_p_statuses = {k for k, _ in MockRegistration.PRIZE_STATUS_CHOICES}
+            if new_prize_status not in valid_p_statuses:
+                return Response({'error': "Noto'g'ri sovrin holati."}, status=400)
+            if reg.prize_status != new_prize_status:
+                changes['prize_status'] = [reg.prize_status, new_prize_status]
+                reg.prize_status = new_prize_status
+
+        if 'prize_title' in data:
+            new_title = str(data['prize_title'] or '').strip()[:200]
+            if reg.prize_title != new_title:
+                changes['prize_title'] = [reg.prize_title, new_title]
+                reg.prize_title = new_title
+
+        if 'prize_amount' in data:
+            from decimal import Decimal
+            try:
+                new_amt = Decimal(str(data['prize_amount'] or 0))
+            except Exception:
+                return Response({'error': "Sovrin summasi noto'g'ri."}, status=400)
+            if reg.prize_amount != new_amt:
+                changes['prize_amount'] = [str(reg.prize_amount), str(new_amt)]
+                reg.prize_amount = new_amt
+
+        if note:
+            changes['note'] = note
+            reg.admin_note = note
+        reg.updated_by = request.user
+        reg.save()
+
+    if changes:
+        _audit(request, 'update', 'MockRegistration', reg.id, f"MockRegistration {reg.registration_id}", changes)
+
+    return Response({
+        'ok': True,
+        'id': reg.id,
+        'registration_id': reg.registration_id,
+        'status': reg.status,
+        'prize_status': reg.prize_status,
+        'prize_title': reg.prize_title,
+        'prize_amount': float(reg.prize_amount or 0),
+        'admin_note': reg.admin_note,
+    })
 
 
 @api_view(['GET'])

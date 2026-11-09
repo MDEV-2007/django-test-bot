@@ -42,6 +42,57 @@ type MockLobbyData = {
   has_completed: boolean;
   completed_attempt_id: number | null;
   completed_score: number | null;
+  is_premium?: boolean;
+  price?: number;
+  prize_description?: string;
+  is_unlocked?: boolean;
+  is_started?: boolean;
+  is_ended?: boolean;
+  can_start?: boolean;
+  lifecycle_state?: string;
+  plan_id?: number | null;
+  checkout_url?: string | null;
+  confirmed_participants_count?: number;
+  registration?: {
+    id: number;
+    registration_id: string;
+    full_name: string;
+    phone: string;
+    region: string;
+    status: string;
+    prize_status: string;
+    prize_title: string;
+    prize_amount: number;
+    payment_id: number | null;
+    payment_status: string | null;
+  } | null;
+};
+
+type LeaderboardRow = {
+  rank: number | null;
+  attempt_id: number;
+  student_name: string;
+  region: string;
+  registration_id: string | null;
+  score: number;
+  correct_answers: number;
+  wrong_answers: number;
+  total_questions: number;
+  duration_str: string;
+  is_disqualified: boolean;
+  prize_status: string;
+  prize_title: string;
+  is_me: boolean;
+};
+
+type LeaderboardPayload = {
+  test_id: number;
+  test_title: string;
+  subject: string;
+  prize_description: string;
+  total_completed: number;
+  my_rank: number | null;
+  results: LeaderboardRow[];
 };
 
 type GradingItem = {
@@ -135,9 +186,14 @@ function formatScheduledTime(dateStr: string | null | undefined): string {
 export default function MockLobbyPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { access, authReady } = useAuthStore();
+  const { access, authReady, user } = useAuthStore();
 
   const [data, setData] = useState<MockLobbyData | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardPayload | null>(null);
+  const [regName, setRegName] = useState('');
+  const [regPhone, setRegPhone] = useState('+998 ');
+  const [regRegion, setRegRegion] = useState('Toshkent shahri');
+  const [registering, setRegistering] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reminded, setReminded] = useState(false);
   const [togglingReminder, setTogglingReminder] = useState(false);
@@ -167,6 +223,19 @@ export default function MockLobbyPage() {
       .then((res) => {
         setData(res);
         setReminded(res.is_reminded);
+        if (res.registration) {
+          setRegName(res.registration.full_name || '');
+          setRegPhone(res.registration.phone || '+998 ');
+          if (res.registration.region) setRegRegion(res.registration.region);
+        } else if (user) {
+          const defaultName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '';
+          setRegName(defaultName);
+          if ((user as { phone?: string }).phone) setRegPhone((user as { phone?: string }).phone!);
+          if ((user as { region?: string }).region) setRegRegion((user as { region?: string }).region!);
+        }
+        apiFetch<LeaderboardPayload>(`/api/tests/${id}/leaderboard/`)
+          .then((lb) => setLeaderboard(lb))
+          .catch(() => {});
 
         if (res.scheduled_at) {
           const target = new Date(res.scheduled_at).getTime();
@@ -255,6 +324,76 @@ export default function MockLobbyPage() {
   }
 
   // Start test
+  async function handleRegisterMock(e: React.FormEvent) {
+    e.preventDefault();
+    if (!regName.trim() || regName.trim().length < 2) {
+      toast.error("Ism va familiyangizni to'liq kiriting.");
+      return;
+    }
+    const digits = regPhone.replace(/\D/g, '');
+    if (digits.length < 7) {
+      toast.error("Telefon raqamingizni to'liq kiriting.");
+      return;
+    }
+    setRegistering(true);
+    try {
+      const res = await apiFetch<{
+        id: number;
+        registration_id: string;
+        status: string;
+        full_name: string;
+        phone: string;
+        region: string;
+        requires_payment: boolean;
+        is_unlocked: boolean;
+        price: number;
+        plan_id: number | null;
+        checkout_url: string | null;
+      }>(`/api/tests/${id}/register/`, {
+        method: 'POST',
+        body: JSON.stringify({
+          full_name: regName.trim(),
+          phone: regPhone.trim(),
+          region: regRegion.trim(),
+        }),
+      });
+      setReminded(true);
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              is_reminded: true,
+              is_unlocked: res.is_unlocked,
+              checkout_url: res.checkout_url,
+              registration: {
+                id: res.id,
+                registration_id: res.registration_id,
+                full_name: res.full_name,
+                phone: res.phone,
+                region: res.region,
+                status: res.status,
+                prize_status: 'NOT_ELIGIBLE',
+                prize_title: '',
+                prize_amount: 0,
+                payment_id: null,
+                payment_status: res.is_unlocked ? 'approved' : 'pending',
+              },
+            }
+          : prev
+      );
+      if (res.requires_payment && res.checkout_url) {
+        toast.success(`Ro'yxatdan o'tdingiz (#${res.registration_id})! Endi to'lovni tasdiqlang.`);
+      } else {
+        soundFX.fanfare();
+        toast.success(`Tabriklaymiz! Ishtirokingiz tasdiqlandi (#${res.registration_id}).`);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Ro'yxatdan o'tishda xatolik yuz berdi");
+    } finally {
+      setRegistering(false);
+    }
+  }
+
   async function startTest() {
     setStarting(true);
     try {
@@ -423,6 +562,147 @@ export default function MockLobbyPage() {
                   </div>
 
                   {/* Status & Actions Section */}
+                  {data.prize_description && (
+                    <div className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs sm:text-sm">
+                      <Award className="size-5 shrink-0 text-amber-500" />
+                      <div>
+                        <span className="font-bold text-amber-600 dark:text-amber-400">Sovrin jamg&apos;armasi: </span>
+                        <span className="font-semibold text-foreground">{data.prize_description}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Official Registration Ticket / Registration Form */}
+                  {!data.has_completed && (
+                    <div className="rounded-2xl border border-[var(--border-strong)] bg-[var(--surface-card)]/95 p-4 sm:p-5 space-y-4">
+                      {data.registration ? (
+                        <div className="space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                Rasmiy ishtirokchi bileti
+                              </span>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="font-mono text-base sm:text-lg font-extrabold text-foreground">
+                                  #{data.registration.registration_id}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  • {data.registration.full_name} {data.registration.region ? `(${data.registration.region})` : ''}
+                                </span>
+                              </div>
+                            </div>
+                            {data.registration.status === 'CONFIRMED' || data.is_unlocked ? (
+                              <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold">
+                                ✅ Tasdiqlangan
+                              </Badge>
+                            ) : data.registration.status === 'DISQUALIFIED' ? (
+                              <Badge className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold">
+                                ⛔ Chetlatilgan
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold">
+                                ⏳ To&apos;lov kutilmoqda
+                              </Badge>
+                            )}
+                          </div>
+
+                          {!data.is_unlocked && data.checkout_url && (
+                            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                              <div className="text-xs">
+                                <p className="font-bold text-foreground">
+                                  Qatnashish badali: {Number(data.price || 0).toLocaleString('uz-UZ')} so&apos;m
+                                </p>
+                                <p className="text-muted-foreground">
+                                  {data.registration.payment_status === 'pending'
+                                    ? "To'lov cheki yuborilgan — admin tasdiqlashini kuting."
+                                    : "Imtihonga kirish ruxsatini olish uchun to'lovni tasdiqlang."}
+                                </p>
+                              </div>
+                              <Button asChild size="sm" className="rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-black shrink-0">
+                                <Link href={data.checkout_url}>
+                                  {data.registration.payment_status === 'pending' ? "To'lov holati" : "To'lov qilish"} <ArrowRight className="size-4 ml-1" />
+                                </Link>
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <form onSubmit={handleRegisterMock} className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-sm sm:text-base font-bold text-foreground">
+                                Respublika Mock imtihoniga ro&apos;yxatdan o&apos;tish
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                Rasmiy reyting va sertifikatda ism-sharifingiz to&apos;g&apos;ri chiqishi uchun ma&apos;lumotlarni tasdiqlang.
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="font-bold text-xs shrink-0">
+                              {data.is_premium && Number(data.price || 0) > 0
+                                ? `${Number(data.price).toLocaleString('uz-UZ')} so'm`
+                                : 'Bepul'}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <input
+                              type="text"
+                              required
+                              placeholder="Ism va familiyangiz"
+                              value={regName}
+                              onChange={(e) => setRegName(e.target.value)}
+                              className="w-full rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/50 px-3 py-2 text-xs sm:text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                            />
+                            <input
+                              type="tel"
+                              required
+                              placeholder="+998 90 123 45 67"
+                              value={regPhone}
+                              onChange={(e) => setRegPhone(e.target.value)}
+                              className="w-full rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/50 px-3 py-2 text-xs sm:text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                            />
+                            <select
+                              value={regRegion}
+                              onChange={(e) => setRegRegion(e.target.value)}
+                              className="w-full rounded-xl border border-[var(--border-card)] bg-[var(--surface-hover)]/50 px-3 py-2 text-xs sm:text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                            >
+                              {[
+                                'Toshkent shahri',
+                                'Toshkent viloyati',
+                                'Samarqand',
+                                "Farg'ona",
+                                'Andijon',
+                                'Namangan',
+                                'Buxoro',
+                                'Navoiy',
+                                'Qashqadaryo',
+                                'Surxondaryo',
+                                'Jizzax',
+                                'Sirdaryo',
+                                'Xorazm',
+                                "Qoraqalpog'iston",
+                              ].map((r) => (
+                                <option key={r} value={r}>
+                                  {r}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <Button
+                            type="submit"
+                            disabled={registering}
+                            className="w-full rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                          >
+                            {registering
+                              ? "Ro'yxatdan o'tkazilmoqda..."
+                              : data.is_premium && !data.is_unlocked && Number(data.price || 0) > 0
+                                ? `Ro'yxatdan o'tish va to'lovga o'tish (${Number(data.price).toLocaleString('uz-UZ')} so'm)`
+                                : "Rasmiy ro'yxatdan o'tish (Bepul)"}
+                          </Button>
+                        </form>
+                      )}
+                    </div>
+                  )}
+
                   {data.has_completed ? (
                     <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 sm:p-5 space-y-3">
                       <div className="flex items-center gap-3">
@@ -439,6 +719,25 @@ export default function MockLobbyPage() {
                       </Button>
                     </div>
                   ) : isLiveNow || data.has_active_attempt ? (
+                    data.is_premium && !data.is_unlocked && !data.has_active_attempt ? (
+                      <div className="rounded-[26px] border border-amber-500/40 bg-amber-500/10 p-5 sm:p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                            Imtihon boshlangan — Kirish uchun to&apos;lov talab qilinadi
+                          </span>
+                          <Badge className="rounded-full bg-amber-500 text-black font-bold text-xs">
+                            {Number(data.price || 0).toLocaleString('uz-UZ')} so&apos;m
+                          </Badge>
+                        </div>
+                        {data.checkout_url && (
+                          <Button asChild size="lg" className="w-full rounded-full font-bold text-base bg-amber-500 hover:bg-amber-600 text-black h-12">
+                            <Link href={data.checkout_url}>
+                              To&apos;lovni amalga oshirish va kirish <ArrowRight className="size-5 ml-2" />
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
                     <div className="rounded-[26px] bg-[var(--ps-green)] text-white p-5 sm:p-6 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -463,6 +762,7 @@ export default function MockLobbyPage() {
                         <ArrowRight className="size-5 ml-2" />
                       </Button>
                     </div>
+                    )
                   ) : (
                     <div className="space-y-5 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface-card)]/90 p-5 sm:p-6 backdrop-blur-md">
                       <div className="flex items-center justify-between">
@@ -623,6 +923,61 @@ export default function MockLobbyPage() {
                 </CardContent>
               </Card>
             </Reveal>
+
+            {/* Rasmiy Respublika Mock Reytingi (Leaderboard) */}
+            {leaderboard && leaderboard.results.length > 0 && (
+              <Reveal delay={0.12}>
+                <Card className="border-[var(--border-card)] bg-[var(--surface-card-soft)]/90 shadow-sm overflow-hidden">
+                  <CardHeader className="pb-3 pt-5 px-5 flex flex-row items-center justify-between">
+                    <CardTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-foreground">
+                      <Users className="size-4 text-emerald-500" /> Rasmiy Reyting Jadvali ({leaderboard.total_completed} ishtirokchi)
+                    </CardTitle>
+                    {leaderboard.my_rank && (
+                      <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-xs">
+                        Sizning o&apos;rningiz: #{leaderboard.my_rank}
+                      </Badge>
+                    )}
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-[var(--border-card)] max-h-[380px] overflow-y-auto">
+                      {leaderboard.results.slice(0, 30).map((row) => (
+                        <div
+                          key={row.attempt_id}
+                          className={cn(
+                            'flex items-center justify-between px-5 py-3 text-xs sm:text-sm',
+                            row.is_me && 'bg-emerald-500/10 font-bold'
+                          )}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="font-mono font-bold w-7 text-center shrink-0">
+                              {row.is_disqualified ? '⛔' : row.rank === 1 ? '🥇' : row.rank === 2 ? '🥈' : row.rank === 3 ? '🥉' : `#${row.rank}`}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate font-semibold text-foreground">
+                                {row.student_name} {row.is_me && '(Siz)'}
+                              </p>
+                              <p className="truncate text-[11px] text-muted-foreground">
+                                {[row.region, row.registration_id ? `#${row.registration_id}` : null, row.duration_str]
+                                  .filter(Boolean)
+                                  .join(' • ')}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0 ml-3">
+                            <span className="font-mono font-bold text-foreground block">
+                              {row.score.toFixed(1)}%
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {row.correct_answers}/{row.total_questions} to&apos;g&apos;ri
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Reveal>
+            )}
           </div>
 
           {/* =========================================================

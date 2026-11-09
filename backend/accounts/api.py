@@ -17,15 +17,17 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes, throttle_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
+from core.parsers import ObjectJSONParser
 
 from .models import Profile, ensure_profile_for_user
 from .referrals import apply_referral
+from .throttles import AuthThrottle, RefreshThrottle, RegisterThrottle
 from analytics.tracking import record_signup_source
 from .serializers import ProfileSerializer
 from .utils import (
@@ -46,7 +48,10 @@ def _tokens_for(user):
 
 def _auth_response(user):
     profile = ensure_profile_for_user(user)
-    profile.update_streak()
+    if user.is_staff or user.is_superuser or getattr(profile, 'is_superadmin', False):
+        from .admin_mfa import clear_panel_mfa_verified
+        clear_panel_mfa_verified(user)
+    # Login streakni oshirmaydi — faqat o'qish amallari (audit ECON-002).
     return Response({**_tokens_for(user), 'user': ProfileSerializer(profile).data})
 
 
@@ -61,6 +66,7 @@ def auth_config_api(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthThrottle])
 def login_api(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -93,6 +99,7 @@ def _password_error_uz(err):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([RegisterThrottle])
 def register_api(request):
     username = (request.data.get('username') or '').strip()
     first_name = (request.data.get('first_name') or '').strip()
@@ -118,6 +125,16 @@ def register_api(request):
     )
     profile = ensure_profile_for_user(user)
     profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
+    if request.data.get('region'):
+        profile.region = str(request.data.get('region')).strip()[:100]
+    if request.data.get('district'):
+        profile.district = str(request.data.get('district')).strip()[:100]
+    if request.data.get('school'):
+        profile.school = str(request.data.get('school')).strip()[:150]
+    if request.data.get('target_university'):
+        profile.target_university = str(request.data.get('target_university')).strip()[:150]
+    if request.data.get('target_faculty'):
+        profile.target_faculty = str(request.data.get('target_faculty')).strip()[:150]
     profile.save()
     referrer = apply_referral(profile, ref_code) if ref_code else None
     record_signup_source(profile, request.data.get('source') or 'web', referred=bool(referrer))
@@ -127,6 +144,7 @@ def register_api(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthThrottle])
 def google_login_api(request):
     if not settings.GOOGLE_OAUTH_CLIENT_ID:
         return Response({'error': 'Google kirish sozlanmagan.'}, status=503)
@@ -183,10 +201,16 @@ def google_login_api(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthThrottle])
 def telegram_login_api(request):
-    init_data = request.data.get('initData')
-    if not init_data:
+    init_data = request.data.get('initData') if isinstance(request.data, dict) else None
+    if not init_data or not isinstance(init_data, str):
         return Response({'error': 'Missing initData'}, status=400)
+
+    # Bo'sh token bilan HMAC'ni istalgan odam hisoblay oladi — bunday muhitda Telegram
+    # orqali kirish butunlay o'chiriladi (audit AUTH-006).
+    if not settings.TELEGRAM_BOT_TOKEN:
+        return Response({'error': "Telegram orqali kirish sozlanmagan."}, status=503)
 
     if not verify_telegram_webapp_data(init_data, settings.TELEGRAM_BOT_TOKEN):
         return Response({'error': 'Invalid signature'}, status=401)
@@ -196,7 +220,12 @@ def telegram_login_api(request):
     if not user_json:
         return Response({'error': 'User data missing in initData'}, status=400)
 
-    user_data = json.loads(user_json)
+    try:
+        user_data = json.loads(user_json)
+    except (TypeError, ValueError):
+        return Response({'error': 'Invalid user data in initData'}, status=400)  # AUTH-012
+    if not isinstance(user_data, dict) or not str(user_data.get('id') or '').isdigit():
+        return Response({'error': 'Invalid user data in initData'}, status=400)
     tg_id = str(user_data.get('id'))
     first_name = user_data.get('first_name', '')
     last_name = user_data.get('last_name', '')
@@ -217,30 +246,24 @@ def telegram_login_api(request):
             profile.telegram_username = tg_username
             profile.save(update_fields=['telegram_username'])
     except Profile.DoesNotExist:
-        # Agar ilgari vebda yoki botda username orqali ro'yxatdan o'tgan bo'lsa va telegram_id bo'sh bo'lsa,
-        # hisoblarni birlashtiramiz (yangi bo'sh foydalanuvchi yaratmasdan)
-        profile = None
-        if tg_username:
-            profile = Profile.objects.filter(telegram_username__iexact=tg_username, telegram_id__isnull=True).first()
+        # Hisob faqat Telegram ID bo'yicha bog'lanadi. Ilgari ID topilmasa @username bo'yicha
+        # boshqa (telegram_id'siz) hisobga ulanardi — Telegram username'lari qayta beriladi,
+        # ya'ni handle'ning yangi egasi eski hisobni egallab olardi (audit AUTH-007).
+        django_username = f'tg_{tg_id}'
+        user, created = User.objects.get_or_create(username=django_username)
+        if not created and not user.is_active:
+            return Response({'error': 'Hisobingiz chetlashtirilgan.'}, status=403)
+        if created:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
 
-        if profile:
-            profile.telegram_id = tg_id
-            profile.save(update_fields=['telegram_id'])
-            user = profile.user
-        else:
-            django_username = f'tg_{tg_id}'
-            user, created = User.objects.get_or_create(username=django_username)
-            if created:
-                user.first_name = first_name
-                user.last_name = last_name
-                user.save()
-
-            profile = ensure_profile_for_user(user)
-            profile.telegram_id = tg_id
-            profile.telegram_username = tg_username
-            profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={tg_username or tg_id}'
-            profile.last_active_date = timezone.localdate()
-            profile.save()
+        profile = ensure_profile_for_user(user)
+        profile.telegram_id = tg_id
+        profile.telegram_username = tg_username
+        profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={tg_username or tg_id}'
+        profile.last_active_date = timezone.localdate()
+        profile.save()
 
         start_param = (request.data.get('start_param') or '').strip()
         referrer = None
@@ -262,11 +285,48 @@ class SafeTokenRefreshView(TokenRefreshView):
     when a still-unexpired refresh token names a user that no longer exists in the DB —
     e.g. an account deleted after the browser already cached the token, or leftover test
     data. A stale/invalid token is a normal client-side condition, not a server error."""
+    throttle_classes = [RefreshThrottle]
+
     def post(self, request, *args, **kwargs):
+        from rest_framework_simplejwt.exceptions import TokenError
+
+        from .tokens import token_is_revoked
+
+        # Expired impersonation sessions must not be renewed by rotation (audit API-007).
+        raw = request.data.get('refresh') if isinstance(request.data, dict) else None
+        if raw:
+            try:
+                parsed = RefreshToken(raw)
+                if token_is_revoked(parsed.payload.get('user_id'), parsed.payload):
+                    return Response({'detail': 'Token has been revoked.', 'code': 'token_revoked'}, status=401)
+            except TokenError:
+                pass  # let the parent view produce its normal 401
         try:
             return super().post(request, *args, **kwargs)
         except User.DoesNotExist:
             return Response({'detail': 'User no longer exists.'}, status=401)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def logout_api(request):
+    """Revoke the caller's refresh token (audit AUTH-002). With `all_devices: true` and a
+    valid access token, every session of the user is revoked."""
+    from rest_framework_simplejwt.exceptions import TokenError
+
+    from .tokens import revoke_user_tokens
+
+    data = request.data if isinstance(request.data, dict) else {}
+    if data.get('all_devices') and request.user and request.user.is_authenticated:
+        revoke_user_tokens(request.user)
+        return Response({'ok': True})
+    raw = data.get('refresh')
+    if raw:
+        try:
+            RefreshToken(raw).blacklist()
+        except TokenError:
+            pass  # already invalid/blacklisted — logout is idempotent
+    return Response({'ok': True})
 
 
 @api_view(['GET'])
@@ -311,7 +371,7 @@ def subscription_check_api(request):
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def profile_api(request):
     from battles.models import Battle
     from django.db.models import Q as _Q
@@ -326,10 +386,10 @@ def profile_api(request):
         user = request.user
         updated_user_fields = []
         if 'first_name' in request.data:
-            user.first_name = str(request.data.get('first_name', '')).strip()
+            user.first_name = str(request.data.get('first_name', '')).strip()[:150]  # DB limit (API-004)
             updated_user_fields.append('first_name')
         if 'last_name' in request.data:
-            user.last_name = str(request.data.get('last_name', '')).strip()
+            user.last_name = str(request.data.get('last_name', '')).strip()[:150]
             updated_user_fields.append('last_name')
         if updated_user_fields:
             user.save(update_fields=updated_user_fields)
@@ -341,8 +401,32 @@ def profile_api(request):
                 profile.exam_track = track
                 updated_profile_fields.append('exam_track')
         if 'region' in request.data:
-            profile.region = str(request.data.get('region', '')).strip()
+            profile.region = str(request.data.get('region', '')).strip()[:100]
             updated_profile_fields.append('region')
+        if 'district' in request.data:
+            profile.district = str(request.data.get('district', '')).strip()[:100]
+            updated_profile_fields.append('district')
+        if 'school' in request.data:
+            profile.school = str(request.data.get('school', '')).strip()[:150]
+            updated_profile_fields.append('school')
+        if 'target_university' in request.data:
+            profile.target_university = str(request.data.get('target_university', '')).strip()[:150] or 'TATU'
+            updated_profile_fields.append('target_university')
+        if 'target_faculty' in request.data:
+            profile.target_faculty = str(request.data.get('target_faculty', '')).strip()[:150] or 'Dasturiy injiniring'
+            updated_profile_fields.append('target_faculty')
+        if 'target_subject_slug' in request.data or 'target_subject_id' in request.data or 'target_subject' in request.data:
+            from tests_app.models import Subject
+            subj_val = request.data.get('target_subject_slug') or request.data.get('target_subject_id') or request.data.get('target_subject')
+            subj = None
+            if isinstance(subj_val, int) or (isinstance(subj_val, str) and subj_val.isdigit()):
+                subj = Subject.objects.filter(pk=int(subj_val)).first()
+            elif isinstance(subj_val, str):
+                subj = Subject.objects.filter(slug=subj_val).first()
+            if subj:
+                profile.target_subject = subj
+                request.session['selected_subject'] = subj.slug
+                updated_profile_fields.append('target_subject')
         if updated_profile_fields:
             profile.save(update_fields=updated_profile_fields)
 
@@ -448,5 +532,30 @@ def profile_api(request):
 def onboarding_complete_api(request):
     profile = ensure_profile_for_user(request.user)
     profile.has_seen_onboarding = True
-    profile.save(update_fields=['has_seen_onboarding'])
+    update_fields = ['has_seen_onboarding']
+
+    subj_val = request.data.get('subject') or request.data.get('chosen_subject') or request.session.get('selected_subject')
+    if subj_val:
+        from tests_app.models import Subject
+        subj = None
+        if isinstance(subj_val, int) or (isinstance(subj_val, str) and str(subj_val).isdigit()):
+            subj = Subject.objects.filter(pk=int(subj_val)).first()
+        elif isinstance(subj_val, str):
+            subj = Subject.objects.filter(slug=subj_val).first()
+        if subj:
+            profile.target_subject = subj
+            request.session['selected_subject'] = subj.slug
+            update_fields.append('target_subject')
+            try:
+                from learning_loop.views import switch_today_loop_subject
+                switch_today_loop_subject(request.user, subj)
+            except Exception:
+                pass
+
+    for field_name, max_len in (('region', 100), ('district', 100), ('school', 150), ('target_university', 150), ('target_faculty', 150)):
+        if field_name in request.data and request.data.get(field_name) is not None:
+            setattr(profile, field_name, str(request.data.get(field_name)).strip()[:max_len])
+            update_fields.append(field_name)
+
+    profile.save(update_fields=update_fields)
     return Response({'ok': True})

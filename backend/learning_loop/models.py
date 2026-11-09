@@ -93,6 +93,12 @@ class DailyLearningLoop(models.Model):
         ordering = ['-date', '-cycle_number', '-id']
         verbose_name = "Kunlik Avtopilot Sikli"
         verbose_name_plural = "Kunlik Avtopilot Sikllari"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'date', 'cycle_number'],
+                name='unique_user_daily_loop_cycle',
+            ),
+        ]
 
     def __str__(self):
         return f"{self.user.username} | {self.date} (Sikl #{self.cycle_number}) -> {self.current_stage}"

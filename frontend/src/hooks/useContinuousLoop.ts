@@ -13,6 +13,14 @@ export type LoopStage =
   | 'STAGE_4_ARENA'
   | 'STAGE_5_COMPLETED';
 
+export interface LoopSubject {
+  id: number | null;
+  name: string;
+  slug: string;
+  icon_name?: string | null;
+  color?: string | null;
+}
+
 export interface LoopTopic {
   id: number;
   title: string;
@@ -467,6 +475,8 @@ export function useContinuousLoop() {
     title: "O'zbekiston tarixi & DTM Standartlari",
     subject_name: "Tarix",
   });
+  const [subject, setSubject] = useState<LoopSubject | null>(null);
+  const [availableSubjects, setAvailableSubjects] = useState<LoopSubject[]>([]);
   const [ecoTree, setEcoTree] = useState<EcoTreeState>({
     growth_stage: 1,
     stage_name: 'Nihol',
@@ -498,6 +508,8 @@ export function useContinuousLoop() {
         ok: boolean;
         loop: LoopState;
         topic: LoopTopic;
+        subject?: LoopSubject;
+        available_subjects?: LoopSubject[];
         eco_tree: EcoTreeState;
         stage_data: LoopStageData;
       }>('/api/v1/loop/current/');
@@ -506,18 +518,22 @@ export function useContinuousLoop() {
         setIsOffline(false);
         setLoop(res.loop);
         setTopic(res.topic);
+        if (res.subject) setSubject(res.subject);
+        if (res.available_subjects) setAvailableSubjects(res.available_subjects);
         setEcoTree(res.eco_tree);
         setStageData(res.stage_data);
       } else {
         // Fallback default
         setIsOffline(true);
+        setError("Serverdan marafon ma'lumoti kelmadi (oflayn rejim).");
         setLoop(DEFAULT_FALLBACK_LOOP);
         setTopic({ id: 1, title: "O'zbekiston tarixi & DTM Standartlari", subject_name: "Tarix" });
         setStageData(DEFAULT_FALLBACK_STAGE_DATA);
       }
-    } catch {
+    } catch (err) {
       // Fallback default
       setIsOffline(true);
+      setError(err instanceof Error && err.message ? err.message : "Marafon holatini yuklab bo'lmadi.");
       setLoop(DEFAULT_FALLBACK_LOOP);
       setTopic({ id: 1, title: "O'zbekiston tarixi & DTM Standartlari", subject_name: "Tarix" });
       setStageData(DEFAULT_FALLBACK_STAGE_DATA);
@@ -531,8 +547,11 @@ export function useContinuousLoop() {
   }, [fetchLoop]);
 
   // Bosqichni oldinga surish (Advance Stage)
+  const isAdvancingRef = useRef(false);
   const advanceStage = useCallback(
     async (fromStage: LoopStage, payload: Record<string, any> = {}) => {
+      if (isAdvancingRef.current) return null;
+      isAdvancingRef.current = true;
       try {
         const res = await apiFetch<{
           ok: boolean;
@@ -569,45 +588,12 @@ export function useContinuousLoop() {
           await fetchLoop();
           return null;
         }
-        // Fallback optimistic local transition
-        setLoop((prev) => {
-          if (!prev) return prev;
-          let nextStage: LoopStage = 'STAGE_2_SPRINT';
-          let combo = prev.combo_multiplier;
-          let dtm = prev.dtm_score_delta;
-
-          if (fromStage === 'STAGE_1_WARMUP') {
-            nextStage = 'STAGE_2_SPRINT';
-            dtm += 0.4;
-          } else if (fromStage === 'STAGE_2_SPRINT') {
-            const mistakes = payload?.mistake_question_ids || [];
-            if (mistakes.length > 0) {
-              nextStage = 'STAGE_3_CLEANUP';
-              combo = 1.5;
-            } else {
-              nextStage = 'STAGE_4_ARENA';
-              combo = 2.0;
-            }
-            dtm += 1.2;
-          } else if (fromStage === 'STAGE_3_CLEANUP') {
-            nextStage = 'STAGE_4_ARENA';
-            combo = 2.0;
-            dtm += 0.6;
-          } else if (fromStage === 'STAGE_4_ARENA') {
-            nextStage = 'STAGE_5_COMPLETED';
-            combo = 2.5;
-            dtm += 0.8;
-          }
-
-          return {
-            ...prev,
-            current_stage: nextStage,
-            combo_multiplier: combo,
-            dtm_score_delta: dtm,
-            session_mistakes_ids: payload?.mistake_question_ids || prev.session_mistakes_ids,
-            is_chest_claimed: nextStage === 'STAGE_5_COMPLETED',
-          };
-        });
+        // Tarmoq / server xatosi: bosqich lokal SOXTA siljitilmaydi (LOOP-NEW-001)
+        toast.error(err instanceof Error && err.message
+          ? err.message
+          : "Bosqichni saqlab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.");
+      } finally {
+        isAdvancingRef.current = false;
       }
       return null;
     },
@@ -615,6 +601,7 @@ export function useContinuousLoop() {
   );
 
   // Javobni serverga yuborish (sprint yoki arena). Xatoda null — chaqiruvchi holatni tiklaydi.
+  const isSubmittingAnswerRef = useRef(false);
   const submitLoopAnswer = useCallback(
     async (
       stage: 'sprint' | 'arena',
@@ -622,6 +609,8 @@ export function useContinuousLoop() {
       optionId: number,
       revenge = false,
     ): Promise<LoopAnswerResult | null> => {
+      if (isSubmittingAnswerRef.current) return null;
+      isSubmittingAnswerRef.current = true;
       try {
         const res = await apiFetch<{ ok: boolean } & LoopAnswerResult>('/api/v1/loop/answer/', {
           method: 'POST',
@@ -639,6 +628,8 @@ export function useContinuousLoop() {
         }
         toast.error(err instanceof Error && err.message ? err.message : "Javobni yuborib bo'lmadi. Qayta urinib ko'ring.");
         return null;
+      } finally {
+        isSubmittingAnswerRef.current = false;
       }
     },
     [fetchLoop],
@@ -710,72 +701,138 @@ export function useContinuousLoop() {
     []
   );
 
+  // Fan tanlash va siklni shu fanga moslashtirish (Subject Switcher)
+  const switchSubject = useCallback(
+    async (subjectSlugOrId: string | number) => {
+      try {
+        setLoading(true);
+        const payload = typeof subjectSlugOrId === 'number'
+          ? { subject_id: subjectSlugOrId, force: true }
+          : { subject_slug: subjectSlugOrId, force: true };
+        const res = await apiFetch<{
+          ok: boolean;
+          loop: LoopState;
+          topic: LoopTopic;
+          subject: LoopSubject;
+          available_subjects?: LoopSubject[];
+          stage_data: LoopStageData;
+        }>('/api/v1/loop/set-subject/', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        if (res?.ok && res.loop) {
+          setLoop(res.loop);
+          if (res.topic) setTopic(res.topic);
+          if (res.subject) setSubject(res.subject);
+          if (res.available_subjects) setAvailableSubjects(res.available_subjects);
+          if (res.stage_data) setStageData(res.stage_data);
+          soundFX.celebrate();
+          tgHaptic('success');
+          toast.success(`Fan tanlandi: ${res.subject?.name || ''}`);
+          return true;
+        }
+      } catch (err) {
+        toast.error(err instanceof Error && err.message ? err.message : "Fanni o'zgartirib bo'lmadi.");
+        return false;
+      } finally {
+        setLoading(false);
+      }
+      return false;
+    },
+    []
+  );
+
   // 2.0x / 2.5x Super-Combo bilan keyingi siklni boshlash (Multi-cycle marafon)
+  const isRestartingRef = useRef(false);
   const restartCycle = useCallback(async () => {
-    tgHaptic('success');
-    soundFX.celebrate();
+    if (isRestartingRef.current) return false;
+    isRestartingRef.current = true;
     try {
       const res = await apiFetch<{
         ok: boolean;
         loop: LoopState;
+        topic?: LoopTopic;
+        eco_tree?: EcoTreeState;
         stage_data: LoopStageData;
         message: string;
       }>('/api/v1/loop/restart-cycle/', { method: 'POST' });
 
-      if (res?.ok) {
-        setLoop((prev) => (prev ? { ...prev, ...res.loop } : res.loop));
+      if (res?.ok && res.loop) {
+        tgHaptic('success');
+        soundFX.celebrate();
+        setLoop(res.loop);
+        if (res.topic) setTopic(res.topic);
+        if (res.eco_tree) setEcoTree(res.eco_tree);
         setStageData(res.stage_data);
         toast.success(res.message);
         return true;
       }
+      toast.error("Serverdan noto'g'ri javob keldi.");
+      return false;
     } catch (err) {
-      // Server yangi siklni rad etdi (joriy sikl tugamagan / kunlik limit) — xabar
-      // ko'rsatiladi; lokal "soxta" sikl ochilmaydi.
+      // Server yangi siklni rad etdi (409: sikl tugamagan; 429: kunlik limit) — xabar ko'rsatiladi;
+      // lokal "soxta" sikl ochilmaydi.
       if (err instanceof ApiError && (err.status === 409 || err.status === 429)) {
         toast.error(err.message);
         return false;
       }
-      // Fallback local multi-cycle transition (Offline / 404 da ham ishlaydi)
-      let nextCycle = 2;
-      setLoop((prev) => {
-        nextCycle = (prev?.cycle_number || 1) + 1;
-        const combo = nextCycle === 2 ? 2.0 : 2.5;
-        return {
-          id: (prev?.id || 1) + 1,
-          date: new Date().toISOString().split('T')[0],
-          cycle_number: nextCycle,
-          current_stage: 'STAGE_1_WARMUP',
-          combo_multiplier: combo,
-          dtm_score_delta: (prev?.dtm_score_delta || 0) + 0.4,
-          session_mistakes_ids: [],
-          is_chest_claimed: false,
-        };
-      });
 
-      setEcoTree((prev) => {
-        const nextWater = Math.min(100, (prev?.water_level || 35) + 35);
-        const stageName = nextWater >= 100 ? 'Chinor' : nextWater >= 70 ? "Ko'chat" : "Nihol";
-        const growthStage = nextWater >= 100 ? 4 : nextWater >= 70 ? 2 : 1;
-        return {
-          ...prev,
-          water_level: nextWater,
-          stage_name: stageName,
-          growth_stage: growthStage,
-          total_cycles_completed: (prev?.total_cycles_completed || 0) + 1,
-          needs_water: false,
-        };
-      });
+      // Offline / demo fallback FAQAT explicit development flag yoqilganda ishlaydi (LOOP-NEW-001).
+      // Production muhitida hech qachon avtomatik yoqilmaydi!
+      const allowOfflineDemo =
+        process.env.NEXT_PUBLIC_ENABLE_LOOP_OFFLINE_DEMO === 'true' &&
+        process.env.NODE_ENV !== 'production';
 
-      // Keyingi raund uchun yangi mavzu
-      const nextTopicTitle = nextCycle === 2
-        ? "Amir Temur va Temuriylar saltanati (BMB Standarti)"
-        : "O'zbekiston tarixi: Xonliklar davri va DTM Qopqonlari";
-      setTopic({ id: nextCycle, title: nextTopicTitle, subject_name: "Tarix" });
+      if (allowOfflineDemo) {
+        let nextCycle = 2;
+        setLoop((prev) => {
+          nextCycle = (prev?.cycle_number || 1) + 1;
+          const combo = nextCycle === 2 ? 2.0 : 2.5;
+          return {
+            id: (prev?.id || 1) + 1,
+            date: new Date().toISOString().split('T')[0],
+            cycle_number: nextCycle,
+            current_stage: 'STAGE_1_WARMUP',
+            combo_multiplier: combo,
+            dtm_score_delta: (prev?.dtm_score_delta || 0) + 0.4,
+            session_mistakes_ids: [],
+            is_chest_claimed: false,
+          };
+        });
 
-      toast.success(`🔥 ${nextCycle}-Raund Super-Combo bilan boshlandi! (+35% suv)`);
-      return true;
+        setEcoTree((prev) => {
+          const nextWater = Math.min(100, (prev?.water_level || 35) + 35);
+          const stageName = nextWater >= 100 ? 'Chinor' : nextWater >= 70 ? "Ko'chat" : "Nihol";
+          const growthStage = nextWater >= 100 ? 4 : nextWater >= 70 ? 2 : 1;
+          return {
+            ...prev,
+            water_level: nextWater,
+            stage_name: stageName,
+            growth_stage: growthStage,
+            total_cycles_completed: (prev?.total_cycles_completed || 0) + 1,
+            needs_water: false,
+          };
+        });
+
+        const nextTopicTitle = nextCycle === 2
+          ? "Amir Temur va Temuriylar saltanati (BMB Standarti)"
+          : "O'zbekiston tarixi: Xonliklar davri va DTM Qopqonlari";
+        setTopic({ id: nextCycle, title: nextTopicTitle, subject_name: "Tarix" });
+
+        toast.success(`[DEMO] 🔥 ${nextCycle}-Raund boshlandi (+35% suv)`);
+        return true;
+      }
+
+      // Production rejimida va server/tarmoq xatosida: HECH QACHON soxta success yoki mukofot berilmaydi!
+      const errorMsg =
+        err instanceof Error && err.message
+          ? err.message
+          : "Tarmoq xatosi: keyingi siklni boshlab bo'lmadi. Qayta urinib ko'ring.";
+      toast.error(errorMsg);
+      return false;
+    } finally {
+      isRestartingRef.current = false;
     }
-    return false;
   }, []);
 
   // Chiqishni boshqarish
@@ -792,6 +849,8 @@ export function useContinuousLoop() {
     error,
     loop,
     topic,
+    subject,
+    availableSubjects,
     ecoTree,
     stageData,
     fetchLoop,
@@ -808,6 +867,7 @@ export function useContinuousLoop() {
     // Actions
     shareToFeed,
     restartCycle,
+    switchSubject,
     // Loss Aversion Guard
     showExitModal,
     setShowExitModal,

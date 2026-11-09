@@ -68,4 +68,7 @@ def rankings_api(request):
         'my_group': my_group,
         'subjects': [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in subjects],
         'selected_view': view,
+        'micro_league': services.get_weekly_micro_league(profile),
+        'otm_simulator': services.get_otm_mandat_simulator(profile, request.GET.get('otm')),
+        'clans': services.get_clans_ranking(profile),
     })

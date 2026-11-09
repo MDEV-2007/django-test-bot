@@ -1,0 +1,4611 @@
+[
+ {
+  "path": "/api/auth/config/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "accounts.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/login/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 401,
+  "teacher": 401
+ },
+ {
+  "path": "/api/auth/register/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "accounts.api",
+  "anon": 400,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/auth/google/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 401,
+  "teacher": 401
+ },
+ {
+  "path": "/api/auth/telegram/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "accounts.api",
+  "anon": 400,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/auth/refresh/",
+  "method": "POST",
+  "perms": [],
+  "src": "backend/accounts/api.py:260",
+  "anon": 400,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/auth/me/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/profile/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/profile/",
+  "method": "PATCH",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/profile/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/profile/",
+  "method": "PUT",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/subscription/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/subscription/check/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/auth/onboarding-complete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "accounts.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/b2b/active-campaign/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "b2b_ads.views",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/b2b/submit-lead/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "b2b_ads.views",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/b2b/track/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "b2b_ads.views",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/system/feature-flags/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "core.views",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/system/admin/feature-flags/",
+  "method": "PATCH",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/v1/system/admin/feature-flags/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/v1/system/cheat-sheet/<int:topic_id>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "core.views",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/system/parent-radar/status/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/system/parent-radar/invoice/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/system/class-battles/my/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/system/class-battles/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/v1/system/class-battles/<str:pin_code>/join/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/v1/system/class-battles/<int:room_id>/state/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/system/class-battles/<int:room_id>/start/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/system/class-battles/<int:room_id>/finish/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/system/class-battles/<int:room_id>/submit/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/system/class-battles/<int:room_id>/analytics/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/system/ads/targeted-offer/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "core.views",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/system/ads/lead-submit/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/system/profile/radar/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/core/feature-flags/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "core.views",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/core/admin/feature-flags/",
+  "method": "PATCH",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/core/admin/feature-flags/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/core/cheat-sheet/<int:topic_id>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "core.views",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/core/parent-radar/status/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/core/parent-radar/invoice/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/core/class-battles/my/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/core/class-battles/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/core/class-battles/<str:pin_code>/join/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/core/class-battles/<int:room_id>/state/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/core/class-battles/<int:room_id>/start/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/core/class-battles/<int:room_id>/finish/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/core/class-battles/<int:room_id>/submit/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/core/class-battles/<int:room_id>/analytics/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/core/ads/targeted-offer/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "core.views",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/core/ads/lead-submit/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/core/profile/radar/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "core.views",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/dashboard/home/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "dashboard.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/dashboard/daily-chest/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "dashboard.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/dashboard/daily-chest/open/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "dashboard.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/dashboard/notifications/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "dashboard.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/dashboard/notifications/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "dashboard.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/dashboard/landing-leaderboard/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "dashboard.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/dashboard/landing-reviews/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "dashboard.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/<int:test_id>/lobby/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/<int:test_id>/remind/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/<int:test_id>/broadcast/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/tests/<int:test_id>/start/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/start-random/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/start-mistakes/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/tests/mistakes-summary/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/question/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/finish/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/exam/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.cefr_api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/exam/answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.cefr_api",
+  "anon": 401,
+  "student": 409,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/annotations/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.cefr_api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/exam/audio-play/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.cefr_api",
+  "anon": 401,
+  "student": 409,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/writing-review/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.cefr_api",
+  "anon": 401,
+  "student": 402,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/feedback/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/survey/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/survey/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/story-link/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/story/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "tests_app.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/history/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/revision/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/revision/<int:item_id>/check/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/tab-switch/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/tests/stress-config/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "tests_app.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/start-stress/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/tests/attempts/<int:attempt_id>/bubble-answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "tests_app.api",
+  "anon": 401,
+  "student": 409,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/sprint/subjects/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/sprint/views.py:29",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/sprint/questions/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:269",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/sprint/answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:362",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/sprint/explain-mistake/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:70",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/sprint/resolve-revenge/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:227",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/sprint/subjects/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/sprint/views.py:29",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/sprint/questions/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:269",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/sprint/answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:362",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/sprint/explain-mistake/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:70",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/sprint/resolve-revenge/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/sprint/views.py:227",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/loop/current/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:317",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/loop/answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:377",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/loop/advance-stage/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:427",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/loop/share-post/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:583",
+  "anon": 401,
+  "student": 409,
+  "teacher": 409
+ },
+ {
+  "path": "/api/v1/loop/restart-cycle/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:635",
+  "anon": 401,
+  "student": 409,
+  "teacher": 409
+ },
+ {
+  "path": "/api/loop/current/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:317",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/loop/answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:377",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/loop/advance-stage/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:427",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/loop/share-post/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:583",
+  "anon": 401,
+  "student": 409,
+  "teacher": 409
+ },
+ {
+  "path": "/api/loop/restart-cycle/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/learning_loop/views.py:635",
+  "anon": 401,
+  "student": 409,
+  "teacher": 409
+ },
+ {
+  "path": "/api/growth/open-question/evaluate/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/growth/views.py:15",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/growth/essay/evaluate/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/growth/views.py:68",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/growth/onboarding-blitz/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/growth/views.py:147",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/growth/onboarding/blitz/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/growth/views.py:147",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/growth/onboarding/blitz/answer/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/growth/views.py:220",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/growth/status/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/growth/views.py:255",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/growth/arena/matchmake/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/growth/arena_views.py:83",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/growth/arena/record-replay/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/growth/arena_views.py:151",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/growth/arena/create-duel/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/growth/arena_views.py:194",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/growth/arena/duel/<str:duel_token>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/growth/arena_views.py:247",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/growth/arena/duel/<str:duel_token>/submit/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/growth/arena_views.py:286",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/leaderboard/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "leaderboard.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/battles/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "battles.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/battles/online/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "battles.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/battles/start-quiz/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "battles.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/battles/submit-round/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "battles.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/battles/finish/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "battles.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/shop/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "shop.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/shop/inventory/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "shop.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/shop/buy/<slug:slug>/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "shop.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/shop/equip/<slug:slug>/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "shop.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/shop/unequip/<slug:slug>/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "shop.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/premium/public-plans/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "premium.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/premium/plans/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "premium.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/premium/checkout/<int:plan_id>/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/premium/api.py:63",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/premium/checkout/<int:plan_id>/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/premium/api.py:63",
+  "anon": 401,
+  "student": 415,
+  "teacher": 415
+ },
+ {
+  "path": "/api/premium/parent-checkout/<str:token>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/premium/api.py:120",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/premium/parent-checkout/<str:token>/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "backend/premium/api.py:120",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/premium/payments/<int:payment_id>/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "premium.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/premium/payments/<int:payment_id>/screenshot/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "backend/premium/api.py:205",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/premium/my-payments/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "premium.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/classroom/mocks/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "classroom.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/classroom/mocks/<int:mock_id>/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "classroom.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/classroom/mocks/<int:mock_id>/start/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "classroom.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/classroom/mocks/<int:mock_id>/leaderboard/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "classroom.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/classroom/attempts/<int:mock_attempt_id>/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "classroom.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/classroom/attempts/<int:mock_attempt_id>/submit/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "classroom.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/toggle-bookmark/<int:lesson_id>/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/mentor/stream/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "backend/learning/api.py:33",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/learning/flashcards/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/flashcards/complete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/flashcards/<str:deck_id>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/study/start/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/study/complete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/reels/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/reels/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/learning/reels/quiz/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 500,
+  "teacher": 500
+ },
+ {
+  "path": "/api/learning/reels/<int:reel_id>/comments/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/reels/<int:reel_id>/comments/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/feed/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/create-auto/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/auto-post/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/react/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/comments/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/comments/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/pin/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/vote-poll/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/learning/feed/<int:post_id>/report/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/stories/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/stories/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/library/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/learning/library/<int:book_id>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/library/<int:book_id>/bookmark/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/learning/library/<int:book_id>/download/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/toggle-bookmark/<int:lesson_id>/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/mentor/stream/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsChannelSubscribed"
+  ],
+  "src": "backend/learning/api.py:33",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/learning/flashcards/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/flashcards/complete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/flashcards/<str:deck_id>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/study/start/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/study/complete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/reels/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/reels/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/learning/reels/quiz/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 500,
+  "teacher": 500
+ },
+ {
+  "path": "/api/v1/learning/reels/<int:reel_id>/comments/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/reels/<int:reel_id>/comments/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/feed/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/feed/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/feed/create-auto/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/feed/auto-post/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/react/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/comments/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/comments/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/pin/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/vote-poll/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/v1/learning/feed/<int:post_id>/report/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/stories/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/stories/create/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/library/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/v1/learning/library/<int:book_id>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/library/<int:book_id>/bookmark/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "learning.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/v1/learning/library/<int:book_id>/download/",
+  "method": "POST",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "learning.api",
+  "anon": 404,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/tests/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/tests/create/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 400
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/info/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/info/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/info/",
+  "method": "PUT",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/build/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/preview/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/publish/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/results/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/reorder/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/make-game/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/sections/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/sections/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/sections/<int:sid>/",
+  "method": "DELETE",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/sections/<int:sid>/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/sections/<int:sid>/",
+  "method": "PUT",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/questions/add/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/questions/bulk/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/ai-parse/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/questions/<int:qid>/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/questions/<int:qid>/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/questions/<int:qid>/",
+  "method": "PUT",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/questions/<int:qid>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/questions/<int:qid>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/attempts/<int:attempt_id>/grade/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/tests/<int:pk>/attempts/<int:attempt_id>/grade/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/surveys/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/topics/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/lessons/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/lessons/create/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 400
+ },
+ {
+  "path": "/api/teacher/lessons/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/lessons/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/lessons/<int:pk>/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/lessons/<int:pk>/",
+  "method": "PUT",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/lessons/<int:pk>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/games/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/games/create/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 400
+ },
+ {
+  "path": "/api/teacher/games/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/games/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/games/<int:pk>/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/games/<int:pk>/",
+  "method": "PUT",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/games/<int:pk>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsTeacher"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/teacher/register/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/teacher/me/referral-link/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/me/dashboard/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 200
+ },
+ {
+  "path": "/api/teacher/me/students/<int:student_id>/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "teacher.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 404
+ },
+ {
+  "path": "/api/panel/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/create/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/edit/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/edit/",
+  "method": "PUT",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/toggle-block/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/reset-password/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/adjust/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/set-premium/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/<int:pk>/impersonate/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/teachers/<int:pk>/verify/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stop-impersonation/",
+  "method": "POST",
+  "perms": [],
+  "src": "panel.api",
+  "anon": 400,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/panel/teachers/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/teachers/create/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/subjects/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/subjects/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/subjects/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/subjects/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/subjects/<int:pk>/",
+  "method": "PUT",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/shop/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/shop/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/shop/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/shop/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/shop/<int:pk>/",
+  "method": "PUT",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/bulk/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/edit/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/edit/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/edit/",
+  "method": "PUT",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/audio/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/audio/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/duplicate/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/toggle-publish/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/review/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/testsets/<int:pk>/review/<int:question_pk>/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/lessons/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/lessons/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/lessons/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/lessons/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/lessons/<int:pk>/",
+  "method": "PUT",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/games/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/games/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/games/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/games/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/games/<int:pk>/",
+  "method": "PUT",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/attempts/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/attempts/export/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/attempts/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/payments/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/payments/<int:pk>/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/payments/<int:pk>/approve/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/payments/<int:pk>/reject/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/payments/grant/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/settings/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/settings/",
+  "method": "PUT",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/audit-log/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/broadcast/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/broadcast/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/broadcast/<int:pk>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/surveys/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/surveys/<int:pk>/toggle-featured/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/surveys/create/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/surveys/<int:pk>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/mocks/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/mocks/live/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/mocks/<int:pk>/remind/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/mocks/export/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/mocks/export-pdf/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/promocodes/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/promocodes/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/promocodes/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/promocodes/<int:pk>/toggle/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/finance/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/telegram/status/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/telegram/channels/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/telegram/channels/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/telegram/channels/<int:pk>/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/telegram/reset-menu/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/users/export/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/health/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/flush-cache/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/logs/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/anti-cheat/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/backup/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/backups/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/backups/download/<str:filename>/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "panel.api",
+  "anon": 403,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/system/ai-usage/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/certificate/<int:attempt_pk>/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/broadcast/schedule/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/marketing/analytics/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.marketing_api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/marketing/telegram-post/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.marketing_api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/features/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/features/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/features/public/",
+  "method": "GET",
+  "perms": [
+   "AllowAny"
+  ],
+  "src": "panel.api",
+  "anon": 200,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/panel/features/<str:key>/toggle/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/",
+  "method": "DELETE",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/",
+  "method": "PATCH",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>",
+  "method": "DELETE",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>",
+  "method": "PATCH",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/delete",
+  "method": "DELETE",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/<int:reel_id>/delete",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/hardest-questions/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/reels/hardest-questions",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated",
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/<int:post_id>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/<int:post_id>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/<int:post_id>/delete",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/<int:post_id>/delete",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/<int:post_id>/pin/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/<int:post_id>/visibility/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/community/<int:post_id>/pin",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories/create/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories/create",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories/<int:story_id>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories/<int:story_id>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories/<int:story_id>/delete",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stories/<int:story_id>/delete",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/create/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/create",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/edit/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/edit",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/toggle/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/toggle",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/delete/",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/delete/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/delete",
+  "method": "DELETE",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/<int:campaign_id>/delete",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/leads/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/leads/<int:lead_id>/status/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/campaigns/leads",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stress-exam/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stress-exam/",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stress-exam",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/panel/stress-exam",
+  "method": "POST",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "panel.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/games/timeline/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "games.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/games/timeline/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "games.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/games/map/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "games.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/games/map/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "games.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/games/character/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "games.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/games/character/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "games.api",
+  "anon": 401,
+  "student": 404,
+  "teacher": 404
+ },
+ {
+  "path": "/api/analytics/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "analytics.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/analytics/predicted-score/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "analytics.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/analytics/score-history/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "analytics.api",
+  "anon": 401,
+  "student": 200,
+  "teacher": 200
+ },
+ {
+  "path": "/api/analytics/tagging-status/",
+  "method": "GET",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "analytics.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ },
+ {
+  "path": "/api/analytics/event/",
+  "method": "POST",
+  "perms": [
+   "IsAuthenticated"
+  ],
+  "src": "analytics.api",
+  "anon": 401,
+  "student": 400,
+  "teacher": 400
+ },
+ {
+  "path": "/api/analytics/growth/",
+  "method": "GET",
+  "perms": [
+   "IsSuperAdmin"
+  ],
+  "src": "analytics.api",
+  "anon": 401,
+  "student": 403,
+  "teacher": 403
+ }
+]

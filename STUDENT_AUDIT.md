@@ -159,3 +159,11 @@ huquqiy muammo tug'diradi.
 - Learning Loop 1-raund boshidan oxirigacha o'tdi, sandiq va mukofot server tomonda to'g'ri.
 - Barcha sahifalar 375px da gorizontal toshmaydi, API xatosi yo'q.
 - AI Mentor to'g'ri javob berdi.
+
+
+
+
+
+
+
+

@@ -113,7 +113,10 @@ def get_equipped(profile):
     currently-equipped cosmetics. Cached per profile so the context processor that runs
     on every page render is a single cache hit, not a DB query."""
     key = EQUIPPED_CACHE_KEY.format(pid=profile.pk)
-    data = cache.get(key)
+    try:
+        data = cache.get(key)
+    except Exception:
+        data = None
     if data is None:
         data = {}
         qs = (InventoryItem.objects
@@ -128,7 +131,10 @@ def get_equipped(profile):
                 'rarity': inv.item.rarity,
                 'payload': inv.item.payload,
             }
-        cache.set(key, data, EQUIPPED_CACHE_TTL)
+        try:
+            cache.set(key, data, EQUIPPED_CACHE_TTL)
+        except Exception:
+            pass
     return data
 
 
@@ -164,7 +170,10 @@ def display_avatar_url(profile_avatar_url, cosmetics):
 
 
 def _bust_equipped_cache(profile_pk):
-    cache.delete(EQUIPPED_CACHE_KEY.format(pid=profile_pk))
+    try:
+        cache.delete(EQUIPPED_CACHE_KEY.format(pid=profile_pk))
+    except Exception:
+        pass
 
 
 # --- Streak Freeze (Feature 6) -------------------------------------------------

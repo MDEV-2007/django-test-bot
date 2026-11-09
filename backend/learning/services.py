@@ -1,6 +1,6 @@
 import re
 import time
-from datetime import date
+from django.utils import timezone
 from django.core.cache import cache
 from django.db.models import Q
 from core.ai_client import ask_groq
@@ -26,7 +26,7 @@ def _mentor_ai_allowed(user_id, is_pro=False):
     still under the daily limit. Uses the cache (resets naturally at end of day).
     PRO users get a higher limit (mentor_daily_limit), not an unlimited one — every
     answer is a paid Groq call."""
-    key = f"mentor_ai:{user_id}:{date.today().isoformat()}"
+    key = f"mentor_ai:{user_id}:{timezone.localdate().isoformat()}"
     try:
         count = cache.get_or_set(key, 0, 60 * 60 * 26)
         cache.incr(key)

@@ -104,7 +104,10 @@ class LearningLoopFlowTests(TestCase):
         current = self.client.get('/api/v1/loop/current/').json()
         self.assertEqual(self._advance('STAGE_1_WARMUP').status_code, 200)
         answer_loop_questions(self.client, 'sprint', stage_question_ids(current, 'sprint'))
-        self.assertEqual(self._advance('STAGE_2_SPRINT').status_code, 200)
+        res_sprint = self._advance('STAGE_2_SPRINT')
+        self.assertEqual(res_sprint.status_code, 200)
+        if res_sprint.json().get('current_stage') == 'STAGE_3_CLEANUP':
+            self.assertEqual(self._advance('STAGE_3_CLEANUP').status_code, 200)
         answer_loop_questions(self.client, 'arena', stage_question_ids(current, 'arena'))
         self.assertEqual(self._advance('STAGE_4_ARENA').status_code, 200)
 

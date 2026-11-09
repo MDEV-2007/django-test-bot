@@ -1,4 +1,5 @@
 import hashlib
+import os
 import hmac
 import logging
 import re
@@ -62,13 +63,31 @@ def generate_unique_username(base: str) -> str:
 # super-admin accounts also use, without a heavyweight dependency.
 LOGIN_MAX_FAILURES = 8
 LOGIN_LOCKOUT_SECONDS = 15 * 60
+# Per-username cap that does not depend on the caller's IP at all: an attacker rotating
+# IPs (botnet, proxies) still gets at most this many guesses per window for one account.
+LOGIN_MAX_FAILURES_PER_USERNAME = 30
+LOGIN_USERNAME_WINDOW_SECONDS = 60 * 60
 
 
-def _client_ip(request):
+def client_ip(request):
+    """The real client IP.
+
+    Production runs behind our own nginx, which sets `X-Real-IP $remote_addr` (it
+    overwrites anything the client sent) and APPENDS to `X-Forwarded-For`. The first XFF
+    entry is therefore whatever the client typed — trusting it let an attacker rotate a
+    fake header and bypass the login lockout (audit AUTH-001). Prefer X-Real-IP, then the
+    LAST XFF hop (added by our proxy), then the socket address.
+    """
+    real_ip = (request.META.get('HTTP_X_REAL_IP') or '').strip()
+    if real_ip:
+        return real_ip
     xff = request.META.get('HTTP_X_FORWARDED_FOR', '')
     if xff:
-        return xff.split(',')[0].strip()
+        return xff.split(',')[-1].strip()
     return request.META.get('REMOTE_ADDR', 'unknown')
+
+
+_client_ip = client_ip  # backward-compatible alias
 
 
 def _login_throttle_key(username, ip):
@@ -76,22 +95,45 @@ def _login_throttle_key(username, ip):
     return f"login_fail:{ident}"
 
 
+def _login_username_key(username):
+    ident = hashlib.sha256((username or '').lower().encode('utf-8')).hexdigest()[:32]
+    return f"login_fail_user:{ident}"
+
+
+def _bump(key, ttl):
+    try:
+        cache.add(key, 0, ttl)
+        cache.incr(key)
+    except ValueError:
+        try:
+            cache.set(key, 1, ttl)
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+
 def login_is_locked(request, username):
-    key = _login_throttle_key(username, _client_ip(request))
-    return (cache.get(key, 0) or 0) >= LOGIN_MAX_FAILURES
+    ip_key = _login_throttle_key(username, client_ip(request))
+    try:
+        if (cache.get(ip_key, 0) or 0) >= LOGIN_MAX_FAILURES:
+            return True
+        return (cache.get(_login_username_key(username), 0) or 0) >= LOGIN_MAX_FAILURES_PER_USERNAME
+    except Exception:
+        return False
 
 
 def login_record_failure(request, username):
-    key = _login_throttle_key(username, _client_ip(request))
-    try:
-        cache.add(key, 0, LOGIN_LOCKOUT_SECONDS)
-        cache.incr(key)
-    except ValueError:
-        cache.set(key, 1, LOGIN_LOCKOUT_SECONDS)
+    _bump(_login_throttle_key(username, client_ip(request)), LOGIN_LOCKOUT_SECONDS)
+    _bump(_login_username_key(username), LOGIN_USERNAME_WINDOW_SECONDS)
 
 
 def login_clear_failures(request, username):
-    cache.delete(_login_throttle_key(username, _client_ip(request)))
+    try:
+        cache.delete(_login_throttle_key(username, client_ip(request)))
+        cache.delete(_login_username_key(username))
+    except Exception:
+        pass
 
 
 def send_telegram_message(chat_id: str, text: str) -> bool:
@@ -400,7 +442,58 @@ def sync_telegram_avatar(tg_id: str) -> str | None:
 
 # initData imzosi to'g'ri bo'lsa ham, undagi auth_date shu muddatdan eski bo'lsa
 # rad etiladi — o'g'irlangan/eski initData'ni qayta ishlatish (replay) hujumidan himoya.
-TELEGRAM_INITDATA_MAX_AGE_SECONDS = 24 * 60 * 60  # 24 soat
+# Mini App har ochilishda initData'ni qayta imzolaydi, shuning uchun uzoq muddat kerak emas.
+# 24 soat edi — o'g'irlangan initData bir kun davomida yangi 30 kunlik sessiya berardi (AUTH-005).
+TELEGRAM_INITDATA_MAX_AGE_SECONDS = int(os.environ.get('TELEGRAM_INITDATA_MAX_AGE_SECONDS', str(15 * 60)))
+TELEGRAM_AUTH_MAX_AGE_SECONDS = TELEGRAM_INITDATA_MAX_AGE_SECONDS
+_TG_REPLAY_SOURCE = 'tg_initdata_hash'
+
+
+def cleanup_expired_telegram_initdata(now_ts: float | int | None = None) -> int:
+    """Delete expired Telegram initData replay ledger rows (SEC-002).
+
+    Only rows whose `auth_date` (or `created_at` for legacy rows) is older than the
+    `TELEGRAM_INITDATA_MAX_AGE_SECONDS` window + 60s clock-skew buffer are pruned, so:
+      - Active `initData` within the 15-minute window is never deleted.
+      - Any `initData` whose ledger row was deleted is already older than 15 minutes and
+        is unconditionally rejected by the `auth_date` age check.
+    """
+    import time as _time
+    from datetime import timedelta
+    from django.db.models import Q
+    from django.utils import timezone
+    from core.models import RewardClaim
+
+    now = int(now_ts if now_ts is not None else _time.time())
+    retention_seconds = TELEGRAM_INITDATA_MAX_AGE_SECONDS + 60
+    cutoff_ts = now - retention_seconds
+    cutoff_dt = timezone.now() - timedelta(seconds=retention_seconds)
+    deleted, _ = (
+        RewardClaim.objects.filter(source='tg_initdata_hash')
+        .filter(
+            Q(count__gt=1, count__lt=cutoff_ts)
+            | Q(count__lte=1, created_at__lt=cutoff_dt)
+        )
+        .delete()
+    )
+    return deleted
+
+
+def _claim_telegram_initdata_once(received_hash: str, auth_date: int) -> bool:
+    """Atomically record `received_hash` in the durable replay ledger with its `auth_date`."""
+    from django.db import IntegrityError, transaction
+    from core.models import RewardClaim
+    from core.reward_caps import _ONCE_DAY
+
+    key = dict(subject_id=0, source='tg_initdata_hash', day=_ONCE_DAY, item=str(received_hash)[:128])
+    if RewardClaim.objects.filter(**key).exists():
+        return False
+    try:
+        with transaction.atomic():
+            RewardClaim.objects.create(**key, count=int(auth_date))
+        return True
+    except IntegrityError:
+        return False
 
 
 def verify_telegram_webapp_data(init_data_str: str, bot_token: str) -> bool:
@@ -443,11 +536,18 @@ def verify_telegram_webapp_data(init_data_str: str, bot_token: str) -> bool:
 
         # --- auth_date muddati: imzo to'g'ri, lekin juda eski bo'lsa ham rad etamiz ---
         import time as _time
+        now = _time.time()
         auth_date = int(parsed.get('auth_date', ['0'])[0])
-        if auth_date <= 0:
+        if auth_date <= 0 or auth_date > now + 60:
             return False
-        if _time.time() - auth_date > TELEGRAM_INITDATA_MAX_AGE_SECONDS:
+        if now - auth_date > TELEGRAM_INITDATA_MAX_AGE_SECONDS:
             logger.warning("Telegram initData rad etildi: auth_date juda eski (%s)", auth_date)
+            return False
+
+        # --- Replay himoyasi (SEC-002): bir xil imzolangan initData ikkinchi marta qabul qilinmaydi ---
+        cleanup_expired_telegram_initdata(now)
+        if not _claim_telegram_initdata_once(received_hash, auth_date):
+            logger.warning("Telegram initData rad etildi: replay aniqlandi")
             return False
 
         return True

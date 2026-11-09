@@ -369,6 +369,28 @@ class TestSet(models.Model):
     def __str__(self):
         return f"{self.title} ({self.questions.count()} savol)"
 
+    reminder_15m_sent_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Jonli mock boshlanishiga 15 daqiqa qolganda eslatma jo'natilgan vaqt.",
+    )
+    prize_description = models.CharField(
+        max_length=300, blank=True, default='',
+        help_text="Respublika Mock sovrin jamg'armasi yoki sovg'alar tavsifi (masalan: '1-o'rin 500 000 so'm + Sertifikat').",
+    )
+
+    def clean(self):
+        errors = {}
+        if self.duration_minutes is not None and self.duration_minutes <= 0:
+            errors['duration_minutes'] = "Imtihon davomiyligi 0 dan katta bo'lishi kerak."
+        if self.price is not None and self.price < 0:
+            errors['price'] = "Test narxi manfiy bo'lishi mumkin emas."
+        if self.is_live_mock and not self.scheduled_at:
+            errors['scheduled_at'] = "Jonli mock imtihon uchun boshlanish vaqti (scheduled_at) kiritilishi shart."
+        if self.pk and self.is_published and self.is_live_mock and not self.questions.exists():
+            errors['is_published'] = "Savollari bo'lmagan jonli mock imtihonni nashr etib bo'lmaydi."
+        if errors:
+            raise ValidationError(errors)
+
     def ordered_questions(self):
         """Questions in the teacher-defined drag-drop order (question_order), with any
         questions not yet in that list appended by id. Falls back to plain id order when
@@ -657,7 +679,9 @@ def normalize_gap_answer(value):
     text = (value or '').strip().lower()
     for curly, plain in (('’', "'"), ('‘', "'"), ('“', '"'), ('”', '"')):
         text = text.replace(curly, plain)
-    text = re.sub(r"[^\w\s'\-]", ' ', text, flags=re.UNICODE)
+    # Valyuta va foiz belgilari ma'noni o'zgartiradi ("$50" != "£50"); chiziqcha esa yo'q
+    # ("NOT-GIVEN" == "NOT GIVEN") — audit GRADE-007. Ikkala tomon ham shu funksiyadan o'tadi.
+    text = re.sub(r"[^\w\s'£$€%]", ' ', text, flags=re.UNICODE)
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
@@ -821,3 +845,67 @@ class StressExamConfig(models.Model):
         ]
         obj, _ = cls.objects.get_or_create(id=1, defaults={'supervisor_messages': default_messages})
         return obj
+
+
+
+class MockRegistration(models.Model):
+    """Respublika Mock imtihoniga ro'yxatdan o'tish, to'lov holati va sovrin auditi."""
+    STATUS_CHOICES = [
+        ('PENDING_PAYMENT', "To'lov kutilmoqda"),
+        ('CONFIRMED', "Tasdiqlangan"),
+        ('CANCELLED', "Bekor qilingan"),
+        ('REFUNDED', "To'lov qaytarilgan"),
+        ('DISQUALIFIED', "Chetlatilgan (Anti-cheat)"),
+    ]
+    PRIZE_STATUS_CHOICES = [
+        ('NOT_ELIGIBLE', "Sovrinsiz"),
+        ('PENDING_REVIEW', "Ko'rib chiqilmoqda"),
+        ('APPROVED', "Sovrin tasdiqlandi"),
+        ('PAID', "Topshirildi / To'landi"),
+        ('DISPUTED', "Shikoyat / Bahsli"),
+    ]
+
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='mock_registrations')
+    test = models.ForeignKey(TestSet, on_delete=models.CASCADE, related_name='mock_registrations')
+    registration_id = models.CharField(max_length=24, unique=True, db_index=True)
+    full_name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=30)
+    region = models.CharField(max_length=80, blank=True, default='')
+    status = models.CharField(max_length=24, choices=STATUS_CHOICES, default='PENDING_PAYMENT', db_index=True)
+    payment = models.ForeignKey(
+        'premium.Payment', on_delete=models.SET_NULL, null=True, blank=True, related_name='mock_registrations'
+    )
+    registered_at = models.DateTimeField(auto_now_add=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    prize_status = models.CharField(max_length=24, choices=PRIZE_STATUS_CHOICES, default='NOT_ELIGIBLE', db_index=True)
+    prize_title = models.CharField(max_length=200, blank=True, default='')
+    prize_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    admin_note = models.TextField(blank=True, default='')
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+'
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-registered_at']
+        constraints = [
+            models.UniqueConstraint(fields=['profile', 'test'], name='unique_profile_mock_registration'),
+        ]
+
+    @classmethod
+    def generate_registration_id(cls, test_id: int) -> str:
+        import secrets
+        for _ in range(20):
+            code = f"RM-{test_id}-{secrets.token_hex(3).upper()}"
+            if not cls.objects.filter(registration_id=code).exists():
+                return code
+        return f"RM-{test_id}-{secrets.token_hex(5).upper()}"
+
+    def save(self, *args, **kwargs):
+        if not self.registration_id:
+            self.registration_id = self.generate_registration_id(self.test_id or 0)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.registration_id} — {self.full_name} ({self.status})"

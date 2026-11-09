@@ -19,6 +19,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from core.parsers import ObjectJSONParser
 
 from accounts.models import Profile, ensure_profile_for_user
 from accounts.permissions import IsTeacher
@@ -367,7 +368,7 @@ def _type_data(request):
 
 @api_view(['POST'])
 @permission_classes([IsTeacher])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def question_add_api(request, pk):
     test = _own_test(request, pk)
     form = QuestionBaseForm(request.data, request.FILES)
@@ -396,7 +397,7 @@ def question_add_api(request, pk):
 
 @api_view(['POST'])
 @permission_classes([IsTeacher])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def test_ai_parse_api(request, pk):
     """Word (.docx), PDF (.pdf) yoki matndan AI orqali test savollarini avtomatik ajratish."""
     test = _own_test(request, pk)
@@ -478,7 +479,7 @@ def question_bulk_api(request, pk):
 
 @api_view(['GET', 'POST', 'PUT'])
 @permission_classes([IsTeacher])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def question_detail_api(request, pk, qid):
     test = _own_test(request, pk)
     question = get_object_or_404(Question, pk=qid, test_sets=test)
@@ -1165,7 +1166,7 @@ def _save_section(section, data, files):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsTeacher])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def sections_api(request, pk):
     """Testning CEFR partlari: ro'yxat va yangisini yaratish.
 
@@ -1194,7 +1195,7 @@ def sections_api(request, pk):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsTeacher])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
+@parser_classes([MultiPartParser, FormParser, ObjectJSONParser])
 def section_detail_api(request, pk, sid):
     test = _own_test(request, pk)
     section = get_object_or_404(ExamSection, pk=sid, test_set=test)

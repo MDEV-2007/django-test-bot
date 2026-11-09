@@ -1,0 +1,1327 @@
+{
+ "note": "Synthetic audit cases (2026-11). expected=True cases may go to AI; expected=False must never pass deterministically.",
+ "cases": [
+  {
+   "id": "GC-001",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "exact",
+   "student_answer": "Amir Temur"
+  },
+  {
+   "id": "GC-002",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "lowercase",
+   "student_answer": "amir temur"
+  },
+  {
+   "id": "GC-003",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "uppercase",
+   "student_answer": "AMIR TEMUR"
+  },
+  {
+   "id": "GC-004",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "extra spaces",
+   "student_answer": "  Amir   Temur  "
+  },
+  {
+   "id": "GC-005",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "trailing period",
+   "student_answer": "Amir Temur."
+  },
+  {
+   "id": "GC-006",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Mirzo Ulug'bek"
+   ],
+   "expected": true,
+   "reason": "okina apostrophe",
+   "student_answer": "Mirzo Ulugʻbek"
+  },
+  {
+   "id": "GC-007",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Mirzo Ulug'bek"
+   ],
+   "expected": true,
+   "reason": "right quote apostrophe",
+   "student_answer": "mirzo ulug’bek"
+  },
+  {
+   "id": "GC-008",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Buxoro"
+   ],
+   "expected": true,
+   "reason": "x/h rule",
+   "student_answer": "Buhoro"
+  },
+  {
+   "id": "GC-009",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Xorazm"
+   ],
+   "expected": true,
+   "reason": "x/h rule",
+   "student_answer": "Horazm"
+  },
+  {
+   "id": "GC-010",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "1221-yil"
+   ],
+   "expected": true,
+   "reason": "exact year",
+   "student_answer": "1221-yil"
+  },
+  {
+   "id": "GC-011",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "1221-yil"
+   ],
+   "expected": true,
+   "reason": "hyphen vs space",
+   "student_answer": "1221 yil"
+  },
+  {
+   "id": "GC-012",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Parvon jangi (1221-yil)"
+   ],
+   "expected": true,
+   "reason": "parenthetical alternative",
+   "student_answer": "Parvon jangi"
+  },
+  {
+   "id": "GC-013",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Hind (Sind) daryosi"
+   ],
+   "expected": true,
+   "reason": "parenthetical alternative",
+   "student_answer": "Sind"
+  },
+  {
+   "id": "GC-014",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Kir II"
+   ],
+   "expected": true,
+   "reason": "roman numeral as digit",
+   "student_answer": "Kir 2"
+  },
+  {
+   "id": "GC-015",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Doro I"
+   ],
+   "expected": true,
+   "reason": "roman lowercase",
+   "student_answer": "doro i"
+  },
+  {
+   "id": "GC-016",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Qutayba ibn Muslim"
+   ],
+   "expected": true,
+   "reason": "exact multiword",
+   "student_answer": "Qutayba ibn Muslim"
+  },
+  {
+   "id": "GC-017",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Fotosintez"
+   ],
+   "expected": true,
+   "reason": "lowercase",
+   "student_answer": "fotosintez"
+  },
+  {
+   "id": "GC-018",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Mitoxondriya"
+   ],
+   "expected": true,
+   "reason": "lowercase",
+   "student_answer": "mitoxondriya"
+  },
+  {
+   "id": "GC-019",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Alisher Navoiy"
+   ],
+   "expected": true,
+   "reason": "exact",
+   "student_answer": "Alisher Navoiy"
+  },
+  {
+   "id": "GC-020",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Zikkurat"
+   ],
+   "expected": true,
+   "reason": "plural suffix (prompt rule 3)",
+   "student_answer": "Zikkuratlar"
+  },
+  {
+   "id": "GC-021",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Samarqand"
+   ],
+   "expected": true,
+   "reason": "extra stop word",
+   "student_answer": "Samarqand shahri"
+  },
+  {
+   "id": "GC-022",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Ot"
+   ],
+   "expected": true,
+   "reason": "short exact",
+   "student_answer": "ot"
+  },
+  {
+   "id": "GC-023",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Kislorod"
+   ],
+   "expected": true,
+   "reason": "exact",
+   "student_answer": "Kislorod"
+  },
+  {
+   "id": "GC-024",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Temur tuzuklari"
+   ],
+   "expected": true,
+   "reason": "exact",
+   "student_answer": "Temur tuzuklari"
+  },
+  {
+   "id": "GC-025",
+   "grader": "open_written",
+   "category": "correct",
+   "correct_answers": [
+    "Xiva xonligi"
+   ],
+   "expected": true,
+   "reason": "lowercase",
+   "student_answer": "xiva xonligi"
+  },
+  {
+   "id": "GC-026",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": false,
+   "reason": "different person, shared first word",
+   "student_answer": "Amir Husayn"
+  },
+  {
+   "id": "GC-027",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Samarqand"
+   ],
+   "expected": false,
+   "reason": "different city, similar spelling",
+   "student_answer": "Samarra"
+  },
+  {
+   "id": "GC-028",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Buxoro"
+   ],
+   "expected": false,
+   "reason": "different city",
+   "student_answer": "Xiva"
+  },
+  {
+   "id": "GC-029",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Mirzo Ulug'bek"
+   ],
+   "expected": false,
+   "reason": "different person, shared title",
+   "student_answer": "Mirzo Bobur"
+  },
+  {
+   "id": "GC-030",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Alisher Navoiy"
+   ],
+   "expected": false,
+   "reason": "different author",
+   "student_answer": "Abdulla Qodiriy"
+  },
+  {
+   "id": "GC-031",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "1221-yil"
+   ],
+   "expected": false,
+   "reason": "off-by-one year",
+   "student_answer": "1222-yil"
+  },
+  {
+   "id": "GC-032",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "1370-yil"
+   ],
+   "expected": false,
+   "reason": "swapped digits",
+   "student_answer": "1307-yil"
+  },
+  {
+   "id": "GC-033",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Fotosintez"
+   ],
+   "expected": false,
+   "reason": "different process",
+   "student_answer": "Fotoliz"
+  },
+  {
+   "id": "GC-034",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Mitoxondriya"
+   ],
+   "expected": false,
+   "reason": "different organelle",
+   "student_answer": "Xloroplast"
+  },
+  {
+   "id": "GC-035",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Kislorod"
+   ],
+   "expected": false,
+   "reason": "different substance",
+   "student_answer": "Karbonat angidrid"
+  },
+  {
+   "id": "GC-036",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Vodorod"
+   ],
+   "expected": false,
+   "reason": "different element, same suffix",
+   "student_answer": "Kislorod"
+  },
+  {
+   "id": "GC-037",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Shayboniylar"
+   ],
+   "expected": false,
+   "reason": "different dynasty, same suffix",
+   "student_answer": "Ashtarxoniylar"
+  },
+  {
+   "id": "GC-038",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Somoniylar"
+   ],
+   "expected": false,
+   "reason": "different dynasty, same suffix",
+   "student_answer": "Qoraxoniylar"
+  },
+  {
+   "id": "GC-039",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "G'aznaviylar"
+   ],
+   "expected": false,
+   "reason": "different dynasty",
+   "student_answer": "Saljuqiylar"
+  },
+  {
+   "id": "GC-040",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Kir II"
+   ],
+   "expected": false,
+   "reason": "different ruler number",
+   "student_answer": "Kir I"
+  },
+  {
+   "id": "GC-041",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Doro I"
+   ],
+   "expected": false,
+   "reason": "different ruler number",
+   "student_answer": "Doro III"
+  },
+  {
+   "id": "GC-042",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Ibn Sino"
+   ],
+   "expected": false,
+   "reason": "different scholar, shared 'ibn'",
+   "student_answer": "Ibn Rushd"
+  },
+  {
+   "id": "GC-043",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Ibn Sino"
+   ],
+   "expected": false,
+   "reason": "only the particle",
+   "student_answer": "Ibn"
+  },
+  {
+   "id": "GC-044",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Qutayba ibn Muslim"
+   ],
+   "expected": false,
+   "reason": "only the particle",
+   "student_answer": "ibn"
+  },
+  {
+   "id": "GC-045",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Mustaqillik kuni"
+   ],
+   "expected": false,
+   "reason": "only the generic word",
+   "student_answer": "kuni"
+  },
+  {
+   "id": "GC-046",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Temur tuzuklari"
+   ],
+   "expected": false,
+   "reason": "different book",
+   "student_answer": "Boburnoma"
+  },
+  {
+   "id": "GC-047",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Ot"
+   ],
+   "expected": false,
+   "reason": "different word containing key",
+   "student_answer": "Otam"
+  },
+  {
+   "id": "GC-048",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Ot"
+   ],
+   "expected": false,
+   "reason": "different part of speech",
+   "student_answer": "Fe'l"
+  },
+  {
+   "id": "GC-049",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Sifat"
+   ],
+   "expected": false,
+   "reason": "different part of speech",
+   "student_answer": "Son"
+  },
+  {
+   "id": "GC-050",
+   "grader": "open_written",
+   "category": "wrong",
+   "correct_answers": [
+    "Pifagor"
+   ],
+   "expected": false,
+   "reason": "different scientist",
+   "student_answer": "Arximed"
+  },
+  {
+   "id": "GC-051",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Samarqand"
+   ],
+   "expected": true,
+   "reason": "q->k",
+   "student_answer": "Samarkand"
+  },
+  {
+   "id": "GC-052",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "dropped letter",
+   "student_answer": "Amir Temr"
+  },
+  {
+   "id": "GC-053",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Alisher Navoiy"
+   ],
+   "expected": true,
+   "reason": "dropped letter",
+   "student_answer": "Alisher Navoi"
+  },
+  {
+   "id": "GC-054",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Fotosintez"
+   ],
+   "expected": true,
+   "reason": "z->s",
+   "student_answer": "Fotosintes"
+  },
+  {
+   "id": "GC-055",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Mitoxondriya"
+   ],
+   "expected": true,
+   "reason": "x->h",
+   "student_answer": "Mitohondriya"
+  },
+  {
+   "id": "GC-056",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Mirzo Ulug'bek"
+   ],
+   "expected": true,
+   "reason": "missing apostrophe",
+   "student_answer": "Mirzo Ulugbek"
+  },
+  {
+   "id": "GC-057",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Zahiriddin Muhammad Bobur"
+   ],
+   "expected": true,
+   "reason": "o->a",
+   "student_answer": "Zahiriddin Muhammad Babur"
+  },
+  {
+   "id": "GC-058",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Shayboniyxon"
+   ],
+   "expected": true,
+   "reason": "dropped y",
+   "student_answer": "Shaybonixon"
+  },
+  {
+   "id": "GC-059",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Qoraxoniylar"
+   ],
+   "expected": true,
+   "reason": "dropped final r",
+   "student_answer": "Qoraxoniyla"
+  },
+  {
+   "id": "GC-060",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Toshkent"
+   ],
+   "expected": true,
+   "reason": "o->a",
+   "student_answer": "Tashkent"
+  },
+  {
+   "id": "GC-061",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Xorazmshohlar"
+   ],
+   "expected": true,
+   "reason": "h->x",
+   "student_answer": "Xorazmshoxlar"
+  },
+  {
+   "id": "GC-062",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Kislorod"
+   ],
+   "expected": true,
+   "reason": "o->a",
+   "student_answer": "Kislarod"
+  },
+  {
+   "id": "GC-063",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Jaloliddin Mang'uberdi"
+   ],
+   "expected": true,
+   "reason": "i->y, no apostrophe",
+   "student_answer": "Jaloliddin Manguberdy"
+  },
+  {
+   "id": "GC-064",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Navro'z"
+   ],
+   "expected": true,
+   "reason": "o'->u",
+   "student_answer": "Navruz"
+  },
+  {
+   "id": "GC-065",
+   "grader": "open_written",
+   "category": "typo",
+   "correct_answers": [
+    "Avesto"
+   ],
+   "expected": true,
+   "reason": "two vowel errors",
+   "student_answer": "Avista"
+  },
+  {
+   "id": "GC-066",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "Ot"
+   ],
+   "expected": false,
+   "reason": "single letter inside key",
+   "student_answer": "O"
+  },
+  {
+   "id": "GC-067",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "H2O"
+   ],
+   "expected": true,
+   "reason": "formula exact",
+   "student_answer": "H2O"
+  },
+  {
+   "id": "GC-068",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "H2O"
+   ],
+   "expected": false,
+   "reason": "formula prefix",
+   "student_answer": "H"
+  },
+  {
+   "id": "GC-069",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "CO2"
+   ],
+   "expected": false,
+   "reason": "different molecule",
+   "student_answer": "CO"
+  },
+  {
+   "id": "GC-070",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "Fe"
+   ],
+   "expected": false,
+   "reason": "different element symbol",
+   "student_answer": "F"
+  },
+  {
+   "id": "GC-071",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "Ha"
+   ],
+   "expected": false,
+   "reason": "opposite",
+   "student_answer": "Yo'q"
+  },
+  {
+   "id": "GC-072",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "Yo'q"
+   ],
+   "expected": false,
+   "reason": "opposite",
+   "student_answer": "Ha"
+  },
+  {
+   "id": "GC-073",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "AQSH"
+   ],
+   "expected": true,
+   "reason": "case variant",
+   "student_answer": "AQSh"
+  },
+  {
+   "id": "GC-074",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "BMT"
+   ],
+   "expected": true,
+   "reason": "exact",
+   "student_answer": "BMT"
+  },
+  {
+   "id": "GC-075",
+   "grader": "open_written",
+   "category": "short",
+   "correct_answers": [
+    "BMT"
+   ],
+   "expected": false,
+   "reason": "different organisation",
+   "student_answer": "NATO"
+  },
+  {
+   "id": "GC-076",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "24"
+   ],
+   "expected": true,
+   "reason": "exact",
+   "student_answer": "24"
+  },
+  {
+   "id": "GC-077",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "24"
+   ],
+   "expected": false,
+   "reason": "swapped digits",
+   "student_answer": "42"
+  },
+  {
+   "id": "GC-078",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "0.5"
+   ],
+   "expected": true,
+   "reason": "equivalent fraction",
+   "student_answer": "1/2"
+  },
+  {
+   "id": "GC-079",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "2,5"
+   ],
+   "expected": true,
+   "reason": "decimal comma vs point",
+   "student_answer": "2.5"
+  },
+  {
+   "id": "GC-080",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "1221-yil"
+   ],
+   "expected": true,
+   "reason": "year without suffix",
+   "student_answer": "1221"
+  },
+  {
+   "id": "GC-081",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "1991-yil 31-avgust"
+   ],
+   "expected": false,
+   "reason": "only day of a date",
+   "student_answer": "31"
+  },
+  {
+   "id": "GC-082",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "1991-yil 1-sentabr"
+   ],
+   "expected": true,
+   "reason": "reordered date",
+   "student_answer": "1-sentabr 1991-yil"
+  },
+  {
+   "id": "GC-083",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "-5"
+   ],
+   "expected": false,
+   "reason": "sign lost",
+   "student_answer": "5"
+  },
+  {
+   "id": "GC-084",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "100 km/soat"
+   ],
+   "expected": false,
+   "reason": "wrong unit",
+   "student_answer": "100 m/s"
+  },
+  {
+   "id": "GC-085",
+   "grader": "open_written",
+   "category": "number",
+   "correct_answers": [
+    "x = 3"
+   ],
+   "expected": false,
+   "reason": "wrong root",
+   "student_answer": "x = 4"
+  },
+  {
+   "id": "GC-086",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "O'zbekiston"
+   ],
+   "expected": true,
+   "reason": "okina",
+   "student_answer": "Oʻzbekiston"
+  },
+  {
+   "id": "GC-087",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "O'zbekiston"
+   ],
+   "expected": true,
+   "reason": "left quote",
+   "student_answer": "O‘zbekiston"
+  },
+  {
+   "id": "GC-088",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "O'zbekiston"
+   ],
+   "expected": true,
+   "reason": "no apostrophe",
+   "student_answer": "Ozbekiston"
+  },
+  {
+   "id": "GC-089",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "O'zbekiston"
+   ],
+   "expected": true,
+   "reason": "Uzbek Cyrillic",
+   "student_answer": "Ўзбекистон"
+  },
+  {
+   "id": "GC-090",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "Samarqand"
+   ],
+   "expected": true,
+   "reason": "Uzbek Cyrillic",
+   "student_answer": "Самарқанд"
+  },
+  {
+   "id": "GC-091",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "Uzbek Cyrillic",
+   "student_answer": "Амир Темур"
+  },
+  {
+   "id": "GC-092",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "G'ijduvon"
+   ],
+   "expected": true,
+   "reason": "okina",
+   "student_answer": "Gʻijduvon"
+  },
+  {
+   "id": "GC-093",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "Ma'mun"
+   ],
+   "expected": true,
+   "reason": "modifier apostrophe",
+   "student_answer": "Maʼmun"
+  },
+  {
+   "id": "GC-094",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "Toshkent"
+   ],
+   "expected": true,
+   "reason": "Russian Cyrillic",
+   "student_answer": "Ташкент"
+  },
+  {
+   "id": "GC-095",
+   "grader": "open_written",
+   "category": "script",
+   "correct_answers": [
+    "Moskva"
+   ],
+   "expected": true,
+   "reason": "Russian Cyrillic",
+   "student_answer": "Москва"
+  },
+  {
+   "id": "GC-096",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": false,
+   "reason": "empty answer",
+   "student_answer": ""
+  },
+  {
+   "id": "GC-097",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": false,
+   "reason": "shotgun list of names",
+   "student_answer": "Amir Temur, Bobur, Navoiy, Ulug'bek"
+  },
+  {
+   "id": "GC-098",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "Fotosintez"
+   ],
+   "expected": false,
+   "reason": "single random letter",
+   "student_answer": "o"
+  },
+  {
+   "id": "GC-099",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "1453-yil"
+   ],
+   "expected": false,
+   "reason": "shotgun list of years",
+   "student_answer": "1000 1100 1200 1300 1400 1453 1500"
+  },
+  {
+   "id": "GC-100",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "Samarqand"
+   ],
+   "expected": false,
+   "reason": "vowel spam",
+   "student_answer": "a e i o u"
+  },
+  {
+   "id": "GC-101",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "Ibn Sino"
+   ],
+   "expected": false,
+   "reason": "'I don't know'",
+   "student_answer": "bilmayman"
+  },
+  {
+   "id": "GC-102",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "Kir II"
+   ],
+   "expected": false,
+   "reason": "single letter",
+   "student_answer": "i"
+  },
+  {
+   "id": "GC-103",
+   "grader": "open_written",
+   "category": "adversarial",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": false,
+   "reason": "very long garbage input",
+   "student_answer": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+   "id": "GC-104",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "wing"
+   ],
+   "expected": true,
+   "reason": "case + punctuation",
+   "student_answer": "Wing."
+  },
+  {
+   "id": "GC-105",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "wing"
+   ],
+   "expected": false,
+   "reason": "plural is a different answer",
+   "student_answer": "wings"
+  },
+  {
+   "id": "GC-106",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "19th century",
+    "nineteenth century"
+   ],
+   "expected": true,
+   "reason": "accepted variant",
+   "student_answer": "19th Century"
+  },
+  {
+   "id": "GC-107",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "don't"
+   ],
+   "expected": true,
+   "reason": "curly apostrophe",
+   "student_answer": "don’t"
+  },
+  {
+   "id": "GC-108",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "TRUE"
+   ],
+   "expected": true,
+   "reason": "case",
+   "student_answer": "true"
+  },
+  {
+   "id": "GC-109",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "NOT GIVEN"
+   ],
+   "expected": true,
+   "reason": "double space",
+   "student_answer": "not  given"
+  },
+  {
+   "id": "GC-110",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "NOT GIVEN"
+   ],
+   "expected": true,
+   "reason": "hyphen variant",
+   "student_answer": "NOT-GIVEN"
+  },
+  {
+   "id": "GC-111",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "colour",
+    "color"
+   ],
+   "expected": false,
+   "reason": "misspelling (exact grader)",
+   "student_answer": "colr"
+  },
+  {
+   "id": "GC-112",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "£50"
+   ],
+   "expected": false,
+   "reason": "wrong currency",
+   "student_answer": "$50"
+  },
+  {
+   "id": "GC-113",
+   "grader": "gap_fill",
+   "category": "gap",
+   "correct_answers": [
+    "FALSE"
+   ],
+   "expected": false,
+   "reason": "empty",
+   "student_answer": ""
+  },
+  {
+   "id": "GC-114",
+   "grader": "growth_open",
+   "category": "growth",
+   "correct_answers": [
+    "Amir Temur"
+   ],
+   "expected": true,
+   "reason": "case",
+   "student_answer": "amir temur"
+  },
+  {
+   "id": "GC-115",
+   "grader": "growth_open",
+   "category": "growth",
+   "correct_answers": [
+    "Samarqand"
+   ],
+   "expected": false,
+   "reason": "different city",
+   "student_answer": "Samarra"
+  },
+  {
+   "id": "GC-116",
+   "grader": "growth_open",
+   "category": "growth",
+   "correct_answers": [
+    "1221"
+   ],
+   "expected": false,
+   "reason": "off-by-one year",
+   "student_answer": "1222"
+  },
+  {
+   "id": "GC-117",
+   "grader": "growth_open",
+   "category": "growth",
+   "correct_answers": [
+    "Fotosintez"
+   ],
+   "expected": true,
+   "reason": "typo",
+   "student_answer": "Fotosintes"
+  },
+  {
+   "id": "GC-118",
+   "grader": "growth_open",
+   "category": "growth",
+   "correct_answers": [
+    "O'zbekiston"
+   ],
+   "expected": true,
+   "reason": "okina",
+   "student_answer": "Oʻzbekiston"
+  },
+  {
+   "id": "GC-119",
+   "grader": "growth_open",
+   "category": "growth",
+   "correct_answers": [
+    "Kir II"
+   ],
+   "expected": false,
+   "reason": "different ruler number",
+   "student_answer": "Kir I"
+  },
+  {
+   "id": "GC-120",
+   "grader": "growth_open",
+   "category": "growth",
+   "correct_answers": [
+    "O'zbekiston"
+   ],
+   "expected": true,
+   "reason": "Uzbek Cyrillic",
+   "student_answer": "Ўзбекистон"
+  }
+ ]
+}

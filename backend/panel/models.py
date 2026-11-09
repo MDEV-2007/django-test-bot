@@ -80,10 +80,16 @@ class SiteSettings(models.Model):
         single page for data that almost never changes. Cached for an hour and refreshed
         on save."""
         from django.core.cache import cache
-        obj = cache.get(cls.CACHE_KEY)
+        try:
+            obj = cache.get(cls.CACHE_KEY)
+        except Exception:
+            obj = None
         if obj is None:
             obj, _ = cls.objects.get_or_create(pk=1)
-            cache.set(cls.CACHE_KEY, obj, 3600)
+            try:
+                cache.set(cls.CACHE_KEY, obj, 3600)
+            except Exception:
+                pass
         return obj
 
 
