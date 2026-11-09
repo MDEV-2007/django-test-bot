@@ -22,7 +22,7 @@ from accounts.models import Profile
 from tests_app.models import SubjectScore
 
 RANKING_TTL = 60 * 7  # 7 minutes
-TOP_N = 50
+TOP_N = 100
 
 
 def _key(view):
@@ -50,10 +50,6 @@ def get_top_ranking(view, timeframe='all'):
         user__is_superuser=False,
         user__is_staff=False,
         xp__gt=0,
-    ).annotate(
-        completed_tests=Count('attempts', filter=Q(attempts__is_completed=True))
-    ).filter(
-        Q(completed_tests__gte=3) | Q(xp__gte=150)
     )
 
     if timeframe == 'weekly':

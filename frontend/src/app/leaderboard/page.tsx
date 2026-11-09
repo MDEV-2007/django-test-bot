@@ -15,6 +15,7 @@ import {
   Clock,
   Building2,
   MapPin,
+  Sparkles,
 } from 'lucide-react';
 import { useApiQuery } from '@/lib/api-cache';
 import { useAuthStore } from '@/lib/auth-store';
@@ -433,6 +434,54 @@ export default function LeaderboardPage() {
                     })}
                   </div>
                 </section>
+              )}
+
+              {/* 3. Respublika Peshqadamlari Ro'yxati (4-o'rindan boshlab) */}
+              {data && data.rankings && data.rankings.length > 0 && (
+                <section className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
+                  <div className="relative flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--ps-orange)]/15 text-[var(--ps-orange)]">
+                        <Trophy className="size-5" />
+                      </span>
+                      <div>
+                        <h3 className="ps-display text-[24px] sm:text-[28px]">Respublika reytingi</h3>
+                        <p className="text-[12.5px] text-[var(--text-muted)]">Eng faol o&apos;quvchilar ro&apos;yxati (Top-100)</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-[var(--ps-neutral)] px-3.5 py-1 font-mono text-[12px] font-bold">
+                      Jami: {data.podium.length + data.rankings.length} nafar abituriyent
+                    </span>
+                  </div>
+
+                  <div className="relative mt-6 space-y-2">
+                    {data.rankings.map((r, i) => {
+                      const rankNum = (r as any).rank || i + 4;
+                      const isMe = r.username === user?.username || r.profile_id === (user as any)?.id;
+                      return (
+                        <Reveal key={r.profile_id} index={i} y={4}>
+                          {renderRow(r, rankNum, isMe)}
+                        </Reveal>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {/* Bo'sh reyting holati uchun chaqiruv */}
+              {data && data.podium.length > 0 && (!data.rankings || data.rankings.length === 0) && (
+                <div className="flex flex-col items-center justify-center rounded-[32px] bg-[var(--ps-paper)] p-8 text-center border border-dashed border-[var(--border-card)]">
+                  <Sparkles className="size-8 text-[var(--ps-orange)]" />
+                  <p className="mt-3 text-sm font-bold text-[var(--text-primary)]">
+                    Shohsupadan keyingi o&apos;rinlar hali bo&apos;sh!
+                  </p>
+                  <p className="mt-1 max-w-sm text-xs text-[var(--text-muted)]">
+                    Test yechib, ball to&apos;plang va Respublika reytingi safiga birinchilardan bo&apos;lib kiring.
+                  </p>
+                  <Link href="/tests" className="ps-btn ps-btn-ink mt-4 !min-h-10 !text-xs !font-bold">
+                    Test yechishga o&apos;tish
+                  </Link>
+                </div>
               )}
 
               {/* Raqobat guruhi */}

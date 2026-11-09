@@ -30,7 +30,7 @@ def rankings_api(request):
     # boshqalarga ko'rinishida.
     cosmetics_by_id = shop_services.get_equipped_bulk(ids)
 
-    def row(r):
+    def row(r, rank_num=None):
         p = by_id.get(r['profile_id'])
         if p is None:
             return None
@@ -41,20 +41,21 @@ def rankings_api(request):
             'avatar_url': shop_services.display_avatar_url(p.avatar_url, cosmetics),
             'xp': r['xp'] if view != 'all' else p.xp,
             'level': p.level,
+            'rank': rank_num,
             'cosmetics': cosmetics,
             'role': p.role,
             'is_superadmin': p.is_superadmin,
             'is_teacher': p.is_teacher,
         }
 
-    ranked = [row(r) for r in top]
+    ranked = [row(r, i + 1) for i, r in enumerate(top)]
     ranked = [r for r in ranked if r is not None]
 
     # "Sizning guruhingiz": o'quvchi qatnashadigan yaqin atrof. Global ro'yxatda
     # ko'rinmaydigan o'quvchi ham shu yerda o'zini va erishsa bo'ladigan maqsadni ko'radi.
     my_group = []
     for n in neighbors:
-        data = row(n)
+        data = row(n, n.get('rank'))
         if data is None:
             continue
         data['rank'] = n['rank']
@@ -63,7 +64,7 @@ def rankings_api(request):
 
     return Response({
         'podium': ranked[:3],
-        'rankings': ranked[3:15],
+        'rankings': ranked[3:100],
         'my_rank': my_rank,
         'my_group': my_group,
         'subjects': [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in subjects],
