@@ -15,6 +15,8 @@ export type SosPollData = {
   /** Faqat ovoz bergandan keyin (yoki muallifga) keladi. */
   correct_option?: string;
   explanation?: string;
+  /** Rasmli savol (xarita/diagramma) — test paytida chiqarilgan SOS'da bo'ladi. */
+  image_url?: string;
   votes: Record<string, number>;
   /** Joriy foydalanuvchining tanlovi (server beradi; boshqalarning ovozlari yashirin). */
   user_choice?: string | null;
@@ -139,6 +141,13 @@ export default function SosQuestionCard({
           <p className="relative mt-1.5 whitespace-pre-wrap text-[15px] font-semibold leading-relaxed sm:text-[16px]">
             {poll.question_text || 'Savol matni yuklanmoqda...'}
           </p>
+          {poll.image_url && (
+            <img
+              src={poll.image_url}
+              alt=""
+              className="relative mt-3 max-h-64 w-full rounded-[16px] bg-white object-contain"
+            />
+          )}
         </div>
 
         {/* Variantlar */}

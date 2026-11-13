@@ -6,6 +6,7 @@ JWT instead of session cookies). The frontend keeps its own chat history and onl
 the model's reply, so no session and no new DB model are needed."""
 import json
 import logging
+from datetime import timedelta
 
 from django.db.models import Prefetch, Count
 from django.http import HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
@@ -1734,6 +1735,101 @@ def community_auto_post_api(request):
     })
 
 
+SOS_SOURCES = {'test', 'blitz', 'stress', 'sprint'}
+SOS_CHOICE_TYPES = {'single_choice', 'image_based', 'table_based'}
+SOS_DAILY_LIMIT = 5
+# Muallif SOS savolining rasmiy javobini shu vaqtdan keyin ko'radi: test hali davom
+# etayotganida lenta "javob kaliti" bo'lib qolmasin (eng uzun DTM imtihoni ~3 soat).
+SOS_AUTHOR_REVEAL_DELAY = timedelta(hours=3)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def community_sos_from_question_api(request):
+    """POST /api/learning/feed/sos/ {question_id, source}
+
+    Test / blitz / stress / sprint yechayotganda qiyin savolni hamjamiyatga SOS so'rovnoma
+    qilib chiqarish. Savol matni, variantlar va to'g'ri javob klientdan emas, serverdagi
+    savoldan olinadi: test paytida klient to'g'ri javobni bilmaydi va uni soxtalashtira olmaydi.
+    """
+    from django.utils.html import strip_tags
+    from tests_app.models import Question
+    from learning.models import CommunityStory
+
+    if not isinstance(request.data, dict):
+        return Response({'error': "JSON obyekt kutilgan."}, status=400)
+    source = request.data.get('source')
+    if source not in SOS_SOURCES:
+        return Response({'error': "Noto'g'ri manba."}, status=400)
+    try:
+        question_id = int(request.data.get('question_id'))
+    except (TypeError, ValueError):
+        return Response({'error': "question_id majburiy."}, status=400)
+
+    question = (Question.objects.select_related('subject')
+                .prefetch_related('choices').filter(pk=question_id).first())
+    if not question:
+        return Response({'error': "Savol topilmadi."}, status=404)
+    choices = list(question.choices.all().order_by('id'))
+    if question.question_type not in SOS_CHOICE_TYPES or not (2 <= len(choices) <= 6):
+        return Response({'error': "Bu turdagi savolni SOS qilib bo'lmaydi."}, status=400)
+
+    user = request.user
+    now = timezone.now()
+    day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    mine_today = CommunityPost.objects.filter(author=user, post_type='sos_question', created_at__gte=day_start)
+    if mine_today.filter(poll_data__source_question_id=question.id).exists():
+        return Response({'error': "Bu savol bugun allaqachon hamjamiyatga chiqarilgan."}, status=409)
+    if mine_today.count() >= SOS_DAILY_LIMIT:
+        return Response({'error': f"Kuniga {SOS_DAILY_LIMIT} ta SOS savol chiqarish mumkin."}, status=429)
+
+    letters = [chr(65 + i) for i in range(len(choices))]
+    correct = next((letters[i] for i, c in enumerate(choices) if c.is_correct), '')
+    subject = question.subject
+    subject_name = subject.name if subject else "Umumiy"
+    image = question.image.url if question.image else (question.image_url or '')
+    question_text = strip_tags(question.body or '').strip()[:2000]
+
+    profile = getattr(user, 'profile', None)
+    title = f"🙋‍♂️ Yordam kerak: {subject_name} bo'yicha qiyin savol!"
+    post = CommunityPost.objects.create(
+        author=user,
+        post_type='sos_question',
+        title=title,
+        subject_name=subject_name,
+        subject_slug=subject.slug if subject else 'umumiy',
+        caption="Ushbu savolning javobini kim biladi? O'z variantingizni tanlang va izohda tushuntiring 👇",
+        exam_track=getattr(profile, 'exam_track', 'DTM_SERTIFIKAT') if profile else 'DTM_SERTIFIKAT',
+        image_url=image[:500],
+        poll_data={
+            'question_text': question_text,
+            'options': [strip_tags(c.text) for c in choices],
+            'correct_option': correct,
+            'explanation': question.explanation or '',
+            'image_url': image,
+            'votes': {letter: 0 for letter in letters},
+            'voted_users': {},
+            'source': source,
+            'source_question_id': question.id,
+            'author_reveal_at': (now + SOS_AUTHOR_REVEAL_DELAY).isoformat(),
+        },
+    )
+    try:
+        CommunityStory.objects.create(
+            author=user, story_type='streak', exam_track='ALL', title=title,
+            caption=question_text[:120], badge="🙋 SOS Savol", cta_text="Yordam berish ✍️",
+            cta_link="/feed", expires_at=now + timedelta(hours=24),
+        )
+    except Exception:
+        logger.exception("SOS story yaratilmadi (post %s)", post.id)
+
+    return Response({
+        'success': True,
+        'message': "Savol hamjamiyatga SOS bo'lib chiqdi! Javoblarni lentada kuzating.",
+        'post': post.to_dict(current_user=user),
+    }, status=201)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def community_post_vote_poll_api(request, post_id):
@@ -1766,6 +1862,11 @@ def _vote_poll_locked(request, post, selected_option, award_capped_xp):
     # Variant harf ('A') yoki matn bo'lishi mumkin (ikki xil klient) — faqat hajmni cheklaymiz.
     if not isinstance(selected_option, str) or len(selected_option) > 500:
         return Response({'error': "Noto'g'ri variant."}, status=400)
+
+    # Ovoz javobida to'g'ri variant qaytadi — muallif o'z SOS'iga ovoz berib, test hali
+    # tugamasdan javobni bilib olmasin.
+    if post.author_id == request.user.id and not post.sos_answer_revealed_to_author():
+        return Response({'error': "O'z SOS savolingizga hozircha ovoz bera olmaysiz."}, status=403)
 
     # Agar foydalanuvchi hali ovoz bermagan bo'lsa
     if user_id_str not in voted_users:

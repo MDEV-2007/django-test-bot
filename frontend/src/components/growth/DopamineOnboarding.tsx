@@ -22,6 +22,7 @@ import { tgHaptic } from '@/lib/telegram';
 import { celebrate } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import SosAskButton from '@/components/common/SosAskButton';
 
 interface BlitzChoice {
   id: number;
@@ -470,6 +471,8 @@ export default function DopamineOnboarding({ onComplete, subject }: DopamineOnbo
               </span>
             </div>
             <div className="flex flex-col items-end gap-1.5">
+              {/* Oflayn demo savollar bazada yo'q — SOS faqat server sessiyasida */}
+              {sessionId && <SosAskButton questionId={currentQ.id} source="blitz" />}
               <span
                 className={cn(
                   'rounded-full px-3 py-1 text-[11px] font-bold',

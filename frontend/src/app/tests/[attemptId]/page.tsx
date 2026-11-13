@@ -24,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import SosAskButton from '@/components/common/SosAskButton';
 
 const DIFFICULTY_LABEL: Record<string, string> = { easy: 'Oson', medium: "O'rta", hard: 'Qiyin' };
 
@@ -747,6 +748,7 @@ export default function TestScreenPage() {
                   </span>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
+                  <SosAskButton questionId={q.id} source={isStressMode ? 'stress' : 'test'} />
                   <span
                     className={cn(
                       'rounded-full px-3 py-1 text-[11px] font-bold',

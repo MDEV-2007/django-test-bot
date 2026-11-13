@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api-client';
 import { toast } from 'sonner';
+import SosAskButton from '@/components/common/SosAskButton';
 import { soundFX } from '@/lib/soundFX';
 import { HelpCircle, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -78,16 +79,12 @@ export default function NeuralSprintView({
     if (!currentQuestion) return;
     setIsSendingSos(true);
     try {
-      await apiFetch('/api/learning/feed/create-auto/', {
+      // Server savolni o'zi yuklaydi: klient yuborgan matn/to'g'ri javobga tayanmaymiz.
+      await apiFetch('/api/learning/feed/sos/', {
         method: 'POST',
         body: JSON.stringify({
-          post_type: 'sos_question',
-          subject_name: topicTitle,
-          subject_slug: topicTitle.toLowerCase().replace(/\s+/g, '-'),
-          question_text: currentQuestion.body,
-          options: currentQuestion.options.map(o => o.text),
-          correct_option: currentQuestion.options.find(o => o.id === currentQuestion.correctOptionId)?.text || 'A',
-          explanation: activeExplanation?.memoryHack || activeExplanation?.whyWrong || '',
+          question_id: Number(currentQuestion.originalQuestionId ?? currentQuestion.id),
+          source: 'sprint',
         }),
       });
       soundFX.fanfare();
@@ -397,6 +394,14 @@ export default function NeuralSprintView({
               className="space-y-4"
             >
               <div className="ps-card relative overflow-hidden !rounded-[32px] p-6 sm:p-9">
+                {!currentQuestion.isOffline && (
+                  <div className="mb-3 flex justify-end">
+                    <SosAskButton
+                      questionId={currentQuestion.originalQuestionId ?? currentQuestion.id}
+                      source="sprint"
+                    />
+                  </div>
+                )}
                 <div
                   className="reading-block font-bold text-foreground max-w-none [&_p]:my-0"
                   dangerouslySetInnerHTML={{ __html: currentQuestion.body }}

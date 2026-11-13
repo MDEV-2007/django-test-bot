@@ -367,6 +367,15 @@ class CommunityPost(models.Model):
     def __str__(self):
         return f"{self.author.username} - {self.title} ({self.score}%)"
 
+    def sos_answer_revealed_to_author(self):
+        """Test yechish paytida chiqarilgan SOS (`author_reveal_at`) — muallif rasmiy javobni
+        shu vaqtgacha ko'rmaydi, aks holda SOS testning javob kalitiga aylanadi."""
+        from django.utils.dateparse import parse_datetime
+        from django.utils import timezone
+
+        reveal_at = parse_datetime(str((self.poll_data or {}).get('author_reveal_at') or ''))
+        return reveal_at is None or timezone.now() >= reveal_at
+
     def public_poll_data(self, current_user=None):
         """So'rovnoma lentada: to'g'ri javob va izoh faqat ovoz bergan (yoki muallif)
         foydalanuvchiga; kim nimaga ovoz bergani (`voted_users`) hech kimga chiqmaydi."""
@@ -377,6 +386,8 @@ class CommunityPost(models.Model):
         uid = str(getattr(current_user, 'id', '') or '')
         user_choice = voted.get(uid) if uid else None
         is_author = bool(uid) and uid == str(self.author_id)
+        if is_author and not self.sos_answer_revealed_to_author():
+            is_author = False
         if not (user_choice or is_author):
             poll.pop('correct_option', None)
             poll.pop('explanation', None)
