@@ -114,7 +114,6 @@ export default function Stage5RewardCeremony({
   const rewards = [
     { icon: Coins, tone: 'bg-[var(--ps-orange)] text-[#080808]', value: `+${coinsEarned}`, label: 'Tanga' },
     { icon: Zap, tone: 'bg-[var(--ps-purple)] text-white', value: `+${xpEarned}`, label: 'XP' },
-    { icon: Trophy, tone: 'bg-[var(--ps-green)] text-white', value: `+${dtmScoreDelta.toFixed(1)}`, label: 'DTM ball' },
     { icon: Sparkles, tone: 'bg-[var(--ps-lilac)] text-[#080808]', value: '+1', label: 'AI esse krediti' },
   ];
 

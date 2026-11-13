@@ -20,7 +20,7 @@ export type Profile = {
   elo_rating: number;
   next_level_xp: number;
   freeze_count: number;
-  estimated_dtm_score?: number;
+  estimated_dtm_score?: number | null;
   stability_multiplier?: number;
   target_university?: string;
   target_faculty?: string;

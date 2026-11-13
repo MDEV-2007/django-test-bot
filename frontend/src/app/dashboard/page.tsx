@@ -69,7 +69,7 @@ type DashboardData = {
     elo_rating: number;
     next_level_xp: number;
     is_premium: boolean;
-    estimated_dtm_score?: number;
+    estimated_dtm_score?: number | null;
     target_university?: string;
     target_faculty?: string;
     stability_multiplier?: number;
@@ -411,9 +411,9 @@ export default function DashboardPage() {
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
                   <span className="ps-num text-4xl sm:text-5xl font-black text-[var(--ps-orange)]">
-                    {p.estimated_dtm_score || 94.5}
+                    {p.estimated_dtm_score != null ? p.estimated_dtm_score.toFixed(1) : '—'}
                   </span>
-                  <span className="text-sm font-semibold text-[var(--text-muted)]">/ 189.0 ball</span>
+                  <span className="text-sm font-semibold text-[var(--text-muted)]">/ 189 ball</span>
                 </div>
                 <p className="mt-1 text-xs text-[var(--text-secondary)] font-semibold truncate">
                   Maqsad: {p.target_university || 'TATU'} — {p.target_faculty || 'Dasturiy injiniring'}
@@ -422,10 +422,12 @@ export default function DashboardPage() {
 
               <div className="mt-4 pt-3 border-t border-[var(--ps-neutral)] flex items-center justify-between text-xs">
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                  ⚡ Har bir test: +0.2 ball
+                  {p.estimated_dtm_score != null
+                    ? '⚡ Javoblaringiz asosida taxmin'
+                    : '⚡ 50 ta javobdan keyin hisoblanadi'}
                 </span>
                 <span className="rounded-full bg-black/5 dark:bg-white/5 px-2.5 py-0.5 font-bold">
-                  {p.stability_multiplier || 1.0}x bonus koeffitsiyenti
+                  {p.stability_multiplier || 1.0}x tanga bonusi
                 </span>
               </div>
             </div>

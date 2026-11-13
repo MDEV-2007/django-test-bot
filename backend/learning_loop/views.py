@@ -446,7 +446,7 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
         'water_reward': 35 if paid else 0,
         'share_caption': (
             f"🚀 Bugungi 4-bosqichli Avtopilot Marafonini 100% yopdim! "
-            f"DTM ballimga +{loop.dtm_score_delta} qo'shildi, Eco-Daraxtim o'sdi va Sirli Sandiq ochildi! 🎁🔥"
+            f"Eco-Daraxtim o'sdi va Sirli Sandiq ochildi! 🎁🔥"
         ),
     }
 
@@ -722,6 +722,8 @@ class AdvanceStageView(APIView):
                     coins = int(200 * reward_multiplier)
                     xp = int(100 * reward_multiplier)
                     profile = ensure_profile_for_user(user)
+                    # Barqarorlik koeffitsiyenti (streak bo'yicha 1.2x–2x)
+                    coins += int(coins * (profile.stability_multiplier - 1.0))
                     # Yakunlangan sikl ham Do'stlik Zanjirida test sifatida hisoblanadi (1.5x tanga).
                     from core.services import buddy_coin_bonus
                     coins += buddy_coin_bonus(profile, coins)
@@ -732,8 +734,8 @@ class AdvanceStageView(APIView):
                     quota.free_essay_credits = (quota.free_essay_credits or 0) + 1
                     quota.save(update_fields=['free_essay_credits'])
 
-                    # Dinamik DTM ballini oshiramiz (+0.4 dan +1.5 gacha)
-                    profile.add_dtm_score(loop.dtm_score_delta)
+                    # Taxminiy DTM bali haqiqiy javoblardan qayta hisoblanadi
+                    profile.refresh_dtm_estimate()
 
                     loop.is_chest_claimed = True
                 else:
@@ -805,7 +807,7 @@ class ShareLoopPostView(APIView):
                                 status=status.HTTP_409_CONFLICT)
 
             caption = str(request.data.get('caption') or (
-                f"🚀 Bugungi 4-bosqichli Marafonni 100% yopdim (+{loop.dtm_score_delta} DTM Ball)! "
+                f"🚀 Bugungi 4-bosqichli Marafonni 100% yopdim! "
                 f"Sirli Sandiq ochildi va Ilm Ildizi Daraxtimga suv quydim! 🔥🎁"
             ))[:1000]
 

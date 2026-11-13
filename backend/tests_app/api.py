@@ -1230,6 +1230,9 @@ def finish_api(request, attempt_id):
     multiplier = stress_cfg.bonus_xp_multiplier if (attempt.is_stress_mode and stress_cfg.bonus_xp_multiplier > 1.0) else 1.0
     xp_awarded = 0 if (profile.is_privileged or is_repeat or not meets_accuracy) else int(correct * 50 * multiplier)
     coins_awarded = 0 if (is_repeat or not meets_accuracy) else int(correct * 5 * (1.5 if attempt.is_stress_mode else 1.0))
+    # Barqarorlik koeffitsiyenti (streak 3/7/14/30 kun → 1.2x/1.5x/1.75x/2x) — dashboard'da va'da qilingan.
+    stability_bonus_coins = int(coins_awarded * (profile.stability_multiplier - 1.0))
+    coins_awarded += stability_bonus_coins
     # Do'stlik Zanjiri: test hisoblanadi; bugun ikkala do'st ham ishlagan bo'lsa tanga 1.5x.
     buddy_bonus_coins = 0
     if meets_accuracy and not is_repeat:
@@ -1240,7 +1243,7 @@ def finish_api(request, attempt_id):
     profile.add_coins(coins_awarded)
     if meets_accuracy and not is_repeat:
         profile.update_streak()
-        profile.add_dtm_score(0.2)
+        profile.refresh_dtm_estimate()
 
     # O'zgaruvchan Mukofot (Variable Reward): 25% omadli test bonusi
     lucky_bonus = None
@@ -1342,6 +1345,7 @@ def finish_api(request, attempt_id):
         'xp_awarded': xp_awarded,
         'coins_awarded': coins_awarded,
         'buddy_bonus_coins': buddy_bonus_coins,
+        'stability_bonus_coins': stability_bonus_coins,
         'streak': profile.streak,
         'meets_accuracy': meets_accuracy,
         'rushed_answers_count': rushed_answers_count,

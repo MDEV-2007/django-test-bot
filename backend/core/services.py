@@ -186,11 +186,13 @@ def send_parent_weekly_report(conn: ParentConnection):
     tests_count = recent_attempts.count()
 
     total_correct = sum(a.correct_answers for a in recent_attempts)
-    avg_score = recent_attempts.aggregate(avg=Avg('score'))['avg'] or (student.avg_score or 72.0)
+    avg_score = recent_attempts.aggregate(avg=Avg('score'))['avg'] or 0.0
 
-    # Prognoz ball dinamikasi
-    estimated_dtm = round(avg_score * 1.89, 1)
-    prev_dtm = max(110.0, round(estimated_dtm - 8.4, 1))
+    # Taxminiy DTM bali — faqat haqiqiy javoblardan hisoblangan bo'lsa (analytics.prediction)
+    dtm_line = (
+        f"🎯 <b>Taxminiy DTM bali:</b> {student.estimated_dtm_score:.1f} / 189\n"
+        if student.estimated_dtm_score is not None else ""
+    )
 
     text = (
         f"📊 <b>IlmIldizi Rasmiy Haftalik Ta'lim Hisoboti:</b>\n\n"
@@ -198,7 +200,7 @@ def send_parent_weekly_report(conn: ParentConnection):
         f"Farzandingiz <b>{student_name}</b> ushbu haftada platformada faol shug'ullandi:\n\n"
         f"⏱ <b>Bajarilgan testlar:</b> {tests_count} ta rasmiy imtihon ({total_correct} ta to'g'ri javob)\n"
         f"📈 <b>O'rtacha natija:</b> {avg_score:.1f}%\n"
-        f"🎯 <b>BMB Prognoz balli:</b> {prev_dtm} balldan <b>{estimated_dtm} ballga (+{(estimated_dtm - prev_dtm):.1f} ball)</b> o'sdi!\n"
+        f"{dtm_line}"
         f"🔥 <b>Uzluksiz kunlik odat (Streak):</b> {student.streak} kun ketma-ket faol!\n\n"
         f"<i>Tavsiya: Farzandingizni ushbu yutuqlari bilan tabriklab, unga ruhiy dalda berishingizni so'raymiz!</i> 🌟"
     )
@@ -221,7 +223,9 @@ def send_parent_honor_certificate(student_profile: Profile) -> int:
         return 0
 
     student_name = student_profile.user.get_full_name() or student_profile.user.username
-    dtm_gain = max(14.0, round((student_profile.estimated_dtm_score or 112.5) - 94.5, 1))
+    dtm_now = student_profile.estimated_dtm_score
+    dtm_line = (f"📈 Uning hozirgi taxminiy DTM bali: <b>{dtm_now:.1f} / 189</b>.\n\n"
+                if dtm_now is not None else "")
     origin = getattr(settings, 'FRONTEND_URL', 'https://ilmildizi.uz')
 
     from premium.models import SubscriptionPlan
@@ -239,9 +243,8 @@ def send_parent_honor_certificate(student_profile: Profile) -> int:
             f"🏅 <b>ILMILIDIZI RASMIY FAXRNOMASI</b>\n\n"
             f"Hurmatli <b>{parent_title}</b>!\n\n"
             f"Farzandingiz <b>{student_name}</b> so'nggi {student_profile.streak} kunda birorta ham kun "
-            f"qoldirmasdan ilm oldi va O'zbekistondagi 50 000 abituriyent orasida eng intizomli "
-            f"<b>Top-5% o'quvchilar</b> qatoriga kirdi!\n\n"
-            f"📈 Shu davrda u o'zining taxminiy Davlat Granti (DTM) ballini <b>+{dtm_gain} ballga</b> oshirdi.\n\n"
+            f"qoldirmasdan ilm oldi!\n\n"
+            f"{dtm_line}"
             f"🌟 <i>Bunday intizomli farzand tarbiyalaganingiz uchun tashakkur! Farzandingizning keyingi oylik "
             f"PRO ta'lim obunasini qo'llab-quvvatlash uchun quyidagi tugmadan foydalanishingiz mumkin:</i>"
         )

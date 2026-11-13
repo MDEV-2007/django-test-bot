@@ -99,9 +99,18 @@ class Profile(models.Model):
         help_text="Tanlangan OTM yo'nalishi",
     )
     estimated_dtm_score = models.FloatField(
-        default=94.5,
-        help_text="Shaxsiy Dinamik DTM Balli (max 189.0 ball)",
+        null=True,
+        blank=True,
+        default=None,
+        help_text="Taxminiy DTM bali (max 189) — analytics.prediction'dan, haqiqiy javoblar asosida. "
+                  "None = hali yetarli javob yo'q.",
     )
+    # Haftalik mikro-liga: daraja (1-5) va 30 kishilik divizion faqat yakshanba 22:00 dagi
+    # `rollover_micro_leagues` da o'zgaradi; reyting shu haftaning XP'si bo'yicha.
+    league_tier = models.PositiveSmallIntegerField(default=1, db_index=True)
+    league_division = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+    weekly_xp = models.PositiveIntegerField(default=0)
+    weekly_xp_week = models.DateField(null=True, blank=True, help_text="weekly_xp qaysi hafta (dushanba) uchun")
     target_subject = models.ForeignKey(
         'tests_app.Subject',
         on_delete=models.SET_NULL,
@@ -167,6 +176,8 @@ class Profile(models.Model):
                 Profile.objects.filter(pk=self.pk).update(xp=F('xp') + amount)
                 locked.refresh_from_db(fields=['xp'])
                 self.xp = locked.xp
+                if amount > 0:
+                    Profile.bump_weekly_xp(self.pk, amount)
 
             leveled_up = False
             next_level_threshold = locked.level * 1000
@@ -201,19 +212,44 @@ class Profile(models.Model):
             locked.refresh_from_db(fields=['coins'])
             self.coins = locked.coins
 
-    def add_dtm_score(self, delta: float):
-        """Dinamik DTM ballini (0.2 - 1.5 ball) atomik oshiradi (maksimal 189.0 ball)."""
-        if not delta or self.is_privileged:
+    @staticmethod
+    def current_week_start():
+        """Joriy haftaning dushanbasi (mahalliy vaqt)."""
+        from datetime import timedelta
+        today = timezone.localdate()
+        return today - timedelta(days=today.weekday())
+
+    @classmethod
+    def bump_weekly_xp(cls, pk, amount: int):
+        """Haftalik liga XP'si. Yangi hafta boshlangan bo'lsa hisob noldan boshlanadi."""
+        from django.db.models import F
+        if amount <= 0:
+            return
+        week = cls.current_week_start()
+        if not cls.objects.filter(pk=pk, weekly_xp_week=week).update(weekly_xp=F('weekly_xp') + amount):
+            cls.objects.filter(pk=pk).update(weekly_xp=amount, weekly_xp_week=week)
+
+    @property
+    def current_weekly_xp(self) -> int:
+        return self.weekly_xp if self.weekly_xp_week == self.current_week_start() else 0
+
+    def refresh_dtm_estimate(self):
+        """Taxminiy DTM balini haqiqiy javoblardan qayta hisoblaydi (analytics.prediction).
+
+        Ilgari har test +0.2 qo'shilardi — bal faqat o'sardi va bilimni emas, faollikni
+        o'lchardi. Endi og'irlikli to'g'ri javob ulushi * 189; javob kam bo'lsa None.
+        Og'ir hisob bo'lgani uchun bir o'quvchiga 5 daqiqada ko'pi bilan bir marta."""
+        if self.is_privileged:
             return self.estimated_dtm_score
-        from django.db import transaction
-        with transaction.atomic():
-            locked = Profile.objects.select_for_update().get(pk=self.pk)
-            current = locked.estimated_dtm_score or 94.5
-            new_score = round(min(189.0, max(56.7, current + float(delta))), 1)
-            if new_score != current:
-                Profile.objects.filter(pk=self.pk).update(estimated_dtm_score=new_score)
-                self.estimated_dtm_score = new_score
-        return self.estimated_dtm_score
+        from django.core.cache import cache
+        if not cache.add(f'dtm-refresh:{self.pk}', 1, timeout=300):
+            return self.estimated_dtm_score
+        from analytics.prediction import save_prediction
+        row = save_prediction(self)
+        value = float(row.predicted_dtm) if row else None
+        Profile.objects.filter(pk=self.pk).update(estimated_dtm_score=value)
+        self.estimated_dtm_score = value
+        return value
 
     @property
     def stability_multiplier(self) -> float:
@@ -231,17 +267,10 @@ class Profile(models.Model):
 
     @property
     def league_info(self) -> dict:
-        """5 bosqichli IlmIldizi Ligasi."""
-        xp = self.xp or 0
-        if xp >= 10000:
-            return {'tier': 'grant', 'level': 5, 'name': "Davlat Granti Ligasi", 'badge': '👑', 'has_gold_border': True}
-        if xp >= 5000:
-            return {'tier': 'kontrakt', 'level': 4, 'name': "Kuchli Kontrakt Ligasi", 'badge': '🎓', 'has_gold_border': False}
-        if xp >= 2500:
-            return {'tier': 'chinor', 'level': 3, 'name': "Chinor Ligasi", 'badge': '🌳', 'has_gold_border': False}
-        if xp >= 1000:
-            return {'tier': 'kurtak', 'level': 2, 'name': "Kurtak Ligasi", 'badge': '🌿', 'has_gold_border': False}
-        return {'tier': 'nihol', 'level': 1, 'name': "Nihol Ligasi", 'badge': '🌱', 'has_gold_border': False}
+        """5 bosqichli IlmIldizi Ligasi — saqlangan `league_tier` (haftalik ko'tarilish/tushish)."""
+        from leaderboard.services import league_by_level
+        t = league_by_level(self.league_tier)
+        return {k: t[k] for k in ('tier', 'level', 'name', 'badge', 'has_gold_border')}
 
     def update_streak(self):
         """Updates the activity streak based on calendar days.

@@ -37,11 +37,9 @@ class ArenaResilienceTests(TestCase):
         self.assertEqual(res2.status_code, 200)
 
     def test_arena_matchmake_anonymous_and_authenticated(self):
-        # 1. Anonymous matchmake
+        # 1. Anonymous matchmake — javob kalitlari (is_correct) qaytgani uchun login talab qilinadi
         res_anon = self.client.post('/api/growth/arena/matchmake/', {'subject_slug': 'tarix'}, format='json')
-        self.assertEqual(res_anon.status_code, 200)
-        self.assertTrue(res_anon.data.get('ok'))
-        self.assertGreaterEqual(len(res_anon.data.get('questions', [])), 1)
+        self.assertEqual(res_anon.status_code, 401)
 
         # 2. Authenticated matchmake
         self.client.force_authenticate(user=self.user)

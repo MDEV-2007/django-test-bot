@@ -76,6 +76,9 @@ class GamificationMasterTests(TestCase):
         self.assertEqual(tier2['tier'], 'grant')
         self.assertTrue(tier2['has_gold_border'])
 
+        # Liga XP'dan emas, saqlangan league_tier'dan (haftalik ko'tarilish/tushish)
+        self.p1.league_tier = 4
+        self.p1.save(update_fields=['league_tier'])
         league_data = get_weekly_micro_league(self.p1)
         self.assertEqual(league_data['current_league']['tier'], 'kontrakt')
         self.assertGreaterEqual(len(league_data['rows']), 1)
@@ -175,8 +178,10 @@ class GamificationMasterTests(TestCase):
         self.assertIn('selected_university', otm_data)
         self.assertIn('my_dtm', otm_data)
         self.assertIn('max_dtm', otm_data)
-        self.assertIn('simulated_rank', otm_data)
-        self.assertIn('admission_probability_pct', otm_data)
+        self.assertIn('ready', otm_data)
+        # To'qima mandat o'rni va "kirish ehtimoli" foizi endi berilmaydi
+        self.assertNotIn('simulated_rank', otm_data)
+        self.assertNotIn('admission_probability_pct', otm_data)
         self.assertIn('status', otm_data)
         self.assertIn('name', otm_data['selected_university'])
         self.assertIn('faculty', otm_data['selected_university'])

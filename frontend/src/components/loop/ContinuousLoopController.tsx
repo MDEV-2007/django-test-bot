@@ -7,7 +7,7 @@ import {
   Brain, Zap, Sparkles, Trophy, X, Flame,
   Clock, ArrowRight, CheckCircle2, AlertCircle,
   HelpCircle, Swords, Check, RotateCw, Lightbulb,
-  ShieldAlert, TrendingUp
+  ShieldAlert
 } from 'lucide-react';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
@@ -399,9 +399,6 @@ export default function ContinuousLoopController({ onClose }: ContinuousLoopCont
               </h1>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <span className="hidden items-center gap-1 rounded-full bg-[var(--ps-green)] px-3 py-1.5 text-[12px] font-bold text-white sm:inline-flex">
-                <TrendingUp className="size-3.5" /> +{(loop?.dtm_score_delta ?? 0.4).toFixed(1)} DTM
-              </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-[12px] font-bold text-[#080808]">
                 <Flame className="size-3.5 fill-current" /> {(loop?.combo_multiplier ?? 1.0).toFixed(1)}x
               </span>

@@ -124,6 +124,7 @@ def award_profile_rewards_atomic(profile_id: int, coins_delta: int = 0, xp_delta
         Profile.objects.filter(pk=profile_id).update(**updates)
         locked.refresh_from_db(fields=list(updates.keys()))
         if 'xp' in updates and xp_delta > 0:
+            Profile.bump_weekly_xp(profile_id, xp_delta)
             # XP allaqachon qo'shilgan: add_xp(0) faqat daraja (level) ni qayta hisoblaydi.
             locked.add_xp(0)
 

@@ -50,8 +50,10 @@ type MicroLeagueRow = {
   username: string;
   name: string;
   avatar_url: string;
+  /** Shu haftalik XP */
   xp: number;
-  dtm_score: number;
+  total_xp?: number;
+  dtm_score: number | null;
   streak: number;
   zone: 'promotion' | 'demotion' | 'safe';
   is_me: boolean;
@@ -97,15 +99,17 @@ type OtmCatalogItem = {
 type OtmSimulatorData = {
   selected_university: OtmCatalogItem;
   catalog: OtmCatalogItem[];
-  my_dtm: number;
+  /** false — taxminiy ball uchun javoblar hali yetarli emas */
+  ready: boolean;
+  my_dtm: number | null;
   max_dtm: number;
-  simulated_rank: number;
-  total_applicants: number;
-  points_to_grant: number;
-  points_to_contract: number;
-  admission_probability_pct: number;
-  status: 'grant' | 'contract' | 'below';
+  platform_rank?: number;
+  platform_total?: number;
+  points_to_grant?: number;
+  points_to_contract?: number;
+  status: 'grant' | 'contract' | 'below' | 'unknown';
   status_label: string;
+  cutoffs_note?: string;
 };
 
 type RegionClan = {
@@ -113,7 +117,7 @@ type RegionClan = {
   region: string;
   total_xp: number;
   students_count: number;
-  avg_dtm: number;
+  avg_dtm: number | null;
   is_my_region: boolean;
 };
 
@@ -123,7 +127,7 @@ type SchoolClan = {
   region: string;
   total_xp: number;
   students_count: number;
-  avg_dtm: number;
+  avg_dtm: number | null;
   is_my_school: boolean;
 };
 
@@ -633,9 +637,11 @@ export default function LeaderboardPage() {
                                 <Flame className="size-3 text-orange-500" /> {r.streak} kun
                               </span>
                               <span>·</span>
-                              <span className="text-[var(--ps-purple)] font-mono font-bold">
-                                {r.dtm_score} DTM ball
-                              </span>
+                              {r.dtm_score != null && (
+                                <span className="text-[var(--ps-purple)] font-mono font-bold">
+                                  ~{r.dtm_score} DTM ball
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -656,6 +662,7 @@ export default function LeaderboardPage() {
                           <span className="font-mono text-sm font-bold flex items-center gap-1">
                             <Zap className="size-3.5 text-[var(--ps-orange)]" />
                             {r.xp.toLocaleString('uz-UZ')} XP
+                            <span className="text-[10px] font-semibold opacity-60">/hafta</span>
                           </span>
                         </div>
                       </div>
@@ -683,18 +690,13 @@ export default function LeaderboardPage() {
                 grant_cutoff: 156.4,
                 contract_cutoff: 114.2,
               };
-            const myDtm = Number(otmSim?.my_dtm ?? (otmSim as any)?.my_dtm_score ?? 94.5);
-            const maxDtm = Number(otmSim?.max_dtm ?? (otmSim as any)?.max_dtm_score ?? 189.0);
-            const simulatedRank = Number(otmSim?.simulated_rank ?? (otmSim as any)?.my_rank ?? 145);
-            const totalApplicants = Number(otmSim?.total_applicants ?? 420);
-            const probPct = Number(otmSim?.admission_probability_pct ?? (otmSim as any)?.admission_probability ?? 50);
-            const rawStatus = otmSim?.status ?? (otmSim as any)?.status_zone;
-            const status = rawStatus === 'danger' ? 'below' : rawStatus || 'contract';
-            const grantCutoff = Number(selectedUni?.grant_cutoff ?? 156.4);
-            const contractCutoff = Number(selectedUni?.contract_cutoff ?? 114.2);
-            const pointsToGrant = Number(otmSim?.points_to_grant ?? Math.max(0, grantCutoff - myDtm).toFixed(1));
-            const pointsToContract = Number(otmSim?.points_to_contract ?? Math.max(0, contractCutoff - myDtm).toFixed(1));
-
+            // Taxminiy ball haqiqiy javoblardan (analytics.prediction); yetarli javob bo'lmasa null.
+            const ready = Boolean(otmSim?.ready && otmSim?.my_dtm != null);
+            const myDtm = ready ? Number(otmSim?.my_dtm) : 0;
+            const maxDtm = Number(otmSim?.max_dtm ?? 189);
+            const status = otmSim?.status ?? 'unknown';
+            const pointsToGrant = Number(otmSim?.points_to_grant ?? 0);
+            const pointsToContract = Number(otmSim?.points_to_contract ?? 0);
             return (
               <div className="space-y-6">
                 {/* OTM Tanlash Tugmalari */}
@@ -725,7 +727,7 @@ export default function LeaderboardPage() {
                     <div>
                       <span className="ps-chip">
                         <GraduationCap className="size-3.5 text-[var(--ps-purple)]" />
-                        Haqiqiy DTM Mandat Simulyatsiyasi
+                        Taxminiy DTM solishtiruvi
                       </span>
                       <h2 className="mt-3 text-2xl sm:text-3xl font-black">
                         {selectedUni.name}
@@ -735,88 +737,89 @@ export default function LeaderboardPage() {
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-black/5 dark:bg-white/5 p-4 text-center md:text-right shrink-0">
-                      <p className="text-xs text-[var(--text-muted)] font-bold">Taxminiy Mandatdagi O&apos;rningiz</p>
-                      <p className="text-4xl font-black text-[var(--ps-orange)]">
-                        #{simulatedRank}
-                      </p>
-                      <p className="text-[11px] text-[var(--text-muted)]">
-                        {totalApplicants} nafar abituriyent orasida
-                      </p>
-                    </div>
+                    {ready && otmSim?.platform_rank != null && (
+                      <div className="rounded-2xl bg-black/5 dark:bg-white/5 p-4 text-center md:text-right shrink-0">
+                        <p className="text-xs text-[var(--text-muted)] font-bold">Platformadagi o&apos;rningiz</p>
+                        <p className="text-4xl font-black text-[var(--ps-orange)]">
+                          #{otmSim.platform_rank}
+                        </p>
+                        <p className="text-[11px] text-[var(--text-muted)]">
+                          shu OTMni tanlagan {otmSim.platform_total} o&apos;quvchi orasida
+                        </p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Dinamik DTM Ko'rsatkichi */}
                   <div className="mt-6 space-y-4">
                     <div className="flex items-center justify-between text-xs font-bold">
                       <span className="flex items-center gap-1.5">
                         <TrendingUp className="size-4 text-[var(--ps-green)]" />
-                        Sizning Taxminiy DTM Ballingiz:
+                        Sizning taxminiy DTM balingiz:
                       </span>
                       <span className="font-mono text-lg text-[var(--ps-orange)]">
-                        {myDtm} / {maxDtm} ball
+                        {ready ? `${myDtm} / ${maxDtm} ball` : '—'}
                       </span>
                     </div>
 
-                    {/* Progress Bar with markers */}
-                    <div className="relative h-4 w-full overflow-hidden rounded-full bg-[var(--ps-neutral)]">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-700"
-                        style={{
-                          width: `${Math.min(100, (myDtm / maxDtm) * 100)}%`,
-                        }}
-                      />
-                    </div>
+                    {ready && (
+                      <div className="relative h-4 w-full overflow-hidden rounded-full bg-[var(--ps-neutral)]">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-700"
+                          style={{ width: `${Math.min(100, (myDtm / maxDtm) * 100)}%` }}
+                        />
+                      </div>
+                    )}
 
-                    {/* Ostonalar (Thresholds) */}
+                    {/* Taxminiy o'tish ballari */}
                     <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
                       <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3.5">
                         <p className="font-bold text-emerald-600 dark:text-emerald-400">
-                          Davlat Granti (Kvota: {selectedUni.grant_quota ?? 35} ta)
+                          Davlat granti (kvota: {selectedUni.grant_quota ?? '—'} ta)
                         </p>
                         <p className="text-lg font-black font-mono mt-0.5">
-                          {selectedUni.grant_cutoff ?? 156.4} ball
+                          ~{selectedUni.grant_cutoff} ball
                         </p>
                       </div>
 
                       <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-3.5">
                         <p className="font-bold text-blue-600 dark:text-blue-400">
-                          To&apos;lov-Kontrakt (Kvota: {selectedUni.contract_quota ?? 140} ta)
+                          To&apos;lov-kontrakt (kvota: {selectedUni.contract_quota ?? '—'} ta)
                         </p>
                         <p className="text-lg font-black font-mono mt-0.5">
-                          {selectedUni.contract_cutoff ?? 114.2} ball
+                          ~{selectedUni.contract_cutoff} ball
                         </p>
                       </div>
                     </div>
+                    <p className="text-[11px] text-[var(--text-muted)]">
+                      {otmSim?.cutoffs_note || "O'tish ballari o'tgan yillar asosida taxminiy, rasmiy emas."}
+                    </p>
 
-                    {/* Psixologik Tahlil & Xulosa */}
                     <div
                       className={cn(
-                        'rounded-2xl p-4 text-xs font-semibold leading-relaxed flex items-center justify-between gap-4',
-                        status === 'grant'
-                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                          : status === 'contract'
-                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                            : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30'
+                        'rounded-2xl p-4 text-xs font-semibold leading-relaxed',
+                        !ready
+                          ? 'bg-black/5 text-[var(--text-secondary)] border border-[var(--ps-neutral)] dark:bg-white/5'
+                          : status === 'grant'
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                            : status === 'contract'
+                              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                              : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30'
                       )}
                     >
-                      <div>
-                        <p className="text-sm font-black mb-1">
-                          {status === 'grant'
-                            ? '👑 Tabriklaymiz! Siz Davlat Granti kvotasi ichidasiz.'
+                      <p className="text-sm font-black mb-1">
+                        {!ready
+                          ? '📊 Taxminiy ball hali hisoblanmagan'
+                          : status === 'grant'
+                            ? "👑 Taxminiy balingiz grant o'tish balidan yuqori."
                             : status === 'contract'
-                              ? `🎓 Siz to'lov-kontrakt zonasidasiz. Davlat grantiga kirish uchun yana +${pointsToGrant} ball yetishmayapti.`
-                              : `⚠️ Kontrakt ostonasiga yetish uchun yana +${pointsToContract} ball to'plashingiz zarur.`}
-                        </p>
-                        <p className="opacity-80">
-                          Kunlik 15 daqiqalik test va xatolar ustida ishlash har hafta ballingizni +2.5 ballgacha oshiradi.
-                        </p>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <span className="text-2xl font-black">{probPct}%</span>
-                        <p className="text-[10px] uppercase font-bold opacity-70">Kirish ehtimoli</p>
-                      </div>
+                              ? `🎓 Kontrakt zonasidasiz. Grant uchun yana +${pointsToGrant} ball kerak.`
+                              : `⚠️ Kontrakt o'tish baliga yetish uchun yana +${pointsToContract} ball kerak.`}
+                      </p>
+                      <p className="opacity-80">
+                        {!ready
+                          ? otmSim?.status_label || "Ko'proq test yeching — ball haqiqiy javoblaringiz asosida hisoblanadi."
+                          : 'Ball haqiqiy javoblaringizdan hisoblanadi: qiyin savollar va turli mavzular uni ko‘proq ko‘taradi.'}
+                      </p>
                     </div>
                   </div>
                 </section>
@@ -925,7 +928,7 @@ export default function LeaderboardPage() {
                               )}
                             </p>
                             <p className="text-xs opacity-70">
-                              {reg.students_count ?? (reg as any).students ?? 0} o&apos;quvchi faol · O&apos;rtacha: {reg.avg_dtm} DTM ball
+                              {reg.students_count ?? (reg as any).students ?? 0} o&apos;quvchi faol · O&apos;rtacha: {reg.avg_dtm != null ? `${reg.avg_dtm} DTM ball` : '—'}
                             </p>
                           </div>
                         </div>

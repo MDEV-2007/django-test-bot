@@ -235,7 +235,7 @@ def finish_battle_api(request):
     if total_coins_awarded > 0:
         profile.add_coins(total_coins_awarded)
     if result == 'win':
-        profile.add_dtm_score(0.2)
+        profile.refresh_dtm_estimate()
 
     # ELO atomik: to'liq profile.save() boshqa so'rov yozgan tanga/XP'ni eski qiymat
     # bilan ustidan yozib yuborishi mumkin edi (lost update).

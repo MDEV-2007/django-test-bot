@@ -137,13 +137,15 @@ def send_streak_saver_reminders(limit: int = 500) -> dict:
         name = profile.user.first_name or profile.user.username
         streak = profile.streak
         uni = getattr(profile, 'target_university', None) or 'Tanlagan OTM'
-        dtm = round(getattr(profile, 'estimated_dtm_score', None) or 94.5, 1)
-        prob = min(98, max(25, int((dtm / 189.0) * 100)))
+        dtm = getattr(profile, 'estimated_dtm_score', None)
+        dtm_line = (
+            f"<b>{uni}</b> sari taxminiy DTM balingiz: <b>{dtm:.1f} / 189</b> — orqaga qaytmang!\n\n"
+            if dtm is not None else ""
+        )
 
         text = (
             f"🚨 <b>{name}, {streak} kunlik mehnatingiz o'chib ketishiga 2 soat qoldi!</b> 🔥\n\n"
-            f"Shu kungacha <b>{uni}</b>ga kirish ehtimolingizni <b>{prob}% ga ({dtm} / 189.0 ball)</b> "
-            f"chiqargandingiz — orqaga qaytmang!\n\n"
+            f"{dtm_line}"
             f"Olovingizni va Bilim Daraxtingizni saqlab qolish uchun hoziroq <b>5 daqiqa</b> vaqt ajrating 👇"
         )
 

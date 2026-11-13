@@ -212,11 +212,69 @@ LEAGUE_TIERS = [
 
 
 def resolve_league_tier(xp: int) -> dict:
+    """XP bo'yicha boshlang'ich liga (faqat migratsiya/yangi profil uchun; keyin haftalik o'zgaradi)."""
     xp_val = max(0, int(xp or 0))
     for info in reversed(LEAGUE_TIERS):
         if xp_val >= info['min_xp']:
             return info
     return LEAGUE_TIERS[0]
+
+
+def league_by_level(level) -> dict:
+    lvl = min(len(LEAGUE_TIERS), max(1, int(level or 1)))
+    return LEAGUE_TIERS[lvl - 1]
+
+
+DIVISION_SIZE = 30
+PROMOTE_COUNT = 5
+DEMOTE_COUNT = 5
+MIN_DIVISION_FOR_DEMOTION = 10
+
+
+def _league_students():
+    return Profile.objects.filter(role='student', user__is_superuser=False, user__is_staff=False)
+
+
+def _weekly_xp_expr():
+    """Faqat joriy haftaning XP'si; o'tgan hafta yozuvi 0 hisoblanadi."""
+    from django.db.models import Case, IntegerField, Value, When
+    return Case(
+        When(weekly_xp_week=Profile.current_week_start(), then='weekly_xp'),
+        default=Value(0), output_field=IntegerField(),
+    )
+
+
+def ensure_league_division(profile: Profile) -> int:
+    """Divizionsiz o'quvchini o'z ligasidagi bo'sh (30 dan kam) divizionga joylaydi."""
+    from django.db.models import Count, Max
+    if profile.league_division is not None:
+        return profile.league_division
+    peers = _league_students().filter(league_tier=profile.league_tier, league_division__isnull=False)
+    open_div = (peers.values('league_division').annotate(n=Count('id'))
+                .filter(n__lt=DIVISION_SIZE).order_by('league_division').first())
+    if open_div:
+        division = open_div['league_division']
+    else:
+        division = (peers.aggregate(m=Max('league_division'))['m'] or 0) + 1
+    Profile.objects.filter(pk=profile.pk).update(league_division=division)
+    profile.league_division = division
+    return division
+
+
+def _ranked_division(tier: int, division: int):
+    return list(
+        _league_students().filter(league_tier=tier, league_division=division)
+        .annotate(week_xp=_weekly_xp_expr())
+        .select_related('user').order_by('-week_xp', 'id')
+    )
+
+
+def _zone(idx: int, total: int, week_xp: int) -> str:
+    if idx <= PROMOTE_COUNT and week_xp > 0:
+        return 'promotion'
+    if total >= MIN_DIVISION_FOR_DEMOTION and idx > total - DEMOTE_COUNT:
+        return 'demotion'
+    return 'safe'
 
 
 def _seconds_until_sunday_2200() -> int:
@@ -238,58 +296,30 @@ def _seconds_until_sunday_2200() -> int:
 
 
 def get_weekly_micro_league(profile: Profile = None) -> dict:
-    """Har dushanba 30 nafar darajasi bir xil o'quvchi bitta mikro-ligaga tushadi.
-    Top-5 keyingi ligaga o'tadi ('promotion'), oxirgi 5 kishi pastga tushadi ('demotion').
-    """
-    user_xp = getattr(profile, 'xp', 0) if profile else 0
-    my_tier = resolve_league_tier(user_xp)
-    min_xp = my_tier['min_xp']
-    max_xp = my_tier['max_xp']
+    """O'quvchining 30 kishilik divizioni, shu haftaning XP'si bo'yicha.
+    Yakshanba 22:00 da (`rollover_micro_leagues`) Top-5 keyingi ligaga chiqadi, oxirgi 5 tasi
+    tushadi, haftalik XP nolga qaytadi."""
+    is_student = bool(profile and profile.role == 'student' and not profile.is_privileged)
+    my_tier = league_by_level(profile.league_tier if profile else 1)
 
-    qs = Profile.objects.filter(
-        role='student',
-        user__is_superuser=False,
-        user__is_staff=False,
-        xp__gte=min_xp,
-    )
-    if max_xp is not None:
-        qs = qs.filter(xp__lte=max_xp)
-
-    # Agar shu divizionda 30 ta odam chiqmasa, eng yaqin XP egalari bilan 30 tagacha to'ldiramiz
-    cohort_profiles = list(qs.select_related('user').order_by('-xp', 'id')[:30])
-    if profile and profile.role == 'student' and not profile.is_privileged and all(p.id != profile.id for p in cohort_profiles):
-        cohort_profiles.append(profile)
-        cohort_profiles.sort(key=lambda p: (-p.xp, p.id))
-        cohort_profiles = cohort_profiles[:30]
-
-    if len(cohort_profiles) < 10:
-        extra_ids = {p.id for p in cohort_profiles}
-        extra = list(
-            Profile.objects.filter(role='student', user__is_superuser=False, user__is_staff=False)
-            .exclude(id__in=extra_ids)
-            .select_related('user')
-            .order_by('-xp', 'id')[: (30 - len(cohort_profiles))]
+    if is_student:
+        division = ensure_league_division(profile)
+        cohort = _ranked_division(profile.league_tier, division)
+    else:
+        # Admin/mehmon: shu ligadagi eng faol o'quvchilarni ko'rsatamiz
+        cohort = list(
+            _league_students().filter(league_tier=my_tier['level'])
+            .annotate(week_xp=_weekly_xp_expr()).select_related('user')
+            .order_by('-week_xp', 'id')[:DIVISION_SIZE]
         )
-        cohort_profiles.extend(extra)
-        cohort_profiles.sort(key=lambda p: (-p.xp, p.id))
 
-    total_in_cohort = len(cohort_profiles)
-    demotion_start = max(6, total_in_cohort - 4)  # Oxirgi 5 o'rin (agar guruhda yetarli odam bo'lsa)
-
+    total = len(cohort)
     rows = []
     my_cohort_rank = None
-    for idx, p in enumerate(cohort_profiles, start=1):
-        if idx <= 5:
-            zone = 'promotion'
-        elif idx >= demotion_start and total_in_cohort >= 10:
-            zone = 'demotion'
-        else:
-            zone = 'safe'
-
+    for idx, p in enumerate(cohort, start=1):
         is_me = bool(profile and p.id == profile.id)
         if is_me:
             my_cohort_rank = idx
-
         full_name = f"{p.user.first_name} {p.user.last_name}".strip() or p.user.username
         rows.append({
             'rank': idx,
@@ -297,30 +327,97 @@ def get_weekly_micro_league(profile: Profile = None) -> dict:
             'username': p.user.username,
             'name': full_name,
             'avatar_url': p.avatar_url or f"https://api.dicebear.com/7.x/adventurer/svg?seed={p.user.username}",
-            'xp': p.xp,
-            'dtm_score': round(getattr(p, 'estimated_dtm_score', 94.5) or 94.5, 1),
+            'xp': p.week_xp,
+            'total_xp': p.xp,
+            'dtm_score': round(p.estimated_dtm_score, 1) if p.estimated_dtm_score is not None else None,
             'streak': p.streak,
-            'zone': zone,
+            'zone': _zone(idx, total, p.week_xp),
             'is_me': is_me,
             'has_gold_border': my_tier['has_gold_border'] or idx <= 3,
         })
 
     next_tier = next((t for t in LEAGUE_TIERS if t['level'] == my_tier['level'] + 1), None)
     prev_tier = next((t for t in LEAGUE_TIERS if t['level'] == my_tier['level'] - 1), None)
+    demotion_start = total - DEMOTE_COUNT + 1 if total >= MIN_DIVISION_FOR_DEMOTION else None
 
     return {
         'current_league': my_tier,
         'next_league': next_tier,
         'prev_league': prev_tier,
         'all_leagues': LEAGUE_TIERS,
-        'cohort_size': total_in_cohort,
+        'cohort_size': total,
         'my_cohort_rank': my_cohort_rank,
-        'promotion_cutoff_rank': 5,
-        'demotion_start_rank': demotion_start if total_in_cohort >= 10 else None,
+        'promotion_cutoff_rank': PROMOTE_COUNT,
+        'demotion_start_rank': demotion_start,
         'seconds_until_reset': _seconds_until_sunday_2200(),
-        'reset_label': 'Yakshanba 22:00 da Top-5 keyingi ligaga chiqadi',
+        'reset_label': "Yakshanba 22:00 da Top-5 keyingi ligaga chiqadi, oxirgi 5 tasi tushadi",
+        'xp_label': "shu haftalik XP",
         'rows': rows,
     }
+
+
+def rollover_micro_leagues(dry_run: bool = False) -> dict:
+    """Haftalik yakun (yakshanba 22:00): har divizionda Top-5 (shu hafta XP > 0) bir liga
+    yuqoriga, 10+ kishilik divizionda oxirgi 5 tasi bir liga pastga. So'ng shu hafta faol
+    bo'lganlar har ligada 30 kishilik divizionlarga qayta bo'linadi, haftalik XP nolga qaytadi."""
+    import random
+    from django.db import transaction
+    from core.models import Notification
+
+    max_level = len(LEAGUE_TIERS)
+    promoted, demoted = [], []
+    divisions = (_league_students().filter(league_division__isnull=False)
+                 .values_list('league_tier', 'league_division').distinct())
+    for tier, division in divisions:
+        cohort = _ranked_division(tier, division)
+        total = len(cohort)
+        for idx, p in enumerate(cohort, start=1):
+            zone = _zone(idx, total, p.week_xp)
+            if zone == 'promotion' and tier < max_level:
+                promoted.append(p)
+            elif zone == 'demotion' and tier > 1:
+                demoted.append(p)
+
+    result = {'promoted': len(promoted), 'demoted': len(demoted)}
+    if dry_run:
+        return result
+
+    with transaction.atomic():
+        for p in promoted:
+            Profile.objects.filter(pk=p.pk).update(league_tier=p.league_tier + 1)
+        for p in demoted:
+            Profile.objects.filter(pk=p.pk).update(league_tier=p.league_tier - 1)
+
+        # Qayta bo'lish: shu hafta faol bo'lganlar divizionga kiradi; nofaollar keyingi
+        # safar liga sahifasini ochganda ensure_league_division bilan joylanadi.
+        week = Profile.current_week_start()
+        active = list(_league_students().filter(weekly_xp_week=week, weekly_xp__gt=0)
+                      .values_list('id', 'league_tier'))
+        _league_students().update(league_division=None, weekly_xp=0)
+        by_tier = {}
+        for pid, tier in active:
+            by_tier.setdefault(tier, []).append(pid)
+        for tier, ids in by_tier.items():
+            random.shuffle(ids)
+            for i in range(0, len(ids), DIVISION_SIZE):
+                Profile.objects.filter(id__in=ids[i:i + DIVISION_SIZE]).update(
+                    league_division=i // DIVISION_SIZE + 1)
+
+        for p in promoted:
+            t = league_by_level(p.league_tier + 1)
+            Notification.objects.create(
+                profile=p, type='achievement',
+                title=f"{t['badge']} {t['name']}ga ko'tarildingiz!",
+                message="Haftaning Top-5 taligidan joy oldingiz. Yangi ligada omad!",
+            )
+        for p in demoted:
+            t = league_by_level(p.league_tier - 1)
+            Notification.objects.create(
+                profile=p, type='system',
+                title=f"{t['badge']} {t['name']}ga tushdingiz",
+                message="Bu hafta divizioningizda oxirgi 5 talikda qoldingiz. Keyingi haftada qaytaring!",
+            )
+    return result
 
 
 # ─── OTM va Kvota Simulyatori (Haqiqiy Mandat Simulyatsiyasi) ──────────────────
@@ -389,93 +486,77 @@ OTM_CATALOG = [
 
 
 def get_otm_mandat_simulator(profile: Profile = None, university_code: str = None) -> dict:
-    """O'quvchining tanlagan OTM va yo'nalishi bo'yicha haqiqiy mandat simulyatsiyasi."""
+    """O'quvchining taxminiy DTM bali (haqiqiy javoblardan) va tanlagan OTMning taxminiy
+    o'tish ballari solishtiriladi.
+
+    Halollik: o'tish ballari o'tgan yillar asosidagi qo'lda kiritilgan taxmin (rasmiy emas);
+    "kirish ehtimoli" foizi va to'qima mandat o'rni berilmaydi. Platformadagi o'rin esa
+    haqiqiy: shu OTMni tanlagan o'quvchilar orasida taxminiy bal bo'yicha."""
     user_target = getattr(profile, 'target_university', '') if profile else ''
     code = (university_code or user_target or 'TATU').strip()
     otm = next((item for item in OTM_CATALOG if item['code'].lower() == code.lower()), OTM_CATALOG[0])
-
-    my_dtm = round(float(getattr(profile, 'estimated_dtm_score', None) or 94.5), 1) if profile else 94.5
-    user_xp = getattr(profile, 'xp', 0) if profile else 0
-    # Agar o'quvchi XP to'plagan bo'lsa-yu, estimated_dtm_score hali boshlang'ich 94.5 da tursa,
-    # XP va o'rtacha test natijasidan dinamik hisoblaymiz:
-    if my_dtm <= 95.0 and user_xp > 100:
-        my_dtm = round(min(189.0, 94.5 + min(75.0, (user_xp / 180.0))), 1)
-
     grant_cutoff = otm['grant_cutoff']
     contract_cutoff = otm['contract_cutoff']
-    grant_quota = otm['grant_quota']
-    contract_quota = otm['contract_quota']
 
-    # Real bazadagi shu OTMni tanlagan abituriyentlar
-    real_ahead = Profile.objects.filter(
-        role='student',
-        target_university__iexact=otm['code'],
-        estimated_dtm_score__gt=my_dtm,
-    ).count()
-
-    # Mandatdagi o'rin simulyatsiyasi (grant_cutoff ga nisbatan realistik pog'ona)
-    if my_dtm >= grant_cutoff:
-        simulated_offset = max(0, int((189.0 - my_dtm) * (grant_quota / max(1.0, 189.0 - grant_cutoff))))
-        my_rank = max(1, min(grant_quota, simulated_offset + 1 + real_ahead))
-    elif my_dtm >= contract_cutoff:
-        gap_ratio = (grant_cutoff - my_dtm) / max(1.0, grant_cutoff - contract_cutoff)
-        my_rank = grant_quota + max(1, int(gap_ratio * (contract_quota - grant_quota))) + real_ahead
-    else:
-        gap_below = contract_cutoff - my_dtm
-        my_rank = contract_quota + max(1, int(gap_below * 3.2)) + real_ahead
-
-    total_applicants = max(otm['base_applicants'], my_rank + 42)
-    points_to_grant = round(max(0.0, grant_cutoff - my_dtm), 1)
-    points_to_contract = round(max(0.0, contract_cutoff - my_dtm), 1)
-
-    if my_dtm >= grant_cutoff:
-        status_zone = 'grant'
-        probability = min(98, 85 + int((my_dtm - grant_cutoff) * 0.7))
-        headline = (
-            f"🎉 Tabriklaymiz! Siz hozir #{my_rank}-o'rindasiz va Davlat Granti "
-            f"(Top-{grant_quota}) kvotasi ichidasiz!"
-        )
-    elif my_dtm >= contract_cutoff:
-        status_zone = 'contract'
-        probability = min(84, max(45, int(45 + ((my_dtm - contract_cutoff) / max(1.0, grant_cutoff - contract_cutoff)) * 38)))
-        headline = (
-            f"Sen hozir #{my_rank}-o'rindasan. Davlat grantiga kirish (Top-{grant_quota}) "
-            f"uchun yana {points_to_grant} ball yetishmayapti."
-        )
-    else:
-        status_zone = 'danger'
-        probability = max(18, int((my_dtm / max(1.0, contract_cutoff)) * 44))
-        headline = (
-            f"Sen hozir #{my_rank}-o'rindasan. Davlat grantiga kirish (Top-{grant_quota}) "
-            f"uchun yana {points_to_grant} ball, kontrakt uchun esa {points_to_contract} ball yetishmayapti."
-        )
-
-    return {
-        # Frontend-kutgan maydonlar:
+    my_dtm = getattr(profile, 'estimated_dtm_score', None) if profile else None
+    base = {
         'catalog': OTM_CATALOG,
         'selected_university': otm,
-        'my_dtm': my_dtm,
-        'max_dtm': 189.0,
-        'simulated_rank': my_rank,
-        'admission_probability_pct': probability,
-        'status': 'below' if status_zone == 'danger' else status_zone,
-        'status_label': headline,
-
-        # Backend va testlar uchun mavjud maydonlar:
         'selected_otm': otm,
         'available_otms': OTM_CATALOG,
-        'my_dtm_score': my_dtm,
+        'max_dtm': 189.0,
         'max_dtm_score': 189.0,
-        'my_rank': my_rank,
-        'total_applicants': total_applicants,
-        'grant_quota': grant_quota,
-        'contract_quota': contract_quota,
+        'grant_quota': otm['grant_quota'],
+        'contract_quota': otm['contract_quota'],
         'grant_cutoff': grant_cutoff,
         'contract_cutoff': contract_cutoff,
+        'cutoffs_note': "O'tish ballari o'tgan yillar asosida taxminiy, rasmiy emas.",
+    }
+    if my_dtm is None:
+        from analytics.prediction import MIN_ANSWERS
+        return {
+            **base,
+            'ready': False,
+            'my_dtm': None,
+            'my_dtm_score': None,
+            'status': 'unknown',
+            'status_zone': 'unknown',
+            'status_label': f"Taxminiy ball uchun kamida {MIN_ANSWERS} ta savolga javob bering.",
+            'headline': f"Taxminiy ball uchun kamida {MIN_ANSWERS} ta savolga javob bering.",
+        }
+
+    my_dtm = round(float(my_dtm), 1)
+    rivals = Profile.objects.filter(role='student', target_university__iexact=otm['code'],
+                                    estimated_dtm_score__isnull=False)
+    if profile:
+        rivals = rivals.exclude(pk=profile.pk)
+    platform_rank = rivals.filter(estimated_dtm_score__gt=my_dtm).count() + 1
+    platform_total = rivals.count() + 1
+
+    points_to_grant = round(max(0.0, grant_cutoff - my_dtm), 1)
+    points_to_contract = round(max(0.0, contract_cutoff - my_dtm), 1)
+    if my_dtm >= grant_cutoff:
+        status_zone = 'grant'
+        headline = "Taxminiy balingiz grant o'tish balidan yuqori."
+    elif my_dtm >= contract_cutoff:
+        status_zone = 'contract'
+        headline = f"Kontrakt zonasidasiz. Grant uchun yana {points_to_grant} ball kerak."
+    else:
+        status_zone = 'below'
+        headline = f"Kontrakt o'tish baliga yana {points_to_contract} ball kerak."
+
+    return {
+        **base,
+        'ready': True,
+        'my_dtm': my_dtm,
+        'my_dtm_score': my_dtm,
+        'platform_rank': platform_rank,
+        'platform_total': platform_total,
         'points_to_grant': points_to_grant,
         'points_to_contract': points_to_contract,
-        'admission_probability': probability,
+        'status': status_zone,
         'status_zone': status_zone,
+        'status_label': headline,
         'headline': headline,
     }
 
@@ -521,7 +602,7 @@ def get_clans_ranking(profile: Profile = None) -> dict:
             'total_xp': int(r['total_xp'] or 0),
             'students_count': int(r['students_count'] or 0),
             'students': int(r['students_count'] or 0),
-            'avg_dtm': round(float(r['avg_dtm'] or 108.5), 1),
+            'avg_dtm': round(float(r['avg_dtm']), 1) if r['avg_dtm'] is not None else None,
             'is_my_region': bool(user_region and user_region.lower() == reg_name.lower()),
         })
 
@@ -537,7 +618,7 @@ def get_clans_ranking(profile: Profile = None) -> dict:
                 'total_xp': 0,
                 'students_count': 0,
                 'students': 0,
-                'avg_dtm': 94.5,
+                'avg_dtm': None,
                 'is_my_region': bool(user_region and user_region.lower() == reg_name.lower()),
             })
 
@@ -565,7 +646,7 @@ def get_clans_ranking(profile: Profile = None) -> dict:
             'total_xp': int(s['total_xp'] or 0),
             'students_count': int(s['students_count'] or 0),
             'students': int(s['students_count'] or 0),
-            'avg_dtm': round(float(s['avg_dtm'] or 112.0), 1),
+            'avg_dtm': round(float(s['avg_dtm']), 1) if s['avg_dtm'] is not None else None,
             'is_my_school': bool(user_school and user_school.lower() == s['school'].lower()),
         })
 
