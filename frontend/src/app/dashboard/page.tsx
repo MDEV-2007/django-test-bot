@@ -193,6 +193,20 @@ export default function DashboardPage() {
 
   const [chestModalOpen, setChestModalOpen] = useState(false);
   const [buddyModalOpen, setBuddyModalOpen] = useState(false);
+  const [buddyJoinCode, setBuddyJoinCode] = useState<string | undefined>();
+
+  // Do'stning taklif havolasi (t.me/<bot>?startapp=buddy_<KOD>) AuthProvider orqali
+  // /dashboard?buddy=<KOD> ga keladi — modalni kod yozilgan holda ochamiz.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('buddy')?.trim();
+    if (!code) return;
+    setBuddyJoinCode(code);
+    setBuddyModalOpen(true);
+    params.delete('buddy');
+    const rest = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (rest ? `?${rest}` : ''));
+  }, []);
   const [chestStatus, setChestStatus] = useState<DailyChestStatus | null>(null);
   const [startingMistakesTest, setStartingMistakesTest] = useState(false);
 
@@ -534,6 +548,7 @@ export default function DashboardPage() {
       <BuddyStreakModal
         open={buddyModalOpen}
         onOpenChange={setBuddyModalOpen}
+        initialJoinCode={buddyJoinCode}
       />
     </ModernAppLayout>
   );

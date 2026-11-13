@@ -27,14 +27,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { soundFX } from '@/lib/soundFX';
+import { openTelegramLink } from '@/lib/telegram';
 import { cn } from '@/lib/utils';
 
 type BuddyState = {
   has_buddy: boolean;
   status: 'none' | 'pending' | 'active' | 'broken';
   invite_code?: string;
-  share_link?: string;
-  telegram_share_url?: string;
+  /** Backend: https://t.me/<bot>?startapp=buddy_<KOD> — do'st bossa ilova shu kod bilan ochiladi */
+  share_url?: string;
   current_streak?: number;
   best_streak?: number;
   me?: {
@@ -57,12 +58,15 @@ interface BuddyStreakModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStreakUpdate?: () => void;
+  /** Taklif havolasidan kelgan do'st kodi — "Bog'lanish" maydoniga oldindan yoziladi */
+  initialJoinCode?: string;
 }
 
 export default function BuddyStreakModal({
   open,
   onOpenChange,
   onStreakUpdate,
+  initialJoinCode,
 }: BuddyStreakModalProps) {
   const { user } = useAuthStore();
   const [buddyData, setBuddyData] = useState<BuddyState | null>(null);
@@ -89,6 +93,20 @@ export default function BuddyStreakModal({
       fetchBuddyStatus();
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open && initialJoinCode) {
+      setJoinCode(initialJoinCode.toUpperCase());
+    }
+  }, [open, initialJoinCode]);
+
+  const shareInvite = () => {
+    if (!buddyData?.share_url) return;
+    const text = `Keling, IlmIldizi'da birga o'qiymiz! Do'stlik Zanjiriga qo'shiling — kod: ${buddyData.invite_code}`;
+    openTelegramLink(
+      `https://t.me/share/url?url=${encodeURIComponent(buddyData.share_url)}&text=${encodeURIComponent(text)}`,
+    );
+  };
 
   const handleCreateInvite = async () => {
     try {
@@ -313,11 +331,11 @@ export default function BuddyStreakModal({
                     {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
                   </Button>
                 </div>
-                {buddyData.telegram_share_url && (
+                {buddyData.share_url && (
                   <Button
                     size="sm"
                     className="mt-2 w-full bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs h-9 rounded-xl font-bold"
-                    onClick={() => window.open(buddyData.telegram_share_url, '_blank')}
+                    onClick={shareInvite}
                   >
                     <Share2 className="size-3.5 mr-1.5" /> Telegramda do‘stga jo‘natish
                   </Button>
