@@ -12,7 +12,12 @@ import {
   Swords,
   BookOpen,
   Brain,
+  GraduationCap,
+  Users,
+  Flame,
+  ArrowUpRight,
 } from 'lucide-react';
+import BuddyStreakModal from '@/components/gamification/BuddyStreakModal';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 import { useApiQuery } from '@/lib/api-cache';
@@ -64,6 +69,10 @@ type DashboardData = {
     elo_rating: number;
     next_level_xp: number;
     is_premium: boolean;
+    estimated_dtm_score?: number;
+    target_university?: string;
+    target_faculty?: string;
+    stability_multiplier?: number;
   };
   xp_progress: number;
   freeze_count: number;
@@ -87,9 +96,26 @@ type DashboardData = {
     completed_at: string | null;
     time_spent_display: string;
   }[];
-  suggested_topic: { id: number; title: string; description: string } | null;
+  suggested_topic: { id: number; title: string; description: string; reason?: string; subject_name?: string; priority?: string } | null;
   selected_subject: { id: number; name: string } | null;
-  upcoming_mocks?: { id: number; title: string; subject: string; scheduled_at: string; duration_minutes: number; is_live: boolean }[];
+  upcoming_mocks?: {
+    id: number;
+    title: string;
+    subject?: string;
+    subject_name?: string;
+    scheduled_at: string | null;
+    duration_minutes: number;
+    question_count?: number;
+    participants_count?: number;
+    is_premium?: boolean;
+    price?: number;
+    prize_description?: string;
+    is_unlocked?: boolean;
+    registration_id?: string | null;
+    registration_status?: string;
+    lifecycle_state?: string;
+    is_live?: boolean;
+  }[];
   unread_notifications_count?: number;
   daily_chest?: DailyChestStatus;
 };
@@ -166,6 +192,21 @@ export default function DashboardPage() {
   const [loadingNotifs, setLoadingNotifs] = useState(false);
 
   const [chestModalOpen, setChestModalOpen] = useState(false);
+  const [buddyModalOpen, setBuddyModalOpen] = useState(false);
+  const [buddyJoinCode, setBuddyJoinCode] = useState<string | undefined>();
+
+  // Do'stning taklif havolasi (t.me/<bot>?startapp=buddy_<KOD>) AuthProvider orqali
+  // /dashboard?buddy=<KOD> ga keladi — modalni kod yozilgan holda ochamiz.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('buddy')?.trim();
+    if (!code) return;
+    setBuddyJoinCode(code);
+    setBuddyModalOpen(true);
+    params.delete('buddy');
+    const rest = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (rest ? `?${rest}` : ''));
+  }, []);
   const [chestStatus, setChestStatus] = useState<DailyChestStatus | null>(null);
   const [startingMistakesTest, setStartingMistakesTest] = useState(false);
 
@@ -277,11 +318,13 @@ export default function DashboardPage() {
 
   const p = data.profile;
   const firstName = p.first_name || p.username;
-  const doneMissions = data.missions.filter((m) => m.is_completed).length;
-  const remainingMissions = data.missions.length - doneMissions;
+  const missionsList = data.missions || [];
+  const doneMissions = missionsList.filter((m) => m?.is_completed).length;
+  const remainingMissions = missionsList.length - doneMissions;
   const xpRemaining = Math.max(0, (p.next_level_xp || p.level * 1000) - p.xp);
-  const lastAttempt = data.recent_attempts[0] || null;
-  const isNewUser = data.recent_attempts.length === 0;
+  const recentAttempts = data.recent_attempts || [];
+  const lastAttempt = recentAttempts[0] || null;
+  const isNewUser = recentAttempts.length === 0;
   const subjects = (data.subject_mastery || []).slice(0, 5);
   const upcoming = data.upcoming_mocks || [];
   const activity = notifications.slice(0, 4);
@@ -308,8 +351,8 @@ export default function DashboardPage() {
       href: '/study',
       icon: BookOpen,
       title: data.suggested_topic.title,
-      meta: data.selected_subject?.name || "O'qish",
-      tag: 'Keyingi dars',
+      meta: data.suggested_topic.reason || data.suggested_topic.subject_name || data.selected_subject?.name || "O'qish",
+      tag: data.suggested_topic.priority === 'weakness' ? 'Mustahkamlash' : 'Keyingi dars',
     });
   }
   recommendations.push({
@@ -345,6 +388,80 @@ export default function DashboardPage() {
 
         <InView>
           <MagneticLoopCard userName={firstName} userStreak={p.streak} />
+        </InView>
+
+        {/* Gamifikatsiya: Dinamik DTM & Do'stlik Zanjiri */}
+        <InView>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Dinamik DTM Ball Indikatori */}
+            <div className="ps-card relative overflow-hidden !rounded-[28px] p-5 sm:p-6 flex flex-col justify-between">
+              <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-[var(--ps-purple)]/10" />
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-purple)]/15 px-3 py-1 text-xs font-bold text-[var(--ps-purple)]">
+                    <GraduationCap className="size-3.5" />
+                    Dinamik DTM Ball
+                  </span>
+                  <Link
+                    href="/leaderboard"
+                    className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1"
+                  >
+                    Mandat <ArrowUpRight className="size-3.5" />
+                  </Link>
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="ps-num text-4xl sm:text-5xl font-black text-[var(--ps-orange)]">
+                    {p.estimated_dtm_score || 94.5}
+                  </span>
+                  <span className="text-sm font-semibold text-[var(--text-muted)]">/ 189.0 ball</span>
+                </div>
+                <p className="mt-1 text-xs text-[var(--text-secondary)] font-semibold truncate">
+                  Maqsad: {p.target_university || 'TATU'} — {p.target_faculty || 'Dasturiy injiniring'}
+                </p>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-[var(--ps-neutral)] flex items-center justify-between text-xs">
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  ⚡ Har bir test: +0.2 ball
+                </span>
+                <span className="rounded-full bg-black/5 dark:bg-white/5 px-2.5 py-0.5 font-bold">
+                  {p.stability_multiplier || 1.0}x bonus koeffitsiyenti
+                </span>
+              </div>
+            </div>
+
+            {/* Do'stlik Zanjiri (Co-op Buddy Streak) */}
+            <div className="ps-card relative overflow-hidden !rounded-[28px] p-5 sm:p-6 flex flex-col justify-between">
+              <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-amber-500/15" />
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-600 dark:text-amber-400">
+                    <Users className="size-3.5" />
+                    Do&apos;stlik Zanjiri
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-orange-500">
+                    <Flame className="size-3.5 fill-orange-500" /> Co-op
+                  </span>
+                </div>
+                <h3 className="mt-3 text-lg sm:text-xl font-black">
+                  Birga o&apos;qing, olovni so&apos;ndirmang!
+                </h3>
+                <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed">
+                  Do&apos;stingiz bilan umumiy streak bog&apos;lang. Ikkalangiz ham test ishlasangiz 1.5x tanga bonusi beriladi.
+                </p>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-[var(--ps-neutral)]">
+                <button
+                  type="button"
+                  onClick={() => setBuddyModalOpen(true)}
+                  className="ps-btn ps-btn-ink !min-h-10 !w-full justify-center !text-xs !font-bold cursor-pointer"
+                >
+                  <Users className="size-3.5 mr-1.5" /> Do&apos;stlik Zanjirini ochish
+                </button>
+              </div>
+            </div>
+          </div>
         </InView>
 
         <StatBento
@@ -425,6 +542,13 @@ export default function DashboardPage() {
         onClaimSuccess={() => {
           setChestStatus((prev) => (prev ? { ...prev, can_claim: false } : null));
         }}
+      />
+
+      {/* Do'stlik Zanjiri (Buddy Streak) Modali */}
+      <BuddyStreakModal
+        open={buddyModalOpen}
+        onOpenChange={setBuddyModalOpen}
+        initialJoinCode={buddyJoinCode}
       />
     </ModernAppLayout>
   );

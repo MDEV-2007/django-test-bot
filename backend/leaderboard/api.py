@@ -1,6 +1,8 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from accounts.jwt_auth import OptionalAuditAwareJWTAuthentication
 from accounts.models import Profile, ensure_profile_for_user
 from tests_app.models import Subject
 
@@ -10,13 +12,20 @@ from . import services
 
 
 @api_view(['GET'])
+@authentication_classes([OptionalAuditAwareJWTAuthentication])
+@permission_classes([AllowAny])
 def rankings_api(request):
     subjects = list(Subject.objects.all())
     view = request.GET.get('subject', 'all')
     if view != 'all' and not any(s.slug == view for s in subjects):
         view = 'all'
 
-    profile = ensure_profile_for_user(request.user)
+    profile = None
+    if request.user and request.user.is_authenticated:
+        try:
+            profile = ensure_profile_for_user(request.user)
+        except Exception:
+            profile = None
 
     timeframe = request.GET.get('timeframe', 'all')
     top = services.get_top_ranking(view, timeframe=timeframe)
@@ -30,7 +39,7 @@ def rankings_api(request):
     # boshqalarga ko'rinishida.
     cosmetics_by_id = shop_services.get_equipped_bulk(ids)
 
-    def row(r):
+    def row(r, rank_num=None):
         p = by_id.get(r['profile_id'])
         if p is None:
             return None
@@ -41,31 +50,35 @@ def rankings_api(request):
             'avatar_url': shop_services.display_avatar_url(p.avatar_url, cosmetics),
             'xp': r['xp'] if view != 'all' else p.xp,
             'level': p.level,
+            'rank': rank_num,
             'cosmetics': cosmetics,
             'role': p.role,
             'is_superadmin': p.is_superadmin,
             'is_teacher': p.is_teacher,
         }
 
-    ranked = [row(r) for r in top]
+    ranked = [row(r, i + 1) for i, r in enumerate(top)]
     ranked = [r for r in ranked if r is not None]
 
     # "Sizning guruhingiz": o'quvchi qatnashadigan yaqin atrof. Global ro'yxatda
     # ko'rinmaydigan o'quvchi ham shu yerda o'zini va erishsa bo'ladigan maqsadni ko'radi.
     my_group = []
     for n in neighbors:
-        data = row(n)
+        data = row(n, n.get('rank'))
         if data is None:
             continue
         data['rank'] = n['rank']
-        data['is_me'] = n['profile_id'] == profile.id
+        data['is_me'] = bool(profile and n['profile_id'] == profile.id)
         my_group.append(data)
 
     return Response({
         'podium': ranked[:3],
-        'rankings': ranked[3:15],
+        'rankings': ranked[3:100],
         'my_rank': my_rank,
         'my_group': my_group,
         'subjects': [{'id': s.id, 'name': s.name, 'slug': s.slug} for s in subjects],
         'selected_view': view,
+        'micro_league': services.get_weekly_micro_league(profile),
+        'otm_simulator': services.get_otm_mandat_simulator(profile, request.GET.get('otm')),
+        'clans': services.get_clans_ranking(profile),
     })

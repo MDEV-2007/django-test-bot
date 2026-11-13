@@ -22,7 +22,7 @@ from accounts.models import ensure_profile_for_user
 from accounts.permissions import IsChannelSubscribed
 from .models import (
     AIFeedback, Attempt, AttemptAnswer, Question, RevisionItem, Subject, TestSet,
-    ExamSurvey, StressExamConfig,
+    ExamSurvey, StressExamConfig, MockRegistration,
 )
 from .subject_utils import resolve_subject as _resolve_subject
 from .feedback import _dispatch_ai_feedback, seed_questions_if_needed
@@ -107,6 +107,7 @@ def _test_payload(t, social=None, unlocked=False):
         'is_premium': t.is_premium,
         'price': float(t.price) if getattr(t, 'price', None) is not None else None,
         'is_live_mock': getattr(t, 'is_live_mock', False),
+        'prize_description': getattr(t, 'prize_description', '') or '',
         'scheduled_at': _iso_scheduled_at(getattr(t, 'scheduled_at', None)),
         # `is_unlocked` — shu O'QUVCHI uchun: global mock-test kirishi yoki aynan shu
         # test uchun tasdiqlangan to'lov bo'lsa True.
@@ -244,7 +245,14 @@ def center_api(request):
             'is_reminded': pinned_mock.remind_users.filter(id=request.user.id).exists() if request.user.is_authenticated else False,
             'remind_users_count': pinned_mock.remind_users.count(),
             # Haqiqiy son (ilgari `count*3+18`, kamida 24 — sun'iy oshirilgan edi).
-            'waiting_participants_count': pinned_mock.remind_users.count(),
+            'waiting_participants_count': max(
+                pinned_mock.remind_users.count(),
+                MockRegistration.objects.filter(test=pinned_mock, status='CONFIRMED').count(),
+            ),
+            'is_premium': pinned_mock.is_premium,
+            'price': float(pinned_mock.price) if pinned_mock.price is not None else (float(mock_plan.price) if mock_plan else 0.0),
+            'prize_description': getattr(pinned_mock, 'prize_description', '') or '',
+            'is_unlocked': (not pinned_mock.is_premium) or (pinned_mock.price is not None and float(pinned_mock.price) <= 0) or has_sub or profile.premium_mock_test_unlocked or (pinned_mock.id in unlocked_ids),
             'author': _author_payload(getattr(pinned_mock, 'created_by', None)),
         }
 
@@ -330,7 +338,14 @@ def start_test_api(request, test_id):
     now = timezone.now()
 
     # Jonli Mock Imtihon vaqti tekshiruvi
-    if test.is_live_mock and test.scheduled_at and now < test.scheduled_at:
+    # Jonli Mock Imtihon ro'yxatdan o'tish va vaqt tekshiruvi
+    mock_reg = MockRegistration.objects.filter(profile=profile, test=test).first() if test.is_live_mock else None
+    if mock_reg and mock_reg.status == 'DISQUALIFIED':
+        return Response({
+            'error': "Siz ushbu mock imtihonidan qoidabuzarlik sababli chetlatilgansiz.",
+            'code': 'DISQUALIFIED',
+        }, status=403)
+    if test.is_live_mock and test.scheduled_at and now < test.scheduled_at and test.created_by_id != request.user.id and not profile.is_superadmin:
         tz = timezone.get_current_timezone()
         local_sched = test.scheduled_at.astimezone(tz) if timezone.is_aware(test.scheduled_at) else test.scheduled_at
         return Response({
@@ -353,7 +368,14 @@ def start_test_api(request, test_id):
     # PRO obuna ham, bir martalik mock-test xaridi ham ochadi (yuqoridagi center_api bilan
     # bir xil qoida — ikkalasi ajralib qolsa, katalogda "ochiq" ko'ringan test start'da
     # 403 berardi).
-    if (test.is_premium
+    is_free_price = test.price is not None and float(test.price) <= 0
+    if (test.is_premium and not is_free_price
+            and not profile.is_vip_active
+            and not profile.premium_mock_test_unlocked
+            and test.id not in _unlocked_ids(profile)):
+        track_event(profile, 'paywall_view', feature='mock')
+        return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi.", 'code': 'PAYMENT_REQUIRED'}, status=403)
+    if False and (test.is_premium
             and not profile.is_vip_active
             and not profile.premium_mock_test_unlocked
             and test.id not in _unlocked_ids(profile)):
@@ -366,6 +388,28 @@ def start_test_api(request, test_id):
         return Response({'error': "Stress zali birinchi marta bepul edi. Davom etish uchun PRO obuna kerak.",
                          'requires_pro': True}, status=403)
     attempt = _new_attempt(profile, test, is_stress=is_stress)
+    if test.is_live_mock:
+        if mock_reg:
+            mock_reg.checked_in_at = now
+            if mock_reg.status != 'CONFIRMED':
+                mock_reg.status = 'CONFIRMED'
+                mock_reg.confirmed_at = mock_reg.confirmed_at or now
+            mock_reg.save(update_fields=['checked_in_at', 'status', 'confirmed_at', 'updated_at'])
+        else:
+            u_obj = request.user
+            full_name = f"{u_obj.first_name} {u_obj.last_name}".strip() or u_obj.username
+            MockRegistration.objects.get_or_create(
+                profile=profile,
+                test=test,
+                defaults={
+                    'full_name': full_name,
+                    'phone': getattr(profile, 'phone', '') or '',
+                    'region': getattr(profile, 'region', '') or '',
+                    'status': 'CONFIRMED',
+                    'confirmed_at': now,
+                    'checked_in_at': now,
+                },
+            )
     # `mode` — klient qaysi ekranni ochishini aytadi. Partlarga (ExamSection) bo'lingan
     # test CEFR imtihon ekranida ochiladi: matn/audio va butun part bir varaqda. Qolgan
     # hamma test eski "bitta savol — bitta ekran" oqimida qoladi.
@@ -399,13 +443,304 @@ def mock_lobby_api(request, test_id):
         'server_now': now.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%dT%H:%M:%S+05:00'),
         'is_reminded': is_reminded,
         'remind_users_count': test.remind_users.count(),
-        'waiting_participants_count': test.remind_users.count(),  # haqiqiy son
+        'waiting_participants_count': max(
+            test.remind_users.count(),
+            MockRegistration.objects.filter(test=test, status='CONFIRMED').count(),
+        ),
+        **_mock_lobby_extra_payload(test, profile, now, active_attempt, completed_attempt),
         'has_active_attempt': active_attempt is not None,
         'active_attempt_id': active_attempt.id if active_attempt else None,
         'has_completed': completed_attempt is not None,
         'completed_attempt_id': completed_attempt.id if completed_attempt else None,
         'completed_score': completed_attempt.score if completed_attempt else None,
         'author': _author_payload(getattr(test, 'created_by', None)),
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
+def _unused_decorator_target_for_mock_lobby(request):
+    return Response({})
+
+
+def _mock_lobby_extra_payload(test, profile, now, active_attempt, completed_attempt):
+    from premium.models import SubscriptionPlan, Payment, unlocked_test_ids
+    mock_plan = SubscriptionPlan.objects.filter(plan_type='mock_test', is_active=True).order_by('order').first()
+    effective_price = float(test.price) if test.price is not None else (float(mock_plan.price) if (test.is_premium and mock_plan) else 0.0)
+    is_free = (not test.is_premium) or effective_price <= 0
+    unlocked_ids = unlocked_test_ids(profile)
+    is_unlocked = is_free or profile.is_vip_active or profile.premium_mock_test_unlocked or (test.id in unlocked_ids)
+
+    reg = MockRegistration.objects.select_related('payment').filter(profile=profile, test=test).first()
+    if reg and reg.status == 'PENDING_PAYMENT' and is_unlocked:
+        reg.status = 'CONFIRMED'
+        reg.confirmed_at = reg.confirmed_at or now
+        reg.save(update_fields=['status', 'confirmed_at', 'updated_at'])
+
+    latest_payment = (reg.payment if reg and reg.payment_id else None) or (
+        Payment.objects.filter(profile=profile, test=test).order_by('-created_at').first()
+    )
+
+    is_started = bool(not test.scheduled_at or now >= test.scheduled_at)
+    end_dt = (test.scheduled_at + timezone.timedelta(minutes=(test.duration_minutes or 60) + 120)) if test.scheduled_at else None
+    is_ended = bool(end_dt and now >= end_dt)
+
+    if completed_attempt:
+        lifecycle_state = 'RESULTS_PUBLISHED' if is_ended else 'COMPLETED'
+    elif reg and reg.status == 'DISQUALIFIED':
+        lifecycle_state = 'DISQUALIFIED'
+    elif is_started and not is_ended:
+        lifecycle_state = 'LIVE_NOW'
+    elif reg and reg.status == 'CONFIRMED':
+        lifecycle_state = 'REGISTERED_CONFIRMED'
+    elif reg and reg.status == 'PENDING_PAYMENT':
+        lifecycle_state = 'REGISTERED_PENDING_PAYMENT'
+    else:
+        lifecycle_state = 'OPEN_REGISTRATION'
+
+    can_start = bool(
+        is_started
+        and is_unlocked
+        and completed_attempt is None
+        and (not reg or reg.status != 'DISQUALIFIED')
+    )
+
+    reg_payload = None
+    if reg:
+        reg_payload = {
+            'id': reg.id,
+            'registration_id': reg.registration_id,
+            'full_name': reg.full_name,
+            'phone': reg.phone,
+            'region': reg.region,
+            'status': reg.status,
+            'registered_at': reg.registered_at.isoformat() if reg.registered_at else None,
+            'confirmed_at': reg.confirmed_at.isoformat() if reg.confirmed_at else None,
+            'checked_in_at': reg.checked_in_at.isoformat() if reg.checked_in_at else None,
+            'prize_status': reg.prize_status,
+            'prize_title': reg.prize_title,
+            'prize_amount': float(reg.prize_amount or 0),
+            'payment_id': latest_payment.id if latest_payment else None,
+            'payment_status': latest_payment.status if latest_payment else ('approved' if is_unlocked else None),
+        }
+
+    return {
+        'is_premium': bool(test.is_premium and not is_free),
+        'price': effective_price,
+        'prize_description': getattr(test, 'prize_description', '') or '',
+        'is_unlocked': is_unlocked,
+        'is_started': is_started,
+        'is_ended': is_ended,
+        'can_start': can_start,
+        'lifecycle_state': lifecycle_state,
+        'plan_id': mock_plan.id if mock_plan else None,
+        'checkout_url': f"/premium/checkout/{mock_plan.id}?test={test.id}" if (mock_plan and not is_unlocked) else None,
+        'registration': reg_payload,
+        'confirmed_participants_count': MockRegistration.objects.filter(test=test, status='CONFIRMED').count(),
+    }
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsChannelSubscribed])
+def mock_register_api(request, test_id):
+    """Respublika Mock imtihoniga rasmiy ro'yxatdan o'tish."""
+    import re
+    from accounts.models import Profile
+    from premium.models import SubscriptionPlan, Payment, unlocked_test_ids
+
+    test = get_object_or_404(TestSet, id=test_id, is_published=True, is_archived=False)
+    profile = ensure_profile_for_user(request.user)
+    data = request.data or {}
+
+    raw_name = (
+        data.get('full_name')
+        or f"{request.user.first_name} {request.user.last_name}".strip()
+        or request.user.username
+        or ''
+    ).strip()
+    raw_phone = str(data.get('phone') if 'phone' in data else (getattr(profile, 'phone', '') or '')).strip()
+    raw_region = str(data.get('region') if 'region' in data else (getattr(profile, 'region', '') or '')).strip()
+
+    if len(raw_name) < 2 or len(raw_name) > 150:
+        return Response({'error': "Ism va familiyangizni to'liq kiriting (kamida 2 ta harf)."}, status=400)
+
+    digits = re.sub(r'\D', '', raw_phone)
+    if len(digits) < 7 or len(digits) > 15:
+        return Response({'error': "Telefon raqamni to'g'ri formatda kiriting (masalan: +998 90 123 45 67)."}, status=400)
+
+    now = timezone.now()
+    mock_plan = SubscriptionPlan.objects.filter(plan_type='mock_test', is_active=True).order_by('order').first()
+    effective_price = float(test.price) if test.price is not None else (float(mock_plan.price) if (test.is_premium and mock_plan) else 0.0)
+    is_free = (not test.is_premium) or effective_price <= 0
+
+    with transaction.atomic():
+        locked_profile = Profile.objects.select_for_update().get(pk=profile.pk)
+        profile_updates = []
+        if raw_region and getattr(locked_profile, 'region', '') != raw_region[:64]:
+            locked_profile.region = raw_region[:64]
+            profile_updates.append('region')
+        if profile_updates:
+            locked_profile.save(update_fields=profile_updates)
+
+        is_unlocked = (
+            is_free
+            or locked_profile.is_vip_active
+            or locked_profile.premium_mock_test_unlocked
+            or (test.id in unlocked_test_ids(locked_profile))
+        )
+        existing_payment = Payment.objects.filter(profile=locked_profile, test=test).order_by('-created_at').first()
+
+        reg = MockRegistration.objects.select_for_update().filter(profile=locked_profile, test=test).first()
+        if reg and reg.status == 'DISQUALIFIED':
+            return Response({'error': "Siz ushbu mock imtihonidan chetlatilgansiz.", 'code': 'DISQUALIFIED'}, status=403)
+
+        target_status = 'CONFIRMED' if is_unlocked else 'PENDING_PAYMENT'
+        if reg is None:
+            reg = MockRegistration.objects.create(
+                profile=locked_profile,
+                test=test,
+                full_name=raw_name[:150],
+                phone=raw_phone[:30],
+                region=raw_region[:80],
+                status=target_status,
+                confirmed_at=now if target_status == 'CONFIRMED' else None,
+                payment=existing_payment,
+            )
+            created = True
+        else:
+            reg.full_name = raw_name[:150]
+            reg.phone = raw_phone[:30]
+            if raw_region:
+                reg.region = raw_region[:80]
+            if reg.status != 'CONFIRMED':
+                reg.status = target_status
+            if reg.status == 'CONFIRMED' and not reg.confirmed_at:
+                reg.confirmed_at = now
+            if existing_payment and not reg.payment_id:
+                reg.payment = existing_payment
+            reg.save()
+            created = False
+
+        test.remind_users.add(request.user)
+
+    checkout_url = f"/premium/checkout/{mock_plan.id}?test={test.id}" if (reg.status == 'PENDING_PAYMENT' and mock_plan) else None
+    return Response({
+        'created': created,
+        'id': reg.id,
+        'registration_id': reg.registration_id,
+        'status': reg.status,
+        'full_name': reg.full_name,
+        'phone': reg.phone,
+        'region': reg.region,
+        'requires_payment': reg.status == 'PENDING_PAYMENT',
+        'is_unlocked': reg.status == 'CONFIRMED',
+        'price': effective_price,
+        'plan_id': mock_plan.id if mock_plan else None,
+        'checkout_url': checkout_url,
+    }, status=201 if created else 200)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def mock_leaderboard_api(request, test_id):
+    """Respublika Mock imtihoni rasmiy reyting jadvali (PII yashirilgan, adolatli tie-break)."""
+    test = get_object_or_404(TestSet.objects.select_related('subject'), id=test_id, is_published=True, is_archived=False)
+    req_profile_id = getattr(getattr(request.user, 'profile', None), 'id', None) if request.user and request.user.is_authenticated else None
+
+    attempts_qs = (
+        Attempt.objects
+        .filter(test=test, is_completed=True)
+        .select_related('profile__user')
+        .order_by('-score', '-correct_answers', 'completed_at', 'id')
+    )
+    regs_by_profile = {
+        r.profile_id: r
+        for r in MockRegistration.objects.filter(test=test)
+    }
+
+    # Har bir o'quvchining birinchi yakunlangan urinishini olamiz (dublikat urinish bo'lmasligi uchun)
+    seen_profiles = set()
+    valid_entries = []
+    disqualified_entries = []
+    total_q_default = test.questions.count() or 30
+
+    for a in attempts_qs:
+        if a.profile_id in seen_profiles:
+            continue
+        seen_profiles.add(a.profile_id)
+        reg = regs_by_profile.get(a.profile_id)
+        is_disq = bool(a.is_cheating_flagged or (reg and reg.status == 'DISQUALIFIED'))
+
+        duration_sec = 999999
+        if a.started_at and a.completed_at:
+            try:
+                duration_sec = max(0, int((a.completed_at - a.started_at).total_seconds()))
+            except Exception:
+                duration_sec = 999999
+
+        mins, secs = divmod(duration_sec if duration_sec < 999999 else 0, 60)
+        duration_str = f"{mins} daq {secs} son" if mins > 0 else f"{secs} son"
+
+        u = a.profile.user if a.profile else None
+        student_name = (
+            (reg.full_name if reg and reg.full_name else '')
+            or (f"{getattr(u, 'first_name', '')} {getattr(u, 'last_name', '')}".strip() if u else '')
+            or (getattr(u, 'username', '') if u else '')
+            or "Ishtirokchi"
+        )
+        region = (reg.region if reg and reg.region else '') or (getattr(a.profile, 'region', '') if a.profile else '') or ''
+        score_val = round(float(a.score or 0.0), 1)
+        c_ans = a.correct_answers or 0
+        w_ans = a.wrong_answers or 0
+        s_ans = a.skipped_answers or 0
+        tot_q = (c_ans + w_ans + s_ans) or total_q_default
+
+        entry = {
+            'attempt_id': a.id,
+            'student_name': student_name,
+            'region': region,
+            'registration_id': reg.registration_id if reg else None,
+            'score': score_val,
+            'correct_answers': c_ans,
+            'wrong_answers': w_ans,
+            'total_questions': tot_q,
+            'duration_seconds': duration_sec if duration_sec < 999999 else None,
+            'duration_str': duration_str,
+            'completed_at': a.completed_at.isoformat() if a.completed_at else None,
+            'is_disqualified': is_disq,
+            'prize_status': reg.prize_status if reg else 'NOT_ELIGIBLE',
+            'prize_title': reg.prize_title if reg else '',
+            'is_me': bool(req_profile_id and a.profile_id == req_profile_id),
+            '_sort_key': (-score_val, -c_ans, duration_sec, a.completed_at.timestamp() if a.completed_at else 0, a.id),
+        }
+        if is_disq:
+            disqualified_entries.append(entry)
+        else:
+            valid_entries.append(entry)
+
+    valid_entries.sort(key=lambda x: x['_sort_key'])
+    leaderboard = []
+    my_rank = None
+    for idx, item in enumerate(valid_entries, start=1):
+        item.pop('_sort_key', None)
+        item['rank'] = idx
+        if item['is_me']:
+            my_rank = idx
+        leaderboard.append(item)
+
+    for item in disqualified_entries:
+        item.pop('_sort_key', None)
+        item['rank'] = None
+        leaderboard.append(item)
+
+    return Response({
+        'test_id': test.id,
+        'test_title': test.title,
+        'subject': test.subject.name if test.subject else 'Asosiy',
+        'prize_description': getattr(test, 'prize_description', '') or '',
+        'total_completed': len(valid_entries),
+        'my_rank': my_rank,
+        'results': leaderboard[:200],
     })
 
 
@@ -504,8 +839,8 @@ def start_mistakes_test_api(request):
     )
     test.questions.set(questions_to_use)
     attempt = Attempt.objects.create(profile=profile, test=test)
-    for q in questions_to_use:
-        AttemptAnswer.objects.create(attempt=attempt, question=q)
+    # bulk create attempt answers
+    AttemptAnswer.objects.bulk_create([AttemptAnswer(attempt=attempt, question=q) for q in questions_to_use])
     return Response({'attempt_id': attempt.id})
 
 
@@ -828,6 +1163,26 @@ def finish_api(request, attempt_id):
     attempt.is_completed = True
     attempt.completed_at = timezone.now()
 
+    # ─── Anti-Cheat: 3 soniyalik Vaqt filtri ("Tavakkal bosish") ───────────────────
+    # Agar savolga 3 soniyadan kam vaqtda (< 3s) javob berilgan bo'lsa, bu "Tavakkal bosish"
+    # deb hisoblanadi va ball berilmaydi.
+    rushed_answers_count = 0
+    for a in scored:
+        if a.time_spent_sec is not None and 0 < a.time_spent_sec < 3 and a.is_correct:
+            a.is_correct = False
+            a.ai_grading_note = "3 soniyadan tez belgilandi (Tavakkal bosish)."
+            a.save(update_fields=['is_correct', 'ai_grading_note'])
+            rushed_answers_count += 1
+
+    if rushed_answers_count > 0:
+        correct_points = max(0.0, correct_points - rushed_answers_count)
+        correct = max(0, correct - rushed_answers_count)
+        wrong = max(0, scored_total - correct - skipped)
+        score = round((correct_points / scored_total) * 100, 1) if scored_total else 0.0
+        attempt.correct_answers = correct
+        attempt.wrong_answers = wrong
+        attempt.score = score
+
     # ─── Anti-Cheat: Speed Detection ─────────────────────────────────
     # Agar test juda tez topshirilsa — bayroq tiklanadi.
     # Shubhali chegara: ajratilgan vaqtning 20% dan kamida tugallangan va kamida 10 ta savol.
@@ -865,12 +1220,21 @@ def finish_api(request, attempt_id):
     is_repeat = bool(attempt.test_id) and Attempt.objects.filter(
         profile=profile, test_id=attempt.test_id, is_completed=True,
     ).exclude(pk=attempt.pk).exists()
+    if not is_repeat and attempt.test and getattr(attempt.test, 'is_random', False):
+        from core.reward_caps import claim_daily_reward
+        if not claim_daily_reward(profile.id, 'random_test'):
+            is_repeat = True
+    # ─── Anti-Cheat: Aniqlik koeffitsiyenti (kamida 60%) ───────────────────────────
+    # Testning kamida 60% qismi to'g'ri topilmaguncha, Streak ham, XP ham hisoblanmaydi.
+    meets_accuracy = bool(score >= 60.0)
     multiplier = stress_cfg.bonus_xp_multiplier if (attempt.is_stress_mode and stress_cfg.bonus_xp_multiplier > 1.0) else 1.0
-    xp_awarded = 0 if (profile.is_privileged or is_repeat) else int(correct * 50 * multiplier)
-    coins_awarded = 0 if is_repeat else int(correct * 5 * (1.5 if attempt.is_stress_mode else 1.0))
+    xp_awarded = 0 if (profile.is_privileged or is_repeat or not meets_accuracy) else int(correct * 50 * multiplier)
+    coins_awarded = 0 if (is_repeat or not meets_accuracy) else int(correct * 5 * (1.5 if attempt.is_stress_mode else 1.0))
     profile.add_xp(xp_awarded)
     profile.add_coins(coins_awarded)
-    profile.update_streak()
+    if meets_accuracy and not is_repeat:
+        profile.update_streak()
+        profile.add_dtm_score(0.2)
 
     # O'zgaruvchan Mukofot (Variable Reward): 25% omadli test bonusi
     lucky_bonus = None
@@ -972,6 +1336,9 @@ def finish_api(request, attempt_id):
         'xp_awarded': xp_awarded,
         'coins_awarded': coins_awarded,
         'streak': profile.streak,
+        'meets_accuracy': meets_accuracy,
+        'rushed_answers_count': rushed_answers_count,
+        'estimated_dtm_score': profile.estimated_dtm_score,
         'lucky_bonus': lucky_bonus,
         'rasch': rasch_metrics,
     })
@@ -1405,7 +1772,8 @@ def start_stress_test_api(request):
                     or ((not test.is_published or test.is_archived)
                         and test.created_by_id != request.user.id and not profile.is_superadmin)):
                 return Response({'error': 'Test topilmadi'}, status=404)
-            if (test.is_premium and not has_pro
+            is_free_price = test.price is not None and float(test.price) <= 0
+            if (test.is_premium and not is_free_price and not has_pro
                     and not profile.premium_mock_test_unlocked
                     and test.id not in _unlocked_ids(profile)):
                 return Response({'error': "Bu test PRO obuna yoki mock test xaridi bilan ochiladi."}, status=403)

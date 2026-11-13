@@ -12,6 +12,31 @@ import { useFeaturesStore } from '@/lib/features';
  * Telegram Mini App ichida ochilganda: agar sessiya hali bo'lmasa, initData orqali
  * darhol avtomatik kiriladi va kanal obunasi holati tekshiriladi.
  */
+/** Telegram `startapp` parametri bo'yicha kerakli sahifaga o'tkazadi. O'tkazgan bo'lsa true.
+ *  - mock_<id>  -> /tests/mock/<id>
+ *  - buddy_<KOD> -> /dashboard?buddy=<KOD> (Do'stlik Zanjiri modali kod bilan ochiladi).
+ *    start_param Mini App yopilguncha saqlanib qoladi, shuning uchun bir marta ishlaydi. */
+function redirectForStartParam(sp: string | undefined): boolean {
+  if (!sp || typeof window === 'undefined') return false;
+  if (sp.startsWith('mock_')) {
+    const mockId = sp.replace('mock_', '').trim();
+    if (mockId && !window.location.pathname.includes(`/tests/mock/${mockId}`)) {
+      window.location.href = `/tests/mock/${mockId}`;
+      return true;
+    }
+    return false;
+  }
+  if (sp.startsWith('buddy_')) {
+    const code = sp.slice('buddy_'.length).trim();
+    const key = `buddy_sp_handled_${code}`;
+    if (!code || sessionStorage.getItem(key)) return false;
+    sessionStorage.setItem(key, '1');
+    window.location.href = `/dashboard?buddy=${encodeURIComponent(code)}`;
+    return true;
+  }
+  return false;
+}
+
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const { hydrate, logout, setAuthReady, setUser } = useAuthStore();
 
@@ -29,14 +54,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             const manualOut = typeof window !== 'undefined' && sessionStorage.getItem(TG_MANUAL_LOGOUT_KEY) === '1';
             if (wa?.initData && !manualOut) {
               await loginWithTelegram(wa.initData, wa.initDataUnsafe?.start_param);
-              const sp = wa?.initDataUnsafe?.start_param;
-              if (sp && sp.startsWith('mock_')) {
-                const mockId = sp.replace('mock_', '').trim();
-                if (mockId && typeof window !== 'undefined' && !window.location.pathname.includes(`/tests/mock/${mockId}`)) {
-                  window.location.href = `/tests/mock/${mockId}`;
-                  return;
-                }
-              }
+              if (redirectForStartParam(wa?.initDataUnsafe?.start_param)) return;
               setAuthReady();
               return;
             }
@@ -53,14 +71,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       if (isTelegramEnv()) {
         try {
           const wa = await loadTelegramSdk();
-          const sp = wa?.initDataUnsafe?.start_param;
-          if (sp && sp.startsWith('mock_')) {
-            const mockId = sp.replace('mock_', '').trim();
-            if (mockId && typeof window !== 'undefined' && !window.location.pathname.includes(`/tests/mock/${mockId}`)) {
-              window.location.href = `/tests/mock/${mockId}`;
-              return;
-            }
-          }
+          if (redirectForStartParam(wa?.initDataUnsafe?.start_param)) return;
         } catch { /* ignore */ }
       }
 

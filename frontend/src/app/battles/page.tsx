@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  Swords, Bot, Trophy, Shield, Users, Target, Flame, Zap, Play, Loader2, RotateCcw, Radio, Share2, Copy, MapPin, UserCheck, History, Sparkles, ArrowRight, Clock, CheckCircle2, XCircle,
+  Swords, Bot, Trophy, Shield, Users, Target, Flame, Zap, Play, Loader2, RotateCcw, Radio, Share2, Copy, MapPin, UserCheck, History, Sparkles, ArrowRight, Clock, CheckCircle2, XCircle, Coins,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -26,7 +26,7 @@ import PremiumIcon from '@/components/ui/premium-icon';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import GhostBattleArena from '@/components/arena/GhostBattleArena';
 import ArenaStage from '@/components/arena/ArenaStage';
 import ViralDuelModal from '@/components/growth/ViralDuelModal';
@@ -73,9 +73,21 @@ export default function BattlesPage() {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [incomingChallenge, setIncomingChallenge] = useState<IncomingChallenge | null>(null);
   const [sentChallengeTo, setSentChallengeTo] = useState<number | null>(null);
+  const [searchTimedOut, setSearchTimedOut] = useState(false);
+  const [selectedStake, setSelectedStake] = useState<number>(0);
+  const [lastBattleData, setLastBattleData] = useState<{
+    result?: string;
+    msg?: string;
+    stake_coins?: number;
+    net_stake_delta?: number;
+    can_rematch?: boolean;
+    rematch_cta?: string;
+  } | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const mmRef = useRef<WebSocket | null>(null);
   const lobbyRef = useRef<WebSocket | null>(null);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const roundTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadArena = () => apiFetch<ArenaData>('/api/battles/').then((d) => {
     setArena(d);
@@ -177,12 +189,19 @@ export default function BattlesPage() {
       .catch((e) => toast.error(e instanceof Error ? e.message : "Yuklashda xatolik yuz berdi"));
   }
 
-  async function startAiBattle() {
+  async function startAiBattle(stakeOverride?: number | unknown, rematchId?: number | null) {
+    const stake = typeof stakeOverride === 'number' ? stakeOverride : selectedStake;
     const qs = selectedSubject ? `?subject=${selectedSubject}` : '';
     let data;
     try {
       data = await apiFetch<{ battle_id: number; questions: Question[]; opponent: { name: string } }>(
-        `/api/battles/start-quiz/${qs}`, { method: 'POST' },
+        `/api/battles/start-quiz/${qs}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            stake_coins: stake,
+            rematch_battle_id: rematchId || undefined,
+          }),
+        },
       );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Jangni boshlab bo'lmadi");
@@ -191,8 +210,9 @@ export default function BattlesPage() {
     if (!ensurePlayable(data.questions)) return;
     setBattleId(data.battle_id);
     setQuestions(data.questions);
-    setOpponentName(data.opponent.name);
+    setOpponentName(data.opponent?.name || 'Raqib');
     setRoundIdx(0); setMyScore(0); setOppScore(0); setSelectedChoice(null); setCorrectChoiceId(null);
+    setLastBattleData(null);
     setMode('ai');
   }
 
@@ -212,10 +232,18 @@ export default function BattlesPage() {
       if (roundIdx + 1 < questions.length) {
         setRoundIdx(roundIdx + 1); setSelectedChoice(null); setCorrectChoiceId(null);
       } else {
-        const fin = await apiFetch<{ result: string; msg: string }>('/api/battles/finish/', {
+        const fin = await apiFetch<{
+          result: string;
+          msg: string;
+          stake_coins?: number;
+          net_stake_delta?: number;
+          can_rematch?: boolean;
+          rematch_cta?: string;
+        }>('/api/battles/finish/', {
           method: 'POST', body: JSON.stringify({ battle_id: battleId }),
         });
         setResultMsg(fin.msg);
+        setLastBattleData(fin);
         setMode('result');
         if (fin.result === 'win') {
           soundFX.fanfare();
@@ -229,21 +257,28 @@ export default function BattlesPage() {
   }
 
   function startLiveMatch() {
-    setMode('ghost');
-    return;
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    mmRef.current?.close();
+    setSearchTimedOut(false);
     setMode('live-searching');
     const subject = selectedSubject || '';
     const mm = openSocket('/ws/battles/matchmaking/', subject ? { subject } : {});
     mmRef.current = mm;
+    searchTimerRef.current = setTimeout(() => {
+      mm.close();
+      setSearchTimedOut(true);
+    }, 25000);
     mm.onmessage = (e) => {
       const data = JSON.parse(e.data);
       if (data.event === 'search_failed') {
+        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
         mm.close();
         setMode('idle');
         toast.error(data.reason || "Bu fanda jang boshlab bo'lmadi");
         return;
       }
       if (data.event === 'matched') {
+        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
         mm.close();
         if (!ensurePlayable(data.questions)) return;
         setBattleId(data.battle_id);
@@ -273,17 +308,38 @@ export default function BattlesPage() {
     ws.onopen = () => setMode('live');
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
-      if (msg.event === 'waiting_for_opponent') {
+      if (msg.event === 'battle_state') {
+        if (msg.questions && msg.questions.length > 0) setQuestions(msg.questions);
+        const myId = String(useAuthStore.getState().user?.id);
+        const scores = (msg.scores || {}) as Record<string, number>;
+        const otherId = Object.keys(scores).find((k) => k !== myId);
+        setMyScore(scores[myId] ?? 0);
+        setOppScore(otherId ? scores[otherId] : 0);
+        if (typeof msg.current_round === 'number' && msg.current_round >= 1) {
+          setRoundIdx(Math.max(0, msg.current_round - 1));
+        }
+        setWaitingOpponent(Boolean(msg.waiting_for_opponent));
+      } else if (msg.event === 'waiting_for_opponent') {
         setWaitingOpponent(true);
+        if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+        roundTimeoutRef.current = setTimeout(() => {
+          ws.send(JSON.stringify({ action: 'claim_timeout', round_number: msg.round_number }));
+        }, 30000);
       } else if (msg.event === 'round_result') {
+        if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
         setWaitingOpponent(false);
         const myId = String(useAuthStore.getState().user?.id);
         const scores = msg.scores as Record<string, number>;
         const otherId = Object.keys(scores).find((k) => k !== myId);
         setMyScore(scores[myId] ?? 0);
         setOppScore(otherId ? scores[otherId] : 0);
+        if (typeof msg.correct_choice_id === 'number') {
+          setCorrectChoiceId(msg.correct_choice_id);
+        }
         setTimeout(() => { setRoundIdx((i) => i + 1); setSelectedChoice(null); setCorrectChoiceId(null); }, 600);
       } else if (msg.event === 'battle_finished') {
+        if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+        setWaitingOpponent(false);
         const myId = String(useAuthStore.getState().user?.id);
         const result = msg.results[myId];
         setResultMsg(`Natija: ${result.result} · +${result.xp_gained} XP, +${result.coins_gained} tanga`);
@@ -306,8 +362,12 @@ export default function BattlesPage() {
   }
 
   function reset() {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
     wsRef.current?.close();
     mmRef.current?.close();
+    setSearchTimedOut(false);
+    setWaitingOpponent(false);
     setMode('idle');
   }
 
@@ -380,12 +440,23 @@ export default function BattlesPage() {
                     onClick={() => {
                       soundFX.click();
                       tgHaptic('medium');
-                      setMode('ghost');
+                      startLiveMatch();
                     }}
                     className="ps-btn ps-btn-ink"
                   >
-                    <Swords className="size-4 text-[var(--ps-orange)]" /> Raqib topish
+                    <Swords className="size-4 text-[var(--ps-orange)]" /> Jonli raqib topish
                     <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundFX.click();
+                      tgHaptic('medium');
+                      setMode('ghost');
+                    }}
+                    className="ps-btn ps-btn-ghost"
+                  >
+                    <Zap className="size-4" /> Ghost Replay duel
                   </button>
                   <button type="button" onClick={() => setActiveBattleTab('class')} className="ps-btn ps-btn-ghost">
                     <Users className="size-4" /> Sinf jangi
@@ -464,9 +535,9 @@ export default function BattlesPage() {
             })()}
 
             {/* ── Fan filtri ── */}
-            {arena && arena.subjects.length > 0 && (
+            {arena && (arena.subjects || []).length > 0 && (
               <div className="ds-seg flex max-w-full gap-1 overflow-x-auto no-scrollbar sm:w-fit">
-                {arena.subjects.map((s) => (
+                {(arena.subjects || []).map((s) => (
                   <button
                     key={s.id}
                     type="button"
@@ -517,6 +588,38 @@ export default function BattlesPage() {
             {/* TAB 1: 1v1 jonli duel */}
             {activeBattleTab === '1v1' && (
               <div className="space-y-8">
+                {/* 1v1 Tanga Tikish (Wager) */}
+                <div className="ps-card relative flex flex-wrap items-center justify-between gap-4 !rounded-[28px] p-5">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-500">
+                      <Coins className="size-6" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold">1v1 Tanga Tikish (Duel Banki)</p>
+                      <p className="text-xs text-[var(--text-muted)]">G&apos;olib 2x miqdorda «Ildiz tangalari»ni oladi</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {[0, 25, 50, 100].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          soundFX.click();
+                          setSelectedStake(s);
+                        }}
+                        className={cn(
+                          'cursor-pointer rounded-full px-4 py-2 text-xs font-bold transition-all',
+                          selectedStake === s
+                            ? 'bg-[#080808] text-[#FFFCF7] shadow-md dark:bg-[#FFFCF7] dark:text-[#080808]'
+                            : 'bg-[var(--ps-neutral)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        )}
+                      >
+                        {s === 0 ? '0 🪙 Bepul' : `${s} 🪙`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 {/* Tezkor duel banneri */}
                 <section className="ps-ink relative flex flex-col items-start justify-between gap-5 overflow-hidden rounded-[32px] p-6 sm:flex-row sm:items-center sm:p-8">
                   <span aria-hidden className="absolute -right-12 -top-16 size-48 rounded-full bg-[var(--ps-coral)] opacity-60" />
@@ -549,7 +652,7 @@ export default function BattlesPage() {
                 {/* 3 ta duel turi */}
                 <div className="grid gap-4 md:grid-cols-3">
                   {[
-                    { onClick: startAiBattle, icon: Bot, title: "AI bilan mashg'ulot jangi", desc: "AI bilan tezkor savollarda mashq qiling. Xavf yo'q, bilimlarni mustahkamlang.", cta: 'Boshlash', tone: 'bg-[var(--ps-purple)]' },
+                    { onClick: () => startAiBattle(), icon: Bot, title: "AI bilan mashg'ulot jangi", desc: "AI bilan tezkor savollarda mashq qiling. Xavf yo'q, bilimlarni mustahkamlang.", cta: 'Boshlash', tone: 'bg-[var(--ps-purple)]' },
                     { onClick: startLiveMatch, icon: Swords, title: 'Jonli abituriyent bilan duel', desc: "Onlayn o'quvchilar bilan real vaqtda bellashing va ELO reyting to'plang.", cta: 'Raqib topish', tone: 'bg-[var(--ps-coral)]' },
                     { onClick: inviteFriend, icon: Share2, title: "Do'stni jangga chorlash", desc: "Sinfdoshingizga Telegram orqali duel havolasini yuborib bellashing.", cta: 'Telegramda ulashish', tone: 'bg-[var(--ps-orange)]', copy: true },
                   ].map((c, i) => (
@@ -696,19 +799,19 @@ export default function BattlesPage() {
                   Onlayn ({onlineUsers.length})
                 </div>
                 <div className="space-y-2">
-                  {onlineUsers.map((u) => (
+                  {(onlineUsers || []).map((u) => (
                     <Card key={u.id}>
                       <CardContent className="flex items-center justify-between gap-3 py-3">
                         <div className="flex min-w-0 items-center gap-2.5">
                           <div className="relative shrink-0">
                             <Avatar className="size-9">
                               <AvatarImage src={u.avatar} alt="" />
-                              <AvatarFallback className="text-xs">{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                              <AvatarFallback className="text-xs">{u?.name ? u.name.slice(0, 2).toUpperCase() : 'U'}</AvatarFallback>
                             </Avatar>
                             <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[var(--bg-page)] bg-[var(--success)]" />
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-bold">{u.name}</p>
+                            <p className="truncate text-sm font-bold">{u?.name || "O'quvchi"}</p>
                             <p className="font-mono text-xs text-muted-foreground">{u.elo} ELO</p>
                           </div>
                         </div>
@@ -739,19 +842,46 @@ export default function BattlesPage() {
                 <Radio className="size-3.5 animate-pulse text-[var(--ps-coral)]" />
                 Jonli matchmaking
               </span>
-              <h3 className="ps-display mt-5 text-[34px] sm:text-[44px]">
-                Raqib <span className="text-[var(--ps-coral)]">qidirilmoqda</span>
-                <span className="text-[var(--ps-purple)]">…</span>
-              </h3>
-              <p className="mt-2 max-w-xs text-[13px] text-[var(--text-muted)]">Sizning darajangizga mos bilimdon ulanmoqda</p>
-              <div className="relative mt-8 flex size-24 items-center justify-center">
-                <span className="absolute inset-0 animate-ping rounded-full bg-[var(--ps-coral)] opacity-25" />
-                <span className="absolute inset-2 rounded-full border-2 border-dashed border-[var(--ps-coral)] opacity-60" />
-                <span className="relative inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
-                  <Swords className="size-7 animate-spin [animation-duration:2.4s]" />
-                </span>
-              </div>
-              <button type="button" onClick={reset} className="ps-btn ps-btn-ghost mt-8">Bekor qilish</button>
+              {!searchTimedOut ? (
+                <>
+                  <h3 className="ps-display mt-5 text-[34px] sm:text-[44px]">
+                    Raqib <span className="text-[var(--ps-coral)]">qidirilmoqda</span>
+                    <span className="text-[var(--ps-purple)]">…</span>
+                  </h3>
+                  <p className="mt-2 max-w-xs text-[13px] text-[var(--text-muted)]">Sizning darajangizga mos onlayn bilimdon ulanmoqda</p>
+                  <div className="relative mt-8 flex size-24 items-center justify-center">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-[var(--ps-coral)] opacity-25" />
+                    <span className="absolute inset-2 rounded-full border-2 border-dashed border-[var(--ps-coral)] opacity-60" />
+                    <span className="relative inline-flex size-16 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                      <Swords className="size-7 animate-spin [animation-duration:2.4s]" />
+                    </span>
+                  </div>
+                  <button type="button" onClick={reset} className="ps-btn ps-btn-ghost mt-8">Bekor qilish</button>
+                </>
+              ) : (
+                <>
+                  <h3 className="ps-display mt-5 text-[28px] sm:text-[36px]">
+                    Hozir bo&apos;sh <span className="text-[var(--ps-coral)]">raqib topilmadi</span>
+                  </h3>
+                  <p className="mt-2 max-w-sm text-[13px] text-[var(--text-muted)]">
+                    Shu fanda hozir onlayn navbatda boshqa o&apos;quvchi yo&apos;q. Qayta qidirishingiz, saqlangan Ghost yozuvi yoki AI bot bilan bellashishingiz mumkin.
+                  </p>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <button type="button" onClick={startLiveMatch} className="ps-btn ps-btn-ink">
+                      <RotateCcw className="size-4" /> Qayta qidirish
+                    </button>
+                    <button type="button" onClick={() => setMode('ghost')} className="ps-btn ps-btn-light">
+                      <Zap className="size-4" /> Ghost Replay bilan o&apos;ynash
+                    </button>
+                    <button type="button" onClick={() => startAiBattle()} className="ps-btn ps-btn-ghost">
+                      <Bot className="size-4" /> AI Bot bilan mashq
+                    </button>
+                  </div>
+                  <button type="button" onClick={reset} className="mt-4 text-xs font-semibold text-[var(--text-muted)] underline">
+                    Arenaga qaytish
+                  </button>
+                </>
+              )}
             </div>
           </ArenaStage>
         )}
@@ -813,7 +943,7 @@ export default function BattlesPage() {
                       Raund {roundIdx + 1} / {questions.length}
                     </span>
                     <div className="flex items-center gap-1">
-                      {questions.map((_, i) => (
+                      {(questions || []).map((_, i) => (
                         <span
                           key={i}
                           className={cn(
@@ -826,8 +956,8 @@ export default function BattlesPage() {
                   </div>
                   <h2
                     key={roundIdx}
-                    className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px]"
-                    dangerouslySetInnerHTML={{ __html: currentQ.text }}
+                    className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px] [&_p]:m-0"
+                    dangerouslySetInnerHTML={{ __html: formatRichText(currentQ.text) }}
                   />
                 </div>
 
@@ -838,7 +968,7 @@ export default function BattlesPage() {
                   </p>
                 ) : (
                   <div className="mt-auto space-y-2.5">
-                    {currentQ.choices.map((c, i) => {
+                    {(currentQ?.choices || []).map((c, i) => {
                       const isSelected = selectedChoice === c.id;
                       const isCorrect = correctChoiceId === c.id;
                       // Variant matni o'z harfi bilan kelsa ("B) 3, 6") — harfni doiraga olamiz.
@@ -866,7 +996,7 @@ export default function BattlesPage() {
                           <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-black', letter)}>
                             {label}
                           </span>
-                          <span className="flex-1">{body}</span>
+                          <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatRichText(body) }} />
                           {selectedChoice !== null && isCorrect && <CheckCircle2 className="size-5 shrink-0" />}
                           {selectedChoice !== null && isSelected && correctChoiceId !== null && !isCorrect && <XCircle className="size-5 shrink-0" />}
                         </button>
@@ -940,9 +1070,38 @@ export default function BattlesPage() {
                 </div>
               )}
 
-              <button type="button" onClick={reset} className="ps-btn ps-btn-ink mt-5 w-full max-w-sm">
-                <RotateCcw className="size-4" /> Yana o&apos;ynash
-              </button>
+              {lastBattleData?.net_stake_delta != null && lastBattleData.net_stake_delta !== 0 && (
+                <div className={cn(
+                  'mt-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold',
+                  lastBattleData.net_stake_delta > 0
+                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                    : 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30'
+                )}>
+                  <Coins className="size-4" />
+                  {lastBattleData.net_stake_delta > 0
+                    ? `+${lastBattleData.net_stake_delta} tanga yutib oldingiz!`
+                    : `${lastBattleData.net_stake_delta} tanga sarflandi`}
+                </div>
+              )}
+
+              <div className="mt-5 flex flex-col gap-2.5 w-full max-w-sm">
+                {battleId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundFX.click();
+                      startAiBattle(selectedStake, battleId);
+                    }}
+                    className="ps-btn ps-btn-ink w-full"
+                  >
+                    <Swords className="size-4 text-[var(--ps-orange)]" />
+                    Yana bir marta kuch sinashamizmi? (Revansh)
+                  </button>
+                )}
+                <button type="button" onClick={reset} className="ps-btn ps-btn-ghost w-full">
+                  <RotateCcw className="size-4" /> Arenaga qaytish
+                </button>
+              </div>
             </div>
           </ArenaStage>
         )}
@@ -954,7 +1113,7 @@ export default function BattlesPage() {
                 <Swords className="size-5 text-[var(--ps-coral)]" /> Jang chaqiruvi
               </DialogTitle>
               <DialogDescription>
-                <strong className="text-foreground">{incomingChallenge?.from.name}</strong> sizni tezkor duelga chaqirmoqda. Jang qilasizmi?
+                <strong className="text-foreground">{incomingChallenge?.from?.name || 'Raqib'}</strong> sizni tezkor duelga chaqirmoqda. Jang qilasizmi?
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

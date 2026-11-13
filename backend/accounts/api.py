@@ -125,6 +125,16 @@ def register_api(request):
     )
     profile = ensure_profile_for_user(user)
     profile.avatar_url = f'https://api.dicebear.com/7.x/adventurer/svg?seed={username}'
+    if request.data.get('region'):
+        profile.region = str(request.data.get('region')).strip()[:100]
+    if request.data.get('district'):
+        profile.district = str(request.data.get('district')).strip()[:100]
+    if request.data.get('school'):
+        profile.school = str(request.data.get('school')).strip()[:150]
+    if request.data.get('target_university'):
+        profile.target_university = str(request.data.get('target_university')).strip()[:150]
+    if request.data.get('target_faculty'):
+        profile.target_faculty = str(request.data.get('target_faculty')).strip()[:150]
     profile.save()
     referrer = apply_referral(profile, ref_code) if ref_code else None
     record_signup_source(profile, request.data.get('source') or 'web', referred=bool(referrer))
@@ -393,6 +403,18 @@ def profile_api(request):
         if 'region' in request.data:
             profile.region = str(request.data.get('region', '')).strip()[:100]
             updated_profile_fields.append('region')
+        if 'district' in request.data:
+            profile.district = str(request.data.get('district', '')).strip()[:100]
+            updated_profile_fields.append('district')
+        if 'school' in request.data:
+            profile.school = str(request.data.get('school', '')).strip()[:150]
+            updated_profile_fields.append('school')
+        if 'target_university' in request.data:
+            profile.target_university = str(request.data.get('target_university', '')).strip()[:150] or 'TATU'
+            updated_profile_fields.append('target_university')
+        if 'target_faculty' in request.data:
+            profile.target_faculty = str(request.data.get('target_faculty', '')).strip()[:150] or 'Dasturiy injiniring'
+            updated_profile_fields.append('target_faculty')
         if 'target_subject_slug' in request.data or 'target_subject_id' in request.data or 'target_subject' in request.data:
             from tests_app.models import Subject
             subj_val = request.data.get('target_subject_slug') or request.data.get('target_subject_id') or request.data.get('target_subject')
@@ -529,6 +551,11 @@ def onboarding_complete_api(request):
                 switch_today_loop_subject(request.user, subj)
             except Exception:
                 pass
+
+    for field_name, max_len in (('region', 100), ('district', 100), ('school', 150), ('target_university', 150), ('target_faculty', 150)):
+        if field_name in request.data and request.data.get(field_name) is not None:
+            setattr(profile, field_name, str(request.data.get(field_name)).strip()[:max_len])
+            update_fields.append(field_name)
 
     profile.save(update_fields=update_fields)
     return Response({'ok': True})

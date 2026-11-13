@@ -17,6 +17,7 @@ def on_test_set_saved(sender, instance, created, **kwargs):
         instance.is_published
         and not instance.is_random
         and not instance.is_archived
+        and not instance.is_live_mock
         and instance.notified_at is None
     ):
         # Agar savollar hali bo'lmasa (masalan test endi yaratildi), m2m_changed signali orqali yuboriladi
@@ -34,6 +35,7 @@ def on_test_set_questions_changed(sender, instance, action, **kwargs):
         and instance.is_published
         and not instance.is_random
         and not instance.is_archived
+        and not instance.is_live_mock
         and instance.notified_at is None
     ):
         test_id = instance.id

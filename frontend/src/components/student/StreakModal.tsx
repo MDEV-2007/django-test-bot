@@ -126,6 +126,28 @@ export default function StreakModal({ open, onOpenChange, user }: StreakModalPro
           </Link>
         </div>
 
+        {/* Do'stlik Zanjiri Bloki */}
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/8 p-3.5">
+          <div className="flex items-center gap-3 min-w-0">
+            <PremiumIcon icon={Flame} tone="amber" size="sm" solid />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-foreground truncate">
+                Do&apos;stlik Zanjiri (Co-op)
+              </p>
+              <p className="text-[12px] text-muted-foreground truncate">
+                Do&apos;stingiz bilan birga olovni saqlang va 1.5x tanga oling.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard"
+            onClick={() => onOpenChange(false)}
+            className="ios-spring shrink-0 inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-600 px-3 py-1.5 text-xs font-bold text-white shadow-2xs"
+          >
+            <span>Ulash</span>
+          </Link>
+        </div>
+
         {/* CTA Button */}
         <div className="mt-4">
           {!isDoneToday ? (

@@ -114,6 +114,33 @@ class Payment(models.Model):
         from accounts.models import Profile
 
         if self.plan.plan_type == 'mock_test' and self.test_id:
+            from tests_app.models import MockRegistration
+            now_ts = timezone.now()
+            with transaction.atomic():
+                updated = MockRegistration.objects.filter(
+                    profile_id=self.profile_id,
+                    test_id=self.test_id,
+                ).exclude(status='DISQUALIFIED').update(
+                    status='CONFIRMED',
+                    confirmed_at=now_ts,
+                    payment=self,
+                )
+                if not updated and self.test and getattr(self.test, 'is_live_mock', False):
+                    u = self.profile.user
+                    full_name = f"{u.first_name} {u.last_name}".strip() or u.username
+                    MockRegistration.objects.get_or_create(
+                        profile_id=self.profile_id,
+                        test_id=self.test_id,
+                        defaults={
+                            'full_name': full_name,
+                            'phone': getattr(self.profile, 'phone', '') or '',
+                            'region': getattr(self.profile, 'region', '') or '',
+                            'status': 'CONFIRMED',
+                            'confirmed_at': now_ts,
+                            'payment': self,
+                        },
+                    )
+            # Single test unlocked and MockRegistration confirmed above
             return
         # Fresh, locked row: the cached self.profile may be stale, and a full save() of a
         # stale instance reverted concurrent coin/XP changes (audit ECON-003).
@@ -129,11 +156,27 @@ class Payment(models.Model):
                 profile.premium_expires_at = base + timezone.timedelta(days=self.plan.duration_days)
                 profile.save(update_fields=['is_premium', 'premium_expires_at'])
         self.profile = profile
+        from tests_app.models import MockRegistration
+        MockRegistration.objects.filter(
+            profile_id=self.profile_id,
+            status='PENDING_PAYMENT',
+        ).update(
+            status='CONFIRMED',
+            confirmed_at=timezone.now(),
+            payment=self,
+        )
 
 
 def unlocked_test_ids(profile) -> set:
     """Shu o'quvchi alohida sotib olgan (tasdiqlangan) testlarning id'lari."""
-    return set(
+    from tests_app.models import MockRegistration
+    return set(MockRegistration.objects.filter(profile=profile, status='CONFIRMED').values_list('test_id', flat=True)) | set(
+        Payment.objects
+        .filter(profile=profile, status='approved', plan__plan_type='mock_test', test__isnull=False)
+        .values_list('test_id', flat=True)
+    )
+    if False:
+        return set(
         Payment.objects
         .filter(profile=profile, status='approved', plan__plan_type='mock_test', test__isnull=False)
         .values_list('test_id', flat=True)

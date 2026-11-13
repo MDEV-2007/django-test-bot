@@ -20,7 +20,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
 import { celebrate } from '@/lib/confetti';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import ArenaStage from './ArenaStage';
 import { toast } from 'sonner';
 
@@ -59,6 +59,21 @@ export interface GhostBattleArenaProps {
   onExit?: () => void;
   onOpenViralDuel?: (userScore: number, opponentScore: number) => void;
 }
+
+const FALLBACK_OPPONENTS: OpponentData[] = [
+  { id: 8001, name: 'Shahlo Mirzayeva', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Shahlo', region: 'Toshkent sh., 1-litsey', elo_rating: 1180, is_ghost: true },
+  { id: 8002, name: 'Bekzod Rustamov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Bekzod', region: 'Buxoro sh., 23-maktab', elo_rating: 1220, is_ghost: true },
+  { id: 8003, name: 'Dilnoza Olimova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Dilnoza', region: 'Farg‘ona sh., 4-IDUM', elo_rating: 1150, is_ghost: true },
+  { id: 8004, name: 'Farrux Xolmatov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Farrux', region: 'Samarqand sh., 42-maktab', elo_rating: 1290, is_ghost: true },
+  { id: 8005, name: 'Zilola Yusupova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Zilola', region: 'Andijon sh., 9-maktab', elo_rating: 1110, is_ghost: true },
+  { id: 8006, name: 'Bobur Samadov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Bobur', region: 'Namangan sh., 15-maktab', elo_rating: 1260, is_ghost: true },
+  { id: 8007, name: 'Nilufar Rahimova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Nilufar', region: 'Xorazm, Urganch 1-litsey', elo_rating: 1200, is_ghost: true },
+  { id: 8008, name: 'Akmal Zokirov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Akmal', region: 'Qashqadaryo, Qarshi 2-IDUM', elo_rating: 1170, is_ghost: true },
+  { id: 8009, name: 'Madina Karimova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Madina', region: 'Navoiy sh., 11-maktab', elo_rating: 1240, is_ghost: true },
+  { id: 8010, name: 'Sardor Temurov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sardor', region: 'Surxondaryo, Termiz 5-maktab', elo_rating: 1190, is_ghost: true },
+  { id: 8011, name: 'Gulbahor Toshmatova', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Gulbahor', region: 'Jizzax sh., 7-maktab', elo_rating: 1110, is_ghost: true },
+  { id: 8012, name: 'Jasur Mahmudov', avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Jasur', region: 'Sirdaryo, Guliston litseyi', elo_rating: 1240, is_ghost: true },
+];
 
 export default function GhostBattleArena({
   subjectSlug = 'tarix',
@@ -136,6 +151,7 @@ export default function GhostBattleArena({
       }
 
       // Standart 1v1 Matchmaking (3 soniya radar effekti)
+      const lastOppId = typeof window !== 'undefined' ? sessionStorage.getItem('last_arena_opp_id') : null;
       const res = await apiFetch<{
         ok: boolean;
         match_id: string;
@@ -144,71 +160,101 @@ export default function GhostBattleArena({
         ghost_moves: GhostMove[];
       }>('/api/growth/arena/matchmake/', {
         method: 'POST',
-        body: JSON.stringify({ subject_slug: subjectSlug }),
+        body: JSON.stringify({ subject_slug: subjectSlug, last_opponent_id: lastOppId }),
       });
 
-      if (res && res.ok) {
+      if (res && res.ok && res.questions && res.questions.length > 0) {
         setMatchId(res.match_id);
         const opp: OpponentData = {
           ...res.opponent,
-          region: res.opponent.region || 'Toshkent sh., 1-litsey',
-        };
-        setOpponent(opp);
-        setQuestions(res.questions);
-        setGhostMoves(res.ghost_moves);
-        triggerMatchFound(opp);
-      }
-    } catch {
-      // Fallback opponent agar server offline bo'lsa
-      setTimeout(() => {
-        const fallbackOpp: OpponentData = {
-          id: 8888,
-          name: 'Javohir Aliyev',
-          avatar_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Javohir',
-          region: 'Samarqand sh., 42-maktab',
-          elo_rating: 1240,
+          name: res.opponent?.name || 'Sardor Temurov',
+          avatar_url: res.opponent?.avatar_url || 'https://api.dicebear.com/7.x/adventurer/svg?seed=fighter',
+          region: res.opponent?.region || 'Toshkent sh., 1-litsey',
+          elo_rating: res.opponent?.elo_rating || 1050,
           is_ghost: true,
         };
-        setOpponent(fallbackOpp);
-        setQuestions([
-          {
-            id: 1,
-            body: "Amir Temur qaysi yili Balx shahrida buyuk amir deb e'lon qilingan?",
-            choices: [
-              { id: 1, text: '1365-yil', is_correct: false },
-              { id: 2, text: '1370-yil', is_correct: true },
-              { id: 3, text: '1385-yil', is_correct: false },
-              { id: 4, text: '1391-yil', is_correct: false },
-            ],
-          },
-          {
-            id: 2,
-            body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi yodgorlikdan topilgan?",
-            choices: [
-              { id: 5, text: 'Dalvarzintepa', is_correct: false },
-              { id: 6, text: 'Taxiti Sangin', is_correct: true },
-              { id: 7, text: 'Xolchayon', is_correct: false },
-              { id: 8, text: 'Qoratepa', is_correct: false },
-            ],
-          },
-          {
-            id: 3,
-            body: 'Qadimgi Turon xalqlari qaysi din ta\'limotiga e\'tiqod qilgan?',
-            choices: [
-              { id: 9, text: 'Zardushtiylik', is_correct: true },
-              { id: 10, text: 'Buddizm', is_correct: false },
-              { id: 11, text: 'Monaviylik', is_correct: false },
-              { id: 12, text: 'Xristianlik', is_correct: false },
-            ],
-          },
-        ]);
-        setGhostMoves([
-          { question_id: 1, selected_option_id: 2, is_correct: true, time_taken_ms: 3200, score: 10 },
-          { question_id: 2, selected_option_id: 6, is_correct: true, time_taken_ms: 2800, score: 10 },
-          { question_id: 3, selected_option_id: 9, is_correct: true, time_taken_ms: 3500, score: 10 },
-        ]);
-        triggerMatchFound(fallbackOpp);
-      }, 3000);
+        if (opp.id && typeof window !== 'undefined') {
+          sessionStorage.setItem('last_arena_opp_id', String(opp.id));
+        }
+        setOpponent(opp);
+        setQuestions(res.questions);
+        setGhostMoves(res.ghost_moves || []);
+        triggerMatchFound(opp);
+        return;
+      }
+      throw new Error("Bo'sh savollar");
+    } catch {
+      // Fallback opponent agar server offline bo'lsa yoki ulanishda xatolik bo'lsa — har safar turli raqib tanlanadi
+      const lastOppId = typeof window !== 'undefined' ? Number(sessionStorage.getItem('last_arena_opp_id')) : 0;
+      const candidates = FALLBACK_OPPONENTS.filter((o) => o.id !== lastOppId);
+      const chosenOpp = candidates[Math.floor(Math.random() * candidates.length)] || FALLBACK_OPPONENTS[0];
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('last_arena_opp_id', String(chosenOpp.id));
+      }
+      setOpponent(chosenOpp);
+      const fallbackQuestions = [
+        {
+          id: 1,
+          body: "Amir Temur qaysi yili Balx shahrida buyuk amir deb e'lon qilingan?",
+          choices: [
+            { id: 1, text: '1365-yil', is_correct: false },
+            { id: 2, text: '1370-yil', is_correct: true },
+            { id: 3, text: '1385-yil', is_correct: false },
+            { id: 4, text: '1391-yil', is_correct: false },
+          ],
+        },
+        {
+          id: 2,
+          body: "O'zbekiston hududidagi qadimgi Oks ibodatxonasi qaysi yodgorlikdan topilgan?",
+          choices: [
+            { id: 5, text: 'Dalvarzintepa', is_correct: false },
+            { id: 6, text: 'Taxti Sangin', is_correct: true },
+            { id: 7, text: 'Xolchayon', is_correct: false },
+            { id: 8, text: 'Qoratepa', is_correct: false },
+          ],
+        },
+        {
+          id: 3,
+          body: "Qadimgi Turon xalqlari qaysi din ta'limotiga e'tiqod qilgan?",
+          choices: [
+            { id: 9, text: 'Zardushtiylik', is_correct: true },
+            { id: 10, text: 'Buddizm', is_correct: false },
+            { id: 11, text: 'Monaviylik', is_correct: false },
+            { id: 12, text: 'Xristianlik', is_correct: false },
+          ],
+        },
+        {
+          id: 4,
+          body: "Al-Xorazmiyning 'Al-jabr val-muqobala' asari qaysi fanga asos solgan?",
+          choices: [
+            { id: 13, text: 'Algebra', is_correct: true },
+            { id: 14, text: 'Geometriya', is_correct: false },
+            { id: 15, text: 'Astronomiya', is_correct: false },
+            { id: 16, text: 'Fizika', is_correct: false },
+          ],
+        },
+        {
+          id: 5,
+          body: "Mirzo Ulug'bek rasadxonasi qaysi shahar yaqinida bunyod etilgan?",
+          choices: [
+            { id: 17, text: 'Samarqand', is_correct: true },
+            { id: 18, text: 'Buxoro', is_correct: false },
+            { id: 19, text: 'Xiva', is_correct: false },
+            { id: 20, text: 'Shahrisabz', is_correct: false },
+          ],
+        },
+      ];
+      setQuestions(fallbackQuestions);
+      setGhostMoves([
+        { question_id: 1, selected_option_id: 2, is_correct: true, time_taken_ms: 3100, score: 10 },
+        { question_id: 2, selected_option_id: 6, is_correct: true, time_taken_ms: 2700, score: 10 },
+        { question_id: 3, selected_option_id: 9, is_correct: true, time_taken_ms: 3400, score: 10 },
+        { question_id: 4, selected_option_id: 13, is_correct: true, time_taken_ms: 2900, score: 10 },
+        { question_id: 5, selected_option_id: 17, is_correct: true, time_taken_ms: 3200, score: 10 },
+      ]);
+      setTimeout(() => {
+        triggerMatchFound(chosenOpp);
+      }, 1500);
     }
   }, [incomingDuelToken, subjectSlug]);
 
@@ -309,7 +355,7 @@ export default function GhostBattleArena({
         method: 'POST',
         body: JSON.stringify({
           moves_log: userMovesLogRef.current,
-          question_ids: questions.map((q) => q.id),
+          question_ids: (questions || []).map((q) => q.id),
         }),
       });
 
@@ -351,14 +397,14 @@ export default function GhostBattleArena({
           >
             <span className="ps-chip">
               <Radio className="size-3.5 animate-pulse text-[var(--ps-coral)]" />
-              Tezkor matchmaking · 3 soniya
+              Ghost Replay · Asinxron duel
             </span>
             <h3 className="ps-display mt-5 text-[34px] sm:text-[44px]">
-              Raqib <span className="text-[var(--ps-coral)]">qidirilmoqda</span>
+              Ghost yozuvi <span className="text-[var(--ps-coral)]">tanlanmoqda</span>
               <span className="text-[var(--ps-purple)]">…</span>
             </h3>
             <p className="mt-2 max-w-xs text-[13px] text-[var(--text-muted)]">
-              ELO reytingingizga yaqin kuchli raqib tanlanmoqda
+              ELO reytingingizga yaqin o&apos;quvchining saqlangan haqiqiy o&apos;yin yozuvi (Ghost Replay) yuklanmoqda
             </p>
 
             <div className="mt-8 grid w-full max-w-md grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
@@ -440,12 +486,12 @@ export default function GhostBattleArena({
                 <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-white/15" />
                 <span aria-hidden className="ps-dots absolute bottom-0 right-0 h-16 w-28 opacity-25" />
                 <div className="relative">
-                  <img src={opponent.avatar_url} alt={opponent.name} className="size-24 rounded-full border-[5px] border-white/85 bg-white object-cover" />
+                  <img src={opponent?.avatar_url || "https://api.dicebear.com/7.x/adventurer/svg?seed=fighter"} alt={opponent?.name || "Raqib"} className="size-24 rounded-full border-[5px] border-white/85 bg-white object-cover" />
                   <span className="absolute bottom-1 right-1 size-5 rounded-full border-[3px] border-[var(--ps-coral)] bg-[var(--ps-green)]" />
                 </div>
-                <p className="relative mt-4 max-w-full truncate text-[18px] font-bold">{opponent.name}</p>
+                <p className="relative mt-4 max-w-full truncate text-[18px] font-bold">{opponent?.name || "Raqib"}</p>
                 {opponent.region && <p className="relative max-w-full truncate text-[12px] font-semibold text-white/80">{opponent.region}</p>}
-                <span className="relative mt-2 rounded-full bg-black/20 px-3 py-1 font-mono text-[12.5px] font-bold">{opponent.elo_rating} ELO</span>
+                <span className="relative mt-2 rounded-full bg-black/20 px-3 py-1 font-mono text-[12.5px] font-bold">{opponent?.elo_rating || 1000} ELO</span>
               </motion.div>
 
               {/* VS markazda */}
@@ -509,8 +555,8 @@ export default function GhostBattleArena({
                       <span className="absolute -right-0.5 -top-0.5 size-2.5 animate-ping rounded-full bg-[var(--ps-green)]" />
                     </div>
                     <span className="truncate text-[13.5px] font-bold">{opponent?.name}</span>
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--ps-green)] px-2 py-0.5 text-[10.5px] font-bold text-white">
-                      <span className="size-1.5 rounded-full bg-white" /> Jonli
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10.5px] font-bold text-[#080808]">
+                      <span className="size-1.5 rounded-full bg-[#080808]" /> {opponent?.is_ghost !== false ? 'Ghost yozuvi' : 'Jonli'}
                     </span>
                   </div>
                   <span className="ps-num shrink-0 text-[24px] leading-none text-[var(--ps-coral)]">
@@ -545,7 +591,7 @@ export default function GhostBattleArena({
                   Savol {currentQIndex + 1} / {totalQuestions}
                 </span>
                 <div className="flex items-center gap-1">
-                  {questions.map((q, i) => (
+                  {(questions || []).map((q, i) => (
                     <span
                       key={q.id}
                       className={cn(
@@ -557,21 +603,20 @@ export default function GhostBattleArena({
                 </div>
               </div>
               <AnimatePresence mode="wait">
-                <motion.p
+                <motion.div
                   key={currentQ.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
-                  className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px]"
-                >
-                  {currentQ.body}
-                </motion.p>
+                  className="mt-4 text-[20px] font-bold leading-snug text-[var(--text-primary)] sm:text-[24px] [&_p]:m-0"
+                  dangerouslySetInnerHTML={{ __html: formatRichText(currentQ.body) }}
+                />
               </AnimatePresence>
             </div>
 
             {/* Variantlar */}
             <div className="mt-auto space-y-2.5">
-              {currentQ.choices.map((choice, i) => {
+              {(currentQ?.choices || []).map((choice, i) => {
                 const isSelected = selectedChoiceId === choice.id;
                 let row = 'bg-[var(--ps-neutral)] text-[var(--text-primary)] hover:-translate-y-0.5 hover:bg-[var(--ps-lilac)] hover:text-[#080808]';
                 let letter = 'bg-[var(--ps-paper)] text-[var(--text-primary)]';
@@ -601,7 +646,7 @@ export default function GhostBattleArena({
                     <span className={cn('inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[14px] font-black transition-colors', letter)}>
                       {LETTERS[i] || i + 1}
                     </span>
-                    <span className="flex-1">{choice.text}</span>
+                    <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatRichText(choice.text) }} />
                     {isAnswered && choice.is_correct && <CheckCircle2 className="size-5 shrink-0" />}
                     {isAnswered && isSelected && !choice.is_correct && <XCircle className="size-5 shrink-0" />}
                   </button>

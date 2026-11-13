@@ -223,7 +223,6 @@ export function PastelHero({
             src="/images/dashboard-hero-team.webp"
             alt="IlmIldizi jamoasi"
             fill
-            priority
             sizes="(max-width: 640px) 260px, 360px"
             className="object-cover object-[50%_32%]"
           />
@@ -447,8 +446,9 @@ type Mission = {
 };
 
 export function MissionsCard({ missions }: { missions: Mission[] }) {
-  const done = missions.filter((m) => m.is_completed).length;
-  const total = missions.length;
+  const safeMissions = missions || [];
+  const done = safeMissions.filter((m) => m?.is_completed).length;
+  const total = safeMissions.length;
   return (
     <div className="ps-card ps-ink relative h-full overflow-hidden !border-0 p-6 sm:p-7">
       <div aria-hidden className="absolute -right-12 -bottom-16 size-52 rounded-full bg-[var(--ps-purple)]/35 blur-2xl" />
@@ -480,7 +480,7 @@ export function MissionsCard({ missions }: { missions: Mission[] }) {
           </p>
         ) : (
           <ul className="mt-5 grid gap-2 sm:grid-cols-2">
-            {missions.slice(0, 4).map((m) => (
+            {safeMissions.slice(0, 4).map((m) => (
               <li
                 key={m.title}
                 className={cn(
@@ -600,13 +600,30 @@ const DATE_TONES = ['ps-coral', 'ps-orange', 'ps-purple', 'ps-green'];
 export function UpcomingCard({
   mocks,
 }: {
-  mocks: { id: number; title: string; subject: string; scheduled_at: string; is_live: boolean }[];
+  mocks: {
+    id: number;
+    title: string;
+    subject?: string;
+    subject_name?: string;
+    scheduled_at: string | null;
+    duration_minutes?: number;
+    question_count?: number;
+    participants_count?: number;
+    is_premium?: boolean;
+    price?: number;
+    prize_description?: string;
+    is_unlocked?: boolean;
+    registration_id?: string | null;
+    registration_status?: string;
+    lifecycle_state?: string;
+    is_live?: boolean;
+  }[];
 }) {
   return (
     <div className="ps-card ps-card-cream h-full p-6 sm:p-7">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <Eyebrow>Kalendar</Eyebrow>
+          <Eyebrow>Respublika Mock</Eyebrow>
           <h2 className="ps-display mt-2 text-[28px] sm:text-[34px]">Kelayotgan testlar</h2>
         </div>
         <CircleLink href="/tests" label="Barcha testlar" />
@@ -623,12 +640,15 @@ export function UpcomingCard({
       ) : (
         <ul className="mt-5 space-y-2.5">
           {mocks.map((m, i) => {
-            const d = new Date(m.scheduled_at);
+            const d = m.scheduled_at ? new Date(m.scheduled_at) : null;
+            const validDate = d && !isNaN(d.getTime()) ? d : null;
+            const subjectLabel = m.subject || m.subject_name || 'Asosiy fan';
+            const isLive = m.is_live || m.lifecycle_state === 'LIVE_NOW';
             return (
               <li key={m.id}>
                 <Link
                   href={`/tests/mock/${m.id}`}
-                  className="flex items-center gap-3 rounded-2xl bg-[var(--ps-paper)] p-2.5 pr-4 transition-transform duration-300 hover:translate-x-1"
+                  className="flex items-center gap-3 rounded-2xl bg-[var(--ps-paper)] p-3 pr-4 transition-transform duration-300 hover:translate-x-1"
                 >
                   <span
                     className={cn(
@@ -636,20 +656,43 @@ export function UpcomingCard({
                       DATE_TONES[i % DATE_TONES.length],
                     )}
                   >
-                    <span className="ps-num text-xl">{d.getDate()}</span>
-                    <span className="mt-0.5 text-[10px] font-bold uppercase">{MONTHS_SHORT[d.getMonth()]}</span>
+                    <span className="ps-num text-xl">{validDate ? validDate.getDate() : '★'}</span>
+                    <span className="mt-0.5 text-[10px] font-bold uppercase">
+                      {validDate ? MONTHS_SHORT[validDate.getMonth()] : 'MOCK'}
+                    </span>
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold">{m.title}</p>
                     <p className="truncate text-xs text-[var(--text-muted)]">
-                      {[m.subject, d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })]
+                      {[
+                        subjectLabel,
+                        validDate ? validDate.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }) : null,
+                        m.price && m.is_premium ? `${Number(m.price).toLocaleString('uz-UZ')} so'm` : 'Bepul',
+                      ]
                         .filter(Boolean)
                         .join(' · ')}
                     </p>
+                    {(m.registration_id || m.prize_description) && (
+                      <p className="mt-0.5 truncate text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                        {m.registration_id ? `Bilet: #${m.registration_id}` : m.prize_description}
+                      </p>
+                    )}
                   </div>
-                  {m.is_live && (
+                  {isLive ? (
                     <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--ps-coral)] px-2.5 py-1 text-[10px] font-bold text-white">
                       <span className="size-1.5 animate-pulse rounded-full bg-white" /> Jonli
+                    </span>
+                  ) : m.registration_status === 'CONFIRMED' ? (
+                    <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+                      Tasdiqlangan
+                    </span>
+                  ) : m.registration_status === 'PENDING_PAYMENT' ? (
+                    <span className="inline-flex shrink-0 items-center rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                      To&apos;lov kutilmoqda
+                    </span>
+                  ) : (
+                    <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--ps-purple)]/15 px-2.5 py-1 text-[10px] font-bold text-[var(--text-primary)]">
+                      Ro&apos;yxatdan o&apos;tish
                     </span>
                   )}
                 </Link>
@@ -703,7 +746,7 @@ export function SubjectsSection({
           </div>
         ) : (
           <ul className="divide-y divide-[var(--border-card)]">
-            {subjects.map((s, i) => (
+            {(subjects || []).map((s, i) => (
               <InView key={s.id} delay={i * 0.05} y={14}>
                 <li className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 py-4 sm:grid-cols-[auto_minmax(0,180px)_1fr_auto] sm:gap-x-5">
                   <span className="ps-num w-8 text-sm text-[var(--text-faint)]">{String(i + 1).padStart(2, '0')}</span>

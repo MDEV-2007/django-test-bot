@@ -25,3 +25,15 @@ class AuditAwareJWTAuthentication(JWTAuthentication):
                 raise AuthenticationFailed('Token has been revoked.', code='token_revoked')
             set_current_user(user)
         return result
+
+
+class OptionalAuditAwareJWTAuthentication(AuditAwareJWTAuthentication):
+    """AuditAwareJWTAuthentication bilan bir xil, lekin token eskirgan yoki yaroqsiz bo'lsa
+    AuthenticationFailed (401) tashlamasdan, anonymous foydalanuvchi sifatida (None) qaytaradi.
+    AllowAny ruxsatiga ega bo'lgan ochiq API'lar (masalan: ochiq feature flaglar, umumiy savollar)
+    uchun ishlatiladi."""
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except Exception:
+            return None

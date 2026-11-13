@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { tgHaptic } from '@/lib/telegram';
 import { soundFX } from '@/lib/soundFX';
 import { apiFetch } from '@/lib/api-client';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import { toast } from 'sonner';
 
 type CorePill = {
@@ -224,7 +224,13 @@ export default function TopicCheatSheetView({
               {trap.explanation && (
                 <p className="flex items-start gap-2 px-1 text-[12.5px] leading-relaxed text-[var(--text-secondary)]">
                   <span className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--ps-orange,#FFB82E)] text-[11px]">💡</span>
-                  <span><b>Layfxak:</b> {trap.explanation}</span>
+                  <span>
+                    <b>Layfxak: </b>
+                    <span
+                      className="[&_p]:inline"
+                      dangerouslySetInnerHTML={{ __html: formatRichText(trap.explanation) }}
+                    />
+                  </span>
                 </p>
               )}
             </div>

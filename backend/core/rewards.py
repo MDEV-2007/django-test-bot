@@ -200,17 +200,25 @@ def open_daily_chest(profile_id: int) -> dict:
             base_amount = random.choice([150, 180, 200, 250])
 
     elif rarity == 'epic':
-        # Epic mukofotda Streak Freeze chiqish imkoniyati bor!
-        if random.random() < 0.4:
+        # Epic mukofotda Streak Freeze, PDF-Shpargalka yoki 24 soatlik PRO Trial chiqish imkoniyati!
+        epic_roll = random.random()
+        if epic_roll < 0.35:
             reward_type = 'streak_freeze'
             base_amount = 1
+        elif epic_roll < 0.65:
+            reward_type = 'cheat_sheet_pdf'
+            base_amount = 120
         else:
             reward_type = 'xp'
             base_amount = random.choice([300, 350, 400])
 
-    else:  # legendary (3% - Jack-pot)
-        reward_type = 'legendary_bundle'
-        base_amount = 500  # 500 XP + 200 Coins
+    else:  # legendary (Jack-pot: 24 soatlik VIP/PRO obuna yoki 500 Tanga + XP)
+        if random.random() < 0.55:
+            reward_type = 'vip_24h'
+            base_amount = 24
+        else:
+            reward_type = 'legendary_bundle'
+            base_amount = 500  # 500 XP + 300 Coins
 
     # 3. Streak bonusini hisoblash
     final_amount = base_amount
@@ -221,10 +229,29 @@ def open_daily_chest(profile_id: int) -> dict:
     # 4. Foydalanuvchi balansiga qo'shish
     if reward_type == 'coins':
         profile.add_coins(final_amount)
-        reward_title = f"+{final_amount} Tanga"
+        reward_title = f"+{final_amount} Ildiz Tangasi"
     elif reward_type == 'xp':
         profile.add_xp(final_amount)
         reward_title = f"+{final_amount} XP"
+    elif reward_type == 'cheat_sheet_pdf':
+        profile.add_coins(final_amount)
+        profile.add_xp(150)
+        reward_title = f"Maxfiy PDF-Shpargalka + {final_amount} Tanga"
+        extra_note = "Qiyin mavzuning yopiq Mnemonika kartochkasi ochildi va +150 XP berildi!"
+    elif reward_type == 'vip_24h':
+        now_dt = timezone.now()
+        base_exp = (
+            profile.premium_expires_at
+            if (profile.is_premium and profile.premium_expires_at and profile.premium_expires_at > now_dt)
+            else now_dt
+        )
+        profile.is_premium = True
+        profile.premium_expires_at = base_exp + timedelta(hours=24)
+        profile.save(update_fields=['is_premium', 'premium_expires_at'])
+        profile.add_coins(100)
+        reward_title = "👑 24 soatlik VIP/PRO Obuna + 100 Tanga!"
+        extra_note = "Sizga 24 soatga barcha PRO imkoniyatlar (AI Ustoz, Stress Zali va Mock tahlillar) bepul ochildi!"
+        final_amount = 24
     elif reward_type == 'streak_freeze':
         reward_title = "1x Muzlatgich (Streak Freeze)"
         extra_note = "Olovingizni saqlab qolish uchun inventaringizga 1 ta Muzlatgich qo'shildi!"

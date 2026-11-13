@@ -491,3 +491,49 @@ class RewardClaim(models.Model):
 
     def __str__(self):
         return f"{self.source}:{self.subject_id}:{self.day}:{self.item}={self.count}"
+
+
+class BuddyStreak(models.Model):
+    """Do'stlik Streak'i (Juftlik Zanjiri / Co-op Streak).
+    Ikki nafar do'st o'rtasida umumiy olov (Streak) bog'lanadi. Agar bugun ikkalasi ham
+    kunlik normani bajarsa, umumiy streak oshadi va ikkalasiga ham +25 Ildiz tangasi beriladi.
+    Agar bittasi kirmasa, 22:00 da 'Tez kirib 5 ta testingni ishla!' eslatmasi (Nudge) yuboriladi.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Taklif kutilmoqda'),
+        ('active', 'Faol juftlik'),
+        ('broken', 'Uzilgan'),
+    ]
+
+    user1 = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name='buddy_streaks_as_u1',
+    )
+    user2 = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='buddy_streaks_as_u2',
+    )
+    invite_code = models.CharField(max_length=24, unique=True, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
+    current_streak = models.PositiveIntegerField(default=1)
+    best_streak = models.PositiveIntegerField(default=1)
+    user1_last_active = models.DateField(null=True, blank=True)
+    user2_last_active = models.DateField(null=True, blank=True)
+    last_paired_date = models.DateField(null=True, blank=True)
+    last_nudge_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = "Do'stlik Streak Juftligi"
+        verbose_name_plural = "Do'stlik Streak Juftliklari"
+
+    def __str__(self):
+        p2 = self.user2.user.username if self.user2 else "Kutilmoqda..."
+        return f"BuddyStreak: {self.user1.user.username} & {p2} (🔥 {self.current_streak} kun)"
+

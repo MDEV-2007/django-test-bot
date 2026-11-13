@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import {
   Gift, Trophy, Sparkles, Coins, Zap, Droplets,
   Share2, ArrowRight, RotateCcw, CheckCircle2,
-  Check, Flame, Swords, ShieldAlert
+  Check, Flame, Swords, ShieldAlert, Loader2
 } from 'lucide-react';
 import { soundFX } from '@/lib/soundFX';
 import { tgHaptic } from '@/lib/telegram';
@@ -26,6 +26,7 @@ interface Stage5RewardCeremonyProps {
   onRestartCycle: () => void;
   onFinishToDashboard: () => void;
   onStartBoss?: () => void;
+  isStartingBoss?: boolean;
 }
 
 export default function Stage5RewardCeremony({
@@ -39,6 +40,7 @@ export default function Stage5RewardCeremony({
   onRestartCycle,
   onFinishToDashboard,
   onStartBoss,
+  isStartingBoss = false,
 }: Stage5RewardCeremonyProps) {
   const [chestOpened, setChestOpened] = useState(false);
   const [shared, setShared] = useState(false);
@@ -291,9 +293,22 @@ export default function Stage5RewardCeremony({
                 <ShieldAlert className="size-5 shrink-0" />
                 <p className="text-[12.5px]"><b className="block">Kunlik boss sinovi ochildi!</b> 15 daqiqalik mini-BMB stress sinovi orqali super-reyting oling.</p>
               </div>
-              <button type="button" onClick={onStartBoss || onRestartCycle} className="ps-btn ps-btn-light relative w-full">
-                <Swords className="size-4" /> Boss sinovini boshlash
-                <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+              <button
+                type="button"
+                onClick={onStartBoss || onRestartCycle}
+                disabled={isStartingBoss}
+                className="ps-btn ps-btn-light relative w-full disabled:opacity-60"
+              >
+                {isStartingBoss ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin text-[var(--ps-orange)]" /> Boss sinovi tayyorlanmoqda...
+                  </>
+                ) : (
+                  <>
+                    <Swords className="size-4" /> Boss sinovini boshlash
+                    <span className="ps-btn-arrow"><ArrowRight className="size-4" /></span>
+                  </>
+                )}
               </button>
             </section>
           )}

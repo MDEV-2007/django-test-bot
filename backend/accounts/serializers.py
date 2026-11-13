@@ -19,16 +19,24 @@ class ProfileSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     base_avatar_url = serializers.CharField(source='avatar_url', read_only=True)
     target_subject = serializers.SerializerMethodField()
+    stability_multiplier = serializers.FloatField(read_only=True)
+    league_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = [
             'id', 'username', 'first_name', 'last_name', 'email', 'role',
             'is_superadmin', 'is_teacher', 'avatar_url', 'xp', 'level', 'coins',
-            'streak', 'last_active_date', 'is_premium', 'has_seen_onboarding', 'elo_rating', 'next_level_xp',
+            'streak', 'last_active_date', 'is_premium', 'premium_expires_at', 'has_seen_onboarding', 'elo_rating', 'next_level_xp',
             'freeze_count', 'cosmetics', 'base_avatar_url',
-            'exam_track', 'region', 'tree_stage', 'tree_health', 'target_subject',
+            'exam_track', 'region', 'district', 'school',
+            'target_university', 'target_faculty', 'estimated_dtm_score',
+            'stability_multiplier', 'league_info',
+            'tree_stage', 'tree_health', 'target_subject',
         ]
+
+    def get_league_info(self, obj):
+        return obj.league_info
 
     def get_target_subject(self, obj):
         if not obj.target_subject:

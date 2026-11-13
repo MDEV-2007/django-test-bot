@@ -29,7 +29,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import VoiceExplanationButton from '@/components/common/VoiceExplanationButton';
 import { soundFX } from '@/lib/soundFX';
 
@@ -1239,11 +1239,17 @@ export default function FeedbackPage() {
                       <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
                         <Lightbulb className="size-3.5" />
                       </span>
-                      <span className="pt-1">
-                        {r.explanation || (status === 'correct'
-                          ? "Barakalla! Ovozli tushuntirish bilan mavzuni yana mustahkamlang."
-                          : "Ovozli tushuntirishni tinglang — savol va to'g'ri javob o'qib beriladi.")}
-                      </span>
+                      <span
+                        className="pt-1 [&_p]:m-0"
+                        dangerouslySetInnerHTML={{
+                          __html: formatRichText(
+                            r.explanation ||
+                              (status === 'correct'
+                                ? "Barakalla! Ovozli tushuntirish bilan mavzuni yana mustahkamlang."
+                                : "Ovozli tushuntirishni tinglang — savol va to'g'ri javob o'qib beriladi.")
+                          ),
+                        }}
+                      />
                     </p>
                     <VoiceExplanationButton
                       text={

@@ -16,6 +16,7 @@ import SocialProofAndStats from '@/components/landing/SocialProofAndStats';
 import LeadMagnetBanner from '@/components/landing/LeadMagnetBanner';
 import PricingSection, { PlanCard, FALLBACK_PLANS, FREE_PLAN } from '@/components/landing/PricingSection';
 import FaqAccordion from '@/components/landing/FaqAccordion';
+import { AEO_FAQ_ITEMS } from '@/lib/faq-data';
 import MobileStickyCta from '@/components/landing/MobileStickyCta';
 import LandingAiChatWidget from '@/components/landing/LandingAiChatWidget';
 import ProductWorkflow from '@/components/landing/ProductWorkflow';
@@ -105,28 +106,7 @@ async function loadPlans(): Promise<PlanCard[]> {
   }
 }
 
-const FAQ = [
-  {
-    q: "IlmIldizi qanday imtihonlarga tayyorlaydi?",
-    a: "Milliy sertifikat, BBA (Bakalavr Bosqichiga Ariza) va CEFR Multi-Level ingliz tili formatidagi testlarga. Savol turlari, taymer va ball hisobi rasmiy davlat imtihoni bilan bir xil tuzilgan.",
-  },
-  {
-    q: "Platformadan bepul foydalansa bo'ladimi?",
-    a: "Ha! Kundalik mashq testlari, 1v1 arena, mini o'yinlar, kunlik missiyalar, reyting, asosiy tahlil va AI Mentor mutlaqo bepul. To'lov faqat rasmiy to'liq jonli mock testlar va cheklovsiz AI Mentor tahlili uchun.",
-  },
-  {
-    q: "Telegram orqali kirish xavfsizmi?",
-    a: "Ha, 100% xavfsiz. Telegram orqali kirganingizda ma'lumotlar rasmiy Telegram bot kaliti bilan kriptografik tekshiriladi. Parol o'ylab topish yoki bank karta kiritish talab etilmaydi.",
-  },
-  {
-    q: "DTM ball bashorati qanday ishlaydi?",
-    a: "Hisob yechilgan savollar soni, ularning qiyinlik darajasi, fanlar kesimidagi xatolar va so'nggi natijalarga asoslanadi. Bu taxminiy ko'rsatkich: test qancha ko'p yechilsa, bashorat shuncha barqaror bo'ladi.",
-  },
-  {
-    q: "O'qituvchilar uchun qanday qulayliklar bor?",
-    a: "O'qituvchi o'z havolasi orqali butun sinfini bir joyga jamlaydi. Barcha o'quvchilarning kuchli va zaif mavzulari, yechgan testlari va natijalari bitta umumiy monitoring jadvalida ko'rinadi.",
-  },
-];
+const FAQ = AEO_FAQ_ITEMS;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -333,6 +313,61 @@ export default async function LandingPage() {
         <RevealOnScroll>
           <LeadMagnetBanner />
         </RevealOnScroll>
+
+        {/* =========================================================
+            AEO / SEO SEMANTIK EKOTIZIM: TARIX, CEFR, CLASSROOM, BOT
+            ========================================================= */}
+        <section aria-label="Ilm Ildizi Ekotizimi va Fanlar" className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7659C7]">
+              Imtihonlar va Asosiy Yo&apos;nalishlar
+            </span>
+            <h2 className="mt-2.5 text-3xl font-bold tracking-tight text-[#080808] sm:text-4xl">
+              DTM, Milliy Sertifikat va CEFR uchun Yagona Platforma
+            </h2>
+            <p className="mt-3 text-sm text-[#6B6577] leading-relaxed">
+              6-sinfdan 11-sinfgacha maktab darsliklari, Rasch modeli algoritmi, AI yozma tahlil va Telegram bot integratsiyasi.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* 1. Tarix fani */}
+            <div className="rounded-3xl border border-black/[0.07] bg-white p-6 shadow-sm hover:shadow-md transition-all">
+              <span className="text-3xl">🏛️</span>
+              <h3 className="mt-4 text-lg font-bold text-[#080808]">Tarix Fani va Interaktiv O&apos;yinlar</h3>
+              <p className="mt-2 text-xs text-[#6B6577] leading-relaxed">
+                6–11-sinf O&apos;zbekiston tarixi va Jahon tarixi davlat darsliklari asosida mavzuli testlar, Milliy sertifikat variantlari hamda Tarixiy xarita (<Link href="/games/map" className="text-[#7659C7] font-semibold underline">/games/map</Link>), Xronologiya (<Link href="/games/timeline" className="text-[#7659C7] font-semibold underline">/games/timeline</Link>) va Tarixiy shaxslar (<Link href="/games/character" className="text-[#7659C7] font-semibold underline">/games/character</Link>) o&apos;yinlari.
+              </p>
+            </div>
+
+            {/* 2. CEFR Ingliz tili */}
+            <div className="rounded-3xl border border-black/[0.07] bg-white p-6 shadow-sm hover:shadow-md transition-all">
+              <span className="text-3xl">🇬🇧</span>
+              <h3 className="mt-4 text-lg font-bold text-[#080808]">CEFR Ingliz Tili va AI Writing</h3>
+              <p className="mt-2 text-xs text-[#6B6577] leading-relaxed">
+                CEFR Multi-Level standartlari bo&apos;yicha Listening va Reading bo&apos;limlari, shuningdek rasmiy mezonlar asosida sun&apos;iy intellekt (AI Grader) tomonidan mezonlar bilan baholanuvchi Writing esse tekshiruvi.
+              </p>
+            </div>
+
+            {/* 3. O'quv markazlari va Classroom */}
+            <div className="rounded-3xl border border-black/[0.07] bg-white p-6 shadow-sm hover:shadow-md transition-all">
+              <span className="text-3xl">🏫</span>
+              <h3 className="mt-4 text-lg font-bold text-[#080808]">O&apos;quv Markazlari &amp; Ustozlar</h3>
+              <p className="mt-2 text-xs text-[#6B6577] leading-relaxed">
+                Repetitorlar va o&apos;quv markazlari uchun Classroom virtual sinflari, PDF formatidagi testlarni AI yordamida bir zumda platformaga yuklash va guruhlar bo&apos;yicha jonli mock imtihonlar o&apos;tkazish imkoniyati.
+              </p>
+            </div>
+
+            {/* 4. Telegram bot & AI Ustoz */}
+            <div className="rounded-3xl border border-black/[0.07] bg-white p-6 shadow-sm hover:shadow-md transition-all">
+              <span className="text-3xl">🤖</span>
+              <h3 className="mt-4 text-lg font-bold text-[#080808]">@ilmildiziuz_bot &amp; AI Ustoz</h3>
+              <p className="mt-2 text-xs text-[#6B6577] leading-relaxed">
+                Rasmiy <a href="https://t.me/ilmildiziuz_bot" target="_blank" rel="noopener noreferrer" className="text-[#7659C7] font-semibold underline">@ilmildiziuz_bot</a> Telegram boti orqali kunlik mashqlar, UZBMB viktorinalari va <Link href="/mentor" className="text-[#7659C7] font-semibold underline">AI Ustoz (/mentor)</Link> bilan xatolarni tahlil qilish.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* =========================================================
             QANDAY ISHLAYDI (ILMILDIZI O'RGANISH SIKLI - 6 BOSQICH)

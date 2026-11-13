@@ -1,0 +1,102 @@
+{
+ "list_body_5xx": [
+  "POST /api/auth/login/ (accounts.api)",
+  "POST /api/auth/register/ (accounts.api)",
+  "POST /api/auth/google/ (accounts.api)",
+  "POST /api/auth/telegram/ (accounts.api)",
+  "PATCH /api/auth/profile/ (accounts.api)",
+  "POST /api/auth/profile/ (accounts.api)",
+  "PUT /api/auth/profile/ (accounts.api)",
+  "POST /api/v1/b2b/submit-lead/ (b2b_ads.views)",
+  "POST /api/v1/b2b/track/ (b2b_ads.views)",
+  "POST /api/v1/system/parent-radar/invoice/ (core.views)",
+  "POST /api/v1/system/ads/lead-submit/ (core.views)",
+  "POST /api/core/parent-radar/invoice/ (core.views)",
+  "POST /api/core/ads/lead-submit/ (core.views)",
+  "POST /api/dashboard/notifications/ (dashboard.api)",
+  "POST /api/tests/<int:test_id>/start/ (tests_app.api)",
+  "POST /api/tests/attempts/<int:attempt_id>/answer/ (tests_app.api)",
+  "POST /api/tests/attempts/<int:attempt_id>/annotations/ (tests_app.cefr_api)",
+  "POST /api/tests/attempts/<int:attempt_id>/survey/ (tests_app.api)",
+  "POST /api/tests/start-stress/ (tests_app.api)",
+  "POST /api/v1/sprint/answer/ (backend/sprint/views.py:362)",
+  "POST /api/v1/sprint/resolve-revenge/ (backend/sprint/views.py:227)",
+  "POST /api/sprint/answer/ (backend/sprint/views.py:362)",
+  "POST /api/sprint/resolve-revenge/ (backend/sprint/views.py:227)",
+  "POST /api/v1/loop/answer/ (backend/learning_loop/views.py:377)",
+  "POST /api/v1/loop/advance-stage/ (backend/learning_loop/views.py:427)",
+  "POST /api/loop/answer/ (backend/learning_loop/views.py:377)",
+  "POST /api/loop/advance-stage/ (backend/learning_loop/views.py:427)",
+  "POST /api/growth/open-question/evaluate/ (backend/growth/views.py:15)",
+  "POST /api/growth/essay/evaluate/ (backend/growth/views.py:68)",
+  "POST /api/growth/onboarding/blitz/answer/ (backend/growth/views.py:220)",
+  "POST /api/growth/arena/matchmake/ (backend/growth/arena_views.py:83)",
+  "POST /api/growth/arena/record-replay/ (backend/growth/arena_views.py:151)",
+  "POST /api/growth/arena/create-duel/ (backend/growth/arena_views.py:194)",
+  "POST /api/growth/arena/duel/<str:duel_token>/submit/ (backend/growth/arena_views.py:286)",
+  "POST /api/battles/submit-round/ (battles.api)",
+  "POST /api/battles/finish/ (battles.api)",
+  "POST /api/learning/mentor/stream/ (backend/learning/api.py:33)",
+  "POST /api/learning/flashcards/complete/ (learning.api)",
+  "POST /api/learning/study/complete/ (learning.api)",
+  "POST /api/learning/reels/create/ (learning.api)",
+  "POST /api/learning/reels/quiz/ (learning.api)",
+  "POST /api/learning/feed/create/ (learning.api)",
+  "POST /api/learning/feed/create-auto/ (learning.api)",
+  "POST /api/learning/feed/auto-post/ (learning.api)",
+  "POST /api/learning/feed/<int:post_id>/vote-poll/ (learning.api)",
+  "POST /api/learning/stories/create/ (learning.api)",
+  "POST /api/v1/learning/mentor/stream/ (backend/learning/api.py:33)",
+  "POST /api/v1/learning/flashcards/complete/ (learning.api)",
+  "POST /api/v1/learning/study/complete/ (learning.api)",
+  "POST /api/v1/learning/reels/create/ (learning.api)",
+  "POST /api/v1/learning/reels/quiz/ (learning.api)",
+  "POST /api/v1/learning/feed/create/ (learning.api)",
+  "POST /api/v1/learning/feed/create-auto/ (learning.api)",
+  "POST /api/v1/learning/feed/auto-post/ (learning.api)",
+  "POST /api/v1/learning/feed/<int:post_id>/vote-poll/ (learning.api)",
+  "POST /api/v1/learning/stories/create/ (learning.api)",
+  "POST /api/teacher/register/ (teacher.api)",
+  "POST /api/games/timeline/ (games.api)",
+  "POST /api/games/map/ (games.api)",
+  "POST /api/games/character/ (games.api)",
+  "POST /api/analytics/event/ (analytics.api)"
+ ],
+ "sensitive_keys_in_student_GET": [
+  {
+   "path": "/api/auth/me/",
+   "keys": [
+    "email"
+   ],
+   "other_users_email": false
+  },
+  {
+   "path": "/api/auth/profile/",
+   "keys": [
+    "email"
+   ],
+   "other_users_email": false
+  },
+  {
+   "path": "/api/dashboard/home/",
+   "keys": [
+    "email"
+   ],
+   "other_users_email": false
+  },
+  {
+   "path": "/api/shop/inventory/",
+   "keys": [
+    "email"
+   ],
+   "other_users_email": false
+  },
+  {
+   "path": "/api/premium/checkout/<int:plan_id>/",
+   "keys": [
+    "card_number"
+   ],
+   "other_users_email": false
+  }
+ ]
+}

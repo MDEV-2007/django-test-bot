@@ -193,6 +193,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       access = await refreshAccessToken();
       if (access) {
         res = await doFetch(access);
+      } else {
+        // Eskirgan token rad etilganda, ochiq (public) API'lar uchun bir marta tokensiz so'rab ko'ramiz
+        res = await doFetch(null);
       }
     }
   } catch (err: unknown) {
@@ -335,7 +338,8 @@ export async function apiFetchBlob(path: string): Promise<Blob> {
     } catch {
       throw new ApiError(0, "Internet aloqasi yoki server bilan bog'lanishda uzilish yuz berdi. Iltimos qayta urinib ko'ring.");
     }
-    if (access) res = await doFetch(access);
+    // Token yangilanmasa ham ochiq endpointlar mehmon sifatida ishlashi uchun tokensiz qayta so'raymiz.
+    res = await doFetch(access || null);
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

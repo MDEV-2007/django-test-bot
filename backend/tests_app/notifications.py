@@ -26,7 +26,7 @@ def send_new_test_notifications(test_id: int):
         return
 
     # Security / sanity checks
-    if not test.is_published or test.is_random or test.is_archived:
+    if not test.is_published or test.is_random or test.is_archived or test.is_live_mock:
         return
 
     # Check if questions exist yet (avoid announcing empty tests)

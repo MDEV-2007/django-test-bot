@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
 
+  experimental: {
+    cpus: 4,
+  },
+
   /* `next dev` begona (cross-origin) domendan kelgan ichki so'rovlarni (HMR, _next/*)
      bloklaydi, shuning uchun tunnel domeni ruxsat ro'yxatida bo'lishi kerak.
 

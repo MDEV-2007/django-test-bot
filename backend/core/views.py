@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from accounts.jwt_auth import OptionalAuditAwareJWTAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -19,6 +20,7 @@ from tests_app.models import Question
 
 # ─── 0-MODUL: Super Admin Feature Flags API ─────────────────────────────────
 @api_view(['GET'])
+@authentication_classes([OptionalAuditAwareJWTAuthentication])
 @permission_classes([AllowAny])
 def system_feature_flags_api(request):
     """Barcha foydalanuvchilar (Frontend) uchun tizimdagi global flaglar (Single Source of Truth)."""
@@ -211,12 +213,25 @@ def class_battle_join_api(request, pin_code):
     if not flags.enable_teacher_class_battles:
         return Response({'error': "Sinf janglari moduli vaqtincha faol emas."}, status=403)
 
-    room = get_object_or_404(ClassBattleRoom, pin_code=str(pin_code).strip())
+    from django.core.cache import cache
+    rate_key = f"cb_pin_fail:{request.user.id}"
+    fail_count = cache.get(rate_key, 0)
+    if fail_count >= 10:
+        return Response({'error': "Juda ko'p noto'g'ri PIN-kod urinishi. Birozdan so'ng qayta urinib ko'ring."}, status=429)
+
+    clean_pin = str(pin_code).strip()
+    room = ClassBattleRoom.objects.filter(pin_code=clean_pin).first()
+    if not room:
+        cache.set(rate_key, fail_count + 1, timeout=300)
+        return Response({'error': "Xona topilmadi. PIN-kodni tekshiring."}, status=404)
+    if room.status == 'finished' or (timezone.now() - room.created_at).total_seconds() > 12 * 3600:
+        return Response({'error': "Bu jang allaqachon yakunlangan yoki muddati tugagan."}, status=400)
     if room.status == 'finished':
         return Response({'error': "Bu jang allaqachon yakunlangan."}, status=400)
 
     profile = ensure_profile_for_user(request.user)
-    nickname = request.data.get('nickname') or (request.user.get_full_name() or request.user.username)
+    raw_nick = str(request.data.get('nickname') or (request.user.get_full_name() or request.user.username)).strip()
+    nickname = raw_nick.replace('<', '').replace('>', '') or request.user.username
 
     part, _ = ClassBattleParticipant.objects.get_or_create(
         room=room,
@@ -248,11 +263,13 @@ def class_battle_state_api(request, room_id):
     # Savollar faqat jang boshlanganda beriladi
     questions_data = []
     if room.status in ['live', 'finished']:
-        questions = Question.objects.filter(id__in=room.question_ids).prefetch_related('choices')
+        q_map = {q.id: q for q in Question.objects.filter(id__in=room.question_ids).prefetch_related('choices')}
+        questions = [q_map[qid] for qid in room.question_ids if qid in q_map]
         for q in questions:
             questions_data.append({
                 'id': q.id,
                 'body': q.body,
+                'text': q.body,
                 'choices': [{'id': c.id, 'text': c.text} for c in q.choices.all()],
             })
 
@@ -355,6 +372,8 @@ def class_battle_submit_api(request, room_id):
         'score': total_score,
         'correct_count': correct_count,
         'total_questions': len(room.question_ids),
+        'accuracy_rate': round((correct_count / max(len(room.question_ids), 1)) * 100),
+        'success': True,
     })
 
 
@@ -461,3 +480,48 @@ def student_radar_api(request):
     profile = ensure_profile_for_user(request.user)
     data = calculate_student_radar(profile)
     return Response(data)
+
+
+# ─── 5-MODUL: Do'stlik Streak'i (Juftlik Zanjiri / Co-op Streak) API ────────
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def buddy_streak_status_api(request):
+    """Do'stlik Streak'i holatini olish."""
+    from core.services import get_buddy_streak_state
+    profile = ensure_profile_for_user(request.user)
+    return Response(get_buddy_streak_state(profile))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def buddy_streak_create_api(request):
+    """Do'stlik Streak'i uchun taklif kodi yaratish."""
+    from core.services import create_or_get_buddy_invite
+    profile = ensure_profile_for_user(request.user)
+    return Response(create_or_get_buddy_invite(profile))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def buddy_streak_join_api(request):
+    """Taklif kodi orqali do'stining Streak zanjiriga qo'shilish."""
+    from core.services import join_buddy_streak
+    profile = ensure_profile_for_user(request.user)
+    code = request.data.get('invite_code') or request.data.get('code') or ''
+    ok, msg, state = join_buddy_streak(profile, str(code))
+    if not ok:
+        return Response({'ok': False, 'error': msg, 'state': state}, status=400)
+    return Response({'ok': True, 'message': msg, 'state': state})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def buddy_streak_nudge_api(request):
+    """Do'stiga 'Tez kirib 5 ta testingni ishla!' eslatmasini yuborish."""
+    from core.services import nudge_buddy_partner
+    profile = ensure_profile_for_user(request.user)
+    ok, msg = nudge_buddy_partner(profile)
+    if not ok:
+        return Response({'ok': False, 'error': msg}, status=400)
+    return Response({'ok': True, 'message': msg})
+

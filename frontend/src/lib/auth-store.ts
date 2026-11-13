@@ -20,6 +20,20 @@ export type Profile = {
   elo_rating: number;
   next_level_xp: number;
   freeze_count: number;
+  estimated_dtm_score?: number;
+  stability_multiplier?: number;
+  target_university?: string;
+  target_faculty?: string;
+  region?: string;
+  district?: string;
+  school?: string;
+  league_info?: {
+    tier: string;
+    level: number;
+    name: string;
+    badge: string;
+    has_gold_border: boolean;
+  };
   /* Do'kondan taqib olingan kosmetika. `avatar_url` server tomonda allaqachon
      taqilgan avatarga almashtirilgan; bu yerdagilar qo'shimcha bezaklar uchun:
      ramka rangi, unvon va nishon. */

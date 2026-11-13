@@ -21,6 +21,13 @@ class Battle(models.Model):
     # AI-vs-bot battles keep this null — they already filter questions via the request's
     # current subject at creation time, so nothing there needs to change.
     subject = models.ForeignKey('tests_app.Subject', on_delete=models.SET_NULL, null=True, blank=True)
+    stake_coins = models.PositiveIntegerField(
+        default=0,
+        help_text="Tikilgan Ildiz tangalari (masalan 50 -> g'olib 100 tanga oladi)",
+    )
+    rematch_of = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='rematches',
+    )
     finished_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

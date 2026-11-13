@@ -39,6 +39,9 @@ DAILY_REWARD_LIMITS = {
     'duel_invite_bonus': 5,
     # Referral: taklif qiluvchiga kuniga shuncha bonus (audit AUTH-009).
     'referral_bonus': 10,
+    # Tasodifiy test va "Xatolar ustida ishlash" (`is_random=True`) har safar yangi TestSet
+    # yaratgani uchun `is_repeat` cheklovidan o'tib ketardi; kunlik mukofot limiti qo'yiladi.
+    'random_test': 5,
 }
 
 # "Bir marta" (claim_once) yozuvlari uchun sana belgisi: ular kunga bog'lanmaydi.

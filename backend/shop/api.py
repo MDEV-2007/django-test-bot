@@ -25,8 +25,62 @@ def _item_payload(item, profile):
     }
 
 
+def _ensure_default_ildiz_market_items():
+    """«Ildiz Market» asosiy mahsulotlari bazada mavjudligini kafolatlaydi."""
+    defaults = [
+        {
+            'slug': 'streak_freeze',
+            'name': "Obi-hayot tomchisi (Streak Muzlatkich)",
+            'category': ShopItem.CATEGORY_CONSUMABLE,
+            'description': "To'y, kasallik yoki internet yo'qligida 1 kunlik dars qoldirilsa, Streak zanjirini nolga tushishdan saqlab qoladi.",
+            'icon_name': 'droplets',
+            'price_coins': 150,
+            'rarity': 'rare',
+            'is_consumable': True,
+            'order': 1,
+        },
+        {
+            'slug': 'premium_test_unlock',
+            'name': "Yopiq DTM Simulyatsiyasiga Chipta",
+            'category': ShopItem.CATEGORY_CONSUMABLE,
+            'description': "Har yakshanba bo'ladigan, haqiqiy imtihonga 100% yaqinlashtirilgan Respublika sinov imtihoniga kirish huquqi.",
+            'icon_name': 'ticket',
+            'price_coins': 450,
+            'rarity': 'epic',
+            'is_consumable': False,
+            'order': 2,
+        },
+        {
+            'slug': 'expert_zoom_ticket',
+            'name': "Ekspert (Ustoz) bilan 15 daqiqalik Zoom-tahlil",
+            'category': ShopItem.CATEGORY_CONSUMABLE,
+            'description': "Tajribali fan ustozi bilan 15 daqiqalik jonli Zoom orqali eng qiyin xatolaringizni shaxsiy tahlil qilish chiptasi.",
+            'icon_name': 'video',
+            'price_coins': 800,
+            'rarity': 'legendary',
+            'is_consumable': True,
+            'order': 3,
+        },
+        {
+            'slug': 'gold_grant_frame',
+            'name': "Davlat Granti Oltin Hoshiyasi",
+            'category': ShopItem.CATEGORY_FRAME,
+            'description': "Elita abituriyentlar profiliga beriladigan maxsus oltin ramka.",
+            'icon_name': 'crown',
+            'price_coins': 600,
+            'rarity': 'legendary',
+            'is_consumable': False,
+            'payload': {'class': 'ring-2 ring-amber-400 shadow-lg'},
+            'order': 4,
+        },
+    ]
+    for d in defaults:
+        ShopItem.objects.get_or_create(slug=d['slug'], defaults=d)
+
+
 @api_view(['GET'])
 def shop_home_api(request):
+    _ensure_default_ildiz_market_items()
     profile = request.user.profile
     items = list(ShopItem.objects.filter(is_active=True))
     owned = {inv.item_id: inv for inv in InventoryItem.objects.filter(profile=profile)}

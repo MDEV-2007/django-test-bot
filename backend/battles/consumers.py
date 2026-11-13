@@ -137,10 +137,13 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             return
         self.profile = await database_sync_to_async(lambda: user.profile)()
         self.battle_group = None
+        self.searching_battle_id = None
         await self.accept()
         await self._find_or_wait()
 
     async def disconnect(self, code):
+        if getattr(self, 'searching_battle_id', None):
+            await database_sync_to_async(self._cancel_searching)(self.searching_battle_id)
         if self.battle_group:
             await self.channel_layer.group_discard(self.battle_group, self.channel_name)
 
@@ -151,6 +154,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
         battle, just_matched = await database_sync_to_async(self._match_or_create)(subject)
+        if not just_matched:
+            self.searching_battle_id = battle.id
         self.battle_group = f'battle_{battle.id}'
         await self.channel_layer.group_add(self.battle_group, self.channel_name)
 
@@ -158,7 +163,18 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             payload = await database_sync_to_async(_battle_payload)(battle)
             await self.channel_layer.group_send(self.battle_group, {'type': 'match.found', 'battle': payload})
 
+    def _cancel_searching(self, battle_id):
+        Battle.objects.filter(
+            id=battle_id, player1=self.profile, status='searching', player2__isnull=True
+        ).delete()
+
     def _match_or_create(self, subject):
+        stale_cutoff = timezone.now() - timezone.timedelta(minutes=2)
+        Battle.objects.filter(
+            status='searching', player2__isnull=True
+        ).filter(
+            Q(player1=self.profile) | Q(created_at__lt=stale_cutoff)
+        ).delete()
         with transaction.atomic():
             waiting = (
                 Battle.objects.select_for_update()
@@ -336,6 +352,13 @@ class BattleConsumer(AsyncWebsocketConsumer):
         self.group = f'battle_{self.battle_id}'
         await self.channel_layer.group_add(self.group, self.channel_name)
         await self.accept()
+        if await database_sync_to_async(
+            lambda: BattlePlayerAnswer.objects.filter(battle_round__battle_id=self.battle_id).exists()
+        )():
+            await self._handle_sync_state()
+        return
+        await self.channel_layer.group_add(self.group, self.channel_name)
+        await self.accept()
 
     async def disconnect(self, code):
         if hasattr(self, 'group'):
@@ -352,6 +375,113 @@ class BattleConsumer(AsyncWebsocketConsumer):
             return
         if data.get('action') == 'answer':
             await self._handle_answer(data.get('round_number'), data.get('choice_id'))
+        elif data.get('action') == 'sync_state':
+            await self._handle_sync_state()
+        elif data.get('action') == 'claim_timeout':
+            await self._handle_claim_timeout(data.get('round_number'))
+        elif data.get('action') == 'forfeit':
+            await self._handle_forfeit()
+
+    async def _handle_sync_state(self):
+        state = await database_sync_to_async(self._get_battle_state)()
+        if state:
+            await self.send(text_data=json.dumps({'event': 'battle_state', **state}))
+
+    def _get_battle_state(self):
+        try:
+            battle = Battle.objects.select_related('player1', 'player2').get(id=self.battle_id)
+        except Battle.DoesNotExist:
+            return None
+        rounds = list(battle.rounds.order_by('round_number'))
+        answers = list(BattlePlayerAnswer.objects.filter(battle_round__battle=battle))
+        by_round = {}
+        for a in answers:
+            by_round.setdefault(a.battle_round_id, {})[a.player_id] = a
+
+        current_round = 1
+        waiting_for_opponent = False
+        for r in rounds:
+            r_ans = by_round.get(r.id, {})
+            if len(r_ans) < 2:
+                current_round = r.round_number
+                waiting_for_opponent = self.profile.id in r_ans
+                break
+        else:
+            current_round = len(rounds)
+
+        def score_for(pid):
+            return sum(1 for a in answers if a.player_id == pid and a.is_correct) * POINTS_PER_CORRECT
+
+        payload = _battle_payload(battle)
+        return {
+            **payload,
+            'status': battle.status,
+            'current_round': current_round,
+            'waiting_for_opponent': waiting_for_opponent,
+            'scores': {
+                str(battle.player1_id): score_for(battle.player1_id),
+                str(battle.player2_id): score_for(battle.player2_id),
+            },
+        }
+
+    async def _handle_claim_timeout(self, round_number):
+        outcome = await database_sync_to_async(self._claim_timeout_sync)(round_number)
+        if not outcome:
+            return
+        await self.channel_layer.group_send(self.group, {'type': 'round.result', **outcome['payload']})
+        if outcome['battle_finished']:
+            finish_payload = await database_sync_to_async(self._finish_battle)()
+            if finish_payload:
+                await self.channel_layer.group_send(self.group, {'type': 'battle.finished', **finish_payload})
+
+    def _claim_timeout_sync(self, round_number):
+        try:
+            battle = Battle.objects.select_related('player1', 'player2').get(id=self.battle_id)
+            if battle.status != 'active' or not battle.player2_id:
+                return None
+            battle_round = BattleRound.objects.select_related('question').get(
+                battle=battle, round_number=round_number
+            )
+        except (Battle.DoesNotExist, BattleRound.DoesNotExist):
+            return None
+
+        # Only allow timeout claim if caller already answered this round and opponent hasn't
+        if not BattlePlayerAnswer.objects.filter(battle_round=battle_round, player=self.profile).exists():
+            return None
+        opp_id = battle.player2_id if self.profile.id == battle.player1_id else battle.player1_id
+        BattlePlayerAnswer.objects.get_or_create(
+            battle_round=battle_round,
+            player_id=opp_id,
+            defaults={'selected_choice': None, 'is_correct': False},
+        )
+        answers = list(BattlePlayerAnswer.objects.filter(battle_round=battle_round))
+
+        def score_for(pid):
+            return BattlePlayerAnswer.objects.filter(
+                battle_round__battle=battle, player_id=pid, is_correct=True
+            ).count() * POINTS_PER_CORRECT
+
+        correct_choice = battle_round.question.choices.filter(is_correct=True).first()
+        payload = {
+            'round_number': round_number,
+            'correct_choice_id': correct_choice.id if correct_choice else None,
+            'timeout_claimed': True,
+            'answers': {
+                str(a.player_id): {'choice_id': a.selected_choice_id, 'is_correct': a.is_correct}
+                for a in answers
+            },
+            'scores': {
+                str(battle.player1_id): score_for(battle.player1_id),
+                str(battle.player2_id): score_for(battle.player2_id),
+            },
+        }
+        total_rounds = battle.rounds.count()
+        return {'both_answered': True, 'payload': payload, 'battle_finished': round_number >= total_rounds}
+
+    async def _handle_forfeit(self):
+        finish_payload = await database_sync_to_async(self._finish_battle)()
+        if finish_payload:
+            await self.channel_layer.group_send(self.group, {'type': 'battle.finished', **finish_payload})
 
     async def _handle_answer(self, round_number, choice_id):
         outcome = await database_sync_to_async(self._save_answer)(round_number, choice_id)

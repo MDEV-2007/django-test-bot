@@ -85,6 +85,12 @@ class CheckoutAPI(APIView):
             profile=profile, plan=plan, amount=amount, status='pending', source='web',
             screenshot=screenshot, test=target_test,
         )
+        if target_test:
+            from tests_app.models import MockRegistration
+            MockRegistration.objects.filter(profile=profile, test=target_test).update(payment=payment)
+        if False:
+            dict(
+        )
         try:
             from telegrambot.payment_review import send_payment_review_notification
             send_payment_review_notification(payment)

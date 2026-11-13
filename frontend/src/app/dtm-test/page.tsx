@@ -245,6 +245,57 @@ export default function DtmTestLandingPage() {
         </div>
       </section>
 
+      {/* AEO & SEO SEMANTIK EKOTIZIM: TARIX, CEFR, CLASSROOM, BOT */}
+      <section aria-label="DTM Tayyorgarlik va Fanlar Ekotizimi" className="py-16 bg-slate-50 border-t border-slate-200">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center space-y-2 mb-10">
+            <Badge className="bg-emerald-600 text-white text-[12px] font-bold uppercase">
+              Mukammal Tayyorgarlik
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              DTM Imtihoniga IlmIldizi Bilan Tayyorlanish Afzalliklari
+            </h2>
+            <p className="text-sm text-slate-600 max-w-2xl mx-auto">
+              Maktab darsliklari, Rasch psixometriyasi, AI yordamchi va o&apos;quv markazlari uchun qulay vositalar.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <span className="text-3xl">🏛️</span>
+              <h3 className="mt-3 text-base font-bold text-slate-900">Tarix Fani va Interaktiv Xaritalar</h3>
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                6–11-sinf O&apos;zbekiston va Jahon tarixi davlat darsliklari bo&apos;yicha bobma-bob DTM testlari, Tarixiy xarita (<Link href="/games/map" className="text-emerald-700 font-semibold underline">/games/map</Link>) va Xronologiya o&apos;yinlari.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <span className="text-3xl">🇬🇧</span>
+              <h3 className="mt-3 text-base font-bold text-slate-900">CEFR Ingliz Tili va Writing</h3>
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                Chet tili mutaxassisligi uchun Reading, Listening va sun&apos;iy intellekt (AI Grader) orqali rasmiy mezonlarda tekshiriluvchi Writing mock testlari.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <span className="text-3xl">🏫</span>
+              <h3 className="mt-3 text-base font-bold text-slate-900">O&apos;quv Markazlari va Classroom</h3>
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                Repetitorlar o&apos;z guruhlarini DTMga tayyorlashi uchun Classroom tizimi, PDF testlarni AI yordamida tezkor yuklash va guruhli sinov imtihonlari.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+              <span className="text-3xl">🤖</span>
+              <h3 className="mt-3 text-base font-bold text-slate-900">@ilmildiziuz_bot va AI Ustoz</h3>
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                <a href="https://t.me/ilmildiziuz_bot" target="_blank" rel="noopener noreferrer" className="text-emerald-700 font-semibold underline">@ilmildiziuz_bot</a> Telegram boti orqali kunlik viktorinalar va <Link href="/mentor" className="text-emerald-700 font-semibold underline">AI Ustoz (/mentor)</Link> bilan har bir xatoning batafsil tahlili.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ SECTION */}
       <section className="py-16 bg-white border-t border-slate-200">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">

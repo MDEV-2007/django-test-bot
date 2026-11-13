@@ -1,21 +1,63 @@
-import type { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilmildizi.uz';
-
-/* Kabinet, o'qituvchi va admin sahifalari indekslanmaydi: ular login talab qiladi,
-   robot ular ortidagi kontentni ko'ra olmaydi va bo'sh sahifalar saytning qidiruvdagi
-   sifatini pasaytiradi. Ochiq sahifalar — landing, kirish va ro'yxatdan o'tish. */
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = "https://ilmildizi.uz";
+
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: [
-        '/dashboard', '/tests', '/learning', '/mentor', '/battles', '/games',
-        '/leaderboard', '/analytics', '/profile', '/shop', '/premium',
-        '/onboarding', '/teacher', '/panel', '/design-system', '/pay',
-      ],
-    },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    rules: [
+      {
+        userAgent: "*",
+        allow: [
+          "/",
+          "/dtm-test",
+          "/milliy-sertifikat",
+          "/mentor",
+          "/library",
+          "/flashcards",
+          "/battles",
+          "/leaderboard",
+          "/feed",
+          "/llms.txt",
+        ],
+        disallow: [
+          "/panel/",
+          "/ads-manager/",
+          "/api/",
+          "/onboarding/",
+          "/pay/",
+        ],
+      },
+      {
+        userAgent: [
+          "GPTBot",
+          "OAI-SearchBot",
+          "ChatGPT-User",
+          "PerplexityBot",
+          "Perplexity-User",
+          "ClaudeBot",
+          "Claude-Web",
+          "anthropic-ai",
+          "Google-Extended",
+          "Googlebot",
+          "Bingbot",
+          "Applebot-Extended",
+        ],
+        allow: [
+          "/",
+          "/dtm-test",
+          "/milliy-sertifikat",
+          "/mentor",
+          "/library",
+          "/flashcards",
+          "/battles",
+          "/leaderboard",
+          "/feed",
+          "/llms.txt",
+        ],
+        disallow: ["/panel/", "/ads-manager/", "/api/", "/pay/"],
+      },
+    ],
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }

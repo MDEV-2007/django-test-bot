@@ -14,7 +14,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from panel.models import AuditLog
 from premium.models import Payment, SubscriptionPlan
-from tests.factories import make_subject, make_test_set, make_user
+from tests.factories import make_question, make_subject, make_test_set, make_user
 from tests_app.models import AnswerOption, Question, SubQuestion
 
 
@@ -99,7 +99,8 @@ class PanelApiTests(TestCase):
 
     def test_testset_duplicate_and_publish(self):
         subject = make_subject()
-        ts = make_test_set(subject=subject, title='Original test')
+        # Savolsiz testni nashr etib bo'lmaydi — dublikatda savol bo'lishi kerak.
+        ts = make_test_set(subject=subject, questions=[make_question(subject=subject)], title='Original test')
         dup = self.client.post(f'/api/panel/testsets/{ts.id}/duplicate/')
         self.assertEqual(dup.status_code, 200)
         new_id = dup.json()['id']

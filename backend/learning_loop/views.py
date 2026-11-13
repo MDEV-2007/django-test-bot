@@ -384,10 +384,18 @@ def _build_stage_data(loop: DailyLearningLoop, user) -> dict:
     sprint_questions = [_format_question_dict(q) for q in sprint_qs]
     arena_questions = [_format_question_dict(q) for q in arena_qs]
 
-    # 3. STAGE 3: CLEANUP (Flashcards for Session Mistakes)
+    # 3. STAGE 3: CLEANUP (Flashcards for Session Mistakes + Ertasi kungi tekshiruv)
+    from sprint.models import UserMistakeNotebook
+    prev_unresolved = list(
+        UserMistakeNotebook.objects
+        .filter(user=user, is_resolved=False)
+        .order_by('-last_attempted_at')
+        .values_list('question_id', flat=True)[:3]
+    )
+    combined_mistake_ids = list(dict.fromkeys(list(loop.session_mistakes_ids or []) + prev_unresolved))
     cleanup_cards = []
-    if loop.session_mistakes_ids:
-        mistake_qs = Question.objects.filter(id__in=loop.session_mistakes_ids).prefetch_related('choices')
+    if combined_mistake_ids:
+        mistake_qs = Question.objects.filter(id__in=combined_mistake_ids).prefetch_related('choices')
         for q in mistake_qs:
             correct_opt = q.choices.filter(is_correct=True).first()
             correct_text = correct_opt.text if correct_opt else "To'g'ri javob"
@@ -716,10 +724,13 @@ class AdvanceStageView(APIView):
                     profile = ensure_profile_for_user(user)
                     grant_rewards_atomic(profile.id, coins_delta=coins, xp_delta=xp)
 
-                    # 3. Bepul AI Esse krediti
+                    # 3. Bepul AI Esse krediti va Dinamik DTM balli
                     quota, _ = UserUsageQuota.objects.get_or_create(profile=profile)
                     quota.free_essay_credits = (quota.free_essay_credits or 0) + 1
                     quota.save(update_fields=['free_essay_credits'])
+
+                    # Dinamik DTM ballini oshiramiz (+0.4 dan +1.5 gacha)
+                    profile.add_dtm_score(loop.dtm_score_delta)
 
                     loop.is_chest_claimed = True
                 else:

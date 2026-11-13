@@ -19,7 +19,7 @@ import { tgHaptic, openTelegramLink } from '@/lib/telegram';
 import ComingSoonFeature from '@/components/ui/coming-soon-feature';
 import VerifiedBadge from '@/components/ui/verified-badge';
 import PremiumIcon from '@/components/ui/premium-icon';
-import { cn } from '@/lib/utils';
+import { cn, formatRichText } from '@/lib/utils';
 import { IlmIcon, ILM_STICKERS, withIlmIcons } from '@/components/brand/IlmIcons';
 
 function cleanOptionText(text: string): string {
@@ -890,9 +890,13 @@ function ReelsInner() {
                               Keyingi savol &darr;
                             </button>
                           </div>
-                          <p className="text-[12px] text-slate-700 dark:text-slate-200 leading-relaxed">
-                            💡 <span className="font-medium">{quizAnswer.explanation}</span>
-                          </p>
+                          <div className="text-[12px] text-slate-700 dark:text-slate-200 leading-relaxed flex items-start gap-1">
+                            <span>💡</span>
+                            <span
+                              className="font-medium [&_p]:m-0"
+                              dangerouslySetInnerHTML={{ __html: formatRichText(quizAnswer.explanation) }}
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
