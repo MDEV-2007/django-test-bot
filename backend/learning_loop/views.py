@@ -679,10 +679,11 @@ class AdvanceStageView(APIView):
                              and len(sprint_answered) >= max(1, min(len(unique_sprint_ids), 6)))
 
                 if not loop.is_chest_claimed and not effort_ok:
+                    # is_chest_claimed False qoladi: u "mukofot haqiqatan berilgan" degani —
+                    # daily_chain_completed va share-post shunga tayanadi (ECON-001).
                     water_result = {'water_level': eco_tree.water_level, 'grew': False}
                     coins = 0
                     xp = 0
-                    loop.is_chest_claimed = True
                 elif not loop.is_chest_claimed:
                     # 1. Eco-Daraxtga suv quyiladi (+35%)
                     water_result = eco_tree.water(35)
@@ -831,18 +832,16 @@ class RestartCycleView(APIView):
             return Response({'ok': False, 'error': "Avval joriy siklni yakunlang"}, status=status.HTTP_409_CONFLICT)
 
         if last_loop and not last_loop.is_chest_claimed:
-            # Agar oldingi sikl STAGE_5_COMPLETED bo'lib, lekin is_chest_claimed False bo'lsa
-            # (eski qatorlar yoki effort_ok nosozligi), blokirovkadan chiqaramiz va haqli mukofotini beramiz.
+            # Sikl yopilgan, lekin mukofot chegarasiga yetmagan (qisman yechilgan: qasos savollari
+            # sprintni siqib chiqargan yoki arenada vaqt tugagan). Bunday holatda keyingi siklga
+            # o'tishga ruxsat beriladi, ammo mukofot berilmaydi — aks holda 1 ta javob bilan
+            # 200 tanga olish mumkin bo'lardi. Umuman javobsiz yopilgan sikl esa qayta
+            # boshlanmaydi (audit ECON-001: bo'sh POSTlar bilan sikl aylantirish).
             sprint_ans = len(_session_results(last_loop.sprint_session)) if last_loop.sprint_session_id else 0
             arena_ans = len(_session_results(last_loop.arena_session)) if last_loop.arena_session_id else 0
-            if sprint_ans >= 1 or arena_ans >= 1:
-                eco_tree, _ = UserEcoTree.objects.get_or_create(user=user)
-                eco_tree.water(35)
-                profile = ensure_profile_for_user(user)
-                from core.rewards import grant_rewards_atomic
-                grant_rewards_atomic(profile.id, coins_delta=200, xp_delta=100)
-            last_loop.is_chest_claimed = True
-            last_loop.save(update_fields=['is_chest_claimed'])
+            if sprint_ans + arena_ans == 0:
+                return Response({'ok': False, 'error': "Avval savollarga javob bering"},
+                                status=status.HTTP_409_CONFLICT)
 
         if last_loop and last_loop.cycle_number >= MAX_CYCLES_PER_DAY:
             return Response({'ok': False, 'error': "Bugungi sikllar limiti tugadi. Ertaga davom etamiz!"},

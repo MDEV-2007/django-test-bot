@@ -75,6 +75,21 @@ class LoopRewardRequiresWorkTests(_LoopBase):
         answer_loop_questions(self.c, 'arena', stage_question_ids(cur, 'arena'))
         self.assertEqual(self.adv(L.STAGE_4_ARENA).json()['rewards_awarded']['coins'], 0)
 
+    def test_partly_answered_cycle_can_restart_without_payout(self):
+        # Round-2 lockout fix: below the reward threshold the next cycle still opens,
+        # but restart must not pay the chest the cycle never earned.
+        cur = self.cur()
+        self.adv(L.STAGE_1_WARMUP)
+        answer_loop_questions(self.c, 'sprint', stage_question_ids(cur, 'sprint')[:1])
+        self.adv(L.STAGE_2_SPRINT); self.adv(L.STAGE_3_CLEANUP)
+        self.assertEqual(self.adv(L.STAGE_4_ARENA).json()['rewards_awarded']['coins'], 0)
+        res = self.c.post(URL + 'restart-cycle/', {}, format='json')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()['loop']['cycle_number'], 2)
+        self.assertEqual(self.coins(), 0)
+        from core.rewards import daily_chain_completed
+        self.assertFalse(daily_chain_completed(Profile.objects.get(pk=self.profile.pk)))
+
     def test_fully_answered_cycle_still_pays(self):
         cur = self.cur()
         self.adv(L.STAGE_1_WARMUP)
