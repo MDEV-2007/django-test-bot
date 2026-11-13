@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Trophy,
@@ -163,6 +163,13 @@ type MainTab = 'republic' | 'micro_league' | 'otm_simulator' | 'clans';
 export default function LeaderboardPage() {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<MainTab>('republic');
+  // Boshqa sahifadan aniq tabga havola: /leaderboard?tab=otm_simulator (masalan, Dashboard'dagi "Mandat")
+  useEffect(() => {
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    if (tab === 'republic' || tab === 'micro_league' || tab === 'otm_simulator' || tab === 'clans') {
+      setActiveTab(tab);
+    }
+  }, []);
   const [subjectView, setSubjectView] = useState('all');
   const [selectedOtmCode, setSelectedOtmCode] = useState<string>('TATU');
 

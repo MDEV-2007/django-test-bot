@@ -403,7 +403,7 @@ export default function DashboardPage() {
                     Dinamik DTM Ball
                   </span>
                   <Link
-                    href="/leaderboard"
+                    href="/leaderboard?tab=otm_simulator"
                     className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1"
                   >
                     Mandat <ArrowUpRight className="size-3.5" />
