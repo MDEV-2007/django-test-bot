@@ -65,3 +65,32 @@ class ArenaResilienceTests(TestCase):
         replay = ArenaGhostReplay.objects.get(pk=replay_id)
         self.assertIsNotNone(replay.avatar_url)
         self.assertEqual(replay.player_name, 'Ali')
+
+
+class GhostArenaMissionTests(TestCase):
+    def setUp(self):
+        from django.utils import timezone
+        from core.models import DailyMission, ProfileMission
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='ghost_mission', password='Password123!')
+        self.profile = ensure_profile_for_user(self.user)
+        mission = DailyMission.objects.create(title='Arena jangi', description='1 ta jang', xp_reward=200,
+                                              coin_reward=20, target_count=1, action_type='battle')
+        self.pm = ProfileMission.objects.create(profile=self.profile, mission=mission, date=timezone.localdate())
+        self.client.force_authenticate(user=self.user)
+
+    def _record(self, n):
+        moves = [{'question_id': i, 'selected_option_id': 1, 'is_correct': True, 'time_taken_ms': 2000}
+                 for i in range(n)]
+        return self.client.post('/api/growth/arena/record-replay/',
+                                {'moves_log': moves, 'question_ids': list(range(n))}, format='json')
+
+    def test_ghost_battle_completes_arena_mission(self):
+        self.assertEqual(self._record(5).status_code, 200)
+        self.pm.refresh_from_db()
+        self.assertTrue(self.pm.is_completed)
+
+    def test_tiny_replay_does_not_count(self):
+        self._record(1)
+        self.pm.refresh_from_db()
+        self.assertFalse(self.pm.is_completed)

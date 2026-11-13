@@ -1,3 +1,4 @@
+import logging
 import random
 import secrets
 import uuid
@@ -15,6 +16,8 @@ from accounts.models import ensure_profile_for_user
 from tests_app.models import Question, Subject
 from .models import ArenaGhostReplay, ViralDuelChallenge, UserUsageQuota
 from telegrambot.client import send_message
+
+logger = logging.getLogger(__name__)
 
 
 BOT_NAMES = [
@@ -356,6 +359,15 @@ class RecordPlayerReplayAPIView(APIView):
                 avg_time_ms=avg_time,
                 is_active=True
             )
+
+            # Ghost Arena jangi ham "Arena jangi" kunlik vazifasiga sanaladi (ilgari faqat
+            # /api/battles/ va jonli jang sanalardi). Vazifa mukofoti kuniga bir marta beriladi.
+            if total_q >= 3:
+                try:
+                    from core.missions import advance_missions
+                    advance_missions(profile, 'battle')
+                except Exception:
+                    logger.warning("Arena mission progress failed", exc_info=True)
 
             return Response({
                 'ok': True,
