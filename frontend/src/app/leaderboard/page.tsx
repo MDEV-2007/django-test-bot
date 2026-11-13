@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Trophy,
@@ -520,165 +520,196 @@ export default function LeaderboardPage() {
           )}
 
           {/* TAB 2: HAFTALIK MIKRO-LIGALAR (30 KISHI) */}
-          {activeTab === 'micro_league' && data?.micro_league && (
-            <div className="space-y-6">
-              {/* Liga Bosqichlari Zanjiri */}
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {data.micro_league.all_leagues.map((lg) => {
-                  const isCurrent = lg.tier === data.micro_league?.current_league.tier;
-                  return (
-                    <div
-                      key={lg.tier}
-                      className={cn(
-                        'relative rounded-2xl p-3 text-center transition-all',
-                        isCurrent
-                          ? 'bg-[#080808] text-[#FFFCF7] shadow-lg ring-2 ring-[var(--ps-orange)] dark:bg-[#FFFCF7] dark:text-[#080808]'
-                          : 'bg-[var(--ps-paper)] text-[var(--text-secondary)] opacity-70'
-                      )}
-                    >
-                      <span className="text-2xl">{lg.badge}</span>
-                      <p className="mt-1 text-xs font-bold truncate">{lg.name}</p>
-                      <p className="text-[10px] opacity-70 font-mono">
-                        {lg.min_xp}+ XP
-                      </p>
-                      {isCurrent && (
-                        <span className="mt-1 inline-block rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[9.5px] font-black text-[#080808]">
-                          Siz shu yerdasiz
-                        </span>
-                      )}
+          {activeTab === 'micro_league' && data?.micro_league && (() => {
+            const ml = data.micro_league;
+            const myRow = ml.rows.find((r) => r.is_me);
+            const promoCount = ml.rows.filter((r) => r.zone === 'promotion').length;
+            const demoCount = ml.rows.filter((r) => r.zone === 'demotion').length;
+            return (
+              <div className="space-y-6">
+                {/* Hero */}
+                <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+                  <div className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
+                    <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-48 rounded-full bg-[var(--ps-green)] opacity-15" />
+                    <div className="relative flex flex-wrap items-center gap-2">
+                      <span className="ps-chip">
+                        <Crown className="size-3.5 text-[var(--ps-orange)]" /> Haftalik liga
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-orange)] px-3 py-1.5 text-[12px] font-bold text-[#080808]">
+                        <Clock className="size-3.5" /> {formatSeconds(ml.seconds_until_reset)} qoldi
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
+                    <h1 className="ps-display relative mt-5 text-[36px] sm:text-[50px]">
+                      <span className="mr-2 inline-block align-[-0.08em]">{ml.current_league?.badge}</span>
+                      {(ml.current_league?.name || 'Nihol ligasi').replace(/\s*Ligasi$/i, '')}{' '}
+                      <span className="text-[var(--ps-green)]">ligasi</span>
+                      <span className="text-[var(--ps-coral)]">.</span>
+                    </h1>
+                    <p className="relative mt-3 max-w-lg text-[14px] leading-relaxed text-[var(--text-secondary)]">
+                      {ml.reset_label}. 30 kishilik divizionda haftalik XP bo&apos;yicha bellashasiz.
+                    </p>
+                    <div className="relative mt-4 flex flex-wrap gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-green)] px-3.5 py-1.5 text-[12.5px] font-bold text-white">
+                        ↑ Top-{promoCount || 5} keyingi ligaga
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-coral)] px-3.5 py-1.5 text-[12.5px] font-bold text-white">
+                        ↓ Oxirgi {demoCount || 5} quyi ligaga
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Reset Timer & Status Header */}
-              <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-[#141414] via-[#222] to-[#141414] p-6 text-white shadow-xl">
-                <span aria-hidden className="absolute -right-8 -top-8 size-36 rounded-full bg-[var(--ps-orange)]/20 blur-xl" />
-                <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                  <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-amber-300">
-                      <Clock className="size-3.5" />
-                      {formatSeconds(data.micro_league.seconds_until_reset)} qoldi
-                    </span>
-                    <h2 className="mt-2 text-2xl sm:text-3xl font-black">
-                      {data.micro_league.current_league?.name || 'Nihol Ligasi'} Divizioni
-                    </h2>
-                    <p className="text-xs sm:text-sm text-white/70 max-w-lg mt-1">
-                      {data.micro_league.reset_label}. {data.micro_league.my_cohort_rank ? (
-                        <>Siz ushbu 30 kishilik divizionda <strong className="text-[var(--ps-orange)]">#{data.micro_league.my_cohort_rank}-o&apos;rindasiz</strong>.</>
-                      ) : (
-                        'Test yechib reytingga kiring va o‘z ligangizda qatnashing.'
-                      )}
+                  <div className="relative flex flex-col justify-between overflow-hidden rounded-[36px] bg-[#080808] p-6 text-[#FFFCF7] sm:p-8 dark:bg-[#FFFCF7] dark:text-[#080808]">
+                    <span aria-hidden className="absolute -right-10 -top-10 size-40 rounded-full bg-[var(--ps-green)] opacity-60" />
+                    <span aria-hidden className="absolute -bottom-8 -left-8 size-24 rounded-full bg-[var(--ps-orange)] opacity-80" />
+                    <p className="ps-eyebrow relative opacity-60">Divizionda o&apos;rningiz</p>
+                    <p className="ps-num relative mt-3 text-[64px] leading-none sm:text-[80px]">
+                      {ml.my_cohort_rank ? <>#{ml.my_cohort_rank}</> : '—'}
+                    </p>
+                    <p className="relative mt-4 text-[13px] font-semibold leading-relaxed opacity-80">
+                      {myRow
+                        ? myRow.zone === 'promotion'
+                          ? "Ko'tarilish zonasidasiz — o'rningizni saqlang!"
+                          : myRow.zone === 'demotion'
+                            ? 'Tushish zonasidasiz — bugun test yeching!'
+                            : `Bu hafta ${myRow.xp.toLocaleString('uz-UZ')} XP to'pladingiz.`
+                        : 'Test yechib reytingga kiring va o‘z ligangizda qatnashing.'}
                     </p>
                   </div>
+                </section>
 
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-500/20 px-3 py-2 text-emerald-400 font-bold border border-emerald-500/30">
-                      🟢 Top-5: Keyingi ligaga
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-xl bg-rose-500/20 px-3 py-2 text-rose-400 font-bold border border-rose-500/30">
-                      🔴 Oxirgi 5: Quyi ligaga
-                    </span>
-                  </div>
-                </div>
-              </section>
-
-              {/* 30 Kishilik Guruh Ro'yxati */}
-              <section className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
-                <div className="flex items-center justify-between pb-4 border-b border-[var(--ps-neutral)]">
-                  <h3 className="ps-display text-[22px] sm:text-[26px]">
-                    Haftalik Divizion <span className="text-[var(--ps-orange)]">(30 ishtirokchi)</span>
-                  </h3>
-                  <span className="text-xs font-bold text-[var(--text-muted)]">
-                    Jami: {data.micro_league.rows.length} kishi
-                  </span>
-                </div>
-
-                <div className="mt-4 space-y-2">
-                  {data.micro_league.rows.map((r) => {
-                    const isPromotion = r.zone === 'promotion';
-                    const isDemotion = r.zone === 'demotion';
-
-                    return (
-                      <div
-                        key={r.profile_id}
-                        className={cn(
-                          'flex items-center justify-between gap-3 rounded-[22px] p-3 pr-4 transition-all',
-                          r.is_me
-                            ? 'bg-[#080808] text-[#FFFCF7] ring-2 ring-[var(--ps-orange)] dark:bg-[#FFFCF7] dark:text-[#080808]'
-                            : isPromotion
-                              ? 'bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20'
-                              : isDemotion
-                                ? 'bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20'
-                                : 'bg-[var(--ps-neutral)] hover:-translate-y-0.5'
-                        )}
-                      >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <span
+                {/* Liga bosqichlari zanjiri */}
+                <section className="ps-card !rounded-[32px] p-4 sm:p-5">
+                  <div className="no-scrollbar -mx-1 flex items-stretch gap-1.5 overflow-x-auto px-1">
+                    {ml.all_leagues.map((lg, idx) => {
+                      const isCurrent = lg.tier === ml.current_league.tier;
+                      const isPassed = lg.tier < ml.current_league.tier;
+                      return (
+                        <React.Fragment key={lg.tier}>
+                          <div
                             className={cn(
-                              'inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full px-2 font-mono text-[13px] font-black',
-                              r.is_me
-                                ? 'bg-[var(--ps-orange)] text-[#080808]'
-                                : isPromotion
-                                  ? 'bg-emerald-500 text-white'
-                                  : isDemotion
-                                    ? 'bg-rose-500 text-white'
-                                    : 'bg-[var(--ps-paper)] text-[var(--text-secondary)]'
+                              'flex min-w-[170px] flex-1 items-center gap-2.5 rounded-[22px] p-2 pr-3',
+                              isCurrent
+                                ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                                : 'bg-[var(--ps-neutral)]',
+                              !isCurrent && !isPassed && 'opacity-60',
                             )}
                           >
-                            #{r.rank}
-                          </span>
-
-                          <div className="min-w-0">
-                            <p className="flex items-center gap-1.5 truncate text-[14px] font-bold">
-                              <span className="truncate">{r.name}</span>
-                              {r.has_gold_border && <span title="Oltin Hoshiya">👑</span>}
-                              {r.is_me && (
-                                <span className="ml-1 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10.5px] font-black text-[#080808]">
-                                  Siz
-                                </span>
+                            <span
+                              className={cn(
+                                'inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[20px]',
+                                isCurrent ? 'bg-[var(--ps-orange)]' : isPassed ? 'bg-[var(--ps-green)]' : 'bg-[var(--ps-paper)]',
                               )}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs font-semibold opacity-70">
-                              <span className="inline-flex items-center gap-1">
-                                <Flame className="size-3 text-orange-500" /> {r.streak} kun
-                              </span>
-                              <span>·</span>
-                              {r.dtm_score != null && (
-                                <span className="text-[var(--ps-purple)] font-mono font-bold">
-                                  ~{r.dtm_score} DTM ball
-                                </span>
-                              )}
+                            >
+                              {lg.badge}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-[12.5px] font-bold leading-tight">{lg.name.replace(/\s*Ligasi$/i, '')}</p>
+                              <p className="text-[11px] font-semibold tabular-nums opacity-65">
+                                {isCurrent ? 'Siz shu yerdasiz' : `${lg.min_xp.toLocaleString('uz-UZ')}+ XP`}
+                              </p>
                             </div>
                           </div>
-                        </div>
+                          {idx < ml.all_leagues.length - 1 && (
+                            <span aria-hidden className={cn('my-auto h-1 w-3 shrink-0 rounded-full', isPassed || isCurrent ? 'bg-[var(--ps-green)]' : 'bg-[var(--ds-track)]')} />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </section>
 
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span
+                {/* 30 kishilik divizion */}
+                <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--ps-green)] text-white">
+                        <Users className="size-5" />
+                      </span>
+                      <div>
+                        <h3 className="ps-display text-[24px] sm:text-[28px]">Haftalik divizion</h3>
+                        <p className="text-[12.5px] text-[var(--text-muted)]">Haftalik XP bo&apos;yicha tartib</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-[var(--ps-neutral)] px-3.5 py-1 text-[12px] font-bold tabular-nums">
+                      {ml.rows.length} / 30 ishtirokchi
+                    </span>
+                  </div>
+
+                  <div className="mt-5 space-y-2">
+                    {ml.rows.map((r, i) => {
+                      const isPromotion = r.zone === 'promotion';
+                      const isDemotion = r.zone === 'demotion';
+                      const prev = ml.rows[i - 1];
+                      const showPromoLine = i > 0 && prev?.zone === 'promotion' && !isPromotion;
+                      const showDemoLine = i > 0 && isDemotion && prev?.zone !== 'demotion';
+                      return (
+                        <React.Fragment key={r.profile_id}>
+                          {showPromoLine && <ZoneDivider tone="green" label="Ko'tarilish chegarasi" />}
+                          {showDemoLine && <ZoneDivider tone="coral" label="Tushish chegarasi" />}
+                          <div
                             className={cn(
-                              'hidden sm:inline-flex rounded-full px-2.5 py-0.5 text-[10.5px] font-bold',
-                              isPromotion
-                                ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                                : isDemotion
-                                  ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
-                                  : 'bg-black/5 text-[var(--text-muted)]'
+                              'flex items-center justify-between gap-3 rounded-[22px] p-2 pr-4 transition-all',
+                              r.is_me
+                                ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]'
+                                : 'bg-[var(--ps-neutral)] hover:-translate-y-0.5',
                             )}
                           >
-                            {isPromotion ? '↑ Ko‘tarilish' : isDemotion ? '↓ Tushish' : 'Barqaror'}
-                          </span>
-                          <span className="font-mono text-sm font-bold flex items-center gap-1">
-                            <Zap className="size-3.5 text-[var(--ps-orange)]" />
-                            {r.xp.toLocaleString('uz-UZ')} XP
-                            <span className="text-[10px] font-semibold opacity-60">/hafta</span>
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            </div>
-          )}
+                            <div className="flex min-w-0 items-center gap-3">
+                              <span
+                                className={cn(
+                                  'inline-flex size-11 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[14px] font-bold tabular-nums',
+                                  isPromotion
+                                    ? 'bg-[var(--ps-green)] text-white'
+                                    : isDemotion
+                                      ? 'bg-[var(--ps-coral)] text-white'
+                                      : r.is_me
+                                        ? 'bg-[var(--ps-orange)] text-[#080808]'
+                                        : 'bg-[var(--ps-paper)]',
+                                )}
+                              >
+                                {r.rank}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="flex items-center gap-1.5 text-[14.5px] font-bold">
+                                  <span className="truncate">{r.name}</span>
+                                  {r.has_gold_border && <Crown className="size-3.5 shrink-0 fill-[var(--ps-orange)] text-[var(--ps-orange)]" aria-label="Oltin hoshiya" />}
+                                  {r.is_me && (
+                                    <span className="shrink-0 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10.5px] font-black text-[#080808]">Siz</span>
+                                  )}
+                                </p>
+                                <p className="flex items-center gap-2 text-[12px] font-semibold opacity-65">
+                                  <span className="inline-flex items-center gap-1">
+                                    <Flame className="size-3 text-[var(--ps-orange)]" /> {r.streak} kun
+                                  </span>
+                                  {r.dtm_score != null && <span className="tabular-nums">· ~{r.dtm_score} DTM</span>}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                              {(isPromotion || isDemotion) && (
+                                <span
+                                  className={cn(
+                                    'hidden rounded-full px-2.5 py-1 text-[11px] font-bold sm:inline-flex',
+                                    isPromotion ? 'bg-[var(--ps-green)]/15 text-[var(--ps-green)]' : 'bg-[var(--ps-coral)]/15 text-[var(--ps-coral)]',
+                                  )}
+                                >
+                                  {isPromotion ? '↑ Ko‘tarilish' : '↓ Tushish'}
+                                </span>
+                              )}
+                              <span className="text-right">
+                                <span className="ps-num block text-[17px] leading-none">{r.xp.toLocaleString('uz-UZ')}</span>
+                                <span className="text-[10.5px] font-bold opacity-55">XP / hafta</span>
+                              </span>
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </section>
+              </div>
+            );
+          })()}
 
           {/* TAB 3: OTM MANDAT SIMULYATORI */}
           {activeTab === 'otm_simulator' && (() => {
@@ -704,10 +735,54 @@ export default function LeaderboardPage() {
             const status = otmSim?.status ?? 'unknown';
             const pointsToGrant = Number(otmSim?.points_to_grant ?? 0);
             const pointsToContract = Number(otmSim?.points_to_contract ?? 0);
+            const pct = (v: number) => `${Math.max(0, Math.min(100, (v / maxDtm) * 100))}%`;
+            const grantCut = Number(selectedUni.grant_cutoff ?? 0);
+            const contractCut = Number(selectedUni.contract_cutoff ?? 0);
+            const statusTone = !ready
+              ? 'bg-[var(--ps-neutral)] text-[var(--text-primary)]'
+              : status === 'grant'
+                ? 'bg-[var(--ps-green)] text-white'
+                : status === 'contract'
+                  ? 'bg-[var(--ps-orange)] text-[#080808]'
+                  : 'bg-[var(--ps-coral)] text-white';
             return (
               <div className="space-y-6">
-                {/* OTM Tanlash Tugmalari */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {/* Hero */}
+                <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+                  <div className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
+                    <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-48 rounded-full bg-[var(--ps-purple)] opacity-15" />
+                    <span className="ps-chip relative">
+                      <GraduationCap className="size-3.5 text-[var(--ps-purple)]" /> OTM mandat simulyatori
+                    </span>
+                    <h1 className="ps-display relative mt-5 text-[36px] sm:text-[50px]">
+                      Grantga <span className="text-[var(--ps-purple)]">yetasizmi</span>
+                      <span className="text-[var(--ps-coral)]">?</span>
+                    </h1>
+                    <p className="relative mt-3 max-w-lg text-[14px] leading-relaxed text-[var(--text-secondary)]">
+                      Taxminiy DTM balingizni tanlagan OTMingizning o&apos;tgan yillardagi o&apos;tish ballari bilan solishtiring.
+                    </p>
+                  </div>
+
+                  <div className="relative flex flex-col justify-between overflow-hidden rounded-[36px] bg-[var(--ps-purple)] p-6 text-white sm:p-8">
+                    <span aria-hidden className="absolute -right-10 -top-10 size-40 rounded-full bg-white/15" />
+                    <span aria-hidden className="absolute -bottom-8 -left-8 size-24 rounded-full bg-[var(--ps-orange)]" />
+                    <p className="ps-eyebrow relative opacity-75">Taxminiy DTM balingiz</p>
+                    <p className="ps-num relative mt-3 text-[60px] leading-none sm:text-[76px]">
+                      {ready ? myDtm : '—'}
+                      <span className="ml-1 text-[20px] opacity-70">/ {maxDtm}</span>
+                    </p>
+                    <p className="relative mt-4 text-[13px] font-semibold leading-relaxed text-white/85">
+                      {ready && otmSim?.platform_rank != null
+                        ? `Shu OTMni tanlagan ${otmSim.platform_total} o'quvchi orasida #${otmSim.platform_rank}-o'rindasiz.`
+                        : ready
+                          ? 'Ball haqiqiy javoblaringizdan hisoblangan.'
+                          : "Ko'proq test yeching — ball javoblaringizdan hisoblanadi."}
+                    </p>
+                  </div>
+                </section>
+
+                {/* OTM tanlash */}
+                <div className="no-scrollbar -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
                   {catalog.map((otm) => {
                     const active = selectedOtmCode.toLowerCase() === otm.code.toLowerCase();
                     return (
@@ -716,10 +791,10 @@ export default function LeaderboardPage() {
                         type="button"
                         onClick={() => setSelectedOtmCode(otm.code)}
                         className={cn(
-                          'shrink-0 cursor-pointer rounded-full px-4 py-2.5 text-xs font-bold transition-all',
+                          'shrink-0 cursor-pointer rounded-full px-4 py-2 text-[13px] font-bold transition-all',
                           active
-                            ? 'bg-[#080808] text-[#FFFCF7] shadow-lg dark:bg-[#FFFCF7] dark:text-[#080808]'
-                            : 'bg-[var(--ps-paper)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                            ? 'bg-[#080808] text-[#FFFCF7] shadow-md dark:bg-[#FFFCF7] dark:text-[#080808]'
+                            : 'bg-[var(--ps-paper)] text-[var(--text-secondary)] shadow-sm hover:-translate-y-0.5',
                         )}
                       >
                         {otm.code}
@@ -728,283 +803,297 @@ export default function LeaderboardPage() {
                   })}
                 </div>
 
-                {/* Mandat Natija Kartasi */}
-                <section className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[var(--ps-neutral)]">
-                    <div>
-                      <span className="ps-chip">
-                        <GraduationCap className="size-3.5 text-[var(--ps-purple)]" />
-                        Taxminiy DTM solishtiruvi
-                      </span>
-                      <h2 className="mt-3 text-2xl sm:text-3xl font-black">
-                        {selectedUni.name}
-                      </h2>
-                      <p className="text-xs sm:text-sm font-semibold text-[var(--text-muted)] mt-1">
-                        Yo&apos;nalish: {selectedUni.faculty}
-                      </p>
+                {/* Mandat natija kartasi */}
+                <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+                  <div className="flex items-start gap-3">
+                    <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--ps-purple)] text-white">
+                      <GraduationCap className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="ps-display text-[22px] sm:text-[28px]">{selectedUni.name}</h2>
+                      <p className="mt-1 text-[13px] font-semibold text-[var(--text-muted)]">Yo&apos;nalish: {selectedUni.faculty}</p>
                     </div>
-
-                    {ready && otmSim?.platform_rank != null && (
-                      <div className="rounded-2xl bg-black/5 dark:bg-white/5 p-4 text-center md:text-right shrink-0">
-                        <p className="text-xs text-[var(--text-muted)] font-bold">Platformadagi o&apos;rningiz</p>
-                        <p className="text-4xl font-black text-[var(--ps-orange)]">
-                          #{otmSim.platform_rank}
-                        </p>
-                        <p className="text-[11px] text-[var(--text-muted)]">
-                          shu OTMni tanlagan {otmSim.platform_total} o&apos;quvchi orasida
-                        </p>
-                      </div>
-                    )}
                   </div>
 
-                  <div className="mt-6 space-y-4">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="flex items-center gap-1.5">
-                        <TrendingUp className="size-4 text-[var(--ps-green)]" />
-                        Sizning taxminiy DTM balingiz:
-                      </span>
-                      <span className="font-mono text-lg text-[var(--ps-orange)]">
-                        {ready ? `${myDtm} / ${maxDtm} ball` : '—'}
-                      </span>
-                    </div>
-
-                    {ready && (
-                      <div className="relative h-4 w-full overflow-hidden rounded-full bg-[var(--ps-neutral)]">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-700"
-                          style={{ width: `${Math.min(100, (myDtm / maxDtm) * 100)}%` }}
-                        />
-                      </div>
-                    )}
-
-                    {/* Taxminiy o'tish ballari */}
-                    <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
-                      <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3.5">
-                        <p className="font-bold text-emerald-600 dark:text-emerald-400">
-                          Davlat granti (kvota: {selectedUni.grant_quota ?? '—'} ta)
-                        </p>
-                        <p className="text-lg font-black font-mono mt-0.5">
-                          ~{selectedUni.grant_cutoff} ball
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-3.5">
-                        <p className="font-bold text-blue-600 dark:text-blue-400">
-                          To&apos;lov-kontrakt (kvota: {selectedUni.contract_quota ?? '—'} ta)
-                        </p>
-                        <p className="text-lg font-black font-mono mt-0.5">
-                          ~{selectedUni.contract_cutoff} ball
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-[var(--text-muted)]">
-                      {otmSim?.cutoffs_note || "O'tish ballari o'tgan yillar asosida taxminiy, rasmiy emas."}
-                    </p>
-
-                    <div
-                      className={cn(
-                        'rounded-2xl p-4 text-xs font-semibold leading-relaxed',
-                        !ready
-                          ? 'bg-black/5 text-[var(--text-secondary)] border border-[var(--ps-neutral)] dark:bg-white/5'
-                          : status === 'grant'
-                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                            : status === 'contract'
-                              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                              : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30'
+                  {/* Ball shkalasi: siz, kontrakt va grant chegaralari */}
+                  <div className="mt-8">
+                    <div className="relative h-4 w-full rounded-full bg-[var(--ds-track)]">
+                      {ready && (
+                        <div className="absolute inset-y-0 left-0 rounded-full bg-[var(--ps-purple)] transition-all duration-700" style={{ width: pct(myDtm) }} />
                       )}
-                    >
-                      <p className="text-sm font-black mb-1">
-                        {!ready
-                          ? '📊 Taxminiy ball hali hisoblanmagan'
-                          : status === 'grant'
-                            ? "👑 Taxminiy balingiz grant o'tish balidan yuqori."
-                            : status === 'contract'
-                              ? `🎓 Kontrakt zonasidasiz. Grant uchun yana +${pointsToGrant} ball kerak.`
-                              : `⚠️ Kontrakt o'tish baliga yetish uchun yana +${pointsToContract} ball kerak.`}
-                      </p>
-                      <p className="opacity-80">
-                        {!ready
-                          ? otmSim?.status_label || "Ko'proq test yeching — ball haqiqiy javoblaringiz asosida hisoblanadi."
-                          : 'Ball haqiqiy javoblaringizdan hisoblanadi: qiyin savollar va turli mavzular uni ko‘proq ko‘taradi.'}
-                      </p>
+                      {contractCut > 0 && (
+                        <span className="absolute -top-2 bottom-[-8px] w-1 -translate-x-1/2 rounded-full bg-[var(--ps-orange)]" style={{ left: pct(contractCut) }} />
+                      )}
+                      {grantCut > 0 && (
+                        <span className="absolute -top-2 bottom-[-8px] w-1 -translate-x-1/2 rounded-full bg-[var(--ps-green)]" style={{ left: pct(grantCut) }} />
+                      )}
+                    </div>
+                    <div className="mt-3 flex justify-between text-[11.5px] font-bold tabular-nums text-[var(--text-muted)]">
+                      <span>0</span>
+                      <span>{maxDtm} ball</span>
                     </div>
                   </div>
+
+                  <div className="mt-5 grid gap-2.5 sm:grid-cols-3">
+                    <div className="rounded-[22px] bg-[var(--ps-neutral)] p-4">
+                      <p className="flex items-center gap-1.5 text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-purple)]">
+                        <span className="size-2.5 rounded-full bg-[var(--ps-purple)]" /> Siz
+                      </p>
+                      <p className="ps-num mt-1 text-[26px] leading-none">{ready ? myDtm : '—'}</p>
+                      <p className="mt-1 text-[12px] font-semibold text-[var(--text-muted)]">taxminiy ball</p>
+                    </div>
+                    <div className="rounded-[22px] bg-[var(--ps-neutral)] p-4">
+                      <p className="flex items-center gap-1.5 text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-orange)]">
+                        <span className="size-2.5 rounded-full bg-[var(--ps-orange)]" /> Kontrakt
+                      </p>
+                      <p className="ps-num mt-1 text-[26px] leading-none">~{selectedUni.contract_cutoff}</p>
+                      <p className="mt-1 text-[12px] font-semibold text-[var(--text-muted)]">kvota: {selectedUni.contract_quota ?? '—'} ta</p>
+                    </div>
+                    <div className="rounded-[22px] bg-[var(--ps-neutral)] p-4">
+                      <p className="flex items-center gap-1.5 text-[11.5px] font-black uppercase tracking-wider text-[var(--ps-green)]">
+                        <span className="size-2.5 rounded-full bg-[var(--ps-green)]" /> Grant
+                      </p>
+                      <p className="ps-num mt-1 text-[26px] leading-none">~{selectedUni.grant_cutoff}</p>
+                      <p className="mt-1 text-[12px] font-semibold text-[var(--text-muted)]">kvota: {selectedUni.grant_quota ?? '—'} ta</p>
+                    </div>
+                  </div>
+
+                  <div className={cn('relative mt-4 overflow-hidden rounded-[24px] p-4 sm:p-5', statusTone)}>
+                    <span aria-hidden className="absolute -right-8 -top-10 size-28 rounded-full bg-white/15" />
+                    <div className="relative flex items-start gap-3">
+                      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[#FFFCF7] text-[#080808]">
+                        {!ready ? <Sparkles className="size-5" /> : status === 'grant' ? <Crown className="size-5 text-[var(--ps-green)]" /> : status === 'contract' ? <GraduationCap className="size-5" /> : <TrendingUp className="size-5 text-[var(--ps-coral)]" />}
+                      </span>
+                      <div>
+                        <p className="font-[family-name:var(--font-grotesk)] text-[17px] font-bold leading-snug">
+                          {!ready
+                            ? 'Taxminiy ball hali hisoblanmagan'
+                            : status === 'grant'
+                              ? "Balingiz grant o'tish balidan yuqori"
+                              : status === 'contract'
+                                ? `Kontrakt zonasidasiz — grantga +${pointsToGrant} ball`
+                                : `Kontraktga yetish uchun yana +${pointsToContract} ball`}
+                        </p>
+                        <p className="mt-1 text-[13px] font-medium opacity-85">
+                          {!ready
+                            ? otmSim?.status_label || "Ko'proq test yeching — ball haqiqiy javoblaringiz asosida hisoblanadi."
+                            : 'Qiyin savollar va turli mavzular balingizni ko‘proq ko‘taradi.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-3 text-[11.5px] text-[var(--text-muted)]">
+                    {otmSim?.cutoffs_note || "O'tish ballari o'tgan yillar asosida taxminiy, rasmiy emas."}
+                  </p>
                 </section>
               </div>
             );
           })()}
 
-          {/* TAB 4: MAKTABLAR VA HUDUDLAR JANGI */}
+          {/* TAB 4: MAKTABLAR VA HUDUDLAR */}
           {activeTab === 'clans' && (() => {
             const clans = data?.clans;
             const derby = clans?.derby;
-            const reg1 = derby?.region1 || (derby as any)?.left || { name: 'Samarqand', total_xp: 12500, students: 45 };
-            const reg2 = derby?.region2 || (derby as any)?.right || { name: 'Buxoro', total_xp: 11800, students: 42 };
+            const reg1 = derby?.region1 || (derby as any)?.left || { name: 'Samarqand', total_xp: 0, students: 0 };
+            const reg2 = derby?.region2 || (derby as any)?.right || { name: 'Buxoro', total_xp: 0, students: 0 };
             const reg1Name = reg1?.name || (reg1 as any)?.region || 'Samarqand';
             const reg2Name = reg2?.name || (reg2 as any)?.region || 'Buxoro';
             const reg1Xp = Number(reg1?.total_xp || 0);
             const reg2Xp = Number(reg2?.total_xp || 0);
             const reg1Students = Number(reg1?.students ?? (reg1 as any)?.students_count ?? 0);
             const reg2Students = Number(reg2?.students ?? (reg2 as any)?.students_count ?? 0);
-            const derbyTitle = derby?.title || `🔥 Oy Derbisi: ${reg1Name} vs ${reg2Name}`;
-            const derbyDesc = derby?.description || `${reg1Name} va ${reg2Name} abituriyentlari o'rtasidagi shiddatli kurash.`;
+            const derbyTitle = (derby?.title || 'Oy derbisi').replace(/^🔥\s*/, '');
+            const derbyDesc = derby?.description || `${reg1Name} va ${reg2Name} abituriyentlari o'rtasidagi kurash.`;
+            const total = reg1Xp + reg2Xp;
+            const share1 = total > 0 ? (reg1Xp / total) * 100 : 50;
 
             const regionsList = Array.isArray(clans?.regions) ? clans.regions : [];
             const schoolsList = Array.isArray(clans?.schools) ? clans.schools : [];
+            const myRegion = regionsList.find((r) => r.is_my_region);
+
+            const rankBadge = (rank: number, mine: boolean) => (
+              <span
+                className={cn(
+                  'inline-flex size-11 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-grotesk)] text-[14px] font-bold tabular-nums',
+                  rank === 1 ? 'bg-[var(--ps-orange)] text-[#080808]'
+                    : rank === 2 ? 'bg-[var(--ps-lilac)] text-[#080808]'
+                    : rank === 3 ? 'bg-[var(--ps-coral)] text-white'
+                    : mine ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-paper)]',
+                )}
+              >
+                {rank}
+              </span>
+            );
 
             return (
               <div className="space-y-6">
-                {/* Featured Derby Clash Card */}
-                {derby && (
-                  <section className="relative overflow-hidden rounded-[36px] bg-[#080808] p-6 text-[#FFFCF7] sm:p-8 dark:bg-[#FFFCF7] dark:text-[#080808] shadow-2xl">
-                    <span aria-hidden className="absolute -left-10 -bottom-10 size-40 rounded-full bg-[var(--ps-coral)] opacity-30 blur-2xl" />
-                    <span aria-hidden className="absolute -right-10 -top-10 size-40 rounded-full bg-[var(--ps-orange)] opacity-30 blur-2xl" />
+                {/* Hero */}
+                <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+                  <div className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
+                    <span aria-hidden className="pointer-events-none absolute -right-14 -top-14 size-48 rounded-full bg-[var(--ps-coral)] opacity-15" />
+                    <span className="ps-chip relative">
+                      <MapPin className="size-3.5 text-[var(--ps-coral)]" /> Maktablar va hududlar
+                    </span>
+                    <h1 className="ps-display relative mt-5 text-[36px] sm:text-[50px]">
+                      Hududlar <span className="text-[var(--ps-coral)]">jangi</span>
+                      <span className="text-[var(--ps-orange)]">.</span>
+                    </h1>
+                    <p className="relative mt-3 max-w-lg text-[14px] leading-relaxed text-[var(--text-secondary)]">
+                      Har bir yechgan testingiz viloyatingiz va maktabingiz hisobiga XP qo&apos;shadi.
+                    </p>
+                  </div>
 
-                    <div className="relative text-center">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-amber-300">
-                        <Flame className="size-3.5 fill-amber-300" />
-                        {derbyTitle}
+                  <div className="relative flex flex-col justify-between overflow-hidden rounded-[36px] bg-[#080808] p-6 text-[#FFFCF7] sm:p-8 dark:bg-[#FFFCF7] dark:text-[#080808]">
+                    <span aria-hidden className="absolute -right-10 -top-10 size-40 rounded-full bg-[var(--ps-coral)] opacity-60" />
+                    <span aria-hidden className="absolute -bottom-8 -left-8 size-24 rounded-full bg-[var(--ps-orange)] opacity-80" />
+                    <p className="ps-eyebrow relative opacity-60">Hududingiz o&apos;rni</p>
+                    <p className="ps-num relative mt-3 text-[64px] leading-none sm:text-[80px]">
+                      {myRegion ? <>#{myRegion.rank}</> : '—'}
+                    </p>
+                    <p className="relative mt-4 text-[13px] font-semibold leading-relaxed opacity-80">
+                      {myRegion ? `${myRegion.region} · ${(myRegion.total_xp || 0).toLocaleString('uz-UZ')} XP` : "Profilingizda viloyatni ko'rsating."}
+                    </p>
+                  </div>
+                </section>
+
+                {/* Derbi */}
+                {derby && (
+                  <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-coral)] px-3 py-1.5 text-[11.5px] font-black uppercase tracking-wider text-white">
+                        <Flame className="size-3.5 fill-current" /> {derbyTitle}
                       </span>
-                      <h2 className="mt-3 text-3xl sm:text-4xl font-black">
-                        {reg1Name} <span className="text-[var(--ps-coral)]">VS</span> {reg2Name}
-                      </h2>
-                      <p className="mt-1 text-xs sm:text-sm opacity-70">
-                        {derbyDesc}
-                      </p>
+                      <span className="text-[12.5px] font-semibold text-[var(--text-muted)]">{derbyDesc}</span>
                     </div>
 
-                    <div className="relative mt-8 grid grid-cols-2 gap-4">
-                      <div className="rounded-2xl bg-white/10 p-4 text-center dark:bg-black/10">
-                        <p className="text-sm font-bold">{reg1Name}</p>
-                        <p className="mt-1 text-2xl sm:text-3xl font-black text-[var(--ps-orange)]">
-                          {reg1Xp.toLocaleString('uz-UZ')} XP
-                        </p>
-                        <p className="text-[11px] opacity-70">{reg1Students} o&apos;quvchi</p>
+                    <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-[family-name:var(--font-grotesk)] text-[20px] font-bold sm:text-[26px]">{reg1Name}</p>
+                        <p className="ps-num mt-1 text-[22px] leading-none text-[var(--ps-orange)] sm:text-[30px]">{reg1Xp.toLocaleString('uz-UZ')}</p>
+                        <p className="mt-1 text-[12px] font-semibold text-[var(--text-muted)]">XP · {reg1Students} o&apos;quvchi</p>
                       </div>
+                      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[#080808] font-[family-name:var(--font-grotesk)] text-[15px] font-bold text-[var(--ps-orange)] dark:bg-[#FFFCF7]">VS</span>
+                      <div className="min-w-0 text-right">
+                        <p className="truncate font-[family-name:var(--font-grotesk)] text-[20px] font-bold sm:text-[26px]">{reg2Name}</p>
+                        <p className="ps-num mt-1 text-[22px] leading-none text-[var(--ps-coral)] sm:text-[30px]">{reg2Xp.toLocaleString('uz-UZ')}</p>
+                        <p className="mt-1 text-[12px] font-semibold text-[var(--text-muted)]">XP · {reg2Students} o&apos;quvchi</p>
+                      </div>
+                    </div>
 
-                      <div className="rounded-2xl bg-white/10 p-4 text-center dark:bg-black/10">
-                        <p className="text-sm font-bold">{reg2Name}</p>
-                        <p className="mt-1 text-2xl sm:text-3xl font-black text-[var(--ps-coral)]">
-                          {reg2Xp.toLocaleString('uz-UZ')} XP
-                        </p>
-                        <p className="text-[11px] opacity-70">{reg2Students} o&apos;quvchi</p>
-                      </div>
+                    <div className="mt-5 flex h-4 w-full overflow-hidden rounded-full">
+                      <div className="h-full bg-[var(--ps-orange)] transition-all duration-700" style={{ width: `${share1}%` }} />
+                      <div className="h-full flex-1 bg-[var(--ps-coral)]" />
+                    </div>
+                    <div className="mt-2 flex justify-between text-[12px] font-bold tabular-nums text-[var(--text-muted)]">
+                      <span>{Math.round(share1)}%</span>
+                      <span>{100 - Math.round(share1)}%</span>
                     </div>
                   </section>
                 )}
 
-                {/* Viloyatlar Reytingi */}
-                <section className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
-                  <div className="flex items-center justify-between pb-4 border-b border-[var(--ps-neutral)]">
-                    <div>
-                      <h3 className="ps-display text-[22px] sm:text-[26px]">
-                        Viloyatlar <span className="text-[var(--ps-orange)]">Reytingi</span>
-                      </h3>
-                      <p className="text-xs text-[var(--text-muted)]">O&apos;zbekiston bo&apos;yicha 14 ta hudud chempionati</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    {regionsList.map((reg) => (
-                      <div
-                        key={reg.region}
-                        className={cn(
-                          'flex items-center justify-between gap-3 rounded-[22px] p-3 pr-4 transition-all',
-                          reg.is_my_region
-                            ? 'bg-[#080808] text-[#FFFCF7] ring-2 ring-[var(--ps-orange)] dark:bg-[#FFFCF7] dark:text-[#080808]'
-                            : 'bg-[var(--ps-neutral)] hover:-translate-y-0.5'
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className={cn(
-                              'inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full px-2 font-mono text-xs font-black',
-                              reg.is_my_region ? 'bg-[var(--ps-orange)] text-[#080808]' : 'bg-[var(--ps-paper)]'
-                            )}
-                          >
-                            #{reg.rank}
-                          </span>
-                          <div>
-                            <p className="text-sm font-bold flex items-center gap-1.5">
-                              <MapPin className="size-3.5 text-[var(--ps-orange)]" />
-                              <span>{reg.region}</span>
-                              {reg.is_my_region && (
-                                <span className="rounded-full bg-[var(--ps-orange)] px-2 py-0.2 text-[10px] font-black text-[#080808]">
-                                  Sizning hududingiz
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-xs opacity-70">
-                              {reg.students_count ?? (reg as any).students ?? 0} o&apos;quvchi faol · O&apos;rtacha: {reg.avg_dtm != null ? `${reg.avg_dtm} DTM ball` : '—'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <span className="font-mono text-sm font-bold flex items-center gap-1">
-                          <Zap className="size-3.5 text-[var(--ps-orange)]" />
-                          {(reg.total_xp || 0).toLocaleString('uz-UZ')} XP
-                        </span>
+                <div className="grid gap-6 xl:grid-cols-2">
+                  {/* Viloyatlar */}
+                  <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--ps-coral)] text-white">
+                        <MapPin className="size-5" />
+                      </span>
+                      <div>
+                        <h3 className="ps-display text-[24px] sm:text-[28px]">Viloyatlar</h3>
+                        <p className="text-[12.5px] text-[var(--text-muted)]">14 ta hudud chempionati</p>
                       </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Maktablar Reytingi */}
-                <section className="ps-card relative overflow-hidden !rounded-[36px] p-6 sm:p-8">
-                  <div className="flex items-center justify-between pb-4 border-b border-[var(--ps-neutral)]">
-                    <div>
-                      <h3 className="ps-display text-[22px] sm:text-[26px]">
-                        Eng Faol <span className="text-[var(--ps-purple)]">Maktablar</span>
-                      </h3>
-                      <p className="text-xs text-[var(--text-muted)]">Maktabingiz sha&apos;nini himoya qiling</p>
                     </div>
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    {schoolsList.map((sch) => (
-                      <div
-                        key={`${sch.school}-${sch.region}`}
-                        className={cn(
-                          'flex items-center justify-between gap-3 rounded-[22px] p-3 pr-4 transition-all',
-                          sch.is_my_school
-                            ? 'bg-[#080808] text-[#FFFCF7] ring-2 ring-[var(--ps-orange)] dark:bg-[#FFFCF7] dark:text-[#080808]'
-                            : 'bg-[var(--ps-neutral)] hover:-translate-y-0.5'
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full bg-[var(--ps-paper)] px-2 font-mono text-xs font-black">
-                            #{sch.rank}
-                          </span>
-                          <div>
-                            <p className="text-sm font-bold flex items-center gap-1.5">
-                              <Building2 className="size-3.5 text-[var(--ps-purple)]" />
-                              <span>{sch.school}</span>
-                              {sch.is_my_school && (
-                                <span className="rounded-full bg-[var(--ps-orange)] px-2 py-0.2 text-[10px] font-black text-[#080808]">
-                                  Sizning maktabingiz
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-xs opacity-70">
-                              {sch.region} · {sch.students_count ?? (sch as any).students ?? 0} o&apos;quvchi
-                            </p>
+                    <div className="mt-5 space-y-2">
+                      {regionsList.length === 0 && <p className="py-6 text-center text-[13px] text-[var(--text-muted)]">Hozircha ma&apos;lumot yo&apos;q.</p>}
+                      {regionsList.map((reg) => (
+                        <div
+                          key={reg.region}
+                          className={cn(
+                            'flex items-center justify-between gap-3 rounded-[22px] p-2 pr-4 transition-all',
+                            reg.is_my_region ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]' : 'bg-[var(--ps-neutral)] hover:-translate-y-0.5',
+                          )}
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            {rankBadge(reg.rank, !!reg.is_my_region)}
+                            <div className="min-w-0">
+                              <p className="flex items-center gap-1.5 text-[14.5px] font-bold">
+                                <span className="truncate">{reg.region}</span>
+                                {reg.is_my_region && <span className="shrink-0 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10.5px] font-black text-[#080808]">Siz</span>}
+                              </p>
+                              <p className="truncate text-[12px] font-semibold opacity-65">
+                                {reg.students_count ?? (reg as any).students ?? 0} o&apos;quvchi{reg.avg_dtm != null ? ` · o'rtacha ${reg.avg_dtm} DTM` : ''}
+                              </p>
+                            </div>
                           </div>
+                          <span className="shrink-0 text-right">
+                            <span className="ps-num block text-[17px] leading-none">{(reg.total_xp || 0).toLocaleString('uz-UZ')}</span>
+                            <span className="text-[10.5px] font-bold opacity-55">XP</span>
+                          </span>
                         </div>
+                      ))}
+                    </div>
+                  </section>
 
-                        <span className="font-mono text-sm font-bold flex items-center gap-1">
-                          <Zap className="size-3.5 text-[var(--ps-purple)]" />
-                          {(sch.total_xp || 0).toLocaleString('uz-UZ')} XP
-                        </span>
+                  {/* Maktablar */}
+                  <section className="ps-card relative overflow-hidden !rounded-[36px] p-5 sm:p-8">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--ps-purple)] text-white">
+                        <Building2 className="size-5" />
+                      </span>
+                      <div>
+                        <h3 className="ps-display text-[24px] sm:text-[28px]">Eng faol maktablar</h3>
+                        <p className="text-[12.5px] text-[var(--text-muted)]">Maktabingiz sha&apos;nini himoya qiling</p>
                       </div>
-                    ))}
-                  </div>
-                </section>
+                    </div>
+                    <div className="mt-5 space-y-2">
+                      {schoolsList.length === 0 && <p className="py-6 text-center text-[13px] text-[var(--text-muted)]">Hozircha ma&apos;lumot yo&apos;q.</p>}
+                      {schoolsList.map((sch) => (
+                        <div
+                          key={`${sch.school}-${sch.region}`}
+                          className={cn(
+                            'flex items-center justify-between gap-3 rounded-[22px] p-2 pr-4 transition-all',
+                            sch.is_my_school ? 'bg-[#080808] text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]' : 'bg-[var(--ps-neutral)] hover:-translate-y-0.5',
+                          )}
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            {rankBadge(sch.rank, !!sch.is_my_school)}
+                            <div className="min-w-0">
+                              <p className="flex items-center gap-1.5 text-[14.5px] font-bold">
+                                <span className="truncate">{sch.school}</span>
+                                {sch.is_my_school && <span className="shrink-0 rounded-full bg-[var(--ps-orange)] px-2 py-0.5 text-[10.5px] font-black text-[#080808]">Siz</span>}
+                              </p>
+                              <p className="truncate text-[12px] font-semibold opacity-65">
+                                {sch.region} · {sch.students_count ?? (sch as any).students ?? 0} o&apos;quvchi
+                              </p>
+                            </div>
+                          </div>
+                          <span className="shrink-0 text-right">
+                            <span className="ps-num block text-[17px] leading-none">{(sch.total_xp || 0).toLocaleString('uz-UZ')}</span>
+                            <span className="text-[10.5px] font-bold opacity-55">XP</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </div>
               </div>
             );
           })()}
 
         </div>
       </main>
+    </div>
+  );
+}
+
+function ZoneDivider({ tone, label }: { tone: 'green' | 'coral'; label: string }) {
+  const c = tone === 'green' ? 'var(--ps-green)' : 'var(--ps-coral)';
+  return (
+    <div className="flex items-center gap-2 py-1" aria-hidden>
+      <span className="h-0.5 flex-1 rounded-full" style={{ background: c, opacity: 0.45 }} />
+      <span className="rounded-full px-2.5 py-0.5 text-[10.5px] font-black uppercase tracking-wider" style={{ color: c }}>{label}</span>
+      <span className="h-0.5 flex-1 rounded-full" style={{ background: c, opacity: 0.45 }} />
     </div>
   );
 }
