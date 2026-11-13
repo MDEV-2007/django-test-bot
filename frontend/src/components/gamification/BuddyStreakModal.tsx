@@ -9,10 +9,13 @@ import {
   Send,
   Zap,
   Sparkles,
-  Share2,
   AlertCircle,
   ShieldCheck,
   Loader2,
+  Clock,
+  Coins,
+  Bell,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api-client';
@@ -23,8 +26,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { soundFX } from '@/lib/soundFX';
 import { openTelegramLink } from '@/lib/telegram';
@@ -182,198 +183,193 @@ export default function BuddyStreakModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const statusPill = (active?: boolean) => (
+    <span
+      className={cn(
+        'mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11.5px] font-bold',
+        active ? 'bg-[var(--ps-green)] text-white' : 'bg-[var(--ps-orange)] text-[#080808]',
+      )}
+    >
+      {active ? <><Check className="size-3 stroke-[3]" /> Bajarildi</> : <><Clock className="size-3" /> Kutilmoqda</>}
+    </span>
+  );
+
+  const person = (p?: { name?: string; avatar_url?: string; is_active_today?: boolean } | null, fallback = 'U') => (
+    <div className="flex min-w-0 flex-col items-center rounded-[24px] bg-[var(--ps-neutral)] p-4 text-center">
+      <Avatar className={cn('size-14 ring-4', p?.is_active_today ? 'ring-[var(--ps-green)]/40' : 'ring-[var(--ps-orange)]/40')}>
+        <AvatarImage src={p?.avatar_url} />
+        <AvatarFallback className="font-bold">{p?.name?.[0] || fallback}</AvatarFallback>
+      </Avatar>
+      <p className="mt-2 max-w-full truncate text-[13.5px] font-bold">{p?.name || 'Siz'}</p>
+      {statusPill(p?.is_active_today)}
+    </div>
+  );
+
+  const benefits = [
+    { tone: 'bg-[var(--ps-orange)] text-[#080808]', icon: Coins, text: <>Bog&apos;langanda darhol <b>+30 Ildiz tangasi</b></> },
+    { tone: 'bg-[var(--ps-purple)] text-white', icon: Zap, text: <>Har kuni birga test yechsangiz <b>1.5× tanga</b></> },
+    { tone: 'bg-[var(--ps-blue)] text-[#080808]', icon: Bell, text: <>Kechki 22:00 da bir-biringizni darsga undaysiz</> },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-1.5rem)] max-w-[460px] overflow-hidden rounded-3xl border border-border bg-card p-6 text-card-foreground shadow-[0_24px_64px_rgba(0,0,0,0.28)]">
-        <DialogHeader className="flex flex-col items-center text-center space-y-2">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#FF9500] to-[#FF5E00] text-white shadow-lg shadow-orange-500/30">
-            <Users className="size-7 stroke-[2.2]" />
-          </div>
-
-          <DialogTitle className="text-2xl font-black tracking-tight text-foreground">
-            Do&apos;stlik Zanjiri <span className="text-[#FF9500]">(Co-op Streak)</span>
+      <DialogContent
+        showCloseButton={false}
+        className="ps-shell max-h-[94svh] w-[calc(100%-1rem)] max-w-[460px] gap-0 overflow-y-auto rounded-[32px] border-0 bg-[var(--ps-paper)] p-0 text-[var(--text-primary)] shadow-[0_40px_80px_-30px_rgba(40,20,80,0.7)] sm:p-0"
+      >
+        {/* Sarlavha lentasi */}
+        <DialogHeader className="relative overflow-hidden bg-[var(--ps-orange)] px-6 pb-6 pt-6 text-left text-[#080808]">
+          <span aria-hidden className="absolute -right-10 -top-12 size-40 rounded-full bg-white/25" />
+          <span aria-hidden className="ps-dots absolute bottom-3 right-6 h-12 w-24 opacity-25" />
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            aria-label="Yopish"
+            className="absolute right-4 top-4 inline-flex size-9 cursor-pointer items-center justify-center rounded-full bg-[#080808]/10 transition-colors hover:bg-[#080808] hover:text-[#FFFCF7]"
+          >
+            <X className="size-4" />
+          </button>
+          <span className="relative inline-flex size-12 items-center justify-center rounded-full bg-[#FFFCF7]">
+            <Users className="size-6 text-[var(--ps-coral)]" />
+          </span>
+          <DialogTitle className="ps-display relative mt-3 text-[28px] text-[#080808] sm:text-[32px]">
+            Do&apos;stlik zanjiri
           </DialogTitle>
-
-          <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-sm">
-            Bir-biringizni qo&apos;llab-quvvatlang! Agar ikkalangiz ham bugun test ishlamasangiz, umumiy olov o&apos;chadi.
+          <p className="relative mt-1.5 max-w-sm text-[13.5px] font-medium leading-relaxed text-[#080808]/75">
+            Bir-biringizni qo&apos;llab-quvvatlang! Ikkalangiz ham bugun test ishlamasangiz, umumiy olov o&apos;chadi.
           </p>
         </DialogHeader>
 
-        {loading && !buddyData ? (
-          <div className="flex h-44 items-center justify-center">
-            <Loader2 className="size-8 animate-spin text-[#FF9500]" />
-          </div>
-        ) : buddyData?.status === 'active' && buddyData.partner ? (
-          /* ACTIVE PAIR VIEW */
-          <div className="mt-4 space-y-4">
-            {/* Streak Counter Banner */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#080808] to-[#201d1a] p-4 text-white shadow-md">
-              <span aria-hidden className="absolute -right-6 -top-6 size-24 rounded-full bg-[#FF9500]/25 blur-xl" />
-              <div className="relative flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-orange-400">Umumiy Zanjir</p>
-                  <p className="mt-0.5 text-3xl font-black tracking-tight flex items-center gap-1.5">
-                    <Flame className="size-7 fill-[#FF9500] text-[#FF9500] animate-bounce" />
-                    <span>{buddyData.current_streak || 0}</span>
-                    <span className="text-sm font-semibold text-white/70">kun</span>
+        <div className="space-y-3 p-5 sm:p-6">
+          {loading && !buddyData ? (
+            <div className="flex h-44 items-center justify-center">
+              <Loader2 className="size-8 animate-spin text-[var(--ps-orange)]" />
+            </div>
+          ) : buddyData?.status === 'active' && buddyData.partner ? (
+            <>
+              {/* Umumiy zanjir */}
+              <div className="relative overflow-hidden rounded-[24px] bg-[#080808] p-5 text-[#FFFCF7] dark:bg-[#FFFCF7] dark:text-[#080808]">
+                <span aria-hidden className="absolute -right-8 -top-8 size-28 rounded-full bg-[var(--ps-orange)] opacity-70" />
+                <div className="relative flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-wider opacity-60">Umumiy zanjir</p>
+                    <p className="mt-1 flex items-center gap-2">
+                      <Flame className="size-8 fill-[var(--ps-orange)] text-[var(--ps-orange)]" />
+                      <span className="ps-num text-[44px] leading-none">{buddyData.current_streak || 0}</span>
+                      <span className="text-[14px] font-bold opacity-70">kun</span>
+                    </p>
+                  </div>
+                  <div className="relative text-right">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-orange)] px-2.5 py-1 text-[11.5px] font-bold text-[#080808]">
+                      <Zap className="size-3 fill-current" /> 1.5× tanga
+                    </span>
+                    <p className="mt-1.5 text-[11.5px] font-semibold opacity-60">Rekord: {buddyData.best_streak || 0} kun</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                {person(buddyData.me, 'U')}
+                {person(buddyData.partner, 'D')}
+              </div>
+
+              {!buddyData.partner?.is_active_today ? (
+                <div className="rounded-[24px] bg-[var(--ps-neutral)] p-4">
+                  <p className="flex items-start gap-2.5 text-[13px] font-medium leading-snug text-[var(--text-secondary)]">
+                    <AlertCircle className="mt-0.5 size-4 shrink-0 text-[var(--ps-coral)]" />
+                    Do&apos;stingiz bugun hali test ishlamadi. Soat 24:00 gacha kirmasa, olovingiz so&apos;nadi.
                   </p>
+                  <button
+                    type="button"
+                    onClick={handleNudge}
+                    disabled={nudging || !buddyData.can_nudge}
+                    className="ps-btn ps-btn-ink mt-3 w-full"
+                  >
+                    {nudging ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4 text-[var(--ps-orange)]" />}
+                    {buddyData.can_nudge ? "Do'stni turtish" : 'Eslatma yuborilgan'}
+                  </button>
                 </div>
-                <div className="text-right">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-amber-300">
-                    <Zap className="size-3" /> 1.5x Tanga Bonusi
+              ) : (
+                <div className="flex items-center gap-3 rounded-[24px] bg-[var(--ps-green)] p-4 text-[13px] font-semibold text-white">
+                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FFFCF7]">
+                    <ShieldCheck className="size-5 text-[var(--ps-green)]" />
                   </span>
-                  <p className="mt-1 text-[11px] text-white/50">Rekord: {buddyData.best_streak || 0} kun</p>
+                  Ikkalangiz ham bugungi vazifani bajardingiz. Zanjir saqlandi!
                 </div>
-              </div>
-            </div>
-
-            {/* Side-by-Side Status */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Me */}
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-muted/40 p-3.5 text-center">
-                <Avatar className="size-14 border-2 border-primary/20">
-                  <AvatarImage src={buddyData.me?.avatar_url} />
-                  <AvatarFallback>{buddyData.me?.name?.[0] || 'U'}</AvatarFallback>
-                </Avatar>
-                <p className="mt-2 text-xs font-bold truncate max-w-full">{buddyData.me?.name || 'Siz'}</p>
-                <span
-                  className={cn(
-                    'mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold',
-                    buddyData.me?.is_active_today
-                      ? 'bg-emerald-500/15 text-emerald-500'
-                      : 'bg-amber-500/15 text-amber-500'
-                  )}
-                >
-                  {buddyData.me?.is_active_today ? '✓ Bajarildi' : '⏳ Kutilmoqda'}
-                </span>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Afzalliklar */}
+              <div className="space-y-2">
+                {benefits.map((b, i) => {
+                  const Icon = b.icon;
+                  return (
+                    <div key={i} className="flex items-center gap-3 rounded-[20px] bg-[var(--ps-neutral)] p-2 pr-4">
+                      <span className={cn('inline-flex size-9 shrink-0 items-center justify-center rounded-full', b.tone)}>
+                        <Icon className="size-4" />
+                      </span>
+                      <span className="text-[13.5px] leading-snug text-[var(--text-secondary)]">{b.text}</span>
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Partner */}
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-muted/40 p-3.5 text-center">
-                <Avatar className="size-14 border-2 border-primary/20">
-                  <AvatarImage src={buddyData.partner?.avatar_url} />
-                  <AvatarFallback>{buddyData.partner?.name?.[0] || 'D'}</AvatarFallback>
-                </Avatar>
-                <p className="mt-2 text-xs font-bold truncate max-w-full">{buddyData.partner?.name}</p>
-                <span
-                  className={cn(
-                    'mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold',
-                    buddyData.partner?.is_active_today
-                      ? 'bg-emerald-500/15 text-emerald-500'
-                      : 'bg-amber-500/15 text-amber-500'
-                  )}
-                >
-                  {buddyData.partner?.is_active_today ? '✓ Bajarildi' : '⏳ Kutilmoqda'}
-                </span>
-              </div>
-            </div>
-
-            {/* Action / Nudge Section */}
-            {!buddyData.partner?.is_active_today ? (
-              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5">
-                <div className="flex items-start gap-2.5">
-                  <AlertCircle className="size-4 shrink-0 text-amber-500 mt-0.5" />
-                  <p className="text-xs text-amber-600 dark:text-amber-400 leading-snug">
-                    Do&apos;stingiz bugun hali test ishlamadi! Soat 24:00 gacha kirmasa, olovingiz so&apos;nadi.
-                  </p>
-                </div>
-                <Button
-                  onClick={handleNudge}
-                  disabled={nudging || !buddyData.can_nudge}
-                  className="mt-3 w-full bg-gradient-to-r from-[#FF9500] to-[#FF5E00] text-white font-bold text-xs h-10 rounded-xl shadow-md hover:opacity-90"
-                >
-                  {nudging ? (
-                    <Loader2 className="size-4 animate-spin mr-1.5" />
-                  ) : (
-                    <Send className="size-3.5 mr-1.5" />
-                  )}
-                  {buddyData.can_nudge
-                    ? 'Do‘stni turtish (Tez kiring deb eslatish)'
-                    : 'Eslatma yuborilgan (Kuting)'}
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                <ShieldCheck className="size-5 shrink-0" />
-                <span>Ikkalangiz ham bugungi vazifani bajardingiz. Zanjir xavfsiz saqlandi!</span>
-              </div>
-            )}
-          </div>
-        ) : (
-          /* NO BUDDY YET / PENDING VIEW */
-          <div className="mt-4 space-y-4">
-            {/* Benefits Banner */}
-            <div className="rounded-2xl border border-border bg-muted/40 p-3.5 space-y-2">
-              <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <Sparkles className="size-4 text-[#FF9500]" /> Birga o‘qishning afzalliklari:
-              </p>
-              <ul className="text-[12px] text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Bog‘langanda darhol <strong>+30 Ildiz tangasi</strong> olasiz</li>
-                <li>Har kuni birga test yechsangiz <strong>1.5x tanga bonusi</strong></li>
-                <li>Bir-biringizni kechki soat 22:00 da darsga undab turasiz</li>
-              </ul>
-            </div>
-
-            {/* Invite Code Generation */}
-            {buddyData?.invite_code ? (
-              <div className="space-y-2 rounded-2xl border-2 border-dashed border-[#FF9500]/40 bg-[#FF9500]/5 p-4 text-center">
-                <p className="text-xs font-semibold text-muted-foreground">Sizning taklif kodingiz:</p>
-                <div className="flex items-center justify-center gap-2">
-                  <span className="font-mono text-2xl font-black tracking-widest text-[#FF9500]">
-                    {buddyData.invite_code}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
+              {/* Taklif kodi */}
+              {buddyData?.invite_code ? (
+                <div className="relative overflow-hidden rounded-[24px] bg-[var(--ps-purple)] p-5 text-center text-white">
+                  <span aria-hidden className="absolute -left-8 -top-8 size-24 rounded-full bg-white/15" />
+                  <p className="relative text-[11px] font-black uppercase tracking-wider opacity-75">Sizning taklif kodingiz</p>
+                  <button
+                    type="button"
                     onClick={copyCode}
-                    className="h-8 rounded-lg px-2 text-xs"
+                    title="Nusxalash"
+                    className="relative mt-2 inline-flex max-w-full cursor-pointer items-center gap-2.5 rounded-full bg-[#080808]/25 py-2 pl-5 pr-2 transition-colors hover:bg-[#080808]/35"
                   >
-                    {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                  </Button>
+                    <span className="truncate font-mono text-[22px] font-bold tracking-[0.12em] text-white sm:text-[24px]">
+                      {buddyData.invite_code}
+                    </span>
+                    <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--ps-orange)] text-[#080808]">
+                      {copied ? <Check className="size-4 stroke-[3]" /> : <Copy className="size-4" />}
+                    </span>
+                  </button>
+                  {buddyData.share_url && (
+                    <button type="button" onClick={shareInvite} className="ps-btn relative mt-4 w-full !bg-[#2AABEE] !text-white">
+                      <Send className="size-4" /> Telegramda do&apos;stga yuborish
+                    </button>
+                  )}
                 </div>
-                {buddyData.share_url && (
-                  <Button
-                    size="sm"
-                    className="mt-2 w-full bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs h-9 rounded-xl font-bold"
-                    onClick={shareInvite}
-                  >
-                    <Share2 className="size-3.5 mr-1.5" /> Telegramda do‘stga jo‘natish
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <Button
-                onClick={handleCreateInvite}
-                disabled={loading}
-                className="w-full h-11 bg-gradient-to-r from-[#FF9500] to-[#FF5E00] text-white font-bold text-xs rounded-xl shadow-md"
-              >
-                {loading ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <Sparkles className="size-4 mr-1.5" />}
-                Taklif kodi yaratish
-              </Button>
-            )}
+              ) : (
+                <button type="button" onClick={handleCreateInvite} disabled={loading} className="ps-btn ps-btn-ink w-full">
+                  {loading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4 text-[var(--ps-orange)]" />}
+                  Taklif kodi yaratish
+                </button>
+              )}
 
-            {/* Join via Friend's Code */}
-            <form onSubmit={handleJoinStreak} className="space-y-2 pt-2 border-t border-border">
-              <p className="text-xs font-semibold text-foreground">Do‘stingizning kodi bormi?</p>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Masalan: ILD-72849"
-                  value={joinCode}
-                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  className="font-mono uppercase text-xs h-10 rounded-xl"
-                  maxLength={12}
-                />
-                <Button
-                  type="submit"
-                  disabled={joining || !joinCode.trim()}
-                  className="h-10 px-4 text-xs font-bold rounded-xl bg-primary text-primary-foreground shrink-0"
-                >
-                  {joining ? <Loader2 className="size-4 animate-spin" /> : 'Bog‘lanish'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
+              {/* Do'st kodi bilan bog'lanish */}
+              <form onSubmit={handleJoinStreak} className="pt-1">
+                <p className="mb-2 text-[13px] font-bold">Do&apos;stingizning kodi bormi?</p>
+                <div className="flex items-center gap-2 rounded-full bg-[var(--ps-neutral)] p-1.5 pl-5 ring-2 ring-transparent transition focus-within:ring-[var(--ps-purple)]">
+                  <input
+                    placeholder="ILDIZ-XXXXXX"
+                    aria-label="Do'stingizning taklif kodi"
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                    className="min-w-0 flex-1 bg-transparent font-mono text-[14px] font-bold uppercase tracking-wider text-[var(--text-primary)] outline-none placeholder:font-medium placeholder:text-[var(--text-faint)]"
+                    maxLength={12}
+                  />
+                  <button
+                    type="submit"
+                    disabled={joining || !joinCode.trim()}
+                    className="ps-btn !min-h-10 shrink-0 !bg-[var(--ps-green)] !px-4 !text-white disabled:!opacity-45"
+                  >
+                    {joining ? <Loader2 className="size-4 animate-spin" /> : "Bog'lanish"}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
