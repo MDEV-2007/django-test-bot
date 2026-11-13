@@ -28,15 +28,32 @@ SPRINT_QUESTION_COUNT = 12
 ARENA_QUESTION_COUNT = 5
 
 
-def _topic_with_questions(subject=None, exclude_id=None):
-    """Savoli bor mavzu (eng ko'p savollisi). Ilgari `Topic.first()` olinardi — u ko'pincha
-    savolsiz mavzu bo'lib, sprintga butunlay boshqa mavzudagi savollar tushardi."""
+def _topic_with_questions(subject=None, exclude_id=None, user=None):
+    """Savoli bor mavzu. Ilgari `Topic.first()` olinardi — u ko'pincha
+    savolsiz mavzu bo'lib, sprintga butunlay boshqa mavzudagi savollar tushardi.
+
+    `user` berilsa — mavzular aylanadi: avval foydalanuvchi hali ko'rmagan mavzu,
+    keyin eng uzoq vaqt oldin ko'rilgani. Aks holda har safar eng ko'p savolli
+    mavzu (yoki exclude bilan ikki mavzu navbatma-navbat) chiqib qolardi."""
     qs = Topic.objects.annotate(n=Count('questions')).filter(n__gt=0)
     if subject:
         qs = qs.filter(subject=subject)
     if exclude_id:
         qs = qs.exclude(id=exclude_id)
-    return qs.order_by('-n').first()
+    if user is None:
+        return qs.order_by('-n').first()
+
+    candidates = list(qs.values_list('id', 'n'))
+    if not candidates:
+        return None
+    recent = (DailyLearningLoop.objects.filter(user=user, topic__isnull=False)
+              .order_by('-id').values_list('topic_id', flat=True)[:200])
+    last_seen = {}
+    for idx, topic_id in enumerate(recent):
+        last_seen.setdefault(topic_id, idx)
+    never_seen = len(last_seen) + 1
+    best_id = max(candidates, key=lambda c: (last_seen.get(c[0], never_seen), c[1]))[0]
+    return Topic.objects.get(id=best_id)
 
 
 def _pick_sprint_questions(topic, subject, count, rng):
@@ -236,7 +253,7 @@ def switch_today_loop_subject(user, subject: Subject, loop: DailyLearningLoop = 
         loop = _create_first_loop(user, today, preferred_subject=subject)
         return loop
 
-    new_topic = _topic_with_questions(subject)
+    new_topic = _topic_with_questions(subject, user=user)
     loop.subject = subject
     loop.topic = new_topic
 
@@ -853,9 +870,10 @@ class RestartCycleView(APIView):
         # Keyingi yangi mavzuni tanlaymiz
         preferred_subject = (last_loop.subject if last_loop and last_loop.subject else None) or _resolve_user_preferred_subject(user)
         new_topic = (_topic_with_questions(preferred_subject,
-                                           exclude_id=last_loop.topic_id if last_loop else None)
-                     or _topic_with_questions(preferred_subject)
-                     or (None if preferred_subject else _topic_with_questions()))
+                                           exclude_id=last_loop.topic_id if last_loop else None,
+                                           user=user)
+                     or _topic_with_questions(preferred_subject, user=user)
+                     or (None if preferred_subject else _topic_with_questions(user=user)))
 
         from django.db import IntegrityError, transaction
 
