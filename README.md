@@ -179,10 +179,9 @@ Daily backup of the database + media (see `core/management/commands/backup_data.
 python manage.py backup_data                  # writes to BACKUP_DIR (default: ./backups)
 ```
 
-**Deploying to a bare VPS** (Nginx, systemd, SSL, firewall, and the two daily jobs above
-wired up as timers instead of manual cron): see `deploy/DEPLOY_VPS.md` for the full,
-copy-pasteable walkthrough, and `deploy/nginx/` + `deploy/systemd/` for the config files
-it installs.
+**Deploying to production** (Docker Compose: nginx, web, frontend, Postgres, Redis,
+certbot): see `deploy/DEPLOY_DOCKER.md`, and `deploy/scripts/crontab.example` for scheduled
+jobs. The older bare-VPS systemd setup is archived in `docs/archive/legacy-systemd-deploy/`.
 
 ### Scale notes
 
