@@ -722,6 +722,9 @@ class AdvanceStageView(APIView):
                     coins = int(200 * reward_multiplier)
                     xp = int(100 * reward_multiplier)
                     profile = ensure_profile_for_user(user)
+                    # Yakunlangan sikl ham Do'stlik Zanjirida test sifatida hisoblanadi (1.5x tanga).
+                    from core.services import buddy_coin_bonus
+                    coins += buddy_coin_bonus(profile, coins)
                     grant_rewards_atomic(profile.id, coins_delta=coins, xp_delta=xp)
 
                     # 3. Bepul AI Esse krediti va Dinamik DTM balli

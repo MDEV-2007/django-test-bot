@@ -1230,6 +1230,12 @@ def finish_api(request, attempt_id):
     multiplier = stress_cfg.bonus_xp_multiplier if (attempt.is_stress_mode and stress_cfg.bonus_xp_multiplier > 1.0) else 1.0
     xp_awarded = 0 if (profile.is_privileged or is_repeat or not meets_accuracy) else int(correct * 50 * multiplier)
     coins_awarded = 0 if (is_repeat or not meets_accuracy) else int(correct * 5 * (1.5 if attempt.is_stress_mode else 1.0))
+    # Do'stlik Zanjiri: test hisoblanadi; bugun ikkala do'st ham ishlagan bo'lsa tanga 1.5x.
+    buddy_bonus_coins = 0
+    if meets_accuracy and not is_repeat:
+        from core.services import buddy_coin_bonus
+        buddy_bonus_coins = buddy_coin_bonus(profile, coins_awarded)
+        coins_awarded += buddy_bonus_coins
     profile.add_xp(xp_awarded)
     profile.add_coins(coins_awarded)
     if meets_accuracy and not is_repeat:
@@ -1335,6 +1341,7 @@ def finish_api(request, attempt_id):
         'skipped': skipped,
         'xp_awarded': xp_awarded,
         'coins_awarded': coins_awarded,
+        'buddy_bonus_coins': buddy_bonus_coins,
         'streak': profile.streak,
         'meets_accuracy': meets_accuracy,
         'rushed_answers_count': rushed_answers_count,

@@ -273,13 +273,8 @@ class Profile(models.Model):
             # this possibly-stale instance and silently reverted coins spent / premium granted by
             # a concurrent request (audit ECON-003).
             self.save(update_fields=['streak', 'last_active_date'])
-
-        # Do'stlik Streak'ini (Juftlik Zanjiri) ham yangilaymiz
-        try:
-            from core.services import record_buddy_daily_activity
-            record_buddy_daily_activity(self)
-        except Exception:
-            pass
+        # Do'stlik Zanjiri bu yerda emas: u faqat test yoki sikl yakunlanganda hisoblanadi
+        # (core.services.record_buddy_daily_activity — tests_app finish va learning_loop).
 
     @property
     def xp_progress(self):

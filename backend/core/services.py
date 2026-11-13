@@ -679,13 +679,32 @@ def join_buddy_streak(profile: Profile, invite_code: str) -> tuple[bool, str, di
     return True, "Do'stlik Streak'i muvaffaqiyatli bog'landi! (+30 🪙)", get_buddy_streak_state(profile)
 
 
-def record_buddy_daily_activity(profile: Profile):
-    """O'quvchi kunlik normani bajarganda juftlik zanjirini yangilash."""
+BUDDY_COIN_MULTIPLIER = 1.5
+
+
+def buddy_coin_bonus(profile: Profile, coins: int) -> int:
+    """Testni (yoki siklni) yakunlaganini juftlik zanjiriga yozadi va qo'shimcha tangani qaytaradi.
+
+    Bugun ikkala do'st ham test ishlagan bo'lsa, shu natijaning tangasi 1.5x bo'ladi —
+    qaytgan qiymat shu ustamaning o'zi (coins * 0.5). Juftlik bo'lmasa yoki sherik hali
+    test ishlamagan bo'lsa 0. Xato bo'lsa ham asosiy mukofotni buzmaydi."""
+    try:
+        both_done = record_buddy_daily_activity(profile)
+    except Exception:
+        logger.warning("Buddy streak activity failed for profile %s", profile.id, exc_info=True)
+        return 0
+    if not both_done or coins <= 0:
+        return 0
+    return int(coins * (BUDDY_COIN_MULTIPLIER - 1))
+
+
+def record_buddy_daily_activity(profile: Profile) -> bool:
+    """O'quvchi bugun test/sikl yakunlaganda juftlik zanjirini yangilaydi.
+    Bugun ikkala do'st ham bajargan bo'lsa True qaytaradi."""
     from django.db import transaction
     from core.models import BuddyStreak, Notification
 
     today = timezone.localdate()
-    yesterday = today - timedelta(days=1)
 
     with transaction.atomic():
         bs = (
@@ -695,7 +714,7 @@ def record_buddy_daily_activity(profile: Profile):
             .first()
         )
         if not bs or not bs.user2_id:
-            return
+            return False
 
         # Agar kechagi kunda ikkalasidan biri kirmagan bo'lsa (48 soatdan oshsa) zanjir 1 ga tushadi
         if bs.last_paired_date and (today - bs.last_paired_date).days > 1:
@@ -725,6 +744,57 @@ def record_buddy_daily_activity(profile: Profile):
                 )
         else:
             bs.save()
+        return bs.user1_last_active == today and bs.user2_last_active == today
+
+
+def send_buddy_evening_nudges(dry_run: bool = False) -> dict:
+    """22:00 dagi avtomatik eslatma (cron: send_buddy_nudges).
+
+    Bugun sherigi test ishlagan, o'zi esa hali ishlamagan o'quvchiga "olov kuyib ketadi"
+    xabari yuboriladi. Ikkalasi ham ishlamagan juftliklarga yuborilmaydi — ular uchun
+    umumiy streak eslatmasi bor."""
+    from core.models import BuddyStreak, Notification
+
+    today = timezone.localdate()
+    site_url = getattr(settings, 'NEXT_PUBLIC_SITE_URL', 'https://ilmildizi.uz')
+    sent = failed = 0
+    pairs = (BuddyStreak.objects.filter(status='active', user2__isnull=False)
+             .filter(Q(user1_last_active=today) ^ Q(user2_last_active=today))
+             .select_related('user1__user', 'user2__user'))
+    for bs in pairs:
+        if bs.user1_last_active == today:
+            done, lagging = bs.user1, bs.user2
+        else:
+            done, lagging = bs.user2, bs.user1
+        done_name = done.user.first_name or done.user.username
+        lagging_name = lagging.user.first_name or lagging.user.username
+        if dry_run:
+            sent += 1
+            continue
+        Notification.objects.create(
+            profile=lagging,
+            title=f"🔥 {done_name} bugungi testini ishladi — navbat sizda!",
+            message=(f"Bugun hali test ishlamadingiz. Yarim tungacha bitta test yechmasangiz, "
+                     f"{bs.current_streak} kunlik Do'stlik Zanjiri uziladi."),
+            type='system',
+        )
+        if lagging.telegram_id:
+            tg_text = (
+                f"🔥 <b>{lagging_name}, Do'stlik Zanjiringiz xavf ostida!</b>\n\n"
+                f"{done_name} bugungi testini allaqachon ishladi. Siz yarim tungacha bitta test "
+                f"yechmasangiz, <b>{bs.current_streak} kunlik</b> umumiy olovingiz o'chadi."
+            )
+            reply_markup = {"inline_keyboard": [[
+                {"text": "🔥 Hoziroq test ishlash", "web_app": {"url": f"{site_url}/dashboard"}}
+            ]]}
+            try:
+                ok = bool(send_message(lagging.telegram_id, tg_text, reply_markup=reply_markup).get('ok'))
+            except Exception:
+                ok = False
+            if not ok:
+                failed += 1
+        sent += 1
+    return {'sent': sent, 'failed': failed}
 
 
 def nudge_buddy_partner(profile: Profile) -> tuple[bool, str]:
